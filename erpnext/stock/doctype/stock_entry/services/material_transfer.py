@@ -1,10 +1,23 @@
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, flt
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from .manufacturing import _check_bom_component_qty, get_bom_items
 from .stock_entry_base import BaseStockEntry
+
+
+def get_outward_rows(ste_details):
+	return {
+		row.name: row
+		for row in frappe.get_all(
+			"Stock Entry Detail",
+			filters={"name": ("in", ste_details)},
+			fields=["name", "item_code", "t_warehouse", "transfer_qty"],
+		)
+	}
 
 
 class BaseMaterialTransferStockEntry(BaseStockEntry):
@@ -21,6 +34,47 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 				frappe.throw(_("Target Warehouse is required for item {0}").format(row.item_code))
 			if not row.s_warehouse:
 				frappe.throw(_("Source Warehouse is required for item {0}").format(row.item_code))
+
+		self.validate_transit_warehouses()
+		self.validate_stock_in_rows()
+
+	def validate_transit_warehouses(self):
+		if not self.doc.add_to_transit:
+			return
+
+		target_warehouses = {row.t_warehouse for row in self.doc.items if row.t_warehouse}
+		if self.doc.to_warehouse:
+			target_warehouses.add(self.doc.to_warehouse)
+
+		if not target_warehouses:
+			return
+
+		transit_warehouses = set(
+			frappe.get_all(
+				"Warehouse",
+				filters={
+					"name": ("in", list(target_warehouses)),
+					"warehouse_type": "Transit",
+					"company": self.doc.company,
+				},
+				pluck="name",
+			)
+		)
+
+		if self.doc.to_warehouse and self.doc.to_warehouse not in transit_warehouses:
+			frappe.throw(
+				_(
+					"Default Target Warehouse {0} must be a Transit warehouse when Add to Transit is enabled."
+				).format(frappe.bold(self.doc.to_warehouse))
+			)
+
+		for row in self.doc.items:
+			if row.t_warehouse and row.t_warehouse not in transit_warehouses:
+				frappe.throw(
+					_(
+						"Row #{0}: Target Warehouse {1} must be a Transit warehouse when Add to Transit is enabled."
+					).format(row.idx, frappe.bold(row.t_warehouse))
+				)
 
 	def validate_same_source_target_warehouse(self):
 		"""
@@ -76,25 +130,22 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 		self._bulk_update_transferred_qty(stock_entries, child_list)
 		self._update_per_transferred_field()
 
-	def _get_item_transferred_qty(self, item):
+	def _get_transferred_qty_map(self, ste_details):
 		sed = frappe.qb.DocType("Stock Entry Detail")
-		result = (
-			frappe.qb.from_(sed)
-			.select(Sum(sed.transfer_qty).as_("qty"))
-			.where(
-				(sed.against_stock_entry == item.against_stock_entry)
-				& (sed.ste_detail == item.ste_detail)
-				& (sed.docstatus == 1)
-			)
-		).run(as_dict=True)
-		return result[0].qty if result and result[0].qty else 0.0
+		return dict(
+			(
+				frappe.qb.from_(sed)
+				.select(sed.ste_detail, Sum(sed.transfer_qty))
+				.where((sed.ste_detail.isin(ste_details)) & (sed.docstatus == 1))
+				.groupby(sed.ste_detail)
+			).run()
+		)
 
-	def _validate_item_transferred_qty(self, item, transferred_qty):
+	def _validate_item_transferred_qty(self, item, transferred_qty, outward_row):
 		if item.docstatus != 1:
 			return
 
-		transfer_qty = frappe.get_value("Stock Entry Detail", item.ste_detail, "transfer_qty")
-		if transferred_qty > transfer_qty:
+		if transferred_qty > flt(outward_row.transfer_qty):
 			frappe.throw(
 				_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
 					item.idx
@@ -102,16 +153,54 @@ class BaseMaterialTransferStockEntry(BaseStockEntry):
 			)
 
 	def _collect_transferred_qtys(self):
-		stock_entries, child_list = {}, []
-		for item in self.doc.items:
-			if not (item.against_stock_entry and item.ste_detail):
-				continue
+		rows = [item for item in self.doc.items if item.against_stock_entry and item.ste_detail]
+		if not rows:
+			return {}, []
 
-			transferred_qty = self._get_item_transferred_qty(item)
-			self._validate_item_transferred_qty(item, transferred_qty)
+		ste_details = [item.ste_detail for item in rows]
+		outward_rows = get_outward_rows(ste_details)
+		transferred_qty_map = self._get_transferred_qty_map(ste_details)
+
+		stock_entries, child_list = {}, []
+		for item in rows:
+			transferred_qty = flt(transferred_qty_map.get(item.ste_detail))
+			self._validate_item_transferred_qty(
+				item, transferred_qty, outward_rows.get(item.ste_detail, frappe._dict())
+			)
 			child_list.append(item.ste_detail)
 			stock_entries[(item.against_stock_entry, item.ste_detail)] = transferred_qty
 		return stock_entries, child_list
+
+	def validate_stock_in_rows(self):
+		rows = [item for item in self.doc.items if item.against_stock_entry and item.ste_detail]
+		if not rows:
+			return
+
+		outward_rows = get_outward_rows([item.ste_detail for item in rows])
+		for item in rows:
+			outward_row = outward_rows.get(item.ste_detail)
+			if not outward_row:
+				continue
+
+			if item.item_code != outward_row.item_code:
+				frappe.throw(
+					_("Row #{0}: Item {1} does not match item {2} sent by {3}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(outward_row.item_code),
+						item.against_stock_entry,
+					)
+				)
+
+			if item.s_warehouse != outward_row.t_warehouse:
+				frappe.throw(
+					_("Row #{0}: Item {1} must be taken from {2}, where {3} sent it.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(outward_row.t_warehouse),
+						item.against_stock_entry,
+					)
+				)
 
 	def _bulk_update_transferred_qty(self, stock_entries, child_list):
 		sed = frappe.qb.DocType("Stock Entry Detail")
@@ -178,12 +267,93 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate(self):
 		self.validate_warehouse()
+		self.validate_job_card_for_semi_finished_goods()
+		self.validate_work_order_status_for_return()
+		self.validate_returned_qty_within_work_order()
 		self.validate_component_and_quantities()
 		self.validate_same_source_target_warehouse()
+		self.validate_alternative_items()
+
+	def validate_job_card_for_semi_finished_goods(self):
+		"""Semi-finished goods move per operation: through its Job Card, or its Subcontracting Order
+		when subcontracted."""
+		if self.doc.is_return or not (self.wo_doc and self.wo_doc.track_semi_finished_goods):
+			return
+
+		if not self.doc.job_card:
+			frappe.throw(
+				_("Transfer materials for Work Order {0} from its Job Cards.").format(
+					get_link_to_form("Work Order", self.wo_doc.name)
+				),
+				title=_("Job Card Required"),
+			)
+
+		if frappe.db.get_value("Job Card", self.doc.job_card, "is_subcontracted"):
+			frappe.throw(
+				_("Send materials for Job Card {0} to the supplier from its Subcontracting Order.").format(
+					get_link_to_form("Job Card", self.doc.job_card)
+				),
+				title=_("Subcontracted Job Card"),
+			)
+
+	def validate_work_order_status_for_return(self):
+		if not (self.doc.is_return and self.wo_doc) or self.wo_doc.status in ("Completed", "Closed"):
+			return
+
+		frappe.throw(
+			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
+				get_link_to_form("Work Order", self.doc.work_order)
+			),
+			title=_("Work Order Not Finished"),
+		)
+
+	def validate_returned_qty_within_work_order(self):
+		if not (self.doc.is_return and self.wo_doc):
+			return
+
+		returnable_qty = self.get_returnable_qty()
+		for item_code, returned_qty in self.get_returned_qty_by_item().items():
+			if flt(returned_qty, 6) > flt(returnable_qty[item_code], 6):
+				frappe.throw(
+					_(
+						"Item {0}: cannot return {1} to the store, Work Order {2} has only {3} of it left unconsumed."
+					).format(
+						frappe.bold(item_code),
+						flt(returned_qty),
+						get_link_to_form("Work Order", self.wo_doc.name),
+						flt(returnable_qty[item_code]),
+					),
+					title=_("Excess Return"),
+				)
+
+	def get_returnable_qty(self) -> dict:
+		from .manufacturing import ManufactureStockEntry
+
+		available = ManufactureStockEntry(self.doc)
+		available.prepare_available_materials_based_on_transfer()
+		returnable_qty = defaultdict(float)
+		for row in available._transfer_entries or []:
+			returnable_qty[row.item_code] += flt(row.transfer_qty)
+
+		for row in getattr(available, "_consumption_entries", None) or []:
+			returnable_qty[row.item_code] -= flt(row.transfer_qty)
+
+		return returnable_qty
+
+	def get_returned_qty_by_item(self) -> dict:
+		qty_by_item = defaultdict(float)
+		for row in self.doc.items:
+			if row.s_warehouse:
+				qty_by_item[row.item_code] += flt(row.qty) * flt(row.conversion_factor or 1)
+
+		return qty_by_item
 
 	def validate_component_and_quantities(self):
 		if self.doc.fg_completed_qty:
-			if frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
+			if (
+				frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom")
+				and self.backflush_based_on != "Material Transferred for Manufacture"
+			):
 				_check_bom_component_qty(
 					self.doc, get_bom_items(self.doc.bom_no, self.doc.use_multi_level_bom)
 				)
@@ -204,10 +374,16 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not wo:
 			return
 
+		from erpnext.manufacturing.doctype.work_order.services.required_items import (
+			get_allowed_transfer_qty,
+		)
+
 		pending_by_item = {}
 		for r in wo.required_items:
 			pending_by_item[r.item_code] = (
-				pending_by_item.get(r.item_code, 0.0) + flt(r.required_qty) - flt(r.transferred_qty)
+				pending_by_item.get(r.item_code, 0.0)
+				+ get_allowed_transfer_qty(r.required_qty)
+				- flt(r.transferred_qty)
 			)
 
 		transfer_by_item = {}
@@ -216,19 +392,21 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			if not item.s_warehouse:
 				continue
 
-			key = (
-				item.item_code if item.item_code in pending_by_item else getattr(item, "original_item", None)
-			)
+			key = item.original_item or item.item_code
 			if key not in pending_by_item:
 				continue
 
-			transfer_by_item[key] = transfer_by_item.get(key, 0.0) + flt(item.qty)
+			transfer_by_item[key] = transfer_by_item.get(key, 0.0) + flt(item.qty) * flt(
+				item.conversion_factor or 1
+			)
 			first_row_by_item.setdefault(key, item)
 
 		for key, transfer_qty in transfer_by_item.items():
-			pending_qty = pending_by_item[key]
+			item = first_row_by_item[key]
+			precision = item.precision("transfer_qty")
+			transfer_qty = flt(transfer_qty, precision)
+			pending_qty = flt(pending_by_item[key], precision)
 			if transfer_qty > pending_qty:
-				item = first_row_by_item[key]
 				frappe.throw(
 					_(
 						"Row #{0}: Cannot transfer {1} {2} of Item {3}. "
@@ -236,7 +414,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 					).format(
 						item.idx,
 						transfer_qty,
-						item.uom,
+						item.stock_uom,
 						frappe.bold(item.item_code),
 						pending_qty,
 					),
@@ -304,39 +482,54 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		work_order = self.wo_doc
 		consider_job_card = work_order.transfer_material_against == "Job Card" and self.doc.get("job_card")
 		job_card_items = self.get_job_card_item_codes() if consider_job_card else []
-		wip_warehouse = self._resolve_wip_warehouse(work_order)
-		extra_pct = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+		self.job_card_operation = (
+			frappe.db.get_value(
+				"Job Card", self.doc.job_card, ["operation_row_id", "operation"], as_dict=True
+			)
+			if consider_job_card
+			else None
 		)
+		wip_warehouse = self._resolve_wip_warehouse(work_order)
 		item_dict = frappe._dict()
 		for d in work_order.get("required_items"):
 			self._add_required_item(
-				item_dict, d, consider_job_card, job_card_items, wip_warehouse, extra_pct, work_order
+				item_dict, d, consider_job_card, job_card_items, wip_warehouse, work_order
 			)
 		return item_dict
+
+	def _is_row_of_job_card_operation(self, row):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import is_row_of_operation
+
+		operation = self.job_card_operation
+		return not operation or is_row_of_operation(row, operation)
 
 	def _resolve_wip_warehouse(self, work_order):
 		if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 			return work_order.wip_warehouse
 		return None
 
-	def _add_required_item(
-		self, item_dict, d, consider_job_card, job_card_items, wip_warehouse, extra_pct, work_order
-	):
+	def _add_required_item(self, item_dict, d, consider_job_card, job_card_items, wip_warehouse, work_order):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import (
+			get_allowed_transfer_qty,
+		)
+
 		if consider_job_card and d.item_code not in job_card_items:
 			return
-		additional_qty = extra_pct * flt(d.required_qty) / 100 if extra_pct else 0.0
-		transfer_pending = (
-			(flt(d.required_qty) + additional_qty) > flt(d.transferred_qty)
-			if additional_qty
-			else flt(d.required_qty) > flt(d.transferred_qty)
-		)
+		if consider_job_card and not self._is_row_of_job_card_operation(d):
+			return
+		transfer_pending = get_allowed_transfer_qty(d.required_qty) > flt(d.transferred_qty)
 		can_transfer = transfer_pending or self.backflush_based_on == "Material Transferred for Manufacture"
 		if not can_transfer or not d.include_item_in_manufacturing:
 			return
 		self._build_required_item_row(item_dict, d, consider_job_card, wip_warehouse, work_order)
 
 	def _build_required_item_row(self, item_dict, d, consider_job_card, wip_warehouse, work_order):
+		key = (d.item_code, d.source_warehouse)
+		if existing_row := item_dict.get(key):
+			existing_row["required_qty"] = flt(existing_row["required_qty"]) + flt(d.required_qty)
+			existing_row["transferred_qty"] = flt(existing_row["transferred_qty"]) + flt(d.transferred_qty)
+			return
+
 		item_row = d.as_dict()
 		item_row["idx"] = len(item_dict) + 1
 		if consider_job_card:
@@ -344,9 +537,11 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if d.source_warehouse and not frappe.db.get_value("Warehouse", d.source_warehouse, "is_group"):
 			item_row["from_warehouse"] = d.source_warehouse
 		item_row["to_warehouse"] = wip_warehouse
-		if item_row["allow_alternative_item"]:
-			item_row["allow_alternative_item"] = work_order.allow_alternative_item
-		item_dict.setdefault(d.item_code, item_row)
+		item_row["allow_alternative_item"] = cint(
+			work_order.allow_alternative_item
+			and frappe.get_cached_value("Item", d.item_code, "allow_alternative_item")
+		)
+		item_dict.setdefault(key, item_row)
 
 	def _get_job_card_item(self, item_code):
 		return (
@@ -396,6 +591,7 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 
 	def validate(self):
 		self.validate_warehouse()
+		self.validate_same_source_target_warehouse()
 		self.validate_material_request()
 
 	def get_material_request(self, item_row):
@@ -419,7 +615,7 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 		for row in self.doc.items:
 			material_request, material_request_item = self.get_material_request(row)
 			if not material_request:
-				return
+				continue
 
 			mreq_item = frappe.db.get_value(
 				"Material Request Item",
@@ -462,7 +658,7 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 			if mr not in material_requests and self.doc.outgoing_stock_entry and parent_se:
 				mr = frappe.get_value("Stock Entry Detail", item.ste_detail, "material_request")
 			if mr and mr not in material_requests:
-				status = self._update_mr_transfer_status(mr, status, material_requests)
+				self._update_mr_transfer_status(mr, status, material_requests)
 
 	def _update_mr_transfer_status(self, material_request, status, material_requests):
 		material_requests.append(material_request)
@@ -471,7 +667,6 @@ class MaterialRequestStockEntry(BaseMaterialTransferStockEntry):
 			if qty.get("transfer_qty") > qty.get("transferred_qty"):
 				status = "In Transit"
 		frappe.db.set_value("Material Request", material_request, "transfer_status", status)
-		return status
 
 
 def _resolve_transfer_qty(desire_to_transfer, pending_to_issue, can_transfer):

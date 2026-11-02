@@ -8,6 +8,31 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestBomSearch(ERPNextTestSuite):
+	def test_only_submitted_documents_are_returned(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		for doctype, fields in (
+			("BOM", {"item": "_Test FG Item", "company": "_Test Company", "currency": "INR"}),
+			("Product Bundle", {"new_item_code": bundle_item}),
+		):
+			doc = frappe.get_doc({"doctype": doctype, **fields})
+			doc.append("items", {"item_code": "_Test Item", "qty": 1})
+			doc.insert()
+
+			for status in (0, 1, 2):
+				if status == 1:
+					doc.submit()
+				elif status == 2:
+					doc.cancel()
+
+				for search_sub_assemblies in (0, 1):
+					with self.subTest(doctype=doctype, status=status, exploded=search_sub_assemblies):
+						rows = self.run_report(
+							item1="_Test Item", search_sub_assemblies=search_sub_assemblies
+						)
+						self.assertEqual((doc.name, doctype) in rows, status == 1)
+
 	def run_report(self, **extra):
 		filters = frappe._dict({"search_sub_assemblies": 0})
 		filters.update(extra)
@@ -44,6 +69,14 @@ class TestBomSearch(ERPNextTestSuite):
 		# sub-assembly surfaces the top-level BOM
 		deep = [row[0] for row in self.run_report(search_sub_assemblies=1, item1=raw_material)]
 		self.assertIn(top_bom.name, deep)
+
+		for filters in (
+			{"item1": sub_assembly},
+			{"item1": sub_assembly, "item2": raw_material},
+		):
+			with self.subTest(filters=filters):
+				rows = self.run_report(search_sub_assemblies=1, **filters)
+				self.assertEqual(rows.count((top_bom.name, "BOM")), 1)
 
 		# search_sub_assemblies=0 scans only direct BOM Items, so the top-level BOM (which lists
 		# the sub-assembly, not the raw material) is not returned for the raw material

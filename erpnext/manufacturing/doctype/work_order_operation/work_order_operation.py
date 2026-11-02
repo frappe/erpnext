@@ -20,7 +20,9 @@ class WorkOrderOperation(Document):
 		actual_start_time: DF.Datetime | None
 		backflush_from_wip_warehouse: DF.Check
 		batch_size: DF.Float
+		batch_split: DF.Check
 		bom: DF.Link | None
+		bom_operation: DF.Data | None
 		bom_no: DF.Link | None
 		completed_qty: DF.Float
 		description: DF.TextEditor | None
@@ -29,6 +31,7 @@ class WorkOrderOperation(Document):
 		hour_rate: DF.Float
 		is_subcontracted: DF.Check
 		operation: DF.Link
+		output_qty: DF.Float
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -43,6 +46,7 @@ class WorkOrderOperation(Document):
 		source_warehouse: DF.Link | None
 		status: DF.Literal["Pending", "Work in Progress", "Completed"]
 		time_in_mins: DF.Float
+		weight_per_piece: DF.Float
 		wip_warehouse: DF.Link | None
 		workstation: DF.Link | None
 		workstation_type: DF.Link | None

@@ -2,7 +2,9 @@
  "actions": [],
  "autoname": "format:QA-REV-{#####}",
  "creation": "2018-10-02 11:45:16.301955",
+ "description": "A periodic check of how a quality goal is going.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quality_review",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -76,6 +78,7 @@
    "reqd": 1
   }
  ],
+ "icon": "clipboard-check",
  "index_web_pages_for_search": 1,
  "links": [
   {
@@ -84,7 +87,7 @@
    "link_fieldname": "review"
   }
  ],
- "modified": "2024-03-27 13:10:30.167995",
+ "modified": "2026-10-05 14:52:56.725983",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Review",
@@ -110,21 +113,15 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Desk User",
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Quality Manager",
-   "share": 1,
-   "write": 1
+   "role": "Desk User"
   }
  ],
  "sort_field": "creation",

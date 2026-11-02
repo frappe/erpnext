@@ -10,7 +10,7 @@
  "use_report_chart": 1,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2020-07-09 12:15:51.564487",
+ "modified": "2026-10-05 02:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Quality Inspection Analysis",
@@ -21,5 +21,6 @@
  "timeseries": 0,
  "timespan": "Last Year",
  "type": "Donut",
- "y_axis": []
+ "y_axis": [],
+ "empty_state_message": "How many of your inspections pass or fail."
 }

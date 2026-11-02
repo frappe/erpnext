@@ -79,6 +79,11 @@ frappe.ui.form.on("BOM Operation", {
 		const d = locals[cdt][cdn];
 		frm.events.calculate_operating_cost(frm, d);
 	},
+
+	hour_rate: function (frm, cdt, cdn) {
+		const d = locals[cdt][cdn];
+		frm.events.calculate_operating_cost(frm, d);
+	},
 });
 
 frappe.tour["Routing"] = [
@@ -89,7 +94,7 @@ frappe.tour["Routing"] = [
 	},
 	{
 		fieldname: "operations",
-		title: "BOM Operations",
+		title: __("BOM Operations"),
 		description: __(
 			"Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n\n After that, set the Operation Time in minutes and the table will calculate the Operation Costs based on the Hourly Rate and Operation Time."
 		),

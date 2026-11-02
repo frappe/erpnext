@@ -1,0 +1,21 @@
+{
+ "action": "Complete Onboarding",
+ "action_label": "Open Buying",
+ "creation": "2026-10-04 03:16:15.368554",
+ "description": "Add a supplier, order from them and pay their bill.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 03:16:15.368554",
+ "modified_by": "Administrator",
+ "module_onboarding": "Buying Onboarding",
+ "name": "Complete Buying Onboarding",
+ "owner": "Administrator",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Order from your suppliers",
+ "validate_action": 1
+}

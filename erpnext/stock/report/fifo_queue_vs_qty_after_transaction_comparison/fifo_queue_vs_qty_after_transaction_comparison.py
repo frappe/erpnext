@@ -8,6 +8,13 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
+	maintains_fifo_queue,
+)
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.utils import get_valuation_method, is_serial_no_wise_valuation_disabled
+
 SLE_FIELDS = (
 	"name",
 	"item_code",
@@ -21,6 +28,9 @@ SLE_FIELDS = (
 	"qty_after_transaction",
 	"stock_queue",
 	"batch_no",
+	"serial_no",
+	"serial_and_batch_bundle",
+	"company",
 	"stock_value",
 	"valuation_rate",
 )
@@ -29,7 +39,7 @@ SLE_FIELDS = (
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_data(filters):
@@ -57,15 +67,22 @@ def get_stock_ledger_entries(filters):
 			frappe.get_all("Item", filters=item_group_filter, pluck="name", order_by=None),
 		)
 
-	if filters.from_date:
+	if filters.from_date and filters.to_date:
+		sle_filters["posting_date"] = ("between", [filters.from_date, filters.to_date])
+	elif filters.from_date:
 		sle_filters["posting_date"] = (">=", filters.from_date)
-	if filters.to_date:
+	elif filters.to_date:
 		sle_filters["posting_date"] = ("<=", filters.to_date)
+
+	ledger_filters = [sle_filters]
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	if condition := get_allowed_companies_condition(sle.company, "Stock Ledger Entry"):
+		ledger_filters.append(condition)
 
 	return frappe.get_all(
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
-		filters=sle_filters,
+		filters=ledger_filters,
 		order_by="posting_datetime, creation",
 	)
 
@@ -76,25 +93,23 @@ def find_first_bad_queue(sles):
 		item_warehouse_sles.setdefault((sle.item_code, sle.warehouse), []).append(sle)
 
 	data = []
+	valuation_methods = {}
 
-	for _item_wh, sles in item_warehouse_sles.items():
+	for (item_code, _warehouse), sles in item_warehouse_sles.items():
 		for idx, sle in enumerate(sles):
-			queue = json.loads(sle.stock_queue or "[]")
-
-			sle.fifo_queue_qty = 0.0
-			sle.fifo_stock_value = 0.0
-			for qty, rate in queue:
-				sle.fifo_queue_qty += flt(qty)
-				sle.fifo_stock_value += flt(qty) * flt(rate)
-
-			sle.fifo_qty_diff = sle.qty_after_transaction - sle.fifo_queue_qty
-			sle.fifo_value_diff = sle.stock_value - sle.fifo_stock_value
+			key = (item_code, sle.company)
+			if key not in valuation_methods:
+				valuation_methods[key] = get_valuation_method(item_code, sle.company)
 
 			if sle.batch_no:
 				sle.use_batchwise_valuation = frappe.db.get_value(
 					"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
 				)
 
+			if not keeps_fifo_queue(sle, valuation_methods[key]):
+				continue
+
+			set_queue_totals(sle)
 			if abs(sle.fifo_qty_diff) > 0.001 or abs(sle.fifo_value_diff) > 0.1:
 				if idx:
 					data.append(sles[idx - 1])
@@ -103,6 +118,24 @@ def find_first_bad_queue(sles):
 				break
 
 	return data
+
+
+def keeps_fifo_queue(sle, valuation_method):
+	if valuation_method != "Moving Average" and is_serial_no_wise_valuation_disabled(sle.item_code):
+		return True
+
+	return maintains_fifo_queue(sle, valuation_method)
+
+
+def set_queue_totals(sle):
+	sle.fifo_queue_qty = 0.0
+	sle.fifo_stock_value = 0.0
+	for qty, rate in json.loads(sle.stock_queue or "[]"):
+		sle.fifo_queue_qty += flt(qty)
+		sle.fifo_stock_value += flt(qty) * flt(rate)
+
+	sle.fifo_qty_diff = sle.qty_after_transaction - sle.fifo_queue_qty
+	sle.fifo_value_diff = sle.stock_value - sle.fifo_stock_value
 
 
 def get_columns():

@@ -5,7 +5,9 @@
 import frappe
 from frappe import _
 from frappe.query_builder import Case
+from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import IfNull
+from frappe.utils import cstr
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 
@@ -48,11 +50,26 @@ def execute(filters=None):
 
 
 def get_pos_entries(filters, group_by_field):
-	p = frappe.qb.DocType("POS Invoice")
+	"""POS sales from POS Invoices and from Sales Invoices made directly at the POS."""
+	entries = get_invoice_entries("POS Invoice", filters, group_by_field)
+	entries += get_invoice_entries("Sales Invoice", filters, group_by_field)
+	sort_field = group_by_field or "posting_date"
+	entries.sort(key=lambda d: (d.posting_date, cstr(d.get(sort_field))))
+	if group_by_field == "mode_of_payment":
+		show_grand_total_once(entries)
+	return entries
+
+
+def get_invoice_entries(doctype, filters, group_by_field):
+	if not frappe.has_permission(doctype, "select"):
+		return []
+
+	p = frappe.qb.DocType(doctype)
 	query = (
 		frappe.qb.from_(p)
 		.select(
 			p.posting_date,
+			ConstantColumn(doctype).as_("invoice_type"),
 			p.name.as_("pos_invoice"),
 			p.pos_profile,
 			p.company,
@@ -62,32 +79,39 @@ def get_pos_entries(filters, group_by_field):
 			p.base_grand_total.as_("grand_total"),
 		)
 		.where(p.docstatus == 1)
+		.where(p.name.isin(frappe.qb.get_query(doctype, fields=["name"], ignore_permissions=False)))
 	)
+
+	if doctype == "Sales Invoice":
+		# consolidated invoices only merge POS Invoices that are already listed
+		query = query.where((p.is_pos == 1) & (p.is_consolidated == 0))
 
 	for condition in get_conditions(filters, p):
 		query = query.where(condition)
 
 	if group_by_field == "mode_of_payment":
 		sip = frappe.qb.DocType("Sales Invoice Payment")
-		paid_amount = sip.base_amount - Case().when(sip.type == "Cash", p.change_amount).else_(0)
+		paid_amount = sip.base_amount - Case().when(sip.type == "Cash", p.base_change_amount).else_(0)
 		query = (
 			query.inner_join(sip)
-			.on(sip.parent == p.name)
+			.on((sip.parent == p.name) & (sip.parenttype == doctype))
 			.select(sip.mode_of_payment, paid_amount.as_("paid_amount"))
 			.where(IfNull(paid_amount, 0) != 0)
-			.orderby(p.posting_date)
-			.orderby(sip.mode_of_payment)
-		)
-	elif group_by_field:
-		query = (
-			query.select((p.base_paid_amount - p.change_amount).as_("paid_amount"))
-			.orderby(p.posting_date)
-			.orderby(p[group_by_field])
 		)
 	else:
-		query = query.orderby(p.posting_date)
+		query = query.select((p.base_paid_amount - p.base_change_amount).as_("paid_amount"))
 
 	return query.run(as_dict=1)
+
+
+def show_grand_total_once(entries):
+	"""An invoice has a row per payment; keep its grand total on the first so group totals add up."""
+	seen = set()
+	for entry in entries:
+		invoice = (entry.invoice_type, entry.pos_invoice)
+		if invoice in seen:
+			entry.grand_total = 0
+		seen.add(invoice)
 
 
 def concat_mode_of_payments(pos_entries):
@@ -187,10 +211,17 @@ def get_columns(filters):
 	columns = [
 		{"label": _("Posting Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 90},
 		{
-			"label": _("POS Invoice"),
-			"fieldname": "pos_invoice",
+			"label": _("Invoice Type"),
+			"fieldname": "invoice_type",
 			"fieldtype": "Link",
-			"options": "POS Invoice",
+			"options": "DocType",
+			"width": 120,
+		},
+		{
+			"label": _("Invoice"),
+			"fieldname": "pos_invoice",
+			"fieldtype": "Dynamic Link",
+			"options": "invoice_type",
 			"width": 120,
 		},
 		{

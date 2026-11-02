@@ -17,7 +17,7 @@ class AssetActivity(Document):
 
 		asset: DF.Link
 		date: DF.Datetime
-		subject: DF.SmallText
+		subject: DF.TextEditor
 		user: DF.Link
 	# end: auto-generated types
 
@@ -34,3 +34,21 @@ def add_asset_activity(asset, subject):
 			"date": now_datetime(),
 		}
 	).insert(ignore_permissions=True, ignore_links=True)
+
+
+def get_permission_query_conditions(user: str | None = None, doctype: str | None = None):
+	"""Apply the user's restrictions on Asset (user permissions, query conditions) to its activity."""
+	user = user or frappe.session.user
+	if user == "Administrator" or not frappe.has_permission("Asset", "select", user=user):
+		return None
+
+	readable_assets = frappe.qb.get_query("Asset", fields=["name"], ignore_permissions=False, user=user)
+	return frappe.qb.DocType("Asset Activity").asset.isin(readable_assets)
+
+
+def has_permission(doc, user=None, ptype=None):
+	user = user or frappe.session.user
+	if not frappe.has_permission("Asset", "select", user=user):
+		return False
+
+	return bool(frappe.get_list("Asset", filters={"name": doc.asset}, user=user, limit=1))

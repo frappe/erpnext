@@ -3,7 +3,9 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2019-02-18 17:23:11.708371",
+ "description": "A set of tasks to start new projects from.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project-template",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -33,8 +35,9 @@
    "label": "Disabled"
   }
  ],
+ "icon": "folder",
  "links": [],
- "modified": "2025-03-12 14:20:57.301906",
+ "modified": "2026-10-05 17:03:50.245948",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
@@ -52,6 +55,18 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Projects Manager",
+   "select": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Projects User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

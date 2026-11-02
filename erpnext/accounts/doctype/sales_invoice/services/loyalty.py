@@ -11,6 +11,8 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
 
+NO_EXPIRY_DATE = "9999-12-31"
+
 
 class LoyaltyService:
 	def __init__(self, doc):
@@ -48,7 +50,9 @@ class LoyaltyService:
 					"invoice": doc.name,
 					"loyalty_points": points_earned,
 					"purchase_amount": eligible_amount,
-					"expiry_date": add_days(doc.posting_date, lp_details.expiry_duration),
+					"expiry_date": add_days(doc.posting_date, lp_details.expiry_duration)
+					if lp_details.expiry_duration
+					else NO_EXPIRY_DATE,
 					"posting_date": doc.posting_date,
 				}
 			)
@@ -97,7 +101,7 @@ class LoyaltyService:
 
 		points_to_redeem = doc.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			if lp_entry.invoice_type != doc.doctype or lp_entry.invoice == doc.name:
+			if lp_entry.invoice == doc.name:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			redeemed_points = min(available_points, points_to_redeem)

@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -15,7 +17,7 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	query_filters = {"docstatus": ("<", 2)}
+	query_filters = {"docstatus": 1}
 
 	fields = [
 		"name",
@@ -36,8 +38,13 @@ def get_data(filters):
 
 	query_filters["report_date"] = ["between", [filters.get("from_date"), filters.get("to_date")]]
 
-	return frappe.get_all(
-		"Quality Inspection", fields=fields, filters=query_filters, order_by="report_date asc"
+	inspection_filters = [query_filters]
+	company = frappe.qb.DocType("Quality Inspection").company
+	if condition := get_allowed_companies_condition(company, "Quality Inspection"):
+		inspection_filters.append(condition)
+
+	return frappe.get_list(
+		"Quality Inspection", fields=fields, filters=inspection_filters, order_by="report_date asc"
 	)
 
 
@@ -49,7 +56,8 @@ def get_chart_data(periodic_data, columns):
 	datasets = []
 
 	for d in periodic_data:
-		status_wise_data[d.status] += 1
+		if d.status in status_wise_data:
+			status_wise_data[d.status] += 1
 
 	datasets.append(
 		{
@@ -97,7 +105,13 @@ def get_columns(filters):
 				"fieldtype": "Data",
 				"width": 110,
 			},
-			{"label": _("Document Type"), "fieldname": "reference_type", "fieldtype": "Data", "width": 90},
+			{
+				"label": _("Document Type"),
+				"fieldname": "reference_type",
+				"fieldtype": "Link",
+				"options": "DocType",
+				"width": 90,
+			},
 			{
 				"label": _("Document Name"),
 				"fieldname": "reference_name",

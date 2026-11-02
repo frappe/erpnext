@@ -245,9 +245,9 @@ const BankTransactionListView = () => {
 
     const content = _("Below is a list of all bank transactions imported in the system for the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account_name}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
 
-    return <div className="space-y-2 py-2">
+    return <div className="flex min-h-0 flex-1 flex-col space-y-2 py-2">
 
-        <div className="flex gap-2 justify-between items-center">
+        <div className="flex shrink-0 gap-2 justify-between items-center">
             <span className="text-p-sm">
                 <MarkdownRenderer content={content} />
             </span>
@@ -278,8 +278,9 @@ const BankTransactionListView = () => {
             data={filteredResults}
             columns={transactionColumns}
             getRowId={(row) => row.name}
-            maxHeight="calc(100vh - 200px)"
-            scrollAreaClassName="min-h-[calc(100vh-200px)]"
+            className="min-h-0 flex-1"
+            maxHeight="none"
+            scrollAreaClassName="flex-1"
             emptyState={<Empty>
                 <EmptyMedia>
                     <ListIcon />

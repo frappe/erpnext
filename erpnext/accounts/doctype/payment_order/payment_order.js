@@ -7,11 +7,20 @@ frappe.ui.form.on("Payment Order", {
 			return {
 				filters: {
 					is_company_account: 1,
+					company: frm.doc.company,
+					disabled: 0,
 				},
 			};
 		});
 
 		frm.set_df_property("references", "cannot_add_rows", true);
+	},
+	company: function (frm) {
+		frm.set_value({
+			company_bank_account: "",
+			company_bank: "",
+			account: "",
+		});
 	},
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 0) {
@@ -50,16 +59,12 @@ frappe.ui.form.on("Payment Order", {
 	},
 
 	remove_button: function (frm) {
-		// remove custom button of order type that is not imported
-
-		let label = ["Payment Request", "Payment Entry"];
-
 		if (frm.doc.references.length > 0 && frm.doc.payment_order_type) {
-			label = label.reduce((x) => {
-				x != frm.doc.payment_order_type;
-				return x;
-			});
-			frm.remove_custom_button(label, "Get from");
+			for (const label of ["Payment Request", "Payment Entry"]) {
+				if (label !== frm.doc.payment_order_type) {
+					frm.remove_custom_button(__(label), __("Get Payments from"));
+				}
+			}
 		}
 	},
 
@@ -75,6 +80,7 @@ frappe.ui.form.on("Payment Order", {
 				party: frm.doc.supplier || "",
 			},
 			get_query_filters: {
+				company: frm.doc.company,
 				bank: frm.doc.bank,
 				docstatus: 1,
 				payment_type: ["!=", "Receive"],
@@ -96,6 +102,7 @@ frappe.ui.form.on("Payment Order", {
 				party: frm.doc.supplier || "",
 			},
 			get_query_filters: {
+				company: frm.doc.company,
 				bank: frm.doc.bank,
 				docstatus: 1,
 				status: ["=", "Initiated"],
@@ -136,10 +143,7 @@ frappe.ui.form.on("Payment Order", {
 			],
 		});
 
-		dialog.set_primary_action(__("Submit"), function () {
-			var args = dialog.get_values();
-			if (!args) return;
-
+		dialog.set_primary_action(__("Submit"), function (args) {
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_order.payment_order.make_payment_records",
 				args: {

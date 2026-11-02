@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Purchase Invoice",
+ "creation": "2026-10-04 01:25:22.673945",
+ "description": "It posts the expense, and what you owe the supplier, to your ledger. See [Purchase Invoice](https://docs.frappe.io/erpnext/user/manual/en/purchase-invoice).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "intro_video_url": "https://www.youtube.com/watch?v=Cb4gYZuV60k",
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:39:31.631983",
+ "modified_by": "Administrator",
+ "name": "Create Accounting Purchase Invoice",
+ "owner": "Administrator",
+ "reference_document": "Purchase Invoice",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Enter a supplier's bill",
+ "validate_action": 1
+}

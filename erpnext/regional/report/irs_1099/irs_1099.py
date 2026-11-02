@@ -25,33 +25,26 @@ def execute(filters=None):
 		filters.setdefault("fiscal_year", get_fiscal_year(nowdate())[0])
 		filters.setdefault("company", frappe.db.get_default("company"))
 
-	region = frappe.db.get_value("Company", filters={"name": filters.company}, fieldname=["country"])
-
-	if region != "United States":
-		return [], []
+	frappe.has_permission("Company", doc=filters.company, throw=True)
+	validate_company_region(filters.company)
 
 	columns = get_columns()
 
-	gl = frappe.qb.DocType("GL Entry")
+	payments = get_payments(filters).as_("payments")
 	s = frappe.qb.DocType("Supplier")
 	query = (
-		frappe.qb.from_(gl)
+		frappe.qb.from_(payments)
 		.inner_join(s)
-		.on(s.name == gl.party)
+		.on(s.name == payments.supplier)
 		.select(
 			s.supplier_group.as_("supplier_group"),
-			gl.party.as_("supplier"),
+			payments.supplier.as_("supplier"),
 			s.tax_id.as_("tax_id"),
-			Sum(gl.debit_in_account_currency).as_("payments"),
+			Sum(payments.amount).as_("payments"),
 		)
-		.where(
-			(s.irs_1099 == 1)
-			& (gl.fiscal_year == filters.fiscal_year)
-			& (gl.party_type == "Supplier")
-			& (gl.company == filters.company)
-		)
-		.groupby(gl.party, s.supplier_group, s.tax_id)
-		.orderby(gl.party, order=frappe.qb.desc)
+		.where(s.irs_1099 == 1)
+		.groupby(payments.supplier, s.supplier_group, s.tax_id)
+		.orderby(payments.supplier, order=frappe.qb.desc)
 	)
 
 	if filters.supplier_group:
@@ -60,6 +53,58 @@ def execute(filters=None):
 	data = query.run(as_dict=True)
 
 	return columns, data
+
+
+def validate_company_region(company):
+	if frappe.get_cached_value("Company", company, "country") != "United States":
+		frappe.throw(
+			_(
+				"The company {0} is not in the United States. IRS 1099 is only available for companies in the United States."
+			).format(frappe.bold(company))
+		)
+
+
+def get_payments(filters):
+	"""Supplier payments from the ledger, plus those made directly on paid Purchase Invoices."""
+	gl = frappe.qb.DocType("GL Entry")
+	ledger_payments = (
+		frappe.qb.from_(gl)
+		.select(gl.party.as_("supplier"), (gl.debit - gl.credit).as_("amount"))
+		.where(
+			(gl.fiscal_year == filters.fiscal_year)
+			& (gl.party_type == "Supplier")
+			& (gl.company == filters.company)
+			& (gl.is_cancelled == 0)
+			& is_payment_voucher(gl)
+		)
+	)
+
+	pi = frappe.qb.DocType("Purchase Invoice")
+	year_start, year_end = frappe.get_cached_value(
+		"Fiscal Year", filters.fiscal_year, ["year_start_date", "year_end_date"]
+	)
+	invoice_payments = (
+		frappe.qb.from_(pi)
+		.select(pi.supplier, pi.base_paid_amount)
+		.where(
+			(pi.docstatus == 1)
+			& (pi.is_paid == 1)
+			& (pi.company == filters.company)
+			& pi.posting_date.between(year_start, year_end)
+		)
+	)
+	return ledger_payments.union_all(invoice_payments)
+
+
+def is_payment_voucher(gl):
+	"""Payment Entries and Journal Entries through a bank or cash account, so invoices and debit notes are left out."""
+	account = frappe.qb.DocType("Journal Entry Account")
+	bank_or_cash_journals = (
+		frappe.qb.from_(account).select(account.parent).where(account.account_type.isin(["Bank", "Cash"]))
+	)
+	return (gl.voucher_type == "Payment Entry") | (
+		(gl.voucher_type == "Journal Entry") & gl.voucher_no.isin(bank_or_cash_journals)
+	)
 
 
 def get_columns():
@@ -81,46 +126,6 @@ def get_columns():
 		{"fieldname": "tax_id", "label": _("Tax ID"), "fieldtype": "Data", "width": 200},
 		{"fieldname": "payments", "label": _("Total Payments"), "fieldtype": "Currency", "width": 200},
 	]
-
-
-@frappe.whitelist()
-def irs_1099_print(filters: str | dict):
-	if not filters:
-		frappe._dict(
-			{
-				"company": frappe.db.get_default("Company"),
-				"fiscal_year": frappe.db.get_default("Fiscal Year"),
-			}
-		)
-	else:
-		filters = frappe._dict(frappe.parse_json(filters))
-
-	fiscal_year_doc = get_fiscal_year(fiscal_year=filters.fiscal_year, as_dict=True)
-	fiscal_year = cstr(fiscal_year_doc.year_start_date.year)
-
-	company_address = get_payer_address_html(filters.company)
-	company_tin = frappe.db.get_value("Company", filters.company, "tax_id")
-
-	columns, data = execute(filters)
-	template = frappe.get_doc("Print Format", "IRS 1099 Form").html
-	output = PdfWriter()
-
-	for row in data:
-		row["fiscal_year"] = fiscal_year
-		row["company"] = filters.company
-		row["company_tin"] = company_tin
-		row["payer_street_address"] = company_address
-		row["recipient_street_address"], row["recipient_city_state"] = get_street_address_html(
-			"Supplier", row.supplier
-		)
-		row["payments"] = fmt_money(row["payments"], precision=0, currency="USD")
-		get_pdf(render_template(template, row), output=output if output else None)
-
-	frappe.local.response.filename = (
-		f"{filters.fiscal_year} {filters.company} IRS 1099 Forms{IRS_1099_FORMS_FILE_EXTENSION}"
-	)
-	frappe.local.response.filecontent = read_multi_pdf(output)
-	frappe.local.response.type = "download"
 
 
 def get_payer_address_html(company):

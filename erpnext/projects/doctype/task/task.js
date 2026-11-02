@@ -5,6 +5,7 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Task", {
 	setup: function (frm) {
+		frm.add_fetch("type", "weight", "task_weight");
 		frm.make_methods = {
 			Timesheet: () =>
 				frappe.model.open_mapped_doc({
@@ -14,6 +15,12 @@ frappe.ui.form.on("Task", {
 		};
 	},
 	onload: function (frm) {
+		frm.set_query("project", function () {
+			return {
+				query: "erpnext.controllers.queries.get_project_name",
+			};
+		});
+
 		frm.set_query("task", "depends_on", function () {
 			let filters = {
 				name: ["!=", frm.doc.name],
@@ -37,6 +44,8 @@ frappe.ui.form.on("Task", {
 	},
 
 	is_group: function (frm) {
+		if (frm.is_new()) return;
+
 		frappe.call({
 			method: "erpnext.projects.doctype.task.task.check_if_child_exists",
 			args: {

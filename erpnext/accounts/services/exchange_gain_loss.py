@@ -11,6 +11,13 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.accounts.utils import create_gain_loss_journal, get_currency_precision
 
 
+def get_exchange_gain_loss_account(company: str, is_gain: bool) -> str | None:
+	fieldname = "exchange_gain_account" if is_gain else "exchange_loss_account"
+	return frappe.get_cached_value("Company", company, fieldname) or frappe.get_cached_value(
+		"Company", company, "exchange_gain_loss_account"
+	)
+
+
 def gain_loss_journal_already_booked(
 	gain_loss_account: str,
 	exc_gain_loss: float,
@@ -72,10 +79,9 @@ def make_exchange_gain_loss_journal(
 					party_account = arg.get("account")
 					gain_loss_account = arg.get("difference_account")
 					difference_amount = arg.get("difference_amount") or arg.get("exchange_gain_loss")
-					if difference_amount > 0:
-						dr_or_cr = "debit" if arg.get("party_type") == "Customer" else "credit"
-					else:
-						dr_or_cr = "credit" if arg.get("party_type") == "Customer" else "debit"
+					dr_or_cr = "debit" if difference_amount > 0 else "credit"
+					if is_payable_account(doc.doctype, party_account):
+						dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 
 					reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
@@ -163,9 +169,7 @@ def make_exchange_gain_loss_journal(
 
 				reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-				gain_loss_account = frappe.get_cached_value(
-					"Company", doc.company, "exchange_gain_loss_account"
-				)
+				gain_loss_account = get_exchange_gain_loss_account(doc.company, reverse_dr_or_cr == "credit")
 				je = create_gain_loss_journal(
 					doc.company,
 					args.get("difference_posting_date") if args else doc.posting_date,
@@ -195,7 +199,7 @@ def make_exchange_gain_loss_journal(
 
 def is_payable_account(reference_doctype: str, account: str) -> bool:
 	if reference_doctype == "Purchase Invoice" or (
-		reference_doctype == "Journal Entry"
+		reference_doctype in ("Journal Entry", "Payment Entry")
 		and frappe.get_cached_value("Account", account, "account_type") == "Payable"
 	):
 		return True

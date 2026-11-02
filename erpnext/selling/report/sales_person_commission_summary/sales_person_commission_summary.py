@@ -1,8 +1,11 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import frappe
 from frappe import _, msgprint, qb
 from frappe.query_builder import Criterion
+
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
@@ -13,14 +16,18 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	data = []
 
+	seen_documents = set()
 	for d in entries:
+		# amount is the document total, so show it once per document to keep the total row correct
+		amount = None if d.name in seen_documents else d.base_net_amount
+		seen_documents.add(d.name)
 		data.append(
 			[
 				d.name,
 				d.customer,
 				d.territory,
 				d.posting_date,
-				d.base_net_amount,
+				amount,
 				d.sales_person,
 				d.allocated_percentage,
 				d.commission_rate,
@@ -28,10 +35,6 @@ def execute(filters=None):
 				d.incentives,
 			]
 		)
-
-	if data:
-		total_row = [""] * len(data[0])
-		data.append(total_row)
 
 	return columns, data
 
@@ -142,7 +145,14 @@ def get_conditions(dt, st, filters, date_field):
 		if filters.get(field):
 			conditions.append(dt[field].eq(filters.get(field)))
 
+	if condition := get_allowed_companies_condition(dt.company, filters["doc_type"]):
+		conditions.append(condition)
+
 	if filters.get("sales_person"):
-		conditions.append(st["sales_person"].eq(filters.get("sales_person")))
+		lft, rgt = frappe.db.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
+		sp = qb.DocType("Sales Person")
+		conditions.append(
+			st.sales_person.isin(qb.from_(sp).select(sp.name).where((sp.lft >= lft) & (sp.rgt <= rgt)))
+		)
 
 	return conditions

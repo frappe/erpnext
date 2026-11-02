@@ -9,21 +9,24 @@ the controller; work_order.py re-exports them for backward compatibility.
 """
 
 import json
+import math
 from functools import partial
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 @frappe.whitelist()
 def get_item_details(item: str, project: str | None = None, skip_bom_info: bool = False, throw: bool = True):
-	frappe.has_permission("Item", "read", throw=True)
+	frappe.has_permission("Item", "read", doc=item, throw=True)
 
 	res = _item_master_details(item)
 	if not res:
@@ -115,7 +118,7 @@ def make_work_order(
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	item_details = get_item_details(item, project)
-	bom_no = _variant_default_bom(item) or bom_no
+	bom_no = _variant_default_bom(item, bom_no) or bom_no
 	wo_doc = _new_work_order(item, bom_no, company, item_details, use_multi_level_bom)
 
 	if flt(qty) > 0:
@@ -128,8 +131,11 @@ def make_work_order(
 	return wo_doc
 
 
-def _variant_default_bom(item):
+def _variant_default_bom(item, bom_no=None):
 	if not frappe.db.get_value("Item", item, "variant_of"):
+		return None
+	# selected BOM already belongs to this variant
+	if bom_no and frappe.db.get_value("BOM", bom_no, "item") == item:
 		return None
 	return frappe.db.get_value("BOM", {"item": item, "is_default": 1, "docstatus": 1})
 
@@ -233,7 +239,7 @@ def make_stock_entry(
 ):
 	frappe.has_permission("Stock Entry", "create", throw=True)
 
-	work_order = frappe.get_doc("Work Order", work_order_id)
+	work_order = frappe.get_doc("Work Order", work_order_id, check_permission="read")
 	stock_entry = _new_manufacture_stock_entry(work_order, purpose, qty)
 	_set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehouse, source_stock_entry)
 
@@ -285,6 +291,77 @@ def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehou
 
 
 @frappe.whitelist()
+def get_fg_conversion_details(work_order: str):
+	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
+		get_alternative_finished_goods,
+		get_converted_fg_qty,
+	)
+
+	if not work_order or not isinstance(work_order, str):
+		frappe.throw(_("Invalid Work Order"))
+
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+
+	wo_details = frappe.db.get_value(
+		"Work Order", work_order, ["production_item", "produced_qty"], as_dict=True
+	)
+
+	return {
+		"alternative_items": get_alternative_finished_goods(wo_details.production_item),
+		"available_qty": flt(wo_details.produced_qty) - get_converted_fg_qty(work_order),
+	}
+
+
+@frappe.whitelist()
+def make_fg_conversion_entry(work_order: str, item_code: str, qty: float):
+	if not (work_order and isinstance(work_order, str) and item_code and isinstance(item_code, str)):
+		frappe.throw(_("Invalid Work Order or Item"))
+
+	qty = flt(qty)
+	if qty <= 0:
+		frappe.throw(_("The qty to convert must be greater than zero."))
+
+	frappe.has_permission("Stock Entry", "create", throw=True)
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+
+	wo_doc = frappe.get_doc("Work Order", work_order)
+
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.purpose = "Repack"
+	stock_entry.is_fg_conversion = 1
+	stock_entry.work_order = wo_doc.name
+	stock_entry.company = wo_doc.company
+	stock_entry.set_stock_entry_type()
+
+	stock_entry.append("items", _get_fg_conversion_row(wo_doc.production_item, qty, wo_doc.fg_warehouse))
+
+	target_row = _get_fg_conversion_row(item_code, qty, wo_doc.fg_warehouse, is_target=True)
+	stock_entry.append("items", target_row)
+
+	return stock_entry.as_dict()
+
+
+def _get_fg_conversion_row(item_code, qty, warehouse, is_target=False):
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	row = {
+		"item_code": item_code,
+		"qty": flt(qty),
+		"transfer_qty": flt(qty),
+		"uom": stock_uom,
+		"stock_uom": stock_uom,
+		"conversion_factor": 1,
+		"use_serial_batch_fields": 1,
+	}
+
+	if is_target:
+		row.update({"t_warehouse": warehouse, "is_finished_item": 1})
+	else:
+		row["s_warehouse"] = warehouse
+
+	return row
+
+
+@frappe.whitelist()
 def make_job_card(work_order: str, operations: str | list, parent_bom: str | None = None):
 	frappe.has_permission("Job Card", "create", throw=True)
 
@@ -307,6 +384,7 @@ def get_operation_details(name, work_order, parent_bom):
 	for row in work_order.operations:
 		if row.name == name:
 			return {
+				"idx": row.idx,
 				"workstation": row.workstation,
 				"workstation_type": row.workstation_type,
 				"source_warehouse": row.source_warehouse,
@@ -315,12 +393,20 @@ def get_operation_details(name, work_order, parent_bom):
 				"finished_good": row.finished_good,
 				"bom_no": row.get("bom_no") or parent_bom,
 				"is_subcontracted": row.get("is_subcontracted"),
+				"output_qty": row.output_qty,
 			}
+
+
+def get_operation_qty(work_order, operation):
+	if work_order.get("track_semi_finished_goods") and flt(operation.get("output_qty")):
+		return flt(operation.get("output_qty"))
+
+	return flt(work_order.get("qty"))
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
-		row.batch_size = row.get("qty") or wo_doc.qty
+		row.batch_size = row.get("qty") or get_operation_qty(wo_doc, row)
 
 	row.job_card_qty = row.batch_size
 	if row.batch_size and qty >= row.batch_size:
@@ -347,23 +433,25 @@ def get_serial_nos_for_job_card(row, wo_doc):
 	):
 		used_serial_nos.extend(get_serial_nos(d.serial_no))
 
+	used_serial_nos = [
+		d.serial_no
+		for d in SerialBatchIdentity("Serial No").get_records(
+			wo_doc.production_item, used_serial_nos, ["serial_no"]
+		)
+	]
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
 	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
 
 
 def get_serial_nos_for_work_order(work_order, production_item):
-	serial_nos = []
-	for d in frappe.get_all(
+	return frappe.get_all(
 		"Serial No",
-		fields=["name"],
 		filters={
 			"work_order": work_order,
 			"item_code": production_item,
 		},
-	):
-		serial_nos.append(d.name)
-
-	return serial_nos
+		pluck="serial_no",
+	)
 
 
 def validate_operation_data(row):
@@ -384,7 +472,7 @@ def validate_operation_data(row):
 		)
 
 
-def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False):
+def create_job_card(work_order, row, enable_capacity_planning=False, auto_create=False, schedule_blocks=None):
 	doc = frappe.new_doc("Job Card")
 	doc.update(_job_card_values(work_order, row))
 
@@ -397,9 +485,9 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		doc.set_secondary_items()
 
 	if auto_create:
-		_auto_create_job_card(doc, row, enable_capacity_planning)
+		_auto_create_job_card(doc, row, enable_capacity_planning, schedule_blocks)
 
-	if enable_capacity_planning:
+	if enable_capacity_planning or schedule_blocks:
 		# automatically added scheduling rows shouldn't change status to WIP
 		doc.db_set("status", "Open")
 
@@ -439,7 +527,7 @@ def _job_card_warehouse_values(work_order, row, qty):
 
 	return {
 		"serial_no": row.get("serial_no"),
-		"time_required": (row.get("time_in_mins", 0) / work_order.qty) * qty,
+		"time_required": (row.get("time_in_mins", 0) / get_operation_qty(work_order, row)) * qty,
 		"source_warehouse": row.get("source_warehouse") or work_order.get("source_warehouse"),
 		"target_warehouse": row.get("fg_warehouse") or work_order.get("fg_warehouse"),
 		"wip_warehouse": wip_warehouse,
@@ -448,16 +536,35 @@ def _job_card_warehouse_values(work_order, row, qty):
 		"finished_good": row.get("finished_good"),
 		"semi_fg_bom": row.get("bom_no"),
 		"is_subcontracted": row.get("is_subcontracted"),
+		"batch_split": row.get("batch_split"),
+		"weight_per_piece": row.get("weight_per_piece"),
 	}
 
 
-def _auto_create_job_card(doc, row, enable_capacity_planning):
+def _auto_create_job_card(doc, row, enable_capacity_planning, schedule_blocks=None):
 	doc.flags.ignore_mandatory = True
-	if enable_capacity_planning:
+	if schedule_blocks:
+		_apply_schedule_blocks(doc, schedule_blocks)
+	elif enable_capacity_planning:
 		doc.schedule_time_logs(row)
 
 	doc.insert()
 	frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
+
+
+def _apply_schedule_blocks(doc, schedule_blocks):
+	if schedule_blocks[0].workstation:
+		doc.workstation = schedule_blocks[0].workstation
+
+	for block in schedule_blocks:
+		doc.append(
+			"scheduled_time_logs",
+			{
+				"from_time": block.from_time,
+				"to_time": block.to_time,
+				"time_in_mins": flt(block.duration_mins),
+			},
+		)
 
 
 def get_work_order_operation_data(work_order, operation, workstation):
@@ -467,44 +574,130 @@ def get_work_order_operation_data(work_order, operation, workstation):
 
 
 @frappe.whitelist()
-def create_pick_list(source_name: str, target_doc: str | dict | None = None, for_qty: float | None = None):
+def create_pick_list(
+	source_name: str, target_doc: str | dict | Document | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Pick List", "create", throw=True)
 
-	for_qty = for_qty or frappe.parse_json(target_doc).get("for_qty")
-	max_finished_goods_qty = frappe.db.get_value("Work Order", source_name, "qty")
-	postprocess = partial(
-		_set_pick_list_item_qty, for_qty=for_qty, max_finished_goods_qty=max_finished_goods_qty
-	)
+	if for_qty is None:
+		for_qty = frappe.parse_json(target_doc or "{}").get("for_qty")
 
-	doc = get_mapped_doc("Work Order", source_name, _pick_list_mapping(postprocess), target_doc)
+	for_qty = _validated_for_qty(for_qty)
+	work_order = frappe.get_doc("Work Order", source_name)
+	allocation = _allocate_material_demand(work_order, for_qty / flt(work_order.qty))
+	postprocess = partial(_set_pick_list_item_qty, allocation_by_item=allocation)
+
+	doc = get_mapped_doc("Work Order", source_name, _pick_list_mapping(postprocess, allocation), target_doc)
+	_validate_material_is_pending(doc.locations)
 	doc.purpose = "Material Transfer for Manufacture"
 	doc.for_qty = for_qty
-	doc.set_item_locations()
+	if not doc.pick_manually:
+		doc.set_item_locations()
 	return doc
 
 
-def _pick_list_mapping(postprocess):
+def _pick_list_mapping(postprocess, allocation):
 	return {
 		"Work Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
 		"Work Order Item": {
 			"doctype": "Pick List Item",
+			"field_no_map": ["transferred_qty"],
 			"postprocess": postprocess,
-			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+			"condition": lambda doc: _allocation_key(doc) in allocation,
 		},
 	}
 
 
-def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished_goods_qty):
-	pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
-	desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
+def _allocate_material_demand(work_order, fraction):
+	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
+	at the group's proportional share of the item's pending pool. Whole number UOMs
+	round up, within the item's rounded up total and its unrounded pending qty."""
+	required_by_item = {}
+	covered_by_item = {}
+	required_by_group = {}
+	uom_by_item = {}
+	for row in work_order.required_items:
+		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+		uom_by_item.setdefault(row.item_code, row.stock_uom)
+		covered_by_item.setdefault(row.item_code, flt(row.requested_qty) + flt(row.picked_qty))
+		covered_by_item[row.item_code] += flt(row.transferred_qty)
+		key = _allocation_key(row)
+		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
 
-	qty = 0
-	if desire_to_transfer <= pending_to_issue:
-		qty = desire_to_transfer
-	elif pending_to_issue > 0:
-		qty = pending_to_issue
+	pending_pool = {
+		item_code: required_qty - covered_by_item[item_code]
+		for item_code, required_qty in required_by_item.items()
+	}
 
-	if not qty:
+	precision = frappe.get_precision("Work Order Item", "required_qty")
+	remaining_by_item = {
+		item_code: min(
+			_round_demand(required_qty * fraction, uom_by_item[item_code], precision),
+			pending_pool[item_code],
+		)
+		for item_code, required_qty in required_by_item.items()
+	}
+
+	allocation = {}
+	for key, required_qty in required_by_group.items():
+		item_code = key[0]
+		if required_by_item[item_code] <= 0:
+			continue
+
+		pool_share = pending_pool[item_code] * required_qty / required_by_item[item_code]
+		qty = _round_demand(min(required_qty * fraction, pool_share), uom_by_item[item_code], precision)
+		qty = min(qty, remaining_by_item[item_code])
+		if qty > 0:
+			allocation[key] = qty
+			remaining_by_item[item_code] -= qty
+	return allocation
+
+
+def _round_demand(qty, stock_uom, precision):
+	"""Whole number UOMs round up even a demand below field precision. Rounding to 9
+	decimals first keeps float noise (30 * 0.1) from adding a unit."""
+	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
+		return math.ceil(flt(qty, 9))
+	return flt(qty, precision)
+
+
+def _allocation_key(row):
+	"""Manual rows have no operation_row_id; their operation label splits them."""
+	return (row.item_code, row.source_warehouse, cint(row.operation_row_id) or row.operation)
+
+
+def _merge_allocation_per_item(allocation):
+	"""Material Request rejects repeated item codes unless Buying Settings allows them."""
+	merged = {}
+	key_by_item = {}
+	for key, qty in allocation.items():
+		item_code = key[0]
+		if item_code in key_by_item:
+			merged[key_by_item[item_code]] += qty
+		else:
+			key_by_item[item_code] = key
+			merged[key] = qty
+	return merged
+
+
+def _validated_for_qty(for_qty):
+	qty = flt(for_qty)
+	if not math.isfinite(qty) or qty <= 0:
+		frappe.throw(_("Quantity must be greater than zero."))
+	return qty
+
+
+def _validate_material_is_pending(rows):
+	if not rows:
+		frappe.throw(
+			_("All required items have already been transferred, requested or picked."),
+			title=_("No Pending Materials"),
+		)
+
+
+def _set_pick_list_item_qty(source, target, source_parent, allocation_by_item):
+	qty = allocation_by_item.pop(_allocation_key(source), 0.0)
+	if qty <= 0:
 		target.delete()
 		return
 
@@ -516,15 +709,32 @@ def _set_pick_list_item_qty(source, target, source_parent, for_qty, max_finished
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: str | dict | None = None):
+def make_material_request(
+	source_name: str, target_doc: str | dict | Document | None = None, for_qty: float | None = None
+):
 	frappe.has_permission("Material Request", "create", throw=True)
 
-	doc = get_mapped_doc("Work Order", source_name, _material_request_mapping(), target_doc)
+	if for_qty is None and frappe.flags.args:
+		for_qty = frappe.flags.args.for_qty
+
+	work_order = frappe.get_doc("Work Order", source_name)
+	fraction = 1.0
+	if for_qty is not None:
+		fraction = _validated_for_qty(for_qty) / flt(work_order.qty)
+
+	allocation = _allocate_material_demand(work_order, fraction)
+	if not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items")):
+		allocation = _merge_allocation_per_item(allocation)
+	postprocess = partial(_set_material_request_item, allocation_by_item=allocation)
+	doc = get_mapped_doc(
+		"Work Order", source_name, _material_request_mapping(postprocess, allocation), target_doc
+	)
+	_validate_material_is_pending(doc.items)
 	doc.material_request_type = "Material Transfer"
 	return doc
 
 
-def _material_request_mapping():
+def _material_request_mapping(postprocess, allocation):
 	return {
 		"Work Order": {
 			"doctype": "Material Request",
@@ -534,19 +744,23 @@ def _material_request_mapping():
 		"Work Order Item": {
 			"doctype": "Material Request Item",
 			"field_map": [
-				("required_qty", "qty"),
 				("stock_uom", "uom"),
 				("source_warehouse", "from_warehouse"),
 			],
-			"postprocess": _set_material_request_item,
-			"condition": lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty),
+			"postprocess": postprocess,
+			"condition": lambda doc: _allocation_key(doc) in allocation,
 		},
 	}
 
 
-def _set_material_request_item(source, target, source_parent):
+def _set_material_request_item(source, target, source_parent, allocation_by_item):
+	qty = allocation_by_item.pop(_allocation_key(source), 0.0)
+	if qty <= 0:
+		target.delete()
+		return
+
 	target.warehouse = source_parent.wip_warehouse
-	target.qty = flt(source.required_qty) - flt(source.transferred_qty)
+	target.qty = qty
 	target.schedule_date = nowdate()
 
 
@@ -558,12 +772,13 @@ def make_stock_return_entry(work_order: str):
 
 	frappe.has_permission("Stock Entry", "create", throw=True)
 
-	wo_doc = frappe.get_cached_doc("Work Order", work_order)
+	wo_doc = frappe.get_doc("Work Order", work_order, check_permission="read")
 
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.from_bom = 1
 	stock_entry.is_return = 1
 	stock_entry.work_order = work_order
+	stock_entry.company = wo_doc.company
 	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.bom_no = wo_doc.bom_no
 	stock_entry.set_stock_entry_type()

@@ -7,7 +7,9 @@ import frappe
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
+from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import add_months, formatdate, getdate, sbool, today
+from frappe.utils.password import get_decrypted_password
 from plaid.errors import ItemError
 
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
@@ -37,8 +39,12 @@ class PlaidSettings(Document):
 		return plaid.get_link_token()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def get_plaid_configuration():
+	# Returns plaid_env and a freshly minted Plaid link_token. Plaid Settings is a System-Manager-only
+	# single doctype and every caller reaches this from its own form, so that is the boundary.
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	if frappe.db.get_single_value("Plaid Settings", "enabled"):
 		plaid_settings = frappe.get_single("Plaid Settings")
 		return {
@@ -52,6 +58,8 @@ def get_plaid_configuration():
 
 @frappe.whitelist(methods=["POST"])
 def add_institution(token: str, response: str | dict):
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	response = frappe.parse_json(response)
 
 	plaid = PlaidConnector()
@@ -81,6 +89,8 @@ def add_institution(token: str, response: str | dict):
 
 @frappe.whitelist(methods=["POST"])
 def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	response = frappe.parse_json(response)
 	bank = frappe.parse_json(bank)
 	result = []
@@ -105,7 +115,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 			add_account_subtype(account["subtype"])
 
 		bank_account_name = "{} - {}".format(account["name"], bank["bank_name"])
-		existing_bank_account = frappe.db.exists("Bank Account", bank_account_name)
+		existing_bank_account = get_existing_bank_account(account["id"], bank_account_name, company)
 
 		if not existing_bank_account:
 			try:
@@ -136,7 +146,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 						"company": company,
 					}
 				)
-				new_account.insert()
+				new_account.insert(set_name=append_number_if_name_exists("Bank Account", bank_account_name))
 
 				result.append(new_account.name)
 			except frappe.UniqueValidationError:
@@ -183,6 +193,15 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 	return result
 
 
+def get_existing_bank_account(integration_id: str, bank_account_name: str, company: str) -> str | None:
+	"""Return the company's Bank Account already linked to this Plaid account, or one with the same name."""
+	return frappe.db.get_value(
+		"Bank Account", {"integration_id": integration_id, "company": company}
+	) or frappe.db.get_value(
+		"Bank Account", {"name": bank_account_name, "is_company_account": 1, "company": company}
+	)
+
+
 def add_account_type(account_type):
 	try:
 		frappe.get_doc({"doctype": "Bank Account Type", "account_type": account_type}).insert()
@@ -221,8 +240,15 @@ def sync_transactions(bank, bank_account):
 				try:
 					result += new_bank_transaction(transaction)
 				except Exception:
+					# skip the row so one bad transaction does not block the rest of the account's sync
 					frappe.db.rollback(save_point="plaid_sync_txn")
-					raise
+					frappe.log_error(
+						_("Plaid transaction {0} could not be imported").format(
+							transaction.get("transaction_id")
+						),
+						reference_doctype="Bank Account",
+						reference_name=bank_account,
+					)
 
 		if result:
 			last_transaction_date = frappe.db.get_value("Bank Transaction", result.pop(), "date")
@@ -243,10 +269,12 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 		related_bank = frappe.db.get_values(
 			"Bank Account", bank_account, ["bank", "integration_id"], as_dict=True
 		)
-		access_token = frappe.db.get_value("Bank", related_bank[0].bank, "plaid_access_token")
+		access_token = get_decrypted_password(
+			"Bank", related_bank[0].bank, "plaid_access_token", raise_exception=False
+		)
 		account_id = related_bank[0].integration_id
 	else:
-		access_token = frappe.db.get_value("Bank", bank, "plaid_access_token")
+		access_token = get_decrypted_password("Bank", bank, "plaid_access_token", raise_exception=False)
 		account_id = None
 
 	plaid = PlaidConnector(access_token)
@@ -328,10 +356,14 @@ def automatic_synchronization():
 		enqueue_synchronization()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def enqueue_synchronization():
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	plaid_accounts = frappe.get_all(
-		"Bank Account", filters={"integration_id": ["!=", ""]}, fields=["name", "bank"]
+		"Bank Account",
+		filters={"integration_id": ["!=", ""], "disabled": 0, "is_company_account": 1},
+		fields=["name", "bank"],
 	)
 
 	for plaid_account in plaid_accounts:
@@ -342,8 +374,17 @@ def enqueue_synchronization():
 		)
 
 
-@frappe.whitelist()
-def get_link_token_for_update(access_token: str):
+@frappe.whitelist(methods=["POST"])
+def get_link_token_for_update(bank: str):
+	# mints a link token at Plaid, so this creates state at the provider even though it writes
+	# nothing here.
+	frappe.has_permission("Plaid Settings", throw=True)
+	frappe.has_permission("Bank", "read", bank, throw=True)
+
+	access_token = get_decrypted_password("Bank", bank, "plaid_access_token", raise_exception=False)
+	if not access_token:
+		frappe.throw(_("Bank {0} is not linked with Plaid").format(bank))
+
 	plaid = PlaidConnector(access_token)
 	return plaid.get_link_token(update_mode=True)
 
@@ -362,8 +403,10 @@ def get_company(bank_account_name):
 	frappe.throw(_("Could not detect the Company for updating Bank Accounts"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_bank_account_ids(response: str | dict):
+	frappe.has_permission("Plaid Settings", throw=True)
+
 	data = frappe.parse_json(response)
 	institution_name = data["institution"]["name"]
 	bank = frappe.get_doc("Bank", institution_name).as_dict()

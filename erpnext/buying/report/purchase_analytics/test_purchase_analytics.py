@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.report.purchase_analytics.purchase_analytics import execute
 from erpnext.tests.utils import ERPNextTestSuite
@@ -41,6 +42,51 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 	def make_po(self, qty=4, rate=250):
 		return create_purchase_order(
 			company=COMPANY, supplier=SUPPLIER, qty=qty, rate=rate, transaction_date="2019-04-10"
+		)
+
+	def make_pi(self, **args):
+		pi = make_purchase_invoice(
+			company=COMPANY, supplier=SUPPLIER, posting_date="2019-04-10", do_not_save=1, **args
+		)
+		pi.set_posting_time = 1
+		return pi
+
+	def test_supplier_entity_filter(self):
+		filters = self._filters(tree_type="Supplier", entity=[SUPPLIER], curves="all")
+		base_total = flt(self._rows(filters).get(SUPPLIER, {}).get("total", 0.0))
+
+		po = self.make_po()
+		columns, data, _message, chart, *_rest = execute(filters)
+
+		self.assertTrue(columns)
+		self.assertEqual({row["entity"] for row in data}, {SUPPLIER})
+		self.assertAlmostEqual(data[0]["total"] - base_total, flt(po.base_net_total), places=2)
+
+		supplier_name = frappe.db.get_value("Supplier", SUPPLIER, "supplier_name")
+		self.assertEqual({dataset["name"] for dataset in chart["data"]["datasets"]}, {supplier_name})
+
+	def test_parent_supplier_group_filter_preserves_rollup(self):
+		self.make_po()
+		filters = self._filters(tree_type="Supplier Group")
+		unfiltered = self._rows(filters)
+		filtered = self._rows(self._filters(tree_type="Supplier Group", entity=["All Supplier Groups"]))
+
+		self.assertEqual(set(filtered), {"All Supplier Groups"})
+		self.assertAlmostEqual(
+			filtered["All Supplier Groups"]["total"],
+			unfiltered["All Supplier Groups"]["total"],
+			places=2,
+		)
+
+	def test_supplier_group_entity_filter(self):
+		self.make_po()
+		unfiltered = self._rows(self._filters(tree_type="Supplier Group"))
+		filtered = self._rows(self._filters(tree_type="Supplier Group", entity=[SUPPLIER_GROUP]))
+
+		self.assertEqual(set(filtered), {SUPPLIER_GROUP})
+		self.assertEqual(filtered[SUPPLIER_GROUP]["indent"], 0)
+		self.assertAlmostEqual(
+			filtered[SUPPLIER_GROUP]["total"], unfiltered[SUPPLIER_GROUP]["total"], places=2
 		)
 
 	def test_supplier_group_tree_rolls_up_to_root(self):
@@ -91,3 +137,53 @@ class TestPurchaseAnalytics(ERPNextTestSuite):
 		self.assertAlmostEqual(
 			rows["All Supplier Groups"]["total"] - base_root_qty, flt(po.total_qty), places=2
 		)
+
+	def test_item_tree_excludes_opening_invoices(self):
+		filters = self._filters(tree_type="Item", doc_type="Purchase Invoice")
+		base_total = flt(self._rows(filters).get("_Test Item", {}).get("total"))
+
+		self.make_pi(qty=2, rate=100).submit()
+		opening = self.make_pi(qty=3, rate=5000)
+		opening.is_opening = "Yes"
+		opening.items[0].expense_account = "Temporary Opening - _TC"
+		opening.submit()
+
+		self.assertAlmostEqual(self._rows(filters)["_Test Item"]["total"] - base_total, 200, places=2)
+
+	def test_quantity_in_stock_uom_for_every_tree(self):
+		entities = {
+			"Supplier": SUPPLIER,
+			"Supplier Group": SUPPLIER_GROUP,
+			"Item": "_Test Item",
+			"Item Group": "_Test Item Group",
+		}
+		filters = {tree: self._filters(tree_type=tree, value_quantity="Quantity") for tree in entities}
+		base = {
+			tree: flt(self._rows(filters[tree]).get(entity, {}).get("total"))
+			for tree, entity in entities.items()
+		}
+
+		po = create_purchase_order(
+			company=COMPANY, supplier=SUPPLIER, qty=2, transaction_date="2019-04-10", do_not_save=1
+		)
+		po.items[0].uom = "_Test UOM 1"
+		po.items[0].conversion_factor = 10
+		po.submit()
+
+		for tree, entity in entities.items():
+			self.assertAlmostEqual(self._rows(filters[tree])[entity]["total"] - base[tree], 20, places=2)
+
+	def test_weekly_range_keeps_iso_week_across_year_end(self):
+		filters = self._filters(
+			tree_type="Supplier", range="Weekly", from_date="2020-12-21", to_date="2021-01-10"
+		)
+		base = self._rows(filters).get(SUPPLIER, {})
+
+		for transaction_date, rate in (("2020-12-30", 1000), ("2021-01-02", 2000)):
+			create_purchase_order(
+				company=COMPANY, supplier=SUPPLIER, qty=1, rate=rate, transaction_date=transaction_date
+			)
+
+		row = self._rows(filters)[SUPPLIER]
+		self.assertAlmostEqual(row["week_53_2020"] - flt(base.get("week_53_2020")), 3000, places=2)
+		self.assertAlmostEqual(row["total"] - flt(base.get("total")), 3000, places=2)

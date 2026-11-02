@@ -6,6 +6,9 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+from erpnext.controllers.queries import bom
+from erpnext.stock.get_item_details import get_default_bom
+
 
 class SubcontractingBOM(Document):
 	# begin: auto-generated types
@@ -29,30 +32,47 @@ class SubcontractingBOM(Document):
 
 	def validate(self):
 		self.validate_finished_good()
+		self.validate_finished_good_bom()
 		self.validate_service_item()
+		self.validate_quantities()
 		self.validate_is_active()
 
 	def before_save(self):
 		self.set_conversion_factor()
 
 	def validate_finished_good(self):
-		disabled, is_stock_item, default_bom, is_sub_contracted_item = frappe.db.get_value(
+		disabled, is_stock_item, is_sub_contracted_item = frappe.db.get_value(
 			"Item",
 			self.finished_good,
-			["disabled", "is_stock_item", "default_bom", "is_sub_contracted_item"],
+			["disabled", "is_stock_item", "is_sub_contracted_item"],
 		)
 
 		if disabled:
 			frappe.throw(_("Finished Good {0} is disabled.").format(frappe.bold(self.finished_good)))
 		if not is_stock_item:
 			frappe.throw(_("Finished Good {0} must be a stock item.").format(frappe.bold(self.finished_good)))
-		if not default_bom:
+		if not get_default_bom(self.finished_good):
 			frappe.throw(
 				_("Finished Good {0} does not have a default BOM.").format(frappe.bold(self.finished_good))
 			)
 		if not is_sub_contracted_item:
 			frappe.throw(
 				_("Finished Good {0} must be a sub-contracted item.").format(frappe.bold(self.finished_good))
+			)
+
+	def validate_finished_good_bom(self):
+		bom_item, is_active, docstatus = frappe.db.get_value(
+			"BOM", self.finished_good_bom, ["item", "is_active", "docstatus"]
+		)
+		if bom_item not in get_applicable_bom_items(self.finished_good):
+			frappe.throw(
+				_("BOM {0} does not belong to Item {1}").format(
+					frappe.bold(self.finished_good_bom), frappe.bold(self.finished_good)
+				)
+			)
+		if self.is_active and (not is_active or docstatus != 1):
+			frappe.throw(
+				_("BOM {0} must be active and submitted.").format(frappe.bold(self.finished_good_bom))
 			)
 
 	def validate_service_item(self):
@@ -66,6 +86,11 @@ class SubcontractingBOM(Document):
 			frappe.throw(
 				_("Service Item {0} must be a non-stock item.").format(frappe.bold(self.service_item))
 			)
+
+	def validate_quantities(self):
+		for fieldname in ("finished_good_qty", "service_item_qty"):
+			if flt(self.get(fieldname)) <= 0:
+				frappe.throw(_("{0} must be greater than zero.").format(_(self.meta.get_label(fieldname))))
 
 	def validate_is_active(self):
 		if self.is_active:
@@ -83,8 +108,58 @@ class SubcontractingBOM(Document):
 		self.conversion_factor = flt(self.service_item_qty) / flt(self.finished_good_qty)
 
 
+def get_finished_good_bom(item: Document) -> str | None:
+	"""BOM of the active Subcontracting BOM, else the default BOM of the item or its template."""
+	return (
+		frappe.db.get_value(
+			"Subcontracting BOM", {"finished_good": item.name, "is_active": 1}, "finished_good_bom"
+		)
+		or item.default_bom
+		or get_default_bom(item.variant_of)
+	)
+
+
+def get_applicable_bom_items(item_code: str) -> list[str]:
+	"""Items whose BOMs can be used for `item_code`: the item and its template."""
+	template = frappe.get_cached_value("Item", item_code, "variant_of")
+	return [item_code, template] if template else [item_code]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def finished_good_bom_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | None = None
+):
+	"""BOMs of the finished good and of its template."""
+	filters = filters or {}
+	finished_good = filters.pop("finished_good", None)
+	if not finished_good or not isinstance(finished_good, str):
+		return []
+
+	filters["item"] = ["in", get_applicable_bom_items(finished_good)]
+	return bom(doctype, txt, searchfield, start, page_len, filters)
+
+
+LOOKUP_FIELDS = [
+	"finished_good",
+	"finished_good_qty",
+	"finished_good_uom",
+	"service_item",
+	"service_item_qty",
+	"service_item_uom",
+	"conversion_factor",
+]
+
+
+def check_order_read_permission():
+	"""Subcontracting BOMs are looked up from Purchase and Sales Orders."""
+	if not (frappe.has_permission("Purchase Order", "read") or frappe.has_permission("Sales Order", "read")):
+		frappe.throw_permission_error()
+
+
 @frappe.whitelist()
 def get_subcontracting_boms_for_finished_goods(fg_items: str | list):
+	check_order_read_permission()
 	if fg_items:
 		filters = {"is_active": 1}
 
@@ -93,7 +168,7 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list):
 		else:
 			filters["finished_good"] = fg_items
 
-		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=["*"]):
+		if subcontracting_boms := frappe.get_all("Subcontracting BOM", filters=filters, fields=LOOKUP_FIELDS):
 			if isinstance(fg_items, list):
 				return {d.finished_good: d for d in subcontracting_boms}
 			else:
@@ -104,9 +179,10 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list):
 
 @frappe.whitelist()
 def get_subcontracting_boms_for_service_item(service_item: str) -> dict:
+	check_order_read_permission()
 	if service_item:
 		filters = {"is_active": 1, "service_item": service_item}
-		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=["*"])
+		Subcontracting_boms = frappe.db.get_all("Subcontracting BOM", filters=filters, fields=LOOKUP_FIELDS)
 
 		if Subcontracting_boms:
 			return {d.finished_good: d for d in Subcontracting_boms}

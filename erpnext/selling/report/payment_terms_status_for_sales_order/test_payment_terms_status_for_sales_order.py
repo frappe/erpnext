@@ -1,6 +1,7 @@
 import datetime
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, add_months, flt, nowdate
 
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
@@ -400,6 +401,64 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 		self.assertEqual(len(data), 1)
 		self.assertEqual(data, expected_value)
 
+	def test_invoice_split_counts_orders_outside_filters(self):
+		"""An invoice billing a June order and a March order must be split over both, even when the report
+		covers only June. The June order should be credited 600 of the 1000 invoice, not all of it, leaving its
+		second term Partly Paid."""
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test PT Split Item", is_stock_item=0)
+
+		orders = []
+		for transaction_date in ("2021-06-15", "2021-03-15"):
+			so = make_sales_order(
+				transaction_date=transaction_date,
+				item=item.item_code,
+				qty=10,
+				rate=100,
+				do_not_save=True,
+			)
+			so.po_no = ""
+			so.taxes_and_charges = ""
+			so.taxes = ""
+			so.payment_terms_template = self.template.name
+			so.save()
+			so.submit()
+			orders.append(so)
+		so_x, so_y = orders
+
+		sinv = make_sales_invoice(so_x.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 6
+		sinv.append(
+			"items",
+			{
+				"item_code": item.item_code,
+				"qty": 4,
+				"rate": 100,
+				"sales_order": so_y.name,
+				"so_detail": so_y.items[0].name,
+			},
+		)
+		sinv.insert()
+		sinv.submit()
+
+		_, data, _, _ = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
+		)
+
+		self.assertEqual(
+			[(row.paid_amount, row.status) for row in data if row.name == so_x.name],
+			[(500.0, "Completed"), (100.0, "Partly Paid")],
+		)
+
 	def test_invoice_billing_multiple_orders_splits_proportionally(self):
 		"""An invoice that bills several Sales Orders must contribute to each, in proportion to each
 		order's net line amount. Grouping by the invoice alone and taking Max(sales_order) credited the
@@ -474,3 +533,39 @@ class TestPaymentTermsStatusForSalesOrder(ERPNextTestSuite):
 			flt(sinv.base_grand_total),
 			places=2,
 		)
+
+	def test_user_permission_on_company(self):
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test Excavator 1", is_stock_item=0)
+		orders = {}
+		for company, warehouse, conversion_rate in (
+			("_Test Company", "_Test Warehouse - _TC", 1),
+			("_Test Company 1", "_Test Warehouse 2 - _TC1", 0.02),
+		):
+			so = make_sales_order(
+				company=company,
+				customer="_Test Customer 1",
+				transaction_date="2021-06-15",
+				warehouse=warehouse,
+				item=item.item_code,
+				qty=1,
+				rate=1000,
+				do_not_save=True,
+			)
+			so.conversion_rate = conversion_rate
+			so.plc_conversion_rate = conversion_rate
+			so.payment_terms_template = self.template.name
+			so.save()
+			so.submit()
+			orders[company] = so.name
+
+		user = create_user("test_payment_terms_status_user@example.com", "Sales User")
+		frappe.permissions.add_user_permission("Company", "_Test Company", user.name)
+
+		filters = frappe._dict({"period_start_date": "2021-06-01", "period_end_date": "2021-06-30"})
+		with self.set_user(user.name):
+			_, own, _, _ = execute(filters.copy().update({"company": "_Test Company"}))
+			_, other, _, _ = execute(filters.copy().update({"company": "_Test Company 1"}))
+
+		self.assertIn(orders["_Test Company"], [row.name for row in own])
+		self.assertNotIn(orders["_Test Company 1"], [row.name for row in other])

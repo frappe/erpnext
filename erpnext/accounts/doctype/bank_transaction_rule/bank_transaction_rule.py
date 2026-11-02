@@ -157,12 +157,9 @@ class BankTransactionRule(Document):
 		"""
 		Delete the matched rule from the bank transaction
 		"""
-		try:
-			frappe.db.set_value(
-				"Bank Transaction", {"matched_transaction_rule": self.name}, "matched_transaction_rule", None
-			)
-		except Exception:
-			pass
+		frappe.db.set_value(
+			"Bank Transaction", {"matched_transaction_rule": self.name}, "matched_transaction_rule", None
+		)
 
 	def after_delete(self):
 		"""

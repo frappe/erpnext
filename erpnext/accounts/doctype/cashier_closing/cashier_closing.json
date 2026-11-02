@@ -122,6 +122,7 @@
    "read_only": 1
   }
  ],
+ "icon": "lock",
  "is_submittable": 1,
  "links": [],
  "modified": "2024-03-27 13:06:44.260440",

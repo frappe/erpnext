@@ -4,6 +4,13 @@
 erpnext.sales_trends_filters = {
 	filters: [
 		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
+		{
 			fieldname: "period",
 			label: __("Period"),
 			fieldtype: "Select",
@@ -47,11 +54,13 @@ erpnext.sales_trends_filters = {
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 		},
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "MultiSelectList",
+			options: "Item",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Item", txt);
+			},
 		},
 	],
 };

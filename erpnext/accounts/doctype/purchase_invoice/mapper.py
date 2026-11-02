@@ -10,17 +10,18 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 from erpnext.controllers.accounts_controller import merge_taxes
+from erpnext.controllers.mapper import get_qty_already_mapped
 
 
 @frappe.whitelist()
-def make_debit_note(source_name: str, target_doc: str | Document | None = None):
+def make_debit_note(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Invoice", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	doc = get_mapped_doc(
 		"Purchase Invoice",
 		source_name,
@@ -38,7 +39,7 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_inter_company_sales_invoice(source_name: str, target_doc: Document | None = None):
+def make_inter_company_sales_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
@@ -46,11 +47,16 @@ def make_inter_company_sales_invoice(source_name: str, target_doc: Document | No
 
 @frappe.whitelist()
 def make_purchase_receipt(
-	source_name: str, target_doc: str | Document | None = None, args: str | dict | None = None
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
+
+	mapped_qty_by_item = get_qty_already_mapped(target_doc, "purchase_invoice_item")
+
+	def received_and_mapped_qty(obj):
+		return flt(obj.received_qty) + flt(mapped_qty_by_item.get(obj.name, 0))
 
 	def post_parent_process(source_parent, target_parent):
 		remove_items_with_zero_qty(target_parent)
@@ -75,15 +81,13 @@ def make_purchase_receipt(
 			or {}
 		)
 
-		target.qty = flt(obj.qty) - flt(obj.received_qty) - flt(returned_qty_map.get("qty"))
-		target.received_qty = flt(obj.qty) - flt(obj.received_qty)
-		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty) - flt(returned_qty_map.get("qty"))) * flt(
-			obj.conversion_factor
-		)
-		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (
-			(flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate) * flt(source_parent.conversion_rate)
-		)
+		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj)
+
+		target.qty = pending_qty - flt(returned_qty_map.get("qty"))
+		target.received_qty = pending_qty
+		target.stock_qty = (pending_qty - flt(returned_qty_map.get("qty"))) * flt(obj.conversion_factor)
+		target.amount = pending_qty * flt(obj.rate)
+		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -113,7 +117,8 @@ def make_purchase_receipt(
 					"wip_composite_asset": "wip_composite_asset",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty) and select_item(doc),
+				"condition": lambda doc: abs(received_and_mapped_qty(doc)) < abs(doc.qty)
+				and select_item(doc),
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",

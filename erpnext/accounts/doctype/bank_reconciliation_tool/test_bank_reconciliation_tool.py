@@ -2,18 +2,43 @@
 # See license.txt
 
 
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
+	clear_clearing_date,
+	create_bank_entry_and_reconcile,
+	create_bulk_payment_entry_and_reconcile,
+	create_internal_transfer,
+	create_journal_entry_bts,
+	create_payment_entry_and_reconcile,
+	create_payment_entry_bts,
+	get_account_balance,
+	get_account_opening_balance,
 	get_auto_reconcile_message,
 	get_bank_transactions,
+	get_linked_payments,
+	reconcile_vouchers,
+	update_clearance_date,
 )
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	assert_refused_for_names,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
+
+RATE_METHOD = "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_exchange_rate"
 
 
 class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
@@ -99,13 +124,14 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		transactions = get_bank_transactions(self.bank_account, from_date, to_date)
 		self.assertEqual(len(transactions), 0)
 
-	def make_bank_transaction(self, date, deposit=100):
+	def make_bank_transaction(self, date, deposit=100, withdrawal=0):
 		return (
 			frappe.get_doc(
 				{
 					"doctype": "Bank Transaction",
 					"date": date,
 					"deposit": deposit,
+					"withdrawal": withdrawal,
 					"bank_account": self.bank_account,
 					"currency": "INR",
 				}
@@ -114,10 +140,182 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 			.submit()
 		)
 
+	def get_matching_payment_entries(self, bank_transaction, exact_match=False):
+		document_types = ["payment_entry", "exact_match"] if exact_match else ["payment_entry"]
+		vouchers = get_linked_payments(
+			bank_transaction,
+			document_types,
+			from_date=add_days(today(), -1),
+			to_date=today(),
+		)
+		return [v for v in vouchers if v.get("doctype") == "Payment Entry"]
+
 	def test_get_bank_transactions_excludes_dates_after_to_date(self):
 		self.make_bank_transaction(date=today())
 		names = [t.name for t in get_bank_transactions(self.bank_account, to_date=add_days(today(), -1))]
 		self.assertEqual(names, [])
+
+	def test_get_linked_payments_without_document_types(self):
+		bank_transaction = self.make_bank_transaction(date=today())
+		self.assertEqual(get_linked_payments(bank_transaction.name), [])
+
+	def test_get_linked_payments_hides_vouchers_outside_the_fence(self):
+		def make_payment(cost_center):
+			payment = create_payment_entry(
+				company=self.company,
+				payment_type="Receive",
+				party_type="Customer",
+				party=self.customer,
+				paid_from=self.debit_to,
+				paid_to=self.bank,
+				paid_amount=100,
+			)
+			payment.cost_center = cost_center
+			return payment.save().submit()
+
+		def make_journal(cost_center):
+			return make_journal_entry(self.bank, "Sales - _TC", 100, cost_center=cost_center, submit=True)
+
+		def get_matches(transaction):
+			vouchers = get_linked_payments(
+				transaction.name,
+				["payment_entry", "journal_entry"],
+				from_date=add_days(today(), -1),
+				to_date=today(),
+			)
+			return {(v["doctype"], v["name"]) for v in vouchers}
+
+		inside = make_payment("_Test Cost Center - _TC"), make_journal("_Test Cost Center - _TC")
+		outside = make_payment("_Test Cost Center 2 - _TC"), make_journal("_Test Cost Center 2 - _TC")
+		inside = {(doc.doctype, doc.name) for doc in inside}
+		outside = {(doc.doctype, doc.name) for doc in outside}
+		transaction = self.make_bank_transaction(date=today())
+
+		self.assertLessEqual(inside | outside, get_matches(transaction))
+
+		user = make_fenced_user(
+			"brt-fenced@example.com", ["Accounts User"], [("Cost Center", "_Test Cost Center - _TC")]
+		)
+		with as_user(user):
+			for doctype, name in outside:
+				self.assertFalse(frappe.has_permission(doctype, "read", doc=name))
+			matches = get_matches(transaction)
+		self.assertLessEqual(inside, matches)
+		self.assertFalse(outside & matches)
+
+	def test_get_linked_payments_drops_rows_without_a_doctype(self):
+		transaction = self.make_bank_transaction(date=today())
+		rows = [frappe._dict(name="ROW-WITHOUT-DOCTYPE", paid_amount=100)]
+		with patch(
+			"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool._get_linked_payments",
+			return_value=rows,
+		):
+			self.assertEqual(get_linked_payments(transaction.name, ["payment_entry"]), [])
+
+	def test_rejects_reversed_date_ranges(self):
+		from_date, to_date = today(), add_days(today(), -1)
+		with self.assertRaisesRegex(frappe.ValidationError, "From Date cannot be greater than To Date"):
+			get_bank_transactions(self.bank_account, from_date, to_date)
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
+		):
+			auto_reconcile_vouchers(
+				self.bank_account,
+				filter_by_reference_date=True,
+				from_reference_date=from_date,
+				to_reference_date=to_date,
+			)
+
+		transaction = self.make_bank_transaction(date=today())
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "From Reference Date cannot be greater than To Reference Date"
+		):
+			get_linked_payments(
+				transaction.name,
+				["payment_entry"],
+				filter_by_reference_date=True,
+				from_reference_date=from_date,
+				to_reference_date=to_date,
+			)
+
+	def test_deposit_matches_amount_received_in_bank_account(self):
+		# money leaves another bank account and lands here minus a charge, so the two sides differ
+		payment = frappe.get_doc(
+			{
+				"doctype": "Payment Entry",
+				"payment_type": "Internal Transfer",
+				"company": self.company,
+				"posting_date": today(),
+				"paid_from": "_Test Bank - _TC",
+				"paid_to": self.bank,
+				"paid_amount": 3537.64,
+				"received_amount": 3460.52,
+				"reference_no": "TRF-001",
+				"reference_date": today(),
+			}
+		)
+		payment.set_missing_values()
+		payment.set_exchange_rate()
+		payment.set_amounts()
+		payment.deductions[-1].account = "_Test Exchange Gain/Loss - _TC"
+		payment.deductions[-1].cost_center = "_Test Cost Center - _TC"
+		payment = payment.save().submit()
+
+		transaction = self.make_bank_transaction(date=today(), deposit=3460.52)
+
+		# the received side is what reached this bank account, so that is what is shown
+		matches = self.get_matching_payment_entries(transaction.name)
+		self.assertEqual([m["name"] for m in matches], [payment.name])
+		self.assertEqual(matches[0]["paid_amount"], 3460.52)
+
+		# and what the exact match compares against
+		exact_matches = self.get_matching_payment_entries(transaction.name, exact_match=True)
+		self.assertEqual([m["name"] for m in exact_matches], [payment.name])
+
+	def test_withdrawal_matches_amount_paid_from_bank_account(self):
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party="_Test Supplier",
+			paid_from=self.bank,
+			paid_to="Creditors - _TC",
+			paid_amount=1250,
+		)
+		payment = payment.save().submit()
+
+		transaction = self.make_bank_transaction(date=today(), deposit=0, withdrawal=1250)
+
+		exact_matches = self.get_matching_payment_entries(transaction.name, exact_match=True)
+		self.assertEqual([m["name"] for m in exact_matches], [payment.name])
+		self.assertEqual(exact_matches[0]["paid_amount"], 1250)
+
+	def test_opening_balance_includes_uncleared_entries(self):
+		def opening():
+			return get_account_opening_balance(self.bank_account, today())
+
+		def cleared():
+			return get_account_balance(self.bank_account, today(), self.company)
+
+		opening_before, cleared_before = opening(), cleared()
+
+		# customer pays 12,700 in, a 240 bank charge goes out, neither is cleared yet
+		create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=12700,
+			save=1,
+			submit=1,
+		)
+		create_payment_entry(paid_from=self.bank, paid_amount=240, save=1, submit=1)
+
+		# the opening balance is the ledger balance, while the cleared balance ignores uncleared entries
+		self.assertEqual(opening() - opening_before, 12460)
+		self.assertEqual(cleared() - cleared_before, 0)
 
 	def test_auto_reconcile_message_for_no_matches(self):
 		message, indicator = get_auto_reconcile_message([], [])
@@ -135,3 +333,532 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIn("1 Transaction Partially Reconciled", singular)
 		plural, _ = get_auto_reconcile_message(["p1", "p2"], [])
 		self.assertIn("2 Transactions Partially Reconciled", plural)
+
+	def test_multi_currency_pay_converts_and_balances(self):
+		# withdrawal from an INR bank paying a USD supplier; rate 3.0 makes 100/3 non-exact
+		self.enable_multi_currency_setup()
+		pe = self.reconcile_new_payment(
+			self.make_multi_currency_txn(withdrawal=100),
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			party_account=self.creditors_usd,
+			paid_from=self.bank,
+			paid_to=self.creditors_usd,
+			rate=3.0,
+		)
+		self.assertEqual(pe.docstatus, 1)  # submits despite the rounding residual
+		self.assertEqual((pe.source_exchange_rate, pe.target_exchange_rate), (1.0, 3.0))
+		self.assertEqual((pe.paid_amount, pe.received_amount), (100, 33.33))  # bank side kept, 100/3
+		self.assertEqual(pe.difference_amount, 0)
+		# Payment Entry auto-books the rounding residual to Exchange Gain/Loss
+		self.assertTrue(pe.deductions[0].is_exchange_gain_loss)
+		self.assertEqual(pe.deductions[0].amount, 0.01)  # 100 - 33.33 * 3
+
+	def test_multi_currency_receive_converts_and_balances(self):
+		# deposit into an INR bank from a USD customer; the party side must convert
+		self.enable_multi_currency_setup()
+		pe = self.reconcile_new_payment(
+			self.make_multi_currency_txn(deposit=100),
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			party_account=self.debtors_usd,
+			paid_from=self.debtors_usd,
+			paid_to=self.bank,
+			rate=3.0,
+		)
+		self.assertEqual(pe.docstatus, 1)
+		self.assertEqual((pe.source_exchange_rate, pe.target_exchange_rate), (3.0, 1.0))
+		self.assertEqual((pe.received_amount, pe.paid_amount), (100, 33.33))  # bank side kept, 100/3
+		self.assertEqual(pe.difference_amount, 0)
+
+	def test_multi_currency_bulk_pay_converts_and_balances(self):
+		# the bulk path builds the Payment Entry itself, so it must convert too
+		self.enable_multi_currency_setup()
+		txn = self.make_multi_currency_txn(withdrawal=100)
+		with patch(RATE_METHOD, return_value=3.0):
+			result = create_bulk_payment_entry_and_reconcile(
+				[txn.name], "Supplier", self.supplier, self.creditors_usd
+			)
+
+		pe = frappe.get_doc("Payment Entry", result[0]["payment_entry"].name)
+		self.assertEqual(pe.docstatus, 1)
+		self.assertEqual(pe.target_exchange_rate, 3.0)
+		self.assertEqual((pe.paid_amount, pe.received_amount), (100, 33.33))
+		self.assertEqual(pe.difference_amount, 0)
+
+	def enable_multi_currency_setup(self):
+		# USD party/accounts + a company gain/loss account to absorb rounding residuals
+		self.company_abbr = "_TC"
+		self.create_supplier(supplier_name="_Test Supplier USD", currency="USD")
+		self.create_customer(customer_name="_Test Customer USD", currency="USD")
+		self.create_usd_payable_account()
+		self.create_usd_receivable_account()
+		self.set_party_account("Supplier", self.supplier, self.creditors_usd)
+		if not frappe.db.get_value("Company", self.company, "exchange_gain_loss_account"):
+			frappe.db.set_value(
+				"Company", self.company, "exchange_gain_loss_account", "Exchange Gain/Loss - _TC"
+			)
+
+	def set_party_account(self, party_type, party, account):
+		doc = frappe.get_doc(party_type, party)
+		if not any(row.company == self.company for row in doc.accounts):
+			doc.append("accounts", {"company": self.company, "account": account})
+			doc.save()
+
+	def make_multi_currency_txn(self, withdrawal=0, deposit=0):
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Bank Transaction",
+					"date": today(),
+					"withdrawal": withdrawal,
+					"deposit": deposit,
+					"bank_account": self.bank_account,
+					"currency": "INR",
+					"reference_number": "TEST-FX-REF",
+				}
+			)
+			.save()
+			.submit()
+		)
+
+	def reconcile_new_payment(
+		self, txn, *, payment_type, party_type, party, party_account, paid_from, paid_to, rate
+	):
+		# mimics the /banking frontend, which sends a hardcoded 1:1 rate
+		payment_entry_doc = {
+			"payment_type": payment_type,
+			"company": self.company,
+			"party_type": party_type,
+			"party": party,
+			"party_account": party_account,
+			"paid_from": paid_from,
+			"paid_to": paid_to,
+			"paid_amount": txn.unallocated_amount,
+			"received_amount": txn.unallocated_amount,
+			"source_exchange_rate": 1,
+			"target_exchange_rate": 1,
+			"posting_date": today(),
+			"reference_no": f"TEST-FX-{payment_type}",
+			"reference_date": today(),
+		}
+		with patch(RATE_METHOD, return_value=rate):
+			result = create_payment_entry_and_reconcile(txn.name, payment_entry_doc)
+		return frappe.get_doc("Payment Entry", result["payment_entry"].name)
+
+	def make_other_company_payment(self):
+		return create_payment_entry(
+			company="_Test Company 1",
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from="Debtors - _TC1",
+			paid_to="_Test Bank - _TC1",
+			paid_amount=100,
+			save=True,
+		)
+
+	def test_reconcile_vouchers_fences_the_bank_transaction(self):
+		txn = self.make_bank_transaction(today())
+
+		def reconcile_kwargs(name):
+			return {"bank_transaction_name": name, "vouchers": []}
+
+		outside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused_for_names(
+				self, reconcile_vouchers, reconcile_kwargs, [txn.name], type_gated=True, caller_supplied=True
+			)
+		inside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(inside):
+			self.assertEqual(reconcile_vouchers(txn.name, []).name, txn.name)
+		with as_user("Administrator"):
+			self.assertEqual(reconcile_vouchers(txn.name, []).name, txn.name)
+
+	def test_reconcile_vouchers_refuses_a_voucher_outside_the_fence(self):
+		txn = self.make_bank_transaction(today())
+		payment = self.make_other_company_payment()
+
+		def voucher_kwargs(name):
+			return {
+				"bank_transaction_name": txn.name,
+				"vouchers": [{"payment_doctype": "Payment Entry", "payment_name": name, "amount": 100}],
+			}
+
+		user = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			assert_refused_for_names(
+				self, reconcile_vouchers, voucher_kwargs, [payment.name], caller_supplied=True
+			)
+
+	def test_reconcile_vouchers_with_a_malformed_name_changes_no_record_for_administrator(self):
+		txn = self.make_bank_transaction(today())
+		payment = self.make_other_company_payment()
+		before = frappe.db.get_value("Payment Entry", payment.name, "modified")
+		transaction_before = frappe.db.get_value("Bank Transaction", txn.name, "modified")
+		for value in ({"name": ["like", "%"]}, ["like", "%"]):
+			vouchers = [{"payment_doctype": "Payment Entry", "payment_name": value, "amount": 100}]
+			with as_user("Administrator"):
+				with self.assertRaises(frappe.ValidationError) as raised:
+					reconcile_vouchers(txn.name, vouchers)
+			self.assertIn(str(value), str(raised.exception))
+		self.assertEqual(frappe.db.get_value("Payment Entry", payment.name, "modified"), before)
+		self.assertEqual(frappe.db.get_value("Bank Transaction", txn.name, "modified"), transaction_before)
+		self.assertFalse(frappe.get_all("Bank Transaction Payments", filters={"parent": txn.name}))
+
+	def test_reconcile_vouchers_accepts_doctypes_from_the_hook(self):
+		txn = self.make_bank_transaction(today())
+		vouchers = [{"payment_doctype": "Sales Order", "payment_name": "SO-MISSING-0001", "amount": 1}]
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be reconciled", reconcile_vouchers, txn.name, vouchers
+		)
+		hooked = ["Payment Entry", "Journal Entry", "Purchase Invoice", "Sales Invoice", "Sales Order"]
+		with patch(
+			"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_doctypes_for_bank_reconciliation",
+			return_value=hooked,
+		):
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"is not affecting bank account",
+				reconcile_vouchers,
+				txn.name,
+				vouchers,
+			)
+
+	def test_create_bts_entries_check_the_party(self):
+		txn = self.make_bank_transaction(today())
+		for party, fence in (("_Test Customer", "_Test Customer 1"), ("_Test Customer 1", "_Test Customer")):
+			user = make_fenced_user("brt-fenced@example.com", ["Accounts User"], [("Customer", fence)])
+			with as_user(user):
+				assert_refused(
+					self,
+					create_payment_entry_bts,
+					txn.name,
+					party_type="Customer",
+					party=party,
+					posting_date=today(),
+					reference_number="x",
+					reference_date=today(),
+					allow_edit=1,
+				)
+				assert_refused(
+					self,
+					create_journal_entry_bts,
+					txn.name,
+					second_account=self.debit_to,
+					entry_type="Bank Entry",
+					posting_date=today(),
+					party_type="Customer",
+					party=party,
+					allow_edit=1,
+				)
+		user = make_fenced_user("brt-fenced@example.com", ["Accounts User"], [("Customer", "_Test Customer")])
+		with as_user(user):
+			payment = create_payment_entry_bts(
+				txn.name,
+				party_type="Customer",
+				party="_Test Customer",
+				posting_date=today(),
+				reference_number="x",
+				reference_date=today(),
+				allow_edit=1,
+			)
+		self.assertEqual(payment.party, "_Test Customer")
+
+	def test_party_check_refuses_a_non_party_doctype_and_an_empty_party_type(self):
+		txn = self.make_bank_transaction(today())
+		user = make_fenced_user("brt-fenced@example.com", ["Accounts User"])
+		with as_user(user):
+			for party_type, party in (("User", user), ("", "_Test Customer")):
+				assert_refused(
+					self,
+					create_journal_entry_bts,
+					txn.name,
+					second_account=self.debit_to,
+					entry_type="Bank Entry",
+					posting_date=today(),
+					party_type=party_type,
+					party=party,
+					allow_edit=1,
+				)
+
+	def test_bank_entry_and_payment_entry_reconcile_check_the_party(self):
+		txn = self.make_bank_transaction(today())
+		user = make_fenced_user(
+			"brt-fenced@example.com", ["Accounts User"], [("Customer", "_Test Customer 1")]
+		)
+		with as_user(user):
+			assert_refused(
+				self,
+				create_bank_entry_and_reconcile,
+				txn.name,
+				today(),
+				today(),
+				"x",
+				[
+					{
+						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": "_Test Customer",
+						"credit": 100,
+					}
+				],
+			)
+			assert_refused(
+				self,
+				create_payment_entry_and_reconcile,
+				txn.name,
+				{"party_type": "Customer", "party": "_Test Customer"},
+			)
+			assert_refused(
+				self,
+				create_bulk_payment_entry_and_reconcile,
+				[txn.name],
+				"Customer",
+				"_Test Customer",
+				self.debit_to,
+			)
+		outside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused(
+				self,
+				create_bulk_payment_entry_and_reconcile,
+				[txn.name],
+				"Customer",
+				"_Test Customer",
+				self.debit_to,
+			)
+
+	def test_internal_transfer_checks_the_counterpart_account(self):
+		txn = self.make_bank_transaction(today())
+		args = {
+			"posting_date": today(),
+			"reference_date": today(),
+			"reference_no": "x",
+			"paid_to": "_Test Cash - _TC",
+		}
+		user = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			assert_refused(self, create_internal_transfer, txn.name, paid_from="_Test Bank - _TC1", **args)
+			assert_refused(
+				self,
+				create_internal_transfer,
+				txn.name,
+				paid_from="_Test Cash - _TC",
+				dimensions={"payment_type": "Pay"},
+				**args,
+			)
+			result = create_internal_transfer(txn.name, paid_from="_Test Cash - _TC", **args)
+		self.assertEqual(result["payment_entry"].paid_from, "_Test Cash - _TC")
+		account_fenced = make_fenced_user(
+			"brt-fenced@example.com",
+			["Accounts User"],
+			[("Account", "_Test Cash - _TC"), ("Account", self.bank)],
+		)
+		with as_user(account_fenced):
+			assert_refused(self, create_internal_transfer, txn.name, paid_from="_Test Bank - _TC1", **args)
+
+	def test_auto_reconcile_vouchers_fences_the_bank_account(self):
+		self.make_bank_transaction(today())
+
+		def auto_reconcile_kwargs(name):
+			return {"bank_account": name, "from_date": today(), "to_date": today()}
+
+		outside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused_for_names(
+				self,
+				auto_reconcile_vouchers,
+				auto_reconcile_kwargs,
+				[self.bank_account],
+				type_gated=True,
+				caller_supplied=True,
+			)
+		inside = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(inside):
+			auto_reconcile_vouchers(self.bank_account, today(), today())
+
+	def test_update_clearance_date_validates_dates_and_reconciliation(self):
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+		)
+		payment.reference_date = add_days(payment.posting_date, 1)
+		payment.save().submit()
+
+		for clearance_date, message in (
+			(add_days(payment.posting_date, -1), "posting date"),
+			(payment.posting_date, "cheque date"),
+		):
+			with self.subTest(clearance_date=clearance_date):
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					update_clearance_date(payment.doctype, payment.name, self.bank, str(clearance_date))
+				self.assertFalse(payment.reload().clearance_date)
+
+		clearance_date = str(payment.reference_date)
+		update_clearance_date(payment.doctype, payment.name, self.bank, clearance_date)
+		self.assertEqual(payment.reload().clearance_date, getdate(clearance_date))
+		update_clearance_date(payment.doctype, payment.name, self.bank, None)
+		self.assertFalse(payment.reload().clearance_date)
+
+		transaction = self.make_bank_transaction(clearance_date)
+		reconcile_vouchers(
+			transaction.name, [{"payment_doctype": payment.doctype, "payment_name": payment.name}]
+		)
+		update_clearance_date(payment.doctype, payment.name, self.bank, clearance_date)
+		for changed_date in (None, str(add_days(clearance_date, 1))):
+			with self.subTest(clearance_date=changed_date):
+				with self.assertRaisesRegex(frappe.ValidationError, "Unreconcile"):
+					update_clearance_date(payment.doctype, payment.name, self.bank, changed_date)
+				self.assertEqual(payment.reload().clearance_date, getdate(clearance_date))
+		self.assertEqual(transaction.reload().allocated_amount, 100)
+
+	def test_clear_clearing_date_on_pos_payments(self):
+		mode_of_payment = frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "Clearance Transfer",
+				"type": "Bank",
+				"accounts": [{"company": self.company, "default_account": self.bank}],
+			}
+		).insert()
+		invoice = create_sales_invoice(is_pos=1, qty=1, rate=100, do_not_save=1)
+		invoice.set("payments", [{"mode_of_payment": mode_of_payment.name, "amount": 100}])
+		invoice.insert().submit()
+		update_clearance_date(invoice.doctype, invoice.name, self.bank, today())
+		clear_clearing_date(invoice.doctype, invoice.name)
+		self.assertFalse(invoice.reload().payments[0].clearance_date)
+
+		transaction = self.make_bank_transaction(today())
+		reconcile_vouchers(
+			transaction.name, [{"payment_doctype": invoice.doctype, "payment_name": invoice.name}]
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "Unreconcile"):
+			clear_clearing_date(invoice.doctype, invoice.name)
+		self.assertEqual(invoice.reload().payments[0].clearance_date, getdate(today()))
+		self.assertEqual(transaction.reload().allocated_amount, 100)
+
+	def test_unchanged_restricted_vouchers_do_not_block_clearance(self):
+		payments = [
+			create_payment_entry(
+				company=self.company,
+				payment_type="Receive",
+				party_type="Customer",
+				party=self.customer,
+				paid_from=self.debit_to,
+				paid_to=self.bank,
+				paid_amount=amount,
+			)
+			.save()
+			.submit()
+			for amount in (100, 50, 75)
+		]
+		update_clearance_date(payments[2].doctype, payments[2].name, self.bank, today())
+		for payment in payments:
+			payment.reload()
+
+		user = make_fenced_user(
+			"clearance-fenced@example.com", ["Accounts User"], [("Payment Entry", payments[0].name)]
+		)
+		clearance = frappe.get_doc(
+			{
+				"doctype": "Bank Clearance",
+				"account": self.bank,
+				"from_date": today(),
+				"to_date": today(),
+				"include_reconciled_entries": 1,
+			}
+		)
+		with as_user(user):
+			clearance.get_payment_entries()
+			self.assertEqual(
+				{row.payment_entry for row in clearance.payment_entries}, {p.name for p in payments}
+			)
+			for row in clearance.payment_entries:
+				if row.payment_entry == payments[0].name:
+					row.clearance_date = today()
+			clearance.update_clearance_date()
+
+		self.assertEqual(payments[0].reload().clearance_date, getdate(today()))
+		for payment in payments[1:]:
+			modified, clearance_date = payment.modified, payment.clearance_date
+			payment.reload()
+			self.assertEqual((payment.modified, payment.clearance_date), (modified, clearance_date))
+
+		with as_user(user):
+			for row in clearance.payment_entries:
+				if row.payment_entry == payments[1].name:
+					row.clearance_date = today()
+			with self.assertRaises(frappe.PermissionError):
+				clearance.update_clearance_date()
+		self.assertFalse(payments[1].reload().clearance_date)
+
+	def test_clear_clearing_date_preserves_reconciliation(self):
+		payment = (
+			create_payment_entry(
+				company=self.company,
+				payment_type="Receive",
+				party_type="Customer",
+				party=self.customer,
+				paid_from=self.debit_to,
+				paid_to=self.bank,
+				paid_amount=100,
+			)
+			.save()
+			.submit()
+		)
+		user = make_fenced_user("clearance-api@example.com", ["Accounts User"])
+		with as_user(user):
+			update_clearance_date(payment.doctype, payment.name, self.bank, today())
+			clear_clearing_date(payment.doctype, payment.name)
+		self.assertFalse(payment.reload().clearance_date)
+
+		transaction = self.make_bank_transaction(today())
+		reconcile_vouchers(
+			transaction.name, [{"payment_doctype": payment.doctype, "payment_name": payment.name}]
+		)
+		with as_user(user):
+			with self.assertRaisesRegex(frappe.ValidationError, "Unreconcile"):
+				clear_clearing_date(payment.doctype, payment.name)
+		self.assertEqual(payment.reload().clearance_date, getdate(today()))
+		self.assertEqual(transaction.reload().allocated_amount, 100)
+
+	def test_update_clearance_date_fences_the_voucher(self):
+		payment = self.make_other_company_payment()
+
+		def clearance_kwargs(name):
+			return {
+				"payment_document": "Payment Entry",
+				"payment_entry": name,
+				"account": "_Test Bank - _TC1",
+				"clearance_date": today(),
+			}
+
+		user = make_company_fenced_user("brt-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				update_clearance_date,
+				clearance_kwargs,
+				[payment.name],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			with self.assertRaises(frappe.PermissionError):
+				clear_clearing_date(payment.doctype, payment.name)
+		self.assertRaises(
+			frappe.ValidationError,
+			update_clearance_date,
+			"Sales Order",
+			"SO-MISSING-0001",
+			self.bank,
+			today(),
+		)
+		self.assertRaises(frappe.ValidationError, clear_clearing_date, "Sales Order", "SO-MISSING-0001")

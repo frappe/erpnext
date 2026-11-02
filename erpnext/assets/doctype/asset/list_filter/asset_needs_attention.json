@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"asset_name\", \"label\": \"Asset Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"asset_category\", \"label\": \"Asset Category\"}, {\"fieldname\": \"location\", \"label\": \"Location\"}, {\"fieldname\": \"custodian\", \"label\": \"Custodian\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.964905",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Needs Attention",
+ "filters": "[[\"Asset\", \"status\", \"in\", [\"In Maintenance\", \"Out of Order\", \"Issue\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.964905",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset-Needs Attention",
+ "owner": "Administrator",
+ "reference_doctype": "Asset",
+ "route_signature": "status=[\"in\",[\"In Maintenance\",\"Out of Order\",\"Issue\"]]",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

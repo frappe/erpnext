@@ -10,6 +10,12 @@ from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -63,3 +69,37 @@ class TestBOMUpdateTool(ERPNextTestSuite):
 
 		doc.load_from_db()
 		self.assertEqual(doc.total_cost, 200)
+
+	def test_replace_bom_requires_every_rewritten_bom_to_be_writable(self):
+		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
+		parent_bom = frappe.db.get_value("BOM Item", {"bom_no": current_bom, "parenttype": "BOM"}, "parent")
+		bom_doc = frappe.copy_doc(self.globalTestRecords["BOM"][0])
+		bom_doc.items[1].item_code = "_Test Item"
+		bom_doc.insert()
+
+		def current_kwargs(name):
+			return {"boms": {"current_bom": name, "new_bom": bom_doc.name}}
+
+		def new_kwargs(name):
+			return {"boms": {"current_bom": current_bom, "new_bom": name}}
+
+		fenced = make_fenced_user(
+			"bom-fenced@example.com", ["Manufacturing Manager"], [("BOM", current_bom), ("BOM", bom_doc.name)]
+		)
+		with as_user(fenced):
+			assert_refused_without(
+				self,
+				[parent_bom],
+				enqueue_replace_bom,
+				boms={"current_bom": current_bom, "new_bom": bom_doc.name},
+			)
+			assert_refused_for_names(self, enqueue_replace_bom, current_kwargs, [], caller_supplied=True)
+			assert_refused_for_names(self, enqueue_replace_bom, new_kwargs, [], caller_supplied=True)
+		allowed = make_fenced_user(
+			"bom-fenced@example.com",
+			["Manufacturing Manager"],
+			[("BOM", current_bom), ("BOM", bom_doc.name), ("BOM", parent_bom)],
+		)
+		with as_user(allowed):
+			enqueue_replace_bom(boms={"current_bom": current_bom, "new_bom": bom_doc.name})
+		self.assertTrue(frappe.db.exists("BOM Item", {"bom_no": bom_doc.name, "parent": parent_bom}))

@@ -22,6 +22,13 @@ jobs:
         version: ["15", "16"]
 
     steps:
+      - name: Get Frappe Release Bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FRAPPE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FRAPPE_BOT_PRIVATE_KEY }}
+          permission-pull-requests: write
       - uses: octokit/request-action@v2.x
         with:
           route: POST /repos/{owner}/{repo}/pulls
@@ -33,4 +40,4 @@ jobs:
           base: version-${{ matrix.version }}
           head: version-${{ matrix.version }}-hotfix
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

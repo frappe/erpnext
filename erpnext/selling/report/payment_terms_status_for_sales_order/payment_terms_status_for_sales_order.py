@@ -7,6 +7,7 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 from frappe.utils.dateutils import getdate
+from pypika.terms import Bracket, LiteralValue
 
 
 def get_columns():
@@ -217,6 +218,11 @@ def get_so_with_invoices(filters):
 		.orderby(so.name, so.transaction_date, ps.due_date)
 	)
 
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions("Sales Order"):
+		query_so = query_so.where(Bracket(LiteralValue(match_conditions)))
+
 	sorders = query_so.run(as_dict=True)
 
 	invoices = []
@@ -241,7 +247,12 @@ def get_so_with_invoices(filters):
 				Sum(sii.base_net_amount).as_("order_net_amount"),
 				Max(si.base_grand_total).as_("invoice_grand_total"),
 			)
-			.where((sii.sales_order.isin([x.name for x in sorders])) & (si.docstatus == 1))
+			.where(
+				sii.parent.isin(
+					qb.from_(sii).select(sii.parent).where(sii.sales_order.isin([x.name for x in sorders]))
+				)
+				& (si.docstatus == 1)
+			)
 			.groupby(sii.parent, sii.sales_order)
 		)
 		invoices = query_inv.run(as_dict=True)

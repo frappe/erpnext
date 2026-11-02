@@ -1,14 +1,14 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-window.doc={{ doc.as_json() }};
+window.doc = {{ portal_doc | tojson }};
 
 $(document).ready(function() {
 	new rfq();
-	doc.supplier = "{{ doc.supplier }}"
-	doc.currency = "{{ doc.currency }}"
-	doc.number_format = "{{ doc.number_format }}"
-	doc.buying_price_list = "{{ doc.buying_price_list }}"
+	doc.supplier = {{ doc.supplier | tojson }}
+	doc.currency = {{ doc.currency | tojson }}
+	doc.number_format = {{ doc.number_format | tojson }}
+	doc.buying_price_list = {{ doc.buying_price_list | tojson }}
 });
 
 rfq = class rfq {

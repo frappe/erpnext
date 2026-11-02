@@ -4,33 +4,24 @@
 # Decompiled by https://python-decompiler.com
 
 import frappe
+from frappe.desk.query_report import run
+from frappe.utils import getdate
 
+from erpnext.buying.report.subcontracted_item_to_be_received.test_subcontracted_item_to_be_received import (
+	get_report_filters,
+	make_subcontracting_order,
+)
 from erpnext.buying.report.subcontracted_raw_materials_to_be_transferred.subcontracted_raw_materials_to_be_transferred import (
 	execute,
 )
 from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
-from erpnext.controllers.tests.test_subcontracting_controller import (
-	get_subcontracting_order,
-	make_service_item,
-)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractedItemToBeTransferred(ERPNextTestSuite):
 	def test_pending_and_transferred_qty(self):
-		make_service_item("Subcontracted Service Item 1")
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
-				"qty": 10,
-				"rate": 500,
-				"fg_item": "_Test FG Item",
-				"fg_item_qty": 10,
-			},
-		]
-		sco = get_subcontracting_order(service_items=service_items)
+		sco = make_subcontracting_order()
 
 		# Material Receipt of RMs
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=100, basic_rate=100)
@@ -70,6 +61,25 @@ class TestSubcontractedItemToBeTransferred(ERPNextTestSuite):
 		self.assertEqual(sco_data[1]["rm_item_code"], "_Test Item Home Desktop 100")
 		self.assertEqual(sco_data[1]["p_qty"], 19)
 		self.assertEqual(sco_data[1]["transferred_qty"], 1)
+
+	def test_report_runs_from_desk(self):
+		sco = make_subcontracting_order()
+
+		filters = get_report_filters(sco)
+		result = run("Subcontracted Raw Materials To Be Transferred", filters=filters)["result"]
+		self.assertIn(sco.name, {row["subcontract_order"] for row in result if isinstance(row, dict)})
+
+	def test_closed_order_is_not_listed(self):
+		sco = make_subcontracting_order()
+		sco.update_status("Closed")
+
+		data = execute(get_report_filters(sco))[1]
+		self.assertNotIn(sco.name, {row["subcontract_order"] for row in data})
+
+	def test_one_day_range_is_accepted(self):
+		frappe.clear_messages()
+		execute(frappe._dict({"supplier": "_Test Supplier", "from_date": getdate(), "to_date": getdate()}))
+		self.assertFalse(frappe.get_message_log())
 
 
 def transfer_subcontracted_raw_materials(sco):

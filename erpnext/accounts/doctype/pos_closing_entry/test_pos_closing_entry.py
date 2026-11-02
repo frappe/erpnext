@@ -1,6 +1,9 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from contextlib import contextmanager
+from unittest.mock import patch
+
 import frappe
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
@@ -21,13 +24,12 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPOSClosingEntry(ERPNextTestSuite):
 	def setUp(self):
-		init_user_and_profile()
+		self.test_user, self.pos_profile = init_user_and_profile()
 		make_stock_entry(target="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 
 	def test_pos_closing_entry(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -55,12 +57,39 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
 
+	def test_closing_with_disabled_sales_person(self):
+		opening = create_opening_entry(self.pos_profile, self.test_user.name)
+		frappe.set_user("Administrator")
+		person = frappe.get_doc(
+			doctype="Sales Person",
+			sales_person_name=f"_Test Closing {frappe.generate_hash(length=10)}",
+			commission_rate=10,
+			enabled=1,
+		).insert()
+		invoice = create_pos_invoice(rate=100, do_not_submit=1)
+		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		invoice.append("sales_team", {"sales_person": person.name, "allocated_percentage": 100})
+		invoice.save()
+		invoice.submit()
+		person.enabled = 0
+		person.save()
+
+		closing = make_closing_entry_from_opening(opening)
+		closing.flags.in_test = True
+		closing.submit()
+		invoice.reload()
+		self.assertTrue(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+		closing.cancel()
+		invoice.reload()
+		self.assertFalse(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+
 	def test_pos_closing_without_item_code(self):
 		"""
 		Test if POS Closing Entry is created without item code
 		"""
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -79,10 +108,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
-		test_item_qty = get_test_item_qty(pos_profile)
+		test_item_qty = get_test_item_qty(self.pos_profile)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -104,13 +132,11 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pcv_doc.flags.in_test = True
 		pcv_doc.submit()
 
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
-		test_item_qty_after_sales = get_test_item_qty(pos_profile)
+		test_item_qty_after_sales = get_test_item_qty(self.pos_profile)
 		self.assertEqual(test_item_qty_after_sales, test_item_qty - 1)
 
 	def test_cancelling_of_pos_closing_entry(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
@@ -169,9 +195,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pos_profile.insert()
 		self.assertTrue(frappe.db.exists("POS Profile", pos_profile.name))
 
-		test_user = init_user_and_profile(do_not_create_pos_profile=1)
-
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(pos_profile, self.test_user.name)
 		pos_inv1 = create_pos_invoice(rate=350, do_not_submit=1, pos_profile=pos_profile.name)
 		pos_inv1.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv1.save()
@@ -187,17 +211,8 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		pcv_doc.flags.in_test = True
 		self.assertRaises(frappe.ValidationError, pcv_doc.submit)
 
-		accounting_dimension_department = frappe.get_doc(
-			"Accounting Dimension Detail", {"parent": "Department"}
-		)
-		accounting_dimension_department.mandatory_for_bs = 0
-		accounting_dimension_department.save()
-
 	def test_merging_into_sales_invoice_for_batched_item(self):
 		frappe.flags.print_message = False
-		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
-			init_user_and_profile,
-		)
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 		item_doc = make_item(
@@ -220,8 +235,7 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		)
 		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
 
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_inv = create_pos_invoice(
 			item_code=item_code,
@@ -291,18 +305,17 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "Sales Invoice"})
 	def test_closing_entries_with_sales_invoice(self):
-		test_user, pos_profile = init_user_and_profile()
-		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
 		pos_si = create_sales_invoice(
-			qty=10, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+			qty=10, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=1
 		)
 		pos_si.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
 		pos_si.save()
 		pos_si.submit()
 
 		pos_si2 = create_sales_invoice(
-			qty=5, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=11
+			qty=5, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=11
 		)
 		pos_si2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000})
 		pos_si2.save()
@@ -332,12 +345,10 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
 
-		test_user, pos_profile = init_user_and_profile()
-
 		with self.change_settings("POS Settings", {"invoice_type": "Sales Invoice"}):
-			opening_entry1 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry1 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_si1, pos_si2 = create_multiple_sales_invoices(pos_profile)
+			pos_si1, pos_si2 = create_multiple_sales_invoices(self.pos_profile)
 
 			pos_inv = create_pos_invoice(rate=100, do_not_save=1)
 			pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
@@ -357,13 +368,13 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertEqual(pos_si2.pos_closing_entry, pcv_doc1.name)
 
 		with self.change_settings("POS Settings", {"invoice_type": "POS Invoice"}):
-			opening_entry2 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry2 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_inv1, pos_inv2 = create_multiple_pos_invoices(pos_profile)
+			pos_inv1, pos_inv2 = create_multiple_pos_invoices(self.pos_profile)
 
 			# Trying to create Sales Invoice when invoice_type is set to POS Invoice.
 			pos_si3 = create_sales_invoice(
-				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+				qty=1, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=1
 			)
 			pos_si3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_si3.save)
@@ -394,16 +405,14 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 
-		test_user, pos_profile = init_user_and_profile()
-
 		with self.change_settings("POS Settings", {"invoice_type": "POS Invoice"}):
-			opening_entry1 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry1 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_inv1, pos_inv2 = create_multiple_pos_invoices(pos_profile)
+			pos_inv1, pos_inv2 = create_multiple_pos_invoices(self.pos_profile)
 
 			# Trying to create Sales Invoice when invoice_type is set to POS Invoice.
 			pos_sinv = create_sales_invoice(
-				qty=1, is_created_using_pos=1, pos_profile=pos_profile.name, do_not_save=1
+				qty=1, is_created_using_pos=1, pos_profile=self.pos_profile.name, do_not_save=1
 			)
 			pos_sinv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
 			self.assertRaises(frappe.ValidationError, pos_sinv.save)
@@ -421,9 +430,9 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertEqual(pcv_doc1.grand_total, 300)
 
 		with self.change_settings("POS Settings", {"invoice_type": "Sales Invoice"}):
-			opening_entry2 = create_opening_entry(pos_profile, test_user.name)
+			opening_entry2 = create_opening_entry(self.pos_profile, self.test_user.name)
 
-			pos_si1, pos_si2 = create_multiple_sales_invoices(pos_profile)
+			pos_si1, pos_si2 = create_multiple_sales_invoices(self.pos_profile)
 
 			pos_inv3 = create_pos_invoice(rate=100, do_not_save=1)
 			pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100})
@@ -456,13 +465,241 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 			self.assertEqual(pos_si2.pos_closing_entry, pcv_doc2.name)
 			self.assertEqual(pos_rinv2_si.pos_closing_entry, pcv_doc2.name)
 
+	def test_change_is_taken_once_from_modes_sharing_an_account(self):
+		with self.set_user("Administrator"):
+			add_wallet_mode_of_payment(self.pos_profile, "Cash - _TC")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 50), ("_Test Wallet", 50)])
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
+
+	def test_change_is_taken_from_the_mode_on_the_change_account(self):
+		with self.set_user("Administrator"):
+			wallet_account = make_cash_account("_Test Wallet Cash")
+			add_wallet_mode_of_payment(self.pos_profile, wallet_account)
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 40), ("_Test Wallet", 60)], account_for_change_amount=wallet_account)
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 40, "_Test Wallet": 50})
+
+	def test_change_is_taken_after_the_cash_account_changes(self):
+		with self.set_user("Administrator"):
+			new_cash_account = make_cash_account("Zz Test Cash")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 100)])
+		frappe.db.set_value(
+			"Mode of Payment Account",
+			{"parent": "Cash", "company": "_Test Company"},
+			"default_account",
+			new_cash_account,
+		)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 180})
+
+	def test_change_is_taken_when_the_change_account_differs(self):
+		with self.set_user("Administrator"):
+			change_account = make_cash_account("_Test Change Cash")
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 100)], account_for_change_amount=change_account)
+
+		self.assertEqual(get_expected_amounts(opening_entry), {"Cash": 90})
+
+	def test_closing_refuses_session_invoices_left_out(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+		self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
+
+	def test_cancel_with_ten_invoices_unconsolidates_after_commit(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		for _ in range(10):
+			make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		self.assertTrue(enqueue.call_args.kwargs["enqueue_after_commit"])
+		self.assertEqual(closing_entry.ignore_linked_doctypes, ("POS Invoice Merge Log", "Sales Invoice"))
+		merge_logs = enqueue.call_args.kwargs["merge_logs"]
+		enqueue.call_args.args[0](
+			merge_logs=merge_logs, closing_entry=enqueue.call_args.kwargs["closing_entry"]
+		)
+
+		for merge_log in merge_logs:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_retry_runs_only_on_failed_closing_entry(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate) as consolidate_pos_invoices:
+			self.assertRaises(frappe.ValidationError, closing_entry.retry)
+			consolidate_pos_invoices.assert_not_called()
+
+			closing_entry.db_set("status", "Failed")
+			closing_entry.status = "Submitted"
+			closing_entry.retry()
+			consolidate_pos_invoices.assert_called_once()
+
+	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+		closing_entry.db_set("status", "Failed")
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+
+		with patch(consolidate) as consolidate_pos_invoices:
+			with self.assertRaises(frappe.ValidationError) as context:
+				closing_entry.retry()
+			consolidate_pos_invoices.assert_not_called()
+
+		self.assertIn(late_sale.name, str(context.exception))
+
+	def test_failed_cancel_keeps_closing_entry_submitted(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.cancel)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(1, "Submitted"),
+		)
+
+	def test_failed_submit_keeps_closing_entry_draft(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry).insert()
+
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.submit", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(0, "Draft"),
+		)
+
+	def test_failed_background_cancel_is_marked_failed_and_can_be_retried(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		for _ in range(10):
+			make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		job, job_arguments = enqueue.call_args.args[0], enqueue.call_args.kwargs
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(
+				frappe.ValidationError,
+				job,
+				merge_logs=job_arguments["merge_logs"],
+				closing_entry=job_arguments["closing_entry"],
+			)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Failed"),
+		)
+
+		new_opening_entry = create_opening_entry(self.pos_profile, self.test_user.name, get_obj=True)
+		self.assertRaises(frappe.ValidationError, closing_entry.retry)
+		new_opening_entry.cancel()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.retry()
+		enqueue.call_args.args[0](
+			merge_logs=enqueue.call_args.kwargs["merge_logs"],
+			closing_entry=enqueue.call_args.kwargs["closing_entry"],
+		)
+
+		for merge_log in job_arguments["merge_logs"]:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Cancelled"),
+		)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_cancel_without_queue_keeps_back_link_check(self):
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		closing_entry.cancel()
+		self.assertFalse(closing_entry.get("ignore_linked_doctypes"))
+
+	def test_missing_invoices_message_lists_first_ten(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sales = [make_paid_pos_invoice([("Cash", 90)]).name for _ in range(11)]
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			closing_entry.submit()
+
+		message = str(context.exception)
+		self.assertIn("and 1 more", message)
+		self.assertEqual(sum(name in message for name in late_sales), 10)
+
+
+MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"
+
+
+@contextmanager
+def failures_handled_outside_tests():
+	frappe.db.savepoint("before_failure")
+	rollback = frappe.db.rollback
+	with (
+		patch.object(frappe, "in_test", False),
+		patch.dict(frappe.flags, {"in_test": False}),
+		patch.object(frappe.db, "rollback", lambda **kwargs: rollback(save_point="before_failure")),
+		patch.object(frappe.db, "commit"),
+	):
+		yield
+
 
 def init_user_and_profile(**args):
-	user = "test@example.com"
+	user = "test-pos@example.com"
 	test_user = frappe.get_doc("User", user)
-
-	roles = ("Accounts Manager", "Accounts User", "Sales Manager", "Stock User", "Item Manager")
-	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
 	if args.get("do_not_create_pos_profile"):
@@ -518,3 +755,46 @@ def create_multiple_pos_invoices(pos_profile):
 	pos_inv2.submit()
 
 	return pos_inv1, pos_inv2
+
+
+def make_paid_pos_invoice(payments, **args):
+	pos_invoice = create_pos_invoice(rate=90, do_not_submit=1, **args)
+	for mode_of_payment, amount in payments:
+		pos_invoice.append("payments", {"mode_of_payment": mode_of_payment, "amount": amount})
+	pos_invoice.save()
+	pos_invoice.submit()
+	return pos_invoice
+
+
+def get_expected_amounts(opening_entry):
+	closing_entry = make_closing_entry_from_opening(opening_entry)
+	return {row.mode_of_payment: row.expected_amount for row in closing_entry.payment_reconciliation}
+
+
+def make_cash_account(account_name):
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": account_name,
+				"parent_account": frappe.db.get_value("Account", "Cash - _TC", "parent_account"),
+				"company": "_Test Company",
+				"account_type": "Cash",
+			}
+		)
+		.insert()
+		.name
+	)
+
+
+def add_wallet_mode_of_payment(pos_profile, account):
+	frappe.get_doc(
+		{
+			"doctype": "Mode of Payment",
+			"mode_of_payment": "_Test Wallet",
+			"type": "General",
+			"accounts": [{"company": "_Test Company", "default_account": account}],
+		}
+	).insert()
+	pos_profile.append("payments", {"mode_of_payment": "_Test Wallet"})
+	pos_profile.save()

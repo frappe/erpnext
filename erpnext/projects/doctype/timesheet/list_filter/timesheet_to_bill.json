@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"employee_name\", \"label\": \"Employee Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"total_billable_hours\", \"label\": \"Total Billable Hours\"}, {\"fieldname\": \"total_billable_amount\", \"label\": \"Total Billable Amount\"}, {\"fieldname\": \"per_billed\", \"label\": \"% Amount Billed\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.955281",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Bill",
+ "filters": "[[\"Timesheet\", \"docstatus\", \"=\", 1], [\"Timesheet\", \"status\", \"in\", [\"Submitted\", \"Partially Billed\"]], [\"Timesheet\", \"total_billable_amount\", \">\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.955281",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Timesheet-To Bill",
+ "owner": "Administrator",
+ "reference_doctype": "Timesheet",
+ "route_signature": "docstatus=1&status=[\"in\",[\"Submitted\",\"Partially Billed\"]]&total_billable_amount=[\">\",0]",
+ "sort_field": "start_date",
+ "sort_order": "asc"
+}

@@ -23,7 +23,7 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
-from frappe.utils.nestedset import NestedSet, rebuild_tree
+from frappe.utils.nestedset import NestedSet, get_root_of, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -49,6 +49,7 @@ class Company(NestedSet):
 		asset_received_but_not_billed: DF.Link | None
 		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
+		bank_charges_account: DF.Link | None
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
 		chart_of_accounts: DF.Literal[None]
@@ -89,6 +90,7 @@ class Company(NestedSet):
 		default_sales_contact: DF.Link | None
 		default_scrap_warehouse: DF.Link | None
 		default_selling_terms: DF.Link | None
+		default_warehouse: DF.Link | None
 		default_warehouse_for_sales_return: DF.Link | None
 		default_wip_warehouse: DF.Link | None
 		depreciation_cost_center: DF.Link | None
@@ -102,8 +104,12 @@ class Company(NestedSet):
 		enable_provisional_accounting_for_non_stock_items: DF.Check
 		enable_stock_delivered_but_not_billed: DF.Check
 		exception_budget_approver_role: DF.Link | None
+		exchange_gain_account: DF.Link | None
 		exchange_gain_loss_account: DF.Link | None
+		exchange_loss_account: DF.Link | None
 		existing_company: DF.Link | None
+		expenses_added_to_stock_account: DF.Link | None
+		expenses_added_to_stock_contra_account: DF.Link | None
 		fax: DF.Data | None
 		is_group: DF.Check
 		lft: DF.Int
@@ -126,6 +132,7 @@ class Company(NestedSet):
 		round_off_cost_center: DF.Link | None
 		round_off_for_opening: DF.Link | None
 		sales_monthly_history: DF.SmallText | None
+		sample_retention_warehouse: DF.Link | None
 		series_for_depreciation_entry: DF.Data | None
 		service_expense_account: DF.Link | None
 		stock_adjustment_account: DF.Link | None
@@ -185,6 +192,7 @@ class Company(NestedSet):
 		self.validate_parent_company()
 		self.set_reporting_currency()
 		self.validate_inventory_account_settings()
+		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_pending_reposts(old_doc)
 		self.validate_sdbnb_configuration()
@@ -297,6 +305,42 @@ class Company(NestedSet):
 				title=_("Cannot Change Inventory Account Setting"),
 			)
 
+	def validate_warehouses(self):
+		for fieldname in (
+			"default_warehouse",
+			"sample_retention_warehouse",
+			"default_in_transit_warehouse",
+			"default_warehouse_for_sales_return",
+			"default_wip_warehouse",
+			"default_fg_warehouse",
+			"default_scrap_warehouse",
+		):
+			warehouse = self.get(fieldname)
+			if not warehouse:
+				continue
+
+			details = frappe.db.get_value("Warehouse", warehouse, ["is_group", "company"], as_dict=True)
+			if not details:
+				continue
+
+			label = self.meta.get_translated_label(fieldname)
+
+			if details.is_group:
+				frappe.throw(
+					_(
+						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
+					).format(bold(label)),
+					title=_("Incorrect Warehouse"),
+				)
+
+			if details.company != self.name:
+				frappe.throw(
+					_("{0} {1} does not belong to company {2}").format(
+						bold(label), bold(warehouse), bold(self.name)
+					),
+					title=_("Incorrect Warehouse"),
+				)
+
 	def validate_abbr(self):
 		if not self.abbr:
 			self.abbr = "".join(c[0] for c in self.company_name.split()).upper()
@@ -325,9 +369,12 @@ class Company(NestedSet):
 			["Stock Delivered But Not Billed Account", "stock_delivered_but_not_billed"],
 			["Stock Adjustment Account", "stock_adjustment_account"],
 			["Write Off Account", "write_off_account"],
+			["Bank Charges Account", "bank_charges_account"],
 			["Default Payment Discount Account", "default_discount_account"],
 			["Unrealized Profit / Loss Account", "unrealized_profit_loss_account"],
 			["Exchange Gain / Loss Account", "exchange_gain_loss_account"],
+			["Exchange Gain Account", "exchange_gain_account"],
+			["Exchange Loss Account", "exchange_loss_account"],
 			["Unrealized Exchange Gain / Loss Account", "unrealized_exchange_gain_loss_account"],
 			["Round Off Account", "round_off_account"],
 			["Default Deferred Revenue Account", "default_deferred_revenue_account"],
@@ -475,10 +522,16 @@ class Company(NestedSet):
 			)
 			warehouse.flags.ignore_permissions = True
 			warehouse.flags.ignore_mandatory = True
+			warehouse.flags.ignore_inventory_account_validation = True
 			warehouse.insert()
 
 			if wh_detail["is_group"]:
 				parent_warehouse = warehouse.name
+
+		if not self.default_warehouse:
+			stores = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores"), "company": self.name})
+			if stores:
+				self.db_set("default_warehouse", stores)
 
 	def create_default_accounts(self):
 		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
@@ -499,91 +552,92 @@ class Company(NestedSet):
 		)
 
 	def create_default_departments(self):
+		root = get_root_of("Department") or "All Departments"
 		records = [
 			# Department
 			{
 				"doctype": "Department",
-				"department_name": _("All Departments"),
+				"department_name": root,
 				"is_group": 1,
 				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+				"__condition": lambda: not frappe.db.exists("Department", root),
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 			{
 				"doctype": "Department",
 				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
+				"parent_department": root,
 				"company": self.name,
 			},
 		]
@@ -738,12 +792,33 @@ class Company(NestedSet):
 
 			self.db_set("write_off_account", write_off_acct)
 
+		if not self.bank_charges_account:
+			bank_charges_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Bank Charges"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("bank_charges_account", bank_charges_acct)
+
 		if not self.exchange_gain_loss_account:
 			exchange_gain_loss_acct = frappe.db.get_value(
 				"Account", {"account_name": _("Exchange Gain/Loss"), "company": self.name, "is_group": 0}
 			)
 
 			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
+
+		if not self.exchange_gain_account:
+			exchange_gain_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Gain"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_gain_account", exchange_gain_acct)
+
+		if not self.exchange_loss_account:
+			exchange_loss_acct = frappe.db.get_value(
+				"Account", {"account_name": _("Exchange Loss"), "company": self.name, "is_group": 0}
+			)
+
+			self.db_set("exchange_loss_account", exchange_loss_acct)
 
 		if not self.disposal_account:
 			disposal_acct = frappe.db.get_value(
@@ -824,6 +899,13 @@ class Company(NestedSet):
 		"""
 		Trash accounts and cost centers for this company if no gl entry exists
 		"""
+		if frappe.db.get_single_value("Global Defaults", "demo_company") == self.name:
+			frappe.throw(
+				_("{0} is the site's Demo Company and cannot be deleted directly. Use {1} instead.").format(
+					bold(self.name), bold(_("Delete Demo Data"))
+				)
+			)
+
 		NestedSet.validate_if_child_exists(self)
 		frappe.utils.nestedset.update_nsm(self)
 
@@ -984,13 +1066,25 @@ def update_transactions_annual_history(company, commit=False):
 
 
 def cache_companies_monthly_sales_history():
+	refresh_total_monthly_sales = _should_refresh_total_monthly_sales()
 	companies = [d["name"] for d in frappe.get_list("Company")]
 	for company in companies:
 		update_company_monthly_sales(company)
 		update_transactions_annual_history(company)
+		if refresh_total_monthly_sales:
+			update_company_current_month_sales(company)
 
 	if not frappe.in_test:
 		frappe.db.commit()
+
+
+def _should_refresh_total_monthly_sales():
+	# "Each Transaction" updates on submit; refresh the cached figure for the
+	# scheduled frequencies only ("Monthly" just on the 1st).
+	frequency = frappe.get_single_value("Selling Settings", "sales_update_frequency")
+	if frequency == "Monthly":
+		return frappe.utils.now_datetime().day == 1
+	return frequency == "Daily"
 
 
 @frappe.whitelist()
@@ -1000,7 +1094,10 @@ def get_children(doctype: str, parent: str | None = None, company: str | None = 
 
 	filters = {"parent_company": parent} if parent else {"parent_company": ["is", "not set"]}
 
-	return frappe.get_all(
+	# get_list, not get_all: it applies the caller's Company permission and their Company User
+	# Permissions, so a restricted user sees only their own companies. Matches the sibling tree
+	# source in accounts/utils.py, which already uses get_list.
+	return frappe.get_list(
 		"Company",
 		filters=filters,
 		fields=["name as value", "is_group as expandable"],
@@ -1013,6 +1110,11 @@ def add_node():
 
 	args = frappe.form_dict
 	args = make_tree_args(**args)
+
+	# This is the Company tree's "add node" action; `args` comes straight from form_dict, so without
+	# this the caller chooses the doctype that gets created. insert() would still check permissions
+	# on whatever they named, but nothing else here is meant to build anything but a Company.
+	args.doctype = "Company"
 
 	if args.parent_company == "All Companies":
 		args.parent_company = None
@@ -1083,6 +1185,22 @@ def get_default_company_address(
 	sort_key: Literal["is_shipping_address", "is_primary_address"] = "is_primary_address",
 	existing_address: str | None = None,
 ):
+	# `Literal` is NOT enforced by typing_validations — measured, sort_key="name" was accepted — and
+	# addr[sort_key] is a column reference, so check it here.
+	if sort_key not in ("is_shipping_address", "is_primary_address"):
+		frappe.throw(_("Invalid sort key"), frappe.PermissionError)
+
+	# Same boundary as accounts/custom/address.py::get_shipping_address: `select` denies the portal
+	# identities and costs none of the twelve transaction-writing roles, and the company scoping is
+	# what actually closes the cross-company read.
+	frappe.has_permission("Company", ptype="select", throw=True)
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Address")
+	if allowed_companies and name not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(name), frappe.PermissionError)
+
 	addr = frappe.qb.DocType("Address")
 	dl = frappe.qb.DocType("Dynamic Link")
 	out = (
@@ -1121,6 +1239,8 @@ def get_billing_shipping_address(
 @frappe.whitelist(methods=["POST"])
 def create_transaction_deletion_request(company: str):
 	frappe.only_for("System Manager")
+	# User Permission check
+	frappe.has_permission("Company", ptype="delete", doc=company, throw=True)
 
 	from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
 		is_deletion_doc_running,
@@ -1129,6 +1249,7 @@ def create_transaction_deletion_request(company: str):
 	is_deletion_doc_running(company)
 
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
+	tdr.flags.ignore_permissions = 1
 	tdr.insert()
 
 	tdr.generate_to_delete_list()

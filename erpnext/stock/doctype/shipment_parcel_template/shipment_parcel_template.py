@@ -2,8 +2,10 @@
 # For license information, please see license.txt
 
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class ShipmentParcelTemplate(Document):
@@ -15,11 +17,16 @@ class ShipmentParcelTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		height: DF.Int
-		length: DF.Int
+		height: DF.Float
+		length: DF.Float
 		parcel_template_name: DF.Data
 		weight: DF.Float
-		width: DF.Int
+		width: DF.Float
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		for fieldname in ("length", "width", "height", "weight"):
+			if flt(self.get(fieldname)) <= 0:
+				frappe.throw(
+					_("{0} must be greater than 0").format(frappe.bold(self.meta.get_label(fieldname)))
+				)

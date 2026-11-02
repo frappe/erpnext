@@ -78,6 +78,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 		});
 
 		frm.trigger("update_party_labels");
+		frm.trigger("update_invoice_table");
 	},
 
 	setup_company_filters: function (frm) {
@@ -167,6 +168,18 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 
 			row.party_type = frm.doc.invoice_type == "Sales" ? "Customer" : "Supplier";
 		});
+		frm.refresh_field("invoices");
+
+		if (frm.doc.company) {
+			return frappe.db.get_value("Company", frm.doc.company, "default_currency", (r) => {
+				$.each(frm.doc.invoices, (idx, row) => {
+					if (!row.currency) {
+						row.currency = r.default_currency;
+					}
+				});
+				frm.refresh_field("invoices");
+			});
+		}
 	},
 
 	create_missing_party: function (frm) {

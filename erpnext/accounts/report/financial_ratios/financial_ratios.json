@@ -8,7 +8,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-07-13 16:11:11.925096",
+ "modified": "2026-10-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Financial Ratios",
@@ -23,12 +23,6 @@
   },
   {
    "role": "Auditor"
-  },
-  {
-   "role": "Sales User"
-  },
-  {
-   "role": "Purchase User"
   },
   {
    "role": "Accounts Manager"

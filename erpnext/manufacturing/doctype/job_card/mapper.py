@@ -7,13 +7,14 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
 
 
 @frappe.whitelist()
-def make_subcontracting_po(source_name: str, target_doc: Document | str | None = None):
+def make_subcontracting_po(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_item_details = get_subcontracting_boms_for_finished_goods(source.finished_good)
 
@@ -54,9 +55,22 @@ def make_subcontracting_po(source_name: str, target_doc: Document | str | None =
 
 
 @frappe.whitelist()
-def make_material_request(source_name: str, target_doc: Document | str | None = None):
+def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
+	shortages = get_shortages_to_request(source_name)
+	pending = get_pending_qty_to_request(source_name)
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
+
 	def update_item(obj, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
+		if shortages is not None:
+			target.qty = shortages[obj.name]
+		if pending[obj.name] > 0:
+			target.qty = min(flt(target.qty), pending[obj.name])
+
+	def can_request(row):
+		if shortages is not None and row.name not in shortages:
+			return False
+		return allow_excess_transfer or pending[row.name] > 0
 
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Transfer"
@@ -75,6 +89,7 @@ def make_material_request(source_name: str, target_doc: Document | str | None = 
 				"doctype": "Material Request Item",
 				"field_map": {"required_qty": "qty", "uom": "stock_uom", "name": "job_card_item"},
 				"postprocess": update_item,
+				"condition": can_request,
 			},
 		},
 		target_doc,
@@ -84,8 +99,26 @@ def make_material_request(source_name: str, target_doc: Document | str | None = 
 	return doclist
 
 
+def get_pending_qty_to_request(job_card):
+	"""Qty per item still open to request."""
+	doc = frappe.get_doc("Job Card", job_card)
+	requested = doc.get_requested_qty_by_item()
+	return {
+		item.name: flt(flt(item.required_qty) - flt(requested.get(item.name)), item.precision("required_qty"))
+		for item in doc.items
+	}
+
+
+def get_shortages_to_request(job_card):
+	if not (frappe.flags.args or {}).get("only_shortage"):
+		return None
+
+	shortages = frappe.get_doc("Job Card", job_card).get_material_shortages()
+	return {row["name"]: row["shortage_qty"] for row in shortages}
+
+
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: Document | str | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.stock.doctype.stock_entry.services.manufacturing import (
 		set_previous_operation_serial_batch,
 	)
@@ -97,10 +130,12 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 			target.conversion_factor = 1
 
 		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
-		if pending_rm_qty > 0:
-			target.qty = pending_rm_qty
+		target.qty = pending_rm_qty if pending_rm_qty > 0 else flt(source.required_qty)
 
 	def set_missing_values(source, target):
+		if not source.items:
+			frappe.throw(_("This Job Card has no raw materials to transfer."))
+
 		if source.finished_good and not source.target_warehouse:
 			frappe.throw(_("Please set the Target Warehouse in the Job Card"))
 
@@ -131,6 +166,7 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 			)
 			set_previous_operation_serial_batch(target, item)
 
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 	doclist = get_mapped_doc(
 		"Job Card",
 		source_name,
@@ -147,7 +183,8 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 					"name": "job_card_item",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.required_qty > 0,
+				"condition": lambda doc: flt(doc.required_qty) > 0
+				and (allow_excess_transfer or flt(doc.required_qty) > flt(doc.transferred_qty)),
 			},
 		},
 		target_doc,
@@ -162,19 +199,37 @@ def make_corrective_job_card(
 	source_name: str,
 	operation: str | None = None,
 	for_operation: str | None = None,
-	target_doc: Document | str | None = None,
+	target_doc: str | dict | Document | None = None,
 ):
+	if not operation:
+		frappe.throw(_("Corrective Operation is required"))
+
+	if not for_operation:
+		frappe.throw(_("For Operation is required"))
+
 	def set_missing_values(source, target):
+		if source.track_semi_finished_goods:
+			frappe.throw(
+				_("Corrective Job Cards cannot be created for Work Orders that track semi-finished goods")
+			)
+
 		target.is_corrective_job_card = 1
 		target.operation = operation
 		target.for_operation = for_operation
+		target.total_completed_qty = 0
+		target.process_loss_qty = 0
+		target.pending_qty = 0
 
 		target.set("time_logs", [])
 		target.set("employee", [])
 		target.set("items", [])
 		target.set("sub_operations", [])
 		target.set_sub_operations()
-		target.get_required_items()
+		target.set_onload("backflush_raw_materials_based_on", get_backflush_based_on(target.bom_no))
+		target.set_onload(
+			"transfer_material_against",
+			frappe.get_cached_value("Work Order", target.work_order, "transfer_material_against"),
+		)
 
 	doclist = get_mapped_doc(
 		"Job Card",

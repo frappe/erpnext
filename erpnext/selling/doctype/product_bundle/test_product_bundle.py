@@ -164,10 +164,41 @@ class TestProductBundle(ERPNextTestSuite):
 		self.assertIn("stock_quantity", fieldnames)
 		self.assertNotIn("is_default", fieldnames)
 
+	def test_component_uom_must_be_convertible(self):
+		child = make_item("_Test PB UOM Child", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": self.parent})
+		doc.append("items", {"item_code": child, "qty": 1, "uom": "Box"})  # no Box conversion on the item
+		self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_component_uom_resolved_by_global_conversion_is_allowed(self):
+		# a UOM with only a global UOM Conversion Factor (Kg->Gram), not an item-level one,
+		# is resolved by packing, so it must not be rejected
+		child = make_item("_Test PB Global UOM Child", {"is_stock_item": 1, "stock_uom": "Gram"}).name
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": self.parent})
+		doc.append("items", {"item_code": child, "qty": 1, "uom": "Kg"})
+		doc.insert()  # must not raise
+		self.assertTrue(doc.name)
+
 	def test_child_cannot_be_active_bundle(self):
 		make_product_bundle(self.parent, ["_Test PB Child A"])
 		outer = make_item("_Test PB Outer", {"is_stock_item": 0, "is_sales_item": 1}).name
 
 		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": outer})
 		doc.append("items", {"item_code": self.parent, "qty": 1})
+		self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_bundle_cannot_reference_itself(self):
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": self.parent})
+		doc.append("items", {"item_code": self.parent, "qty": 1})
+		self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_parent_used_as_component_cannot_become_a_bundle(self):
+		# OUTER bundles INNER while INNER is still a plain item; turning INNER into its
+		# own bundle afterwards would nest it under OUTER, so it must be rejected
+		inner = make_item("_Test PB Nest Inner", {"is_stock_item": 0, "is_sales_item": 1}).name
+		outer = make_item("_Test PB Nest Outer", {"is_stock_item": 0, "is_sales_item": 1}).name
+		make_product_bundle(outer, [inner])
+
+		doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": inner})
+		doc.append("items", {"item_code": "_Test PB Child A", "qty": 1})
 		self.assertRaises(frappe.ValidationError, doc.insert)

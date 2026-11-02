@@ -4,7 +4,10 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, NullIf, Sum
+from frappe.utils import flt
+
+KEY_LENGTH = 8
 
 
 class General_Payment_Ledger_Comparison:
@@ -76,8 +79,18 @@ class General_Payment_Ledger_Comparison:
 
 				if acc_type == "receivable":
 					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
+					outstanding_in_account_currency = (
+						Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency)
+					).as_("outstanding_in_account_currency")
 				else:
 					outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
+					outstanding_in_account_currency = (
+						Sum(gle.credit_in_account_currency) - Sum(gle.debit_in_account_currency)
+					).as_("outstanding_in_account_currency")
+
+				# unallocated amounts have no against voucher in GL but point to themselves in Payment Ledger
+				against_voucher_type = IfNull(NullIf(gle.against_voucher_type, ""), gle.voucher_type)
+				against_voucher = IfNull(NullIf(gle.against_voucher, ""), gle.voucher_no)
 
 				self.account_types[acc_type].gle = (
 					qb.from_(gle)
@@ -88,7 +101,10 @@ class General_Payment_Ledger_Comparison:
 						gle.voucher_no,
 						gle.party_type,
 						gle.party,
+						against_voucher_type,
+						against_voucher,
 						outstanding,
+						outstanding_in_account_currency,
 					)
 					.where(
 						(gle.company == self.filters.company)
@@ -97,7 +113,14 @@ class General_Payment_Ledger_Comparison:
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(
-						gle.company, gle.account, gle.voucher_type, gle.voucher_no, gle.party_type, gle.party
+						gle.company,
+						gle.account,
+						gle.voucher_type,
+						gle.voucher_no,
+						gle.party_type,
+						gle.party,
+						against_voucher_type,
+						against_voucher,
 					)
 					.run()
 				)
@@ -132,7 +155,10 @@ class General_Payment_Ledger_Comparison:
 						ple.voucher_no,
 						ple.party_type,
 						ple.party,
+						ple.against_voucher_type,
+						ple.against_voucher_no,
 						Sum(ple.amount).as_("outstanding"),
+						Sum(ple.amount_in_account_currency).as_("outstanding_in_account_currency"),
 					)
 					.where(
 						(ple.company == self.filters.company)
@@ -141,7 +167,14 @@ class General_Payment_Ledger_Comparison:
 					)
 					.where(Criterion.all(filter_criterion))
 					.groupby(
-						ple.company, ple.account, ple.voucher_type, ple.voucher_no, ple.party_type, ple.party
+						ple.company,
+						ple.account,
+						ple.voucher_type,
+						ple.voucher_no,
+						ple.party_type,
+						ple.party,
+						ple.against_voucher_type,
+						ple.against_voucher_no,
 					)
 					.run()
 				)
@@ -155,20 +188,76 @@ class General_Payment_Ledger_Comparison:
 			self.gle_balances = set(val.gle) | self.gle_balances
 			self.ple_balances = set(val.ple) | self.ple_balances
 
+		self.ple_balances = self.fold_reconciled_allocations()
 		self.variation_in_payment_ledger = self.gle_balances.difference(self.ple_balances)
 		self.variation_in_general_ledger = self.ple_balances.difference(self.gle_balances)
 		self.diff = frappe._dict({})
 
 		for x in self.variation_in_payment_ledger:
-			self.diff[(x[0], x[1], x[2], x[3], x[4], x[5])] = frappe._dict({"gl_balance": x[6]})
+			gl_balance, gl_balance_in_account_currency = x[KEY_LENGTH:]
+			self.diff[x[:KEY_LENGTH]] = frappe._dict(
+				gl_balance=gl_balance, gl_balance_in_account_currency=gl_balance_in_account_currency
+			)
 
 		for x in self.variation_in_general_ledger:
+			pl_balance, pl_balance_in_account_currency = x[KEY_LENGTH:]
 			self.diff.setdefault(
-				(x[0], x[1], x[2], x[3], x[4], x[5]), frappe._dict({"gl_balance": 0.0})
-			).update(frappe._dict({"pl_balance": x[6]}))
+				x[:KEY_LENGTH], frappe._dict({"gl_balance": 0.0, "gl_balance_in_account_currency": 0.0})
+			).update(pl_balance=pl_balance, pl_balance_in_account_currency=pl_balance_in_account_currency)
+
+	def fold_reconciled_allocations(self) -> set[tuple]:
+		"""Reconciliation re-points Payment Ledger rows to invoices but leaves the GL entry unallocated,
+		so count such rows under the voucher's unallocated GL row."""
+		gl_keys = {row[:KEY_LENGTH] for row in self.gle_balances}
+		balances = {}
+		for row in self.ple_balances:
+			key, unallocated = row[:KEY_LENGTH], (*row[:6], row[2], row[3])
+			if key not in gl_keys and unallocated in gl_keys:
+				key = unallocated
+			balances[key] = (
+				tuple(
+					flt(total + amount, 9)
+					for total, amount in zip(balances[key], row[KEY_LENGTH:], strict=True)
+				)
+				if key in balances
+				else row[KEY_LENGTH:]
+			)
+		return {(*key, *amounts) for key, amounts in balances.items()}
+
+	def remove_restricted_parties(self):
+		permitted = self.get_permitted_parties()
+		self.diff = frappe._dict(
+			{key: val for key, val in self.diff.items() if (key[4], key[5]) in permitted}
+		)
+
+	def get_permitted_parties(self) -> set[tuple[str, str]]:
+		parties_by_type = {}
+		for key in self.diff:
+			parties_by_type.setdefault(key[4], set()).add(key[5])
+
+		permitted = set()
+		for party_type, parties in parties_by_type.items():
+			if not party_type or not frappe.has_permission(party_type, "read"):
+				continue
+			names = frappe.get_list(party_type, filters={"name": ["in", list(parties)]}, pluck="name")
+			permitted.update((party_type, name) for name in names)
+		return permitted
+
+	def get_account_currencies(self) -> dict[str, str]:
+		accounts = list({key[1] for key in self.diff})
+		if not accounts:
+			return {}
+		account = qb.DocType("Account")
+		return dict(
+			qb.from_(account)
+			.select(account.name, account.account_currency)
+			.where(account.name.isin(accounts))
+			.run()
+		)
 
 	def generate_data(self):
 		self.data = []
+		account_currencies = self.get_account_currencies()
 		for key, val in self.diff.items():
 			self.data.append(
 				frappe._dict(
@@ -179,8 +268,13 @@ class General_Payment_Ledger_Comparison:
 						"voucher_no": key[3],
 						"party_type": key[4],
 						"party": key[5],
+						"against_voucher_type": key[6],
+						"against_voucher_no": key[7],
 						"gl_balance": val.gl_balance,
 						"pl_balance": val.pl_balance,
+						"account_currency": account_currencies[key[1]],
+						"gl_balance_in_account_currency": val.gl_balance_in_account_currency,
+						"pl_balance_in_account_currency": val.pl_balance_in_account_currency,
 					}
 				)
 			)
@@ -211,7 +305,8 @@ class General_Payment_Ledger_Comparison:
 			dict(
 				label=_("Voucher Type"),
 				fieldname="voucher_type",
-				fieldtype="Data",
+				fieldtype="Link",
+				options="DocType",
 				width="100",
 			)
 		)
@@ -230,7 +325,8 @@ class General_Payment_Ledger_Comparison:
 			dict(
 				label=_("Party Type"),
 				fieldname="party_type",
-				fieldtype="Data",
+				fieldtype="Link",
+				options="DocType",
 				width="100",
 			)
 		)
@@ -241,6 +337,26 @@ class General_Payment_Ledger_Comparison:
 				fieldname="party",
 				fieldtype="Dynamic Link",
 				options="party_type",
+				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Against Voucher Type"),
+				fieldname="against_voucher_type",
+				fieldtype="Link",
+				options="DocType",
+				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Against Voucher"),
+				fieldname="against_voucher_no",
+				fieldtype="Dynamic Link",
+				options="against_voucher_type",
 				width="100",
 			)
 		)
@@ -265,12 +381,33 @@ class General_Payment_Ledger_Comparison:
 			)
 		)
 
+		self.columns.append(
+			dict(
+				label=_("GL Balance (Account Currency)"),
+				fieldname="gl_balance_in_account_currency",
+				fieldtype="Currency",
+				options="account_currency",
+				width="200",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Payment Ledger Balance (Account Currency)"),
+				fieldname="pl_balance_in_account_currency",
+				fieldtype="Currency",
+				options="account_currency",
+				width="200",
+			)
+		)
+
 	def run(self):
 		self.get_accounts()
 		self.generate_filters()
 		self.get_gle()
 		self.get_ple()
 		self.compare()
+		self.remove_restricted_parties()
 		self.generate_data()
 		self.get_columns()
 

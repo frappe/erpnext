@@ -8,11 +8,12 @@ from itertools import chain
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Count, UnixTimestamp
-from frappe.utils import add_years, flt, nowdate
+from frappe.utils import add_years, flt, get_link_to_form, nowdate
 from frappe.utils.data import get_url_to_list
 from frappe.utils.nestedset import NestedSet, get_root_of
 
 from erpnext import get_default_currency
+from erpnext.setup.doctype.target_detail.target_detail import validate_targets
 
 
 class SalesPerson(NestedSet):
@@ -42,6 +43,7 @@ class SalesPerson(NestedSet):
 	nsm_parent_field = "parent_sales_person"
 
 	def validate(self):
+		validate_targets(self.get("targets"))
 		if not self.enabled:
 			self.validate_sales_person()
 
@@ -105,6 +107,30 @@ class SalesPerson(NestedSet):
 				)
 			)
 
+		for doctype in ("Sales Order", "Delivery Note"):
+			transaction = frappe.qb.DocType(doctype)
+			unfinished = (
+				transaction.status.notin(("Completed", "Closed"))
+				if doctype == "Sales Order"
+				else (transaction.status != "Closed") & (transaction.per_billed < 100)
+			)
+			linked_transactions = (
+				frappe.qb.from_(transaction)
+				.join(sales_team)
+				.on((transaction.name == sales_team.parent) & (sales_team.parenttype == doctype))
+				.select(transaction.name)
+				.where((sales_team.sales_person == self.name) & (transaction.docstatus == 1) & unfinished)
+				.limit(1)
+			).run()
+			if linked_transactions:
+				frappe.throw(
+					_("Sales Person {0} cannot be disabled because {1} {2} is unfinished.").format(
+						frappe.bold(self.name),
+						_(doctype),
+						get_link_to_form(doctype, linked_transactions[0][0]),
+					)
+				)
+
 	def get_email_id(self):
 		if self.employee:
 			user = frappe.db.get_value("Employee", self.employee, "user_id")
@@ -123,6 +149,13 @@ class SalesPerson(NestedSet):
 				)
 
 
+@frappe.whitelist()
+def get_commission_rate(sales_person: str) -> float:
+	person = frappe.get_doc("Sales Person", sales_person)
+	person.check_permission("select")
+	return flt(person.commission_rate)
+
+
 def on_doctype_update():
 	frappe.db.add_index("Sales Person", ["lft", "rgt"])
 
@@ -135,9 +168,10 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 		return dict(
 			frappe.qb.from_(transaction)
 			.join(sales_team)
-			.on(transaction.name == sales_team.parent)
+			.on((transaction.name == sales_team.parent) & (sales_team.parenttype == doctype))
 			.select(UnixTimestamp(transaction[date_field]), Count("*"))
 			.where(sales_team.sales_person == name)
+			.where(transaction.docstatus == 1)
 			.where(transaction[date_field] > add_years(nowdate(), -1))
 			.groupby(transaction[date_field])
 			.run()

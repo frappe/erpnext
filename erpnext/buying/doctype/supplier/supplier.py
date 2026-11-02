@@ -10,14 +10,18 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
+from frappe.utils import get_link_to_form, getdate, nowdate
 
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
-from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
+from erpnext.controllers.website_list_for_contact import (
+	add_role_for_portal_user,
+	link_portal_users_to_contacts,
+)
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 from erpnext.utilities.transaction_base import TransactionBase
 
 
@@ -70,6 +74,7 @@ class Supplier(TransactionBase):
 		primary_address: DF.TextEditor | None
 		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		supplier_details: DF.Text | None
 		supplier_group: DF.Link | None
 		supplier_name: DF.Data
@@ -96,6 +101,14 @@ class Supplier(TransactionBase):
 		elif self.on_hold and not self.hold_type:
 			self.hold_type = "All"
 
+	def is_blocked_for(self, hold_type: str) -> bool:
+		"""Whether transactions of `hold_type` ("Invoices", "Payments" or "All") are on hold today."""
+		return bool(
+			self.on_hold
+			and self.hold_type in ("All", hold_type)
+			and (not self.release_date or getdate(nowdate()) < getdate(self.release_date))
+		)
+
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name)
 		self.set_onload("dashboard_info", info)
@@ -112,6 +125,7 @@ class Supplier(TransactionBase):
 	def on_update(self):
 		self.create_primary_contact()
 		self.create_primary_address()
+		link_portal_users_to_contacts(self)
 
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
@@ -146,10 +160,46 @@ class Supplier(TransactionBase):
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
 		validate_party_accounts(self)
+		validate_default_price_list_side(self.default_price_list, "buying")
+		self.validate_supplier_group()
 		self.validate_internal_supplier()
+		self.validate_primary_contact_and_address()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
-		validate_allowed_companies(self)
+
+	def validate_supplier_group(self):
+		if not self.supplier_group:
+			return
+
+		if frappe.db.get_value("Supplier Group", self.supplier_group, "is_group"):
+			frappe.throw(
+				_("Cannot select a Group type Supplier Group. Please select a non-group Supplier Group."),
+				title=_("Invalid Supplier Group"),
+			)
+
+	def validate_primary_contact_and_address(self):
+		for fieldname, link_doctype in (
+			("supplier_primary_contact", "Contact"),
+			("supplier_primary_address", "Address"),
+		):
+			name = self.get(fieldname)
+			if not name or not self.has_value_changed(fieldname):
+				continue
+
+			if not frappe.db.exists(
+				"Dynamic Link",
+				{
+					"parenttype": link_doctype,
+					"parent": name,
+					"link_doctype": "Supplier",
+					"link_name": self.name,
+				},
+			):
+				frappe.throw(
+					_("{0} {1} is not linked to Supplier {2}").format(
+						_(link_doctype), frappe.bold(name), frappe.bold(self.name)
+					)
+				)
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
@@ -170,21 +220,30 @@ class Supplier(TransactionBase):
 		if not self.is_internal_supplier:
 			self.represents_company = ""
 
+		if self.disabled:
+			return
+
 		internal_supplier = frappe.db.get_value(
 			"Supplier",
 			{
 				"is_internal_supplier": 1,
 				"represents_company": self.represents_company,
+				"disabled": 0,
 				"name": ("!=", self.name),
 			},
 			"name",
 		)
 
 		if internal_supplier:
+			internal_supplier_link = get_link_to_form("Supplier", internal_supplier)
 			frappe.throw(
-				_("Internal Supplier for company {0} already exists").format(
-					frappe.bold(self.represents_company)
-				)
+				_(
+					"Internal Supplier {0} already exists for {1}. Disable it to make this Supplier internal."
+				).format(
+					internal_supplier_link,
+					frappe.bold(self.represents_company),
+				),
+				title=_("Internal Supplier Already Exists"),
 			)
 
 	def create_primary_contact(self):
@@ -233,6 +292,16 @@ def get_supplier_primary(
 ):
 	supplier = filters.get("supplier")
 	type = filters.get("type")
+
+	# `type` is caller-supplied and was interpolated straight into qb.DocType(), so any doctype on
+	# the site could be joined to Dynamic Link and read. The two pickers that call this
+	# (supplier.js:51,61) send only these two values.
+	if type not in ("Contact", "Address"):
+		frappe.throw(_("Invalid type"), frappe.PermissionError)
+
+	# authorise the party, not Contact/Address: the `if_owner` row on Address would empty the picker rather than error
+	frappe.has_permission("Supplier", doc=supplier, throw=True)
+
 	type_doctype = frappe.qb.DocType(type)
 	dynamic_link = frappe.qb.DocType("Dynamic Link")
 

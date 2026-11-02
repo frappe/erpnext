@@ -16,7 +16,7 @@ frappe.ui.form.on("Operation", {
 frappe.tour["Operation"] = [
 	{
 		fieldname: "__newname",
-		title: "Operation Name",
+		title: __("Operation Name"),
 		description: __("Enter a name for the Operation, for example, Cutting."),
 	},
 	{

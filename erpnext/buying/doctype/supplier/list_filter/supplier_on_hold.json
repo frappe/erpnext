@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"supplier_group\", \"label\": \"Supplier Group\"}, {\"fieldname\": \"hold_type\", \"label\": \"Hold Type\"}, {\"fieldname\": \"release_date\", \"label\": \"Release Date\"}]",
+ "creation": "2026-09-30 21:12:56.796750",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "On Hold",
+ "filters": "[[\"Supplier\", \"on_hold\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.796750",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier-On Hold",
+ "owner": "Administrator",
+ "reference_doctype": "Supplier",
+ "route_signature": "on_hold=1",
+ "sort_field": "supplier_name",
+ "sort_order": "asc"
+}

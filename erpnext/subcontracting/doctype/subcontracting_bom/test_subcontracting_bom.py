@@ -3,11 +3,110 @@
 
 import frappe
 
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+	finished_good_bom_query,
+	get_subcontracting_boms_for_finished_goods,
+	get_subcontracting_boms_for_service_item,
+)
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingBOM(ERPNextTestSuite):
-	pass
+	def test_variant_finished_good_can_use_template_bom(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+
+		create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=template_bom.name, service_item=service_item.name
+		)
+
+		subcontracting_bom = get_subcontracting_boms_for_finished_goods(variant.name)
+		self.assertEqual(subcontracting_bom.service_item, service_item.name)
+
+	def test_lookups_need_order_read_permission(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=template_bom.name, service_item=service_item.name
+		)
+		purchase_user = make_fenced_user("subcontracting-bom-purchase@example.com", ["Purchase User"])
+		website_user = make_fenced_user("subcontracting-bom-website@example.com", [])
+
+		with as_user(purchase_user):
+			subcontracting_bom = get_subcontracting_boms_for_finished_goods(variant.name)
+		self.assertEqual(subcontracting_bom.service_item, service_item.name)
+		self.assertNotIn("owner", subcontracting_bom)
+
+		with as_user(website_user):
+			self.assertRaises(
+				frappe.PermissionError, get_subcontracting_boms_for_finished_goods, variant.name
+			)
+			self.assertRaises(
+				frappe.PermissionError, get_subcontracting_boms_for_service_item, service_item.name
+			)
+
+	def test_finished_good_bom_must_belong_to_finished_good(self):
+		variant, _ = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		unrelated_item = make_item("Subcontracted Unrelated Item", {"is_stock_item": 1})
+		unrelated_bom = make_bom(item=unrelated_item.name, raw_materials=["Subcontracted Template RM Item"])
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_subcontracting_bom,
+			finished_good=variant.name,
+			finished_good_bom=unrelated_bom.name,
+			service_item=service_item.name,
+		)
+
+	def test_finished_good_bom_must_be_active_and_submitted(self):
+		variant, _ = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		draft_bom = make_bom(
+			item=variant.name, raw_materials=["Subcontracted Template RM Item"], do_not_submit=True
+		)
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_subcontracting_bom,
+			finished_good=variant.name,
+			finished_good_bom=draft_bom.name,
+			service_item=service_item.name,
+		)
+
+		bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
+		subcontracting_bom = create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=bom.name, service_item=service_item.name
+		)
+		frappe.db.set_value("BOM", bom.name, "is_active", 0)
+		subcontracting_bom.is_active = 0
+		subcontracting_bom.save()
+
+	def test_quantities_must_be_greater_than_zero(self):
+		variant, template_bom = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		subcontracting_bom = create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=template_bom.name, service_item=service_item.name
+		)
+
+		for fieldname in ("finished_good_qty", "service_item_qty"):
+			subcontracting_bom.reload()
+			subcontracting_bom.set(fieldname, 0)
+			self.assertRaises(frappe.ValidationError, subcontracting_bom.save)
+
+	def test_finished_good_bom_query_lists_variant_and_template_boms(self):
+		variant, template_bom = make_subcontracted_variant()
+		variant_bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
+
+		boms = finished_good_bom_query("BOM", "", "name", 0, 20, {"finished_good": variant.name})
+
+		self.assertEqual({row[0] for row in boms}, {template_bom.name, variant_bom.name})
 
 
 def create_subcontracting_bom(**kwargs):

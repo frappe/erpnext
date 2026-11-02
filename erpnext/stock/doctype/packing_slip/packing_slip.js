@@ -37,7 +37,7 @@ frappe.ui.form.on("Packing Slip", {
 			erpnext.utils.map_current_doc({
 				method: "erpnext.stock.doctype.delivery_note.mapper.make_packing_slip",
 				source_name: frm.doc.delivery_note,
-				target_doc: frm,
+				target: frm,
 				freeze: true,
 				freeze_message: __("Creating Packing Slip ..."),
 			});

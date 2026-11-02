@@ -4,6 +4,7 @@ from frappe.utils import getdate, today
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -89,8 +90,8 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		first_tax_description = "Tax Description A"
 		second_tax_description = "Tax Description B"
-		first_tax_amount_field = f"{frappe.scrub(first_tax_description)}_amount"
-		second_tax_amount_field = f"{frappe.scrub(second_tax_description)}_amount"
+		first_tax_amount_field = f"{frappe.scrub('_Test Account VAT - _TC')}_amount"
+		second_tax_amount_field = f"{frappe.scrub('_Test Account Service Tax - _TC')}_amount"
 
 		self.create_sales_invoice(
 			item=first_item,
@@ -127,3 +128,157 @@ class TestItemWiseSalesRegister(ERPNextTestSuite, AccountsTestMixin):
 
 		self.assertEqual(grand_total_row[first_tax_amount_field], 5.0)
 		self.assertEqual(grand_total_row[second_tax_amount_field], 2.0)
+
+	def test_percent_of_grand_total_follows_filters(self):
+		self.create_sales_invoice()
+		self.customer = "_Test Customer 1"
+		self.create_sales_invoice()
+
+		data = self.get_grouped_data(customer="_Test Customer 1")
+
+		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 100)
+
+	def test_grouped_report_with_zero_grand_total(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+
+		self.customer = "_Test Customer 2"
+		make_sales_return(self.create_sales_invoice().name).submit()
+
+		data = self.get_grouped_data(customer=self.customer)
+
+		self.assertEqual(self.get_grand_total_row(data)["total"], 0)
+		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 0)
+
+	def test_tax_columns_are_split_by_account(self):
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "_Test Account VAT - _TC", "description": "GST", "rate": 5},
+				{"account_head": "_Test Account Service Tax - _TC", "description": "GST", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		vat, service_tax = (frappe.scrub(f"_Test Account {name} - _TC") for name in ("VAT", "Service Tax"))
+		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (5, 5))
+		self.assertEqual((row[f"{service_tax}_rate"], row[f"{service_tax}_amount"]), (2, 2))
+
+	def test_subtotal_rows_include_other_charges(self):
+		self.customer = "_Test Customer 2"
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "Freight and Forwarding Charges - _TC", "description": "Freight", "rate": 10}
+			]
+		)
+
+		data = self.get_grouped_data(customer=self.customer)
+
+		self.assertEqual(self.get_grand_total_row(data)["total_other_charges"], 10)
+		self.assertEqual(self.get_grand_total_row(data)["total"], 110)
+
+	def test_tax_rows_on_same_account_combine_rates(self):
+		self.create_sales_invoice(
+			taxes=[
+				{"account_head": "_Test Account VAT - _TC", "description": "VAT A", "rate": 2},
+				{"account_head": "_Test Account VAT - _TC", "description": "VAT B", "rate": 2},
+			]
+		)
+
+		filters = frappe._dict({"from_date": today(), "to_date": today(), "company": self.company})
+		row = execute(filters)[1][0]
+
+		vat = frappe.scrub("_Test Account VAT - _TC")
+		self.assertEqual((row[f"{vat}_rate"], row[f"{vat}_amount"]), (4, 4))
+
+	def test_accounts_with_same_scrubbed_name_keep_their_own_columns(self):
+		accounts = [self.create_tax_account(name) for name in ("_Test Tax-1", "_Test Tax 1")]
+		customers = ("_Test Customer", "_Test Customer 1")
+		for customer, account in zip(customers, accounts, strict=True):
+			self.customer = customer
+			self.create_sales_invoice(taxes=[{"account_head": account, "description": "Tax", "rate": 5}])
+
+		all_fieldnames = self.get_amount_fieldnames()
+		self.assertEqual(len(set(all_fieldnames.values())), 2)
+		for customer, account in zip(customers, accounts, strict=True):
+			# filtering out the other account must not move this account to another column
+			fieldnames = self.get_amount_fieldnames(customer=customer)
+			self.assertEqual(fieldnames, {account: all_fieldnames[account]})
+
+	def test_delivery_notes_for_invoice_made_from_order(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		so = make_sales_order(item_code=self.item, qty=2)
+		delivery_notes = []
+		for _delivery in range(2):
+			dn = make_delivery_note(so.name)
+			dn.items[0].qty = 1
+			delivery_notes.append(dn.submit().name)
+		si = make_sales_invoice(so.name).submit()
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual(row["delivery_doctype"], "Delivery Note")
+		self.assertCountEqual(row["delivery_note"].split(", "), delivery_notes)
+
+	def test_update_stock_invoice_is_its_own_delivery(self):
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		si = create_sales_invoice(item=self.item, update_stock=1)
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual((row["delivery_doctype"], row["delivery_note"]), ("Sales Invoice", si.name))
+
+	def test_update_stock_invoice_for_partly_delivered_order(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		make_stock_entry(item_code=self.item, target="_Test Warehouse - _TC", qty=2, rate=100)
+		so = make_sales_order(item_code=self.item, qty=2)
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 1
+		dn.submit()
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.items[0].qty = 1
+		si.submit()
+
+		row = self.get_invoice_row(si.name)
+
+		self.assertEqual((row["delivery_doctype"], row["delivery_note"]), ("Sales Invoice", si.name))
+
+	def get_amount_fieldnames(self, **filters):
+		filters = frappe._dict(from_date=today(), to_date=today(), company=self.company, **filters)
+		columns = execute(filters)[0]
+		return {
+			column["label"].removesuffix(" Amount"): column["fieldname"]
+			for column in columns
+			if column["fieldname"].endswith("_amount") and column["label"].startswith("_Test Tax")
+		}
+
+	def create_tax_account(self, account_name):
+		account = frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": account_name,
+				"parent_account": "Duties and Taxes - _TC",
+				"company": self.company,
+				"account_type": "Tax",
+			}
+		).insert()
+		return account.name
+
+	def get_grouped_data(self, **filters):
+		filters = frappe._dict(
+			from_date=today(), to_date=today(), company=self.company, group_by="Customer", **filters
+		)
+		return execute(filters)[1]
+
+	def get_grand_total_row(self, data):
+		return next(row for row in data if row.get("bold") and row.get("item_code") == "Total")
+
+	def get_invoice_row(self, invoice):
+		filters = frappe._dict(from_date=today(), to_date=today(), company=self.company)
+		return next(row for row in execute(filters)[1] if row["invoice"] == invoice)

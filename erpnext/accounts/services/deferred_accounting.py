@@ -55,3 +55,21 @@ class DeferredAccountingService:
 
 	def _is_deferred(self, item) -> bool:
 		return bool(item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"))
+
+	def clear_stale_deferred_fields(self) -> None:
+		doc_before_save = self.doc.get_doc_before_save()
+		if not doc_before_save:
+			return
+
+		was_deferred = {item.name for item in doc_before_save.get("items") if self._is_deferred(item)}
+		account_field = DEFERRED_ACCOUNT_FIELD.get(self.doc.doctype)
+
+		for item in self.doc.get("items"):
+			if self._is_deferred(item) or item.name not in was_deferred:
+				continue
+
+			item.service_start_date = None
+			item.service_end_date = None
+			item.service_stop_date = None
+			if account_field:
+				item.set(account_field, None)

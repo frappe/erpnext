@@ -4,14 +4,22 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt
+from frappe.utils import cint, cstr, flt
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.report.general_ledger.general_ledger import get_accounts_with_children
-from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.report.trial_balance.trial_balance import (
+	validate_company_permission,
+	validate_filters,
+)
+from erpnext.accounts.utils import get_currency_precision
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 
 	show_party_name = is_party_name_visible(filters)
@@ -30,8 +38,12 @@ def get_data(filters, show_party_name):
 	else:
 		party_name_field = "name"
 
-	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
-	parties = frappe.get_all(
+	party_filters = [{"name": filters.get("party")}] if filters.get("party") else []
+	party_type = frappe.qb.DocType(filters.get("party_type"))
+	if condition := get_allowed_masters_condition(party_type.name, filters.get("party_type")):
+		party_filters.append(condition)
+
+	parties = frappe.get_list(
 		filters.get("party_type"),
 		fields=["name", party_name_field],
 		filters=party_filters,
@@ -43,6 +55,7 @@ def get_data(filters, show_party_name):
 		account_filter = get_accounts_with_children(filters.get("account"))
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
+	precision = get_currency_precision()
 	opening_balances = get_opening_balances(filters, account_filter)
 	balances_within_period = get_balances_within_period(filters, account_filter)
 
@@ -65,14 +78,17 @@ def get_data(filters, show_party_name):
 
 		# opening
 		opening_debit, opening_credit = opening_balances.get(party.name, [0, 0])
+		opening_debit, opening_credit = flt(opening_debit, precision), flt(opening_credit, precision)
 		row.update({"opening_debit": opening_debit, "opening_credit": opening_credit})
 
 		# within period
 		debit, credit = balances_within_period.get(party.name, [0, 0])
+		debit, credit = flt(debit, precision), flt(credit, precision)
 		row.update({"debit": debit, "credit": credit})
 
 		# closing
 		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
+		closing_debit, closing_credit = flt(closing_debit, precision), flt(closing_credit, precision)
 		row.update({"closing_debit": closing_debit, "closing_credit": closing_credit})
 
 		row.update({"currency": company_currency})
@@ -122,6 +138,12 @@ def get_opening_balances(filters, account_filter=None):
 	if account_filter:
 		query = query.where(GL_Entry.account.isin(account_filter))
 
+	if finance_book_condition := get_finance_book_condition(GL_Entry, filters):
+		query = query.where(finance_book_condition)
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
 	gle = query.run(as_dict=True)
 
 	opening = frappe._dict()
@@ -157,6 +179,12 @@ def get_balances_within_period(filters, account_filter=None):
 	if account_filter:
 		query = query.where(GL_Entry.account.isin(account_filter))
 
+	if finance_book_condition := get_finance_book_condition(GL_Entry, filters):
+		query = query.where(finance_book_condition)
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
 	gle = query.run(as_dict=True)
 
 	balances_within_period = frappe._dict()
@@ -164,6 +192,21 @@ def get_balances_within_period(filters, account_filter=None):
 		balances_within_period.setdefault(d.party, [d.debit, d.credit])
 
 	return balances_within_period
+
+
+def get_finance_book_condition(gl_entry, filters):
+	"""Limit entries to the selected and blank finance books, as Trial Balance does."""
+	if not frappe.db.count("Finance Book"):
+		return None
+
+	finance_books = [cstr(filters.get("finance_book")), ""]
+	if filters.get("include_default_book_entries"):
+		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+		if filters.get("finance_book") and company_fb and cstr(filters.finance_book) != cstr(company_fb):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+		finance_books.append(cstr(company_fb))
+
+	return gl_entry.finance_book.isin(finance_books) | gl_entry.finance_book.isnull()
 
 
 def toggle_debit_credit(debit, credit):

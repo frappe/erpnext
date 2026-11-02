@@ -8,7 +8,7 @@
           <svg class="icon icon-xs"><use href="#icon-corner-down-right"></use></svg>
         </span>
       {% endif %}
-      {{ task.subject }}</a>
+      {{ task.subject | e }}</a>
   </div>
   <div class="col-sm-2">{{ task.status }}</div>
   <div class="col-sm-2 small text-muted">
@@ -26,11 +26,11 @@
 		["full_name", "user_image"],
 		as_dict = True)%}
         {% if user_details.user_image %}
-          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name | e }}">
             <img src="{{ user_details.user_image | e }}">
           </span>
         {% else %}
-          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name | e }}">
             <div class='standard-image' style='background-color: #F5F4F4; color: #000;'>
               {{ frappe.utils.get_abbr(user_details.full_name) }}
             </div>

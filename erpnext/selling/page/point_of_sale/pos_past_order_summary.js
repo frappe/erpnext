@@ -50,7 +50,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			title: __("Email Receipt"),
 			fields: [
 				{ fieldname: "email_id", fieldtype: "Data", options: "Email", label: "Email ID", reqd: 1 },
-				{ fieldname: "content", fieldtype: "Small Text", label: "Message (if any)" },
+				{ fieldname: "content", fieldtype: "Small Text", label: __("Message (if any)") },
 			],
 			primary_action: () => {
 				this.send_email();
@@ -61,7 +61,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		const print_dialog = new frappe.ui.Dialog({
 			title: __("Print Receipt"),
-			fields: [{ fieldname: "print", fieldtype: "Data", label: "Print Preview" }],
+			fields: [{ fieldname: "print", fieldtype: "Data", label: __("Print Preview") }],
 			primary_action: () => {
 				this.print_receipt();
 			},
@@ -294,21 +294,30 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	send_email() {
 		const frm = this.events.get_frm();
+		const doc = this.doc || frm.doc;
+
+		frappe
+			.xcall("erpnext.selling.page.point_of_sale.point_of_sale.get_receipt_email_content", {
+				doctype: doc.doctype,
+				name: doc.name,
+			})
+			.then((email) => this.send_receipt_email(frm, doc, email));
+	}
+
+	send_receipt_email(frm, doc, email) {
 		const recipients = this.email_dialog.get_values().email_id;
 		const content = this.email_dialog.get_values().content;
-		const doc = this.doc || frm.doc;
-		const print_format = frm.pos_print_format;
 
 		frappe.call({
 			method: "frappe.core.doctype.communication.email.make",
 			args: {
 				recipients: recipients,
-				subject: __(frm.meta.name) + ": " + doc.name,
-				content: content ? content : __(frm.meta.name) + ": " + doc.name,
+				subject: email.subject,
+				content: content ? content : email.message,
 				doctype: doc.doctype,
 				name: doc.name,
 				send_email: 1,
-				print_format,
+				print_format: frm.pos_print_format,
 				sender_full_name: frappe.user.full_name(),
 				_lang: doc.language,
 			},

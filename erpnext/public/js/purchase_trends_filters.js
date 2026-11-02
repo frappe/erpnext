@@ -31,16 +31,6 @@ erpnext.purchase_trends_filters = {
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 		},
 		{
-			fieldname: "period_based_on",
-			label: __("Period based On"),
-			fieldtype: "Select",
-			options: [
-				{ value: "posting_date", label: __("Posting Date") },
-				{ value: "bill_date", label: __("Billing Date") },
-			],
-			default: "posting_date",
-		},
-		{
 			fieldname: "based_on",
 			label: __("Based On"),
 			fieldtype: "Select",
@@ -62,6 +52,15 @@ erpnext.purchase_trends_filters = {
 			fieldtype: "Select",
 			options: ["", { value: "Item", label: __("Item") }, { value: "Supplier", label: __("Supplier") }],
 			default: "",
+		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "MultiSelectList",
+			options: "Item",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Item", txt);
+			},
 		},
 	],
 };

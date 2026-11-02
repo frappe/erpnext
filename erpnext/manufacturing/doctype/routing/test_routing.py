@@ -85,6 +85,53 @@ class TestRouting(ERPNextTestSuite):
 		self.assertEqual(bom_doc.operations[0].time_in_mins, 30)
 		self.assertEqual(bom_doc.operations[1].time_in_mins, 20)
 
+	def test_workstation_change_refreshes_hour_rate(self):
+		operations = [
+			{
+				"operation": "_Test Op Routing Rate",
+				"workstation": "_Test WS Routing 600",
+				"hour_rate_rent": 600,
+			},
+			{
+				"operation": "_Test Op Routing Rate",
+				"workstation": "_Test WS Routing 1200",
+				"hour_rate_rent": 1200,
+			},
+		]
+		setup_operations(operations)
+		routing = create_routing(
+			routing_name="Routing Rate Change",
+			operations=[
+				{
+					"operation": "_Test Op Routing Rate",
+					"workstation": "_Test WS Routing 600",
+					"time_in_mins": 60,
+				}
+			],
+		)
+		self.assertEqual(routing.operations[0].hour_rate, 600)
+
+		routing.operations[0].workstation = "_Test WS Routing 1200"
+		routing.save()
+		self.assertEqual(routing.operations[0].hour_rate, 1200)
+		self.assertEqual(routing.operations[0].operating_cost, 1200)
+
+		routing.operations[0].hour_rate = 900
+		routing.save()
+		self.assertEqual(routing.operations[0].hour_rate, 900)
+
+	def test_disabled_routing_refused_on_bom(self):
+		operations = [
+			{"operation": "Test Operation A", "workstation": "Test Workstation A", "time_in_mins": 30}
+		]
+		setup_operations(operations)
+		routing = create_routing(routing_name="Disabled Route", operations=operations)
+		routing.db_set("disabled", 1)
+
+		self.assertRaises(
+			frappe.ValidationError, setup_bom, item_code="_Test Disabled Routing Item", routing=routing.name
+		)
+
 
 def setup_operations(rows):
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -102,17 +149,8 @@ def create_routing(**args):
 	doc.update(args)
 
 	if not args.do_not_save:
-		frappe.db.savepoint("create_routing")
-		try:
-			doc.insert()
-		except frappe.DuplicateEntryError:
-			frappe.db.rollback(save_point="create_routing")
-			doc = frappe.get_doc("Routing", args.routing_name)
-			doc.delete_key("operations")
-			for operation in args.operations:
-				doc.append("operations", operation)
-
-			doc.save()
+		doc.routing_name = f"{args.routing_name}-{frappe.generate_hash(length=10)}"
+		doc.insert()
 
 	return doc
 
@@ -136,7 +174,11 @@ def setup_bom(**args):
 
 		args.raw_materials = ["Test Extra Item N-1"]
 
-	name = frappe.db.get_value("BOM", {"item": args.item_code}, "name")
+	name = frappe.db.get_value(
+		"BOM",
+		{"item": args.item_code, "routing": args.routing, "docstatus": 1},
+		"name",
+	)
 	if not name:
 		bom_doc = make_bom(
 			item=args.item_code,

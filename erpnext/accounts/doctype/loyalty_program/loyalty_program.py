@@ -97,6 +97,8 @@ def get_loyalty_program_details_with_points(
 	include_expired_entry: bool = False,
 	current_transaction_amount: int | float = 0,
 ):
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
 	loyalty_details = get_loyalty_details(
@@ -127,6 +129,11 @@ def get_loyalty_program_details(
 	silent: bool = False,
 	include_expired_entry: bool = False,
 ):
+	# Same guard as get_loyalty_program_details_with_points above: the customer is what the caller
+	# is entitled to, not the programme. A check on Loyalty Program itself would be read-only to
+	# System Manager and would deny every role that actually fills in the two calling forms.
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	lp_details = frappe._dict()
 
 	if not loyalty_program:
@@ -148,6 +155,13 @@ def get_loyalty_program_details(
 
 @frappe.whitelist()
 def get_redeemption_factor(loyalty_program: str | None = None, customer: str | None = None):
+	# both call sites send only `loyalty_program`, so the calling form is the boundary; the customer branch stays guarded
+	if not (frappe.has_permission("Sales Invoice") or frappe.has_permission("POS Invoice")):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	if customer:
+		frappe.has_permission("Customer", doc=customer, throw=True)
+
 	customer_loyalty_program = None
 	if not loyalty_program:
 		customer_loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
@@ -179,6 +193,9 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 		frappe.throw(_("The Loyalty Program isn't valid for the selected company"))
 
 	if loyalty_program and points_to_redeem:
+		if points_to_redeem < 0:
+			frappe.throw(_("Loyalty Points to redeem must be greater than 0."))
+
 		loyalty_program_details = get_loyalty_program_details_with_points(
 			ref_doc.customer, loyalty_program, posting_date, ref_doc.company
 		)
@@ -192,8 +209,7 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 		if loyalty_amount > total_amount:
 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Total Amount."))
 
-		if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
-			ref_doc.loyalty_amount = loyalty_amount
+		ref_doc.loyalty_amount = loyalty_amount
 		if not ref_doc.loyalty_points and ref_doc.loyalty_points != points_to_redeem:
 			ref_doc.loyalty_points = points_to_redeem
 

@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.general_ledger import make_round_off_gle
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.utils import get_account_currency, get_advance_payment_doctypes
 
@@ -34,6 +35,13 @@ class PaymentEntryGLComposer(BaseGLComposer):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, doc)
+		if rounding := doc.get_unallocated_amount_rounding():
+			make_round_off_gle(
+				gl_entries,
+				rounding,
+				rounding / doc.transaction_exchange_rate,
+				doc.precision("difference_amount"),
+			)
 		self.set_transaction_currency_and_rate_in_gl_map(gl_entries, doc)
 		return gl_entries
 

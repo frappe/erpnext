@@ -37,12 +37,17 @@
 		{% if show_pay_button %}
 			<div class="form-column col-sm-6">
 				<div class="page-header-actions-block" data-html-block="header-actions">
-					<p>
-						<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
+					<form action="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request" method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token | e }}">
+						<input type="hidden" name="dn" value="{{ doc.name | e }}">
+						<input type="hidden" name="dt" value="{{ doc.doctype | e }}">
+						<input type="hidden" name="submit_doc" value="1">
+						<input type="hidden" name="order_type" value="Shopping Cart">
+						<button type="submit"
 							class="btn btn-primary btn-sm" id="pay-for-order">
 							{{ _("Pay", null, "Amount") }} {{ pay_amount }}
-						</a>
-					</p>
+						</button>
+					</form>
 				</div>
 			</div>
 		{% endif %}
@@ -73,11 +78,11 @@
 			</div>
 			<div class="text-right col-2">
 				{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
-				<b>{{ party_name }}</b>
+				<b>{{ party_name | e }}</b>
 
 				{% if doc.contact_display and doc.contact_display != party_name %}
 					<br>
-					{{ doc.contact_display }}
+					{{ doc.contact_display | e }}
 				{% endif %}
 			</div>
 		</div>
@@ -151,7 +156,7 @@
 	{% if doc.terms %}
 		<div class="terms-and-condition text-muted small">
 			<hr>
-			<p>{{ doc.terms }}</p>
+			<p>{{ frappe.sanitize_html(doc.terms) }}</p>
 		</div>
 	{% endif %}
 {% endblock %}

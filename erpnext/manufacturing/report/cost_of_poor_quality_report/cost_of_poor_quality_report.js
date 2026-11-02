@@ -2,6 +2,8 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Cost of Poor Quality Report"] = {
+	export_hidden_cols: true,
+	formatter: erpnext.utils.format_serial_batch_number,
 	filters: [
 		{
 			label: __("Company"),
@@ -89,7 +91,7 @@ frappe.query_reports["Cost of Poor Quality Report"] = {
 			label: __("Batch No"),
 			fieldname: "batch_no",
 			fieldtype: "Link",
-			options: "Batch No",
+			options: "Batch",
 			depends_on: "eval: doc.production_item",
 			get_query: function () {
 				var item_code = frappe.query_report.get_filter_value("production_item");

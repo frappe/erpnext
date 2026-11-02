@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import os
+
 import frappe
 from frappe.utils import flt
 
@@ -88,6 +90,45 @@ class TestCustomFinancialStatement(ERPNextTestSuite):
 		# the account-data row picks up the posted expense; the calculated row doubles it
 		self.assertEqual(flt(rows["Test Expense"][period_key]), 2000.0)
 		self.assertEqual(flt(rows["Expense Doubled"][period_key]), 4000.0)
+
+	def test_ratios_template_counts_other_and_investment_income(self):
+		# Sales 1000, COGS 400, rent 100, other operating income 30, interest income 50: profit 580
+		for debit, credit, amount in (
+			(self.cash_account, "Sales - _TC", 1000),
+			("Cost of Goods Sold - _TC", self.cash_account, 400),
+			("Office Rent - _TC", self.cash_account, 100),
+			(self.cash_account, "Gain/Loss on Asset Disposal - _TC", 30),
+			(self.cash_account, "Interest Income - _TC", 50),
+		):
+			make_journal_entry(
+				debit, credit, amount, posting_date="2024-06-15", company=self.company, submit=True
+			)
+
+		data = execute(self._filters(self._make_shipped_ratios_template()))[1]
+		margins = {
+			row.get("account_name"): flt(row[row["_segment_info"]["period_keys"][0]])
+			for row in data
+			if "Margin" in (row.get("account_name") or "")
+		}
+
+		self.assertEqual(margins["Operating Profit Margin % (Target: > 10%)"], 53.0)
+		self.assertEqual(margins["Net Profit Margin % (Target: > 5%)"], 58.0)
+
+	def _make_shipped_ratios_template(self):
+		import erpnext
+
+		path = os.path.join(
+			os.path.dirname(erpnext.__file__),
+			"accounts/financial_report_template/financial_ratios_analysis/financial_ratios_analysis.json",
+		)
+		with open(path) as f:
+			template = frappe.parse_json(f.read())
+
+		# a copy under a new name, without a module so nothing is exported
+		for field in ("name", "module", "creation", "modified"):
+			template.pop(field)
+		template.template_name = f"Test Ratios {frappe.generate_hash()[:8]}"
+		return frappe.get_doc(template).insert().template_name
 
 	def test_no_template_returns_nothing(self):
 		"""Without a report_template the report short-circuits and returns None."""

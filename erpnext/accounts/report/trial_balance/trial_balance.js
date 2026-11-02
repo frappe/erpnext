@@ -49,7 +49,7 @@ frappe.query_reports["Trial Balance"] = {
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
+				return erpnext.utils.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -60,7 +60,7 @@ frappe.query_reports["Trial Balance"] = {
 			label: __("Project"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Project", txt, {
+				return erpnext.utils.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},

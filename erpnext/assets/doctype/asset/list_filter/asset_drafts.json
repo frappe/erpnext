@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"asset_name\", \"label\": \"Asset Name\"}, {\"fieldname\": \"asset_category\", \"label\": \"Asset Category\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}, {\"fieldname\": \"purchase_date\", \"label\": \"Purchase Date\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.973232",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Drafts",
+ "filters": "[[\"Asset\", \"docstatus\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 5,
+ "modified": "2026-09-30 21:12:56.973232",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset-Drafts",
+ "owner": "Administrator",
+ "reference_doctype": "Asset",
+ "route_signature": "docstatus=0",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

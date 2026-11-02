@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"sales_stage\", \"label\": \"Sales Stage\"}, {\"fieldname\": \"probability\", \"label\": \"Probability (%)\"}, {\"fieldname\": \"opportunity_amount\", \"label\": \"Opportunity Amount\"}, {\"fieldname\": \"expected_closing\", \"label\": \"Expected Closing Date\"}, {\"fieldname\": \"opportunity_owner\", \"label\": \"Opportunity Owner\"}]",
+ "creation": "2026-09-30 21:12:56.924833",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Closing This Month",
+ "filters": "[[\"Opportunity\", \"status\", \"in\", [\"Open\", \"Replied\", \"Quotation\"]], [\"Opportunity\", \"expected_closing\", \"Timespan\", \"this month\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.924833",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Opportunity-Closing This Month",
+ "owner": "Administrator",
+ "reference_doctype": "Opportunity",
+ "route_signature": "expected_closing=[\"Timespan\",\"this month\"]&status=[\"in\",[\"Open\",\"Replied\",\"Quotation\"]]",
+ "sort_field": "expected_closing",
+ "sort_order": "asc"
+}

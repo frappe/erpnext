@@ -174,7 +174,10 @@ frappe.ui.form.on("Shipment", {
 							__("Email or Phone/Mobile of the Contact are mandatory to continue.") +
 								"</br>" +
 								__("Please set Email/Phone for the contact") +
-								` <a href='/app/contact/${contact_name}'>${contact_name}</a>`
+								` <a href="${frappe.utils.get_form_link(
+									"Contact",
+									contact_name
+								)}">${frappe.utils.escape_html(contact_name)}</a>`
 						);
 					}
 					let contact_display = r.message.contact_display;
@@ -426,7 +429,7 @@ frappe.ui.form.on("Shipment", {
 	remove_email_row: function (frm, table, fieldname) {
 		$.each(frm.doc[table] || [], function (i, detail) {
 			if (detail.email === fieldname) {
-				cur_frm.get_field(table).grid.grid_rows[i].remove();
+				frm.get_field(table).grid.grid_rows[i].remove();
 			}
 		});
 	},

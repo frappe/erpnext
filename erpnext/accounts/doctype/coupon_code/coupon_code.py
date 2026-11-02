@@ -37,12 +37,33 @@ class CouponCode(Document):
 
 		if not self.coupon_code:
 			if self.coupon_type == "Promotional":
-				self.coupon_code = "".join(i for i in self.coupon_name if not i.isdigit())[0:8].upper()
+				prefix = "".join(c for c in self.coupon_name if not (c.isdigit() or c.isspace()))[:8].upper()
+				self.coupon_code = prefix
+				while not self.coupon_code or frappe.db.exists(
+					"Coupon Code", {"coupon_code": self.coupon_code}
+				):
+					self.coupon_code = prefix + frappe.generate_hash(length=6).upper()
 			elif self.coupon_type == "Gift Card":
 				self.coupon_code = frappe.generate_hash()[:10].upper()
 
 	def validate(self):
+		self.validate_from_to_dates("valid_from", "valid_upto")
+		self.validate_pricing_rule()
+
 		if self.coupon_type == "Gift Card":
 			self.maximum_use = 1
 			if not self.customer:
 				frappe.throw(_("Please select the customer."))
+
+	def validate_pricing_rule(self):
+		if not self.pricing_rule or self.from_external_ecomm_platform:
+			return
+
+		# Allow existing coupons to be updated after their pricing rule is disabled.
+		if not (
+			self.has_value_changed("pricing_rule") or self.has_value_changed("from_external_ecomm_platform")
+		):
+			return
+
+		if frappe.db.get_value("Pricing Rule", self.pricing_rule, "disable"):
+			frappe.throw(_("Pricing Rule {0} is disabled").format(frappe.bold(self.pricing_rule)))

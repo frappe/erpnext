@@ -184,6 +184,7 @@ class JournalEntryReferenceValidator:
 				continue
 			invoice = frappe.get_doc(reference_type, reference_name)
 			self._validate_invoice_outstanding(invoice, total, reference_type, reference_name)
+			self._validate_block_invoice(invoice)
 
 	def _validate_invoice_outstanding(self, invoice, total, reference_type, reference_name) -> None:
 		"""Payment booked against an invoice cannot exceed its outstanding amount."""
@@ -195,5 +196,17 @@ class JournalEntryReferenceValidator:
 			frappe.throw(
 				_("Payment against {0} {1} cannot be greater than Outstanding Amount {2}").format(
 					reference_type, reference_name, invoice.outstanding_amount
+				)
+			)
+
+	def _validate_block_invoice(self, invoice):
+		"""Payment cannnot be booked against blocked Purchase Invoices"""
+		if invoice.doctype != "Purchase Invoice":
+			return
+
+		if invoice.invoice_is_blocked():
+			frappe.throw(
+				_("{0} {1} is blocked and on hold until {2}.").format(
+					invoice.doctype, invoice.name, invoice.release_date
 				)
 			)

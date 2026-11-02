@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}, {\"fieldname\": \"customer\", \"label\": \"Customer\"}, {\"fieldname\": \"warranty_expiry_date\", \"label\": \"Warranty Expiry Date\"}, {\"fieldname\": \"maintenance_status\", \"label\": \"Maintenance Status\"}]",
+ "creation": "2026-09-30 21:12:56.996808",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Delivered",
+ "filters": "[[\"Serial No\", \"status\", \"=\", \"Delivered\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.996808",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Serial No-Delivered",
+ "owner": "Administrator",
+ "reference_doctype": "Serial No",
+ "route_signature": "status=Delivered",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

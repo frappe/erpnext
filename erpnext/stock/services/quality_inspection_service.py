@@ -50,9 +50,23 @@ QI_OUTGOING_PURPOSES = (
 )
 
 
+SECONDARY_ITEM_PURPOSES = ("Manufacture", "Repack", "Disassemble")
+
+
+def is_inspection_exempt_secondary_row(doc, row) -> bool:
+	"""Whether the row is a secondary item on a document that produces secondary items."""
+	if not (row.get("secondary_item_type") or row.get("valuation_type")):
+		return False
+
+	if doc.doctype == "Stock Entry":
+		return doc.purpose in SECONDARY_ITEM_PURPOSES
+
+	return True
+
+
 def stock_entry_row_requires_inspection(purpose, row):
 	"""Check if this Stock Entry row need a Quality Inspection."""
-	if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
+	if purpose in SECONDARY_ITEM_PURPOSES and (row.get("secondary_item_type") or row.get("valuation_type")):
 		return False
 	if purpose == "Manufacture":
 		return bool(row.is_finished_item)
@@ -80,6 +94,7 @@ class QualityInspectionService:
 			return
 
 		for row in self.doc.get("items"):
+			validate_qi_reference(self.doc, row)
 			qi_required = False
 			if inspection_required_fieldname and frappe.get_cached_value(
 				"Item", row.item_code, inspection_required_fieldname
@@ -88,7 +103,7 @@ class QualityInspectionService:
 			elif self.doc.doctype == "Stock Entry":
 				qi_required = stock_entry_row_requires_inspection(self.doc.purpose, row)
 
-			if row.get("secondary_item_type") or row.get("is_legacy_scrap_item"):
+			if is_inspection_exempt_secondary_row(self.doc, row):
 				continue
 
 			if qi_required:  # validate row only if inspection is required on item level
@@ -97,6 +112,7 @@ class QualityInspectionService:
 					"Purchase Invoice",
 					"Sales Invoice",
 					"Delivery Note",
+					"Subcontracting Receipt",
 				] and frappe.get_single_value(
 					"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
 				):
@@ -138,7 +154,7 @@ class QualityInspectionService:
 		action = frappe.get_single_value("Stock Settings", "action_if_quality_inspection_is_rejected")
 		qa_status = frappe.db.get_value("Quality Inspection", row.quality_inspection, "status")
 
-		if qa_status == "Rejected":
+		if qa_status != "Accepted":
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = _("Row #{0}: Quality Inspection {1} was rejected for item {2}").format(
 				row.idx, link, row.item_code
@@ -147,3 +163,31 @@ class QualityInspectionService:
 				frappe.throw(msg, title=_("Inspection Rejected"), exc=QualityInspectionRejectedError)
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
+
+
+def validate_qi_reference(doc, row, item_code=None):
+	if not row.get("quality_inspection"):
+		return
+
+	qi = frappe.db.get_value(
+		"Quality Inspection",
+		row.quality_inspection,
+		["reference_type", "reference_name", "item_code"],
+		as_dict=True,
+	)
+	if not qi:
+		return
+
+	if qi.reference_type != doc.doctype or qi.reference_name != doc.name:
+		frappe.throw(
+			_(
+				"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
+			).format(row.idx, frappe.bold(doc.doctype), frappe.bold(doc.name))
+		)
+
+	if qi.item_code != (item_code or row.item_code):
+		frappe.throw(
+			_("Row #{0}: Please select a valid Quality Inspection with Item Code {1}.").format(
+				row.idx, frappe.bold(item_code or row.item_code)
+			)
+		)

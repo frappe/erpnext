@@ -9,16 +9,16 @@
 	<div class="row">
 		<div class="col-md-4">
 			{% if logo %}
-			<img itemprop="brand" src="{{ logo }}" class="partner-logo"
-				alt="{{ partner_name }}" title="{{ partner_name }}" />
+			<img itemprop="brand" src="{{ logo | abs_url | e }}" class="partner-logo"
+				alt="{{ partner_name | e }}" title="{{ partner_name | e }}" />
 			<br><br>
 			{% endif %}
 			{% if addresses %}
 				{% for address in addresses %}
 					<address>
-						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address }}</p>{% endif %}
-						{% if address.phone %}<p itemprop="telephone">{{ address.phone }}</p>{% endif %}
-						{% if address.email %}<p itemprop="email"><svg class="icon icon-xs"><use href="#icon-mail"></use></svg> {{ address.email }}</p>{% endif %}
+						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address | e }}</p>{% endif %}
+						{% if address.phone %}<p itemprop="telephone">{{ address.phone | e }}</p>{% endif %}
+						{% if address.email %}<p itemprop="email"><svg class="icon icon-xs"><use href="#icon-mail"></use></svg> {{ address.email | e }}</p>{% endif %}
 					</address>
 				{% endfor %}
 			{% endif %}

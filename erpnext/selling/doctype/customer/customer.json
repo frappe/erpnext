@@ -5,11 +5,15 @@
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2026-07-14 12:46:50.256889",
- "description": "Buyer of Goods and Services.",
+ "description": "A company or person you sell goods or services to.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/customer",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "basic_info",
   "naming_series",
   "customer_name",
@@ -64,8 +68,13 @@
   "column_break_21",
   "tax_withholding_group",
   "tax_withholding_category",
+  "items_tab",
+  "frequently_bought_html",
+  "party_specific_items_section",
+  "party_specific_items_html",
   "settings_tab",
   "company_restrictions_section",
+  "restrict_to_companies",
   "allowed_companies",
   "section_break_ario",
   "so_required",
@@ -73,6 +82,9 @@
   "column_break_53",
   "disabled",
   "is_frozen",
+  "block_customer_section",
+  "on_hold",
+  "release_date",
   "sales_team_tab",
   "account_manager",
   "sales_team",
@@ -102,6 +114,22 @@
   "connections_tab"
  ],
  "fields": [
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "basic_info",
    "fieldtype": "Section Break",
@@ -187,6 +215,7 @@
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Customer Group",
@@ -199,6 +228,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Territory",
@@ -210,12 +240,15 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Tax ID"
   },
   {
    "description": "Controls which tax template is auto-applied when this customer is selected on a transaction.",
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -236,11 +269,13 @@
   },
   {
    "depends_on": "is_internal_customer",
+   "description": "Select the related company that this Customer represents for inter-company transactions.",
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
    "options": "Company",
+   "show_description_on_click": 1,
    "unique": 1
   },
   {
@@ -255,6 +290,7 @@
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Billing Currency",
    "no_copy": 1,
@@ -266,6 +302,7 @@
    "fieldname": "default_price_list",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_import_template": 1,
    "label": "Price List",
    "link_filters": "[[\"Price List\", \"selling\", \"=\", 1]]",
    "options": "Price List",
@@ -281,7 +318,6 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
-   "label": "Address and Contact",
    "options": "fa fa-map-marker"
   },
   {
@@ -319,14 +355,18 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "customer_primary_contact",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Contact",
    "no_copy": 1,
-   "options": "Contact"
+   "options": "Contact",
+   "show_on_timeline": 1
   },
   {
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
+   "in_global_search": 1,
    "label": "Mobile No",
    "no_copy": 1,
    "options": "Mobile"
@@ -335,6 +375,8 @@
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
+   "in_global_search": 1,
    "label": "Email Id",
    "no_copy": 1,
    "options": "Email"
@@ -347,13 +389,16 @@
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Address",
    "no_copy": 1,
-   "options": "Address"
+   "options": "Address",
+   "show_on_timeline": 1
   },
   {
    "fieldname": "primary_address",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Primary Address",
    "no_copy": 1,
    "read_only": 1
@@ -378,6 +423,7 @@
    "description": "Defines when payment is due (e.g. Net 30, 50% advance). Applied automatically on invoices for this customer.",
    "fieldname": "payment_terms",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Payment Terms Template",
    "options": "Payment Terms Template",
    "show_description_on_click": 1
@@ -406,11 +452,31 @@
   },
   {
    "default": "0",
-   "description": "Blocks all further accounting entries on this customer's account. Only users with the frozen-entries role can override.\n",
+   "description": "Blocks new transactions and further accounting entries on this customer's account. Only users with the role set in Company's \"Roles Allowed to Set and Edit Frozen Account Entries\" can transact.",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen",
    "show_description_on_click": 1
+  },
+  {
+   "fieldname": "block_customer_section",
+   "fieldtype": "Section Break",
+   "label": "Block Customer"
+  },
+  {
+   "default": "0",
+   "description": "Blocks saving or submitting Sales Orders, Delivery Notes, Sales Invoices and POS Invoices for this customer.",
+   "fieldname": "on_hold",
+   "fieldtype": "Check",
+   "label": "Block Customer",
+   "show_description_on_click": 1
+  },
+  {
+   "depends_on": "eval:doc.on_hold",
+   "description": "Leave blank if the Customer is blocked indefinitely",
+   "fieldname": "release_date",
+   "fieldtype": "Date",
+   "label": "Release Date"
   },
   {
    "description": "Loyalty scheme this customer earns points under. Auto-assigned if a matching program exists.",
@@ -470,10 +536,10 @@
    "report_hide": 1
   },
   {
-   "description": "Transactions are blocked or warned when outstanding balance exceeds this amount.",
+   "description": "Transactions are blocked when the outstanding balance exceeds the credit limit. When Restrict Customer Over Billing is enabled, new invoices are also blocked when the customer's overdue amount exceeds the Overdue Limit.",
    "fieldname": "credit_limits",
    "fieldtype": "Table",
-   "label": "Credit Limit",
+   "label": "Credit & Overdue Limits",
    "options": "Customer Credit Limit",
    "show_description_on_click": 1
   },
@@ -516,18 +582,27 @@
    "label": "Settings"
   },
   {
-   "description": "If set, this Customer is only available for transactions in the listed companies. Leave empty for no restriction.",
    "fieldname": "company_restrictions_section",
    "fieldtype": "Section Break",
    "label": "Company Restrictions",
-   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+   "permlevel": 1
   },
   {
+   "default": "0",
+   "description": "If checked, this Customer is only available for transactions in the companies listed below.",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "permlevel": 1
+  },
+  {
+   "depends_on": "eval:doc.restrict_to_companies",
    "fieldname": "allowed_companies",
    "fieldtype": "Table MultiSelect",
    "label": "Allowed Companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
    "options": "Company Restriction",
-   "depends_on": "eval:cint(frappe.sys_defaults.enable_company_wise_masters)"
+   "permlevel": 1
   },
   {
    "collapsible": 1,
@@ -704,9 +779,29 @@
   {
    "fieldname": "section_break_ario",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "frequently_bought_html",
+   "fieldtype": "HTML",
+   "label": "Frequently Bought HTML"
+  },
+  {
+   "fieldname": "party_specific_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_specific_items_html",
+   "fieldtype": "HTML",
+   "label": "Party Specific Items HTML"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "user-round",
  "idx": 363,
  "image_field": "image",
  "index_web_pages_for_search": 1,
@@ -717,7 +812,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-07-14 21:00:00.000000",
+ "modified": "2026-10-22 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -733,11 +828,6 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
-  },
-  {
-   "permlevel": 1,
-   "read": 1,
-   "role": "Sales User"
   },
   {
    "email": 1,
@@ -792,6 +882,62 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "role": "Delivery Manager",
+   "select": 1
+  },
+  {
+   "role": "Delivery User",
+   "select": 1
+  },
+  {
+   "role": "Employee",
+   "select": 1
+  },
+  {
+   "role": "Fulfillment User",
+   "select": 1
+  },
+  {
+   "role": "HR Manager",
+   "select": 1
+  },
+  {
+   "role": "HR User",
+   "select": 1
+  },
+  {
+   "role": "Maintenance Manager",
+   "select": 1
+  },
+  {
+   "role": "Maintenance User",
+   "select": 1
+  },
+  {
+   "role": "Projects Manager",
+   "select": 1
+  },
+  {
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Quality Manager",
+   "select": 1
+  },
+  {
+   "role": "Support Team",
+   "select": 1
+  },
+  {
+   "role": "Website Manager",
+   "select": 1
   }
  ],
  "quick_entry": 1,

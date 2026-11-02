@@ -58,6 +58,7 @@ class BankTransaction(Document):
 		self.db_set("status", "Cancelled")
 
 	def validate(self):
+		self.set_status()
 		self.validate_included_fee()
 		self.validate_duplicate_references()
 		self.validate_currency()
@@ -82,13 +83,14 @@ class BankTransaction(Document):
 					)
 
 	def set_status(self):
-		if self.docstatus == 2:
+		if self.docstatus.is_draft():
+			self.status = "Pending"
+		elif self.docstatus.is_cancelled():
 			self.db_set("status", "Cancelled")
-		elif self.docstatus == 1:
-			if self.unallocated_amount > 0:
-				self.db_set("status", "Unreconciled")
-			elif self.unallocated_amount <= 0:
-				self.db_set("status", "Reconciled")
+		elif self.unallocated_amount > 0:
+			self.db_set("status", "Unreconciled")
+		else:
+			self.db_set("status", "Reconciled")
 
 	def validate_duplicate_references(self):
 		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""

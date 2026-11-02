@@ -2,8 +2,10 @@
  "actions": [],
  "autoname": "naming_series:",
  "creation": "2021-09-04 13:38:04.217187",
+ "description": "Turns stock items or services into an asset, or one asset into another.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-capitalization",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -70,7 +72,8 @@
    "in_standard_filter": 1,
    "label": "Target Asset",
    "no_copy": 1,
-   "options": "Asset"
+   "options": "Asset",
+   "reqd": 1
   },
   {
    "fetch_from": "target_asset.asset_name",
@@ -292,10 +295,11 @@
    "fieldtype": "Column Break"
   }
  ],
+ "icon": "trending-up",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-06 01:52:41.890713",
+ "modified": "2026-10-19 16:05:58.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
@@ -328,6 +332,33 @@
    "read": 1,
    "report": 1,
    "role": "Quality Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
    "share": 1,
    "submit": 1,
    "write": 1

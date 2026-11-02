@@ -4,6 +4,7 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2020-01-24 15:29:29.933693",
+ "description": "A sale made at the point of sale.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -497,6 +498,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.currency && doc.currency != erpnext.get_currency(doc.company)",
    "depends_on": "customer",
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
@@ -1639,10 +1641,10 @@
    "print_hide": 1
   }
  ],
- "icon": "fa fa-file-text",
+ "icon": "receipt-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-21 12:46:13.250145",
+ "modified": "2026-09-29 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
@@ -1685,6 +1687,16 @@
    "permlevel": 1,
    "read": 1,
    "role": "All"
+  },
+  {
+   "read": 1,
+   "role": "Sales Manager",
+   "select": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

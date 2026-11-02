@@ -47,8 +47,8 @@ erpnext.PointOfSale.Controller = class {
 			if (!pos_profile) return;
 			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
 				dialog.fields_dict.balance_details.df.data = [];
-				payments.forEach((pay) => {
-					const { mode_of_payment } = pay;
+				const modes_of_payment = new Set(payments.map((pay) => pay.mode_of_payment));
+				modes_of_payment.forEach((mode_of_payment) => {
 					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: "0" });
 				});
 				dialog.fields_dict.balance_details.grid.refresh();
@@ -175,7 +175,7 @@ erpnext.PointOfSale.Controller = class {
 				const msg =
 					data.operation === "Closed"
 						? __("POS has been closed at {0}. Please refresh the page.", [
-								frappe.datetime.str_to_user(data.doc?.creation).bold(),
+								frappe.datetime.str_to_user(data.creation).bold(),
 						  ])
 						: __("POS Opening Entry has been cancelled. Please refresh the page.");
 				frappe.msgprint({
@@ -558,6 +558,9 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	make_new_invoice() {
+		if (this.payment) {
+			this.payment.selected_mode = "";
+		}
 		return frappe.run_serially([
 			() => frappe.dom.freeze(),
 			() => this.make_invoice_frm(this.settings.frm_doctype),
@@ -652,6 +655,14 @@ erpnext.PointOfSale.Controller = class {
 			const item_row_exists = !$.isEmptyObject(item_row);
 
 			const from_selector = field === "qty" && value === "+1";
+			if (from_selector && item.serial_no) {
+				if (this.is_duplicate_serial_no(item.item_code, item.serial_no)) return;
+				await this.check_serial_no_availablilty(
+					item.item_code,
+					this.frm.doc.set_warehouse,
+					item.serial_no
+				);
+			}
 			if (from_selector) value = flt(item_row.qty) + flt(value);
 
 			if (item_row_exists) {
@@ -670,7 +681,7 @@ erpnext.PointOfSale.Controller = class {
 							item_row.doctype,
 							item_row.name,
 							"serial_no",
-							item_row.serial_no + `\n${item.serial_no}`
+							[item_row.serial_no, item.serial_no].filter(Boolean).join("\n")
 						);
 					}
 					this.update_cart_html(item_row);
@@ -693,7 +704,13 @@ erpnext.PointOfSale.Controller = class {
 				const new_item = { item_code, batch_no, rate, uom, [field]: value, stock_uom };
 
 				if (serial_no) {
-					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
+					if (!from_selector) {
+						await this.check_serial_no_availablilty(
+							item_code,
+							this.frm.doc.set_warehouse,
+							serial_no
+						);
+					}
 					new_item["serial_no"] = serial_no;
 				}
 
@@ -712,13 +729,13 @@ erpnext.PointOfSale.Controller = class {
 
 				this.update_cart_html(item_row);
 
-				if (this.item_details.$component.is(":visible")) this.edit_item_details_of(item_row);
-
 				if (
-					this.check_serial_batch_selection_needed(item_row) &&
-					!this.item_details.$component.is(":visible")
-				)
+					this.item_details.$component.is(":visible") ||
+					(item_row.has_batch_no && !batch_no) ||
+					this.check_serial_batch_selection_needed(item_row)
+				) {
 					this.edit_item_details_of(item_row);
+				}
 			}
 		} catch (error) {
 			console.log(error);
@@ -745,13 +762,14 @@ erpnext.PointOfSale.Controller = class {
 			// if item is clicked twice from item selector
 			// then "item_code, batch_no, uom, rate" will help in getting the exact item
 			// to increase the qty by one
-			const has_batch_no = batch_no !== "null" && batch_no !== null;
+			const has_batch_no = batch_no && batch_no !== "null";
 			item_row = this.frm.doc.items.find(
 				(i) =>
 					i.item_code === item_code &&
-					(!has_batch_no || (has_batch_no && i.batch_no === batch_no)) &&
+					(has_batch_no ? i.batch_no === batch_no : !i.batch_no) &&
 					i.uom === uom &&
-					i.price_list_rate === flt(rate)
+					flt(i.price_list_rate, precision("price_list_rate", i)) ===
+						flt(rate, precision("price_list_rate", i))
 			);
 		}
 
@@ -832,6 +850,23 @@ erpnext.PointOfSale.Controller = class {
 			frappe.utils.play_sound("error");
 		}
 		frappe.dom.freeze();
+	}
+
+	is_duplicate_serial_no(item_code, serial_no) {
+		const duplicate = this.frm.doc.items.some(
+			(row) =>
+				row.item_code === item_code &&
+				(row.serial_no || "")
+					.split(/[\n,]/)
+					.some((number) => number.trim().toLowerCase() === serial_no.trim().toLowerCase())
+		);
+		if (duplicate) {
+			frappe.show_alert({
+				message: __("Serial No {0} is already added.", [frappe.utils.escape_html(serial_no)]),
+				indicator: "orange",
+			});
+		}
+		return duplicate;
 	}
 
 	async check_serial_no_availablilty(item_code, warehouse, serial_no) {

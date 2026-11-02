@@ -14,6 +14,9 @@ class BlanketOrderItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		base_price_list_rate: DF.Currency
+		base_rate: DF.Currency
+		closed: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		ordered_qty: DF.Float
@@ -21,8 +24,10 @@ class BlanketOrderItem(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		party_item_code: DF.Data | None
+		price_list_rate: DF.Currency
 		qty: DF.Float
 		rate: DF.Currency
+		stock_uom: DF.Link | None
 		terms_and_conditions: DF.Text | None
 	# end: auto-generated types
 

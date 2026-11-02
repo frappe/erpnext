@@ -3,7 +3,6 @@
 
 import ast
 import json
-import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cache, reduce
@@ -15,7 +14,7 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.model import numeric_fieldtypes
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Cast_, Sum
-from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils import cstr, date_diff, escape_html, flt, getdate
 from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
 
@@ -29,9 +28,11 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_templat
 	FinancialReportTemplate,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_validation import (
+	FORMULA_FUNCTIONS,
 	AccountFilterValidator,
 	CalculationFormulaValidator,
 	DependencyValidator,
+	get_valid_api_method,
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -490,7 +491,10 @@ class DataCollector:
 		if company:
 			query = query.where(account.company == company)
 
-		if conditions := filter_parser.build_conditions(account_rows, account):
+		# filters are optional: no filter means all (enabled, non-group) accounts of the company.
+		# invalid filters can't reach here — build_conditions raises on them (raise_on_invalid).
+		conditions = filter_parser.build_conditions(account_rows, account, raise_on_invalid=True)
+		if conditions is not None:
 			query = query.where(conditions)
 
 		return query.run(pluck=True)
@@ -802,49 +806,52 @@ class FilterExpressionParser:
 	def __init__(self):
 		self.validator = AccountFilterValidator()
 
-	def build_conditions(self, report_rows, table):
+	def build_conditions(self, report_rows, table, raise_on_invalid=False):
 		conditions = []
 		for row in report_rows or []:
-			condition = self.build_condition(row, table)
+			condition = self.build_condition(row, table, raise_on_invalid=raise_on_invalid)
 			if condition is not None:
 				conditions.append(condition)
+
+		if not conditions:
+			return None
 
 		# ensure brackets in or condition
 		return reduce(lambda a, b: (a) | (b), conditions)
 
-	def build_condition(self, report_row, table):
+	def build_condition(self, report_row, table, raise_on_invalid=False):
 		"""
-		Build SQL condition directly from filter formula.
+		Build an SQL condition from a filter formula.
 
-		Supports:
-		1. Simple condition: ["field", "operator", "value"]
-		   Example: ["account_type", "=", "Income"]
+		- A single condition is `["field", "operator", "value"]`:
 
-		2. Complex logical conditions:
-		   {"and": [condition1, condition2, ...]}  # All conditions must be true
-		   {"or": [condition1, condition2, ...]}   # Any condition can be true
+		```
+		["account_type", "=", "Income"]
+		```
 
-		   Example:
-		   {
-		         "and": [
-		           ["account_type", "=", "Income"],
-		           {"or": [
-		                 ["category", "=", "Direct Income"],
-		                 ["category", "=", "Indirect Income"]
-		           ]}
-		         ]
-		   }
+		- `and` and `or` nest them. `and` needs every condition to hold, `or` needs one:
 
-		Returns:
-		        SQL condition object or None if invalid
+		```
+		{
+		    "and": [
+		        ["account_type", "=", "Income"],
+		        {"or": [["category", "=", "Direct Income"], ["category", "=", "Indirect Income"]]},
+		    ]
+		}
+		```
+
+		---
+		Returns the condition, or None when the row has no filter or the filter is invalid.
 		"""
 		filter_formula = report_row.calculation_formula
 		if not filter_formula:
 			return None
 
-		errors = self.validator.validate(report_row)
+		errors = self.validator.validate_filter(report_row)
 		if not errors.is_valid:
 			error_messages = [str(issue) for issue in errors.issues]
+			if raise_on_invalid:
+				frappe.throw("<br><br>".join(error_messages), title=_("Invalid Filter"))
 			frappe.log_error(f"Filter validation errors found:\n{'<br><br>'.join(error_messages)}")
 			return None
 
@@ -1041,7 +1048,11 @@ class FormulaFieldUpdater:
 
 @frappe.whitelist()
 def get_filtered_accounts(company: str, account_rows: str | list):
+	if not company:
+		frappe.throw(_("Company is required"), title=_("Missing Company"))
+
 	frappe.has_permission("Financial Report Template", ptype="read", throw=True)
+	frappe.has_permission("Company", doc=company, throw=True)
 
 	account_rows = [frappe._dict(row) for row in frappe.parse_json(account_rows)]
 
@@ -1182,10 +1193,12 @@ class RowProcessor:
 
 	def _process_api_row(self, row) -> RowData:
 		api_path = row.calculation_formula
-		# TODO
+
+		method = get_valid_api_method(api_path)
 
 		try:
-			values = frappe.call(api_path, filters=self.context.filters, periods=self.period_list, row=row)
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval
+			values = frappe.call(method, filters=self.context.filters, periods=self.period_list, row=row)
 
 			if row.reverse_sign:
 				values = [-1 * v for v in values]
@@ -1313,49 +1326,62 @@ class FormulaCalculator:
 		self.precision = get_currency_precision()
 		self.validator = CalculationFormulaValidator(set(row_data.keys()))
 
-		self.math_functions = {
-			"abs": abs,
-			"round": round,
-			"min": min,
-			"max": max,
-			"sum": sum,
-			"sqrt": math.sqrt,
-			"pow": math.pow,
-			"ceil": math.ceil,
-			"floor": math.floor,
-		}
-
 	def evaluate_formula(self, report_row: dict[str, Any]) -> list[float]:
 		validation_result = self.validator.validate(report_row)
-		formula = report_row.calculation_formula
+		formula = (report_row.calculation_formula or "").strip()
 		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
-			# TODO: Throw?
-			messages = "<br><br>".join(issue.message for issue in validation_result.issues)
-			frappe.log_error(f"Formula validation errors found:\n{messages}")
-			return [0.0] * len(self.period_list)
+			frappe.throw(
+				"<br>".join(str(issue) for issue in validation_result.issues),
+				title=_("Formula Error"),
+			)
 
 		results = []
 		for i in range(len(self.period_list)):
-			result = self._evaluate_for_period(formula, i, negation_factor)
+			result = self._evaluate_for_period(report_row, formula, i, negation_factor)
 			results.append(result)
 
 		return results
 
-	def _evaluate_for_period(self, formula: str, period_index: int, negation_factor: int) -> float:
-		# TODO: consistent error handling
+	@staticmethod
+	def _row_label(report_row: dict[str, Any]) -> str:
+		"""Name the template row the reader has to go and fix."""
+		return _("Template row {0} ({1})").format(
+			report_row.idx, report_row.display_name or report_row.reference_code
+		)
+
+	def _evaluate_for_period(
+		self, report_row: dict[str, Any], formula: str, period_index: int, negation_factor: int
+	) -> float:
 		try:
 			context = self._build_context(period_index)
-			result = frappe.safe_eval(formula, context)
-			return flt(result * negation_factor, self.precision)
+			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
 
 		except ZeroDivisionError:
-			frappe.log_error(f"Division by zero in formula: {formula}")
-			return 0.0
+			frappe.throw(
+				_("{0}: formula {1} divides by zero. Check the divisor first, for example {2}.").format(
+					self._row_label(report_row), f'"{escape_html(formula)}"', '"A / B if B else 0"'
+				),
+				title=_("Formula Error"),
+			)
 		except Exception as e:
-			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
-			return 0.0
+			frappe.throw(
+				_("{0}: formula {1} couldn't be calculated: {2}.").format(
+					self._row_label(report_row), f'"{escape_html(formula)}"', escape_html(str(e))
+				),
+				title=_("Formula Error"),
+			)
+
+		if type(result) not in (int, float):
+			frappe.throw(
+				_("{0}: formula {1} must return a number, got {2}.").format(
+					self._row_label(report_row), f'"{escape_html(formula)}"', type(result).__name__
+				),
+				title=_("Formula Error"),
+			)
+
+		return flt(result * negation_factor, self.precision)
 
 	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}
@@ -1368,7 +1394,7 @@ class FormulaCalculator:
 				context[code] = 0.0
 
 		# math functions
-		context.update(self.math_functions)
+		context.update(FORMULA_FUNCTIONS)
 
 		return context
 

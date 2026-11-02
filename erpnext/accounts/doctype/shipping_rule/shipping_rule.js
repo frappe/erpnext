@@ -9,10 +9,15 @@ frappe.ui.form.on("Shipping Rule", {
 	},
 
 	company: function (frm) {
+		if (frm.previous_company !== frm.doc.company) {
+			frm.previous_company = frm.doc.company;
+			frm.set_value("account", "");
+		}
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	refresh: function (frm) {
+		frm.previous_company = frm.doc.company;
 		frm.set_query("account", function () {
 			return {
 				filters: {

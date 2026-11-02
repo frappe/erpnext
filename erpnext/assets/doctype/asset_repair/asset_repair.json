@@ -3,8 +3,10 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2017-10-23 11:38:54.004355",
+ "description": "A repair made to an asset, and what it cost.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/asset-repair",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -38,11 +40,12 @@
   "column_break_spre",
   "capitalize_repair_cost",
   "increase_in_asset_life",
+  "asset_value_updated",
   "column_break_xebe",
   "total_repair_cost",
   "accounting_dimensions_section",
   "cost_center",
-  "column_break_14",
+  "dimension_col_break",
   "project",
   "connection_tab"
  ],
@@ -173,7 +176,7 @@
    "options": "Project"
   },
   {
-   "fieldname": "column_break_14",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -195,6 +198,16 @@
    "fieldtype": "Int",
    "label": "Increase In Asset Life(Months)",
    "no_copy": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "asset_value_updated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Asset Value Updated",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fetch_from": "asset.company",
@@ -267,6 +280,7 @@
    "show_dashboard": 1
   }
  ],
+ "icon": "wrench",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
@@ -275,7 +289,7 @@
    "link_fieldname": "asset_repair"
   }
  ],
- "modified": "2026-06-20 15:43:54.943335",
+ "modified": "2026-10-19 16:20:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
@@ -310,6 +324,29 @@
    "read": 1,
    "report": 1,
    "role": "Quality Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
    "share": 1,
    "submit": 1,
    "write": 1

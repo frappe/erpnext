@@ -48,6 +48,7 @@ class POSInvoiceItem(SalesInvoiceItem):
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
 		income_account: DF.Link
+		incoming_rate: DF.Currency
 		is_fixed_asset: DF.Check
 		is_free_item: DF.Check
 		item_code: DF.Link | None
@@ -55,6 +56,7 @@ class POSInvoiceItem(SalesInvoiceItem):
 		item_name: DF.Data
 		item_tax_rate: DF.SmallText | None
 		item_tax_template: DF.Link | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		net_amount: DF.Currency

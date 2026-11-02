@@ -9,14 +9,17 @@ from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
+from erpnext.exceptions import PartyDisabled
+
 
 @frappe.whitelist()
-def make_customer(source_name: str, target_doc: str | Document | None = None):
+def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_lead_is_enabled(source_name, "Customer")
 	return _make_customer(source_name, target_doc)
 
 
 def _make_customer(
-	source_name: str, target_doc: str | Document | None = None, ignore_permissions: bool = False
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
 ):
 	def set_missing_values(source, target):
 		if source.company_name:
@@ -60,7 +63,9 @@ def _make_customer(
 
 
 @frappe.whitelist()
-def make_opportunity(source_name: str, target_doc: str | Document | None = None):
+def make_opportunity(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_lead_is_enabled(source_name, "Opportunity")
+
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -90,7 +95,9 @@ def make_opportunity(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_lead_is_enabled(source_name, "Quotation")
+
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -113,6 +120,16 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 @frappe.whitelist(methods=["POST"])
 def make_lead_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
+
+	# `communication` is caller supplied and nothing here checked it. Communication grants read to
+	# `All` only for the owner (if_owner) and carries a has_permission hook, so doc= is what decides
+	# access; the desk button only appears on an email the caller already has open.
+	frappe.has_permission("Communication", doc=communication, throw=True)
+
+	# both paths below end in a Lead. The insert path checks `create` on its own, but the path that
+	# reuses an existing Lead required nothing, so it returned a Lead's name and linked the email
+	# for callers with no access to Leads at all.
+	frappe.has_permission("Lead", ptype="create", throw=True)
 
 	doc = frappe.get_doc("Communication", communication)
 	lead_name = None
@@ -166,3 +183,11 @@ def _set_missing_values(source, target):
 
 	if contact:
 		target.contact_person = contact[0].parent
+
+
+def validate_lead_is_enabled(lead: str, doctype: str) -> None:
+	if frappe.db.get_value("Lead", lead, "disabled"):
+		frappe.throw(
+			_("Lead {0} is disabled. Enable it to create a new {1}.").format(lead, _(doctype)),
+			PartyDisabled,
+		)

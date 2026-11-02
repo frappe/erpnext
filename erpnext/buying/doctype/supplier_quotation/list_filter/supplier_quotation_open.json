@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"transaction_date\", \"label\": \"Date\"}, {\"fieldname\": \"valid_till\", \"label\": \"Valid Till\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.988189",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Open",
+ "filters": "[[\"Supplier Quotation\", \"status\", \"=\", \"Submitted\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.988189",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier Quotation-Open",
+ "owner": "Administrator",
+ "reference_doctype": "Supplier Quotation",
+ "route_signature": "status=Submitted",
+ "sort_field": "valid_till",
+ "sort_order": "asc"
+}

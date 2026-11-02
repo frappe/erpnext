@@ -40,6 +40,7 @@
   "discount_percentage",
   "discount_amount",
   "distributed_discount_amount",
+  "mapped_additional_discount_amount",
   "base_rate_with_margin",
   "section_break1",
   "rate",
@@ -85,10 +86,13 @@
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
   "col_break5",
+  "incoming_rate",
   "allow_zero_valuation_rate",
   "item_tax_rate",
   "actual_batch_qty",
   "actual_qty",
+  "serial_batch_entries_section",
+  "serial_batch_entries_html",
   "section_break_tlhi",
   "serial_no",
   "column_break_ciit",
@@ -257,6 +261,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "reqd": 1
   },
@@ -662,6 +667,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:parent.is_return && parent.update_stock && !parent.return_against",
+   "fieldname": "incoming_rate",
+   "fieldtype": "Currency",
+   "label": "Incoming Rate (Costing)",
+   "no_copy": 1,
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1
+  },
+  {
    "default": "0",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
@@ -860,6 +875,15 @@
    "label": "Use Serial No / Batch Fields"
   },
   {
+   "fieldname": "serial_batch_entries_section",
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch Entries"
+  },
+  {
+   "fieldname": "serial_batch_entries_html",
+   "fieldtype": "HTML"
+  },
+  {
    "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "section_break_tlhi",
    "fieldtype": "Section Break"
@@ -873,11 +897,22 @@
    "fieldtype": "Currency",
    "label": "Distributed Discount Amount",
    "options": "currency"
+  },
+  {
+   "default": "0",
+   "description": "Tax-exclusive additional discount carried from a source document, per stock unit.",
+   "fieldname": "mapped_additional_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount per Stock Unit",
+   "options": "currency",
+   "precision": "9",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 20:00:00.000000",
+ "modified": "2026-10-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Item",

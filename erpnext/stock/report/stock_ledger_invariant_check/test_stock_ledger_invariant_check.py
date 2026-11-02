@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import json
+
 import frappe
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -58,6 +60,64 @@ class TestStockLedgerInvariantCheck(ERPNextTestSuite):
 		data = self.run_report(item_code=item, show_incorrect_entries=1)
 		self.assertEqual(len(data), 2)  # incorrect entry + one before it for context
 		self.assertEqual(data[-1].name, sle.name)
+
+	def test_show_incorrect_entries_catches_queue_mismatch(self):
+		item = self.make_movements()
+
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		tampered_queue = json.dumps([[sle.qty_after_transaction + 5, 100]])
+		frappe.db.set_value("Stock Ledger Entry", sle.name, "stock_queue", tampered_queue)
+
+		data = self.run_report(item_code=item, show_incorrect_entries=1)
+		self.assertEqual(len(data), 2)
+		self.assertEqual(data[-1].name, sle.name)
+
+	def test_show_incorrect_entries_catches_a_wrong_valuation_rate(self):
+		item = self.make_movements()
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		frappe.db.set_value("Stock Ledger Entry", sle.name, "valuation_rate", sle.valuation_rate + 10)
+
+		data = self.run_report(item_code=item, show_incorrect_entries=1)
+
+		self.assertEqual(data[-1].name if data else None, sle.name)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	def test_rounded_stock_values_are_not_incorrect(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_method": "FIFO"}).name
+		for qty, days in ((1.004, -2), (2.006, -1)):
+			create_stock_reconciliation(
+				item_code=item,
+				warehouse=WAREHOUSE,
+				qty=qty,
+				rate=1,
+				posting_date=frappe.utils.add_days(frappe.utils.today(), days),
+			)
+
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
+
+	def test_moving_average_item_skips_fifo_queue_checks(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=100)
+		make_stock_entry(item_code=item, from_warehouse=WAREHOUSE, qty=4)
+
+		data = self.run_report(item_code=item)
+		self.assertTrue(data)
+		for row in data:
+			self.assertIsNone(row.fifo_qty_diff)
+			self.assertIsNone(row.fifo_value_diff)
+
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
 
 	def test_batch_item_skips_fifo_queue_checks(self):
 		from erpnext.stock.doctype.item.test_item import make_item

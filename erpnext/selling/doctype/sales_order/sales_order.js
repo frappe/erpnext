@@ -1,14 +1,14 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-
 erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Sales Order");
 erpnext.sales_common.setup_selling_controller();
 
 frappe.ui.form.on("Sales Order", {
 	setup: function (frm) {
+		frm.cscript.tax_table = "Sales Taxes and Charges";
+
 		frm.custom_make_buttons = {
 			"Delivery Note": "Delivery Note",
 			"Pick List": "Pick List",
@@ -25,7 +25,9 @@ frappe.ui.form.on("Sales Order", {
 		// formatter for material request item
 		frm.set_indicator_formatter("item_code", function (doc) {
 			let color;
-			if (!doc.qty && frm.doc.has_unit_price_items) {
+			if (doc.closed) {
+				color = "gray";
+			} else if (!doc.qty && frm.doc.has_unit_price_items) {
 				color = "yellow";
 			} else if (doc.stock_qty - doc.delivered_qty <= doc.actual_qty) {
 				color = "green";
@@ -1008,23 +1010,29 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 				} else if (doc.status === "Closed") {
 					// un-close
-					this.frm.add_custom_button(
-						__("Re-open"),
-						function () {
-							me.frm.cscript.update_status("Re-open", "Draft");
-						},
-						__("Status")
-					);
+					if (!doc.items.every((item) => item.closed)) {
+						this.frm.add_custom_button(
+							__("Re-open"),
+							function () {
+								me.frm.cscript.update_status("Re-open", "Draft");
+							},
+							__("Status")
+						);
+					}
 				}
 			}
 			if (doc.status !== "Closed") {
 				if (doc.status !== "On Hold") {
 					const items_are_deliverable = this.frm.doc.items.some(
-						(item) => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty)
+						(item) =>
+							!item.skip_delivery &&
+							item.delivered_by_supplier === 0 &&
+							!item.closed &&
+							item.qty > flt(item.delivered_qty)
 					);
 					allow_delivery =
-						(this.frm.doc.has_unit_price_items || items_are_deliverable) &&
-						!this.frm.doc.skip_delivery_note;
+						!this.frm.doc.skip_delivery_note &&
+						(this.frm.doc.has_unit_price_items || items_are_deliverable);
 
 					if (this.frm.has_perm("submit")) {
 						if (flt(doc.per_delivered) < 100 || flt(doc.per_billed) < 100) {
@@ -1044,7 +1052,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					if (doc.is_subcontracted) {
-						if (!doc.items.every((item) => item.qty == item.subcontracted_qty)) {
+						if (
+							doc.items.some(
+								(item) => !item.closed && flt(item.subcontracted_qty) < flt(item.stock_qty)
+							)
+						) {
 							this.frm.add_custom_button(
 								__("Subcontracting Inward Order"),
 								() => {
@@ -1076,19 +1088,20 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					// delivery note
-					if (
-						flt(doc.per_delivered) < 100 &&
-						(order_is_a_sale || order_is_a_custom_sale) &&
-						allow_delivery
-					) {
-						if (frappe.model.can_create("Delivery Note")) {
-							this.frm.add_custom_button(
-								__("Delivery Note"),
-								() => this.make_delivery_note_based_on_delivery_date(true),
-								__("Create")
-							);
-						}
+					const is_sale = order_is_a_sale || order_is_a_custom_sale;
+					const can_deliver = flt(doc.per_delivered) < 100 && is_sale && allow_delivery;
+					const can_over_deliver =
+						is_sale && !doc.skip_delivery_note && doc.__onload?.has_over_deliverable_rows;
 
+					if ((can_deliver || can_over_deliver) && frappe.model.can_create("Delivery Note")) {
+						this.frm.add_custom_button(
+							__("Delivery Note"),
+							() => this.make_delivery_note_based_on_delivery_date(true),
+							__("Create")
+						);
+					}
+
+					if (can_deliver) {
 						if (frappe.model.can_create("Work Order") && !doc.is_subcontracted) {
 							this.frm.add_custom_button(
 								__("Work Order"),
@@ -1108,7 +1121,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					// sales invoice
 					if (
-						(flt(doc.per_billed) < 100 && frappe.model.can_create("Sales Invoice")) ||
+						(doc.__onload?.has_potentially_billable_items &&
+							frappe.model.can_create("Sales Invoice")) ||
 						doc.is_subcontracted
 					) {
 						this.frm.add_custom_button(
@@ -1244,6 +1258,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						get_query_filters: {
 							company: me.frm.doc.company,
 							docstatus: 1,
+							is_active: 1,
 							status: ["not in", ["Lost", "Ordered"]],
 						},
 						allow_child_item_selection: true,
@@ -1256,6 +1271,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		}
 
 		this.order_type(doc);
+
+		this.set_item_close_buttons();
 	}
 
 	items_add(doc, cdt, cdn) {
@@ -1426,14 +1443,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		});
 	}
 
-	skip_delivery_note() {
-		this.toggle_delivery_date();
-	}
-
 	toggle_delivery_date() {
+		const items = this.frm.doc.items || [];
+		const all_skipped = items.length && items.every((item) => item.skip_delivery);
 		this.frm.fields_dict.items.grid.toggle_reqd(
 			"delivery_date",
-			this.frm.doc.order_type == "Sales" && !this.frm.doc.skip_delivery_note
+			this.frm.doc.order_type == "Sales" && !all_skipped
 		);
 	}
 
@@ -1516,8 +1531,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var d = new frappe.ui.Dialog({
 			title: __("Items for Raw Material Request"),
 			fields: fields,
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				me.frm.call({
 					method: "erpnext.selling.doctype.sales_order.mapper.make_raw_material_request",
 					args: {
@@ -1846,8 +1860,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				frappe.call({
 					method: "frappe.desk.form.utils.add_comment",
 					args: {
@@ -1870,6 +1883,19 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 	close_sales_order() {
 		this.frm.cscript.update_status("Close", "Closed");
+	}
+
+	set_item_close_buttons() {
+		erpnext.item_close.add_buttons(
+			this.frm,
+			erpnext.item_close.fulfilment_config({
+				qty_field: "delivered_qty",
+				qty_label: __("Delivered Qty"),
+				help: __(
+					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note, Sales Invoice or Work Order."
+				),
+			})
+		);
 	}
 	update_status(label, status) {
 		var doc = this.frm.doc;
@@ -1896,7 +1922,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.selling.SalesOrderController({ frm: cur_frm }));
+frappe.ui.form.set_controller("Sales Order", erpnext.selling.SalesOrderController);
 
 function prevent_past_delivery_dates(frm) {
 	if (frm.doc.transaction_date) {

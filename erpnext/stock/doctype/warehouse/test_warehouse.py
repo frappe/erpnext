@@ -7,8 +7,14 @@ import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.warehouse.warehouse import convert_to_group_or_ledger, get_children
+from erpnext.stock.doctype.warehouse.warehouse import (
+	convert_to_group_or_ledger,
+	get_children,
+	get_warehouses_based_on_account,
+)
 from erpnext.tests.utils import ERPNextTestSuite
+
+INVENTORY_FALLBACK_COMPANY = "_Test Company Inventory Fallback"
 
 
 class TestWarehouse(ERPNextTestSuite):
@@ -88,11 +94,317 @@ class TestWarehouse(ERPNextTestSuite):
 		# SLE exists
 		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse.name)
 
+	def test_warehouses_based_on_account_follow_effective_account(self):
+		company = "_Test Company"
+		default_account = get_warehouse_account("_Test Default Inventory", company)
+		frappe.db.set_value("Company", company, "default_inventory_account", default_account)
+		inheriting = create_warehouse("_Test Default Account WH", {"account": None}, company=company)
+		explicit = create_warehouse(
+			"_Test Explicit Default WH", {"account": default_account}, company=company
+		)
+		disabled = create_warehouse(
+			"_Test Disabled Default WH", {"account": default_account}, company=company
+		)
+		frappe.db.set_value("Warehouse", disabled, "disabled", 1)
+		other = create_warehouse("_Test Other Account WH", company=company)
+
+		warehouses = get_warehouses_based_on_account(default_account, company)
+
+		self.assertTrue({inheriting, explicit, disabled} <= set(warehouses))
+		self.assertNotIn(other, warehouses)
+		self.assertNotIn("_Test Warehouse - _TC1", warehouses)
+
+	def test_group_flag_cannot_be_flipped_by_save(self):
+		item = create_item("_Test Group Flip Item")
+		warehouse = create_warehouse("_Test Group Flip Stock WH")
+		make_stock_entry(item_code=item.name, target=warehouse, qty=5, basic_rate=100)
+
+		doc = frappe.get_doc("Warehouse", warehouse)
+		doc.is_group = 1
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+		group = create_warehouse("_Test Group Flip Parent WH", {"is_group": 1})
+		create_warehouse("_Test Group Flip Child WH", {"parent_warehouse": group})
+
+		doc = frappe.get_doc("Warehouse", group)
+		doc.is_group = 0
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+	def test_convert_to_group_refused_with_open_orders_or_item_default(self):
+		warehouse = create_warehouse("_Test Open Order WH")
+		item = create_item("_Test Open Order Item")
+		frappe.get_doc(
+			{"doctype": "Bin", "item_code": item.name, "warehouse": warehouse, "ordered_qty": 10}
+		).insert()
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse)
+
+		frappe.db.delete("Bin", {"warehouse": warehouse})
+		item.reload()
+		item.item_defaults[0].default_warehouse = warehouse
+		item.save()
+		self.assertRaises(frappe.ValidationError, convert_to_group_or_ledger, warehouse)
+
+	def test_company_cannot_change_with_stock(self):
+		item = create_item("_Test Company Change Item")
+		warehouse = create_warehouse("_Test Company Change WH")
+		make_stock_entry(item_code=item.name, target=warehouse, qty=3, basic_rate=100)
+
+		doc = frappe.get_doc("Warehouse", warehouse)
+		doc.company = "_Test Company 1"
+		doc.account = None
+		doc.parent_warehouse = None
+		self.assertRaisesRegex(frappe.ValidationError, "stock transactions", doc.save)
+
+	def test_company_cannot_change_on_group_with_children(self):
+		group = create_warehouse("_Test Company Change Group", properties={"is_group": 1})
+		create_warehouse("_Test Company Change Child", properties={"parent_warehouse": group})
+
+		doc = frappe.get_doc("Warehouse", group)
+		doc.company = "_Test Company 1"
+		doc.account = None
+		doc.parent_warehouse = None
+		self.assertRaisesRegex(frappe.ValidationError, "child warehouses", doc.save)
+
+	def test_warehouse_account_must_be_stock_ledger(self):
+		income_account = frappe.db.get_value(
+			"Account", {"company": "_Test Company", "root_type": "Income", "is_group": 0}, "name"
+		)
+		group_stock_account = get_group_stock_account("_Test Company")
+
+		for account in (income_account, group_stock_account):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "_Test Wrong Account WH",
+					"company": "_Test Company",
+					"account": account,
+				}
+			)
+			self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_parent_warehouse_must_be_group_of_same_company(self):
+		other_company_group = frappe.db.get_value(
+			"Warehouse", {"company": "_Test Company 1", "is_group": 1}, "name"
+		)
+		for parent in ("_Test Warehouse - _TC", other_company_group):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": "_Test Wrong Parent WH",
+					"company": "_Test Company",
+					"parent_warehouse": parent,
+				}
+			)
+			self.assertRaises(frappe.ValidationError, doc.insert)
+
+	def test_warehouse_with_stock_cannot_be_disabled(self):
+		item = create_item("_Test Disable WH Item")
+		warehouse = create_warehouse("_Test Disable Stock WH")
+		make_stock_entry(item_code=item.name, target=warehouse, qty=5, basic_rate=100)
+
+		doc = frappe.get_doc("Warehouse", warehouse)
+		doc.disabled = 1
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+	def test_default_in_transit_warehouse_must_be_transit_ledger(self):
+		doc = frappe.get_doc("Warehouse", create_warehouse("_Test Transit Default WH"))
+		group = frappe.db.get_value("Warehouse", {"company": "_Test Company", "is_group": 1}, "name")
+
+		for transit_warehouse in ("_Test Warehouse - _TC", group):
+			doc.default_in_transit_warehouse = transit_warehouse
+			self.assertRaises(frappe.ValidationError, doc.save)
+
 	def test_get_children(self):
 		company = "_Test Company"
 
 		children = get_children("Warehouse", parent=company, company=company, is_root=True)
 		self.assertTrue(any(wh["value"] == "_Test Warehouse - _TC" for wh in children))
+
+	def test_inventory_account_fallback_with_multiple_stock_accounts(self):
+		from erpnext.stock import get_warehouse_account
+
+		company = INVENTORY_FALLBACK_COMPANY
+		frappe.db.set_value("Company", company, "default_inventory_account", None)
+		if frappe.db.exists("Account", "Extra Inventory Account - _TCIF"):
+			frappe.delete_doc("Account", "Extra Inventory Account - _TCIF")
+
+		warehouse = frappe.get_doc("Warehouse", {"company": company, "is_group": 0})
+		single_account = frappe.db.get_value(
+			"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
+		)
+		self.assertEqual(get_warehouse_account(warehouse), single_account)
+
+		create_account(
+			account_name="Extra Inventory Account",
+			parent_account=frappe.db.get_value("Account", single_account, "parent_account"),
+			account_type="Stock",
+			company=company,
+		)
+		self.assertRaises(frappe.ValidationError, get_warehouse_account, warehouse)
+
+	def test_unrelated_warehouse_without_inventory_account_is_ignored(self):
+		from erpnext.stock import get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		warehouse_account_map = get_warehouse_account_map(company)
+		resolved_warehouse = next(iter(warehouse_account_map))
+		stock_entry = frappe.get_doc({"doctype": "Stock Entry", "company": company})
+
+		self.assertNotIn(warehouse.name, warehouse_account_map)
+		self.assertTrue(
+			stock_entry.get_inventory_account_dict(
+				frappe._dict(warehouse=resolved_warehouse), warehouse_account_map
+			).account
+		)
+		self.assertFalse(
+			stock_entry.get_inventory_account_dict(
+				frappe._dict(supplier_warehouse=warehouse.name),
+				warehouse_account_map,
+				"supplier_warehouse",
+				raise_error=False,
+			)
+		)
+
+	def test_warehouse_without_inventory_account_is_validated_when_used(self):
+		from erpnext.stock import get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		stock_entry = frappe.get_doc({"doctype": "Stock Entry", "company": company})
+
+		with self.assertRaises(frappe.ValidationError):
+			stock_entry.get_inventory_account_dict(
+				frappe._dict(warehouse=warehouse.name), get_warehouse_account_map(company)
+			)
+
+	def test_new_warehouse_requires_inventory_account(self):
+		company, _warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+		parent_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
+		frappe.db.set_value("Warehouse", parent_warehouse, "account", None)
+		warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Missing Inventory Account",
+				"parent_warehouse": parent_warehouse,
+				"company": company,
+			}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Missing Inventory Account - _TCIF", warehouse.insert)
+
+	def test_new_warehouse_inherits_from_parent_created_in_same_transaction(self):
+		from erpnext.stock import get_warehouse_account
+
+		company, _warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+		root_warehouse = frappe.db.get_value("Warehouse", {"company": company, "is_group": 1}, "name")
+		inventory_account = frappe.db.get_value(
+			"Account", {"company": company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		parent_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "New Parent Warehouse",
+				"parent_warehouse": root_warehouse,
+				"company": company,
+				"is_group": 1,
+				"account": inventory_account,
+			}
+		).insert()
+		child_warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "New Child Warehouse",
+				"parent_warehouse": parent_warehouse.name,
+				"company": company,
+			}
+		).insert()
+
+		self.assertEqual(get_warehouse_account(child_warehouse), inventory_account)
+
+	def test_warehouse_onload_allows_missing_inventory_account(self):
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		frappe.db.set_value("Company", company, "enable_perpetual_inventory", 1)
+
+		warehouse.run_method("onload")
+
+		self.assertNotIn("account", warehouse.get_onload())
+
+	def test_stock_accounts_are_fetched_once_per_company(self):
+		from unittest.mock import patch
+
+		from erpnext.stock import get_company_stock_accounts, get_warehouse_account_map
+
+		company, warehouse = create_ambiguous_inventory_account_warehouse()
+		other_warehouse = frappe.get_all(
+			"Warehouse",
+			filters={"company": company, "is_group": 0, "name": ["!=", warehouse.name]},
+			pluck="name",
+			limit=1,
+		)[0]
+		frappe.db.set_value("Warehouse", other_warehouse, "account", None)
+
+		with patch(
+			"erpnext.stock.get_company_stock_accounts", wraps=get_company_stock_accounts
+		) as fetch_stock_accounts:
+			get_warehouse_account_map(company)
+
+		fetch_stock_accounts.assert_called_once_with(company)
+
+	def test_warehouse_account_company_validation(self):
+		company_1 = "_Test Company"
+		company_2 = "_Test Company 1"
+
+		account_company_2 = frappe.db.get_value(
+			"Account", {"company": company_2, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		warehouse = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"warehouse_name": "Test Company Account Mismatch",
+				"company": company_1,
+				"account": account_company_2,
+			}
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", warehouse.insert)
+
+		warehouse.account = None
+		warehouse.insert()
+
+		warehouse.account = account_company_2
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", warehouse.save)
+
+		warehouse.delete()
+
+
+def create_ambiguous_inventory_account_warehouse():
+	company = INVENTORY_FALLBACK_COMPANY
+	frappe.db.set_value("Company", company, "default_inventory_account", None)
+
+	single_account = frappe.db.get_value(
+		"Account", {"account_type": "Stock", "is_group": 0, "company": company}, "name"
+	)
+	warehouses = frappe.get_all(
+		"Warehouse", filters={"company": company, "is_group": 0}, pluck="name", order_by="name"
+	)
+	for warehouse_name in warehouses:
+		frappe.db.set_value("Warehouse", warehouse_name, "account", single_account)
+
+	warehouse = frappe.get_doc("Warehouse", warehouses[0])
+	warehouse.db_set({"account": None, "disabled": 0})
+
+	if not frappe.db.exists("Account", "Extra Inventory Account - _TCIF"):
+		create_account(
+			account_name="Extra Inventory Account",
+			parent_account=frappe.db.get_value("Account", single_account, "parent_account"),
+			account_type="Stock",
+			company=company,
+		)
+
+	return company, warehouse
 
 
 def create_warehouse(warehouse_name, properties=None, company=None):
@@ -103,7 +415,7 @@ def create_warehouse(warehouse_name, properties=None, company=None):
 	if not frappe.db.exists("Warehouse", warehouse_id):
 		w = frappe.new_doc("Warehouse")
 		w.warehouse_name = warehouse_name
-		w.parent_warehouse = "_Test Warehouse Group - _TC"
+		w.parent_warehouse = get_test_parent_warehouse(company)
 		w.company = company
 		w.account = get_warehouse_account(warehouse_name, company)
 		if properties:
@@ -112,6 +424,15 @@ def create_warehouse(warehouse_name, properties=None, company=None):
 		return w.name
 	else:
 		return warehouse_id
+
+
+def get_test_parent_warehouse(company):
+	if company == "_Test Company":
+		return "_Test Warehouse Group - _TC"
+
+	return frappe.db.get_value(
+		"Warehouse", {"company": company, "is_group": 1, "parent_warehouse": ("is", "not set")}, "name"
+	)
 
 
 def get_warehouse(**args):

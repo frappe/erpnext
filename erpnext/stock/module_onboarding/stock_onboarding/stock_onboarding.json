@@ -12,33 +12,44 @@
  "doctype": "Module Onboarding",
  "idx": 0,
  "is_complete": 0,
- "modified": "2026-02-25 16:59:45.630766",
+ "modified": "2026-10-04 01:46:59.607242",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Onboarding",
  "owner": "Administrator",
  "steps": [
   {
+   "is_optional": 0,
    "step": "Setup Warehouse"
   },
   {
+   "is_optional": 0,
    "step": "Create Item"
   },
   {
+   "is_optional": 0,
+   "step": "Create Opening Stock"
+  },
+  {
+   "is_optional": 0,
    "step": "Create Purchase Receipt"
   },
   {
-   "step": "Create Transfer Entry"
-  },
-  {
+   "is_optional": 0,
    "step": "Create Delivery Note"
   },
   {
-   "step": "View Stock Balance Report"
+   "is_optional": 1,
+   "step": "Move Stock"
   },
   {
-   "step": "Review Stock Settings"
+   "is_optional": 1,
+   "step": "View Stock Ledger"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Stock Balance Report"
   }
  ],
- "title": "Stock Setup"
+ "title": "Keep track of your stock"
 }

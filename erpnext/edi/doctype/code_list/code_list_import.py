@@ -1,15 +1,20 @@
 import json
+from html import unescape
 from urllib.parse import urlsplit
 
 import frappe
 import requests
 from frappe import _
+from frappe.core.doctype.file.utils import get_safe_file_name
 from frappe.utils import escape_html
 from frappe.utils.file_manager import save_file
 from lxml import etree
 
+from erpnext.edi.doctype.code_list.code_list import get_required_text
+
 GENERICODE_FETCH_TIMEOUT = 15
 LOCAL_FILE_PREFIXES = ("/files/", "/private/files/")
+DEFAULT_FILE_NAME = "genericode.xml"
 
 
 class RemoteGenericodeUrlNotAllowedError(Exception):
@@ -20,8 +25,11 @@ class CodeListSelectionMismatchError(Exception):
 	pass
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def import_genericode():
+	# check before save(), which only runs after the XML is fetched and parsed; denies exactly who save() would, sooner
+	frappe.has_permission("Code List", "create", throw=True)
+
 	try:
 		content, file_name = get_uploaded_genericode_file()
 
@@ -52,7 +60,7 @@ def import_genericode_from_url(
 ):
 	"""Import a Code List from a trusted backend URL."""
 	content = fetch_genericode_from_url(url)
-	file_name = urlsplit(url).path.rsplit("/", 1)[-1] or "genericode.xml"
+	file_name = urlsplit(url).path.rsplit("/", 1)[-1] or DEFAULT_FILE_NAME
 
 	return import_genericode_content(
 		doctype=doctype,
@@ -103,7 +111,7 @@ def import_genericode_content(
 	root = parse_genericode_content(content)
 
 	# Extract the name (CanonicalVersionUri) from the parsed XML
-	name = root.find(".//CanonicalVersionUri").text
+	name = get_required_text(root, ".//CanonicalVersionUri")
 	docname = docname or name
 
 	if frappe.db.exists(doctype, docname):
@@ -119,7 +127,7 @@ def import_genericode_content(
 	code_list.save()
 
 	file_doc = save_file(
-		fname=file_name,
+		fname=get_safe_file_name(file_name or "").lstrip(".") or DEFAULT_FILE_NAME,
 		content=content,
 		dt=doctype,
 		dn=code_list.name,
@@ -149,7 +157,7 @@ def parse_genericode_content(content: bytes):
 	return etree.fromstring(content, parser=parser)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def process_genericode_import(
 	code_list_name: str,
 	file_name: str,
@@ -160,11 +168,22 @@ def process_genericode_import(
 ):
 	from erpnext.edi.doctype.common_code.common_code import import_genericode
 
-	column_map = {"code": code_column, "title": title_column, "description": description_column}
+	# Same reasoning as above: common_code.save() enforces this per document, but only after the
+	# file has been read and its XML parsed and queried.
+	frappe.has_permission("Common Code", "create", throw=True)
+	frappe.has_permission("Code List", doc=code_list_name, throw=True)
 
-	return import_genericode(
-		code_list_name, file_name, column_map, frappe.parse_json(filters) if filters else None
-	)
+	# the dialog gets column ids and values HTML-escaped, match them against the raw file
+	column_map = {
+		"code": unescape(code_column),
+		"title": unescape(title_column) if title_column else None,
+		"description": unescape(description_column) if description_column else None,
+	}
+	filters = {
+		unescape(column): unescape(str(value)) for column, value in frappe.parse_json(filters or {}).items()
+	}
+
+	return import_genericode(code_list_name, file_name, column_map, filters)
 
 
 def get_genericode_columns_and_examples(root):

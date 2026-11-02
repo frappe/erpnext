@@ -14,7 +14,8 @@
   "section_break_mjlv",
   "due_date",
   "column_break_qghl",
-  "amount"
+  "amount",
+  "currency"
  ],
  "fields": [
   {
@@ -55,7 +56,17 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+   "options": "currency",
    "precision": "2"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_lnjp",
@@ -74,7 +85,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-01-19 02:21:36.455830",
+ "modified": "2026-07-11 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reference",

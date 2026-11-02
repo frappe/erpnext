@@ -178,13 +178,6 @@ frappe.help.help_links["Form/Print Settings"] = [
 	},
 ];
 
-frappe.help.help_links["print-format-builder"] = [
-	{
-		label: "Print Format Builder",
-		url: docsUrl + "user/manual/en/print-format-builder",
-	},
-];
-
 //setup-integrations
 
 frappe.help.help_links["Form/PayPal Settings"] = [

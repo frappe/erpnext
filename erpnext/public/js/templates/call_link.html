@@ -8,7 +8,7 @@
 			<span class="text-muted"> • {{ comment_when(creation) }}</span>
 		</div>
 		<span>
-			<a class="action-btn" href="/app/call-log/{{ name }}" title="{{ __("Open Call Log") }}">
+			<a class="action-btn" href="/app/call-log/{{ frappe.utils.escape_html(name) }}" title="{{ __("Open Call Log") }}">
 				<svg class="icon icon-sm">
 					<use href="#icon-link" class="like-icon"></use>
 				</svg>
@@ -34,7 +34,7 @@
 		<div class="margin-top">
 				<audio
 					controls
-					src="{{ recording_url }}">
+					src="{{ frappe.utils.escape_html(recording_url) }}">
 				</audio>
 		</div>
 		{% } %}

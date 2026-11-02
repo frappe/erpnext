@@ -53,6 +53,10 @@ erpnext.PointOfSale.ItemSelector = class {
 	async load_items_data() {
 		await this.item_ready_group;
 
+		// drop memoized search results so stock qty reflects the latest ledger
+		this.search_index = {};
+		this.cache_epoch = (this.cache_epoch || 0) + 1;
+
 		this.start_item_loading_animation();
 
 		if (!this.price_list) {
@@ -69,7 +73,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			});
 	}
 
-	get_items({ start = 0, page_length = 40, search_term = "" }) {
+	get_items({ start = 0, page_length = 40, search_term = "", item_code, record_type }) {
 		const doc = this.events.get_frm().doc;
 		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
@@ -77,7 +81,16 @@ erpnext.PointOfSale.ItemSelector = class {
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: { start, page_length, price_list, item_group, search_term, pos_profile },
+			args: {
+				start,
+				page_length,
+				price_list,
+				item_group,
+				search_term,
+				pos_profile,
+				item_code,
+				record_type,
+			},
 		});
 	}
 
@@ -119,6 +132,24 @@ erpnext.PointOfSale.ItemSelector = class {
 		</div>`;
 	}
 
+	// price list can be in another currency (e.g. USD list, INR invoice), so show/use the invoice price
+	convert_to_invoice_currency(price, currency) {
+		const doc = this.events.get_frm().doc || {};
+		if (
+			price == null ||
+			!doc.currency ||
+			currency === doc.currency ||
+			!doc.plc_conversion_rate ||
+			!doc.conversion_rate
+		)
+			return { price, currency };
+
+		return {
+			price: (flt(price) * flt(doc.plc_conversion_rate)) / flt(doc.conversion_rate),
+			currency: doc.currency,
+		};
+	}
+
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
@@ -143,7 +174,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			uom,
 			price_list_rate,
 		} = sanitize_item;
-		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
+		const shown = me.convert_to_invoice_currency(price_list_rate, item.currency);
+		const doc = me.events.get_frm().doc;
+		const rate_df = doc && frappe.meta.get_docfield(`${doc.doctype} Item`, "price_list_rate");
+		// whole prices without decimals, others with the invoice rate field's precision (e.g. 3 for KWD)
+		const precision =
+			flt(shown.price, 6) % 1 == 0 ? 0 : rate_df ? frappe.meta.get_field_precision(rate_df, doc) : 2;
 		let indicator_color;
 		let qty_to_display = actual_qty;
 
@@ -184,6 +220,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				data-item-code="${item_code}" data-serial-no="${serial_no}"
 				data-batch-no="${batch_no}" data-uom="${uom}"
 				data-rate="${price_list_rate || 0}"
+				data-currency="${sanitize_item.currency}"
 				data-stock-uom="${stock_uom}"
 				title="${item_name}">
 
@@ -196,12 +233,12 @@ erpnext.PointOfSale.ItemSelector = class {
 					${
 						!me.hide_images
 							? `<div class="item-rate">
-								${frappe.utils.escape_html(format_currency(price_list_rate, item.currency, precision)) || 0} / ${uom}
+								${frappe.utils.escape_html(format_currency(shown.price, shown.currency, precision)) || 0} / ${uom}
 							</div>`
 							: `
 							<div class="item-price">${
 								frappe.utils.escape_html(
-									format_currency(price_list_rate, item.currency, precision)
+									format_currency(shown.price, shown.currency, precision)
 								) || 0
 							}</div>
 							<div class="item-uom">${uom}</div>
@@ -361,10 +398,13 @@ erpnext.PointOfSale.ItemSelector = class {
 			let stock_uom = $item.attr("data-stock-uom");
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
-			batch_no = batch_no === "undefined" ? undefined : batch_no;
+			batch_no = ["undefined", "null"].includes(batch_no) ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
-			rate = rate === "undefined" ? undefined : rate;
+			rate =
+				rate === "undefined"
+					? undefined
+					: me.convert_to_invoice_currency(rate, $item.attr("data-currency")).price;
 			stock_uom = stock_uom === "undefined" ? undefined : stock_uom;
 
 			me.events.item_selected({
@@ -432,46 +472,47 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 	}
 
-	filter_items({ search_term = "" } = {}) {
+	async filter_items({ search_term = "" } = {}) {
 		this.start_item_loading_animation();
-
 		const selling_price_list = this.events.get_frm().doc.selling_price_list;
+		this.search_index = this.search_index || {};
+		const cache = (this.search_index[selling_price_list] ||= {});
+		const cache_key = search_term.toLowerCase();
 
-		if (search_term) {
-			search_term = search_term.toLowerCase();
-
-			// memoize
-			this.search_index = this.search_index || {};
-			this.search_index[selling_price_list] = this.search_index[selling_price_list] || {};
-			if (this.search_index[selling_price_list][search_term]) {
-				const items = this.search_index[selling_price_list][search_term];
-				this.items = items;
-				this.render_item_list(items);
-				this.auto_add_item &&
-					this.search_field.$input[0].value &&
-					this.items.length == 1 &&
-					this.add_filtered_item_to_cart();
-				return;
-			}
-		}
-
-		this.get_items({ search_term })
-			.then(({ message }) => {
-				// eslint-disable-next-line no-unused-vars
-				const { items, serial_no, batch_no, barcode } = message;
-				if (search_term && !barcode) {
-					this.search_index[selling_price_list][search_term] = items;
+		try {
+			let items = search_term && cache[cache_key];
+			if (!items) {
+				const epoch = this.cache_epoch;
+				let { message } = await this.get_items({ search_term });
+				if (message.candidates?.length) {
+					this.items = [];
+					this.$items_container.empty();
+					const selected = await erpnext.utils.BarcodeScanner.select_scan_match(message.candidates);
+					if (!selected) return;
+					({ message } = await this.get_items({
+						search_term,
+						item_code: selected.item_code,
+						record_type: selected.record_type,
+					}));
 				}
-				this.items = items;
-				this.render_item_list(items);
-				this.auto_add_item &&
-					this.search_field.$input[0].value &&
-					this.items.length == 1 &&
-					this.add_filtered_item_to_cart();
-			})
-			.always(() => {
-				this.stop_item_loading_animation();
-			});
+				items = message.items || [];
+				if (
+					search_term &&
+					!message.barcode_scan &&
+					!message.candidates &&
+					epoch === this.cache_epoch
+				) {
+					cache[cache_key] = items;
+				}
+			}
+			this.items = items;
+			this.render_item_list(items);
+			if (this.auto_add_item && this.search_field.get_value() && items.length === 1) {
+				this.add_filtered_item_to_cart();
+			}
+		} finally {
+			this.stop_item_loading_animation();
+		}
 	}
 
 	start_item_loading_animation() {

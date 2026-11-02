@@ -44,13 +44,15 @@ class ShopFloor {
 		this.view = "operator"; // overwritten once context loads
 		this.active_bucket = "open";
 		this.with_job_cards_only = true; // board default: hide WOs that have no job cards
-		this.buckets = {}; // key -> { rows, total, start, loaded }
+		this.buckets = {}; // key -> { rows, total, page_length }
+		this.board_request = 0;
 		this.selected_wo = null;
 		this.focus_index = -1;
 		this.op_state = { workstation: null, work_order: null };
+		// Job Card updates arrive for the whole site, so cap reloads on a busy floor.
+		this.throttled_reload = frappe.utils.throttle(() => this.reload_operations(), 2000);
 
 		this.make();
-		this.bind_realtime();
 		this.bind_lifecycle();
 		this.init();
 	}
@@ -287,27 +289,29 @@ class ShopFloor {
 		this.load_bucket(this.active_bucket);
 	}
 
-	load_bucket(bucket, append = false) {
-		const state = this.buckets[bucket] || { rows: [], total: 0, start: 0, loaded: false };
-		const start = append ? state.start : 0;
+	load_bucket(bucket, more = false) {
+		const state = this.buckets[bucket];
+		// Every request fetches all pages asked for, so a reload can't undo "Load more".
+		if (state && more) state.page_length += PAGE_LENGTH;
+		const page_length = state?.page_length || PAGE_LENGTH;
+		// Only the latest request applies, so an older reply can't replace newer rows.
+		const request = ++this.board_request;
 
 		frappe.call({
 			method: "erpnext.manufacturing.page.shop_floor.shop_floor.get_work_orders",
 			args: {
 				status_group: bucket,
-				start: start,
-				page_length: PAGE_LENGTH,
+				page_length: page_length,
 				search: this.search_term || null,
 				with_job_cards_only: this.with_job_cards_only ? 1 : 0,
 			},
 			callback: (r) => {
+				if (request !== this.board_request) return;
 				const data = r.message || {};
-				const rows = data.work_orders || [];
 				this.buckets[bucket] = {
-					rows: append ? state.rows.concat(rows) : rows,
+					rows: data.work_orders || [],
 					total: cint(data.total),
-					start: start + rows.length,
-					loaded: true,
+					page_length: page_length,
 				};
 				this.update_tab_count(bucket);
 				if (bucket === this.active_bucket) this.render_board();
@@ -323,7 +327,9 @@ class ShopFloor {
 
 	render_board() {
 		const state = this.buckets[this.active_bucket] || { rows: [], total: 0 };
-		this.focus_index = -1;
+		// Realtime reloads re-render the board, so keep keyboard focus on the same work order.
+		const focused = this.focused_el()?.attr("data-name");
+		this.focus_index = state.rows.findIndex((wo) => wo.name === focused);
 
 		if (!state.rows.length) {
 			this.board_container.html(`<div class="sf-empty">${__("No work orders here.")}</div>`);
@@ -341,6 +347,7 @@ class ShopFloor {
 		this.board_container.html(
 			`<div class="sf-wo-grid">${cards}</div><div class="sf-board-more">${more}</div>`
 		);
+		this.focused_el()?.addClass("sf-focused");
 
 		this.board_container.find(".sf-wo-card").on("click", (e) => {
 			this.open_wo($(e.currentTarget).attr("data-name"));
@@ -356,7 +363,7 @@ class ShopFloor {
 		// Hero image = the current operation's workstation. No item-image fallback — when the
 		// workstation has no image uploaded we show its initials, never the product image.
 		const image = wo.workstation_image
-			? `<img src="${wo.workstation_image}" alt="">`
+			? `<img src="${frappe.utils.escape_html(wo.workstation_image)}" alt="">`
 			: `<span class="sf-wo-image-fallback">${frappe.get_abbr(wo.workstation_name || item, 2)}</span>`;
 
 		const workstation_line = wo.workstation_name
@@ -370,7 +377,9 @@ class ShopFloor {
 		const wip_pct = Math.min(cint(wo.per_in_progress), 100 - done_pct);
 
 		return `
-			<div class="sf-wo-card" data-sf-focusable data-kind="wo" data-name="${wo.name}" tabindex="0">
+			<div class="sf-wo-card" data-sf-focusable data-kind="wo" data-name="${frappe.utils.escape_html(
+				wo.name
+			)}" tabindex="0">
 				<div class="sf-wo-top">
 					<div class="sf-wo-image">${image}</div>
 					<div class="sf-wo-head">
@@ -378,7 +387,9 @@ class ShopFloor {
 						${workstation_line}
 						<div class="sf-wo-id">
 							<span class="sf-wo-status-dot ${wo.status_colour}" title="${frappe.utils.escape_html(__(wo.status))}"></span>
-							<a href="/app/work-order/${wo.name}" onclick="event.stopPropagation()">${wo.name}</a>
+							<a href="/app/work-order/${encodeURIComponent(
+								wo.name
+							)}" onclick="event.stopPropagation()">${frappe.utils.escape_html(wo.name)}</a>
 						</div>
 					</div>
 				</div>
@@ -405,16 +416,18 @@ class ShopFloor {
 		this.board_container
 			.find(".sf-wo-card")
 			.removeClass("sf-selected")
-			.filter(`[data-name="${name}"]`)
+			.filter(`[data-name="${$.escapeSelector(name)}"]`)
 			.addClass("sf-selected");
 		// The detail pane reuses the operator rendering for a single work order.
 		this.detail_container.html(`
 			<div class="sf-detail-head">
-				<button class="btn btn-default btn-sm sf-detail-back">${frappe.utils.icon("left", "sm")} ${__(
+				<button class="btn btn-default btn-sm sf-detail-back">${frappe.utils.icon("chevron-left", "sm")} ${__(
 			"Back"
 		)} (Esc)</button>
 				<span class="sf-detail-title">${frappe.utils.escape_html(name)}</span>
-				<a class="btn btn-default btn-sm" href="/app/work-order/${name}" target="_blank">${__("Open")}</a>
+				<a class="btn btn-default btn-sm" href="/app/work-order/${encodeURIComponent(name)}" target="_blank">${__(
+			"Open"
+		)}</a>
 			</div>
 			<div class="sf-detail-body"></div>
 		`);
@@ -496,6 +509,17 @@ class ShopFloor {
 		} else {
 			this.load_operator();
 		}
+	}
+
+	reload_operations() {
+		if (this.view !== "manager") {
+			this.load_operator();
+			return;
+		}
+		if (this.selected_wo) {
+			this.load_operator_data(this.op_container_target, { work_order: this.selected_wo });
+		}
+		this.load_bucket(this.active_bucket);
 	}
 
 	refresh() {
@@ -786,16 +810,20 @@ class ShopFloor {
 			pending = flt(jc.pending_qty);
 		}
 
+		const qty_with_uom = (qty) => `${flt(qty)} ${jc.stock_uom || ""}`.trim();
+
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const d = me.session_dialog;
 					d.set_value("completed_qty", d.get_value("for_quantity"));
+					d.set_value("pending_qty", 0);
 					d.set_value("process_loss_qty", 0);
 				},
 			},
@@ -807,8 +835,23 @@ class ShopFloor {
 				default: pending,
 				change() {
 					const d = me.session_dialog;
-					const remaining = flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"));
-					if (remaining > 0 && remaining !== flt(d.get_value("pending_qty"))) {
+					const remaining =
+						flt(d.get_value("for_quantity")) -
+						flt(d.get_value("completed_qty")) -
+						flt(d.get_value("process_loss_qty"));
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(d.get_value("for_quantity")) - flt(d.get_value("process_loss_qty"));
+						d.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [
+								qty_with_uom(max_completed_qty),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
@@ -818,13 +861,26 @@ class ShopFloor {
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
 				default: 0.0,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const d = me.session_dialog;
 					const pl =
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("pending_qty"));
-					if (pl >= 0 && pl !== flt(d.get_value("process_loss_qty"))) {
+
+					if (pl < 0) {
+						d.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
+							])
+						);
+					}
+
+					if (pl !== flt(d.get_value("process_loss_qty"))) {
 						d.set_value("process_loss_qty", pl);
 					}
 				},
@@ -834,13 +890,26 @@ class ShopFloor {
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
 				default: 0.0,
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				change() {
 					const d = me.session_dialog;
 					const remaining =
 						flt(d.get_value("for_quantity")) -
 						flt(d.get_value("completed_qty")) -
 						flt(d.get_value("process_loss_qty"));
-					if (remaining >= 0 && remaining !== flt(d.get_value("pending_qty"))) {
+
+					if (remaining < 0) {
+						d.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								qty_with_uom(
+									flt(d.get_value("for_quantity")) - flt(d.get_value("completed_qty"))
+								),
+							])
+						);
+					}
+
+					if (remaining !== flt(d.get_value("pending_qty"))) {
 						d.set_value("pending_qty", remaining);
 					}
 				},
@@ -1190,7 +1259,7 @@ class ShopFloor {
 		const pad = (n) => (n < 10 ? "0" + n : String(n));
 
 		const scope = $container || this.wrapper;
-		const timer = scope.find(`.mes-job-timer[data-job-card="${jc_name}"]`);
+		const timer = scope.find(`.mes-job-timer[data-job-card="${$.escapeSelector(jc_name)}"]`);
 		timer.find(".h").text(pad(h));
 		timer.find(".m").text(pad(m));
 		timer.find(".s").text(pad(s));
@@ -1198,11 +1267,21 @@ class ShopFloor {
 
 	// ── Realtime + lifecycle ───────────────────────────────────────────────────
 	bind_realtime() {
-		frappe.realtime.on("update_workstation_status", (data) => {
-			if (data && data.name === this.op_state.workstation) {
-				this.reload();
+		frappe.realtime.doctype_subscribe("Workstation");
+		frappe.realtime.doctype_subscribe("Job Card");
+		if (this.status_handler) {
+			frappe.realtime.off("list_update", this.status_handler);
+		}
+		this.status_handler = (data) => {
+			if (
+				this.initialized &&
+				frappe.get_route()[0] === "shop-floor" &&
+				["Workstation", "Job Card"].includes(data.doctype)
+			) {
+				this.throttled_reload();
 			}
-		});
+		};
+		frappe.realtime.on("list_update", this.status_handler);
 	}
 
 	bind_lifecycle() {
@@ -1223,11 +1302,18 @@ class ShopFloor {
 	}
 
 	on_show() {
+		this.bind_realtime();
 		$(document.body).addClass("shop-floor-active");
 		this.bind_keys();
 		// Cached re-navigation (e.g. the Work Order "Shop Floor" button) lands here with fresh
 		// route_options; init() handles the very first load before we're initialized.
-		if (this.initialized) this.apply_route_options();
+		if (this.initialized) {
+			if (frappe.route_options?.work_order || frappe.route_options?.workstation) {
+				this.apply_route_options();
+			} else {
+				this.refresh();
+			}
+		}
 	}
 
 	// ── Keyboard ────────────────────────────────────────────────────────────────

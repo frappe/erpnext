@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "Add Bank Account",
+ "creation": "2026-10-04 01:25:22.669022",
+ "description": "The account your customers pay into and you pay from, linked to its account in your chart of accounts. See [Bank Account](https://docs.frappe.io/erpnext/user/manual/en/bank-account).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:33:32.308446",
+ "modified_by": "Administrator",
+ "name": "Add Bank Account",
+ "owner": "Administrator",
+ "reference_document": "Bank Account",
+ "route_options": "{\n    \"is_company_account\": 1\n}",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Add the bank account you use",
+ "validate_action": 1
+}

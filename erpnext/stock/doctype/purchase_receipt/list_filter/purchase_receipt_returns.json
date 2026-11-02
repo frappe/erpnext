@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"posting_date\", \"label\": \"Date\"}, {\"fieldname\": \"return_against\", \"label\": \"Return Against Purchase Receipt\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.840415",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Returns",
+ "filters": "[[\"Purchase Receipt\", \"is_return\", \"=\", 1], [\"Purchase Receipt\", \"docstatus\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.840415",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Purchase Receipt-Returns",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Receipt",
+ "route_signature": "docstatus=1&is_return=1",
+ "sort_field": "posting_date",
+ "sort_order": "desc"
+}

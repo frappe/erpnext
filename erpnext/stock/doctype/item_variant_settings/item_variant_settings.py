@@ -24,7 +24,12 @@ class ItemVariantSettings(Document):
 		fields: DF.Table[VariantField]
 	# end: auto-generated types
 
-	invalid_fields_for_copy_fields_in_variants: typing.ClassVar[list] = ["barcodes"]
+	invalid_fields_for_copy_fields_in_variants: typing.ClassVar[list] = [
+		"barcodes",
+		"attributes",
+		"has_variants",
+		"variant_of",
+	]
 
 	def set_default_fields(self):
 		self.fields = []

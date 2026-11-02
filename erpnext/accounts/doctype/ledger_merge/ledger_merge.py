@@ -24,6 +24,7 @@ class LedgerMerge(Document):
 
 		account: DF.Link
 		account_name: DF.Data
+		account_type: DF.Data | None
 		company: DF.Link
 		is_group: DF.Check
 		merge_accounts: DF.Table[LedgerMergeAccounts]
@@ -56,7 +57,9 @@ class LedgerMerge(Document):
 
 @frappe.whitelist()
 def form_start_merge(docname: str):
-	return frappe.get_doc("Ledger Merge", docname).start_merge()
+	lm_doc = frappe.get_doc("Ledger Merge", docname)
+	lm_doc.check_permission("write")
+	return lm_doc.start_merge()
 
 
 def start_merge(docname):
@@ -78,6 +81,8 @@ def start_merge(docname):
 				frappe.publish_realtime(
 					"ledger_merge_progress",
 					{"ledger_merge": ledger_merge.name, "current": successful_merges, "total": total},
+					doctype=ledger_merge.doctype,
+					docname=ledger_merge.name,
 				)
 			except Exception:
 				frappe.db.rollback(save_point="ledger_merge_row")
@@ -90,4 +95,9 @@ def start_merge(docname):
 				else:
 					ledger_merge.db_set("status", "Error")
 
-	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})
+	frappe.publish_realtime(
+		"ledger_merge_refresh",
+		{"ledger_merge": ledger_merge.name},
+		doctype=ledger_merge.doctype,
+		docname=ledger_merge.name,
+	)

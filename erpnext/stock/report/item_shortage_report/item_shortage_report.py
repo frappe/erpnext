@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils.nestedset import get_descendants_of
 
 
 def execute(filters=None):
@@ -32,9 +33,12 @@ def get_data(filters):
 			bin.item_code,
 			bin.actual_qty,
 			bin.ordered_qty,
+			bin.indented_qty,
 			bin.planned_qty,
 			bin.reserved_qty,
 			bin.reserved_qty_for_production,
+			bin.reserved_qty_for_sub_contract,
+			bin.reserved_qty_for_production_plan,
 			bin.projected_qty,
 			wh.company,
 			item.item_name,
@@ -49,13 +53,21 @@ def get_data(filters):
 		.orderby(bin.projected_qty)
 	)
 
-	if filters.get("warehouse"):
-		query = query.where(bin.warehouse.isin(filters.get("warehouse")))
+	if warehouses := filters.get("warehouse"):
+		query = query.where(bin.warehouse.isin(get_warehouses_with_descendants(warehouses)))
 
 	if filters.get("company"):
 		query = query.where(wh.company == filters.get("company"))
 
 	return query.run(as_dict=True)
+
+
+def get_warehouses_with_descendants(warehouses):
+	result = set(warehouses)
+	for warehouse in warehouses:
+		result.update(get_descendants_of("Warehouse", warehouse))
+
+	return list(result)
 
 
 def get_chart_data(data):
@@ -106,6 +118,13 @@ def get_columns():
 			"convertible": "qty",
 		},
 		{
+			"label": _("Requested Quantity"),
+			"fieldname": "indented_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
 			"label": _("Planned Quantity"),
 			"fieldname": "planned_qty",
 			"fieldtype": "Float",
@@ -122,6 +141,20 @@ def get_columns():
 		{
 			"label": _("Reserved Quantity for Production"),
 			"fieldname": "reserved_qty_for_production",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved Quantity for Subcontracting"),
+			"fieldname": "reserved_qty_for_sub_contract",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty",
+		},
+		{
+			"label": _("Reserved Quantity for Production Plan"),
+			"fieldname": "reserved_qty_for_production_plan",
 			"fieldtype": "Float",
 			"width": 120,
 			"convertible": "qty",

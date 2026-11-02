@@ -2,13 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from math import isfinite
 from typing import Any
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, get_link_to_form, get_number_format_info
+from frappe.query_builder.functions import IfNull
+from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils.number_format import NUMBER_FORMAT_MAP, NumberFormat
 
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -75,20 +78,29 @@ class QualityInspection(Document):
 			self.get_item_specification_details()
 
 		if self.inspection_type == "In Process" and self.reference_type == "Job Card":
-			item_qi_template = frappe.db.get_value("Item", self.item_code, "quality_inspection_template")
-			parameters = get_template_details(item_qi_template)
-			for reading in self.readings:
-				for d in parameters:
-					if reading.specification == d.specification:
-						reading.update(d)
-						reading.status = "Accepted"
+			self.set_acceptance_criteria_from_template()
 
 		if self.readings:
+			self.validate_reading_number_format()
 			self.inspect_and_set_status()
 
 		self.validate_inspection_required()
+		self.validate_status()
 		self.set_child_row_reference()
 		self.set_company()
+
+	def set_acceptance_criteria_from_template(self):
+		template = self.quality_inspection_template or frappe.db.get_value(
+			"Item", self.item_code, "quality_inspection_template"
+		)
+		parameters = {d.specification: d for d in get_template_details(template)}
+		for reading in self.readings:
+			if criteria := parameters.get(reading.specification):
+				reading.update(criteria)
+
+	def validate_status(self):
+		if self.status == "Cancelled" and self.docstatus < 2:
+			frappe.throw(_("Status Cancelled can only be set by cancelling the Quality Inspection"))
 
 	def set_company(self):
 		if self.reference_type and self.reference_name:
@@ -110,10 +122,14 @@ class QualityInspection(Document):
 		child_doc = frappe.qb.DocType(doctype)
 		qi_doc = frappe.qb.DocType("Quality Inspection")
 
-		child_row_references = (
+		query = (
 			frappe.qb.from_(child_doc)
 			.left_join(qi_doc)
-			.on(child_doc.name == qi_doc.child_row_reference)
+			.on(
+				(child_doc.name == qi_doc.child_row_reference)
+				& (qi_doc.docstatus < 2)
+				& (qi_doc.name != self.name)
+			)
 			.select(child_doc.name)
 			.where(
 				(child_doc.item_code == self.item_code)
@@ -122,10 +138,28 @@ class QualityInspection(Document):
 				& (qi_doc.name.isnull())
 			)
 			.orderby(child_doc.idx)
-		).run(pluck=True)
+		)
+		if self.batch_no and frappe.get_meta(doctype).has_field("batch_no"):
+			query = query.where(child_doc.batch_no == self.batch_no)
 
-		if len(child_row_references):
+		if child_row_references := query.run(pluck=True):
 			self.child_row_reference = child_row_references[0]
+		elif frappe.get_meta(doctype).has_field("quality_inspection") and self.has_inspected_rows(doctype):
+			frappe.throw(
+				_("Every row of Item {0} in {1} {2} already has a Quality Inspection").format(
+					frappe.bold(self.item_code), _(self.reference_type), frappe.bold(self.reference_name)
+				)
+			)
+
+	def has_inspected_rows(self, doctype):
+		return frappe.db.exists(
+			doctype,
+			{
+				"parent": self.reference_name,
+				"item_code": self.item_code,
+				"quality_inspection": ("not in", ["", self.name]),
+			},
+		)
 
 	def validate_inspection_required(self):
 		if frappe.db.get_single_value(
@@ -152,7 +186,12 @@ class QualityInspection(Document):
 			)
 
 	def before_submit(self):
+		self.validate_sample_size()
 		self.validate_readings_status_mandatory()
+
+	def validate_sample_size(self):
+		if flt(self.sample_size) <= 0:
+			frappe.throw(_("Sample Size must be greater than zero"), title=_("Invalid Sample Size"))
 
 	@frappe.whitelist()
 	def get_item_specification_details(self):
@@ -201,10 +240,41 @@ class QualityInspection(Document):
 		):
 			self.update_qc_reference()
 
+	def before_cancel(self):
+		self.validate_not_used_by_submitted_document()
+
+	def validate_not_used_by_submitted_document(self):
+		if not (self.reference_type and self.reference_name) or frappe.db.get_single_value(
+			"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+		):
+			return
+
+		if frappe.db.get_value(self.reference_type, self.reference_name, "docstatus") != 1:
+			return
+
+		if self.is_linked_on_reference():
+			frappe.throw(
+				_("Quality Inspection {0} is used by {1} {2}. Cancel {2} first.").format(
+					frappe.bold(self.name),
+					_(self.reference_type),
+					get_link_to_form(self.reference_type, self.reference_name),
+				)
+			)
+
+	def is_linked_on_reference(self):
+		if self.reference_type == "Job Card":
+			return frappe.db.get_value("Job Card", self.reference_name, "quality_inspection") == self.name
+
+		doctype = (
+			"Stock Entry Detail" if self.reference_type == "Stock Entry" else self.reference_type + " Item"
+		)
+		return frappe.db.exists(doctype, {"parent": self.reference_name, "quality_inspection": self.name})
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = "Serial and Batch Bundle"
 
 		self.update_qc_reference()
+		self.db_set("status", "Cancelled")
 
 	def on_trash(self):
 		self.update_qc_reference(remove_reference=True)
@@ -247,8 +317,10 @@ class QualityInspection(Document):
 				if self.batch_no and self.docstatus < 2:
 					query = query.where(child_doc.batch_no == self.batch_no)
 
-				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
+				if self.docstatus == 2 or remove_reference:
 					query = query.where(child_doc.quality_inspection == self.name)
+				else:
+					query = query.where(IfNull(child_doc.quality_inspection, "").isin(["", self.name]))
 
 				if self.child_row_reference:
 					query = query.where(child_doc.name == self.child_row_reference)
@@ -261,6 +333,9 @@ class QualityInspection(Document):
 					"modified",
 					self.modified,
 				)
+
+		if self.reference_type and self.reference_name:
+			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
 
 	def inspect_and_set_status(self):
 		for reading in self.readings:
@@ -280,6 +355,47 @@ class QualityInspection(Document):
 						_("Status set to rejected as there are one or more rejected readings."), alert=True
 					)
 					break
+
+	def validate_reading_number_format(self):
+		"""Reject newly entered readings that are not numbers in the user's format.
+
+		They would otherwise be misread rather than refused, silently rejecting an
+		inspection whose readings are in fact within the acceptance range. Readings
+		already stored are left alone, so a document entered by a user in one locale
+		stays saveable and submittable by a user in another."""
+		number_format = get_reading_number_format()
+		decimal_str, comma_str = get_reading_separators(number_format)
+		before_save = self.get_doc_before_save()
+
+		for reading in self.readings:
+			if not cint(reading.numeric) or cint(reading.manual_inspection):
+				continue
+
+			stored = before_save and before_save.get("readings", {"name": reading.name})
+			stored = stored[0] if stored else None
+
+			for i in range(1, 11):
+				field = "reading_" + str(i)
+				value = reading.get(field)
+				if value is None or not value.strip():
+					continue
+
+				if stored and stored.get(field) == value:
+					continue
+
+				if parse_reading(value, decimal_str, comma_str) is None:
+					frappe.throw(
+						_(
+							"Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator."
+						).format(
+							reading.idx,
+							i,
+							frappe.bold(value),
+							frappe.bold(number_format.string),
+							frappe.bold(decimal_str),
+						),
+						title=_("Invalid Reading"),
+					)
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
@@ -375,10 +491,12 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 	if not reference_doctype:
 		return []
 	elif reference_doctype == "Job Card":
-		production_item, item_name = frappe.get_value(
-			"Job Card", filters.get("reference_name"), ["production_item", "item_name"]
+		return frappe.get_list(
+			"Job Card",
+			filters={"name": filters.get("reference_name")},
+			fields=["production_item", "item_name"],
+			as_list=True,
 		)
-		return ((production_item, item_name),)
 	else:
 		my_filters = [
 			["items.parent", "=", filters.get("reference_name")],
@@ -399,7 +517,7 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 					"and",
 					["items.secondary_item_type", "is", "not set"],
 					"and",
-					["items.is_legacy_scrap_item", "=", 0],
+					["items.valuation_type", "is", "not set"],
 				]
 			)
 			if purpose == "Manufacture":
@@ -473,7 +591,7 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 def quality_inspection_query(
 	doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict
 ):
-	return frappe.get_all(
+	return frappe.get_list(
 		"Quality Inspection",
 		limit_start=start,
 		limit_page_length=page_len,
@@ -489,7 +607,7 @@ def quality_inspection_query(
 
 
 @frappe.whitelist()
-def make_quality_inspection(source_name: str, target_doc: Document | str | None = None):
+def make_quality_inspection(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
 		doc.inspected_by = frappe.session.user
 		doc.get_quality_inspection_template()
@@ -511,17 +629,61 @@ def make_quality_inspection(source_name: str, target_doc: Document | str | None 
 	return doc
 
 
+def get_reading_number_format() -> NumberFormat:
+	"""Number format the user enters readings in.
+
+	User defaults fall back to the global default, so this is the same format the
+	user's desk formats numbers with."""
+	number_format = frappe.defaults.get_user_default("number_format")
+	if number_format not in NUMBER_FORMAT_MAP:
+		number_format = "#,###.##"
+
+	return NumberFormat.from_string(number_format)
+
+
+def get_reading_separators(number_format: NumberFormat) -> tuple[str, str]:
+	"""Decimal and thousands separator a reading may be written with.
+
+	A format with no decimal separator still has to accept decimal readings, so it
+	falls back to a dot and gives up any grouping that would collide with it."""
+	decimal_str = number_format.decimal_separator or "."
+	comma_str = number_format.thousands_separator
+
+	return decimal_str, "" if comma_str == decimal_str else comma_str
+
+
+def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
+	"""Reading as a float, or None when it is not a number in that format."""
+	value = value.strip()
+	integer_part = value.partition(decimal_str)[0]
+
+	if comma_str and comma_str in integer_part:
+		groups = integer_part.split(comma_str)
+		lead = groups[0][1:] if groups[0][:1] in ("+", "-") else groups[0]
+		if not 1 <= len(lead) <= 3 or len(groups[-1]) != 3:
+			return None
+
+		if any(len(group) not in (2, 3) for group in groups[1:-1]):
+			return None
+
+		value = value.replace(comma_str, "")
+
+	if decimal_str != ".":
+		value = value.replace(decimal_str, ".")
+
+	try:
+		number = float(value)
+	except ValueError:
+		return None
+
+	return number if isfinite(number) else None
+
+
 def parse_float(num: str) -> float:
 	"""Since reading_# fields are `Data` field they might contain number which
 	is representation in user's prefered number format instead of machine
 	readable format. This function converts them to machine readable format."""
 
-	number_format = frappe.db.get_default("number_format") or "#,###.##"
-	decimal_str, comma_str, _number_format_precision = get_number_format_info(number_format)
+	decimal_str, comma_str = get_reading_separators(get_reading_number_format())
 
-	if decimal_str == "," and comma_str == ".":
-		num = num.replace(",", "#$")
-		num = num.replace(".", ",")
-		num = num.replace("#$", ".")
-
-	return flt(num)
+	return flt(parse_reading(num, decimal_str, comma_str))

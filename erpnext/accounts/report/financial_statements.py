@@ -20,7 +20,11 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 	get_doctypes_with_dimensions,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+)
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
 
@@ -427,7 +431,7 @@ def calculate_values(
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
-						not ignore_accumulated_values_for_fy
+						not (accumulated_values and ignore_accumulated_values_for_fy)
 						or entry.fiscal_year == period.to_date_fiscal_year
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
@@ -633,6 +637,7 @@ def set_gl_entries_by_account(
 
 	# For balance sheet
 	ignore_closing_balances = frappe.get_single_value("Accounts Settings", "ignore_account_closing_balance")
+	ignore_closing_balances = ignore_closing_balances or has_gl_entry_restrictions()
 	if not from_date and not ignore_closing_balances:
 		last_period_closing_voucher = frappe.db.get_all(
 			"Period Closing Voucher",
@@ -993,20 +998,13 @@ def compute_growth_view_data(data, columns):
 			data[row_idx][current_period_key] = growth_percent
 
 
-def compute_margin_view_data(data, columns):
-	if not columns:
+def compute_margin_view_data(data, columns, base_row: dict | None):
+	"""Express every row as a percentage of `base_row`, the income total row."""
+	if not columns or not base_row:
 		return
 
 	data_copy = copy.deepcopy(data)
-
-	base_row = None
-	for row in data_copy:
-		if row.get("account_name") == _("Income"):
-			base_row = row
-			break
-
-	if not base_row:
-		return
+	base_row = copy.deepcopy(base_row)
 
 	for row_idx in range(len(data_copy)):
 		# Taking the total income from each column (for all the financial years) as the base (100%)

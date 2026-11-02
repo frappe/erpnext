@@ -12,30 +12,48 @@
  "doctype": "Module Onboarding",
  "idx": 4,
  "is_complete": 0,
- "modified": "2026-02-23 22:51:34.267812",
+ "modified": "2026-10-04 03:10:04.115901",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Onboarding",
  "owner": "Administrator",
  "steps": [
   {
+   "is_optional": 0,
    "step": "Chart of Accounts"
   },
   {
-   "step": "Setup Sales taxes"
+   "is_optional": 0,
+   "step": "Review Taxes"
   },
   {
-   "step": "Create Sales Invoice"
+   "is_optional": 0,
+   "step": "Add Bank Account"
   },
   {
-   "step": "Create Payment Entry"
+   "is_optional": 1,
+   "step": "Create Accounting Purchase Invoice"
   },
   {
+   "is_optional": 1,
+   "step": "Create Journal Entry"
+  },
+  {
+   "is_optional": 1,
+   "step": "Open Banking"
+  },
+  {
+   "is_optional": 1,
+   "step": "View General Ledger"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Profit and Loss"
+  },
+  {
+   "is_optional": 1,
    "step": "View Balance Sheet"
-  },
-  {
-   "step": "Review Accounts Settings"
   }
  ],
- "title": "Accounting Onboarding"
+ "title": "Get your books ready"
 }

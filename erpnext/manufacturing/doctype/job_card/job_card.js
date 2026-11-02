@@ -3,6 +3,8 @@
 
 frappe.ui.form.on("Job Card", {
 	setup(frm) {
+		$(frm.wrapper).on("dirty", () => frm.events.keep_one_primary_button(frm));
+
 		frm.set_query("operation", () => ({
 			query: "erpnext.manufacturing.doctype.job_card.job_card.get_operations",
 			filters: { work_order: frm.doc.work_order },
@@ -67,7 +69,11 @@ frappe.ui.form.on("Job Card", {
 		if (remaining_qty < frm.doc.pending_qty) {
 			frm.doc.pending_qty = 0.0;
 			refresh_field("pending_qty");
-			frappe.throw(__("Pending Quantity cannot be greater than {0}", [remaining_qty]));
+			frappe.throw(
+				__("Pending Quantity cannot be greater than {0}", [
+					get_qty_with_uom(remaining_qty, frm.doc.stock_uom),
+				])
+			);
 		}
 
 		const process_loss_qty = flt(remaining_qty) - flt(frm.doc.pending_qty);
@@ -92,6 +98,41 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
+	set_corrective_job_card_labels(frm) {
+		const is_corrective_job_card = Boolean(frm.doc.is_corrective_job_card);
+
+		frm.set_df_property(
+			"for_quantity",
+			"label",
+			is_corrective_job_card ? __("Qty To Correct") : __("Qty To Manufacture")
+		);
+		frm.set_df_property(
+			"total_completed_qty",
+			"label",
+			is_corrective_job_card ? __("Total Corrected Qty") : __("Total Completed Qty")
+		);
+	},
+
+	toggle_material_tables(frm) {
+		const backflush_based_on_material_transfer =
+			frm.doc.__onload?.backflush_raw_materials_based_on === "Material Transferred for Manufacture";
+		const show_material_tables =
+			backflush_based_on_material_transfer ||
+			frm.doc.__onload?.transfer_material_against === "Job Card" ||
+			Boolean(frm.doc.track_semi_finished_goods) ||
+			Boolean(frm.doc.items?.length) ||
+			Boolean(frm.doc.secondary_items?.length);
+
+		frm.toggle_display(
+			["section_break_8", "items", "secondary_items_section", "secondary_items"],
+			show_material_tables
+		);
+	},
+
+	track_semi_finished_goods(frm) {
+		frm.trigger("toggle_material_tables");
+	},
+
 	setup_stock_entry(frm) {
 		const { doc } = frm;
 		const can_make_stock_entry =
@@ -99,17 +140,45 @@ frappe.ui.form.on("Job Card", {
 			doc.docstatus === 1 &&
 			!doc.is_subcontracted &&
 			(doc.skip_material_transfer || doc.transferred_qty > 0) &&
-			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) < flt(doc.for_quantity);
+			flt(doc.manufactured_qty) + flt(doc.process_loss_qty) <
+				flt(doc.for_quantity) - flt(doc.pending_qty);
 
 		if (!can_make_stock_entry) return;
 
-		frm.add_custom_button(__("Make Stock Entry"), () => {
-			frappe.confirm(
-				__("Do you want to submit the stock entry?"),
-				() => frm.events.make_manufacture_stock_entry(frm, 1),
-				() => frm.events.make_manufacture_stock_entry(frm, 0)
-			);
-		}).addClass("btn-primary");
+		frm.add_custom_button(__("Record Output"), () => frm.events.confirm_record_output(frm)).addClass(
+			"btn-primary"
+		);
+	},
+
+	confirm_record_output(frm) {
+		const { doc } = frm;
+		const dialog = new frappe.ui.Dialog({
+			title: __("Record Output"),
+			fields: [
+				{
+					fieldtype: "HTML",
+					fieldname: "message",
+					options: `<p>${__(
+						"This makes a Stock Entry that puts {0} made in this Job Card into {1}.",
+						[
+							frappe.utils.escape_html(doc.finished_good),
+							frappe.utils.escape_html(doc.target_warehouse || __("the target warehouse")),
+						]
+					)}</p>`,
+				},
+			],
+			primary_action_label: __("Save and Submit"),
+			primary_action() {
+				dialog.hide();
+				frm.events.make_manufacture_stock_entry(frm, 1);
+			},
+			secondary_action_label: __("Save as Draft"),
+			secondary_action() {
+				dialog.hide();
+				frm.events.make_manufacture_stock_entry(frm, 0);
+			},
+		});
+		dialog.show();
 	},
 
 	make_manufacture_stock_entry(frm, submit_entry) {
@@ -135,6 +204,8 @@ frappe.ui.form.on("Job Card", {
 		}
 
 		frm.trigger("make_fields_read_only");
+		frm.trigger("set_corrective_job_card_labels");
+		frm.trigger("toggle_material_tables");
 
 		if (!frm.is_new() && doc.__onload?.work_order_closed) {
 			frm.disable_save();
@@ -172,13 +243,14 @@ frappe.ui.form.on("Job Card", {
 			},
 		}));
 
-		frm.trigger("toggle_operation_number");
-
 		const is_timer_running = frm.events.setup_job_action_buttons(frm, has_items);
 
 		if (!is_timer_running) {
 			frm.trigger("setup_stock_entry");
 		}
+
+		frm.events.hold_submit_until_job_is_done(frm, has_items);
+		frm.events.keep_one_primary_button(frm);
 
 		frm.trigger("setup_quality_inspection");
 
@@ -209,7 +281,7 @@ frappe.ui.form.on("Job Card", {
 		const excess_transfer_allowed = doc.__onload.job_card_excess_transfer;
 		const to_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
-		const to_request = to_transfer;
+		const to_request = to_transfer && flt(doc.requested_qty) < flt(doc.for_quantity);
 
 		if (has_items && (to_request || excess_transfer_allowed)) {
 			frm.add_custom_button(
@@ -228,6 +300,138 @@ frappe.ui.form.on("Job Card", {
 		}
 	},
 
+	keep_one_primary_button(frm) {
+		const dashboard = $(frm.fields_dict["job_card_dashboard"].wrapper);
+		const has_primary = !!dashboard.find(".btn-primary").length;
+		frappe.ui.button
+			.dress(frm.page.btn_primary, { variant: has_primary ? "subtle" : "solid" })
+			.toggleClass("btn-primary", !has_primary);
+	},
+
+	hold_submit_until_job_is_done(frm, has_items) {
+		if (frm.doc.docstatus !== 0 || frm.is_new() || frm.is_dirty()) return;
+
+		const steps = frm.events.get_job_steps(frm, has_items);
+		if (steps.slice(0, -1).some((step) => !step.done)) {
+			frm.page.clear_primary_action();
+			frm.dashboard.clear_headline();
+		}
+	},
+
+	get_job_steps(frm, has_items) {
+		const { doc } = frm;
+		const needs_move = has_items && !doc.skip_material_transfer && !doc.is_corrective_job_card;
+		const steps = [];
+
+		if (needs_move) {
+			steps.push({
+				label: __("Move Materials"),
+				done: !doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty)),
+			});
+		}
+
+		steps.push(
+			{ label: __("Start Job"), done: !!doc.time_logs?.length },
+			{ label: __("Complete Job"), done: frm.events.is_job_done(frm) },
+			{ label: __("Submit"), done: false }
+		);
+
+		return steps;
+	},
+
+	is_job_done(frm) {
+		const { doc } = frm;
+		const last_log = doc.time_logs?.[doc.time_logs.length - 1];
+		const qty_precision = precision("for_quantity", doc);
+		const accounted_qty = flt(doc.total_completed_qty) + flt(doc.process_loss_qty) + flt(doc.pending_qty);
+		const needs_end_time = !!doc.__onload?.enforce_time_logs;
+
+		return (
+			!!last_log &&
+			(!needs_end_time || !!last_log.to_time) &&
+			flt(doc.for_quantity) > 0 &&
+			flt(accounted_qty, qty_precision) >= flt(doc.for_quantity, qty_precision)
+		);
+	},
+
+	get_job_steps_html(frm, has_items) {
+		const steps = frm.events.get_job_steps(frm, has_items);
+		const current = steps.find((step) => !step.done);
+
+		const pills = steps
+			.map((step, idx) => {
+				const color = step.done ? "green" : step === current ? "blue" : "gray";
+				const mark = step.done ? "✓" : `${idx + 1}.`;
+				return `<span class="indicator-pill no-indicator-dot ${color}" style="flex-shrink:0;">${mark} ${step.label}</span>`;
+			})
+			.join(`<span class="text-muted" style="flex-shrink:0;">›</span>`);
+
+		return `<div style="display:flex;align-items:center;gap:6px;overflow-x:auto;margin-bottom:16px;">${pills}</div>`;
+	},
+
+	move_materials(frm) {
+		frm.call({ method: "get_material_shortages", doc: frm.doc, freeze: true }).then(({ message }) => {
+			if (!message?.length) {
+				frm.trigger("make_stock_entry");
+				return;
+			}
+
+			frm.events.show_shortage_dialog(frm, message);
+		});
+	},
+
+	show_shortage_dialog(frm, shortages) {
+		const escape = frappe.utils.escape_html;
+		const qty_precision = precision("for_quantity", frm.doc);
+		const qty = (value, uom) => `${format_number(value, null, qty_precision)} ${escape(uom || "")}`;
+		const rows = shortages
+			.map(
+				(row) => `<tr>
+					<td class="ellipsis">${escape(row.item_code)}</td>
+					<td class="ellipsis">${escape(row.warehouse)}</td>
+					<td class="text-right">${qty(row.qty_to_move, row.uom)}</td>
+					<td class="text-right">${qty(row.available_qty, row.uom)}</td>
+					<td class="text-right text-danger">${qty(row.shortage_qty, row.uom)}</td>
+				</tr>`
+			)
+			.join("");
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Not Enough Stock"),
+			size: "large",
+			fields: [
+				{
+					fieldtype: "HTML",
+					fieldname: "shortages",
+					options: `<p>${__(
+						"These raw materials are short in their source warehouse, so the transfer cannot be submitted yet."
+					)}</p>
+						<table class="table table-bordered" style="table-layout:fixed;">
+							<thead><tr>
+								<th>${__("Item")}</th>
+								<th>${__("Source Warehouse")}</th>
+								<th class="text-right">${__("To Move")}</th>
+								<th class="text-right">${__("In Stock")}</th>
+								<th class="text-right">${__("Short")}</th>
+							</tr></thead>
+							<tbody>${rows}</tbody>
+						</table>`,
+				},
+			],
+			primary_action_label: __("Request Missing Materials"),
+			primary_action() {
+				dialog.hide();
+				frm.events.make_material_request(frm, true);
+			},
+			secondary_action_label: __("Continue to Transfer"),
+			secondary_action() {
+				dialog.hide();
+				frm.trigger("make_stock_entry");
+			},
+		});
+		dialog.show();
+	},
+
 	// Renders the dashboard widget (info + timer + action buttons) into job_card_dashboard wrapper.
 	// Returns true if the job timer is actively running, so the caller can skip the stock entry button.
 	setup_job_action_buttons(frm, has_items) {
@@ -239,17 +443,22 @@ frappe.ui.form.on("Job Card", {
 		if (frm.doc.pending_qty > 0) {
 			pending_qty = frm.doc.pending_qty;
 		}
+		const completed_qty = get_completable_qty(frm, pending_qty);
 
 		const fields = [
 			{
 				fieldtype: "Float",
-				label: __("Qty to Manufacture"),
+				label: __("Qty to Manufacture in this Cycle"),
 				fieldname: "for_quantity",
 				reqd: 1,
 				default: pending_qty,
+				description: __("Completed, Pending and Process Loss quantities must add up to this."),
 				change() {
 					const dialog = frm.job_completion_dialog;
-					dialog.set_value("completed_qty", dialog.get_value("for_quantity"));
+					const for_quantity = dialog.get_value("for_quantity");
+					const completed_qty = get_completable_qty(frm, for_quantity);
+					dialog.set_value("completed_qty", completed_qty);
+					dialog.set_value("pending_qty", for_quantity - completed_qty);
 					dialog.set_value("process_loss_qty", 0);
 				},
 			},
@@ -257,12 +466,26 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Completed Quantity"),
 				fieldname: "completed_qty",
-				reqd: 1,
-				default: pending_qty,
+				default: completed_qty,
 				change() {
 					const dialog = frm.job_completion_dialog;
-					const remaining = dialog.get_value("for_quantity") - dialog.get_value("completed_qty");
-					if (remaining > 0 && remaining != dialog.get_value("pending_qty")) {
+					const remaining =
+						dialog.get_value("for_quantity") -
+						dialog.get_value("completed_qty") -
+						dialog.get_value("process_loss_qty");
+
+					if (remaining < 0) {
+						const max_completed_qty =
+							flt(dialog.get_value("for_quantity")) - flt(dialog.get_value("process_loss_qty"));
+						dialog.set_value("completed_qty", max_completed_qty);
+						frappe.throw(
+							__("Completed Quantity cannot be greater than {0}", [
+								get_qty_with_uom(max_completed_qty, frm.doc.stock_uom),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -271,14 +494,29 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Pending Quantity"),
 				fieldname: "pending_qty",
-				default: 0.0,
+				default: pending_qty - completed_qty,
+				description: __("Qty left for a later cycle or for another job card."),
 				change() {
 					const dialog = frm.job_completion_dialog;
 					const process_loss_qty =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("pending_qty");
-					if (process_loss_qty >= 0 && process_loss_qty != dialog.get_value("process_loss_qty")) {
+
+					if (process_loss_qty < 0) {
+						dialog.set_value("pending_qty", 0);
+						frappe.throw(
+							__("Pending Quantity cannot be greater than {0}", [
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
+							])
+						);
+					}
+
+					if (process_loss_qty != dialog.get_value("process_loss_qty")) {
 						dialog.set_value("process_loss_qty", process_loss_qty);
 					}
 				},
@@ -287,13 +525,28 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Float",
 				label: __("Process Loss Quantity"),
 				fieldname: "process_loss_qty",
+				description: __("Qty scrapped in this cycle, nobody will produce it."),
 				onchange() {
 					const dialog = frm.job_completion_dialog;
 					const remaining =
 						dialog.get_value("for_quantity") -
 						dialog.get_value("completed_qty") -
 						dialog.get_value("process_loss_qty");
-					if (remaining >= 0 && remaining != dialog.get_value("pending_qty")) {
+
+					if (remaining < 0) {
+						dialog.set_value("process_loss_qty", 0);
+						frappe.throw(
+							__("Process Loss Quantity cannot be greater than {0}", [
+								get_qty_with_uom(
+									flt(dialog.get_value("for_quantity")) -
+										flt(dialog.get_value("completed_qty")),
+									frm.doc.stock_uom
+								),
+							])
+						);
+					}
+
+					if (remaining != dialog.get_value("pending_qty")) {
 						dialog.set_value("pending_qty", remaining);
 					}
 				},
@@ -337,8 +590,8 @@ frappe.ui.form.on("Job Card", {
 		frm.job_completion_dialog = frappe.prompt(
 			fields,
 			(data) => {
-				if (data.qty <= 0) {
-					frappe.throw(__("Quantity should be greater than 0"));
+				if (data.completed_qty < 0) {
+					frappe.throw(__("Completed Quantity cannot be negative"));
 				}
 
 				frm.call({
@@ -357,9 +610,8 @@ frappe.ui.form.on("Job Card", {
 					},
 				});
 			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
+			__("Complete Job"),
+			__("Update")
 		);
 	},
 
@@ -385,46 +637,6 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
-	make_finished_good(frm) {
-		const fields = [
-			{
-				fieldtype: "Float",
-				label: __("Completed Quantity"),
-				fieldname: "qty",
-				reqd: 1,
-				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
-			},
-			{
-				fieldtype: "Datetime",
-				label: __("End Time"),
-				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
-			},
-		];
-
-		frappe.prompt(
-			fields,
-			(data) => {
-				if (data.qty <= 0) {
-					frappe.throw(__("Quantity should be greater than 0"));
-				}
-
-				frm.call({
-					method: "make_finished_good",
-					doc: frm.doc,
-					args: { qty: data.qty, end_time: data.end_time },
-					callback(r) {
-						const doc = frappe.model.sync(r.message);
-						frappe.set_route("Form", doc[0].doctype, doc[0].name);
-					},
-				});
-			},
-			__("Enter Value"),
-			__("Update"),
-			__("Set Finished Good Quantity")
-		);
-	},
-
 	setup_quality_inspection(frm) {
 		const quality_inspection_field = frm.get_docfield("quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function (frm) {
@@ -434,7 +646,7 @@ frappe.ui.form.on("Job Card", {
 				reference_name: frm.doc.name,
 				item_code: frm.doc.production_item,
 				item_name: frm.doc.item_name,
-				item_serial_no: frm.doc.serial_no,
+				item_serial_no: frm.doc.serial_no ? frm.doc.serial_no.split("\n")[0] : null,
 				batch_no: frm.doc.batch_no,
 				quality_inspection_template: frm.doc.quality_inspection_template,
 			};
@@ -455,6 +667,7 @@ frappe.ui.form.on("Job Card", {
 						label: __("Corrective Operation"),
 						options: "Operation",
 						fieldname: "operation",
+						reqd: 1,
 						get_query() {
 							return { filters: { is_corrective_operation: 1 } };
 						},
@@ -464,6 +677,7 @@ frappe.ui.form.on("Job Card", {
 						label: __("For Operation"),
 						options: "Operation",
 						fieldname: "for_operation",
+						reqd: 1,
 						get_query() {
 							return { filters: { name: ["in", operations] } };
 						},
@@ -473,10 +687,11 @@ frappe.ui.form.on("Job Card", {
 				frappe.prompt(
 					fields,
 					(d) => frm.events.make_corrective_job_card(frm, d.operation, d.for_operation),
-					__("Select Corrective Operation")
+					__("Select Corrective Operation"),
+					__("Create")
 				);
 			},
-			__("Make")
+			__("Create")
 		);
 	},
 
@@ -498,45 +713,46 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	operation(frm) {
-		frm.trigger("toggle_operation_number");
-
-		if (frm.doc.operation && frm.doc.work_order) {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
-				args: {
-					work_order: frm.doc.work_order,
-					operation: frm.doc.operation,
-				},
-				callback(r) {
-					if (!r.message) return;
-
-					if (r.message.length == 1) {
-						frm.set_value("operation_id", r.message[0].name);
-					} else {
-						const args = r.message.map((row) => ({ label: row.idx, value: row.name }));
-						const description = __("Operation {0} added multiple times in the work order {1}", [
-							frm.doc.operation,
-							frm.doc.work_order,
-						]);
-						frm.set_df_property("operation_row_number", "options", args);
-						frm.set_df_property("operation_row_number", "description", description);
-					}
-
-					frm.trigger("toggle_operation_number");
-				},
-			});
+		if (frm.doc.operation_id) {
+			frm.set_value("operation_id", "");
 		}
-	},
 
-	operation_row_number(frm) {
-		if (frm.doc.operation_row_number) {
-			frm.set_value("operation_id", frm.doc.operation_row_number);
-		}
-	},
+		if (!frm.doc.operation || !frm.doc.work_order) return;
 
-	toggle_operation_number(frm) {
-		frm.toggle_display("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
-		frm.toggle_reqd("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
+		const { operation, work_order } = frm.doc;
+		const is_current = () => frm.doc.operation === operation && frm.doc.work_order === work_order;
+
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
+			args: { work_order, operation },
+			callback(r) {
+				if (!is_current() || !r.message || !r.message.length) return;
+
+				if (r.message.length == 1) {
+					frm.set_value("operation_id", r.message[0].name);
+				} else {
+					frappe.prompt(
+						{
+							fieldname: "operation_row",
+							fieldtype: "Select",
+							label: __("Operation Row"),
+							options: r.message.map((row) => ({ label: row.idx, value: row.name })),
+							reqd: 1,
+							description: __("Operation {0} is added multiple times in the work order {1}", [
+								operation,
+								work_order,
+							]),
+						},
+						(values) => {
+							if (is_current()) {
+								frm.set_value("operation_id", values.operation_row);
+							}
+						},
+						__("Select Operation Row")
+					);
+				}
+			},
+		});
 	},
 
 	make_time_log(frm, args) {
@@ -587,8 +803,7 @@ frappe.ui.form.on("Job Card", {
 		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
 		const pending_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
-		const materials_ready =
-			doc.skip_material_transfer || !pending_transfer || !doc.finished_good || !has_items;
+		const materials_ready = doc.skip_material_transfer || doc.is_corrective_job_card || !pending_transfer;
 
 		let last_row = {};
 		const has_sub_ops_or_pending_qty = doc.sub_operations?.length || doc.pending_qty > 0;
@@ -656,7 +871,10 @@ frappe.ui.form.on("Job Card", {
 			check: { d: '<polyline points="20 6 9 17 4 12"/>', sw: 3 },
 		};
 
+		const show_move = has_remaining_qty && !materials_ready;
+
 		const buttons_html = [
+			show_move && btn("btn-primary jcd-btn-move", "truck", __("Move Materials")),
 			show_start && btn("btn-primary jcd-btn-start", "play", __("Start Job")),
 			show_resume && btn("btn-primary jcd-btn-resume", "play", __("Resume Job")),
 			show_pause && btn("btn-default jcd-btn-pause", "pause", __("Pause Job")),
@@ -670,6 +888,7 @@ frappe.ui.form.on("Job Card", {
 			<div class="job-card-dashboard-widget"
 				style="border:1px solid var(--border-color);border-radius:var(--border-radius-lg,8px);
 					background:var(--card-bg,#fff);padding:16px 20px;margin-bottom:16px;">
+				${frm.events.get_job_steps_html(frm, has_items)}
 				<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
 					<div>
 						<div style="font-size:10px;color:var(--text-muted);font-weight:600;
@@ -692,6 +911,10 @@ frappe.ui.form.on("Job Card", {
 			</div>`);
 
 		// ── Wire up button click handlers ─────────────────────────────────
+		if (show_move) {
+			wrapper.find(".jcd-btn-move").on("click", () => frm.events.move_materials(frm));
+		}
+
 		if (show_start) {
 			wrapper.find(".jcd-btn-start").on("click", () => {
 				const has_no_employee = !frm.doc.employee || !frm.doc.employee.length;
@@ -807,6 +1030,10 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	for_quantity(frm) {
+		if (frm.doc.is_corrective_job_card) {
+			return;
+		}
+
 		frm.doc.items = [];
 		frm.call({
 			method: "get_required_items",
@@ -817,10 +1044,11 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
-	make_material_request(frm) {
+	make_material_request(frm, only_shortage = false) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.manufacturing.doctype.job_card.mapper.make_material_request",
 			frm: frm,
+			args: only_shortage === true ? { only_shortage: 1 } : null,
 			run_link_triggers: true,
 		});
 	},
@@ -885,4 +1113,17 @@ function get_last_completed_row(time_logs) {
 
 function get_last_row(time_logs) {
 	return time_logs[time_logs.length - 1] || {};
+}
+
+function get_completable_qty(frm, qty) {
+	const max_completable_qty = frm.doc.__onload?.max_completable_qty;
+	if (max_completable_qty == null) {
+		return qty;
+	}
+
+	return Math.min(flt(qty), Math.max(flt(max_completable_qty), 0));
+}
+
+function get_qty_with_uom(qty, stock_uom) {
+	return stock_uom ? `${flt(qty)} ${stock_uom}` : flt(qty);
 }

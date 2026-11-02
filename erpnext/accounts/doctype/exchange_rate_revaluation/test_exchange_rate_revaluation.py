@@ -9,11 +9,10 @@ from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.tests.utils import ERPNextTestSuite
 
 
-class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
+class TestExchangeRateRevaluation(ERPNextTestSuite):
 	def setUp(self):
 		self.company = "_Test Company"
 		self.item = "_Test Item"
@@ -23,14 +22,6 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		self.set_system_and_company_settings()
 
 	def set_system_and_company_settings(self):
-		# set number and currency precision
-		system_settings = frappe.get_doc("System Settings")
-		system_settings.float_precision = 2
-		system_settings.currency_precision = 2
-		system_settings.language = "en"
-		system_settings.time_zone = "Asia/Kolkata"
-		system_settings.save()
-
 		# Using Exchange Gain/Loss account for unrealized as well.
 		company_doc = frappe.get_doc("Company", self.company)
 		company_doc.unrealized_exchange_gain_loss_account = company_doc.exchange_gain_loss_account
@@ -312,7 +303,7 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		si = create_sales_invoice(
 			item=self.item,
 			company=self.company,
-			customer=self.customer,
+			customer="_Test Customer 1",
 			debit_to=self.debtors_usd,
 			posting_date=today(),
 			parent_cost_center=self.cost_center,
@@ -377,6 +368,15 @@ class TestExchangeRateRevaluation(ERPNextTestSuite, AccountsTestMixin):
 		self.assertFalse(ret.get("reversals_posted"))
 
 		err.make_reverse_journal()
+		# submit
+		draft = frappe.db.get_all(
+			"Journal Entry",
+			filters={"docstatus": 0, "reversal_of": je.name, "voucher_type": "Exchange Rate Revaluation"},
+			pluck="name",
+			as_list=1,
+		)
+		self.assertIsNotNone(draft)
+		frappe.get_doc("Journal Entry", draft[0]).submit()
 		ret = err.check_journal_and_reversal()
 		self.assertTrue(ret.get("journals_posted"))
 		self.assertTrue(ret.get("reversals_posted"))

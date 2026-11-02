@@ -2,28 +2,36 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.query_builder.functions import IfNull, Lower, Sum
-from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
+from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form, getdate, nowdate
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import _refuse
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	SalesInvoice,
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
 from erpnext.accounts.doctype.sales_invoice.services.loyalty import LoyaltyService
+from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
+from erpnext.accounts.doctype.sales_invoice.services.status import get_discounting_status
 from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.controllers.queries import item_query as _item_query
 from erpnext.controllers.sales_and_purchase_return import get_sales_invoice_item_from_consolidated_invoice
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
+from erpnext.stock.utils import get_bin_qty_map
 
 
 class ProductBundleStockValidationError(frappe.ValidationError):
@@ -218,6 +226,8 @@ class POSInvoice(SalesInvoice):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
+		self.validate_loyalty_transaction()
+		self.set_paid_amount()
 		self.validate_change_amount()
 		self.validate_change_account()
 		self.validate_item_cost_centers()
@@ -228,16 +238,14 @@ class POSInvoice(SalesInvoice):
 		self.set_status()
 		self.validate_pos()
 		self.validate_payment_amount()
-		self.validate_loyalty_transaction()
 		self.validate_company_with_pos_company()
 		self.validate_full_payment()
 		self.update_packing_list()
-		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
-
-			validate_coupon_code(self.coupon_code)
+		if self.coupon_code and self.counts_coupon_use():
+			validate_coupon_code(self.coupon_code, self.customer)
 
 	def before_submit(self):
+		POSService(self).validate_mandatory_pos_fields()
 		self.set_outstanding_amount()
 
 	def on_submit(self):
@@ -252,12 +260,13 @@ class POSInvoice(SalesInvoice):
 			LoyaltyService(self).apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+		self.update_status_of_return_against()
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 			self.submit_serial_batch_bundle(table_name)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
@@ -278,12 +287,16 @@ class POSInvoice(SalesInvoice):
 				pluck="parent",
 				limit=1,
 			)
-			frappe.throw(
-				_("You need to cancel POS Closing Entry {0} to be able to cancel this document.").format(
-					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
-				),
-				title=_("Not Allowed"),
-			)
+			if pos_closing_entry:
+				msg = _(
+					"You need to cancel POS Closing Entry {0} to be able to cancel this document."
+				).format(get_link_to_form("POS Closing Entry", pos_closing_entry[0]))
+			else:
+				msg = _("You need to cancel Sales Invoice {0} to be able to cancel this document.").format(
+					get_link_to_form("Sales Invoice", self.consolidated_invoice)
+				)
+
+			frappe.throw(msg, title=_("Not Allowed"))
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ["Payment Ledger Entry", "Serial and Batch Bundle"]
@@ -297,13 +310,18 @@ class POSInvoice(SalesInvoice):
 			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
 
 		self.db_set("status", "Cancelled")
+		self.update_status_of_return_against()
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		self.delink_serial_and_batch_bundle()
+
+	def update_status_of_return_against(self):
+		if self.is_return and self.return_against:
+			frappe.get_doc("POS Invoice", self.return_against).set_status(update=True)
 
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
@@ -394,7 +412,7 @@ class POSInvoice(SalesInvoice):
 					)
 
 	def validate_stock_availablility(self):
-		if self.is_return:
+		if self.is_return or frappe.get_cached_doc("Stock Settings").allow_negative_stock:
 			return
 
 		if self.docstatus.is_draft() and not frappe.db.get_value(
@@ -402,69 +420,71 @@ class POSInvoice(SalesInvoice):
 		):
 			return
 
-		for d in self.get("items"):
-			if not d.serial_and_batch_bundle:
-				if get_active_product_bundle(d.item_code):
-					(
-						availability,
-						is_stock_item,
-						is_negative_stock_allowed,
-					) = get_product_bundle_stock_availability(d.item_code, d.warehouse, d.stock_qty)
+		rows = [d for d in self.get("items") if d.item_code and not d.serial_and_batch_bundle]
+		if not rows:
+			return
 
-				else:
-					availability, is_stock_item, is_negative_stock_allowed = get_stock_availability(
-						d.item_code, d.warehouse
+		bundle_items = get_active_bundle_items({d.item_code for d in rows})
+		required_qty = get_required_stock_qty(rows, bundle_items)
+		available_qty, reserved_stock_keys = get_available_stock_qty(required_qty)
+		items = get_stock_item_details({item_code for item_code, warehouse in required_qty})
+		keys_to_check = {
+			key
+			for key in required_qty
+			if is_stock_check_needed(items.get(key[0]), key in reserved_stock_keys)
+		}
+
+		for d in rows:
+			if d.item_code in bundle_items:
+				self.validate_bundle_stock(
+					d, bundle_items[d.item_code], required_qty, available_qty, keys_to_check
+				)
+			elif (d.item_code, d.warehouse) in keys_to_check:
+				self.validate_item_stock(d, required_qty, available_qty)
+
+	def validate_item_stock(self, row, required_qty, available_qty):
+		key = (row.item_code, row.warehouse)
+		item_code, warehouse = frappe.bold(row.item_code), frappe.bold(row.warehouse)
+		if available_qty[key] <= 0:
+			frappe.throw(
+				_("Row #{0}: Item {1} has no stock in warehouse {2}.").format(row.idx, item_code, warehouse),
+				title=_("Item Out of Stock"),
+			)
+		elif available_qty[key] < required_qty[key]:
+			frappe.throw(
+				_("Row #{0}: Item {1} in warehouse {2}: Available {3}, Needed {4}.").format(
+					row.idx,
+					item_code,
+					warehouse,
+					frappe.bold(flt(available_qty[key], 2)),
+					frappe.bold(flt(required_qty[key], 2)),
+				),
+				title=_("Insufficient Stock"),
+			)
+
+	def validate_bundle_stock(self, row, components, required_qty, available_qty, keys_to_check):
+		error_msgs = []
+		for component in components:
+			key = (component.item_code, row.warehouse)
+			if key in keys_to_check and available_qty[key] < required_qty[key]:
+				error_msgs.append(
+					_("<li>Packed Item {0}: Required {1}, Available {2}</li>").format(
+						frappe.bold(component.item_code),
+						frappe.bold(flt(required_qty[key], 2)),
+						frappe.bold(flt(available_qty[key], 2)),
 					)
+				)
 
-				if is_negative_stock_allowed:
-					continue
-
-				if isinstance(availability, list):
-					error_msgs = []
-					for item in availability:
-						if flt(item["available"]) < flt(item["required"]):
-							error_msgs.append(
-								_("<li>Packed Item {0}: Required {1}, Available {2}</li>").format(
-									frappe.bold(item["item_code"]),
-									frappe.bold(flt(item["required"], 2)),
-									frappe.bold(flt(item["available"], 2)),
-								)
-							)
-
-					if error_msgs:
-						frappe.throw(
-							_(
-								"<b>Row #{0}:</b> Bundle {1} in warehouse {2} has insufficient packed items:<br><div style='margin-top: 15px;'><ul style='line-height: 0.8;'>{3}</ul></div>"
-							).format(
-								d.idx,
-								frappe.bold(d.item_code),
-								frappe.bold(d.warehouse),
-								"<br>".join(error_msgs),
-							),
-							title=_("Insufficient Stock for Product Bundle Items"),
-							exc=ProductBundleStockValidationError,
-						)
-
-				else:
-					item_code, warehouse = frappe.bold(d.item_code), frappe.bold(d.warehouse)
-					if is_stock_item and flt(availability) <= 0:
-						frappe.throw(
-							_("Row #{0}: Item {1} has no stock in warehouse {2}.").format(
-								d.idx, item_code, warehouse
-							),
-							title=_("Item Out of Stock"),
-						)
-					elif is_stock_item and flt(availability) < flt(d.stock_qty):
-						frappe.throw(
-							_("Row #{0}: Item {1} in warehouse {2}: Available {3}, Needed {4}.").format(
-								d.idx,
-								item_code,
-								warehouse,
-								frappe.bold(flt(availability, 2)),
-								frappe.bold(flt(d.stock_qty, 2)),
-							),
-							title=_("Insufficient Stock"),
-						)
+		if error_msgs:
+			frappe.throw(
+				_(
+					"<b>Row #{0}:</b> Bundle {1} in warehouse {2} has insufficient packed items:<br><div style='margin-top: 15px;'><ul style='line-height: 0.8;'>{3}</ul></div>"
+				).format(
+					row.idx, frappe.bold(row.item_code), frappe.bold(row.warehouse), "<br>".join(error_msgs)
+				),
+				title=_("Insufficient Stock for Product Bundle Items"),
+				exc=ProductBundleStockValidationError,
+			)
 
 	def validate_is_pos_using_sales_invoice(self):
 		self.invoice_type_in_pos = frappe.db.get_single_value("POS Settings", "invoice_type")
@@ -472,12 +492,16 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("Sales Invoice mode is activated in POS. Please create Sales Invoice instead."))
 
 	def validate_serialised_or_batched_item(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		auto_picks_serial_nos = SerialBatchBundleService(self).auto_picks_outward_serial_batch()
 		error_msg = []
 		for d in self.get("items"):
 			error_msg = ""
+			serial_no_missing = not d.serial_no and not (auto_picks_serial_nos and d.get("has_batch_no"))
 			if d.get("has_serial_no") and (
 				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
-				or (d.use_serial_batch_fields and not d.serial_no)
+				or (d.use_serial_batch_fields and serial_no_missing)
 			):
 				error_msg = f"Row #{d.idx}: Please select Serial No. for item {bold(d.item_code)}"
 
@@ -502,33 +526,27 @@ class POSInvoice(SalesInvoice):
 					).format(d.idx, frappe.bold(d.item_code)),
 					title=_("Invalid Item"),
 				)
-			if d.get("serial_no"):
-				serial_nos = get_serial_nos(d.serial_no)
-				for sr in serial_nos:
-					POI = frappe.qb.DocType("POS Invoice Item")
-					s = sr.lower()
-					serial_no_exists = (
-						frappe.qb.from_(POI)
-						.select(POI.name)
-						.where(POI.parent == self.return_against)
-						.where(
-							(Lower(POI.serial_no) == s)
-							| Lower(POI.serial_no).like(f"{s}\n%")
-							| Lower(POI.serial_no).like(f"%\n{s}")
-							| Lower(POI.serial_no).like(f"%\n{s}\n%")
-						)
-						.limit(1)
-						.run()
-					)
+			self.validate_return_serial_nos(d)
 
-					if not serial_no_exists:
-						bold_return_against = frappe.bold(self.return_against)
-						bold_serial_no = frappe.bold(sr)
-						frappe.throw(
-							_(
-								"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
-							).format(d.idx, bold_serial_no, bold_return_against)
-						)
+	def validate_return_serial_nos(self, item):
+		serial_ids = get_serial_batch_list_from_item(item)[0]
+		if not serial_ids:
+			return
+		original_serials = set()
+		for row in frappe.get_all(
+			"POS Invoice Item",
+			filters={"parent": self.return_against, "item_code": item.item_code},
+			fields=["item_code", "serial_no", "batch_no", "serial_and_batch_bundle"],
+		):
+			original_serials.update(get_serial_batch_list_from_item(row)[0])
+
+		invalid_serials = [name for name in serial_ids if name not in original_serials]
+		for number in SerialBatchIdentity("Serial No").get_numbers(item.item_code, invalid_serials):
+			frappe.throw(
+				_(
+					"Row #{0}: Serial No {1} cannot be returned since it was not transacted in original invoice {2}"
+				).format(item.idx, bold(escape_html(number)), bold(escape_html(self.return_against)))
+			)
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -546,13 +564,26 @@ class POSInvoice(SalesInvoice):
 				)
 			)
 
+	def set_paid_amount(self):
+		POSService(self).update_paid_amount()
+		if self.redeem_loyalty_points and self.loyalty_amount:
+			self.base_paid_amount += flt(self.loyalty_amount)
+			self.paid_amount += flt(self.loyalty_amount) / flt(self.conversion_rate)
+
+		self.paid_amount = flt(self.paid_amount, self.precision("paid_amount"))
+		self.base_paid_amount = flt(self.base_paid_amount, self.precision("base_paid_amount"))
+
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
-		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
-		if not flt(self.change_amount) and grand_total < flt(self.paid_amount):
-			self.change_amount = flt(self.paid_amount - grand_total + flt(self.write_off_amount))
-			self.base_change_amount = (
-				flt(self.base_paid_amount) - base_grand_total + flt(self.base_write_off_amount)
+		self.change_amount = self.base_change_amount = 0
+		if grand_total < flt(
+			flt(self.paid_amount) + flt(self.write_off_amount), self.precision("grand_total")
+		):
+			self.change_amount = flt(
+				self.paid_amount - grand_total + flt(self.write_off_amount), self.precision("change_amount")
+			)
+			self.base_change_amount = flt(
+				self.change_amount * flt(self.conversion_rate), self.precision("base_change_amount")
 			)
 
 		if flt(self.change_amount) and not self.account_for_change_amount:
@@ -582,8 +613,12 @@ class POSInvoice(SalesInvoice):
 			)
 
 	def set_outstanding_amount(self):
-		total = flt(self.rounded_total) or flt(self.grand_total)
-		self.outstanding_amount = total - flt(self.paid_amount) if total > flt(self.paid_amount) else 0
+		precision = self.precision("outstanding_amount")
+		total = flt(
+			(flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount), precision
+		)
+		paid_amount = flt(self.paid_amount, precision)
+		self.outstanding_amount = flt(total - paid_amount, precision) if total > paid_amount else 0
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
@@ -618,7 +653,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) < getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
@@ -626,7 +661,7 @@ class POSInvoice(SalesInvoice):
 				elif (
 					0 < flt(self.outstanding_amount) < total
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Partly Paid and Discounted"
 				elif 0 < flt(self.outstanding_amount) < total:
@@ -635,7 +670,7 @@ class POSInvoice(SalesInvoice):
 					flt(self.outstanding_amount) > 0
 					and getdate(self.due_date) >= getdate(nowdate())
 					and self.is_discounted
-					and self.get_discounting_status() == "Disbursed"
+					and get_discounting_status(self.name) == "Disbursed"
 				):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
@@ -818,6 +853,22 @@ class POSInvoice(SalesInvoice):
 
 				return pay_req
 
+	def validate_payments_to_collect(self, payments):
+		allowed_modes = frappe.get_all(
+			"POS Payment Method", filters={"parent": self.pos_profile}, pluck="mode_of_payment"
+		)
+		for payment in payments:
+			payment = frappe._dict(payment)
+			if flt(payment.amount) <= 0:
+				frappe.throw(_("Payment amount must be greater than 0."))
+
+			if payment.mode_of_payment not in allowed_modes:
+				frappe.throw(
+					_("Mode of Payment {0} is not allowed in POS Profile {1}.").format(
+						bold(payment.mode_of_payment), bold(self.pos_profile)
+					)
+				)
+
 	def get_new_payment_request(self, mop):
 		payment_gateway_account = frappe.db.get_value(
 			"Payment Gateway Account",
@@ -859,13 +910,18 @@ class POSInvoice(SalesInvoice):
 		if pr:
 			return frappe.get_doc("Payment Request", pr)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def update_payments(self, payments: list):
 		if self.status == "Consolidated":
 			frappe.throw(_("Create Payment Entry for Consolidated POS Invoices."))
 
-		paid_amount = flt(self.paid_amount)
-		total = flt(self.rounded_total) or flt(self.grand_total)
+		self.validate_payments_to_collect(payments)
+
+		paid_amount = flt(self.paid_amount, self.precision("paid_amount"))
+		total = flt(
+			(flt(self.rounded_total) or flt(self.grand_total)) - flt(self.write_off_amount),
+			self.precision("grand_total"),
+		)
 
 		if paid_amount >= total:
 			frappe.throw(title=_("Invoice Paid"), msg=_("This invoice has already been paid."))
@@ -909,12 +965,41 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code: str | None, warehouse: str):
+	# The POS Profile is what entitles a caller to POS stock figures, and it is the only boundary
+	# that fits: `Item` read and `Bin` read both exclude Accounts Manager, `Item` select is granted
+	# to every desk user by `Desk User`, and `POS Invoice` read is granted to `All`.
+	frappe.has_permission("POS Profile", throw=True)
+
+	# and keep a company-restricted caller inside their own companies, which costs nobody who has
+	# no Company User Permission
+	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "POS Profile")
+	if allowed_companies:
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		if company and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+	# the caller picks the warehouse when allow_warehouse_change is set, and the company check above
+	# does not narrow within a company; costs nobody who has no Warehouse User Permission
+	from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+
+	if warehouse_permissions := get_user_permissions(frappe.session.user).get("Warehouse"):
+		allowed_warehouses = get_allowed_docs_for_doctype(warehouse_permissions, "POS Invoice")
+		if allowed_warehouses and warehouse not in allowed_warehouses:
+			frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
+
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
-		bin_qty = get_bin_qty(item_code, warehouse)
+		bin_data = get_bin_data(item_code, warehouse)
+		bin_qty = flt(bin_data.actual_qty) - flt(bin_data.reserved_stock)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 
-		return bin_qty - pos_sales_qty, is_stock_item, is_negative_stock_allowed(item_code=item_code)
+		return (
+			bin_qty - pos_sales_qty,
+			is_stock_item,
+			is_negative_stock_allowed_in_pos(item_code, bin_data.reserved_stock),
+		)
 	else:
 		is_stock_item = True
 		if get_active_product_bundle(item_code):
@@ -923,26 +1008,6 @@ def get_stock_availability(item_code: str | None, warehouse: str):
 			is_stock_item = False
 			# Is a service item or non_stock item
 			return 0, is_stock_item, False
-
-
-def get_product_bundle_stock_availability(item_code, warehouse, item_qty):
-	is_stock_item = True
-	bundle = frappe.get_doc("Product Bundle", get_active_product_bundle(item_code))
-	availabilities = []
-	for bundle_item in bundle.items:
-		if frappe.get_value("Item", bundle_item.item_code, "is_stock_item"):
-			bin_qty = get_bin_qty(bundle_item.item_code, warehouse)
-			reserved_qty = get_pos_reserved_qty(bundle_item.item_code, warehouse)
-			available = bin_qty - reserved_qty
-			availabilities.append(
-				{
-					"item_code": bundle_item.item_code,
-					"required": bundle_item.qty * item_qty,
-					"available": available,
-				}
-			)
-
-	return availabilities, is_stock_item, is_negative_stock_allowed(item_code=item_code)
 
 
 def get_bundle_availability(bundle_item_code, warehouse):
@@ -963,69 +1028,123 @@ def get_bundle_availability(bundle_item_code, warehouse):
 
 
 def get_bin_qty(item_code, warehouse):
-	actual_qty = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty")
+	bin_data = get_bin_data(item_code, warehouse)
+	return flt(bin_data.actual_qty) - flt(bin_data.reserved_stock)
 
-	return actual_qty or 0
+
+def get_bin_data(item_code, warehouse):
+	return (
+		frappe.db.get_value(
+			"Bin",
+			{"item_code": item_code, "warehouse": warehouse},
+			["actual_qty", "reserved_stock"],
+			as_dict=True,
+		)
+		or frappe._dict()
+	)
+
+
+def is_negative_stock_allowed_in_pos(item_code, reserved_stock):
+	if frappe.get_cached_doc("Stock Settings").allow_negative_stock:
+		return True
+
+	return flt(reserved_stock) <= 0 and is_negative_stock_allowed(item_code=item_code)
 
 
 def get_pos_reserved_qty(item_code, warehouse):
-	"""
-	Calculate total quantity reserved for the given item and warehouse.
+	return get_pos_reserved_qty_map({item_code}, {warehouse}).get((item_code, warehouse), 0.0)
 
-	Includes:
-	- Direct sales of the item in submitted POS Invoices
-	- Sales of the item as a component of a Product Bundle
 
-	Excludes consolidated invoices (already merged into Sales Invoices via
-	POS Closing Entry). Used to reflect near real-time availability in the
-	POS UI and to prevent overselling while multiple sessions may be active.
-	"""
-	pinv_item_reserved_qty = get_pos_reserved_qty_from_table("POS Invoice Item", item_code, warehouse)
-	packed_item_reserved_qty = get_pos_reserved_qty_from_table("Packed Item", item_code, warehouse)
-
-	reserved_qty = pinv_item_reserved_qty + packed_item_reserved_qty
+def get_pos_reserved_qty_map(item_codes, warehouses):
+	reserved_qty = defaultdict(float)
+	for child_table, qty_column in (("POS Invoice Item", "stock_qty"), ("Packed Item", "qty")):
+		for row in get_pos_reserved_qty_from_table(child_table, qty_column, item_codes, warehouses):
+			reserved_qty[(row.item_code, row.warehouse)] += flt(row.qty)
 
 	return reserved_qty
 
 
-def get_pos_reserved_qty_from_table(child_table, item_code, warehouse):
-	"""
-	Get the total reserved quantity for a given item in POS Invoices
-	from a specific child table.
-
-	Args:
-	  child_table (str): Name of the child table to query
-	                (e.g., "POS Invoice Item", "Packed Item").
-	  item_code (str): The Item Code to filter by.
-	  warehouse (str): The Warehouse to filter by.
-
-	Returns:
-	  float: The total reserved quantity for the item in the given
-	                warehouse from submitted, unconsolidated POS Invoices.
-	"""
+def get_pos_reserved_qty_from_table(child_table, qty_column, item_codes, warehouses):
 	p_inv = frappe.qb.DocType("POS Invoice")
 	p_item = frappe.qb.DocType(child_table)
 
-	qty_column = "qty" if child_table == "Packed Item" else "stock_qty"
-
-	reserved_qty = (
+	return (
 		frappe.qb.from_(p_inv)
 		.from_(p_item)
-		.select(Sum(p_item[qty_column]).as_("stock_qty"))
+		.select(p_item.item_code, p_item.warehouse, Sum(p_item[qty_column]).as_("qty"))
 		.where(
 			(p_inv.name == p_item.parent)
 			& (IfNull(p_inv.consolidated_invoice, "") == "")
 			& (p_item.docstatus == 1)
-			& (p_item.item_code == item_code)
-			& (p_item.warehouse == warehouse)
+			& (p_item.item_code.isin(list(item_codes)))
+			& (p_item.warehouse.isin(list(warehouses)))
+		)
+		.groupby(p_item.item_code, p_item.warehouse)
+	).run(as_dict=True)
+
+
+def get_active_bundle_items(item_codes):
+	bundle = frappe.qb.DocType("Product Bundle")
+	bundle_item = frappe.qb.DocType("Product Bundle Item")
+	rows = (
+		frappe.qb.from_(bundle)
+		.join(bundle_item)
+		.on(bundle_item.parent == bundle.name)
+		.select(bundle.new_item_code, bundle_item.item_code, bundle_item.qty)
+		.where(
+			bundle.new_item_code.isin(list(item_codes))
+			& (bundle.is_active == 1)
+			& (bundle.docstatus == 1)
+			& (bundle.disabled == 0)
 		)
 	).run(as_dict=True)
 
-	return flt(reserved_qty[0].stock_qty) if reserved_qty else 0
+	bundle_items = defaultdict(list)
+	for row in rows:
+		bundle_items[row.new_item_code].append(row)
+
+	return bundle_items
+
+
+def get_required_stock_qty(rows, bundle_items):
+	required_qty = defaultdict(float)
+	for row in rows:
+		for component in bundle_items.get(row.item_code) or [frappe._dict(item_code=row.item_code, qty=1)]:
+			required_qty[(component.item_code, row.warehouse)] += flt(component.qty) * flt(row.stock_qty)
+
+	return required_qty
+
+
+def get_available_stock_qty(required_qty):
+	keys = [frappe._dict(item_code=item_code, warehouse=warehouse) for item_code, warehouse in required_qty]
+	bin_qty = get_bin_qty_map(keys)
+	reserved_qty = get_pos_reserved_qty_map({d.item_code for d in keys}, {d.warehouse for d in keys})
+
+	available_qty, reserved_stock_keys = {}, set()
+	for key in required_qty:
+		bin_data = bin_qty.get(key) or frappe._dict()
+		available_qty[key] = flt(bin_data.actual_qty) - flt(bin_data.reserved_stock) - reserved_qty[key]
+		if flt(bin_data.reserved_stock) > 0:
+			reserved_stock_keys.add(key)
+
+	return available_qty, reserved_stock_keys
+
+
+def get_stock_item_details(item_codes):
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ["in", list(item_codes)]},
+		fields=["name", "is_stock_item", "allow_negative_stock"],
+	)
+	return {item.name: item for item in items}
+
+
+def is_stock_check_needed(item, has_reserved_stock):
+	return bool(item and item.is_stock_item and (has_reserved_stock or not item.allow_negative_stock))
 
 
 @frappe.whitelist()
-def make_sales_return(source_name: str, target_doc: Document | str | None = None):
+def make_sales_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("POS Invoice", source_name, target_doc)
@@ -1039,6 +1158,11 @@ def make_merge_log(invoices: str | list):
 
 	if len(invoices) == 0:
 		frappe.throw(_("At least one invoice has to be selected."))
+
+	for inv in invoices:
+		inv["name"] = cstr(inv.get("name"))
+		if not inv["name"] or not frappe.has_permission("POS Invoice", "read", doc=inv["name"]):
+			_refuse()
 
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())

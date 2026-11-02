@@ -1,11 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import random_string
+from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	get_charts_for_country,
@@ -107,6 +109,48 @@ class TestCompany(ERPNextTestSuite):
 				finally:
 					frappe.delete_doc("Company", template)
 
+	def test_philippines_coa_default_payable_account(self):
+		company_name = "_Test Philippines COA Company"
+		if frappe.db.exists("Company", company_name):
+			frappe.delete_doc("Company", company_name)
+
+		abbr = random_string(3)
+		while frappe.db.exists("Company", {"abbr": abbr}):
+			abbr = random_string(3)
+
+		company = frappe.new_doc("Company")
+		company.company_name = company_name
+		company.abbr = abbr
+		company.default_currency = "PHP"
+		company.country = "Philippines"
+		company.create_chart_of_accounts_based_on = "Standard Template"
+		company.chart_of_accounts = "Philippines"
+		company.save()
+
+		try:
+			company.reload()
+			self.assertTrue(company.default_payable_account)
+			self.assertEqual(
+				frappe.db.get_value("Account", company.default_payable_account, "account_name"),
+				"Accounts Payable - Trade",
+			)
+
+			customer_deposits = frappe.db.get_value(
+				"Account",
+				{"company": company.name, "account_name": "Customer Deposits"},
+				["name", "account_type"],
+				as_dict=True,
+			)
+			self.assertTrue(customer_deposits)
+			self.assertNotEqual(customer_deposits.account_type, "Payable")
+			self.assertNotEqual(company.default_payable_account, customer_deposits.name)
+
+			self.assertFalse(
+				frappe.db.exists("Account", {"company": company.name, "account_name": ["like", "%Demo%"]})
+			)
+		finally:
+			frappe.delete_doc("Company", company.name)
+
 	def test_basic_tree(self, records=None):
 		self.load_test_records("Company")
 		min_lft = 1
@@ -159,12 +203,10 @@ class TestCompany(ERPNextTestSuite):
 			}
 		)
 		secondary.insert()
-		self.addCleanup(secondary.delete)
 
 		primary = frappe.copy_doc(secondary)
 		primary.is_primary_address = 1
 		primary.insert()
-		self.addCleanup(primary.delete)
 
 		self.assertEqual(get_default_company_address(company), primary.name)
 
@@ -186,6 +228,31 @@ class TestCompany(ERPNextTestSuite):
 				return no_of_children
 
 		return get_no_of_children([company], 0)
+
+	def test_default_departments_ignore_session_translations(self):
+		self.assertEqual(get_root_of("Department"), "All Departments")
+
+		translations = {"All Departments": "Alle Abteilungen", "Accounts": "Buchhaltung"}
+		with patch("frappe.translate.get_all_translations", return_value=translations):
+			company = frappe.new_doc("Company")
+			company.company_name = "Dept Translation Test Co"
+			company.abbr = "DTTC"
+			company.default_currency = "INR"
+			company.country = "India"
+			company.insert()
+
+		self.assertFalse(frappe.db.exists("Department", "Alle Abteilungen"))
+		self.assertEqual(
+			frappe.get_all("Department", filters={"parent_department": ("is", "not set")}, pluck="name"),
+			["All Departments"],
+		)
+
+		departments = frappe.get_all(
+			"Department", filters={"company": company.name}, fields=["name", "parent_department"]
+		)
+		self.assertTrue(departments)
+		self.assertEqual({d.parent_department for d in departments}, {"All Departments"})
+		self.assertIn("Buchhaltung - DTTC", [d.name for d in departments])
 
 	def test_change_parent_company(self):
 		child_company = frappe.get_doc("Company", "_Test Company 5")
@@ -209,12 +276,8 @@ class TestCompany(ERPNextTestSuite):
 
 		company = "_Test Company"
 		cd = frappe.qb.DocType("Company")
-		original = frappe.db.get_value("Company", company, "parent_company")
 		# force '' (not NULL) at the SQL layer, bypassing frappe's empty -> NULL doc coercion
 		frappe.qb.update(cd).set(cd.parent_company, "").where(cd.name == company).run()
-		self.addCleanup(
-			lambda: frappe.qb.update(cd).set(cd.parent_company, original).where(cd.name == company).run()
-		)
 
 		roots = {row.value for row in get_children("Company", parent="")}
 		self.assertIn(company, roots)
@@ -235,10 +298,8 @@ class TestCompany(ERPNextTestSuite):
 
 		before = get_all_transactions_annual_history(company).get(key, 0)
 
-		quotation = make_quotation(company=company, transaction_date=txn_date, do_not_submit=True)
-		self.addCleanup(frappe.delete_doc, "Quotation", quotation.name, force=True)
-		sales_order = make_sales_order(company=company, transaction_date=txn_date, do_not_submit=True)
-		self.addCleanup(frappe.delete_doc, "Sales Order", sales_order.name, force=True)
+		make_quotation(company=company, transaction_date=txn_date, do_not_submit=True)
+		make_sales_order(company=company, transaction_date=txn_date, do_not_submit=True)
 
 		after = get_all_transactions_annual_history(company).get(key, 0)
 		self.assertEqual(after - before, 2)
@@ -281,23 +342,29 @@ class TestCompany(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
-	def test_demo_data(self):
-		from erpnext.setup.demo import clear_demo_data, setup_demo_data
+	def test_clear_demo_data(self):
+		from erpnext.setup.demo import clear_demo_data, read_data_file_using_hooks
 
-		self.load_test_records("Company")
-
-		setup_demo_data(self.globalTestRecords["Company"][0]["company_name"])
-		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
-		self.assertTrue(company_name)
-
-		for transaction in frappe.get_hooks("demo_transaction_doctypes"):
-			self.assertTrue(frappe.db.exists(frappe.unscrub(transaction), {"company": company_name}))
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "_Test Company (Demo)",
+				"abbr": "_TCD",
+				"default_currency": "INR",
+				"country": "India",
+			}
+		).insert()
+		frappe.db.set_single_value("Global Defaults", "demo_company", company.name)
+		for doctype in frappe.get_hooks("demo_master_doctypes"):
+			for record in json.loads(read_data_file_using_hooks(doctype)):
+				frappe.get_doc(record).insert(ignore_if_duplicate=True)
 
 		clear_demo_data()
-		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})
-		self.assertFalse(company_name)
-		for transaction in frappe.get_hooks("demo_transaction_doctypes"):
-			self.assertFalse(frappe.db.exists(frappe.unscrub(transaction), {"company": company_name}))
+
+		self.assertFalse(frappe.db.exists("Company", company.name))
+		self.assertFalse(frappe.db.get_single_value("Global Defaults", "demo_company"))
+		self.assertFalse(frappe.db.exists("Customer", {"customer_name": "Grant Plastics Ltd."}))
+		self.assertFalse(frappe.db.exists("Item", "SKU001"))
 
 
 def create_company_communication(doctype, docname):

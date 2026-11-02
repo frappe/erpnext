@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [],
  "fields": [],
+ "icon": "shield",
  "idx": 1,
  "issingle": 1,
  "links": [],

@@ -43,14 +43,10 @@ def get_warehouse_wise_balance(filters: StockBalanceFilter) -> list[SLEntry]:
 
 
 def get_warehouses(report_filters: StockBalanceFilter):
-	filters = {"company": report_filters.company, "disabled": 0}
-	if report_filters.get("show_disabled_warehouses"):
-		filters["disabled"] = ("in", [0, report_filters.show_disabled_warehouses])
-
 	return frappe.get_all(
 		"Warehouse",
 		fields=["name", "parent_warehouse", "is_group", "disabled"],
-		filters=filters,
+		filters={"company": report_filters.company},
 		order_by="lft",
 	)
 
@@ -65,34 +61,27 @@ def get_data(filters: StockBalanceFilter):
 	update_indent(warehouses)
 	set_balance_in_parent(warehouses)
 
-	return warehouses
+	if filters.get("show_disabled_warehouses"):
+		return warehouses
+
+	return [warehouse for warehouse in warehouses if not warehouse.disabled or warehouse.stock_balance]
 
 
 def update_indent(warehouses):
+	# warehouses are ordered by lft, so a parent always comes before its children
+	indent_by_name = {}
 	for warehouse in warehouses:
-
-		def add_indent(warehouse, indent):
-			warehouse.indent = indent
-			for child in warehouses:
-				if child.parent_warehouse == warehouse.name:
-					add_indent(child, indent + 1)
-
-		if warehouse.is_group:
-			add_indent(warehouse, warehouse.indent or 0)
+		warehouse.indent = indent_by_name.get(warehouse.parent_warehouse, -1) + 1
+		indent_by_name[warehouse.name] = warehouse.indent
 
 
 def set_balance_in_parent(warehouses):
-	# sort warehouses by indent in descending order
-	warehouses = sorted(warehouses, key=lambda x: x.get("indent", 0), reverse=1)
+	warehouse_by_name = {warehouse.name: warehouse for warehouse in warehouses}
 
-	for warehouse in warehouses:
-
-		def update_balance(warehouse, balance):
-			for parent in warehouses:
-				if warehouse.parent_warehouse == parent.name:
-					parent.stock_balance += balance
-
-		update_balance(warehouse, warehouse.stock_balance)
+	# reverse lft order rolls up every child before its parent
+	for warehouse in reversed(warehouses):
+		if parent := warehouse_by_name.get(warehouse.parent_warehouse):
+			parent.stock_balance += warehouse.stock_balance
 
 
 def get_columns(filters: StockBalanceFilter) -> list[dict]:

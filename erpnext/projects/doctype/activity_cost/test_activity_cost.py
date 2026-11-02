@@ -4,6 +4,7 @@
 import frappe
 
 from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -29,7 +30,7 @@ class TestActivityCost(ERPNextTestSuite):
 		self.assertRaises(DuplicationError, activity_cost2.insert)
 
 	def test_default_activity_cost_title_and_duplication(self):
-		activity_type = self._activity_type("_Test Default Cost Type")
+		activity_type = "_Test Activity Type"
 
 		default_cost = frappe.get_doc(
 			{
@@ -46,7 +47,7 @@ class TestActivityCost(ERPNextTestSuite):
 		self.assertRaises(DuplicationError, duplicate.insert)
 
 	def test_employee_name_and_title_are_set(self):
-		activity_type = self._activity_type("_Test Employee Cost Type")
+		activity_type = "_Test Activity Type"
 		employee = frappe.db.get_all("Employee", filters={"first_name": "_Test Employee"})[0].name
 		employee_name = frappe.db.get_value("Employee", employee, "employee_name")
 
@@ -63,7 +64,23 @@ class TestActivityCost(ERPNextTestSuite):
 		self.assertEqual(cost.employee_name, employee_name)
 		self.assertEqual(cost.title, f"{employee_name} for {activity_type}")
 
-	def _activity_type(self, name):
-		if not frappe.db.exists("Activity Type", name):
-			frappe.get_doc({"doctype": "Activity Type", "activity_type": name}).insert()
-		return name
+	def test_duplication_is_checked_per_employee(self):
+		first = make_employee("_test_namesake_1@example.com", "_Test Company", first_name="_Test Namesake")
+		second = make_employee("_test_namesake_2@example.com", "_Test Company", first_name="_Test Namesake")
+		make_activity_cost(first)
+		cost = make_activity_cost(second)
+
+		cost.employee = first
+		self.assertRaises(DuplicationError, cost.save)
+
+
+def make_activity_cost(employee):
+	return frappe.get_doc(
+		{
+			"doctype": "Activity Cost",
+			"employee": employee,
+			"activity_type": "_Test Activity Type",
+			"billing_rate": 100,
+			"costing_rate": 50,
+		}
+	).insert()

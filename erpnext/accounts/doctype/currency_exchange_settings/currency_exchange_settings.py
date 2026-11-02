@@ -1,6 +1,9 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from math import isfinite
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 import frappe
 import requests
 from frappe import _
@@ -24,7 +27,7 @@ class CurrencyExchangeSettings(Document):
 			CurrencyExchangeSettingsResult,
 		)
 
-		access_key: DF.Data | None
+		access_key: DF.Password | None
 		api_endpoint: DF.Data
 		disabled: DF.Check
 		req_params: DF.Table[CurrencyExchangeSettingsDetails]
@@ -41,6 +44,14 @@ class CurrencyExchangeSettings(Document):
 		response, value = self.validate_parameters()
 		self.validate_result(response, value)
 
+	def on_update(self):
+		def clear_rates():
+			frappe.cache.delete_keys("currency_exchange_rate_")
+
+		clear_rates()
+		# Concurrent lookups can cache old provider rates before this save commits.
+		frappe.db.after_commit.add(clear_rates)
+
 	def set_parameters_and_result(self):
 		if self.service_provider == "exchangerate.host":
 			if not self.access_key:
@@ -55,7 +66,6 @@ class CurrencyExchangeSettings(Document):
 
 			self.api_endpoint = get_api_endpoint(self.service_provider, self.use_http)
 			self.append("result_key", {"key": "result"})
-			self.append("req_params", {"key": "access_key", "value": self.access_key})
 			self.append("req_params", {"key": "amount", "value": "1"})
 			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
 			self.append("req_params", {"key": "from", "value": "{from_currency}"})
@@ -84,11 +94,14 @@ class CurrencyExchangeSettings(Document):
 			params[row.key] = row.value.format(
 				transaction_date=nowdate(), to_currency="INR", from_currency="USD"
 			)
+		params.update(get_auth_params(self))
 
 		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 
 		try:
-			response = requests.get(api_url, params=params)
+			response = requests.get(
+				api_url, params=params, timeout=frappe.conf.get("currency_exchange_request_timeout") or 10
+			)
 		except requests.exceptions.RequestException as e:
 			frappe.throw(_("Error: {0}").format(str(e)))
 
@@ -105,10 +118,25 @@ class CurrencyExchangeSettings(Document):
 				]
 		except Exception:
 			frappe.throw(_("Invalid result key. Response:") + " " + response.text)
-		if not isinstance(value, int | float):
-			frappe.throw(_("Returned exchange rate is neither integer not float."))
+		if isinstance(value, bool) or not isinstance(value, int | float) or not isfinite(value) or value <= 0:
+			frappe.throw(_("Returned exchange rate must be a positive finite number."))
 
-		self.url = response.url
+		self.url = remove_access_key(response.url)
+
+
+def get_auth_params(settings: "CurrencyExchangeSettings") -> dict:
+	"""Return the provider's access key, which is kept out of the stored request parameters."""
+	if settings.service_provider == "exchangerate.host":
+		return {"access_key": settings.get_password("access_key")}
+	return {}
+
+
+def remove_access_key(url: str) -> str:
+	parts = urlsplit(url)
+	query = [
+		(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True) if key != "access_key"
+	]
+	return urlunsplit(parts._replace(query=urlencode(query)))
 
 
 @frappe.whitelist()

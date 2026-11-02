@@ -16,16 +16,20 @@ from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_
 from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.query_builder import CustomFunction, Field, functions
 from frappe.query_builder.functions import Cast, Coalesce, Max
-from frappe.utils import cint, cstr, flt, get_formatted_email, today
+from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
 
+from erpnext import get_company_currency
 from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
 	validate_party_currency_before_merging,
 )
-from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
-from erpnext.stock.doctype.company_restriction.company_restriction import validate_allowed_companies
+from erpnext.controllers.website_list_for_contact import (
+	add_role_for_portal_user,
+	link_portal_users_to_contacts,
+)
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 from erpnext.utilities.transaction_base import TransactionBase
 
 from .mapper import (
@@ -90,12 +94,15 @@ class Customer(TransactionBase):
 		market_segment: DF.Link | None
 		mobile_no: DF.ReadOnly | None
 		naming_series: DF.Literal["CUST-.YYYY.-"]
+		on_hold: DF.Check
 		opportunity_name: DF.Link | None
 		payment_terms: DF.Link | None
 		portal_users: DF.Table[PortalUser]
 		primary_address: DF.TextEditor | None
 		prospect_name: DF.Link | None
+		release_date: DF.Date | None
 		represents_company: DF.Link | None
+		restrict_to_companies: DF.Check
 		sales_team: DF.Table[SalesTeam]
 		so_required: DF.Check
 		supplier_numbers: DF.Table[SupplierNumberAtCustomer]
@@ -115,6 +122,10 @@ class Customer(TransactionBase):
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
 		self.set_onload("dashboard_info", info)
+
+	def before_save(self):
+		if not self.on_hold:
+			self.release_date = None
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default("cust_master_name")
@@ -181,15 +192,17 @@ class Customer(TransactionBase):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		self.validate_customer_group()
+		self.validate_lead_not_converted()
 		validate_party_accounts(self)
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.validate_prospect_not_converted()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
-		validate_allowed_companies(self)
+		validate_default_price_list_side(self.default_price_list, "selling")
 
 		# set loyalty program tier
 		if not self.is_new() and (customer := self.get_doc_before_save()):
@@ -197,8 +210,21 @@ class Customer(TransactionBase):
 				self.loyalty_program_tier = customer.loyalty_program_tier
 
 		if self.sales_team:
-			if sum(member.allocated_percentage or 0 for member in self.sales_team) != 100:
+			total = sum(flt(member.allocated_percentage) for member in self.sales_team)
+			if flt(total, self.precision("allocated_percentage", "sales_team")) != 100:
 				frappe.throw(_("Total contribution percentage should be equal to 100"))
+
+	def validate_lead_not_converted(self):
+		if not (self.is_new() and self.lead_name):
+			return
+
+		if customer := frappe.db.exists("Customer", {"lead_name": self.lead_name}):
+			frappe.throw(
+				_("Lead {0} is already converted to Customer {1}").format(
+					frappe.bold(self.lead_name), get_link_to_form("Customer", customer)
+				),
+				frappe.DuplicateEntryError,
+			)
 
 	@frappe.whitelist(methods=["POST"])
 	def get_customer_group_details(self):
@@ -207,17 +233,21 @@ class Customer(TransactionBase):
 		self.credit_limits = []
 		self.payment_terms = self.default_price_list = ""
 
-		tables = [["accounts", "account"], ["credit_limits", "credit_limit"]]
+		tables = [
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "overdue_billing_threshold", "bypass_credit_limit_check"]],
+		]
 		fields = ["payment_terms", "default_price_list"]
 
 		for row in tables:
-			table, field = row[0], row[1]
+			table, table_fields = row[0], row[1]
 			if not doc.get(table):
 				continue
 
 			for entry in doc.get(table):
 				child = self.append(table)
-				child.update({"company": entry.company, field: entry.get(field)})
+				child.update({"company": entry.company})
+				child.update({field: entry.get(field) for field in table_fields})
 
 		for field in fields:
 			if not doc.get(field):
@@ -259,10 +289,15 @@ class Customer(TransactionBase):
 		)
 
 		if internal_customer:
+			internal_customer_link = get_link_to_form("Customer", internal_customer)
 			frappe.throw(
-				_("Internal Customer for company {0} already exists").format(
-					frappe.bold(self.represents_company)
-				)
+				_(
+					"Internal Customer {0} already exists for {1}. Disable it to make this Customer internal."
+				).format(
+					internal_customer_link,
+					frappe.bold(self.represents_company),
+				),
+				title=_("Internal Customer Already Exists"),
 			)
 
 	def on_update(self):
@@ -279,6 +314,8 @@ class Customer(TransactionBase):
 
 		self.update_customer_groups()
 
+		link_portal_users_to_contacts(self)
+
 	def add_role_for_user(self):
 		for portal_user in self.portal_users:
 			add_role_for_portal_user(portal_user, "Customer")
@@ -291,7 +328,7 @@ class Customer(TransactionBase):
 			)
 
 	def create_primary_contact(self):
-		if not self.customer_primary_contact and not self.lead_name:
+		if not self.customer_primary_contact and not self.lead_has_contact():
 			if self.mobile_no or self.email_id or self.first_name or self.last_name:
 				contact = make_contact(self)
 				self.db_set("customer_primary_contact", contact.name)
@@ -299,6 +336,15 @@ class Customer(TransactionBase):
 				self.db_set("email_id", self.email_id)
 		elif self.customer_primary_contact:
 			frappe.set_value("Contact", self.customer_primary_contact, "is_primary_contact", 1)  # ensure
+
+	def lead_has_contact(self) -> bool:
+		"""The lead's contacts are linked to the customer instead of making a new one."""
+		return bool(
+			self.lead_name
+			and frappe.db.exists(
+				"Dynamic Link", {"parenttype": "Contact", "link_doctype": "Lead", "link_name": self.lead_name}
+			)
+		)
 
 	def create_primary_address(self):
 		from frappe.contacts.doctype.address.address import get_address_display
@@ -315,8 +361,29 @@ class Customer(TransactionBase):
 	def update_lead_status(self):
 		"""If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity"""
-		if self.lead_name:
-			frappe.db.set_value("Lead", self.lead_name, "status", "Converted")
+		if not self.lead_name:
+			return
+
+		lead = frappe.get_doc("Lead", self.lead_name)
+		lead.db_set("status", "Converted")
+		lead.update_prospect()
+		for doctype, party_type_field in (("Quotation", "quotation_to"), ("Opportunity", "opportunity_from")):
+			self.link_lead_records(doctype, party_type_field)
+
+	def link_lead_records(self, doctype: str, party_type_field: str):
+		names = [
+			name
+			for name in frappe.get_all(
+				doctype, {party_type_field: "Lead", "party_name": self.lead_name}, pluck="name"
+			)
+			if frappe.has_permission(doctype, "write", name)
+		]
+		if names:
+			frappe.db.set_value(
+				doctype,
+				{"name": ("in", names), party_type_field: "Lead", "party_name": self.lead_name},
+				{party_type_field: "Customer", "party_name": self.name},
+			)
 
 	def link_address_and_contact(self):
 		linked_documents = {
@@ -353,8 +420,8 @@ class Customer(TransactionBase):
 
 		from erpnext.crm.utils import copy_comments, link_communications
 
-		copy_comments("Lead", self.lead_name, self)
-		link_communications("Lead", self.lead_name, self)
+		copy_comments("Lead", self.lead_name, self, self.flags.ignore_permissions)
+		link_communications("Lead", self.lead_name, self, self.flags.ignore_permissions)
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
@@ -364,6 +431,21 @@ class Customer(TransactionBase):
 				),
 				frappe.NameError,
 			)
+
+	def validate_prospect_not_converted(self):
+		if not (self.is_new() and self.prospect_name):
+			return
+
+		customer = frappe.db.exists("Customer", {"prospect_name": self.prospect_name})
+		if not customer:
+			return
+
+		message = _("Prospect {0} is already converted to a Customer").format(frappe.bold(self.prospect_name))
+		if frappe.has_permission("Customer", "read", customer):
+			message = _("Prospect {0} is already converted to Customer {1}").format(
+				frappe.bold(self.prospect_name), get_link_to_form("Customer", customer)
+			)
+		frappe.throw(message, frappe.DuplicateEntryError)
 
 	def validate_customer_group(self):
 		if not self.customer_group:
@@ -403,6 +485,9 @@ class Customer(TransactionBase):
 				)
 			else:
 				company_record.append(limit.company)
+
+			if not flt(limit.credit_limit):
+				continue
 
 			outstanding_amt = get_customer_outstanding(
 				self.name, limit.company, ignore_outstanding_sales_order=limit.bypass_credit_limit_check
@@ -499,6 +584,13 @@ def get_nested_links(link_doctype, link_name, ignore_permissions=False):
 	return links
 
 
+def is_customer_blocked(customer: str) -> bool:
+	on_hold, release_date = frappe.db.get_value("Customer", customer, ["on_hold", "release_date"])
+	if not on_hold:
+		return False
+	return not release_date or getdate(today()) < getdate(release_date)
+
+
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
 	credit_limit = get_credit_limit(customer, company)
 	if not credit_limit:
@@ -507,8 +599,12 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
+	customer_outstanding = flt(
+		customer_outstanding,
+		frappe.get_precision("Customer Credit Limit", "credit_limit", get_company_currency(company)),
+	)
 
-	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
+	if credit_limit > 0 and customer_outstanding > credit_limit:
 		message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 			customer, customer_outstanding, credit_limit
 		)
@@ -541,11 +637,8 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 			# if the current user does not have permissions to override credit limit,
 			# prompt them to send out an email to the controller users
-			frappe.msgprint(
-				message,
-				title=_("Credit Limit Crossed"),
-				raise_exception=1,
-				primary_action={
+			primary_action = (
+				{
 					"label": "Send Email",
 					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
 					"hide_on_success": True,
@@ -555,7 +648,16 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 						"credit_limit": credit_limit,
 						"credit_controller_users_list": credit_controller_users,
 					},
-				},
+				}
+				if frappe.has_permission("Customer", ptype="email", doc=customer)
+				else None
+			)
+
+			frappe.msgprint(
+				message,
+				title=_("Credit Limit Crossed"),
+				raise_exception=1,
+				primary_action=primary_action,
 			)
 
 
@@ -563,12 +665,132 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 def send_emails(
 	customer: str, customer_outstanding: float, credit_limit: float, credit_controller_users_list: str | list
 ):
+	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
 	credit_controller_users_list = frappe.parse_json(credit_controller_users_list)
 	subject = _("Credit limit reached for customer {0}").format(customer)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
 		customer, customer_outstanding, credit_limit
 	)
 	frappe.sendmail(recipients=credit_controller_users_list, subject=subject, message=message)
+
+
+def check_overdue_billing_threshold(customer: str, company: str) -> None:
+	if not frappe.get_single_value("Accounts Settings", "enable_overdue_billing_threshold"):
+		return
+
+	threshold = get_overdue_billing_threshold(customer, company)
+	if not threshold:
+		return
+
+	overdue_amount = get_customer_overdue_amount(customer, company)
+	if overdue_amount <= threshold:
+		return
+
+	bypass_role = frappe.get_single_value("Accounts Settings", "role_allowed_to_bypass_overdue_billing")
+	if bypass_role and bypass_role in frappe.get_roles():
+		return
+
+	company_currency = frappe.get_cached_value("Company", company, "default_currency")
+	frappe.throw(
+		_("Overdue Limit crossed for customer {0}. Overdue amount {1} exceeds the allowed limit {2}.").format(
+			customer,
+			fmt_money(overdue_amount, currency=company_currency),
+			fmt_money(threshold, currency=company_currency),
+		),
+		title=_("Overdue Limit Crossed"),
+	)
+
+
+def get_overdue_billing_threshold(customer: str, company: str) -> float:
+	"""Overdue limit set on the customer, falling back to its customer group."""
+	threshold = frappe.db.get_value(
+		"Customer Credit Limit",
+		{"parent": customer, "parenttype": "Customer", "company": company},
+		"overdue_billing_threshold",
+	)
+
+	if not threshold:
+		customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
+		threshold = frappe.db.get_value(
+			"Customer Credit Limit",
+			{"parent": customer_group, "parenttype": "Customer Group", "company": company},
+			"overdue_billing_threshold",
+		)
+
+	return flt(threshold)
+
+
+def get_customer_overdue_amount(customer: str, company: str) -> float:
+	"""Amount the customer owes past its due date, in company currency.
+
+	Reads the Payment Ledger, the same source as `outstanding_amount`, so this agrees
+	with the Overdue status the invoice list already shows.
+	"""
+	invoices = get_outstanding_invoices_for_customer(customer, company)
+	if not invoices:
+		return 0.0
+
+	payable_amounts = get_past_due_payable_amounts([d.name for d in invoices])
+	return flt(sum(get_overdue_portion(d, payable_amounts.get(d.name)) for d in invoices))
+
+
+def get_outstanding_invoices_for_customer(customer: str, company: str) -> list[frappe._dict]:
+	from frappe.query_builder.functions import Sum
+
+	ple = frappe.qb.DocType("Payment Ledger Entry")
+	sales_invoice = frappe.qb.DocType("Sales Invoice")
+
+	# the Payment Ledger, not the GL, carries allocations made after submit (reconciled advances).
+	# `amount` is booked in company currency, so this is comparable to the overdue limit.
+	outstanding = Sum(ple.amount)
+
+	return (
+		frappe.qb.from_(ple)
+		.inner_join(sales_invoice)
+		.on(sales_invoice.name == ple.against_voucher_no)
+		.select(
+			sales_invoice.name,
+			sales_invoice.due_date,
+			sales_invoice.base_grand_total,
+			outstanding.as_("outstanding"),
+		)
+		.where(ple.party_type == "Customer")
+		.where(ple.party == customer)
+		.where(ple.company == company)
+		.where(ple.delinked == 0)
+		.where(ple.against_voucher_type == "Sales Invoice")
+		.groupby(sales_invoice.name, sales_invoice.due_date, sales_invoice.base_grand_total)
+		.having(outstanding > 0)
+	).run(as_dict=True)
+
+
+def get_past_due_payable_amounts(invoices: list[str]) -> dict[str, float]:
+	from frappe.query_builder.functions import Sum
+
+	payment_schedule = frappe.qb.DocType("Payment Schedule")
+
+	rows = (
+		frappe.qb.from_(payment_schedule)
+		.select(payment_schedule.parent, Sum(payment_schedule.base_payment_amount).as_("payable"))
+		.where(payment_schedule.parenttype == "Sales Invoice")
+		.where(payment_schedule.parent.isin(invoices))
+		.where(payment_schedule.due_date < getdate())
+		.groupby(payment_schedule.parent)
+	).run(as_dict=True)
+
+	return {d.parent: flt(d.payable) for d in rows}
+
+
+def get_overdue_portion(invoice: frappe._dict, payable_amount: float | None) -> float:
+	outstanding = flt(invoice.outstanding)
+
+	# No payable amount means either a schedule-less invoice (POS, opening) or one whose terms are
+	# all still in the future. Both are answered by the invoice due date, which is the last term.
+	if payable_amount is None:
+		return outstanding if invoice.due_date and getdate(invoice.due_date) < getdate() else 0.0
+
+	paid = flt(invoice.base_grand_total) - outstanding
+	return min(max(payable_amount - paid, 0.0), outstanding)
 
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
@@ -616,14 +838,34 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	SalesInvoice = frappe.qb.DocType("Sales Invoice")
 	SalesInvoiceItem = frappe.qb.DocType("Sales Invoice Item")
+
+	returned_items = (
+		frappe.qb.from_(DeliveryNoteItem)
+		.join(DeliveryNote)
+		.on(DeliveryNote.name == DeliveryNoteItem.parent)
+		.select(DeliveryNoteItem.name, DeliveryNoteItem.dn_detail)
+		.where(DeliveryNote.customer == customer)
+		.where(DeliveryNote.company == company)
+		.where(DeliveryNote.docstatus == 1)
+		.where(DeliveryNote.is_return == 1)
+	).as_("returned_items")
+	# Credits against a return delivery reduce the original delivery row's billed quantity.
+	billed_dn_detail = Coalesce(returned_items.dn_detail, SalesInvoiceItem.dn_detail)
 
 	si_subquery = (
 		frappe.qb.from_(SalesInvoiceItem)
-		.select(SalesInvoiceItem.dn_detail, Sum(SalesInvoiceItem.amount).as_("billed_amount"))
+		.join(SalesInvoice)
+		.on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.left_join(returned_items)
+		.on((returned_items.name == SalesInvoiceItem.dn_detail) & (SalesInvoice.is_return == 1))
+		.select(billed_dn_detail.as_("dn_detail"), Sum(SalesInvoiceItem.stock_qty).as_("billed_qty"))
 		.where(SalesInvoiceItem.docstatus == 1)
-		.groupby(SalesInvoiceItem.dn_detail)
+		.where((SalesInvoice.is_return == 0) | (SalesInvoice.update_billed_amount_in_delivery_note == 1))
+		.groupby(billed_dn_detail)
 	)
+	returned_qty = IfNull(DeliveryNoteItem.returned_qty, 0.0)
 
 	dn_query = (
 		frappe.qb.from_(DeliveryNote)
@@ -634,7 +876,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.select(
 			Sum(
 				(
-					(DeliveryNoteItem.amount - IfNull(si_subquery.billed_amount, 0.0))
+					DeliveryNoteItem.base_net_amount
+					* (DeliveryNoteItem.stock_qty - IfNull(si_subquery.billed_qty, 0.0) - returned_qty)
+					/ DeliveryNoteItem.stock_qty
 					/ DeliveryNote.base_net_total
 				)
 				* DeliveryNote.base_grand_total
@@ -645,7 +889,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 		.where(DeliveryNote.docstatus == 1)
 		.where(DeliveryNote.base_net_total > 0)
 		.where(DeliveryNote.status.notin(["Closed", "Stopped"]))
-		.where(DeliveryNoteItem.amount > IfNull(si_subquery.billed_amount, 0.0))
+		.where(DeliveryNoteItem.stock_qty > IfNull(si_subquery.billed_qty, 0.0) + returned_qty)
 		.where(
 			Criterion.any(
 				[DeliveryNoteItem.against_sales_order.isnull(), DeliveryNoteItem.against_sales_order == ""]
@@ -700,6 +944,16 @@ def get_credit_limit(customer, company):
 def get_customer_primary(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	customer = filters.get("customer")
 	type = filters.get("type")
+
+	# `type` is caller-supplied and was interpolated straight into qb.DocType(), so any doctype on
+	# the site could be joined to Dynamic Link and read. The two pickers that call this
+	# (customer.js:84,94) send only these two values.
+	if type not in ("Contact", "Address"):
+		frappe.throw(_("Invalid type"), frappe.PermissionError)
+
+	# authorise the party, not Contact/Address: the `if_owner` row on Address would empty the picker rather than error
+	frappe.has_permission("Customer", doc=customer, throw=True)
+
 	type_doctype = qb.DocType(type)
 	dlink = qb.DocType("Dynamic Link")
 

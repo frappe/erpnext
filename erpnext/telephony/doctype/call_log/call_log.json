@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:id",
  "creation": "2022-02-21 11:54:58.414784",
+ "description": "A phone call made or received.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -161,6 +162,7 @@
    "read_only": 1
   }
  ],
+ "icon": "phone",
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],

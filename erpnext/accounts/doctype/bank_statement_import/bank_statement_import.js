@@ -7,6 +7,7 @@ frappe.ui.form.on("Bank Statement Import", {
 			return {
 				filters: {
 					company: doc.company,
+					is_company_account: 1,
 				},
 			};
 		});

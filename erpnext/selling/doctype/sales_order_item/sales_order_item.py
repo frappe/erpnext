@@ -1,9 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import math
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
+
+from erpnext.controllers.status_updater import get_allowance_for
 
 
 class SalesOrderItem(Document):
@@ -30,6 +34,7 @@ class SalesOrderItem(Document):
 		blanket_order_rate: DF.Currency
 		bom_no: DF.Link | None
 		brand: DF.Link | None
+		closed: DF.Check
 		company_total_stock: DF.Float
 		conversion_factor: DF.Float
 		cost_center: DF.Link | None
@@ -41,7 +46,6 @@ class SalesOrderItem(Document):
 		discount_amount: DF.Currency
 		discount_percentage: DF.Percent
 		distributed_discount_amount: DF.Currency
-		ensure_delivery_based_on_produced_serial_no: DF.Check
 		fg_item: DF.Link | None
 		fg_item_qty: DF.Float
 		grant_commission: DF.Check
@@ -54,6 +58,7 @@ class SalesOrderItem(Document):
 		item_name: DF.Data
 		item_tax_rate: DF.Code | None
 		item_tax_template: DF.Link | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		material_request: DF.Link | None
@@ -83,6 +88,7 @@ class SalesOrderItem(Document):
 		requested_qty: DF.Float
 		reserve_stock: DF.Check
 		returned_qty: DF.Float
+		skip_delivery: DF.Check
 		stock_qty: DF.Float
 		stock_reserved_qty: DF.Float
 		stock_uom: DF.Link | None
@@ -100,7 +106,15 @@ class SalesOrderItem(Document):
 		work_order_qty: DF.Float
 	# end: auto-generated types
 
-	pass
+	@property
+	def max_deliverable_qty(self) -> float:
+		"""Ordered qty plus the over delivery allowance, in whole units when the UOM needs it."""
+		allowance = flt(get_allowance_for(self.item_code, qty_or_amount="qty")[0])
+		max_qty = flt(flt(self.qty) * (100 + allowance) / 100, self.precision("qty"))
+		if frappe.get_cached_value("UOM", self.uom, "must_be_whole_number"):
+			return math.floor(max_qty)
+
+		return max_qty
 
 
 def on_doctype_update():

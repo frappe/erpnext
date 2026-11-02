@@ -134,7 +134,7 @@ class GLEntry(Document):
 		mandatory = ["account", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
+				frappe.throw(_("{0} is required").format(self.meta.get_translated_label(k)))
 
 		if not self.is_cancelled and not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
@@ -303,6 +303,9 @@ class GLEntry(Document):
 		default_currency, reporting_currency = frappe.get_cached_value(
 			"Company", self.company, ["default_currency", "reporting_currency"]
 		)
+		if not reporting_currency:
+			return
+
 		transaction_date = self.transaction_date or self.posting_date
 		self.reporting_currency_exchange_rate = get_exchange_rate(
 			default_currency, reporting_currency, transaction_date

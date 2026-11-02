@@ -12,6 +12,7 @@ const DIFFERENCE_FIELD_NAMES = [
 ];
 
 frappe.query_reports["Stock Ledger Invariant Check"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "item_code",
@@ -35,13 +36,13 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 		{
 			fieldname: "show_incorrect_entries",
 			fieldtype: "Check",
-			label: "Show Incorrect Entries",
+			label: __("Show Incorrect Entries"),
 			default: 0,
 		},
 	],
 
 	formatter(value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (DIFFERENCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = '<span style="color:red">' + value + "</span>";
 		}

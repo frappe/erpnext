@@ -1,8 +1,8 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -23,4 +23,11 @@ class QualityFeedbackTemplate(Document):
 		template: DF.Data
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		parameters = set()
+		for d in self.parameters:
+			if d.parameter in parameters:
+				frappe.throw(
+					_("Row #{0}: Parameter {1} is already added").format(d.idx, frappe.bold(d.parameter))
+				)
+			parameters.add(d.parameter)

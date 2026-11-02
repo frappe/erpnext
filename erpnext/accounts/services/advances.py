@@ -168,6 +168,7 @@ def set_total_advance_paid(doc) -> None:
 		advance = advance[0]
 		advance_paid = flt(advance.amount, doc.precision("advance_paid"))
 		if advance.account_currency:
+			doc.party_account_currency = advance.account_currency
 			frappe.db.set_value(doc.doctype, doc.name, "party_account_currency", advance.account_currency)
 
 	doc.db_set("advance_paid", advance_paid)
@@ -179,7 +180,7 @@ def set_advance_payment_status(doc) -> None:
 	new_status = None
 
 	PaymentRequest = frappe.qb.DocType("Payment Request")
-	paid_amount = frappe.get_value(
+	requested_paid_amount = frappe.get_value(
 		doctype="Payment Request",
 		filters={
 			"reference_doctype": doc.doctype,
@@ -189,14 +190,35 @@ def set_advance_payment_status(doc) -> None:
 		fieldname=Sum(PaymentRequest.grand_total - PaymentRequest.outstanding_amount),
 	)
 
+	advance_paid = flt(doc.get("advance_paid"))
+	if advance_paid and doc.get("party_account_currency") != doc.get("currency"):
+		exchange_rate = get_exchange_rate(
+			doc.party_account_currency, doc.company_currency, doc.transaction_date
+		)
+		if not exchange_rate:
+			frappe.throw(
+				_("Unable to find exchange rate from {0} to {1} on {2}").format(
+					doc.party_account_currency, doc.company_currency, doc.transaction_date
+				)
+			)
+		advance_paid = advance_paid * exchange_rate / doc.conversion_rate
+
+	# Payment Requests can cover the same advances, so do not add the amounts.
+	# Keep their paid amount as a fallback after advances are moved to invoices.
+	paid_amount = max(advance_paid, flt(requested_paid_amount))
+
 	if not paid_amount:
 		if doc.doctype in get_advance_payment_doctypes(payment_type="receivable"):
-			new_status = "Not Requested" if paid_amount is None else "Requested"
+			new_status = "Not Requested" if requested_paid_amount is None else "Requested"
 		elif doc.doctype in get_advance_payment_doctypes(payment_type="payable"):
-			new_status = "Not Initiated" if paid_amount is None else "Initiated"
+			new_status = "Not Initiated" if requested_paid_amount is None else "Initiated"
 	else:
 		total_amount = doc.get("rounded_total") or doc.get("grand_total")
-		new_status = "Fully Paid" if paid_amount == total_amount else "Partially Paid"
+		new_status = (
+			"Fully Paid"
+			if flt(paid_amount, doc.precision("grand_total")) >= total_amount
+			else "Partially Paid"
+		)
 
 	if new_status == doc.advance_payment_status:
 		return

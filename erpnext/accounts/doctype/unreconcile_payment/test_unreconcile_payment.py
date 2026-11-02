@@ -11,6 +11,11 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	make_company_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -489,6 +494,64 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 
 		self.disable_advance_as_liability()
 
+	def test_08_adv_from_so_to_invoice_without_advance_account(self):
+		so = self.create_sales_order()
+		pe = self.create_payment_entry()
+		pe.paid_amount = 1000
+		pe.append(
+			"references",
+			{"reference_doctype": so.doctype, "reference_name": so.name, "allocated_amount": 1000},
+		)
+		pe.save().submit()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, 1000)
+
+		si = make_sales_invoice(so.name)
+		si.insert().submit()
+
+		pr = frappe.get_doc(
+			{
+				"doctype": "Payment Reconciliation",
+				"company": self.company,
+				"party_type": "Customer",
+				"party": so.customer,
+				"receivable_payable_account": get_party_account("Customer", so.customer, so.company),
+			}
+		)
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		so.reload()
+		self.assertEqual(so.advance_paid, 1000)
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		unreconcile.allocations = [x for x in unreconcile.allocations if x.reference_name == si.name]
+		unreconcile.save().submit()
+
+		pe.reload()
+		so.reload()
+		self.assertEqual(len(pe.references), 0)
+		self.assertEqual(pe.unallocated_amount, 1000)
+		self.assertEqual(so.advance_paid, 0)
+		self.assertFalse(
+			frappe.db.exists(
+				"Advance Payment Ledger Entry",
+				{"voucher_no": pe.name, "against_voucher_no": so.name, "delinked": 0},
+			)
+		)
+
 	def test_unreconcile_advance_from_journal_entry(self):
 		po = create_purchase_order(
 			company=self.company,
@@ -541,3 +604,64 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 
 		po.reload()
 		self.assertEqual(po.advance_paid, 0)
+
+	def test_reference_count_needs_voucher_read(self):
+		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import doc_has_references
+
+		si = self.create_sales_invoice()
+		pe = self.create_payment_entry()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 100},
+		)
+		pe.save().submit()
+
+		inside = make_company_fenced_user("unrec-count@example.com", ["Accounts User"], self.company)
+		with as_user(inside):
+			self.assertEqual(doc_has_references(si.doctype, si.name), 1)
+			self.assertRaises(frappe.ValidationError, doc_has_references, si.doctype, "")
+
+		outside = make_company_fenced_user("unrec-count@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			self.assertRaises(frappe.PermissionError, doc_has_references, si.doctype, si.name)
+
+	def test_unreconcile_selection_fences_the_voucher(self):
+		from erpnext.accounts.doctype.unreconcile_payment.unreconcile_payment import (
+			create_unreconcile_doc_for_selection,
+		)
+
+		si = self.create_sales_invoice()
+		pe = self.create_payment_entry()
+		pe.append(
+			"references",
+			{"reference_doctype": si.doctype, "reference_name": si.name, "allocated_amount": 100},
+		)
+		pe.save().submit()
+
+		def selection(voucher_no):
+			return [
+				{
+					"company": self.company,
+					"voucher_type": "Payment Entry",
+					"voucher_no": voucher_no,
+					"against_voucher_type": si.doctype,
+					"against_voucher_no": si.name,
+				}
+			]
+
+		def selection_kwargs(voucher_no):
+			return {"selections": selection(voucher_no)}
+
+		outside = make_company_fenced_user("unrec-fenced@example.com", ["Accounts User"], "_Test Company 1")
+		with as_user(outside):
+			assert_refused_for_names(
+				self, create_unreconcile_doc_for_selection, selection_kwargs, [pe.name], caller_supplied=True
+			)
+		inside = make_company_fenced_user("unrec-fenced@example.com", ["Accounts User"], "_Test Company")
+		with as_user(inside):
+			assert_refused_for_names(
+				self, create_unreconcile_doc_for_selection, selection_kwargs, [], caller_supplied=True
+			)
+			create_unreconcile_doc_for_selection(selection(pe.name))
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 100)

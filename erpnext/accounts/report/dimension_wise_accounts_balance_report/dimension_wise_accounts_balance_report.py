@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 import erpnext
 from erpnext.accounts.report.financial_statements import (
@@ -92,9 +92,10 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 	if account:
 		gl_filters["account"] = ["in", account]
 
-	gl_entries = frappe.get_all(
+	query = frappe.qb.get_query(
 		"GL Entry",
 		filters=gl_filters,
+		ignore_permissions=False,
 		fields=[
 			"posting_date",
 			"account",
@@ -109,8 +110,12 @@ def set_gl_entries_by_account(dimension_list, filters, account, gl_entries_by_ac
 		],
 		order_by="account, posting_date",
 	)
+	gl_entry = frappe.qb.DocType("GL Entry")
+	query = query.where(
+		gl_entry.finance_book.isin([cstr(filters.get("finance_book")), ""]) | gl_entry.finance_book.isnull()
+	).where(gl_entry.voucher_type != "Period Closing Voucher")
 
-	for entry in gl_entries:
+	for entry in query.run(as_dict=True):
 		gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
 
@@ -183,7 +188,7 @@ def get_dimensions(filters):
 	if meta.has_field("company"):
 		query_filters = {"company": filters.get("company")}
 
-	return frappe.get_all(filters.get("dimension"), filters=query_filters, pluck="name")
+	return frappe.get_list(filters.get("dimension"), filters=query_filters, pluck="name")
 
 
 def get_columns(dimension_list):

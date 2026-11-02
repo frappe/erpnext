@@ -179,6 +179,9 @@
                 },
                 "Impairment": {
                     "account_category": "Operating Expenses"
+                },
+                "Exchange Loss": {
+                    "account_category": "Operating Expenses"
                 }
             },
             "root_type": "Expense"
@@ -196,6 +199,10 @@
                 "account_type": "Income Account"
             },
             "Indirect Income": {
+                "Exchange Gain": {
+                    "account_type": "Income Account",
+                    "account_category": "Other Operating Income"
+                },
                 "account_type": "Income Account",
                 "is_group": 1
             },

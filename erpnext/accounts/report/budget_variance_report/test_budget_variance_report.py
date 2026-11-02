@@ -13,6 +13,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 ACCOUNT = "_Test Account Cost for Goods Sold - _TC"
 COST_CENTER = "_Test Cost Center - _TC"
 COST_CENTER_2 = "_Test Cost Center 2 - _TC"
+PAST_FISCAL_YEAR = "_Test Fiscal Year 2025"
 
 
 class TestBudgetVarianceReport(ERPNextTestSuite):
@@ -20,7 +21,10 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 		self.fy = get_fiscal_year(nowdate())[0]
 
 	def run_report(self, **extra):
-		filters = frappe._dict(
+		return execute(self.get_filters(**extra))[1]
+
+	def get_filters(self, **extra):
+		return frappe._dict(
 			{
 				"company": "_Test Company",
 				"from_fiscal_year": self.fy,
@@ -30,7 +34,6 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 				**extra,
 			}
 		)
-		return execute(filters)[1]
 
 	def report_row(self, data, dimension, account=ACCOUNT):
 		row = next(
@@ -115,3 +118,87 @@ class TestBudgetVarianceReport(ERPNextTestSuite):
 		# a dimension without any budget produces no report rows
 		data = self.run_report(budget_against_filter=["_Test Write Off Cost Center - _TC"])
 		self.assertEqual(data, [])
+
+	def test_period_closing_entries_are_not_actuals(self):
+		self.fy = PAST_FISCAL_YEAR
+		make_past_budget(COST_CENTER)
+		make_journal_entry(
+			ACCOUNT, "_Test Bank - _TC", 5000, cost_center=COST_CENTER, posting_date="2025-05-10", submit=True
+		)
+		actual = self.report_row(self.run_report(), COST_CENTER)[self.field("Actual")]
+
+		closing = make_journal_entry(
+			"_Test Bank - _TC",
+			ACCOUNT,
+			actual,
+			cost_center=COST_CENTER,
+			posting_date="2025-12-31",
+			submit=True,
+		)
+		gl_entry = frappe.qb.DocType("GL Entry")
+		frappe.qb.update(gl_entry).set(gl_entry.voucher_type, "Period Closing Voucher").where(
+			gl_entry.voucher_no == closing.name
+		).run()
+
+		self.assertEqual(self.report_row(self.run_report(), COST_CENTER)[self.field("Actual")], actual)
+
+	def test_entries_of_other_finance_books_are_not_actuals(self):
+		self.fy = PAST_FISCAL_YEAR
+		make_past_budget(COST_CENTER)
+		actual = self.report_row(self.run_report(), COST_CENTER)[self.field("Actual")]
+
+		journal_entry = make_journal_entry(
+			ACCOUNT, "_Test Bank - _TC", 7000, cost_center=COST_CENTER, posting_date="2025-05-10", save=False
+		)
+		journal_entry.finance_book = make_finance_book()
+		journal_entry.submit()
+
+		self.assertEqual(self.report_row(self.run_report(), COST_CENTER)[self.field("Actual")], actual)
+
+	def test_chart_covers_only_permitted_cost_centers(self):
+		self.fy = PAST_FISCAL_YEAR
+		make_past_budget(COST_CENTER)
+		make_past_budget(COST_CENTER_2)
+		user = make_user_restricted_to_cost_center(COST_CENTER)
+
+		frappe.set_user(user)
+		try:
+			_columns, data, _message, chart = execute(self.get_filters())
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual({row["budget_against"] for row in data}, {COST_CENTER})
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [data[0][self.field("Budget")]])
+
+
+def make_user_restricted_to_cost_center(cost_center):
+	user = "test_budget_variance@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Budget Variance",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Cost Center", cost_center, user)
+	return user
+
+
+def make_finance_book():
+	finance_book = "_Test Budget Variance Finance Book"
+	if not frappe.db.exists("Finance Book", finance_book):
+		frappe.get_doc({"doctype": "Finance Book", "finance_book_name": finance_book}).insert()
+	return finance_book
+
+
+def make_past_budget(cost_center):
+	return make_budget(
+		budget_against="Cost Center",
+		cost_center=cost_center,
+		budget_amount=10000000,
+		from_fiscal_year=PAST_FISCAL_YEAR,
+		to_fiscal_year=PAST_FISCAL_YEAR,
+		submit_budget=1,
+	)

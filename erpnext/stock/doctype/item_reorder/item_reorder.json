@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_bulk_edit": 1,
  "autoname": "hash",
  "creation": "2013-03-07 11:42:59",
  "doctype": "DocType",
@@ -18,6 +19,7 @@
    "columns": 3,
    "fieldname": "warehouse_group",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Check Availability in Warehouse",
    "options": "Warehouse"
@@ -26,6 +28,7 @@
    "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Request for",
    "options": "Warehouse",
@@ -59,7 +62,7 @@
  "in_create": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-12-02 16:02:23.254963",
+ "modified": "2026-07-28 15:54:36.089238",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Reorder",

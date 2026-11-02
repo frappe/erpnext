@@ -4,7 +4,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Max
+from frappe.query_builder import Case
+from frappe.query_builder.functions import IfNull, Max
 from frappe.utils import flt, get_datetime, get_link_to_form, getdate, nowtime, today
 from frappe.utils.caching import request_cache
 
@@ -34,6 +35,36 @@ class ItemStandardCost(Document):
 		self.validate_effective_date()
 		self.validate_rate()
 		self.warn_backdated_transactions_will_be_blocked()
+
+	def before_submit(self):
+		self.validate_no_negative_stock()
+
+	def validate_no_negative_stock(self):
+		resulting_qty = self.get_source_reconciliation_qty()
+		negative = [
+			row.warehouse
+			for row in self.get_warehouse_wise_balance()
+			if flt(resulting_qty.get(row.warehouse, row.actual_qty)) < 0
+		]
+		if negative:
+			frappe.throw(
+				_(
+					"Item {0} has negative stock in {1}. Bring the stock to zero or above before setting a new Standard Valuation Rate."
+				).format(
+					get_link_to_form("Item", self.item_code), ", ".join(frappe.bold(wh) for wh in negative)
+				)
+			)
+
+	def get_source_reconciliation_qty(self):
+		if not self.revaluation_entry:
+			return {}
+
+		rows = frappe.get_all(
+			"Stock Reconciliation Item",
+			filters={"parent": self.revaluation_entry, "item_code": self.item_code},
+			fields=["warehouse", "qty"],
+		)
+		return {row.warehouse: row.qty for row in rows}
 
 	def warn_backdated_transactions_will_be_blocked(self):
 		# Heads-up while creating (R2 enforces it later on every stock voucher): once this rate is
@@ -119,7 +150,22 @@ class ItemStandardCost(Document):
 		self.create_revaluation_entry()
 
 	def before_cancel(self):
+		self.validate_revaluation_entry_is_own()
 		self.validate_no_stock_activity_on_or_after_effective_date()
+
+	def validate_revaluation_entry_is_own(self):
+		if not self.revaluation_entry or self.flags.from_source_reconciliation:
+			return
+
+		reco_creation = frappe.db.get_value("Stock Reconciliation", self.revaluation_entry, "creation")
+		if reco_creation and get_datetime(reco_creation) < get_datetime(self.creation):
+			frappe.throw(
+				_(
+					"Item Standard Cost {0} was created by Stock Reconciliation {1}. Cancel the Stock Reconciliation instead."
+				).format(
+					frappe.bold(self.name), get_link_to_form("Stock Reconciliation", self.revaluation_entry)
+				)
+			)
 
 	def has_stock_activity_on_or_after_effective_date(self):
 		"""Is there any live stock transaction for this item on or after the effective date, other than
@@ -177,6 +223,7 @@ class ItemStandardCost(Document):
 			reco = frappe.get_doc("Stock Reconciliation", self.revaluation_entry)
 			if reco.docstatus == 1:
 				reco.flags.via_item_standard_cost = True
+				reco.flags.ignore_permissions = True
 				reco.cancel()
 
 	def create_revaluation_entry(self):
@@ -206,8 +253,7 @@ class ItemStandardCost(Document):
 			)
 
 		reco.flags.via_item_standard_cost = True
-		reco.insert()
-		reco.submit()
+		submit_as_system_entry(reco)
 
 		self.db_set("revaluation_entry", reco.name)
 
@@ -287,6 +333,12 @@ class ItemStandardCost(Document):
 		)
 
 
+def submit_as_system_entry(doc):
+	doc.flags.ignore_permissions = True
+	doc.insert()
+	doc.submit()
+
+
 @request_cache
 def get_item_standard_rate(item_code, company, posting_date=None):
 	"""Return the standard valuation rate effective for `item_code` in `company` as of
@@ -332,13 +384,8 @@ def clear_item_standard_rate_cache():
 
 
 def get_purchase_price_variance_account(item_code, company):
-	"""Resolve the Purchase Price Variance account for a Standard Cost item: the per-company
-	Item Default override if set, otherwise the Company default."""
-	account = frappe.db.get_value(
-		"Item Default",
-		{"parent": item_code, "company": company},
-		"purchase_price_variance_account",
-	)
+	"""Resolve the Purchase Price Variance account for a Standard Cost item."""
+	account = get_variance_account(item_code, company, "purchase_price_variance_account")
 
 	if not account:
 		account = frappe.get_cached_value("Company", company, "default_purchase_price_variance_account")
@@ -354,14 +401,8 @@ def get_purchase_price_variance_account(item_code, company):
 
 
 def get_manufacturing_variance_account(item_code, company):
-	"""Resolve the Manufacturing Variance account for a Standard Cost item: the per-company Item Default
-	override if set, otherwise the Company default. During Manufacture/Repack this account absorbs the
-	difference between the consumed (raw material + additional) cost and the finished good's standard rate."""
-	account = frappe.db.get_value(
-		"Item Default",
-		{"parent": item_code, "company": company},
-		"manufacturing_variance_account",
-	)
+	"""Resolve the Manufacturing Variance account for a Standard Cost item."""
+	account = get_variance_account(item_code, company, "manufacturing_variance_account")
 
 	if not account:
 		account = frappe.get_cached_value("Company", company, "default_manufacturing_variance_account")
@@ -376,6 +417,20 @@ def get_manufacturing_variance_account(item_code, company):
 	return account
 
 
+def get_variance_account(item_code, company, fieldname):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+	from erpnext.stock.doctype.item.item import get_item_defaults
+
+	for defaults in (
+		get_item_defaults(item_code, company),
+		get_item_group_defaults(item_code, company),
+		get_brand_defaults(item_code, company),
+	):
+		if account := defaults.get(fieldname):
+			return account
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_standard_cost_items(
@@ -385,31 +440,48 @@ def get_standard_cost_items(
 	'Standard Cost' — i.e. the item is explicitly Standard Cost, or it has no valuation method of its
 	own and the applicable default (Company, else Stock Settings) is Standard Cost. This mirrors
 	get_valuation_method, so every shown item also passes validate_item."""
+	# the form is the boundary, not Item: Accounts Manager writes this doctype and holds no Item read or select
+	frappe.has_permission("Item Standard Cost", throw=True)
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import (
+		get_allowed_companies,
+		get_restriction_criterion,
+	)
+
+	allowed_companies = get_allowed_companies(frappe.session.user, "Item Standard Cost")
 	company = (filters or {}).get("company")
 	if company:
+		# `company` is caller supplied and selects whose default valuation method is applied, so a
+		# caller restricted to particular companies must not ask about the others
+		if allowed_companies and company not in allowed_companies:
+			frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
 		default_method = frappe.get_cached_value("Company", company, "valuation_method")
 	else:
 		default_method = frappe.db.get_single_value("Stock Settings", "valuation_method")
 
+	item = frappe.qb.DocType("Item")
 	if default_method == "Standard Cost":
 		# Items with no method of their own inherit the Standard Cost default.
-		valuation_condition = "and ifnull(item.valuation_method, '') in ('', 'Standard Cost')"
+		valuation_condition = IfNull(item.valuation_method, "").isin(["", "Standard Cost"])
 	else:
-		valuation_condition = "and item.valuation_method = 'Standard Cost'"
+		valuation_condition = item.valuation_method == "Standard Cost"
 
-	return frappe.db.sql(  # nosemgrep
-		f"""
-		select item.name, item.item_name
-		from `tabItem` item
-		where item.is_stock_item = 1
-			and item.disabled = 0
-			and item.has_variants = 0
-			{valuation_condition}
-			and ({searchfield} like %(txt)s or item.item_name like %(txt)s)
-		order by
-			(case when item.name like %(txt)s then 0 else 1 end),
-			item.name
-		limit %(page_len)s offset %(start)s
-		""",
-		{"txt": f"%{txt}%", "start": start, "page_len": page_len},
+	search_text = f"%{txt}%"
+	query = (
+		frappe.qb.from_(item)
+		.select(item.name, item.item_name)
+		.where((item.is_stock_item == 1) & (item.disabled == 0) & (item.has_variants == 0))
+		.where(valuation_condition)
+		.where(item[searchfield].like(search_text) | item.item_name.like(search_text))
+		.orderby(Case().when(item.name.like(search_text), 0).else_(1))
+		.orderby(item.name)
+		.limit(page_len)
+		.offset(start)
 	)
+
+	companies = [company] if company else allowed_companies
+	if companies:
+		query = query.where(get_restriction_criterion("Item", companies))
+
+	return query.run()

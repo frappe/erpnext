@@ -34,6 +34,23 @@ class TestBisectAccountingStatements(ERPNextTestSuite):
 		doc.to_date = "2026-01-01"
 		self.assertRaises(frappe.ValidationError, doc.validate)
 
+	def test_cached_node_preserves_statement_summaries(self):
+		doc = frappe.new_doc("Bisect Accounting Statements")
+		doc.current_node = frappe.new_doc("Bisect Nodes").insert().name
+		doc.p_l_summary = 1200
+		doc.b_s_summary = 900
+		doc.difference = 300
+		doc.update_node()
+
+		doc.p_l_summary = 0
+		doc.b_s_summary = 0
+		doc.difference = 0
+		doc.fetch_or_calculate()
+
+		self.assertEqual(doc.p_l_summary, 1200)
+		self.assertEqual(doc.b_s_summary, 900)
+		self.assertEqual(doc.difference, 300)
+
 	def test_bfs_partitions_range_into_single_days(self):
 		doc = frappe.new_doc("Bisect Accounting Statements")
 		doc.bfs(datetime.datetime(2026, 1, 1), datetime.datetime(2026, 1, 8))

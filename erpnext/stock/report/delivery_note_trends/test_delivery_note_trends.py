@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe import _
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -9,6 +10,7 @@ from erpnext.stock.report.delivery_note_trends.delivery_note_trends import execu
 from erpnext.tests.utils import ERPNextTestSuite
 
 ITEM = "_Test Item"
+OTHER_ITEM = "_Test Item 2"
 WAREHOUSE = "Stores - _TC"
 CUSTOMER = "_Test Customer"
 
@@ -51,13 +53,19 @@ class TestDeliveryNoteTrends(ERPNextTestSuite):
 		row = self.find_row(columns, data, match)
 		return {label: self.value(columns, row, label) for label in wanted_labels}
 
-	def deliver(self, qty=5, rate=200, customer=CUSTOMER, posting_date="2026-06-01"):
+	def total_amount(self, **extra):
+		# the report's own consolidated total row, which must follow the filtered rows
+		columns, data = self.run_report_full(**extra)
+		total_row = next(row for row in data if row[0] == f"'{_('Total')}'")
+		return total_row[self.labels(columns).index("Total(Amt)")] or 0
+
+	def deliver(self, qty=5, rate=200, customer=CUSTOMER, posting_date="2026-06-01", item_code=ITEM):
 		# stock the item first so the delivery note can ship, then deliver
 		make_stock_entry(
-			item_code=ITEM, to_warehouse=WAREHOUSE, qty=qty + 10, rate=100, posting_date=posting_date
+			item_code=item_code, to_warehouse=WAREHOUSE, qty=qty + 10, rate=100, posting_date=posting_date
 		)
 		create_delivery_note(
-			item_code=ITEM,
+			item_code=item_code,
 			warehouse=WAREHOUSE,
 			qty=qty,
 			rate=rate,
@@ -124,3 +132,44 @@ class TestDeliveryNoteTrends(ERPNextTestSuite):
 		after = self.values({"Item": ITEM}, cols, based_on="Customer", group_by="Item")
 		self.assertEqual(after["Total(Qty)"] - before["Total(Qty)"], 5)
 		self.assertEqual(after["Total(Amt)"] - before["Total(Amt)"], 1000)
+
+	def test_item_filter_restricts_rows(self):
+		self.deliver()
+		self.deliver(qty=3, rate=100, item_code=OTHER_ITEM)
+		columns, data = self.run_report_full(item_code=[ITEM])
+		items = {row[self.labels(columns).index("Item")] for row in data}
+		self.assertIn(ITEM, items)
+		self.assertNotIn(OTHER_ITEM, items)
+
+	def test_item_filter_narrows_total(self):
+		# the excluded item's 300 must not reach the total the footer adds up
+		before = self.total_amount(item_code=[ITEM])
+		self.deliver()
+		self.deliver(qty=3, rate=100, item_code=OTHER_ITEM)
+		after = self.total_amount(item_code=[ITEM])
+		self.assertEqual(after - before, 1000)
+
+	def test_item_filter_accepts_multiple_items(self):
+		before = self.total_amount(item_code=[ITEM, OTHER_ITEM])
+		self.deliver()
+		self.deliver(qty=3, rate=100, item_code=OTHER_ITEM)
+		after = self.total_amount(item_code=[ITEM, OTHER_ITEM])
+		self.assertEqual(after - before, 1300)
+
+	def test_item_filter_applies_under_group_by(self):
+		# group_by runs its own per-row queries, so the filter has to reach those too
+		self.deliver()
+		self.deliver(qty=3, rate=100, item_code=OTHER_ITEM)
+		columns, data = self.run_report_full(based_on="Customer", group_by="Item", item_code=[ITEM])
+		items = {row[self.labels(columns).index("Item")] for row in data}
+		self.assertIn(ITEM, items)
+		self.assertNotIn(OTHER_ITEM, items)
+
+	def test_item_filter_accepts_bare_string(self):
+		# the desk always sends a list, but a direct API call may pass one item code
+		self.deliver()
+		self.deliver(qty=3, rate=100, item_code=OTHER_ITEM)
+		columns, data = self.run_report_full(item_code=ITEM)
+		items = {row[self.labels(columns).index("Item")] for row in data}
+		self.assertIn(ITEM, items)
+		self.assertNotIn(OTHER_ITEM, items)

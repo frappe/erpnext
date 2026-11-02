@@ -7,47 +7,55 @@ from frappe import _
 from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
+SALES_VOUCHER_TYPES = ("Delivery Note", "Sales Invoice")
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
 	consumed_details = get_consumed_details(filters)
 	supplier_details = get_suppliers_details(filters)
-	material_transfer_vouchers = get_material_transfer_vouchers()
 	data = []
 
-	for item_code, suppliers in supplier_details.items():
-		consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
-		total_qty = total_amount = 0.0
-		if consumed_details.get(item_code):
-			for cd in consumed_details.get(item_code):
-				if cd.voucher_no not in material_transfer_vouchers:
-					if cd.voucher_type in ["Delivery Note", "Sales Invoice"]:
-						delivered_qty += abs(flt(cd.actual_qty))
-						delivered_amount += abs(flt(cd.stock_value_difference))
-					elif cd.voucher_type != "Delivery Note":
-						consumed_qty += abs(flt(cd.actual_qty))
-						consumed_amount += abs(flt(cd.stock_value_difference))
+	for item_code, entries in consumed_details.items():
+		if filters.get("supplier") and item_code not in supplier_details:
+			continue
 
-			if consumed_qty or consumed_amount or delivered_qty or delivered_amount:
-				total_qty += delivered_qty + consumed_qty
-				total_amount += delivered_amount + consumed_amount
-
-				row = [
-					cd.item_code,
-					cd.item_name,
-					cd.description,
-					cd.stock_uom,
-					consumed_qty,
-					consumed_amount,
-					delivered_qty,
-					delivered_amount,
-					total_qty,
-					total_amount,
-					",".join(list(set(suppliers))),
-				]
-				data.append(row)
+		if row := get_item_row(entries, supplier_details.get(item_code, [])):
+			data.append(row)
 
 	return columns, data
+
+
+def get_item_row(entries, suppliers):
+	consumed_qty = consumed_amount = delivered_qty = delivered_amount = 0.0
+	for cd in entries:
+		if cd.voucher_type in SALES_VOUCHER_TYPES:
+			delivered_qty -= flt(cd.actual_qty)
+			delivered_amount -= flt(cd.stock_value_difference)
+		elif cd.voucher_type not in PURCHASE_VOUCHER_TYPES:
+			consumed_qty -= flt(cd.actual_qty)
+			consumed_amount -= flt(cd.stock_value_difference)
+
+	if not (consumed_qty or consumed_amount or delivered_qty or delivered_amount):
+		return
+
+	cd = entries[0]
+	return [
+		cd.item_code,
+		cd.item_name,
+		cd.description,
+		cd.stock_uom,
+		consumed_qty,
+		consumed_amount,
+		delivered_qty,
+		delivered_amount,
+		delivered_qty + consumed_qty,
+		delivered_amount + consumed_amount,
+		",".join(set(suppliers)),
+	]
 
 
 def get_columns(filters):
@@ -86,8 +94,15 @@ def get_consumed_details(filters):
 			sle.stock_value_difference,
 			sle.voucher_no,
 			sle.voucher_type,
+			sle.voucher_detail_no,
 		)
-		.where((sle.is_cancelled == 0) & (sle.item_code == item.name) & (sle.actual_qty < 0))
+		# the stock an Adjustment Entry counts out comes back in, it is not consumed
+		.where(
+			(sle.is_cancelled == 0)
+			& (sle.item_code == item.name)
+			& ((sle.actual_qty < 0) | (sle.voucher_type.isin(SALES_VOUCHER_TYPES)))
+			& (sle.is_adjustment_entry == 0)
+		)
 	)
 
 	if filters.get("from_date") and filters.get("to_date"):
@@ -95,11 +110,36 @@ def get_consumed_details(filters):
 			(sle.posting_date >= filters.get("from_date")) & (sle.posting_date <= filters.get("to_date"))
 		)
 
+	if condition := get_allowed_companies_condition(sle.company, "Stock Ledger Entry"):
+		query = query.where(condition)
+
+	entries = query.run(as_dict=True)
+	transfer_rows = get_stock_entry_transfer_rows(entries)
+
 	consumed_details = {}
-	for d in query.run(as_dict=True):
-		consumed_details.setdefault(d.item_code, []).append(d)
+	for d in entries:
+		if d.voucher_detail_no not in transfer_rows:
+			consumed_details.setdefault(d.item_code, []).append(d)
 
 	return consumed_details
+
+
+def get_stock_entry_transfer_rows(entries):
+	names = [d.voucher_detail_no for d in entries if d.voucher_type == "Stock Entry" and d.voucher_detail_no]
+	if not names:
+		return set()
+
+	detail = frappe.qb.DocType("Stock Entry Detail")
+	return set(
+		frappe.qb.from_(detail)
+		.select(detail.name)
+		.where(
+			(detail.name.isin(names))
+			& (IfNull(detail.s_warehouse, "") != "")
+			& (IfNull(detail.t_warehouse, "") != "")
+		)
+		.run(pluck=True)
+	)
 
 
 def get_suppliers_details(filters):
@@ -128,6 +168,9 @@ def get_suppliers_details(filters):
 		)
 	)
 
+	if condition := get_allowed_companies_condition(pr.company, "Purchase Receipt"):
+		query = query.where(condition)
+
 	for d in query.run(as_dict=True):
 		item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
 
@@ -153,6 +196,9 @@ def get_suppliers_details(filters):
 		)
 	)
 
+	if condition := get_allowed_companies_condition(pi.company, "Purchase Invoice"):
+		query = query.where(condition)
+
 	for d in query.run(as_dict=True):
 		if d.item_code not in item_supplier_map:
 			item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
@@ -167,12 +213,3 @@ def get_suppliers_details(filters):
 			del item_supplier_map[item_code]
 
 	return item_supplier_map
-
-
-def get_material_transfer_vouchers():
-	se = frappe.qb.DocType("Stock Entry")
-	query = (
-		frappe.qb.from_(se).select(se.name).where((se.purpose == "Material Transfer") & (se.docstatus == 1))
-	)
-
-	return [r[0] for r in query.run()]

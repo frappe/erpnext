@@ -1,0 +1,51 @@
+{
+ "allow_roles": [
+  {
+   "role": "Quality Manager"
+  },
+  {
+   "role": "Maintenance Manager"
+  }
+ ],
+ "creation": "2026-10-04 01:54:23.370911",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2026-10-04 01:54:23.370911",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Onboarding",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "is_optional": 0,
+   "step": "Create Quality Goal"
+  },
+  {
+   "is_optional": 0,
+   "step": "Create Quality Procedure"
+  },
+  {
+   "is_optional": 0,
+   "step": "Create Quality Inspection Template"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Quality Inspection"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Non Conformance"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Quality Review"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Maintenance Schedule"
+  }
+ ],
+ "title": "Keep quality in check"
+}

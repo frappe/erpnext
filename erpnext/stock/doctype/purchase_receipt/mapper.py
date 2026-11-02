@@ -11,12 +11,14 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt
 
 from erpnext.controllers.accounts_controller import merge_taxes
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_transaction
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def get_invoiced_qty_map(purchase_receipt: str) -> dict:
@@ -47,6 +49,7 @@ def get_returned_qty_map(purchase_receipt: str) -> dict:
 			& (pr.is_return == 1)
 			& (pr.return_against == purchase_receipt)
 			& (pr_item.purchase_receipt_item.isnotnull())
+			& (pr_item.return_qty_from_rejected_warehouse == 0)
 		)
 		.groupby(pr_item.purchase_receipt_item)
 	).run(as_list=1)
@@ -56,7 +59,7 @@ def get_returned_qty_map(purchase_receipt: str) -> dict:
 
 @frappe.whitelist()
 def make_purchase_invoice(
-	source_name: str | None, target_doc: str | Document | None = None, args: dict | str | None = None
+	source_name: str | None, target_doc: str | dict | Document | None = None, args: dict | str | None = None
 ):
 	if args is None:
 		args = {}
@@ -65,8 +68,13 @@ def make_purchase_invoice(
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
+	if doc.status == "Closed":
+		frappe.throw(_("Purchase Receipt {0} is closed and cannot be invoiced").format(frappe.bold(doc.name)))
+
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	for ref, qty in get_qty_already_mapped(target_doc, "pr_detail").items():
+		invoiced_qty_map[ref] = invoiced_qty_map.get(ref, 0) + qty
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
@@ -87,8 +95,7 @@ def make_purchase_invoice(
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
-			target_doc.rejected_qty = 0
+		target_doc.rejected_qty = 0
 		target_doc.stock_qty = flt(target_doc.qty) * flt(
 			target_doc.conversion_factor, target_doc.precision("conversion_factor")
 		)
@@ -106,9 +113,6 @@ def make_purchase_invoice(
 			return pending_qty, 0
 
 		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
-		if item_row.rejected_qty and returned_qty:
-			returned_qty -= item_row.rejected_qty
-
 		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0
@@ -122,7 +126,7 @@ def make_purchase_invoice(
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
+		return child_filter and not d.closed
 
 	doclist = get_mapped_doc(
 		"Purchase Receipt",
@@ -154,7 +158,7 @@ def make_purchase_invoice(
 				},
 				"postprocess": update_item,
 				"filter": lambda d: (
-					get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
+					get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] >= 0
 				),
 				"condition": select_item,
 			},
@@ -179,14 +183,14 @@ def make_purchase_return_against_rejected_warehouse(source_name: str):
 
 
 @frappe.whitelist()
-def make_purchase_return(source_name: str, target_doc: str | Document | None = None):
+def make_purchase_return(source_name: str, target_doc: str | dict | Document | None = None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
 
 
 @frappe.whitelist()
-def make_stock_entry(source_name: str, target_doc: str | Document | None = None):
+def make_stock_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.purpose = "Material Transfer"
@@ -196,7 +200,9 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 		if source_doc.serial_and_batch_bundle:
 			serial_nos = get_serial_nos_from_bundle(source_doc.serial_and_batch_bundle)
 			if serial_nos:
-				serial_nos = "\n".join(serial_nos)
+				serial_nos = "\n".join(
+					SerialBatchIdentity("Serial No").get_numbers(source_doc.item_code, serial_nos)
+				)
 
 			batches = get_batches_from_bundle(source_doc.serial_and_batch_bundle)
 			if batches:
@@ -246,5 +252,5 @@ def make_stock_entry(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_inter_company_delivery_note(source_name: str, target_doc: str | Document | None = None):
+def make_inter_company_delivery_note(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)

@@ -5,8 +5,10 @@
  "autoname": "field:workstation_type",
  "creation": "2022-11-04 17:03:23.334818",
  "default_view": "List",
+ "description": "A kind of workstation, with its costs.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/workstation_type",
  "engine": "InnoDB",
  "field_order": [
   "workstation_type",
@@ -68,7 +70,7 @@
    "options": "Workstation Cost"
   }
  ],
- "icon": "icon-wrench",
+ "icon": "tag",
  "links": [],
  "modified": "2025-08-19 12:06:56.683558",
  "modified_by": "Administrator",

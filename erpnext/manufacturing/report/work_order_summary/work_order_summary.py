@@ -5,7 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, flt, getdate, today
+from frappe.utils import add_days, date_diff, flt, getdate, today
 
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
@@ -16,8 +16,15 @@ def execute(filters=None):
 	if not filters.get("age"):
 		filters["age"] = 0
 
+	show_actual_finished_goods = frappe.db.get_single_value(
+		"Manufacturing Settings", "allow_alternative_finished_goods"
+	)
+
 	data = get_data(filters)
-	columns = get_columns(filters)
+	if show_actual_finished_goods:
+		set_actual_finished_goods(data)
+
+	columns = get_columns(filters, show_actual_finished_goods)
 	chart_data = get_chart_data(data, filters)
 	return columns, data, None, chart_data
 
@@ -33,6 +40,7 @@ def get_data(filters):
 		"qty",
 		"creation",
 		"produced_qty",
+		"process_loss_qty",
 		"planned_start_date",
 		"planned_end_date",
 		"actual_start_date",
@@ -50,14 +58,14 @@ def get_data(filters):
 
 	if filters.get("based_on") == "Planned Date":
 		query_filters["planned_start_date"] = (">=", filters.get("from_date"))
-		query_filters["planned_end_date"] = ("<=", filters.get("to_date"))
+		query_filters["planned_end_date"] = ("<", add_days(filters.get("to_date"), 1))
 	elif filters.get("based_on") == "Actual Date":
 		query_filters["actual_start_date"] = (">=", filters.get("from_date"))
-		query_filters["actual_end_date"] = ("<=", filters.get("to_date"))
+		query_filters["actual_end_date"] = ("<", add_days(filters.get("to_date"), 1))
 	else:
 		query_filters["creation"] = ("between", [filters.get("from_date"), filters.get("to_date")])
 
-	data = frappe.get_all(
+	data = frappe.get_list(
 		"Work Order", fields=fields, filters=query_filters, order_by="planned_start_date asc"
 	)
 
@@ -67,12 +75,55 @@ def get_data(filters):
 		d.age = 0
 
 		if d.status != "Completed":
-			d.age = date_diff(today(), start_date)
+			d.age = max(date_diff(today(), start_date), 0)
 
 		if filters.get("age") <= d.age:
 			res.append(d)
 
 	return res
+
+
+def set_actual_finished_goods(data):
+	work_orders = [d.name for d in data if flt(d.produced_qty)]
+	if not work_orders:
+		return
+
+	conversion_rows = get_fg_conversion_rows(work_orders)
+	if not conversion_rows:
+		return
+
+	converted_qty, alternative_fg = defaultdict(float), defaultdict(lambda: defaultdict(float))
+	production_items = {d.name: d.production_item for d in data}
+
+	for row in conversion_rows:
+		if row.is_finished_item:
+			alternative_fg[row.work_order][row.item_code] += flt(row.transfer_qty)
+		elif row.item_code == production_items.get(row.work_order):
+			converted_qty[row.work_order] += flt(row.transfer_qty)
+
+	for d in data:
+		if d.name not in alternative_fg:
+			continue
+
+		outputs = [(d.production_item, flt(d.produced_qty) - converted_qty[d.name])]
+		outputs.extend(sorted(alternative_fg[d.name].items()))
+		d.actual_finished_goods = ", ".join(
+			f"{item_code}: {flt(qty)}" for item_code, qty in outputs if flt(qty)
+		)
+
+
+def get_fg_conversion_rows(work_orders):
+	se = frappe.qb.DocType("Stock Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
+
+	return (
+		frappe.qb.from_(se)
+		.inner_join(sed)
+		.on(sed.parent == se.name)
+		.select(se.work_order, sed.item_code, sed.transfer_qty, sed.is_finished_item)
+		.where((se.docstatus == 1) & (se.is_fg_conversion == 1) & se.work_order.isin(work_orders))
+		.run(as_dict=True)
+	)
 
 
 def get_chart_data(data, filters):
@@ -112,7 +163,10 @@ def get_chart_based_on_age(data):
 	age_wise_data = {"0-30 Days": 0, "30-60 Days": 0, "60-90 Days": 0, "90 Above": 0}
 
 	for d in data:
-		if d.age > 0 and d.age <= 30:
+		if d.status == "Completed":
+			continue
+
+		if d.age <= 30:
 			age_wise_data["0-30 Days"] += 1
 		elif d.age > 30 and d.age <= 60:
 			age_wise_data["30-60 Days"] += 1
@@ -180,13 +234,20 @@ def prepare_chart_data(data, filters):
 
 		for d in data:
 			if getdate(d.planned_start_date) >= from_date and getdate(d.planned_start_date) <= end_date:
-				periodic_data["Pending"][period] += flt(d.qty) - flt(d.produced_qty)
+				periodic_data["Pending"][period] += get_pending_qty(d)
 				periodic_data["Completed"][period] += flt(d.produced_qty)
 
 	return labels, periodic_data
 
 
-def get_columns(filters):
+def get_pending_qty(work_order):
+	if work_order.status in ("Completed", "Closed", "Stopped"):
+		return 0.0
+
+	return flt(work_order.qty) - flt(work_order.produced_qty) - flt(work_order.process_loss_qty)
+
+
+def get_columns(filters, show_actual_finished_goods=False):
 	columns = [
 		{
 			"label": _("Id"),
@@ -213,6 +274,21 @@ def get_columns(filters):
 			},
 			{"label": _("Produce Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 110},
 			{"label": _("Produced Qty"), "fieldname": "produced_qty", "fieldtype": "Float", "width": 110},
+		]
+	)
+
+	if show_actual_finished_goods:
+		columns.append(
+			{
+				"label": _("Actual Finished Goods"),
+				"fieldname": "actual_finished_goods",
+				"fieldtype": "Data",
+				"width": 200,
+			}
+		)
+
+	columns.extend(
+		[
 			{
 				"label": _("Sales Order"),
 				"fieldname": "sales_order",

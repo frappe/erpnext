@@ -7,8 +7,29 @@ import json
 import frappe
 from frappe import _
 from frappe.modules.utils import get_module_app
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Lower, Max
 from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
+
+# fields read by templates/includes/transaction_row.html
+PORTAL_ROW_FIELDS = (
+	"name",
+	"docstatus",
+	"status",
+	"modified",
+	"currency",
+	"grand_total",
+	"rounded_total",
+	"disable_rounded_total",
+)
+PORTAL_ROW_DISPLAY_KEYS = (
+	"indicator_color",
+	"indicator_title",
+	"status_percent",
+	"status_display",
+	"items_preview",
+)
 
 
 def get_list_context(context=None):
@@ -184,11 +205,10 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 	party = frappe.qb.DocType(parties_doctype)
 	data = (
 		frappe.qb.from_(party)
-		# creation must be selected: Postgres requires SELECT DISTINCT order-by exprs in the select list
-		.select(party.parent.as_("name"), party.supplier, party.creation)
-		.distinct()
-		.where((party.supplier == parties[0]) & (party.docstatus == 1))
-		.orderby(party.creation, order=frappe.qb.desc)
+		.select(party.parent.as_("name"))
+		.where(party.supplier.isin(parties) & (party.docstatus == 1))
+		.groupby(party.parent)
+		.orderby(Max(party.creation), order=frappe.qb.desc)
 		.limit(limit_page_length)
 		.offset(limit_start)
 	).run(as_dict=True)
@@ -223,9 +243,21 @@ def post_process(doctype, data):
 
 		doc.status_display = ", ".join(doc.status_display)
 		doc.items_preview = ", ".join(d.item_name for d in doc.items if d.item_name)
-		result.append(doc)
+		result.append(get_portal_row(doc))
 
 	return result
+
+
+def get_portal_row(doc):
+	"""Return a copy of `doc` with only the values the portal row shows.
+
+	The list is also returned as JSON, so the full document would expose cost and margin fields.
+	"""
+	row = frappe.get_doc({"doctype": doc.doctype, **{f: doc.get(f) for f in PORTAL_ROW_FIELDS}})
+	for key in PORTAL_ROW_DISPLAY_KEYS:
+		row.set(key, doc.get(key))
+
+	return row
 
 
 def get_customers_suppliers(doctype, user):
@@ -239,36 +271,44 @@ def get_customers_suppliers(doctype, user):
 	has_supplier_field = meta.has_field("supplier")
 
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
-		suppliers = get_parents_for_user("Supplier")
-		customers = get_parents_for_user("Customer")
-	elif frappe.has_permission(doctype, "read", user=user):
+		suppliers = get_parents_for_user("Supplier", user)
+		customers = get_parents_for_user("Customer", user)
+	elif frappe.has_permission(doctype, "read", user=user) and frappe.has_permission(
+		"Customer", "read", user=user
+	):
 		customer_list = frappe.get_list("Customer")
 		customers = suppliers = [customer.name for customer in customer_list]
 
 	return customers if has_customer_field else None, suppliers if has_supplier_field else None
 
 
-def get_parents_for_user(parenttype: str) -> list[str]:
+def get_parents_for_user(parenttype: str, user: str | None = None) -> list[str]:
 	portal_user = frappe.qb.DocType("Portal User")
 
 	return (
 		frappe.qb.from_(portal_user)
 		.select(portal_user.parent)
-		.where(portal_user.user == frappe.session.user)
+		.where(portal_user.user == (user or frappe.session.user))
 		.where(portal_user.parenttype == parenttype)
 	).run(pluck="name")
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
+	# only portal users get access through their Customer / Supplier, everyone else
+	# goes through `has_permission`, which applies their User Permissions
+	if not has_common(["Supplier", "Customer"], frappe.get_roles(user)):
+		return False
+
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
-	if customers:
-		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
-	elif suppliers:
+	if customers and frappe.db.exists(doctype, get_customer_filter(doc, customers)):
+		return True
+
+	if suppliers:
 		fieldname = "suppliers" if doctype == "Request for Quotation" else "supplier"
-		return frappe.db.exists(doctype, {"name": doc.name, fieldname: ["in", suppliers]})
-	else:
-		return False
+		return bool(frappe.db.exists(doctype, {"name": doc.name, fieldname: ["in", suppliers]}))
+
+	return False
 
 
 def get_customer_filter(doc, customers):
@@ -309,3 +349,63 @@ def add_role_for_portal_user(portal_user, role):
 
 	user_doc.add_roles(role)
 	frappe.msgprint(_("Added {1} role to user {0}.").format(frappe.bold(user_doc.name), role), alert=True)
+
+
+def link_portal_users_to_contacts(doc):
+	"""When portal users are added to Supplier/Customer, link them to the Contact profile."""
+	# a User's name is its (lowercased) email, so portal_users are already the emails
+	portal_users = {p.user for p in doc.get("portal_users") or [] if p.user}
+	if not portal_users:
+		return
+
+	before = doc.get_doc_before_save()
+	if before:
+		previous_users = {p.user for p in before.get("portal_users") or [] if p.user}
+		if portal_users == previous_users:
+			return
+
+	portal_users = list(portal_users)
+
+	contact = frappe.qb.DocType("Contact")
+	contact_email = frappe.qb.DocType("Contact Email")
+
+	query = (
+		frappe.qb.from_(contact)
+		.left_join(contact_email)
+		.on(contact_email.parent == contact.name)
+		.select(contact.name)
+		.distinct()
+	)
+
+	conditions = [
+		contact.user.isin(portal_users),
+		Lower(contact.email_id).isin(portal_users),
+		Lower(contact_email.email_id).isin(portal_users),
+	]
+
+	query = query.where(Criterion.any(conditions))
+	contacts = query.run(pluck=True)
+
+	if not contacts:
+		return
+
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	existing_links = (
+		frappe.qb.from_(dynamic_link)
+		.select(dynamic_link.parent)
+		.where(
+			(dynamic_link.parenttype == "Contact")
+			& (dynamic_link.parent.isin(contacts))
+			& (dynamic_link.link_doctype == doc.doctype)
+			& (dynamic_link.link_name == doc.name)
+		)
+		.run(pluck=True)
+	)
+
+	contacts_to_link = [name for name in contacts if name not in existing_links]
+
+	for name in contacts_to_link:
+		contact_doc = frappe.get_doc("Contact", name)
+		if not contact_doc.has_link(doc.doctype, doc.name):
+			contact_doc.append("links", {"link_doctype": doc.doctype, "link_name": doc.name})
+			contact_doc.save(ignore_permissions=True)

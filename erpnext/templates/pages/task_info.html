@@ -28,32 +28,32 @@
 			<div class="col-sm-12" style="max-width: 500px;">
 				<div class="form-group">
 					<label for="project" class="control-label text-muted small">{{ _("Project") }}</label>
-						<input type="text" class="form-control" name="project" readonly value= "{{ doc.project or ""|e }}">
+						<input type="text" class="form-control" name="project" readonly value= "{{ (doc.project or "")|e }}">
 				</div>
 
 				<div class="form-group">
 					<label for="subject" class="control-label text-muted small">{{ _("Subject") }}</label>
-					<input type="text" class="form-control" name="subject" readonly value="{{ doc.subject or ""|e }}">
+					<input type="text" class="form-control" name="subject" readonly value="{{ (doc.subject or "")|e }}">
 				</div>
 
 				<div class="form-group">
 					<label for="description" class="control-label text-muted small">{{ _("Details") }}</label>
-					<textarea class="form-control" style="height: 200px;" name="description" readonly>{{ doc.description or ""|e }}</textarea>
+					<textarea class="form-control" style="height: 200px;" name="description" readonly>{{ (doc.description or "")|e }}</textarea>
 				</div>
 
 				<div class="form-group">
 					<label for="priority" class="control-label text-muted small">{{ _("Priority") }}</label>
-					<input type="text" class="form-control" name="priority" readonly value="{{ doc.priority or ""|e }}">
+					<input type="text" class="form-control" name="priority" readonly value="{{ (doc.priority or "")|e }}">
 				</div>
 
 				<div class="form-group">
 					<label for="exp_start_date" class="control-label text-muted small">{{ _("Expected Start Date") }}</label>
-					<input type="text" class="form-control hasDatepicker" name="exp_start_date" readonly value="{{ doc.exp_start_date or ""|e }}">
+					<input type="text" class="form-control hasDatepicker" name="exp_start_date" readonly value="{{ (doc.exp_start_date or "")|e }}">
 				</div>
 
 				<div class="form-group">
 					<label for="exp_end_date" class="control-label text-muted small">{{ _("Expected End Date") }}</label>
-					<input type="text" class="form-control hasDatepicker" name="exp_end_date" readonly value="{{ doc.exp_end_date or ""|e }}">
+					<input type="text" class="form-control hasDatepicker" name="exp_end_date" readonly value="{{ (doc.exp_end_date or "")|e }}">
 				</div>
 
 				<div class="form-group">
@@ -71,7 +71,7 @@
 	<h3>{{ _("Comments") }}</h3>
 	<div class="no-comment">
 		{% for comment in comments %}
-			<p class="text-muted">{{comment.comment_email}}:
+			<p class="text-muted">{{ comment.comment_email|e }}:
 				{{comment.content|e}} {{ _("on") }} {{comment.creation.strftime('%Y-%m-%d')}}</p>
 		{% endfor %}
 	</div>

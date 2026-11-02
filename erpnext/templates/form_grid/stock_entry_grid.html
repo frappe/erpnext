@@ -12,9 +12,9 @@
 	</div>
 {% } else { %}
 	<div class="row">
-		<div class="col-sm-5 col-xs-4"><strong>{%= doc.item_code %}</strong>
+		<div class="col-sm-5 col-xs-4"><strong>{%= frappe.utils.escape_html(doc.item_code) %}</strong>
 			{% if(doc.item_name != doc.item_code) { %}
-				<br>{%= doc.item_name %}{% } %}
+				<br>{%= frappe.utils.escape_html(doc.item_name) %}{% } %}
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 		</div>
 
@@ -30,11 +30,11 @@
 					}
 				%}
 				 <span class="indicator {{ color }}" title="{{ title }}">
-					 {%= doc.s_warehouse %}</span>
+					 {%= frappe.utils.escape_html(doc.s_warehouse) %}</span>
             {% }; %}
 			{% if(doc.t_warehouse) { %}
 				<div><span class="indicator {{ doc.docstatus==1 ? "blue" : "grey" }}" title="{{ __("Target" ) }}">
-					{%= doc.t_warehouse %}</span>
+					{%= frappe.utils.escape_html(doc.t_warehouse) %}</span>
 				</div>
             {% }; %}
 		</div>
@@ -42,7 +42,7 @@
 		<!-- qty -->
 		<div class="col-sm-2 col-xs-2 text-right">
 			{%= doc.get_formatted("qty") %}
-			<br><small>{%= doc.uom || doc.stock_uom %}</small>
+			<br><small>{%= frappe.utils.escape_html(doc.uom || doc.stock_uom) %}</small>
 		</div>
 
 		<!-- amount -->

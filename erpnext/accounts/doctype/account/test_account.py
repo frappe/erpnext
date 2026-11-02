@@ -1,14 +1,20 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import json
+import os
+import re
+
 import frappe
 from frappe.utils import nowdate
+from frappe.utils.nestedset import get_ancestors_of
 
 from erpnext.accounts.doctype.account.account import (
 	InvalidAccountMergeError,
 	merge_account,
 	update_account_number,
 )
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_chart
 from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -43,8 +49,6 @@ class TestAccount(ERPNextTestSuite):
 
 		self.assertEqual(new_acc.account_name, "Debtors 1 - Test -")
 		self.assertEqual(new_acc.account_number, "1211-11-4 - 6 -")
-
-		frappe.delete_doc("Account", "1211-11-4 - 6 - Debtors 1 - Test - - _TC")
 
 	def test_merge_account(self):
 		create_account(
@@ -189,10 +193,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC3")
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
-		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
-
 	def test_account_currency_sync(self):
 		"""
 		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
@@ -240,9 +240,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
-		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
-
 	def test_child_company_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
@@ -276,16 +273,6 @@ class TestAccount(ERPNextTestSuite):
 			)
 		)
 
-		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 0)
-
-		to_delete = [
-			"Test Group Account - _TC3",
-			"Test Group Account - _TC4",
-			"Test Modified Account - _TC5",
-		]
-		for doc in to_delete:
-			frappe.delete_doc("Account", doc)
-
 	def test_validate_account_currency(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
@@ -306,6 +293,31 @@ class TestAccount(ERPNextTestSuite):
 		acc.account_currency = "USD"
 		self.assertRaises(frappe.ValidationError, acc.save)
 
+	def test_stock_account_type_change_with_ledger_entries(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		stock_account = get_warehouse_account(frappe.get_doc("Warehouse", warehouse))
+
+		make_stock_entry(
+			item_code="_Test Item",
+			target=warehouse,
+			company=company,
+			qty=5,
+			basic_rate=100,
+		)
+
+		account = frappe.get_doc("Account", stock_account)
+		self.assertEqual(account.account_type, "Stock")
+
+		account.account_type = ""
+		self.assertRaises(frappe.ValidationError, account.save)
+
+		account.reload()
+		account.account_name = f"{account.account_name} Updated"
+		account.save()  # non-type change stays allowed
+
 	def test_account_balance(self):
 		from erpnext.accounts.utils import get_balance_on
 
@@ -318,6 +330,257 @@ class TestAccount(ERPNextTestSuite):
 
 		balance = get_balance_on(account="Test Percent Account %5 - _TC", date=nowdate())
 		self.assertEqual(balance, 0)
+
+	def test_verified_charts_have_no_demo_accounts(self):
+		verified_path = os.path.join(os.path.dirname(__file__), "chart_of_accounts", "verified")
+
+		for fname in os.listdir(verified_path):
+			if not fname.endswith(".json"):
+				continue
+
+			with open(os.path.join(verified_path, fname)) as f:
+				tree = json.load(f).get("tree", {})
+
+			demo_accounts = [
+				account_name
+				for account_name, _details in walk_chart_tree(tree)
+				if re.search(r"\bdemo\b", account_name, re.IGNORECASE)
+			]
+			self.assertEqual(demo_accounts, [], msg=f"Demo account(s) found in verified chart {fname}")
+
+	def test_philippines_chart_payable_account_types(self):
+		tree = get_chart("Philippines")
+		accounts = dict(walk_chart_tree(tree))
+
+		self.assertNotIn("Raw Materials - Demo", accounts)
+		self.assertIn("Raw Materials", accounts)
+
+		# pick it as default_payable_account
+		self.assertNotEqual(accounts["Customer Deposits"].get("account_type"), "Payable")
+
+		payable_ledgers = [
+			account_name
+			for account_name, details in accounts.items()
+			if details.get("account_type") == "Payable" and not details.get("is_group")
+		]
+		self.assertEqual(payable_ledgers, ["Accounts Payable - Trade"])
+
+	def test_merge_group_into_its_grandchild(self):
+		company = "_Test Company"
+		top = create_account(
+			account_name="Merge Top", is_group=1, parent_account="Current Assets - _TC", company=company
+		)
+		middle = create_account(account_name="Merge Middle", is_group=1, parent_account=top, company=company)
+		bottom = create_account(
+			account_name="Merge Bottom", is_group=1, parent_account=middle, company=company
+		)
+		ledger = create_account(account_name="Merge Ledger", parent_account=bottom, company=company)
+
+		merge_account(top, bottom)
+
+		self.assertEqual(frappe.db.get_value("Account", bottom, "parent_account"), "Current Assets - _TC")
+		self.assertEqual(frappe.db.get_value("Account", middle, "parent_account"), bottom)
+		self.assertEqual(get_ancestors_of("Account", middle)[0], bottom)
+		self.assertEqual(
+			get_ancestors_of("Account", ledger)[:3],
+			[bottom, "Current Assets - _TC", "Application of Funds (Assets) - _TC"],
+		)
+
+	def test_move_account_with_ledger_entries_to_another_report_type(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		company = "_Test Company"
+		group = create_account(
+			account_name="Root Type Group", is_group=1, parent_account="Current Assets - _TC", company=company
+		)
+		ledger = create_account(account_name="Root Type Ledger", parent_account=group, company=company)
+		make_journal_entry(ledger, "Cash - _TC", 500, submit=True)
+
+		account = frappe.get_doc("Account", ledger)
+		account.parent_account = "Indirect Income - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change Report Type", account.save)
+
+		account = frappe.get_doc("Account", group)
+		account.parent_account = "Indirect Expenses - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "Cannot change Report Type", account.save)
+		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Asset")
+
+		account = frappe.get_doc("Account", ledger)
+		account.parent_account = "Current Liabilities - _TC"
+		account.save()
+		self.assertEqual(frappe.db.get_value("Account", ledger, "root_type"), "Liability")
+
+	def test_company_of_account_cannot_be_changed(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		ledger = create_account(
+			account_name="Company Change Ledger",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+		make_journal_entry(ledger, "Cash - _TC", 300, submit=True)
+
+		account = frappe.get_doc("Account", ledger)
+		account.company = "_Test Company 1"
+		account.parent_account = "Current Assets - _TC1"
+		self.assertRaises(frappe.CannotChangeConstantError, account.save)
+
+	def test_merge_ledgers_with_different_account_type(self):
+		company = "_Test Company"
+		receivable = create_account(
+			account_name="Merge Receivable",
+			parent_account="Accounts Receivable - _TC",
+			company=company,
+			account_type="Receivable",
+		)
+		deposit = create_account(
+			account_name="Merge Deposit", parent_account="Current Assets - _TC", company=company
+		)
+
+		self.assertRaises(InvalidAccountMergeError, merge_account, receivable, deposit)
+		self.assertTrue(frappe.db.exists("Account", receivable))
+
+	def test_child_company_account_rename_from_request_ignores_from_descendant(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Request Rename Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		child_account = frappe.db.get_value(
+			"Account", {"account_name": "Test Request Rename Account", "company": "_Test Company 4"}
+		)
+		self.assertRaises(
+			frappe.ValidationError,
+			frappe.call,
+			update_account_number,
+			name=child_account,
+			account_name="Local Name",
+			from_descendant=1,
+		)
+		self.assertTrue(frappe.db.exists("Account", child_account))
+
+	def test_update_account_number_with_spaces(self):
+		company = "_Test Company"
+		owner = create_account(
+			account_name="Number Owner", parent_account="Current Assets - _TC", company=company
+		)
+		owner = update_account_number(owner, "Number Owner", "9627011")
+		other = create_account(
+			account_name="Number Taker", parent_account="Current Assets - _TC", company=company
+		)
+
+		self.assertRaises(frappe.ValidationError, update_account_number, other, "Number Taker", " 9627011")
+		self.assertRaises(frappe.ValidationError, update_account_number, other, "   ")
+		self.assertEqual(frappe.get_all("Account", {"account_number": "9627011"}, pluck="name"), [owner])
+		self.assertEqual(frappe.db.get_value("Account", other, "account_name"), "Number Taker")
+
+	def test_freeze_account_without_frozen_entries_role(self):
+		account = frappe.get_doc("Account", "Cash - _TC")
+		account.run_method("onload")
+		self.assertFalse(account.get_onload().get("can_freeze_account"))
+
+		frappe.db.set_value("Company", "_Test Company", "role_allowed_for_frozen_entries", "Accounts Manager")
+		account = frappe.get_doc("Account", "Cash - _TC")
+		account.run_method("onload")
+		self.assertTrue(account.get_onload().get("can_freeze_account"))
+
+	def test_freeze_parent_company_account_syncs_to_child_company(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+		frappe.db.set_value(
+			"Company", "_Test Company 3", "role_allowed_for_frozen_entries", "Accounts Manager"
+		)
+
+		account = frappe.new_doc("Account")
+		account.account_name = "Test Freeze Sync Account"
+		account.parent_account = "Temporary Accounts - _TC3"
+		account.company = "_Test Company 3"
+		account.insert()
+
+		account.freeze_account = "Yes"
+		account.save()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Account",
+				{"account_name": "Test Freeze Sync Account", "company": "_Test Company 4"},
+				"freeze_account",
+			),
+			"Yes",
+		)
+
+	def test_merge_into_account_with_balance_must_be(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		company = "_Test Company"
+		source = create_account(
+			account_name="Merge Debit Source", parent_account="Current Assets - _TC", company=company
+		)
+		target = create_account(
+			account_name="Merge Credit Target", parent_account="Current Assets - _TC", company=company
+		)
+		frappe.db.set_value("Account", target, "balance_must_be", "Credit")
+		make_journal_entry(source, "Cash - _TC", 100, submit=True)
+
+		self.assertRaises(InvalidAccountMergeError, merge_account, source, target)
+		self.assertTrue(frappe.db.exists("Account", source))
+
+		frappe.db.set_value("Account", target, "balance_must_be", "Debit")
+		merge_account(source, target)
+		self.assertFalse(frappe.db.exists("Account", source))
+
+	def test_update_account_number_with_deprecated_from_descendant(self):
+		account = create_account(
+			account_name="Deprecated Argument Account",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+
+		with self.assertWarns(Warning):
+			new_name = update_account_number(account, "Deprecated Argument Renamed", from_descendant=True)
+
+		self.assertEqual(new_name, "Deprecated Argument Renamed - _TC")
+
+	def test_parent_company_account_checks_run_before_child_company_rename(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		number_holder = frappe.new_doc("Account")
+		number_holder.account_name = "Test Number Holder Account"
+		number_holder.account_number = "8800"
+		number_holder.parent_account = "Temporary Accounts - _TC3"
+		number_holder.company = "_Test Company 3"
+		number_holder.flags.ignore_root_company_validation = True
+		number_holder.insert()
+
+		account = frappe.new_doc("Account")
+		account.account_name = "Test Rename Order Account"
+		account.parent_account = "Temporary Accounts - _TC3"
+		account.company = "_Test Company 3"
+		account.insert()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already used",
+			update_account_number,
+			account.name,
+			"Test Rename Order Account",
+			"8800",
+		)
+		self.assertFalse(
+			frappe.db.exists("Account", {"account_number": "8800", "company": "_Test Company 4"})
+		)
+
+
+def walk_chart_tree(tree):
+	"""Yield (account_name, details) for every account in a chart of accounts tree"""
+	for account_name, details in tree.items():
+		if not isinstance(details, dict):
+			continue
+
+		yield account_name, details
+		yield from walk_chart_tree(details)
 
 
 def get_inventory_account(company, warehouse=None):

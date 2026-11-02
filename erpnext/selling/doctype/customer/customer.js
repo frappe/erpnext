@@ -2,6 +2,12 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Customer", {
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
 		frm.set_query("allowed_companies", () => ({
 			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
@@ -153,7 +159,7 @@ frappe.ui.form.on("Customer", {
 		if (frappe.defaults.get_default("cust_master_name") != "Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
-			erpnext.toggle_naming_series();
+			erpnext.toggle_naming_series(frm);
 		}
 
 		if (!frm.doc.__islocal) {
@@ -211,8 +217,16 @@ frappe.ui.form.on("Customer", {
 				);
 			}
 
-			// indicator
-			erpnext.utils.set_party_dashboard_indicators(frm);
+			const loyalty = (frm.doc.__onload?.dashboard_info || []).filter((d) => d.loyalty_points);
+			loyalty.forEach((info) => {
+				const label =
+					loyalty.length > 1
+						? __("Loyalty Points ({0}): {1}", [info.company, info.loyalty_points])
+						: __("Loyalty Points: {0}", [info.loyalty_points]);
+				frm.dashboard.add_indicator(label, "blue");
+			});
+
+			frm.trigger("render_items_tab");
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
@@ -242,6 +256,32 @@ frappe.ui.form.on("Customer", {
 	validate: function (frm) {
 		if (frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 	},
+
+	render_items_tab(frm) {
+		frm.party_items ??= new erpnext.PartyItems(frm, {
+			party_type: "Customer",
+			order_doctype: "Sales Order",
+			labels: {
+				frequent_description: __("The items this customer orders most often."),
+				frequent_empty: __("No sales orders from this customer yet."),
+				orders_title: __("Submitted sales orders that include this item"),
+				section_title: __("Customer Specific Items"),
+				add_title: __("Add Customer Specific Item"),
+				allowed_description: __("When selling to this customer, only these items can be selected."),
+				allowed_empty: __("No limits set. Every item can be sold to this customer."),
+				first_rule_note: __(
+					"After this, only items in Customer Specific Items can be sold to this customer."
+				),
+				item_hint: __("Items this customer orders most often are listed first."),
+			},
+		});
+		frm.party_items.refresh();
+	},
+
+	on_tab_change(frm) {
+		frm.party_items?.show();
+	},
+
 	get_customer_group_details: function (frm) {
 		frappe.call({
 			method: "get_customer_group_details",

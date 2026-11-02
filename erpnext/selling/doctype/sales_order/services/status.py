@@ -6,8 +6,11 @@
 import frappe
 from frappe import _
 from frappe.desk.notifications import clear_doctype_notifications
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt
 
+from erpnext.controllers.item_close import validate_parent_reopen
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import validate_reopen_against_blanket_order
 from erpnext.selling.doctype.sales_order.services.subcontracting import SubcontractingService
 
 
@@ -27,6 +30,14 @@ class StatusService:
 	def update_status(self, status: str) -> None:
 		doc = self.doc
 		self.check_modified_date()
+
+		if status == "Closed":
+			self._validate_no_reserved_stock()
+
+		if status != "Closed" and doc.status == "Closed":
+			validate_parent_reopen(doc)
+			validate_reopen_against_blanket_order(doc)
+
 		doc.set_status(update=True, status=status)
 		# Upon Sales Order Re-open, check for credit limit.
 		# Limit should be checked after the 'Hold/Closed' status is reset.
@@ -37,6 +48,60 @@ class StatusService:
 		doc.notify_update()
 		clear_doctype_notifications(doc)
 		doc.update_blanket_order()
+
+	def _validate_no_reserved_stock(self) -> None:
+		"""Closing must not strand reserved stock; the user unreserves it deliberately (like row close)."""
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
+
+		if has_reserved_stock(self.doc.doctype, self.doc.name):
+			frappe.throw(
+				_("Sales Order {0} has reserved stock. Unreserve it before closing.").format(
+					frappe.bold(self.doc.name)
+				)
+			)
+
+	def recalculate_after_item_close(self) -> None:
+		"""Refresh progress after row flags changed.
+
+		Billing runs last because it reloads the parent and writes the final
+		status from both percentages.
+		"""
+		doc = self.doc
+		doc.update_reserved_qty()
+		self.update_picking_status()
+		self.update_delivery_percentage()
+		self.update_billing_percentage()
+
+	def update_delivery_percentage(self, update_modified: bool = True) -> None:
+		self.doc._update_percent_field(
+			{
+				"target_dt": "Sales Order Item",
+				"target_parent_dt": "Sales Order",
+				"target_parent_field": "per_delivered",
+				"target_ref_field": "qty",
+				"target_field": "delivered_qty",
+				"exclude_field": "skip_delivery",
+				"status_field": "delivery_status",
+				"keyword": "Delivered",
+				"name": self.doc.name,
+			},
+			update_modified,
+		)
+
+	def update_billing_percentage(self, update_modified: bool = True) -> None:
+		self.doc._update_percent_field(
+			{
+				"target_dt": "Sales Order Item",
+				"target_parent_dt": "Sales Order",
+				"target_parent_field": "per_billed",
+				"target_ref_field": "amount",
+				"target_field": "billed_amt",
+				"status_field": "billing_status",
+				"keyword": "Billed",
+				"name": self.doc.name,
+			},
+			update_modified,
+		)
 
 	def check_modified_date(self) -> None:
 		doc = self.doc
@@ -49,21 +114,30 @@ class StatusService:
 		doc = self.doc
 		tot_qty, delivered_qty = 0.0, 0.0
 
-		for item in doc.items:
+		deliverable_items = [item for item in doc.items if not item.skip_delivery]
+		for item in deliverable_items:
 			if item.delivered_by_supplier:
-				item_delivered_qty = frappe.get_all(
-					"Purchase Order Item",
-					{"sales_order_item": item.name, "docstatus": 1},
-					[{"SUM": "received_qty", "AS": "received_qty"}],
-					pluck="received_qty",
-				)[0]
-				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
+				item.db_set("delivered_qty", self.get_drop_ship_delivered_qty(item), update_modified=False)
 
+		# Refresh closed rows too, but exclude them from progress while open rows remain.
+		for item in [item for item in deliverable_items if not item.closed] or deliverable_items:
 			delivered_qty += min(item.delivered_qty, item.qty)
 			tot_qty += item.qty
 
 		if tot_qty != 0:
 			doc.db_set("per_delivered", flt(delivered_qty / tot_qty) * 100, update_modified=False)
+
+	def get_drop_ship_delivered_qty(self, item) -> float:
+		"""Qty received against the drop-ship Purchase Orders of `item`, in the Sales Order UOM."""
+		po_item = frappe.qb.DocType("Purchase Order Item")
+		received_stock_qty = (
+			frappe.qb.from_(po_item)
+			.select(Sum(po_item.received_qty * po_item.conversion_factor))
+			.where((po_item.sales_order_item == item.name) & (po_item.docstatus == 1))
+		).run()[0][0]
+		return flt(
+			flt(received_stock_qty) / flt(item.conversion_factor or 1), item.precision("delivered_qty")
+		)
 
 	def update_picking_status(self) -> None:
 		doc = self.doc
@@ -71,7 +145,7 @@ class StatusService:
 		total_qty = 0.0
 		per_picked = 0.0
 
-		for so_item in doc.items:
+		for so_item in [item for item in doc.items if not item.closed] or doc.items:
 			if cint(
 				frappe.get_cached_value("Item", so_item.item_code, "is_stock_item")
 			) or doc.has_product_bundle(so_item.item_code):

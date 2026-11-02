@@ -34,7 +34,8 @@ def update_itemised_tax_data(doc):
 def export_invoices(filters: str | None = None):
 	frappe.has_permission("Sales Invoice", throw=True)
 
-	invoices = frappe.get_all(
+	# get_list, not get_all: what leaves here is a zip of e-invoice attachments, so the rows must be scoped too
+	invoices = frappe.get_list(
 		"Sales Invoice", filters=get_conditions(filters), fields=["name", "company_tax_id"]
 	)
 
@@ -218,8 +219,10 @@ def append_row_as_charges(items, tax, reference_row, summary_data):
 
 # Preflight for successful e-invoice export.
 def sales_invoice_validate(doc):
+	set_payment_schedule_swift_number(doc)
+
 	# Validate company
-	if doc.doctype != "Sales Invoice":
+	if doc.doctype != "Sales Invoice" or doc.is_opening == "Yes":
 		return
 
 	if not doc.company_address:
@@ -300,10 +303,24 @@ def sales_invoice_validate(doc):
 			)
 
 
+def set_payment_schedule_swift_number(doc):
+	"""Set the SWIFT/BIC of each Payment Schedule bank account (used in <DatiPagamento><BIC>).
+
+	The SWIFT code is stored on Bank, not on Bank Account, so it cannot be fetched through
+	the `bank_account` link with `fetch_from`."""
+	for row in doc.get("payment_schedule") or []:
+		swift_number = None
+		if row.get("bank_account"):
+			bank = frappe.get_cached_value("Bank Account", row.bank_account, "bank")
+			swift_number = bank and frappe.get_cached_value("Bank", bank, "swift_number")
+
+		row.bank_account_swift_number = swift_number or None
+
+
 # Ensure payment details are valid for e-invoice.
 def sales_invoice_on_submit(doc, method):
 	# Validate payment details
-	if get_company_country(doc.company) not in [
+	if doc.is_opening == "Yes" or get_company_country(doc.company) not in [
 		"Italy",
 		"Italia",
 		"Italian Republic",
@@ -369,7 +386,7 @@ def generate_single_invoice(docname: str):
 
 # Delete e-invoice attachment on cancel.
 def sales_invoice_on_cancel(doc, method):
-	if get_company_country(doc.company) not in [
+	if doc.is_opening == "Yes" or get_company_country(doc.company) not in [
 		"Italy",
 		"Italia",
 		"Italian Republic",
@@ -404,7 +421,7 @@ def get_e_invoice_attachments(invoices):
 	attachments = frappe.get_all(
 		"File",
 		fields=("name", "file_name", "attached_to_name", "is_private"),
-		filters={"attached_to_name": ("in", tax_id_map), "attached_to_doctype": "Sales Invoice"},
+		filters={"attached_to_name": ("in", list(tax_id_map)), "attached_to_doctype": "Sales Invoice"},
 	)
 
 	out = []
