@@ -23,6 +23,7 @@ import frappe
 from frappe.query_builder import Tuple
 from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import flt, now
+from pypika.terms import Bracket
 
 
 def execute():
@@ -1563,13 +1564,24 @@ def copy_category_to_items_for_purchase(column_cache):
 	parent = frappe.qb.DocType(parent_doctype)
 	item = frappe.qb.DocType(item_doctype, alias="item")
 
+	# A subquery and an unqualified column, as Postgres supports neither UPDATE ... JOIN nor alias.column in SET
 	(
 		frappe.qb.update(item)
-		.join(parent)
-		.on(item.parent == parent.name)
-		.set(item.tax_withholding_category, parent.tax_withholding_category)
-		.where(parent.tax_withholding_category.isnotnull())
-		.where(parent.tax_withholding_category != "")
+		.set(
+			"tax_withholding_category",
+			Bracket(
+				frappe.qb.from_(parent)
+				.select(parent.tax_withholding_category)
+				.where(parent.name == item.parent)
+			),
+		)
+		.where(
+			item.parent.isin(
+				frappe.qb.from_(parent)
+				.select(parent.name)
+				.where(IfNull(parent.tax_withholding_category, "") != "")
+			)
+		)
 		.where(item.apply_tds == 1)
 		.where(IfNull(item.tax_withholding_category, "") == "")
 		.run()
@@ -1589,15 +1601,27 @@ def copy_category_to_items_for_sales(column_cache):
 	item = frappe.qb.DocType(item_doctype, alias="item")
 	customer = frappe.qb.DocType("Customer", alias="customer")
 
-	(
-		frappe.qb.update(item)
-		.join(parent)
-		.on(item.parent == parent.name)
+	invoice_category = (
+		frappe.qb.from_(parent)
 		.join(customer)
 		.on(parent.customer == customer.name)
-		.set(item.tax_withholding_category, customer.tax_withholding_category)
-		.where(customer.tax_withholding_category.isnotnull())
-		.where(customer.tax_withholding_category != "")
+		.select(customer.tax_withholding_category)
+		.where(parent.name == item.parent)
+	)
+
+	# A subquery and an unqualified column, as Postgres supports neither UPDATE ... JOIN nor alias.column in SET
+	(
+		frappe.qb.update(item)
+		.set("tax_withholding_category", Bracket(invoice_category))
+		.where(
+			item.parent.isin(
+				frappe.qb.from_(parent)
+				.join(customer)
+				.on(parent.customer == customer.name)
+				.select(parent.name)
+				.where(IfNull(customer.tax_withholding_category, "") != "")
+			)
+		)
 		.where(IfNull(item.tax_withholding_category, "") == "")
 		.run()
 	)
