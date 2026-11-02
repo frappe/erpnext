@@ -48,9 +48,9 @@ class Lot:
 
 	@cached_property
 	def for_quantity(self):
-		if not self.inputs or not self.is_last:
-			return self.output_qty
-		return max(self.output_qty, flt(self.operation_qty - self.flow.get_done_qty(self.idx), 3))
+		if self.is_last and self.flow.get_stage(self.idx).is_packing:
+			return max(self.output_qty, self.flow.get_closing_qty(self.idx))
+		return self.output_qty
 
 	@cached_property
 	def scale(self):
