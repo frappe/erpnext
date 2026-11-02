@@ -277,14 +277,17 @@ class TestConsolidatedFinancialStatement(FrappeTestCase):
 
 	def set_exchange_rate(self, rate, date):
 		for from_currency, to_currency, exchange_rate in (("USD", "INR", rate), ("INR", "USD", 1 / rate)):
+			filters = {"date": date, "from_currency": from_currency, "to_currency": to_currency}
+			if existing := frappe.db.get_value("Currency Exchange", filters, ["name", "exchange_rate"]):
+				# today's seeded rate falls on the year end date when the tests run on that day
+				frappe.db.set_value("Currency Exchange", existing[0], "exchange_rate", exchange_rate)
+				self.addCleanup(
+					frappe.db.set_value, "Currency Exchange", existing[0], "exchange_rate", existing[1]
+				)
+				continue
+
 			currency_exchange = frappe.get_doc(
-				{
-					"doctype": "Currency Exchange",
-					"date": date,
-					"from_currency": from_currency,
-					"to_currency": to_currency,
-					"exchange_rate": exchange_rate,
-				}
+				{"doctype": "Currency Exchange", "exchange_rate": exchange_rate, **filters}
 			).insert()
 			self.addCleanup(currency_exchange.delete)
 
