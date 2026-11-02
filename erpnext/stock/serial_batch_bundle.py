@@ -1549,18 +1549,7 @@ class SerialBatchCreation:
 		def get_series(partial_series, digits):
 			return f"{current_value:0{digits}d}"
 
-<<<<<<< HEAD
-		posting_date = frappe.db.get_value(
-			voucher_type,
-			voucher_no,
-			"posting_date",
-		)
-
 		for _i in range(abs(cint(self.actual_qty))):
-=======
-		serial_ids = SerialBatchIdentity("Serial No").get_new_names(abs(cint(self.actual_qty)))
-		for serial_id in serial_ids:
->>>>>>> 0389b50 (fix(serial no): resolve fieldname parts of the series for auto-created serial nos)
 			current_value += 1
 			serial_no = parse_naming_series(
 				self.serial_no_series, doc=serial_no_values, number_generator=get_series
