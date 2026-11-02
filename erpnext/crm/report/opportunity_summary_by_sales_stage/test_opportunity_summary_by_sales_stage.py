@@ -88,6 +88,18 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 
 		self.assertIn("Prospecting", [column["fieldname"] for column in columns])
 
+	def test_sales_stage_columns_follow_user_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		if not frappe.db.exists("Sales Stage", "Negotiation"):
+			frappe.get_doc({"doctype": "Sales Stage", "stage_name": "Negotiation"}).insert()
+		user = create_user("sales_stage_restricted_user@example.com", "Sales User")
+		add_user_permission("Sales Stage", "Prospecting", user.name)
+		filters = {"based_on": "Opportunity Owner", "data_based_on": "Number", "company": "Best Test"}
+		columns = execute_as(user.name, filters)[0]
+
+		self.assertEqual(["Prospecting"], [column["fieldname"] for column in columns[1:]])
+
 	def test_amount_uses_opportunity_conversion_rate(self):
 		opportunity_type = make_opportunity_type()
 		frappe.get_doc(
