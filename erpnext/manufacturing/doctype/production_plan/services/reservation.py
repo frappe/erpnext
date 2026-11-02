@@ -189,6 +189,68 @@ class ProductionPlanStockReservation:
 		StockReservation(self.doc).cancel_stock_reservation_entries(sre_list)
 		self.doc.reload()
 
+	def reserve_received(self, receipt: Document, rows: list) -> None:
+		unclaimed_qty = self.get_unclaimed_qty({plan_row for _row, plan_row in rows})
+		items = []
+		for row, plan_row in rows:
+			qty = flt(min(row.stock_qty, unclaimed_qty[plan_row]), row.precision("stock_qty"))
+			if qty <= 0:
+				continue
+
+			unclaimed_qty[plan_row] -= qty
+			items.append(get_received_item(receipt, row, plan_row, qty))
+
+		if not items:
+			return
+
+		sre = StockReservation(self.doc, items=items, kwargs=_RESERVATION_TABLES["mr_items"])
+		sre.make_stock_reservation_entries()
+		sre.transfer_reservation_entries_to(
+			self.doc.name, from_doctype="Production Plan", to_doctype="Work Order"
+		)
+
+	def get_unclaimed_qty(self, plan_rows: set) -> defaultdict:
+		unclaimed_qty = defaultdict(float)
+		for row in self.doc.mr_items:
+			if row.name in plan_rows:
+				unclaimed_qty[row.name] += flt(row.required_bom_qty)
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		claimed_qty = (
+			frappe.qb.from_(sre)
+			.select(sre.voucher_detail_no, Sum(sre.reserved_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == self.doc.doctype)
+				& (sre.voucher_no == self.doc.name)
+				& sre.voucher_detail_no.isin(list(plan_rows))
+			)
+			.groupby(sre.voucher_detail_no)
+		).run()
+		for plan_row, qty in claimed_qty:
+			unclaimed_qty[plan_row] -= flt(qty)
+
+		return unclaimed_qty
+
+
+def get_received_item(receipt: Document, row: Document, plan_row: str, qty: float) -> frappe._dict:
+	item = frappe._dict(
+		{
+			"idx": row.idx,
+			"item_code": row.item_code,
+			"warehouse": row.warehouse,
+			"stock_qty": qty,
+			"voucher_detail_no": plan_row,
+			"from_voucher_type": receipt.doctype,
+			"from_voucher_no": receipt.name,
+			"from_voucher_detail_no": row.name,
+		}
+	)
+	if row.serial_and_batch_bundle:
+		item.serial_and_batch_bundles = [row.serial_and_batch_bundle]
+
+	return item
+
 
 def reserve_received_stock(receipt: Document) -> None:
 	ReceivedStockReservation(receipt).reserve()
@@ -199,52 +261,30 @@ class ReceivedStockReservation:
 		self.doc = doc
 
 	def reserve(self) -> None:
-		doc = self.doc
-		if doc.is_return or not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+		if self.doc.is_return or not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
 
+		for plan, rows in self.get_rows_by_plan().items():
+			plan_doc = frappe.get_doc("Production Plan", plan)
+			ProductionPlanStockReservation(plan_doc).reserve_received(self.doc, rows)
+
+	def get_rows_by_plan(self) -> dict:
 		production_plan_references = self.get_production_plan_references()
 		if not production_plan_references:
-			return
+			return {}
 
 		reservable_plans = self.get_reservable_production_plans(production_plan_references)
 		if not reservable_plans:
-			return
+			return {}
 
-		production_plan_items = []
-		doc.reload()
+		self.doc.reload()
+		rows_by_plan = defaultdict(list)
+		for row in self.doc.items:
+			ref = production_plan_references.get(row.material_request_item)
+			if ref and ref.production_plan in reservable_plans:
+				rows_by_plan[ref.production_plan].append((row, ref.material_request_plan_item))
 
-		docnames = []
-		for row in doc.items:
-			if row.material_request_item and row.material_request_item in production_plan_references:
-				_ref = production_plan_references[row.material_request_item]
-				if _ref.production_plan not in reservable_plans:
-					continue
-
-				docnames.append(_ref.production_plan)
-				row.update(
-					{
-						"voucher_type": "Production Plan",
-						"voucher_no": _ref.production_plan,
-						"voucher_detail_no": _ref.material_request_plan_item,
-						"from_voucher_no": doc.name,
-						"from_voucher_detail_no": row.name,
-						"from_voucher_type": doc.doctype,
-						"serial_and_batch_bundles": [row.serial_and_batch_bundle],
-					}
-				)
-
-				production_plan_items.append(row)
-
-		if not production_plan_items:
-			return
-
-		sre = StockReservation(doc=doc, items=production_plan_items)
-		sre.make_stock_reservation_entries()
-		if docnames:
-			sre.transfer_reservation_entries_to(
-				docnames, from_doctype="Production Plan", to_doctype="Work Order"
-			)
+		return rows_by_plan
 
 	def get_reservable_production_plans(self, production_plan_references: frappe._dict) -> set:
 		"""Production Plans that opted into stock reservation (``reserve_stock``).

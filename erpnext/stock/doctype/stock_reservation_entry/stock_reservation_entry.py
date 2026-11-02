@@ -1435,13 +1435,19 @@ class StockReservation:
 			order_by="creation",
 		)
 
+		qty_to_reserve = sre.reserved_qty
 		for detail in bundle_details:
+			qty = flt(min(abs(detail.qty), qty_to_reserve), sre.precision("reserved_qty"))
+			if qty <= 0:
+				break
+
+			qty_to_reserve -= qty
 			sre.append(
 				"sb_entries",
 				{
 					"serial_no": detail.serial_no,
 					"batch_no": detail.batch_no,
-					"qty": abs(detail.qty),
+					"qty": qty,
 					"warehouse": sre.warehouse,
 				},
 			)
