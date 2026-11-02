@@ -233,6 +233,7 @@ class ProductionPlanStockReservation:
 				(work_order.production_plan == self.doc.name)
 				& (work_order.docstatus == 1)
 				& (work_order.reserve_stock == 1)
+				& (work_order.status != "Closed")
 				& work_order_item.item_code.isin(item_codes)
 			)
 		).run()
