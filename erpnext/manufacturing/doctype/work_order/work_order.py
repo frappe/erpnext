@@ -1359,7 +1359,20 @@ class WorkOrder(Document):
 		if not item_details.serial_no_series:
 			self.throw_missing_item_setting("serial_no_series")
 
+<<<<<<< HEAD
 		serial_nos = get_available_serial_nos(item_details.serial_no_series, qty or self.qty)
+=======
+		serial_no_values = frappe._dict(
+			company=self.company,
+			item_code=self.production_item,
+			item_name=item_details.item_name,
+			description=item_details.description,
+			work_order=self.name,
+		)
+		serial_nos = get_available_serial_nos(
+			item_details.serial_no_series, qty or self.qty, self.production_item, serial_no_values
+		)
+>>>>>>> ba4fd52 (fix(work order): resolve fieldname parts of the serial no series)
 		if not serial_nos:
 			return
 

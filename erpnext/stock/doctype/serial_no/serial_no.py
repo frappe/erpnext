@@ -135,18 +135,33 @@ class SerialNo(StockController):
 			)
 
 
+<<<<<<< HEAD
 def get_available_serial_nos(serial_no_series, qty) -> list[str]:
 	serial_nos = []
 	for _i in range(cint(qty)):
 		serial_nos.append(get_new_serial_number(serial_no_series))
+=======
+def get_available_serial_nos(serial_no_series, qty, item_code, doc=None) -> list[str]:
+	serial_nos = []
+	for _i in range(cint(qty)):
+		serial_nos.append(get_new_serial_number(serial_no_series, item_code, doc))
+>>>>>>> ba4fd52 (fix(work order): resolve fieldname parts of the serial no series)
 
 	return serial_nos
 
 
+<<<<<<< HEAD
 def get_new_serial_number(series):
 	sr_no = make_autoname(series, "Serial No")
 	if frappe.db.exists("Serial No", sr_no):
 		sr_no = get_new_serial_number(series)
+=======
+def get_new_serial_number(series, item_code, doc=None):
+	sr_no = make_autoname(series, "Serial No", doc)
+	identity = SerialBatchIdentity("Serial No")
+	while identity.get_records(item_code, [sr_no], ["name"]):
+		sr_no = make_autoname(series, "Serial No", doc)
+>>>>>>> ba4fd52 (fix(work order): resolve fieldname parts of the serial no series)
 	return sr_no
 
 
