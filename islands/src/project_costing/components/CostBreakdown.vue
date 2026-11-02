@@ -22,6 +22,8 @@ const modes = [
 
 const active = computed(() => props.view.sources.filter((source) => source.amount > 0));
 const slices = computed(() => active.value.map((source) => ({ label: source.label, amount: source.amount })));
+// The centre always reads the total; the legend below already splits it by source.
+const total = computed(() => active.value.reduce((sum, source) => sum + source.amount, 0));
 const months = computed(() => props.view.months.map((row) => ({ ...row, label: format.month(row.month) })));
 const series = computed(() =>
 	Object.fromEntries(active.value.map((source) => [source.key, { label: source.label }]))
@@ -63,6 +65,12 @@ function open_source(event) {
 			</template>
 			<template #actions>
 				<TabButtons v-model="mode" :options="modes" size="sm" />
+			</template>
+			<template #center>
+				<div class="truncate text-center text-xl font-semibold tabular-nums text-ink-gray-8">
+					{{ format.short(total) }}
+				</div>
+				<div class="truncate text-center text-xs text-ink-gray-5">{{ __("Total cost") }}</div>
 			</template>
 		</DonutChart>
 		<BarChart

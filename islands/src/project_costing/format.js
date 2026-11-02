@@ -24,9 +24,10 @@ export function createFormat(host, get_currency) {
 			maximumFractionDigits: compact ? 1 : 0,
 		}).format(value);
 
-	// A negative amount as "−₹ 200", not "₹ -200": the sign reads first.
+	// A negative amount as "−₹ 200", not "₹ -200": the sign reads first. A chart tooltip passes
+	// NaN for a month with no value.
 	const signed = (value, render) => {
-		if (value == null) return "—";
+		if (value == null || Number.isNaN(value)) return "—";
 		const rounded = Math.round(value);
 		return rounded < 0 ? `−${render(-rounded)}` : render(rounded);
 	};

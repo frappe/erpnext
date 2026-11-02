@@ -11,22 +11,6 @@ export const ACCOUNT_STATUS = {
 	none: { label: __("No budget"), theme: "gray" },
 };
 
-// What a Budget does once exceeded, by its strongest action and the stage that triggers it.
-const CONTROLS = {
-	Stop: {
-		"Purchase Order": __("Stops on orders"),
-		"Material Request": __("Stops on requests"),
-		Expense: __("Stops on expenses"),
-		Cumulative: __("Stops on total spend"),
-	},
-	Warn: {
-		"Purchase Order": __("Warns on orders"),
-		"Material Request": __("Warns on requests"),
-		Expense: __("Warns on expenses"),
-		Cumulative: __("Warns on total spend"),
-	},
-};
-
 /** The Accounts view of the payload: rows split by root type, with totals across them. */
 export function toAccountsView(payload) {
 	const expense = payload.rows.filter((row) => row.root_type === "Expense");
@@ -41,21 +25,20 @@ export function toAccountsView(payload) {
 		income,
 		budget_count: budgeted.length,
 		budget: budgeted.length ? budget : null,
-		budgeted_actual: sum(budgeted, (row) => row.actual),
+		// a Budget over several fiscal years counts what its earlier years spent too
+		budgeted_spent: sum(budgeted, (row) => row.budget.spent),
 		unbudgeted: sum(expense, (row) => (row.budget ? 0 : row.actual)),
 		income_actual: sum(income, (row) => row.actual),
 		actual,
 		committed: sum(expense, (row) => row.committed),
-		available: budgeted.length ? budget - sum(budgeted, (row) => row.actual + row.committed) : null,
+		available: budgeted.length ? sum(budgeted, (row) => row.budget.available) : null,
 		has_entries: payload.rows.some((row) => row.entries),
 	};
 }
 
 /** How the account's Budget acts when exceeded, for the line under its name; "" without one. */
 export function accountMeta(row) {
-	const control = row.budget?.control;
-	if (control) return CONTROLS[control.action][control.stage];
-	return row.budget ? __("Tracks only") : "";
+	return row.budget?.rule || "";
 }
 
 /**
@@ -63,12 +46,16 @@ export function accountMeta(row) {
  * the books recorded, with three real numbers and no word about a missing budget. Adding one stays
  * on the chart's header.
  */
-export function accountKpis(accounts, format, { has_labour = false } = {}) {
+export function accountKpis(accounts, format) {
 	const actual = {
-		label: __("Actual"),
+		label: __("Spent"),
 		value: format.short(accounts.actual),
-		sub: actual_caption(accounts, format, has_labour),
-		hint: __("Ledger expense this fiscal year; timesheets don't post here"),
+		sub: actual_caption(accounts, format),
+		hint: accounts.budget_count
+			? __(
+					"Ledger expense this fiscal year; timesheets don't post here · Budget share counts the budget's whole period"
+			  )
+			: __("Ledger expense this fiscal year; timesheets don't post here"),
 	};
 	if (!accounts.budget_count)
 		return [
@@ -88,7 +75,6 @@ export function accountKpis(accounts, format, { has_labour = false } = {}) {
 		{
 			label: __("Budget"),
 			value: format.short(accounts.budget),
-			sub: count(accounts.budget_count, __("1 account"), __("{0} accounts", [accounts.budget_count])),
 		},
 		actual,
 		// Available already takes out what is committed, so Committed shows as its caption.
@@ -96,31 +82,22 @@ export function accountKpis(accounts, format, { has_labour = false } = {}) {
 			label: __("Available"),
 			value: format.short(accounts.available),
 			sub: accounts.committed ? __("after {0} committed", [format.short(accounts.committed)]) : null,
-			hint: __("Budget − actual − committed"),
+			hint: __("Budget − spent − committed"),
 		},
 	];
 }
 
 /**
- * What Actual is measured against. A share of the budget only holds when every account with spend
+ * What Spent is measured against. A share of the budget only holds when every account with spend
  * has a budget; otherwise the caption says how much sits outside them, so the share isn't read
- * against a total that includes it. With no budget, it says that timesheet labour is left out,
- * when the project has any.
+ * against a total that includes it. Without a budget there is nothing to measure against.
  */
-function actual_caption(accounts, format, has_labour) {
-	if (!accounts.budget_count) return has_labour ? __("Excludes timesheet labour") : null;
+function actual_caption(accounts, format) {
+	if (!accounts.budget_count) return null;
+	// when none of it is on a budgeted account, the amount would only repeat the card's value
+	if (accounts.unbudgeted > 0 && accounts.unbudgeted >= accounts.actual) return __("All without a budget");
 	if (accounts.unbudgeted) return __("{0} without a budget", [format.short(accounts.unbudgeted)]);
-	return __("{0} of budget", [format.percent((accounts.budgeted_actual / accounts.budget) * 100)]);
-}
-
-// The singular and plural strings, each translated whole.
-const count = (number, one, many) => (number === 1 ? one : many);
-
-/** The desk route for a new Budget on the project, prefilled. */
-export function newBudgetRoute(accounts, account) {
-	const options = { budget_against: "Project", project: accounts.project, company: accounts.company };
-	if (account) options.account = account;
-	return `Form/Budget/new?${new URLSearchParams(options)}`;
+	return __("{0} of budget", [format.percent((accounts.budgeted_spent / accounts.budget) * 100)]);
 }
 
 /**
@@ -150,14 +127,13 @@ export function accountsReports(accounts) {
 	return accounts.reports.filter((report) => routes[report]).map((report) => [__(report), routes[report]]);
 }
 
-/** The General Ledger report, filtered to the project, and to one account when given. */
-export function ledgerReportRoute(accounts, account) {
+/** The General Ledger report, filtered to the project. */
+export function ledgerReportRoute(accounts) {
 	const filters = {
 		company: accounts.company,
 		from_date: accounts.from_date,
 		to_date: accounts.to_date,
 		project: accounts.project,
 	};
-	if (account) filters.account = account;
 	return report_route("General Ledger", filters);
 }

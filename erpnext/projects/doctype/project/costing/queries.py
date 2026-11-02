@@ -6,7 +6,7 @@ from frappe import qb
 from frappe.query_builder.functions import Coalesce, Extract, NullIf, Sum
 from frappe.utils import flt
 from pypika.enums import DatePart
-from pypika.queries import QueryBuilder
+from pypika.queries import QueryBuilder, Table
 from pypika.terms import Term
 
 CONSUMPTION_VOUCHER_TYPES = ("Stock Entry", "Delivery Note", "Sales Invoice")
@@ -40,12 +40,12 @@ class ProjectCostQueries:
 	def labour_cost(self, by_month: bool = False) -> float | MonthlyAmounts:
 		"""Costing amount of the project's submitted time logs, by the day the work started."""
 		detail = qb.DocType("Timesheet Detail")
-		return sum_amount(self.time_logs(), detail.base_costing_amount, detail.from_time, by_month)
+		return sum_amount(self.time_logs(), detail.base_costing_amount, work_date(detail), by_month)
 
 	def labour_hours(self, by_month: bool = False) -> float | MonthlyAmounts:
 		"""Hours on the project's submitted time logs, by the day the work started."""
 		detail = qb.DocType("Timesheet Detail")
-		return sum_amount(self.time_logs(), detail.hours, detail.from_time, by_month)
+		return sum_amount(self.time_logs(), detail.hours, work_date(detail), by_month)
 
 	def purchase_cost(self, by_month: bool = False) -> float | MonthlyAmounts:
 		"""Non-stock items bought for the project, less the landed cost capitalised into stock.
@@ -214,6 +214,12 @@ def sum_by(query: QueryBuilder, group: Term, amount: Term) -> dict[str, float]:
 	"""Sum `amount` over `query` for each value of `group`."""
 	rows = query.select(group.as_("group_value"), Sum(amount).as_("amount")).groupby(group).run(as_dict=True)
 	return {row.group_value: flt(row.amount) for row in rows}
+
+
+def work_date(detail: Table) -> Term:
+	"""The day a time log's work started, or ended when it has no start. A Timesheet submits a log
+	with either one, as the API and Data Import can add, so a log always has one of them."""
+	return Coalesce(detail.from_time, detail.to_time)
 
 
 def sum_amount(

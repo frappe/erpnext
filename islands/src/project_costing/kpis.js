@@ -58,9 +58,7 @@ class HeadlineNumbers {
 		return {
 			label,
 			value: format.short(view.cost),
-			sub: view.has_estimate
-				? __("{0} of estimate", [format.percent(view.used_percent)])
-				: __("No estimate set"),
+			sub: view.has_estimate ? __("{0} of estimate", [format.percent(view.used_percent)]) : undefined,
 			hint,
 		};
 	}

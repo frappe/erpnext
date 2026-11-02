@@ -15,7 +15,6 @@ const PAGE = 20;
 const props = defineProps({
 	accounts: { type: Object, required: true },
 });
-const account = defineModel("account", { type: String, default: null });
 
 const __ = window.__;
 const format = useFormat();
@@ -34,10 +33,7 @@ const entries = useCall({
 	method: "GET",
 	immediate: false,
 	params: () => {
-		const params = { project: props.accounts.project, page_length: page_length.value + 1 };
-		if (account.value) params.account = account.value;
-		else params.root_type = kind.value;
-		return params;
+		return { project: props.accounts.project, root_type: kind.value, page_length: page_length.value + 1 };
 	},
 });
 
@@ -46,14 +42,11 @@ const rows = computed(() => (entries.data || []).slice(0, page_length.value));
 const has_more = computed(() => (entries.data || []).length > page_length.value);
 
 // Synchronous, so a new filter and its first page go out as one request.
-watch([account, kind], () => (page_length.value = PAGE), { flush: "sync" });
-watch([account, kind, page_length, () => props.accounts], () => entries.reload(), { immediate: true });
+watch(kind, () => (page_length.value = PAGE), { flush: "sync" });
+watch([kind, page_length, () => props.accounts], () => entries.reload(), { immediate: true });
 
-const account_name = computed(
-	() => props.accounts.rows.find((row) => row.account === account.value)?.account_name || account.value
-);
 const open_voucher = (row) => host.navigate?.(form_route(row.voucher_type, row.voucher_no));
-const open_report = () => host.navigate?.(ledgerReportRoute(props.accounts, account.value));
+const open_report = () => host.navigate?.(ledgerReportRoute(props.accounts));
 </script>
 
 <template>
@@ -71,20 +64,14 @@ const open_report = () => host.navigate?.(ledgerReportRoute(props.accounts, acco
 			</template>
 
 			<div class="mb-3 mt-2 flex flex-wrap items-center gap-2">
-				<TabButtons v-if="!account" v-model="kind" :options="kinds" size="sm" />
-				<Button
-					v-else
-					size="sm"
-					:label="account_name"
-					icon-right="lucide-x"
-					@click="account = null"
-				/>
+				<TabButtons v-model="kind" :options="kinds" size="sm" />
 			</div>
 
 			<ErrorMessage v-if="entries.error" :message="entries.error.message" />
 			<div v-else-if="rows.length" class="-mx-1 overflow-x-auto px-1">
 				<div class="min-w-[640px]">
 					<List
+						class="list-row-px-3"
 						:columns="['6.5rem', 'minmax(11rem,1.2fr)', 'minmax(9rem,1fr)', '6.5rem', '6.5rem']"
 						:row-height="52"
 					>
@@ -97,7 +84,7 @@ const open_report = () => host.navigate?.(ledgerReportRoute(props.accounts, acco
 						</ListHeader>
 						<ListRow v-for="row in rows" :key="row.name" @click="open_voucher(row)">
 							<ListCell>
-								<span class="text-sm text-ink-gray-5">{{
+								<span class="text-sm text-ink-gray-8">{{
 									format.date(row.posting_date)
 								}}</span>
 							</ListCell>

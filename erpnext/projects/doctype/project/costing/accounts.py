@@ -5,8 +5,9 @@ from functools import cached_property
 
 import frappe
 from frappe import qb
+from frappe.query_builder import Case, Criterion
 from frappe.query_builder.functions import Coalesce, Count, Extract, Sum
-from frappe.utils import flt, getdate
+from frappe.utils import flt, get_last_day, getdate
 from pypika.enums import DatePart
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -14,6 +15,7 @@ from erpnext.projects.doctype.project.costing.budgets import BUDGET_FIELDS, acco
 from erpnext.projects.doctype.project.costing.project_costing import (
 	can_create,
 	can_read,
+	can_submit,
 	month_range,
 	permitted_reports,
 )
@@ -48,14 +50,12 @@ def get_project_accounts(project: str) -> dict:
 @frappe.whitelist(methods=["GET"])
 def get_ledger_entries(
 	project: str,
-	account: str | None = None,
 	root_type: str | None = None,
 	start: int = 0,
 	page_length: int = 20,
 ) -> list[dict]:
 	"""One page of the project's ledger entries on Profit and Loss accounts in the current fiscal
-	year, newest first, optionally for one account or the accounts of one root type ("Expense" or
-	"Income").
+	year, newest first, optionally for the accounts of one root type ("Expense" or "Income").
 
 	The balance sheet side of each voucher (debtors, creditors, stock) is left out, so an amount
 	shows once, on the account it was spent or earned on."""
@@ -68,8 +68,7 @@ def get_ledger_entries(
 		"is_cancelled": 0,
 		"posting_date": ["between", [period.year_start_date, period.year_end_date]],
 	}
-	accounts = profit_and_loss_accounts(company, root_type)
-	filters["account"] = account if account in accounts else ["in", accounts]
+	filters["account"] = ["in", profit_and_loss_accounts(company, root_type)]
 	return frappe.get_list(
 		"GL Entry",
 		filters=filters,
@@ -116,7 +115,8 @@ class ProjectAccounts:
 			"to_date": str(self.fiscal_year.year_end_date),
 			"access": {
 				"budgets": self.can_read_budgets,
-				"manage_budgets": can_create("Budget"),
+				# a budget added from the tab is submitted as well as created
+				"manage_budgets": can_create("Budget") and can_submit("Budget"),
 			},
 			"reports": permitted_reports(ACCOUNTS_REPORTS),
 			"rows": rows,
@@ -132,6 +132,7 @@ class ProjectAccounts:
 			"actual": sign * flt(booked.get("balance")),
 			"ordered": self.ordered.get(account.name, 0) if expense else 0,
 			"requested": self.requested.get(account.name, 0) if expense else 0,
+			**self.budget_spend.get(account.name, {"spent": 0.0, "spent_to_date": 0.0}),
 		}
 		return {
 			"account": account.name,
@@ -140,7 +141,7 @@ class ProjectAccounts:
 			"actual": spend["actual"],
 			"entries": booked.get("entries", 0),
 			"committed": spend["ordered"] + spend["requested"],
-			"budget": budget and budget_summary(budget),
+			"budget": budget and budget_summary(budget, spend),
 			"status": account_status(budget, spend) if expense else None,
 		}
 
@@ -273,10 +274,45 @@ class ProjectAccounts:
 			.run(as_dict=True)
 		)
 
+	@cached_property
+	def budget_spend(self) -> dict[str, dict[str, float]]:
+		"""Debit less credit on each budgeted account over its Budget's whole period, in all and to
+		the end of this month. ERPNext's ledger check measures an expense this way, so a Budget that
+		runs over several fiscal years counts what its earlier years spent."""
+		if not self.budgets:
+			return {}
+		gle = qb.DocType("GL Entry")
+		amount = gle.debit - gle.credit
+		periods = Criterion.any(
+			[
+				(gle.account == account)
+				& gle.posting_date[budget["budget_start_date"] : budget["budget_end_date"]]
+				for account, budget in self.budgets.items()
+			]
+		)
+		to_date = Case().when(gle.posting_date <= get_last_day(getdate()), amount).else_(0)
+		rows = (
+			self.readable_ledger()
+			.where(periods)
+			.select(gle.account, Sum(amount).as_("spent"), Sum(to_date).as_("spent_to_date"))
+			.groupby(gle.account)
+			.run(as_dict=True)
+		)
+		return {
+			row.account: {"spent": flt(row.spent), "spent_to_date": flt(row.spent_to_date)} for row in rows
+		}
+
 	def ledger_query(self):
-		"""The project's GL Entries in the fiscal year that the user may read. The rules come from the
-		framework's query builder, so User Permissions on accounts, cost centers and the like apply,
-		as they do to the ledger list."""
+		"""The project's GL Entries in the fiscal year that the user may read."""
+		gle = qb.DocType("GL Entry")
+		return self.readable_ledger().where(
+			gle.posting_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date]
+		)
+
+	def readable_ledger(self):
+		"""The project's GL Entries that the user may read. The rules come from the framework's query
+		builder, so User Permissions on accounts, cost centers and the like apply, as they do to the
+		ledger list."""
 		gle = qb.DocType("GL Entry")
 		readable = frappe.qb.get_query(
 			"GL Entry", fields=["name"], filters={"project": self.project.name}, ignore_permissions=False
@@ -287,7 +323,6 @@ class ProjectAccounts:
 			.where(gle.project == self.project.name)
 			.where(gle.company == self.project.company)
 			.where(gle.is_cancelled == 0)
-			.where(gle.posting_date[self.fiscal_year.year_start_date : self.fiscal_year.year_end_date])
 		)
 
 	@cached_property

@@ -241,6 +241,7 @@ class TestProjectCosting(ERPNextTestSuite):
 		queries = ProjectCostQueries(project.name)
 		for method in (
 			queries.labour_cost,
+			queries.labour_hours,
 			queries.purchase_cost,
 			queries.material_cost,
 			queries.billed_amount,
@@ -252,6 +253,9 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertLess(billed[month_key(second_month)], 0)
 		self.assertEqual(
 			set(queries.labour_cost(by_month=True)), {month_key(first_month), month_key(second_month)}
+		)
+		self.assertEqual(
+			set(queries.labour_hours(by_month=True)), {month_key(first_month), month_key(second_month)}
 		)
 		self.assertEqual(set(queries.material_cost(by_month=True)), {month_key(second_month)})
 
@@ -268,8 +272,14 @@ class TestProjectCosting(ERPNextTestSuite):
 		make_stock_entry(item_code=self.stock_item, qty=5, to_warehouse="_Test Warehouse - _TC", rate=100)
 
 	def book_second_month(self, project: str) -> None:
-		"""More time, stock issued to the project, and a credit note against it."""
+		"""More time, one log of it with only an end time, as the API and Data Import can add, stock
+		issued to the project, and a credit note against it."""
 		make_timesheet(self.monthly_employee(), simulate=True, project=project)
+		employee = make_employee("cost-queries-ended@example.com", company="_Test Company")
+		ended_only = make_timesheet(employee, project=project, do_not_submit=True)
+		ended_only.time_logs[0].from_time = None
+		ended_only.save()
+		ended_only.submit()
 		issue_to_project(self.stock_item, 3, project)
 		invoice_for_project(project, qty=-1, is_return=1)
 
