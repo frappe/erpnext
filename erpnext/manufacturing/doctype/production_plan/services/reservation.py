@@ -307,7 +307,7 @@ def get_received_item(receipt: Document, row: Document, plan_row: str, qty: floa
 
 
 def hand_off_reserved_stock(plan: str, to_doctype: str, items: list | None = None) -> None:
-	ProductionPlanStockReservation(frappe.get_doc("Production Plan", plan)).hand_off(to_doctype, items)
+	ProductionPlanStockReservation(frappe.get_lazy_doc("Production Plan", plan)).hand_off(to_doctype, items)
 
 
 def reserve_received_stock(receipt: Document) -> None:
