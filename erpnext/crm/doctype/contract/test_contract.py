@@ -144,7 +144,9 @@ class TestContract(FrappeTestCase):
 		contract.update({"party_type": "Employee", "party_name": employee})
 		contract.insert()
 
-		property_setter = make_property_setter("Contract", "party_type", "options", "Customer\nSupplier", "Text")
+		property_setter = make_property_setter(
+			"Contract", "party_type", "options", "Customer\nSupplier", "Text"
+		)
 		self.addCleanup(frappe.clear_cache, doctype="Contract")
 		self.addCleanup(property_setter.delete)
 		user = create_user("contract-hr-manager@example.com", "HR Manager")

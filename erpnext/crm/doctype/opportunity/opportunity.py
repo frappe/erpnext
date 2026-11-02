@@ -372,8 +372,7 @@ class Opportunity(TransactionBase, CRMNote):
 	def has_active_quotation(self) -> list[str]:
 		quotation = frappe.qb.DocType("Quotation")
 		return self.get_linked_quotations(
-			(quotation.docstatus == 1)
-			& quotation.status.notin(["Lost", "Cancelled", "Expired"])
+			(quotation.docstatus == 1) & quotation.status.notin(["Lost", "Cancelled", "Expired"])
 		)
 
 	def has_ordered_quotation(self) -> list[str]:

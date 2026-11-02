@@ -172,7 +172,9 @@ class TestOpportunity(unittest.TestCase):
 			set_multiple_status(json.dumps([opportunity.name]), status)
 			self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), status)
 
-		self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), "Converted")
+		self.assertRaises(
+			frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), "Converted"
+		)
 		set_multiple_status(json.dumps([opportunity.name]), "Quotation")
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Quotation")
 
@@ -187,7 +189,9 @@ class TestOpportunity(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
 
 		for status in ("Open", "Closed", "Quotation", "Lost"):
-			self.assertRaises(frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), status)
+			self.assertRaises(
+				frappe.ValidationError, set_multiple_status, json.dumps([opportunity.name]), status
+			)
 		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
 
 	def test_lost_on_follows_the_lost_status(self):
