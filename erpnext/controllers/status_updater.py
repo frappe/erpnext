@@ -277,6 +277,14 @@ class StatusUpdater(Document):
 						else "`{}`".format(args["target_ref_field"])
 					)
 
+				if self.get("is_return") and args.get("overflow_type") == "billing":
+					if args.get("billing_flag") and not self.get(args["billing_flag"]):
+						# the return never changes the order's billed amount
+						continue
+					if self.docstatus != 2 and flt(d.get("qty")) * flt(d.get("rate")) <= 0:
+						# this return row lowers billing, so it cannot create an overflow
+						continue
+
 					# get all qty where qty > target_field
 					item = frappe.db.sql(
 						"""select item_code, {ref_expr} as `{target_ref_field}`,
