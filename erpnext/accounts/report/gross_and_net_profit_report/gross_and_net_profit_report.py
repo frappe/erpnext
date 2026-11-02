@@ -33,7 +33,7 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
-		ignore_accumulated_values_for_fy=True,
+		ignore_accumulated_values_for_fy=bool(filters.accumulated_values),
 		total=False,
 	)
 
@@ -45,7 +45,7 @@ def execute(filters=None):
 		filters=filters,
 		accumulated_values=filters.accumulated_values,
 		ignore_closing_entries=True,
-		ignore_accumulated_values_for_fy=True,
+		ignore_accumulated_values_for_fy=bool(filters.accumulated_values),
 		total=False,
 	)
 
