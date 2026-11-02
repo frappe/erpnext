@@ -43,6 +43,10 @@ class AssetMaintenanceTeam(Document):
 			members.add(row.team_member)
 
 	def validate_manager_is_member(self):
+		# checked only when the manager is set, so older teams with an outside manager still save
+		if not (self.is_new() or self.has_value_changed("maintenance_manager")):
+			return
+
 		if self.maintenance_manager and self.maintenance_manager not in self.get_members():
 			frappe.throw(
 				_("Maintenance Manager {0} must be a member of the team.").format(
