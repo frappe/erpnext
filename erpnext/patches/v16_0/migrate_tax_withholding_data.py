@@ -45,6 +45,17 @@ def execute():
 	party_categories = {}
 	skip_docs = get_docs_with_entries()
 
+	# On a re-run, documents created after the first run belong to the new flow, even without entries
+	created_before = (
+		frappe.db.get_value(
+			"Patch Log",
+			{"patch": ("like", "erpnext.patches.v16_0.migrate_tax_withholding_data%")},
+			"creation",
+			order_by="creation asc",
+		)
+		or now()
+	)
+
 	# One query per party type instead of one per party; other party types are still looked up one by one
 	for party_type in ("Supplier", "Customer"):
 		tax_id_field = next((f for f in ("pan", "tax_id") if column_cache[party_type][f]), None)
@@ -63,16 +74,19 @@ def execute():
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
 	purchase_migrator = PurchaseInvoiceMigrator(
-		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs
+		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
 	)
 	purchase_migrator.migrate()
-	migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
+	migrate_sales_invoices(
+		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
+	)
 	migrate_journal_entries(
 		tds_accounts,
 		tax_rate_map,
 		column_cache,
 		party_tax_id_cache,
 		skip_docs,
+		created_before,
 		purchase_migrator.tds_paid_by_other,
 		party_categories,
 	)
@@ -365,12 +379,15 @@ def bulk_insert_entries(all_entries):
 
 
 class PurchaseInvoiceMigrator:
-	def __init__(self, tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
+	def __init__(
+		self, tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
+	):
 		self.tds_accounts = tds_accounts
 		self.tax_rate_map = tax_rate_map
 		self.column_cache = column_cache
 		self.party_tax_id_cache = party_tax_id_cache
 		self.skip_docs = skip_docs
+		self.created_before = created_before
 
 		# Build TDS account set
 		self.all_tds_accounts = set()
@@ -471,6 +488,7 @@ class PurchaseInvoiceMigrator:
 				ptc.base_tax_amount_after_discount_amount,
 			)
 			.where(pi.docstatus == 1)
+			.where(pi.creation < self.created_before)
 			.where(tds_row)
 			.run(as_dict=True)
 		)
@@ -489,6 +507,7 @@ class PurchaseInvoiceMigrator:
 					.on(ptc.parent == pi.name)
 					.select(ptc.parent)
 					.where(pi.docstatus == 1)
+					.where(pi.creation < self.created_before)
 					.where(tds_row)
 				)
 			)
@@ -519,6 +538,7 @@ class PurchaseInvoiceMigrator:
 			.where(at.parenttype == "Purchase Invoice")
 			.where(at.reference_type == "Payment Entry")
 			.where(pi.docstatus == 1)
+			.where(pi.creation < self.created_before)
 			.run(as_dict=True)
 		)
 
@@ -545,6 +565,7 @@ class PurchaseInvoiceMigrator:
 				atc.add_deduct_tax,
 			)
 			.where(pe.docstatus == 1)
+			.where(pe.creation < self.created_before)
 			.where(pe.apply_tds == 1)
 			.where(atc.account_head.isin(list(self.all_tds_accounts)))
 			.run(as_dict=True)
@@ -566,6 +587,7 @@ class PurchaseInvoiceMigrator:
 				pi.conversion_rate,
 			)
 			.where(pi.docstatus == 1)
+			.where(pi.creation < self.created_before)
 			.where(pi.is_opening == "No")
 			.where(pi.apply_tds == 1)
 			.where(IfNull(pi.tax_withholding_category, "") != "")
@@ -1052,7 +1074,9 @@ class PurchaseInvoiceMigrator:
 # =============================================================================
 
 
-def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
+def migrate_sales_invoices(
+	tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
+):
 	"""
 	Migrate Sales Invoice TCS data.
 
@@ -1109,6 +1133,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 			tcs_gl.account,
 		)
 		.where(si.docstatus == 1)
+		.where(si.creation < created_before)
 		.where(si.is_opening == "No")
 		# without a category or a TCS row there is no rate, so the invoice would be skipped below
 		.where((IfNull(cust.tax_withholding_category, "") != "") | tcs_gl.account.isnotnull())
@@ -1244,6 +1269,7 @@ def migrate_journal_entries(
 	column_cache,
 	party_tax_id_cache,
 	skip_docs,
+	created_before,
 	tds_paid_by_other,
 	party_categories,
 ):
@@ -1284,6 +1310,7 @@ def migrate_journal_entries(
 		.where(gle.voucher_type == "Journal Entry")
 		.where(gle.is_cancelled == 0)
 		.where(je.docstatus == 1)
+		.where(je.creation < created_before)
 		.where(gle.account.isin(list(all_tds_accounts)))
 		.run(as_dict=True)
 	)
@@ -1434,6 +1461,7 @@ def migrate_journal_entries(
 			Sum(jea.credit - jea.debit).as_("amount"),
 		)
 		.where(je.docstatus == 1)
+		.where(je.creation < created_before)
 		.where(je.is_opening == "No")
 		.where(je.apply_tds == 1)
 		.where(IfNull(je.tax_withholding_category, "") != "")
