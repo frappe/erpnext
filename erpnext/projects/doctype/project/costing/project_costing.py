@@ -4,10 +4,11 @@
 from functools import cached_property
 
 import frappe
+from frappe.desk.query_report import get_reference_report
 from frappe.model import get_permitted_fields
 from frappe.utils import add_months, flt, getdate
 
-from erpnext.projects.doctype.project.costing.billing import ProjectBilling
+from erpnext.projects.doctype.project.costing.billing import INVOICE_PAGE, ProjectBilling
 from erpnext.projects.doctype.project.costing.drivers import CostDrivers
 from erpnext.projects.doctype.project.costing.queries import MonthlyAmounts, ProjectCostQueries
 from erpnext.projects.doctype.project.project_overview import check_access
@@ -33,6 +34,15 @@ def get_project_costing(project: str) -> dict:
 	"""
 	check_access(project)
 	return ProjectCosting(project).build()
+
+
+@frappe.whitelist()
+def get_project_invoices(project: str, start: int = 0) -> list[dict]:
+	"""A page of the invoices billed to the project, newest first. The Billing card pages through
+	them when its invoices name the project in different ways and no list filter finds them all."""
+	check_access(project)
+	billing = ProjectBilling(project, get_costing_access(project))
+	return billing.invoices(start=max(start, 0), page_length=INVOICE_PAGE) or []
 
 
 class ProjectCosting:
@@ -155,13 +165,22 @@ def has_hrms() -> bool:
 
 
 def permitted_reports(names: tuple[str, ...]) -> list[str]:
-	"""Of `names`, the reports the site has enabled and the user's roles may open, in their order."""
+	"""Of `names`, the reports the site has enabled and the user may open, in their order."""
 	if not names:
 		return []
 	enabled = frappe.get_all("Report", filters={"name": ["in", names], "disabled": 0}, pluck="name")
-	return [
-		name for name in names if name in enabled and frappe.get_cached_doc("Report", name).is_permitted()
-	]
+	return [name for name in names if name in enabled and can_open_report(name)]
+
+
+def can_open_report(name: str) -> bool:
+	"""What the report page checks before it runs, on the report a Custom Report is saved from:
+	that it is enabled, its roles, and report permission on the doctype it reports on."""
+	report = get_reference_report(frappe.get_cached_doc("Report", name))
+	return (
+		not report.disabled
+		and report.is_permitted()
+		and bool(frappe.has_permission(report.ref_doctype, "report"))
+	)
 
 
 def can_read(doctype: str) -> bool:
