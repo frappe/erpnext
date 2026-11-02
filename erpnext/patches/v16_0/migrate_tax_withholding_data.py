@@ -438,12 +438,13 @@ class PurchaseInvoiceMigrator:
 			{key: rows for key, rows in self.all_entries.items() if key not in self.skip_docs}
 		)
 
-		# v15 advance tax rows have no withholding flag; an "Add" row is a reversal, not the deduction
-		if pe_names := [name for name in self.pe_taxes if ("Payment Entry", name) not in self.skip_docs]:
+		# v15 advance tax rows have no withholding flag; an "Add" row is a reversal, not the deduction.
+		# Skipped payments are flagged too: their entries are kept, but their rows were never flagged
+		if self.pe_taxes:
 			frappe.db.set_value(
 				"Advance Taxes and Charges",
 				{
-					"parent": ("in", pe_names),
+					"parent": ("in", list(self.pe_taxes)),
 					"parenttype": "Payment Entry",
 					"account_head": ("in", list(self.all_tds_accounts)),
 					"add_deduct_tax": "Deduct",
@@ -1246,11 +1247,13 @@ def migrate_sales_invoices(
 		invoices = [name for _doctype, name in all_entries]
 		frappe.db.set_value("Sales Invoice", {"name": ("in", invoices)}, {"apply_tds": 1})
 
-		# v15 sales tax rows have no withholding flag; without it the new flow adds a second TCS row
+	# v15 sales tax rows have no withholding flag; without it the new flow adds a second TCS row.
+	# Skipped invoices are flagged too: their entries are kept, but their rows were never flagged
+	if invoices_with_tcs := [row.invoice_name for row in tcs_entries if row.account]:
 		frappe.db.set_value(
 			"Sales Taxes and Charges",
 			{
-				"parent": ("in", invoices),
+				"parent": ("in", invoices_with_tcs),
 				"parenttype": "Sales Invoice",
 				"account_head": ("in", tcs_accounts_list),
 			},
@@ -1352,11 +1355,9 @@ def migrate_journal_entries(
 
 	all_entries = {}
 	category_wise_jes = defaultdict(set)
+	journals_with_tds = []
 
 	for je_name, data in je_taxes.items():
-		if ("Journal Entry", je_name) in skip_docs:
-			continue
-
 		info = data["info"]
 
 		# Assume TCS not allowed in Journal Entry
@@ -1365,6 +1366,10 @@ def migrate_journal_entries(
 
 		if total_tds <= 0:
 			# Ignore TDS payment entries
+			continue
+
+		journals_with_tds.append(je_name)
+		if ("Journal Entry", je_name) in skip_docs:
 			continue
 
 		# Get party from JE accounts (non-TDS rows)
@@ -1527,12 +1532,13 @@ def migrate_journal_entries(
 			{"apply_tds": 1, "tax_withholding_category": category},
 		)
 
-	# Only the deduction row: a debit is a TDS payment and a party row is the party's own account
-	if all_entries:
+	# Only the deduction row: a debit is a TDS payment and a party row is the party's own account.
+	# Skipped journals are flagged too: their entries are kept, but their rows were never flagged
+	if journals_with_tds:
 		frappe.db.set_value(
 			"Journal Entry Account",
 			{
-				"parent": ("in", [name for _doctype, name in all_entries]),
+				"parent": ("in", journals_with_tds),
 				"parenttype": "Journal Entry",
 				"account": ("in", list(all_tds_accounts)),
 				"credit": (">", 0),
