@@ -1530,21 +1530,30 @@ class SerialBatchCreation:
 		if self.get("voucher_type"):
 			voucher_type = self.get("voucher_type")
 
+		serial_no_values = frappe._dict(
+			warehouse=self.warehouse,
+			company=self.company,
+			item_code=self.item_code,
+			item_name=self.item_name,
+			description=self.description,
+			status="Active",
+			reference_doctype=voucher_type,
+			reference_name=voucher_no,
+			posting_date=frappe.db.get_value(voucher_type, voucher_no, "posting_date"),
+			batch_no=self.batch_no,
+		)
+
 		obj = NamingSeries(self.serial_no_series)
-		current_value = obj.get_current_value()
+		current_value = obj.get_current_value(serial_no_values)
 
 		def get_series(partial_series, digits):
 			return f"{current_value:0{digits}d}"
 
-		posting_date = frappe.db.get_value(
-			voucher_type,
-			voucher_no,
-			"posting_date",
-		)
-
 		for _i in range(abs(cint(self.actual_qty))):
 			current_value += 1
-			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
+			serial_no = parse_naming_series(
+				self.serial_no_series, doc=serial_no_values, number_generator=get_series
+			)
 
 			sr_nos.append(serial_no)
 			serial_nos_details.append(
@@ -1555,16 +1564,7 @@ class SerialBatchCreation:
 					now(),
 					frappe.session.user,
 					frappe.session.user,
-					self.warehouse,
-					self.company,
-					self.item_code,
-					self.item_name,
-					self.description,
-					"Active",
-					voucher_type,
-					voucher_no,
-					posting_date,
-					self.batch_no,
+					*serial_no_values.values(),
 				)
 			)
 
@@ -1576,16 +1576,7 @@ class SerialBatchCreation:
 				"modified",
 				"owner",
 				"modified_by",
-				"warehouse",
-				"company",
-				"item_code",
-				"item_name",
-				"description",
-				"status",
-				"reference_doctype",
-				"reference_name",
-				"posting_date",
-				"batch_no",
+				*serial_no_values,
 			]
 
 			try:
@@ -1601,7 +1592,7 @@ class SerialBatchCreation:
 				else:
 					raise e
 
-		obj.update_counter(current_value)
+		obj.update_counter(current_value, serial_no_values)
 
 		return sr_nos
 

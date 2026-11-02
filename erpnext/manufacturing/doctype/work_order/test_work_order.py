@@ -1508,6 +1508,23 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_auto_serial_no_series_with_fieldname(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		fg_item = frappe.generate_hash(length=20)
+		create_nested_bom({fg_item: {frappe.generate_hash(length=20): {}}}, prefix="")
+
+		item = frappe.get_doc("Item", fg_item)
+		item.has_serial_no = 1
+		item.serial_no_series = "WOF-.{work_order}.-.#####"
+		item.save()
+
+		wo_order = make_wo_order_test_record(item=fg_item, qty=1, skip_transfer=True)
+		serial_nos = frappe.get_all("Serial No", {"work_order": wo_order.name}, pluck="serial_no")
+		self.assertEqual(serial_nos, [f"WOF-{wo_order.name}-00001"])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
 	def test_auto_serial_no_batch_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
