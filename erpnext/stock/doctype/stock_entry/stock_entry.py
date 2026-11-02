@@ -722,6 +722,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		super().on_submit_subcontracting_inward()
 
 	def on_cancel(self):
+		self.validate_asset_repair_is_cancelled()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
@@ -848,6 +849,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
+
+	def validate_asset_repair_is_cancelled(self):
+		if self.asset_repair and frappe.db.get_value("Asset Repair", self.asset_repair, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel Asset Repair {0} instead, it cancels this Stock Entry").format(
+					get_link_to_form("Asset Repair", self.asset_repair)
+				)
+			)
 
 	def delink_asset_repair_sabb(self):
 		if not self.asset_repair:
@@ -5287,9 +5296,9 @@ def get_remaining_operating_cost(work_order=None, bom_no=None):
 
 	# Get operating cost from BOM if not found in work_order.
 	if not remaining_operating_cost and bom_no:
-		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
+		bom = frappe.db.get_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
-			remaining_operating_cost = flt(bom.operating_cost) / flt(bom.quantity)
+			remaining_operating_cost = flt(bom.base_operating_cost) / flt(bom.quantity)
 
 	return remaining_operating_cost
 

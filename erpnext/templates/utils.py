@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.rate_limiter import rate_limit
-from frappe.utils import escape_html, strip_html
+from frappe.utils import escape_html, strip_html, validate_email_address
 
 
 # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public Contact Us form; only parses the sender and sets lead ownership
@@ -17,6 +17,7 @@ def send_message(sender: str, message: str, subject: str = "Website Query"):
 		return
 
 	website_send_message(sender, message, subject)
+	sender = validate_email_address(sender, throw=True)
 
 	message = escape_html(message)
 	subject = strip_html(subject)
