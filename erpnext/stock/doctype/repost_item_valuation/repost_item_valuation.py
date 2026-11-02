@@ -508,6 +508,7 @@ class RepostItemValuation(Document):
 			and not self.via_landed_cost_voucher
 			and not self.repost_only_accounting_ledgers
 			and not frappe.db.get_single_value("Stock Reposting Settings", "enable_parallel_reposting")
+			and not has_failed_merged_repost(self.company)
 		)
 
 	def get_item_reposts(self):
@@ -585,6 +586,21 @@ def bulk_restart_reposting(names: str | list):
 
 def repost_coverage_cache_key(name):
 	return f"riv_dependent_coverage::{name}"
+
+
+def has_failed_merged_repost(company):
+	failed = frappe.get_all(
+		"Repost Item Valuation",
+		filters={
+			"company": company,
+			"based_on": "Item and Warehouse",
+			"status": "Failed",
+			"docstatus": 1,
+			"items_to_be_repost": ("is", "set"),
+		},
+		pluck="items_to_be_repost",
+	)
+	return any(len(json.loads(items)) > 1 for items in failed)
 
 
 def get_mergeable_item_reposts(doc):
@@ -763,6 +779,7 @@ def repost(doc):
 
 		doc.flags.repost_started_at = doc.get_saved_repost_started_at() or now()
 		doc.set_status("In Progress")
+		doc.merge_queued_item_reposts()
 		mark_closing_entries_outdated(doc.company, doc.posting_date)
 		if not frappe.in_test:
 			frappe.db.commit()
@@ -779,7 +796,6 @@ def repost(doc):
 		if doc.repost_only_accounting_ledgers:
 			repost_gl_entries(doc)
 		else:
-			doc.merge_queued_item_reposts()
 			repost_sl_entries(doc)
 			vouchers = get_reposted_vouchers(doc)
 			repost_gl_entries(doc, vouchers)
