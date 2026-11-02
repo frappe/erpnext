@@ -51,9 +51,10 @@ class AuthorizationRule(Document):
 	def check_duplicate_entry(self):
 		exists = frappe.db.sql(
 			"""select name, docstatus from `tabAuthorization Rule`
-			where transaction = %s and based_on = %s and system_user = %s
-			and system_role = %s and approving_user = %s and approving_role = %s
-			and to_emp =%s and to_designation=%s and name != %s""",
+			where transaction = %s and based_on = %s and coalesce(system_user, '') = %s
+			and coalesce(system_role, '') = %s and coalesce(approving_user, '') = %s and coalesce(approving_role, '') = %s
+			and coalesce(to_emp, '') = %s and coalesce(to_designation, '') = %s and coalesce(master_name, '') = %s
+			and coalesce(company, '') = %s and value = %s and name != %s""",
 			(
 				self.transaction,
 				self.based_on,
@@ -63,6 +64,9 @@ class AuthorizationRule(Document):
 				cstr(self.approving_role),
 				cstr(self.to_emp),
 				cstr(self.to_designation),
+				cstr(self.master_name),
+				cstr(self.company),
+				self.value or 0,
 				self.name,
 			),
 		)
@@ -89,13 +93,33 @@ class AuthorizationRule(Document):
 			"Item Group wise Discount",
 		]:
 			frappe.throw(_("Cannot set authorization on basis of Discount for {0}").format(self.transaction))
-		elif self.based_on == "Average Discount" and flt(self.value) > 100.00:
-			frappe.throw(_("Discount must be less than 100"))
+		elif (
+			self.based_on
+			in (
+				"Average Discount",
+				"Customerwise Discount",
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			)
+			and not 0 <= flt(self.value) <= 100
+		):
+			frappe.throw(_("Discount must be between 0 and 100"))
 		elif self.based_on == "Customerwise Discount" and not self.master_name:
 			frappe.throw(_("Customer required for 'Customerwise Discount'"))
 
+	def _validate_links(self):
+		# Frappe checks links before validate, on both insert and save.
+		self.customer_or_item = {
+			"Customerwise Discount": "Customer",
+			"Itemwise Discount": "Item",
+			"Item Group wise Discount": "Item Group",
+		}.get(self.based_on, "")
+		if not self.customer_or_item:
+			self.master_name = ""
+		super()._validate_links()
+
 	def validate(self):
-		self.check_duplicate_entry()
 		self.validate_rule()
+		self.check_duplicate_entry()
 		if not self.value:
 			self.value = 0.0
