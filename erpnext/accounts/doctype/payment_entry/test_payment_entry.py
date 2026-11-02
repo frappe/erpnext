@@ -2020,6 +2020,72 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_payment_term_allocation_currency_rounding(self):
+		template = frappe.new_doc("Payment Terms Template")
+		template.template_name = "_Test Three Instalments"
+		template.allocate_payment_based_on_payment_terms = 1
+		for idx, portion in enumerate((33.33, 33.33, 33.34), 1):
+			term = f"_Test Instalment {idx}"
+			create_payment_term(term)
+			template.append(
+				"terms",
+				{
+					"payment_term": term,
+					"invoice_portion": portion,
+					"credit_days_based_on": "Day(s) after invoice date",
+					"credit_days": idx,
+				},
+			)
+		template.insert()
+
+		for make_invoice in (create_sales_invoice, make_purchase_invoice):
+			invoice = make_invoice(qty=1, rate=1000, currency="USD", conversion_rate=83.335, do_not_save=True)
+			invoice.payment_terms_template = template.name
+			invoice.submit()
+			with self.subTest(doctype=invoice.doctype):
+				self.assertEqual(invoice.party_account_currency, "INR")
+				self.assertEqual(invoice.outstanding_amount, 83335)
+				payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+				payment.save()
+				self.assertEqual(
+					[row.allocated_amount for row in payment.references], [27775.56, 27775.56, 27783.88]
+				)
+				self.assertEqual(payment.total_allocated_amount, invoice.outstanding_amount)
+				self.assertEqual(payment.unallocated_amount, 0)
+
+				payment.references[-1].allocated_amount += 0.01
+				payment.paid_amount = payment.received_amount = 83335.01
+				with self.assertRaisesRegex(frappe.ValidationError, "Allocated Amount cannot be greater"):
+					payment.save()
+				payment.reload().submit()
+				self.assertEqual(invoice.reload().outstanding_amount, 0)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [0, 0, 0])
+				payment.cancel()
+				self.assertEqual(invoice.reload().outstanding_amount, 83335)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [333.3, 333.3, 333.4])
+
+				partial_payment = get_payment_entry(
+					invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+				)
+				partial_payment.set("references", partial_payment.references[:1])
+				partial_payment.paid_amount = partial_payment.received_amount = 27775.56
+				partial_payment.submit()
+				self.assertEqual(invoice.reload().outstanding_amount, 55559.44)
+
+				payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+				payment.submit()
+				self.assertEqual(len(payment.references), 2)
+				self.assertEqual(payment.total_allocated_amount, 55559.44)
+				self.assertEqual(payment.unallocated_amount, 0)
+				self.assertEqual(invoice.reload().outstanding_amount, 0)
+				self.assertEqual([row.outstanding for row in invoice.payment_schedule], [0, 0, 0])
+				payment.cancel()
+				partial_payment.cancel()
+				self.assertEqual(invoice.reload().outstanding_amount, 83335)
+
 	def test_total_allocation_across_reference_rows(self):
 		invoice = create_sales_invoice(qty=1, rate=100)
 		payment_request = make_payment_request(
