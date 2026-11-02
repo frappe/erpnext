@@ -29,12 +29,14 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
 	item_list = get_items(filters, additional_table_columns, additional_conditions)
+	if not item_list:
+		return columns, [], None, None, None, 0
+
+	itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 	default_taxes = {}
-	if item_list:
-		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
-		for tax in tax_columns:
-			default_taxes[f"{tax}_rate"] = 0
-			default_taxes[f"{tax}_amount"] = 0
+	for tax in tax_columns:
+		default_taxes[f"{tax}_rate"] = 0
+		default_taxes[f"{tax}_amount"] = 0
 
 	mode_of_payments = get_mode_of_payments(set(d.parent for d in item_list))
 	so_dn_map = get_delivery_notes_against_sales_order(item_list)

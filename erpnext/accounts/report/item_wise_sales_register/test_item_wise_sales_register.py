@@ -146,6 +146,9 @@ class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(self.get_grand_total_row(data)["total"], 0)
 		self.assertEqual(self.get_grand_total_row(data)["percent_gt"], 0)
 
+	def test_grouped_report_without_matching_invoices(self):
+		self.assertEqual(self.get_grouped_data(customer="_Test Customer 1"), [])
+
 	def get_grouped_data(self, **filters):
 		filters = frappe._dict(
 			from_date=today(), to_date=today(), company=self.company, group_by="Customer", **filters
