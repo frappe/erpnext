@@ -58,6 +58,9 @@ const hidden = computed(() => {
 const failed = computed(() => mode.value === "project" && Object.keys(costing.data?.errors || {}).length > 0);
 // A list the user may not read comes back as null; with none left, the card goes.
 const has_drivers = computed(() => Object.values(view.value?.drivers || {}).some((list) => list != null));
+// A closed project without an estimate has nothing to track and nothing to set.
+const tracking = computed(() => view.value.has_estimate || !view.value.closed);
+const can_set_estimate = computed(() => !props.read_only && !view.value?.closed);
 // Only a viewer who may read the ledger gets the Accounts view.
 const has_accounts = computed(() => Boolean(view.value?.access.ledger));
 
@@ -72,6 +75,12 @@ const reports = computed(() => {
 			  ]);
 	return (items || []).map(([label, route]) => ({ label, onClick: () => host.navigate?.(route) }));
 });
+
+// The estimate dialog is desk's, as the budget dialog is: the Project form opens it and saves the
+// field, and the new `modified` reloads the tab.
+function set_estimate() {
+	element.value?.dispatchEvent(new CustomEvent("costing-set-estimate", { bubbles: true, composed: true }));
+}
 
 function new_timesheet() {
 	host.navigate?.(`Form/Timesheet/new?parent_project=${encodeURIComponent(props.name)}`);
@@ -110,7 +119,7 @@ function new_timesheet() {
 					v-else-if="accounts.data"
 					:payload="accounts.data"
 					:closed="view.closed"
-					:has_labour="view.sources.some((source) => source.key === 'labour' && source.amount)"
+					@changed="accounts.reload()"
 				/>
 				<div v-else class="space-y-5">
 					<div class="grid grid-cols-2 gap-5 lg:grid-cols-4">
@@ -135,22 +144,32 @@ function new_timesheet() {
 					<span class="lucide-receipt size-6" aria-hidden="true" />
 				</div>
 				<p class="text-base text-ink-gray-7">{{ __("No costs booked yet") }}</p>
-				<Button
-					v-if="!view.closed && view.access.create.Timesheet"
-					variant="solid"
-					theme="gray"
-					icon-left="lucide-clock"
-					:label="__('Log time')"
-					class="mt-2"
-					@click="new_timesheet"
-				/>
+				<div class="mt-2 flex flex-wrap justify-center gap-2">
+					<Button
+						v-if="!view.closed && view.access.create.Timesheet"
+						icon-left="lucide-clock"
+						:label="__('Log time')"
+						@click="new_timesheet"
+					/>
+					<Button
+						v-if="!view.has_estimate && can_set_estimate"
+						:label="__('Set estimate')"
+						@click="set_estimate"
+					/>
+				</div>
 			</div>
 
 			<template v-else>
 				<KpiCards :items="kpis" />
 				<div class="grid gap-5 lg:grid-cols-5">
-					<EstimateCard class="lg:col-span-2" :view="view" />
-					<CostTrend class="lg:col-span-3" :view="view" />
+					<EstimateCard
+						v-if="tracking"
+						class="lg:col-span-2"
+						:view="view"
+						:can_set_estimate="can_set_estimate"
+						@set-estimate="set_estimate"
+					/>
+					<CostTrend :class="tracking ? 'lg:col-span-3' : 'lg:col-span-5'" :view="view" />
 				</div>
 				<div class="grid gap-5 lg:grid-cols-2">
 					<CostBreakdown :view="view" />

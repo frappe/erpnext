@@ -53,7 +53,7 @@ function with_forecast(rows) {
 	const ahead = [];
 	for (let month = next_month(last.month); month <= end; month = next_month(month)) {
 		if (ahead.length === FORECAST_MONTHS_LIMIT) break;
-		ahead.push({ month, label: format.month(month), cost: null });
+		ahead.push({ month, label: format.month(month) });
 	}
 	const step = (view.forecast - last.cost) / ahead.length;
 	last.forecast = last.cost;

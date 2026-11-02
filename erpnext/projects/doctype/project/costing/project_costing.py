@@ -194,6 +194,10 @@ def can_create(doctype: str) -> bool:
 	return bool(frappe.has_permission(doctype, "create"))
 
 
+def can_submit(doctype: str) -> bool:
+	return bool(frappe.has_permission(doctype, "submit"))
+
+
 def can_read_labour_cost() -> bool:
 	"""Costing rates sit on a higher permission level of Timesheet Detail than hours do."""
 	if not can_read("Timesheet"):

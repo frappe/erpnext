@@ -8,14 +8,15 @@ import { useFormat } from "../format.js";
 defineProps({
 	accounts: { type: Object, required: true },
 });
-const emit = defineEmits(["select"]);
 
 const __ = window.__;
 const format = useFormat();
 const columns = ["minmax(9rem,1.6fr)", "6rem", "6rem", "6rem", "6rem", "minmax(7.5rem,1fr)", "7.5rem"];
 
-const available = (row) => (row.budget ? row.budget.amount - row.actual - row.committed : null);
-const used_percent = (row) => ((row.actual + row.committed) * 100) / row.budget.amount;
+// A Budget over several fiscal years counts what its earlier years spent too, so both read the
+// server's whole-period figures rather than this year's actual.
+const available = (row) => (row.budget ? row.budget.available : null);
+const used_percent = (row) => ((row.budget.spent + row.committed) * 100) / row.budget.amount;
 
 const amount_class = (value) =>
 	value == null ? "text-ink-gray-4" : value < 0 ? "text-ink-red-5" : "text-ink-gray-8";
@@ -28,7 +29,7 @@ const amount_class = (value) =>
 				<ListHeader>
 					<ListHeaderCell>{{ __("Account") }}</ListHeaderCell>
 					<ListHeaderCell class="justify-end">{{ __("Budget") }}</ListHeaderCell>
-					<ListHeaderCell class="justify-end">{{ __("Actual") }}</ListHeaderCell>
+					<ListHeaderCell class="justify-end">{{ __("Spent") }}</ListHeaderCell>
 					<ListHeaderCell class="justify-end">{{ __("Committed") }}</ListHeaderCell>
 					<ListHeaderCell class="justify-end">{{ __("Available") }}</ListHeaderCell>
 					<ListHeaderCell class="pl-4">{{ __("Used") }}</ListHeaderCell>
@@ -36,11 +37,7 @@ const amount_class = (value) =>
 				</ListHeader>
 
 				<ListGroup v-if="accounts.expense.length" :label="__('Expense')">
-					<ListRow
-						v-for="row in accounts.expense"
-						:key="row.account"
-						@click="emit('select', row.account)"
-					>
+					<ListRow v-for="row in accounts.expense" :key="row.account">
 						<ListCell>
 							<div class="min-w-0">
 								<p class="truncate text-base text-ink-gray-8">
@@ -125,11 +122,7 @@ const amount_class = (value) =>
 				</ListGroup>
 
 				<ListGroup v-if="accounts.income.length" :label="__('Income')">
-					<ListRow
-						v-for="row in accounts.income"
-						:key="row.account"
-						@click="emit('select', row.account)"
-					>
+					<ListRow v-for="row in accounts.income" :key="row.account">
 						<ListCell>
 							<div class="min-w-0">
 								<p class="truncate text-base text-ink-gray-8">

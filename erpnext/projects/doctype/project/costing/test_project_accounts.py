@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import nowdate
+from frappe.utils import add_days, add_months, getdate, nowdate
 
 from erpnext.accounts.doctype.budget.budget import BudgetError
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -11,6 +11,12 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.projects.doctype.project.costing.accounts import get_ledger_entries, get_project_accounts
 from erpnext.projects.doctype.project.costing.budgets import account_status, budget_control
+from erpnext.projects.doctype.project.costing.project_budgets import (
+	create_project_budget,
+	get_budget_defaults,
+	get_budget_periods,
+	get_project_budgets,
+)
 from erpnext.projects.doctype.project.costing.test_project_costing import invoice_for_project
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
@@ -21,6 +27,7 @@ UNBUDGETED_ACCOUNT = "Administrative Expenses - _TC"
 ACCOUNTS_VIEWER = "accounts-viewer@example.com"
 PROJECTS_VIEWER = "projects-viewer@example.com"
 RESTRICTED_VIEWER = "accounts-restricted@example.com"
+BUDGET_MANAGER = "accounts-budget-manager@example.com"
 
 
 class TestProjectAccounts(ERPNextTestSuite):
@@ -94,11 +101,162 @@ class TestProjectAccounts(ERPNextTestSuite):
 		with self.assertRaises(BudgetError):
 			order_for_project(project, rate=100)
 
-	def test_ledger_entries_filter_by_account_and_root_type(self) -> None:
+	def test_expense_counts_the_budgets_whole_period(self) -> None:
+		"""ERPNext checks an expense against all the Budget's period has spent, earlier fiscal years
+		included, and orders against this fiscal year alone. A two-year budget mostly spent last year
+		refuses this year's invoice past it, and reads over once a warning lets one through."""
+		project = make_project({"project_name": f"_Test Two Years {frappe.generate_hash(length=6)}"}).name
+		service = make_item(properties={"is_stock_item": 0}).name
+		last_year = add_days(get_fiscal_year(nowdate(), company="_Test Company")[1], -1)
+		invoice_on(project, service, 8000, posting_date=last_year)
+		create_project_budget(
+			project,
+			EXPENSE_ACCOUNT,
+			10000,
+			"Stop",
+			"Purchase Order",
+			from_fiscal_year=fiscal_year_of(last_year),
+			to_fiscal_year=fiscal_year_of(nowdate()),
+		)
+		order_for_project(project, rate=3000, item_code=service)
+
+		row = row_for(get_project_accounts(project), EXPENSE_ACCOUNT)
+		self.assertEqual((row["actual"], row["committed"], row["status"]), (0, 3000, "ok"))
+		self.assertEqual((row["budget"]["spent"], row["budget"]["available"]), (8000, -1000))
+		# a refused invoice rolls back with its request; here the savepoint stands in for that
+		frappe.db.savepoint("refused_invoice")
+		with self.assertRaises(BudgetError):
+			invoice_on(project, service, 3000)
+		frappe.db.rollback(save_point="refused_invoice")
+
+		frappe.db.set_value("Budget", {"project": project}, "action_if_annual_budget_exceeded", "Warn")
+		invoice_on(project, service, 3000)
+		row = row_for(get_project_accounts(project), EXPENSE_ACCOUNT)
+		self.assertEqual((row["actual"], row["budget"]["spent"], row["status"]), (3000, 11000, "over"))
+
+	def test_budget_added_from_the_tab(self) -> None:
+		"""A user who may create Budgets adds one on an account: it is submitted for the fiscal year,
+		checks from the chosen stage on, and shows on the account. Others are refused."""
+		project = make_project({"project_name": f"_Test Add Budget {frappe.generate_hash(length=6)}"}).name
+		manager = create_user(BUDGET_MANAGER, "Accounts Manager", "Projects User").name
+		viewer = create_user(PROJECTS_VIEWER, "Projects User").name
+
+		try:
+			frappe.set_user(manager)
+			name = create_project_budget(project, EXPENSE_ACCOUNT, 5000, "Stop", "Purchase Order")
+			row = row_for(get_project_accounts(project), EXPENSE_ACCOUNT)
+			frappe.set_user(viewer)
+			with self.assertRaises(frappe.PermissionError):
+				create_project_budget(project, UNBUDGETED_ACCOUNT, 5000, "Warn", "Expense")
+		finally:
+			frappe.set_user("Administrator")
+
+		budget = frappe.get_doc("Budget", name)
+		self.assertEqual(budget.docstatus, 1)
+		self.assertEqual((budget.applicable_on_purchase_order, budget.applicable_on_material_request), (1, 0))
+		self.assertEqual(budget.action_if_annual_budget_exceeded_on_po, "Stop")
+		self.assertEqual(
+			row["budget"],
+			{
+				"amount": 5000,
+				"control": {"stage": "Purchase Order", "action": "Stop"},
+				"rule": "Stops on orders",
+				"spent": 0,
+				"available": 5000,
+			},
+		)
+
+	def test_budgets_tab_lists_every_status(self) -> None:
+		"""The Budgets tab lists active and cancelled budgets alike, and only to users who may read
+		Budgets."""
+		project = make_project({"project_name": f"_Test Budget List {frappe.generate_hash(length=6)}"}).name
+		cancelled = frappe.get_doc(
+			"Budget", create_project_budget(project, EXPENSE_ACCOUNT, 5000, "Warn", "Expense")
+		)
+		cancelled.cancel()
+		create_project_budget(project, EXPENSE_ACCOUNT, 6000, "Stop", "Purchase Order")
+		viewer = create_user(PROJECTS_VIEWER, "Projects User").name
+
+		listed = get_project_budgets(project)
+		try:
+			frappe.set_user(viewer)
+			with self.assertRaises(frappe.PermissionError):
+				get_project_budgets(project)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			[(row["amount"], row["status"]) for row in listed["budgets"]],
+			[(6000, "Active"), (5000, "Cancelled")],
+		)
+		self.assertEqual(listed["budgets"][0]["control"], {"stage": "Purchase Order", "action": "Stop"})
+		self.assertEqual(listed["budgets"][0]["rule"], "Stops on orders")
+
+	def test_budget_years_follow_the_project_dates(self) -> None:
+		"""A budget covers the fiscal years from the project's expected start to its expected end, or
+		the current year without them; an end past the last fiscal year stops there. Periods outside
+		the project's dates are marked, so a split can leave them out."""
+		start = add_months(nowdate(), 1)
+		end = add_months(start, 13)
+		project = make_project({"project_name": f"_Test Budget Years {frappe.generate_hash(length=6)}"}).name
+		frappe.db.set_value("Project", project, {"expected_start_date": start, "expected_end_date": end})
+
+		defaults = get_budget_defaults(project)
+		self.assertEqual(
+			(defaults["from_fiscal_year"], defaults["to_fiscal_year"]),
+			(fiscal_year_of(start), fiscal_year_of(end)),
+		)
+		self.assertFalse(defaults["capped"])
+		self.assertEqual(defaults["fiscal_years"][0], fiscal_year_of(start))
+		periods = get_budget_periods(project, "Monthly")
+		self.assertTrue(any(not period["in_project"] for period in periods))
+		self.assertTrue(
+			all(
+				period["in_project"]
+				for period in periods
+				if period["start_date"] >= getdate(start) and period["end_date"] <= getdate(end)
+			)
+		)
+
+		frappe.db.set_value("Project", project, "expected_end_date", "2099-12-31")
+		self.assertTrue(get_budget_defaults(project)["capped"])
+
+		frappe.db.set_value("Project", project, {"expected_start_date": None, "expected_end_date": None})
+		defaults = get_budget_defaults(project)
+		self.assertEqual(
+			(defaults["from_fiscal_year"], defaults["to_fiscal_year"]),
+			(fiscal_year_of(nowdate()), fiscal_year_of(nowdate())),
+		)
+
+	def test_budget_added_with_its_own_split(self) -> None:
+		"""A budget spread unevenly over its quarters keeps that split once submitted, and a split that
+		does not name every period is refused."""
+		project = make_project({"project_name": f"_Test Budget Split {frappe.generate_hash(length=6)}"}).name
+		manager = create_user(BUDGET_MANAGER, "Accounts Manager", "Projects User").name
+
+		try:
+			frappe.set_user(manager)
+			self.assertEqual(len(get_budget_periods(project, "Quarterly")), 4)
+			name = create_project_budget(
+				project, EXPENSE_ACCOUNT, 5000, "Warn", "Expense", "Quarterly", [2000, 1000, 1000, 1000]
+			)
+			with self.assertRaises(frappe.ValidationError):
+				create_project_budget(
+					project, UNBUDGETED_ACCOUNT, 5000, "Warn", "Expense", "Quarterly", [5000]
+				)
+		finally:
+			frappe.set_user("Administrator")
+
+		budget = frappe.get_doc("Budget", name)
+		self.assertEqual((budget.docstatus, budget.distribute_equally), (1, 0))
+		self.assertEqual([row.amount for row in budget.budget_distribution], [2000, 1000, 1000, 1000])
+		self.assertEqual(round(sum(row.percent for row in budget.budget_distribution)), 100)
+
+	def test_ledger_entries_filter_by_root_type(self) -> None:
 		project = self.project_with_budget(budget_amount=10000)
 		self.book(project, invoiced=6000)
 
-		expense = get_ledger_entries(project, account=EXPENSE_ACCOUNT)
+		expense = get_ledger_entries(project, root_type="Expense")
 		self.assertEqual([(row.account, row.debit) for row in expense], [(EXPENSE_ACCOUNT, 6000)])
 		income = get_ledger_entries(project, root_type="Income")
 		self.assertTrue(income)
@@ -196,6 +354,22 @@ class TestProjectAccounts(ERPNextTestSuite):
 		invoice_for_project(project, qty=2)
 
 
+def fiscal_year_of(date) -> str:
+	return get_fiscal_year(date, company="_Test Company")[0]
+
+
+def invoice_on(project: str, item_code: str, amount: float, posting_date: str | None = None) -> None:
+	"""A submitted purchase invoice for the project on the expense account, dated `posting_date`."""
+	invoice = make_purchase_invoice(
+		item_code=item_code, qty=1, rate=amount, project=project, do_not_save=True
+	)
+	if posting_date:
+		invoice.set_posting_time = 1
+		invoice.posting_date = invoice.bill_date = posting_date
+	invoice.insert()
+	invoice.submit()
+
+
 def order_for_project(project: str, rate: float, item_code: str | None = None) -> None:
 	"""A submitted purchase order for the project on the expense account."""
 	item_code = item_code or make_item(properties={"is_stock_item": 0}).name
@@ -239,5 +413,16 @@ def budget_doc(
 	}
 
 
-def spend(actual: float = 0, ordered: float = 0, requested: float = 0) -> dict[str, float]:
-	return {"actual": actual, "ordered": ordered, "requested": requested}
+def spend(
+	actual: float = 0, ordered: float = 0, requested: float = 0, spent: float | None = None
+) -> dict[str, float]:
+	"""This fiscal year's spend on an account. The Budget's whole period has spent `spent`, by default
+	the same as this year's actual."""
+	spent = actual if spent is None else spent
+	return {
+		"actual": actual,
+		"ordered": ordered,
+		"requested": requested,
+		"spent": spent,
+		"spent_to_date": spent,
+	}

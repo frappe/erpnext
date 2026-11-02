@@ -27,7 +27,7 @@ const INVOICE_THEMES = {
 	Return: "gray",
 };
 // Shared by the order and invoice lists, so their columns line up.
-const LIST_COLUMNS = ["minmax(0,1fr)", "6rem", "7.5rem"];
+const LIST_COLUMNS = ["6.5rem", "minmax(11rem,1.6fr)", "minmax(8rem,1fr)", "minmax(7.5rem,1fr)"];
 const ORDER_THEMES = { "To Bill": "blue", "To Deliver and Bill": "blue", Completed: "green", Closed: "gray" };
 
 const billing = computed(() => props.view.billing);
@@ -145,8 +145,6 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 					<div v-if="!view.closed" class="mt-2 flex flex-wrap justify-center gap-2">
 						<Button
 							v-if="can_create['Sales Order']"
-							variant="solid"
-							theme="gray"
 							:label="__('Create sales order')"
 							@click="create('Sales Order')"
 						/>
@@ -174,11 +172,17 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 						:options="list_tabs"
 						size="sm"
 					/>
-					<List v-if="active_list === 'invoices'" :columns="LIST_COLUMNS" :row-height="48">
+					<List
+						v-if="active_list === 'invoices'"
+						class="list-row-px-3"
+						:columns="LIST_COLUMNS"
+						:row-height="48"
+					>
 						<ListHeader>
+							<ListHeaderCell>{{ __("Date") }}</ListHeaderCell>
 							<ListHeaderCell>{{ __("Sales invoice") }}</ListHeaderCell>
+							<ListHeaderCell>{{ __("Status") }}</ListHeaderCell>
 							<ListHeaderCell class="justify-end">{{ __("Amount") }}</ListHeaderCell>
-							<ListHeaderCell class="justify-end">{{ __("Status") }}</ListHeaderCell>
 						</ListHeader>
 						<ListRow
 							v-for="invoice in invoices"
@@ -186,12 +190,19 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 							@click="open('Sales Invoice', invoice.name)"
 						>
 							<ListCell>
-								<div class="min-w-0">
-									<p class="truncate text-sm text-ink-gray-8">{{ invoice.name }}</p>
-									<p class="truncate text-xs text-ink-gray-5">
-										{{ format.date(invoice.posting_date) }}
-									</p>
-								</div>
+								<span class="text-sm text-ink-gray-8">{{
+									format.date(invoice.posting_date)
+								}}</span>
+							</ListCell>
+							<ListCell>
+								<span class="truncate text-sm text-ink-gray-8">{{ invoice.name }}</span>
+							</ListCell>
+							<ListCell>
+								<Badge
+									:label="__(invoice.status)"
+									:theme="INVOICE_THEMES[invoice.status] || 'gray'"
+									variant="subtle"
+								/>
 							</ListCell>
 							<ListCell class="justify-end">
 								<span
@@ -200,13 +211,6 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 								>
 									{{ format.money(invoice.amount) }}
 								</span>
-							</ListCell>
-							<ListCell class="justify-end">
-								<Badge
-									:label="__(invoice.status)"
-									:theme="INVOICE_THEMES[invoice.status] || 'gray'"
-									variant="subtle"
-								/>
 							</ListCell>
 						</ListRow>
 					</List>
@@ -228,11 +232,17 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 							@click="load_invoices"
 						/>
 					</template>
-					<List v-if="active_list === 'orders'" :columns="LIST_COLUMNS" :row-height="48">
+					<List
+						v-if="active_list === 'orders'"
+						class="list-row-px-3"
+						:columns="LIST_COLUMNS"
+						:row-height="48"
+					>
 						<ListHeader>
+							<ListHeaderCell>{{ __("Date") }}</ListHeaderCell>
 							<ListHeaderCell>{{ __("Sales order") }}</ListHeaderCell>
+							<ListHeaderCell>{{ __("Status") }}</ListHeaderCell>
 							<ListHeaderCell class="justify-end">{{ __("Amount") }}</ListHeaderCell>
-							<ListHeaderCell class="justify-end">{{ __("Status") }}</ListHeaderCell>
 						</ListHeader>
 						<ListRow
 							v-for="order in orders"
@@ -240,12 +250,19 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 							@click="open('Sales Order', order.name)"
 						>
 							<ListCell>
-								<div class="min-w-0">
-									<p class="truncate text-sm text-ink-gray-8">{{ order.name }}</p>
-									<p class="truncate text-xs text-ink-gray-5">
-										{{ format.date(order.transaction_date) }}
-									</p>
-								</div>
+								<span class="text-sm text-ink-gray-8">{{
+									format.date(order.transaction_date)
+								}}</span>
+							</ListCell>
+							<ListCell>
+								<span class="truncate text-sm text-ink-gray-8">{{ order.name }}</span>
+							</ListCell>
+							<ListCell>
+								<Badge
+									:label="__(order.status)"
+									:theme="ORDER_THEMES[order.status] || 'gray'"
+									variant="subtle"
+								/>
 							</ListCell>
 							<ListCell class="justify-end">
 								<div class="text-right">
@@ -256,13 +273,6 @@ const open = (doctype, name) => host.navigate?.(form_route(doctype, name));
 										{{ __("{0} billed", [format.percent(order.per_billed)]) }}
 									</p>
 								</div>
-							</ListCell>
-							<ListCell class="justify-end">
-								<Badge
-									:label="__(order.status)"
-									:theme="ORDER_THEMES[order.status] || 'gray'"
-									variant="subtle"
-								/>
 							</ListCell>
 						</ListRow>
 					</List>

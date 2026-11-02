@@ -59,6 +59,8 @@
   "gross_margin",
   "column_break_37",
   "per_gross_margin",
+  "budgets_tab",
+  "budgets_html",
   "monitor_progress_tab",
   "section_break_sjmx",
   "collect_progress",
@@ -504,6 +506,17 @@
    "options": "erpnext.project_costing"
   },
   {
+   "fieldname": "budgets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Budgets"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "budgets_html",
+   "fieldtype": "HTML",
+   "label": "Budgets"
+  },
+  {
    "fieldname": "monitor_progress_tab",
    "fieldtype": "Tab Break",
    "label": "Progress updates"
@@ -552,7 +565,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-10-28 12:00:00.000000",
+ "modified": "2026-11-03 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

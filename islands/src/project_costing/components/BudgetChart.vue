@@ -2,35 +2,31 @@
 import { computed, ref } from "vue";
 import { Button, Dialog, Tooltip } from "frappe-ui";
 import { BarChart, ChartCard } from "frappe-ui/charts";
-import { useHost } from "@framework/ui/island";
 
 import AccountTable from "./AccountTable.vue";
-import { newBudgetRoute } from "../accounts.js";
 import { useFormat } from "../format.js";
 
 const props = defineProps({
 	accounts: { type: Object, required: true },
 	closed: { type: Boolean, default: false },
 });
-const emit = defineEmits(["select"]);
+const emit = defineEmits(["add-budget"]);
 
 const __ = window.__;
 const format = useFormat();
-const host = useHost();
 const show_table = ref(false);
 
 /**
  * One bar per expense account: actual, then committed, then what is left of its budget, so a
- * budgeted bar is as long as its budget. An account past its budget has nothing left and runs
- * longer; one without a budget is actual and committed only.
+ * budgeted bar is as long as its budget, less what its earlier fiscal years spent. An account past
+ * its budget has nothing left and runs longer; one without a budget is actual and committed only.
  */
 const rows = computed(() =>
 	props.accounts.expense.map((row) => ({
 		label: row.account_name,
-		account: row.account,
 		actual: row.actual,
 		committed: row.committed,
-		left: row.budget ? Math.max(row.budget.amount - row.actual - row.committed, 0) : 0,
+		left: row.budget ? Math.max(row.budget.available, 0) : 0,
 	}))
 );
 const series = computed(() => [
@@ -39,21 +35,16 @@ const series = computed(() => [
 	...(props.accounts.budget_count ? ["left"] : []),
 ]);
 const series_config = {
-	actual: { label: __("Actual") },
+	actual: { label: __("Spent") },
 	committed: { label: __("Committed") },
 	left: { label: __("Budget left") },
 };
 // With no budget there is nothing to compare against, so the card is about spend, and says so.
 const title = computed(() =>
-	props.accounts.budget_count ? __("Budget vs actual by account") : __("Spend by account")
+	props.accounts.budget_count ? __("Budget vs spend by account") : __("Spend by account")
 );
 
 const can_add = computed(() => props.accounts.access.manage_budgets && !props.closed);
-
-function select_from_table(account) {
-	show_table.value = false;
-	emit("select", account);
-}
 </script>
 
 <template>
@@ -68,7 +59,6 @@ function select_from_table(account) {
 			:y-axis="{ format: format.short, min: 0 }"
 			horizontal
 			stacked
-			@select="(event) => emit('select', event.row.account)"
 		>
 			<template #actions>
 				<div class="flex items-center gap-2">
@@ -77,7 +67,7 @@ function select_from_table(account) {
 						size="sm"
 						icon-left="lucide-plus"
 						:label="__('Add budget')"
-						@click="host.navigate?.(newBudgetRoute(accounts))"
+						@click="emit('add-budget')"
 					/>
 					<Tooltip :text="__('View as table')">
 						<Button
@@ -93,7 +83,7 @@ function select_from_table(account) {
 		</BarChart>
 
 		<Dialog v-model:open="show_table" :title="__('{0} · {1}', [title, accounts.fiscal_year])" size="4xl">
-			<AccountTable :accounts="accounts" @select="select_from_table" />
+			<AccountTable :accounts="accounts" />
 		</Dialog>
 	</ChartCard>
 </template>
