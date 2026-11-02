@@ -4499,6 +4499,48 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 200})
+	def test_purchase_receipt_reserves_only_the_plan_shortfall(self):
+		self.assertEqual(self.receive_more_than_plan_shortfall("RM For SR Shortfall"), 10)
+
+	def receive_more_than_plan_shortfall(self, rm_item):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
+
+		parent_bom = create_nested_bom({f"FG For {rm_item}": {rm_item: {}}}, prefix="")
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+		plan.submit()
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+
+		mr_name = frappe.db.get_value("Material Request", {"production_plan": plan.name})
+		po = make_purchase_order(mr_name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 15
+		po.submit()
+		make_purchase_receipt(po.name).submit()
+
+		reserved_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+		return sum({row.name: row.reserved_qty for row in reserved_entries}.values())
+
 	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
