@@ -75,6 +75,33 @@ class TestAccountsSettings(ERPNextTestSuite):
 			frappe.db.set_single_value("Accounts Settings", "confirm_before_resetting_posting_date", enabled)
 			self.assertEqual(get_posting_date_confirmation(), enabled)
 
+	def test_saving_auto_reconciliation_repairs_existing_job_without_duplicates(self):
+		method = (
+			"erpnext.accounts.doctype.process_payment_reconciliation."
+			"process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
+		)
+		event_filters = {"scheduled_against": "Process Payment Reconciliation", "method": method}
+		settings = frappe.get_doc("Accounts Settings")
+		settings.auto_reconcile_payments = 1
+		settings.auto_reconciliation_job_trigger = 15
+		settings.save()
+
+		job = frappe.get_doc("Scheduled Job Type", {"method": method})
+		job.cron_format = "0/30 * * * *"
+		job.scheduler_event = None
+		job.stopped = 1
+		job.save(ignore_permissions=True)
+
+		settings.save()
+		settings.save()
+
+		job.reload()
+		self.assertEqual(job.cron_format, "0/15 * * * *")
+		self.assertEqual(job.scheduler_event, frappe.db.exists("Scheduler Event", event_filters))
+		self.assertFalse(job.stopped)
+		self.assertEqual(frappe.db.count("Scheduler Event", event_filters), 1)
+		self.assertEqual(frappe.db.count("Scheduled Job Type", {"method": method}), 1)
+
 	def test_stale_days(self):
 		cur_settings = frappe.get_doc("Accounts Settings", "Accounts Settings")
 		cur_settings.allow_stale = 0
