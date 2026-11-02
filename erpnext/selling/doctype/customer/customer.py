@@ -194,6 +194,7 @@ class Customer(TransactionBase):
 		self.validate_customer_group()
 		self.validate_lead_not_converted()
 		validate_party_accounts(self)
+		self.validate_duplicate_credit_limit_company()
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
@@ -458,6 +459,13 @@ class Customer(TransactionBase):
 				title=_("Invalid Customer Group"),
 			)
 
+	def validate_duplicate_credit_limit_company(self):
+		companies = set()
+		for limit in self.credit_limits:
+			if limit.company in companies:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company))
+			companies.add(limit.company)
+
 	def validate_credit_limit_on_change(self):
 		if self.get("__islocal") or not self.credit_limits:
 			return
@@ -477,15 +485,7 @@ class Customer(TransactionBase):
 		if past_credit_limits == current_credit_limits:
 			return
 
-		company_record = []
 		for limit in self.credit_limits:
-			if limit.company in company_record:
-				frappe.throw(
-					_("Credit limit is already defined for the Company {0}").format(limit.company, self.name)
-				)
-			else:
-				company_record.append(limit.company)
-
 			if not flt(limit.credit_limit):
 				continue
 
