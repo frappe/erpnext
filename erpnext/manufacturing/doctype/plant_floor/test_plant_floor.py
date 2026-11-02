@@ -114,6 +114,23 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(required[(1, "_Test Tomato Paste")].required_qty, 250)
 		self.assertEqual(work_order.operations[1].output_qty, 500)
 
+	def test_work_order_company_must_match_plant_floor(self):
+		plant_floor = make_ketchup_plant()
+		work_order = frappe.new_doc("Work Order")
+		work_order.update(
+			{
+				"production_item": plant_floor.production_item,
+				"plant_floor": plant_floor.name,
+				"company": "_Test Company 1",
+				"qty": 10,
+			}
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "belongs to company", work_order.insert)
+
+		work_order = plant_floor.make_work_order(10)
+		work_order.company = "_Test Company 1"
+		self.assertRaisesRegex(frappe.ValidationError, "belongs to company", work_order.save)
+
 	def test_work_order_needs_bom_or_plant_floor(self):
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({"production_item": make_ketchup_items(), "company": "_Test Company", "qty": 1})
