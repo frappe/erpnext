@@ -1,9 +1,10 @@
 <script setup>
 import { computed } from "vue";
-import { Button, FormControl, TextInput, Tooltip } from "frappe-ui";
+import { Badge, Button, FormControl, Switch, TextInput, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { MACHINES } from "../../lib/machines";
+import { moveStage, removeStage, runsWithStageAbove, setRunsWithStageAbove } from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
@@ -27,12 +28,13 @@ const workstationFilters = computed(() =>
 		: { disabled: 0 }
 );
 
-function move(offset) {
-	const [stage] = stages.value.splice(props.index, 1);
-	stages.value.splice(props.index + offset, 0, stage);
-}
-
-const remove = () => stages.value.splice(props.index, 1);
+const move = (offset) => moveStage(props.doc, props.index, props.index + offset);
+const remove = () => removeStage(props.doc, props.index);
+const canRunInParallel = computed(() => !isPacking.value && props.index > 0);
+const parallel = computed({
+	get: () => runsWithStageAbove(stages.value, props.index),
+	set: (value) => setRunsWithStageAbove(props.doc, props.index, value),
+});
 const packing = computed(() => props.doc.packing_materials);
 const addPacking = () => packing.value.push({ item_code: "", qty_per_unit: 1 });
 const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 1);
@@ -55,6 +57,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			<p class="min-w-0 flex-1 truncate text-base font-medium text-ink-gray-8">
 				{{ stage.stage_name || model.label }}
 			</p>
+			<Badge v-if="parallel" :label="__('With Stage {0}', [index])" theme="blue" variant="subtle" />
 			<Tooltip :text="__('Move Up')">
 				<Button
 					variant="ghost"
@@ -97,6 +100,14 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 				<DeskControl v-model="stage.operation" options="Operation" :label="__('Operation')" />
 				<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
 			</div>
+			<Switch
+				v-if="canRunInParallel"
+				v-model="parallel"
+				:label="__('Run with the Stage Above')"
+				:description="
+					__('Both stages run at the same time. The next stage takes the output of both.')
+				"
+			/>
 			<template v-if="!isPacking">
 				<DeskControl
 					v-model="stage.semi_finished_good"

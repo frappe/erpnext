@@ -83,7 +83,12 @@ const lvl = (key) => props.view.level[key] ?? 0;
 		</span>
 	</div>
 
-	<Pipe v-for="(p, i) in layout.pipes" :key="`p${i}`" v-bind="p" :flowing="view.flow[p.flow]" />
+	<Pipe
+		v-for="(p, i) in layout.pipes"
+		:key="`p${i}`"
+		v-bind="p"
+		:flowing="p.flow.some((stage) => view.flow[stage])"
+	/>
 
 	<template v-for="it in layout.store.items" :key="it.m.id">
 		<template v-if="it.shape === 'sacks'">

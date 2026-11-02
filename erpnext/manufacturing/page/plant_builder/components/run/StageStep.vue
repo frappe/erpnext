@@ -34,15 +34,8 @@ const meta = computed(() => {
 	};
 });
 
-const canStart = computed(() => {
-	const stages = run.stages.value;
-	const firstOpen = stages.findIndex((s) => s.phase !== "done");
-	return (
-		props.stage.phase === "waiting" &&
-		props.index === firstOpen &&
-		run.state.value.work_order.docstatus === 1
-	);
-});
+const canStart = computed(() => props.stage.can_start && run.state.value.work_order.docstatus === 1);
+const hasInputs = computed(() => props.stage.items.some((row) => row.is_input));
 const status = computed(() => {
 	if (canStart.value) return "active";
 	return { waiting: "waiting", done: "done" }[props.stage.phase] ?? "active";
@@ -61,34 +54,68 @@ const badge = computed(() => {
 		done: { label: __("Done"), theme: "green" },
 	}[phase];
 });
+const waitingFor = computed(() => {
+	const stages = props.stage.inputs.filter((row) => row.waiting_qty <= 0).map((row) => row.stage_name);
+	return [...new Set(stages)];
+});
 const subtitle = computed(() => {
+	const { output, lot, phase, workstation } = props.stage;
+	if (phase === "done") {
+		const made = __("Made {0} {1} {2}", [fmt(output.completed_qty), output.uom, output.item_name]);
+		return lot > 1 ? `${made} · ${__("{0} lots", [lot])}` : made;
+	}
+	if (
+		phase === "waiting" &&
+		!canStart.value &&
+		waitingFor.value.length &&
+		run.state.value.work_order.docstatus
+	) {
+		return __("Waits for {0}", [waitingFor.value.join(", ")]);
+	}
+	return lot > 1 ? `${__("Lot {0}", [lot])} · ${workstation}` : workstation;
+});
+const lotOutput = computed(() => {
 	const output = props.stage.output;
-	if (props.stage.phase !== "done") return props.stage.workstation;
-	return __("Made {0} {1} {2}", [fmt(output.completed_qty), output.uom, output.item_name]);
+	return __("This lot makes about {0} {1} {2}", [
+		fmt(run.plannedOutput(props.stage)),
+		output.uom,
+		output.item_name,
+	]);
 });
 
 const inputErrors = computed(() => {
 	if (props.stage.phase !== "ready") return [];
-	const tolerance = num(run.state.value.plant.doc.formula_tolerance);
-	return props.stage.items.flatMap((row) => {
-		const actual = run.actualOf(props.stage, row);
-		if (actual <= 0) return [__("{0} needs a quantity above zero", [row.item_name])];
-		if (actual > row.available_qty + 0.0001) {
-			return [__("Only {0} {1} of {2} is in stock", [fmt(row.available_qty), row.uom, row.item_name])];
-		}
-		if (row.is_balance_item || row.is_fixed || !row.planned_qty) return [];
-		const variance = ((actual - row.planned_qty) / row.planned_qty) * 100;
-		if (Math.abs(variance) <= tolerance + 0.0001) return [];
-		return [
-			__("{0} is {1}% {2} the formula. The allowed range is ±{3}%.", [
-				row.item_name,
-				fmt(round(Math.abs(variance), 1)),
-				variance > 0 ? __("over") : __("under"),
-				fmt(tolerance),
-			]),
-		];
-	});
+	const errors = props.stage.items.flatMap((row) => rowErrors(row, run.actualOf(props.stage, row)));
+	if (hasInputs.value && run.plannedOutput(props.stage) <= 0) {
+		errors.push(__("Pass some of the semi-finished goods to this stage"));
+	}
+	return errors;
 });
+
+function rowErrors(row, actual) {
+	if (row.is_input) {
+		if (actual >= 0 && actual <= row.waiting_qty + 0.0001) return [];
+		const values = [fmt(row.waiting_qty), row.uom, row.item_name, row.source_stage];
+		return [__("Only {0} {1} of {2} is waiting from {3}", values)];
+	}
+	if (actual <= 0) return [__("{0} needs a quantity above zero", [row.item_name])];
+	if (actual > row.available_qty + 0.0001) {
+		return [__("Only {0} {1} of {2} is in stock", [fmt(row.available_qty), row.uom, row.item_name])];
+	}
+	const planned = run.plannedOf(props.stage, row);
+	if (row.is_balance_item || !planned) return [];
+	const tolerance = num(run.state.value.plant.doc.formula_tolerance);
+	const variance = ((actual - planned) / planned) * 100;
+	if (Math.abs(variance) <= tolerance + 0.0001) return [];
+	return [
+		__("{0} is {1}% {2} the formula. The allowed range is ±{3}%.", [
+			row.item_name,
+			fmt(round(Math.abs(variance), 1)),
+			variance > 0 ? __("over") : __("under"),
+			fmt(tolerance),
+		]),
+	];
+}
 </script>
 
 <template>
@@ -117,7 +144,7 @@ const inputErrors = computed(() => {
 					:label="__('Start Stage')"
 					class="w-full"
 					:loading="run.busy.value"
-					@click="run.start"
+					@click="run.start(stage)"
 				/>
 			</template>
 			<StageInputs
@@ -126,6 +153,7 @@ const inputErrors = computed(() => {
 				:editable="stage.phase === 'ready' && !run.paused.value"
 			/>
 			<template v-if="stage.phase === 'ready'">
+				<p v-if="hasInputs" class="text-p-sm text-ink-gray-6">{{ lotOutput }}</p>
 				<p v-for="error in inputErrors" :key="error" class="text-p-sm text-ink-red-5">{{ error }}</p>
 				<Button
 					variant="solid"

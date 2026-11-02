@@ -29,7 +29,7 @@ function stationTag(plant, station, view, holding) {
 		return {
 			id: `s${station.i}`,
 			x: station.x,
-			y: YC,
+			y: station.y,
 			z: machineSize(station.stage).height + 12,
 			title,
 			sub,

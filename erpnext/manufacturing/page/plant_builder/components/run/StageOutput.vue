@@ -7,7 +7,6 @@ import { fmt, num, plural, round } from "../../lib/format";
 const props = defineProps({ stage: Object, meta: Object });
 const run = inject("run");
 const local = run.local;
-const order = computed(() => run.state.value.work_order);
 const plan = computed(() => run.state.value.plan);
 
 const consumedWeight = computed(() =>
@@ -15,6 +14,18 @@ const consumedWeight = computed(() =>
 		.filter((row) => row.weight_factor)
 		.reduce((sum, row) => sum + num(row.transferred_qty) / row.weight_factor, 0)
 );
+const packingSets = computed(() => {
+	const perUnit = Object.fromEntries(
+		(run.state.value.plant.doc.packing_materials || []).map((row) => [
+			row.item_code,
+			num(row.qty_per_unit),
+		])
+	);
+	const sets = props.stage.items
+		.filter((row) => perUnit[row.item_code])
+		.map((row) => num(row.transferred_qty) / perUnit[row.item_code]);
+	return sets.length ? Math.min(...sets) : Infinity;
+});
 const unit = computed(() => plural(props.stage.output.uom || ""));
 const outputLabel = computed(() =>
 	props.meta.pack
@@ -27,8 +38,13 @@ const errors = computed(() => {
 	if (output <= 0) return [__("Enter the quantity made")];
 	if (props.meta.pack) {
 		const units = output + num(local.rejected[props.stage.idx]);
-		if (units > order.value.qty)
-			return [__("Only {0} sets of packing material were issued to the line", [fmt(order.value.qty)])];
+		if (units > packingSets.value + 0.001) {
+			return [
+				__("Only {0} sets of packing material were issued to the line", [
+					fmt(round(packingSets.value)),
+				]),
+			];
+		}
 		const needed = units * plan.value.weight_per_unit;
 		if (needed > consumedWeight.value + 0.001) {
 			return [

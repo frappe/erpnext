@@ -10,6 +10,7 @@ from frappe.utils import add_to_date, now_datetime
 
 from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_stock_summary
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import MachineBusyError, PlantRun
+from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
@@ -162,8 +163,8 @@ class TestPlantFloor(ERPNextTestSuite):
 		with minutes_ago(60):
 			run = PlantRun(work_order.name)
 			run.start()
-			job_card = run.active_job_card
-			quantities = get_quantities(job_card, {"_Test Tomato Paste": 520})
+			job_card = run.get_open_job_card(1)
+			quantities = get_quantities(run, job_card, {"_Test Tomato Paste": 520})
 			self.assertRaisesRegex(
 				frappe.ValidationError, "4.0% off the formula", run.consume, job_card.name, quantities
 			)
@@ -180,7 +181,7 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual([stage.phase for stage in run["stages"]], ["waiting", "waiting", "waiting"])
 		self.assertEqual(run["plan"].input_weight, 1250)
 		self.assertEqual(run["stages"][1]["items"][0].item_code, "_Test Ketchup Pre-mix")
-		self.assertTrue(run["stages"][1]["items"][0].is_fixed)
+		self.assertTrue(run["stages"][1]["items"][0].is_input)
 
 	def test_next_stage_waits_while_its_machine_is_busy(self):
 		plant_floor = make_ketchup_plant()
@@ -191,8 +192,8 @@ class TestPlantFloor(ERPNextTestSuite):
 		run_stage(first, 240, 220, output_qty=625)
 		with minutes_ago(215):
 			run = PlantRun(first.name)
-			job_card = run.active_job_card
-			run.consume(job_card.name, get_quantities(job_card, {}))
+			job_card = run.get_open_job_card(2)
+			run.consume(job_card.name, get_quantities(run, job_card, {}))
 
 		run_stage(second, 210, 200, output_qty=625)
 		self.assertEqual(PlantRunState(PlantRun(second.name)).as_dict().stages[1].phase, "waiting")
@@ -204,6 +205,101 @@ class TestPlantFloor(ERPNextTestSuite):
 			PlantRun(second.name).start()
 		self.assertEqual(PlantRunState(PlantRun(second.name)).as_dict().stages[1].phase, "ready")
 
+	def test_parallel_stages_feed_the_stage_after_them(self):
+		plant_floor = make_parallel_ketchup_plant()
+		self.assertEqual(plant_floor.setup_errors, [])
+		plan = plant_floor.get_batch_plan(2000).as_dict()
+		self.assertEqual(plan.input_weight, 1250)
+		self.assertEqual([row.sequence_id for row in plan.stages], [1, 1, 2, 3])
+		self.assertEqual(
+			[(row.item_code, row.qty) for row in plan.stages[2].inputs],
+			[("_Test Ketchup Spice Mix", 62.5), ("_Test Ketchup Pre-mix", 1187.5)],
+		)
+
+		stock_ketchup_materials()
+		make_stock_entry(item_code="_Test Ketchup Spices", target=STORE, qty=100, basic_rate=10)
+		work_order = plant_floor.make_work_order(2000)
+		self.assertEqual([row.sequence_id for row in work_order.operations], [1, 1, 2, 3])
+		with minutes_ago(200):
+			PlantRun(work_order.name).start()
+		phases = [stage.phase for stage in PlantRunState(PlantRun(work_order.name)).as_dict().stages]
+		self.assertEqual(phases, ["ready", "ready", "waiting", "waiting"])
+
+		run_stage(work_order, 190, 160, output_qty=62.5, stage=1)
+		self.assertFalse(PlantRun(work_order.name).get_open_job_card(3).time_logs)
+		run_stage(work_order, 180, 150, output_qty=1187.5, stage=2)
+		kettle = PlantRun(work_order.name).get_open_job_card(3)
+		self.assertTrue(kettle.time_logs)
+		self.assertEqual(
+			{(row.item_code, row.source_warehouse) for row in kettle.items},
+			{
+				("_Test Ketchup Spice Mix", "_Test Mill Warehouse - _TC"),
+				("_Test Ketchup Pre-mix", "_Test Mixer Warehouse - _TC"),
+			},
+		)
+
+		run_stage(work_order, 140, 100, output_qty=1000, stage=3)
+		run_stage(work_order, 90, 60, output_qty=2000, stage=4)
+		work_order.reload()
+		self.assertEqual(work_order.status, "Completed")
+		self.assertEqual(get_stock_balance("_Test Ketchup Spice Mix", "_Test Mill Warehouse - _TC"), 0)
+		self.assertEqual(get_stock_balance("_Test Ketchup Bottle", FINISHED_GOODS), 2000)
+
+	def test_next_stage_takes_part_of_the_semi_finished_goods(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		work_order = plant_floor.make_work_order(2000)
+		run_stage(work_order, 300, 270, output_qty=1250)
+		run_stage(work_order, 260, 230, output_qty=400, actual={"_Test Ketchup Pre-mix": 500}, stage=2)
+
+		kettle, filler = PlantRunState(PlantRun(work_order.name)).as_dict().stages[1:]
+		self.assertEqual((kettle.lot, kettle.phase, kettle.inputs[0].waiting_qty), (2, "ready", 750))
+		self.assertEqual((filler.lot, filler.phase, filler.inputs[0].waiting_qty), (1, "ready", 400))
+
+		run_stage(work_order, 220, 200, output_qty=800, stage=3)
+		run_stage(work_order, 190, 160, output_qty=600, stage=2)
+		run_stage(work_order, 150, 120, output_qty=1200, stage=3)
+
+		work_order.reload()
+		self.assertEqual((work_order.status, work_order.produced_qty), ("Completed", 2000))
+		self.assertEqual(get_stock_balance("_Test Ketchup PET Bottle", STORE), 1000)
+		state = PlantRunState(PlantRun(work_order.name)).as_dict()
+		self.assertEqual(
+			[(stage.phase, stage.lot) for stage in state.stages], [("done", 1), ("done", 2), ("done", 2)]
+		)
+		self.assertEqual(state.stages[1].output.completed_qty, 1000)
+
+	def test_partial_lots_of_whole_units_add_up_to_the_work_order(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		work_order = plant_floor.make_work_order(2000)
+		run_stage(work_order, 300, 270, output_qty=1250)
+		run_stage(work_order, 260, 230, output_qty=1000)
+
+		run_stage(work_order, 220, 200, output_qty=666, actual={"_Test Cooked Ketchup Base": 333.3}, stage=3)
+		filler = PlantRunState(PlantRun(work_order.name)).as_dict().stages[2]
+		self.assertEqual((filler.inputs[0].waiting_qty, filler.output.done_qty), (666.7, 666))
+		run_stage(work_order, 190, 160, output_qty=1334, stage=3)
+
+		work_order.reload()
+		self.assertEqual((work_order.status, work_order.produced_qty), ("Completed", 2000))
+		self.assertEqual(get_stock_balance("_Test Ketchup PET Bottle", STORE), 1000)
+
+	def test_setup_errors_for_parallel_stages(self):
+		plant_floor = make_parallel_ketchup_plant()
+		plant_floor.stages[2].sequence_id = 3
+		plant_floor.stages[3].sequence_id = 3
+		plant_floor.materials[0].stage_row_id = 4
+		plant_floor.materials[3].stage_row_id = 2
+		errors = plant_floor.setup_errors
+
+		self.assertIn("Stage 3 needs Sequence ID 1 or 2", errors)
+		self.assertIn("The packing stage runs on its own, after all other stages", errors)
+		self.assertIn(
+			"Raw material _Test Tomato Paste goes into stage 4, which is not a process stage", errors
+		)
+		self.assertIn("Stage 1 starts the process, so give it at least one raw material", errors)
+
 
 def minutes_ago(minutes):
 	return patch(
@@ -212,20 +308,40 @@ def minutes_ago(minutes):
 	)
 
 
-def run_stage(work_order, start, end, output_qty, rejected_qty=0, actual=None):
+def run_stage(work_order, start, end, output_qty, rejected_qty=0, actual=None, stage=None):
 	with minutes_ago(start):
 		run = PlantRun(work_order.name)
 		if run.work_order.docstatus == 0:
 			run.start()
-		job_card = run.active_job_card
-		run.consume(job_card.name, get_quantities(job_card, actual or {}))
+		job_card = run.get_open_job_card(stage or get_next_stage(run))
+		if not job_card.time_logs:
+			run.start(job_card.name)
+		run.consume(job_card.name, get_quantities(run, job_card, actual or {}))
 
 	with minutes_ago(end):
 		PlantRun(work_order.name).produce(job_card.name, output_qty, rejected_qty)
 
 
-def get_quantities(job_card, actual):
-	return {row.item_code: actual.get(row.item_code, row.required_qty) for row in job_card.items}
+def get_next_stage(run):
+	flow = run.get_flow()
+	return next(row.idx for row in flow.stages if flow.get_open_card(row.idx) and flow.has_input(row.idx))
+
+
+def get_quantities(run, job_card, actual):
+	flow = run.get_flow()
+	waiting = {
+		(row.item_code, row.warehouse): row.waiting_qty for row in flow.get_inputs(job_card.operation_row_id)
+	}
+	passed = {
+		row.name: actual.get(row.item_code, waiting[(row.item_code, row.source_warehouse)])
+		for row in job_card.items
+		if (row.item_code, row.source_warehouse) in waiting
+	}
+	lot = Lot(flow, job_card, passed)
+	return {
+		row.name: actual.get(row.item_code, passed.get(row.name, lot.get_planned_qty(row)))
+		for row in job_card.items
+	}
 
 
 def make_ketchup_items():
@@ -329,6 +445,35 @@ def make_ketchup_plant():
 			"packing_materials": [{"item_code": "_Test Ketchup PET Bottle", "qty_per_unit": 1}],
 		}
 	).insert()
+
+
+def make_parallel_ketchup_plant():
+	for item_code in ("_Test Ketchup Spices", "_Test Ketchup Spice Mix"):
+		make_item(item_code, {"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10})
+	workstation, operation = make_machine("Mill", "Mill")
+
+	plant_floor = make_ketchup_plant()
+	plant_floor.append(
+		"stages",
+		{
+			"stage_name": "Mill",
+			"workstation": workstation,
+			"operation": operation,
+			"semi_finished_good": "_Test Ketchup Spice Mix",
+			"yield_percentage": 100,
+			"time_in_mins": 30,
+		},
+	)
+	plant_floor.stages = [plant_floor.stages[-1], *plant_floor.stages[:-1]]
+	for idx, (stage, sequence_id) in enumerate(zip(plant_floor.stages, (1, 1, 2, 3), strict=True), start=1):
+		stage.idx, stage.sequence_id = idx, sequence_id
+
+	for row in plant_floor.materials:
+		row.stage_row_id = 2
+	plant_floor.materials[2].percentage = 25
+	plant_floor.append("materials", {"item_code": "_Test Ketchup Spices", "percentage": 5, "stage_row_id": 1})
+	plant_floor.save()
+	return plant_floor
 
 
 def stock_ketchup_materials():

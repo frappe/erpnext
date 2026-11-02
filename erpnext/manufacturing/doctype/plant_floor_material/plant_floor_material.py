@@ -20,6 +20,7 @@ class PlantFloorMaterial(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		percentage: DF.Percent
+		stage_row_id: DF.Int
 		storage: DF.Literal["Tank", "Silo", "Sacks"]
 	# end: auto-generated types
 

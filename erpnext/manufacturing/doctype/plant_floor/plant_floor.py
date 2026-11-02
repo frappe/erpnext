@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Order
-from frappe.utils import flt, get_link_to_form, nowdate, nowtime
+from frappe.utils import cint, flt, get_link_to_form, nowdate, nowtime
 
 from erpnext.manufacturing.doctype.plant_floor.services.batch_plan import BatchPlan
 from erpnext.manufacturing.doctype.plant_floor.services.setup_check import PlantSetupCheck
@@ -44,6 +44,12 @@ class PlantFloor(Document):
 		self.validate_warehouse(self.warehouse)
 		self.validate_warehouse(self.fg_warehouse)
 		self.validate_formula()
+		self.set_sequence_ids()
+
+	def set_sequence_ids(self):
+		if not any(stage.sequence_id for stage in self.stages):
+			for stage in self.stages:
+				stage.sequence_id = stage.idx
 
 	def validate_warehouse(self, name):
 		if not name:
@@ -88,6 +94,15 @@ class PlantFloor(Document):
 
 	def is_packing_stage(self, stage) -> bool:
 		return self.machine_models.get(stage.workstation) in PACKING_MACHINE_MODELS
+
+	@property
+	def stage_sequences(self) -> list[list]:
+		has_sequence = any(stage.sequence_id for stage in self.stages)
+		sequences = {}
+		for stage in self.stages:
+			sequence_id = cint(stage.sequence_id) if has_sequence else stage.idx
+			sequences.setdefault(sequence_id, []).append(stage)
+		return [sequences[sequence_id] for sequence_id in sorted(sequences)]
 
 	def get_batch_plan(self, qty: float | None = None) -> BatchPlan:
 		return BatchPlan(self, qty)

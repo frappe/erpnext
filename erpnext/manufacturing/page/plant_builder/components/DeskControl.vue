@@ -63,6 +63,15 @@ watch(
 );
 
 watch(
+	() => JSON.stringify(props.options),
+	() => {
+		control.df.options = props.options;
+		control.refresh();
+		control.set_input(props.modelValue || "");
+	}
+);
+
+watch(
 	() => props.disabled,
 	(disabled) => {
 		control.df.read_only = disabled ? 1 : 0;

@@ -3,6 +3,9 @@ from frappe import _
 from frappe.utils import flt, now_datetime
 
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_transfer_entry
+from erpnext.manufacturing.doctype.work_order.mapper import create_job_card
+from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import PlantFlow
+from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.page.shop_floor.shop_floor import submit_quality_inspection
 
 
@@ -25,16 +28,26 @@ class PlantRun:
 			self._plant_floor = frappe.get_doc("Plant Floor", self.work_order.plant_floor)
 		return self._plant_floor
 
-	@property
-	def active_job_card(self):
+	def get_flow(self):
+		return PlantFlow(self.work_order, self.plant_floor)
+
+	def get_open_job_card(self, stage_idx):
+		card = self.get_flow().get_open_card(stage_idx)
+		return frappe.get_doc("Job Card", card.name) if card else None
+
+	def get_job_card(self, name):
+		job_card = frappe.get_doc("Job Card", name)
+		if job_card.work_order != self.work_order.name or job_card.docstatus != 0:
+			frappe.throw(_("Job Card {0} is not an open stage of this Work Order").format(name))
+		return job_card
+
+	def get_running_job_cards(self):
 		names = frappe.get_all(
 			"Job Card",
 			filters={"work_order": self.work_order.name, "docstatus": 0, "is_corrective_job_card": 0},
-			order_by="operation_row_id asc, creation asc",
-			limit=1,
 			pluck="name",
 		)
-		return frappe.get_doc("Job Card", names[0]) if names else None
+		return [job_card for job_card in map(self.get_job_card, names) if job_card.time_logs]
 
 	def set_qty(self, qty):
 		if self.work_order.docstatus != 0:
@@ -43,84 +56,60 @@ class PlantRun:
 		self.work_order.qty = flt(qty)
 		self.work_order.save()
 
-	def start(self):
+	def start(self, job_card=None):
 		if self.work_order.docstatus == 0:
 			self.work_order.submit()
-			return self.start_when_machine_is_free(self.active_job_card)
+			return self.start_ready_stages()
 
-		if job_card := self.active_job_card:
-			self.validate_machine_is_free(job_card)
-			self.start_job_card(job_card)
+		flow = self.get_flow()
+		names = [job_card] if job_card else [card.name for card in self.get_startable_cards(flow)]
+		for card in map(self.get_job_card, names):
+			if not flow.has_input(card.operation_row_id):
+				frappe.throw(_("{0} waits for the stages before it").format(card.operation))
+			self.validate_machine_is_free(card)
+			self.start_job_card(card)
+
+	@staticmethod
+	def get_startable_cards(flow):
+		cards = [flow.get_open_card(stage.idx) for stage in flow.stages if flow.has_input(stage.idx)]
+		return [card for card in cards if card and not card.started_at]
 
 	@staticmethod
 	def start_job_card(job_card):
-		if job_card and not job_card.time_logs:
+		if not job_card.time_logs:
 			job_card.start_timer(start_time=now_datetime())
 
 	def pause(self):
-		self.get_job_card().pause_job(end_time=now_datetime())
+		running = [job_card for job_card in self.get_running_job_cards() if not job_card.is_paused]
+		if not running:
+			frappe.throw(_("No stage is running"))
+		for job_card in running:
+			job_card.pause_job(end_time=now_datetime())
 
 	def resume(self):
-		self.get_job_card().resume_job(start_time=now_datetime())
-
-	def get_job_card(self, name=None):
-		job_card = self.active_job_card
-		if not job_card or (name and job_card.name != name):
-			frappe.throw(_("Job Card {0} is not the stage in progress").format(name or ""))
-		return job_card
+		for job_card in self.get_running_job_cards():
+			if job_card.is_paused:
+				job_card.resume_job(start_time=now_datetime())
 
 	def consume(self, job_card, quantities):
 		job_card = self.get_job_card(job_card)
-		quantities = {item_code: flt(qty) for item_code, qty in (quantities or {}).items()}
-		fixed_items = self.get_fixed_items(job_card)
-		quantities.update(
-			{row.item_code: row.required_qty for row in job_card.items if row.item_code in fixed_items}
-		)
-		self.validate_quantities(job_card, quantities)
+		if job_card.is_paused:
+			frappe.throw(_("Resume the Work Order before you consume materials"))
 
+		lot = Lot(self.get_flow(), job_card, quantities)
+		quantities = lot.get_quantities()
+		lot.validate(quantities, flt(self.plant_floor.formula_tolerance))
+
+		job_card.set("items", [row for row in job_card.items if quantities[row.name] > 0])
 		for row in job_card.items:
-			row.required_qty = quantities[row.item_code]
+			row.required_qty = quantities[row.name]
+		job_card.for_quantity = lot.for_quantity
 		job_card.save()
 
 		entry = make_transfer_entry(job_card.name)
 		entry.insert()
 		entry.submit()
 		return entry.name
-
-	def validate_quantities(self, job_card, quantities):
-		planned = self.get_planned_quantities(job_card)
-		fixed_items = self.get_fixed_items(job_card)
-		tolerance = flt(self.plant_floor.formula_tolerance)
-		for row in job_card.items:
-			actual = quantities.get(row.item_code, 0)
-			if actual <= 0:
-				frappe.throw(_("{0} needs a quantity above zero").format(row.item_name or row.item_code))
-
-			planned_qty = planned.get(row.item_code)
-			if row.item_code in fixed_items or not planned_qty:
-				continue
-
-			variance = (actual - planned_qty) / planned_qty * 100
-			if abs(variance) > tolerance + 0.0001:
-				frappe.throw(
-					_("{0} is {1}% off the formula. The allowed range is ±{2}%.").format(
-						row.item_name or row.item_code, flt(abs(variance), 1), flt(tolerance)
-					)
-				)
-
-	def get_planned_quantities(self, job_card):
-		return {
-			row.item_code: flt(row.required_qty)
-			for row in self.work_order.required_items
-			if row.operation_row_id == job_card.operation_row_id
-		}
-
-	def get_fixed_items(self, job_card):
-		balance = {row.item_code for row in self.plant_floor.materials if row.is_balance_item}
-		previous = [
-			row.finished_good for row in self.work_order.operations if row.idx < job_card.operation_row_id
-		]
-		return balance | set(previous)
 
 	def produce(self, job_card, output_qty, rejected_qty=0, readings=None):
 		job_card = self.get_job_card(job_card)
@@ -143,14 +132,28 @@ class PlantRun:
 			end_time=now_datetime(),
 			auto_submit=1,
 		)
+		self.make_lots()
+		self.start_ready_stages()
 
-		next_job_card = self.active_job_card
-		self.carry_output(job_card, output_qty, next_job_card)
-		self.start_when_machine_is_free(next_job_card)
+	def make_lots(self):
+		flow = self.get_flow()
+		for stage in flow.stages:
+			if stage.inputs and not flow.get_open_card(stage.idx) and flow.has_input(stage.idx):
+				self.make_lot(flow, stage)
 
-	def start_when_machine_is_free(self, job_card):
-		if job_card and not self.get_busy_job_cards(job_card):
-			self.start_job_card(job_card)
+	def make_lot(self, flow, stage):
+		waiting = {(row.item_code, row.warehouse): row.waiting_qty for row in flow.get_inputs(stage.idx)}
+		qty = flow.get_planned_output(stage.idx, flow.get_lot_share(stage.idx, waiting))
+		operation = self.work_order.operations[stage.idx - 1]
+		create_job_card(
+			self.work_order, frappe._dict(operation.as_dict(), job_card_qty=qty), auto_create=True
+		)
+
+	def start_ready_stages(self):
+		for card in self.get_startable_cards(self.get_flow()):
+			job_card = frappe.get_doc("Job Card", card.name)
+			if not self.get_busy_job_cards(job_card):
+				self.start_job_card(job_card)
 
 	def validate_machine_is_free(self, job_card):
 		if busy := self.get_busy_job_cards(job_card):
@@ -174,13 +177,3 @@ class PlantRun:
 			pluck="name",
 		)
 		return busy if len(busy) >= job_card.get_production_capacity() else []
-
-	@staticmethod
-	def carry_output(job_card, output_qty, next_job_card):
-		if not next_job_card:
-			return
-
-		for row in next_job_card.items:
-			if row.item_code == job_card.finished_good:
-				row.required_qty = output_qty
-		next_job_card.save()

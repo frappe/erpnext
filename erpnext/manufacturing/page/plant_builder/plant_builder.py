@@ -191,8 +191,8 @@ def set_run_qty(work_order: str, qty: float) -> dict:
 
 
 @frappe.whitelist(methods=["POST"])
-def start_run(work_order: str) -> dict:
-	return run_action(work_order, "start")
+def start_run(work_order: str, job_card: str | None = None) -> dict:
+	return run_action(work_order, "start", job_card=job_card)
 
 
 @frappe.whitelist(methods=["POST"])

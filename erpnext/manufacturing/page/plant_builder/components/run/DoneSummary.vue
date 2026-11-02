@@ -11,9 +11,7 @@ const order = computed(() => state.value.work_order);
 
 const kpis = computed(() => {
 	const stages = state.value.stages;
-	const charged = stages[0].items
-		.filter((row) => row.weight_factor)
-		.reduce((sum, row) => sum + num(row.transferred_qty) / row.weight_factor, 0);
+	const charged = num(order.value.charged_weight);
 	const good = num(order.value.produced_qty);
 	const yieldPercentage = charged
 		? round(((good * state.value.plan.weight_per_unit) / charged) * 100, 1)
@@ -32,26 +30,25 @@ const batchesOf = (entry, finished) =>
 
 const chain = computed(() => {
 	const entries = state.value.entries;
-	const firstCard = state.value.stages[0].job_card?.name;
+	const materials = new Set(state.value.plan.materials.map((row) => row.item_code));
 	const rawBatches = entries
-		.filter(
-			(entry) => entry.purpose === "Material Transfer for Manufacture" && entry.job_card === firstCard
-		)
-		.flatMap((entry) => batchesOf(entry, false));
+		.filter((entry) => entry.purpose === "Material Transfer for Manufacture")
+		.flatMap((entry) => entry.items.filter((row) => materials.has(row.item_code) && row.batch_id))
+		.map((row) => row.batch_id);
 	const raw = {
 		title: __("Raw material batches"),
 		meta: [...new Set(rawBatches)].join(", ") || __("Not batch tracked"),
 		icon: "lucide-boxes",
 	};
 	const steps = state.value.stages.map((stage, i) => {
-		const entry = entries.find(
-			(row) => row.purpose === "Manufacture" && row.job_card === stage.job_card?.name
-		);
-		const batch = entry ? batchesOf(entry, true).join(", ") : "";
+		const batches = entries
+			.filter((row) => row.purpose === "Manufacture" && stage.job_cards.includes(row.job_card))
+			.flatMap((entry) => batchesOf(entry, true));
 		const parts = [
-			batch,
+			[...new Set(batches)].join(", "),
 			`${fmt(stage.output.completed_qty)} ${stage.output.uom}`,
-			fmtTimer(Math.floor(stage.job_card?.worked_seconds || 0)),
+			stage.lot > 1 ? __("{0} lots", [stage.lot]) : "",
+			fmtTimer(Math.floor(stage.worked_seconds || 0)),
 		];
 		const machine = MACHINES[run.plant.value.stages[i]?.machine] || MACHINES.generic;
 		return { title: stage.output.item_name, meta: parts.filter(Boolean).join(" · "), icon: machine.icon };

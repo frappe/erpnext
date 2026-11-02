@@ -147,7 +147,7 @@ const STATUS = {
 					<div class="space-y-8">
 						<SetupStatus :errors="data.errors" />
 						<ProductSection :doc="doc" :item="data.item" :is-saved="data.is_saved" />
-						<FormulaSection :doc="doc" />
+						<FormulaSection :doc="doc" :machines="data.machines" />
 						<StagesSection
 							:doc="doc"
 							:machines="data.machines"

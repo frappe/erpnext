@@ -1,5 +1,3 @@
-from itertools import pairwise
-
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
@@ -85,24 +83,21 @@ class PlantFloorService:
 					"output_qty": 0 if stage.is_packing else stage.output_qty,
 					"wip_warehouse": warehouse,
 					"fg_warehouse": self.plant_floor.fg_warehouse if stage.is_packing else warehouse,
-					"sequence_id": stage.idx,
+					"sequence_id": stage.sequence_id,
 					"status": "Pending",
 					"quality_inspection_required": cint(bool(templates.get(stage.operation))),
 				},
 			)
 
 	def set_required_items(self, plan, stages):
-		rows = [
-			self.get_row(material, stages[0], self.plant_floor.warehouse) for material in plan.get_materials()
-		]
-		for previous, stage in pairwise(stages):
-			output = frappe._dict(item_code=previous.output_item, qty=previous.output_qty)
-			rows.append(self.get_row(output, stage, self.get_machine_warehouse(previous)))
+		materials, store, rows = plan.get_materials(), self.plant_floor.warehouse, []
+		for stage in stages:
+			for source in stage.inputs:
+				warehouse = self.get_machine_warehouse(stages[source.stage_idx - 1])
+				rows.append(self.get_row(source, stage, warehouse))
+			rows.extend(self.get_row(row, stage, store) for row in materials if row.stage_row_id == stage.idx)
 
-		packing_stage = stages[-1]
-		for row in plan.get_packing_materials():
-			rows.append(self.get_row(row, packing_stage, self.plant_floor.warehouse))
-
+		rows.extend(self.get_row(row, stages[-1], store) for row in plan.get_packing_materials())
 		self.set_item_details(rows)
 		self.doc.set("required_items", rows)
 
