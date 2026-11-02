@@ -20,10 +20,12 @@ New Structure:
 from collections import defaultdict
 
 import frappe
-from frappe.query_builder import Tuple
 from frappe.query_builder.functions import IfNull, Max, Sum
-from frappe.utils import flt, now
+from frappe.utils import create_batch, flt, now
 from pypika.terms import Bracket
+
+# Names per IN list, so the statements stay well below max_allowed_packet on large sites
+BATCH_SIZE = 50000
 
 
 def execute():
@@ -67,10 +69,27 @@ def execute():
 
 	# Clean up existing migration entries, except on documents the new flow has already used
 	twe = frappe.qb.DocType("Tax Withholding Entry")
-	query = frappe.qb.from_(twe).delete().where(twe.created_by_migration == 1)
-	if skip_docs:
-		query = query.where(Tuple(twe.parenttype, twe.parent).notin(list(skip_docs)))
-	query.run()
+	migrated_docs = defaultdict(list)
+	for parenttype, parent in (
+		frappe.qb.from_(twe)
+		.select(twe.parenttype, twe.parent)
+		.distinct()
+		.where(twe.created_by_migration == 1)
+		.run()
+	):
+		if (parenttype, parent) not in skip_docs:
+			migrated_docs[parenttype].append(parent)
+
+	for parenttype, parents in migrated_docs.items():
+		for batch in create_batch(parents, BATCH_SIZE):
+			(
+				frappe.qb.from_(twe)
+				.delete()
+				.where(twe.created_by_migration == 1)
+				.where(twe.parenttype == parenttype)
+				.where(twe.parent.isin(batch))
+				.run()
+			)
 
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
@@ -196,6 +215,7 @@ def get_docs_with_entries():
 		)
 		.where(twe.created_by_migration == 0)
 		.where(twe.docstatus == 1)
+		.distinct()
 		.run(as_dict=True)
 	)
 
@@ -440,17 +460,18 @@ class PurchaseInvoiceMigrator:
 
 		# v15 advance tax rows have no withholding flag; an "Add" row is a reversal, not the deduction.
 		# Skipped payments are flagged too: their entries are kept, but their rows were never flagged
-		if self.pe_taxes:
+		for batch in create_batch(list(self.pe_taxes), BATCH_SIZE):
 			frappe.db.set_value(
 				"Advance Taxes and Charges",
 				{
-					"parent": ("in", list(self.pe_taxes)),
+					"parent": ("in", batch),
 					"parenttype": "Payment Entry",
 					"account_head": ("in", list(self.all_tds_accounts)),
 					"add_deduct_tax": "Deduct",
 				},
 				"is_tax_withholding_account",
 				1,
+				update_modified=False,
 			)
 
 	# -------------------------------------------------------------------------
@@ -683,23 +704,15 @@ class PurchaseInvoiceMigrator:
 		pe = frappe.qb.DocType("Payment Entry")
 		pi = frappe.qb.DocType("Purchase Invoice")
 
-		if self._pe_names_for_dates:
-			pe_date_rows = (
-				frappe.qb.from_(pe)
-				.select(pe.name, pe.posting_date)
-				.where(pe.name.isin(list(self._pe_names_for_dates)))
-				.run(as_dict=True)
+		for batch in create_batch(list(self._pe_names_for_dates), BATCH_SIZE):
+			self.pe_dates.update(
+				frappe.qb.from_(pe).select(pe.name, pe.posting_date).where(pe.name.isin(batch)).run()
 			)
-			self.pe_dates = {row.name: row.posting_date for row in pe_date_rows}
 
-		if self._pi_names_for_dates:
-			pi_date_rows = (
-				frappe.qb.from_(pi)
-				.select(pi.name, pi.posting_date)
-				.where(pi.name.isin(list(self._pi_names_for_dates)))
-				.run(as_dict=True)
+		for batch in create_batch(list(self._pi_names_for_dates), BATCH_SIZE):
+			self.pi_dates.update(
+				frappe.qb.from_(pi).select(pi.name, pi.posting_date).where(pi.name.isin(batch)).run()
 			)
-			self.pi_dates = {row.name: row.posting_date for row in pi_date_rows}
 
 	# -------------------------------------------------------------------------
 	# Invoice Processing
@@ -1237,28 +1250,30 @@ def migrate_sales_invoices(
 
 	# Update Sales Invoice Item
 	for category, invoices in category_wise_invoices.items():
-		frappe.db.set_value(
-			"Sales Invoice Item",
-			{"parent": ("in", invoices), "parenttype": "Sales Invoice"},
-			{"tax_withholding_category": category, "apply_tds": 1},
-		)
+		for batch in create_batch(invoices, BATCH_SIZE):
+			frappe.db.set_value(
+				"Sales Invoice Item",
+				{"parent": ("in", batch), "parenttype": "Sales Invoice"},
+				{"tax_withholding_category": category, "apply_tds": 1},
+				update_modified=False,
+			)
 
-	if all_entries:
-		invoices = [name for _doctype, name in all_entries]
-		frappe.db.set_value("Sales Invoice", {"name": ("in", invoices)}, {"apply_tds": 1})
+	for batch in create_batch([name for _doctype, name in all_entries], BATCH_SIZE):
+		frappe.db.set_value("Sales Invoice", {"name": ("in", batch)}, {"apply_tds": 1}, update_modified=False)
 
 	# v15 sales tax rows have no withholding flag; without it the new flow adds a second TCS row.
 	# Skipped invoices are flagged too: their entries are kept, but their rows were never flagged
-	if invoices_with_tcs := [row.invoice_name for row in tcs_entries if row.account]:
+	for batch in create_batch([row.invoice_name for row in tcs_entries if row.account], BATCH_SIZE):
 		frappe.db.set_value(
 			"Sales Taxes and Charges",
 			{
-				"parent": ("in", invoices_with_tcs),
+				"parent": ("in", batch),
 				"parenttype": "Sales Invoice",
 				"account_head": ("in", tcs_accounts_list),
 			},
 			"is_tax_withholding_account",
 			1,
+			update_modified=False,
 		)
 
 
@@ -1322,7 +1337,7 @@ def migrate_journal_entries(
 	# Get all JE parties in bulk - only from non-TDS account rows
 	je_names = list({row.journal_entry for row in tds_gl_entries})
 	je_parties = {}
-	if je_names:
+	for batch in create_batch(je_names, BATCH_SIZE):
 		# Get party from JE Account rows that are NOT TDS accounts
 		jea_party_rows = (
 			frappe.qb.from_(jea)
@@ -1334,7 +1349,7 @@ def migrate_journal_entries(
 				jea.account_currency,
 				jea.exchange_rate,
 			)
-			.where(jea.parent.isin(je_names))
+			.where(jea.parent.isin(batch))
 			.where(jea.party_type.isnotnull())
 			.where(jea.party_type != "")
 			.where(jea.party.isnotnull())
@@ -1526,19 +1541,21 @@ def migrate_journal_entries(
 	bulk_insert_entries(all_entries)
 
 	for category, je_names in category_wise_jes.items():
-		frappe.db.set_value(
-			"Journal Entry",
-			{"name": ("in", list(je_names))},
-			{"apply_tds": 1, "tax_withholding_category": category},
-		)
+		for batch in create_batch(list(je_names), BATCH_SIZE):
+			frappe.db.set_value(
+				"Journal Entry",
+				{"name": ("in", batch)},
+				{"apply_tds": 1, "tax_withholding_category": category},
+				update_modified=False,
+			)
 
 	# Only the deduction row: a debit is a TDS payment and a party row is the party's own account.
 	# Skipped journals are flagged too: their entries are kept, but their rows were never flagged
-	if journals_with_tds:
+	for batch in create_batch(journals_with_tds, BATCH_SIZE):
 		frappe.db.set_value(
 			"Journal Entry Account",
 			{
-				"parent": ("in", journals_with_tds),
+				"parent": ("in", batch),
 				"parenttype": "Journal Entry",
 				"account": ("in", list(all_tds_accounts)),
 				"credit": (">", 0),
@@ -1546,6 +1563,7 @@ def migrate_journal_entries(
 			},
 			"is_tax_withholding_account",
 			1,
+			update_modified=False,
 		)
 
 
