@@ -10,6 +10,7 @@ JOB_CARD_FIELDS = [
 	"status",
 	"is_paused",
 	"operation_row_id",
+	"workstation",
 	"for_quantity",
 	"total_completed_qty",
 	"manufactured_qty",

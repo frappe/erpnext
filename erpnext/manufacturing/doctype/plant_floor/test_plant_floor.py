@@ -14,6 +14,7 @@ from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -284,6 +285,35 @@ class TestPlantFloor(ERPNextTestSuite):
 		work_order.reload()
 		self.assertEqual((work_order.status, work_order.produced_qty), ("Completed", 2000))
 		self.assertEqual(get_stock_balance("_Test Ketchup PET Bottle", STORE), 1000)
+
+	def test_breakdown_stops_the_machine_and_restart_makes_downtime_entry(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		work_order = plant_floor.make_work_order(2000)
+		operator = make_employee("plant.operator@example.com", company="_Test Company")
+		with minutes_ago(60):
+			PlantRun(work_order.name).start()
+		job_card = PlantRun(work_order.name).get_open_job_card(1)
+
+		with minutes_ago(50):
+			PlantRun(work_order.name).report_breakdown(job_card.name)
+		state = PlantRunState(PlantRun(work_order.name)).as_dict()
+		self.assertEqual(frappe.db.get_value("Workstation", "_Test Mixer", "status"), "Problem")
+		self.assertTrue(state.stages[0].breakdown)
+		self.assertFalse(state.work_order["is_paused"])
+
+		with minutes_ago(45):
+			PlantRun(work_order.name).resume()
+		self.assertTrue(frappe.db.get_value("Job Card", job_card.name, "is_paused"))
+
+		with minutes_ago(30):
+			downtime = PlantRun(work_order.name).restart_machine(
+				job_card.name, "Machine malfunction", "Replaced the agitator belt", operator
+			)
+		downtime = frappe.get_doc("Downtime Entry", downtime)
+		self.assertEqual((downtime.workstation, round(downtime.downtime)), ("_Test Mixer", 20))
+		self.assertEqual(frappe.db.get_value("Workstation", "_Test Mixer", "status"), "Production")
+		self.assertFalse(frappe.db.get_value("Job Card", job_card.name, "is_paused"))
 
 	def test_setup_errors_for_parallel_stages(self):
 		plant_floor = make_parallel_ketchup_plant()

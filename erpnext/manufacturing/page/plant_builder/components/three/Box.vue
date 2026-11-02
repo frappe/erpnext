@@ -27,6 +27,8 @@ const TONES = {
 	godim: face("bg-surface-green-2", "bg-surface-green-3", "bg-surface-green-2", "border-outline-green-3"),
 	hold: face("bg-surface-amber-4", "bg-surface-amber-5", "bg-surface-amber-4", "border-outline-amber-5"),
 	off: face("bg-surface-gray-3", "bg-surface-gray-4", "bg-surface-gray-3", "border-outline-gray-4"),
+	down: face("bg-surface-red-5", "bg-surface-red-6", "bg-surface-red-5", "border-outline-red-5"),
+	downdim: face("bg-surface-red-2", "bg-surface-red-3", "bg-surface-red-2", "border-outline-red-3"),
 	red: face("bg-surface-red-5", "bg-surface-red-6", "bg-surface-red-5", "border-outline-red-5"),
 	amber: face("bg-surface-amber-4", "bg-surface-amber-5", "bg-surface-amber-4", "border-outline-amber-5"),
 	cream: face("bg-surface-amber-2", "bg-surface-amber-3", "bg-surface-amber-2", "border-outline-amber-3"),

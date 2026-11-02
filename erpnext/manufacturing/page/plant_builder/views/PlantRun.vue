@@ -23,15 +23,23 @@ onMounted(async () => {
 		{ label: __("Open Work Order"), onClick: () => openForm("Work Order", props.workOrder) },
 		{ label: __("Open Plant Floor"), onClick: () => openForm("Plant Floor", props.plant) },
 	]);
-	poll = setInterval(() => run.status.value === "In Process" && !run.busy.value && run.refresh(), 30000);
+	poll = setInterval(() => isRunning.value && !run.busy.value && run.refresh(), 30000);
 });
 onBeforeUnmount(() => clearInterval(poll));
 
-const STATUS = { "Not Started": "gray", "In Process": "blue", "On Hold": "amber", Completed: "green" };
+const STATUS = {
+	"Not Started": "gray",
+	"In Process": "blue",
+	"On Hold": "amber",
+	Breakdown: "red",
+	Completed: "green",
+};
+const isRunning = computed(() => ["In Process", "Breakdown"].includes(run.status.value));
 
 const view = computed(() => {
 	const stages = run.stages.value;
 	const modes = stages.map((s) => {
+		if (s.breakdown) return "down";
 		if (!["charging", "processing", "review"].includes(s.phase)) return "off";
 		return run.paused.value ? "hold" : "run";
 	});
@@ -57,6 +65,7 @@ const uoms = computed(() =>
 function holding(i) {
 	const state = run.state.value;
 	const stage = run.stages.value[i];
+	if (stage.breakdown) return __("Breakdown");
 	const weight = num(state.levels.machines[stage.workstation]);
 	if (weight < 1) return __("Empty");
 	const machine = MACHINES[run.plant.value.stages[i]?.machine] || MACHINES.generic;
@@ -90,7 +99,7 @@ const live = computed(() => {
 							<span
 								class="size-4"
 								:class="
-									run.status.value === 'In Process'
+									isRunning
 										? 'lucide-timer text-ink-gray-6'
 										: 'lucide-timer-off text-ink-gray-5'
 								"
@@ -102,7 +111,7 @@ const live = computed(() => {
 						</div>
 					</Tooltip>
 					<Button
-						v-if="run.status.value === 'In Process'"
+						v-if="isRunning"
 						icon-left="lucide-pause"
 						:label="__('Pause')"
 						:disabled="!run.hasActiveStage.value || run.busy.value"

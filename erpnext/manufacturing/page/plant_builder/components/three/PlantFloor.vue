@@ -27,6 +27,7 @@ const zones = computed(() => {
 			label: `${st.i + 1}  ${st.stage.name || "Stage"}`,
 			...st.zone,
 			active: v.active[st.i],
+			down: v.mode[st.i] === "down",
 		})
 	);
 	if (L.fg) list.push({ key: "fg", label: "Finished goods", ...L.fg, active: v.fgActive });
@@ -60,6 +61,12 @@ const cartons = computed(() => {
 });
 
 const lvl = (key) => props.view.level[key] ?? 0;
+
+function zoneClass(zone) {
+	if (zone.down) return "border-2 border-outline-red-4 bg-surface-red-1";
+	if (zone.active) return "border-2 border-outline-gray-7 bg-surface-gray-2";
+	return "border border-dashed border-outline-gray-4";
+}
 </script>
 
 <template>
@@ -67,16 +74,12 @@ const lvl = (key) => props.view.level[key] ?? 0;
 		v-for="z in zones"
 		:key="z.key"
 		class="pointer-events-none absolute rounded-5"
-		:class="
-			z.active
-				? 'border-2 border-outline-gray-7 bg-surface-gray-2'
-				: 'border border-dashed border-outline-gray-4'
-		"
+		:class="zoneClass(z)"
 		:style="{ left: `${z.x}px`, top: `${z.y}px`, width: `${z.w}px`, height: `${z.h}px` }"
 	>
 		<span
 			class="absolute bottom-2 left-3 max-w-[90%] origin-bottom-left truncate whitespace-nowrap text-lg-semibold"
-			:class="z.active ? 'text-ink-gray-8' : 'text-ink-gray-5'"
+			:class="z.down ? 'text-ink-red-5' : z.active ? 'text-ink-gray-8' : 'text-ink-gray-5'"
 			:style="{ transform: `scale(${Math.min(k, 1.8)})` }"
 		>
 			{{ z.label }}
