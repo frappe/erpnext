@@ -120,12 +120,8 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 		grid_row.doc.project = args.project;
 		grid_row.doc.task = args.task;
 		grid_row.doc.expected_hours = args.expected_hours;
-<<<<<<< HEAD
 		grid_row.doc.hours = currentIncrement / 3600;
-		grid_row.doc.to_time = frappe.datetime.now_datetime();
-=======
 		grid_row.doc.to_time = frappe.datetime.get_datetime_as_string(frappe.datetime.system_datetime());
->>>>>>> b8e6481 (fix(projects): use system time zone for timesheet timer start and end)
 		grid_row.refresh();
 		frm.dirty();
 		frm.save();
