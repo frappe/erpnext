@@ -139,6 +139,11 @@ class PlantFlow:
 		limit = self.get_output_limit(idx)
 		return round_down(max(planned if limit is None else min(planned, limit), 0))
 
+	def get_closing_qty(self, idx):
+		round_up = math_ceil if is_whole_number(self.get_stage(idx).output_item) else ceil_qty
+		order = self.work_order
+		return round_up(flt(order.qty) - flt(order.produced_qty) - flt(order.process_loss_qty))
+
 	def get_card_share(self, idx, card):
 		passed = defaultdict(float)
 		for row in card.materials:
@@ -157,6 +162,14 @@ def floor_qty(qty):
 
 def math_floor(qty):
 	return math.floor(flt(qty) + 0.000001)
+
+
+def ceil_qty(qty):
+	return math.ceil(flt(qty) * 1000 - 0.000001) / 1000
+
+
+def math_ceil(qty):
+	return math.ceil(flt(qty) - 0.000001)
 
 
 def get_job_cards(work_order):

@@ -159,6 +159,7 @@ class TestPlantFloor(ERPNextTestSuite):
 		work_order.reload()
 		self.assertEqual(work_order.status, "Completed")
 		self.assertEqual(work_order.produced_qty, 1975)
+		self.assertEqual(work_order.process_loss_qty, 25)
 		self.assertEqual(get_stock_balance("_Test Ketchup Bottle", FINISHED_GOODS), 1975)
 		self.assertEqual(get_stock_balance("_Test Cooked Ketchup Base", "_Test Filler Warehouse - _TC"), 0)
 
@@ -173,6 +174,18 @@ class TestPlantFloor(ERPNextTestSuite):
 		)
 		finished = next(row for row in cooked["items"] if row.is_finished_item)
 		self.assertTrue(finished.batch_ids[0].startswith("_TKB-"))
+
+	def test_last_lot_tops_up_a_fraction_of_a_unit_lost_to_rounding(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		work_order = plant_floor.make_work_order(2000)
+		run_stage(work_order, 180, 150, output_qty=1250)
+		run_stage(work_order, 150, 105, output_qty=990.333)
+		run_stage(work_order, 105, 45, output_qty=1975, rejected_qty=5)
+
+		work_order.reload()
+		self.assertEqual((work_order.status, work_order.produced_qty), ("Completed", 1975))
+		self.assertEqual(work_order.process_loss_qty, 25.34)
 
 	def test_consume_refuses_quantity_off_formula(self):
 		plant_floor = make_ketchup_plant()
