@@ -4771,6 +4771,7 @@ def update_child_qty_rate(
 	if parent_doctype != "Supplier Quotation":
 		parent.set_payment_schedule()
 	if parent_doctype == "Purchase Order":
+		parent.set_last_purchase_rate()
 		parent.set_tax_withholding()
 		parent.validate_minimum_order_qty()
 		parent.validate_budget()
