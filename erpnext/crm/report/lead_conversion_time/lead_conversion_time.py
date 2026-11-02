@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, msgprint
 from frappe.query_builder.functions import Count, Date
-from frappe.utils import date_diff, flt
+from frappe.utils import date_diff, flt, parse_addr, split_emails
 
 
 def execute(filters=None):
@@ -115,15 +115,7 @@ def get_communication_details(filters):
 		if not communication_count:
 			continue
 
-		first_contact = (
-			frappe.qb.from_(comm)
-			.select(Date(comm.communication_date))
-			.where(comm.recipients.like(f"%{d.contact_email}%") & comm.communication_date.isnotnull())
-			.orderby(comm.communication_date)
-			.limit(1)
-			.run()
-		)
-		first_contact = first_contact[0][0] if first_contact else None
+		first_contact = get_first_contact_date(d.contact_email)
 		if not first_contact:
 			continue
 
@@ -139,3 +131,21 @@ def get_communication_details(filters):
 			}
 		)
 	return communication_list
+
+
+def get_first_contact_date(email: str):
+	comm = frappe.qb.DocType("Communication")
+	communications = (
+		frappe.qb.from_(comm)
+		.select(comm.recipients, Date(comm.communication_date))
+		.where(comm.recipients.like(f"%{email}%") & comm.communication_date.isnotnull())
+		.orderby(comm.communication_date)
+		.run()
+	)
+	for recipients, communication_date in communications:
+		if is_recipient(email, recipients):
+			return communication_date
+
+
+def is_recipient(email: str, recipients: str) -> bool:
+	return any(parse_addr(recipient)[1].lower() == email.lower() for recipient in split_emails(recipients))
