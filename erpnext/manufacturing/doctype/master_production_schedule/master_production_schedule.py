@@ -128,6 +128,33 @@ class MasterProductionSchedule(Document):
 			order_by="delivery_date asc",
 		)
 
+	def get_sales_forecast_demand_data(self):
+		if not self.sales_forecast:
+			return []
+
+		doctype = frappe.qb.DocType("Sales Forecast Item")
+
+		query = (
+			frappe.qb.from_(doctype)
+			.select(
+				doctype.item_code,
+				doctype.warehouse,
+				doctype.uom.as_("stock_uom"),
+				doctype.delivery_date,
+				doctype.demand_qty.as_("qty"),
+			)
+			.where(doctype.parent == self.sales_forecast)
+			.orderby(doctype.delivery_date)
+		)
+
+		if self.from_date:
+			query = query.where(doctype.delivery_date >= self.from_date)
+
+		if self.to_date:
+			query = query.where(doctype.delivery_date <= self.to_date)
+
+		return self.filter_selected_items(query, doctype).run(as_dict=True)
+
 	def update_item_details(self, data):
 		items = [item[0] for item in data if item[0]]
 		item_details = self.get_item_details(items)
@@ -217,8 +244,9 @@ class MasterProductionSchedule(Document):
 	def get_demand_data(self):
 		sales_order_data = self.get_sales_orders_data()
 		material_request_data = self.get_material_requests_data()
+		sales_forecast_data = self.get_sales_forecast_demand_data()
 
-		return sales_order_data + material_request_data
+		return sales_order_data + material_request_data + sales_forecast_data
 
 	def get_material_requests_data(self):
 		material_requests = [m.material_request for m in self.material_requests if m.material_request]
