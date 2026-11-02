@@ -837,14 +837,12 @@ class PurchaseInvoiceMigrator:
 			return None
 
 		info = ctx["info"]
-		taxable = info.base_tax_withholding_net_total or info.base_net_total
-
 		tax_on_excess = ctx["tax_on_excess"]
 		under_withheld_reason = "Threshold Exemption" if tax_on_excess else ""
 
 		return self._create_entry(
 			ctx,
-			taxable_amount=taxable,
+			taxable_amount=ctx["current_taxable"],
 			withholding_amount=0,
 			taxable_doctype="Purchase Invoice",
 			taxable_name=invoice_name,
