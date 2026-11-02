@@ -69,6 +69,29 @@ class TestProspect(unittest.TestCase):
 		other = make_prospect()
 		self.assertRaises(frappe.ValidationError, add_lead_to_prospect, lead.name, other.name)
 
+	def test_lead_in_other_prospect_error_hides_a_prospect_the_user_cannot_read(self):
+		lead = make_lead()
+		prospect = make_prospect()
+		add_lead_to_prospect(lead.name, prospect.name)
+
+		sales_user = "test_prospect_restricted_sales_user@example.com"
+		if not frappe.db.exists("User", sales_user):
+			user = frappe.get_doc(
+				{"doctype": "User", "email": sales_user, "first_name": "Restricted", "send_welcome_email": 0}
+			)
+			user.append("roles", {"role": "Sales User"})
+			user.insert(ignore_permissions=True)
+		frappe.permissions.add_user_permission("Prospect", make_prospect().name, sales_user)
+		self.addCleanup(frappe.db.delete, "User Permission", {"user": sales_user})
+
+		other_prospect = frappe.get_doc({"doctype": "Prospect", "leads": [{"lead": lead.name}]})
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(sales_user)
+		with self.assertRaises(frappe.ValidationError) as prospect_error:
+			other_prospect.validate_leads()
+
+		self.assertNotIn(prospect.name, str(prospect_error.exception))
+
 
 def make_prospect(**args):
 	args = frappe._dict(args)
