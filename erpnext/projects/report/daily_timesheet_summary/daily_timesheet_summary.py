@@ -6,10 +6,13 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.utils import get_combine_datetime
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters = filters or {}
 
 	columns = get_column()

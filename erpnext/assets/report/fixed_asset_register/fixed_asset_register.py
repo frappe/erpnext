@@ -15,7 +15,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 	validate_fiscal_year,
 )
-from erpnext.accounts.report.utils import get_filter_values
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -160,6 +160,7 @@ def get_conditions(filters):
 		conditions["company"] = filters.company
 
 	if filters.filter_based_on == "Date Range":
+		validate_date_range(filters)
 		if not filters.from_date and not filters.to_date:
 			filters.from_date = add_months(nowdate(), -12)
 			filters.to_date = nowdate()

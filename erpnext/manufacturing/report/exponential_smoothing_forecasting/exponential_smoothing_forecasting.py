@@ -8,10 +8,13 @@ from frappe.utils import add_years, cint, flt, getdate
 
 import erpnext
 from erpnext.accounts.report.financial_statements import get_period_list
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return ForecastingReport(filters).execute_report()
 
 

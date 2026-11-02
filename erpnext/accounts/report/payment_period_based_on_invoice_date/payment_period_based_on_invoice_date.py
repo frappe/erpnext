@@ -11,10 +11,13 @@ from frappe.query_builder.terms import ValueWrapper
 from frappe.utils import getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import build_qb_match_conditions
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = {}
 

@@ -6,10 +6,13 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	data = get_data(filters)
 	columns = get_columns(filters)
