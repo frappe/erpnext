@@ -214,6 +214,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
+		self.set_last_purchase_rate()
 		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
 
 		self.validate_uom_is_integer("uom", "qty")
@@ -238,6 +239,16 @@ class PurchaseOrder(BuyingController):
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.set_missing_terms()
+
+	def set_last_purchase_rate(self):
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return
+
+		for d in self.get("items"):
+			if d.item_code:
+				d.last_purchase_rate = item_last_purchase_rate(
+					self.name, self.conversion_rate, d.item_code, d.conversion_factor
+				)
 
 	def set_has_unit_price_items(self):
 		"""
