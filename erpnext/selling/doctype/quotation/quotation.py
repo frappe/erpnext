@@ -536,6 +536,12 @@ def set_expired_status():
 			and so_item.parent = so.name
 			and so_item.prevdoc_docname = `tabQuotation`.name"""
 
+	expired_quotations = frappe.db.sql(
+		f"""SELECT name FROM `tabQuotation` WHERE {cond} and not exists({so_against_quo})""",
+		(nowdate()),
+		pluck=True,
+	)
+
 	# if not exists any SO, set status as Expired
 	frappe.db.multisql(
 		{
@@ -544,6 +550,25 @@ def set_expired_status():
 		},
 		(nowdate()),
 	)
+
+	for opportunity in get_opportunities_of_quotations(expired_quotations):
+		frappe.get_doc("Opportunity", opportunity).set_status(update=True)
+
+
+def get_opportunities_of_quotations(quotations: list[str]) -> set[str]:
+	"""Opportunities linked in the header or the items of the quotations."""
+	if not quotations:
+		return set()
+
+	header_links = frappe.get_all(
+		"Quotation", {"name": ("in", quotations), "opportunity": ("is", "set")}, pluck="opportunity"
+	)
+	item_links = frappe.get_all(
+		"Quotation Item",
+		{"parent": ("in", quotations), "prevdoc_docname": ("is", "set")},
+		pluck="prevdoc_docname",
+	)
+	return set(header_links + item_links)
 
 
 @frappe.whitelist()
