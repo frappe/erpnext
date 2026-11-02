@@ -8,7 +8,9 @@ from frappe.utils import add_days, today
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.billed_items_to_be_received.billed_items_to_be_received import execute
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice_from_receipt
+from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+	make_purchase_invoice as make_invoice_from_receipt,
+)
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt as make_receipt
 
