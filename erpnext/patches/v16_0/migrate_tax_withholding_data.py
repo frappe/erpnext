@@ -623,6 +623,7 @@ class PurchaseInvoiceMigrator:
 			.select(
 				ldc.name,
 				ldc.supplier,
+				ldc.pan_no,
 				ldc.company,
 				ldc.tax_withholding_category,
 				ldc.valid_from,
@@ -632,7 +633,9 @@ class PurchaseInvoiceMigrator:
 			.where(ldc.rate == 0)
 			.run(as_dict=True)
 		):
-			self.nil_certificates[(row.supplier, row.company, row.tax_withholding_category)].append(row)
+			# v15 applied a certificate to every supplier with its PAN
+			for party in {row.pan_no, row.supplier} - {None, ""}:
+				self.nil_certificates[(party, row.company, row.tax_withholding_category)].append(row)
 
 	# -------------------------------------------------------------------------
 	# Lookup Building
@@ -909,7 +912,8 @@ class PurchaseInvoiceMigrator:
 		tax_rate = ctx["tax_rate"]
 
 		for voucher in ctx["withheld_vouchers"]:
-			if voucher.voucher_name == invoice_name:
+			# v15 listed invoices under a nil rate certificate with no taxable amount, so nothing was paid for them
+			if voucher.voucher_name == invoice_name or not flt(voucher.taxable_amount):
 				continue
 
 			self.tds_paid_by_other.add(voucher.voucher_name)
@@ -957,7 +961,10 @@ class PurchaseInvoiceMigrator:
 		}
 
 		# v15 counted invoices under a nil rate certificate as zero; the new flow tracks its limit on these rows
-		for ldc in self.nil_certificates.get((info.supplier, info.company, ctx["category"]), []):
+		certificates = self.nil_certificates.get(
+			(ctx["tax_id"], info.company, ctx["category"])
+		) or self.nil_certificates.get((info.supplier, info.company, ctx["category"]), [])
+		for ldc in certificates:
 			if not (ldc.valid_from <= info.posting_date <= ldc.valid_upto):
 				continue
 
