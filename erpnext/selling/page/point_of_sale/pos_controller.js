@@ -741,7 +741,7 @@ erpnext.PointOfSale.Controller = class {
 		frappe.utils.play_sound("error");
 	}
 
-	get_item_from_frm({ name, item_code, batch_no, uom, rate, warehouse }) {
+	get_item_from_frm({ name, item_code, batch_no, serial_no, uom, rate, warehouse }) {
 		let item_row = null;
 		if (name) {
 			item_row = this.frm.doc.items.find((i) => i.name == name);
@@ -755,6 +755,7 @@ erpnext.PointOfSale.Controller = class {
 					i.item_code === item_code &&
 					(!has_batch_no || i.batch_no === batch_no) &&
 					(!warehouse || i.warehouse === warehouse) &&
+					Boolean(i.serial_no) === Boolean(serial_no && serial_no !== "null") &&
 					i.uom === uom &&
 					i.price_list_rate === flt(rate)
 			);
