@@ -9,6 +9,10 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import flt, get_link_to_form, getdate
 
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.sales_invoice.services.inter_company import get_inter_company_counterpart
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
 
@@ -605,8 +609,6 @@ def create_dunning(
 	args: str | dict | bool | None = None,
 	ignore_permissions: bool = False,
 ):
-	from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
-
 	if isinstance(args, bool):
 		ignore_permissions = args
 		args = None
@@ -645,6 +647,22 @@ def create_dunning(
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))
