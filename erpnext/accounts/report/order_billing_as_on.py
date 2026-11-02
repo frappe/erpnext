@@ -43,8 +43,8 @@ class OrderBillingAsOn:
 	def get_line_billed_later(
 		self, rows: list[frappe._dict], billed: frappe._dict, billed_against_rows: dict
 	) -> dict[str, float]:
-		today = self.spread(rows, billed.amount, billed.qty, billed_against_rows, "amount")
-		then = self.spread(rows, billed.amount_then, billed.qty_then, billed_against_rows, "amount_then")
+		today = self.spread(rows, billed.amount, billed_against_rows, "amount")
+		then = self.spread(rows, billed.amount_then, billed_against_rows, "amount_then")
 		billed_later = {}
 		for row in rows:
 			difference = flt((today[row.name] - then[row.name]) * flt(row.conversion_rate), self.precision)
@@ -53,13 +53,13 @@ class OrderBillingAsOn:
 		return billed_later
 
 	def spread(
-		self, rows: list, amount: float, qty: float, billed_against_rows: dict, billed_field: str
+		self, rows: list, amount: float, billed_against_rows: dict, billed_field: str
 	) -> dict[str, float]:
-		"""Order-level share of each row when `amount` / `qty` were billed against the order line."""
-		pool = OrderBillingPool(amount, qty)
-		take = pool.take_for_receipt if self.doctype == "Purchase Receipt" else pool.take_for_delivery
+		"""Order-level share of each row when `amount` was billed against the order line."""
+		pool = OrderBillingPool(amount)
 		return {
-			row.name: take(row, flt(billed_against_rows.get(row.name, {}).get(billed_field))) for row in rows
+			row.name: pool.take(row, flt(billed_against_rows.get(row.name, {}).get(billed_field)))
+			for row in rows
 		}
 
 	def get_order_lines_billed_after(self) -> list[str]:
@@ -80,7 +80,6 @@ class OrderBillingAsOn:
 		order_link = invoice_item[self.links.invoice_order_link]
 		query = (
 			self.get_billed_query(order_link)
-			.select(Sum(invoice_item.qty).as_("qty"), self.sum_till_date(invoice_item.qty).as_("qty_then"))
 			.where(self.invoice.update_stock == 0)
 			.where(order_link.isin(order_lines))
 			.where(IfNull(invoice_item[self.links.invoice_link], "") == "")
@@ -126,7 +125,6 @@ class OrderBillingAsOn:
 				child.name,
 				child[self.links.order_link].as_("order_detail"),
 				child.amount,
-				child.qty,
 				IfNull(parent.conversion_rate, 1).as_("conversion_rate"),
 			)
 			.where((parent.docstatus == 1) & (parent.is_return == 0))
@@ -139,34 +137,19 @@ class OrderBillingAsOn:
 
 
 class OrderBillingPool:
-	"""What is left of the amount (and qty) billed against an order line while handing it out."""
+	"""What is left of the amount billed against an order line while handing it out."""
 
-	def __init__(self, amount: float | None, qty: float | None):
+	def __init__(self, amount: float | None):
 		self.amount = flt(amount)
-		self.qty = flt(qty)
 
-	def take_for_delivery(self, row: frappe._dict, billed: float) -> float:
-		"""Same first in, first out fill as update_billed_amount_based_on_so."""
+	def take(self, row: frappe._dict, billed: float) -> float:
+		"""Same first in, first out fill by amount as update_billed_amount_based_on_so / _po."""
 		if row.invoiced_row:
 			self.amount -= flt(row.amount)
 			return flt(row.amount)
 		if not self.amount or billed >= flt(row.amount):
 			return 0
 		share = min(flt(row.amount) - billed, self.amount)
-		self.amount -= share
-		return share
-
-	def take_for_receipt(self, row: frappe._dict, billed: float) -> float:
-		"""Same fill as update_billed_amount_based_on_po: by qty at the billed average rate for an
-		unbilled receipt smaller than the qty left, else first in, first out by amount."""
-		if not self.amount or billed >= flt(row.amount):
-			return 0
-		if not billed and self.qty > flt(row.qty):
-			share = self.amount * flt(row.qty) / self.qty
-			self.qty -= flt(row.qty)
-		else:
-			share = min(flt(row.amount) - billed, self.amount)
-			self.qty *= 1 - share / self.amount
 		self.amount -= share
 		return share
 

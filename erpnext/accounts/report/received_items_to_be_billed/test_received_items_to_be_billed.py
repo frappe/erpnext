@@ -194,7 +194,7 @@ class TestReceivedItemsToBeBilled(FrappeTestCase):
 		self.assertIsNone(self.get_row(self.run_report(), second_pr.name))
 
 	@change_settings("Buying Settings", {"maintain_same_rate": 0})
-	def test_order_billing_at_another_rate_after_the_as_on_date_is_spread_by_qty(self):
+	def test_order_billing_at_another_rate_after_the_as_on_date_is_filled_first_in_first_out(self):
 		po = create_purchase_order(qty=10, rate=100, transaction_date="2026-05-25")
 		first_pr = make_receipt_from_order(po.name, qty=4, posting_date="2026-06-01")
 		second_pr = make_receipt_from_order(po.name, qty=6, posting_date="2026-06-02")
@@ -207,15 +207,15 @@ class TestReceivedItemsToBeBilled(FrappeTestCase):
 		self.assertEqual((row.billed_amount, row.pending_amount), (100, 500))
 
 		data = self.run_report()
-		self.assertEqual(self.get_row(data, first_pr.name).pending_amount, 40)
-		self.assertEqual(self.get_row(data, second_pr.name).pending_amount, 60)
+		self.assertIsNone(self.get_row(data, first_pr.name))
+		self.assertEqual(self.get_row(data, second_pr.name).pending_amount, 100)
 
 	def test_fractional_order_billing_later_is_converted_before_rounding(self):
 		order_billing = OrderBillingAsOn(
 			"Purchase Receipt", BILLING_LINKS["Purchase Receipt"], "2026-06-10", precision=2
 		)
-		row = frappe._dict(name="receipt-row", amount=100, qty=3, conversion_rate=100)
-		billed = frappe._dict(amount=1.004, qty=1, amount_then=1, qty_then=1)
+		row = frappe._dict(name="receipt-row", amount=100, conversion_rate=100)
+		billed = frappe._dict(amount=1.004, amount_then=1)
 
 		billed_later = order_billing.get_line_billed_later([row], billed, {})
 		self.assertAlmostEqual(billed_later["receipt-row"], 0.4)
