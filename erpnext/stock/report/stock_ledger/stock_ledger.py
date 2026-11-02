@@ -24,10 +24,7 @@ from erpnext.stock.utils import (
 
 
 def execute(filters=None):
-<<<<<<< HEAD
-=======
 	validate_date_range(filters)
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -152,11 +149,7 @@ def execute(filters=None):
 			conversion_factors.append(item_detail.conversion_factor)
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
-<<<<<<< HEAD
 	return columns, data
-=======
-	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no",))
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 def set_bundle_qty_and_value(sle, bundle_info):

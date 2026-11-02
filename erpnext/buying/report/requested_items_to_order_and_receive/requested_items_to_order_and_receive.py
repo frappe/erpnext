@@ -6,15 +6,10 @@ import copy
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cint, date_diff, flt, getdate
-=======
-from frappe.query_builder.functions import Coalesce, Max, Min, Sum
-from frappe.utils import cint, flt, getdate
 
 from erpnext.accounts.report.utils import validate_date_range
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 def execute(filters=None):
@@ -34,11 +29,12 @@ def execute(filters=None):
 
 def validate_filters(filters):
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
+	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
 
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
-
-	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
+	elif date_diff(to_date, from_date) < 0:
+		frappe.throw(_("To Date cannot be before From Date."))
 
 
 def get_data(filters):

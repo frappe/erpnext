@@ -6,15 +6,8 @@ from frappe import _
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, getdate
 
-<<<<<<< HEAD
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
-=======
 from erpnext.accounts.report.utils import validate_date_range
-from erpnext.stock.doctype.company_restriction.company_restriction import (
-	get_allowed_companies_condition,
-	get_allowed_masters_condition,
-)
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 
 
 def execute(filters=None):

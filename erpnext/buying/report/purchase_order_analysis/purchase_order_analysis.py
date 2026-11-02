@@ -8,21 +8,11 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import IfNull, Sum
-<<<<<<< HEAD
 from frappe.utils import date_diff, flt, getdate
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
-=======
-from frappe.utils import flt, getdate
-
-import erpnext
 from erpnext.accounts.report.utils import validate_date_range
-from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
-	get_invoiced_qty_against_po_items,
-)
-from erpnext.utilities.query import get_match_conditions_qb
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
 
 
 def execute(filters=None):
@@ -53,11 +43,12 @@ def validate_filters(filters):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
+	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
 
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
-
-	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
+	elif date_diff(to_date, from_date) < 0:
+		frappe.throw(_("To Date cannot be before From Date."))
 
 	if filters.get("group_by_po") and filters.get("group_by_item"):
 		frappe.throw(_("Group the report by Purchase Order or by Item, not both."))

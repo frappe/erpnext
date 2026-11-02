@@ -14,13 +14,8 @@ from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 def execute(filters=None):
-<<<<<<< HEAD
-	return get_columns(filters), get_data(filters)
-=======
 	validate_date_range(filters)
-
-	return prepare_serial_batch_report(get_columns(filters), get_data(filters))
->>>>>>> 5fcdcf1 (fix(reports): validate report date ranges)
+	return get_columns(filters), get_data(filters)
 
 
 def get_data(report_filters):
