@@ -153,6 +153,9 @@ class TestReceivedItemsToBeBilled(FrappeTestCase):
 		self.assertEqual((row.returned_amount, row.pending_amount), (0, 800))
 
 	def test_fixed_asset_receipt_is_listed(self):
+		from erpnext.assets.doctype.asset.test_asset import create_asset_data
+
+		create_asset_data()
 		pr = make_purchase_receipt(
 			item_code="Macbook Pro", qty=1, rate=50000, location="Test Location", posting_date="2026-06-01"
 		)

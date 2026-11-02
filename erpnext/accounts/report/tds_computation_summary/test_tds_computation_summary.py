@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_cate
 	create_records,
 )
 from erpnext.accounts.report.tax_withholding_details.test_tax_withholding_details import (
+	create_tax_accounts,
 	create_tax_category,
 )
 from erpnext.accounts.report.tds_computation_summary.tds_computation_summary import execute
@@ -19,6 +20,7 @@ from erpnext.accounts.utils import get_fiscal_year
 class TestTDSComputationSummary(FrappeTestCase):
 	def setUp(self):
 		create_records()
+		create_tax_accounts()
 
 	def tearDown(self):
 		frappe.db.rollback()
