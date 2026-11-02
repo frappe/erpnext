@@ -59,14 +59,11 @@ class PlantFlow:
 			if row.operation_row_id == idx
 		}
 
-	def get_warehouse(self, idx):
-		return self.plant_floor.machine_warehouses.get(self.get_stage(idx).workstation)
-
 	def get_inputs(self, idx):
 		return [self.get_input(idx, source) for source in self.get_stage(idx).inputs]
 
 	def get_input(self, idx, source):
-		warehouse = self.get_warehouse(source.stage_idx)
+		warehouse = self.get_stage(source.stage_idx).warehouse
 		made = self.get_made_qty(source.stage_idx) * source.share
 		return frappe._dict(
 			source,

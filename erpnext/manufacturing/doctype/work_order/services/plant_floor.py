@@ -69,31 +69,26 @@ class PlantFloorService:
 				"from_wip_warehouse": 0,
 				"use_multi_level_bom": 0,
 				"source_warehouse": None,
-				"wip_warehouse": self.get_machine_warehouse(stages[0]),
+				"wip_warehouse": stages[0].warehouse,
 				"fg_warehouse": self.plant_floor.fg_warehouse,
 			}
 		)
 
-	def get_machine_warehouse(self, stage):
-		return self.plant_floor.machine_warehouses.get(stage.workstation)
-
 	def set_operations(self, stages):
 		templates = get_inspection_templates([stage.operation for stage in stages])
-		times = {stage.idx: flt(stage.time_in_mins) for stage in self.plant_floor.stages}
 		self.doc.set("operations", [])
 		for stage in stages:
-			warehouse = self.get_machine_warehouse(stage)
 			self.doc.append(
 				"operations",
 				{
 					"operation": stage.operation,
 					"description": stage.stage_name,
 					"workstation": stage.workstation,
-					"time_in_mins": times[stage.idx],
+					"time_in_mins": stage.time_in_mins,
 					"finished_good": stage.output_item,
 					"output_qty": 0 if stage.is_packing else stage.output_qty,
-					"wip_warehouse": warehouse,
-					"fg_warehouse": self.plant_floor.fg_warehouse if stage.is_packing else warehouse,
+					"wip_warehouse": stage.warehouse,
+					"fg_warehouse": self.plant_floor.fg_warehouse if stage.is_packing else stage.warehouse,
 					"sequence_id": stage.sequence_id,
 					"status": "Pending",
 					"quality_inspection_required": cint(bool(templates.get(stage.operation))),
@@ -104,8 +99,7 @@ class PlantFloorService:
 		materials, store, rows = plan.get_materials(), self.plant_floor.warehouse, []
 		for stage in stages:
 			for source in stage.inputs:
-				warehouse = self.get_machine_warehouse(stages[source.stage_idx - 1])
-				rows.append(self.get_row(source, stage, warehouse))
+				rows.append(self.get_row(source, stage, stages[source.stage_idx - 1].warehouse))
 			rows.extend(self.get_row(row, stage, store) for row in materials if row.stage_row_id == stage.idx)
 
 		rows.extend(self.get_row(row, stages[-1], store) for row in plan.get_packing_materials())
