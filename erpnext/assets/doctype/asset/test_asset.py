@@ -204,6 +204,18 @@ class TestAsset(AssetSetup):
 					rows.append(row)
 				self.assertCountEqual(rows, [item.name for item in purchase_doc.items])
 
+	def test_purchase_amount_matches_linked_purchase_row(self):
+		for doctype in ("Purchase Receipt", "Purchase Invoice"):
+			with self.subTest(doctype=doctype):
+				purchase_doc = self.make_asset_purchase(doctype, [("Macbook Pro", 1, 100000)])
+				fieldname = frappe.scrub(doctype)
+				asset = frappe.get_doc("Asset", {fieldname: purchase_doc.name})
+
+				asset.net_purchase_amount = 600000
+				with self.assertRaisesRegex(frappe.ValidationError, "Net Purchase Amount should be"):
+					asset.save()
+				self.assertEqual(asset.purchase_amount, 100000)
+
 	def test_manual_assets_use_remaining_purchase_row_quantities(self):
 		item = create_fixed_asset_item("_Test Manual Asset Purchase", auto_create_assets=0)
 		for doctype in ("Purchase Receipt", "Purchase Invoice"):
@@ -607,6 +619,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(new_asset.asset_quantity, 2)
 		self.assertEqual(new_asset.net_purchase_amount, 2400)
+		self.assertEqual(new_asset.purchase_amount, 2400)
 		self.assertEqual(new_asset.opening_accumulated_depreciation, 98.63)
 		self.assertEqual(new_asset.split_from, asset.name)
 		self.assertEqual(depr_schedule_of_new_asset[0].depreciation_amount, 400)
@@ -615,6 +628,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(asset.asset_quantity, 8)
 		self.assertEqual(asset.net_purchase_amount, 9600)
+		self.assertEqual(asset.purchase_amount, 9600)
 		self.assertEqual(asset.opening_accumulated_depreciation, 394.52)
 		self.assertEqual(depr_schedule_of_asset[0].depreciation_amount, 1600)
 		self.assertEqual(depr_schedule_of_asset[1].depreciation_amount, 1600)

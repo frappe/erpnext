@@ -79,7 +79,8 @@
    "oldfieldtype": "Link",
    "options": "Company",
    "remember_last_selected_value": 1,
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "root_type",
@@ -209,7 +210,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2026-09-03 12:59:42.190900",
+ "modified": "2026-10-26 09:28:54.723939",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",

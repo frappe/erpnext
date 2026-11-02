@@ -693,15 +693,19 @@ class StockReservationEntry(Document):
 		voucher_delivered_qty = 0
 		if self.voucher_type == "Sales Order":
 			voucher_detail_no = self.voucher_detail_no
-			if not frappe.db.exists("Sales Order Item", self.voucher_detail_no):
+			is_packed_item = not frappe.db.exists("Sales Order Item", self.voucher_detail_no)
+			if is_packed_item:
 				voucher_detail_no = frappe.get_value(
 					"Packed Item", self.voucher_detail_no, "parent_detail_docname"
 				)
 
-			delivered_qty, conversion_factor = frappe.db.get_value(
-				"Sales Order Item", voucher_detail_no, ["delivered_qty", "conversion_factor"]
+			delivered_qty, conversion_factor, stock_qty = frappe.db.get_value(
+				"Sales Order Item", voucher_detail_no, ["delivered_qty", "conversion_factor", "stock_qty"]
 			)
 			voucher_delivered_qty = flt(delivered_qty) * flt(conversion_factor)
+			if is_packed_item:
+				# the row's delivered qty is in bundle units; scale it to component units
+				voucher_delivered_qty *= flt(self.voucher_qty) / (flt(stock_qty) or 1)
 
 		allowed_qty = min(self.available_qty, (self.voucher_qty - voucher_delivered_qty - total_reserved_qty))
 		allowed_qty = flt(allowed_qty, self.precision("reserved_qty"))
@@ -926,6 +930,7 @@ def get_available_serial_nos_to_reserve(
 				& (sre.item_code == item_code)
 				& (sre.warehouse == warehouse)
 				& (sre.delivered_qty < sre.reserved_qty)
+				& (sb_entry.delivered_qty < sb_entry.qty)
 				& (sre.reservation_based_on == "Serial and Batch")
 			)
 		)

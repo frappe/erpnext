@@ -135,6 +135,7 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
+		self.validate_access()
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
 
@@ -242,7 +243,7 @@ class PaymentReconciliation(Document):
 		if self.get("cost_center"):
 			conditions.append(jea.cost_center == self.cost_center)
 
-		account_type = erpnext.get_party_account_type(self.party_type)
+		account_type = frappe.get_cached_value("Account", self.receivable_payable_account, "account_type")
 
 		if account_type == "Receivable":
 			dr_or_cr = jea.credit_in_account_currency - jea.debit_in_account_currency
@@ -452,9 +453,10 @@ class PaymentReconciliation(Document):
 				)
 
 				# Added If clause to handle return Adhoc payments for account type holders ("Payable")
-				if party_account_defaults.get("account_type") in ("Payable") and invoice.get(
-					"invoice_type"
-				) in ["Payment Entry", "Journal Entry"]:
+				if (
+					party_account_defaults.get("account_type") in ("Payable")
+					and invoice.get("invoice_type") == "Payment Entry"
+				):
 					difference_amount = allocated_amount_in_inv_rate - allocated_amount_in_ref_rate
 				else:
 					difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
@@ -477,14 +479,15 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def allocate_entries(self, args: dict):
+		self.validate_access()
 		self.validate_entries()
 
 		exc_gain_loss_posting_date = frappe.db.get_single_value(
 			"Accounts Settings", "exchange_gain_loss_posting_date", cache=True
 		)
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"), args.get("payments"))
-		account_currency = frappe.get_cached_value(
-			"Account", self.receivable_payable_account, "account_currency"
+		account_type, account_currency = frappe.get_cached_value(
+			"Account", self.receivable_payable_account, ["account_type", "account_currency"]
 		)
 		allocated_amount_precision = get_field_precision(
 			frappe.get_meta("Payment Reconciliation Allocation").get_field("allocated_amount"),
@@ -516,7 +519,7 @@ class PaymentReconciliation(Document):
 
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
 				is_gain = (
-					res.difference_amount > 0 if self.party_type == "Customer" else res.difference_amount < 0
+					res.difference_amount > 0 if account_type == "Receivable" else res.difference_amount < 0
 				)
 				res.difference_account = get_exchange_gain_loss_account(self.company, is_gain)
 				res.exchange_rate = inv.get("exchange_rate")
@@ -572,10 +575,9 @@ class PaymentReconciliation(Document):
 
 	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		adjust_allocations_for_taxes(self)
+		account_type = frappe.get_cached_value("Account", self.receivable_payable_account, "account_type")
 		dr_or_cr = (
-			"credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == "Receivable"
-			else "debit_in_account_currency"
+			"credit_in_account_currency" if account_type == "Receivable" else "debit_in_account_currency"
 		)
 
 		entry_list = []
@@ -599,6 +601,7 @@ class PaymentReconciliation(Document):
 
 	@frappe.whitelist()
 	def reconcile(self):
+		self.validate_access()
 		if frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 			running_doc = is_any_doc_running(
 				dict(
@@ -653,6 +656,13 @@ class PaymentReconciliation(Document):
 				payment_details[x.fieldname] = row.get(x.fieldname)
 
 		return payment_details
+
+	def validate_access(self):
+		if self.company:
+			erpnext.require_permission("Company", self.company, "select")
+		if self.receivable_payable_account:
+			erpnext.require_permission("Account", self.receivable_payable_account)
+		erpnext.require_party_permission(self.party_type, self.party)
 
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:

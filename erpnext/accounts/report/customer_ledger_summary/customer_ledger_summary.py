@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
+from erpnext.accounts.report.trial_balance.trial_balance import validate_company_permission
 
 TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
@@ -48,6 +49,8 @@ class PartyLedgerSummaryReport:
 	def validate_filters(self):
 		if not self.filters.get("company"):
 			frappe.throw(_("{0} is mandatory").format(_("Company")))
+
+		validate_company_permission(self.filters.company)
 
 		if self.filters.from_date > self.filters.to_date:
 			frappe.throw(_("From Date must be before To Date"))
@@ -406,6 +409,11 @@ class PartyLedgerSummaryReport:
 						query = query.where(
 							(gle[dimension.fieldname]).isin(self.filters.get(dimension.fieldname))
 						)
+
+		from frappe.desk.reportview import build_match_conditions
+
+		if match_conditions := build_match_conditions("GL Entry"):
+			query = query.where(Bracket(LiteralValue(match_conditions)))
 
 		return query
 

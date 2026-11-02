@@ -1009,6 +1009,18 @@ class TestItem(ERPNextTestSuite):
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
+	def test_disabled_uom_cannot_be_used_by_item(self):
+		disabled_uom = frappe.get_doc(
+			{"doctype": "UOM", "uom_name": frappe.generate_hash(length=12), "enabled": 0}
+		).insert()
+
+		self.assertRaises(frappe.ValidationError, make_item, properties={"stock_uom": disabled_uom.name})
+		self.assertRaises(
+			frappe.ValidationError,
+			make_item,
+			uoms=[{"uom": disabled_uom.name, "conversion_factor": 2}],
+		)
+
 	def test_item_uom_conversion_factor_overrides_global_factor(self):
 		custom_factor = 10.76
 		global_factor = get_uom_conv_factor("Square Meter", "Square Foot")

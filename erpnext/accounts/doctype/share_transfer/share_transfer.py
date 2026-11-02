@@ -7,7 +7,7 @@ from frappe import _
 from frappe.exceptions import ValidationError
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
-from frappe.utils import nowdate
+from frappe.utils import flt, nowdate
 
 
 class ShareDontExists(ValidationError):
@@ -200,12 +200,12 @@ class ShareTransfer(Document):
 			frappe.throw(_("The seller and the buyer cannot be the same"))
 		if self.no_of_shares != self.to_no - self.from_no + 1:
 			frappe.throw(_("The number of shares and the share numbers are inconsistent"))
-		if not self.amount:
-			self.amount = self.rate * self.no_of_shares
-		if self.amount != self.rate * self.no_of_shares:
+		amount = flt(self.rate * self.no_of_shares, self.precision("amount"))
+		if self.amount and flt(self.amount, self.precision("amount")) != amount:
 			frappe.throw(
 				_("There are inconsistencies between the rate, no of shares and the amount calculated")
 			)
+		self.amount = amount
 
 	def share_exists(self, shareholder):
 		doc = self.get_shareholder_doc(shareholder)
@@ -218,9 +218,7 @@ class ShareTransfer(Document):
 				continue  # since query lies outside bounds
 			elif entry.from_no <= self.from_no and entry.to_no >= self.to_no:  # both inside
 				return "Complete"  # absolute truth!
-			elif entry.from_no <= self.from_no <= self.to_no:
-				return "Partial"
-			elif entry.from_no <= self.to_no <= entry.to_no:
+			else:
 				return "Partial"
 
 		return "Outside"

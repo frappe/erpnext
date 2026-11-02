@@ -48,7 +48,6 @@ class SubAssemblyService:
 
 		bom_data = []
 		get_sub_assembly_items(
-			[item.production_item for item in sub_assembly_items_store],
 			bin_details,
 			row.bom_no,
 			bom_data,
@@ -68,7 +67,7 @@ class SubAssemblyService:
 
 		frappe.msgprint(
 			_(
-				"Row #{0}: Since 'Produce an Item at Each Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+				"Row #{0}: Since 'Produce Item per Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
 			).format(row.idx, row.bom_no)
 		)
 		return True

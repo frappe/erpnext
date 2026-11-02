@@ -143,7 +143,9 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			value = data.account_name || value;
 
 			column.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+				"erpnext.financial_statements.open_general_ledger(" +
+				erpnext.financial_statements.to_onclick_arg(data) +
+				")";
 			column.is_tree = true;
 		}
 

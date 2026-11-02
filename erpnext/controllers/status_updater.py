@@ -506,10 +506,17 @@ class StatusUpdater(Document):
 		# installation is not a stock movement, so bundles and non-stock items are installable too
 		if is_qty_check and not is_installation:
 			item_table = frappe.qb.DocType("Item")
+			bundle = frappe.qb.DocType("Product Bundle")
+			# a bundle parent is non-stock, but its packed items move real stock, so limit it like a stock item
+			active_bundle_items = (
+				frappe.qb.from_(bundle)
+				.select(bundle.new_item_code)
+				.where((bundle.is_active == 1) & (bundle.docstatus == 1) & (bundle.disabled == 0))
+			)
 			query = (
 				query.join(item_table)
 				.on(item_table.name == item_field_col)
-				.where(item_table.is_stock_item == 1)
+				.where((item_table.is_stock_item == 1) | item_field_col.isin(active_bundle_items))
 			)
 
 		return query.run(as_dict=True)

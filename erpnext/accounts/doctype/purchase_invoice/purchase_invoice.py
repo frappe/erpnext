@@ -763,6 +763,8 @@ class PurchaseInvoice(BuyingController):
 		self.process_common_party_accounting()
 
 		if self.is_return:
+			if self.return_against:
+				frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 			self.refresh_subscription_status()
 
 	def on_update_after_submit(self):
@@ -884,6 +886,9 @@ class PurchaseInvoice(BuyingController):
 			"Quality Inspection",
 			"Tax Withholding Entry",
 		)
+
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 
 		self.refresh_subscription_status()
 

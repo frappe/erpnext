@@ -6,7 +6,7 @@
    "label": "Work Order Analysis"
   }
  ],
- "content": "[{\"id\": \"edd70d2aa1\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Manufacturing Onboarding\", \"col\": 12}}, {\"id\": \"13b8fcbb95\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Work Order Analysis\", \"col\": 12}}, {\"id\": \"5213f36c4a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Work Orders\", \"col\": 4}}, {\"id\": \"95ca4e04c1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"WIP Work Orders\", \"col\": 4}}, {\"id\": \"2dc98dbd6f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Monthly Completed Work Order\", \"col\": 4}}, {\"id\": \"mfgcard000\", \"type\": \"card\", \"data\": {\"card_name\": \"Production Reports\", \"col\": 4}}, {\"id\": \"mfgcard001\", \"type\": \"card\", \"data\": {\"card_name\": \"Planning Reports\", \"col\": 4}}, {\"id\": \"mfgcard002\", \"type\": \"card\", \"data\": {\"card_name\": \"BOM Reports\", \"col\": 4}}, {\"id\": \"mfgcard003\", \"type\": \"card\", \"data\": {\"card_name\": \"Planning\", \"col\": 4}}, {\"id\": \"mfgcard004\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}, {\"id\": \"mfgcard005\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
+ "content": "[{\"id\": \"edd70d2aa1\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Manufacturing Onboarding\", \"col\": 12}}, {\"id\": \"13b8fcbb95\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Work Order Analysis\", \"col\": 12}}, {\"id\": \"5213f36c4a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Open Work Orders\", \"col\": 4}}, {\"id\": \"95ca4e04c1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"WIP Work Orders\", \"col\": 4}}, {\"id\": \"2dc98dbd6f\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Monthly Completed Work Order\", \"col\": 4}}, {\"id\": \"mfgcard000\", \"type\": \"card\", \"data\": {\"card_name\": \"Production Reports\", \"col\": 4}}, {\"id\": \"mfgcard001\", \"type\": \"card\", \"data\": {\"card_name\": \"Planning Reports\", \"col\": 4}}, {\"id\": \"mfgcard002\", \"type\": \"card\", \"data\": {\"card_name\": \"BOM Reports\", \"col\": 4}}, {\"id\": \"mfgcard006\", \"type\": \"card\", \"data\": {\"card_name\": \"Subcontracting Inward Reports\", \"col\": 4}}, {\"id\": \"mfgcard003\", \"type\": \"card\", \"data\": {\"card_name\": \"Planning\", \"col\": 4}}, {\"id\": \"mfgcard004\", \"type\": \"card\", \"data\": {\"card_name\": \"Tools\", \"col\": 4}}, {\"id\": \"mfgcard005\", \"type\": \"card\", \"data\": {\"card_name\": \"Setup\", \"col\": 4}}]",
  "creation": "2020-03-02 17:11:37.032604",
  "custom_blocks": [],
  "docstatus": 0,
@@ -265,6 +265,44 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Subcontracting Inward Reports",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Subcontracting Inward Order Summary",
+   "link_count": 0,
+   "link_to": "Subcontracting Inward Order Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Subcontracted Raw Materials To Be Received",
+   "link_count": 0,
+   "link_to": "Subcontracted Raw Materials To Be Received",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Subcontracted Items To Be Delivered",
+   "link_count": 0,
+   "link_to": "Subcontracted Items To Be Delivered",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Planning",
    "link_count": 2,
    "onboard": 0,
@@ -347,7 +385,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-04 23:00:00.000000",
+ "modified": "2026-10-30 12:33:46.909819",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",

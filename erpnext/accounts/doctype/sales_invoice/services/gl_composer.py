@@ -437,7 +437,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		doc = self.doc
-		if cint(doc.redeem_loyalty_points and doc.loyalty_points and not doc.is_consolidated):
+		if cint(doc.redeem_loyalty_points and doc.loyalty_points):
 			gl_entries.append(
 				self.get_gl_dict(
 					{

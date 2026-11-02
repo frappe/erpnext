@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 from math import isfinite
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import frappe
 import requests
@@ -26,7 +27,7 @@ class CurrencyExchangeSettings(Document):
 			CurrencyExchangeSettingsResult,
 		)
 
-		access_key: DF.Data | None
+		access_key: DF.Password | None
 		api_endpoint: DF.Data
 		disabled: DF.Check
 		req_params: DF.Table[CurrencyExchangeSettingsDetails]
@@ -65,7 +66,6 @@ class CurrencyExchangeSettings(Document):
 
 			self.api_endpoint = get_api_endpoint(self.service_provider, self.use_http)
 			self.append("result_key", {"key": "result"})
-			self.append("req_params", {"key": "access_key", "value": self.access_key})
 			self.append("req_params", {"key": "amount", "value": "1"})
 			self.append("req_params", {"key": "date", "value": "{transaction_date}"})
 			self.append("req_params", {"key": "from", "value": "{from_currency}"})
@@ -94,6 +94,7 @@ class CurrencyExchangeSettings(Document):
 			params[row.key] = row.value.format(
 				transaction_date=nowdate(), to_currency="INR", from_currency="USD"
 			)
+		params.update(get_auth_params(self))
 
 		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 
@@ -120,7 +121,22 @@ class CurrencyExchangeSettings(Document):
 		if isinstance(value, bool) or not isinstance(value, int | float) or not isfinite(value) or value <= 0:
 			frappe.throw(_("Returned exchange rate must be a positive finite number."))
 
-		self.url = response.url
+		self.url = remove_access_key(response.url)
+
+
+def get_auth_params(settings: "CurrencyExchangeSettings") -> dict:
+	"""Return the provider's access key, which is kept out of the stored request parameters."""
+	if settings.service_provider == "exchangerate.host":
+		return {"access_key": settings.get_password("access_key")}
+	return {}
+
+
+def remove_access_key(url: str) -> str:
+	parts = urlsplit(url)
+	query = [
+		(key, value) for key, value in parse_qsl(parts.query, keep_blank_values=True) if key != "access_key"
+	]
+	return urlunsplit(parts._replace(query=urlencode(query)))
 
 
 @frappe.whitelist()

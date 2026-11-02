@@ -364,6 +364,7 @@ permission_query_conditions = {
 }
 
 has_permission = {
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
 	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
@@ -798,3 +799,7 @@ data_import_providers = {
 	"Customer": "erpnext.utilities.party_import_provider.PartyImportProvider",
 	"Supplier": "erpnext.utilities.party_import_provider.PartyImportProvider",
 }
+
+# Expose method source code through the API discovery endpoints. Safe for open
+# source apps and helps API clients understand what a method does.
+expose_discovery_source = True

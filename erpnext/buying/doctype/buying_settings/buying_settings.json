@@ -32,7 +32,6 @@
   "allow_negative_rates_for_items",
   "set_valuation_rate_for_rejected_materials",
   "disable_last_purchase_rate",
-  "show_pay_button",
   "purchase_invoice_settings_section",
   "bill_for_rejected_quantity_in_purchase_invoice",
   "use_transaction_date_exchange_rate",
@@ -164,13 +163,6 @@
    "fieldname": "disable_last_purchase_rate",
    "fieldtype": "Check",
    "label": "Disable last purchase rate"
-  },
-  {
-   "default": "1",
-   "depends_on": "eval: frappe.boot.versions && frappe.boot.versions.payments",
-   "fieldname": "show_pay_button",
-   "fieldtype": "Check",
-   "label": "Show pay button in Purchase Order portal"
   },
   {
    "default": "0",
@@ -351,7 +343,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-07 20:54:19.279740",
+ "modified": "2026-10-29 05:53:49.117423",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

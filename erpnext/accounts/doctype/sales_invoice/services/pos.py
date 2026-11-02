@@ -211,6 +211,30 @@ class POSService:
 			):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
+	def validate_mandatory_pos_fields(self) -> None:
+		doc = self.doc
+		if frappe.db.get_single_value("POS Settings", "invoice_type") != doc.doctype:
+			return
+
+		mandatory_fields = frappe.get_all(
+			"POS Field",
+			filters={"parent": "POS Settings", "parenttype": "POS Settings", "reqd": 1},
+			fields=["fieldname", "label"],
+		)
+		missing_fields = [_(field.label) for field in mandatory_fields if not doc.get(field.fieldname)]
+		if not missing_fields:
+			return
+
+		message = _("{0} is mandatory in POS Settings")
+		if len(missing_fields) > 1:
+			message = _("{0} are mandatory in POS Settings")
+
+		frappe.throw(
+			message.format(", ".join(map(frappe.bold, missing_fields))),
+			frappe.MandatoryError,
+			title=_("Missing POS Fields"),
+		)
+
 	def validate_created_using_pos(self) -> None:
 		doc = self.doc
 		if doc.is_created_using_pos and not doc.pos_profile:
@@ -232,7 +256,8 @@ class POSService:
 			doc.docstatus == 1
 			and not doc.is_return
 			and not allow_partial_payment
-			and doc.paid_amount < invoice_total
+			and flt(flt(doc.paid_amount) + flt(doc.write_off_amount), doc.precision("grand_total"))
+			< invoice_total
 		):
 			frappe.throw(
 				msg=_("Partial Payment in POS Transactions are not allowed."),
@@ -273,18 +298,35 @@ class POSService:
 	def check_if_consolidated_invoice(self) -> None:
 		doc = self.doc
 		if doc.doctype == "Sales Invoice" and doc.is_consolidated:
-			invoice_or_credit_note = "consolidated_credit_note" if doc.is_return else "consolidated_invoice"
-			pos_closing_entry = frappe.get_all(
-				"POS Invoice Merge Log",
-				filters={invoice_or_credit_note: doc.name},
-				pluck="pos_closing_entry",
-			)
-			if pos_closing_entry and pos_closing_entry[0]:
+			pos_closing_entry = self.get_pos_closing_entry_of_consolidated_invoice()
+			if pos_closing_entry:
 				msg = _("To cancel a {0} you need to cancel the POS Closing Entry {1}.").format(
 					frappe.bold(_("Consolidated Sales Invoice")),
-					get_link_to_form("POS Closing Entry", pos_closing_entry[0]),
+					get_link_to_form("POS Closing Entry", pos_closing_entry),
 				)
 				frappe.throw(msg, title=_("Not Allowed"))
+
+	def get_pos_closing_entry_of_consolidated_invoice(self) -> str | None:
+		merge_log = frappe.qb.DocType("POS Invoice Merge Log")
+		query = frappe.qb.from_(merge_log).select(merge_log.pos_closing_entry).limit(1)
+
+		if self.doc.is_return:
+			merge_log_item = frappe.qb.DocType("POS Invoice Reference")
+			pos_invoice = frappe.qb.DocType("POS Invoice")
+			query = (
+				query.join(merge_log_item)
+				.on(merge_log_item.parent == merge_log.name)
+				.join(pos_invoice)
+				.on(pos_invoice.name == merge_log_item.pos_invoice)
+				.where(pos_invoice.consolidated_invoice == self.doc.name)
+			)
+		else:
+			query = query.where(merge_log.consolidated_invoice == self.doc.name)
+
+		result = query.where(
+			merge_log.pos_closing_entry.isnotnull() & (merge_log.pos_closing_entry != "")
+		).run()
+		return result[0][0] if result else None
 
 	def check_if_created_using_pos_and_pos_closing_entry_generated(self) -> None:
 		doc = self.doc

@@ -6,6 +6,8 @@
 import frappe
 from frappe import _
 
+from erpnext.stock.get_item_details import get_default_bom
+
 
 class SubcontractingService:
 	def __init__(self, doc):
@@ -32,7 +34,7 @@ class SubcontractingService:
 						"Subcontracting BOM",
 						{"finished_good": item.fg_item, "is_active": 1},
 						"finished_good_bom",
-					) and not frappe.get_value("Item", item.fg_item, "default_bom"):
+					) and not get_default_bom(item.fg_item):
 						frappe.throw(
 							_("Row #{0}: BOM not found for FG Item {1}").format(item.idx, item.fg_item)
 						)

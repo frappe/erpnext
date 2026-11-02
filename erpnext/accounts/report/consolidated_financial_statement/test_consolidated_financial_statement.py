@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.utils import add_days, flt, getdate, today
 
 from erpnext.accounts.report import utils as report_utils
@@ -365,6 +366,24 @@ class TestConsolidatedFinancialStatement(ERPNextTestSuite):
 		)
 		profit_change = self.get_change(before, after, "Provisional Profit / Loss (Credit)")
 		self.assertAlmostEqual(profit_change, 150 * transaction_rate, 2)
+
+	def test_company_without_permission_is_refused(self):
+		user = create_user("test_cfs_child_company@example.com", "Accounts User")
+		frappe.permissions.add_user_permission("Company", CHILD_COMPANY, user.name)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, self.run_report, report="Balance Sheet")
+
+	def test_group_company_permission_covers_subsidiaries(self):
+		self.post_journal_entry("Cash - CCI", "Sales - CCI", 100)
+		user = create_user("test_cfs_group_company@example.com", "Accounts User")
+		frappe.permissions.add_user_permission("Company", PARENT_COMPANY, user.name)
+
+		expected = self.run_report(report="Balance Sheet")
+		with self.set_user(user.name):
+			data = self.run_report(report="Balance Sheet")
+		self.assertTrue(data)
+		self.assertEqual(data, expected)
 
 	def test_closed_year_leaves_no_provisional_profit(self):
 		self.set_closing_rate(70)

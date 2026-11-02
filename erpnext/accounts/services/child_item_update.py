@@ -18,6 +18,7 @@ from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from erpnext.stock.get_item_details import (
 	_get_bin_details,
 	get_conversion_factor,
+	get_default_bom,
 	get_item_warehouse_,
 )
 from erpnext.stock.utils import (
@@ -192,6 +193,8 @@ class ChildItemUpdater:
 		if self.parent_doctype == "Sales Order" and not parent.is_subcontracted:
 			make_packing_list(parent)
 			parent.set_gross_profit()
+		elif self.parent_doctype == "Quotation":
+			make_packing_list(parent)
 
 		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
 			parent.doctype, parent.company, parent.base_grand_total, parent
@@ -250,18 +253,22 @@ class ChildItemUpdater:
 			parent.validate_warehouse()
 			parent.update_reserved_qty()
 			parent.update_project()
-			parent.update_prevdoc_status("submit")
+			parent.update_prevdoc_status("submit", update_quotation_qty=True)
 			parent.update_delivery_status()
 
 		elif self.parent_doctype == "Supplier Quotation":
 			parent.update_rfq_supplier_status(parent.docstatus.is_submitted(), self._rfqs_before_update)
 			parent.set_status(update=True)
 
+		elif self.parent_doctype == "Quotation":
+			parent.set_status(update=True)
+
 		parent.reload()
 		self._validate_workflow()
 
 		if self.parent_doctype in ("Purchase Order", "Sales Order"):
-			parent.update_blanket_order()
+			# Covers blanket orders of removed rows, which are no longer on the items
+			parent.update_blanket_order({blanket_order for blanket_order, _ in self._blanket_order_change})
 			parent.update_billing_percentage()
 			parent.set_status()
 
@@ -274,7 +281,14 @@ class ChildItemUpdater:
 				has_reserved_stock,
 			)
 
-			if parent.per_picked == 0 and has_reserved_stock(parent.doctype, parent.name):
+			# Only rebuild reservations when a stock-relevant change happened. A rate/discount edit
+			# must not cancel and re-create them, which would drop delivered and partial reservations
+			# and re-reserve rows the user had deliberately unreserved.
+			if (
+				parent.per_picked == 0
+				and (any_qty_changed or any_conversion_factor_changed or items_added_or_removed)
+				and has_reserved_stock(parent.doctype, parent.name)
+			):
 				cancel_stock_reservation_entries(parent.doctype, parent.name)
 				parent.create_stock_reservation_entries()
 
@@ -323,6 +337,36 @@ class ChildItemUpdater:
 					self.parent.name, _(self.parent.status)
 				)
 			)
+
+		# The Supplier Quotation form hides Update Items for these states; enforce it server-side too.
+		if self.parent_doctype == "Supplier Quotation" and self.parent.status in (
+			"Ordered",
+			"Stopped",
+			"Expired",
+		):
+			frappe.throw(
+				_("Cannot update items of Supplier Quotation {0} because it is {1}.").format(
+					self.parent.name, _(self.parent.status)
+				)
+			)
+
+		# The Quotation form hides Update Items for these states; enforce it server-side too.
+		if self.parent_doctype == "Quotation":
+			quotation = self.parent
+			if quotation.status in ("Lost", "Ordered"):
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it is {1}.").format(
+						quotation.name, _(quotation.status)
+					)
+				)
+			if not quotation.is_active:
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it is not active.").format(quotation.name)
+				)
+			if quotation.valid_till and getdate(quotation.valid_till) < getdate():
+				frappe.throw(
+					_("Cannot update items of Quotation {0} because it has expired.").format(quotation.name)
+				)
 
 	def _validate_changed_uoms(self, data: list) -> None:
 		current_uoms = {row.name: row.uom for row in self.parent.get(self.child_docname)}
@@ -478,15 +522,11 @@ class ChildItemUpdater:
 					)
 				)
 
-			is_sub_contracted_item, default_bom = frappe.db.get_value(
-				"Item", new_data["fg_item"], ["is_sub_contracted_item", "default_bom"]
-			)
-
-			if not is_sub_contracted_item:
+			if not frappe.db.get_value("Item", new_data["fg_item"], "is_sub_contracted_item"):
 				frappe.throw(
 					_("Finished Good Item {0} must be a sub-contracted item").format(new_data["fg_item"])
 				)
-			elif not default_bom:
+			elif not get_default_bom(new_data["fg_item"]):
 				frappe.throw(_("Default BOM not found for FG Item {0}").format(new_data["fg_item"]))
 
 		if not new_data.get("fg_item_qty"):
@@ -524,6 +564,7 @@ def set_order_defaults(
 	child_item.warehouse = get_new_child_item_warehouse(p_doc, item, trans_item, child_doctype)
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get("conversion_factor")) or conversion_factor
+	child_item.price_list_rate = flt(trans_item.get("price_list_rate"))
 	child_item.update(_get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
 
 	if child_doctype in ("Purchase Order Item", "Supplier Quotation Item"):
@@ -709,6 +750,8 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype == "Purchase Order":
 		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
+	elif parent.doctype == "Sales Order":
+		parent.update_ordered_qty_in_quotation_for_removed_items(deleted_children)
 
 	if parent.doctype not in ("Quotation", "Supplier Quotation"):
 		parent.update_prevdoc_status()
@@ -801,7 +844,7 @@ def update_child_item_rate_and_discount(
 
 	child_item.rate = row_rate
 
-	if parent_doctype not in ("Sales Order", "Purchase Order") or not flt(child_item.price_list_rate):
+	if not flt(child_item.price_list_rate):
 		return
 
 	if flt(child_item.rate) > flt(child_item.price_list_rate):
