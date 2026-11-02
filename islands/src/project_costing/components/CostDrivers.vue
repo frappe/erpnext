@@ -37,7 +37,13 @@ const tabs = computed(() =>
 		.filter(([key]) => drivers.value[key] != null)
 		.map(([key, dimension]) => ({ value: key, label: dimension.label }))
 );
-const tab = ref("activities");
+// Activities first; a user who may not read timesheets starts on the first tab they have.
+const selected = ref("activities");
+const tab = computed({
+	get: () =>
+		tabs.value.some((option) => option.value === selected.value) ? selected.value : tabs.value[0]?.value,
+	set: (value) => (selected.value = value),
+});
 
 // Labour by person or activity reveals costing rates, so without them it shows hours.
 const hours_only = computed(() => LABOUR.includes(tab.value) && !props.view.access.labour);

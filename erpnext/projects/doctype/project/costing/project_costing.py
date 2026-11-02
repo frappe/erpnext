@@ -10,7 +10,11 @@ from frappe.utils import add_months, flt, getdate
 
 from erpnext.projects.doctype.project.costing.billing import INVOICE_PAGE, ProjectBilling
 from erpnext.projects.doctype.project.costing.drivers import CostDrivers
-from erpnext.projects.doctype.project.costing.queries import MonthlyAmounts, ProjectCostQueries
+from erpnext.projects.doctype.project.costing.queries import (
+	CONSUMPTION_VOUCHER_TYPES,
+	MonthlyAmounts,
+	ProjectCostQueries,
+)
 from erpnext.projects.doctype.project.project_overview import check_access
 
 PROJECT_FIELDS = ("name", "status", "customer", "company", "percent_complete", "estimated_costing")
@@ -19,13 +23,16 @@ FORECAST_TOLERANCE = 5
 RUNNING_STATUSES = ("Open", "On hold")
 # What each part of the Costing tab opens, and the doctype whose read permission it needs.
 SOURCE_DOCTYPES = {
+	"timesheets": "Timesheet",
 	"purchases": "Purchase Invoice",
 	"invoices": "Sales Invoice",
 	"sales_orders": "Sales Order",
 }
+# What the Costing tab's buttons create.
+NEW_DOCTYPES = ("Timesheet", "Sales Order", "Sales Invoice")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def get_project_costing(project: str) -> dict:
 	"""Return the data behind the Project form's Costing tab.
 
@@ -36,12 +43,12 @@ def get_project_costing(project: str) -> dict:
 	return ProjectCosting(project).build()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["GET"])
 def get_project_invoices(project: str, start: int = 0) -> list[dict]:
 	"""A page of the invoices billed to the project, newest first. The Billing card pages through
 	them when its invoices name the project in different ways and no list filter finds them all."""
 	check_access(project)
-	billing = ProjectBilling(project, get_costing_access(project))
+	billing = ProjectBilling(project, get_costing_access())
 	return billing.invoices(start=max(start, 0), page_length=INVOICE_PAGE) or []
 
 
@@ -57,16 +64,15 @@ class ProjectCosting:
 	def __init__(self, project: str):
 		self.project = frappe.db.get_value("Project", project, PROJECT_FIELDS, as_dict=True)
 		self.queries = ProjectCostQueries(project)
-		self.access = get_costing_access(project)
+		self.access = get_costing_access()
 		self.currency = frappe.get_cached_value("Company", self.project.company, "default_currency")
 
 	def build(self) -> dict:
 		payload = {
 			"project": self.project.name,
-			# the Project stores the customer's ID, which a naming series makes unreadable
-			"customer_name": self.customer_name(),
-			"as_of": str(getdate()),
 			"currency": self.currency,
+			# the stock ledger rows Materials reads, for the list its slice opens
+			"consumption_voucher_types": CONSUMPTION_VOUCHER_TYPES,
 			"access": self.access,
 			"errors": {},
 		}
@@ -78,11 +84,6 @@ class ProjectCosting:
 				payload["errors"][section] = 1
 				frappe.log_error(title="Project Costing: " + section)
 		return payload
-
-	def customer_name(self) -> str | None:
-		if not self.project.customer:
-			return None
-		return frappe.get_cached_value("Customer", self.project.customer, "customer_name")
 
 	def summary(self) -> dict:
 		summary = CostingSummary(self.project, self.totals, self.contract).build()
@@ -143,8 +144,9 @@ class ProjectCosting:
 		return self.queries.sales_order_amount()
 
 
-def get_costing_access(project: str) -> dict[str, bool]:
-	"""What the user may open behind the Costing tab's totals.
+def get_costing_access() -> dict:
+	"""What the user may open behind the Costing tab's totals, and which documents its buttons may
+	create.
 
 	Every user who can read the Project sees the totals. The documents behind them, and the
 	amounts split by person or supplier, follow the user's permission on each doctype.
@@ -153,9 +155,10 @@ def get_costing_access(project: str) -> dict[str, bool]:
 	access["labour"] = can_read_labour_cost()
 	# Materials open as Stock Entries; the list behind them reads stock ledger rows.
 	access["materials"] = can_read("Stock Entry") and can_read("Stock Ledger Entry")
+	access["expenses"] = has_hrms() and can_read("Expense Claim")
 	# The Accounts view reads the project's ledger entries.
 	access["ledger"] = can_read("GL Entry")
-	access["edit_estimate"] = can_edit_estimate(project)
+	access["create"] = {doctype: can_create(doctype) for doctype in NEW_DOCTYPES}
 	return access
 
 
@@ -187,6 +190,10 @@ def can_read(doctype: str) -> bool:
 	return bool(frappe.has_permission(doctype, "read"))
 
 
+def can_create(doctype: str) -> bool:
+	return bool(frappe.has_permission(doctype, "create"))
+
+
 def can_read_labour_cost() -> bool:
 	"""Costing rates sit on a higher permission level of Timesheet Detail than hours do."""
 	if not can_read("Timesheet"):
@@ -195,10 +202,6 @@ def can_read_labour_cost() -> bool:
 		return True
 	permitted = get_permitted_fields("Timesheet Detail", parenttype="Timesheet", permission_type="read")
 	return "costing_rate" in permitted
-
-
-def can_edit_estimate(project: str) -> bool:
-	return bool(frappe.has_permission("Project", "write", doc=project))
 
 
 class CostingSummary:

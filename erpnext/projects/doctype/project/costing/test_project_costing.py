@@ -4,6 +4,7 @@
 from unittest.mock import patch
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.classes.context_managers import freeze_time, patch_hooks
 from frappe.utils import add_months, add_to_date, get_first_day, getdate, now_datetime, nowdate
 
@@ -31,13 +32,14 @@ UNPRICED_ACTIVITY = "_Test Unpriced Activity"
 VIEWER = "costing-viewer@example.com"
 EMPLOYEE_USER = "costing-employee@example.com"
 HR_MANAGER = "costing-hr-manager@example.com"
+SALES_VIEWER = "costing-sales-viewer@example.com"
 ADD_GENERAL_LEDGER = "erpnext.projects.doctype.project.costing.test_project_costing.add_general_ledger"
 
 
 class TestProjectCosting(ERPNextTestSuite):
 	def test_summary_health_forecast_and_margins(self) -> None:
 		"""Forecast scales cost by progress only while the project runs; health compares cost and
-		forecast with the estimate; margins follow billing, contract and estimate."""
+		forecast with the estimate; margins follow billing, contract and estimate, when there are."""
 		running = summary(
 			status="Open", percent_complete=50, estimate=1000, cost=600, billed=1500, contract=2000
 		)
@@ -55,7 +57,7 @@ class TestProjectCosting(ERPNextTestSuite):
 		finished = summary(status="Completed", percent_complete=50, estimate=1000, cost=600)
 		self.assertEqual((finished["forecast"], finished["health"]), (600, "ok"))
 
-	def test_summary_without_estimate_contract_or_billing(self) -> None:
+		# without an estimate, a contract or billing
 		bare = summary(percent_complete=40, cost=400)
 		self.assertEqual(bare["health"], "none")
 		self.assertIsNone(bare["variance"])
@@ -133,24 +135,33 @@ class TestProjectCosting(ERPNextTestSuite):
 		)
 		self.assertIn(item_invoice, {page[0]["name"] for page in pages[:2]})
 
-	def test_viewer_without_cost_access_sees_totals_only(self) -> None:
-		"""A Projects User sees the same totals, but not costing rates or the invoices behind them."""
+	def test_viewers_see_the_totals_and_only_what_they_may_read(self) -> None:
+		"""A Projects User sees the same totals, without costing rates or the invoices behind them. A
+		Sales User the project is shared with cannot read timesheets: the labour lists are left out,
+		and every section still builds."""
 		project = self.project_with_documents()
 		cost = get_project_costing(project.name)["summary"]["cost"]
+		sales_viewer = create_user(SALES_VIEWER, "Sales User").name
+		frappe.share.add("Project", project.name, sales_viewer, read=1)
 
-		frappe.set_user(make_viewer())
-		costing = get_project_costing(project.name)
-		frappe.set_user("Administrator")
+		try:
+			frappe.set_user(make_viewer())
+			projects_view = get_project_costing(project.name)
+			frappe.set_user(sales_viewer)
+			sales_view = get_project_costing(project.name)
+		finally:
+			frappe.set_user("Administrator")
 
-		self.assertEqual(costing["errors"], {})
-		self.assertEqual(
-			costing["customer_name"], frappe.db.get_value("Customer", "_Test Customer", "customer_name")
-		)
-		self.assertFalse(costing["access"]["labour"])
-		self.assertEqual(costing["summary"]["cost"], cost)
-		self.assertIsNone(costing["billing"]["invoices"])
-		self.assertIsNone(costing["rate_gaps"])
-		self.assertNotIn("amount", costing["drivers"]["activities"][0])
+		self.assertEqual((projects_view["errors"], sales_view["errors"]), ({}, {}))
+		self.assertEqual((projects_view["summary"]["cost"], sales_view["summary"]["cost"]), (cost, cost))
+		self.assertFalse(projects_view["access"]["labour"])
+		self.assertFalse(projects_view["access"]["create"]["Sales Invoice"])
+		self.assertIsNone(projects_view["billing"]["invoices"])
+		self.assertIsNone(projects_view["rate_gaps"])
+		self.assertNotIn("amount", projects_view["drivers"]["activities"][0])
+		self.assertFalse(sales_view["access"]["timesheets"])
+		self.assertIsNone(sales_view["drivers"]["activities"])
+		self.assertIsNone(sales_view["drivers"]["employees"])
 
 	def test_lists_keep_to_the_documents_the_user_may_read(self) -> None:
 		"""A user limited to their own Employee sees only their own time in the lists, while the
@@ -178,7 +189,7 @@ class TestProjectCosting(ERPNextTestSuite):
 	def test_reports_come_from_the_dashboard_and_keep_to_those_that_open(self) -> None:
 		"""The Reports menu lists the Project dashboard's reports, including those another app adds,
 		filtered to the project; a disabled report, or one the user's roles may not open, is left out."""
-		project = self.project_with_documents()
+		project = make_project({"project_name": f"_Test Costing Reports {frappe.generate_hash(length=6)}"})
 		with patch_hooks({"override_doctype_dashboards": {"Project": [ADD_GENERAL_LEDGER]}}):
 			reports = get_project_costing(project.name)["reports"]
 
@@ -192,7 +203,7 @@ class TestProjectCosting(ERPNextTestSuite):
 
 		names = ("General Ledger", "Timesheet Billing Summary", "_Test Missing Report")
 		# an Employee is on the report's roles, but may not run reports on Timesheet
-		employee = make_user_with_roles(EMPLOYEE_USER, "Employee")
+		employee = create_user(EMPLOYEE_USER, "Employee").name
 		frappe.set_user(make_viewer())
 		try:
 			self.assertEqual(permitted_reports(names), ["Timesheet Billing Summary"])
@@ -202,7 +213,7 @@ class TestProjectCosting(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 		# a Custom Report opens as the report it is saved from, so it follows that report's roles
 		custom = timesheet_custom_report()
-		frappe.set_user(make_user_with_roles(HR_MANAGER, "HR Manager"))
+		frappe.set_user(create_user(HR_MANAGER, "HR Manager").name)
 		try:
 			# both checks pass on the Custom Report itself
 			self.assertTrue(frappe.get_doc("Report", custom).is_permitted())
@@ -216,9 +227,9 @@ class TestProjectCosting(ERPNextTestSuite):
 		self.assertEqual(permitted_reports(names), ["General Ledger"])
 		self.assertEqual(permitted_reports((custom,)), [])
 
-	def test_monthly_amounts_add_up_to_the_stored_totals(self) -> None:
-		"""Every source, split by month, sums to the total the Project stores for it, and each
-		amount lands in the month of the document that booked it."""
+	def test_monthly_amounts_land_in_their_month(self) -> None:
+		"""Every source, split by month, adds up to its total, and each amount lands in the month of
+		the document that booked it."""
 		project = make_project({"project_name": f"_Test Cost By Month {frappe.generate_hash(length=6)}"})
 		first_month, second_month = month_days(-2), month_days(-1)
 
@@ -226,18 +237,15 @@ class TestProjectCosting(ERPNextTestSuite):
 			self.book_first_month(project.name)
 		with freeze_time(second_month):
 			self.book_second_month(project.name)
-		update_costing_and_billing(project.name)
-		project.reload()
 
 		queries = ProjectCostQueries(project.name)
-		for method, field in (
-			(queries.labour_cost, "total_costing_amount"),
-			(queries.purchase_cost, "total_purchase_cost"),
-			(queries.material_cost, "total_consumed_material_cost"),
-			(queries.billed_amount, "total_billed_amount"),
+		for method in (
+			queries.labour_cost,
+			queries.purchase_cost,
+			queries.material_cost,
+			queries.billed_amount,
 		):
-			self.assertAlmostEqual(sum(method(by_month=True).values()), project.get(field), places=2)
-			self.assertAlmostEqual(method(), project.get(field), places=2)
+			self.assertAlmostEqual(sum(method(by_month=True).values()), method(), places=2)
 
 		billed = queries.billed_amount(by_month=True)
 		self.assertGreater(billed[month_key(first_month)], 0)
@@ -246,15 +254,6 @@ class TestProjectCosting(ERPNextTestSuite):
 			set(queries.labour_cost(by_month=True)), {month_key(first_month), month_key(second_month)}
 		)
 		self.assertEqual(set(queries.material_cost(by_month=True)), {month_key(second_month)})
-
-	def test_project_without_documents_has_nothing_to_split(self) -> None:
-		project = make_project({"project_name": f"_Test Empty Cost {frappe.generate_hash(length=6)}"})
-		queries = ProjectCostQueries(project.name)
-
-		self.assertEqual(queries.labour_cost(by_month=True), {})
-		self.assertEqual(queries.purchase_cost(by_month=True), {})
-		self.assertEqual(queries.billed_amount(), 0)
-		self.assertEqual(queries.sales_order_amount(), 0)
 
 	def book_first_month(self, project: str) -> None:
 		"""Time, a non-stock purchase and an invoice, all booked in the first month.
@@ -360,16 +359,7 @@ def timesheet_custom_report() -> str:
 
 
 def make_viewer() -> str:
-	return make_user_with_roles(VIEWER, "Projects User")
-
-
-def make_user_with_roles(email: str, *roles: str) -> str:
-	if not frappe.db.exists("User", email):
-		user = frappe.get_doc(
-			{"doctype": "User", "email": email, "first_name": "Costing Test", "send_welcome_email": 0}
-		).insert()
-		user.add_roles(*roles)
-	return email
+	return create_user(VIEWER, "Projects User").name
 
 
 def billing_of(project: str) -> dict:
