@@ -2656,38 +2656,49 @@ def get_vouchers_reported_by(report_name, companies, filters):
 
 
 def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
-	auto_reconciliation_job_trigger = auto_reconciliation_job_trigger or frappe.get_single_value(
-		"Accounts Settings", "auto_reconciliation_job_trigger"
+	auto_reconciliation_job_trigger = (
+		auto_reconciliation_job_trigger
+		or frappe.get_single_value("Accounts Settings", "auto_reconciliation_job_trigger")
+		or 15
 	)
 	method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
 
-	sch_event = frappe.get_doc(
-		"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}
-	)
-	if frappe.db.get_value("Scheduled Job Type", {"method": method}):
+	event_filters = {"scheduled_against": "Process Payment Reconciliation", "method": method}
+	# Serialize registration so concurrent settings saves cannot create duplicate records.
+	frappe.db.get_value("DocType", "Scheduler Event", "name", for_update=True)
+	sch_event = frappe.db.get_value("Scheduler Event", event_filters, "name")
+	if not sch_event:
+		sch_event = (
+			frappe.get_doc({"doctype": "Scheduler Event", **event_filters})
+			.insert(ignore_permissions=True)
+			.name
+		)
+	job_name = frappe.db.get_value("Scheduled Job Type", {"method": method}, "name")
+	if job_name:
 		frappe.get_doc(
 			"Scheduled Job Type",
-			{
-				"method": method,
-			},
+			job_name,
 		).update(
 			{
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event,
+				"frequency": "Cron",
+				"create_log": True,
+				"stopped": False,
 			}
-		).save()
+		).save(ignore_permissions=True)
 	else:
 		frappe.get_doc(
 			{
 				"doctype": "Scheduled Job Type",
 				"method": method,
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event,
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
 				"create_log": True,
 				"stopped": False,
 				"frequency": "Cron",
 			}
-		).save()
+		).insert(ignore_permissions=True)
 
 
 def get_link_fields_grouped_by_option(doctype):
