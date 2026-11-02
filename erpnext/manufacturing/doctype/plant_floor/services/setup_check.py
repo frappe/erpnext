@@ -71,11 +71,7 @@ class PlantSetupCheck:
 		return errors + self.get_sequence_errors() + self.get_material_stage_errors()
 
 	def get_sequence_errors(self):
-		stages, errors = self.plant_floor.stages, []
-		if not any(stage.sequence_id for stage in stages):
-			return []
-
-		previous = 0
+		stages, errors, previous = self.plant_floor.stages, [], 0
 		for stage in stages:
 			sequence_id = cint(stage.sequence_id)
 			if stage.idx == 1 and sequence_id != 1:
