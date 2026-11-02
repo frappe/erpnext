@@ -1953,7 +1953,7 @@ class update_entries_after:
 		In case of Stock Entry, also calculate FG Item rate and total incoming/outgoing amount
 		"""
 		if sle.voucher_type == "Stock Reconciliation":
-			if flt(sle.actual_qty) <= 0 and not self.args.get("sle_id"):
+			if not self.args.get("sle_id"):
 				self.update_rate_on_stock_reconciliation(sle)
 			return
 
@@ -2070,7 +2070,7 @@ class update_entries_after:
 		# rows and the pre-reconciliation ledger balance for non-serial rows).
 		frappe.get_lazy_doc(
 			"Stock Reconciliation", sle.voucher_no, for_update=True
-		).recalculate_difference_amount_from_ledger()
+		).recalculate_difference_amount_from_ledger(sle.voucher_detail_no)
 
 	@staticmethod
 	def get_incoming_value_for_serial_nos(sle, serial_nos):

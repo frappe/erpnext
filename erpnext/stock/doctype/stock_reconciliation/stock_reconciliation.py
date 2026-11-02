@@ -1375,7 +1375,7 @@ class StockReconciliation(StockController):
 			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
 			d.amount_difference = flt(d.amount) - flt(d.current_amount)
 
-	def recalculate_difference_amount_from_ledger(self):
+	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
 
 		Submitted reconciliations freeze ``difference_amount`` and the per-row current values at
@@ -1383,49 +1383,49 @@ class StockReconciliation(StockController):
 		Entries and rebuild the GL from them. Without this sync the document keeps showing stale figures
 		that no longer match the GL entries. Anchoring ``amount_difference`` to the row's summed
 		``stock_value_difference`` keeps the document and the GL consistent by construction.
+
+		With ``voucher_detail_no``, only that row is refreshed and the total is summed from all rows.
 		"""
 		if self.purpose == ADJUSTMENT_ENTRY:
 			AdjustmentEntry(self).set_difference_amount_from_ledger()
 			return
 
-		difference_amount = 0.0
-
 		for row in self.items:
-			stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
-			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+			if voucher_detail_no in (None, row.name):
+				self.set_row_values_from_ledger(row)
 
-			if self.is_adjustment_row(row):
-				self.set_adjustment_row_values(row, amount_difference)
-				difference_amount += amount_difference
-				continue
-
-			amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
-			current_amount = flt(amount - amount_difference, row.precision("current_amount"))
-
-			current_qty = self.get_current_qty_from_ledger(row)
-			current_valuation_rate = (
-				flt(current_amount / current_qty, row.precision("current_valuation_rate"))
-				if current_qty
-				else 0.0
-			)
-
-			row.db_set(
-				{
-					"amount": amount,
-					"current_qty": current_qty,
-					"current_valuation_rate": current_valuation_rate,
-					"current_amount": current_amount,
-					"quantity_difference": flt(row.qty) - current_qty,
-					"amount_difference": amount_difference,
-				},
-				update_modified=False,
-			)
-
-			difference_amount += amount_difference
-
+		difference_amount = sum(flt(row.amount_difference) for row in self.items)
 		self.db_set(
 			"difference_amount",
 			flt(difference_amount, self.precision("difference_amount")),
+			update_modified=False,
+		)
+
+	def set_row_values_from_ledger(self, row: StockReconciliationItem):
+		stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
+		amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+
+		if self.is_adjustment_row(row):
+			self.set_adjustment_row_values(row, amount_difference)
+			return
+
+		amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
+		current_amount = flt(amount - amount_difference, row.precision("current_amount"))
+
+		current_qty = self.get_current_qty_from_ledger(row)
+		current_valuation_rate = (
+			flt(current_amount / current_qty, row.precision("current_valuation_rate")) if current_qty else 0.0
+		)
+
+		row.db_set(
+			{
+				"amount": amount,
+				"current_qty": current_qty,
+				"current_valuation_rate": current_valuation_rate,
+				"current_amount": current_amount,
+				"quantity_difference": flt(row.qty) - current_qty,
+				"amount_difference": amount_difference,
+			},
 			update_modified=False,
 		)
 
