@@ -867,6 +867,138 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
 
+	def create_order_with_advance_on_payment_terms(self, advance, allocate_payment_based_on_terms=0):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
+
+		template_name = f"_Test Advance Terms {allocate_payment_based_on_terms}"
+		if not frappe.db.exists("Payment Terms Template", template_name):
+			create_payment_term("_Test Advance Term")
+			create_payment_term("_Test Completion Term")
+			frappe.get_doc(
+				{
+					"doctype": "Payment Terms Template",
+					"template_name": template_name,
+					"allocate_payment_based_on_payment_terms": allocate_payment_based_on_terms,
+					"terms": [
+						{
+							"payment_term": "_Test Advance Term",
+							"invoice_portion": 70,
+							"credit_days_based_on": "Day(s) after invoice date",
+							"credit_days": 1,
+						},
+						{
+							"payment_term": "_Test Completion Term",
+							"invoice_portion": 30,
+							"credit_days_based_on": "Day(s) after invoice date",
+							"credit_days": 30,
+						},
+					],
+				}
+			).insert()
+
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		po.payment_terms_template = template_name
+		po.submit()
+
+		pe = get_payment_entry(
+			"Purchase Order", po.name, party_amount=advance, bank_account="_Test Bank - _TC"
+		)
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.references = pe.references[:1]
+		pe.references[0].allocated_amount = advance
+		pe.submit()
+		return po
+
+	def assert_advance_settles_earliest_terms(self, pi):
+		pi.set_advances()
+		pi.insert()
+		self.assertEqual(pi.total_advance, 700)
+		self.assertEqual([d.payment_amount for d in pi.payment_schedule], [0, 300])
+
+		pi.submit()
+		pi.load_from_db()
+		self.assertEqual(pi.outstanding_amount, 300)
+		self.assertEqual([d.outstanding for d in pi.payment_schedule], [0, 300])
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 0})
+	def test_advance_settles_earliest_terms_without_fetching_from_order(self):
+		po = self.create_order_with_advance_on_payment_terms(700)
+		pi = make_pi_from_po(po.name)
+		pi.payment_terms_template = po.payment_terms_template
+		pi.payment_schedule = []
+		self.assert_advance_settles_earliest_terms(pi)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+	def test_advance_settles_earliest_terms_when_fetching_from_order(self):
+		po = self.create_order_with_advance_on_payment_terms(700)
+		self.assert_advance_settles_earliest_terms(make_pi_from_po(po.name))
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+	def test_advance_settles_earliest_terms_when_allocating_based_on_terms(self):
+		po = self.create_order_with_advance_on_payment_terms(700, allocate_payment_based_on_terms=1)
+		self.assert_advance_settles_earliest_terms(make_pi_from_po(po.name))
+
+	def test_advance_amounts_across_payment_terms(self):
+		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
+
+		# portions, advance, currency, conversion rate, expected amounts, expected base amounts
+		cases = [
+			([70, 30], 500, "INR", 1, [200, 300], [200, 300]),
+			([70, 30], 800, "INR", 1, [0, 200], [0, 200]),
+			([70, 30], 1000, "INR", 1, [0, 0], [0, 0]),
+			([70, 30], 0, "INR", 1, [700, 300], [700, 300]),
+			([50, 30, 20], 600, "INR", 1, [0, 200, 200], [0, 200, 200]),
+			([70, 30], 700, "USD", 80, [0, 300], [0, 24000]),
+		]
+		for portions, advance, currency, rate, amounts, base_amounts in cases:
+			with self.subTest(portions=portions, advance=advance, currency=currency):
+				pi = make_purchase_invoice(do_not_save=1)
+				pi.update(
+					{
+						"party_account_currency": currency,
+						"conversion_rate": rate,
+						"grand_total": 1000,
+						"base_grand_total": 1000 * rate,
+						"rounded_total": 0,
+						"base_rounded_total": 0,
+						"total_advance": advance,
+						"payment_terms_template": "",
+						"payment_schedule": [],
+					}
+				)
+				for idx, portion in enumerate(portions):
+					pi.append(
+						"payment_schedule", {"invoice_portion": portion, "due_date": add_days(nowdate(), idx)}
+					)
+
+				PaymentScheduleService(pi).set_payment_schedule()
+
+				self.assertEqual([d.payment_amount for d in pi.payment_schedule], amounts)
+				self.assertEqual([d.base_payment_amount for d in pi.payment_schedule], base_amounts)
+				self.assertEqual([d.outstanding for d in pi.payment_schedule], amounts)
+
+	def test_advance_leaves_fixed_amount_terms_unchanged(self):
+		from erpnext.accounts.services.payment_schedule import PaymentScheduleService
+
+		pi = make_purchase_invoice(do_not_save=1)
+		pi.update(
+			{
+				"grand_total": 1000,
+				"base_grand_total": 1000,
+				"rounded_total": 0,
+				"base_rounded_total": 0,
+				"total_advance": 700,
+				"payment_terms_template": "",
+				"payment_schedule": [],
+			}
+		)
+		pi.append("payment_schedule", {"payment_amount": 300, "due_date": nowdate()})
+
+		PaymentScheduleService(pi).set_payment_schedule()
+
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 300)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_purchase_invoice_with_advance(self):
 		jv = frappe.copy_doc(self.globalTestRecords["Journal Entry"][1])
@@ -953,9 +1085,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		pi.save()
 		pi.submit()
-		self.assertEqual(pi.payment_schedule[0].payment_amount, 606.15)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, 456.15)
 		self.assertEqual(pi.payment_schedule[0].due_date, pi.posting_date)
-		self.assertEqual(pi.payment_schedule[1].payment_amount, 606.15)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, 756.15)
 		self.assertEqual(pi.payment_schedule[1].due_date, add_days(pi.posting_date, 30))
 
 		pi.load_from_db()
