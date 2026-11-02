@@ -1031,6 +1031,8 @@ class update_entries_after:
 
 			self.distinct_dependant_item_wh.add(item_wh_key)
 			self._sles.extend(self.get_future_entries_to_repost(pending))
+			# resume from here if a checkpoint is saved before its first entry is reposted
+			self.item_wh_wise_last_posted_sle[item_wh_key] = pending
 			started = True
 
 		if started:
