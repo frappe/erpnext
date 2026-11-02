@@ -92,9 +92,10 @@ export function quoteStatus(q: any): string {
 	return q?.status ?? ""
 }
 
-/** Still open, and it stops being valid within a week: the supplier may want to extend it. */
+/** Still open, still something to win, and it stops being valid within a week: the supplier may want
+ *  to extend it. */
 export function quoteIsUrgent(q: any): boolean {
-	if (q.status !== "Submitted") return false
+	if (q.status !== "Submitted" || q.ordered_elsewhere === "all") return false
 	const left = daysUntil(q.valid_till)
 	return left !== null && left >= 0 && left <= 7
 }
@@ -103,6 +104,8 @@ export function quoteIsUrgent(q: any): boolean {
 export function quoteListNote(q: any): string {
 	if (!q.valid_till) return __("sent {0}", [formatDate(q.transaction_date)])
 	if (q.status === "Expired") return __("expired {0}", [formatDate(q.valid_till)])
+	// still Submitted in ERPNext, but nothing is left for it to win
+	if (q.status === "Submitted" && q.ordered_elsewhere === "all") return __("ordered from another supplier")
 	const left = daysUntil(q.valid_till)
 	if (!quoteIsUrgent(q) || left === null) return __("valid till {0}", [formatDate(q.valid_till)])
 	if (left === 0) return __("expires today")
@@ -150,6 +153,8 @@ export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: 
 	}
 	switch (q.status) {
 		case "Submitted":
+			// one the buyer typed in from an emailed quote has no RFQ, and so no form to revise it in
+			if (!q.rfq) return { title: __("Sent. The buyer accepts a quotation by placing an order from it."), theme: "blue" }
 			return { title: __("Sent. The buyer accepts a quotation by placing an order from it. Until then you can revise it."), theme: "blue" }
 		case "Partially Ordered":
 			return { title: __("The buyer ordered part of this quotation."), theme: "amber" }

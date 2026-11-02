@@ -244,8 +244,9 @@
                           "justifySelf": "start",
                           "maxWidth": "100%",
                           "minWidth": "0px",
-                          "overflowWrap": "anywhere",
-                          "whiteSpace": "normal"
+                          "overflow": "hidden",
+                          "textOverflow": "ellipsis",
+                          "whiteSpace": "nowrap"
                          },
                          "blockName": "Link",
                          "componentEvents": {
@@ -292,9 +293,8 @@
                           "cursor": "{{ dataItem.copyable ? 'pointer' : 'auto' }}",
                           "fontWeight": "{{ dataItem.weight }}",
                           "minWidth": "0px",
-                          "overflow": "hidden",
-                          "textOverflow": "ellipsis",
-                          "whiteSpace": "nowrap"
+                          "overflowWrap": "anywhere",
+                          "whiteSpace": "normal"
                          },
                          "blockName": "TextBlock",
                          "componentEvents": {

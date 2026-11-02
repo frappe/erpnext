@@ -268,12 +268,8 @@ LIST_PAGES = {
 			"Expired": [["status", "=", "Expired"]],
 		},
 		"search": ("name", "quotation_number"),
-		"scope": lambda: _documents_scope("Supplier Quotation", _add_quotation_rfqs),
-		# nothing ordered yet, and it stops being valid within a week
-		"urgent": lambda: [
-			["status", "in", REVISABLE_STATUSES],
-			["valid_till", "between", [today(), add_days(today(), 7)]],
-		],
+		"scope": lambda: _documents_scope("Supplier Quotation", _add_lost_quotations),
+		"urgent": lambda: _expiring_quotations(),
 		"deadline": "valid_till",
 	},
 	"orders": {
@@ -422,8 +418,40 @@ def _supplier_doc(doctype: str, name: str):
 	return frappe.get_doc(doctype, name)
 
 
-def _add_quotation_rfqs(rows: list) -> dict:
-	return {name: {"rfq": rfq} for name, rfq in _quotation_rfqs([row.name for row in rows]).items()}
+def _add_lost_quotations(rows: list) -> dict:
+	"""Which quotations the buyer ordered entirely from other suppliers: nothing is left for them to win."""
+	return {name: {"ordered_elsewhere": "all"} for name in _lost_quotations([row.name for row in rows])}
+
+
+def _expiring_quotations() -> list:
+	"""Filters for the open quotations that stop being valid within a week, less the ones already lost
+	to another supplier: their date no longer matters."""
+	expiring = [
+		["status", "in", REVISABLE_STATUSES],
+		["valid_till", "between", [today(), add_days(today(), 7)]],
+	]
+	candidates = frappe.get_all(
+		"Supplier Quotation", filters=[*_supplier_filters("Supplier Quotation"), *expiring], pluck="name"
+	)
+	lost = _lost_quotations(candidates)
+	return [*expiring, *([["name", "not in", list(lost)]] if lost else [])]
+
+
+def _lost_quotations(quotations: list[str]) -> set[str]:
+	"""Of these quotations, those whose RFQ the buyer ordered entirely from other suppliers."""
+	rfqs = _quotation_rfqs(quotations)
+	if not rfqs:
+		return set()
+	suppliers = dict(
+		frappe.get_all(
+			"Supplier Quotation",
+			filters={"name": ["in", list(rfqs)]},
+			fields=["name", "supplier"],
+			as_list=True,
+		)
+	)
+	lost = _all_ordered_elsewhere({rfq: suppliers[name] for name, rfq in rfqs.items()})
+	return {name for name, rfq in rfqs.items() if rfq in lost}
 
 
 def _add_last_receipts(rows: list) -> dict:
@@ -1153,12 +1181,12 @@ def get_portal_comments(doctype: str, name: str) -> list[dict]:
 		"Comment",
 		filters={
 			"reference_doctype": doctype,
-			"reference_name": name,
+			# a revision cancels the document it replaces; the conversation on that one carries on here
+			"reference_name": ["in", [name, *_earlier_revisions(doctype, name)]],
 			"comment_type": "Comment",
 			"published": 1,
 		},
-		# reference_name lets a page tell this thread from the one it showed before
-		fields=["name", "reference_name", "comment_by", "comment_email", "content", "creation"],
+		fields=["name", "comment_by", "comment_email", "content", "creation"],
 		order_by="creation desc",
 	)
 	for comment in comments:
@@ -1166,7 +1194,18 @@ def get_portal_comments(doctype: str, name: str) -> list[dict]:
 		if comment.comment_email != frappe.session.user:
 			comment.comment_email = ""
 		comment["attachments"] = []
+		# lets a page tell this thread from the one it showed before, whichever revision it was left on
+		comment["thread"] = name
 	return comments
+
+
+def _earlier_revisions(doctype: str, name: str) -> list[str]:
+	"""The documents this one revises, newest first. Each was the same supplier's: an amendment keeps
+	the supplier."""
+	earlier = []
+	while (name := frappe.db.get_value(doctype, name, "amended_from")) and name not in earlier:
+		earlier.append(name)
+	return earlier
 
 
 @frappe.whitelist(methods=["POST"])

@@ -10,7 +10,7 @@ export function usePortalComments(context: any, doctype: string, key: string, na
 	// until this link's thread arrives, the resource still holds the one opened before
 	const comments = computed(() =>
 		(context.comments?.data ?? [])
-			.filter((c: any) => c.reference_name === context.route?.params?.[key])
+			.filter((c: any) => c.thread === context.route?.params?.[key])
 			.map((c: any) => ({
 				type: "comment",
 				key: `comment:${c.name}`,
