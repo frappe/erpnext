@@ -1308,15 +1308,6 @@ def migrate_journal_entries(
 			# Ignore TDS payment entries
 			continue
 
-		# Get category
-		category = info.tax_withholding_category
-		if not category:
-			for gl_row in data["gl_rows"]:
-				account_key = (info.company, gl_row.account)
-				category = tds_accounts["account_map"].get(account_key)
-				if category:
-					break
-
 		# Get party from JE accounts (non-TDS rows)
 		party_type = None
 		party = None
@@ -1325,6 +1316,18 @@ def migrate_journal_entries(
 
 		if je_name in je_parties:
 			party_type, party, account_currency, exchange_rate = je_parties[je_name]
+
+		# Get category in the order of the v15 Tax Withholding Details report:
+		# the account's only category, the journal's category, the party's default category
+		category = None
+		for gl_row in data["gl_rows"]:
+			category = tds_accounts["account_map"].get((info.company, gl_row.account))
+			if category:
+				break
+
+		category = category or info.tax_withholding_category
+		if not category and party_type in ("Supplier", "Customer"):
+			category = frappe.get_cached_value(party_type, party, "tax_withholding_category")
 
 		tax_id = get_party_tax_id(party_type, party, column_cache, party_tax_id_cache) if party else None
 		tax_rate, tax_on_excess = get_tax_rate_for_date(tax_rate_map, category, info.posting_date)
