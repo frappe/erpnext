@@ -11,10 +11,13 @@ const props = defineProps({
 	mode: String,
 });
 
+const BLINK = { run: ["go", "godim"], down: ["down", "downdim"] };
+
 const tone = computed(() => {
 	if (props.mode === "hold") return "hold";
-	if (props.mode !== "run") return "off";
-	return (clock.value * 2) % 1 < 0.55 ? "go" : "godim";
+	if (!BLINK[props.mode]) return "off";
+	const [on, dim] = BLINK[props.mode];
+	return (clock.value * 2) % 1 < 0.55 ? on : dim;
 });
 </script>
 

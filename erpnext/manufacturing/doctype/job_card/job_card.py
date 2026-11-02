@@ -2099,7 +2099,7 @@ class JobCard(Document):
 			status = "Idle"
 
 		workstation = frappe.get_doc("Workstation", self.workstation)
-		if workstation.status != status:
+		if workstation.status not in (status, "Problem"):
 			workstation.db_set("status", status, notify=True)
 
 	@frappe.whitelist()

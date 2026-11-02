@@ -206,6 +206,29 @@ def resume_run(work_order: str) -> dict:
 
 
 @frappe.whitelist(methods=["POST"])
+def report_breakdown(work_order: str, job_card: str) -> dict:
+	return run_action(work_order, "report_breakdown", job_card=job_card)
+
+
+@frappe.whitelist(methods=["POST"])
+def restart_machine(
+	work_order: str,
+	job_card: str,
+	stop_reason: str,
+	remarks: str | None = None,
+	operator: str | None = None,
+) -> dict:
+	return run_action(
+		work_order,
+		"restart_machine",
+		job_card=job_card,
+		stop_reason=stop_reason,
+		remarks=remarks,
+		operator=operator,
+	)
+
+
+@frappe.whitelist(methods=["POST"])
 def consume_materials(work_order: str, job_card: str, quantities: str | dict) -> dict:
 	return run_action(work_order, "consume", job_card=job_card, quantities=frappe.parse_json(quantities))
 

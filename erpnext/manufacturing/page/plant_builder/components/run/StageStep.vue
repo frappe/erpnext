@@ -1,9 +1,10 @@
 <script setup>
-import { computed, inject } from "vue";
+import { computed, inject, ref } from "vue";
 import { Button, Progress } from "frappe-ui";
 import StepHeader from "./StepHeader.vue";
 import StageInputs from "./StageInputs.vue";
 import StageOutput from "./StageOutput.vue";
+import BreakdownPanel from "./BreakdownPanel.vue";
 import { __ } from "../../lib/api";
 import { MACHINES } from "../../lib/machines";
 import { fmt, fmtTimer, num, round } from "../../lib/format";
@@ -41,8 +42,18 @@ const status = computed(() => {
 	return { waiting: "waiting", done: "done" }[props.stage.phase] ?? "active";
 });
 const busy = computed(() => ["charging", "processing"].includes(props.stage.phase));
+const confirmingBreakdown = ref(false);
+const canReportBreakdown = computed(
+	() => ["ready", "processing", "review"].includes(props.stage.phase) && !run.paused.value
+);
+async function reportBreakdown() {
+	await run.reportBreakdown(props.stage);
+	confirmingBreakdown.value = false;
+}
+
 const badge = computed(() => {
 	const phase = props.stage.phase;
+	if (props.stage.breakdown) return { label: __("Breakdown"), theme: "red" };
 	if (run.paused.value && !["waiting", "done"].includes(phase))
 		return { label: __("On Hold"), theme: "amber" };
 	return {
@@ -128,7 +139,10 @@ function rowErrors(row, actual) {
 			:status="status"
 			:badge="badge"
 		/>
-		<div v-if="status === 'active'" class="space-y-4 px-3 pb-4">
+		<div v-if="status === 'active' && stage.breakdown" class="px-3 pb-4">
+			<BreakdownPanel :stage="stage" />
+		</div>
+		<div v-else-if="status === 'active'" class="space-y-4 px-3 pb-4">
 			<p class="text-p-sm text-ink-gray-6">{{ meta.instruction }}</p>
 			<template v-if="canStart">
 				<p class="text-p-sm text-ink-amber-5">
@@ -167,7 +181,7 @@ function rowErrors(row, actual) {
 			</template>
 			<div v-else-if="busy" class="space-y-2">
 				<div class="flex items-center justify-between gap-3 text-sm">
-					<span class="truncate text-ink-gray-7">{{ run.activity.value?.label }}</span>
+					<span class="truncate text-ink-gray-7">{{ run.activityOf(stage) }}</span>
 					<span class="w-10 shrink-0 text-right tabular-nums text-ink-gray-5"
 						>{{ Math.round(run.progressOf(stage)) }}%</span
 					>
@@ -188,6 +202,38 @@ function rowErrors(row, actual) {
 				/>
 			</div>
 			<StageOutput v-else-if="stage.phase === 'review'" :stage="stage" :meta="meta" />
+			<div
+				v-if="canReportBreakdown && confirmingBreakdown"
+				class="space-y-3 rounded-4 border border-outline-red-2 bg-surface-red-1 p-3"
+			>
+				<p class="text-p-sm text-ink-gray-8">
+					{{
+						__("Stop {0} for a breakdown? Its timer stops until you restart it.", [
+							stage.workstation,
+						])
+					}}
+				</p>
+				<div class="flex gap-2">
+					<Button
+						variant="solid"
+						theme="red"
+						icon-left="lucide-octagon-x"
+						:label="__('Stop Machine')"
+						:loading="run.busy.value"
+						@click="reportBreakdown"
+					/>
+					<Button :label="__('Cancel')" @click="confirmingBreakdown = false" />
+				</div>
+			</div>
+			<Button
+				v-else-if="canReportBreakdown"
+				variant="ghost"
+				theme="red"
+				icon-left="lucide-triangle-alert"
+				:label="__('Report Machine Breakdown')"
+				class="w-full"
+				@click="confirmingBreakdown = true"
+			/>
 		</div>
 	</div>
 </template>

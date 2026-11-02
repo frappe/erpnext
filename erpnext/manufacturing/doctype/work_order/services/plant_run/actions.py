@@ -88,8 +88,41 @@ class PlantRun:
 
 	def resume(self):
 		for job_card in self.get_running_job_cards():
-			if job_card.is_paused:
+			if job_card.is_paused and not is_broken_down(job_card.workstation):
 				job_card.resume_job(start_time=now_datetime())
+
+	def report_breakdown(self, job_card):
+		job_card = self.get_job_card(job_card)
+		if job_card.is_paused or not job_card.time_logs:
+			frappe.throw(_("Only a running machine can be stopped for a breakdown"))
+
+		job_card.pause_job(end_time=now_datetime())
+		frappe.get_doc("Workstation", job_card.workstation).db_set("status", "Problem", notify=True)
+
+	def restart_machine(self, job_card, stop_reason, remarks=None, operator=None):
+		job_card = self.get_job_card(job_card)
+		if not is_broken_down(job_card.workstation):
+			frappe.throw(_("{0} is not stopped for a breakdown").format(frappe.bold(job_card.workstation)))
+
+		operator = operator or get_operator()
+		if not operator:
+			frappe.throw(_("Pick the operator who reports the breakdown"))
+
+		downtime = frappe.get_doc(
+			{
+				"doctype": "Downtime Entry",
+				"workstation": job_card.workstation,
+				"operator": operator,
+				"from_time": job_card.time_logs[-1].to_time,
+				"to_time": now_datetime(),
+				"stop_reason": stop_reason,
+				"remarks": remarks,
+			}
+		).insert()
+
+		frappe.get_doc("Workstation", job_card.workstation).db_set("status", "Idle", notify=True)
+		job_card.resume_job(start_time=now_datetime())
+		return downtime.name
 
 	def consume(self, job_card, quantities):
 		job_card = self.get_job_card(job_card)
@@ -152,10 +185,18 @@ class PlantRun:
 	def start_ready_stages(self):
 		for card in self.get_startable_cards(self.get_flow()):
 			job_card = frappe.get_doc("Job Card", card.name)
-			if not self.get_busy_job_cards(job_card):
+			if not self.get_busy_job_cards(job_card) and not is_broken_down(job_card.workstation):
 				self.start_job_card(job_card)
 
 	def validate_machine_is_free(self, job_card):
+		if is_broken_down(job_card.workstation):
+			frappe.throw(
+				_("{0} is stopped for a breakdown. Restart it first.").format(
+					frappe.bold(job_card.workstation)
+				),
+				MachineBusyError,
+			)
+
 		if busy := self.get_busy_job_cards(job_card):
 			frappe.throw(
 				_("{0} is busy with {1}. Start this stage when it is free.").format(
@@ -177,3 +218,11 @@ class PlantRun:
 			pluck="name",
 		)
 		return busy if len(busy) >= job_card.get_production_capacity() else []
+
+
+def is_broken_down(workstation):
+	return frappe.db.get_value("Workstation", workstation, "status") == "Problem"
+
+
+def get_operator():
+	return frappe.db.get_value("Employee", {"user_id": frappe.session.user, "status": "Active"})

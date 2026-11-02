@@ -40,6 +40,7 @@ export function useRun(workOrder) {
 		if (!order) return "";
 		if (order.status === "Completed") return order.status;
 		if (paused.value) return "On Hold";
+		if ((state.value.stages || []).some((stage) => stage.breakdown)) return "Breakdown";
 		const started = (state.value.stages || []).some((stage) => stage.phase !== "waiting");
 		return order.docstatus === 1 && started ? "In Process" : "Not Started";
 	});
@@ -266,6 +267,7 @@ export function useRun(workOrder) {
 		paused,
 		elapsed,
 		activity,
+		activityOf,
 		isActive,
 		hasActiveStage,
 		stageSeconds,
@@ -279,6 +281,10 @@ export function useRun(workOrder) {
 		produce,
 		setQty: (qty) => act("set_run_qty", { qty }),
 		start: (stage) => act("start_run", { job_card: stage?.job_card?.name }),
+		reportBreakdown: (stage) => act("report_breakdown", { job_card: stage.job_card.name }),
+		restartMachine: (stage, values) =>
+			act("restart_machine", { job_card: stage.job_card.name, ...values }),
+		secondsSince: runningSeconds,
 		pause: () => act("pause_run"),
 		resume: () => act("resume_run"),
 		openReview: (stage) => (local.review[stage.idx] = true),

@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import flt, get_datetime, now_datetime
 
+from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import get_operator
 from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import is_whole_number
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -18,6 +19,13 @@ class PlantRunState:
 			for row in run.plant_floor.stages
 		}
 		self.stock = get_stock([run.plant_floor.warehouse, *self.machines.values()])
+		self.broken_machines = set(
+			frappe.get_all(
+				"Workstation",
+				filters={"name": ("in", list(self.machines)), "status": "Problem"},
+				pluck="name",
+			)
+		)
 
 	def as_dict(self):
 		return frappe._dict(
@@ -27,6 +35,7 @@ class PlantRunState:
 			stages=[self.get_stage(row) for row in self.work_order.operations],
 			entries=self.get_entries(),
 			levels=self.get_levels(),
+			downtime=get_downtime_defaults(),
 		)
 
 	@property
@@ -45,7 +54,11 @@ class PlantRunState:
 			plant_floor=self.work_order.plant_floor,
 			actual_start_date=self.work_order.actual_start_date,
 			actual_end_date=self.work_order.actual_end_date,
-			is_paused=any(card.is_paused for card in self.all_cards if card.docstatus == 0),
+			is_paused=any(
+				card.is_paused and not self.get_breakdown(card)
+				for card in self.all_cards
+				if card.docstatus == 0
+			),
 			worked_seconds=worked_seconds,
 			running_since=running_since,
 			charged_weight=self.get_charged_weight(),
@@ -79,6 +92,7 @@ class PlantRunState:
 			is_packing=stage.is_packing,
 			planned_minutes=flt(operation.time_in_mins),
 			phase=phase,
+			breakdown=self.get_breakdown(card),
 			can_start=bool(phase == "waiting" and card and card.docstatus == 0 and self.flow.has_input(idx)),
 			lot=len(cards),
 			job_card=card,
@@ -89,6 +103,13 @@ class PlantRunState:
 			output=self.get_output(stage, cards, card),
 			quality=get_quality(card),
 		)
+
+	def get_breakdown(self, card):
+		if not card or card.docstatus != 0 or not card.is_paused:
+			return None
+		if card.workstation not in self.broken_machines or not card.time_logs:
+			return None
+		return frappe._dict(since=card.time_logs[-1].to_time)
 
 	def get_phase(self, idx, card):
 		if self.flow.is_done(idx):
@@ -282,3 +303,11 @@ def get_union_timing(logs):
 	if start and end:
 		worked += (end - start).total_seconds()
 	return worked, start if start and end is None else None
+
+
+def get_downtime_defaults():
+	stop_reason = frappe.get_meta("Downtime Entry").get_field("stop_reason")
+	return frappe._dict(
+		stop_reasons=[reason for reason in (stop_reason.options or "").split("\n") if reason],
+		operator=get_operator(),
+	)
