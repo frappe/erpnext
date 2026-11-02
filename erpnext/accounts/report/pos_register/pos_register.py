@@ -4,13 +4,14 @@
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import IfNull
 from frappe.utils import cstr
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.utils import build_qb_match_conditions
 
 
 def execute(filters=None):
@@ -82,8 +83,8 @@ def get_invoice_entries(doctype, filters, group_by_field):
 		.where(p.docstatus == 1)
 	)
 
-	for condition in build_qb_match_conditions(doctype):
-		query = query.where(condition)
+	if match_conditions := build_match_conditions(doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
 
 	if doctype == "Sales Invoice":
 		# consolidated invoices only merge POS Invoices that are already listed

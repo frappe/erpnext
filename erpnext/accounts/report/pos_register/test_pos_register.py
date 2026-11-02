@@ -79,6 +79,20 @@ class TestPOSRegister(FrappeTestCase):
 			frappe.set_user("Administrator")
 		self.assertEqual([row.get("grand_total") for row in rows if row], [1000, 1000])
 
+	def test_if_owner_role_lists_only_own_invoices(self):
+		self.make_pos_sales_invoice({"Cash": 1000})
+		own_invoice = self.make_pos_sales_invoice({"Cash": 3000}, rate=3000)
+		user = make_user_with_if_owner_access("Sales Invoice")
+		frappe.db.set_value("Sales Invoice", own_invoice.name, "owner", user)
+		self.addCleanup(frappe.clear_cache, doctype="Sales Invoice")
+
+		frappe.set_user(user)
+		try:
+			rows = self.run_report(group_by="")
+		finally:
+			frappe.set_user("Administrator")
+		self.assertEqual([row.pos_invoice for row in rows], [own_invoice.name])
+
 	def make_pos_sales_invoice(self, payments, rate=1000, **args):
 		si = create_sales_invoice(rate=rate, do_not_save=True, **args)
 		si.update({"is_pos": 1, "pos_profile": self.pos_profile, "account_for_change_amount": "Cash - _TC"})
@@ -131,4 +145,27 @@ def make_user_restricted_to_customer(customer):
 			}
 		).insert()
 	frappe.permissions.add_user_permission("Customer", customer, user)
+	return user
+
+
+def make_user_with_if_owner_access(doctype):
+	from frappe.permissions import add_permission, update_permission_property
+
+	role = "_Test POS Register Owner Role"
+	if not frappe.db.exists("Role", role):
+		frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
+	add_permission(doctype, role)
+	update_permission_property(doctype, role, 0, "if_owner", 1)
+
+	user = "test_pos_register_owner@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "POS Register Owner",
+				"send_welcome_email": 0,
+				"roles": [{"role": role}],
+			}
+		).insert()
 	return user
