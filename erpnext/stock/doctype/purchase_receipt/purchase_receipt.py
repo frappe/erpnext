@@ -510,6 +510,15 @@ class PurchaseReceipt(BuyingController):
 			)
 
 		def make_stock_received_but_not_billed_entry(item):
+			if (
+				self.get("is_return")
+				and item.return_qty_from_rejected_warehouse
+				and not frappe.db.get_single_value(
+					"Buying Settings", "set_valuation_rate_for_rejected_materials"
+				)
+			):
+				return 0.0
+
 			account = (
 				warehouse_account[item.from_warehouse]["account"] if item.from_warehouse else stock_asset_rbnb
 			)
