@@ -303,7 +303,7 @@ def get_start_date(period, accumulated_values, company):
 def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
 	name_key = "account" if consolidated else "section"
 	parent_key = "parent_account" if consolidated else "parent_section"
-	label_str = "'" + _("{0}").format(label) + "'"
+	label_str = "'" + str(label) + "'"
 	total_row = {
 		f"{name_key}_name": label_str,
 		name_key: label_str,
