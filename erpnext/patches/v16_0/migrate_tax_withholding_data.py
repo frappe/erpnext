@@ -446,7 +446,10 @@ class PurchaseInvoiceMigrator:
 		pe = frappe.qb.DocType("Payment Entry")
 		atc = frappe.qb.DocType("Advance Taxes and Charges")
 
-		tds_row = ptc.account_head.isin(list(self.all_tds_accounts))
+		# v15 ticked its TDS rows, so a row on an account since removed from the category still counts
+		tds_row = ptc.account_head.isin(list(self.all_tds_accounts)) | (
+			(ptc.is_tax_withholding_account == 1) & (ptc.base_tax_amount_after_discount_amount != 0)
+		)
 
 		# Query 1: Invoices with TDS in taxes table
 		self._invoices_with_tds = (
@@ -1415,6 +1418,7 @@ def migrate_journal_entries(
 
 	# v15 counted journals without TDS towards the threshold, but taxed them on the crossing invoice only in
 	# categories that are not tax on excess; the ones no invoice taxed are still open
+	tds_jea = frappe.qb.DocType("Journal Entry Account", alias="tds_jea")
 	journals_without_tds = (
 		frappe.qb.from_(je)
 		.join(jea)
@@ -1435,6 +1439,16 @@ def migrate_journal_entries(
 		.where(IfNull(je.tax_withholding_category, "") != "")
 		.where(jea.party_type == "Supplier")
 		.where(IfNull(jea.reference_type, "") != "Purchase Invoice")
+		# v15 ticked the TDS row it added, which may be on an account since removed from the category
+		.where(
+			je.name.notin(
+				frappe.qb.from_(tds_jea)
+				.select(tds_jea.parent)
+				.where(tds_jea.parenttype == "Journal Entry")
+				.where(tds_jea.is_tax_withholding_account == 1)
+				.where(tds_jea.credit != tds_jea.debit)
+			)
+		)
 		.groupby(je.name, je.company, je.posting_date, je.tax_withholding_category, jea.party)
 		.run(as_dict=True)
 	)
