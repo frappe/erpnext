@@ -18,7 +18,9 @@ const rows = computed(() =>
 				? __("Manufacture · {0}", [finished?.item_name || ""])
 				: __("Material Transfer · {0}", [stage?.stage_name || ""]);
 		const detail = finished
-			? `${fmt(finished.qty)} ${finished.uom}${finished.batch_id ? " · " + finished.batch_id : ""}`
+			? [`${fmt(finished.qty)} ${finished.uom}`, finished.batch_ids.join(", ")]
+					.filter(Boolean)
+					.join(" · ")
 			: __("{0} items", [entry.items.length]);
 		return {
 			...entry,

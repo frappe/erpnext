@@ -155,7 +155,7 @@ class TestPlantFloor(ERPNextTestSuite):
 			if entry.purpose == "Manufacture" and entry.job_card == state.stages[1].job_card.name
 		)
 		finished = next(row for row in cooked["items"] if row.is_finished_item)
-		self.assertTrue(finished.batch_id.startswith("_TKB-"))
+		self.assertTrue(finished.batch_ids[0].startswith("_TKB-"))
 
 	def test_consume_refuses_quantity_off_formula(self):
 		plant_floor = make_ketchup_plant()
@@ -329,6 +329,26 @@ class TestPlantFloor(ERPNextTestSuite):
 			[(stage.phase, stage.lot) for stage in state.stages], [("done", 1), ("done", 2), ("done", 2)]
 		)
 		self.assertEqual(state.stages[1].output.completed_qty, 1000)
+
+	def test_entry_log_lists_a_row_once_for_all_its_batches(self):
+		plant_floor = make_ketchup_plant()
+		stock_ketchup_materials()
+		work_order = plant_floor.make_work_order(2000)
+		run_stage(work_order, 300, 270, output_qty=1250)
+		run_stage(work_order, 260, 230, output_qty=400, actual={"_Test Ketchup Pre-mix": 500}, stage=2)
+		run_stage(work_order, 220, 190, output_qty=600, stage=2)
+		run_stage(work_order, 180, 150, output_qty=2000, stage=3)
+
+		state = PlantRunState(PlantRun(work_order.name)).as_dict()
+		transfer = next(
+			entry
+			for entry in state.entries
+			if entry.purpose == "Material Transfer for Manufacture"
+			and entry.job_card == state.stages[2].job_card.name
+		)
+		rows = [row for row in transfer["items"] if row.item_code == "_Test Cooked Ketchup Base"]
+		self.assertEqual([row.qty for row in rows], [1000])
+		self.assertEqual(len(rows[0].batch_ids), 2)
 
 	def test_partial_lots_of_whole_units_add_up_to_the_work_order(self):
 		plant_floor = make_ketchup_plant()

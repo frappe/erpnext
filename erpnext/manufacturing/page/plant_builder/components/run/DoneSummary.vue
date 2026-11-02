@@ -24,17 +24,15 @@ const kpis = computed(() => {
 });
 
 const batchesOf = (entry, finished) =>
-	entry.items
-		.filter((row) => !!row.is_finished_item === finished && row.batch_id)
-		.map((row) => row.batch_id);
+	entry.items.filter((row) => !!row.is_finished_item === finished).flatMap((row) => row.batch_ids);
 
 const chain = computed(() => {
 	const entries = state.value.entries;
 	const materials = new Set(state.value.plan.materials.map((row) => row.item_code));
 	const rawBatches = entries
 		.filter((entry) => entry.purpose === "Material Transfer for Manufacture")
-		.flatMap((entry) => entry.items.filter((row) => materials.has(row.item_code) && row.batch_id))
-		.map((row) => row.batch_id);
+		.flatMap((entry) => entry.items.filter((row) => materials.has(row.item_code)))
+		.flatMap((row) => row.batch_ids);
 	const raw = {
 		title: __("Raw material batches"),
 		meta: [...new Set(rawBatches)].join(", ") || __("Not batch tracked"),
