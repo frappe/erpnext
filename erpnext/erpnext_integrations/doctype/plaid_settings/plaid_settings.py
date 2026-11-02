@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
+from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import add_months, formatdate, getdate, sbool, today
 from plaid.errors import ItemError
 
@@ -117,7 +118,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 			add_account_subtype(account["subtype"])
 
 		bank_account_name = "{} - {}".format(account["name"], bank["bank_name"])
-		existing_bank_account = frappe.db.exists("Bank Account", bank_account_name)
+		existing_bank_account = get_existing_bank_account(account["id"], bank_account_name, company)
 
 		if not existing_bank_account:
 			try:
@@ -146,7 +147,7 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 						"company": company,
 					}
 				)
-				new_account.insert()
+				new_account.insert(set_name=append_number_if_name_exists("Bank Account", bank_account_name))
 
 				result.append(new_account.name)
 			except frappe.UniqueValidationError:
@@ -189,6 +190,15 @@ def add_bank_accounts(response: str | dict, bank: str | dict, company: str):
 	return result
 
 
+def get_existing_bank_account(integration_id: str, bank_account_name: str, company: str) -> str | None:
+	"""Return the company's Bank Account already linked to this Plaid account, or one with the same name."""
+	return frappe.db.get_value(
+		"Bank Account", {"integration_id": integration_id, "company": company}
+	) or frappe.db.get_value(
+		"Bank Account", {"name": bank_account_name, "is_company_account": 1, "company": company}
+	)
+
+
 def add_account_type(account_type):
 	try:
 		frappe.get_doc({"doctype": "Bank Account Type", "account_type": account_type}).insert()
@@ -221,7 +231,21 @@ def sync_transactions(bank, bank_account):
 		result = []
 		if transactions:
 			for transaction in reversed(transactions):
-				result += new_bank_transaction(transaction)
+				# per-transaction savepoint: a failed insert/submit must not discard the Bank
+				# Transactions already synced this run (MariaDB keeps them) nor poison the txn on Postgres
+				frappe.db.savepoint("plaid_sync_txn")
+				try:
+					result += new_bank_transaction(transaction)
+				except Exception:
+					# skip the row so one bad transaction does not block the rest of the account's sync
+					frappe.db.rollback(save_point="plaid_sync_txn")
+					frappe.log_error(
+						_("Plaid transaction {0} could not be imported").format(
+							transaction.get("transaction_id")
+						),
+						reference_doctype="Bank Account",
+						reference_name=bank_account,
+					)
 
 		if result:
 			last_transaction_date = frappe.db.get_value("Bank Transaction", result.pop(), "date")
