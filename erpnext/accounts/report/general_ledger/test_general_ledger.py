@@ -4,7 +4,7 @@
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import flt, today
+from frappe.utils import add_days, flt, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
@@ -380,3 +380,73 @@ class TestGeneralLedger(FrappeTestCase):
 			result = generate_report_result(frappe.get_doc("Report", "General Ledger"), filters, user)
 
 		self.assertTrue(result["result"])
+
+	def test_categorize_by_party_separates_party_types(self):
+		self.clear_old_entries()
+		party = "_Test Customer"
+		if not frappe.db.exists("Supplier", party):
+			frappe.get_doc(
+				doctype="Supplier", supplier_name=party, supplier_group="_Test Supplier Group"
+			).insert(set_name=party)
+		opening_date, period_date = add_days(today(), -60), today()
+		self.make_party_journal_entry("Debtors - _TC", "Customer", party, 1000, opening_date)
+		self.make_party_journal_entry("Debtors - _TC", "Customer", party, 200, period_date)
+		self.make_party_journal_entry("Creditors - _TC", "Supplier", party, -400, opening_date)
+		self.make_party_journal_entry("Creditors - _TC", "Supplier", party, -50, period_date)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=add_days(today(), -30),
+			to_date=today(),
+			categorize_by="Categorize by Party",
+		)
+		closing_rows = [r for r in execute(filters)[1] if r.get("account") == "'Closing (Opening + Total)'"]
+
+		# one closing row per party type, then the grand closing
+		self.assertEqual(sorted(r["debit"] - r["credit"] for r in closing_rows[:-1]), [-450, 1200])
+
+	def make_party_journal_entry(self, account, party_type, party, amount, posting_date):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		jv = make_journal_entry(account, "_Test Bank - _TC", amount, posting_date=posting_date, save=False)
+		jv.accounts[0].update({"party_type": party_type, "party": party})
+		jv.insert()
+		jv.submit()
+		return jv
+
+	def test_presentation_currency_without_exchange_rate(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from erpnext.accounts.report import utils as report_utils
+
+		exchange_settings_disabled = frappe.db.get_single_value("Currency Exchange Settings", "disabled")
+		self.addCleanup(
+			frappe.db.set_single_value, "Currency Exchange Settings", "disabled", exchange_settings_disabled
+		)
+		frappe.db.delete("Currency Exchange", {"from_currency": "USD", "to_currency": "INR"})
+		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)
+		exchange_rates = getattr(report_utils, "__exchange_rates")
+		exchange_rates.clear()
+		self.addCleanup(exchange_rates.clear)
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 8000, submit=True)
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			account=["_Test Bank - _TC"],
+			voucher_no=jv.name,
+			presentation_currency="USD",
+		)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Exchange rate from .*USD.* to .*INR", execute, filters
+		)
+
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date=today(),
+			from_currency="USD",
+			to_currency="INR",
+			exchange_rate=80,
+		).insert()
+		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
+		self.assertEqual(total["debit"], 100)

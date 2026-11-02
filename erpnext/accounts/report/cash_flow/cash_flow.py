@@ -2,13 +2,9 @@
 # For license information, please see license.txt
 
 
-from datetime import timedelta
-
 import frappe
 from frappe import _
-from frappe.query_builder import DocType
 from frappe.utils import cstr, flt
-from pypika import Order
 
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -16,12 +12,13 @@ from erpnext.accounts.report.financial_statements import (
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
-	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_net_profit_loss,
 )
 from erpnext.accounts.utils import get_fiscal_year
+
+OTHER_BALANCE_SHEET_ACCOUNTS = "Other Balance Sheet Accounts"
 
 
 def execute(filters=None):
@@ -60,6 +57,9 @@ def execute(filters=None):
 	)
 
 	net_profit_loss = get_net_profit_loss(income, expense, period_list, filters.company)
+	if net_profit_loss:
+		total_keys = get_total_keys(period_list, filters.accumulated_values, filters.company)
+		net_profit_loss["total"] = sum(net_profit_loss[key] for key in total_keys)
 
 	data = []
 	summary_data = {}
@@ -94,15 +94,7 @@ def execute(filters=None):
 			row_data = get_account_type_based_data(
 				filters.company, row["account_type"], period_list, filters.accumulated_values, filters
 			)
-			accounts = frappe.get_all(
-				"Account",
-				filters={
-					"account_type": row["account_type"],
-					"is_group": 0,
-					"company": filters.company,
-				},
-				pluck="name",
-			)
+			accounts = get_row_accounts(filters.company, row["account_type"])
 			row_data.update(
 				{
 					"section_name": row["label"],
@@ -158,6 +150,10 @@ def get_cash_flow_accounts():
 			{"account_type": "Receivable", "label": _("Net Change in Accounts Receivable")},
 			{"account_type": "Payable", "label": _("Net Change in Accounts Payable")},
 			{"account_type": "Stock", "label": _("Net Change in Inventory")},
+			{
+				"account_type": OTHER_BALANCE_SHEET_ACCOUNTS,
+				"label": _("Net Change in Other Balance Sheet Accounts"),
+			},
 		],
 	}
 
@@ -179,9 +175,40 @@ def get_cash_flow_accounts():
 	return [operation_accounts, investing_accounts, financing_accounts]
 
 
+def get_row_accounts(company: str, account_type: str) -> list[str]:
+	return frappe.db.sql_list(
+		f"""select name from tabAccount
+		where is_group = 0 and company = %(company)s and {get_row_account_condition(account_type)}""",
+		{"company": company, "account_type": account_type},
+	)
+
+
+def get_row_account_condition(account_type: str) -> str:
+	"""SQL condition on Account for the accounts of a cash flow row; uses the %(account_type)s parameter."""
+	if account_type != OTHER_BALANCE_SHEET_ACCOUNTS:
+		return "account_type = %(account_type)s"
+
+	# Balance sheet accounts not reported on another row, so that Net Change in Cash equals the movement
+	# on Cash and Bank. Depreciation accounts offset the charge credited to accumulated depreciation,
+	# since the Depreciation row already adds it back.
+	excluded_types = ", ".join(
+		frappe.db.escape(account_type) for account_type in [*get_mapped_account_types(), "Cash", "Bank"]
+	)
+	return f"""((root_type in ('Asset', 'Liability', 'Equity')
+		and ifnull(account_type, '') not in ({excluded_types})) or account_type = 'Depreciation')"""
+
+
+def get_mapped_account_types() -> list[str]:
+	return [
+		row["account_type"]
+		for section in get_cash_flow_accounts()
+		for row in section["account_types"]
+		if row["account_type"] != OTHER_BALANCE_SHEET_ACCOUNTS
+	]
+
+
 def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
 	data = {}
-	total = 0
 	for period in period_list:
 		start_date = get_start_date(period, accumulated_values, company)
 		filters.start_date = start_date
@@ -193,17 +220,56 @@ def get_account_type_based_data(company, account_type, period_list, accumulated_
 		if amount and account_type == "Depreciation":
 			amount *= -1
 
-		total += amount
 		data.setdefault(period["key"], amount)
 
-	data["total"] = total
+	data["total"] = sum(data[key] for key in get_total_keys(period_list, accumulated_values, company))
 	return data
 
 
-def get_account_type_based_gl_data(company, filters=None):
-	cond = ""
-	filters = frappe._dict(filters or {})
+def get_total_keys(
+	period_list: list[dict], accumulated_values: bool, company: str, consolidated: bool = False
+) -> list:
+	"""Period keys whose values add up to the total.
 
+	Accumulated values restart every fiscal year, so the last period of each fiscal year is taken."""
+	if consolidated:
+		return list(period_list)
+
+	if not accumulated_values:
+		return [period["key"] for period in period_list]
+
+	last_keys = {}
+	for period in period_list:
+		fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
+		last_keys[fiscal_year] = period.key
+	return list(last_keys.values())
+
+
+def get_account_type_based_gl_data(company, filters=None):
+	filters = frappe._dict(filters or {})
+	cond = get_gl_conditions(company, filters)
+
+	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		cond += " and is_opening != 'Yes'"
+
+	gl_sum = frappe.db.sql_list(
+		f"""
+		select sum(credit) - sum(debit)
+		from `tabGL Entry`
+		where company=%(company)s and posting_date >= %(start_date)s and posting_date <= %(end_date)s
+			and voucher_type != 'Period Closing Voucher'
+			and account in (
+				select name from tabAccount where is_group = 0 and {get_row_account_condition(filters.account_type)}
+			) {cond}
+	""",
+		filters,
+	)
+
+	return gl_sum[0] if gl_sum and gl_sum[0] else 0
+
+
+def get_gl_conditions(company, filters):
+	"""Finance book and cost center conditions of the report's filters."""
 	if filters.include_default_book_entries:
 		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")
 		cond = """ AND (finance_book in ({}, {}, '') OR finance_book IS NULL)
@@ -220,18 +286,7 @@ def get_account_type_based_gl_data(company, filters=None):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 		cond += " and cost_center in %(cost_center)s"
 
-	gl_sum = frappe.db.sql_list(
-		f"""
-		select sum(credit) - sum(debit)
-		from `tabGL Entry`
-		where company=%(company)s and posting_date >= %(start_date)s and posting_date <= %(end_date)s
-			and voucher_type != 'Period Closing Voucher'
-			and account in ( SELECT name FROM tabAccount WHERE account_type = %(account_type)s) {cond}
-	""",
-		filters,
-	)
-
-	return gl_sum[0] if gl_sum and gl_sum[0] else 0
+	return cond
 
 
 def get_start_date(period, accumulated_values, company):
@@ -246,28 +301,33 @@ def get_start_date(period, accumulated_values, company):
 
 
 def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
+	name_key = "account" if consolidated else "section"
+	parent_key = "parent_account" if consolidated else "parent_section"
+	label_str = "'" + str(label) + "'"
 	total_row = {
-		"section_name": "'" + _("{0}").format(label) + "'",
-		"section": "'" + _("{0}").format(label) + "'",
+		f"{name_key}_name": label_str,
+		name_key: label_str,
 		"currency": currency,
 	}
-
-	summary_data[label] = 0
 
 	# from consolidated financial statement
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 
 	for row in data:
-		if row.get("parent_section"):
+		if row.get(parent_key):
 			for period in period_list:
 				key = period if consolidated else period["key"]
 				total_row.setdefault(key, 0.0)
 				total_row[key] += row.get(key, 0.0)
-				summary_data[label] += row.get(key)
 
 			total_row.setdefault("total", 0.0)
-			total_row["total"] += row["total"]
+			total_row["total"] += row.get("total", 0.0)
+
+	summary_keys = get_total_keys(
+		period_list, filters.get("accumulated_values"), filters.company, consolidated
+	)
+	summary_data[label] = sum(flt(total_row.get(key)) for key in summary_keys)
 
 	out.append(total_row)
 	out.append({})
@@ -305,103 +365,28 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 
 
 def get_opening_balance(company, period_list, filters):
-	from copy import deepcopy
+	"""Balance of the Cash and Bank accounts before the first period, plus their opening entries."""
+	filters = frappe._dict(filters, company=company, start_date=period_list[0]["from_date"])
+	cond = get_gl_conditions(company, filters)
+	date_condition = "posting_date < %(start_date)s"
+	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
+		# opening entries are left out of the movements, so they belong to the opening whatever their date
+		date_condition = f"({date_condition} or is_opening = 'Yes')"
 
-	cash_value = {}
-	account_types = get_cash_flow_accounts()
-	net_profit_loss = 0.0
-
-	local_filters = deepcopy(filters)
-	local_filters.start_date, local_filters.end_date = get_opening_range_using_fiscal_year(
-		company, period_list
+	balance = frappe.db.sql_list(
+		f"""
+		select sum(debit) - sum(credit)
+		from `tabGL Entry`
+		where company=%(company)s and is_cancelled = 0 and {date_condition}
+			and account in (
+				select name from tabAccount
+				where company=%(company)s and is_group = 0 and account_type in ('Cash', 'Bank')
+			) {cond}
+	""",
+		filters,
 	)
 
-	for section in account_types:
-		section_name = section.get("section_name")
-		cash_value.setdefault(section_name, 0.0)
-
-		if section_name == "Operations":
-			net_profit_loss += get_net_income(company, period_list, local_filters)
-
-		for account in section.get("account_types", []):
-			account_type = account.get("account_type")
-			local_filters.account_type = account_type
-
-			amount = get_account_type_based_gl_data(company, local_filters) or 0.0
-
-			if account_type == "Depreciation":
-				cash_value[section_name] += amount * -1
-			else:
-				cash_value[section_name] += amount
-
-	return sum(cash_value.values()) + net_profit_loss
-
-
-def get_net_income(company, period_list, filters):
-	gl_entries_by_account_for_income, gl_entries_by_account_for_expense = {}, {}
-	income, expense = 0.0, 0.0
-	from_date, to_date = get_opening_range_using_fiscal_year(company, period_list)
-
-	for root_type in ["Income", "Expense"]:
-		for root in frappe.db.sql(
-			"""select lft, rgt from tabAccount
-				where root_type=%s and ifnull(parent_account, '') = ''""",
-			root_type,
-			as_dict=1,
-		):
-			set_gl_entries_by_account(
-				company,
-				from_date,
-				to_date,
-				filters,
-				gl_entries_by_account_for_income
-				if root_type == "Income"
-				else gl_entries_by_account_for_expense,
-				root.lft,
-				root.rgt,
-				root_type=root_type,
-				ignore_closing_entries=True,
-			)
-
-	for entries in gl_entries_by_account_for_income.values():
-		for entry in entries:
-			if entry.posting_date <= to_date:
-				amount = (entry.debit - entry.credit) * -1
-				income = flt((income + amount), 2)
-
-	for entries in gl_entries_by_account_for_expense.values():
-		for entry in entries:
-			if entry.posting_date <= to_date:
-				amount = entry.debit - entry.credit
-				expense = flt((expense + amount), 2)
-
-	return income - expense
-
-
-def get_opening_range_using_fiscal_year(company, period_list):
-	first_from_date = period_list[0]["from_date"]
-	previous_day = first_from_date - timedelta(days=1)
-
-	# Get the earliest fiscal year for the company
-
-	FiscalYear = DocType("Fiscal Year")
-	FiscalYearCompany = DocType("Fiscal Year Company")
-
-	earliest_fy = (
-		frappe.qb.from_(FiscalYear)
-		.join(FiscalYearCompany)
-		.on(FiscalYearCompany.parent == FiscalYear.name)
-		.select(FiscalYear.year_start_date)
-		.where(FiscalYearCompany.company == company)
-		.orderby(FiscalYear.year_start_date, order=Order.asc)
-		.limit(1)
-	).run(as_dict=True)
-
-	if not earliest_fy:
-		frappe.throw(_("Not able to find the earliest Fiscal Year for the given company."))
-
-	company_start_date = earliest_fy[0]["year_start_date"]
-	return company_start_date, previous_day
+	return flt(balance[0]) if balance else 0.0
 
 
 def get_report_summary(summary_data, currency):
