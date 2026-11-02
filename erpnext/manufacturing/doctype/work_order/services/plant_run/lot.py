@@ -5,6 +5,7 @@ from frappe import _
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import EPSILON
+from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 
 class Lot:
@@ -63,16 +64,19 @@ class Lot:
 		return not self.get_input(row) and row.item_code in self.flow.balance_items
 
 	def get_quantities(self):
-		quantities = {row.name: self.quantities.get(row.name, 0) for row in self.job_card.items}
-		for row in self.job_card.items:
-			if self.is_balance_row(row):
-				quantities[row.name] = self.get_balance_qty(row)
-		return quantities
+		return {row.name: self.get_qty(row) for row in self.job_card.items}
+
+	def get_qty(self, row):
+		if self.is_balance_row(row):
+			return self.get_balance_qty(row)
+		if row.name in self.quantities:
+			return self.quantities[row.name]
+		return 0 if self.get_input(row) else self.get_planned_qty(row)
 
 	def get_balance_qty(self, row):
 		factors = self.flow.plan.weight_factors
 		shift = sum(
-			(self.quantities.get(other.name, 0) - self.get_planned_qty(other)) / flt(factors[other.item_code])
+			(self.get_qty(other) - self.get_planned_qty(other)) / flt(factors[other.item_code])
 			for other in self.job_card.items
 			if not self.get_input(other)
 			and not self.is_balance_row(other)
@@ -80,38 +84,79 @@ class Lot:
 		)
 		return flt(self.get_planned_qty(row) - shift * (flt(factors.get(row.item_code)) or 1), 3)
 
-	def validate(self, quantities, tolerance):
+	@cached_property
+	def stock(self):
+		bins = frappe.get_all(
+			"Bin",
+			filters={
+				"item_code": ("in", [row.item_code for row in self.job_card.items]),
+				"warehouse": ("in", [row.source_warehouse for row in self.job_card.items]),
+			},
+			fields=["item_code", "warehouse", "actual_qty"],
+		)
+		return {(row.item_code, row.warehouse): flt(row.actual_qty) for row in bins}
+
+	@property
+	def error(self):
 		if self.share <= 0 or self.output_qty <= 0:
-			frappe.throw(_("Pass some of the semi-finished goods to this stage first"))
+			return _("Pass some of the semi-finished goods to this stage first")
 
-		for row in self.job_card.items:
-			qty = quantities[row.name]
-			if source := self.get_input(row):
-				self.validate_input(row, qty, source)
-			else:
-				self.validate_material(row, qty, tolerance)
+	def get_errors(self, quantities, tolerance):
+		errors = {
+			row.name: self.get_row_error(row, quantities[row.name], tolerance) for row in self.job_card.items
+		}
+		return {name: error for name, error in errors.items() if error}
 
-	def validate_input(self, row, qty, source):
-		if qty < 0 or qty > source.waiting_qty + EPSILON:
-			frappe.throw(
-				_("Only {0} {1} of {2} is waiting from {3}").format(
-					flt(source.waiting_qty, 3), row.uom, row.item_name or row.item_code, source.stage_name
+	def validate(self, quantities, tolerance):
+		if error := self.error or next(iter(self.get_errors(quantities, tolerance).values()), None):
+			frappe.throw(error)
+
+	def get_preview(self, tolerance):
+		quantities = self.get_quantities()
+		errors = self.get_errors(quantities, tolerance)
+		return frappe._dict(
+			output_qty=self.output_qty,
+			errors=list(filter(None, [self.error, *errors.values()])),
+			items={
+				row.name: frappe._dict(
+					qty=quantities[row.name],
+					planned_qty=self.get_lot_planned_qty(row),
+					is_off=row.name in errors,
 				)
+				for row in self.job_card.items
+			},
+		)
+
+	def get_lot_planned_qty(self, row):
+		source = self.get_input(row)
+		return source.waiting_qty if source else self.get_planned_qty(row)
+
+	def get_row_error(self, row, qty, tolerance):
+		if source := self.get_input(row):
+			return self.get_input_error(row, qty, source)
+		return self.get_material_error(row, qty, tolerance)
+
+	def get_input_error(self, row, qty, source):
+		if qty < 0 or qty > source.waiting_qty + EPSILON:
+			return _("Only {0} {1} of {2} is waiting from {3}").format(
+				flt(source.waiting_qty, 3), row.uom, row.item_name or row.item_code, source.stage_name
 			)
 
-	def validate_material(self, row, qty, tolerance):
+	def get_material_error(self, row, qty, tolerance):
 		name = row.item_name or row.item_code
 		if qty <= 0:
-			frappe.throw(_("{0} needs a quantity above zero").format(name))
+			return _("{0} needs a quantity above zero").format(name)
+
+		in_stock = self.stock.get((row.item_code, row.source_warehouse), 0)
+		if qty > in_stock + EPSILON and not is_negative_stock_allowed(item_code=row.item_code):
+			return _("Only {0} {1} of {2} is in stock").format(flt(in_stock, 3), row.uom, name)
 
 		planned_qty = self.get_planned_qty(row)
 		if self.is_balance_row(row) or not planned_qty:
-			return
+			return None
 
 		variance = (qty - planned_qty) / planned_qty * 100
 		if abs(variance) > tolerance + 0.0001:
-			frappe.throw(
-				_("{0} is {1}% off the formula. The allowed range is ±{2}%.").format(
-					name, flt(abs(variance), 1), flt(tolerance)
-				)
+			return _("{0} is {1}% off the formula. The allowed range is ±{2}%.").format(
+				name, flt(abs(variance), 1), flt(tolerance)
 			)

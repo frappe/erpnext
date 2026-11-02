@@ -2,7 +2,6 @@ import frappe
 from frappe.utils import flt, get_datetime, now_datetime
 
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import get_operator
-from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import is_whole_number
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
@@ -121,12 +120,9 @@ class PlantRunState:
 		return "processing"
 
 	def get_stage_items(self, idx, card):
-		planned = self.flow.get_planned_quantities(idx)
 		inputs = {(row.item_code, row.warehouse): row for row in self.flow.get_inputs(idx)}
 		rows = card.materials if card else self.get_planned_rows(idx)
-		return [
-			self.get_item(row, planned, inputs.get((row.item_code, row.source_warehouse))) for row in rows
-		]
+		return [self.get_item(row, inputs.get((row.item_code, row.source_warehouse))) for row in rows]
 
 	def get_planned_rows(self, idx):
 		return [
@@ -135,15 +131,13 @@ class PlantRunState:
 			if row.operation_row_id == idx
 		]
 
-	def get_item(self, row, planned, source):
+	def get_item(self, row, source):
 		return frappe._dict(
 			name=row.name,
 			item_code=row.item_code,
 			item_name=row.item_name,
 			uom=row.get("uom") or row.get("stock_uom"),
 			source_warehouse=row.source_warehouse,
-			available_qty=self.stock.get((row.item_code, row.source_warehouse), 0),
-			planned_qty=flt(planned.get((row.item_code, row.source_warehouse))),
 			required_qty=flt(row.required_qty),
 			transferred_qty=flt(row.get("transferred_qty")),
 			is_input=bool(source),
@@ -161,11 +155,7 @@ class PlantRunState:
 			uom=frappe.get_cached_value("Item", stage.output_item, "stock_uom"),
 			planned_qty=flt(card.for_quantity) if card and card.docstatus == 0 else stage.output_qty,
 			expected_qty=self.get_expected_qty(stage, card),
-			done_share=self.flow.get_done_share(stage.idx),
 			done_qty=self.flow.get_done_qty(stage.idx),
-			operation_qty=self.flow.get_operation_qty(stage),
-			limit=self.flow.get_output_limit(stage.idx),
-			whole_number=is_whole_number(stage.output_item),
 			completed_qty=sum(flt(row.total_completed_qty) for row in done),
 			process_loss_qty=sum(flt(row.process_loss_qty) for row in done),
 		)

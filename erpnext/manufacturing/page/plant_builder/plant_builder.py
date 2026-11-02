@@ -222,6 +222,14 @@ def restart_machine(
 	return run_action(work_order, lambda run: run.restart_machine(job_card, stop_reason, remarks, operator))
 
 
+@frappe.whitelist()
+def preview_lot(work_order: str, job_card: str, quantities: str | dict | None = None) -> dict:
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+	run = PlantRun(work_order)
+	run.plant_floor.check_permission("read")
+	return run.preview(job_card, frappe.parse_json(quantities) if quantities else {})
+
+
 @frappe.whitelist(methods=["POST"])
 def consume_materials(work_order: str, job_card: str, quantities: str | dict) -> dict:
 	return run_action(work_order, lambda run: run.consume(job_card, frappe.parse_json(quantities)))
