@@ -72,12 +72,14 @@ class TestCallLog(FrappeTestCase):
 		contact = frappe.get_doc({"doctype": "Contact", "first_name": f"_Test Caller {self.number}"})
 		contact.insert(ignore_permissions=True)
 		self._make_call_log(
+			**{"from": "+15550001111"},
 			to=f"+91{self.number}",
 			type="Incoming",
 			links=[{"link_doctype": "Contact", "link_name": contact.name}],
 		)
 		timeline = get_linked_call_logs("Contact", contact.name)
 		self.assertEqual(len(timeline), 1)
+		self.assertEqual(timeline[0]["template_data"]["from"], "+15550001111")
 		self.assertEqual(timeline[0]["template_data"]["to"], f"+91{self.number}")
 
 		user = "test_call_log_sales_user@example.com"

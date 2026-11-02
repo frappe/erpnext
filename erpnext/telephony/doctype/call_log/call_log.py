@@ -246,7 +246,16 @@ def get_linked_call_logs(doctype, docname):
 
 	logs = frappe.get_list(
 		"Call Log",
-		fields=["name", "type", "`from`", "`to`", "duration", "summary", "recording_url", "creation"],
+		fields=[
+			"name",
+			"type",
+			"`tabCall Log`.`from`",
+			"`tabCall Log`.`to`",
+			"duration",
+			"summary",
+			"recording_url",
+			"creation",
+		],
 		filters={"name": ["in", logs]},
 	)
 
