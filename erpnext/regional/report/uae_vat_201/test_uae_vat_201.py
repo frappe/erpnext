@@ -57,7 +57,7 @@ class TestUaeVat201(TestCase):
 	def test_company_permission(self):
 		user = "test2@example.com"
 		frappe.permissions.add_user_permission("Company", "_Test Company", user)
-		self.addCleanup(frappe.db.delete, "User Permission", {"user": user, "allow": "Company"})
+		self.addCleanup(frappe.permissions.remove_user_permission, "Company", "_Test Company", user)
 		if "Accounts User" not in frappe.get_roles(user):
 			frappe.get_doc("User", user).add_roles("Accounts User")
 			self.addCleanup(frappe.get_doc("User", user).remove_roles, "Accounts User")
