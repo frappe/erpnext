@@ -711,10 +711,10 @@ class PurchaseInvoiceMigrator:
 
 			if ctx["tax_rate"]:
 				taxable_for_allocation = flt(allocated_amount * 100 / ctx["tax_rate"], 2)
+				# The invoice amount already includes the part taxed through the advance
+				ctx["current_taxable"] = max(0, ctx["current_taxable"] - taxable_for_allocation)
 			else:
 				taxable_for_allocation = ctx["current_taxable"]
-
-			ctx["current_taxable"] += taxable_for_allocation
 
 			# Entry in Purchase Invoice
 			entry_in_pi = self._create_entry(
@@ -832,8 +832,8 @@ class PurchaseInvoiceMigrator:
 		return entries
 
 	def _process_underwithheld(self, invoice_name, ctx):
-		# Skip if TDS was paid by another invoice
-		if invoice_name in self.tds_paid_by_other:
+		# Skip if TDS was paid by another invoice or the advance covered the whole invoice
+		if invoice_name in self.tds_paid_by_other or not ctx["current_taxable"]:
 			return None
 
 		info = ctx["info"]
