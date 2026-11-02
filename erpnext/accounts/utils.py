@@ -583,6 +583,7 @@ def reconcile_against_document(
 				entry.account,
 				entry.party_type,
 				entry.party,
+				update_payment_schedule=True,
 			)
 		frappe.flags.ignore_party_validation = False
 
@@ -2204,7 +2205,9 @@ def create_payment_ledger_entry(
 			ple.submit()
 
 
-def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
+def update_voucher_outstanding(
+	voucher_type, voucher_no, account, party_type, party, update_payment_schedule=False
+):
 	from erpnext.accounts.doctype.dunning.dunning import update_linked_dunnings
 
 	if not voucher_type or not voucher_no:
@@ -2250,9 +2253,61 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		outstanding_amount,
 	)
 
+	if update_payment_schedule:
+		sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc)
+
 	update_linked_dunnings(ref_doc, previous_outstanding_amount)
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
+
+
+def sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc=None):
+	"""Make the Payment Schedule total outstanding match the invoice outstanding.
+
+	Reconciliation, unreconciliation and cancellation change the invoice outstanding through the
+	Payment Ledger only. Syncing to the absolute outstanding (not a delta) is idempotent and does not
+	depend on what else already touched the outstanding. Earliest due terms are cleared first, and
+	terms are restored latest first. ponytail: no per-term choice, add if users need to pick the term.
+	"""
+	ref_doc = ref_doc or frappe.get_doc(voucher_type, voucher_no)
+	if ref_doc.docstatus != 1 or ref_doc.get("is_return") or not ref_doc.get("payment_schedule"):
+		return
+
+	rate = flt(ref_doc.conversion_rate) or 1
+	outstanding = flt(ref_doc.outstanding_amount)
+	if ref_doc.party_account_currency != ref_doc.currency:
+		# outstanding is in company currency, the schedule is in transaction currency
+		outstanding /= rate
+
+	precision = ref_doc.precision("outstanding_amount")
+	amount = flt(sum(flt(term.outstanding) for term in ref_doc.payment_schedule) - outstanding, precision)
+	terms = sorted(ref_doc.payment_schedule, key=lambda t: (getdate(t.due_date), t.idx), reverse=amount < 0)
+	# A reversal takes back paid amounts first. A cash discount stays with its payment, unless the
+	# outstanding still needs more, which means the discounted payment itself was reversed.
+	for field in ("paid_amount", "discounted_amount") if amount < 0 else ("paid_amount",):
+		for term in terms:
+			if not amount:
+				break
+
+			if amount > 0:
+				change = min(amount, flt(term.outstanding))
+			else:
+				change = max(amount, -flt(term.get(field)))
+
+			if not change:
+				continue
+
+			base_change = flt(change * rate, term.precision("base_outstanding"))
+			values = {
+				"outstanding": flt(term.outstanding) - change,
+				field: flt(term.get(field)) + change,
+				"base_outstanding": flt(term.base_outstanding) - base_change,
+			}
+			if field == "paid_amount":
+				values["base_paid_amount"] = flt(term.base_paid_amount) + base_change
+
+			term.db_set(values, update_modified=False)
+			amount = flt(amount - change, precision)
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):
