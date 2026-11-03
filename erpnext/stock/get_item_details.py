@@ -311,6 +311,10 @@ def update_stock(ctx, out, doc=None):
 			}
 		)
 
+		if out.has_serial_no:
+			# the serial nos reserved for the Sales Order row, and their batch, are picked first
+			kwargs["sales_order_item"] = ctx.get("so_detail")
+
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
 
