@@ -1,21 +1,6 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-"""
-Migration patch for Tax Withholding Entry data.
-
-This patch migrates historical TDS/TCS data from the old structure to the new
-Tax Withholding Entry child table structure.
-
-Old Structure:
-- Purchase Invoice: taxes table (is_tax_withholding_account), tax_withheld_vouchers, advance_tax
-- Sales Invoice: taxes table (TDS amount without is_tax_withholding_account checkbox)
-- Payment Entry: advance_taxes_and_charges table with allocated_amount
-- Journal Entry: accounts table with is_tax_withholding_account (but not reliable)
-
-New Structure:
-- All doctypes: tax_withholding_entries child table with detailed tracking
-"""
 
 from collections import defaultdict
 
@@ -24,8 +9,7 @@ from frappe.query_builder.functions import Count, IfNull, Max, Sum
 from frappe.utils import create_batch, flt, now
 from pypika.terms import Bracket
 
-# Names per IN list, so the statements stay well below max_allowed_packet on large sites,
-# and purchase invoices per group of suppliers migrated at a time, so memory stays bounded
+# Names per IN list, kept below max_allowed_packet, and invoices per supplier group, so memory stays bounded
 BATCH_SIZE = 50000
 
 
@@ -81,7 +65,6 @@ def execute():
 				.run()
 			)
 
-	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
 	paid_journals = set()
 	for suppliers in get_supplier_groups(column_cache, party_tax_id_cache):
@@ -107,13 +90,11 @@ def execute():
 		party_categories,
 	)
 
-	# Copy tax_withholding_category to item level
 	copy_category_to_items_for_purchase(column_cache)
 	copy_category_to_items_for_sales(column_cache)
 
 
 def get_supplier_groups(column_cache, party_tax_id_cache):
-	"""Suppliers in groups of about BATCH_SIZE purchase invoices, with the suppliers of a PAN together"""
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pe = frappe.qb.DocType("Payment Entry")
 
@@ -197,18 +178,15 @@ def get_tds_accounts():
 	if not result:
 		return None
 
-	# Build lookup: {(company, account): category}
-	# If account has multiple categories, set to None (ambiguous)
 	account_map = {}
 	for row in result:
 		key = (row.company, row.account)
 		if key in account_map:
-			# Multiple categories use same account - ambiguous
+			# An account shared by several categories identifies none
 			account_map[key] = None
 		else:
 			account_map[key] = row.category
 
-	# Also build account set by company for quick lookup
 	accounts_by_company = {}
 	for row in result:
 		accounts_by_company.setdefault(row.company, set()).add(row.account)
@@ -295,23 +273,19 @@ def get_tax_rate_for_date(tax_rate_map, category, posting_date):
 
 
 def determine_status(taxable_name, withholding_name, under_withheld_reason, is_duplicate=False):
-	"""Determine the status of a Tax Withholding Entry."""
 	if is_duplicate:
 		return "Duplicate"
 
-	# If under_withheld_reason is specified, it's settled (legitimate reason for under deduction)
+	# A reason for not deducting settles the entry
 	if under_withheld_reason:
 		return "Settled"
 
-	# If both taxable and withholding are specified, it's settled
 	if taxable_name and withholding_name:
 		return "Settled"
 
-	# If only taxable is specified, it's under withheld (tax not yet deducted)
 	if taxable_name and not withholding_name:
 		return "Under Withheld"
 
-	# If only withholding is specified, it's over withheld (deducted but no taxable doc)
 	if withholding_name and not taxable_name:
 		return "Over Withheld"
 
@@ -319,10 +293,6 @@ def determine_status(taxable_name, withholding_name, under_withheld_reason, is_d
 
 
 def bulk_insert_entries(all_entries):
-	"""
-	Bulk insert Tax Withholding Entries.
-	all_entries: dict of {(parent_doctype, parent_name): [entries]}
-	"""
 	if not all_entries:
 		return
 
@@ -340,7 +310,6 @@ def bulk_insert_entries(all_entries):
 
 	names = iter(names)
 
-	# Prepare all entries with proper fields
 	fields = [
 		"name",
 		"creation",
@@ -381,7 +350,6 @@ def bulk_insert_entries(all_entries):
 	values = []
 	for (parent_doctype, parent_name), entries in all_entries.items():
 		for idx, entry in enumerate(entries, start=1):
-			# Determine status
 			status = determine_status(
 				entry.get("taxable_name"),
 				entry.get("withholding_name"),
@@ -429,11 +397,6 @@ def bulk_insert_entries(all_entries):
 		frappe.db.bulk_insert("Tax Withholding Entry", fields, values, ignore_duplicates=True)
 
 
-# =============================================================================
-# PURCHASE INVOICE MIGRATION
-# =============================================================================
-
-
 class PurchaseInvoiceMigrator:
 	def __init__(
 		self,
@@ -451,19 +414,16 @@ class PurchaseInvoiceMigrator:
 		self.skip_docs = skip_docs
 		self.suppliers = suppliers
 
-		# Build TDS account set
 		self.all_tds_accounts = set()
 		for accounts in tds_accounts["accounts_by_company"].values():
 			self.all_tds_accounts.update(accounts)
 
-		# Raw query results
 		self._invoices_with_tds = []
 		self._all_withheld_vouchers = []
 		self._all_advance_taxes = []
 		self._pe_tds_entries = []
 		self._threshold_invoices = []
 
-		# Lookups
 		self.invoice_taxes = {}  # {invoice_name: {"info": row, "tax_rows": [], "tds_total": float}}
 		self.withheld_by_invoice = defaultdict(list)  # {parent_invoice: [vouchers]}
 		self.advance_by_invoice = defaultdict(list)  # {parent_invoice: [advance_taxes]}
@@ -472,17 +432,14 @@ class PurchaseInvoiceMigrator:
 		self.invoice_info = {}  # {invoice_name: row}
 		self.nil_certificates = defaultdict(list)  # {(supplier, company, category): [certificates]}
 
-		# Sets for tracking
 		self.invoices_with_advance_tax = set()
 		self.tds_paid_by_other = set()
 
-		# Date lookups
 		self.pe_dates = {}
 		self.pi_dates = {}
 		self._pi_names_for_dates = set()
 		self._pe_names_for_dates = set()
 
-		# Output
 		self.all_entries = {}  # {(doctype, name): [entries]}
 
 	def migrate(self):
@@ -499,8 +456,7 @@ class PurchaseInvoiceMigrator:
 			{key: rows for key, rows in self.all_entries.items() if key not in self.skip_docs}
 		)
 
-		# v15 advance tax rows have no withholding flag; an "Add" row is a reversal, not the deduction.
-		# Skipped payments are flagged too: their entries are kept, but their rows were never flagged
+		# v15 advance rows have no withholding flag and an Add row is a reversal; skipped payments need it too
 		for batch in create_batch(list(self.pe_taxes), BATCH_SIZE):
 			frappe.db.set_value(
 				"Advance Taxes and Charges",
@@ -515,10 +471,6 @@ class PurchaseInvoiceMigrator:
 				update_modified=False,
 			)
 
-	# -------------------------------------------------------------------------
-	# Data Fetching
-	# -------------------------------------------------------------------------
-
 	def _fetch_data(self):
 		pi = frappe.qb.DocType("Purchase Invoice")
 		ptc = frappe.qb.DocType("Purchase Taxes and Charges")
@@ -532,7 +484,6 @@ class PurchaseInvoiceMigrator:
 			(ptc.is_tax_withholding_account == 1) & (ptc.base_tax_amount_after_discount_amount != 0)
 		)
 
-		# Query 1: Invoices with TDS in taxes table
 		self._invoices_with_tds = (
 			frappe.qb.from_(pi)
 			.join(ptc)
@@ -559,11 +510,9 @@ class PurchaseInvoiceMigrator:
 			.run(as_dict=True)
 		)
 
-		# Query 2: Tax withheld vouchers, only of invoices with TDS: they are read to split that TDS over
-		# the vouchers it paid for, and v15 listed every earlier voucher on each invoice until TDS started
+		# Only for TDS invoices, to split it over the vouchers it paid for; v15 listed them until TDS started
 		self._all_withheld_vouchers = (
 			frappe.qb.from_(twv)
-			# JV / PE withholding possible
 			.select(twv.parent, twv.voucher_type, twv.voucher_name, twv.taxable_amount)
 			.where(twv.parenttype == "Purchase Invoice")
 			.where(
@@ -580,7 +529,6 @@ class PurchaseInvoiceMigrator:
 			.run(as_dict=True)
 		)
 
-		# Query 3: Advance taxes with PI info
 		self._all_advance_taxes = (
 			frappe.qb.from_(at)
 			.join(pi)
@@ -609,7 +557,6 @@ class PurchaseInvoiceMigrator:
 			.run(as_dict=True)
 		)
 
-		# Query 4: Payment Entries with TDS
 		self._pe_tds_entries = (
 			frappe.qb.from_(pe)
 			.join(atc)
@@ -639,7 +586,7 @@ class PurchaseInvoiceMigrator:
 			.run(as_dict=True)
 		)
 
-		# Query 5: Invoices v15 counted towards the threshold, with or without TDS of their own
+		# Invoices v15 counted towards the threshold, with or without TDS of their own
 		self._threshold_invoices = (
 			frappe.qb.from_(pi)
 			.select(
@@ -682,10 +629,6 @@ class PurchaseInvoiceMigrator:
 			# v15 applied a certificate to every supplier with its PAN
 			for party in {row.pan_no, row.supplier} - {None, ""}:
 				self.nil_certificates[(party, row.company, row.tax_withholding_category)].append(row)
-
-	# -------------------------------------------------------------------------
-	# Lookup Building
-	# -------------------------------------------------------------------------
 
 	def _build_lookups(self):
 		self._build_invoice_taxes_lookup()
@@ -764,10 +707,6 @@ class PurchaseInvoiceMigrator:
 				frappe.qb.from_(pi).select(pi.name, pi.posting_date).where(pi.name.isin(batch)).run()
 			)
 
-	# -------------------------------------------------------------------------
-	# Invoice Processing
-	# -------------------------------------------------------------------------
-
 	def _process_invoices(self):
 		all_invoice_names = (
 			set(self.invoice_taxes.keys())
@@ -775,8 +714,7 @@ class PurchaseInvoiceMigrator:
 			| {row.name for row in self._threshold_invoices}
 		)
 
-		# Invoices with TDS first, so the invoices they paid TDS for are known before the rest
-		# and by date, so certificate limits are used up in the order v15 used them
+		# TDS invoices first so the ones they paid for are known, then by date, as v15 used certificate limits
 		for invoice_name in sorted(
 			all_invoice_names,
 			key=lambda name: (name not in self.invoice_taxes, self.invoice_info[name].posting_date, name),
@@ -788,18 +726,14 @@ class PurchaseInvoiceMigrator:
 		if not info:
 			return
 
-		# Build context for this invoice
 		ctx = self._build_invoice_context(invoice_name, info)
 		entries = []
 
-		# Process advance tax allocations (PE -> PI)
 		entries.extend(self._process_advance_taxes(invoice_name, ctx))
 
-		# Process TDS paid in current invoice
 		if ctx["total_tds_in_invoice"]:
 			entries.extend(self._process_invoice_tds(invoice_name, ctx))
 
-		# Handle under-withheld (no TDS)
 		else:
 			entries.extend(self._process_underwithheld(invoice_name, ctx))
 
@@ -807,7 +741,6 @@ class PurchaseInvoiceMigrator:
 			self._add_entries("Purchase Invoice", invoice_name, entries)
 
 	def _build_invoice_context(self, invoice_name, info):
-		# Get category
 		category = info.tax_withholding_category
 		if not category and invoice_name in self.invoice_taxes:
 			for tax_row in self.invoice_taxes[invoice_name]["tax_rows"]:
@@ -816,7 +749,6 @@ class PurchaseInvoiceMigrator:
 				if category:
 					break
 
-		# Get party info
 		party_type = "Supplier"
 		party = info.supplier
 
@@ -825,21 +757,17 @@ class PurchaseInvoiceMigrator:
 		tax_id = self.party_tax_id_cache.get((party_type, party))
 		tax_rate, tax_on_excess = get_tax_rate_for_date(self.tax_rate_map, category, info.posting_date)
 
-		# Current invoice's taxable amount
 		current_taxable = abs(info.base_tax_withholding_net_total or info.base_net_total)
 
-		# Get TDS total
 		has_tds = invoice_name in self.invoice_taxes
 		tds_total = self.invoice_taxes[invoice_name]["tds_total"] if has_tds else 0
 
 		# Below zero on a bill that is not a return, the TDS rows gave TDS back
 		total_tds_in_invoice = tds_total if tds_total < 0 and not info.is_return else abs(tds_total)
 
-		# Get related data
 		advance_taxes = self.advance_by_invoice.get(invoice_name, [])
 		withheld_vouchers = self.withheld_by_invoice.get(invoice_name, [])
 
-		# Calculate past taxable from withheld vouchers
 		past_taxable_total = sum(
 			flt(v.taxable_amount) for v in withheld_vouchers if v.voucher_name != invoice_name
 		)
@@ -878,7 +806,6 @@ class PurchaseInvoiceMigrator:
 			else:
 				taxable_for_allocation = ctx["current_taxable"]
 
-			# Entry in Purchase Invoice
 			entry_in_pi = self._create_entry(
 				ctx,
 				taxable_amount=taxable_for_allocation,
@@ -892,7 +819,6 @@ class PurchaseInvoiceMigrator:
 			)
 			entries.append(entry_in_pi)
 
-			# Duplicate entry in Payment Entry
 			entry_in_pe = entry_in_pi.copy()
 			entry_in_pe["is_duplicate"] = True
 			self._add_entries("Payment Entry", pe_name, [entry_in_pe])
@@ -923,30 +849,25 @@ class PurchaseInvoiceMigrator:
 		tds_for_past = 0
 		tds_for_current_and_past = abs(ctx["total_tds_in_invoice"])
 
-		# Calculate TDS split between current and past invoices
 		if not ctx["tax_on_excess"] and ctx["past_taxable_total"] > 0 and tax_rate:
 			tds_for_past = flt(ctx["past_taxable_total"] * tax_rate / 100, 2)
 
-			# v15 listed the vouchers until the threshold was crossed, so with less TDS than they need
-			# this invoice did not tax them
+			# v15 listed vouchers until the threshold was crossed, so TDS below their share did not tax them
 			if tds_for_past > tds_for_current_and_past + 1:
 				tds_for_past = 0
 
 		tds_for_current = max(0, tds_for_current_and_past - tds_for_past)
 
-		# Entry for current invoice
 		if tds_for_current:
 			if tax_rate:
 				calc_taxable = flt(tds_for_current * 100 / tax_rate, 2)
 			else:
 				calc_taxable = ctx["current_taxable"]
 
-			# Handle threshold exemption for tax_on_excess categories
 			# v15 counted only invoices with apply_tds towards the threshold
 			if ctx["tax_on_excess"] and info.apply_tds and calc_taxable < ctx["current_taxable"]:
 				taxable_exemption_amount = flt(ctx["current_taxable"] - calc_taxable, 2)
 
-				# Create threshold exemption entry (no TDS on threshold amount)
 				threshold_entry = self._create_entry(
 					ctx,
 					taxable_amount=taxable_exemption_amount,
@@ -974,7 +895,6 @@ class PurchaseInvoiceMigrator:
 			)
 			entries.append(main_entry)
 
-		# Process withheld vouchers (TDS for past invoices paid here)
 		if tds_for_past:
 			entries.extend(self._process_withheld_vouchers(invoice_name, ctx))
 
@@ -986,7 +906,7 @@ class PurchaseInvoiceMigrator:
 		tax_rate = ctx["tax_rate"]
 
 		for voucher in ctx["withheld_vouchers"]:
-			# v15 listed invoices under a nil rate certificate with no taxable amount, so nothing was paid for them
+			# v15 listed nil rate certificate invoices with no taxable amount, so nothing was paid for them
 			if voucher.voucher_name == invoice_name or not flt(voucher.taxable_amount):
 				continue
 
@@ -995,7 +915,6 @@ class PurchaseInvoiceMigrator:
 			voucher_taxable = flt(voucher.taxable_amount)
 			voucher_tds = flt(voucher_taxable * tax_rate / 100, 2) if tax_rate else 0
 
-			# Entry in current invoice
 			entry_in_current = self._create_entry(
 				ctx,
 				taxable_amount=voucher_taxable,
@@ -1009,7 +928,6 @@ class PurchaseInvoiceMigrator:
 			)
 			entries.append(entry_in_current)
 
-			# Duplicate entry in past invoice
 			entry_in_past = entry_in_current.copy()
 			entry_in_past["is_duplicate"] = True
 			self._add_entries(voucher.voucher_type, voucher.voucher_name, [entry_in_past])
@@ -1017,7 +935,7 @@ class PurchaseInvoiceMigrator:
 		return entries
 
 	def _process_underwithheld(self, invoice_name, ctx):
-		# Skip if TDS was paid by another invoice or the advance covered the whole invoice
+		# Paid by another invoice, or the advance covered the whole invoice
 		if (
 			("Purchase Invoice", invoice_name) in self.tds_paid_by_other
 			or not ctx["current_taxable"]
@@ -1038,7 +956,7 @@ class PurchaseInvoiceMigrator:
 			"withholding_date": None,
 		}
 
-		# v15 counted invoices under a nil rate certificate as zero; the new flow tracks its limit on these rows
+		# v15 counted nil rate certificate invoices as zero; the new flow tracks its limit on these rows
 		certificates = self.nil_certificates.get(
 			(ctx["tax_id"], info.company, ctx["category"])
 		) or self.nil_certificates.get((info.supplier, info.company, ctx["category"]), [])
@@ -1075,10 +993,6 @@ class PurchaseInvoiceMigrator:
 
 		return entries
 
-	# -------------------------------------------------------------------------
-	# Payment Entry Over-Withheld Processing
-	# -------------------------------------------------------------------------
-
 	def _process_pe_overwithheld(self):
 		for pe_name, data in self.pe_taxes.items():
 			info = data["info"]
@@ -1087,14 +1001,12 @@ class PurchaseInvoiceMigrator:
 			if not total_tds:
 				continue
 
-			# Calculate unallocated TDS
 			total_allocated = self.pe_allocated.get(pe_name, 0)
 			unallocated_tds = total_tds - total_allocated
 
 			if unallocated_tds <= 0:
 				continue
 
-			# Get category
 			category = info.tax_withholding_category
 
 			party_type = info.party_type
@@ -1107,7 +1019,6 @@ class PurchaseInvoiceMigrator:
 			else:
 				unallocated_taxable = info.paid_amount
 
-			# Get currency and conversion rate based on payment type
 			if info.payment_type == "Receive":
 				currency = info.paid_from_account_currency
 				conversion_rate = info.source_exchange_rate or 1
@@ -1135,10 +1046,6 @@ class PurchaseInvoiceMigrator:
 			}
 
 			self._add_entries("Payment Entry", pe_name, [entry])
-
-	# -------------------------------------------------------------------------
-	# Helper Methods
-	# -------------------------------------------------------------------------
 
 	def _create_entry(self, ctx, **kwargs):
 		is_return = ctx["info"].is_return
@@ -1169,24 +1076,11 @@ class PurchaseInvoiceMigrator:
 		self.all_entries[key].extend(entries)
 
 
-# =============================================================================
-# SALES INVOICE MIGRATION
-# =============================================================================
-
-
 def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs):
-	"""
-	Migrate Sales Invoice TCS data.
-
-	Sales Invoice TCS is simpler - only tax on excess amount for current invoice.
-	No tax_withheld_vouchers or advance_tax tables.
-	Tax is identified from GL Entry on TCS accounts.
-	"""
 	gle = frappe.qb.DocType("GL Entry")
 	si = frappe.qb.DocType("Sales Invoice")
 	cust = frappe.qb.DocType("Customer")
 
-	# Build conditions for TCS accounts
 	all_tcs_accounts = set()
 	for _company, accounts in tds_accounts["accounts_by_company"].items():
 		all_tcs_accounts.update(accounts)
@@ -1194,7 +1088,6 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 	if not all_tcs_accounts:
 		return
 
-	# Get Sales Invoices with TCS amounts aggregated
 	tcs_accounts_list = list(all_tcs_accounts)
 
 	tcs_gl = (
@@ -1246,13 +1139,11 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 		total_tcs = row.total_tcs
 		net_grand_total = abs(row.base_grand_total - total_tcs)
 
-		# Get category
 		category = row.tax_withholding_category
 		if not category:
 			account_key = (row.company, row.account)
 			category = tds_accounts["account_map"].get(account_key)
 
-		# Party info
 		party_type = "Customer"
 		party = row.customer
 		tax_id = party_tax_id_cache.get((party_type, party))
@@ -1262,20 +1153,17 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 		if not tax_rate:
 			continue
 
-		# Back-calculate taxable amount
 		calculated_taxable = 0
 		if tax_rate and total_tcs:
 			calculated_taxable = flt(total_tcs * 100 / tax_rate, 2)
 
-		# For returns, amounts are negative
 		if row.is_return:
 			total_tcs = -abs(total_tcs)
 			calculated_taxable = -abs(calculated_taxable)
 
 		entries = []
 
-		# Handle threshold exemption for categories
-		# NOTE: Default tax_on_excess is True for Sales Invoice
+		# v15 always charged TCS on the excess
 		if abs(calculated_taxable) < net_grand_total:
 			taxable_exemption_amount = flt(net_grand_total - abs(calculated_taxable), 2)
 
@@ -1329,7 +1217,6 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 
 	bulk_insert_entries(all_entries)
 
-	# Update Sales Invoice Item
 	for category, invoices in category_wise_invoices.items():
 		for batch in create_batch(invoices, BATCH_SIZE):
 			frappe.db.set_value(
@@ -1342,8 +1229,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 	for batch in create_batch([name for _doctype, name in all_entries], BATCH_SIZE):
 		frappe.db.set_value("Sales Invoice", {"name": ("in", batch)}, {"apply_tds": 1}, update_modified=False)
 
-	# v15 sales tax rows have no withholding flag; without it the new flow adds a second TCS row.
-	# Skipped invoices are flagged too: their entries are kept, but their rows were never flagged
+	# Without the flag v15 never set, the new flow adds a second TCS row; skipped invoices need it too
 	for batch in create_batch([row.invoice_name for row in tcs_entries if row.account], BATCH_SIZE):
 		frappe.db.set_value(
 			"Sales Taxes and Charges",
@@ -1358,11 +1244,6 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 		)
 
 
-# =============================================================================
-# JOURNAL ENTRY MIGRATION
-# =============================================================================
-
-
 def migrate_journal_entries(
 	tds_accounts,
 	tax_rate_map,
@@ -1371,17 +1252,10 @@ def migrate_journal_entries(
 	paid_journals,
 	party_categories,
 ):
-	"""
-	Migrate Journal Entry TDS data.
-
-	For Journal Entry, we rely on GL Entry to identify TDS transactions.
-	Party info is obtained from JE Account rows that are NOT TDS accounts.
-	"""
 	gle = frappe.qb.DocType("GL Entry")
 	je = frappe.qb.DocType("Journal Entry")
 	jea = frappe.qb.DocType("Journal Entry Account")
 
-	# Build conditions for TDS accounts
 	all_tds_accounts = set()
 	for _company, accounts in tds_accounts["accounts_by_company"].items():
 		all_tds_accounts.update(accounts)
@@ -1389,7 +1263,6 @@ def migrate_journal_entries(
 	if not all_tds_accounts:
 		return
 
-	# Get Journal Entries with TDS entries in GL
 	tds_gl_entries = (
 		frappe.qb.from_(gle)
 		.join(je)
@@ -1412,11 +1285,9 @@ def migrate_journal_entries(
 		.run(as_dict=True)
 	)
 
-	# Get all JE parties in bulk - only from non-TDS account rows
 	je_names = list({row.journal_entry for row in tds_gl_entries})
 	je_parties = {}
 	for batch in create_batch(je_names, BATCH_SIZE):
-		# Get party from JE Account rows that are NOT TDS accounts
 		jea_party_rows = (
 			frappe.qb.from_(jea)
 			.select(
@@ -1439,7 +1310,6 @@ def migrate_journal_entries(
 			if row.parent not in je_parties:
 				je_parties[row.parent] = (row.party_type, row.party, row.account_currency, row.exchange_rate)
 
-	# Group by journal entry
 	je_taxes = {}
 	for row in tds_gl_entries:
 		if row.journal_entry not in je_taxes:
@@ -1453,19 +1323,17 @@ def migrate_journal_entries(
 	for je_name, data in je_taxes.items():
 		info = data["info"]
 
-		# Assume TCS not allowed in Journal Entry
-		# Calculate total TDS (credit - debit)
+		# Journals hold TDS only, never TCS
 		total_tds = sum(flt(row.credit) - flt(row.debit) for row in data["gl_rows"])
 
+		# A net debit is TDS paid to the government
 		if total_tds <= 0:
-			# Ignore TDS payment entries
 			continue
 
 		journals_with_tds.append(je_name)
 		if ("Journal Entry", je_name) in skip_docs:
 			continue
 
-		# Get party from JE accounts (non-TDS rows)
 		party_type = None
 		party = None
 		account_currency = ""
@@ -1474,8 +1342,7 @@ def migrate_journal_entries(
 		if je_name in je_parties:
 			party_type, party, account_currency, exchange_rate = je_parties[je_name]
 
-		# Get category in the order of the v15 Tax Withholding Details report:
-		# the account's only category, the journal's category, the party's default category
+		# Category in the v15 report's order: the account's only one, the journal's, then the party's default
 		category = None
 		for gl_row in data["gl_rows"]:
 			category = tds_accounts["account_map"].get((info.company, gl_row.account))
@@ -1488,14 +1355,12 @@ def migrate_journal_entries(
 		tax_id = party_tax_id_cache.get((party_type, party))
 		tax_rate, tax_on_excess = get_tax_rate_for_date(tax_rate_map, category, info.posting_date)
 
-		# Back-calculate taxable amount
 		calculated_taxable = 0
 		if tax_rate and total_tds:
 			calculated_taxable = min(flt(total_tds * 100 / tax_rate, 2), info.total_debit)
 
 		entries = []
 
-		# Handle threshold exemption for tax_on_excess categories
 		if tax_on_excess and calculated_taxable < info.total_debit:
 			taxable_exemption_amount = flt(info.total_debit - abs(calculated_taxable), 2)
 			threshold_entry = {
@@ -1542,8 +1407,7 @@ def migrate_journal_entries(
 
 		category_wise_jes[category].add(je_name)
 
-	# v15 counted journals without TDS towards the threshold, but taxed them on the crossing invoice only in
-	# categories that are not tax on excess; the ones no invoice taxed are still open
+	# v15 counted journals without TDS but taxed them only in categories not on excess; untaxed ones stay open
 	tds_jea = frappe.qb.DocType("Journal Entry Account", alias="tds_jea")
 	journals_without_tds = (
 		frappe.qb.from_(je)
@@ -1626,8 +1490,7 @@ def migrate_journal_entries(
 				update_modified=False,
 			)
 
-	# Only the deduction row: a debit is a TDS payment and a party row is the party's own account.
-	# Skipped journals are flagged too: their entries are kept, but their rows were never flagged
+	# Only the deduction row (a debit pays TDS, a party row is the party's own); skipped journals need it too
 	for batch in create_batch(journals_with_tds, BATCH_SIZE):
 		frappe.db.set_value(
 			"Journal Entry Account",
@@ -1642,11 +1505,6 @@ def migrate_journal_entries(
 			1,
 			update_modified=False,
 		)
-
-
-# =============================================================================
-# ITEM LEVEL CATEGORY COPY
-# =============================================================================
 
 
 def copy_category_to_items_for_purchase(column_cache):
@@ -1665,7 +1523,7 @@ def copy_category_to_items_for_purchase(column_cache):
 	parent = frappe.qb.DocType(parent_doctype)
 	item = frappe.qb.DocType(item_doctype, alias="item")
 
-	# A subquery and an unqualified column, as Postgres supports neither UPDATE ... JOIN nor alias.column in SET
+	# Subquery and unqualified column: Postgres supports neither UPDATE ... JOIN nor alias.column in SET
 	(
 		frappe.qb.update(item)
 		.set(
@@ -1710,7 +1568,7 @@ def copy_category_to_items_for_sales(column_cache):
 		.where(parent.name == item.parent)
 	)
 
-	# A subquery and an unqualified column, as Postgres supports neither UPDATE ... JOIN nor alias.column in SET
+	# Subquery and unqualified column: Postgres supports neither UPDATE ... JOIN nor alias.column in SET
 	(
 		frappe.qb.update(item)
 		.set("tax_withholding_category", Bracket(invoice_category))
