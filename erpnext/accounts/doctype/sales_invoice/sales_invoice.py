@@ -3362,17 +3362,18 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer):
+def get_loyalty_programs(customer: str):
 	"""sets applicable loyalty program to the customer or returns a list of applicable programs"""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs
 
+	frappe.has_permission("Customer", "read", customer, throw=True)
 	customer = frappe.get_doc("Customer", customer)
 	if customer.loyalty_program:
 		return [customer.loyalty_program]
 
 	lp_details = get_loyalty_programs(customer)
 
-	if len(lp_details) == 1:
+	if len(lp_details) == 1 and customer.has_permission("write"):
 		customer.db_set("loyalty_program", lp_details[0])
 		return lp_details
 	else:
