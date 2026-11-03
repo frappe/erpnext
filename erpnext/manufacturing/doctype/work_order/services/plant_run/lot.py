@@ -21,6 +21,10 @@ class Lot:
 		return self.inputs.get((row.item_code, row.source_warehouse))
 
 	@cached_property
+	def tolerance(self):
+		return flt(self.flow.plant_floor.formula_tolerance)
+
+	@cached_property
 	def share(self):
 		passed = {key: self.get_passed(source) for key, source in self.inputs.items()}
 		return self.flow.get_lot_share(self.idx, passed)
@@ -63,7 +67,8 @@ class Lot:
 	def is_balance_row(self, row):
 		return not self.get_input(row) and row.item_code in self.flow.balance_items
 
-	def get_quantities(self):
+	@cached_property
+	def resolved_quantities(self):
 		return {row.name: self.get_qty(row) for row in self.job_card.items}
 
 	def get_qty(self, row):
@@ -101,27 +106,27 @@ class Lot:
 		if self.share <= 0 or self.output_qty <= 0:
 			return _("Pass some of the semi-finished goods to this stage first")
 
-	def get_errors(self, quantities, tolerance):
+	@cached_property
+	def row_errors(self):
 		errors = {
-			row.name: self.get_row_error(row, quantities[row.name], tolerance) for row in self.job_card.items
+			row.name: self.get_row_error(row, self.resolved_quantities[row.name])
+			for row in self.job_card.items
 		}
 		return {name: error for name, error in errors.items() if error}
 
-	def validate(self, quantities, tolerance):
-		if error := self.error or next(iter(self.get_errors(quantities, tolerance).values()), None):
+	def validate(self):
+		if error := self.error or next(iter(self.row_errors.values()), None):
 			frappe.throw(error)
 
-	def get_preview(self, tolerance):
-		quantities = self.get_quantities()
-		errors = self.get_errors(quantities, tolerance)
+	def get_preview(self):
 		return frappe._dict(
 			output_qty=self.output_qty,
-			errors=list(filter(None, [self.error, *errors.values()])),
+			errors=list(filter(None, [self.error, *self.row_errors.values()])),
 			items={
 				row.name: frappe._dict(
-					qty=quantities[row.name],
+					qty=self.resolved_quantities[row.name],
 					planned_qty=self.get_lot_planned_qty(row),
-					is_off=row.name in errors,
+					is_off=row.name in self.row_errors,
 				)
 				for row in self.job_card.items
 			},
@@ -131,10 +136,10 @@ class Lot:
 		source = self.get_input(row)
 		return source.waiting_qty if source else self.get_planned_qty(row)
 
-	def get_row_error(self, row, qty, tolerance):
+	def get_row_error(self, row, qty):
 		if source := self.get_input(row):
 			return self.get_input_error(row, qty, source)
-		return self.get_material_error(row, qty, tolerance)
+		return self.get_material_error(row, qty)
 
 	def get_input_error(self, row, qty, source):
 		if qty < 0 or qty > source.waiting_qty + EPSILON:
@@ -142,7 +147,7 @@ class Lot:
 				flt(source.waiting_qty, 3), row.uom, row.item_name or row.item_code, source.stage_name
 			)
 
-	def get_material_error(self, row, qty, tolerance):
+	def get_material_error(self, row, qty):
 		name = row.item_name or row.item_code
 		if qty <= 0:
 			return _("{0} needs a quantity above zero").format(name)
@@ -156,7 +161,7 @@ class Lot:
 			return None
 
 		variance = (qty - planned_qty) / planned_qty * 100
-		if abs(variance) > tolerance + 0.0001:
+		if abs(variance) > self.tolerance + 0.0001:
 			return _("{0} is {1}% off the formula. The allowed range is ±{2}%.").format(
-				name, flt(abs(variance), 1), flt(tolerance)
+				name, flt(abs(variance), 1), self.tolerance
 			)

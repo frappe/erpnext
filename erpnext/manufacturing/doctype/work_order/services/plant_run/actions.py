@@ -122,8 +122,7 @@ class PlantRun:
 		return downtime.name
 
 	def preview(self, job_card, quantities):
-		lot = Lot(self.get_flow(), self.get_job_card(job_card), quantities)
-		return lot.get_preview(flt(self.plant_floor.formula_tolerance))
+		return Lot(self.get_flow(), self.get_job_card(job_card), quantities).get_preview()
 
 	def consume(self, job_card, quantities):
 		job_card = self.get_job_card(job_card)
@@ -131,8 +130,8 @@ class PlantRun:
 			frappe.throw(_("Resume the Work Order before you consume materials"))
 
 		lot = Lot(self.get_flow(), job_card, quantities)
-		quantities = lot.get_quantities()
-		lot.validate(quantities, flt(self.plant_floor.formula_tolerance))
+		lot.validate()
+		quantities = lot.resolved_quantities
 
 		job_card.set("items", [row for row in job_card.items if quantities[row.name] > 0])
 		for row in job_card.items:
