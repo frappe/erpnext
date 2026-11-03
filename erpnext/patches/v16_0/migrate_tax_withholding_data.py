@@ -915,11 +915,13 @@ class PurchaseInvoiceMigrator:
 		return entries
 
 	def _process_underwithheld(self, invoice_name, ctx):
-		# Paid by another invoice, or the advance covered the whole invoice
+		# Paid by another invoice, or the advance covered the whole invoice; v15 summed only the items with
+		# Apply TDS, so a zero total means nothing on the bill counted towards the threshold
 		if (
 			("Purchase Invoice", invoice_name) in self.tds_paid_by_other
 			or not ctx["current_taxable"]
 			or not ctx["info"].apply_tds
+			or not ctx["info"].base_tax_withholding_net_total
 		):
 			return []
 
