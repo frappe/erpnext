@@ -85,7 +85,7 @@ frappe.ui.form.on("Work Order", {
 
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
-			return erpnext.work_order.get_operation_qty(frm, doc) == doc.completed_qty ? "green" : "orange";
+			return doc.status === "Completed" ? "green" : "orange";
 		});
 
 		frm.fields_dict["non_stock_items"].grid.set_column_disp_in_list_view("secondary_item_type", false);
@@ -212,7 +212,9 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		let pending_ops = frm.doc?.operations?.filter(
-			(op) => op.completed_qty < erpnext.work_order.get_operation_qty(frm, op)
+			(op) =>
+				flt(flt(op.completed_qty) + flt(op.process_loss_qty), precision("completed_qty", op)) <
+				erpnext.work_order.get_operation_target_qty(frm, op)
 		);
 		// Jump to the operator Shop Floor view, pre-filtered to this work order.
 		if (frm.doc.docstatus === 1 && frm.doc.status !== "Closed" && pending_ops && pending_ops.length > 0) {
@@ -534,11 +536,14 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
-			let operation_qty = erpnext.work_order.get_operation_qty(frm, data);
+			let operation_qty = erpnext.work_order.get_operation_target_qty(frm, data);
 			if (data.completed_qty + data.process_loss_qty != operation_qty) {
-				pending_qty = operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+				pending_qty = flt(
+					operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty),
+					precision("completed_qty", data)
+				);
 
-				if (pending_qty) {
+				if (pending_qty > 0) {
 					dialog.fields_dict.operations.df.data.push({
 						__checked: 1,
 						name: data.name,
@@ -682,8 +687,11 @@ frappe.ui.form.on("Work Order", {
 			let total_completed_qty = frm.doc.qty * frm.doc.operations.length;
 
 			frm.doc.operations.forEach((d) => {
-				let completed_qty =
-					(flt(d.completed_qty) * frm.doc.qty) / erpnext.work_order.get_operation_qty(frm, d);
+				let operation_qty = erpnext.work_order.get_operation_target_qty(frm, d);
+				let completed_qty = operation_qty
+					? Math.min((flt(d.completed_qty) + flt(d.process_loss_qty)) / operation_qty, 1) *
+					  frm.doc.qty
+					: frm.doc.qty;
 				if (!status_wise_oprtation_data[d.status]) {
 					status_wise_oprtation_data[d.status] = [completed_qty, d.operation];
 				} else {
@@ -883,6 +891,10 @@ erpnext.work_order = {
 		}
 
 		return flt(frm.doc.qty);
+	},
+
+	get_operation_target_qty(frm, row) {
+		return flt(frm.doc.__onload?.operation_target_qty?.[row.name] ?? this.get_operation_qty(frm, row));
 	},
 
 	set_custom_buttons: function (frm) {
@@ -1176,7 +1188,7 @@ erpnext.work_order = {
 			return 0;
 		}
 
-		const total_loss = Math.max(...frm.doc.operations.map((row) => flt(row.process_loss_qty)));
+		const total_loss = flt(frm.doc.__onload?.upstream_process_loss);
 		return flt(Math.max(total_loss - flt(frm.doc.process_loss_qty), 0), precision("qty"));
 	},
 
