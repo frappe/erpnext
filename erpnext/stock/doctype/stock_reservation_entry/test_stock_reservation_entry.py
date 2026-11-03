@@ -843,6 +843,53 @@ class TestStockReservationEntry(FrappeTestCase):
 		cancel_all_stock_reservation_entries()
 		return super().tearDown()
 
+	@change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_returned_serial_from_partly_delivered_reservation_can_be_reserved_again(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_nos_from_bundle,
+		)
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=100,
+			serial_no="\n".join(f"{item_code}-{i}" for i in range(2)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=2)
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		delivery = make_delivery_note(sales_order.name, kwargs={"for_reserved_stock": 1})
+		delivery.items[0].qty = 1
+		returned_serial_no = get_serial_nos_from_bundle(delivery.items[0].serial_and_batch_bundle)[0]
+		delivery.items[0].serial_and_batch_bundle = None
+		delivery.items[0].use_serial_batch_fields = 1
+		delivery.items[0].serial_no = returned_serial_no
+		delivery.submit()
+		make_sales_return(delivery.name).submit()
+
+		new_order = make_sales_order(item_code=item_code, warehouse="_Test Warehouse - _TC", qty=1)
+		new_order.create_stock_reservation_entries(notify=False)
+
+		sre_name = frappe.db.get_value(
+			"Stock Reservation Entry", {"voucher_no": new_order.name, "docstatus": 1}
+		)
+		reserved_serial_nos = frappe.get_all(
+			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
+		)
+		self.assertEqual(reserved_serial_nos, [returned_serial_no])
+
 
 def create_items() -> dict:
 	items_properties = [
