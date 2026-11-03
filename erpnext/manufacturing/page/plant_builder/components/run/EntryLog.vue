@@ -12,7 +12,7 @@ const ICONS = {
 const rows = computed(() =>
 	run.state.value.entries.map((entry) => {
 		const finished = entry.items.find((row) => row.is_finished_item);
-		const stage = run.state.value.stages.find((s) => s.job_card?.name === entry.job_card);
+		const stage = run.state.value.stages.find((s) => s.job_cards.includes(entry.job_card));
 		const title =
 			entry.purpose === "Manufacture"
 				? __("Manufacture · {0}", [finished?.item_name || ""])
