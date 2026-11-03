@@ -63,6 +63,13 @@ const cartons = computed(() => {
 	}));
 });
 const lvl = (key) => props.view.level[key] ?? 0;
+const LABEL_CHAR = 10;
+function zoneLabel(zone) {
+	const room = zone.w - 24;
+	const readable = Math.min(props.k, 1.8);
+	const scale = Math.max(readable * 0.6, Math.min(readable, room / (zone.label.length * LABEL_CHAR)));
+	return { transform: `scale(${scale})`, maxWidth: `${room / scale}px` };
+}
 
 function zoneClass(zone) {
 	if (zone.down) return "border-2 border-outline-red-4 bg-surface-red-1";
@@ -82,9 +89,9 @@ function zoneClass(zone) {
 		@pointerleave="emit('hover', null)"
 	>
 		<span
-			class="absolute bottom-2 left-3 max-w-[90%] origin-bottom-left truncate whitespace-nowrap text-lg-semibold"
+			class="absolute bottom-2 left-3 origin-bottom-left truncate whitespace-nowrap text-lg-semibold"
 			:class="z.down ? 'text-ink-red-5' : z.active ? 'text-ink-gray-8' : 'text-ink-gray-5'"
-			:style="{ transform: `scale(${Math.min(k, 1.8)})` }"
+			:style="zoneLabel(z)"
 		>
 			{{ z.label }}
 		</span>
