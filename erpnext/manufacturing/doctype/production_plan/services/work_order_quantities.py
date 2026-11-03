@@ -17,6 +17,9 @@ class ProductionPlanWorkOrderQuantities:
 		self.production_plan = production_plan
 
 	def validate_work_order(self, work_order, *, process_loss_qty=0):
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			round_up_to_whole_unit,
+		)
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 
 		row = self.lock_plan_row(work_order)
@@ -31,7 +34,10 @@ class ProductionPlanWorkOrderQuantities:
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 		precision = work_order.precision("qty")
-		maximum_qty = flt(row.order_qty * (1 + allowance / 100) - committed, precision)
+		maximum_qty = flt(
+			round_up_to_whole_unit(row.order_qty * (1 + allowance / 100) - committed, row.stock_uom),
+			precision,
+		)
 		committed_qty = flt(
 			self._get_committed_qty(work_order, process_loss_qty, row.process_loss_percentage), precision
 		)
@@ -98,6 +104,10 @@ class ProductionPlanWorkOrderQuantities:
 		)
 
 	def get_pending_quantities(self, plan):
+		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+			round_up_to_whole_unit,
+		)
+
 		committed = self.get_committed_quantities(include_drafts=True)
 		precision = frappe.get_precision("Work Order", "qty")
 		pending = {}
@@ -109,8 +119,11 @@ class ProductionPlanWorkOrderQuantities:
 				row.name: max(
 					0,
 					flt(
-						self.get_order_qty(row, reference_field)
-						- committed[reference_field].get(row.name, 0),
+						round_up_to_whole_unit(
+							self.get_order_qty(row, reference_field)
+							- committed[reference_field].get(row.name, 0),
+							row.stock_uom,
+						),
 						precision,
 					),
 				)
