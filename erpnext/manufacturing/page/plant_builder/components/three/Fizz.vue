@@ -10,7 +10,7 @@ const at = (z, opacity, offset) => ({ transform: `translateZ(${z}px) rotateX(-90
 const dots = computed(() => {
 	if (!props.running || props.h < 12) return [];
 	const top = 6 + 0.9 * (props.h - 10);
-	return Array.from({ length: 12 }, (_, i) => {
+	return Array.from({ length: 8 }, (_, i) => {
 		const s = 3 + (i % 3) * 2;
 		const dx = ((i * 37) % (props.r * 1.2)) - props.r * 0.6;
 		return {

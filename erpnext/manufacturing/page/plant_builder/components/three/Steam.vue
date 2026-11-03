@@ -14,10 +14,11 @@ const props = defineProps({
 });
 
 const PERIOD = 2222;
+const PUFFS = 5;
 const k = computed(() => (props.small ? 0.5 : 1));
 const puffs = computed(() =>
 	props.running
-		? Array.from({ length: 7 }, (_, i) => ({
+		? Array.from({ length: PUFFS }, (_, i) => ({
 				i,
 				s: 16 * k.value,
 				rise: {
@@ -31,7 +32,7 @@ const puffs = computed(() =>
 						},
 					],
 					duration: PERIOD,
-					delay: -(i / 7) * PERIOD,
+					delay: -(i / PUFFS) * PERIOD,
 				},
 		  }))
 		: []

@@ -19,7 +19,7 @@ const props = defineProps({
 
 const px = (n) => `${n}px`;
 
-const count = computed(() => props.segments ?? Math.max(6, Math.min(16, Math.round(props.r / 3.5))));
+const count = computed(() => props.segments ?? Math.max(6, Math.min(12, Math.round(props.r / 4))));
 const facing = useFacing(() => Array.from({ length: count.value }, (_, i) => (360 / count.value) * i), -0.3);
 const strips = computed(() => {
 	const n = count.value;
