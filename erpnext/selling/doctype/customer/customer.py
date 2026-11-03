@@ -15,7 +15,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.utils.rename_doc import update_linked_doctypes
-from frappe.query_builder import Criterion, Field, functions
+from frappe.query_builder import Criterion, CustomFunction, Field, functions
 from frappe.query_builder.functions import Coalesce, IfNull, Sum
 from frappe.utils import cint, cstr, flt, fmt_money, get_formatted_email, get_link_to_form, getdate, today
 from frappe.utils.user import get_users_with_role
@@ -133,7 +133,10 @@ class Customer(TransactionBase):
 			set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_customer_name(self):
-		self.customer_name = self.customer_name.strip()
+		self.customer_name = cstr(self.customer_name).strip()
+		if not self.customer_name:
+			frappe.throw(_("Customer Name is mandatory"), frappe.MandatoryError)
+
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			name_prefix = f"{self.customer_name} - %"
 
@@ -193,11 +196,13 @@ class Customer(TransactionBase):
 		self.validate_customer_group()
 		self.validate_lead_not_converted()
 		validate_party_accounts(self)
+		self.validate_duplicate_credit_limit_company()
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.validate_primary_contact_and_address()
 		self.validate_prospect_not_converted()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
@@ -277,11 +282,15 @@ class Customer(TransactionBase):
 			self.represents_company = ""
 			return
 
+		if self.disabled:
+			return
+
 		internal_customer = frappe.db.get_value(
 			"Customer",
 			{
 				"is_internal_customer": 1,
 				"represents_company": self.represents_company,
+				"disabled": 0,
 				"name": ("!=", self.name),
 			},
 			"name",
@@ -298,6 +307,36 @@ class Customer(TransactionBase):
 				),
 				title=_("Internal Customer Already Exists"),
 			)
+
+	def validate_primary_contact_and_address(self):
+		for fieldname, doctype in (
+			("customer_primary_contact", "Contact"),
+			("customer_primary_address", "Address"),
+		):
+			name = self.get(fieldname)
+			if name and self.has_value_changed(fieldname) and not self.is_linked_to_self(doctype, name):
+				frappe.throw(
+					_("{0} {1} is not linked to Customer {2}").format(
+						_(doctype), frappe.bold(name), frappe.bold(self.name)
+					)
+				)
+
+	def is_linked_to_self(self, doctype, name):
+		allowed_links = {("Customer", self.name)}
+		if self.is_new():
+			# Lead, Opportunity and Prospect contacts and addresses get linked to the customer on insert.
+			allowed_links |= {
+				("Lead", self.lead_name),
+				("Opportunity", self.opportunity_name),
+				("Prospect", self.prospect_name),
+			}
+
+		links = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": doctype, "parent": name},
+			fields=["link_doctype", "link_name"],
+		)
+		return any((link.link_doctype, link.link_name) in allowed_links for link in links)
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -422,8 +461,8 @@ class Customer(TransactionBase):
 		copy_comments("Lead", self.lead_name, self, self.flags.ignore_permissions)
 		link_communications("Lead", self.lead_name, self, self.flags.ignore_permissions)
 
-	def validate_name_with_customer_group(self):
-		if frappe.db.exists("Customer Group", self.name):
+	def validate_name_with_customer_group(self, name=None):
+		if frappe.db.exists("Customer Group", name or self.name):
 			frappe.throw(
 				_(
 					"A Customer Group exists with same name please change the Customer name or rename the Customer Group"
@@ -457,6 +496,13 @@ class Customer(TransactionBase):
 				title=_("Invalid Customer Group"),
 			)
 
+	def validate_duplicate_credit_limit_company(self):
+		companies = set()
+		for limit in self.credit_limits:
+			if limit.company in companies:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company))
+			companies.add(limit.company)
+
 	def validate_credit_limit_on_change(self):
 		if self.get("__islocal") or not self.credit_limits:
 			return
@@ -476,15 +522,7 @@ class Customer(TransactionBase):
 		if past_credit_limits == current_credit_limits:
 			return
 
-		company_record = []
 		for limit in self.credit_limits:
-			if limit.company in company_record:
-				frappe.throw(
-					_("Credit limit is already defined for the Company {0}").format(limit.company, self.name)
-				)
-			else:
-				company_record.append(limit.company)
-
 			if not flt(limit.credit_limit):
 				continue
 
@@ -509,6 +547,7 @@ class Customer(TransactionBase):
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
 
 	def before_rename(self, olddn, newdn, merge=False):
+		self.validate_name_with_customer_group(newdn)
 		if merge:
 			validate_party_currency_before_merging("Customer", olddn, newdn)
 
@@ -610,35 +649,21 @@ def make_payment_entry(source_name, target_doc=None):
 
 
 def _set_missing_values(source, target):
-	address = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Address",
-		},
-		["parent"],
-		limit=1,
-	)
+	from frappe.contacts.doctype.address.address import get_default_address
+	from frappe.contacts.doctype.contact.contact import get_default_contact
 
-	contact = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Contact",
-		},
-		["parent"],
-		limit=1,
-	)
+	address = source.customer_primary_address
+	if not address or frappe.db.get_value("Address", address, "disabled"):
+		address = get_default_address(source.doctype, source.name)
+	contact = source.customer_primary_contact or get_default_contact(source.doctype, source.name)
 
 	if address:
-		target.customer_address = address[0].parent
+		target.customer_address = address
 
 	if contact:
-		target.contact_person = contact[0].parent
+		target.contact_person = contact
 		target.contact_display, target.contact_email, target.contact_mobile = frappe.get_value(
-			"Contact", contact[0].parent, ["full_name", "email_id", "mobile_no"]
+			"Contact", contact, ["full_name", "email_id", "mobile_no"]
 		)
 
 
@@ -660,14 +685,10 @@ def get_loyalty_programs(doc):
 	for loyalty_program in loyalty_programs:
 		if (
 			not loyalty_program.customer_group
-			or doc.customer_group
-			in get_nested_links(
-				"Customer Group", loyalty_program.customer_group, doc.flags.ignore_permissions
-			)
+			or doc.customer_group in get_nested_links("Customer Group", loyalty_program.customer_group)
 		) and (
 			not loyalty_program.customer_territory
-			or doc.territory
-			in get_nested_links("Territory", loyalty_program.customer_territory, doc.flags.ignore_permissions)
+			or doc.territory in get_nested_links("Territory", loyalty_program.customer_territory)
 		):
 			lp_details.append(loyalty_program.name)
 
@@ -675,13 +696,8 @@ def get_loyalty_programs(doc):
 
 
 def get_nested_links(link_doctype, link_name, ignore_permissions=False):
-	from frappe.desk.treeview import _get_children
-
-	links = [link_name]
-	for d in _get_children(link_doctype, link_name, ignore_permissions):
-		links.append(d.value)
-
-	return links
+	# ignore_permissions is kept for existing callers; eligibility must not depend on the viewer
+	return [link_name, *frappe.db.get_descendants(link_doctype, link_name)]
 
 
 def is_customer_blocked(customer: str) -> bool:
@@ -714,8 +730,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		# If not authorized person raise exception
 		credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
 		if not credit_controller_role or credit_controller_role not in frappe.get_roles():
-			# form a list of emails for the credit controller users
-			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
+			credit_controller_users = get_credit_controller_users()
 
 			# form a list of emails and names to show to the user
 			credit_controller_users_formatted = [
@@ -742,12 +757,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 					"label": "Send Email",
 					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
 					"hide_on_success": True,
-					"args": {
-						"customer": customer,
-						"customer_outstanding": customer_outstanding,
-						"credit_limit": credit_limit,
-						"credit_controller_users_list": credit_controller_users,
-					},
+					"args": {"customer": customer, "company": company},
 				}
 				if frappe.has_permission("Customer", ptype="email", doc=customer)
 				else None
@@ -762,15 +772,26 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 
 @frappe.whitelist()
-def send_emails(customer, customer_outstanding, credit_limit, credit_controller_users_list):
-	if isinstance(credit_controller_users_list, str):
-		credit_controller_users_list = json.loads(credit_controller_users_list)
+def send_emails(customer: str, company: str):
 	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
-	subject = _("Credit limit reached for customer {0}").format(customer)
-	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-		customer, customer_outstanding, credit_limit
+	currency = get_company_currency(company)
+	outstanding = get_customer_outstanding(
+		customer, company, is_sales_order_credit_check_bypassed(customer, company)
 	)
-	frappe.sendmail(recipients=credit_controller_users_list, subject=subject, message=message)
+	subject = _("Credit limit reached for customer {0}").format(customer)
+	message = _(
+		"A transaction for customer {0} is blocked by its credit limit. Current outstanding: {1}, credit limit: {2}"
+	).format(
+		customer,
+		fmt_money(outstanding, currency=currency),
+		fmt_money(get_credit_limit(customer, company), currency=currency),
+	)
+	frappe.sendmail(recipients=get_credit_controller_users(), subject=subject, message=message)
+
+
+def get_credit_controller_users():
+	credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
+	return get_users_with_role(credit_controller_role or "Sales Master Manager")
 
 
 def check_overdue_billing_threshold(customer: str, company: str) -> None:
@@ -912,22 +933,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
-	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0
-
-	# if credit limit check is bypassed at sales order level,
-	# we should not consider outstanding Sales Orders, when customer credit balance report is run
-	if not ignore_outstanding_sales_order:
-		outstanding_based_on_so = frappe.db.sql(
-			"""
-			select sum(base_grand_total*(100 - per_billed)/100)
-			from `tabSales Order`
-			where customer=%s and docstatus = 1 and company=%s
-			and per_billed < 100 and status != 'Closed'""",
-			(customer, company),
-		)
-
-		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0
+	outstanding_based_on_so = get_sales_order_outstanding(
+		customer, company, delivered_only=ignore_outstanding_sales_order
+	)
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
@@ -1004,32 +1012,86 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 
 
+def get_sales_order_outstanding(customer, company, delivered_only=False):
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	query = (
+		frappe.qb.from_(SalesOrder)
+		.where(SalesOrder.customer == customer)
+		.where(SalesOrder.company == company)
+		.where(SalesOrder.docstatus == 1)
+		.where(SalesOrder.per_billed < 100)
+		.where(SalesOrder.status != "Closed")
+	)
+
+	if delivered_only:
+		SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+		Greatest = CustomFunction("GREATEST", ["a", "b"])
+		# Billing ahead of delivery is already in the ledger, so only the delivered excess counts.
+		unbilled_delivered_share = Greatest(
+			SalesOrderItem.delivered_qty / SalesOrderItem.qty
+			- SalesOrderItem.billed_amt / SalesOrderItem.amount,
+			0,
+		)
+		query = (
+			query.join(SalesOrderItem)
+			.on(SalesOrderItem.parent == SalesOrder.name)
+			.select(
+				Sum(
+					unbilled_delivered_share
+					* SalesOrderItem.base_net_amount
+					/ SalesOrder.base_net_total
+					* SalesOrder.base_grand_total
+				)
+			)
+			.where(SalesOrder.base_net_total > 0)
+			.where(SalesOrderItem.amount > 0)
+			.where(SalesOrderItem.delivered_qty > 0)
+		)
+	else:
+		query = query.select(Sum(SalesOrder.base_grand_total * (100 - SalesOrder.per_billed) / 100))
+
+	res = query.run()
+	return flt(res[0][0]) if res and res[0][0] is not None else 0.0
+
+
 def get_credit_limit(customer, company):
-	credit_limit = None
+	return get_credit_limit_settings(customer, company)[0]
+
+
+def is_sales_order_credit_check_bypassed(customer, company):
+	return get_credit_limit_settings(customer, company)[1]
+
+
+def get_credit_limit_settings(customer, company):
+	credit_limit, bypass = 0.0, False
 
 	if customer:
-		credit_limit = frappe.db.get_value(
+		customer_limit = frappe.db.get_value(
 			"Customer Credit Limit",
 			{"parent": customer, "parenttype": "Customer", "company": company},
-			"credit_limit",
+			["credit_limit", "bypass_credit_limit_check"],
+			as_dict=True,
 		)
+		if customer_limit:
+			credit_limit = flt(customer_limit.credit_limit)
+			bypass = bool(customer_limit.bypass_credit_limit_check)
 
 		if not credit_limit:
 			customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
-
-			result = frappe.db.get_values(
+			group_limit = frappe.db.get_value(
 				"Customer Credit Limit",
 				{"parent": customer_group, "parenttype": "Customer Group", "company": company},
-				fieldname=["credit_limit", "bypass_credit_limit_check"],
+				["credit_limit", "bypass_credit_limit_check"],
 				as_dict=True,
 			)
-			if result and not result[0].bypass_credit_limit_check:
-				credit_limit = result[0].credit_limit
+			if group_limit:
+				credit_limit = flt(group_limit.credit_limit)
+				bypass = bypass or bool(group_limit.bypass_credit_limit_check)
 
 	if not credit_limit:
-		credit_limit = frappe.get_cached_value("Company", company, "credit_limit")
+		credit_limit = flt(frappe.get_cached_value("Company", company, "credit_limit"))
 
-	return flt(credit_limit)
+	return credit_limit, bypass
 
 
 def make_contact(args, is_primary_contact=1):

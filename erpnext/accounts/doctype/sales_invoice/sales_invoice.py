@@ -816,13 +816,14 @@ class SalesInvoice(SellingController):
 		)
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value(
-			"Customer Credit Limit",
-			filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-			fieldname=["bypass_credit_limit_check"],
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
@@ -3361,17 +3362,18 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer):
+def get_loyalty_programs(customer: str):
 	"""sets applicable loyalty program to the customer or returns a list of applicable programs"""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs
 
+	frappe.has_permission("Customer", "read", customer, throw=True)
 	customer = frappe.get_doc("Customer", customer)
 	if customer.loyalty_program:
 		return [customer.loyalty_program]
 
 	lp_details = get_loyalty_programs(customer)
 
-	if len(lp_details) == 1:
+	if len(lp_details) == 1 and customer.has_permission("write"):
 		customer.db_set("loyalty_program", lp_details[0])
 		return lp_details
 	else:
