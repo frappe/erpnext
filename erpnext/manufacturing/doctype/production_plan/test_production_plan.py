@@ -4648,6 +4648,48 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertTrue(len(reserved_entries) == 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_hand_off_releases_the_plan_row(self):
+		warehouse = "_Test Warehouse - _TC"
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=10, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=finished_good,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+		plan.submit()
+
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.source_warehouse = work_order.wip_warehouse = warehouse
+		work_order.fg_warehouse = warehouse
+		work_order.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "stock_reserved_qty"), 0
+		)
+		self.assertEqual(
+			set(
+				frappe.get_all(
+					"Stock Reservation Entry",
+					filters={"voucher_type": "Production Plan", "voucher_no": plan.name, "docstatus": 1},
+					pluck="status",
+				)
+			),
+			{"Closed"},
+		)
+
 	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
