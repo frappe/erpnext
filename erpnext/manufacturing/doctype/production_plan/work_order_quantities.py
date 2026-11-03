@@ -89,7 +89,7 @@ class ProductionPlanWorkOrderQuantities:
 	@staticmethod
 	def get_order_qty(row, reference_field):
 		"""Quantity a plan row orders, before its planned process loss."""
-		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_qty_before_process_loss,
 		)
 
@@ -144,31 +144,12 @@ class ProductionPlanWorkOrderQuantities:
 		if exclude_work_order:
 			query = query.where(table.name != exclude_work_order)
 		if reference_field:
-<<<<<<< HEAD:erpnext/manufacturing/doctype/production_plan/work_order_quantities.py
 			query = query.where(table[reference_field] == reference_name)
 		# Use a current locking read so concurrent submissions see committed quantities.
 		if for_update:
 			query = query.for_update()
 		work_orders = query.run(as_dict=True)
-=======
-			filters[reference_field] = reference_name
-
-		# Read rows instead of an aggregate so MariaDB uses a current locking read on submit.
-		work_orders = frappe.qb.get_query(
-			"Work Order",
-			fields=[
-				"production_plan_item",
-				"production_plan_sub_assembly_item",
-				"qty",
-				"produced_qty",
-				"process_loss_qty",
-			],
-			filters=filters,
-			for_update=for_update,
-			order_by="name",
-		).run(as_dict=True)
 		loss_percentages = self.get_planned_loss_percentages()
->>>>>>> 89b9029 (feat(manufacturing): let a Production Plan order the process loss of its BOMs):erpnext/manufacturing/doctype/production_plan/services/work_order_quantities.py
 		quantities = {
 			"production_plan_item": defaultdict(float),
 			"production_plan_sub_assembly_item": defaultdict(float),
@@ -202,7 +183,7 @@ class ProductionPlanWorkOrderQuantities:
 		return loss_percentages
 
 	def _get_committed_qty(self, work_order, process_loss_qty, planned_loss_percentage):
-		from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
 			get_planned_loss_percentage,
 		)
 

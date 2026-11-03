@@ -32,52 +32,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
-<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
-=======
-
-# Backward-compatible re-exports (moved to mapper.py / services/).
-from erpnext.manufacturing.doctype.production_plan.mapper import (
-	get_so_details,
-	sales_order_query,
-)
-from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-	MaterialRequestService,
-	download_raw_materials,
-	get_bin_details,
-	get_exploded_items,
-	get_item_data,
-	get_items_for_material_requests,
-	get_material_request_items,
-	get_materials_from_other_locations,
-	get_raw_materials_of_sub_assembly_items,
-	get_sales_orders,
-	get_subitems,
-	get_uom_conversion_factor,
-	get_warehouse_list,
-	set_default_warehouses,
-)
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
-	get_plan_process_loss_percentage,
-)
-from erpnext.manufacturing.doctype.production_plan.services.reservation import (
-	cancel_stock_reservation_entries,
-	get_reserved_qty_for_production_plan,
-	get_reserved_qty_for_sub_assembly,
-	make_stock_reservation_entries,
-	reserve_stock_for_production_plan,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
-	SalesOrderSourcingService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
-	SubAssemblyService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
-	WorkOrderCreationService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
->>>>>>> 89b9029 (feat(manufacturing): let a Production Plan order the process loss of its BOMs)
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -988,7 +943,12 @@ class ProductionPlan(Document):
 		pending = ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self)
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
-				subcontracted_po.setdefault(row.supplier, []).append(row)
+				order_qty = ProductionPlanWorkOrderQuantities.get_order_qty(
+					row, "production_plan_sub_assembly_item"
+				)
+				subcontracted_po.setdefault(row.supplier, []).append(
+					frappe._dict(row.as_dict(), qty=order_qty)
+				)
 				continue
 
 			if row.type_of_manufacturing == "Material Request":
@@ -1284,10 +1244,13 @@ class ProductionPlan(Document):
 				bin_details,
 				row.bom_no,
 				bom_data,
-				row.planned_qty,
+				get_qty_before_process_loss(
+					row.planned_qty, get_plan_process_loss_percentage(self, row.bom_no), row.stock_uom
+				),
 				self.company,
 				warehouse=self.sub_assembly_warehouse,
 				skip_available_sub_assembly_item=self.skip_available_sub_assembly_item,
+				consider_process_loss=self.consider_process_loss,
 			)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
@@ -1619,6 +1582,30 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 		item_details.setdefault(d.get("item_code"), d)
 
 	return item_details
+
+
+def get_planned_process_loss_percentage(bom_no):
+	"""BOM process loss % to add to the quantity, 0 when the BOM loses everything."""
+	return get_planned_loss_percentage(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
+
+
+def get_plan_process_loss_percentage(plan, bom_no):
+	"""BOM process loss % a Production Plan orders for, 0 unless it considers process loss."""
+	if not plan.get("consider_process_loss"):
+		return 0
+	return get_planned_process_loss_percentage(bom_no)
+
+
+def get_planned_loss_percentage(loss_percentage):
+	"""Process loss % to plan for, 0 when everything is lost."""
+	loss_percentage = flt(loss_percentage)
+	return loss_percentage if loss_percentage < 100 else 0
+
+
+def get_qty_before_process_loss(qty, loss_percentage, uom):
+	"""Quantity to make so that `qty` is left after `loss_percentage` process loss."""
+	loss_percentage = get_planned_loss_percentage(loss_percentage)
+	return flt(qty) / (1 - loss_percentage / 100)
 
 
 def get_uom_conversion_factor(item_code, uom):
@@ -2474,6 +2461,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
+	consider_process_loss=False,
 ):
 	data = get_bom_children(parent=bom_no)
 	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
@@ -2498,6 +2486,9 @@ def get_sub_assembly_items(
 					stock_qty -= available_qty
 
 			if not d.is_phantom_item:
+				d.process_loss_percentage = (
+					get_planned_process_loss_percentage(d.value) if consider_process_loss else 0
+				)
 				bom_data.append(
 					frappe._dict(
 						{
@@ -2514,11 +2505,13 @@ def get_sub_assembly_items(
 							"indent": indent,
 							"stock_qty": flt(stock_qty, precision),
 							"required_qty": flt(required_qty, precision),
+							"process_loss_percentage": d.process_loss_percentage,
 							"projected_qty": bin_details.get(d.item_code, {}).get("projected_qty", 0),
 							"main_bom": bom_no,
 						}
 					)
 				)
+				stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage, d.stock_uom)
 
 			if d.value:
 				get_sub_assembly_items(
@@ -2530,6 +2523,7 @@ def get_sub_assembly_items(
 					warehouse,
 					indent=indent + 1,
 					skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+					consider_process_loss=consider_process_loss,
 				)
 
 
