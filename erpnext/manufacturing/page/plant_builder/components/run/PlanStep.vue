@@ -62,7 +62,6 @@ const subtitle = computed(() =>
 <template>
 	<div>
 		<StepHeader
-			no="0"
 			:title="__('Plan the Batch')"
 			:subtitle="subtitle"
 			:status="started ? 'done' : 'active'"

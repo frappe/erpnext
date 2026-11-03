@@ -3,7 +3,6 @@ import { computed } from "vue";
 import { Tooltip } from "frappe-ui";
 
 const props = defineProps({
-	no: [Number, String],
 	icon: String,
 	title: String,
 	subtitle: String,
@@ -11,11 +10,6 @@ const props = defineProps({
 	badge: Object,
 });
 
-const CIRCLE = {
-	waiting: "border border-outline-gray-3 text-ink-gray-5",
-	active: "border-2 border-outline-gray-8 text-ink-gray-9",
-	done: "border border-outline-gray-2 text-ink-gray-5",
-};
 const BOX = {
 	red: "border-2 border-outline-red-4 bg-surface-red-1",
 	amber: "border-2 border-outline-amber-4",
@@ -24,19 +18,12 @@ const BOX = {
 	green: "border border-outline-green-4 bg-surface-green-3 text-ink-green-6",
 };
 
-const circle = computed(() => CIRCLE[props.status]);
 const checked = computed(() => props.status === "done" || props.badge?.theme === "green");
 const box = computed(() => (checked.value ? BOX.green : BOX[props.badge?.theme] ?? BOX.gray));
 </script>
 
 <template>
 	<div class="flex h-14 items-center gap-3 px-3">
-		<div
-			class="flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium tabular-nums"
-			:class="circle"
-		>
-			{{ no }}
-		</div>
 		<div class="min-w-0 flex-1">
 			<div class="flex items-center gap-1.5">
 				<span

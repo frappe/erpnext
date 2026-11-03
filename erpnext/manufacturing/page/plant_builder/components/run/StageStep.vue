@@ -103,7 +103,6 @@ const canConsume = computed(
 <template>
 	<div>
 		<StepHeader
-			:no="stage.idx"
 			:icon="machine.icon"
 			:title="stage.stage_name"
 			:subtitle="subtitle"
