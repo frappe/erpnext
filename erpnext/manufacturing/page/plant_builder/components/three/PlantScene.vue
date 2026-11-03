@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useElementSize } from "@vueuse/core";
 import { Button, Progress, TabButtons, Tooltip } from "frappe-ui";
 import PlantFloor from "./PlantFloor.vue";
+import PanButtons from "./PanButtons.vue";
 import { buildLayout } from "../../lib/layout";
 import { buildTags, useOrbitCamera } from "../../lib/scene";
 import { useClock } from "../../lib/clock";
@@ -36,6 +37,7 @@ const {
 	setView,
 	fit: fitView,
 	zoomBy,
+	panBy,
 	onWheel,
 	onDown,
 } = useOrbitCamera();
@@ -210,13 +212,14 @@ const grid = {
 						@click="fitView"
 				/></Tooltip>
 			</div>
+			<PanButtons :pan-by="panBy" />
 		</div>
 
 		<div
 			v-if="chip"
 			class="absolute bottom-3 flex w-96 -translate-x-1/2 flex-col gap-2 rounded-4 border bg-surface-base px-3 py-2 shadow-sm"
 			:class="paused ? 'border-outline-amber-3' : 'pointer-events-none border-outline-gray-2'"
-			:style="{ left: `${center.x}px` }"
+			:style="{ left: `${width / 2}px` }"
 		>
 			<div class="flex h-7 items-center gap-2 text-sm">
 				<span v-if="paused" class="lucide-circle-pause size-4 text-ink-amber-5" aria-hidden="true" />
