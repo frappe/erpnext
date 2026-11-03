@@ -5,6 +5,7 @@
 
 
 import json
+from collections import Counter
 
 import frappe
 import frappe.defaults
@@ -126,35 +127,30 @@ def get_indexed_packed_items_table(doc):
 	Use: to quickly retrieve/check if row existed in table instead of looping n times.
 	A component repeated on a bundle shares one key, so rows are kept as a list and
 	consumed per occurrence rather than collapsed onto a single row.
+
+	A new doc (e.g. mapped) has no link to its item rows yet, so its packed rows are
+	consumed in order per parent item and component. This is only safe if the item rows
+	need exactly these rows, e.g. no item row was removed after mapping.
 	"""
-	cancelled_row_idx = get_cancelled_row_idx(doc)
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
-		parent_row = packed_item.parent_detail_docname
 		key = (
 			packed_item.parent_item,
 			packed_item.item_code,
-			cancelled_row_idx.get(parent_row, parent_row),
+			None if doc.is_new() else packed_item.parent_detail_docname,
 		)
 
 		indexed_table.setdefault(key, []).append(packed_item)
 
-	return indexed_table
-
-
-def get_cancelled_row_idx(doc):
-	"""Row idx by row name of the cancelled document, which an amendment's copied packed rows point to."""
-	if not (doc.is_new() and doc.get("amended_from")):
-		return {}
-
-	return dict(
-		frappe.get_all(
-			doc.meta.get_field("items").options,
-			filters={"parenttype": doc.doctype, "parent": doc.amended_from},
-			fields=["name", "idx"],
-			as_list=True,
+	if doc.is_new():
+		needed_counts = Counter(
+			(item_row.item_code, bundle_item.item_code, None)
+			for item_row in doc.get("items")
+			for bundle_item in get_product_bundle_items(item_row.item_code)
 		)
-	)
+		indexed_table = {key: rows for key, rows in indexed_table.items() if len(rows) == needed_counts[key]}
+
+	return indexed_table
 
 
 def reset_packing_list(doc):
@@ -215,7 +211,7 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	key = (
 		main_item_row.item_code,
 		packing_item.item_code,
-		main_item_row.idx if doc.is_new() else main_item_row.name,
+		None if doc.is_new() else main_item_row.name,
 	)
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
