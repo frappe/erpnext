@@ -29,17 +29,8 @@ def execute():
 
 	tax_rate_map = get_tax_rate_map()
 	column_cache = get_column_cache()
-	party_tax_id_cache = {}
-	party_categories = {}
+	party_tax_id_cache, party_categories = get_party_details(column_cache)
 	skip_docs = get_docs_with_entries()
-
-	# Suppliers and customers are read up front; other party types have no tax id or category to use
-	for party_type in ("Supplier", "Customer"):
-		tax_id_field = next((f for f in ("pan", "tax_id") if column_cache[party_type][f]), None)
-		fields = ["name", "tax_withholding_category", *([tax_id_field] if tax_id_field else [])]
-		for row in frappe.get_all(party_type, fields=fields):
-			party_tax_id_cache[(party_type, row.name)] = row.get(tax_id_field) if tax_id_field else None
-			party_categories[(party_type, row.name)] = row.tax_withholding_category
 
 	# Clean up existing migration entries, except on documents the new flow has already used
 	twe = frappe.qb.DocType("Tax Withholding Entry")
@@ -166,6 +157,20 @@ def get_column_cache():
 			),
 		},
 	}
+
+
+def get_party_details(column_cache):
+	tax_ids, categories = {}, {}
+
+	# Suppliers and customers are read up front; other party types have no tax id or category to use
+	for party_type in ("Supplier", "Customer"):
+		tax_id_field = next((f for f in ("pan", "tax_id") if column_cache[party_type][f]), None)
+		fields = ["name", "tax_withholding_category", *([tax_id_field] if tax_id_field else [])]
+		for row in frappe.get_all(party_type, fields=fields):
+			tax_ids[(party_type, row.name)] = row.get(tax_id_field) if tax_id_field else None
+			categories[(party_type, row.name)] = row.tax_withholding_category
+
+	return tax_ids, categories
 
 
 def get_tds_accounts():
