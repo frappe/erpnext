@@ -4,6 +4,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -297,3 +298,34 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(so.rounding_adjustment, 0)
 		self.assertEqual(so.base_rounded_total, 0)
 		self.assertEqual(so.base_rounding_adjustment, 0)
+
+	def test_grand_total_discount_follows_shipping_charge(self):
+		"""A lower rate moves the net total from the 100 band to the 50 band."""
+		so = self.make_sales_order_with_shipping_rule(rate=150)
+		calculate_taxes_and_totals(so)
+		so.apply_discount_on = "Grand Total"
+		so.additional_discount_percentage = 10
+		calculate_taxes_and_totals(so)
+		self.assertEqual(so.taxes[0].tax_amount, 100)
+
+		so.items[0].rate = 60
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.taxes[0].tax_amount, 50)
+		self.assertEqual(so.discount_amount, 11)
+		self.assertEqual(so.grand_total, 99)
+
+	def test_grand_total_discount_without_taxes(self):
+		so = self.make_sales_order_with_shipping_rule(rate=100)
+		so.apply_discount_on = "Grand Total"
+		so.discount_amount = 10
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.taxes[0].tax_amount, 50)
+		self.assertEqual(so.grand_total, 140)
+
+	def make_sales_order_with_shipping_rule(self, rate):
+		so = make_sales_order(qty=1, rate=rate, do_not_save=True)
+		so.set("taxes", [])
+		so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
+		return so
