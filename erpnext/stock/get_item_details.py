@@ -343,6 +343,8 @@ def update_stock(ctx, out, doc=None):
 
 		if ctx.get("doctype") == "Delivery Note":
 			kwargs["against_sales_order"] = ctx.get("against_sales_order")
+		elif ctx.get("doctype") == "Sales Invoice":
+			kwargs["against_sales_order"] = ctx.get("sales_order")
 
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
