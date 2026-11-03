@@ -3,6 +3,7 @@
 
 
 from collections import defaultdict
+from uuid import uuid7
 
 import frappe
 from frappe.query_builder.functions import Count, IfNull, Max, Sum
@@ -281,20 +282,6 @@ def bulk_insert_entries(all_entries):
 	if not all_entries:
 		return
 
-	# Names unique among themselves and in the table, checked in batches rather than reading every name
-	twe = frappe.qb.DocType("Tax Withholding Entry")
-	needed = sum(len(entries) for entries in all_entries.values())
-	names = set()
-	while len(names) < needed:
-		new_names = {frappe.generate_hash(length=10) for _ in range(needed - len(names))} - names
-		for batch in create_batch(list(new_names), BATCH_SIZE):
-			new_names -= set(
-				frappe.qb.from_(twe).select(twe.name).where(twe.name.isin(batch)).run(pluck=True)
-			)
-		names |= new_names
-
-	names = iter(names)
-
 	fields = [
 		"name",
 		"creation",
@@ -344,7 +331,8 @@ def bulk_insert_entries(all_entries):
 
 			values.append(
 				(
-					next(names),  # name
+					# Never one of the existing 10 character hash names, so no check against the table
+					str(uuid7()),
 					current_time,  # creation
 					current_time,  # modified
 					current_user,  # modified_by
