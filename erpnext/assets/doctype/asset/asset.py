@@ -830,8 +830,21 @@ class Asset(AccountsController):
 	def set_status(self, status=None):
 		"""Get and update status"""
 		if not status:
-			status = "Out of Order" if self.has_pending_repair() else self.get_status()
+			status = self.get_maintenance_status() or self.get_status()
 		self.db_set("status", status)
+
+	def get_maintenance_status(self) -> str | None:
+		"""Out of Order during a pending repair, In Maintenance while maintenance is due."""
+		if self.has_pending_repair():
+			return "Out of Order"
+		if self.has_due_maintenance():
+			return "In Maintenance"
+
+	def has_due_maintenance(self) -> bool:
+		if self.docstatus != 1 or self.disposal_date or not self.maintenance_required:
+			return False
+
+		return has_due_maintenance(self.name)
 
 	def has_pending_repair(self) -> bool:
 		if self.docstatus != 1 or self.disposal_date:
