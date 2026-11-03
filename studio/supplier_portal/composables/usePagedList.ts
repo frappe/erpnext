@@ -174,9 +174,9 @@ export function usePagedList(kind: string, tabs: string[], emptyWords: EmptyWord
  *  the translation files; a name passed in a variable would never reach them. */
 function tabLabel(name: string): string {
 	const labels: Record<string, string> = {
-		"To quote": __("To quote"),
+		"To quote": __("Pending"),
 		All: __("All"),
-		Quoted: __("Quoted"),
+		Quoted: __("Submitted"),
 		Open: __("Open"),
 		Ordered: __("Ordered"),
 		Expired: __("Expired"),
