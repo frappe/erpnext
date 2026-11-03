@@ -1278,6 +1278,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	shipping_rule() {
 		var me = this;
+<<<<<<< HEAD
 		if(this.frm.doc.shipping_rule) {
 			return this.frm.call({
 				doc: this.frm.doc,
@@ -1286,6 +1287,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					me._calculate_taxes_and_totals();
 				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
+=======
+		if (this.frm.doc.shipping_rule) {
+			return this.frm
+				.call({
+					doc: this.frm.doc,
+					method: "apply_shipping_rule",
+					callback: function (r) {
+						me.calculate_discounted_totals();
+					},
+				})
+				.fail(() => this.frm.set_value("shipping_rule", ""));
+>>>>>>> dc55402 (fix: recalculate discount after applying the shipping rule)
 		}
 	}
 
