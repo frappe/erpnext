@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useElementSize } from "@vueuse/core";
 import { Button, TabButtons, Tooltip } from "frappe-ui";
 import MachineModel from "../three/MachineModel.vue";
+import PanButtons from "../three/PanButtons.vue";
 import { shapeExtent } from "../../lib/machines";
 import { useOrbitCamera } from "../../lib/scene";
 import { useClock } from "../../lib/clock";
@@ -20,7 +21,8 @@ const FLOOR = 480;
 const CENTRE = FLOOR / 2;
 
 const stage = ref(null);
-const { viewName, rot, tilt, zoom, pan, dragging, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
+const { viewName, rot, tilt, zoom, pan, dragging, setView, fit, zoomBy, panBy, onWheel, onDown } =
+	useOrbitCamera();
 
 const { width, height } = useElementSize(stage);
 useClock(stage);
@@ -125,7 +127,11 @@ const outline = computed(() => {
 						icon="lucide-zoom-in"
 						@click="zoomBy(0.2)"
 				/></Tooltip>
+				<Tooltip :text="__('Fit machine')"
+					><Button variant="ghost" :aria-label="__('Fit machine')" icon="lucide-scan" @click="fit"
+				/></Tooltip>
 			</div>
+			<PanButtons :pan-by="panBy" />
 		</div>
 
 		<p class="pointer-events-none absolute bottom-3 left-3 text-xs text-ink-gray-5">

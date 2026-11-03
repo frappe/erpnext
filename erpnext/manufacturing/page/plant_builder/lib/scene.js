@@ -63,7 +63,21 @@ export function useOrbitCamera() {
 		dragging.value = false;
 	});
 
-	return { viewName, rot, tilt, zoom, pan, dragging, animateTo, setView, fit, zoomBy, onWheel, onDown };
+	return {
+		viewName,
+		rot,
+		tilt,
+		zoom,
+		pan,
+		dragging,
+		animateTo,
+		setView,
+		fit,
+		zoomBy,
+		panBy,
+		onWheel,
+		onDown,
+	};
 }
 
 export function useFacing(normals, margin = 0.01) {
