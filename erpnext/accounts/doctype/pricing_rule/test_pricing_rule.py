@@ -12,7 +12,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import apply_price_list, get_item_details
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1893,6 +1893,88 @@ class TestPricingRule(ERPNextTestSuite):
 		si.save()
 		self.assertEqual(si.items[0].discount_percentage, 0)
 		self.assertEqual(si.items[0].rate, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_remove_rate_rule_without_item_price(self):
+		for has_item_price in (False, True):
+			item = make_item(f"_Test Rate Rule Removal {has_item_price}", {"is_stock_item": 0}).name
+			rule = make_item_pricing_rule(
+				item,
+				rate_or_discount="Rate",
+				rate=40,
+				min_qty=5,
+				applicable_for="Customer",
+				customer="_Test Customer",
+			)
+			if has_item_price:
+				frappe.get_doc(
+					doctype="Item Price", item_code=item, price_list="_Test Price List", price_list_rate=60
+				).insert()
+
+			for changed_field in ("customer", "qty"):
+				with self.subTest(has_item_price=has_item_price, changed_field=changed_field):
+					order = make_sales_order(
+						item_code=item, qty=5, selling_price_list="_Test Price List", do_not_submit=True
+					)
+					self.assertEqual(order.items[0].rate, 40)
+					self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [rule.name])
+					self.assertEqual(frappe.db.count("Item Price", {"item_code": item}), int(has_item_price))
+					if changed_field == "customer":
+						order.customer = "_Test Customer 1"
+						order.customer_address = None
+						order.shipping_address_name = None
+						order.contact_person = None
+					else:
+						order.items[0].qty = 1
+
+					args = order.as_dict()
+					args.price_list = order.selling_price_list
+					result = apply_price_list(frappe.as_json(args), doc=frappe.as_json(order))["children"][0]
+					self.assertFalse(result.pricing_rules)
+					self.assertEqual(result.rate, 60 if has_item_price else 40)
+					order.save().reload()
+					self.assertFalse(order.items[0].pricing_rules)
+					self.assertEqual(order.items[0].rate, 60 if has_item_price else 40)
+					order.submit()
+					self.assertFalse(order.items[0].pricing_rules)
+					order.cancel()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_replace_rate_rule_without_item_price(self):
+		item = make_item("_Test Rate Rule Replacement", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, rate_or_discount="Rate", rate=40, applicable_for="Customer", customer="_Test Customer"
+		)
+		replacement = make_item_pricing_rule(
+			item,
+			discount_percentage=10,
+			applicable_for="Customer",
+			customer="_Test Customer 1",
+		)
+		for discount_type in ("Discount Percentage", "Discount Amount"):
+			with self.subTest(discount_type=discount_type):
+				replacement.rate_or_discount = discount_type
+				replacement.discount_amount = 4 if discount_type == "Discount Amount" else 0
+				replacement.save()
+				order = make_sales_order(item_code=item, qty=1, do_not_submit=True)
+				self.assertEqual(order.items[0].rate, 40)
+				self.assertFalse(frappe.db.exists("Item Price", {"item_code": item}))
+				order.customer = "_Test Customer 1"
+				order.customer_address = None
+				order.shipping_address_name = None
+				order.contact_person = None
+				args = order.as_dict()
+				args.price_list = order.selling_price_list
+				result = apply_price_list(frappe.as_json(args), doc=frappe.as_json(order))["children"][0]
+				self.assertEqual(result.price_list_rate, 40)
+				self.assertEqual(result.discount_amount, 4)
+				order.save().reload()
+				self.assertEqual(order.items[0].price_list_rate, 40)
+				self.assertEqual(order.items[0].rate, 36)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [replacement.name])
+				order.submit()
+				self.assertEqual(order.grand_total, 36)
+				order.cancel()
 
 	def test_pricing_rule_of_another_item_is_not_applied_on_save(self):
 		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
