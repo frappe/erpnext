@@ -128,6 +128,9 @@ on_session_creation = "erpnext.portal.utils.create_customer_or_supplier"
 # the Studio supplier portal reads these before its first render
 studio_app_boot = {"supplier-portal": "erpnext.portal.supplier_portal.get_portal_boot"}
 
+# suppliers land on the new portal after they log in
+get_website_user_home_page = "erpnext.portal.supplier_portal.get_website_user_home_page"
+
 treeviews = [
 	"Account",
 	"Cost Center",

@@ -1542,6 +1542,13 @@ def _aggregate(doctype: str, filters: list, columns: dict[str, tuple[str, str]])
 	}
 
 
+def get_website_user_home_page(user: str) -> str | None:
+	"""A supplier who logs in, or sets their password from the invite, lands on the new portal."""
+	if frappe.db.get_value("User", user, "user_type") != "Website User":
+		return None
+	return "supplier-portal" if "Supplier" in frappe.get_roles(user) else None
+
+
 def get_portal_boot() -> dict:
 	"""The language and the number and currency formats, as Desk reads them, for the portal's first render."""
 	return {
