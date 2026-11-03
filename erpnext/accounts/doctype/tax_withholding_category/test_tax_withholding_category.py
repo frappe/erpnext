@@ -2935,6 +2935,8 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
 
+		# Stands in for rows written by the v16 migration patch
+		frappe.db.set_value("Tax Withholding Entry", {"parent": pi2.name}, "created_by_migration", 1)
 		pi1.reload()
 		pi1.cancel()
 
@@ -2983,6 +2985,14 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		]
 
 		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
+		self.assertEqual(
+			frappe.get_all(
+				"Tax Withholding Entry",
+				filters={"parent": pi2.name, "created_by_migration": 0},
+				pluck="status",
+			),
+			["Under Withheld"],
+		)
 
 		# Test future invoice adjustment against the under withheld credit
 		pi3 = create_purchase_invoice(supplier="Test TDS Supplier8", rate=5000, do_not_save=True)
@@ -3110,6 +3120,8 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		pe.apply_tds = 1
 		pe.tax_withholding_category = "Test Multi Invoice Category"
 		pe.save().submit()
+		# Stands in for a row written by the v16 migration patch
+		frappe.db.set_value("Tax Withholding Entry", {"parent": pe.name}, "created_by_migration", 1)
 
 		# Step 2: Create Purchase Invoice with partial adjustment and manual rate change
 		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=80000, do_not_save=True)
@@ -3219,6 +3231,14 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		]
 
 		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
+		self.assertEqual(
+			frappe.get_all(
+				"Tax Withholding Entry",
+				filters={"parent": pe.name, "created_by_migration": 0},
+				pluck="status",
+			),
+			["Duplicate"],
+		)
 
 	def test_manual_tax_adjustment_with_rate_change(self):
 		"""Test manual tax adjustment where tax rate is changed during adjustment between payment and invoice"""

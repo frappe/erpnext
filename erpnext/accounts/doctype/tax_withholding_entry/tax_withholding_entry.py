@@ -197,6 +197,7 @@ class TaxWithholdingEntry(Document):
 
 				new_entry = frappe.copy_doc(old_entry)
 				new_entry.update(values_to_update)
+				new_entry.created_by_migration = 0
 				new_entry.flags.skip_docstatus_validation = True
 				new_entry.insert()
 
@@ -334,6 +335,7 @@ class TaxWithholdingEntry(Document):
 				"withholding_doctype": "",
 				"withholding_name": "",
 				"withholding_date": None,
+				"created_by_migration": 0,
 			}
 			new_entry.update(values_to_update)
 			new_entry.flags.skip_docstatus_validation = True
