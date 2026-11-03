@@ -23,7 +23,7 @@
   "description": "Combs fibre into a card sliver.",
   "shapes": [
    {"shape": "Box", "finish": "Steel", "width": 120, "depth": 70, "height": 50, "shakes": 1},
-   {"shape": "Tank", "finish": "Plate", "x": -18, "z": 50, "radius": 30, "height": 18, "shakes": 1},
+   {"shape": "Tank", "finish": "Plate", "x": -18, "z": 50, "radius": 30, "height": 18, "shows_level": 0, "shakes": 1},
    {"shape": "Agitator", "x": 34, "z": 56, "radius": 18, "shakes": 1},
    {"shape": "Open Tank", "finish": "Product", "x": 72, "radius": 16, "height": 44, "shows_level": 1}
   ]
@@ -44,10 +44,10 @@
   "shapes": [
    {"shape": "Box", "finish": "Steel", "width": 150, "depth": 50, "height": 64, "shakes": 1},
    {"shape": "Box", "finish": "Dark", "z": 64, "width": 150, "depth": 16, "height": 8},
-   {"shape": "Tank", "finish": "Cream", "x": -54, "z": 72, "radius": 8, "height": 26, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": -18, "z": 72, "radius": 8, "height": 26, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": 18, "z": 72, "radius": 8, "height": 26, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": 54, "z": 72, "radius": 8, "height": 26, "shakes": 1}
+   {"shape": "Tank", "finish": "Cream", "x": -54, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": -18, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 18, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 54, "z": 72, "radius": 8, "height": 26, "shows_level": 0, "shakes": 1}
   ]
  },
  {
@@ -57,12 +57,12 @@
    {"shape": "Box", "finish": "Steel", "width": 180, "depth": 40, "height": 56, "shakes": 1},
    {"shape": "Box", "finish": "Dark", "x": -103, "width": 26, "depth": 46, "height": 76},
    {"shape": "Box", "finish": "Dark", "z": 56, "width": 180, "depth": 12, "height": 6},
-   {"shape": "Tank", "finish": "Cream", "x": -75, "z": 62, "radius": 6, "height": 20, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": -45, "z": 62, "radius": 6, "height": 20, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": -15, "z": 62, "radius": 6, "height": 20, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": 15, "z": 62, "radius": 6, "height": 20, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": 45, "z": 62, "radius": 6, "height": 20, "shakes": 1},
-   {"shape": "Tank", "finish": "Cream", "x": 75, "z": 62, "radius": 6, "height": 20, "shakes": 1}
+   {"shape": "Tank", "finish": "Cream", "x": -75, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": -45, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": -15, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 15, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 45, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1},
+   {"shape": "Tank", "finish": "Cream", "x": 75, "z": 62, "radius": 6, "height": 20, "shows_level": 0, "shakes": 1}
   ]
  },
  {"workstation_type": "Cone Winder", "machine_model": "Bagging Line", "description": "Winds yarn onto cones and packs them."}
