@@ -1,12 +1,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
-import { Badge, Button, ScrollArea, Switch } from "frappe-ui";
+import { Button, ScrollArea, Switch } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SetupStatus from "../components/setup/SetupStatus.vue";
 import ProductSection from "../components/setup/ProductSection.vue";
 import FormulaSection from "../components/setup/FormulaSection.vue";
 import StagesSection from "../components/setup/StagesSection.vue";
-import { __, call, openForm, setRoute } from "../lib/api";
+import { __, call, openForm, openList, setRoute } from "../lib/api";
 import { newPlantDoc, toScenePlant } from "../lib/plant";
 import { previewView } from "../lib/scene";
 
@@ -15,7 +15,7 @@ const emit = defineEmits(["title", "actions"]);
 
 const doc = ref(null);
 const saved = ref("");
-const data = ref({ machines: {}, errors: [], item: null, work_orders: [], is_saved: false });
+const data = ref({ machines: {}, errors: [], item: null, is_saved: false });
 const catalog = ref([]);
 const saving = ref(false);
 const animate = ref(true);
@@ -43,7 +43,13 @@ onMounted(async () => {
 		"actions",
 		props.name === "new"
 			? []
-			: [{ label: __("Open Plant Floor"), onClick: () => openForm("Plant Floor", props.name) }]
+			: [
+					{
+						label: __("View Work Orders"),
+						onClick: () => openList("Work Order", { plant_floor: props.name }),
+					},
+					{ label: __("Open Plant Floor"), onClick: () => openForm("Plant Floor", props.name) },
+			  ]
 	);
 });
 
@@ -59,7 +65,7 @@ watch(
 
 async function check() {
 	const result = await call("check_plant", { doc: doc.value });
-	data.value = { ...result, is_saved: data.value.is_saved, work_orders: data.value.work_orders };
+	data.value = { ...result, is_saved: data.value.is_saved };
 	syncNames(result.doc);
 }
 
@@ -94,37 +100,11 @@ async function runWorkOrder() {
 const scenePlant = computed(() => toScenePlant(doc.value, data.value.machines, data.value.item));
 const view = computed(() => previewView(scenePlant.value, animate.value, focus.value));
 const canRun = computed(() => data.value.is_saved && !dirty.value && !data.value.errors.length);
-const STATUS = {
-	Completed: "green",
-	"In Process": "blue",
-	"Not Started": "gray",
-	Draft: "gray",
-	Stopped: "red",
-};
 </script>
 
 <template>
 	<div v-if="doc" class="flex min-h-0 flex-1 flex-col">
-		<div class="flex h-12 shrink-0 items-center gap-2 border-b border-outline-gray-2 px-5">
-			<div class="flex min-w-0 flex-1 items-center gap-2">
-				<template v-for="order in data.work_orders.slice(0, 3)" :key="order.name">
-					<Button
-						variant="ghost"
-						size="sm"
-						:label="order.name"
-						@click="setRoute(doc.name, order.name)"
-					>
-						<template #suffix>
-							<Badge
-								:label="order.status"
-								:theme="STATUS[order.status] || 'gray'"
-								variant="subtle"
-								size="sm"
-							/>
-						</template>
-					</Button>
-				</template>
-			</div>
+		<div class="flex h-12 shrink-0 items-center justify-end gap-2 border-b border-outline-gray-2 px-5">
 			<Button
 				:variant="dirty ? 'solid' : 'subtle'"
 				icon-left="lucide-save"
