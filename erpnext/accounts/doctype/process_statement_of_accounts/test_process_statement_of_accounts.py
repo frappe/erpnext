@@ -21,9 +21,19 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestProcessStatementOfAccounts(ERPNextTestSuite, AccountsTestMixin):
 	def setUp(self):
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
+<<<<<<< HEAD
 		letterhead = frappe.get_doc("Letter Head", "Company Letterhead - Grey")
 		letterhead.is_default = 0
 		letterhead.save()
+=======
+		frappe.db.set_value(
+			"Letter Head",
+			"Company Letterhead",
+			"is_default",
+			0,
+			update_modified=False,
+		)
+>>>>>>> 35730d5 (feat: redesign company letterhead and merge the grey one into it)
 
 		self.company = "_Test Company"
 		self.create_customer(customer_name="Other Customer")
