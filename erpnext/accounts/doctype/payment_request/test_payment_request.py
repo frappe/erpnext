@@ -1486,8 +1486,65 @@ class TestPaymentRequest(ERPNextTestSuite):
 			submit_doc=1,
 		)
 
+	def test_schedule_payment_request_for_last_term_of_rounded_up_schedule(self):
+		so = submit_with_payment_terms(make_sales_order(qty=1, rate=99.99, do_not_save=1), [50, 50])
+		self.assertEqual([row.payment_amount for row in so.payment_schedule], [50, 50])
 
-def get_payment_schedules_json(doc):
+		payment_requests = [
+			make_payment_request(
+				dt="Sales Order",
+				dn=so.name,
+				mute_email=1,
+				submit_doc=1,
+				return_doc=1,
+				schedules=get_payment_schedules_json(so, [row]),
+			)
+			for row in so.payment_schedule
+		]
+		self.assertEqual([pr.grand_total for pr in payment_requests], [50, 49.99])
+
+		for pr in payment_requests:
+			pr.create_payment_entry()
+			self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "advance_paid"), 99.99)
+
+	def test_schedule_payment_request_for_all_terms_of_rounded_up_schedule(self):
+		si = submit_with_payment_terms(
+			create_sales_invoice(qty=1, rate=1, do_not_save=1), [16.67, 16.67, 16.67, 16.67, 16.66, 16.66]
+		)
+		self.assertEqual(sum(row.payment_amount for row in si.payment_schedule), 1.02)
+
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			schedules=get_payment_schedules_json(si),
+		)
+		self.assertEqual((pr.grand_total, pr.payment_reference[-1].amount), (1, 0.15))
+
+		pr.create_payment_entry()
+		self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
+
+	def test_schedule_rounding_difference_does_not_allow_requesting_more(self):
+		so = submit_with_payment_terms(make_sales_order(qty=1, rate=99.99, do_not_save=1), [50, 50])
+		make_payment_request(dt="Sales Order", dn=so.name, mute_email=1, submit_doc=1, return_doc=1)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Total Payment Request amount cannot be greater than",
+			make_payment_request,
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			schedules=get_payment_schedules_json(so, so.payment_schedule[:1]),
+		)
+
+
+def get_payment_schedules_json(doc, rows=None):
 	return json.dumps(
 		[
 			{
@@ -1497,9 +1554,38 @@ def get_payment_schedules_json(doc):
 				"payment_amount": row.payment_amount,
 				"description": row.description,
 			}
-			for row in doc.payment_schedule
+			for row in rows or doc.payment_schedule
 		]
 	)
+
+
+def submit_with_payment_terms(doc, portions):
+	doc.payment_terms_template = create_split_payment_terms_template(portions)
+	doc.disable_rounded_total = 1
+	doc.payment_schedule = []
+	doc.save()
+	doc.submit()
+	return doc
+
+
+def create_split_payment_terms_template(portions):
+	template_name = "_Test Split Terms " + " ".join(str(portion) for portion in portions)
+	if not frappe.db.exists("Payment Terms Template", template_name):
+		frappe.get_doc(
+			{
+				"doctype": "Payment Terms Template",
+				"template_name": template_name,
+				"terms": [
+					{
+						"invoice_portion": portion,
+						"due_date_based_on": "Day(s) after invoice date",
+						"credit_days": index,
+					}
+					for index, portion in enumerate(portions)
+				],
+			}
+		).insert()
+	return template_name
 
 
 def get_accounts_user():
