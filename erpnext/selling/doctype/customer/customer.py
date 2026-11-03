@@ -644,8 +644,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 		# If not authorized person raise exception
 		credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
 		if not credit_controller_role or credit_controller_role not in frappe.get_roles():
-			# form a list of emails for the credit controller users
-			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
+			credit_controller_users = get_credit_controller_users()
 
 			# form a list of emails and names to show to the user
 			credit_controller_users_formatted = [
@@ -672,12 +671,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 					"label": "Send Email",
 					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
 					"hide_on_success": True,
-					"args": {
-						"customer": customer,
-						"customer_outstanding": customer_outstanding,
-						"credit_limit": credit_limit,
-						"credit_controller_users_list": credit_controller_users,
-					},
+					"args": {"customer": customer, "company": company},
 				}
 				if frappe.has_permission("Customer", ptype="email", doc=customer)
 				else None
@@ -692,16 +686,26 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 
 @frappe.whitelist()
-def send_emails(
-	customer: str, customer_outstanding: float, credit_limit: float, credit_controller_users_list: str | list
-):
+def send_emails(customer: str, company: str):
 	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
-	credit_controller_users_list = frappe.parse_json(credit_controller_users_list)
-	subject = _("Credit limit reached for customer {0}").format(customer)
-	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-		customer, customer_outstanding, credit_limit
+	currency = get_company_currency(company)
+	outstanding = get_customer_outstanding(
+		customer, company, is_sales_order_credit_check_bypassed(customer, company)
 	)
-	frappe.sendmail(recipients=credit_controller_users_list, subject=subject, message=message)
+	subject = _("Credit limit reached for customer {0}").format(customer)
+	message = _(
+		"A transaction for customer {0} is blocked by its credit limit. Current outstanding: {1}, credit limit: {2}"
+	).format(
+		customer,
+		fmt_money(outstanding, currency=currency),
+		fmt_money(get_credit_limit(customer, company), currency=currency),
+	)
+	frappe.sendmail(recipients=get_credit_controller_users(), subject=subject, message=message)
+
+
+def get_credit_controller_users():
+	credit_controller_role = frappe.get_single_value("Accounts Settings", "credit_controller")
+	return get_users_with_role(credit_controller_role or "Sales Master Manager")
 
 
 def check_overdue_billing_threshold(customer: str, company: str) -> None:
