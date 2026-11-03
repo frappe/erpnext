@@ -736,7 +736,7 @@ frappe.ui.form.on("Work Order", {
 				frm.set_value({
 					bom_no: "",
 					production_item: message.production_item,
-					qty: frm.doc.qty || message.batch_size,
+					qty: (frm.is_new() && message.batch_size) || frm.doc.qty || message.batch_size,
 				});
 			});
 	},
