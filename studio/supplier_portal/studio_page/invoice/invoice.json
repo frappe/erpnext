@@ -161,7 +161,6 @@
              "componentId": "Alert-2255bcb8f9",
              "componentName": "Alert",
              "componentProps": {
-              "icon": "{{ noteIcon }}",
               "theme": "{{ noteTheme }}",
               "title": "{{ noteTitle }}"
              },
