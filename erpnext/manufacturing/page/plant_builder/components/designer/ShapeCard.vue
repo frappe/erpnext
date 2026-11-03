@@ -103,7 +103,6 @@ function setShape(name) {
 						v-model.number="shape[field]"
 						type="number"
 						class="[&_input]:text-right [&_input]:[appearance:textfield] [&_input::-webkit-inner-spin-button]:appearance-none"
-						@focus="$event.target.select()"
 						:disabled="disabled"
 					/>
 				</template>
