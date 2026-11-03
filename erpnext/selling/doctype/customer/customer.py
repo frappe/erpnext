@@ -279,11 +279,15 @@ class Customer(TransactionBase):
 			self.represents_company = ""
 			return
 
+		if self.disabled:
+			return
+
 		internal_customer = frappe.db.get_value(
 			"Customer",
 			{
 				"is_internal_customer": 1,
 				"represents_company": self.represents_company,
+				"disabled": 0,
 				"name": ("!=", self.name),
 			},
 			"name",
