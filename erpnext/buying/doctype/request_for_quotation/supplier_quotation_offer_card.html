@@ -1,0 +1,46 @@
+{%
+	const is_min = (rate) => min_rate !== undefined && Math.abs(rate - min_rate) < 0.0001;
+	const qty_title = [q.is_partial_qty ? q.partial_qty_tooltip : "", q.quoted_as].filter(Boolean).join(" · ");
+%}
+<div class="p-3 rounded" style="background-color: var(--card-bg, #fff); font-size: 13px; line-height: 1.6; min-width: 260px;">
+	<div class="flex justify-between items-center mb-2 {% if (qty_title) { %}cursor-pointer{% } %}" {% if (qty_title) { %}title="{{ frappe.utils.escape_html(qty_title) }}"{% } %}>
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Quantity") }}</span>
+		<span class="{% if (q.is_partial_qty) { %}partial-qty-text{% } %}">{{ format_qty(q.converted_qty) }}</span>
+	</div>
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("UOM") }}</span>
+		<span>{{ frappe.utils.escape_html(q.display_uom || "") }}</span>
+	</div>
+	{% if (q.is_combined) { %}
+		<div class="mb-2">
+			<span class="text-muted whitespace-nowrap" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+			{% for (const row of q.rate_breakdown) { %}
+				<div class="flex justify-between items-center ml-3">
+					<span class="text-muted">{{ frappe.utils.escape_html(row.qty_label) }}</span>
+					<span class="{% if (is_min(row.rate)) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(row.rate, company_currency) }}</span>
+				</div>
+			{% } %}
+		</div>
+	{% } else { %}
+		<div class="flex justify-between items-center mb-2">
+			<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Price per Unit") }}</span>
+			<span class="{% if (is_min(q.converted_rate)) { %}text-ink-green-7 font-weight-bold{% } %}">{{ format_currency(q.converted_rate, company_currency) }}</span>
+		</div>
+	{% } %}
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Total Price") }}</span>
+		<span>{{ format_currency(q.converted_amount, company_currency) }}</span>
+	</div>
+	<div class="flex justify-between items-center mb-2">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Valid Till") }}</span>
+		{% if (q.status === "Expired") { %}
+			<span class="valid-till expired" title="{{ __("Expired on {0}", [frappe.datetime.str_to_user(q.valid_till)]) }}">{{ frappe.datetime.str_to_user(q.valid_till) }}</span>
+		{% } else { %}
+			<span>{{ q.valid_till ? frappe.datetime.str_to_user(q.valid_till) : "-" }}</span>
+		{% } %}
+	</div>
+	<div class="flex justify-between items-center">
+		<span class="text-muted whitespace-nowrap me-2" style="font-size: 13px;">{{ __("Lead Time") }}</span>
+		<span>{{ q.lead_time_days ? q.lead_time_days : "-" }}</span>
+	</div>
+</div>
