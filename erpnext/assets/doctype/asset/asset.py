@@ -279,7 +279,10 @@ class Asset(AccountsController):
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
+		self.cancel_asset_capitalizations()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		if self.flags.cancelled_by_asset_capitalization:
+			self.ignore_linked_doctypes += ("Asset Capitalization",)
 		if self.asset_type != "Composite Component":
 			make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 			self.db_set("booked_fixed_asset", 0)
@@ -798,6 +801,15 @@ class Asset(AccountsController):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
+	def cancel_asset_capitalizations(self):
+		"""Cancel the submitted capitalizations into this asset, as the asset holds their value."""
+		capitalizations = frappe.get_all(
+			"Asset Capitalization", filters={"target_asset": self.name, "docstatus": 1}, pluck="name"
+		)
+		for capitalization in capitalizations:
+			if capitalization != self.flags.cancelled_by_asset_capitalization:
+				frappe.get_doc("Asset Capitalization", capitalization).cancel()
+
 	def cancel_movement_entries(self):
 		# filter the parent Asset Movement's docstatus (as the original SQL did), not the child row's
 		asm = frappe.qb.DocType("Asset Movement")
@@ -837,8 +849,23 @@ class Asset(AccountsController):
 	def set_status(self, status=None):
 		"""Get and update status"""
 		if not status:
-			status = "Out of Order" if self.has_pending_repair() else self.get_status()
+			status = self.get_maintenance_status(self.get_status())
 		self.db_set("status", status)
+
+	def get_maintenance_status(self, status: str) -> str:
+		"""Out of Order during a pending repair, In Maintenance while maintenance is due."""
+		if self.has_pending_repair():
+			return "Out of Order"
+		# a fully depreciated asset has nothing left to depreciate, so it keeps that status
+		if status != "Fully Depreciated" and self.has_due_maintenance():
+			return "In Maintenance"
+		return status
+
+	def has_due_maintenance(self) -> bool:
+		if self.docstatus != 1 or self.disposal_date or not self.maintenance_required:
+			return False
+
+		return has_due_maintenance(self.name)
 
 	def has_pending_repair(self) -> bool:
 		if self.docstatus != 1 or self.disposal_date:
@@ -1192,13 +1219,7 @@ def update_maintenance_status():
 	)
 
 	for asset in assets:
-		asset = frappe.get_doc("Asset", asset.name)
-		if asset.has_pending_repair():
-			asset.set_status("Out of Order")
-		elif has_due_maintenance(asset.name):
-			asset.set_status("In Maintenance")
-		else:
-			asset.set_status()
+		frappe.get_doc("Asset", asset.name).set_status()
 
 
 def has_due_maintenance(asset_name: str) -> bool:
