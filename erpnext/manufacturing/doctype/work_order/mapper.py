@@ -11,6 +11,7 @@ the controller; work_order.py re-exports them for backward compatibility.
 import json
 import math
 from functools import partial
+from itertools import groupby
 
 import frappe
 from frappe import _
@@ -402,6 +403,43 @@ def get_operation_qty(work_order, operation):
 		return flt(operation.get("output_qty"))
 
 	return flt(work_order.get("qty"))
+
+
+def get_upstream_process_loss(work_order, operation=None):
+	"""Loss before an operation, or before finished goods when no operation is supplied."""
+	if work_order.get("track_semi_finished_goods"):
+		return 0
+
+	process_loss_qty = 0
+	available_qty = None
+	for sequence_id, rows in groupby(
+		sorted(work_order.get("operations") or [], key=lambda row: cint(row.sequence_id)),
+		key=lambda row: cint(row.sequence_id),
+	):
+		if operation is not None and sequence_id >= cint(operation.get("sequence_id")):
+			break
+
+		rows = list(rows)
+		# Cap new loss at the previous output; legacy cards can repeat upstream loss.
+		process_loss_qty += max(
+			(
+				flt(row.process_loss_qty)
+				if available_qty is None
+				else min(flt(row.process_loss_qty), max(available_qty - flt(row.completed_qty), 0))
+			)
+			for row in rows
+		)
+		available_qty = min(flt(row.completed_qty) for row in rows)
+
+	return flt(process_loss_qty)
+
+
+def get_operation_target_qty(work_order, operation):
+	"""Operation qty less the process loss booked before it."""
+	return flt(
+		get_operation_qty(work_order, operation) - get_upstream_process_loss(work_order, operation),
+		operation.precision("completed_qty"),
+	)
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):
