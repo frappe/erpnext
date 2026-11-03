@@ -71,7 +71,7 @@ def execute():
 		.set(atc.is_tax_withholding_account, 1)
 		.where(atc.parenttype == "Payment Entry")
 		.where(atc.add_deduct_tax == "Deduct")
-		.where(atc.account_head.isin(list(set().union(*tds_accounts["accounts_by_company"].values()))))
+		.where(atc.account_head.isin(tds_accounts["all_accounts"]))
 		.where(
 			atc.parent.isin(
 				frappe.qb.from_(pe)
@@ -147,16 +147,10 @@ def get_column_cache():
 			"pan": frappe.db.has_column("Customer", "pan"),
 			"tax_id": frappe.db.has_column("Customer", "tax_id"),
 		},
-		"Purchase Invoice": {
-			"tax_withholding_category": frappe.db.has_column("Purchase Invoice", "tax_withholding_category"),
-		},
 		"Purchase Invoice Item": {
 			"tax_withholding_category": frappe.db.has_column(
 				"Purchase Invoice Item", "tax_withholding_category"
 			),
-		},
-		"Sales Invoice": {
-			"tax_withholding_category": frappe.db.has_column("Sales Invoice", "tax_withholding_category"),
 		},
 		"Sales Invoice Item": {
 			"tax_withholding_category": frappe.db.has_column(
@@ -199,11 +193,7 @@ def get_tds_accounts():
 		else:
 			account_map[key] = row.category
 
-	accounts_by_company = {}
-	for row in result:
-		accounts_by_company.setdefault(row.company, set()).add(row.account)
-
-	return {"account_map": account_map, "accounts_by_company": accounts_by_company}
+	return {"account_map": account_map, "all_accounts": list({row.account for row in result})}
 
 
 def get_tax_rate_map():
@@ -413,9 +403,7 @@ class PurchaseInvoiceMigrator:
 		self.skip_docs = skip_docs
 		self.suppliers = suppliers
 
-		self.all_tds_accounts = set()
-		for accounts in tds_accounts["accounts_by_company"].values():
-			self.all_tds_accounts.update(accounts)
+		self.all_tds_accounts = tds_accounts["all_accounts"]
 
 		self._invoices_with_tds = []
 		self._all_withheld_vouchers = []
@@ -442,9 +430,6 @@ class PurchaseInvoiceMigrator:
 		self.all_entries = {}  # {(doctype, name): [entries]}
 
 	def migrate(self):
-		if not self.all_tds_accounts:
-			return
-
 		self._fetch_data()
 		self._build_lookups()
 		self._fetch_dates()
@@ -464,7 +449,7 @@ class PurchaseInvoiceMigrator:
 		atc = frappe.qb.DocType("Advance Taxes and Charges")
 
 		# v15 ticked its TDS rows, so a row on an account since removed from the category still counts
-		tds_row = ptc.account_head.isin(list(self.all_tds_accounts)) | (
+		tds_row = ptc.account_head.isin(self.all_tds_accounts) | (
 			(ptc.is_tax_withholding_account == 1) & (ptc.base_tax_amount_after_discount_amount != 0)
 		)
 
@@ -566,7 +551,7 @@ class PurchaseInvoiceMigrator:
 			.where(pe.party_type == "Supplier")
 			.where(pe.party.isin(self.suppliers))
 			.where(pe.apply_tds == 1)
-			.where(atc.account_head.isin(list(self.all_tds_accounts)))
+			.where(atc.account_head.isin(self.all_tds_accounts))
 			.run(as_dict=True)
 		)
 
@@ -1067,14 +1052,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 	si = frappe.qb.DocType("Sales Invoice")
 	cust = frappe.qb.DocType("Customer")
 
-	all_tcs_accounts = set()
-	for _company, accounts in tds_accounts["accounts_by_company"].items():
-		all_tcs_accounts.update(accounts)
-
-	if not all_tcs_accounts:
-		return
-
-	tcs_accounts_list = list(all_tcs_accounts)
+	tcs_accounts_list = tds_accounts["all_accounts"]
 
 	tcs_gl = (
 		frappe.qb.from_(gle)
@@ -1243,12 +1221,7 @@ def migrate_journal_entries(
 	je = frappe.qb.DocType("Journal Entry")
 	jea = frappe.qb.DocType("Journal Entry Account")
 
-	all_tds_accounts = set()
-	for _company, accounts in tds_accounts["accounts_by_company"].items():
-		all_tds_accounts.update(accounts)
-
-	if not all_tds_accounts:
-		return
+	all_tds_accounts = tds_accounts["all_accounts"]
 
 	tds_gl_entries = (
 		frappe.qb.from_(gle)
@@ -1262,13 +1235,12 @@ def migrate_journal_entries(
 			gle.posting_date,
 			je.company,
 			je.tax_withholding_category,
-			je.voucher_type,
 			je.total_debit,
 		)
 		.where(gle.voucher_type == "Journal Entry")
 		.where(gle.is_cancelled == 0)
 		.where(je.docstatus == 1)
-		.where(gle.account.isin(list(all_tds_accounts)))
+		.where(gle.account.isin(all_tds_accounts))
 		.run(as_dict=True)
 	)
 
@@ -1290,7 +1262,7 @@ def migrate_journal_entries(
 			.where(jea.party_type != "")
 			.where(jea.party.isnotnull())
 			.where(jea.party != "")
-			.where(jea.account.notin(list(all_tds_accounts)))  # Exclude TDS account rows
+			.where(jea.account.notin(all_tds_accounts))  # Exclude TDS account rows
 			.run(as_dict=True)
 		)
 		for row in jea_party_rows:
@@ -1484,7 +1456,7 @@ def migrate_journal_entries(
 			{
 				"parent": ("in", batch),
 				"parenttype": "Journal Entry",
-				"account": ("in", list(all_tds_accounts)),
+				"account": ("in", all_tds_accounts),
 				"credit": (">", 0),
 				"party": ("is", "not set"),
 			},
@@ -1498,11 +1470,7 @@ def copy_category_to_items_for_purchase(column_cache):
 	parent_doctype = "Purchase Invoice"
 	item_doctype = "Purchase Invoice Item"
 
-	parent_cols = column_cache.get(parent_doctype, {})
 	item_cols = column_cache.get(item_doctype, {})
-
-	if not parent_cols.get("tax_withholding_category"):
-		return
 
 	if not item_cols.get("tax_withholding_category"):
 		return
