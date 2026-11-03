@@ -16,6 +16,7 @@ const sub = (row) => {
 const canEdit = (row) => props.editable && !row.is_balance_item;
 const isOff = (row) => run.isOff(props.stage, row);
 function setActual(row, value) {
+	if (value === run.local.actual[props.stage.idx][key(row)]) return;
 	if (row.is_input) run.setPass(props.stage, row, value);
 	else run.setMaterial(props.stage, row, value);
 }
