@@ -14,21 +14,28 @@ def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 
 
 def update_lead_phone_numbers(contact, method):
-	"""Copy the contact's primary phone and mobile number to its Lead, including ones cleared on edit."""
+	"""Copy the contact's phone and mobile number to its Lead, including ones cleared on edit."""
 	lead = contact.get_link_for("Lead")
-	numbers = {
-		field: contact.get(field) or ""
-		for field in ("phone", "mobile_no")
-		if contact.get(field) or (not contact.is_new() and contact.has_value_changed(field))
-	}
-	if not (lead and numbers):
+	if not (lead and (contact.phone_nos or had_phone_numbers(contact))):
 		return
 
+	numbers = get_lead_phone_numbers(contact)
 	current = frappe.db.get_value("Lead", lead, list(numbers), as_dict=True)
 	if changed := {
 		field: number for field, number in numbers.items() if (current.get(field) or "") != number
 	}:
 		frappe.db.set_value("Lead", lead, changed, update_modified=False)
+
+
+def get_lead_phone_numbers(contact) -> dict[str, str]:
+	"""The primary phone and mobile number, or else the contact's first number for both."""
+	first_number = contact.phone_nos[0].phone if contact.phone_nos else ""
+	return {"phone": contact.phone or first_number, "mobile_no": contact.mobile_no or first_number}
+
+
+def had_phone_numbers(contact) -> bool:
+	previous = contact.get_doc_before_save()
+	return bool(previous and previous.phone_nos)
 
 
 def copy_comments(doctype, docname, doc):
