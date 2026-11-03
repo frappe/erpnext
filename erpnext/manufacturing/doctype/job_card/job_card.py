@@ -1321,7 +1321,7 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.qty))
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
 			.where(
 				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
 			)
@@ -1353,7 +1353,7 @@ class JobCard(Document):
 					frappe.qb.from_(sed)
 					.join(se)
 					.on(sed.parent == se.name)
-					.select(sed.job_card_item, Sum(sed.qty))
+					.select(sed.job_card_item, Sum(sed.transfer_qty))
 					.where(
 						(sed.job_card_item.isin(job_card_items))
 						& (se.docstatus == 1)
