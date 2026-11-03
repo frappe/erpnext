@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_datetime, time_diff_in_hours
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -31,8 +33,7 @@ def get_data(filters):
 
 	from_date = get_datetime(filters.get("from_date"))
 	to_date = get_datetime(filters.get("to_date"))
-	if from_date > to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
 
 	query_filters["from_time"] = ("<", to_date)
 	query_filters["to_time"] = (">", from_date)
