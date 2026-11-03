@@ -38,7 +38,7 @@ const checked = computed(() => props.status === "done" || props.badge?.theme ===
 				role="img"
 				:aria-label="badge.label"
 			>
-				<span v-if="checked" class="lucide-check size-4 text-ink-gray-8" aria-hidden="true" />
+				<span v-if="checked" class="lucide-circle-check size-4 text-ink-gray-8" aria-hidden="true" />
 			</span>
 		</Tooltip>
 	</div>
