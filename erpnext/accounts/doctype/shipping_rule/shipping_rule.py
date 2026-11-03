@@ -139,10 +139,16 @@ class ShippingRule(Document):
 		):
 			return doc.base_net_total
 
-		discount = sum(
-			flt(item.distributed_discount_amount) for item in doc.items if not item.get("is_alternative")
+		# rounded per item, as base_net_amount was, so the total does not drift with the discount
+		base_net_total = sum(
+			flt(
+				(item.net_amount + flt(item.distributed_discount_amount)) * doc.conversion_rate,
+				item.precision("base_net_amount"),
+			)
+			for item in doc.items
+			if not item.get("is_alternative")
 		)
-		return flt(doc.base_net_total + discount * doc.conversion_rate, doc.precision("base_net_total"))
+		return flt(base_net_total, doc.precision("base_net_total"))
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
