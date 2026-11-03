@@ -25,6 +25,12 @@ class TestAssetMaintenanceTeam(ERPNextTestSuite):
 		team.maintenance_manager = "test@example.com"
 		self.assertRaises(frappe.ValidationError, team.save)
 
+		# a team saved with an outside manager before the check still saves while the manager stays
+		team.reload()
+		team.db_set("maintenance_manager", "test@example.com")
+		team.reload()
+		team.save()
+
 		make_asset_maintenance("Team Awesome")
 		team.reload()
 		team.maintenance_team_members = [
@@ -44,7 +50,7 @@ def make_asset_maintenance(team: str):
 	asset = frappe.get_doc("Asset", {"purchase_receipt": receipt.name})
 	asset.available_for_use_date = nowdate()
 	asset.purchase_date = nowdate()
-	asset.save()
+	asset.submit()
 	return frappe.get_doc(
 		{
 			"doctype": "Asset Maintenance",

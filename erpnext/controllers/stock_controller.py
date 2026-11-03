@@ -270,7 +270,7 @@ class StockController(AccountsController):
 
 	def get_item_wise_inventory_account_map(self):
 		inventory_account_map = frappe._dict()
-		for table in ["items", "packed_items", "supplied_items"]:
+		for table in ["items", "packed_items", "supplied_items", "stock_items"]:
 			if not self.get(table):
 				continue
 
@@ -1820,9 +1820,10 @@ class StockController(AccountsController):
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
-	def update_blanket_order(self):
-		blanket_orders = sorted({d.blanket_order for d in self.items if d.blanket_order})
-		for blanket_order in blanket_orders:
+	def update_blanket_order(self, extra_blanket_orders=()):
+		"""Refresh ordered qty of the blanket orders on the items and of `extra_blanket_orders`."""
+		blanket_orders = {d.blanket_order for d in self.items if d.blanket_order}
+		for blanket_order in sorted(blanket_orders.union(extra_blanket_orders)):
 			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
@@ -2112,6 +2113,11 @@ class StockController(AccountsController):
 		)
 
 		if self.docstatus == 2:
+			# nothing to repost when the cancelled voucher never touched the stock ledger
+			if not frappe.db.exists(
+				"Stock Ledger Entry", {"voucher_type": self.doctype, "voucher_no": self.name}
+			):
+				return
 			force = True
 
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self):

@@ -5,8 +5,8 @@ import copy
 import gc
 import gzip
 import json
-from collections import deque
-from itertools import islice
+from heapq import heappop, heappush, nsmallest
+from itertools import count
 
 import frappe
 from frappe import _, bold, scrub
@@ -75,6 +75,32 @@ REPOST_SLE_QUEUE_FIELDS = (
 
 class NegativeStockError(frappe.ValidationError):
 	pass
+
+
+class RepostQueue:
+	"""Stock ledger entries waiting to be reposted, popped in posting order.
+
+	Entries with the same posting datetime and creation pop in the order they were added.
+	"""
+
+	def __init__(self, sles=None):
+		self._heap = []
+		self._counter = count()
+		self.extend(sles or [])
+
+	def extend(self, sles):
+		for sle in sles:
+			key = (get_datetime(sle.posting_datetime), get_datetime(sle.creation), next(self._counter))
+			heappush(self._heap, (*key, sle))
+
+	def popleft(self):
+		return heappop(self._heap)[-1]
+
+	def peek(self, n):
+		return [entry[-1] for entry in nsmallest(n, self._heap)]
+
+	def __len__(self):
+		return len(self._heap)
 
 
 class SerialNoExistsInFutureTransaction(frappe.ValidationError):
@@ -781,7 +807,7 @@ class update_entries_after:
 			self.raise_exceptions()
 
 	def initialize_reposting(self):
-		self._sles = []
+		self._sles = RepostQueue()
 		self._sle_batch = {}
 		self.distinct_sles = set()
 		self.distinct_dependant_item_wh = set()
@@ -810,7 +836,7 @@ class update_entries_after:
 		}
 
 	def _get_future_entries_to_repost(self, item_wh_sles):
-		sles = []
+		sles = RepostQueue()
 
 		for sle in item_wh_sles:
 			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
@@ -818,13 +844,10 @@ class update_entries_after:
 
 			sles.extend(self.get_future_entries_to_repost(sle))
 
-		return self.sort_sles(sles)
+		return sles
 
 	def repost_stock_ledgers(self, item_wh_sles=None):
 		self._sles = self._get_future_entries_to_repost(item_wh_sles)
-
-		if not isinstance(self._sles, deque):
-			self._sles = deque(self._sles)
 
 		i = 0
 		while self._sles:
@@ -872,11 +895,13 @@ class update_entries_after:
 			return sle
 
 		names = [queued_sle.name]
-		for row in islice(self._sles, 0, REPOST_SLE_BATCH_SIZE - 1):
+		for row in self._sles.peek(REPOST_SLE_BATCH_SIZE - 1):
 			if row.name not in self.distinct_sles:
 				names.append(row.name)
 
-		self._sle_batch = {row.name: row for row in get_sle_entries_by_names(names)}
+		missing = [name for name in names if name not in self._sle_batch]
+		self._sle_batch.update({row.name: row for row in get_sle_entries_by_names(missing)})
+		self._sle_batch = {name: self._sle_batch[name] for name in names if name in self._sle_batch}
 
 		return self._sle_batch.pop(queued_sle.name, None)
 
@@ -890,8 +915,6 @@ class update_entries_after:
 		)
 
 	def include_dependant_sle_in_reposting(self, sle):
-		repost_dependant_sle = False
-
 		# For a Manufacture/Repack entry the consumed row points at the finished good row,
 		# so the dependants picked up here are the finished goods produced by this entry.
 		# Reposting them here makes any queued repost for the same item-warehouse at a
@@ -912,7 +935,6 @@ class update_entries_after:
 			if item_wh_key in self.distinct_dependant_item_wh:
 				continue
 
-			repost_dependant_sle = True
 			self.distinct_dependant_item_wh.add(item_wh_key)
 			self._sles.extend(self.get_future_entries_to_repost(depend_sle))
 
@@ -922,11 +944,6 @@ class update_entries_after:
 					depend_sle.posting_datetime
 					or get_combine_datetime(depend_sle.posting_date, depend_sle.posting_time),
 				)
-
-		if repost_dependant_sle:
-			self._sles = deque(self.sort_sles(self._sles))
-			# the queue order changed, the prefetched window is no longer the next batch
-			self._sle_batch = {}
 
 	def repost_stock_ledger_entry(self, sle):
 		if isinstance(sle, dict):
@@ -1792,7 +1809,7 @@ class update_entries_after:
 		In case of Stock Entry, also calculate FG Item rate and total incoming/outgoing amount
 		"""
 		if sle.voucher_type == "Stock Reconciliation":
-			if flt(sle.actual_qty) <= 0 and not self.args.get("sle_id"):
+			if not self.args.get("sle_id"):
 				self.update_rate_on_stock_reconciliation(sle)
 			return
 
@@ -1807,6 +1824,10 @@ class update_entries_after:
 				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Subcontracting Receipt":
 				self.update_rate_on_subcontracting_receipt(sle, outgoing_rate)
+			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Asset Capitalization":
+				frappe.get_doc(sle.voucher_type, sle.voucher_no).update_stock_item_rate(
+					sle.voucher_detail_no, outgoing_rate
+				)
 
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
@@ -1904,7 +1925,7 @@ class update_entries_after:
 		# rows and the pre-reconciliation ledger balance for non-serial rows).
 		frappe.get_lazy_doc(
 			"Stock Reconciliation", sle.voucher_no, for_update=True
-		).recalculate_difference_amount_from_ledger()
+		).recalculate_difference_amount_from_ledger(sle.voucher_detail_no)
 
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company

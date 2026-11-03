@@ -24,6 +24,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_reserved_serial_nos_for_sre,
 )
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
@@ -685,6 +686,7 @@ class PickList(TransactionBase):
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
+		own_vouchers = self.get_own_vouchers()
 
 		# reset
 		reset_rows = []
@@ -708,9 +710,8 @@ class PickList(TransactionBase):
 				priority_warehouses.extend(get_descendants_of("Warehouse", source_warehouse))
 				from_warehouses = list(dict.fromkeys(priority_warehouses + from_warehouses))
 
-			self.item_location_map.setdefault(
-				item_code,
-				get_available_item_locations(
+			if item_code not in self.item_location_map:
+				self.item_location_map[item_code] = get_available_item_locations(
 					item_code,
 					from_warehouses,
 					self.item_count_map.get(item_code),
@@ -722,8 +723,8 @@ class PickList(TransactionBase):
 						frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
 					),
 					exclude_warehouses=excluded_warehouses,
-				),
-			)
+					own_vouchers=own_vouchers,
+				)
 
 			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
@@ -866,6 +867,14 @@ class PickList(TransactionBase):
 				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
 			)
 
+	def get_own_vouchers(self):
+		"""Vouchers whose stock reservations this pick list may pick."""
+		vouchers = {row.sales_order for row in self.locations if row.sales_order}
+		if self.work_order:
+			vouchers.add(self.work_order)
+
+		return vouchers
+
 	def get_picked_items_details(self, items):
 		picked_items = frappe._dict()
 
@@ -1004,8 +1013,8 @@ class PickList(TransactionBase):
 			}
 		return product_bundle_qty_map
 
-	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
-		"""Compute how many full bundles can be created from picked items."""
+	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
+		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
 		possible_bundles = {}
 		for item in self.locations:
@@ -1013,8 +1022,9 @@ class PickList(TransactionBase):
 				continue
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
+				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
 				possible_bundles.setdefault(item.product_bundle_item, 0)
-				possible_bundles[item.product_bundle_item] += item.picked_qty / qty_in_bundle
+				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
@@ -1291,6 +1301,7 @@ def get_available_item_locations(
 	priority_warehouses=None,
 	keep_all_locations=False,
 	exclude_warehouses=None,
+	own_vouchers=None,
 ):
 	locations = []
 
@@ -1332,6 +1343,10 @@ def get_available_item_locations(
 
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+	# after picked serials are removed, so a reserved pick is not deducted twice
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
 
 	if locations and keep_all_locations:
 		locations = prioritize_locations(locations, priority_warehouses)
@@ -1418,6 +1433,23 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			filterd_locations.append(row)
 
 	return filterd_locations
+
+
+def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=None):
+	reserved_serial_nos = {
+		row.serial_no
+		for row in get_reserved_serial_nos_for_sre(frappe._dict(item_code=item_code))
+		if row.voucher_no not in (own_vouchers or ())
+	}
+	if not reserved_serial_nos:
+		return locations
+
+	for location in locations:
+		serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty -= len(location.serial_nos) - len(serial_nos)
+		location.serial_nos = serial_nos
+
+	return [location for location in locations if location.qty > 0]
 
 
 def get_available_item_locations_for_serial_and_batched_item(
@@ -1587,6 +1619,22 @@ def get_available_item_locations_for_other_item(
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
 	return create_delivery(source_name, target_doc, "Delivery Note")
+
+
+@frappe.whitelist()
+def get_existing_drafts(source_name: str, target_doctype: str) -> list[str]:
+	if target_doctype not in {"Delivery Note", "Sales Invoice"}:
+		frappe.throw(_("Unsupported target document type"))
+
+	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list.check_permission("read")
+
+	return frappe.get_list(
+		target_doctype,
+		filters={"docstatus": 0, "against_pick_list": source_name},
+		pluck="name",
+		order_by="name",
+	)
 
 
 @frappe.whitelist()
@@ -1921,10 +1969,14 @@ def add_product_bundles_to_target(
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
-		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
-		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
-			so_row, product_bundle_qty_map[value.item_code]
+		pending_qty = pick_list._compute_picked_qty_for_bundle(
+			so_row, product_bundle_qty_map[value.item_code], pending_only=True
 		)
+		if not pending_qty:
+			continue
+
+		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
+		target_bundle_item.qty = pending_qty
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
 
@@ -2186,6 +2238,7 @@ def update_common_item_properties(item, location):
 	item.material_request = location.material_request
 	item.serial_no = location.serial_no
 	item.batch_no = location.batch_no
+	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name
 

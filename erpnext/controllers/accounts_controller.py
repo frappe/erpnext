@@ -81,6 +81,7 @@ from erpnext.stock.get_item_details import (
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
+	get_default_bom,
 	get_item_tax_map,
 	get_item_warehouse_,
 )
@@ -2975,6 +2976,7 @@ class AccountsController(TransactionBase):
 			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
+			keep_settled = self.docstatus == 1 and getattr(self, "_action", None) != "submit"
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
@@ -2983,18 +2985,29 @@ class AccountsController(TransactionBase):
 					d.base_payment_amount = flt(
 						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
 					)
-					d.outstanding = d.payment_amount
-					d.base_outstanding = d.base_payment_amount
 				elif not d.invoice_portion:
 					d.base_payment_amount = flt(
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
-					d.base_outstanding = d.base_payment_amount
+				self.set_term_outstanding(d, keep_settled)
 		else:
 			self.fetch_payment_terms_from_order(
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			self.ignore_default_payment_terms_template = 1
+
+	def set_term_outstanding(self, term, keep_settled: bool) -> None:
+		settled = base_settled = 0
+		if keep_settled:
+			settled = flt(term.paid_amount) + flt(term.discounted_amount)
+			base_settled = flt(term.base_paid_amount) + flt(term.discounted_amount) * flt(
+				self.get("conversion_rate")
+			)
+
+		term.outstanding = flt(term.payment_amount - settled, term.precision("outstanding"))
+		term.base_outstanding = flt(
+			term.base_payment_amount - base_settled, term.precision("base_outstanding")
+		)
 
 	def get_order_details(self):
 		if not self.get("items"):
@@ -3100,6 +3113,13 @@ class AccountsController(TransactionBase):
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.payment_amount * self.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
+				payment_schedule["outstanding"] = schedule.payment_amount
+
+			payment_schedule["base_outstanding"] = payment_schedule["base_payment_amount"]
 
 			self.append("payment_schedule", payment_schedule)
 
@@ -3142,13 +3162,6 @@ class AccountsController(TransactionBase):
 		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			return
 
-		party_account_currency = self.get("party_account_currency")
-		if not party_account_currency:
-			party_type, party = self.get_party()
-
-			if party_type and party:
-				party_account_currency = get_party_account_currency(party_type, party, self.company)
-
 		if self.get("payment_schedule"):
 			total = 0
 			base_total = 0
@@ -3156,24 +3169,7 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount, d.precision("payment_amount"))
 				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
-			base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
-			grand_total = flt(self.get("rounded_total") or self.grand_total)
-
-			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
-				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
-				grand_total = grand_total - flt(self.write_off_amount)
-
-			if self.get("total_advance"):
-				if party_account_currency == self.company_currency:
-					base_grand_total -= self.get("total_advance")
-					grand_total = flt(
-						base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
-					)
-				else:
-					grand_total -= self.get("total_advance")
-					base_grand_total = flt(
-						grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
-					)
+			grand_total, base_grand_total = self.get_payment_schedule_grand_totals()
 
 			if (
 				abs(
@@ -3190,6 +3186,35 @@ class AccountsController(TransactionBase):
 				frappe.throw(
 					_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total")
 				)
+
+	def get_payment_schedule_grand_totals(self):
+		party_account_currency = self.get("party_account_currency")
+		if not party_account_currency:
+			party_type, party = self.get_party()
+
+			if party_type and party:
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
+
+		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+		grand_total = flt(self.get("rounded_total") or self.grand_total)
+
+		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
+			grand_total = grand_total - flt(self.write_off_amount)
+
+		if self.get("total_advance"):
+			if party_account_currency == self.company_currency:
+				base_grand_total -= self.get("total_advance")
+				grand_total = flt(
+					base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
+				)
+			else:
+				grand_total -= self.get("total_advance")
+				base_grand_total = flt(
+					grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
+				)
+
+		return grand_total, base_grand_total
 
 	def is_rounded_total_disabled(self):
 		if self.meta.get_field("disable_rounded_total"):
@@ -3842,6 +3867,27 @@ def validate_inclusive_tax(tax, doc):
 			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
+def is_deduct_with_valuation(tax) -> bool:
+	return tax.get("category") == "Valuation" and tax.get("add_deduct_tax") == "Deduct"
+
+
+def validate_deduct_with_valuation_category(
+	taxes: list | None, allowed_account_heads: set | None = None
+) -> None:
+	for tax in taxes or []:
+		if is_deduct_with_valuation(tax) and tax.account_head not in (allowed_account_heads or set()):
+			throw(
+				_("Row {0}: {1} cannot be {2} when {3} is {4}").format(
+					tax.idx,
+					frappe.bold(_("Add or Deduct")),
+					frappe.bold(_("Deduct")),
+					frappe.bold(_("Consider Tax or Charge for")),
+					frappe.bold(_("Valuation")),
+				),
+				title=_("Invalid Tax Row"),
+			)
+
+
 def set_balance_in_account_currency(
 	gl_dict, account_currency=None, conversion_rate=None, company_currency=None
 ):
@@ -4348,6 +4394,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	child_item.warehouse = get_new_child_item_warehouse(p_doc, item, trans_item, child_doctype)
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get("conversion_factor")) or conversion_factor
+	child_item.price_list_rate = flt(trans_item.get("price_list_rate"))
 	child_item.update(_get_bin_details(child_item.item_code, child_item.warehouse, p_doc.get("company")))
 
 	if child_doctype in ["Purchase Order Item", "Supplier Quotation Item"]:
@@ -4619,6 +4666,14 @@ def update_child_qty_rate(
 				)
 			)
 
+		# The Supplier Quotation form hides Update Items for these states; enforce it server-side too.
+		if doc.doctype == "Supplier Quotation" and doc.status in ("Ordered", "Stopped", "Expired"):
+			frappe.throw(
+				_("Cannot update items of Supplier Quotation {0} because it is {1}.").format(
+					doc.name, _(doc.status)
+				)
+			)
+
 		# The Quotation form hides Update Items for these states; enforce it server-side too.
 		if doc.doctype == "Quotation":
 			if doc.status in ("Lost", "Ordered"):
@@ -4794,15 +4849,11 @@ def update_child_qty_rate(
 					)
 				)
 			else:
-				is_sub_contracted_item, default_bom = frappe.db.get_value(
-					"Item", new_data["fg_item"], ["is_sub_contracted_item", "default_bom"]
-				)
-
-				if not is_sub_contracted_item:
+				if not frappe.db.get_value("Item", new_data["fg_item"], "is_sub_contracted_item"):
 					frappe.throw(
 						_("Finished Good Item {0} must be a sub-contracted item").format(new_data["fg_item"])
 					)
-				elif not default_bom:
+				elif not get_default_bom(new_data["fg_item"]):
 					frappe.throw(_("Default BOM not found for FG Item {0}").format(new_data["fg_item"]))
 
 		if not new_data.get("fg_item_qty"):
@@ -4817,6 +4868,7 @@ def update_child_qty_rate(
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 	had_mapped_discount = parent.has_mapped_discount
 	rfqs_before_update = set()
+	blanket_orders_before_update = {d.blanket_order for d in parent.items if d.get("blanket_order")}
 
 	check_doc_permissions(parent, "write")
 	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
@@ -4948,25 +5000,24 @@ def update_child_qty_rate(
 		if d.get("bom_no") and parent_doctype == "Sales Order":
 			child_item.bom_no = d.get("bom_no")
 
-		if parent_doctype in ["Sales Order", "Purchase Order"]:
-			if flt(child_item.price_list_rate):
-				if flt(child_item.rate) > flt(child_item.price_list_rate):
-					#  if rate is greater than price_list_rate, set margin
-					#  or set discount
-					child_item.discount_percentage = 0
-					child_item.discount_amount = 0
-					child_item.margin_type = "Amount"
-					child_item.margin_rate_or_amount = flt(
-						child_item.rate - child_item.price_list_rate,
-						child_item.precision("margin_rate_or_amount"),
-					)
-					child_item.rate_with_margin = child_item.rate
-				else:
-					child_item.margin_type = ""
-					child_item.margin_rate_or_amount = 0
-					child_item.rate_with_margin = child_item.price_list_rate
-					child_item.discount_percentage = 0
-					child_item.discount_amount = flt(child_item.rate_with_margin) - flt(child_item.rate)
+		if flt(child_item.price_list_rate):
+			if flt(child_item.rate) > flt(child_item.price_list_rate):
+				#  if rate is greater than price_list_rate, set margin
+				#  or set discount
+				child_item.discount_percentage = 0
+				child_item.discount_amount = 0
+				child_item.margin_type = "Amount"
+				child_item.margin_rate_or_amount = flt(
+					child_item.rate - child_item.price_list_rate,
+					child_item.precision("margin_rate_or_amount"),
+				)
+				child_item.rate_with_margin = child_item.rate
+			else:
+				child_item.margin_type = ""
+				child_item.margin_rate_or_amount = 0
+				child_item.rate_with_margin = child_item.price_list_rate
+				child_item.discount_percentage = 0
+				child_item.discount_amount = flt(child_item.rate_with_margin) - flt(child_item.rate)
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
@@ -5001,6 +5052,7 @@ def update_child_qty_rate(
 	if parent_doctype != "Supplier Quotation":
 		parent.set_payment_schedule()
 	if parent_doctype == "Purchase Order":
+		parent.set_last_purchase_rate()
 		parent.validate_minimum_order_qty()
 		parent.validate_budget()
 		if parent.is_against_so():
@@ -5064,7 +5116,8 @@ def update_child_qty_rate(
 	validate_workflow_conditions(parent)
 
 	if parent_doctype in ["Purchase Order", "Sales Order"]:
-		parent.update_blanket_order()
+		# Covers blanket orders of removed rows, which are no longer on the items
+		parent.update_blanket_order(blanket_orders_before_update)
 		parent.update_billing_percentage()
 		parent.set_status()
 
@@ -5180,7 +5233,6 @@ def get_missing_company_details(doctype: str, docname: str):
 	)
 
 	required_fields = [
-		company_details.get("company_logo"),
 		company_details.get("phone_no"),
 		company_details.get("email"),
 	]

@@ -660,8 +660,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				doc.payment_schedule = []
 
 		if doc.get("is_return") and hasattr(doc, "packed_items"):
-			for d in doc.get("packed_items"):
-				d.qty = d.qty * -1
+			update_packed_items(doc)
 
 		if doc.get("discount_amount"):
 			doc.discount_amount = -1 * source.discount_amount
@@ -671,6 +670,17 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			doc.supplier_warehouse = source.supplier_warehouse
 		else:
 			doc.run_method("calculate_taxes_and_totals")
+
+	def update_packed_items(doc):
+		# key each packed row to its bundle row by idx, as packing does on a new document,
+		# so packing keeps the row (and its warehouse) instead of rebuilding it
+		ref_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(doctype) + "_item"
+		item_idx = {item.get(ref_field): item.idx for item in doc.get("items")}
+		for d in doc.get("packed_items"):
+			d.qty = d.qty * -1
+			d.parent_detail_docname = item_idx.get(d.parent_detail_docname)
+			if default_warehouse_for_sales_return:
+				d.warehouse = default_warehouse_for_sales_return
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
@@ -880,6 +890,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				"condition": item_condition,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
+			"Packed Item": {
+				"doctype": "Packed Item",
+				"field_map": {"parent_detail_docname": "parent_detail_docname"},
+			},
 		},
 		target_doc,
 		set_missing_values,

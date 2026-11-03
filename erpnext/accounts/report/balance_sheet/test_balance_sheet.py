@@ -1,12 +1,17 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import flt
 from frappe.utils.data import today
 
-from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+from erpnext.accounts.report.balance_sheet.balance_sheet import execute, execute_snapshot_report
 from erpnext.accounts.report.financial_statements import build_period_list, is_dimension_grouped
+from erpnext.accounts.report.profit_and_loss_statement.test_profit_and_loss_statement import (
+	get_gl_entry_snapshot,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company 6"
@@ -184,6 +189,42 @@ class TestBalanceSheet(ERPNextTestSuite):
 		)
 		self.assertEqual(get_loan_and_provisional_profit(filters), (94.12, flt(provisional - 10, 2)))
 
+	def test_snapshot_totals_with_accumulated_monthly_values(self):
+		create_account("My Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
+		make_journal_entry(
+			[
+				dict(account_name="My Bank", debit_in_account_currency=500),
+				dict(account_name="Sales", credit_in_account_currency=500),
+			],
+			posting_date="2026-03-01",
+		)
+		filters = frappe._dict(
+			company=COMPANY,
+			filter_based_on="Date Range",
+			period_start_date="2026-01-01",
+			period_end_date="2026-12-31",
+			periodicity="Monthly",
+			accumulated_values=1,
+		)
+		with patch("frappe.database.duckdb.database.get_latest_sync", return_value=get_gl_entry_snapshot()):
+			snapshot = get_credit_totals(execute_snapshot_report(frappe._dict(filters))[1])
+
+		expected = get_credit_totals(execute(frappe._dict(filters))[1])
+		self.assertEqual(len(expected), 2)
+		self.assertEqual(snapshot, expected)
+
+	def test_snapshot_with_report_template(self):
+		filters = frappe._dict(
+			company=COMPANY,
+			filter_based_on="Date Range",
+			period_start_date="2026-01-01",
+			period_end_date="2026-12-31",
+			periodicity="Yearly",
+			report_template="Standard Balance Sheet (IFRS)",
+		)
+		snapshot = execute_snapshot_report(frappe._dict(filters))[1]
+		self.assertEqual(snapshot, execute(frappe._dict(filters))[1])
+
 	def test_group_by_dimension(self):
 		create_account("BS Dim Test Bank", f"Bank Accounts - {COMPANY_SHORT_NAME}", COMPANY)
 
@@ -264,6 +305,11 @@ def get_profit_loss_rows(filters):
 		rows.get("'Unclosed Fiscal Years Profit / Loss (Credit)'", 0),
 		rows.get("'Provisional Profit / Loss (Credit)'", 0),
 	)
+
+
+def get_credit_totals(data):
+	accounts = ("'Provisional Profit / Loss (Credit)'", "'Total (Credit)'")
+	return {row["account"]: row["total"] for row in data if row.get("account") in accounts}
 
 
 def get_loan_and_provisional_profit(filters):

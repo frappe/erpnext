@@ -232,6 +232,7 @@ class SalesOrder(SellingController):
 
 	def onload(self) -> None:
 		super().onload()
+		self.set_proforma_onload()
 
 		if self.get("is_subcontracted"):
 			self.set_onload("can_update_items", self.can_update_items())
@@ -249,6 +250,20 @@ class SalesOrder(SellingController):
 				"has_potentially_billable_items",
 				has_potentially_billable_items(self.name),
 			)
+
+	def set_proforma_onload(self) -> None:
+		"""Pass proforma settings to the form, since Sales Users cannot read Selling Settings."""
+		if self.docstatus == 0:
+			return
+
+		if not frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice"):
+			return
+
+		self.set_onload("enable_proforma_invoice", True)
+		self.set_onload(
+			"default_proforma_print_format",
+			frappe.db.get_single_value("Selling Settings", "default_proforma_print_format"),
+		)
 
 	def can_update_items(self) -> bool:
 		result = True
@@ -321,7 +336,7 @@ class SalesOrder(SellingController):
 						"Subcontracting BOM",
 						{"finished_good": item.fg_item, "is_active": 1},
 						"finished_good_bom",
-					) and not frappe.get_value("Item", item.fg_item, "default_bom"):
+					) and not get_default_bom(item.fg_item):
 						frappe.throw(
 							_("Row #{0}: BOM not found for FG Item {1}").format(item.idx, item.fg_item)
 						)
@@ -1031,31 +1046,39 @@ class SalesOrder(SellingController):
 
 	@frappe.whitelist()
 	def create_delivery_schedule(self, child_row, schedules):
+		self.check_permission("write")
+
 		if isinstance(child_row, dict):
 			child_row = frappe._dict(child_row)
 
 		if isinstance(schedules, str):
 			schedules = parse_json(schedules)
 
+		# trust the server-side row, never the client's item/uom/qty
+		item_row = next((r for r in self.items if r.name == child_row.name), None)
+		if not item_row:
+			frappe.throw(_("Row {0} does not belong to this Sales Order").format(child_row.name))
+
+		schedules = [frappe._dict(row) for row in schedules]
+		conversion_factor = flt(item_row.conversion_factor) or 1.0
+
+		total_qty = sum(flt(row.qty) for row in schedules)
+		if flt(total_qty, item_row.precision("qty")) > flt(item_row.qty, item_row.precision("qty")):
+			frappe.throw(_("Total delivery schedule quantity cannot be greater than the item quantity"))
+
 		names = []
-		first_delivery_date = None
 		for row in schedules:
-			row = frappe._dict(row)
-
-			if not first_delivery_date:
-				first_delivery_date = row.delivery_date
-
 			data = {
 				"delivery_date": row.delivery_date,
 				"qty": row.qty,
-				"uom": child_row.uom,
-				"stock_uom": child_row.stock_uom,
-				"item_code": child_row.item_code,
-				"conversion_factor": child_row.conversion_factor or 1.0,
-				"warehouse": child_row.warehouse,
-				"sales_order_item": child_row.name,
+				"uom": item_row.uom,
+				"stock_uom": item_row.stock_uom,
+				"item_code": item_row.item_code,
+				"conversion_factor": conversion_factor,
+				"warehouse": item_row.warehouse,
+				"sales_order_item": item_row.name,
 				"sales_order": self.name,
-				"stock_qty": row.qty * (child_row.conversion_factor or 1.0),
+				"stock_qty": flt(row.qty) * conversion_factor,
 			}
 
 			if frappe.db.exists("Delivery Schedule Item", row.name):
@@ -1068,10 +1091,13 @@ class SalesOrder(SellingController):
 			names.append(doc.name)
 
 		if names:
-			self.delete_delivery_schedule_items(child_row.name, names)
+			self.delete_delivery_schedule_items(item_row.name, names)
 
-		if first_delivery_date:
-			self.update_delivery_date_based_on_schedule(child_row, first_delivery_date)
+		# keep the row's original date value (a string); the field compares against other string dates
+		dated_schedules = [row for row in schedules if row.delivery_date]
+		if dated_schedules:
+			earliest = min(dated_schedules, key=lambda row: getdate(row.delivery_date))
+			self.update_delivery_date_based_on_schedule(item_row, earliest.delivery_date)
 
 	def update_delivery_date_based_on_schedule(self, child_row, first_delivery_date):
 		for row in self.items:
@@ -1967,6 +1993,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
+		target.incoterm = ""
+		target.named_place = ""
 		target.payment_schedule = []
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
@@ -2193,7 +2221,13 @@ def make_production_plan(source_name, target_doc=None):
 
 @frappe.whitelist(methods=["POST"])
 def update_status(status, name):
+	if status not in ("Draft", "On Hold", "Closed"):
+		frappe.throw(_("Sales Order status cannot be set to {0}").format(status))
+
 	so = frappe.get_doc("Sales Order", name, check_permission="submit")
+	if so.docstatus != 1:
+		frappe.throw(_("Only a submitted Sales Order can be put On Hold, Closed or re-opened"))
+
 	so.update_status(status)
 
 
@@ -2387,6 +2421,8 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
+		plan_item = qb.DocType("Production Plan Item")
+		precision = frappe.get_precision("Work Order", "qty")
 
 		items = []
 		item_codes = [i.item_code for i in so.items]
@@ -2409,7 +2445,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+						.left_join(plan_item)
+						.on(plan_item.name == wo.production_plan_item)
+						.select(Sum(qty_against_sales_order(wo, plan_item)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
@@ -2418,7 +2456,7 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 						)
 						.run()[0][0]
 					)
-					pending_qty = stock_qty - total_work_order_qty
+					pending_qty = flt(stock_qty - total_work_order_qty, precision)
 				else:
 					pending_qty = stock_qty
 

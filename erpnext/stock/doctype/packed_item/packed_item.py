@@ -108,8 +108,6 @@ def make_packing_list(doc):
 				if item_row.get("against_pick_list"):
 					update_packed_item_with_pick_list_info(item_row, pi_row)
 
-				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
-
 				if set_price_from_children:  # create/update bundle item wise price dict
 					update_product_bundle_rate(parent_items_price, pi_row, item_row)
 
@@ -290,10 +288,11 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 			["warehouse", "reserve_stock"],
 		) or (None, None)
 
-		if reserve_stock:
+		# reserved stock must ship from the reserved warehouse; otherwise keep any edit on this row
+		if reserve_stock or not pi_row.warehouse:
 			pi_row.warehouse = warehouse
 
-	if not pi_row.warehouse and not doc.amended_from:
+	if not pi_row.warehouse:
 		fetch_warehouse = doc.get("is_pos") or item_data.is_stock_item or not item_data.default_warehouse
 		pi_row.warehouse = (
 			main_item_row.warehouse
@@ -355,21 +354,6 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 	pi_row.rate = rate or item_data.get("valuation_rate") or 0.0
 
 
-def update_packed_item_from_cancelled_doc(main_item_row, packing_item, pi_row, doc):
-	"Update packed item row details from cancelled doc into amended doc."
-	prev_doc_packed_items_map = None
-	if doc.amended_from:
-		prev_doc_packed_items_map = get_cancelled_doc_packed_item_details(doc.packed_items)
-
-	if prev_doc_packed_items_map and prev_doc_packed_items_map.get(
-		(packing_item.item_code, main_item_row.name)
-	):
-		prev_doc_row = prev_doc_packed_items_map.get((packing_item.item_code, main_item_row.name))
-		pi_row.batch_no = prev_doc_row[0].batch_no
-		pi_row.serial_no = prev_doc_row[0].serial_no
-		pi_row.warehouse = prev_doc_row[0].warehouse
-
-
 def get_packed_item_bin_qty(item, warehouse):
 	bin_data = frappe.db.get_values(
 		"Bin",
@@ -379,15 +363,6 @@ def get_packed_item_bin_qty(item, warehouse):
 	)
 
 	return bin_data[0] if bin_data else {}
-
-
-def get_cancelled_doc_packed_item_details(old_packed_items):
-	prev_doc_packed_items_map = {}
-	for items in old_packed_items:
-		prev_doc_packed_items_map.setdefault((items.item_code, items.parent_detail_docname), []).append(
-			items.as_dict()
-		)
-	return prev_doc_packed_items_map
 
 
 def update_product_bundle_rate(parent_items_price, pi_row, item_row):

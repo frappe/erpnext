@@ -1059,9 +1059,9 @@ erpnext.work_order = {
 		(frm.doc.required_items || []).forEach((row) => {
 			required[row.item_code] = (required[row.item_code] || 0) + flt(row.required_qty);
 			if (!(row.item_code in covered)) {
-				covered[row.item_code] =
-					flt(row.transferred_qty) + flt(row.requested_qty) + flt(row.picked_qty);
+				covered[row.item_code] = flt(row.requested_qty) + flt(row.picked_qty);
 			}
+			covered[row.item_code] += flt(row.transferred_qty);
 		});
 
 		let max_fraction = 0;

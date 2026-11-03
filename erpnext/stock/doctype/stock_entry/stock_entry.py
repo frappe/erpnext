@@ -640,14 +640,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 			batches = defaultdict(float)
 			serial_nos = []
 			qty = row.transfer_qty
+			precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 			for batch_no, batch_qty in materials.batch_details.items():
 				if qty <= 0:
 					break
 
-				batch_qty = abs(batch_qty)
+				batch_qty = flt(batch_qty, precision)
+				if batch_qty <= 0:
+					continue
+
 				if batch_qty <= qty:
 					batches[batch_no] = batch_qty
-					qty -= batch_qty
+					qty = flt(qty - batch_qty, precision)
 				else:
 					batches[batch_no] = qty
 					qty = 0
@@ -722,6 +726,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		super().on_submit_subcontracting_inward()
 
 	def on_cancel(self):
+		self.validate_asset_repair_is_cancelled()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
@@ -848,6 +853,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
+
+	def validate_asset_repair_is_cancelled(self):
+		if self.asset_repair and frappe.db.get_value("Asset Repair", self.asset_repair, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel Asset Repair {0} instead, it cancels this Stock Entry").format(
+					get_link_to_form("Asset Repair", self.asset_repair)
+				)
+			)
 
 	def delink_asset_repair_sabb(self):
 		if not self.asset_repair:
@@ -1773,10 +1786,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if not wo:
 			return
 
+		from erpnext.manufacturing.doctype.work_order.work_order import get_allowed_transfer_qty
+
 		pending_by_item = {}
 		for r in wo.required_items:
 			pending_by_item[r.item_code] = (
-				pending_by_item.get(r.item_code, 0.0) + flt(r.required_qty) - flt(r.transferred_qty)
+				pending_by_item.get(r.item_code, 0.0)
+				+ get_allowed_transfer_qty(r.required_qty)
+				- flt(r.transferred_qty)
 			)
 
 		transfer_by_item = {}
@@ -4581,6 +4598,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		"""
 		Gets Work Order Required Items only if Stock Entry purpose is **Material Transferred for Manufacture**.
 		"""
+		from erpnext.manufacturing.doctype.work_order.work_order import get_allowed_transfer_qty
+
 		item_dict, job_card_items = frappe._dict(), []
 		work_order = frappe.get_doc("Work Order", self.work_order)
 
@@ -4592,10 +4611,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			wip_warehouse = work_order.wip_warehouse
 		else:
 			wip_warehouse = None
-
-		transfer_extra_materials_percentage = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
-		)
 
 		job_card_operation = (
 			frappe.db.get_value(
@@ -4612,13 +4627,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			if consider_job_card and not is_row_of_job_card_operation(d, job_card_operation):
 				continue
 
-			additional_qty = 0.0
-			if transfer_extra_materials_percentage:
-				additional_qty = transfer_extra_materials_percentage * flt(d.required_qty) / 100
-
-			transfer_pending = flt(d.required_qty) > flt(d.transferred_qty)
-			if additional_qty:
-				transfer_pending = (flt(d.required_qty) + additional_qty) > flt(d.transferred_qty)
+			transfer_pending = get_allowed_transfer_qty(d.required_qty) > flt(d.transferred_qty)
 
 			can_transfer = transfer_pending or (backflush_based_on == "Material Transferred for Manufacture")
 
@@ -5291,9 +5300,9 @@ def get_remaining_operating_cost(work_order=None, bom_no=None):
 
 	# Get operating cost from BOM if not found in work_order.
 	if not remaining_operating_cost and bom_no:
-		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
+		bom = frappe.db.get_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
-			remaining_operating_cost = flt(bom.operating_cost) / flt(bom.quantity)
+			remaining_operating_cost = flt(bom.base_operating_cost) / flt(bom.quantity)
 
 	return remaining_operating_cost
 
@@ -5737,7 +5746,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 
 			elif row.batch_nos:
 				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
+					item_data.batch_details[batch_no] += abs(qty)
 
 			if row.serial_no:
 				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
@@ -5783,7 +5792,7 @@ def _deduct_consumed_material(buckets, row):
 	batches = (
 		{row.batch_no: flt(row.qty)}
 		if row.batch_no
-		else {batch_no: -flt(qty) for batch_no, qty in (row.batch_nos or {}).items()}
+		else {batch_no: abs(flt(qty)) for batch_no, qty in (row.batch_nos or {}).items()}
 	)
 	for batch_no, batch_qty in batches.items():
 		_deduct_consumed_batch_qty(buckets, batch_no, batch_qty)
