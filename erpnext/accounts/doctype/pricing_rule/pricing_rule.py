@@ -521,10 +521,12 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 	if for_validate:
 		notify_removed_pricing_rules(args, removed_rules)
 
-	restore_rate = any(
-		frappe.get_cached_value("Pricing Rule", rule, "rate_or_discount") == "Rate" for rule in removed_rules
-	)
-	if restore_rate:
+	removed_rate_rules = [
+		rule
+		for rule in removed_rules
+		if frappe.get_cached_value("Pricing Rule", rule, "rate_or_discount") == "Rate"
+	]
+	if removed_rate_rules:
 		get_price_list_rate = frappe.get_attr("erpnext.stock.get_item_details.get_price_list_rate")
 		# A rate rule overwrites the row's price-list rate. Do not reuse it for the next coupon.
 		price_args = args.copy()
@@ -629,12 +631,17 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 
 		item_details.pricing_rules = frappe.as_json([d.pricing_rule for d in rules])
 
-	if restore_rate and item_details.get("price_list_rate") is None:
-		frappe.throw(
-			_("Set an Item Price for item {0} before removing or replacing its Rate pricing rule.").format(
-				args.item_code
+	if removed_rate_rules and item_details.get("price_list_rate") is None:
+		if any(
+			frappe.get_cached_value("Pricing Rule", rule, "coupon_code_based") for rule in removed_rate_rules
+		):
+			frappe.throw(
+				_(
+					"Set an Item Price for item {0} before removing or replacing its Rate pricing rule."
+				).format(args.item_code)
 			)
-		)
+		# Keep the base rate available to replacement discount rules.
+		item_details.price_list_rate = args.price_list_rate
 
 	# "[]" means no rule was applied, so keep the manually entered rate.
 	if not rules and applied_rules:
