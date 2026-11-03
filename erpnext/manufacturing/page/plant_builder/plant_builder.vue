@@ -18,10 +18,14 @@ const chrome = {
 	onTitle: (title) => emit("title", title),
 	onActions: (actions) => emit("actions", actions),
 };
+
+function selectNumber(event) {
+	if (event.target.matches('input[type="number"]')) event.target.select();
+}
 </script>
 
 <template>
-	<div class="flex h-full flex-col bg-surface-base text-ink-gray-9">
+	<div class="flex h-full flex-col bg-surface-base text-ink-gray-9" @focusin="selectNumber">
 		<MachineDesigner v-if="machine" :key="machine" :name="machine" v-bind="chrome" />
 		<PlantRun
 			v-else-if="plant && workOrder"
