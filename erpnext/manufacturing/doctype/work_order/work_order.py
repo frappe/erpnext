@@ -990,6 +990,8 @@ class WorkOrder(Document):
 			if self.sales_order and self.sales_order_item and not self.production_plan_sub_assembly_item:
 				update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
 
+		self.update_work_order_qty_in_sales_orders()
+
 		if self.production_plan:
 			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
@@ -1143,12 +1145,7 @@ class WorkOrder(Document):
 
 	def on_submit(self):
 		self.validate_warehouse()
-		if self.production_plan and frappe.db.exists(
-			"Production Plan Item Reference", {"parent": self.production_plan}
-		):
-			self.update_work_order_qty_in_combined_so()
-		else:
-			self.update_work_order_qty_in_so()
+		self.update_work_order_qty_in_sales_orders()
 
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
@@ -1167,12 +1164,7 @@ class WorkOrder(Document):
 		self.on_close_or_cancel()
 
 	def on_close_or_cancel(self):
-		if self.production_plan and frappe.db.exists(
-			"Production Plan Item Reference", {"parent": self.production_plan}
-		):
-			self.update_work_order_qty_in_combined_so()
-		else:
-			self.update_work_order_qty_in_so()
+		self.update_work_order_qty_in_sales_orders()
 
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -1609,6 +1601,14 @@ class WorkOrder(Document):
 			doc.flags.ignore_permissions = True
 			doc.update_status_and_bin_qty()
 			doc.update_bin_qty({d.item_code for d in self.required_items})
+
+	def update_work_order_qty_in_sales_orders(self):
+		if self.production_plan and frappe.db.exists(
+			"Production Plan Item Reference", {"parent": self.production_plan}
+		):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
 
 	def update_work_order_qty_in_so(self):
 		if (not self.sales_order and not self.sales_order_item) or self.production_plan_sub_assembly_item:
