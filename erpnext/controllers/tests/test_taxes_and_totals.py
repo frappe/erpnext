@@ -300,18 +300,20 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(so.base_rounding_adjustment, 0)
 
 	def test_grand_total_discount_follows_shipping_charge(self):
-		"""The discount moves the net total from the 100 band to the 50 band."""
-		so = self.make_sales_order_with_shipping_rule(rate=115)
+		"""A lower rate moves the net total from the 100 band to the 50 band."""
+		so = self.make_sales_order_with_shipping_rule(rate=150)
 		calculate_taxes_and_totals(so)
-		self.assertEqual(so.taxes[0].tax_amount, 100)
-
 		so.apply_discount_on = "Grand Total"
 		so.additional_discount_percentage = 10
 		calculate_taxes_and_totals(so)
+		self.assertEqual(so.taxes[0].tax_amount, 100)
+
+		so.items[0].rate = 60
+		calculate_taxes_and_totals(so)
 
 		self.assertEqual(so.taxes[0].tax_amount, 50)
-		self.assertEqual(so.discount_amount, 16.5)
-		self.assertEqual(so.grand_total, 148.5)
+		self.assertEqual(so.discount_amount, 11)
+		self.assertEqual(so.grand_total, 99)
 
 	def test_grand_total_discount_without_taxes(self):
 		so = self.make_sales_order_with_shipping_rule(rate=100)
