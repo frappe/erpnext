@@ -7,8 +7,6 @@ import { call, dayjs } from "frappe-ui"
 import { usePortalIdentity } from "@app/composables/usePortalIdentity"
 import { useSession } from "@app/composables/useSession"
 import {
-	addressRows,
-	copyValue,
 	descriptionOf,
 	EMPTY,
 	formatDate,
@@ -19,9 +17,11 @@ import {
 	line,
 	parseNumber,
 	plainText,
+	postalAddress,
 	readableError,
 	RED,
 	routeOpener,
+	numbered,
 } from "@app/utils"
 import {
 	quoteCanBeRevised,
@@ -93,22 +93,34 @@ export default function setup(context) {
 			const place = doc.value.named_place ? `${doc.value.incoterm}, ${doc.value.named_place}` : doc.value.incoterm
 			rows.push(line(__("Incoterm"), place))
 		}
-		const q = quotation.value
-		if (q) {
-			rows.push({ ...line(__("Quotation"), q.name, INK8), route: "/quotations/" + encodeURIComponent(q.name) })
-			rows.push(line(__("Quotation status"), statusText(quoteStatus(q))))
-			rows.push(line(__("Sent on"), formatDate(q.transaction_date)))
-			rows.push(q.valid_till ? line(__("Valid till"), formatDate(q.valid_till)) : line(__("Valid till"), EMPTY, INK5))
-			if (q.quotation_number) rows.push(line(__("Your quotation no."), q.quotation_number))
-		}
 		return rows
 	})
 
-	// the RFQ's addresses are the buyer's: where to bill, and where to deliver
-	const billingAddress = computed(() => addressRows(doc.value.company ?? "", doc.value.billing_address_display))
-	const shippingAddress = computed(() =>
-		addressRows(doc.value.company ?? "", doc.value.shipping_address_display || doc.value.billing_address_display),
-	)
+	/** The quote the supplier sent, as its own group above the request. */
+	const quoteInfo = computed(() => {
+		const q = quotation.value
+		if (!q) return []
+		return [
+			{ ...line(__("Number"), q.name, INK8), route: "/quotations/" + encodeURIComponent(q.name) },
+			line(__("Status"), statusText(quoteStatus(q))),
+			line(__("Sent on"), formatDate(q.transaction_date)),
+			q.valid_till ? line(__("Valid till"), formatDate(q.valid_till)) : line(__("Valid till"), EMPTY, INK5),
+			...(q.quotation_number ? [line(__("Your quotation no."), q.quotation_number)] : []),
+		]
+	})
+
+	// the RFQ's addresses are the buyer's: where to bill, and where to deliver; one row when they are one place
+	const addressDetails = computed(() => {
+		const company = doc.value.company ?? ""
+		const billing = postalAddress(doc.value.billing_address_display)
+		const shipping = postalAddress(doc.value.shipping_address_display) || billing
+		if (!billing && !shipping) return []
+		if (billing === shipping) return [{ key: "both", label: __("Bill and deliver to"), name: company, address: billing }]
+		return [
+			{ key: "bill", label: __("Bill to"), name: company, address: billing },
+			{ key: "deliver", label: __("Deliver to"), name: company, address: shipping },
+		]
+	})
 
 	// ---------------------------------------------------------------- the form
 	const currency = computed(() => quotation.value?.currency || doc.value.currency)
@@ -172,9 +184,9 @@ export default function setup(context) {
 		if (typed[key]) typed[key][field] = value ?? ""
 	}
 
-	/** Under the item name: what was asked for, by when, and the supplier's own part number. */
+	/** Under the item name: by when, and the supplier's own part number. */
 	function askedFor(row: any): string {
-		const parts = [__("Asked for {0}", [formatQty(row.qty, row.uom)])]
+		const parts: string[] = []
 		// the RFQ's own date is in the header already; a line says so only when it needs its own
 		if (row.schedule_date && row.schedule_date !== doc.value.schedule_date) {
 			parts.push(__("deliver by {0}", [formatDate(row.schedule_date)]))
@@ -198,7 +210,7 @@ export default function setup(context) {
 			image: row.image,
 			description: [askedFor(row), descriptionOf(row)].filter(Boolean).join(" · "),
 			...typed[row.name],
-			amount: lineAmount(row.name) ? formatMoney(lineAmount(row.name), currency.value) : EMPTY,
+			amount: formatMoney(lineAmount(row.name), currency.value),
 		})),
 	)
 
@@ -206,8 +218,12 @@ export default function setup(context) {
 	const hasRates = computed(() => pricedKeys.value.length > 0)
 	const typedTotal = computed(() => pricedKeys.value.reduce((sum, key) => sum + lineAmount(key), 0))
 
-	const formHeading = computed(() => (revising.value ? __("Your revised quotation") : __("Your quotation")))
-	const sendLabel = computed(() => (revising.value ? __("Send revised quotation") : __("Send quotation")))
+	const formHeading = computed(() => (revising.value ? __("Revise your quotation") : __("Your quotation")))
+	const sendLabel = computed(() => (revising.value ? __("Send revision") : __("Send quotation")))
+	/** Over the item list: the form, the quote that was sent, or (nothing to quote) what was asked for. */
+	const itemsHeading = computed(() =>
+		quoting.value ? formHeading.value : quotation.value ? __("What you quoted") : __("What the buyer asks for"),
+	)
 
 	// ---------------------------------------------------------------- the sent quote
 	const items = computed(() => {
@@ -217,28 +233,30 @@ export default function setup(context) {
 				name: row.item_name || row.item_code || "",
 				image: row.image,
 				description: [askedFor(row), descriptionOf(row)].filter(Boolean).join(" · "),
+				ordered: "",
 				qty: formatQty(row.qty, row.uom),
 				rate: EMPTY,
+				rateCaption: "",
 				amount: EMPTY,
 			}))
 		}
 		const rfqRows = Object.fromEntries((doc.value.items ?? []).map((row: any) => [row.name, row]))
 		return (quotation.value?.items ?? []).map((quoted: any) => {
 			const row = rfqRows[quoted.request_for_quotation_item] ?? {}
-			const terms = [
-				// first: on an ordered quote it is what matters, and the line is cut short from the end
-				orderedOfQuoted(quoted, row.uom),
-				quoted.discount_percentage
-					? __("{0} less {1}%", [formatMoney(quoted.price_list_rate, currency.value), quoted.discount_percentage])
-					: "",
-				quoted.expected_delivery_date ? __("delivery by {0}", [formatDate(quoted.expected_delivery_date)]) : "",
-			]
 			return {
 				name: row.item_name || row.item_code || "",
 				image: row.image,
-				description: [...terms, descriptionOf(row)].filter(Boolean).join(" · "),
+				description: [
+					quoted.expected_delivery_date ? __("delivery by {0}", [formatDate(quoted.expected_delivery_date)]) : "",
+					descriptionOf(row),
+				].filter(Boolean).join(" · "),
+				ordered: orderedOfQuoted(quoted, row.uom),
 				qty: formatQty(quoted.qty, row.uom),
 				rate: formatMoney(quoted.rate, currency.value),
+				// the list price and discount the rate comes from, under it
+				rateCaption: quoted.discount_percentage
+					? __("{0} less {1}%", [formatMoney(quoted.price_list_rate, currency.value), quoted.discount_percentage])
+					: "",
 				amount: formatMoney(quoted.amount, currency.value),
 			}
 		})
@@ -297,7 +315,7 @@ export default function setup(context) {
 
 	const totals = computed(() => {
 		if (!quoting.value) return quotation.value ? totalRows(quotation.value, currency.value) : []
-		if (!hasRates.value) return []
+		if (!hasRates.value) return [totalRow(__("Total"), 0, currency.value, true)]
 		if (preview.value) return totalRows(preview.value, currency.value)
 		return [totalRow(__("Total"), typedTotal.value, currency.value, true)]
 	})
@@ -305,6 +323,8 @@ export default function setup(context) {
 	const messageText = computed(() => plainText(doc.value.message_for_supplier))
 	const termsText = computed(() => plainText(doc.value.terms))
 	const quoteNotes = computed(() => (quoting.value ? "" : plainText(quotation.value?.terms)))
+	const buyerWords = computed(() => Boolean(messageText.value || termsText.value))
+	const yourWords = computed(() => quoting.value || Boolean(quoteNotes.value))
 
 	// ---------------------------------------------------------------- what happens next
 	// while the form shows, only what to know before quoting; after, what happens next to the quote
@@ -400,14 +420,13 @@ export default function setup(context) {
 	return {
 		...usePortalNotifications(context),
 		notFound, failure, loaded, quoting, revising, canRevise, today,
-		copyValue,
 		crumbs, status, statusTheme: theme, goTo,
 		// suppliers may not print an RFQ in Desk, so this prints the page itself
 		printDocument: () => window.print(),
-		salesInfo, billingAddress, shippingAddress,
-		quoteLines, setLine, hasRates, rateLabel, items, itemImages, totals,
-		messageText, termsText, quoteNotes,
-		formHeading, sendLabel, validTill, reference, notes, startRevising, stopRevising,
+		salesInfo, quoteInfo, addressDetails,
+		quoteLines: numbered(quoteLines), setLine, hasRates, rateLabel, items: numbered(items), itemImages, totals,
+		messageText, termsText, quoteNotes, buyerWords, yourWords,
+		itemsHeading, sendLabel, validTill, reference, notes, startRevising, stopRevising,
 		noteTitle, noteTheme,
 		dialogOpen, dialogActions, dialogMessage, sendError, openConfirm, confirming,
 		companyName, companyLogo, user,
