@@ -461,6 +461,18 @@ execute:from erpnext.setup.install import grant_address_read_to_accounts_manager
 erpnext.patches.v16_0.remove_invalid_fetch_from_italy_payment_schedule_swift_number
 erpnext.patches.v16_0.set_user_on_timesheets
 erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
+<<<<<<< HEAD
+=======
+erpnext.patches.v16_0.set_default_mins_between_operations
+erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
+erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
+erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
+erpnext.patches.v16_0.set_lost_on_in_opportunity
+erpnext.patches.v16_0.restore_in_words_print_defaults
+erpnext.patches.v16_0.apply_selling_settings_section_toggles
+erpnext.patches.v16_0.set_output_qty_in_work_order_operations
+>>>>>>> c3f1e1e (fix(setup): preserve in-words print defaults)
 execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
 execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
 execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
