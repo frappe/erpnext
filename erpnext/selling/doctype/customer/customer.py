@@ -354,8 +354,8 @@ class Customer(TransactionBase):
 		copy_comments("Lead", self.lead_name, self)
 		link_communications("Lead", self.lead_name, self)
 
-	def validate_name_with_customer_group(self):
-		if frappe.db.exists("Customer Group", self.name):
+	def validate_name_with_customer_group(self, name=None):
+		if frappe.db.exists("Customer Group", name or self.name):
 			frappe.throw(
 				_(
 					"A Customer Group exists with same name please change the Customer name or rename the Customer Group"
@@ -422,6 +422,7 @@ class Customer(TransactionBase):
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s", self.lead_name)
 
 	def before_rename(self, olddn, newdn, merge=False):
+		self.validate_name_with_customer_group(newdn)
 		if merge:
 			validate_party_currency_before_merging("Customer", olddn, newdn)
 
