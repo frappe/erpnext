@@ -267,8 +267,8 @@ class SellingController(StockController):
 					flt(d.discount_percentage) > discount
 					or (
 						reference_rate > 0
-						and flt(d.discount_amount)
-						> flt(reference_rate * discount / 100, d.precision("discount_amount"))
+						and flt(d.rate, d.precision("rate"))
+						< flt(reference_rate * (1 - discount / 100), d.precision("rate"))
 					)
 				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
