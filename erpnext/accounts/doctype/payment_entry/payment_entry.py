@@ -49,6 +49,7 @@ from erpnext.accounts.utils import (
 	get_advance_payment_doctypes,
 	get_outstanding_invoices,
 	get_reconciliation_effect_date,
+	sync_payment_schedule_outstanding,
 )
 from erpnext.controllers.accounts_controller import (
 	AccountsController,
@@ -252,6 +253,13 @@ class PaymentEntry(AccountsController):
 				frappe.throw(
 					_("Row #{0}: Dunning charges must have a negative deduction amount.").format(row.idx)
 				)
+			if not self.get_doc_before_save() or self.get_doc_before_save().docstatus == 0:
+				if successor := frappe.get_doc("Dunning", row.dunning).get_settled_successor():
+					frappe.throw(
+						_("Dunning {0} has already been settled through Dunning {1}.").format(
+							row.dunning, successor
+						)
+					)
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
@@ -379,6 +387,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_linked_dunnings()
 		self.delink_advance_entry_references()
+		self.sync_payment_schedules()
 		self.set_status()
 		self.trigger_invoice_update_for_subscriptions()
 
@@ -590,6 +599,12 @@ class PaymentEntry(AccountsController):
 			# Check for negative outstanding invoices as well
 			if allocated_amount < 0 and total_allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
+
+	def sync_payment_schedules(self):
+		"""Reconciled references carry no payment term, so cancel cannot reverse them term by term."""
+		for reference in {(d.reference_doctype, d.reference_name) for d in self.references}:
+			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
+				sync_payment_schedule_outstanding(*reference)
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
@@ -944,12 +959,15 @@ class PaymentEntry(AccountsController):
 						"discount",
 						"outstanding",
 						"discount_type",
+						"discounted_amount",
 					],
 				)
 				for term in payment_schedule:
 					invoice_key = (term.payment_term, ref.reference_name, ref.reference_doctype)
 					invoice_paid_amount_map.setdefault(invoice_key, {})
 					invoice_paid_amount_map[invoice_key]["outstanding"] = term.outstanding
+					invoice_paid_amount_map[invoice_key]["paid_amount"] = term.paid_amount
+					invoice_paid_amount_map[invoice_key]["discounted_amount"] = term.discounted_amount
 					# Older payments booked the configured discount, even when it was not applied.
 					if self.payment_term_discounts_calculated or not (term.discount_type and term.discount):
 						continue
@@ -976,6 +994,14 @@ class PaymentEntry(AccountsController):
 
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get("outstanding"))
 			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get("discounted_amt"))
+
+			if cancel:
+				# Reconciliation can move paid amounts between terms, so reverse only what this term
+				# still has paid and discounted. sync_payment_schedules puts back the rest.
+				term = invoice_paid_amount_map.get(key, {})
+				discounted_amt = min(discounted_amt, flt(term.get("discounted_amount")))
+				paid = min(allocated_amount - discounted_amt, flt(term.get("paid_amount")))
+				allocated_amount = max(paid, 0) + discounted_amt
 
 			conversion_rate = frappe.db.get_value(key[2], {"name": key[1]}, "conversion_rate")
 			base_paid_amount_precision = get_field_precision(
@@ -2553,8 +2579,10 @@ def get_negative_outstanding_invoices(
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	account = "debit_to" if voucher_type == "Sales Invoice" else "credit_to"
 	supplier_condition = ""
+	query_values = {"currency": party_account_currency, "party": party, "party_account": party_account}
 	if voucher_type == "Purchase Invoice":
-		supplier_condition = "and (release_date is null or release_date <= CURRENT_DATE)"
+		supplier_condition = "and (release_date is null or release_date <= %(today)s)"
+		query_values["today"] = nowdate()
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
 		rounded_total_field = "base_rounded_total"
@@ -2568,11 +2596,11 @@ def get_negative_outstanding_invoices(
 			'{voucher_type}' as voucher_type, name as voucher_no, {account} as account,
 			coalesce(nullif({rounded_total_field}, 0), {grand_total_field}) as invoice_amount,
 			outstanding_amount, posting_date,
-			due_date, conversion_rate as exchange_rate, %s as currency
+			due_date, conversion_rate as exchange_rate, %(currency)s as currency
 		from
 			`tab{voucher_type}`
 		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and
+			{party_type} = %(party)s and {party_account} = %(party_account)s and docstatus = 1 and
 			outstanding_amount < 0
 			{supplier_condition}
 			{condition}
@@ -2591,7 +2619,7 @@ def get_negative_outstanding_invoices(
 				"account": account,
 			}
 		),
-		(party_account_currency, party, party_account),
+		query_values,
 		as_dict=True,
 	)
 
@@ -2824,6 +2852,8 @@ def get_payment_entry(
 
 	doc = frappe.get_doc(dt, dn)
 	doc.check_permission()
+	if dt == "Dunning" and (successor := doc.get_settled_successor()):
+		frappe.throw(_("Dunning {0} has already been settled through Dunning {1}.").format(dn, successor))
 
 	over_billing_allowance = frappe.get_single_value("Accounts Settings", "over_billing_allowance")
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= (100.0 + over_billing_allowance):
@@ -3448,6 +3478,7 @@ def get_reference_as_per_payment_terms(
 	payment_schedule, dt, dn, doc, grand_total, outstanding_amount, party_account_currency
 ):
 	references = []
+	remaining_outstanding = outstanding_amount
 	is_multi_currency_acc = (doc.currency != doc.company_currency) and (
 		party_account_currency != doc.company_currency
 	)
@@ -3462,6 +3493,15 @@ def get_reference_as_per_payment_terms(
 			)
 
 		if payment_term_outstanding:
+			# Independently rounded terms can exceed the invoice outstanding after conversion.
+			allocated_amount = (
+				min(payment_term_outstanding, remaining_outstanding)
+				if payment_term_outstanding > 0
+				else max(payment_term_outstanding, remaining_outstanding)
+			)
+			remaining_outstanding = flt(
+				remaining_outstanding - allocated_amount, payment_term.precision("payment_amount")
+			)
 			references.append(
 				{
 					"reference_doctype": dt,
@@ -3472,7 +3512,7 @@ def get_reference_as_per_payment_terms(
 					"outstanding_amount": outstanding_amount,
 					"payment_term_outstanding": payment_term_outstanding,
 					"payment_term": payment_term.payment_term,
-					"allocated_amount": payment_term_outstanding,
+					"allocated_amount": allocated_amount,
 				}
 			)
 

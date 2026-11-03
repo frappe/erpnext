@@ -291,6 +291,18 @@ class TestSerialNo(ERPNextTestSuite):
 		)
 		self.assertEqual(value_diff, -113)
 
+	def test_serial_no_series_with_fieldname(self):
+		item_code = make_item(
+			"_Test Serial Item Fieldname Series",
+			{"has_serial_no": 1, "serial_no_series": "SNF-.{reference_name}.-.#####"},
+		).name
+		pr = make_purchase_receipt(item_code=item_code, qty=2)
+
+		serial_nos = frappe.get_all(
+			"Serial No", {"item_code": item_code}, pluck="serial_no", order_by="serial_no"
+		)
+		self.assertEqual(serial_nos, [f"SNF-{pr.name}-00001", f"SNF-{pr.name}-00002"])
+
 	def test_auto_fetch(self):
 		item_code = make_item(
 			properties={

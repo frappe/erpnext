@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form, strip_html
 
 from erpnext.accounts.doctype.mode_of_payment.mode_of_payment import validate_enabled_mode_of_payment
 
@@ -213,15 +213,28 @@ class POSService:
 
 	def validate_mandatory_pos_fields(self) -> None:
 		doc = self.doc
-		if frappe.db.get_single_value("POS Settings", "invoice_type") != doc.doctype:
+		if frappe.db.get_single_value("POS Settings", "invoice_type") != doc.doctype or (
+			doc.doctype == "Sales Invoice" and doc.flags.is_consolidated
+		):
 			return
 
 		mandatory_fields = frappe.get_all(
 			"POS Field",
 			filters={"parent": "POS Settings", "parenttype": "POS Settings", "reqd": 1},
-			fields=["fieldname", "label"],
+			fields=["fieldname", "label", "fieldtype"],
 		)
-		missing_fields = [_(field.label) for field in mandatory_fields if not doc.get(field.fieldname)]
+		missing_fields = []
+		for field in mandatory_fields:
+			if field.fieldtype == "Check" or not doc.meta.has_field(field.fieldname):
+				continue
+
+			value = doc.get(field.fieldname)
+			value = "" if value in (None, []) else cstr(value)
+			if field.fieldtype == "Text Editor" and "<img" in value:
+				continue
+
+			if not strip_html(value).strip():
+				missing_fields.append(_(field.label))
 		if not missing_fields:
 			return
 

@@ -90,7 +90,7 @@ function build_dialog_fields(data) {
 		make_field(__("Address Line 1"), "address_line1", "Data", data.address_line),
 		make_field(__("Address Line 2"), "address_line2", "Data", data.address_line, false),
 		make_field(__("City"), "city", "Data", data.address_line),
-		make_field(__("State"), "state", "Data", data.address_line, false),
+		make_field(__("State/Province"), "state", "Data", data.address_line, false),
 		{
 			label: __("Country"),
 			fieldname: "country",
