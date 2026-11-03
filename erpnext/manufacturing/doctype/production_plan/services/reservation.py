@@ -169,15 +169,15 @@ class ProductionPlanStockReservation:
 		if items and isinstance(items, str):
 			items = parse_json(items)
 
-		for child_table_name, kwargs in _RESERVATION_TABLES.items():
+		for child_table_name, table in _RESERVATION_TABLES.items():
 			if table_name and table_name != child_table_name:
 				continue
-			self._reserve_or_cancel_plan_table(items, kwargs)
+			self._reserve_or_cancel_plan_table(items, table)
 
 		self.doc.reload()
 
-	def _reserve_or_cancel_plan_table(self, items, kwargs):
-		sre = StockReservation(self.doc, items=items, kwargs=kwargs)
+	def _reserve_or_cancel_plan_table(self, items, table):
+		sre = StockReservation(self.doc, items=items, **table)
 		if self.doc.docstatus == 1:
 			if sre.make_stock_reservation_entries():
 				frappe.msgprint(_("Stock Reservation Entries Created"), alert=True)
@@ -188,6 +188,22 @@ class ProductionPlanStockReservation:
 		"""Cancel specific (or all) Stock Reservation Entries held by the plan."""
 		StockReservation(self.doc).cancel_stock_reservation_entries(sre_list)
 		self.doc.reload()
+
+	def release_untouched(self) -> None:
+		sre_list = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"voucher_type": self.doc.doctype,
+				"voucher_no": self.doc.name,
+				"docstatus": 1,
+				"status": ("in", ["Reserved", "Partially Reserved"]),
+			},
+			pluck="name",
+		)
+		for sre_name in sre_list:
+			sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
+			sre_doc.flags.ignore_permissions = True
+			sre_doc.cancel()
 
 	def reserve_received(self, receipt: Document, rows: list) -> None:
 		unclaimed_qty = self.get_unclaimed_qty({plan_row for _row, plan_row in rows})
@@ -204,7 +220,7 @@ class ProductionPlanStockReservation:
 			return
 
 		StockReservation(
-			self.doc, items=items, kwargs=_RESERVATION_TABLES["mr_items"]
+			self.doc, items=items, **_RESERVATION_TABLES["mr_items"]
 		).make_stock_reservation_entries()
 		self.hand_off_to_work_orders(items)
 
@@ -217,10 +233,13 @@ class ProductionPlanStockReservation:
 			if row.item_code == item.item_code
 		]
 		if work_order_items:
-			StockReservation(self.doc, items=work_order_items).transfer_reservation_entries_to(
-				self.doc.name, from_doctype=self.doc.doctype, to_doctype="Work Order"
-			)
+			self.hand_off("Work Order", work_order_items)
 			self.update_work_order_status({row.parent for row in work_order_rows})
+
+	def hand_off(self, to_doctype: str, items: list | None = None) -> None:
+		StockReservation(self.doc, items=items).transfer_reservation_entries_to(
+			self.doc.name, from_doctype=self.doc.doctype, to_doctype=to_doctype
+		)
 
 	def update_work_order_status(self, work_orders: set) -> None:
 		for name in work_orders:
@@ -285,6 +304,10 @@ def get_received_item(receipt: Document, row: Document, plan_row: str, qty: floa
 		item.serial_and_batch_bundles = [row.serial_and_batch_bundle]
 
 	return item
+
+
+def hand_off_reserved_stock(plan: str, to_doctype: str, items: list | None = None) -> None:
+	ProductionPlanStockReservation(frappe.get_lazy_doc("Production Plan", plan)).hand_off(to_doctype, items)
 
 
 def reserve_received_stock(receipt: Document) -> None:
