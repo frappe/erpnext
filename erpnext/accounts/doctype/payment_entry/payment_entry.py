@@ -36,6 +36,7 @@ from erpnext.accounts.doctype.tax_withholding_entry.tax_withholding_entry import
 from erpnext.accounts.general_ledger import (
 	make_gl_entries,
 	make_reverse_gl_entries,
+	make_round_off_gle,
 	process_gl_map,
 )
 from erpnext.accounts.party import (
@@ -1262,45 +1263,39 @@ class PaymentEntry(AccountsController):
 		)
 
 	def set_unallocated_amount(self):
-		self.unallocated_amount = 0
-		if not self.party:
-			return
-
-		deductions_to_consider = sum(
-			flt(d.amount) for d in self.get("deductions") if not d.is_exchange_gain_loss
+		self.unallocated_amount = flt(
+			max(self.get_base_unallocated_amount(), 0) / self.get_exchange_rate(),
+			get_field_precision(
+				self.meta.get_field("unallocated_amount"), self, currency=self.party_account_currency
+			),
 		)
-		included_taxes = self.get_included_taxes()
 
-		if self.payment_type == "Receive" and self.base_total_allocated_amount < (
-			self.base_paid_amount + deductions_to_consider
+	def get_base_unallocated_amount(self):
+		if not self.party or self.payment_type == "Internal Transfer":
+			return 0
+
+		deductions = sum(flt(row.amount) for row in self.deductions if not row.is_exchange_gain_loss)
+		if self.payment_type == "Receive":
+			amount = self.base_paid_amount + deductions - self.base_total_allocated_amount
+		else:
+			amount = self.base_received_amount - deductions - self.base_total_allocated_amount
+
+		return amount - self.get_included_taxes()
+
+	def get_unallocated_amount_rounding(self):
+		base_unallocated_amount = self.get_base_unallocated_amount()
+		rounding = base_unallocated_amount - self.unallocated_amount * self.get_exchange_rate()
+		# A rounded-up advance can leave a negative base remainder when fully allocated.
+		# Do not write off allocations exceeding the rounded payment balance.
+		if rounding < 0 and self.total_allocated_amount > flt(
+			(self.base_total_allocated_amount + base_unallocated_amount) / self.get_exchange_rate(),
+			get_field_precision(
+				self.meta.get_field("unallocated_amount"), self, currency=self.party_account_currency
+			),
 		):
-			self.unallocated_amount = (
-				flt(
-					(
-						self.base_paid_amount
-						+ deductions_to_consider
-						- self.base_total_allocated_amount
-						- included_taxes
-					),
-					self.precision("unallocated_amount"),
-				)
-				/ self.source_exchange_rate
-			)
-		elif self.payment_type == "Pay" and self.base_total_allocated_amount < (
-			self.base_received_amount - deductions_to_consider
-		):
-			self.unallocated_amount = (
-				flt(
-					(
-						self.base_received_amount
-						- deductions_to_consider
-						- self.base_total_allocated_amount
-						- included_taxes
-					),
-					self.precision("unallocated_amount"),
-				)
-				/ self.target_exchange_rate
-			)
+			return 0
+
+		return flt(rounding * (-1 if self.payment_type == "Pay" else 1), self.precision("difference_amount"))
 
 	def set_exchange_gain_loss(self):
 		exchange_gain_loss = flt(
@@ -1370,7 +1365,8 @@ class PaymentEntry(AccountsController):
 		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
 
 		self.difference_amount = flt(
-			self.difference_amount - total_deductions, self.precision("difference_amount")
+			self.difference_amount - total_deductions + self.get_unallocated_amount_rounding(),
+			self.precision("difference_amount"),
 		)
 
 	def get_included_taxes(self):
@@ -1486,6 +1482,13 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 		add_regional_gl_entries(gl_entries, self)
+		if rounding := self.get_unallocated_amount_rounding():
+			make_round_off_gle(
+				gl_entries,
+				rounding,
+				rounding / self.transaction_exchange_rate,
+				self.precision("difference_amount"),
+			)
 		self.set_transaction_currency_and_rate_in_gl_map(gl_entries)
 		return gl_entries
 
