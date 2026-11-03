@@ -6,6 +6,7 @@ import PlantFloor from "./PlantFloor.vue";
 import { buildLayout } from "../../lib/layout";
 import { buildTags, useOrbitCamera } from "../../lib/scene";
 import { useClock } from "../../lib/clock";
+import { __ } from "../../lib/api";
 import { clamp } from "../../lib/format";
 
 const props = defineProps({
@@ -121,28 +122,28 @@ const grid = {
 			<TabButtons
 				:model-value="viewName"
 				:options="[
-					{ label: '3D', value: '3d' },
-					{ label: 'Top', value: 'top' },
-					{ label: 'Front', value: 'front' },
+					{ label: __('3D'), value: '3d' },
+					{ label: __('Top'), value: 'top' },
+					{ label: __('Front'), value: 'front' },
 				]"
 				@update:model-value="setView"
 			/>
 			<div
 				class="flex items-center gap-0.5 rounded-4 border border-outline-gray-2 bg-surface-base p-0.5"
 			>
-				<Tooltip text="Rotate left"
+				<Tooltip :text="__('Rotate left')"
 					><Button variant="ghost" icon="lucide-rotate-ccw" @click="animateTo(rot - 45, tilt)"
 				/></Tooltip>
-				<Tooltip text="Rotate right"
+				<Tooltip :text="__('Rotate right')"
 					><Button variant="ghost" icon="lucide-rotate-cw" @click="animateTo(rot + 45, tilt)"
 				/></Tooltip>
-				<Tooltip text="Zoom out"
+				<Tooltip :text="__('Zoom out')"
 					><Button variant="ghost" icon="lucide-zoom-out" @click="zoomBy(-0.2)"
 				/></Tooltip>
-				<Tooltip text="Zoom in"
+				<Tooltip :text="__('Zoom in')"
 					><Button variant="ghost" icon="lucide-zoom-in" @click="zoomBy(0.2)"
 				/></Tooltip>
-				<Tooltip text="Fit plant"
+				<Tooltip :text="__('Fit plant')"
 					><Button
 						variant="ghost"
 						icon="lucide-scan"
@@ -175,7 +176,7 @@ const grid = {
 					v-if="paused"
 					size="sm"
 					icon-left="lucide-play"
-					label="Resume"
+					:label="__('Resume')"
 					@click="emit('resume')"
 				/>
 			</div>
@@ -183,7 +184,7 @@ const grid = {
 		</div>
 
 		<p class="pointer-events-none absolute bottom-3 left-3 text-xs text-ink-gray-5">
-			Drag to rotate · Scroll to zoom
+			{{ __("Drag to rotate · Scroll to zoom") }}
 		</p>
 	</div>
 </template>

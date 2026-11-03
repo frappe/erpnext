@@ -19,7 +19,7 @@ const saving = ref(false);
 const dirty = computed(() => JSON.stringify(shapes.value) !== saved.value);
 const isPacking = computed(() => isPackingModel(design.value.machine_model));
 const editable = computed(() => design.value.can_write && !isPacking.value);
-const preset = computed(() => design.value.machine_model || machineOf("").label);
+const preset = computed(() => __(design.value.machine_model || machineOf("").label));
 
 const note = computed(() => {
 	if (isPacking.value) return __("Packing lines keep their own drawing.");
@@ -58,7 +58,7 @@ function remove(at) {
 }
 
 const presetOptions = Object.keys(PRESETS).map((model) => ({
-	label: model,
+	label: __(model),
 	icon: machineOf(model).icon,
 	onClick: () => {
 		shapes.value = copy(PRESETS[model]);
@@ -66,7 +66,7 @@ const presetOptions = Object.keys(PRESETS).map((model) => ({
 	},
 }));
 const addOptions = Object.keys(SHAPES).map((shape) => ({
-	label: shape,
+	label: __(shape),
 	onClick: () => insert(shapes.value.length, newShape(shape)),
 }));
 

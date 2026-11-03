@@ -1,5 +1,5 @@
 import { computed, onBeforeUnmount, reactive, ref } from "vue";
-import { call } from "./api";
+import { __, call } from "./api";
 import { holdClock, levels, setLevels, tween } from "./clock";
 import { machineOf } from "./machines";
 import { toScenePlant } from "./plant";
@@ -83,15 +83,15 @@ export function useRun(workOrder) {
 		const machine = machineOf(stage.machine_model);
 		const minutes = Math.round(stageSeconds(stage) / 60);
 		return stage.phase === "charging"
-			? `Charging ${stage.workstation}`
-			: `${machine.verb} · ${fmt(minutes)} of ${fmt(stage.planned_minutes)} min`;
+			? __("Charging {0}", [stage.workstation])
+			: __("{0} · {1} of {2} min", [__(machine.verb), fmt(minutes), fmt(stage.planned_minutes)]);
 	}
 
 	const activity = computed(() => {
 		const busy = stages.value.filter((s) => ["charging", "processing"].includes(s.phase));
-		if (!busy.length) return paused.value ? { label: "Work Order on hold", progress: null } : null;
+		if (!busy.length) return paused.value ? { label: __("Work Order on hold"), progress: null } : null;
 		const label = busy.length > 1 ? busy.map((s) => s.stage_name).join(" · ") : activityOf(busy[0]);
-		return { label: paused.value ? `On hold · ${label}` : label, progress: progressOf(busy[0]) };
+		return { label: paused.value ? __("On hold · {0}", [label]) : label, progress: progressOf(busy[0]) };
 	});
 
 	function seedLocal(data) {

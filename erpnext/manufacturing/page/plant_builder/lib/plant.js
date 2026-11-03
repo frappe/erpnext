@@ -1,4 +1,5 @@
 import { MATERIAL_TONES, toneFor } from "./machines";
+import { __ } from "./api";
 import { num } from "./format";
 
 export const balancePercentage = (doc) =>
@@ -40,7 +41,7 @@ export function toScenePlant(doc, machines, item) {
 		name: doc.floor_name,
 		product: {
 			name: item?.item_name || doc.production_item || "",
-			unit: item?.stock_uom || "Unit",
+			unit: item?.stock_uom || __("Unit"),
 			fillKg: num(item?.weight_per_unit),
 			color: toneFor(doc.production_item),
 		},

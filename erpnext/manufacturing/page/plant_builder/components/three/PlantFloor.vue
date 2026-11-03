@@ -5,6 +5,7 @@ import Tank from "./Tank.vue";
 import Pipe from "./Pipe.vue";
 import MachineModel from "./MachineModel.vue";
 import PackLine from "./PackLine.vue";
+import { __ } from "../../lib/api";
 
 const props = defineProps({
 	plant: Object,
@@ -20,17 +21,17 @@ const SACK_LIGHT = ["gray", "cream", "blue"];
 const zones = computed(() => {
 	const L = props.layout;
 	const v = props.view;
-	const list = [{ key: "store", label: "Raw material store", ...L.store.zone, active: v.storeActive }];
+	const list = [{ key: "store", label: __("Raw material store"), ...L.store.zone, active: v.storeActive }];
 	L.stations.forEach((st) =>
 		list.push({
 			key: st.stage.id,
-			label: `${st.i + 1}  ${st.stage.name || "Stage"}`,
+			label: `${st.i + 1}  ${st.stage.name || __("Stage")}`,
 			...st.zone,
 			active: v.active[st.i],
 			down: v.mode[st.i] === "down",
 		})
 	);
-	if (L.fg) list.push({ key: "fg", label: "Finished goods", ...L.fg, active: v.fgActive });
+	if (L.fg) list.push({ key: "fg", label: __("Finished goods"), ...L.fg, active: v.fgActive });
 	return list;
 });
 
