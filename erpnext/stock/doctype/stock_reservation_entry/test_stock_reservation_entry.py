@@ -1123,6 +1123,34 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		for row in dn.items:
 			self.assertEqual(get_bundle_serial_nos(row), get_reserved_serial_nos(so, row.so_detail))
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_delivery_note_picks_serial_nos_reserved_for_bundle_component(self) -> None:
+		component = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		frappe.get_doc(
+			{
+				"doctype": "Product Bundle",
+				"new_item_code": bundle,
+				"items": [{"item_code": component.name, "qty": 2}],
+			}
+		).insert().submit()
+		create_material_receipt(items={component.name: component}, warehouse=self.warehouse, qty=4)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=True)
+		so.reserve_stock = 1
+		so.packed_items[0].reserve_stock = 1
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(
+			get_bundle_serial_nos(dn.packed_items[0]), get_reserved_serial_nos(so, so.packed_items[0].name)
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_delivery_consumes_bundle_component_reservation_from_other_warehouse(self) -> None:
 		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
