@@ -73,10 +73,13 @@ class TestDeliveryNote(ERPNextTestSuite):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=11, basic_rate=100)
 
 		# A submitted standalone delivery is already in customer outstanding, so it is not counted twice.
-		create_delivery_note(customer=customer.name, qty=6, rate=100)
+		create_delivery_note(customer=customer.name, qty=3, rate=100)
 
-		so = make_sales_order(customer=customer.name, qty=5, rate=100)
-		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 5)
+		# Earlier unbilled deliveries against Sales Orders still count once the order check is bypassed.
+		so = make_sales_order(customer=customer.name, qty=4, rate=100)
+		create_dn_against_so(so.name, 4)
+		so = make_sales_order(customer=customer.name, qty=4, rate=100)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 4)
 
 	def test_customer_outstanding_uses_delivery_base_net_amount(self):
 		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
