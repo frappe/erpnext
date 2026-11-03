@@ -745,6 +745,8 @@ def submit_rfq_quotation(
 	if valid_till and getdate(valid_till) < getdate(today()):
 		frappe.throw(_("Valid till cannot be in the past."))
 	quotation = _build_quotation(rfq, supplier, frappe.parse_json(items))
+	if not valid_till:
+		frappe.throw(_("Enter the date this quotation is valid till."))
 	quotation.update(
 		{
 			"valid_till": valid_till or None,
