@@ -1901,6 +1901,63 @@ class TestPricingRule(FrappeTestCase):
 					self.assertFalse(order.items[0].pricing_rules)
 					order.cancel()
 
+	@change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_replace_rate_rule_without_item_price(self):
+		item = make_item("_Test Rate Rule Replacement", {"is_stock_item": 0, "stock_uom": "Nos"}).name
+		frappe.get_doc(
+			doctype="Pricing Rule",
+			title="Customer rate",
+			company="_Test Company",
+			currency="INR",
+			selling=1,
+			apply_on="Item Code",
+			items=[{"item_code": item}],
+			price_or_product_discount="Price",
+			rate_or_discount="Rate",
+			rate=40,
+			applicable_for="Customer",
+			customer="_Test Customer",
+		).insert()
+		replacement = frappe.get_doc(
+			doctype="Pricing Rule",
+			title="Customer discount",
+			company="_Test Company",
+			currency="INR",
+			selling=1,
+			apply_on="Item Code",
+			items=[{"item_code": item}],
+			price_or_product_discount="Price",
+			rate_or_discount="Discount Percentage",
+			discount_percentage=10,
+			applicable_for="Customer",
+			customer="_Test Customer 1",
+		).insert()
+		for discount_type in ("Discount Percentage", "Discount Amount"):
+			with self.subTest(discount_type=discount_type):
+				replacement.rate_or_discount = discount_type
+				replacement.discount_amount = 4 if discount_type == "Discount Amount" else 0
+				replacement.save()
+				order = make_sales_order(item_code=item, qty=1, do_not_submit=True)
+				self.assertEqual(order.items[0].rate, 40)
+				self.assertFalse(frappe.db.exists("Item Price", {"item_code": item}))
+				order.customer = "_Test Customer 1"
+				order.customer_address = None
+				order.shipping_address_name = None
+				order.contact_person = None
+				args = order.as_dict()
+				args.price_list = order.selling_price_list
+				result = apply_price_list(frappe.as_json(args), doc=frappe.as_json(order))["children"][0]
+				self.assertEqual(result.price_list_rate, 40)
+				self.assertEqual(result.discount_amount, 4)
+				order.items[0].update(result)
+				order.save().reload()
+				self.assertEqual(order.items[0].price_list_rate, 40)
+				self.assertEqual(order.items[0].rate, 36)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [replacement.name])
+				order.submit()
+				self.assertEqual(order.grand_total, 36)
+				order.cancel()
+
 
 test_dependencies = ["Campaign"]
 
