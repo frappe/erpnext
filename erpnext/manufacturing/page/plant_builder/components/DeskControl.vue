@@ -1,6 +1,7 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { FormLabel } from "frappe-ui";
+import { READ_ONLY } from "../lib/plant";
 
 const props = defineProps({
 	modelValue: { type: String, default: "" },
@@ -34,6 +35,8 @@ function onChange() {
 	if (value !== (props.modelValue || "")) emit("update:modelValue", value);
 }
 
+const readOnly = inject(READ_ONLY, ref(false));
+
 onMounted(() => {
 	parent = makeSlottedParent();
 	control = window.frappe.ui.form.make_control({
@@ -41,7 +44,7 @@ onMounted(() => {
 		df: {
 			fieldtype: props.fieldtype,
 			options: props.options,
-			read_only: props.disabled ? 1 : 0,
+			read_only: props.disabled || readOnly.value ? 1 : 0,
 			get_query: () => ({ filters: props.filters }),
 			change: onChange,
 		},

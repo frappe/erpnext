@@ -106,3 +106,5 @@ export function removeStage(doc, index) {
 		(no) => (no === index + 1 ? 1 : no > index + 1 ? no - 1 : no)
 	);
 }
+
+export const READ_ONLY = Symbol("readOnly");
