@@ -4183,6 +4183,37 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertEqual(sorted(returned), sorted(batches))
 
+	def test_disassembly_picks_finished_serial_nos_from_its_source_warehouse(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		warehouse, other_warehouse = "_Test Warehouse - _TC", "Stores - _TC"
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "DISFG-.#####"}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100)
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=2, basic_rate=100)
+		wo = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=1, source_warehouse=warehouse)
+
+		frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1)).insert().submit()
+		wo.db_set("fg_warehouse", other_warehouse)
+		manufacture = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1)).insert()
+		manufacture.submit()
+		manufacture.reload()
+		fg_row = next(row for row in manufacture.items if row.item_code == fg_item)
+
+		disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 1))
+		disassembly.insert().submit()
+		disassembled_row = next(row for row in disassembly.items if row.item_code == fg_item)
+
+		self.assertEqual(disassembled_row.s_warehouse, other_warehouse)
+		self.assertEqual(
+			get_serial_nos_from_bundle(disassembled_row.serial_and_batch_bundle),
+			get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle),
+		)
+
 	def test_disassembly_skips_batch_left_with_rounding_residue(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
