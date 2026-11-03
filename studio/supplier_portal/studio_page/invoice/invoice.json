@@ -632,7 +632,7 @@
                      "componentId": "TextBlock-vzpb4k0k7",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-p-base",
+                      "fontSize": "text-base",
                       "tag": "span",
                       "text": "{{ dataItem.value }}"
                      }
@@ -732,7 +732,7 @@
                      "componentId": "TextBlock-invbal003",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-p-base",
+                      "fontSize": "text-base",
                       "tag": "span",
                       "text": "{{ dataItem.value }}"
                      }
@@ -1022,7 +1022,7 @@
                        "componentId": "TextBlock-27056c7532",
                        "componentName": "TextBlock",
                        "componentProps": {
-                        "fontSize": "text-base-semibold",
+                        "fontSize": "text-base-medium",
                         "tag": "span",
                         "text": "{{ dataItem.name }}"
                        }

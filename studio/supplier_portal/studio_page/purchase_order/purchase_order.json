@@ -706,7 +706,7 @@
                      "componentId": "TextBlock-t6u1ip5vm",
                      "componentName": "TextBlock",
                      "componentProps": {
-                      "fontSize": "text-p-base",
+                      "fontSize": "text-base",
                       "tag": "span",
                       "text": "{{ dataItem.value }}"
                      },
@@ -1020,7 +1020,7 @@
                        "componentId": "TextBlock-617903c694",
                        "componentName": "TextBlock",
                        "componentProps": {
-                        "fontSize": "text-base-semibold",
+                        "fontSize": "text-base-medium",
                         "tag": "span",
                         "text": "{{ dataItem.name }}"
                        }
