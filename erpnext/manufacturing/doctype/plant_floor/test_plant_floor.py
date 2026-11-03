@@ -234,6 +234,21 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(run["stages"][1]["items"][0].item_code, "_Test Ketchup Pre-mix")
 		self.assertTrue(run["stages"][1]["items"][0].is_input)
 
+	def test_plant_builder_check_needs_workstation_read(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import check_plant
+
+		workstation, operation = make_machine("Mixer", "Mixer")
+		unsaved = {
+			"floor_name": "_Test Unsaved Plant",
+			"stages": [{"stage_name": "Mixer", "workstation": workstation, "operation": operation}],
+		}
+		self.assertIn(workstation, check_plant(unsaved)["machines"])
+
+		user = create_user("plant-builder-manager@example.com", "Manufacturing Manager")
+		with self.set_user(user.name):
+			self.assertTrue(frappe.has_permission("Plant Floor", "read"))
+			self.assertRaises(frappe.PermissionError, check_plant, unsaved)
+
 	def test_plant_builder_run_needs_plant_floor_read(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run, preview_lot
 

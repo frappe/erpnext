@@ -53,6 +53,8 @@ def get_plant(name: str) -> dict:
 def check_plant(doc: str | dict) -> dict:
 	plant_floor = frappe.get_doc({**frappe.parse_json(doc), "doctype": "Plant Floor"})
 	frappe.has_permission("Plant Floor", "read", throw=True)
+	for workstation in {row.workstation for row in plant_floor.stages if row.workstation}:
+		frappe.has_permission("Workstation", doc=workstation, throw=True)
 	plant_floor.set_row_numbers()
 	set_item_names(plant_floor)
 	return get_plant_data(plant_floor)
