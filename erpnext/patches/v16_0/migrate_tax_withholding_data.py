@@ -49,7 +49,7 @@ def execute():
 
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
 	paid_journals = set()
-	for suppliers in get_supplier_groups(column_cache, party_tax_id_cache):
+	for suppliers in get_party_groups("Supplier", column_cache, party_tax_id_cache):
 		purchase_migrator = PurchaseInvoiceMigrator(
 			tds_accounts,
 			tax_rate_map,
@@ -84,7 +84,9 @@ def execute():
 		.run()
 	)
 
-	migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs)
+	for customers in get_party_groups("Customer", column_cache, party_tax_id_cache):
+		migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs, customers)
+
 	migrate_journal_entries(
 		tds_accounts,
 		tax_rate_map,
@@ -98,35 +100,37 @@ def execute():
 	copy_category_to_items_for_sales(column_cache)
 
 
-def get_supplier_groups(column_cache, party_tax_id_cache):
-	pi = frappe.qb.DocType("Purchase Invoice")
+def get_party_groups(party_type, column_cache, party_tax_id_cache):
+	invoice = frappe.qb.DocType("Purchase Invoice" if party_type == "Supplier" else "Sales Invoice")
+	party_field = invoice.supplier if party_type == "Supplier" else invoice.customer
 	invoice_counts = dict(
-		frappe.qb.from_(pi)
-		.select(pi.supplier, Count("*"))
-		.where(pi.docstatus == 1)
-		.groupby(pi.supplier)
+		frappe.qb.from_(invoice)
+		.select(party_field, Count("*"))
+		.where(invoice.docstatus == 1)
+		.groupby(party_field)
 		.run()
 	)
 
 	# Suppliers without invoices still need a group for the TDS on their payments
-	for party_type, party in party_tax_id_cache:
-		if party_type == "Supplier":
-			invoice_counts.setdefault(party, 0)
+	if party_type == "Supplier":
+		for key_type, party in party_tax_id_cache:
+			if key_type == party_type:
+				invoice_counts.setdefault(party, 0)
 
-	# v15 counted all suppliers with the same PAN together, and nothing across PANs
-	suppliers_by_pan = defaultdict(list)
-	for supplier in invoice_counts:
-		pan = column_cache["Supplier"]["pan"] and party_tax_id_cache.get(("Supplier", supplier))
-		suppliers_by_pan[pan or supplier].append(supplier)
+	# v15 counted all parties with the same PAN together, and nothing across PANs
+	parties_by_pan = defaultdict(list)
+	for party in invoice_counts:
+		pan = column_cache[party_type]["pan"] and party_tax_id_cache.get((party_type, party))
+		parties_by_pan[pan or party].append(party)
 
 	group, group_invoices = [], 0
-	for suppliers in suppliers_by_pan.values():
-		invoices = sum(invoice_counts[supplier] for supplier in suppliers)
-		if group and (group_invoices + invoices > BATCH_SIZE or len(group) + len(suppliers) > BATCH_SIZE):
+	for parties in parties_by_pan.values():
+		invoices = sum(invoice_counts[party] for party in parties)
+		if group and (group_invoices + invoices > BATCH_SIZE or len(group) + len(parties) > BATCH_SIZE):
 			yield group
 			group, group_invoices = [], 0
 
-		group.extend(suppliers)
+		group.extend(parties)
 		group_invoices += invoices
 
 	if group:
@@ -1058,7 +1062,7 @@ class PurchaseInvoiceMigrator:
 		self.all_entries[key].extend(entries)
 
 
-def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs):
+def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs, customers):
 	gle = frappe.qb.DocType("GL Entry")
 	si = frappe.qb.DocType("Sales Invoice")
 	cust = frappe.qb.DocType("Customer")
@@ -1106,6 +1110,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 		)
 		.where(si.docstatus == 1)
 		.where(si.is_opening == "No")
+		.where(si.customer.isin(customers))
 		# Without a category or a TCS row there is no rate, so the invoice would be skipped below
 		.where((IfNull(cust.tax_withholding_category, "") != "") | tcs_gl.account.isnotnull())
 		.run(as_dict=True)
