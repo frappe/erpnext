@@ -635,8 +635,7 @@ class DisassembleStockEntry(BaseStockEntry):
 	def _set_serial_batch_for_disassembly_from_available_materials(self):
 		available_materials = get_available_materials(self.doc.work_order, self.doc)
 		for row in self.doc.items:
-			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			materials = available_materials.get(row.item_code)
 			if materials:
 				self._apply_available_material_bundle(row, materials)
 
@@ -717,7 +716,8 @@ def sort_serial_nos_by_number(available_materials):
 
 def _get_material_key(row, stock_entry_doc):
 	if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-		return (row.item_code, row.s_warehouse or row.warehouse)
+		# components can return to a warehouse other than the one they were consumed from
+		return row.item_code
 	if row.purpose != "Material Transfer for Manufacture":
 		return (row.item_code, row.s_warehouse)
 	return (row.item_code, row.warehouse)
