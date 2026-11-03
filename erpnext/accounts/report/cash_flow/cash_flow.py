@@ -25,6 +25,7 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+<<<<<<< HEAD
 	period_list = get_period_list(
 		filters.from_fiscal_year,
 		filters.to_fiscal_year,
@@ -34,6 +35,15 @@ def execute(filters=None):
 		filters.periodicity,
 		company=filters.company,
 	)
+=======
+	if filters and filters.report_template:
+		return FinancialReportEngine().execute(filters)
+
+	period_list = build_period_list(filters, split_on_fiscal_year=bool(filters.accumulated_values))
+
+	if not period_list:
+		return
+>>>>>>> ff6929d (fix(accounts): retain fiscal year boundaries in accumulated reports)
 
 	cash_flow_sections = get_cash_flow_accounts()
 
