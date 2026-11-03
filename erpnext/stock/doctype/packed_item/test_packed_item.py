@@ -210,6 +210,7 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertEqual(dn.packed_items[2].qty, 6)
 		self.assertEqual(dn.packed_items[3].qty, 6)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_newly_mapped_doc_with_removed_bundle_row(self):
 		"Packed items of a removed row must not move to another row with the same bundle."
 		so_items = [
