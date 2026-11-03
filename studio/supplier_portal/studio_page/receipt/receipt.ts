@@ -5,7 +5,6 @@ import { computed } from "vue"
 import { usePortalIdentity } from "@app/composables/usePortalIdentity"
 import { useSession } from "@app/composables/useSession"
 import {
-	addressRows,
 	descriptionOf,
 	EMPTY,
 	formatDate,
@@ -13,11 +12,15 @@ import {
 	formatQty,
 	INK5,
 	INK6,
+	INK7,
 	INK8,
 	line,
 	magnitude,
 	plainText,
+	postalAddress,
+	RED,
 	routeOpener,
+	numbered,
 } from "@app/utils"
 import { statusText, statusTheme } from "@app/lib/documents"
 import { usePortalNotifications } from "@app/composables/useNotifications"
@@ -38,10 +41,10 @@ export default function setup(context) {
 	/** The words that differ between a receipt and a return. */
 	const labels = computed(() =>
 		isReturn.value
-			? { section: __("Return"), date: __("Returned"), value: __("Value returned"), billed: __("Debit note"),
-				shipped: __("Returned"), pending: "" }
-			: { section: __("Receipt"), date: __("Received"), value: __("Goods value"), billed: __("Invoiced"),
-				shipped: __("Accepted"), pending: __("Yet to deliver") },
+			? { date: __("Returned"), value: __("Value returned"), billed: __("Debit note"),
+				shipped: __("Returned"), pending: "", rejected: "" }
+			: { date: __("Received"), value: __("Goods value"), billed: __("Invoiced"),
+				shipped: __("Ordered"), pending: __("Accepted"), rejected: __("Rejected") },
 	)
 
 	const crumbs = computed(() => [
@@ -105,11 +108,18 @@ export default function setup(context) {
 			...present(__("LR date"), formatDate(doc.value.lr_date)),
 			...present(__("Transporter"), doc.value.transporter_name),
 		]
-		return rows.length ? rows : [line("", __("No transport details"), INK5)]
+		return rows
 	})
 
-	// where the buyer took the goods in
-	const shippingAddress = computed(() => addressRows(doc.value.company ?? "", doc.value.shipping_address_display))
+	// where the buyer took the goods in, or sent them back from
+	const addressDetails = computed(() => {
+		const address = postalAddress(doc.value.shipping_address_display)
+		if (!address) return []
+		const label = isReturn.value ? __("Returned from") : __("Delivered to")
+		return [{ key: "delivered", label, name: doc.value.company ?? "", address }]
+	})
+
+	const itemsTitle = computed(() => (isReturn.value ? __("What was returned") : __("What the buyer received")))
 
 	// ---------------------------------------------------------------- items
 	const orderLines = computed(() => {
@@ -124,10 +134,8 @@ export default function setup(context) {
 		return map
 	})
 
-	/** Rejected goods come first: they are what the supplier most needs to know about. */
 	function itemDescription(row: any): string {
 		return [
-			Number(row.rejected_qty) ? __("{0} rejected", [formatQty(magnitude(row.rejected_qty), row.uom)]) : "",
 			// with two orders on one receipt, the same item can come from either
 			sourceOrders.value.length > 1 && row.purchase_order ? __("Order {0}", [row.purchase_order]) : "",
 			descriptionOf(row),
@@ -143,24 +151,26 @@ export default function setup(context) {
 					description: itemDescription(row),
 					shipped: formatQty(magnitude(row.qty), row.uom),
 					pending: "",
+					rejected: "",
+					rejectedColor: INK7,
 				}
 			}
 			const ordered = orderLines.value[row.purchase_order]?.[row.item_code]
-			const pending = ordered ? Math.max(0, ordered.qty - ordered.received) : null
+			const rejected = magnitude(row.rejected_qty)
 			return {
 				name: row.item_name || row.item_code,
 				description: itemDescription(row),
-				shipped: ordered
-					? __("{0} of {1}", [formatQty(row.qty), formatQty(ordered.qty, row.uom)])
-					: formatQty(row.qty, row.uom),
-				pending: pending === null ? EMPTY : formatQty(pending),
+				shipped: ordered ? formatQty(ordered.qty, row.uom) : EMPTY,
+				pending: formatQty(row.qty, row.uom),
+				rejected: rejected ? formatQty(rejected, row.uom) : EMPTY,
+				rejectedColor: rejected ? RED : INK7,
 			}
 		}),
 	)
 
 	// a return has nothing still to deliver, so it has no column for it
 	const itemColumns = computed(() =>
-		isReturn.value ? ["minmax(0, 1fr)", "140px"] : ["minmax(0, 1fr)", "140px", "110px"],
+		isReturn.value ? ["28px", "minmax(0, 1fr)", "140px"] : ["28px", "minmax(0, 1fr)", "110px", "110px", "110px"],
 	)
 
 	/** What is still to deliver on the whole of this receipt's orders, not only the lines it carries:
@@ -180,19 +190,28 @@ export default function setup(context) {
 		return [...byUom].filter(([, qty]) => qty).map(([uom, qty]) => formatQty(qty, uom)).join(__(" and "))
 	}
 
-	/** One quiet line under the items, in words. */
-	const summary = computed(() => {
-		const received = quantities(
-			(doc.value.items ?? []).map((row: any): [number, string] => [magnitude(row.qty), row.uom]),
-		)
-		if (!received) return ""
-		if (isReturn.value) return __("{0} returned", [received])
-		if (!pending.value.length) return __("{0} accepted", [received])
+	/** The one line under the items: what happens next. */
+	const note = computed(() => {
+		if (isReturn.value) return { title: __("These goods went back to you."), theme: "gray", icon: "lucide-undo-2" }
+		if (!pending.value.length) return { title: "", theme: "gray", icon: "" }
 		const several = sourceOrders.value.length > 1
 		const left = quantities(pending.value)
-		if (left) return several ? __("{0} still to deliver on the orders", [left]) : __("{0} still to deliver on the order", [left])
-		return several ? __("This completes the orders") : __("This completes the order")
+		if (left) {
+			return {
+				title: several ? __("{0} still to deliver on the orders.", [left]) : __("{0} still to deliver on the order.", [left]),
+				theme: "amber",
+				icon: "lucide-truck",
+			}
+		}
+		return {
+			title: several ? __("This completes the orders.") : __("This completes the order."),
+			theme: "green",
+			icon: "lucide-circle-check",
+		}
 	})
+	const noteTitle = computed(() => note.value.title)
+	const noteTheme = computed(() => note.value.theme)
+	const noteIcon = computed(() => note.value.icon)
 
 	// ---------------------------------------------------------------- comments
 	const { comments, postComment, posting, clearing } = usePortalComments(
@@ -208,8 +227,8 @@ export default function setup(context) {
 		notFound, failure, loaded,
 		// suppliers may not print a Purchase Receipt in Desk, so this prints the page itself
 		docId, crumbs, status, statusTheme: theme, printDocument: () => window.print(), goTo,
-		labels, isReturn, dispatchInfo, tracking, shippingAddress,
-		items, itemColumns, summary, termsText, comments, postComment, posting, clearing,
+		labels, isReturn, dispatchInfo, tracking, addressDetails, itemsTitle,
+		items: numbered(items), itemColumns, noteTitle, noteTheme, noteIcon, termsText, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}
 }
