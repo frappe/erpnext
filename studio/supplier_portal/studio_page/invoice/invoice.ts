@@ -4,7 +4,6 @@ import { computed } from "vue"
 import { usePortalIdentity } from "@app/composables/usePortalIdentity"
 import { useSession } from "@app/composables/useSession"
 import {
-	addressRows,
 	descriptionOf,
 	EMPTY,
 	formatDate,
@@ -14,9 +13,11 @@ import {
 	INK8,
 	line,
 	plainText,
+	postalAddress,
 	printDocument,
 	RED,
 	routeOpener,
+	numbered,
 } from "@app/utils"
 import {
 	invoiceIsOverdue,
@@ -105,11 +106,20 @@ export default function setup(context) {
 		return rows
 	})
 
-	// the buyer's addresses: where they are billed, and where the goods went
-	const billingAddress = computed(() => addressRows(doc.value.company ?? "", doc.value.billing_address_display))
-	const shippingAddress = computed(() =>
-		addressRows(doc.value.company ?? "", doc.value.shipping_address_display || doc.value.billing_address_display),
-	)
+	// who the invoice is to, and where the goods went; once when they are the same place
+	const addressDetails = computed(() => {
+		const company = doc.value.company ?? ""
+		const billing = postalAddress(doc.value.billing_address_display)
+		const shipping = postalAddress(doc.value.shipping_address_display) || billing
+		if (!billing && !shipping) return []
+		if (billing === shipping) return [{ key: "billed", label: __("Billed to"), name: company, address: billing }]
+		return [
+			{ key: "billed", label: __("Billed to"), name: company, address: billing },
+			{ key: "deliver", label: __("Delivered to"), name: company, address: shipping },
+		].filter((row) => row.address)
+	})
+
+	const itemsTitle = computed(() => (doc.value.is_return ? __("What the debit note covers") : __("What was billed")))
 
 	// ---------------------------------------------------------------- items
 	const items = computed(() =>
@@ -144,13 +154,42 @@ export default function setup(context) {
 		return rows
 	})
 
+	// ---------------------------------------------------------------- what happens next
+	const note = computed(() => {
+		if (doc.value.is_return) {
+			const against = doc.value.return_against
+			return {
+				title: against ? __("A debit note against invoice {0}.", [against]) : __("A debit note."),
+				theme: "gray",
+				icon: "lucide-undo-2",
+			}
+		}
+		if (status.value === "Debit Note Issued") {
+			return { title: __("Settled by a debit note."), theme: "gray", icon: "lucide-undo-2" }
+		}
+		if (outstanding.value <= 0) return { title: __("Paid in full."), theme: "green", icon: "lucide-circle-check" }
+		const owed = formatMoney(outstanding.value, partyCurrency.value)
+		const due = doc.value.due_date ? formatDate(doc.value.due_date) : ""
+		if (overdue.value) {
+			return { title: __("{0} still to be paid. It was due {1}.", [owed, due]), theme: "red", icon: "lucide-circle-alert" }
+		}
+		return {
+			title: due ? __("{0} still to be paid, due {1}.", [owed, due]) : __("{0} still to be paid.", [owed]),
+			theme: "blue",
+			icon: "lucide-wallet",
+		}
+	})
+	const noteTitle = computed(() => note.value.title)
+	const noteTheme = computed(() => note.value.theme)
+	const noteIcon = computed(() => note.value.icon)
+
 	// ---------------------------------------------------------------- payments
 	const payments = computed(() =>
 		(doc.value.payments ?? []).map((row: any) => ({
 			key: row.name + ":" + row.posting_date,
-			date: formatDate(row.posting_date),
-			// the buyer's own document name is not a reference the supplier can use; a cash payment has none
-			reference: row.reference_no || "",
+			// on one line with the date: the buyer's own document name is not a reference the supplier can
+			// use, and a cash payment has none
+			date: [formatDate(row.posting_date), row.reference_no].filter(Boolean).join(" · "),
 			method: row.mode_of_payment || EMPTY,
 			amount: formatMoney(row.allocated_amount, partyCurrency.value),
 		})),
@@ -170,8 +209,8 @@ export default function setup(context) {
 		notFound, failure, loaded,
 		// the document's own print format, as the customer portal prints; ERPNext lets a supplier's portal users print their own
 		docId, crumbs, statusLabel, statusTheme: theme, printDocument: () => printDocument("Purchase Invoice", docId.value), goTo,
-		invoiceInfo, billingAddress, shippingAddress,
-		items, itemImages, totals, balance, amountInWords, termsText, payments, comments, postComment, posting, clearing,
+		invoiceInfo, addressDetails, itemsTitle, noteTitle, noteTheme, noteIcon,
+		items: numbered(items), itemImages, totals, balance, amountInWords, termsText, payments, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}
 }
