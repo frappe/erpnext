@@ -611,9 +611,11 @@
               },
               {
                "baseStyles": {
-                "display": "flex",
-                "flexDirection": "column",
-                "gap": "12px",
+                "alignItems": "baseline",
+                "columnGap": "16px",
+                "display": "grid",
+                "gridTemplateColumns": "8rem minmax(0, 1fr)",
+                "rowGap": "12px",
                 "width": "100%"
                },
                "blockName": "Lines",
@@ -630,20 +632,20 @@
                  "slotContent": [
                   {
                    "baseStyles": {
-                    "alignItems": "baseline",
-                    "columnGap": "12px",
                     "cursor": "{{ dataItem.route ? 'pointer' : 'auto' }}",
-                    "display": "flex",
-                    "flexDirection": "row",
-                    "flexWrap": "wrap",
-                    "justifyContent": "space-between",
-                    "rowGap": "2px"
+                    "display": "contents"
                    },
                    "blockName": "Line",
                    "children": [
                     {
+                     "attributes": {
+                      "title": "{{ dataItem.label }}"
+                     },
                      "baseStyles": {
                       "color": "var(--ink-gray-6)",
+                      "minWidth": "0px",
+                      "overflow": "hidden",
+                      "textOverflow": "ellipsis",
                       "whiteSpace": "nowrap"
                      },
                      "blockName": "TextBlock",
@@ -659,8 +661,7 @@
                     },
                     {
                      "baseStyles": {
-                      "marginLeft": "auto",
-                      "textAlign": "right"
+                      "minWidth": "0px"
                      },
                      "blockName": "Full number",
                      "componentId": "Tooltip-td8j77gkt",
@@ -684,12 +685,10 @@
                           "borderBottomWidth": "1px",
                           "color": "var(--ink-gray-8)",
                           "cursor": "pointer",
-                          "justifySelf": "end",
-                          "marginLeft": "auto",
+                          "justifySelf": "start",
                           "maxWidth": "100%",
                           "minWidth": "0px",
                           "overflow": "hidden",
-                          "textAlign": "right",
                           "textOverflow": "ellipsis",
                           "whiteSpace": "nowrap"
                          },
@@ -722,9 +721,7 @@
                      "baseStyles": {
                       "color": "{{ dataItem.color }}",
                       "fontWeight": "{{ dataItem.weight }}",
-                      "marginLeft": "auto",
                       "minWidth": "0px",
-                      "textAlign": "right",
                       "whiteSpace": "normal"
                      },
                      "blockName": "TextBlock",
@@ -793,9 +790,11 @@
               },
               {
                "baseStyles": {
-                "display": "flex",
-                "flexDirection": "column",
-                "gap": "12px",
+                "alignItems": "baseline",
+                "columnGap": "16px",
+                "display": "grid",
+                "gridTemplateColumns": "8rem minmax(0, 1fr)",
+                "rowGap": "12px",
                 "width": "100%"
                },
                "blockName": "Lines",
@@ -812,20 +811,20 @@
                  "slotContent": [
                   {
                    "baseStyles": {
-                    "alignItems": "baseline",
-                    "columnGap": "12px",
                     "cursor": "{{ dataItem.route ? 'pointer' : 'auto' }}",
-                    "display": "flex",
-                    "flexDirection": "row",
-                    "flexWrap": "wrap",
-                    "justifyContent": "space-between",
-                    "rowGap": "2px"
+                    "display": "contents"
                    },
                    "blockName": "Line",
                    "children": [
                     {
+                     "attributes": {
+                      "title": "{{ dataItem.label }}"
+                     },
                      "baseStyles": {
                       "color": "var(--ink-gray-6)",
+                      "minWidth": "0px",
+                      "overflow": "hidden",
+                      "textOverflow": "ellipsis",
                       "whiteSpace": "nowrap"
                      },
                      "blockName": "TextBlock",
@@ -841,8 +840,7 @@
                     },
                     {
                      "baseStyles": {
-                      "marginLeft": "auto",
-                      "textAlign": "right"
+                      "minWidth": "0px"
                      },
                      "blockName": "Full number",
                      "componentId": "Tooltip-wgu4lnlit",
@@ -866,12 +864,10 @@
                           "borderBottomWidth": "1px",
                           "color": "var(--ink-gray-8)",
                           "cursor": "pointer",
-                          "justifySelf": "end",
-                          "marginLeft": "auto",
+                          "justifySelf": "start",
                           "maxWidth": "100%",
                           "minWidth": "0px",
                           "overflow": "hidden",
-                          "textAlign": "right",
                           "textOverflow": "ellipsis",
                           "whiteSpace": "nowrap"
                          },
@@ -904,9 +900,7 @@
                      "baseStyles": {
                       "color": "{{ dataItem.color }}",
                       "fontWeight": "{{ dataItem.weight }}",
-                      "marginLeft": "auto",
                       "minWidth": "0px",
-                      "textAlign": "right",
                       "whiteSpace": "normal"
                      },
                      "blockName": "TextBlock",

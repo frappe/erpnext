@@ -221,7 +221,7 @@ Line.props = ["text", "width", "end"];
 }
 @media (min-width: 1280px) {
 	.portal-doc {
-		grid-template-columns: minmax(0, 1fr) 20rem;
+		grid-template-columns: minmax(0, 1fr) 22rem;
 		grid-template-rows: auto 1fr;
 		min-height: 100%;
 	}
@@ -249,7 +249,7 @@ Line.props = ["text", "width", "end"];
 }
 @media (min-width: 1536px) {
 	.portal-doc {
-		grid-template-columns: minmax(0, 1fr) 22rem;
+		grid-template-columns: minmax(0, 1fr) 24rem;
 	}
 }
 /* Printing a page (an RFQ, a receipt): the document only, without the sidebar, buttons or comment
