@@ -1694,6 +1694,13 @@ def get_subitems(
 			_merge_subitem(item_details, d)
 
 		if explode:
+			qty = (
+				d.qty
+				if d.is_phantom_item
+				else get_qty_before_process_loss(
+					d.qty, get_plan_process_loss_percentage(doc, child_bom), d.stock_uom
+				)
+			)
 			get_subitems(
 				doc,
 				data,
@@ -1702,7 +1709,7 @@ def get_subitems(
 				company,
 				include_non_stock_items,
 				include_subcontracted_items,
-				d.qty,
+				qty,
 			)
 	return {key: value for key, value in item_details.items() if not value.get("is_phantom_item")}
 
@@ -2149,7 +2156,9 @@ def get_items_for_material_requests(
 
 			sub_assembly_items[
 				(d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
-			] += d.get("qty")
+			] += get_qty_before_process_loss(
+				d.get("qty"), d.get("process_loss_percentage"), d.get("stock_uom")
+			)
 		sub_assembly_items = {k[:2]: v for k, v in sub_assembly_items.items()}
 
 	requested_sub_assemblies = get_requested_sub_assemblies(doc)
@@ -2165,6 +2174,9 @@ def get_items_for_material_requests(
 		)
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
+		if data.get("bom_no") and not data.get("required_qty"):
+			loss_percentage = get_plan_process_loss_percentage(doc, data.get("bom_no"))
+			planned_qty = get_qty_before_process_loss(planned_qty, loss_percentage, data.get("stock_uom"))
 		ignore_existing_ordered_qty = data.get("ignore_existing_ordered_qty") or ignore_existing_ordered_qty
 
 		item_details = {}
