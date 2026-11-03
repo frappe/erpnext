@@ -21,7 +21,6 @@ onMounted(async () => {
 	emit("title", props.workOrder);
 	emit("actions", [
 		{ label: __("Open Work Order"), onClick: () => openForm("Work Order", props.workOrder) },
-		{ label: __("Open Plant Floor"), onClick: () => openForm("Plant Floor", props.plant) },
 	]);
 	poll = setInterval(() => isRunning.value && !run.busy.value && run.refresh(), 30000);
 });
