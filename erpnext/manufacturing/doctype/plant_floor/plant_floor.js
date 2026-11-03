@@ -6,22 +6,6 @@ frappe.ui.form.on("Plant Floor", {
 		frm.trigger("setup_queries");
 	},
 
-	add_workstation(frm) {
-		frm.add_custom_button(__("Create Workstation"), () => {
-			var doc = frappe.model.get_new_doc("Workstation");
-			doc.plant_floor = frm.doc.name;
-			doc.status = "Off";
-			frappe.ui.form.make_quick_entry(
-				"Workstation",
-				() => {
-					frm.trigger("prepare_workstation_dashboard");
-				},
-				null,
-				doc
-			);
-		}).addClass("btn-primary");
-	},
-
 	setup_queries(frm) {
 		frm.set_query("warehouse", (doc) => {
 			if (!doc.company) {
@@ -38,47 +22,8 @@ frappe.ui.form.on("Plant Floor", {
 	},
 
 	refresh(frm) {
-		frm.trigger("prepare_stock_dashboard");
-		frm.trigger("prepare_workstation_dashboard");
-		frm.trigger("update_realtime_status");
-
-		if (!frm.is_new()) {
-			frm.trigger("add_workstation");
-			frm.add_custom_button(__("Open Plant Builder"), () =>
-				frappe.set_route("plant-builder", frm.doc.name)
-			);
-			frm.disable_save();
-		}
-	},
-
-	prepare_workstation_dashboard(frm) {
-		let wrapper = $(frm.fields_dict["plant_dashboard"].wrapper);
-		wrapper.empty();
-
-		frm.visual_plant_floor = new frappe.ui.VisualPlantFloor({
-			wrapper: wrapper,
-			skip_filters: true,
-			plant_floor: frm.doc.name,
-		});
-	},
-
-	update_realtime_status(frm) {
-		frappe.realtime.doctype_subscribe("Workstation");
-		if (frm.workstation_status_handler) {
-			frappe.realtime.off("list_update", frm.workstation_status_handler);
-		}
-		frm.workstation_status_handler = (data) => {
-			const route = frappe.get_route();
-			if (
-				route[0] === "Form" &&
-				route[1] === frm.doctype &&
-				route[2] === frm.doc.name &&
-				data.doctype === "Workstation"
-			) {
-				frm.visual_plant_floor.prepare_data();
-			}
-		};
-		frappe.realtime.on("list_update", frm.workstation_status_handler);
+		frappe.route_flags.replace_route = true;
+		frappe.set_route("plant-builder", frm.is_new() ? "new" : frm.doc.name);
 	},
 
 	prepare_stock_dashboard(frm) {

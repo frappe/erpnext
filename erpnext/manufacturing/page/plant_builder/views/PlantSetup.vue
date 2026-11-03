@@ -6,7 +6,7 @@ import SetupStatus from "../components/setup/SetupStatus.vue";
 import ProductSection from "../components/setup/ProductSection.vue";
 import FormulaSection from "../components/setup/FormulaSection.vue";
 import StagesSection from "../components/setup/StagesSection.vue";
-import { __, call, openForm, openList, setRoute } from "../lib/api";
+import { __, call, openList, setRoute } from "../lib/api";
 import { newPlantDoc, toScenePlant } from "../lib/plant";
 import { previewView } from "../lib/scene";
 
@@ -48,7 +48,6 @@ onMounted(async () => {
 						label: __("View Work Orders"),
 						onClick: () => openList("Work Order", { plant_floor: props.name }),
 					},
-					{ label: __("Open Plant Floor"), onClick: () => openForm("Plant Floor", props.name) },
 			  ]
 	);
 });
