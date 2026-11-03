@@ -4771,6 +4771,48 @@ class TestStockEntry(ERPNextTestSuite):
 			for batch_no in batches:
 				self.assertEqual(get_batch_qty(batch_no, warehouse, rm_item), 5)
 
+	def test_disassembly_after_material_transfer_returns_consumed_batches(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "DIST-.#####",
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100)
+		batches = [
+			get_batch_from_bundle(
+				make_stock_entry(item_code=rm_item, target=warehouse, qty=5, basic_rate=100)
+				.items[0]
+				.serial_and_batch_bundle
+			)
+			for _ in range(2)
+		]
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=10, source_warehouse=warehouse, wip_warehouse="Work In Progress - _TC"
+		)
+		frappe.get_doc(
+			make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 10)
+		).insert().submit()
+		for _ in range(2):
+			frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 5)).insert().submit()
+
+		returned = []
+		for _ in range(2):
+			disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 5))
+			disassembly.insert().submit()
+			rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+			returned.append(get_batch_from_bundle(rm_row.serial_and_batch_bundle))
+
+		self.assertEqual(sorted(returned), sorted(batches))
+
 	def test_disassembly_skips_batch_left_with_rounding_residue(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
