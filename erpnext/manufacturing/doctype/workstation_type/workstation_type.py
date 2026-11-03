@@ -10,6 +10,7 @@ from frappe.utils import flt
 
 MACHINE_SHAPES = frappe.get_file_json(Path(__file__).with_name("machine_shapes.json"))
 PACKING_MACHINE_MODELS = ("Filling Line", "Bagging Line")
+DEFAULT_WORKSTATION_TYPES = Path(__file__).with_name("default_workstation_types.json")
 
 
 class WorkstationType(Document):
@@ -151,3 +152,9 @@ def get_workstations(workstation_type):
 	)
 
 	return [workstation.name for workstation in workstations]
+
+
+def create_default_workstation_types():
+	for values in frappe.get_file_json(DEFAULT_WORKSTATION_TYPES):
+		if not frappe.db.exists("Workstation Type", values["workstation_type"]):
+			frappe.get_doc({"doctype": "Workstation Type", **values}).insert(ignore_permissions=True)
