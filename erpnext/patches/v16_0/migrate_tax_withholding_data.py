@@ -62,6 +62,28 @@ def execute():
 		paid_journals.update(
 			name for doctype, name in purchase_migrator.tds_paid_by_other if doctype == "Journal Entry"
 		)
+
+	# v15 advance rows have no withholding flag and an Add row is a reversal; skipped payments need it too
+	pe = frappe.qb.DocType("Payment Entry")
+	atc = frappe.qb.DocType("Advance Taxes and Charges")
+	(
+		frappe.qb.update(atc)
+		.set(atc.is_tax_withholding_account, 1)
+		.where(atc.parenttype == "Payment Entry")
+		.where(atc.add_deduct_tax == "Deduct")
+		.where(atc.account_head.isin(list(set().union(*tds_accounts["accounts_by_company"].values()))))
+		.where(
+			atc.parent.isin(
+				frappe.qb.from_(pe)
+				.select(pe.name)
+				.where(pe.docstatus == 1)
+				.where(pe.party_type == "Supplier")
+				.where(pe.apply_tds == 1)
+			)
+		)
+		.run()
+	)
+
 	migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs)
 	migrate_journal_entries(
 		tds_accounts,
@@ -428,21 +450,6 @@ class PurchaseInvoiceMigrator:
 		bulk_insert_entries(
 			{key: rows for key, rows in self.all_entries.items() if key not in self.skip_docs}
 		)
-
-		# v15 advance rows have no withholding flag and an Add row is a reversal; skipped payments need it too
-		for batch in create_batch(list(self.pe_taxes), BATCH_SIZE):
-			frappe.db.set_value(
-				"Advance Taxes and Charges",
-				{
-					"parent": ("in", batch),
-					"parenttype": "Payment Entry",
-					"account_head": ("in", list(self.all_tds_accounts)),
-					"add_deduct_tax": "Deduct",
-				},
-				"is_tax_withholding_account",
-				1,
-				update_modified=False,
-			)
 
 	def _fetch_data(self):
 		pi = frappe.qb.DocType("Purchase Invoice")
