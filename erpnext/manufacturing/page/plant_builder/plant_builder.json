@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2026-10-31 12:00:00.000000",
+ "modified": "2026-11-03 09:04:47.064145",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "plant-builder",
@@ -22,6 +22,9 @@
   },
   {
    "role": "Shop Floor User"
+  },
+  {
+   "role": "System Manager"
   }
  ],
  "script": null,
