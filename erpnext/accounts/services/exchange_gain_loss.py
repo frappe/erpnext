@@ -272,10 +272,93 @@ def get_revalued_exchange_rate(
 	else:
 		return None
 
+	for row in _party_revaluations(inv.company, account, party_type, party, inv.posting_date, on_date):
+		if not _revaluation_covers(
+			row, invoice_doctype, invoice_name, inv.company, account, party_type, party
+		):
+			continue
+		reversed_by_date = frappe.db.exists(
+			"Journal Entry",
+			{"reversal_of": row.name, "docstatus": 1, "posting_date": ("<=", on_date)},
+		)
+		if not reversed_by_date:
+			return flt(row.new_exchange_rate)
+	return None
+
+
+def validate_settlement_can_be_undone(
+	voucher_type: str,
+	voucher_no: str,
+	against_voucher_type: str | None = None,
+	against_voucher_no: str | None = None,
+) -> None:
+	"""Refuse to undo a settlement dated on or before a revaluation covering the settled voucher.
+	The amount it restores was not revalued, but would then be settled at the revalued rate."""
+	if voucher_type == "Journal Entry" and (
+		frappe.db.get_value("Journal Entry", voucher_no, "voucher_type") == "Exchange Rate Revaluation"
+	):
+		return
+
+	ple = qb.DocType("Payment Ledger Entry")
+	query = (
+		qb.from_(ple)
+		.select(
+			ple.company,
+			ple.account,
+			ple.party_type,
+			ple.party,
+			ple.posting_date,
+			ple.against_voucher_type,
+			ple.against_voucher_no,
+		)
+		.distinct()
+		.where(
+			(ple.voucher_type == voucher_type)
+			& (ple.voucher_no == voucher_no)
+			& (ple.delinked == 0)
+			& (ple.amount_in_account_currency != 0)
+			& (ple.against_voucher_type.isin(["Sales Invoice", "Purchase Invoice", "Journal Entry"]))
+		)
+	)
+	if against_voucher_no:
+		query = query.where(
+			(ple.against_voucher_type == against_voucher_type)
+			& (ple.against_voucher_no == against_voucher_no)
+		)
+
+	for settled in query.run(as_dict=True):
+		if (settled.against_voucher_type, settled.against_voucher_no) == (voucher_type, voucher_no):
+			continue
+		for row in _party_revaluations(
+			settled.company, settled.account, settled.party_type, settled.party, settled.posting_date
+		):
+			if _revaluation_covers(
+				row,
+				settled.against_voucher_type,
+				settled.against_voucher_no,
+				settled.company,
+				settled.account,
+				settled.party_type,
+				settled.party,
+			) and not frappe.db.exists("Journal Entry", {"reversal_of": row.name, "docstatus": 1}):
+				frappe.throw(
+					_(
+						"Cannot undo {0} against {1}: it is dated on or before Exchange Rate Revaluation {2}, which did not revalue this amount. Reverse the revaluation first."
+					).format(
+						get_link_to_form(voucher_type, voucher_no),
+						get_link_to_form(settled.against_voucher_type, settled.against_voucher_no),
+						get_link_to_form("Exchange Rate Revaluation", row.revaluation),
+					),
+					title=_("Covered by Exchange Rate Revaluation"),
+				)
+
+
+def _party_revaluations(company, account, party_type, party, from_date, to_date=None) -> list:
+	"""Submitted revaluation journals of the party account, posted from `from_date`, latest first."""
 	je = qb.DocType("Journal Entry")
 	jea = qb.DocType("Journal Entry Account")
 	err_acc = qb.DocType("Exchange Rate Revaluation Account")
-	revaluations = (
+	query = (
 		qb.from_(je)
 		.join(jea)
 		.on(jea.parent == je.name)
@@ -298,10 +381,9 @@ def get_revalued_exchange_rate(
 		.where(
 			(je.voucher_type == "Exchange Rate Revaluation")
 			& (je.docstatus == 1)
-			& (je.company == inv.company)
+			& (je.company == company)
 			& (je.reversal_of.isnull())
-			& (je.posting_date >= inv.posting_date)
-			& (je.posting_date <= on_date)
+			& (je.posting_date >= from_date)
 			& (jea.reference_type == "Exchange Rate Revaluation")
 			& (jea.account == account)
 			& (jea.party_type == party_type)
@@ -310,34 +392,29 @@ def get_revalued_exchange_rate(
 		)
 		.orderby(je.posting_date, order=frappe.qb.desc)
 		.orderby(je.creation, order=frappe.qb.desc)
-		.run(as_dict=True)
 	)
+	if to_date:
+		query = query.where(je.posting_date <= to_date)
+	return query.run(as_dict=True)
 
-	for row in revaluations:
-		party_vouchers = {
-			"parent": row.revaluation,
-			"account": account,
-			"party_type": party_type,
-			"party": party,
-		}
-		if frappe.db.exists("Exchange Rate Revaluation Voucher", party_vouchers):
-			covered = frappe.db.exists(
+
+def _revaluation_covers(row, voucher_type, voucher_no, company, account, party_type, party) -> bool:
+	party_vouchers = {
+		"parent": row.revaluation,
+		"account": account,
+		"party_type": party_type,
+		"party": party,
+	}
+	if frappe.db.exists("Exchange Rate Revaluation Voucher", party_vouchers):
+		return bool(
+			frappe.db.exists(
 				"Exchange Rate Revaluation Voucher",
-				{**party_vouchers, "voucher_type": invoice_doctype, "voucher_no": invoice_name},
+				{**party_vouchers, "voucher_type": voucher_type, "voucher_no": voucher_no},
 			)
-		else:
-			covered = _covered_by_revaluation_without_vouchers(
-				row, invoice_doctype, invoice_name, inv.company, account, party_type, party
-			)
-		if not covered:
-			continue
-		reversed_by_date = frappe.db.exists(
-			"Journal Entry",
-			{"reversal_of": row.name, "docstatus": 1, "posting_date": ("<=", on_date)},
 		)
-		if not reversed_by_date:
-			return flt(row.new_exchange_rate)
-	return None
+	return _covered_by_revaluation_without_vouchers(
+		row, voucher_type, voucher_no, company, account, party_type, party
+	)
 
 
 def _covered_by_revaluation_without_vouchers(
