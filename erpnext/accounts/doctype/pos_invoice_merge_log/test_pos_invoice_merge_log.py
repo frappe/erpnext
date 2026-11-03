@@ -927,3 +927,48 @@ class TestPOSInvoiceMergeLog(ERPNextTestSuite):
 		copied_invoice.change_amount = copied_invoice.base_change_amount = 0
 		copied_invoice.calculate_taxes_and_totals()
 		self.assertEqual(copied_invoice.change_amount, 100)
+
+	def test_change_from_collected_outstanding_is_kept_on_consolidation(self):
+		sale = self.collect_outstanding_with_change()
+		self.assertEqual((sale.change_amount, sale.base_change_amount), (10, 10))
+
+		self.make_closing_entry()
+		self.assert_consolidated_change(sale)
+
+	def test_patch_sets_base_change_amount_of_collected_outstanding(self):
+		from erpnext.patches.v16_0.set_base_change_amount_on_pos_invoices import execute
+
+		sale = self.collect_outstanding_with_change()
+		frappe.db.set_value("POS Invoice", sale.name, "base_change_amount", 0)
+
+		execute()
+		self.assertEqual(frappe.db.get_value("POS Invoice", sale.name, "base_change_amount"), 10)
+
+		self.make_closing_entry()
+		self.assert_consolidated_change(sale)
+
+	def collect_outstanding_with_change(self):
+		self.pos_profile.allow_partial_payment = 1
+		self.pos_profile.save()
+
+		sale = create_pos_invoice(pos_profile=self.pos_profile.name, rate=110, do_not_submit=1)
+		sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 40})
+		sale.save().submit()
+		sale.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 80}])
+		return sale
+
+	def assert_consolidated_change(self, sale):
+		consolidated_invoice = frappe.get_doc(
+			"Sales Invoice", frappe.db.get_value("POS Invoice", sale.name, "consolidated_invoice")
+		)
+		self.assertEqual(
+			(consolidated_invoice.change_amount, consolidated_invoice.base_change_amount), (10, 10)
+		)
+		self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+
+		cash_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": consolidated_invoice.name, "account": "Cash - _TC", "is_cancelled": 0},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(sum(entry.debit - entry.credit for entry in cash_entries), 110)
