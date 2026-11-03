@@ -95,7 +95,6 @@ def get_plant_data(plant_floor):
 		"machines": get_machines(tuple({row.workstation for row in plant_floor.stages})),
 		"errors": errors,
 		"plan": None if errors else plant_floor.get_batch_plan().as_dict(),
-		"work_orders": get_work_orders(plant_floor.name) if plant_floor.get("creation") else [],
 	}
 
 
@@ -118,16 +117,6 @@ def get_item(item_code):
 
 	return frappe.get_cached_value(
 		"Item", item_code, ["item_name", "stock_uom", "weight_per_unit", "weight_uom"], as_dict=True
-	)
-
-
-def get_work_orders(plant_floor):
-	return frappe.get_list(
-		"Work Order",
-		filters={"plant_floor": plant_floor, "docstatus": ("<", 2)},
-		fields=["name", "status", "qty", "produced_qty", "creation"],
-		order_by="creation desc",
-		limit=5,
 	)
 
 
