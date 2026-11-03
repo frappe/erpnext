@@ -93,7 +93,8 @@ def get_depreciable_assets_data(date):
 		.where(a.calculate_depreciation == 1)
 		.where(a.docstatus == 1)
 		.where(ads.docstatus == 1)
-		.where(a.status.isin(["Submitted", "Partially Depreciated"]))
+		# an asset under maintenance keeps depreciating
+		.where(a.status.isin(["Submitted", "Partially Depreciated", "In Maintenance"]))
 		.where(ds.journal_entry.isnull())
 		.where(ds.schedule_date <= date)
 		# a.name/a.creation are constant per ads.name; include them so postgres accepts the
