@@ -1,6 +1,7 @@
 from collections import Counter
 
 import frappe
+from frappe.permissions import has_permission
 from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_workstation_details
@@ -91,11 +92,18 @@ def get_plant_data(plant_floor):
 	return {
 		"doc": plant_floor.as_dict(),
 		"is_saved": bool(plant_floor.get("creation")),
+		"can_write": can_write(plant_floor),
 		"item": get_item(plant_floor.production_item),
 		"machines": get_machines(tuple({row.workstation for row in plant_floor.stages})),
 		"errors": errors,
 		"plan": None if errors else plant_floor.get_batch_plan().as_dict(),
 	}
+
+
+def can_write(plant_floor):
+	if not plant_floor.get("creation"):
+		return bool(has_permission("Plant Floor", "create", print_logs=False))
+	return bool(has_permission("Plant Floor", "write", plant_floor, print_logs=False))
 
 
 def get_machines(workstations):

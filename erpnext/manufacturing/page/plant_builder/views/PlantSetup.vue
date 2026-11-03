@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, provide, ref, watch } from "vue";
 import { Button, ScrollArea, Switch } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SetupStatus from "../components/setup/SetupStatus.vue";
@@ -7,7 +7,7 @@ import ProductSection from "../components/setup/ProductSection.vue";
 import FormulaSection from "../components/setup/FormulaSection.vue";
 import StagesSection from "../components/setup/StagesSection.vue";
 import { __, call, openList, setRoute } from "../lib/api";
-import { newPlantDoc, toScenePlant } from "../lib/plant";
+import { READ_ONLY, newPlantDoc, toScenePlant } from "../lib/plant";
 import { previewView } from "../lib/scene";
 
 const props = defineProps({ name: String });
@@ -23,6 +23,8 @@ const focus = ref(null);
 let checkTimer = null;
 
 const dirty = computed(() => !!doc.value && JSON.stringify(doc.value) !== saved.value);
+const readOnly = computed(() => !data.value.can_write);
+provide(READ_ONLY, readOnly);
 
 function apply(result) {
 	data.value = result;
@@ -105,6 +107,7 @@ const canRun = computed(() => data.value.is_saved && !dirty.value && !data.value
 	<div v-if="doc" class="flex min-h-0 flex-1 flex-col">
 		<div class="flex h-12 shrink-0 items-center justify-end gap-2 border-b border-outline-gray-2 px-5">
 			<Button
+				v-if="!readOnly"
 				:variant="dirty ? 'solid' : 'subtle'"
 				icon-left="lucide-save"
 				:label="__('Save')"
@@ -123,7 +126,10 @@ const canRun = computed(() => data.value.is_saved && !dirty.value && !data.value
 		<div class="flex min-h-0 flex-1">
 			<aside class="flex w-[30rem] shrink-0 flex-col border-r border-outline-gray-2">
 				<ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-5 pb-16">
-					<div class="space-y-8">
+					<fieldset :disabled="readOnly" class="m-0 min-w-0 space-y-8 border-0 p-0">
+						<p v-if="readOnly" class="text-p-sm text-ink-gray-6">
+							{{ __("You can view this plant but not change it.") }}
+						</p>
 						<SetupStatus :errors="data.errors" />
 						<ProductSection :doc="doc" :item="data.item" :is-saved="data.is_saved" />
 						<FormulaSection :doc="doc" :machines="data.machines" />
@@ -134,7 +140,7 @@ const canRun = computed(() => data.value.is_saved && !dirty.value && !data.value
 							:focus="focus"
 							@focus="focus = $event"
 						/>
-					</div>
+					</fieldset>
 				</ScrollArea>
 			</aside>
 			<div class="relative min-w-0 flex-1 bg-surface-gray-1">

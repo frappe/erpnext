@@ -240,6 +240,19 @@ class TestPlantFloor(ERPNextTestSuite):
 			self.assertTrue(frappe.has_permission("Plant Floor", "read"))
 			self.assertRaises(frappe.PermissionError, check_plant, unsaved)
 
+	def test_plant_builder_setup_is_read_only_without_plant_floor_write(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import get_plant
+
+		plant = make_ketchup_plant().name
+		reader = create_user("plant-builder-reader@example.com", "Manufacturing User")
+		with self.set_user(reader.name):
+			self.assertFalse(get_plant(plant)["can_write"])
+
+		writer = create_user("plant-builder-writer@example.com", "Manufacturing Manager")
+		writer.add_roles("Manufacturing User")
+		with self.set_user(writer.name):
+			self.assertTrue(get_plant(plant)["can_write"])
+
 	def test_plant_builder_run_needs_plant_floor_read(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run, preview_lot
 
