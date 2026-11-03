@@ -309,6 +309,99 @@ class TestPaymentEntry(ERPNextTestSuite):
 						self.assertEqual(payment.reload().unallocated_amount, expected_unallocated)
 						payment.cancel()
 
+	def test_reconcile_rounded_foreign_advance_with_deduction(self):
+		for create_invoice, party in (
+			(
+				create_sales_invoice,
+				{"customer": "_Test Customer USD", "debit_to": "_Test Receivable USD - _TC"},
+			),
+			(
+				make_purchase_invoice,
+				{"supplier": "_Test Supplier USD", "credit_to": "_Test Payable USD - _TC"},
+			),
+		):
+			for deduction in (0, 0.5):
+				with self.subTest(doctype=create_invoice.__name__, deduction=deduction):
+					invoice = create_invoice(currency="USD", conversion_rate=80, qty=1, rate=200, **party)
+					payment = get_payment_entry(
+						invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+					)
+					payment.set("references", [])
+					if payment.payment_type == "Receive":
+						payment.paid_amount, payment.received_amount = 100, 8000
+						payment.source_exchange_rate, payment.target_exchange_rate = 80, 1
+					else:
+						payment.paid_amount, payment.received_amount = 8000, 100
+						payment.source_exchange_rate, payment.target_exchange_rate = 1, 80
+					if deduction:
+						payment.append(
+							"deductions",
+							{
+								"account": "Write Off - _TC",
+								"cost_center": "Main - _TC",
+								"amount": deduction if payment.payment_type == "Receive" else -deduction,
+							},
+						)
+					payment.submit()
+					self.assertEqual(payment.unallocated_amount, 100.01 if deduction else 100)
+
+					reconciliation = frappe.get_doc("Payment Reconciliation")
+					reconciliation.update(
+						{
+							"company": payment.company,
+							"party_type": payment.party_type,
+							"party": payment.party,
+							"receivable_payable_account": payment.party_account,
+							"bank_cash_account": "_Test Cash - _TC",
+							"payment_name": payment.name,
+							"invoice_name": invoice.name,
+						}
+					)
+					reconciliation.get_unreconciled_entries()
+					self.assertEqual(len(reconciliation.invoices), 1)
+					self.assertEqual(len(reconciliation.payments), 1)
+					reconciliation.allocate_entries(
+						frappe._dict(
+							invoices=[row.as_dict() for row in reconciliation.invoices],
+							payments=[row.as_dict() for row in reconciliation.payments],
+						)
+					)
+					reconciliation.reconcile()
+					self.assertEqual(payment.reload().unallocated_amount, 0)
+					self.assertEqual(invoice.reload().outstanding_amount, 99.99 if deduction else 100)
+					entries = frappe.get_all(
+						"GL Entry",
+						filters={
+							"voucher_type": payment.doctype,
+							"voucher_no": payment.name,
+							"is_cancelled": 0,
+						},
+						fields=[
+							"debit",
+							"credit",
+							"debit_in_transaction_currency",
+							"credit_in_transaction_currency",
+						],
+					)
+					self.assertEqual(flt(sum(row.debit - row.credit for row in entries), 2), 0)
+					self.assertEqual(
+						flt(
+							sum(
+								row.debit_in_transaction_currency - row.credit_in_transaction_currency
+								for row in entries
+							),
+							2,
+						),
+						0,
+					)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, 200)
+					overallocated = frappe.copy_doc(payment)
+					overallocated.references[0].allocated_amount += 0.01
+					with self.assertRaisesRegex(frappe.ValidationError, "Difference Amount must be zero"):
+						overallocated.submit()
+					invoice.cancel()
+
 	def test_unregistered_party_type_is_rejected(self):
 		doc = frappe.get_doc(doctype="Payment Entry", party_type="User", party="Administrator")
 		self.assertRaises(frappe.ValidationError, doc.validate_party_details)
