@@ -191,7 +191,10 @@ class Asset(AccountsController):
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
+		self.cancel_asset_capitalizations()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		if self.flags.cancelled_by_asset_capitalization:
+			self.ignore_linked_doctypes += ("Asset Capitalization",)
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 		self.db_set("booked_fixed_asset", 0)
 		add_asset_activity(self.name, _("Asset cancelled"))
@@ -706,6 +709,15 @@ class Asset(AccountsController):
 			)
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
+
+	def cancel_asset_capitalizations(self):
+		"""Cancel the submitted capitalizations into this asset, as the asset holds their value."""
+		capitalizations = frappe.get_all(
+			"Asset Capitalization", filters={"target_asset": self.name, "docstatus": 1}, pluck="name"
+		)
+		for capitalization in capitalizations:
+			if capitalization != self.flags.cancelled_by_asset_capitalization:
+				frappe.get_doc("Asset Capitalization", capitalization).cancel()
 
 	def cancel_movement_entries(self):
 		movements = frappe.db.sql(

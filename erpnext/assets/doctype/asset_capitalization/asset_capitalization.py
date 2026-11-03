@@ -132,12 +132,17 @@ class AssetCapitalization(StockController):
 		self.update_target_asset()
 
 	def before_cancel(self):
-		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 1:
-			frappe.throw(
-				_("Cancel the submitted Target Asset {0} before cancelling this Asset Capitalization").format(
-					get_link_to_form("Asset", self.target_asset)
-				)
-			)
+		self.cancel_target_asset()
+
+	def cancel_target_asset(self):
+		"""A submitted target asset carries the capitalised value, so it is cancelled together with this."""
+		if not self.target_asset or frappe.db.get_value("Asset", self.target_asset, "docstatus") != 1:
+			return
+
+		target_asset = frappe.get_doc("Asset", self.target_asset)
+
+		target_asset.flags.cancelled_by_asset_capitalization = self.name
+		target_asset.cancel()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
