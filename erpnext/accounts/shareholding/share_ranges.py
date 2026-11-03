@@ -190,4 +190,4 @@ def get_range_entries(company, share_class, start, end, folio=None, exclude_tran
 		query = query.where(
 			entry.share_transaction.isnull() | (entry.share_transaction != exclude_transaction)
 		)
-	return query.orderby(entry.creation).orderby(entry.posting_sequence).for_update().run(as_dict=True)
+	return query.orderby(entry.posting_sequence).for_update().run(as_dict=True)

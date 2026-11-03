@@ -26,65 +26,77 @@ def validate_posting(company, share_class, posting_date):
 def assert_cancellable(source, reversal_date=None):
 	"""Require dependent ownership operations to be reversed first."""
 	lock_company(source.company)
-	entries = frappe.get_all(
-		"Share Ledger Entry",
-		filters={"source_doctype": source.doctype, "source_name": source.name, "is_reversal": 0},
-		fields=["name", "share_class", "creation", "from_share_number", "to_share_number"],
-	)
-	earliest_by_class = {}
-	for entry in entries:
-		current = earliest_by_class.get(entry.share_class)
-		if current is None or entry.creation < current.creation:
-			earliest_by_class[entry.share_class] = entry
-	for entry in earliest_by_class.values():
-		movement = frappe.qb.DocType("Share Ledger Entry")
-		reversal = frappe.qb.DocType("Share Ledger Entry").as_("reversal")
-		later = (
-			frappe.qb.from_(movement)
-			.left_join(reversal)
-			.on(reversal.reversal_of == movement.name)
-			.select(movement.name)
-			.where(
-				(movement.company == source.company)
-				& (movement.share_class == entry.share_class)
-				& (movement.from_share_number <= entry.to_share_number)
-				& (movement.to_share_number >= entry.from_share_number)
-				& (movement.creation > entry.creation)
-				& ~((movement.source_doctype == source.doctype) & (movement.source_name == source.name))
-				& (movement.is_reversal == 0)
-				& reversal.name.isnull()
-			)
-			.limit(1)
-		).run()
-		if later:
+	for entry in get_earliest_entries_by_class(source):
+		checker = LaterMovementCheck(source, entry)
+		if checker.has_unreversed_movement():
 			frappe.throw(
 				_(
 					"Reverse later ownership movements affecting these share numbers before cancelling this document."
 				)
 			)
-		if reversal_date:
-			incompatible_reversal = (
-				frappe.qb.from_(movement)
-				.join(reversal)
-				.on(reversal.reversal_of == movement.name)
-				.select(movement.name)
-				.where(
-					(movement.company == source.company)
-					& (movement.share_class == entry.share_class)
-					& (movement.from_share_number <= entry.to_share_number)
-					& (movement.to_share_number >= entry.from_share_number)
-					& (movement.creation > entry.creation)
-					& ~((movement.source_doctype == source.doctype) & (movement.source_name == source.name))
-					& (movement.is_reversal == 0)
-					& (reversal.posting_date > movement.posting_date)
-					& (reversal.posting_date > getdate(reversal_date))
-				)
-				.limit(1)
-			).run()
-			if incompatible_reversal:
-				frappe.throw(
-					_(
-						"Cancellation would invalidate historical ownership before a later movement's reversal."
-					)
-				)
+		if reversal_date and checker.has_reversal_after(reversal_date):
+			frappe.throw(
+				_("Cancellation would invalidate historical ownership before a later movement's reversal.")
+			)
 		validate_posting(source.company, entry.share_class, nowdate())
+
+
+def get_earliest_entries_by_class(source):
+	entries = frappe.get_all(
+		"Share Ledger Entry",
+		filters={"source_doctype": source.doctype, "source_name": source.name, "is_reversal": 0},
+		fields=["name", "share_class", "posting_sequence", "from_share_number", "to_share_number"],
+		order_by="posting_sequence asc",
+	)
+	earliest = {}
+	for entry in entries:
+		earliest.setdefault(entry.share_class, entry)
+	return earliest.values()
+
+
+class LaterMovementCheck:
+	"""Find movements of the same share numbers posted after a source entry."""
+
+	def __init__(self, source, entry):
+		self.source = source
+		self.entry = entry
+		self.movement = frappe.qb.DocType("Share Ledger Entry")
+		self.reversal = frappe.qb.DocType("Share Ledger Entry").as_("reversal")
+
+	def has_unreversed_movement(self):
+		query = (
+			frappe.qb.from_(self.movement)
+			.left_join(self.reversal)
+			.on(self.reversal.reversal_of == self.movement.name)
+			.select(self.movement.name)
+			.where(self.get_later_movement_condition() & self.reversal.name.isnull())
+			.limit(1)
+		)
+		return bool(query.run())
+
+	def has_reversal_after(self, reversal_date):
+		query = (
+			frappe.qb.from_(self.movement)
+			.join(self.reversal)
+			.on(self.reversal.reversal_of == self.movement.name)
+			.select(self.movement.name)
+			.where(
+				self.get_later_movement_condition()
+				& (self.reversal.posting_date > self.movement.posting_date)
+				& (self.reversal.posting_date > getdate(reversal_date))
+			)
+			.limit(1)
+		)
+		return bool(query.run())
+
+	def get_later_movement_condition(self):
+		movement, entry, source = self.movement, self.entry, self.source
+		return (
+			(movement.company == source.company)
+			& (movement.share_class == entry.share_class)
+			& (movement.from_share_number <= entry.to_share_number)
+			& (movement.to_share_number >= entry.from_share_number)
+			& (movement.posting_sequence > entry.posting_sequence)
+			& ~((movement.source_doctype == source.doctype) & (movement.source_name == source.name))
+			& (movement.is_reversal == 0)
+		)

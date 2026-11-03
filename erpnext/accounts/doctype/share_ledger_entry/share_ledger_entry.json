@@ -93,6 +93,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Order in which entries were posted in this company. It always increases, also for a reversal dated earlier.",
    "fieldname": "posting_sequence",
    "fieldtype": "Int",
    "in_list_view": 1,

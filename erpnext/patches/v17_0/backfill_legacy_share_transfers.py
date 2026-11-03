@@ -264,12 +264,12 @@ def post_legacy_movements(prepared):
 			posting_key = f"legacy-share-transfer:{transfer.name}:{side}"
 			if frappe.db.exists("Share Ledger Entry", {"posting_key": posting_key}):
 				continue
-			sequence_key = (transfer.company, transfer.date)
+			sequence_key = transfer.company
 			if sequence_key not in sequences:
 				sequences[sequence_key] = cint(
 					frappe.db.get_value(
 						"Share Ledger Entry",
-						{"company": transfer.company, "posting_date": transfer.date},
+						{"company": transfer.company},
 						"posting_sequence",
 						order_by="posting_sequence desc",
 					)

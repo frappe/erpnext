@@ -55,6 +55,55 @@ class TestShareholdingReviewRegressions(ShareholdingTestCase):
 			first_issue.cancel()
 		self.assertEqual(frappe.db.get_value("Share Transaction", first_issue.name, "docstatus"), 2)
 
+	def test_posting_sequence_follows_posting_order_across_dates(self):
+		holder, other_holder = self.create_shareholder(), self.create_shareholder()
+		three_days_ago, two_days_ago, yesterday = (add_days(nowdate(), -days) for days in (3, 2, 1))
+		self.create_transaction(
+			transaction_type="Issue",
+			to_shareholder=holder,
+			from_share_number=1,
+			to_share_number=3,
+			face_value_per_share=10,
+			rate_per_share=15,
+			posting_date=three_days_ago,
+		)
+		self.create_transaction(
+			transaction_type="Buyback",
+			from_shareholder=holder,
+			from_share_number=1,
+			to_share_number=3,
+			rate_per_share=20,
+			posting_date=two_days_ago,
+		)
+		reissue = self.create_transaction(
+			transaction_type="Reissue",
+			to_shareholder=other_holder,
+			from_share_number=1,
+			to_share_number=3,
+			rate_per_share=25,
+			posting_date=yesterday,
+		)
+		second_buyback = self.create_transaction(
+			transaction_type="Buyback",
+			from_shareholder=other_holder,
+			from_share_number=1,
+			to_share_number=3,
+			rate_per_share=30,
+		)
+		with patch("erpnext.accounts.utils.is_immutable_ledger_enabled", return_value=False):
+			second_buyback.cancel()
+			# The reversal is dated yesterday but is posted after today's movements.
+			reissue.cancel()
+
+		sequences = frappe.get_all(
+			"Share Ledger Entry", filters={"company": self.company}, pluck="posting_sequence", order_by="creation"
+		)
+		self.assertEqual(sequences, sorted(set(sequences)))
+		retirement = self.create_transaction(
+			transaction_type="Retirement", from_share_number=1, to_share_number=3
+		)
+		self.assertEqual(retirement.treasury_cost, 60)
+
 	def test_cancel_rejects_changed_submitted_range(self):
 		issue = self.issue()
 		transfer = self.create_transaction(

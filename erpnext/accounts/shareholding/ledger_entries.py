@@ -17,7 +17,7 @@ def create_ledger_entry(
 	reversal_of=None,
 	original=None,
 ):
-	posting_sequence = get_next_posting_sequence(transaction.company, posting_date)
+	posting_sequence = get_next_posting_sequence(transaction.company)
 	entry = frappe.get_doc(
 		{
 			"doctype": "Share Ledger Entry",
@@ -60,11 +60,16 @@ def create_ledger_entry(
 	return entry
 
 
-def get_next_posting_sequence(company, posting_date):
+def get_next_posting_sequence(company):
+	"""Return the next company-wide sequence.
+
+	It records the order of posting. A cancellation can post a reversal on an
+	earlier date, so posting date alone cannot replay ownership correctly.
+	"""
 	lock_company(company)
 	sequence = frappe.db.get_value(
 		"Share Ledger Entry",
-		{"company": company, "posting_date": posting_date},
+		{"company": company},
 		"posting_sequence",
 		order_by="posting_sequence desc",
 		for_update=True,

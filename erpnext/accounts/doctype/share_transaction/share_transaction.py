@@ -208,7 +208,7 @@ class ShareTransaction(TransactionAccounting, TransactionSettlement, Document):
 				"Share Ledger Entry",
 				{"company": self.company, "share_class": self.share_class, "face_value_per_share": [">", 0]},
 				"face_value_per_share",
-				order_by="posting_date asc, posting_sequence asc",
+				order_by="posting_sequence asc",
 				for_update=True,
 			)
 			if existing_face_value is not None and flt(existing_face_value) != flt(self.face_value_per_share):
@@ -299,7 +299,7 @@ class ShareTransaction(TransactionAccounting, TransactionSettlement, Document):
 			"Share Ledger Entry",
 			filters={"share_transaction": self.name, "is_reversal": 0},
 			fields=["name", "share_folio", "quantity_change", "treasury_cost_change", *REVERSED_FIELDS],
-			order_by="posting_sequence asc",
+			order_by="posting_sequence desc",
 		)
 
 	def get_reversal_date(self):

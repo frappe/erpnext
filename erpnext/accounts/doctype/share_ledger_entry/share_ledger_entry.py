@@ -60,9 +60,7 @@ def on_doctype_update():
 		"equity_position_lookup",
 	)
 	frappe.db.add_index("Share Ledger Entry", ["source_doctype", "source_name"], "equity_source_lookup")
-	frappe.db.add_index(
-		"Share Ledger Entry", ["company", "posting_date", "posting_sequence"], "share_posting_sequence"
-	)
+	frappe.db.add_index("Share Ledger Entry", ["company", "posting_sequence"], "company_posting_sequence")
 	frappe.db.add_index(
 		"Share Ledger Entry",
 		["company", "share_class", "from_share_number", "to_share_number"],
