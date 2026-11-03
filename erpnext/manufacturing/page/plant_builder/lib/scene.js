@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, inject, provide, ref } from "vue";
 import { useEventListener } from "@vueuse/core";
 import { machineOf, machineSize } from "./machines";
 import { YC } from "./layout";
@@ -6,6 +6,7 @@ import { __ } from "./api";
 import { clamp, fmt, plural } from "./format";
 
 const VIEWS = { "3d": [-24, 56], top: [0, 0], front: [0, 72] };
+const CAMERA = Symbol("camera");
 
 export function useOrbitCamera() {
 	const [rot, tilt] = VIEWS["3d"].map((angle) => ref(angle));
@@ -13,6 +14,7 @@ export function useOrbitCamera() {
 	const zoom = ref(1);
 	const dragging = ref(false);
 	const orbit = { on: false, x: 0, y: 0, moved: 0 };
+	provide(CAMERA, { rot, tilt });
 
 	const animateTo = (toRot, toTilt) => turnCamera(rot, tilt, toRot, toTilt);
 	const zoomBy = (step) => (zoom.value = clamp(zoom.value + step, 0.5, 3));
@@ -43,6 +45,19 @@ export function useOrbitCamera() {
 	});
 
 	return { viewName, rot, tilt, zoom, dragging, animateTo, setView, zoomBy, onWheel, onDown };
+}
+
+export function useFacing(normals, margin = 0.01) {
+	const camera = inject(CAMERA, null);
+	return computed(() => {
+		const angles = typeof normals === "function" ? normals() : normals;
+		if (!camera) return 2 ** angles.length - 1;
+		const tilt = Math.sin((camera.tilt.value * Math.PI) / 180);
+		return angles.reduce((mask, angle, i) => {
+			const facing = Math.cos(((angle + camera.rot.value) * Math.PI) / 180) * tilt;
+			return facing > margin ? mask | (1 << i) : mask;
+		}, 0);
+	});
 }
 
 function turnCamera(rot, tilt, toRot, toTilt) {

@@ -1,6 +1,5 @@
 <script setup>
 import { computed } from "vue";
-import Box from "./Box.vue";
 import FlowStrip from "./FlowStrip.vue";
 
 const props = defineProps({
@@ -13,6 +12,7 @@ const props = defineProps({
 });
 
 const T = 8;
+const LIFT = 4;
 const across = computed(() => props.y1 === props.y2);
 const rect = computed(() => ({
 	x: Math.min(props.x1, props.x2) - T / 2,
@@ -26,16 +26,27 @@ const sign = computed(
 </script>
 
 <template>
-	<Box :x="rect.x" :y="rect.y" :w="rect.w" :d="rect.d" :h="T" tone="steel" />
-	<FlowStrip
-		:x="rect.x"
-		:y="rect.y"
-		:w="rect.w"
-		:d="rect.d"
-		:z="T + 0.5"
-		:color="color"
-		:vertical="!across"
-		:sign="sign"
-		:running="flowing"
-	/>
+	<div
+		class="absolute border border-outline-gray-4 bg-surface-gray-2"
+		:style="{
+			left: `${rect.x}px`,
+			top: `${rect.y}px`,
+			width: `${rect.w}px`,
+			height: `${rect.d}px`,
+			transform: `translateZ(${LIFT}px)`,
+			transformStyle: 'preserve-3d',
+		}"
+	>
+		<FlowStrip
+			:x="0"
+			:y="0"
+			:w="rect.w - 2"
+			:d="rect.d - 2"
+			:z="0.5"
+			:color="color"
+			:vertical="!across"
+			:sign="sign"
+			:running="flowing"
+		/>
+	</div>
 </template>
