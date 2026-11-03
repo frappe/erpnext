@@ -19,6 +19,12 @@ watch(qty, (value) => {
 		timer = setTimeout(() => run.setQty(num(value)), 600);
 });
 
+async function start() {
+	clearTimeout(timer);
+	if (num(qty.value) !== num(order.value.qty)) await run.setQty(num(qty.value));
+	await run.start();
+}
+
 const overfull = computed(() =>
 	plan.value.stages
 		.filter((stage) => !stage.inputs.length)
@@ -123,7 +129,7 @@ const subtitle = computed(() =>
 				class="w-full"
 				:loading="run.busy.value"
 				:disabled="!!error"
-				@click="run.start()"
+				@click="start"
 			/>
 		</div>
 	</div>
