@@ -180,10 +180,15 @@ def make_work_order(plant_floor: str, qty: float | None = None) -> str:
 
 @frappe.whitelist()
 def get_run(work_order: str) -> dict:
-	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+	run = get_plant_run(work_order, "read")
+	return {**PlantRunState(run).as_dict(), "plant": get_plant_data(run.plant_floor)}
+
+
+def get_plant_run(work_order, ptype):
+	frappe.has_permission("Work Order", ptype, doc=work_order, throw=True)
 	run = PlantRun(work_order)
 	run.plant_floor.check_permission("read")
-	return {**PlantRunState(run).as_dict(), "plant": get_plant_data(run.plant_floor)}
+	return run
 
 
 @frappe.whitelist(methods=["POST"])
@@ -224,9 +229,7 @@ def restart_machine(
 
 @frappe.whitelist()
 def preview_lot(work_order: str, job_card: str, quantities: str | dict | None = None) -> dict:
-	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
-	run = PlantRun(work_order)
-	run.plant_floor.check_permission("read")
+	run = get_plant_run(work_order, "read")
 	return run.preview(job_card, frappe.parse_json(quantities) if quantities else {})
 
 
@@ -250,7 +253,6 @@ def produce_output(
 
 
 def run_action(work_order, action):
-	frappe.has_permission("Work Order", "write", doc=work_order, throw=True)
-	action(PlantRun(work_order))
+	action(get_plant_run(work_order, "write"))
 	frappe.clear_messages()
 	return get_run(work_order)
