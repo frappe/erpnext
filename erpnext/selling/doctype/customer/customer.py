@@ -159,6 +159,7 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
+		self.validate_primary_contact_and_address()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
 
@@ -245,6 +246,36 @@ class Customer(TransactionBase):
 				),
 				title=_("Internal Customer Already Exists"),
 			)
+
+	def validate_primary_contact_and_address(self):
+		for fieldname, doctype in (
+			("customer_primary_contact", "Contact"),
+			("customer_primary_address", "Address"),
+		):
+			name = self.get(fieldname)
+			if name and self.has_value_changed(fieldname) and not self.is_linked_to_self(doctype, name):
+				frappe.throw(
+					_("{0} {1} is not linked to Customer {2}").format(
+						_(doctype), frappe.bold(name), frappe.bold(self.name)
+					)
+				)
+
+	def is_linked_to_self(self, doctype, name):
+		allowed_links = {("Customer", self.name)}
+		if self.is_new():
+			# Lead, Opportunity and Prospect contacts and addresses get linked to the customer on insert.
+			allowed_links |= {
+				("Lead", self.lead_name),
+				("Opportunity", self.opportunity_name),
+				("Prospect", self.prospect_name),
+			}
+
+		links = frappe.get_all(
+			"Dynamic Link",
+			filters={"parenttype": doctype, "parent": name},
+			fields=["link_doctype", "link_name"],
+		)
+		return any((link.link_doctype, link.link_name) in allowed_links for link in links)
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
