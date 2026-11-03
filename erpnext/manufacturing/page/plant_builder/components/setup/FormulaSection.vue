@@ -1,14 +1,15 @@
 <script setup>
-import { computed } from "vue";
+import { computed, inject, ref } from "vue";
 import { Badge, Button, Dropdown, TextInput } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH, isPackingModel } from "../../lib/machines";
-import { balancePercentage, machineModelOf } from "../../lib/plant";
+import { READ_ONLY, balancePercentage, machineModelOf } from "../../lib/plant";
 import { fmt } from "../../lib/format";
 
 const props = defineProps({ doc: Object, machines: { type: Object, default: () => ({}) } });
+const readOnly = inject(READ_ONLY, ref(false));
 
 const materials = computed(() => props.doc.materials);
 const balanceRow = computed(() => materials.value.find((row) => row.is_balance_item));
@@ -108,13 +109,13 @@ const add = () =>
 					size="sm"
 					class="[&_input]:bg-surface-base [&_input]:text-right"
 				/>
-				<Dropdown :options="rowMenu(row)">
+				<Dropdown v-if="!readOnly" :options="rowMenu(row)">
 					<Button variant="ghost" size="sm" icon="lucide-ellipsis" :aria-label="__('More')" />
 				</Dropdown>
 			</div>
 		</div>
 		<div class="flex items-center gap-3">
-			<Button icon-left="lucide-plus" :label="__('Add Material')" @click="add" />
+			<Button v-if="!readOnly" icon-left="lucide-plus" :label="__('Add Material')" @click="add" />
 			<p class="min-w-0 truncate text-xs text-ink-gray-5">
 				<template v-if="balanceRow">
 					{{

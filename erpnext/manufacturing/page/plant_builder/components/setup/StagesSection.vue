@@ -1,11 +1,11 @@
 <script setup>
-import { computed } from "vue";
+import { computed, inject, ref } from "vue";
 import { Button, Dropdown } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
 import { isPackingModel, machineOf } from "../../lib/machines";
-import { insertStage, machineModelOf } from "../../lib/plant";
+import { READ_ONLY, insertStage, machineModelOf } from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
@@ -13,6 +13,7 @@ const props = defineProps({
 	catalog: { type: Array, default: () => [] },
 	focus: { type: Number, default: null },
 });
+const readOnly = inject(READ_ONLY, ref(false));
 const emit = defineEmits(["focus"]);
 
 const models = computed(() => props.doc.stages.map((stage) => machineModelOf(stage, props.machines)));
@@ -67,7 +68,7 @@ const addOptions = computed(() =>
 			:focused="focus === i"
 			@focus="emit('focus', $event)"
 		/>
-		<Dropdown v-if="addOptions.length" :options="addOptions">
+		<Dropdown v-if="addOptions.length && !readOnly" :options="addOptions">
 			<Button icon-left="lucide-plus" :label="__('Add Stage')" />
 		</Dropdown>
 		<p v-else class="text-p-sm text-ink-gray-5">
