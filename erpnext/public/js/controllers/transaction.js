@@ -1220,10 +1220,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 		this.set_dynamic_labels();
 		let company_currency = this.get_company_currency();
-		// Currency the stored margins/actual charges are denominated in, captured
-		// before this trigger updates the tracker for the next one.
-		let previous_currency = this._doc_currency;
-		this._doc_currency = this.frm.doc.currency;
 		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& (!this.frm.doc.__onload?.load_after_mapping || inter_company_reference
@@ -1236,14 +1232,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						// currency; convert them only when the currency itself changed,
 						// not when just the exchange rate was refreshed (e.g. by a date
 						// change), otherwise the entered margin keeps shrinking.
-						if (previous_currency !== me.frm.doc.currency) {
+						if (me._doc_currency !== me.frm.doc.currency) {
 							me.set_margin_amount_based_on_currency(exchange_rate);
 							me.set_actual_charges_based_on_currency(exchange_rate);
 						}
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
+					// Advance only after converting, so overlapping triggers can't skip it.
+					me._doc_currency = me.frm.doc.currency;
 				});
 		} else {
+			this._doc_currency = this.frm.doc.currency;
 			// company currency and doc currency is same
 			// this will prevent unnecessary conversion rate triggers
 			if(this.frm.doc.currency === this.get_company_currency()) {
