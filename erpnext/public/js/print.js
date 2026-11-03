@@ -14,20 +14,21 @@ const allowed_print_formats = doctype_list.flatMap((doctype) =>
 );
 const allowed_letterheads = ["Company Letterhead", "Company Letterhead - Grey"];
 
-handle_route_event();
+const checked_documents = new Set();
 
-function handle_route_event() {
-	const route = frappe.get_route();
-	const current_doctype = route[1];
-	const current_docname = route[2];
+const preview = frappe.ui.form.PrintView.prototype.preview;
+frappe.ui.form.PrintView.prototype.preview = function () {
+	preview.call(this);
+	check_company_details(this.frm.doctype, this.frm.docname);
+};
 
-	if (!doctype_list.includes(current_doctype)) return;
+function check_company_details(doctype, docname) {
+	const key = `${doctype}:${docname}`;
+	if (!doctype_list.includes(doctype) || checked_documents.has(key)) return;
+	if (!should_fetch_company_details()) return;
 
-	setTimeout(() => {
-		if (should_fetch_company_details()) {
-			fetch_company_details(current_doctype, current_docname);
-		}
-	}, 500);
+	checked_documents.add(key);
+	fetch_company_details(doctype, docname);
 }
 
 function should_fetch_company_details() {
@@ -56,6 +57,11 @@ function open_company_details_dialog(data, current_doctype) {
 		primary_action_label: __("Save"),
 		primary_action(values) {
 			save_company_details(dialog, data, values, current_doctype);
+		},
+		secondary_action_label: __("Skip"),
+		secondary_action() {
+			skip_company_details(data.company);
+			dialog.hide();
 		},
 	});
 
@@ -127,6 +133,18 @@ function make_field(label, fieldname, fieldtype, existing_value, required_if_emp
 		reqd: existing_value ? 0 : required_if_empty ? 1 : 0,
 		hidden: existing_value ? 1 : 0,
 	};
+}
+
+function skip_company_details(company) {
+	frappe.model.user_settings.get("Company").then((settings) => {
+		const skipped = settings.skipped_print_details || [];
+		if (skipped.includes(company)) return;
+
+		frappe.xcall("frappe.model.utils.user_settings.save", {
+			doctype: "Company",
+			user_settings: { skipped_print_details: [...skipped, company] },
+		});
+	});
 }
 
 function save_company_details(dialog, data, values, current_doctype) {
