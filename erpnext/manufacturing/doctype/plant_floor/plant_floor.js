@@ -22,6 +22,8 @@ frappe.ui.form.on("Plant Floor", {
 	},
 
 	refresh(frm) {
+		if (frappe._from_link?.field_obj?.df?.options === frm.doctype) return;
+
 		frappe.route_flags.replace_route = true;
 		frappe.set_route("plant-builder", frm.is_new() ? "new" : frm.doc.name);
 	},
