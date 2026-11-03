@@ -5,8 +5,7 @@ import { computed } from "vue"
 import { usePortalIdentity } from "@app/composables/usePortalIdentity"
 import { useSession } from "@app/composables/useSession"
 import {
-	addressRows,
-	copyValue,
+	postalAddress,
 	descriptionOf,
 	EMPTY,
 	formatDate,
@@ -19,6 +18,7 @@ import {
 	printDocument,
 	RED,
 	routeOpener,
+	numbered,
 } from "@app/utils"
 import {
 	quoteCanBeRevised,
@@ -89,34 +89,41 @@ export default function setup(context) {
 		return rows
 	})
 
-	// the buyer's addresses: where to bill, and where to deliver
-	const billingAddress = computed(() => addressRows(doc.value.company ?? "", doc.value.billing_address_display))
-	const shippingAddress = computed(() =>
-		addressRows(doc.value.company ?? "", doc.value.shipping_address_display || doc.value.billing_address_display),
-	)
+	// the buyer's addresses: where to bill, and where to deliver; one row when they are one place
+	const addressDetails = computed(() => {
+		const company = doc.value.company ?? ""
+		const billing = postalAddress(doc.value.billing_address_display)
+		const shipping = postalAddress(doc.value.shipping_address_display) || billing
+		if (!billing && !shipping) return []
+		if (billing === shipping) return [{ key: "both", label: __("Bill and deliver to"), name: company, address: billing }]
+		return [
+			{ key: "bill", label: __("Bill to"), name: company, address: billing },
+			{ key: "deliver", label: __("Deliver to"), name: company, address: shipping },
+		]
+	})
 
 	// ---------------------------------------------------------------- items
 	const currency = computed(() => doc.value.currency || "")
 
+	const itemsTitle = computed(() => __("What you quoted"))
+
 	const items = computed(() =>
-		(doc.value.items ?? []).map((row: any) => {
-			const terms = [
-				// first: on an ordered quote it is what matters, and the line is cut short from the end
-				orderedOfQuoted(row, row.uom),
-				row.discount_percentage
-					? __("{0} less {1}%", [formatMoney(row.price_list_rate, currency.value), row.discount_percentage])
-					: "",
+		(doc.value.items ?? []).map((row: any) => ({
+			name: row.item_name || row.item_code,
+			image: row.image,
+			description: [
 				row.expected_delivery_date ? __("delivery by {0}", [formatDate(row.expected_delivery_date)]) : "",
-			]
-			return {
-				name: row.item_name || row.item_code,
-				image: row.image,
-				description: [...terms, descriptionOf(row)].filter(Boolean).join(" · "),
-				qty: formatQty(row.qty, row.uom),
-				rate: formatMoney(row.rate, currency.value),
-				amount: formatMoney(row.amount, currency.value),
-			}
-		}),
+				descriptionOf(row),
+			].filter(Boolean).join(" · "),
+			ordered: orderedOfQuoted(row, row.uom),
+			qty: formatQty(row.qty, row.uom),
+			rate: formatMoney(row.rate, currency.value),
+			// the list price and discount the rate comes from, under it
+			rateCaption: row.discount_percentage
+				? __("{0} less {1}%", [formatMoney(row.price_list_rate, currency.value), row.discount_percentage])
+				: "",
+			amount: formatMoney(row.amount, currency.value),
+		})),
 	)
 
 	// the server only sends photos when the print format shows them
@@ -137,12 +144,11 @@ export default function setup(context) {
 	return {
 		...usePortalNotifications(context),
 		notFound, failure, loaded,
-		copyValue,
 		crumbs, status, statusTheme: theme, goTo, canAct, revise, responseNote, responseTheme,
 		// the document's own print format, as the customer portal prints; ERPNext lets a supplier's portal users print their own
 		printDocument: () => printDocument("Supplier Quotation", docId.value),
-		salesInfo, billingAddress, shippingAddress,
-		items, itemImages, totals, amountInWords, termsText,
+		salesInfo, addressDetails,
+		itemsTitle, items: numbered(items), itemImages, totals, amountInWords, termsText,
 		comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}

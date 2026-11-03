@@ -411,19 +411,6 @@
                        "blockName": "Your no.",
                        "children": [
                         {
-                         "blockName": "Icon",
-                         "classes": [
-                          "size-3.5",
-                          "text-ink-gray-5"
-                         ],
-                         "componentId": "span-5fc0v9uv1",
-                         "componentName": "Icon",
-                         "componentProps": {
-                          "icon": "lucide-hash"
-                         },
-                         "componentSlots": {}
-                        },
-                        {
                          "baseStyles": {
                           "color": "var(--ink-gray-5)",
                           "minWidth": "0px",
