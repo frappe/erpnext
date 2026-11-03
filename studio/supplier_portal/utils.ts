@@ -3,6 +3,7 @@
  *  anything about RFQs, quotations, orders, receipts or invoices — those rules live in
  *  lib/documents.ts. */
 
+import { computed, type Ref } from "vue"
 import { dayjs, toast } from "frappe-ui"
 import { DEFAULT_NUMBER_FORMAT, flt, formatNumber } from "@framework/ui/components/FormLayout/formatNumber"
 import { __ } from "@app/lib/translate"
@@ -76,6 +77,8 @@ export const INK7 = "var(--ink-gray-7)"
 export const INK6 = "var(--ink-gray-6)"
 export const INK5 = "var(--ink-gray-5)"
 export const RED = "var(--ink-red-7)"
+export const GREEN = "var(--ink-green-7)"
+export const AMBER = "var(--ink-amber-7)"
 
 /** One label/value row of a detail page's info grid. */
 export function line(label: string, value: string, color = INK8, weight = "420") {
@@ -102,6 +105,11 @@ function splitAddress(display: string | null | undefined): { postal: string; con
 
 	// joined rather than one row per line: blank pieces would otherwise print ", ,"
 	return { postal: postal.join(", "), contacts }
+}
+
+/** An address on one line, without its contact lines: what a Details row shows after the company. */
+export function postalAddress(display: string | null | undefined): string {
+	return splitAddress(display).postal
 }
 
 /** A detail page's address column: who, where (when there is an address), and any extra line such as
@@ -236,3 +244,9 @@ export function readableError(error: any, fallback = __("Could not send that jus
 	}
 	return fallback
 }
+
+/** Item rows with their line number, as the desk's item grid shows it. */
+export function numbered<T extends object>(rows: Ref<T[]>) {
+	return computed(() => rows.value.map((row, i) => ({ ...row, no: String(i + 1) })))
+}
+

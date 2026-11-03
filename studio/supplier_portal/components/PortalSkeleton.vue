@@ -27,61 +27,62 @@
 		</div>
 
 		<!-- a document page: the info and address columns, the item table and its total -->
-		<div v-else-if="variant === 'detail'" class="mx-auto flex max-w-[900px] flex-col gap-6">
-			<div class="grid grid-cols-3 gap-8">
-				<div class="flex min-w-0 flex-col gap-3">
-					<Line text="text-sm-medium" width="2.5rem" />
+		<!-- a document page in the side-panel layout: the note and item table, then the facts beside them
+		     on a wide screen (below it, under them), as `.portal-doc` lays the page out -->
+		<div v-else-if="variant === 'detail'" class="portal-doc">
+			<div class="portal-doc-lead">
+				<div class="flex w-full flex-col">
+					<Skeleton :class="[BLOCK, 'mb-6 h-11 w-full rounded']" />
+					<Line text="text-lg-semibold" width="9rem" />
 					<div
-						class="grid gap-x-4 gap-y-2.5"
-						style="grid-template-columns: max-content minmax(0, 1fr)"
+						class="mt-3 grid h-8 items-center gap-3.5 px-3"
+						:style="{ gridTemplateColumns: columns.join(' ') }"
 					>
-						<template v-for="i in 4" :key="i">
-							<Line text="text-p-sm" width="3rem" />
-							<Line text="text-p-base" :width="width(i, 50)" />
-						</template>
+						<Line text="text-sm" width="1rem" end />
+						<Line text="text-sm" width="2rem" />
+						<Line v-for="c in columns.length - 2" :key="c" text="text-sm" width="3rem" end />
 					</div>
-				</div>
-				<div v-for="column in 2" :key="column" class="flex min-w-0 flex-col gap-3">
-					<Line text="text-sm-medium" width="7rem" />
-					<div class="flex flex-col gap-1">
-						<Line text="text-p-base" width="60%" />
-						<Line text="text-p-base" width="90%" />
-						<Line text="text-p-base" width="50%" />
+					<div
+						v-for="i in 2"
+						:key="i"
+						class="grid items-start gap-3.5 border-b border-outline-gray-1 px-3 py-3"
+						:style="{ gridTemplateColumns: columns.join(' ') }"
+					>
+						<Line text="text-sm" width="0.5rem" end />
+						<div class="flex min-w-0 items-start gap-2.5">
+							<Skeleton :class="[BLOCK, 'size-8 shrink-0 rounded']" />
+							<div class="flex min-w-0 flex-1 flex-col gap-0.5">
+								<Line text="text-base-medium" :width="width(i, 30)" />
+								<Line text="text-p-sm" :width="width(i + 2, 45)" />
+							</div>
+						</div>
+						<Line
+							v-for="c in columns.length - 2"
+							:key="c"
+							text="text-base"
+							:width="c === 1 ? '60%' : '75%'"
+							end
+						/>
+					</div>
+					<!-- the total, at the right edge -->
+					<div class="ml-auto w-48 pt-4">
+						<Line text="text-p-base" width="100%" />
 					</div>
 				</div>
 			</div>
-
-			<div class="flex flex-col">
-				<div
-					class="grid h-8 items-center gap-3.5"
-					:style="{ gridTemplateColumns: columns.join(' ') }"
-				>
-					<Line text="text-sm" width="2rem" />
-					<Line v-for="c in columns.length - 1" :key="c" text="text-sm" width="3rem" end />
-				</div>
-				<div
-					v-for="i in 2"
-					:key="i"
-					class="grid h-[62px] items-center gap-3.5"
-					:style="{ gridTemplateColumns: columns.join(' ') }"
-				>
-					<div class="flex min-w-0 items-center gap-2.5">
-						<Skeleton :class="[BLOCK, 'size-8 shrink-0 rounded']" />
-						<div class="flex min-w-0 flex-1 flex-col gap-0.5">
-							<Line text="text-base-medium" :width="width(i, 30)" />
-							<Line text="text-p-sm" :width="width(i + 2, 45)" />
-						</div>
+			<div class="portal-doc-aside flex flex-col gap-6">
+				<div class="flex w-full flex-col gap-3">
+					<Line text="text-sm" width="3rem" />
+					<div v-for="i in 4" :key="i" class="flex justify-between gap-3">
+						<Line text="text-base" width="5rem" />
+						<Line text="text-base" width="6rem" end />
 					</div>
-					<Line
-						v-for="c in columns.length - 1"
-						:key="c"
-						text="text-base"
-						:width="c === 1 ? '60%' : '75%'"
-						end
-					/>
 				</div>
-				<div class="border-t border-outline-gray-1 pt-2.5">
-					<Line text="text-p-base" width="12rem" end />
+				<div class="flex w-full flex-col gap-1 border-t border-outline-gray-1 pt-6">
+					<Line text="text-sm" width="6rem" />
+					<Line text="text-base-semibold" width="60%" />
+					<Line text="text-p-sm" width="90%" />
+					<Line text="text-p-sm" width="70%" />
 				</div>
 			</div>
 		</div>
@@ -173,6 +174,82 @@ Line.props = ["text", "width", "end"];
 @keyframes portal-fade-in {
 	from {
 		opacity: 0;
+	}
+}
+/* A document page: the items lead, the facts sit in a side panel on the right, and everything longer
+   (terms, payments, comments) follows the items. The panel only sits beside the items on a wide
+   screen, where the item table still has room; narrower, it is one column in the same order. Studio
+   blocks have no wide-screen breakpoint, so the layout lives here. */
+.portal-doc {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+}
+.portal-doc-lead,
+.portal-doc-rest {
+	padding: 24px 24px 0;
+}
+.portal-doc-rest {
+	padding-top: 32px;
+	padding-bottom: 64px;
+	border-top: 1px solid var(--outline-gray-1);
+}
+.portal-doc-lead > *,
+.portal-doc-rest > * {
+	width: 100%;
+	max-width: 880px;
+	margin-inline: auto;
+}
+.portal-doc-aside {
+	margin-top: 32px;
+	padding: 24px;
+	border-top: 1px solid var(--outline-gray-1);
+}
+.portal-doc-aside > * {
+	max-width: 880px;
+	margin-inline: auto;
+}
+.portal-side-section + .portal-side-section {
+	border-top: 1px solid var(--outline-gray-1);
+	padding-top: 24px;
+}
+@media (max-width: 767px) {
+	.portal-doc-lead,
+	.portal-doc-rest,
+	.portal-doc-aside {
+		padding-inline: 12px;
+	}
+}
+@media (min-width: 1280px) {
+	.portal-doc {
+		grid-template-columns: minmax(0, 1fr) 20rem;
+		grid-template-rows: auto 1fr;
+		min-height: 100%;
+	}
+	.portal-doc-lead {
+		grid-column: 1;
+		grid-row: 1;
+	}
+	.portal-doc-rest {
+		grid-column: 1;
+		grid-row: 2;
+		border-top: 0;
+	}
+	.portal-doc-aside {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+		margin-top: 0;
+		padding: 24px 20px 40px;
+		border-top: 0;
+		border-left: 1px solid var(--outline-gray-1);
+		align-self: stretch;
+	}
+	.portal-doc-aside > * {
+		max-width: none;
+	}
+}
+@media (min-width: 1536px) {
+	.portal-doc {
+		grid-template-columns: minmax(0, 1fr) 22rem;
 	}
 }
 /* Printing a page (an RFQ, a receipt): the document only, without the sidebar, buttons or comment
