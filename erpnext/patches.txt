@@ -571,3 +571,4 @@ execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superse
 erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
 erpnext.patches.v16_0.share_assigned_appointments_with_agents
 erpnext.patches.v16_0.link_receipt_reservations_to_production_plan_rows
+erpnext.patches.v16_0.merge_grey_letter_head_into_company_letter_head
