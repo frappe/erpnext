@@ -11,6 +11,12 @@ LIKE_WILDCARDS = r"[%_]"
 QUEUE_PREFIX = "Item:"
 BARCODE_COLUMN = "barcodes"
 TOKENIZER = "trigram remove_diacritics 1"
+MINIMUM_SQLITE_VERSION = (3, 45, 0)
+
+
+def sqlite_supports_tokenizer() -> bool:
+	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
+	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
 
 
 def get_searched_fieldnames() -> list[str]:
@@ -121,8 +127,11 @@ class ItemSearch(SQLiteSearch):
 		return get_barcodes_by_item([item_code]).get(item_code, "")
 
 	def is_search_enabled(self) -> bool:
-		"""Off unless Global Defaults opts in: building reads every Item, which is not free."""
-		return bool(frappe.get_single_value("Global Defaults", "enable_item_search_index"))
+		"""Off unless Global Defaults opts in, since building reads every Item, and off on SQLite
+		that cannot build the tokenizer."""
+		return sqlite_supports_tokenizer() and bool(
+			frappe.get_single_value("Global Defaults", "enable_item_search_index")
+		)
 
 	def get_search_filters(self) -> dict:
 		return {}
