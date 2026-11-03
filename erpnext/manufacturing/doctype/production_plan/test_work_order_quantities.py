@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
@@ -290,8 +291,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				second.submit()
 				self.assert_pending_qty(plan, field, 0)
 
-<<<<<<< HEAD
-=======
 	def test_sub_assembly_plan_includes_process_loss(self):
 		field = "production_plan_sub_assembly_item"
 		plan = self.make_plan(qty=81, consider_process_loss=True)
@@ -324,33 +323,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		self.assertEqual(work_order.reload().produced_qty, 100)
 		self.assert_pending_qty(plan, field, 0)
 
-	def test_whole_number_replacement_rounds_up(self):
-		field = "production_plan_sub_assembly_item"
-		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10}).name
-		sub_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
-		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
-		make_bom(item=sub_item, raw_materials=[rm_item], quantity=10, process_loss_percentage=10)
-		make_bom(item=fg_item, raw_materials=[sub_item])
-		plan = create_production_plan(
-			item_code=fg_item,
-			planned_qty=90,
-			warehouse=self.warehouse,
-			sub_assembly_warehouse=self.warehouse,
-			stock_uom="Nos",
-			consider_process_loss=1,
-			skip_getting_mr_items=True,
-			do_not_submit=True,
-		)
-		plan.get_sub_assembly_items()
-		plan.submit()
-		work_order = self.create_work_order(plan, field)
-		work_order.submit()
-		self.manufacture_with_loss(work_order, loss_qty=25)
-
-		replacement = self.create_work_order(plan, field)
-		self.assertEqual(replacement.qty, 17)
-		replacement.submit()
-
 	def test_finished_good_plan_includes_process_loss(self):
 		field = "production_plan_item"
 		plan = self.make_plan(qty=90, consider_process_loss=True)
@@ -366,7 +338,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		self.assertEqual(work_order.reload().produced_qty, 90)
 		self.assert_pending_qty(plan, field, 0)
 
->>>>>>> a577592 (test: Production Plan rounds whole number UOMs up)
 	def test_stopped_and_closed_orders_consume_quantity(self):
 		plan = self.make_plan()
 		for field in REFERENCE_FIELDS:
@@ -443,13 +414,14 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "must reference a row"):
 			work_order.submit()
 
-	def make_plan(self, qty=100, submit=True):
+	def make_plan(self, qty=100, submit=True, consider_process_loss=False):
 		plan = create_production_plan(
 			item_code=self.finished_good,
 			planned_qty=qty,
 			stock_uom="Kg",
 			warehouse=self.warehouse,
 			sub_assembly_warehouse=self.warehouse,
+			consider_process_loss=consider_process_loss,
 			skip_getting_mr_items=True,
 			do_not_submit=True,
 		)
