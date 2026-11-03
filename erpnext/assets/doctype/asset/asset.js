@@ -41,7 +41,7 @@ frappe.ui.form.on("Asset", {
 	},
 
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Journal Entry"];
+		frm.ignore_doctypes_on_cancel_all = ["Journal Entry", "Asset Capitalization"];
 
 		frm.make_methods = {
 			"Asset Movement": () => {
