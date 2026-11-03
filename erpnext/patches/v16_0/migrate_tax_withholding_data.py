@@ -550,6 +550,7 @@ class PurchaseInvoiceMigrator:
 				pi.currency,
 				pi.conversion_rate,
 				ptc.account_head,
+				ptc.add_deduct_tax,
 				ptc.base_tax_amount_after_discount_amount,
 			)
 			.where(pi.docstatus == 1)
@@ -700,7 +701,8 @@ class PurchaseInvoiceMigrator:
 				self.invoice_taxes[inv_name] = {"info": row, "tax_rows": [], "tds_total": 0}
 
 			self.invoice_taxes[inv_name]["tax_rows"].append(row)
-			self.invoice_taxes[inv_name]["tds_total"] += abs(flt(row.base_tax_amount_after_discount_amount))
+			amount = flt(row.base_tax_amount_after_discount_amount)
+			self.invoice_taxes[inv_name]["tds_total"] += amount if row.add_deduct_tax == "Deduct" else -amount
 
 	def _build_withheld_vouchers_lookup(self):
 		for row in self._all_withheld_vouchers:
@@ -828,7 +830,10 @@ class PurchaseInvoiceMigrator:
 
 		# Get TDS total
 		has_tds = invoice_name in self.invoice_taxes
-		total_tds_in_invoice = abs(self.invoice_taxes[invoice_name]["tds_total"]) if has_tds else 0
+		tds_total = self.invoice_taxes[invoice_name]["tds_total"] if has_tds else 0
+
+		# Below zero on a bill that is not a return, the TDS rows gave TDS back
+		total_tds_in_invoice = tds_total if tds_total < 0 and not info.is_return else abs(tds_total)
 
 		# Get related data
 		advance_taxes = self.advance_by_invoice.get(invoice_name, [])
@@ -898,6 +903,22 @@ class PurchaseInvoiceMigrator:
 		entries = []
 		info = ctx["info"]
 		tax_rate = ctx["tax_rate"]
+
+		# TDS given back is the bill's own, as in the ledger, with nothing to split or exempt
+		if ctx["total_tds_in_invoice"] < 0:
+			return [
+				self._create_entry(
+					ctx,
+					taxable_amount=ctx["current_taxable"],
+					withholding_amount=ctx["total_tds_in_invoice"],
+					taxable_doctype="Purchase Invoice",
+					taxable_name=invoice_name,
+					taxable_date=info.posting_date,
+					withholding_doctype="Purchase Invoice",
+					withholding_name=invoice_name,
+					withholding_date=info.posting_date,
+				)
+			]
 
 		tds_for_past = 0
 		tds_for_current_and_past = abs(ctx["total_tds_in_invoice"])
