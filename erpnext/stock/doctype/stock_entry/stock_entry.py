@@ -644,7 +644,9 @@ class StockEntry(StockController, SubcontractingInwardController):
 				if qty <= 0:
 					break
 
-				batch_qty = abs(batch_qty)
+				if batch_qty <= 0:
+					continue
+
 				if batch_qty <= qty:
 					batches[batch_no] = batch_qty
 					qty -= batch_qty
@@ -5742,7 +5744,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 
 			elif row.batch_nos:
 				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
+					item_data.batch_details[batch_no] += abs(qty)
 
 			if row.serial_no:
 				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
@@ -5788,7 +5790,7 @@ def _deduct_consumed_material(buckets, row):
 	batches = (
 		{row.batch_no: flt(row.qty)}
 		if row.batch_no
-		else {batch_no: -flt(qty) for batch_no, qty in (row.batch_nos or {}).items()}
+		else {batch_no: abs(flt(qty)) for batch_no, qty in (row.batch_nos or {}).items()}
 	)
 	for batch_no, batch_qty in batches.items():
 		_deduct_consumed_batch_qty(buckets, batch_no, batch_qty)
