@@ -25,7 +25,20 @@ const tags = computed(() => buildTags(props.plant, layout.value, props.view, pro
 
 const stage = ref(null);
 const hovered = ref(null);
-const { viewName, rot, tilt, zoom, dragging, animateTo, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
+const {
+	viewName,
+	rot,
+	tilt,
+	zoom,
+	pan,
+	dragging,
+	animateTo,
+	setView,
+	fit: fitView,
+	zoomBy,
+	onWheel,
+	onDown,
+} = useOrbitCamera();
 
 const { width, height } = useElementSize(stage);
 useClock(stage);
@@ -38,7 +51,10 @@ const fit = computed(() => {
 	);
 });
 const scale = computed(() => fit.value * zoom.value * (1 - tilt.value / 300));
-const center = computed(() => ({ x: width.value / 2, y: height.value / 2 + 50 }));
+const center = computed(() => ({
+	x: width.value / 2 + pan.value.x,
+	y: height.value / 2 + 50 + pan.value.y,
+}));
 
 function project(t) {
 	const r = (rot.value * Math.PI) / 180;
@@ -108,6 +124,7 @@ const grid = {
 				touchAction: 'none',
 			}"
 			@pointerdown="onDown"
+			@contextmenu.prevent
 			@wheel.prevent="onWheel"
 		>
 			<div
@@ -158,25 +175,39 @@ const grid = {
 				class="flex items-center gap-0.5 rounded-4 border border-outline-gray-2 bg-surface-base p-0.5"
 			>
 				<Tooltip :text="__('Rotate left')"
-					><Button variant="ghost" icon="lucide-rotate-ccw" @click="animateTo(rot - 45, tilt)"
+					><Button
+						variant="ghost"
+						:aria-label="__('Rotate left')"
+						icon="lucide-rotate-ccw"
+						@click="animateTo(rot - 45, tilt)"
 				/></Tooltip>
 				<Tooltip :text="__('Rotate right')"
-					><Button variant="ghost" icon="lucide-rotate-cw" @click="animateTo(rot + 45, tilt)"
+					><Button
+						variant="ghost"
+						:aria-label="__('Rotate right')"
+						icon="lucide-rotate-cw"
+						@click="animateTo(rot + 45, tilt)"
 				/></Tooltip>
 				<Tooltip :text="__('Zoom out')"
-					><Button variant="ghost" icon="lucide-zoom-out" @click="zoomBy(-0.2)"
+					><Button
+						variant="ghost"
+						:aria-label="__('Zoom out')"
+						icon="lucide-zoom-out"
+						@click="zoomBy(-0.2)"
 				/></Tooltip>
 				<Tooltip :text="__('Zoom in')"
-					><Button variant="ghost" icon="lucide-zoom-in" @click="zoomBy(0.2)"
+					><Button
+						variant="ghost"
+						:aria-label="__('Zoom in')"
+						icon="lucide-zoom-in"
+						@click="zoomBy(0.2)"
 				/></Tooltip>
 				<Tooltip :text="__('Fit plant')"
 					><Button
 						variant="ghost"
+						:aria-label="__('Fit plant')"
 						icon="lucide-scan"
-						@click="
-							zoom = 1;
-							setView('3d');
-						"
+						@click="fitView"
 				/></Tooltip>
 			</div>
 		</div>
@@ -210,7 +241,7 @@ const grid = {
 		</div>
 
 		<p class="pointer-events-none absolute bottom-3 left-3 text-xs text-ink-gray-5">
-			{{ __("Drag to rotate · Scroll to zoom") }}
+			{{ __("Drag to rotate · Shift + drag to move · Scroll to zoom") }}
 		</p>
 	</div>
 </template>
