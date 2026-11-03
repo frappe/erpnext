@@ -5935,6 +5935,30 @@ class TestSalesInvoice(ERPNextTestSuite):
 		frappe.get_doc("Purchase Invoice", purchase_invoices[0]).cancel()
 		self.assertFalse(si.get_db_value("inter_company_invoice_reference"))
 
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "Row #2: Asset .* is already added in another row"
+		):
+			si.insert()
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
