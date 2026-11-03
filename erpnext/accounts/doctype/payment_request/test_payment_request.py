@@ -1898,9 +1898,13 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 			test_address.insert(ignore_permissions=True)
 			address_name = test_address.name
 
-		# Link contact and address to customer
-		customer.customer_primary_contact = contact_name
-		customer.customer_primary_address = address_name
+		# Link contact and address to customer; a reused contact may not be linked yet
+		for doctype, name in (("Contact", contact_name), ("Address", address_name)):
+			linked_doc = frappe.get_doc(doctype, name)
+			if not linked_doc.has_link("Customer", customer.name):
+				linked_doc.append("links", {"link_doctype": "Customer", "link_name": customer.name})
+				linked_doc.save(ignore_permissions=True)
+			customer.set(f"customer_primary_{doctype.lower()}", linked_doc.name)
 		customer.save(ignore_permissions=True)
 
 		pr = frappe.new_doc("Payment Request")
