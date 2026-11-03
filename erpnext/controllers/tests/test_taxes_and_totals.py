@@ -249,7 +249,6 @@ class TestTaxesAndTotals(FrappeTestCase):
 		self.assertEqual(so.base_rounded_total, 0)
 		self.assertEqual(so.base_rounding_adjustment, 0)
 
-<<<<<<< HEAD
 	def test_tax_net_amount_with_not_applicable_item_tax(self):
 		"""Each tax row records only the net of the items it actually applies to.
 
@@ -387,7 +386,7 @@ class TestTaxesAndTotals(FrappeTestCase):
 
 		self.assertEqual(so.taxes[0].net_amount, so.net_total)
 		self.assertEqual(so.grand_total, 1090.0)
-=======
+
 	def test_grand_total_discount_follows_shipping_charge(self):
 		"""A lower rate moves the net total from the 100 band to the 50 band."""
 		so = self.make_sales_order_with_shipping_rule(rate=150)
@@ -418,4 +417,3 @@ class TestTaxesAndTotals(FrappeTestCase):
 		so.set("taxes", [])
 		so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
 		return so
->>>>>>> 821b5ec (test: discount follows the shipping charge)
