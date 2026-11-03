@@ -2277,6 +2277,50 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			if gle.account == account:
 				self.assertEqual(gle.credit, 50)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 1})
+	def test_zero_rate_purchase_into_negative_stock_posts_gl(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		stock_account = get_inventory_account(company, warehouse)
+		expense_account = frappe.get_cached_value("Company", company, "default_expense_account")
+		item_code = make_item(properties={"valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=5, rate=50)
+		make_stock_entry(item_code=item_code, from_warehouse=warehouse, qty=25)
+
+		for doctype in ("Purchase Receipt", "Purchase Invoice"):
+			with self.subTest(doctype=doctype):
+				purchase = frappe.get_doc(
+					{
+						"doctype": doctype,
+						"company": company,
+						"supplier": "_Test Supplier",
+						"update_stock": 1,
+						"items": [
+							{
+								"item_code": item_code,
+								"warehouse": warehouse,
+								"qty": 8,
+								"rate": 0,
+								"allow_zero_valuation_rate": 1,
+							}
+						],
+					}
+				).submit()
+
+				filters = {"voucher_type": doctype, "voucher_no": purchase.name, "is_cancelled": 0}
+				self.assertEqual(
+					frappe.db.get_value("Stock Ledger Entry", filters, "stock_value_difference"), 400
+				)
+				gl_entries = frappe.get_all(
+					"GL Entry", filters=filters, fields=["account", "debit", "credit"]
+				)
+				self.assertEqual(
+					{entry.account: entry.debit - entry.credit for entry in gl_entries},
+					{stock_account: 400, expense_account: -400},
+				)
+
 	def test_backdated_transaction_for_internal_transfer(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
