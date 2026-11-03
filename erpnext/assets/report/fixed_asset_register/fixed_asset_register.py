@@ -54,6 +54,11 @@ def get_data(filters):
 
 	revaluation_amount_map = get_asset_value_adjustment_map(filters, finance_book)
 
+	if not finance_book:
+		value_assets_on_first_finance_book(
+			filters, assets_linked_to_fb, depreciation_amount_map, revaluation_amount_map
+		)
+
 	group_by = frappe.scrub(filters.get("group_by"))
 	end_date = get_report_end_date(filters)
 
@@ -276,6 +281,38 @@ def get_assets_linked_to_fb(filters):
 	assets_linked_to_fb = set(chain(*query.run(as_list=1)))
 
 	return assets_linked_to_fb
+
+
+def value_assets_on_first_finance_book(
+	filters, assets_linked_to_fb: set, depreciation_amount_map: dict, revaluation_amount_map: dict
+) -> None:
+	"""With no finance book chosen, list a depreciating asset with only named books on its first book."""
+	first_finance_books = get_first_finance_books(assets_linked_to_fb)
+	for finance_book in set(first_finance_books.values()):
+		book_depreciation_map = get_asset_depreciation_amount_map(filters, finance_book)
+		book_revaluation_map = get_asset_value_adjustment_map(filters, finance_book)
+		for asset, asset_finance_book in first_finance_books.items():
+			if asset_finance_book == finance_book:
+				depreciation_amount_map[asset] = book_depreciation_map.get(asset, 0.0)
+				revaluation_amount_map[asset] = book_revaluation_map.get(asset, 0.0)
+
+	assets_linked_to_fb.update(first_finance_books)
+
+
+def get_first_finance_books(assets_linked_to_fb: set) -> dict[str, str]:
+	"""First finance book of each asset that has no row for the selected or blank book."""
+	afb = frappe.qb.DocType("Asset Finance Book")
+	rows = (
+		frappe.qb.from_(afb)
+		.select(afb.parent, afb.finance_book)
+		.where((afb.parenttype == "Asset") & (afb.idx == 1))
+		.run()
+	)
+	return {
+		asset: finance_book
+		for asset, finance_book in rows
+		if finance_book and asset not in assets_linked_to_fb
+	}
 
 
 def get_asset_depreciation_amount_map(filters, finance_book):
