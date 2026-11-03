@@ -53,7 +53,8 @@ function project(t) {
 	return { x: center.value.x + scale.value * x1 * f, y: center.value.y + scale.value * y2 * f };
 }
 
-const tagRank = (t) => (t.active ? 0 : t.id.startsWith("s") ? 1 : t.id === "fg" ? 2 : 3);
+const tagRank = (t) =>
+	t.id === hovered.value ? -1 : t.active ? 0 : t.id.startsWith("s") ? 1 : t.id === "fg" ? 2 : 3;
 const tagWidth = (t) =>
 	Math.min(256, 26 + 7.5 * Math.max((t.title || "").length, String(t.sub || "").length));
 
@@ -86,7 +87,6 @@ const floorStyle = computed(() => ({
 	height: `${layout.value.H}px`,
 	transform: `translate(-50%, -50%) scale(${scale.value}) rotateX(${tilt.value}deg) rotateZ(${rot.value}deg)`,
 	transformStyle: "preserve-3d",
-	willChange: "transform",
 }));
 
 const grid = {

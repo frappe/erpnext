@@ -45,7 +45,7 @@ const TONES = {
 };
 
 const t = computed(() => TONES[props.tone] ?? TONES.steel);
-const facing = useFacing([90, -90, 180, 0]);
+const facing = useFacing([90, -90, 180, 0], -0.2);
 const px = (n) => `${n}px`;
 </script>
 
