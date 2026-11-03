@@ -823,6 +823,7 @@ class Item(Document):
 					{"company": defaults.get("company"), "default_warehouse": defaults.default_warehouse},
 				)
 
+<<<<<<< HEAD
 		item_group = frappe.get_cached_doc("Item Group", self.item_group)
 		if not self.taxes and item_group.taxes:
 			for tax in item_group.taxes:
@@ -837,6 +838,8 @@ class Item(Document):
 					},
 				)
 
+=======
+>>>>>>> 2de530c (fix(stock): stop copying item group tax rows onto new items)
 	def update_variants(self):
 		if self.flags.dont_update_variants or frappe.db.get_single_value(
 			"Item Variant Settings", "do_not_update_variants"
