@@ -708,10 +708,29 @@ class StockController(AccountsController):
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
 				parent_rows = self.get("items", {"name": row.parent_detail_docname}) or []
 				for d in parent_rows:
-					if d.get(field) and not d.get(bundle_field):
+					if (
+						d.get(field)
+						and not d.get(bundle_field)
+						and not self.is_legacy_packed_item(row, d.get(field))
+					):
 						reference_ids.append(d.get(field))
 
 		return field, reference_ids
+
+	def is_legacy_packed_item(self, row, source_parent_detail_docname):
+		"""Packed items delivered before v15 have serial / batch fields, but no bundle to return
+		against. make_bundle_using_old_serial_batch_fields handles them."""
+		if not (row.serial_no or row.batch_no):
+			return False
+
+		return not frappe.db.exists(
+			"Packed Item",
+			{
+				"parent_detail_docname": source_parent_detail_docname,
+				"item_code": row.item_code,
+				"serial_and_batch_bundle": ("is", "set"),
+			},
+		)
 
 	@frappe.request_cache
 	def is_serial_batch_item(self, item_code) -> bool:
