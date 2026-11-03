@@ -10,7 +10,6 @@ const state = computed(() => run.state.value);
 const order = computed(() => state.value.work_order);
 
 const kpis = computed(() => {
-	const stages = state.value.stages;
 	const charged = num(order.value.charged_weight);
 	const good = num(order.value.produced_qty);
 	const yieldPercentage = charged
@@ -18,7 +17,7 @@ const kpis = computed(() => {
 		: 0;
 	return [
 		{ label: __("Good {0}", [plural(order.value.stock_uom).toLowerCase()]), value: fmt(good) },
-		{ label: __("Process Loss"), value: fmt(stages.at(-1).output.process_loss_qty) },
+		{ label: __("Process Loss"), value: fmt(order.value.process_loss_qty) },
 		{ label: __("Overall Yield"), value: `${fmt(yieldPercentage)}%` },
 	];
 });
