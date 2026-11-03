@@ -4536,6 +4536,38 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.reload()
 		self.assertTrue(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle))
 
+	def test_credit_note_returns_packed_serial_and_batch_items(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		batch_item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SI-PKD-B-.#####"}
+		).name
+		serial_item = make_item(properties={"has_serial_no": 1, "serial_no_series": "SI-PKD-S-.#####"}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [batch_item, serial_item], qty=2)
+		for item_code in (batch_item, serial_item):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+
+		si = create_sales_invoice(item_code=bundle_item, warehouse=warehouse, update_stock=1, qty=1)
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.submit()
+		si.reload()
+		credit_note.reload()
+
+		for row, returned_row in zip(si.packed_items, credit_note.packed_items, strict=True):
+			if row.item_code == batch_item:
+				self.assertEqual(
+					get_batch_from_bundle(returned_row.serial_and_batch_bundle),
+					get_batch_from_bundle(row.serial_and_batch_bundle),
+				)
+			else:
+				self.assertEqual(
+					sorted(get_serial_nos_from_bundle(returned_row.serial_and_batch_bundle)),
+					sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)),
+				)
+
 	def test_sales_invoice_with_disabled_account(self):
 		try:
 			account_name = "Sales Expenses - _TC"
