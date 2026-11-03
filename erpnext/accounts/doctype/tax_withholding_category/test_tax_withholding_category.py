@@ -515,6 +515,34 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.validate_tax_withholding_entries("Purchase Invoice", pi3.name, expected_entries)
 		self.assertEqual(pi3.taxes[0].tax_amount, 1000)
 
+		# Ignoring the threshold taxes the whole invoice, without an exemption
+		self.setup_party_with_category("Supplier", "Test TDS Supplier7", "New TDS Category")
+		pi4 = create_purchase_invoice(supplier="Test TDS Supplier7", rate=10000, do_not_save=True)
+		pi4.apply_tds = 1
+		pi4.ignore_tax_withholding_threshold = 1
+		pi4.save()
+		pi4.submit()
+		invoices.append(pi4)
+
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier7",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi4.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi4.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi4.name, expected_entries)
+		self.assertEqual(pi4.taxes[0].tax_amount, 1000)
+
 		self.cleanup_invoices(invoices)
 
 	def test_cumulative_threshold_tcs_on_gross_amount(self):

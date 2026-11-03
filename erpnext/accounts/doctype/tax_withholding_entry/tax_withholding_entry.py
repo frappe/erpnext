@@ -694,7 +694,7 @@ class TaxWithholdingController:
 
 	def _get_unused_threshold(self, category):
 		"""Calculate unused threshold amount for tax on excess scenarios"""
-		if not category.tax_on_excess_amount:
+		if not category.tax_on_excess_amount or self.doc.ignore_tax_withholding_threshold:
 			return 0
 
 		entry = frappe.qb.DocType(DOCTYPE)
