@@ -100,9 +100,11 @@ export function useRun(workOrder) {
 			const key = `${stage.job_card?.name}:${stage.phase}:${waiting}`;
 			if (local.seeded[stage.idx] === key) return;
 			local.seeded[stage.idx] = key;
-			local.actual[stage.idx] = Object.fromEntries(
-				stage.items.map((row) => [row.name, row.is_input ? row.waiting_qty : row.required_qty])
-			);
+			if (stage.job_card) {
+				local.actual[stage.idx] = Object.fromEntries(
+					stage.items.map((row) => [row.name, row.is_input ? row.waiting_qty : row.required_qty])
+				);
+			}
 			clearTimeout(previewTimers[stage.idx]);
 			delete local.pending[stage.idx];
 			delete local.preview[stage.idx];
