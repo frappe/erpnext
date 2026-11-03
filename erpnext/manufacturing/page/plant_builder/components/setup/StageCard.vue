@@ -1,10 +1,16 @@
 <script setup>
-import { computed } from "vue";
+import { computed, inject, ref } from "vue";
 import { Badge, Button, FormControl, Switch, TextInput, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { isPackingModel, machineOf } from "../../lib/machines";
-import { moveStage, removeStage, runsWithStageAbove, setRunsWithStageAbove } from "../../lib/plant";
+import {
+	READ_ONLY,
+	moveStage,
+	removeStage,
+	runsWithStageAbove,
+	setRunsWithStageAbove,
+} from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
@@ -13,6 +19,7 @@ const props = defineProps({
 	machineModel: String,
 	focused: Boolean,
 });
+const readOnly = inject(READ_ONLY, ref(false));
 const emit = defineEmits(["focus"]);
 
 const machine = computed(() => machineOf(props.machineModel));
@@ -58,7 +65,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 				{{ stage.stage_name || __(machine.label) }}
 			</p>
 			<Badge v-if="parallel" :label="__('With Stage {0}', [index])" theme="blue" variant="subtle" />
-			<Tooltip :text="__('Move Up')">
+			<Tooltip v-if="!readOnly" :text="__('Move Up')">
 				<Button
 					variant="ghost"
 					size="sm"
@@ -67,7 +74,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					@click="move(-1)"
 				/>
 			</Tooltip>
-			<Tooltip :text="__('Move Down')">
+			<Tooltip v-if="!readOnly" :text="__('Move Down')">
 				<Button
 					variant="ghost"
 					size="sm"
@@ -76,7 +83,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					@click="move(1)"
 				/>
 			</Tooltip>
-			<Tooltip :text="__('Remove Stage')">
+			<Tooltip v-if="!readOnly" :text="__('Remove Stage')">
 				<Button
 					variant="ghost"
 					size="sm"
@@ -139,6 +146,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 						class="[&_input]:bg-surface-base [&_input]:text-right"
 					/>
 					<Button
+						v-if="!readOnly"
 						variant="ghost"
 						size="sm"
 						icon="lucide-x"
@@ -147,6 +155,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					/>
 				</div>
 				<Button
+					v-if="!readOnly"
 					size="sm"
 					icon-left="lucide-plus"
 					:label="__('Add Packing Material')"
