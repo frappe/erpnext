@@ -13,10 +13,7 @@ class PlantRunState:
 		self.work_order = run.work_order
 		self.flow = run.get_flow()
 		self.plan = self.flow.plan
-		self.machines = {
-			row.workstation: run.plant_floor.machine_warehouses.get(row.workstation)
-			for row in run.plant_floor.stages
-		}
+		self.machines = {stage.workstation: stage.warehouse for stage in self.flow.stages}
 		self.stock = get_stock([run.plant_floor.warehouse, *self.machines.values()])
 		self.broken_machines = set(
 			frappe.get_all(
