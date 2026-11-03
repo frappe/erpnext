@@ -218,6 +218,7 @@ def rfq_transaction_list(parties_doctype, doctype, parties, limit_start, limit_p
 
 def post_process(doctype, data):
 	result = []
+	web_form_fields = get_web_form_list_fields(doctype)
 	for d in data:
 		doc = frappe.get_doc(doctype, d.name)
 
@@ -243,21 +244,46 @@ def post_process(doctype, data):
 
 		doc.status_display = ", ".join(doc.status_display)
 		doc.items_preview = ", ".join(d.item_name for d in doc.items if d.item_name)
-		result.append(get_portal_row(doc))
+		result.append(get_portal_row(doc, web_form_fields))
 
 	return result
 
 
-def get_portal_row(doc):
+def get_portal_row(doc, extra_fields=()):
 	"""Return a copy of `doc` with only the values the portal row shows.
 
 	The list is also returned as JSON, so the full document would expose cost and margin fields.
 	"""
-	row = frappe.get_doc({"doctype": doc.doctype, **{f: doc.get(f) for f in PORTAL_ROW_FIELDS}})
+	fields = PORTAL_ROW_FIELDS + tuple(extra_fields)
+	row = frappe.get_doc({"doctype": doc.doctype, **{f: doc.get(f) for f in fields}})
 	for key in PORTAL_ROW_DISPLAY_KEYS:
 		row.set(key, doc.get(key))
 
 	return row
+
+
+def get_web_form_list_fields(doctype):
+	web_form_name = frappe.form_dict.get("web_form_name")
+	if not web_form_name or not frappe.db.exists("Web Form", web_form_name):
+		return ()
+
+	web_form = frappe.get_cached_doc("Web Form", web_form_name)
+	if web_form.doc_type != doctype or not web_form.published or not web_form.show_list:
+		return ()
+
+	meta = frappe.get_meta(doctype)
+	fields = []
+	for column in web_form.list_columns:
+		df = meta.get_field(column.fieldname)
+		if (
+			df
+			and not df.permlevel
+			and df.fieldtype not in frappe.model.no_value_fields
+			and df.fieldtype != "Password"
+		):
+			fields.append(df.fieldname)
+
+	return tuple(fields)
 
 
 def get_customers_suppliers(doctype, user):
