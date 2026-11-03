@@ -69,7 +69,7 @@ function holding(i) {
 	if (weight < 1) return __("Empty");
 	const machine = machineOf(stage.machine_model);
 	const item =
-		stage.phase === "processing" || stage.phase === "review" ? machine.verb : stage.output.item_name;
+		stage.phase === "processing" || stage.phase === "review" ? __(machine.verb) : stage.output.item_name;
 	return `${item} · ${fmt(Math.round(weight))} ${state.plan.weight_uom}`;
 }
 
@@ -87,7 +87,11 @@ const live = computed(() => {
 <template>
 	<div v-if="run.state.value" class="flex min-h-0 flex-1 flex-col">
 		<div class="flex h-12 shrink-0 items-center gap-2 border-b border-outline-gray-2 px-5">
-			<Badge :label="run.status.value" :theme="STATUS[run.status.value] || 'gray'" variant="subtle" />
+			<Badge
+				:label="__(run.status.value)"
+				:theme="STATUS[run.status.value] || 'gray'"
+				variant="subtle"
+			/>
 			<span class="min-w-0 truncate text-sm text-ink-gray-5">{{
 				run.state.value.work_order.item_name
 			}}</span>

@@ -21,7 +21,7 @@ const hasPacking = computed(() => models.value.some(isPackingModel));
 function addStage(type) {
 	const machine = machineOf(type.machine_model);
 	const stage = {
-		stage_name: machine.stage,
+		stage_name: __(machine.stage),
 		workstation: "",
 		workstation_type: type.name,
 		machine_model: type.machine_model,

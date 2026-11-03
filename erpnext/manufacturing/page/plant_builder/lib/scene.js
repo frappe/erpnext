@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { useEventListener } from "@vueuse/core";
 import { machineOf, machineSize } from "./machines";
 import { YC } from "./layout";
+import { __ } from "./api";
 import { clamp, fmt, plural } from "./format";
 
 const VIEWS = { "3d": [-24, 56], top: [0, 0], front: [0, 72] };
@@ -77,9 +78,9 @@ export function previewView(plant, animate, focus) {
 
 function stationTag(plant, station, view, holding) {
 	const machine = machineOf(station.stage.machine_model);
-	const title = station.stage.name || machine.label;
+	const title = station.stage.name || __(machine.label);
 	const active = view.active[station.i];
-	const sub = holding ? holding(station.i) : machine.label;
+	const sub = holding ? holding(station.i) : __(machine.label);
 	if (!station.pack) {
 		return {
 			id: `s${station.i}`,
@@ -124,7 +125,7 @@ export function buildTags(plant, layout, view, live = {}) {
 			x: layout.fg.x + 160,
 			y: layout.fg.y + 105,
 			z: 70,
-			title: "Finished goods",
+			title: __("Finished goods"),
 			sub,
 			active: view.fgActive,
 		},

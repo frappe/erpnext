@@ -55,7 +55,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			</span>
 			<span class="size-4 shrink-0 text-ink-gray-6" :class="machine.icon" aria-hidden="true" />
 			<p class="min-w-0 flex-1 truncate text-base font-medium text-ink-gray-8">
-				{{ stage.stage_name || machine.label }}
+				{{ stage.stage_name || __(machine.label) }}
 			</p>
 			<Badge v-if="parallel" :label="__('With Stage {0}', [index])" theme="blue" variant="subtle" />
 			<Tooltip :text="__('Move Up')">

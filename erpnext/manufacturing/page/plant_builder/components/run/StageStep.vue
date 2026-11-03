@@ -21,12 +21,12 @@ const meta = computed(() => {
 	const unit = (props.stage.output.uom || "").toLowerCase();
 	const instruction = pack
 		? __("{0} {1} {2} into each {3}, then seal and label it.", [
-				machine.value.verb,
+				__(machine.value.verb),
 				fmt(plan.value.weight_per_unit),
 				plan.value.weight_uom,
 				unit,
 		  ])
-		: __("{0} for {1} minutes.", [machine.value.verb, fmt(props.stage.planned_minutes)]) +
+		: __("{0} for {1} minutes.", [__(machine.value.verb), fmt(props.stage.planned_minutes)]) +
 		  (loss > 0 ? " " + __("About {0}% of the weight is lost here.", [fmt(loss)]) : "");
 	return {
 		pack,
@@ -60,7 +60,7 @@ const badge = computed(() => {
 		waiting: { label: __("Waiting"), theme: "gray" },
 		ready: { label: __("Ready"), theme: "blue" },
 		charging: { label: __("Charging"), theme: "amber" },
-		processing: { label: machine.value.verb, theme: "amber" },
+		processing: { label: __(machine.value.verb), theme: "amber" },
 		review: { label: __("Record Output"), theme: "blue" },
 		done: { label: __("Done"), theme: "green" },
 	}[phase];
