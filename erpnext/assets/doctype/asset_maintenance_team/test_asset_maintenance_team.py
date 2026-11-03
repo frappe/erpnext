@@ -31,6 +31,13 @@ class TestAssetMaintenanceTeam(ERPNextTestSuite):
 		team.reload()
 		team.save()
 
+		# a manager who is a member cannot be dropped from the members
+		shift = make_team("Removal Shift", ["marcus@abc.com", "thalia@abc.com"])
+		shift.maintenance_team_members = [
+			row for row in shift.maintenance_team_members if row.team_member != "marcus@abc.com"
+		]
+		self.assertRaises(frappe.ValidationError, shift.save)
+
 		make_asset_maintenance("Team Awesome")
 		team.reload()
 		team.maintenance_team_members = [

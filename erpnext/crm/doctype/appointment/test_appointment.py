@@ -622,6 +622,13 @@ class TestAppointment(ERPNextTestSuite):
 		# assigned while Employee could read every appointment, so it was not shared
 		add_assignment({"doctype": "Appointment", "name": appointment.name, "assign_to": [agent_email]})
 		frappe.db.delete("DocShare", {"share_doctype": "Appointment", "share_name": appointment.name})
+		# a closed ToDo drops the agent from _assign, but the agent still needs the appointment
+		todo = frappe.get_last_doc(
+			"ToDo", {"reference_type": "Appointment", "reference_name": appointment.name}
+		)
+		todo.status = "Closed"
+		todo.save(ignore_permissions=True)
+		self.assertNotIn(agent_email, frappe.db.get_value("Appointment", appointment.name, "_assign") or "")
 		self.assertFalse(frappe.has_permission("Appointment", doc=appointment.name, user=agent_email))
 
 		execute()
