@@ -168,6 +168,7 @@ def _add_remaining_operating_cost(stock_entry, work_order, expense_account, job_
 	from erpnext.stock.doctype.stock_entry.stock_entry import uses_sub_assembly_operating_cost
 
 	if add_operating_cost_component_wise(stock_entry, work_order, expense_account, job_card=job_card):
+		_add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card)
 		return
 	if job_card:
 		return
@@ -175,6 +176,7 @@ def _add_remaining_operating_cost(stock_entry, work_order, expense_account, job_
 	if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
 		for operation in work_order.operations:
 			_add_operation_cost(stock_entry, work_order, operation, expense_account)
+		_add_fg_based_operating_cost(stock_entry, work_order, expense_account)
 		return
 
 	_append_operating_cost(stock_entry, expense_account, remaining_cost * flt(stock_entry.fg_completed_qty))
@@ -215,6 +217,22 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 			**operation_fields,
 		},
 	)
+
+
+def _add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card=None):
+	"""FG-based cost of a multi-level BOM without operations, next to its sub-assembly operation costs."""
+	if job_card or not work_order.use_multi_level_bom:
+		return
+
+	bom = frappe.get_cached_value(
+		"BOM",
+		work_order.bom_no,
+		["fg_based_operating_cost", "with_operations", "base_operating_cost", "quantity"],
+		as_dict=True,
+	)
+	if bom.fg_based_operating_cost and not bom.with_operations:
+		amount = flt(bom.base_operating_cost) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+		_append_operating_cost(stock_entry, expense_account, amount)
 
 
 def _add_additional_operating_cost(stock_entry, work_order, expense_account, job_card=None):
