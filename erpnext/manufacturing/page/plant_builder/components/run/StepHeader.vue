@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { Tooltip } from "frappe-ui";
+import { Checkbox, Tooltip } from "frappe-ui";
 
 const props = defineProps({
 	icon: String,
@@ -10,16 +10,7 @@ const props = defineProps({
 	badge: Object,
 });
 
-const BOX = {
-	red: "border-2 border-outline-red-4 bg-surface-red-1",
-	amber: "border-2 border-outline-amber-4",
-	blue: "border-2 border-outline-blue-4",
-	gray: "border border-outline-gray-3",
-	green: "border border-outline-green-4 bg-surface-green-3 text-ink-green-6",
-};
-
 const checked = computed(() => props.status === "done" || props.badge?.theme === "green");
-const box = computed(() => (checked.value ? BOX.green : BOX[props.badge?.theme] ?? BOX.gray));
 </script>
 
 <template>
@@ -42,13 +33,14 @@ const box = computed(() => (checked.value ? BOX.green : BOX[props.badge?.theme] 
 			<p class="truncate text-sm text-ink-gray-5">{{ subtitle }}</p>
 		</div>
 		<Tooltip v-if="badge" :text="badge.label">
-			<span
-				class="flex size-5 shrink-0 items-center justify-center rounded-[5px]"
-				:class="box"
-				:aria-label="badge.label"
-				role="img"
-			>
-				<span v-if="checked" class="lucide-check size-3.5" aria-hidden="true" />
+			<span class="inline-flex">
+				<Checkbox
+					:model-value="checked"
+					size="md"
+					tabindex="-1"
+					:aria-label="badge.label"
+					@click.prevent
+				/>
 			</span>
 		</Tooltip>
 	</div>
