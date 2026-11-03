@@ -229,7 +229,7 @@ frappe.ui.form.on("Work Order", {
 		}
 		erpnext.work_order.add_start_button(frm);
 
-		if (frm.doc.plant_floor && !frm.doc.bom_no && !frm.is_new()) {
+		if (frm.doc.plant_floor && !frm.doc.bom_no && !frm.is_new() && frappe.model.can_read("Plant Floor")) {
 			frm.add_custom_button(__("Open in Plant Builder"), () => {
 				frappe.set_route("plant-builder", frm.doc.plant_floor, frm.doc.name);
 			});
