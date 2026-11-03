@@ -1127,44 +1127,13 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 			calculated_taxable = -abs(calculated_taxable)
 
 		entries = []
-
-		# v15 always charged TCS on the excess
-		if abs(calculated_taxable) < net_grand_total:
-			taxable_exemption_amount = flt(net_grand_total - abs(calculated_taxable), 2)
-
-			if row.is_return:
-				taxable_exemption_amount = -abs(taxable_exemption_amount)
-
-			threshold_entry = {
-				"company": row.company,
-				"party_type": party_type,
-				"party": party,
-				"tax_id": tax_id,
-				"tax_withholding_category": category,
-				"taxable_amount": taxable_exemption_amount,
-				"tax_rate": tax_rate,
-				"withholding_amount": 0,
-				"taxable_doctype": "Sales Invoice",
-				"taxable_name": row.invoice_name,
-				"taxable_date": row.posting_date,
-				"withholding_doctype": "Sales Invoice",
-				"withholding_name": row.invoice_name,
-				"withholding_date": row.posting_date,
-				"under_withheld_reason": "Threshold Exemption",
-				"currency": row.currency,
-				"conversion_rate": row.conversion_rate or 1,
-			}
-			entries.append(threshold_entry)
-
-		entry = {
+		values = {
 			"company": row.company,
 			"party_type": party_type,
 			"party": party,
 			"tax_id": tax_id,
 			"tax_withholding_category": category,
-			"taxable_amount": calculated_taxable,
 			"tax_rate": tax_rate,
-			"withholding_amount": total_tcs,
 			"taxable_doctype": "Sales Invoice",
 			"taxable_name": row.invoice_name,
 			"taxable_date": row.posting_date,
@@ -1174,8 +1143,25 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_
 			"currency": row.currency,
 			"conversion_rate": row.conversion_rate or 1,
 		}
+
+		# v15 always charged TCS on the excess
+		if abs(calculated_taxable) < net_grand_total:
+			taxable_exemption_amount = flt(net_grand_total - abs(calculated_taxable), 2)
+
+			if row.is_return:
+				taxable_exemption_amount = -abs(taxable_exemption_amount)
+
+			entries.append(
+				{
+					**values,
+					"taxable_amount": taxable_exemption_amount,
+					"withholding_amount": 0,
+					"under_withheld_reason": "Threshold Exemption",
+				}
+			)
+
 		if total_tcs:
-			entries.append(entry)
+			entries.append({**values, "taxable_amount": calculated_taxable, "withholding_amount": total_tcs})
 
 		all_entries[("Sales Invoice", row.invoice_name)] = entries
 		category_wise_invoices[category].append(row.invoice_name)
@@ -1319,39 +1305,13 @@ def migrate_journal_entries(
 			calculated_taxable = min(flt(total_tds * 100 / tax_rate, 2), info.total_debit)
 
 		entries = []
-
-		if tax_on_excess and calculated_taxable < info.total_debit:
-			taxable_exemption_amount = flt(info.total_debit - abs(calculated_taxable), 2)
-			threshold_entry = {
-				"company": info.company,
-				"party_type": party_type,
-				"party": party,
-				"tax_id": tax_id,
-				"tax_withholding_category": category,
-				"taxable_amount": taxable_exemption_amount,
-				"tax_rate": tax_rate,
-				"withholding_amount": 0,
-				"taxable_doctype": "Journal Entry",
-				"taxable_name": je_name,
-				"taxable_date": info.posting_date,
-				"withholding_doctype": "Journal Entry",
-				"withholding_name": je_name,
-				"withholding_date": info.posting_date,
-				"under_withheld_reason": "Threshold Exemption",
-				"currency": account_currency or "",
-				"conversion_rate": flt(exchange_rate, 9) or 1,
-			}
-			entries.append(threshold_entry)
-
-		entry = {
+		values = {
 			"company": info.company,
 			"party_type": party_type,
 			"party": party,
 			"tax_id": tax_id,
 			"tax_withholding_category": category,
-			"taxable_amount": calculated_taxable,
 			"tax_rate": tax_rate,
-			"withholding_amount": total_tds,
 			"taxable_doctype": "Journal Entry",
 			"taxable_name": je_name,
 			"taxable_date": info.posting_date,
@@ -1361,7 +1321,18 @@ def migrate_journal_entries(
 			"currency": account_currency or "",
 			"conversion_rate": flt(exchange_rate, 9) or 1,
 		}
-		entries.append(entry)
+
+		if tax_on_excess and calculated_taxable < info.total_debit:
+			entries.append(
+				{
+					**values,
+					"taxable_amount": flt(info.total_debit - abs(calculated_taxable), 2),
+					"withholding_amount": 0,
+					"under_withheld_reason": "Threshold Exemption",
+				}
+			)
+
+		entries.append({**values, "taxable_amount": calculated_taxable, "withholding_amount": total_tds})
 		all_entries[("Journal Entry", je_name)] = entries
 
 		category_wise_jes[category].add(je_name)
