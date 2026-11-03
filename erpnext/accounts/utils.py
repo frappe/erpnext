@@ -1677,7 +1677,7 @@ def get_coa(doctype: str, parent: str, is_root: bool | None = None, chart: str |
 	chart = chart if chart else frappe.flags.chart
 	frappe.flags.chart = chart
 
-	parent = None if parent == _("All Accounts") else parent
+	parent = None if is_root else parent
 	accounts = build_tree_from_json(chart)  # returns alist of dict in a tree render-able form
 
 	# filter out to show data for the selected node only
