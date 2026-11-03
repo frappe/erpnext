@@ -605,7 +605,7 @@ erpnext.PointOfSale.Controller = class {
 				freeze: true,
 				args: {
 					doc,
-					ctx: {
+					args: {
 						item_code,
 						batch_no,
 						uom,
