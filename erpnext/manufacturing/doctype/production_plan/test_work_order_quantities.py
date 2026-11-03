@@ -319,8 +319,8 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		plan = self.make_plan(qty=81, consider_process_loss=True)
 		work_order = self.create_work_order(plan, field)
 		work_order.submit()
-		self.manufacture_with_loss(work_order, loss_qty=0)
-		self.assertEqual(work_order.reload().produced_qty, 100)
+		self.manufacture_with_loss(work_order, loss_qty=5)
+		self.assertEqual(work_order.reload().produced_qty, 95)
 		self.assert_pending_qty(plan, field, 0)
 
 	def test_finished_good_plan_includes_process_loss(self):
