@@ -5,6 +5,7 @@ from frappe import _
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.report.stock_balance.stock_balance import (
@@ -18,6 +19,8 @@ from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 
 def execute(filters: StockBalanceFilter | None = None):
+	validate_date_range(filters)
+
 	return SerialAndBatchWiseStockBalanceReport(filters).run()
 
 
