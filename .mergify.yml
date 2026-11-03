@@ -92,5 +92,4 @@ queue_rules:
 
 merge_queue:
   max_parallel_checks: 2
-  queue_controls_comment: false
   skip_intermediate_results: true
