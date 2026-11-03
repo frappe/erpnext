@@ -321,7 +321,8 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 			["warehouse", "reserve_stock"],
 		) or (None, None)
 
-		if reserve_stock:
+		# reserved stock must ship from the reserved warehouse; otherwise keep any edit on this row
+		if reserve_stock or not pi_row.warehouse:
 			pi_row.warehouse = warehouse
 
 	if not pi_row.warehouse:

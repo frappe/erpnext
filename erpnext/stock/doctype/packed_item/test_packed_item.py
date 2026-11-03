@@ -534,6 +534,19 @@ class TestPackedItem(ERPNextTestSuite):
 			[row.warehouse for row in dn_ret.packed_items], [other_warehouse, "_Test Warehouse 2 - _TC"]
 		)
 
+	def test_mapped_docs_keep_order_packed_item_warehouse(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1, do_not_submit=True)
+		for row in so.packed_items:
+			row.warehouse = other_warehouse
+		so.save()
+		so.submit()
+
+		for target in (make_delivery_note(so.name), make_sales_invoice(so.name)):
+			self.assertEqual([row.warehouse for row in target.packed_items], [other_warehouse] * 2)
+
 	def test_amended_order_keeps_packed_item_warehouse(self):
 		other_warehouse = "_Test Warehouse 1 - _TC"
 		item_list = [
