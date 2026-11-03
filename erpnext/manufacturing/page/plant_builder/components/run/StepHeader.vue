@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { Checkbox, Tooltip } from "frappe-ui";
+import { Tooltip } from "frappe-ui";
 
 const props = defineProps({
 	icon: String,
@@ -33,14 +33,12 @@ const checked = computed(() => props.status === "done" || props.badge?.theme ===
 			<p class="truncate text-sm text-ink-gray-5">{{ subtitle }}</p>
 		</div>
 		<Tooltip v-if="badge" :text="badge.label">
-			<span class="inline-flex">
-				<Checkbox
-					:model-value="checked"
-					size="md"
-					tabindex="-1"
-					:aria-label="badge.label"
-					@click.prevent
-				/>
+			<span
+				class="flex size-4 shrink-0 items-center justify-center"
+				role="img"
+				:aria-label="badge.label"
+			>
+				<span v-if="checked" class="lucide-check size-4 text-ink-gray-8" aria-hidden="true" />
 			</span>
 		</Tooltip>
 	</div>
