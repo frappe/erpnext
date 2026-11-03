@@ -752,11 +752,18 @@ class WorkOrder(Document):
 		return {row.operation_id: flt(row.cost) for row in rows}
 
 	def validate_work_order_against_so(self):
+		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+			get_qty_before_process_loss,
+		)
+
 		# already ordered qty
 		wo = frappe.qb.DocType("Work Order")
+		plan_item = frappe.qb.DocType("Production Plan Item")
 		ordered_qty_against_so = (
 			frappe.qb.from_(wo)
-			.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+			.left_join(plan_item)
+			.on(plan_item.name == wo.production_plan_item)
+			.select(Sum(qty_against_sales_order(wo, plan_item)))
 			.where(
 				(wo.production_item == self.production_item)
 				& (wo.sales_order == self.sales_order)
@@ -764,8 +771,6 @@ class WorkOrder(Document):
 				& (wo.name != self.name)
 			)
 		).run()[0][0]
-
-		total_qty = flt(ordered_qty_against_so) + flt(self.qty)
 
 		# get qty from Sales Order Item table
 		so_item_qty = frappe.db.sql(
@@ -786,7 +791,13 @@ class WorkOrder(Document):
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
 
-		if total_qty > so_qty + (allowance_percentage / 100 * so_qty):
+		max_qty = get_qty_before_process_loss(
+			so_qty + (allowance_percentage / 100 * so_qty) - flt(ordered_qty_against_so),
+			self._planned_process_loss_percentage(),
+			self.stock_uom,
+		)
+		precision = self.precision("qty")
+		if flt(self.qty, precision) > flt(max_qty, precision):
 			frappe.throw(
 				_("Cannot produce more Item {0} than Sales Order quantity {1} {2}").format(
 					get_link_to_form("Item", self.production_item),
@@ -795,6 +806,13 @@ class WorkOrder(Document):
 				),
 				OverProductionError,
 			)
+
+	def _planned_process_loss_percentage(self):
+		if not self.production_plan_item:
+			return 0
+		return frappe.db.get_value(
+			"Production Plan Item", self.production_plan_item, "process_loss_percentage"
+		)
 
 	def update_status(self, status=None):
 		"""Update status of work order if unknown"""
@@ -1125,7 +1143,12 @@ class WorkOrder(Document):
 
 	def on_submit(self):
 		self.validate_warehouse()
-		self.update_work_order_qty_in_sales_orders()
+		if self.production_plan and frappe.db.exists(
+			"Production Plan Item Reference", {"parent": self.production_plan}
+		):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
 
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
@@ -1144,7 +1167,12 @@ class WorkOrder(Document):
 		self.on_close_or_cancel()
 
 	def on_close_or_cancel(self):
-		self.update_work_order_qty_in_sales_orders()
+		if self.production_plan and frappe.db.exists(
+			"Production Plan Item Reference", {"parent": self.production_plan}
+		):
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
 
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -1610,9 +1638,12 @@ class WorkOrder(Document):
 
 	def get_work_order_qty_against_sales_order(self):
 		wo = frappe.qb.DocType("Work Order")
+		plan_item = frappe.qb.DocType("Production Plan Item")
 		query = (
 			frappe.qb.from_(wo)
-			.select(Sum(qty_against_sales_order(wo, wo.qty)))
+			.left_join(plan_item)
+			.on(plan_item.name == wo.production_plan_item)
+			.select(Sum(qty_against_sales_order(wo, plan_item)))
 			.where((wo.sales_order == self.sales_order) & (wo.docstatus == 1))
 		)
 		if self.product_bundle_item:
@@ -1658,10 +1689,13 @@ class WorkOrder(Document):
 
 	def get_ordered_qty_of_plan_item(self):
 		work_order = frappe.qb.DocType("Work Order")
+		plan_item = frappe.qb.DocType("Production Plan Item")
 		return flt(
 			(
 				frappe.qb.from_(work_order)
-				.select(Sum(work_order.qty))
+				.left_join(plan_item)
+				.on(plan_item.name == work_order.production_plan_item)
+				.select(Sum(qty_against_sales_order(work_order, plan_item)))
 				.where(
 					(work_order.production_plan_item == self.production_plan_item)
 					& (work_order.docstatus == 1)
@@ -3019,7 +3053,6 @@ def make_stock_reservation_entries(doc, items=None, is_transfer=True, notify=Fal
 	reserve_stock_for_work_order(doc, items, is_transfer, notify)
 
 
-<<<<<<< HEAD
 def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False):
 	"""Reserve stock for a Work Order. Internal: no permission check, because the Work Order and
 	Stock Entry lifecycles reach it for a user who need not hold Work Order write. The cancelled and
@@ -3029,13 +3062,6 @@ def reserve_stock_for_work_order(doc, items=None, is_transfer=True, notify=False
 	is_transfer = cint(is_transfer)
 	if items and isinstance(items, str):
 		items = parse_json(items)
-=======
-	def update_work_order_qty_in_sales_orders(self):
-		return StatusService(self).update_work_order_qty_in_sales_orders()
-
-	def update_work_order_qty_in_so(self):
-		return StatusService(self).update_work_order_qty_in_so()
->>>>>>> 48210c7 (fix(manufacturing): refresh the Sales Order's Work Order Qty when a Work Order produces or loses qty)
 
 	sre = StockReservation(doc, items=items)
 	if doc.docstatus == 2 or doc.status == "Closed":
@@ -3563,8 +3589,15 @@ def get_operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
 	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
 
 
-def qty_against_sales_order(wo, open_qty):
-	return Case().when(wo.status == "Closed", wo.produced_qty).else_(open_qty)
+def qty_against_sales_order(wo, plan_item):
+	"""Good output a Work Order counts against its Sales Order, after recorded or planned process loss."""
+	loss_percentage = IfNull(plan_item.process_loss_percentage, 0)
+	planned_loss_qty = wo.qty * loss_percentage / 100
+	loss_qty = (
+		Case().when(wo.process_loss_qty > planned_loss_qty, wo.process_loss_qty).else_(planned_loss_qty)
+	)
+	output_qty = Case().when(wo.produced_qty > wo.qty - loss_qty, wo.produced_qty).else_(wo.qty - loss_qty)
+	return Case().when(wo.status == "Closed", wo.produced_qty).else_(output_qty)
 
 
 def validate_status_change(work_order, status, allowed_statuses):

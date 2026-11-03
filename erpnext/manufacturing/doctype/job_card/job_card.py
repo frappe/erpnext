@@ -1215,7 +1215,6 @@ class JobCard(Document):
 				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
 					work_order, process_loss_qty=work_order.process_loss_qty
 				)
-			work_order.update_work_order_qty_in_sales_orders()
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
@@ -1254,30 +1253,6 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, pending_qty, time_in_mins, wo):
-<<<<<<< HEAD
-=======
-		time_data = self.get_operation_time_data()
-
-		for data in wo.operations:
-			if data.get("name") == self.operation_id:
-				self.update_wo_operation_row(
-					data, for_quantity, process_loss_qty, pending_qty, time_in_mins, time_data
-				)
-
-		wo.flags.ignore_validate_update_after_submit = True
-		wo.update_operation_status(self.operation_id)
-		wo.calculate_operating_cost()
-		wo.set_actual_dates()
-
-		if wo.track_semi_finished_goods:
-			wo.set_process_loss_qty()
-			wo.update_work_order_qty_in_sales_orders()
-
-		wo.status = wo.get_status()
-		wo.save()
-
-	def get_operation_time_data(self):
->>>>>>> 48210c7 (fix(manufacturing): refresh the Sales Order's Work Order Qty when a Work Order produces or loses qty)
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
