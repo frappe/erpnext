@@ -87,28 +87,18 @@ def execute():
 
 def get_supplier_groups(column_cache, party_tax_id_cache):
 	pi = frappe.qb.DocType("Purchase Invoice")
-	pe = frappe.qb.DocType("Payment Entry")
-
-	invoice_counts = defaultdict(int)
-	for supplier, count in (
+	invoice_counts = dict(
 		frappe.qb.from_(pi)
 		.select(pi.supplier, Count("*"))
 		.where(pi.docstatus == 1)
 		.groupby(pi.supplier)
 		.run()
-	):
-		invoice_counts[supplier] += count
+	)
 
-	for (supplier,) in (
-		frappe.qb.from_(pe)
-		.select(pe.party)
-		.distinct()
-		.where(pe.docstatus == 1)
-		.where(pe.party_type == "Supplier")
-		.where(pe.apply_tds == 1)
-		.run()
-	):
-		invoice_counts[supplier] += 0
+	# Suppliers without invoices still need a group for the TDS on their payments
+	for party_type, party in party_tax_id_cache:
+		if party_type == "Supplier":
+			invoice_counts.setdefault(party, 0)
 
 	# v15 counted all suppliers with the same PAN together, and nothing across PANs
 	suppliers_by_pan = defaultdict(list)
