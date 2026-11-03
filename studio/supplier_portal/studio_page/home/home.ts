@@ -112,7 +112,7 @@ export default function setup(context) {
 	}
 
 	const homeGroups = computed(() => [
-		group("rfqs", __("RFQs"), "/rfqs", __("Requested"), {
+		group("rfqs", __("Requests for Quotation"), "/rfqs", __("Requested"), {
 			icon: "lucide-inbox",
 			title: __("No requests for quotation yet"),
 			caption: __("Requests for quotation sent to you will appear here."),
