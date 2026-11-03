@@ -11,7 +11,7 @@ import Beacon from "./Beacon.vue";
 import PulseRing from "./PulseRing.vue";
 import { SHAPES, machineBounds, stageShapes } from "../../lib/machines";
 import { num } from "../../lib/format";
-import { clock } from "../../lib/clock";
+import { vLoop } from "../../lib/motion";
 
 const props = defineProps({
 	machineModel: String,
@@ -37,12 +37,18 @@ const ring = computed(() => {
 	const w = half.value * 2 + 34;
 	return { w, h: bounds.value.round ? w : Math.max(120, deep.value * 2 + 34) };
 });
-const jitter = computed(() => {
-	if (!props.working) return "";
-	const t = clock.value;
-	return `translate3d(${Math.sin(t * 71) * 0.9}px, ${Math.cos(t * 53) * 0.9}px, 0)`;
+const JITTER = [
+	[0.9, 0],
+	[-0.5, 0.9],
+	[0.4, -0.9],
+	[-0.9, -0.4],
+	[0.9, 0],
+];
+const shake = (lift) => ({
+	keyframes: JITTER.map(([dx, dy]) => ({ transform: `translate3d(${dx}px, ${dy}px, ${lift}px)` })),
+	duration: 180,
 });
-const heat = computed(() => (props.working && (clock.value * 1.4) % 1 < 0.5 ? "red" : "amber"));
+const heat = computed(() => (props.working ? "red" : "amber"));
 
 function tone(shape) {
 	const finish = shape.finish || SHAPES[shape.shape]?.finish || "Steel";
@@ -96,7 +102,7 @@ const parts = computed(() =>
 		.map((s, i) => {
 			const at = { x: props.x + num(s.x), y: props.y + num(s.y), z: num(s.z) };
 			const [is, attrs, lift = 0] = DRAW[s.shape](s, at);
-			return { i, is, attrs, transform: `${s.shakes ? jitter.value : ""} translateZ(${lift}px)` };
+			return { i, is, attrs, lift, shakes: !!s.shakes };
 		})
 );
 </script>
@@ -106,8 +112,9 @@ const parts = computed(() =>
 	<div
 		v-for="part in parts"
 		:key="part.i"
+		v-loop="part.shakes && working ? shake(part.lift) : null"
 		class="absolute left-0 top-0"
-		:style="{ transform: part.transform, transformStyle: 'preserve-3d' }"
+		:style="{ transform: `translateZ(${part.lift}px)`, transformStyle: 'preserve-3d' }"
 	>
 		<component :is="part.is" v-bind="part.attrs" />
 	</div>

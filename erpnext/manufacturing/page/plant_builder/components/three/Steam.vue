@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { clock } from "../../lib/clock";
+import { vLoop } from "../../lib/motion";
 
 const props = defineProps({
 	x: Number,
@@ -13,37 +13,48 @@ const props = defineProps({
 	tone: { type: String, default: "bg-surface-gray-3" },
 });
 
-const puffs = computed(() => {
-	if (!props.running) return [];
-	const k = props.small ? 0.5 : 1;
-	return Array.from({ length: 7 }, (_, i) => {
-		const p = (clock.value * 0.45 + i / 7) % 1;
-		return {
-			i,
-			z: props.z + 6 + p * 110 * k,
-			s: (16 + p * 36) * k,
-			o: 0.6 * (1 - p),
-			dx: Math.sin((p + i) * 3) * 14 * k,
-		};
-	});
-});
+const PERIOD = 2222;
+const k = computed(() => (props.small ? 0.5 : 1));
+const puffs = computed(() =>
+	props.running
+		? Array.from({ length: 7 }, (_, i) => ({
+				i,
+				s: 16 * k.value,
+				rise: {
+					keyframes: [
+						{ transform: "translate(0px, 0px) scale(1)", opacity: 0.6 },
+						{
+							transform: `translate(${Math.sin(i * 3) * 14 * k.value}px, ${
+								-96 * k.value
+							}px) scale(3.25)`,
+							opacity: 0,
+						},
+					],
+					duration: PERIOD,
+					delay: -(i / 7) * PERIOD,
+				},
+		  }))
+		: []
+);
 </script>
 
 <template>
 	<div
-		v-for="p in puffs"
-		:key="p.i"
+		v-if="running"
 		class="pointer-events-none absolute"
 		:style="{
-			left: `${x + p.dx}px`,
+			left: `${x}px`,
 			top: `${y}px`,
 			width: 0,
 			height: 0,
-			transform: `translateZ(${p.z}px) rotateZ(${-rot}deg) rotateX(${-tilt}deg)`,
+			transform: `translateZ(${z + 6}px) rotateZ(${-rot}deg) rotateX(${-tilt}deg)`,
 			transformStyle: 'preserve-3d',
 		}"
 	>
 		<div
+			v-for="p in puffs"
+			:key="p.i"
+			v-loop="p.rise"
 			class="absolute rounded-full"
 			:class="tone"
 			:style="{
@@ -51,7 +62,7 @@ const puffs = computed(() => {
 				top: `${-p.s / 2}px`,
 				width: `${p.s}px`,
 				height: `${p.s}px`,
-				opacity: p.o,
+				opacity: 0,
 			}"
 		/>
 	</div>
