@@ -29,9 +29,12 @@ def update_lead_phone_numbers(contact, method):
 
 
 def get_lead_phone_numbers(contact) -> dict[str, str]:
-	"""The primary phone and mobile number, or else the contact's first number for both."""
-	first_number = contact.phone_nos[0].phone if contact.phone_nos else ""
-	return {"phone": contact.phone or first_number, "mobile_no": contact.mobile_no or first_number}
+	"""The primary phone and mobile number, or the first number for both when none is marked primary."""
+	if contact.phone or contact.mobile_no or not contact.phone_nos:
+		return {"phone": contact.phone or "", "mobile_no": contact.mobile_no or ""}
+
+	first_number = contact.phone_nos[0].phone
+	return {"phone": first_number, "mobile_no": first_number}
 
 
 def had_phone_numbers(contact) -> bool:

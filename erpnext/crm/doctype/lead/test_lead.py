@@ -295,10 +295,9 @@ class TestLead(ERPNextTestSuite):
 		contact.save()
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
 
-		# the removed phone is replaced by the only number left
 		contact.phone_nos = [row for row in contact.phone_nos if row.is_primary_mobile_no]
 		contact.save()
-		self.assertEqual(frappe.db.get_value("Lead", lead.name, "phone"), "9800011111")
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
 
 		contact.phone_nos = []
