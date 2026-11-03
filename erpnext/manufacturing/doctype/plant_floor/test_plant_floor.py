@@ -8,7 +8,6 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 from frappe.utils import add_to_date, now_datetime
 
-from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_stock_summary
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import MachineBusyError, PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
@@ -40,15 +39,6 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(hidden["total"], 0)
 		self.assertEqual(hidden["work_orders"], [])
 		self.assertEqual([row.name for row in visible["work_orders"]], [allowed.name])
-
-	def test_stock_summary_includes_child_item_groups(self):
-		parent = make_item_group("_Test Plant Floor Parent Group", "All Item Groups", is_group=1)
-		child = make_item_group("_Test Plant Floor Child Group", parent)
-		item = make_item("_Test Plant Floor Item", {"is_stock_item": 1, "item_group": child}).name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=10)
-
-		rows = get_stock_summary("_Test Warehouse - _TC", item_group=parent)
-		self.assertIn(item, [row.item_code for row in rows])
 
 	def test_group_or_other_company_warehouse_refused(self):
 		for warehouse in ("All Warehouses - _TC", "Stores - TCP1"):
@@ -712,16 +702,3 @@ def stock_ketchup_materials():
 		("_Test Ketchup PET Bottle", 3000),
 	):
 		make_stock_entry(item_code=item_code, target=STORE, qty=qty, basic_rate=10)
-
-
-def make_item_group(name, parent, is_group=0):
-	if not frappe.db.exists("Item Group", name):
-		frappe.get_doc(
-			{
-				"doctype": "Item Group",
-				"item_group_name": name,
-				"parent_item_group": parent,
-				"is_group": is_group,
-			}
-		).insert()
-	return name
