@@ -436,7 +436,7 @@ scheduler_events = {
 		# Daily but offset by 45 minutes
 		"45 0 * * *": [],
 		"0 1 */3 * *": [
-			"erpnext.stock.stock_ledger_audit.audit_stock_ledger_entries",
+			"erpnext.stock.stock_ledger_audit.audit_recent_stock_ledger_entries",
 		],
 	},
 	"hourly": [
@@ -491,6 +491,7 @@ scheduler_events = {
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_monthly",
+		"erpnext.stock.stock_ledger_audit.audit_stock_ledger_entries",
 	],
 }
 
