@@ -1,5 +1,3 @@
-import json
-
 import frappe
 from frappe.share import add_docshare
 
@@ -7,10 +5,14 @@ from frappe.share import add_docshare
 def execute():
 	"""Share assigned appointments with agents who could read them only before Employee access became owner-only."""
 	users = set(frappe.get_all("User", pluck="name"))
-	appointments = frappe.get_all(
-		"Appointment", filters={"_assign": ("is", "set")}, fields=["name", "_assign"]
+	# closed ToDos drop out of _assign, so read the agents from the ToDos themselves
+	assignments = frappe.get_all(
+		"ToDo",
+		filters={"reference_type": "Appointment", "status": ("!=", "Cancelled")},
+		fields=["reference_name", "allocated_to"],
+		distinct=True,
 	)
-	for appointment in appointments:
-		for agent in json.loads(appointment._assign or "[]"):
-			if agent in users and not frappe.has_permission("Appointment", doc=appointment.name, user=agent):
-				add_docshare("Appointment", appointment.name, agent, flags={"ignore_share_permission": True})
+	for assignment in assignments:
+		appointment, agent = assignment.reference_name, assignment.allocated_to
+		if agent in users and not frappe.has_permission("Appointment", doc=appointment, user=agent):
+			add_docshare("Appointment", appointment, agent, flags={"ignore_share_permission": True})
