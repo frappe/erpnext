@@ -22,6 +22,6 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: alyf-de/po-review-action@57fff275f4a0518a2ca55869ec6776fa3813b3d5 # v1.2.0
+      - uses: alyf-de/po-review-action@f40006d8450de7fd5b538e38603185bbee744117 # v1.3.0
         with:
           hidden-po-files: eo.po
