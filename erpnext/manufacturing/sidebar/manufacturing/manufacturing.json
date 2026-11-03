@@ -442,6 +442,21 @@
    "indent": 0,
    "is_default_module": 0,
    "keep_closed": 0,
+   "label": "Plant Floor",
+   "link_to": "Plant Floor",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "added": 0,
+   "child": 1,
+   "collapsible": 1,
+   "hidden": 0,
+   "indent": 0,
+   "is_default_module": 0,
+   "keep_closed": 0,
    "label": "Settings",
    "link_to": "Manufacturing Settings",
    "link_type": "DocType",
@@ -450,7 +465,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-31 11:55:30.883461",
+ "modified": "2026-11-03 09:27:52.381533",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

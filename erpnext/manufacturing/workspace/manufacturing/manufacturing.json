@@ -332,9 +332,19 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Tools",
-   "link_count": 1,
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Visual Plant Floor",
+   "link_count": 0,
+   "link_to": "visual-plant-floor",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -385,7 +395,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-11-02 09:27:04.558399",
+ "modified": "2026-11-03 09:27:52.381533",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "module_onboarding": "Manufacturing Onboarding",
