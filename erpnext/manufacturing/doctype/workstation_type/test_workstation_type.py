@@ -7,7 +7,11 @@ from erpnext.manufacturing.doctype.operation.test_operation import make_operatio
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
-from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_preset_shapes
+from erpnext.manufacturing.doctype.workstation_type.workstation_type import (
+	DEFAULT_WORKSTATION_TYPES,
+	create_default_workstation_types,
+	get_preset_shapes,
+)
 from erpnext.manufacturing.page.plant_builder.plant_builder import (
 	get_machine_catalog,
 	get_workstation,
@@ -152,6 +156,22 @@ class TestWorkstationType(ERPNextTestSuite):
 
 		shapes = get_workstation(workstation.name)["shapes"]
 		self.assertEqual([(row["shape"], row["radius"]) for row in shapes], [("Open Tank", 30)])
+
+	def test_default_workstation_types_are_added_once_and_keep_existing_ones(self):
+		names = [row["workstation_type"] for row in frappe.get_file_json(DEFAULT_WORKSTATION_TYPES)]
+		for name in names:
+			frappe.delete_doc_if_exists("Workstation Type", name, force=True)
+		create_workstation_type(workstation_type="Dryer", description="Our own dryer")
+
+		create_default_workstation_types()
+		create_default_workstation_types()
+
+		self.assertEqual(frappe.db.count("Workstation Type", {"name": ("in", names)}), len(names))
+		self.assertEqual(frappe.db.get_value("Workstation Type", "Dryer", "description"), "Our own dryer")
+		self.assertEqual(len(frappe.get_doc("Workstation Type", "Ring Frame").shapes), 9)
+		self.assertEqual(
+			frappe.get_doc("Workstation Type", "Mixer").machine_shapes, get_preset_shapes("Mixer")
+		)
 
 
 def create_workstation_type(**args):
