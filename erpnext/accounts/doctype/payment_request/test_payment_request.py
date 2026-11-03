@@ -1877,6 +1877,7 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 					"last_name": "Contact",
 					"email_id": "test.contact@example.com",
 					"phone": "+1234567890",
+					"links": [{"link_doctype": "Customer", "link_name": customer.name}],
 				}
 			)
 			test_contact.insert(ignore_permissions=True)
@@ -1893,6 +1894,7 @@ class TestPaymentRequestV2Gateway(ERPNextTestSuite):
 					"address_line1": "123 Test Street",
 					"city": "Test City",
 					"country": "United States",
+					"links": [{"link_doctype": "Customer", "link_name": customer.name}],
 				}
 			)
 			test_address.insert(ignore_permissions=True)
