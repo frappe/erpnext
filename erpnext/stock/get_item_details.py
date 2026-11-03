@@ -308,9 +308,12 @@ def update_stock(ctx, out, doc=None):
 				"warehouse": ctx.warehouse,
 				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 				"qty": out.stock_qty,
-				"against_sales_order": ctx.get("against_sales_order") or ctx.get("sales_order"),
 			}
 		)
+
+		if out.has_serial_no:
+			# the serial nos reserved for the Sales Order row, and their batch, are picked first
+			kwargs["sales_order_item"] = ctx.get("so_detail")
 
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")

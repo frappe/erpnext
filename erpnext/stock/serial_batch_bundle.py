@@ -1301,7 +1301,7 @@ class SerialBatchCreation:
 			kwargs["already_picked_batches"] = self.already_picked_batches
 
 		if self.has_serial_no and not self.get("serial_nos"):
-			kwargs["against_sales_order"] = self.get_sales_order()
+			kwargs["sales_order_item"] = self.get_sales_order_item()
 
 		if (
 			self.has_serial_no
@@ -1321,13 +1321,10 @@ class SerialBatchCreation:
 
 			self.batches = get_available_batches(kwargs)
 
-	def get_sales_order(self) -> str | None:
-		"""Sales Order the delivered row is against, so its reserved serial nos are picked."""
-		field = {"Delivery Note": "against_sales_order", "Sales Invoice": "sales_order"}.get(
-			self.get("voucher_type")
-		)
-		if field and self.get("voucher_detail_no"):
-			return frappe.db.get_value(f"{self.voucher_type} Item", self.voucher_detail_no, field)
+	def get_sales_order_item(self) -> str | None:
+		"""Sales Order row the delivered row is against, so its reserved serial nos are picked."""
+		if self.get("voucher_type") in ("Delivery Note", "Sales Invoice") and self.get("voucher_detail_no"):
+			return frappe.db.get_value(f"{self.voucher_type} Item", self.voucher_detail_no, "so_detail")
 
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
