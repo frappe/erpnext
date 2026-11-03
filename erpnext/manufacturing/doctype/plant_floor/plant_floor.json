@@ -10,8 +10,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "stock_summary_tab",
-  "stock_summary",
   "details_tab",
   "column_break_mvbx",
   "floor_name",
@@ -53,17 +51,6 @@
    "options": "Warehouse",
    "set_only_once": 1,
    "show_description_on_click": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal && doc.warehouse",
-   "fieldname": "stock_summary_tab",
-   "fieldtype": "Tab Break",
-   "label": "Stock Summary"
-  },
-  {
-   "fieldname": "stock_summary",
-   "fieldtype": "HTML",
-   "label": "Stock Summary"
   },
   {
    "fieldname": "company",
@@ -147,7 +134,7 @@
  "icon": "layout-grid",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-11-03 08:54:01.196000",
+ "modified": "2026-11-03 09:40:02.699874",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
