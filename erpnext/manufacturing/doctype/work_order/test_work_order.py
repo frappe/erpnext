@@ -505,6 +505,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		work_order.sales_order_item = so.items[0].name
 		self.assertRaises(OverProductionError, work_order.save)
 
+	def test_sales_order_work_order_qty_follows_recorded_process_loss(self):
+		fg_item = make_item("_Test SO Recorded Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		rm_item = make_item("_Test SO Recorded Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20)
+		so = make_sales_order(item_code=fg_item, qty=80)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			sales_order=so.name,
+			qty=80,
+			stock_uom="Kg",
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+			do_not_save=True,
+		)
+		work_order.sales_order_item = so.items[0].name
+		work_order.submit()
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=80, basic_rate=10
+		)
+
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 80))
+		entry.process_loss_percentage = 12.5
+		entry.process_loss_qty = 10
+		for item in entry.items:
+			if item.is_finished_item:
+				item.qty = 70
+		entry.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 70)
+
 	def test_work_order_with_non_stock_item(self):
 		items = {
 			"Finished Good Test Item For non stock": 1,
