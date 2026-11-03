@@ -4,20 +4,23 @@ import { computed } from "vue"
 import { usePortalIdentity } from "@app/composables/usePortalIdentity"
 import { useSession } from "@app/composables/useSession"
 import {
-	addressRows,
-	copyValue,
+	AMBER,
 	descriptionOf,
 	EMPTY,
 	formatDate,
 	formatMoneyExact as formatMoney,
 	formatQty,
+	GREEN,
 	INK5,
+	INK7,
 	INK8,
 	line,
 	plainText,
+	postalAddress,
 	printDocument,
 	RED,
 	routeOpener,
+	numbered,
 } from "@app/utils"
 import { orderDueDate, orderIsOverdue, orderStatus, statusText, statusTheme, totalRows } from "@app/lib/documents"
 import { usePortalNotifications } from "@app/composables/useNotifications"
@@ -103,21 +106,22 @@ export default function setup(context) {
 	}
 
 	// the order's addresses are the buyer's: where to bill, and where to deliver
-	const billingAddress = computed(() => addressRows(doc.value.company ?? "", doc.value.billing_address_display))
-	const shippingAddress = computed(() =>
-		addressRows(doc.value.company ?? "", doc.value.shipping_address_display || doc.value.billing_address_display),
-	)
+	const addressDetails = computed(() => {
+		const company = doc.value.company ?? ""
+		const billing = postalAddress(doc.value.billing_address_display)
+		const shipping = postalAddress(doc.value.shipping_address_display) || billing
+		if (!billing && !shipping) return []
+		if (billing === shipping) return [{ key: "both", label: __("Bill and deliver to"), name: company, address: billing }]
+		return [
+			{ key: "bill", label: __("Billing address"), name: company, address: billing },
+			{ key: "deliver", label: __("Deliver to"), name: company, address: shipping },
+		]
+	})
 
 	// ---------------------------------------------------------------- items
 	const currency = computed(() => doc.value.currency || "")
 
-	/** How much of a line the buyer has received: nothing said until something arrives. */
-	function delivered(row: any): string {
-		const received = Number(row.received_qty ?? 0)
-		if (!received) return ""
-		if (received >= Number(row.qty)) return __("delivered in full")
-		return __("{0} delivered", [formatQty(received, row.uom)])
-	}
+	const itemsTitle = computed(() => __("What was ordered"))
 
 	const items = computed(() =>
 		(doc.value.items ?? []).map((row: any) => {
@@ -126,7 +130,6 @@ export default function setup(context) {
 				row.schedule_date && Number(row.received_qty ?? 0) < Number(row.qty) && row.schedule_date !== orderDueDate(doc.value)
 					? __("deliver by {0}", [formatDate(row.schedule_date)])
 					: "",
-				delivered(row),
 				row.supplier_part_no ? __("your part no. {0}", [row.supplier_part_no]) : "",
 			]
 			return {
@@ -134,6 +137,9 @@ export default function setup(context) {
 				image: row.image,
 				description: [...detail, descriptionOf(row)].filter(Boolean).join(" · "),
 				qty: formatQty(row.qty, row.uom),
+				delivered: formatQty(Number(row.received_qty ?? 0), row.uom),
+				deliveredColor:
+					Number(row.received_qty ?? 0) >= Number(row.qty) ? GREEN : Number(row.received_qty ?? 0) > 0 ? AMBER : INK7,
 				rate: formatMoney(row.rate, currency.value),
 				amount: formatMoney(row.amount, currency.value),
 			}
@@ -147,6 +153,36 @@ export default function setup(context) {
 	const amountInWords = computed(() => doc.value.in_words || "")
 	const termsText = computed(() => plainText(doc.value.terms))
 
+	// ---------------------------------------------------------------- what happens next
+	const note = computed(() => {
+		const status = doc.value.status
+		if (status === "On Hold") {
+			return { title: __("The buyer put this order on hold. Wait for them before you deliver."), theme: "amber", icon: "lucide-circle-pause" }
+		}
+		if (status === "Closed") return { title: __("The buyer closed this order."), theme: "gray", icon: "lucide-circle-slash" }
+		const left = (doc.value.items ?? [])
+			.map((row: any) => ({ row, left: Number(row.qty) - Number(row.received_qty ?? 0) }))
+			.filter(({ left }) => left > 0)
+		if (!left.length) {
+			return Number(doc.value.per_billed ?? 0) >= 100
+				? { title: __("Delivered and billed in full."), theme: "green", icon: "lucide-circle-check" }
+				: { title: __("Delivered in full. The buyer bills it next."), theme: "green", icon: "lucide-circle-check" }
+		}
+		// up to three lines by name; more than that is said as a count
+		const what = left.length <= 3
+			? left.map(({ row, left }) => __("{0} of {1}", [formatQty(left, row.uom), row.item_name || row.item_code])).join(__(" and "))
+			: __("{0} items", [left.length])
+		const due = orderDueDate(doc.value)
+		return {
+			title: due ? __("Deliver {0} by {1}.", [what, formatDate(due)]) : __("Deliver {0}.", [what]),
+			theme: orderIsOverdue(doc.value) ? "red" : "blue",
+			icon: "lucide-truck",
+		}
+	})
+	const noteTitle = computed(() => note.value.title)
+	const noteTheme = computed(() => note.value.theme)
+	const noteIcon = computed(() => note.value.icon)
+
 	// ---------------------------------------------------------------- comments
 	const { comments, postComment, posting, clearing } = usePortalComments(
 		context, "Purchase Order", "order", () => docId.value,
@@ -159,11 +195,10 @@ export default function setup(context) {
 	return {
 		...usePortalNotifications(context),
 		notFound, failure, loaded,
-		copyValue,
 		// the document's own print format, as the customer portal prints; ERPNext lets a supplier's portal users print their own
 		docId, crumbs, statusLabel, statusTheme: theme, printDocument: () => printDocument("Purchase Order", docId.value), goTo,
-		salesInfo, billingAddress, shippingAddress,
-		items, itemImages, totals, amountInWords, termsText, comments, postComment, posting, clearing,
+		salesInfo, addressDetails, itemsTitle, noteTitle, noteTheme, noteIcon,
+		items: numbered(items), itemImages, totals, amountInWords, termsText, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}
 }
