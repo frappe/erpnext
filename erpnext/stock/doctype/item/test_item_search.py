@@ -42,6 +42,13 @@ class TestItemSearchSetting(ERPNextTestSuite):
 		):
 			self.assertFalse(ItemSearch().is_search_enabled())
 
+	def test_old_sqlite_blocks_enabling_the_index(self):
+		global_defaults = frappe.get_single("Global Defaults")
+		global_defaults.enable_item_search_index = 1
+
+		with patch.object(sqlite3, "sqlite_version_info", (3, 37, 2)):
+			self.assertRaises(frappe.ValidationError, global_defaults.save)
+
 
 class TestItemSearchIndex(ERPNextTestSuite):
 	@classmethod
