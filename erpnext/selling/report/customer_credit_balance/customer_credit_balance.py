@@ -6,11 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.selling.doctype.customer.customer import (
-	get_credit_limit,
-	get_customer_outstanding,
-	is_sales_order_credit_check_bypassed,
-)
+from erpnext.selling.doctype.customer.customer import get_credit_limit_settings, get_customer_outstanding
 
 
 def execute(filters=None):
@@ -26,13 +22,11 @@ def execute(filters=None):
 
 	for d in customer_list:
 		row = []
-		bypass_credit_limit_check = is_sales_order_credit_check_bypassed(d.name, filters.get("company"))
+		credit_limit, bypass_credit_limit_check = get_credit_limit_settings(d.name, filters.get("company"))
 
 		outstanding_amt = get_customer_outstanding(
 			d.name, filters.get("company"), ignore_outstanding_sales_order=bypass_credit_limit_check
 		)
-
-		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
