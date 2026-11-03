@@ -501,19 +501,25 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		self.assertEqual(target_asset.db_get("net_purchase_amount"), 800)
 		self.assertEqual(asset_capitalization.db_get("total_value"), 800)
 
-	def test_cancel_is_refused_after_the_target_asset_is_submitted(self):
-		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
-		asset_capitalization = create_asset_capitalization(
-			target_asset=target_asset.name,
-			service_rate=500,
-			service_expense_account="Expenses Included In Asset Valuation - _TC",
-			submit=1,
-		)
-		target_asset.reload()
-		target_asset.submit()
+	def test_capitalization_and_submitted_target_asset_are_cancelled_together(self):
+		for cancel_target_first in (False, True):
+			with self.subTest(cancel_target_first=cancel_target_first):
+				consumed_asset = create_asset(submit=1, warehouse="Stores - _TC")
+				target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+				asset_capitalization = create_asset_capitalization(
+					target_asset=target_asset.name, consumed_asset=consumed_asset.name, submit=1
+				)
+				target_asset.reload()
+				target_asset.submit()
 
-		self.assertRaises(frappe.ValidationError, asset_capitalization.cancel)
-		self.assertEqual(target_asset.db_get("net_purchase_amount"), 500)
+				if cancel_target_first:
+					target_asset.cancel()
+				else:
+					asset_capitalization.cancel()
+
+				self.assertEqual(asset_capitalization.db_get("docstatus"), 2)
+				self.assertEqual(target_asset.db_get("docstatus"), 2)
+				self.assertNotEqual(consumed_asset.db_get("status"), "Capitalized")
 
 	def test_consumed_asset_cannot_be_added_twice(self):
 		consumed_asset = create_asset(submit=1, warehouse="Stores - _TC")
