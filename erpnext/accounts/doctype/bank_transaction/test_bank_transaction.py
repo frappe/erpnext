@@ -27,13 +27,13 @@ class TestBankTransaction(ERPNextTestSuite):
 
 		# generate and use a uniq hash identifier for 'Bank Account' and it's linked GL 'Account' to avoid validation error
 		uniq_identifier = frappe.generate_hash(length=10)
-		gl_account = create_gl_account("_Test Bank " + uniq_identifier)
-		bank_account = create_bank_account(
-			gl_account=gl_account, bank_account_name="Checking Account " + uniq_identifier
+		self.gl_account = create_gl_account("_Test Bank " + uniq_identifier)
+		self.bank_account = create_bank_account(
+			gl_account=self.gl_account, bank_account_name="Checking Account " + uniq_identifier
 		)
 
-		add_transactions(bank_account=bank_account)
-		add_vouchers(gl_account=gl_account)
+		add_transactions(bank_account=self.bank_account)
+		add_vouchers(gl_account=self.gl_account)
 
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
@@ -133,6 +133,35 @@ class TestBankTransaction(ERPNextTestSuite):
 		amended.insert()
 
 		self.assertFalse(amended.clearance_date)
+
+	def test_cancelled_status_cleared_on_amend(self):
+		bank_transaction = add_transaction(
+			self.bank_account,
+			"_Test amended Bank Transaction status",
+			"2018-10-26",
+			deposit=100,
+		)
+		bank_transaction.cancel()
+
+		amended = frappe.copy_doc(bank_transaction)
+		amended.amended_from = bank_transaction.name
+		amended.docstatus = 0
+		amended.insert()
+		self.assertEqual(amended.status, "Pending")
+
+	def test_status_reset_on_duplicate(self):
+		bank_transaction = add_transaction(
+			self.bank_account,
+			"_Test duplicated Bank Transaction status",
+			"2018-10-26",
+			deposit=100,
+		)
+		self.assertEqual(bank_transaction.status, "Unreconciled")
+
+		duplicate = frappe.copy_doc(bank_transaction)
+		duplicate.docstatus = 0
+		duplicate.insert()
+		self.assertEqual(duplicate.status, "Pending")
 
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
@@ -284,6 +313,21 @@ def create_gl_account(gl_account_name="_Test Bank - _TC"):
 		}
 	).insert()
 	return gl_account.name
+
+
+def add_transaction(bank_account, description, date, **amount):
+	doc = frappe.get_doc(
+		{
+			"doctype": "Bank Transaction",
+			"description": description,
+			"date": date,
+			"currency": "INR",
+			"bank_account": bank_account,
+			**amount,
+		}
+	).insert()
+	doc.submit()
+	return doc
 
 
 def add_transactions(bank_account="_Test Bank - _TC"):
