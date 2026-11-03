@@ -221,14 +221,41 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None, from_r
 			new_gl_map.append(d)
 			continue
 
+		transaction_precision = get_transaction_currency_precision(d, precision)
+		allocated_percentage = 0
+		allocated_transaction_amounts = {
+			"debit_in_transaction_currency": 0,
+			"credit_in_transaction_currency": 0,
+		}
 		for sub_cost_center, percentage in cost_center_allocation:
 			gle = copy.deepcopy(d)
 			gle.cost_center = sub_cost_center
-			for field in ("debit", "credit", "debit_in_account_currency", "credit_in_account_currency"):
+			for field in (
+				"debit",
+				"credit",
+				"debit_in_account_currency",
+				"credit_in_account_currency",
+			):
 				gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
+
+			# Round cumulative amounts so each allocation carries forward the rounding remainder.
+			allocated_percentage += percentage
+			for field, allocated_amount in allocated_transaction_amounts.items():
+				cumulative_amount = flt(flt(d.get(field)) * allocated_percentage / 100, transaction_precision)
+				gle[field] = flt(cumulative_amount - allocated_amount, transaction_precision)
+				allocated_transaction_amounts[field] = cumulative_amount
 			new_gl_map.append(gle)
 
 	return new_gl_map
+
+
+def get_transaction_currency_precision(entry, default_precision):
+	if not entry.get("transaction_currency"):
+		return default_precision
+	return get_field_precision(
+		frappe.get_meta("GL Entry").get_field("debit_in_transaction_currency"),
+		currency=entry.transaction_currency,
+	)
 
 
 @request_cache
@@ -409,11 +436,12 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
 
-def make_entry(args, adv_adj, update_outstanding, from_repost=False):
+def make_entry(args, adv_adj, update_outstanding, from_repost=False, *, from_reversal=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
+	gle.flags.from_reversal = from_reversal
 	gle.flags.adv_adj = adv_adj
 	gle.flags.update_outstanding = update_outstanding or "Yes"
 	gle.flags.notify_update = False
@@ -490,20 +518,23 @@ def process_debit_credit_difference(gl_map):
 def get_debit_credit_difference(gl_map, precision):
 	debit_credit_diff = 0.0
 	trx_cur_debit_credit_diff = 0
+	transaction_precision = 0
 
 	for entry in gl_map:
 		entry.debit = flt(entry.debit, precision)
 		entry.credit = flt(entry.credit, precision)
 		debit_credit_diff += entry.debit - entry.credit
 
-		entry.debit_in_transaction_currency = flt(entry.debit_in_transaction_currency, precision)
-		entry.credit_in_transaction_currency = flt(entry.credit_in_transaction_currency, precision)
+		entry_precision = get_transaction_currency_precision(entry, precision)
+		transaction_precision = max(transaction_precision, entry_precision)
+		entry.debit_in_transaction_currency = flt(entry.debit_in_transaction_currency, entry_precision)
+		entry.credit_in_transaction_currency = flt(entry.credit_in_transaction_currency, entry_precision)
 		trx_cur_debit_credit_diff += (
 			entry.debit_in_transaction_currency - entry.credit_in_transaction_currency
 		)
 
 	debit_credit_diff = flt(debit_credit_diff, precision)
-	trx_cur_debit_credit_diff = flt(trx_cur_debit_credit_diff, precision)
+	trx_cur_debit_credit_diff = flt(trx_cur_debit_credit_diff, transaction_precision)
 
 	return debit_credit_diff, trx_cur_debit_credit_diff
 
@@ -560,6 +591,9 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 					debit_credit_diff -= flt(d.debit) - flt(d.credit)
 				else:
 					debit_credit_diff += flt(d.credit)
+				trx_cur_debit_credit_diff -= flt(d.debit_in_transaction_currency) - flt(
+					d.credit_in_transaction_currency
+				)
 				round_off_account_exists = True
 
 		debit_credit_diff = flt(debit_credit_diff, precision)
@@ -782,7 +816,7 @@ def make_reverse_gl_entries(
 				new_gle["posting_date"] = posting_date
 
 			if new_gle["debit"] or new_gle["credit"]:
-				make_entry(new_gle, adv_adj, "Yes")
+				make_entry(new_gle, adv_adj, "Yes", from_reversal=True)
 
 
 def check_freezing_date(posting_date, adv_adj=False):

@@ -5,6 +5,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
@@ -918,8 +919,14 @@ def make_subcontract_return(source_name, target_doc=None):
 	return make_return_doc("Subcontracting Receipt", source_name, target_doc)
 
 
-@frappe.whitelist()
-def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False, notify=False):
+@frappe.whitelist(methods=["POST"])
+def make_purchase_receipt(
+	source_name: Document | str,
+	target_doc: str | dict | Document | None = None,
+	save: bool = False,
+	submit: bool = False,
+	notify: bool = False,
+):
 	if isinstance(source_name, str):
 		source_doc = frappe.get_doc("Subcontracting Receipt", source_name)
 	else:

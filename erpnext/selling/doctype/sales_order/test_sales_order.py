@@ -36,6 +36,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import InvalidWarehouseCompany
+from erpnext.tests.permission_test_utils import make_fenced_user
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -61,6 +62,92 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
+
+	def test_maximum_discount_for_percentage_amount_and_rate(self):
+		frappe.db.set_value("Price List", "Standard Selling", "currency", "INR")
+		item = make_item(properties={"is_stock_item": 0, "max_discount": 10})
+		item_price = frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "Standard Selling",
+				"price_list_rate": 100,
+			}
+		).insert()
+		user = make_fenced_user("max-discount@example.com", ["Sales User"])
+
+		with self.set_user(user):
+			for values in (
+				{"discount_percentage": 50},
+				{"discount_amount": 50, "rate": 50},
+				{"rate": 50},
+				{
+					"margin_type": "Percentage",
+					"margin_rate_or_amount": 25,
+					"discount_amount": 25,
+					"rate": 100,
+				},
+			):
+				with self.subTest(values=values):
+					order = make_sales_order(
+						item_list=[{"item_code": item.name, "qty": 1, **values}],
+						selling_price_list="Standard Selling",
+						do_not_save=True,
+					)
+					with self.assertRaisesRegex(frappe.ValidationError, "Maximum discount for Item"):
+						order.insert().submit()
+
+			for values, expected_rate in (
+				({"discount_percentage": 10}, 90),
+				({"discount_amount": 10, "rate": 90}, 90),
+				({"rate": 90}, 90),
+				(
+					{
+						"margin_type": "Percentage",
+						"margin_rate_or_amount": 25,
+						"discount_amount": 12.5,
+						"rate": 112.5,
+					},
+					112.5,
+				),
+			):
+				with self.subTest(values=values):
+					order = make_sales_order(
+						item_list=[{"item_code": item.name, "qty": 1, **values}],
+						selling_price_list="Standard Selling",
+					)
+					self.assertEqual(order.docstatus, 1)
+					self.assertEqual(order.items[0].price_list_rate, 100)
+					self.assertEqual(order.items[0].rate, expected_rate)
+
+		item_price.price_list_rate = 0.06
+		item_price.save()
+		with self.set_user(user):
+			order = make_sales_order(
+				item_list=[{"item_code": item.name, "qty": 1, "discount_percentage": 10}],
+				selling_price_list="Standard Selling",
+			)
+			self.assertAlmostEqual(order.items[0].discount_amount, 0.01)
+			self.assertEqual(order.items[0].rate, 0.05)
+
+		full_price_item = make_item(properties={"is_stock_item": 0})
+		for price_list_rate, rate in ((0, 50), (-100, -100)):
+			item_price.price_list_rate = price_list_rate
+			item_price.save()
+			with (
+				self.subTest(price_list_rate=price_list_rate),
+				change_settings("Selling Settings", {"allow_negative_rates_for_items": 1}),
+				self.set_user(user),
+			):
+				order = make_sales_order(
+					item_list=[
+						{"item_code": item.name, "qty": 1, "rate": rate},
+						{"item_code": full_price_item.name, "qty": 1, "rate": 200},
+					],
+					selling_price_list="Standard Selling",
+				)
+				self.assertEqual(order.items[0].rate, rate)
+				self.assertEqual(order.items[0].discount_amount, 0)
 
 	@change_settings(
 		"Stock Settings",
@@ -847,6 +934,16 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.cancel()
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
+
+	def test_update_status_endpoint_rejects_invalid_status(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		so = make_sales_order()
+		# only Draft / On Hold / Closed are allowed, and only on a submitted order
+		self.assertRaises(frappe.ValidationError, update_status, "Cancelled", so.name)
+
+		draft = make_sales_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_status, "Closed", draft.name)
 
 	def test_sales_order_on_hold(self):
 		so = make_sales_order(item_code="_Test Product Bundle Item")
@@ -2533,7 +2630,8 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		item = make_item()
+		so = make_sales_order(item_code=item.name, uom="Nos", do_not_save=1)
 		so.items[0].rate = 0
 		so.save()
 		so.submit()
@@ -2541,7 +2639,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.net_total, 0)
 		self.assertEqual(so.billing_status, "Not Billed")
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(item_code=item.name, qty=10, do_not_save=1)
 		si.price_list = "_Test Price List"
 		si.items[0].rate = 0
 		si.items[0].price_list_rate = 0
@@ -3255,6 +3353,24 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		# SO still has qty 0, so billed % should be unset
 		self.assertFalse(so.per_billed)
 		self.assertEqual(so.status, "To Deliver and Bill")
+
+	def test_make_purchase_order_does_not_inherit_incoterm(self):
+		for delivered_by_supplier in (0, 1):
+			with self.subTest(delivered_by_supplier=delivered_by_supplier):
+				so = make_sales_order(do_not_save=True)
+				so.incoterm = "CIF"
+				so.named_place = "Hamburg port"
+				so.items[0].delivered_by_supplier = delivered_by_supplier
+				so.items[0].supplier = "_Test Supplier"
+				so.submit()
+
+				po = make_purchase_order(so.name, selected_items=so.items)
+
+				self.assertFalse(po.incoterm)
+				self.assertFalse(po.named_place)
+				self.assertEqual(po.items[0].sales_order, so.name)
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "incoterm"), "CIF")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "named_place"), "Hamburg port")
 
 	def test_make_purchase_order_does_not_inherit_party_fields(self):
 		"""

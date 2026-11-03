@@ -155,6 +155,7 @@ def _get_item_details(
 		):
 			fallback_args = args.copy()
 			fallback_args.price_list = frappe.get_single_value("Selling Settings", "selling_price_list")
+			fallback_args.price_list_uom_dependant = None
 			out.update(get_price_list_rate(fallback_args, item))
 
 	args.customer = current_customer
@@ -290,8 +291,6 @@ def update_bin_details(args, out, doc):
 
 
 def update_stock(ctx, out, doc=None):
-	from erpnext.stock.doctype.batch.batch import get_available_batches
-
 	if (
 		(
 			ctx.get("doctype") in ["Delivery Note", "POS Invoice"]
@@ -312,30 +311,21 @@ def update_stock(ctx, out, doc=None):
 			}
 		)
 
+		if out.has_serial_no:
+			# the serial nos reserved for the Sales Order row, and their batch, are picked first
+			kwargs["sales_order_item"] = ctx.get("so_detail")
+
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
 
-		qty = out.stock_qty
-		batches = []
 		if out.has_batch_no and not ctx.get("batch_no"):
-			batches = get_available_batches(kwargs)
-			if doc:
-				filter_batches(batches, doc)
-
-			for batch_no, batch_qty in batches.items():
+			batch_no = get_batch_no_covering_qty(kwargs, doc, out.stock_qty)
+			if batch_no:
+				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
 				rate = _get_batch_based_item_price(
 					{"price_list": doc.get("selling_price_list"), "uom": out.uom, "batch_no": batch_no},
 					out.item_code,
 				)
-				if batch_qty >= qty:
-					out.update({"batch_no": batch_no, "actual_batch_qty": qty})
-					if rate:
-						out.update({"rate": rate, "price_list_rate": rate})
-					break
-				else:
-					qty -= batch_qty
-
-				out.update({"batch_no": batch_no, "actual_batch_qty": batch_qty})
 				if rate:
 					out.update({"rate": rate, "price_list_rate": rate})
 
@@ -356,8 +346,9 @@ def needs_serial_nos(ctx, out):
 def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 
-	if out.has_batch_no:
-		kwargs["batches"] = [ctx.get("batch_no") or out.get("batch_no")]
+	batch_no = ctx.get("batch_no") or out.get("batch_no")
+	if out.has_batch_no and batch_no:
+		kwargs["batches"] = [batch_no]
 
 	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
 	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
@@ -374,6 +365,20 @@ def has_incorrect_serial_nos(ctx, out):
 		return True
 
 	return False
+
+
+def get_batch_no_covering_qty(kwargs, doc, qty):
+	from erpnext.stock.doctype.batch.batch import get_available_batches
+
+	batches = get_available_batches(frappe._dict(kwargs, qty=0))
+	if doc:
+		filter_batches(batches, doc)
+
+	batch_no = next(iter(batches), None)
+	if batch_no and flt(batches[batch_no]) >= flt(qty):
+		return batch_no
+
+	return None
 
 
 def filter_batches(batches, doc):
@@ -1090,6 +1095,12 @@ def get_price_list_rate(args, item_doc, out=None):
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
+		# Transactions have no field for this flag, so item rows must read it from the Price List
+		if args.get("price_list_uom_dependant") is None and args.price_list:
+			args.price_list_uom_dependant = frappe.get_cached_value(
+				"Price List", args.price_list, "price_not_uom_dependent"
+			)
+
 		price_list_rate = get_price_list_rate_for(args, item_doc.name)
 
 		# variant
@@ -1727,7 +1738,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_details = get_price_list_details(args.price_list)
 
 	price_list_currency = price_list_details.get("currency")
-	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+	price_list_uom_dependant = price_list_details.get("price_not_uom_dependent")
 
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)

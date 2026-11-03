@@ -58,25 +58,13 @@ class calculate_taxes_and_totals:
 		if not len(self.doc.items):
 			return
 
-		self.discount_amount_applied = False
 		self.need_recomputation = False
 		self.ignore_tax_template_validation = ignore_tax_template_validation
 
-		self._calculate()
-
-		if self.doc.meta.get_field("discount_amount") and not self.has_mapped_discount:
-			self.set_discount_amount()
-			self.apply_discount_amount()
+		self.calculate_discounted_totals()
 
 		if not ignore_tax_template_validation and self.need_recomputation:
 			return self.calculate(ignore_tax_template_validation=True)
-
-		# Update grand total as per cash and non trade discount
-		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
-			self.doc.grand_total -= self.doc.discount_amount
-			self.doc.base_grand_total -= self.doc.base_discount_amount
-			self.doc.rounding_adjustment = self.doc.base_rounding_adjustment = 0.0
-			self.set_rounded_total()
 
 		self.calculate_shipping_charges()
 
@@ -85,6 +73,21 @@ class calculate_taxes_and_totals:
 
 		if self.doc.meta.get_field("other_charges_calculation"):
 			self.set_item_wise_tax_breakup()
+
+	def calculate_discounted_totals(self):
+		self.discount_amount_applied = False
+		self._calculate()
+
+		if self.doc.meta.get_field("discount_amount") and not self.has_mapped_discount:
+			self.set_discount_amount()
+			self.apply_discount_amount()
+
+		# Update grand total as per cash and non trade discount
+		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
+			self.doc.grand_total -= self.doc.discount_amount
+			self.doc.base_grand_total -= self.doc.base_discount_amount
+			self.doc.rounding_adjustment = self.doc.base_rounding_adjustment = 0.0
+			self.set_rounded_total()
 
 	def _calculate(self):
 		self.validate_conversion_rate()
@@ -467,7 +470,7 @@ class calculate_taxes_and_totals:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
 			shipping_rule.apply(self.doc)
 
-			self._calculate()
+			self.calculate_discounted_totals()
 
 	def calculate_taxes(self):
 		# reset value from earlier calculations
@@ -485,6 +488,7 @@ class calculate_taxes_and_totals:
 				if tax.charge_type == "Actual"
 			]
 		)
+		self.set_actual_tax_distribution()
 
 		for n, item in enumerate(self._items):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
@@ -500,7 +504,7 @@ class calculate_taxes_and_totals:
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
 					actual_tax_dict[tax.idx] -= current_tax_amount
-					if n == len(self._items) - 1:
+					if n == self._actual_tax_distribution[tax.idx].last_idx:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# net_amount is the taxable basis, it feeds no total and is always
@@ -566,6 +570,31 @@ class calculate_taxes_and_totals:
 
 			self._set_in_company_currency(tax, ["total"])
 
+	def set_actual_tax_distribution(self):
+		# Actual taxes are split only over the items they apply to
+		self._actual_tax_distribution = {}
+		item_tax_maps = [self._load_item_tax_rate(item.item_tax_rate) for item in self._items]
+
+		for tax in self.doc.taxes:
+			if tax.charge_type != "Actual":
+				continue
+
+			net_total, last_idx = 0.0, None
+			for n, item in enumerate(self._items):
+				is_applicable = self._get_tax_rate(tax, item_tax_maps[n]) != NOT_APPLICABLE_TAX
+				if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
+					is_applicable = is_applicable and item.get("apply_tds")
+
+				if is_applicable:
+					net_total += flt(item.net_amount)
+					last_idx = n
+
+			# no applicable item: keep the remainder on the last item as before
+			if last_idx is None:
+				last_idx = len(self._items) - 1
+
+			self._actual_tax_distribution[tax.idx] = frappe._dict(net_total=net_total, last_idx=last_idx)
+
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
 		# if tax/charges is for deduction, multiply by -1
@@ -605,18 +634,18 @@ class calculate_taxes_and_totals:
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-
 			if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
-				if not item.get("apply_tds") or not self.doc.tax_withholding_net_total:
-					current_tax_amount = 0.0
-				else:
-					current_net_amount = item.net_amount
-					current_tax_amount = current_net_amount * actual / self.doc.tax_withholding_net_total
-			else:
+				if not item.get("apply_tds"):
+					return current_net_amount, current_tax_amount
+
+			distribution = self._actual_tax_distribution[tax.idx]
+			if distribution.net_total:
 				current_net_amount = item.net_amount
-				current_tax_amount = (
-					current_net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
-				)
+				current_tax_amount = current_net_amount * actual / distribution.net_total
+			elif item is self._items[distribution.last_idx]:
+				# nothing to distribute over, allocate to the last applicable item
+				current_net_amount = item.net_amount
+				current_tax_amount = actual
 
 		elif tax.charge_type == "On Net Total":
 			current_net_amount = item.net_amount
