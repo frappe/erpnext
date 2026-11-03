@@ -49,6 +49,7 @@ export default function setup(context) {
 	const note = computed(() => quoteNote(doc.value, orderedElsewhere.value))
 	const responseNote = computed(() => note.value?.title ?? "")
 	const responseTheme = computed(() => note.value?.theme ?? "gray")
+	const responseIcon = computed(() => note.value?.icon ?? "")
 
 	// the form for a revision is the RFQ's, filled in with this quote
 	const canAct = computed(() => Boolean(doc.value.rfq) && quoteCanBeRevised(doc.value, orderedElsewhere.value))
@@ -144,7 +145,7 @@ export default function setup(context) {
 	return {
 		...usePortalNotifications(context),
 		notFound, failure, loaded,
-		crumbs, status, statusTheme: theme, goTo, canAct, revise, responseNote, responseTheme,
+		crumbs, status, statusTheme: theme, goTo, canAct, revise, responseNote, responseTheme, responseIcon,
 		// the document's own print format, as the customer portal prints; ERPNext lets a supplier's portal users print their own
 		printDocument: () => printDocument("Supplier Quotation", docId.value),
 		salesInfo, addressDetails,

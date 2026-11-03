@@ -182,6 +182,7 @@
              "componentId": "Alert-respnote",
              "componentName": "Alert",
              "componentProps": {
+              "icon": "{{ responseIcon }}",
               "theme": "{{ responseTheme }}",
               "title": "{{ responseNote }}"
              },

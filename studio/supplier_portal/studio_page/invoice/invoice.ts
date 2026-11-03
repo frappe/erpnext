@@ -161,24 +161,27 @@ export default function setup(context) {
 			return {
 				title: against ? __("A debit note against invoice {0}.", [against]) : __("A debit note."),
 				theme: "gray",
+				icon: "lucide-undo-2",
 			}
 		}
 		if (status.value === "Debit Note Issued") {
-			return { title: __("Settled by a debit note."), theme: "gray" }
+			return { title: __("Settled by a debit note."), theme: "gray", icon: "lucide-undo-2" }
 		}
-		if (outstanding.value <= 0) return { title: __("Paid in full."), theme: "green" }
+		if (outstanding.value <= 0) return { title: __("Paid in full."), theme: "green", icon: "lucide-circle-check" }
 		const owed = formatMoney(outstanding.value, partyCurrency.value)
 		const due = doc.value.due_date ? formatDate(doc.value.due_date) : ""
 		if (overdue.value) {
-			return { title: __("{0} still to be paid. It was due {1}.", [owed, due]), theme: "red" }
+			return { title: __("{0} still to be paid. It was due {1}.", [owed, due]), theme: "red", icon: "lucide-triangle-alert" }
 		}
 		return {
 			title: due ? __("{0} still to be paid, due {1}.", [owed, due]) : __("{0} still to be paid.", [owed]),
 			theme: "blue",
+			icon: "lucide-wallet",
 		}
 	})
 	const noteTitle = computed(() => note.value.title)
 	const noteTheme = computed(() => note.value.theme)
+	const noteIcon = computed(() => note.value.icon)
 
 	// ---------------------------------------------------------------- payments
 	const payments = computed(() =>
@@ -206,7 +209,7 @@ export default function setup(context) {
 		notFound, failure, loaded,
 		// the document's own print format, as the customer portal prints; ERPNext lets a supplier's portal users print their own
 		docId, crumbs, statusLabel, statusTheme: theme, printDocument: () => printDocument("Purchase Invoice", docId.value), goTo,
-		invoiceInfo, addressDetails, itemsTitle, noteTitle, noteTheme,
+		invoiceInfo, addressDetails, itemsTitle, noteTitle, noteTheme, noteIcon,
 		items: numbered(items), itemImages, totals, balance, amountInWords, termsText, payments, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}

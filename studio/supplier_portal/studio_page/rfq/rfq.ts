@@ -333,6 +333,7 @@ export default function setup(context) {
 			? {
 					title: __("The buyer is already recording a quotation from you for this request. Contact them to change it."),
 					theme: "gray",
+					icon: "lucide-pencil-line",
 				}
 			: quoting.value || !quotation.value
 			? rfqNoteBeforeQuoting(orderedElsewhere.value)
@@ -340,6 +341,7 @@ export default function setup(context) {
 	)
 	const noteTitle = computed(() => note.value?.title ?? "")
 	const noteTheme = computed(() => note.value?.theme ?? "gray")
+	const noteIcon = computed(() => note.value?.icon ?? "")
 
 	// ---------------------------------------------------------------- sending
 	const dialogOpen = ref(false)
@@ -427,7 +429,7 @@ export default function setup(context) {
 		quoteLines: numbered(quoteLines), setLine, hasRates, rateLabel, items: numbered(items), itemImages, totals,
 		messageText, termsText, quoteNotes, buyerWords, yourWords,
 		itemsHeading, sendLabel, validTill, reference, notes, startRevising, stopRevising,
-		noteTitle, noteTheme,
+		noteTitle, noteTheme, noteIcon,
 		dialogOpen, dialogActions, dialogMessage, sendError, openConfirm, confirming,
 		companyName, companyLogo, user,
 	}

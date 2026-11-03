@@ -124,12 +124,12 @@ export function quoteCanBeRevised(q: any, orderedElsewhere: OrderedElsewhere): b
 }
 
 /** Before quoting: what the supplier should know about the RFQ first. */
-export function rfqNoteBeforeQuoting(orderedElsewhere: OrderedElsewhere): { title: string; theme: string } | null {
+export function rfqNoteBeforeQuoting(orderedElsewhere: OrderedElsewhere): { title: string; theme: string; icon: string } | null {
 	if (orderedElsewhere === "all") {
-		return { title: __("The buyer has already ordered these items from another supplier."), theme: "gray" }
+		return { title: __("The buyer has already ordered these items from another supplier."), theme: "gray", icon: "lucide-circle-x" }
 	}
 	if (orderedElsewhere === "some") {
-		return { title: __("The buyer has already ordered some of these items from another supplier."), theme: "amber" }
+		return { title: __("The buyer has already ordered some of these items from another supplier."), theme: "amber", icon: "lucide-triangle-alert" }
 	}
 	return null
 }
@@ -142,30 +142,31 @@ export function orderedOfQuoted(line: any, uom?: string): string {
 }
 
 /** The one line that says what happens next. */
-export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: string; theme: string } | null {
+export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: string; theme: string; icon: string } | null {
 	if (!q?.name) return null
 	if (q.status === "Submitted" && orderedElsewhere === "all") {
-		return { title: __("The buyer ordered these items from another supplier."), theme: "gray" }
+		return { title: __("The buyer ordered these items from another supplier."), theme: "gray", icon: "lucide-circle-x" }
 	}
 	if (q.status === "Submitted" && orderedElsewhere === "some") {
 		return {
 			title: __("The buyer ordered some of these items from another supplier. You can still revise your quotation."),
 			theme: "amber",
+			icon: "lucide-triangle-alert",
 		}
 	}
 	switch (q.status) {
 		case "Submitted":
 			// one the buyer typed in from an emailed quote has no RFQ, and so no form to revise it in
-			if (!q.rfq) return { title: __("Sent. The buyer accepts a quotation by placing an order from it."), theme: "blue" }
-			return { title: __("Sent. The buyer accepts a quotation by placing an order from it. Until then you can revise it."), theme: "blue" }
+			if (!q.rfq) return { title: __("Sent. The buyer accepts a quotation by placing an order from it."), theme: "blue", icon: "lucide-send" }
+			return { title: __("Sent. The buyer accepts a quotation by placing an order from it. Until then you can revise it."), theme: "blue", icon: "lucide-send" }
 		case "Partially Ordered":
-			return { title: __("The buyer ordered part of this quotation."), theme: "amber" }
+			return { title: __("The buyer ordered part of this quotation."), theme: "amber", icon: "lucide-shopping-cart" }
 		case "Ordered":
-			return { title: __("The buyer placed an order from this quotation."), theme: "green" }
+			return { title: __("The buyer placed an order from this quotation."), theme: "green", icon: "lucide-circle-check" }
 		case "Expired":
-			return { title: __("This quotation expired before anything was ordered from it."), theme: "gray" }
+			return { title: __("This quotation expired before anything was ordered from it."), theme: "gray", icon: "lucide-clock" }
 		case "Stopped":
-			return { title: __("The buyer stopped this quotation."), theme: "gray" }
+			return { title: __("The buyer stopped this quotation."), theme: "gray", icon: "lucide-circle-x" }
 		default:
 			return null
 	}

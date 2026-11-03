@@ -192,23 +192,26 @@ export default function setup(context) {
 
 	/** The one line under the items: what happens next. */
 	const note = computed(() => {
-		if (isReturn.value) return { title: __("These goods went back to you."), theme: "gray" }
-		if (!pending.value.length) return { title: "", theme: "gray" }
+		if (isReturn.value) return { title: __("These goods went back to you."), theme: "gray", icon: "lucide-undo-2" }
+		if (!pending.value.length) return { title: "", theme: "gray", icon: "" }
 		const several = sourceOrders.value.length > 1
 		const left = quantities(pending.value)
 		if (left) {
 			return {
 				title: several ? __("{0} still to deliver on the orders.", [left]) : __("{0} still to deliver on the order.", [left]),
 				theme: "amber",
+				icon: "lucide-truck",
 			}
 		}
 		return {
 			title: several ? __("This completes the orders.") : __("This completes the order."),
 			theme: "green",
+			icon: "lucide-circle-check",
 		}
 	})
 	const noteTitle = computed(() => note.value.title)
 	const noteTheme = computed(() => note.value.theme)
+	const noteIcon = computed(() => note.value.icon)
 
 	// ---------------------------------------------------------------- comments
 	const { comments, postComment, posting, clearing } = usePortalComments(
@@ -225,7 +228,7 @@ export default function setup(context) {
 		// suppliers may not print a Purchase Receipt in Desk, so this prints the page itself
 		docId, crumbs, status, statusTheme: theme, printDocument: () => window.print(), goTo,
 		labels, isReturn, dispatchInfo, tracking, addressDetails, itemsTitle,
-		items: numbered(items), itemColumns, noteTitle, noteTheme, termsText, comments, postComment, posting, clearing,
+		items: numbered(items), itemColumns, noteTitle, noteTheme, noteIcon, termsText, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}
 }

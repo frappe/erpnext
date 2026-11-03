@@ -157,16 +157,16 @@ export default function setup(context) {
 	const note = computed(() => {
 		const status = doc.value.status
 		if (status === "On Hold") {
-			return { title: __("The buyer put this order on hold. Wait for them before you deliver."), theme: "amber" }
+			return { title: __("The buyer put this order on hold. Wait for them before you deliver."), theme: "amber", icon: "lucide-circle-pause" }
 		}
-		if (status === "Closed") return { title: __("The buyer closed this order."), theme: "gray" }
+		if (status === "Closed") return { title: __("The buyer closed this order."), theme: "gray", icon: "lucide-circle-x" }
 		const left = (doc.value.items ?? [])
 			.map((row: any) => ({ row, left: Number(row.qty) - Number(row.received_qty ?? 0) }))
 			.filter(({ left }) => left > 0)
 		if (!left.length) {
 			return Number(doc.value.per_billed ?? 0) >= 100
-				? { title: __("Delivered and billed in full."), theme: "green" }
-				: { title: __("Delivered in full. The buyer bills it next."), theme: "green" }
+				? { title: __("Delivered and billed in full."), theme: "green", icon: "lucide-circle-check" }
+				: { title: __("Delivered in full. The buyer bills it next."), theme: "green", icon: "lucide-circle-check" }
 		}
 		// up to three lines by name; more than that is said as a count
 		const what = left.length <= 3
@@ -176,10 +176,12 @@ export default function setup(context) {
 		return {
 			title: due ? __("Deliver {0} by {1}.", [what, formatDate(due)]) : __("Deliver {0}.", [what]),
 			theme: orderIsOverdue(doc.value) ? "red" : "blue",
+			icon: "lucide-truck",
 		}
 	})
 	const noteTitle = computed(() => note.value.title)
 	const noteTheme = computed(() => note.value.theme)
+	const noteIcon = computed(() => note.value.icon)
 
 	// ---------------------------------------------------------------- comments
 	const { comments, postComment, posting, clearing } = usePortalComments(
@@ -195,7 +197,7 @@ export default function setup(context) {
 		notFound, failure, loaded,
 		// the document's own print format, as the customer portal prints; ERPNext lets a supplier's portal users print their own
 		docId, crumbs, statusLabel, statusTheme: theme, printDocument: () => printDocument("Purchase Order", docId.value), goTo,
-		salesInfo, addressDetails, itemsTitle, noteTitle, noteTheme,
+		salesInfo, addressDetails, itemsTitle, noteTitle, noteTheme, noteIcon,
 		items: numbered(items), itemImages, totals, amountInWords, termsText, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 	}

@@ -224,6 +224,7 @@
              "componentId": "Alert-respnote",
              "componentName": "Alert",
              "componentProps": {
+              "icon": "{{ noteIcon }}",
               "theme": "{{ noteTheme }}",
               "title": "{{ noteTitle }}"
              },
