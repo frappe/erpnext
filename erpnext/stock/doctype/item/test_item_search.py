@@ -35,6 +35,13 @@ class TestItemSearchSetting(ERPNextTestSuite):
 		with self.change_settings("Global Defaults", enable_item_search_index=1):
 			self.assertTrue(ItemSearch().is_search_enabled())
 
+	def test_old_sqlite_keeps_the_index_off(self):
+		with (
+			self.change_settings("Global Defaults", enable_item_search_index=1),
+			patch.object(sqlite3, "sqlite_version_info", (3, 37, 2)),
+		):
+			self.assertFalse(ItemSearch().is_search_enabled())
+
 
 class TestItemSearchIndex(ERPNextTestSuite):
 	@classmethod
