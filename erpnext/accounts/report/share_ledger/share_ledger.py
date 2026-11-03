@@ -69,25 +69,20 @@ def get_columns():
 def get_data(filters):
 	entry = frappe.qb.DocType("Share Ledger Entry")
 	folio = frappe.qb.DocType("Share Folio")
+	# The columns, plus currency for Currency columns and company for permission checks.
 	fields = (
-		"name",
-		"source_doctype",
-		"source_name",
-		"posting_date",
-		"posting_sequence",
 		"company",
-		"share_transaction",
+		"posting_date",
 		"transaction_type",
+		"share_transaction",
 		"share_class",
-		"share_folio",
 		"from_share_number",
 		"to_share_number",
 		"quantity_change",
 		"face_value_per_share",
 		"treasury_cost_change",
-		"currency",
-		"is_reversal",
 		"reversal_of",
+		"currency",
 	)
 	query = (
 		frappe.qb.from_(entry)

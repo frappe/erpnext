@@ -5,13 +5,6 @@
 frappe.query_reports["Share Balance"] = {
 	filters: [
 		{
-			fieldname: "date",
-			label: __("As Of Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
-			reqd: 1,
-		},
-		{
 			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
@@ -24,6 +17,13 @@ frappe.query_reports["Share Balance"] = {
 			label: __("Shareholder"),
 			fieldtype: "Link",
 			options: "Shareholder",
+		},
+		{
+			fieldname: "date",
+			label: __("As Of Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
+			reqd: 1,
 		},
 	],
 };

@@ -81,10 +81,9 @@ def get_data(filters, *, ignore_company_permissions=False):
 		.on(folio.name == entry.share_folio)
 		.select(
 			entry.company,
-			entry.share_class,
-			entry.share_folio,
-			folio.folio_number,
 			folio.shareholder,
+			entry.share_class,
+			folio.folio_number,
 			Case().when(folio.is_treasury == 1, "Treasury").else_("Shareholder").as_("holding_type"),
 			quantity.as_("quantity"),
 			(face_value / NullIf(quantity, 0)).as_("face_value_per_share"),
@@ -94,8 +93,8 @@ def get_data(filters, *, ignore_company_permissions=False):
 		)
 		.groupby(
 			entry.company,
-			entry.share_class,
 			entry.share_folio,
+			entry.share_class,
 			folio.folio_number,
 			folio.shareholder,
 			folio.is_treasury,
