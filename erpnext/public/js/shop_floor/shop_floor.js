@@ -421,11 +421,12 @@ class ShopFloor {
 		const plant_floor = this.buckets[this.active_bucket]?.rows.find(
 			(row) => row.name === name
 		)?.plant_floor;
-		const plant_builder = plant_floor
-			? `<a class="btn btn-default btn-sm" href="/app/plant-builder/${encodeURIComponent(
-					plant_floor
-			  )}/${encodeURIComponent(name)}">${__("Open in Plant Builder")}</a>`
-			: "";
+		const plant_builder =
+			plant_floor && frappe.model.can_read("Plant Floor")
+				? `<a class="btn btn-default btn-sm" href="/app/plant-builder/${encodeURIComponent(
+						plant_floor
+				  )}/${encodeURIComponent(name)}">${__("Open in Plant Builder")}</a>`
+				: "";
 		// The detail pane reuses the operator rendering for a single work order.
 		this.detail_container.html(`
 			<div class="sf-detail-head">
