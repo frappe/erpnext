@@ -13,6 +13,7 @@ from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import 
 from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
 from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.item.test_item import make_item
@@ -476,6 +477,20 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual((downtime.workstation, round(downtime.downtime)), ("_Test Mixer", 20))
 		self.assertEqual(frappe.db.get_value("Workstation", "_Test Mixer", "status"), "Production")
 		self.assertFalse(frappe.db.get_value("Job Card", job_card.name, "is_paused"))
+
+	def test_closing_work_order_clears_the_machine_breakdown(self):
+		plant_floor = make_ketchup_plant()
+		work_order = plant_floor.make_work_order(2000)
+		with minutes_ago(60):
+			PlantRun(work_order.name).start()
+		job_card = PlantRun(work_order.name).get_open_job_card(1)
+		with minutes_ago(50):
+			PlantRun(work_order.name).report_breakdown(job_card.name)
+
+		close_work_order(work_order.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Job Card", job_card.name, "status"), "Cancelled")
+		self.assertEqual(frappe.db.get_value("Workstation", "_Test Mixer", "status"), "Off")
 
 	def test_setup_errors_for_parallel_stages(self):
 		plant_floor = make_parallel_ketchup_plant()
