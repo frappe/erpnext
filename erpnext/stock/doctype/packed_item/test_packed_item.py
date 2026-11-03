@@ -343,7 +343,7 @@ class TestPackedItem(ERPNextTestSuite):
 		)
 
 	def test_mapped_docs_keep_order_packed_item_warehouse(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
 		other_warehouse = "_Test Warehouse 1 - _TC"
 		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1, do_not_submit=True)
