@@ -1286,7 +1286,7 @@ class PaymentEntry(AccountsController):
 
 	def set_unallocated_amount(self):
 		self.unallocated_amount = flt(
-			self.get_base_unallocated_amount() / self.get_exchange_rate(),
+			max(0, self.get_base_unallocated_amount()) / self.get_exchange_rate(),
 			get_field_precision(
 				self.meta.get_field("unallocated_amount"), self, currency=self.party_account_currency
 			),
@@ -1302,10 +1302,21 @@ class PaymentEntry(AccountsController):
 		else:
 			amount = self.base_received_amount - deductions - self.base_total_allocated_amount
 
-		return amount - self.get_included_taxes() if amount > 0 else 0
+		return amount - self.get_included_taxes()
 
 	def get_unallocated_amount_rounding(self):
-		rounding = self.get_base_unallocated_amount() - self.unallocated_amount * self.get_exchange_rate()
+		base_unallocated_amount = self.get_base_unallocated_amount()
+		rounding = base_unallocated_amount - self.unallocated_amount * self.get_exchange_rate()
+		# A rounded-up advance can leave a negative base remainder when fully allocated.
+		# Do not write off allocations exceeding the rounded payment balance.
+		if rounding < 0 and self.total_allocated_amount > flt(
+			(self.base_total_allocated_amount + base_unallocated_amount) / self.get_exchange_rate(),
+			get_field_precision(
+				self.meta.get_field("unallocated_amount"), self, currency=self.party_account_currency
+			),
+		):
+			return 0
+
 		return flt(rounding * (-1 if self.payment_type == "Pay" else 1), self.precision("difference_amount"))
 
 	def set_exchange_gain_loss(self):
