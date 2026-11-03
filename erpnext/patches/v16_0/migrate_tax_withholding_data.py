@@ -33,28 +33,18 @@ def execute():
 	skip_docs = get_docs_with_entries()
 
 	# Clean up existing migration entries, except on documents the new flow has already used
-	twe = frappe.qb.DocType("Tax Withholding Entry")
-	migrated_docs = defaultdict(list)
-	for parenttype, parent in (
-		frappe.qb.from_(twe)
-		.select(twe.parenttype, twe.parent)
-		.distinct()
-		.where(twe.created_by_migration == 1)
-		.run()
-	):
-		if (parenttype, parent) not in skip_docs:
-			migrated_docs[parenttype].append(parent)
+	used_docs = defaultdict(list)
+	for doctype, name in skip_docs:
+		used_docs[doctype].append(name)
 
-	for parenttype, parents in migrated_docs.items():
-		for batch in create_batch(parents, BATCH_SIZE):
-			(
-				frappe.qb.from_(twe)
-				.delete()
-				.where(twe.created_by_migration == 1)
-				.where(twe.parenttype == parenttype)
-				.where(twe.parent.isin(batch))
-				.run()
-			)
+	twe = frappe.qb.DocType("Tax Withholding Entry")
+	delete_query = frappe.qb.from_(twe).delete().where(twe.created_by_migration == 1)
+
+	# One column per test, so the list is searched sorted; a (parenttype, parent) pair checks every item
+	for doctype, names in used_docs.items():
+		delete_query = delete_query.where((twe.parenttype != doctype) | twe.parent.notin(names))
+
+	delete_query.run()
 
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
 	paid_journals = set()
