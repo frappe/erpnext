@@ -1,9 +1,14 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
+import frappe
+
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
 	aggregate_with_last_account_closing_balance,
 	generate_key,
+	make_closing_entries,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -57,3 +62,31 @@ class TestAccountClosingBalance(ERPNextTestSuite):
 		key_reversal, _ = generate_key(entry(account="Sales - _TC", is_period_closing_voucher_entry=0), [])
 		key_closing, _ = generate_key(entry(account="Sales - _TC", is_period_closing_voucher_entry=1), [])
 		self.assertNotEqual(key_reversal, key_closing)
+
+	def test_reporting_amount_of_carried_balance_keeps_its_rate(self):
+		module = "erpnext.accounts.doctype.account_closing_balance.account_closing_balance"
+		previous = entry(
+			company="_Test Company",
+			account="Sales - _TC",
+			credit=1000,
+			credit_in_account_currency=1000,
+			credit_in_reporting_currency=12,
+		)
+		current = frappe._dict(
+			entry(company="_Test Company", account="Sales - _TC", credit=500, credit_in_account_currency=500)
+		)
+
+		with (
+			patch(f"{module}.get_previous_closing_entries", return_value=[previous]),
+			patch(f"{module}.get_reporting_currency_exchange_rate", return_value=0.01),
+		):
+			make_closing_entries([current], "ACB-TEST-PCV", "_Test Company", "2025-05-31")
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Account Closing Balance",
+				{"period_closing_voucher": "ACB-TEST-PCV"},
+				["credit", "credit_in_reporting_currency"],
+			),
+			(1500, 17),
+		)

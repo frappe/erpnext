@@ -46,6 +46,11 @@ class AccountClosingBalance(Document):
 def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 	accounting_dimensions = get_accounting_dimensions()
 
+	exchange_rate = get_reporting_currency_exchange_rate(company, closing_date)
+	for entry in closing_entries:
+		entry["debit_in_reporting_currency"] = flt(entry.get("debit")) * exchange_rate
+		entry["credit_in_reporting_currency"] = flt(entry.get("credit")) * exchange_rate
+
 	previous_closing_entries = get_previous_closing_entries(company, closing_date, accounting_dimensions)
 	combined_entries = closing_entries + previous_closing_entries
 
@@ -59,9 +64,9 @@ def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 			{
 				"period_closing_voucher": voucher_name,
 				"closing_date": closing_date,
+				"reporting_currency_exchange_rate": exchange_rate,
 			}
 		)
-		set_amount_in_reporting_currency(cle, company, closing_date)
 		cle.flags.ignore_permissions = True
 		cle.flags.ignore_links = True
 		cle.submit()
@@ -78,6 +83,8 @@ def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
 				"credit": 0,
 				"debit_in_account_currency": 0,
 				"credit_in_account_currency": 0,
+				"debit_in_reporting_currency": 0,
+				"credit_in_reporting_currency": 0,
 			},
 		)
 
@@ -86,6 +93,8 @@ def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
 		merged_entries[key]["credit"] += entry.get("credit")
 		merged_entries[key]["debit_in_account_currency"] += entry.get("debit_in_account_currency")
 		merged_entries[key]["credit_in_account_currency"] += entry.get("credit_in_account_currency")
+		merged_entries[key]["debit_in_reporting_currency"] += flt(entry.get("debit_in_reporting_currency"))
+		merged_entries[key]["credit_in_reporting_currency"] += flt(entry.get("credit_in_reporting_currency"))
 
 	return merged_entries
 
@@ -136,6 +145,8 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 			account_closing_balance.credit,
 			account_closing_balance.debit_in_account_currency,
 			account_closing_balance.credit_in_account_currency,
+			account_closing_balance.debit_in_reporting_currency,
+			account_closing_balance.credit_in_reporting_currency,
 			account_closing_balance.cost_center,
 			account_closing_balance.project,
 			account_closing_balance.finance_book,
@@ -153,13 +164,13 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 	return entries
 
 
-def set_amount_in_reporting_currency(cle, company, closing_date):
+def get_reporting_currency_exchange_rate(company, closing_date) -> float:
 	default_currency, reporting_currency = frappe.get_cached_value(
 		"Company", company, ["default_currency", "reporting_currency"]
 	)
 
 	if not reporting_currency:
-		return
+		return 0
 
 	reporting_currency_exchange_rate = get_exchange_rate(default_currency, reporting_currency, closing_date)
 	if not reporting_currency_exchange_rate:
@@ -170,13 +181,5 @@ def set_amount_in_reporting_currency(cle, company, closing_date):
 			).format(default_currency, reporting_currency, closing_date),
 			exc=ReportingCurrencyExchangeNotFoundError,
 		)
-	debit_in_reporting_currency = flt(cle.get("debit", 0) * reporting_currency_exchange_rate)
-	credit_in_reporting_currency = flt(cle.get("credit", 0) * reporting_currency_exchange_rate)
 
-	cle.update(
-		{
-			"reporting_currency_exchange_rate": reporting_currency_exchange_rate,
-			"debit_in_reporting_currency": debit_in_reporting_currency,
-			"credit_in_reporting_currency": credit_in_reporting_currency,
-		}
-	)
+	return reporting_currency_exchange_rate
