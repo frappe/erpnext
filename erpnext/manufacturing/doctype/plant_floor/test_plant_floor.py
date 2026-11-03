@@ -235,13 +235,30 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertTrue(run["stages"][1]["items"][0].is_input)
 
 	def test_plant_builder_run_needs_plant_floor_read(self):
-		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run
+		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run, preview_lot
 
 		work_order = make_ketchup_plant().make_work_order(2000)
+		PlantRun(work_order.name).start()
+		job_card = PlantRun(work_order.name).get_open_job_card(1)
 		user = create_user("plant-builder-stock-user@example.com", "Stock User")
 		with self.set_user(user.name):
 			self.assertTrue(frappe.has_permission("Work Order", "read", doc=work_order.name))
 			self.assertRaises(frappe.PermissionError, get_run, work_order.name)
+			self.assertRaises(frappe.PermissionError, preview_lot, work_order.name, job_card.name)
+
+	def test_plant_builder_action_checks_plant_floor_read_before_it_runs(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import set_run_qty
+
+		work_order = make_ketchup_plant().make_work_order(2000)
+		if not frappe.db.exists("Plant Floor", "_Test Other Plant"):
+			frappe.get_doc({"doctype": "Plant Floor", "floor_name": "_Test Other Plant"}).insert()
+		user = create_user("plant-builder-other-plant@example.com", "Manufacturing User")
+		add_user_permission("Plant Floor", "_Test Other Plant", user.name, applicable_for="Plant Floor")
+		with self.set_user(user.name):
+			self.assertTrue(frappe.has_permission("Work Order", "write", doc=work_order.name))
+			self.assertRaises(frappe.PermissionError, set_run_qty, work_order.name, 1000)
+
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "qty"), 2000)
 
 	def test_plant_builder_save_numbers_stages_by_position(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import (
