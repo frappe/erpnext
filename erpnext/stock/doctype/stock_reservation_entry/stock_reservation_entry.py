@@ -1435,13 +1435,19 @@ class StockReservation:
 			order_by="creation",
 		)
 
+		qty_to_reserve = sre.reserved_qty
 		for detail in bundle_details:
+			qty = flt(min(abs(detail.qty), qty_to_reserve), sre.precision("reserved_qty"))
+			if qty <= 0:
+				break
+
+			qty_to_reserve -= qty
 			sre.append(
 				"sb_entries",
 				{
 					"serial_no": detail.serial_no,
 					"batch_no": detail.batch_no,
-					"qty": abs(detail.qty),
+					"qty": qty,
 					"warehouse": sre.warehouse,
 				},
 			)
@@ -1536,6 +1542,7 @@ class StockReservation:
 								"voucher_type": entry.voucher_type or to_doctype,
 								"voucher_no": entry.voucher_no,
 								"voucher_detail_no": entry.voucher_detail_no,
+								"voucher_qty": entry.get("required_qty"),
 								"stock_uom": entry.stock_uom,
 								"serial_nos": [],
 								"sre_names": defaultdict(float),
@@ -1638,7 +1645,7 @@ class StockReservation:
 
 		sre.available_qty = row.get("qty_to_reserve")
 		sre.reserved_qty = row.get("qty_to_reserve")
-		sre.voucher_qty = row.get("qty_to_reserve")
+		sre.voucher_qty = row.get("voucher_qty") or row.get("qty_to_reserve")
 
 		against_row = row.get("against_row")
 		sre.from_voucher_no = against_row.voucher_no
