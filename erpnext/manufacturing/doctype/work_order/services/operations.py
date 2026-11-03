@@ -240,8 +240,6 @@ class OperationsService:
 			return
 
 		operations = self._collect_bom_operations()
-		if not operations:
-			return
 		for correct_index, operation in enumerate(operations, start=1):
 			operation.idx = correct_index
 
