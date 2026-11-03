@@ -13,6 +13,7 @@ from frappe.utils import cint, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.utils import prepare_serial_batch_report
@@ -23,6 +24,7 @@ from erpnext.stock.utils import (
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
