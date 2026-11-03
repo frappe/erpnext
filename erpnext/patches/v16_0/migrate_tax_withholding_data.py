@@ -49,7 +49,7 @@ def execute():
 	party_categories = {}
 	skip_docs = get_docs_with_entries()
 
-	# Suppliers and customers are read up front; other party types are looked up one by one
+	# Suppliers and customers are read up front; other party types have no tax id or category to use
 	for party_type in ("Supplier", "Customer"):
 		tax_id_field = next((f for f in ("pan", "tax_id") if column_cache[party_type][f]), None)
 		fields = ["name", "tax_withholding_category", *([tax_id_field] if tax_id_field else [])]
@@ -88,7 +88,6 @@ def execute():
 		purchase_migrator = PurchaseInvoiceMigrator(
 			tds_accounts,
 			tax_rate_map,
-			column_cache,
 			party_tax_id_cache,
 			party_categories,
 			skip_docs,
@@ -98,11 +97,10 @@ def execute():
 		paid_journals.update(
 			name for doctype, name in purchase_migrator.tds_paid_by_other if doctype == "Journal Entry"
 		)
-	migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
+	migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs)
 	migrate_journal_entries(
 		tds_accounts,
 		tax_rate_map,
-		column_cache,
 		party_tax_id_cache,
 		skip_docs,
 		paid_journals,
@@ -296,26 +294,6 @@ def get_tax_rate_for_date(tax_rate_map, category, posting_date):
 	return 0, False
 
 
-def get_party_tax_id(party_type, party, column_cache, party_tax_id_cache):
-	if not party:
-		return None
-
-	cache_key = (party_type, party)
-	if cache_key in party_tax_id_cache:
-		return party_tax_id_cache[cache_key]
-
-	tax_id = None
-	doctype_cols = column_cache.get(party_type, {})
-
-	if doctype_cols.get("pan"):
-		tax_id = frappe.db.get_value(party_type, party, "pan")
-	elif doctype_cols.get("tax_id"):
-		tax_id = frappe.db.get_value(party_type, party, "tax_id")
-
-	party_tax_id_cache[cache_key] = tax_id
-	return tax_id
-
-
 def determine_status(taxable_name, withholding_name, under_withheld_reason, is_duplicate=False):
 	"""Determine the status of a Tax Withholding Entry."""
 	if is_duplicate:
@@ -461,7 +439,6 @@ class PurchaseInvoiceMigrator:
 		self,
 		tds_accounts,
 		tax_rate_map,
-		column_cache,
 		party_tax_id_cache,
 		party_categories,
 		skip_docs,
@@ -469,7 +446,6 @@ class PurchaseInvoiceMigrator:
 	):
 		self.tds_accounts = tds_accounts
 		self.tax_rate_map = tax_rate_map
-		self.column_cache = column_cache
 		self.party_tax_id_cache = party_tax_id_cache
 		self.party_categories = party_categories
 		self.skip_docs = skip_docs
@@ -844,7 +820,7 @@ class PurchaseInvoiceMigrator:
 
 		# Like the v15 Tax Withholding Details report, fall back to the supplier's category
 		category = category or self.party_categories.get((party_type, party))
-		tax_id = get_party_tax_id(party_type, party, self.column_cache, self.party_tax_id_cache)
+		tax_id = self.party_tax_id_cache.get((party_type, party))
 		tax_rate, tax_on_excess = get_tax_rate_for_date(self.tax_rate_map, category, info.posting_date)
 
 		# Current invoice's taxable amount
@@ -1102,7 +1078,7 @@ class PurchaseInvoiceMigrator:
 
 			party_type = info.party_type
 			party = info.party
-			tax_id = get_party_tax_id(party_type, party, self.column_cache, self.party_tax_id_cache)
+			tax_id = self.party_tax_id_cache.get((party_type, party))
 			tax_rate, _ = get_tax_rate_for_date(self.tax_rate_map, category, info.posting_date)
 
 			if tax_rate:
@@ -1177,7 +1153,7 @@ class PurchaseInvoiceMigrator:
 # =============================================================================
 
 
-def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
+def migrate_sales_invoices(tds_accounts, tax_rate_map, party_tax_id_cache, skip_docs):
 	"""
 	Migrate Sales Invoice TCS data.
 
@@ -1258,7 +1234,7 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 		# Party info
 		party_type = "Customer"
 		party = row.customer
-		tax_id = get_party_tax_id(party_type, party, column_cache, party_tax_id_cache)
+		tax_id = party_tax_id_cache.get((party_type, party))
 
 		tax_rate, _ = get_tax_rate_for_date(tax_rate_map, category, row.posting_date)
 
@@ -1369,7 +1345,6 @@ def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_i
 def migrate_journal_entries(
 	tds_accounts,
 	tax_rate_map,
-	column_cache,
 	party_tax_id_cache,
 	skip_docs,
 	paid_journals,
@@ -1489,7 +1464,7 @@ def migrate_journal_entries(
 		category = category or info.tax_withholding_category
 		category = category or party_categories.get((party_type, party))
 
-		tax_id = get_party_tax_id(party_type, party, column_cache, party_tax_id_cache) if party else None
+		tax_id = party_tax_id_cache.get((party_type, party))
 		tax_rate, tax_on_excess = get_tax_rate_for_date(tax_rate_map, category, info.posting_date)
 
 		# Back-calculate taxable amount
@@ -1603,7 +1578,7 @@ def migrate_journal_entries(
 				"company": row.company,
 				"party_type": "Supplier",
 				"party": row.party,
-				"tax_id": get_party_tax_id("Supplier", row.party, column_cache, party_tax_id_cache),
+				"tax_id": party_tax_id_cache.get(("Supplier", row.party)),
 				"tax_withholding_category": row.tax_withholding_category,
 				"taxable_amount": row.amount,
 				"tax_rate": tax_rate,
