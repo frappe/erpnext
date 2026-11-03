@@ -4,11 +4,15 @@ shared:
     - label!=dont-merge
     - check-success=linters
   suite_checks: &suite_checks
-    - check-success=Patch Test
-    - check-success=Python Unit Tests (1)
-    - check-success=Python Unit Tests (2)
-    - check-success=Python Unit Tests (3)
-    - check-success=Python Unit Tests (4)
+    - or:
+        - and:
+            - check-success=Patch Test
+            - check-success=Python Unit Tests (1)
+            - check-success=Python Unit Tests (2)
+            - check-success=Python Unit Tests (3)
+            - check-success=Python Unit Tests (4)
+        # Only the translation template changed: the test workflows skip it via paths-ignore
+        - -files~=^(?!erpnext/locale/main\.pot$)
 
 commands_restrictions:
   queue:
