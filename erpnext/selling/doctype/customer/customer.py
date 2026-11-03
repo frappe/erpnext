@@ -137,7 +137,10 @@ class Customer(TransactionBase):
 			set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_customer_name(self):
-		self.customer_name = self.customer_name.strip()
+		self.customer_name = cstr(self.customer_name).strip()
+		if not self.customer_name:
+			frappe.throw(_("Customer Name is mandatory"), frappe.MandatoryError)
+
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			name_prefix = f"{self.customer_name} - %"
 			Customer = frappe.qb.DocType("Customer")
