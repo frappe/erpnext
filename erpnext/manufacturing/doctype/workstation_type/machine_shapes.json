@@ -24,7 +24,6 @@
   "Reactor": [
    {"shape": "Tank", "finish": "Product", "radius": 50, "height": 170, "shows_level": 1},
    {"shape": "Band", "finish": "Heat", "z": 34, "radius": 54, "height": 16},
-   {"shape": "Band", "finish": "Heat", "z": 104, "radius": 54, "height": 16},
    {"shape": "Box", "finish": "Dark", "z": 170, "width": 16, "depth": 16, "height": 16},
    {"shape": "Steam", "finish": "Steel", "z": 186, "is_small": 1}
   ],
@@ -50,13 +49,10 @@
   ],
   "Cooler": [
    {"shape": "Box", "finish": "Dark", "width": 84, "depth": 64, "height": 8},
-   {"shape": "Box", "finish": "Plate", "x": -33, "z": 8, "width": 7, "depth": 56, "height": 82},
-   {"shape": "Box", "finish": "Plate", "x": -22, "z": 8, "width": 7, "depth": 56, "height": 82},
-   {"shape": "Box", "finish": "Plate", "x": -11, "z": 8, "width": 7, "depth": 56, "height": 82},
-   {"shape": "Box", "finish": "Plate", "x": 0, "z": 8, "width": 7, "depth": 56, "height": 82},
-   {"shape": "Box", "finish": "Plate", "x": 11, "z": 8, "width": 7, "depth": 56, "height": 82},
-   {"shape": "Box", "finish": "Plate", "x": 22, "z": 8, "width": 7, "depth": 56, "height": 82},
-   {"shape": "Box", "finish": "Plate", "x": 33, "z": 8, "width": 7, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": -30, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": -10, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": 10, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": 30, "z": 8, "width": 9, "depth": 56, "height": 82},
    {"shape": "Box", "finish": "Steel", "z": 90, "width": 84, "depth": 8, "height": 8},
    {"shape": "Flow Strip", "finish": "Blue", "z": 98.5, "width": 84, "depth": 8},
    {"shape": "Steam", "finish": "Blue", "z": 92, "is_small": 1}
