@@ -28,7 +28,7 @@ const strips = computed(() => {
 		const a = (360 / n) * i;
 		const shade = 0.3 * (1 - Math.cos(((a - 150) * Math.PI) / 180)) * 0.5;
 		return { i, a, w, shadow: `linear-gradient(rgba(17, 17, 17, ${shade}), rgba(17, 17, 17, ${shade}))` };
-	}).filter((s) => facing.value & (1 << s.i));
+	}).filter((s) => props.open || facing.value & (1 << s.i));
 });
 
 const fill = computed(() => SWATCH[props.liquid] ?? SWATCH.gray);
