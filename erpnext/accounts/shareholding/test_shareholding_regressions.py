@@ -8,14 +8,14 @@ from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.report.equity_position.equity_position import execute as positions
 from erpnext.accounts.report.share_balance.share_balance import execute as balances
-from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
+from erpnext.accounts.shareholding.shareholding_test_utils import ShareholdingTestCase
 
 
-class TestShareholdingReviewRegressions(ShareholdingTestCase):
+class TestShareholdingRegressions(ShareholdingTestCase):
 	def setUp(self):
 		super().setUp()
-		frappe.db.savepoint("shareholding_review_case")
-		self.addCleanup(frappe.db.rollback, save_point="shareholding_review_case")
+		frappe.db.savepoint("shareholding_regression_case")
+		self.addCleanup(frappe.db.rollback, save_point="shareholding_regression_case")
 
 	def issue(self, **values):
 		return self.create_transaction(

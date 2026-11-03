@@ -9,10 +9,10 @@ from erpnext.accounts.report.share_balance.share_balance import execute as balan
 from erpnext.accounts.report.share_ledger.share_ledger import execute as ledger
 from erpnext.accounts.shareholding.ledger_entries import create_ledger_entry
 from erpnext.accounts.shareholding.share_folios import get_or_create_folio
-from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
+from erpnext.accounts.shareholding.shareholding_test_utils import ShareholdingTestCase
 
 
-class TestShareholdingAccessAndIdentity(ShareholdingTestCase):
+class TestShareholderAccess(ShareholdingTestCase):
 	def issue(self):
 		return self.create_transaction(
 			transaction_type="Issue",

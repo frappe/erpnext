@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.report.share_balance.share_balance import execute
-from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
+from erpnext.accounts.shareholding.shareholding_test_utils import ShareholdingTestCase
 
 
 class TestShareBalanceReport(ShareholdingTestCase):

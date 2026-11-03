@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.accounts.shareholding.test_helpers import ShareholdingTestCase
+from erpnext.accounts.shareholding.shareholding_test_utils import ShareholdingTestCase
 
 
 class TestShareTransactionAccounting(ShareholdingTestCase):
