@@ -407,6 +407,130 @@ class TestPaymentEntry(ERPNextTestSuite):
 					payment.cancel()
 					self.assertEqual(invoice.reload().outstanding_amount, 100)
 
+	def test_reconcile_rounded_foreign_advance(self):
+		for create_invoice, party in (
+			(
+				create_sales_invoice,
+				{"customer": "_Test Customer USD", "debit_to": "_Test Receivable USD - _TC"},
+			),
+			(
+				make_purchase_invoice,
+				{"supplier": "_Test Supplier USD", "credit_to": "_Test Payable USD - _TC"},
+			),
+		):
+			for deduction in (0.5, 0.4, 0.3, 0):
+				for allocation_method in ("Payment Reconciliation", "Invoice Advances"):
+					with self.subTest(party=party, deduction=deduction, allocation_method=allocation_method):
+						invoice = create_invoice(
+							currency="USD", conversion_rate=80, qty=1, rate=200, do_not_submit=True, **party
+						)
+						payment = get_payment_entry(
+							invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+						)
+						payment.set("references", [])
+						if payment.payment_type == "Receive":
+							payment.source_exchange_rate, payment.target_exchange_rate = 80, 1
+							payment.paid_amount, payment.received_amount = 100, 8000
+						else:
+							payment.source_exchange_rate, payment.target_exchange_rate = 1, 80
+							payment.paid_amount, payment.received_amount = 8000, 100
+						if deduction:
+							payment.append(
+								"deductions",
+								{
+									"account": "Write Off - _TC",
+									"cost_center": "Main - _TC",
+									"amount": deduction if payment.payment_type == "Receive" else -deduction,
+								},
+							)
+						if allocation_method == "Payment Reconciliation":
+							excess_payment = frappe.copy_doc(payment)
+						payment.submit()
+						expected_unallocated = flt(100 + deduction / 80, 2)
+						self.assertEqual(payment.unallocated_amount, expected_unallocated)
+
+						if allocation_method == "Invoice Advances":
+							invoice.set_advances()
+							for advance in invoice.advances:
+								advance.allocated_amount = (
+									expected_unallocated if advance.reference_name == payment.name else 0
+								)
+							invoice.submit()
+						else:
+							invoice.submit()
+							excess_payment.append(
+								"references",
+								{
+									"reference_doctype": invoice.doctype,
+									"reference_name": invoice.name,
+									"allocated_amount": flt(expected_unallocated + 0.01, 2),
+								},
+							)
+							excess_payment.insert()
+							self.assertNotEqual(excess_payment.difference_amount, 0)
+
+							reconciliation = frappe.new_doc("Payment Reconciliation")
+							reconciliation.update(
+								{
+									"company": payment.company,
+									"party_type": payment.party_type,
+									"party": payment.party,
+									"receivable_payable_account": payment.party_account,
+								},
+							)
+							for amount in (50, flt(expected_unallocated - 50, 2)):
+								reconciliation.get_unreconciled_entries()
+								reconciliation.allocate_entries(
+									frappe._dict(
+										invoices=[
+											row.as_dict()
+											for row in reconciliation.invoices
+											if row.invoice_number == invoice.name
+										],
+										payments=[
+											row.as_dict()
+											for row in reconciliation.payments
+											if row.reference_name == payment.name
+										],
+									)
+								)
+								self.assertEqual(len(reconciliation.allocation), 1)
+								reconciliation.allocation[0].allocated_amount = amount
+								reconciliation.reconcile()
+
+						self.assertEqual(payment.reload().unallocated_amount, 0)
+						self.assertEqual(
+							invoice.reload().outstanding_amount, flt(200 - expected_unallocated, 2)
+						)
+						gl_entries = frappe.get_all(
+							"GL Entry",
+							filters={
+								"voucher_type": payment.doctype,
+								"voucher_no": payment.name,
+								"is_cancelled": 0,
+							},
+							fields=["account", "debit", "credit"],
+						)
+						self.assertEqual(flt(sum(row.debit - row.credit for row in gl_entries), 2), 0)
+						self.assertEqual(
+							flt(
+								sum(
+									row.debit - row.credit
+									for row in gl_entries
+									if row.account == "Round Off - _TC"
+								),
+								2,
+							),
+							flt(
+								((expected_unallocated - 100) * 80 - deduction)
+								* (1 if payment.payment_type == "Receive" else -1),
+								2,
+							),
+						)
+						invoice.cancel()
+						self.assertEqual(payment.reload().unallocated_amount, expected_unallocated)
+						payment.cancel()
+
 	@ERPNextTestSuite.change_settings(
 		"System Settings",
 		{"currency_precision": "", "number_format": "#,###.##", "use_number_format_from_currency": 1},
