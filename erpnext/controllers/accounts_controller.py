@@ -3143,13 +3143,6 @@ class AccountsController(TransactionBase):
 		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			return
 
-		party_account_currency = self.get("party_account_currency")
-		if not party_account_currency:
-			party_type, party = self.get_party()
-
-			if party_type and party:
-				party_account_currency = get_party_account_currency(party_type, party, self.company)
-
 		if self.get("payment_schedule"):
 			total = 0
 			base_total = 0
@@ -3157,24 +3150,7 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount, d.precision("payment_amount"))
 				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
-			base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
-			grand_total = flt(self.get("rounded_total") or self.grand_total)
-
-			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
-				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
-				grand_total = grand_total - flt(self.write_off_amount)
-
-			if self.get("total_advance"):
-				if party_account_currency == self.company_currency:
-					base_grand_total -= self.get("total_advance")
-					grand_total = flt(
-						base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
-					)
-				else:
-					grand_total -= self.get("total_advance")
-					base_grand_total = flt(
-						grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
-					)
+			grand_total, base_grand_total = self.get_payment_schedule_grand_totals()
 
 			if (
 				abs(
@@ -3191,6 +3167,35 @@ class AccountsController(TransactionBase):
 				frappe.throw(
 					_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total")
 				)
+
+	def get_payment_schedule_grand_totals(self):
+		party_account_currency = self.get("party_account_currency")
+		if not party_account_currency:
+			party_type, party = self.get_party()
+
+			if party_type and party:
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
+
+		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+		grand_total = flt(self.get("rounded_total") or self.grand_total)
+
+		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
+			grand_total = grand_total - flt(self.write_off_amount)
+
+		if self.get("total_advance"):
+			if party_account_currency == self.company_currency:
+				base_grand_total -= self.get("total_advance")
+				grand_total = flt(
+					base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
+				)
+			else:
+				grand_total -= self.get("total_advance")
+				base_grand_total = flt(
+					grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
+				)
+
+		return grand_total, base_grand_total
 
 	def is_rounded_total_disabled(self):
 		if self.meta.get_field("disable_rounded_total"):
