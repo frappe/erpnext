@@ -61,14 +61,15 @@ class TestFixedAssetRegister(AssetSetup):
 		frappe.db.delete("Asset Finance Book", {"finance_book": ("is", "not set")})
 		asset = create_asset(item_code="Macbook Pro", available_for_use_date="2019-12-31", do_not_save=1)
 		asset.calculate_depreciation = 1
-		for finance_book in ("Test Finance Book 1", "Test Finance Book 2"):
+		# the second book depreciates 20,000 a year, so the books give different amounts
+		for finance_book, depreciations in (("Test Finance Book 1", 4), ("Test Finance Book 2", 5)):
 			asset.append(
 				"finance_books",
 				{
 					"finance_book": finance_book,
 					"depreciation_method": "Straight Line",
 					"frequency_of_depreciation": 12,
-					"total_number_of_depreciations": 4,
+					"total_number_of_depreciations": depreciations,
 					"depreciation_start_date": "2020-12-31",
 				},
 			)
@@ -77,8 +78,8 @@ class TestFixedAssetRegister(AssetSetup):
 
 		# with no book chosen, only the first book's depreciation counts
 		self.assertEqual(self.report_row(asset.name)["depreciated_amount"], 25000)
-		row = self.report_row(asset.name, finance_book="Test Finance Book 1")
-		self.assertEqual(row["depreciated_amount"], 25000)
+		row = self.report_row(asset.name, finance_book="Test Finance Book 2")
+		self.assertEqual(row["depreciated_amount"], 20000)
 
 	def test_reversed_depreciation_is_not_counted(self):
 		asset = create_asset(
