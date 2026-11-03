@@ -2057,6 +2057,29 @@ class TestPickList(ERPNextTestSuite):
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
 
+	def test_second_delivery_note_maps_only_undelivered_bundles(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, components = create_product_bundle([5, 2], warehouse=warehouse)
+		so = make_sales_order(item_code=bundle, qty=4, rate=42)
+		pl = create_pick_list(so.name).save().submit()
+
+		first_dn = create_delivery_note(pl.name)
+		first_dn.items[0].qty = 1
+		first_dn.save().submit()
+
+		second_dn = create_delivery_note(pl.name)
+		self.assertEqual(second_dn.items[0].qty, 3)
+		packed_qty = {row.item_code: row.qty for row in second_dn.packed_items}
+		self.assertEqual(packed_qty, {components[0]: 15, components[1]: 6})
+
+		second_dn.submit()
+		so.reload()
+		self.assertEqual(so.items[0].delivered_qty, 4)
+		self.assertEqual(so.per_delivered, 100)
+		pl.reload()
+		self.assertEqual(pl.per_delivered, 100)
+		self.assertEqual(pl.status, "Completed")
+
 	def test_pick_list_status(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
