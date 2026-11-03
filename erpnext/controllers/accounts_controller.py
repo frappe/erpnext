@@ -1052,7 +1052,9 @@ class AccountsController(TransactionBase):
 
 	def validate_line_items(self, ref_dt, ref_dn_field, ref_link_field):
 		action, role_allowed_to_override = frappe.get_cached_value(
-			"Accounts Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+			"Accounts Settings",
+			"Accounts Settings",
+			["maintain_same_rate_action", "role_to_override_stop_action"],
 		)
 
 		reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
