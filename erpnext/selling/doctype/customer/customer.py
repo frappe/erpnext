@@ -194,6 +194,7 @@ class Customer(TransactionBase):
 		self.validate_customer_group()
 		self.validate_lead_not_converted()
 		validate_party_accounts(self)
+		self.validate_duplicate_credit_limit_company()
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
@@ -458,6 +459,13 @@ class Customer(TransactionBase):
 				title=_("Invalid Customer Group"),
 			)
 
+	def validate_duplicate_credit_limit_company(self):
+		companies = set()
+		for limit in self.credit_limits:
+			if limit.company in companies:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company))
+			companies.add(limit.company)
+
 	def validate_credit_limit_on_change(self):
 		if self.get("__islocal") or not self.credit_limits:
 			return
@@ -477,15 +485,7 @@ class Customer(TransactionBase):
 		if past_credit_limits == current_credit_limits:
 			return
 
-		company_record = []
 		for limit in self.credit_limits:
-			if limit.company in company_record:
-				frappe.throw(
-					_("Credit limit is already defined for the Company {0}").format(limit.company, self.name)
-				)
-			else:
-				company_record.append(limit.company)
-
 			if not flt(limit.credit_limit):
 				continue
 
@@ -821,20 +821,9 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	gle_res = gle_query.run()
 	outstanding_based_on_gle = flt(gle_res[0][0]) if gle_res and gle_res[0][0] is not None else 0.0
 
-	outstanding_based_on_so = 0.0
-	if not ignore_outstanding_sales_order:
-		SalesOrder = frappe.qb.DocType("Sales Order")
-		so_query = (
-			frappe.qb.from_(SalesOrder)
-			.select(Sum(SalesOrder.base_grand_total * (100 - SalesOrder.per_billed) / 100))
-			.where(SalesOrder.customer == customer)
-			.where(SalesOrder.company == company)
-			.where(SalesOrder.docstatus == 1)
-			.where(SalesOrder.per_billed < 100)
-			.where(SalesOrder.status != "Closed")
-		)
-		so_res = so_query.run()
-		outstanding_based_on_so = flt(so_res[0][0]) if so_res and so_res[0][0] is not None else 0.0
+	outstanding_based_on_so = get_sales_order_outstanding(
+		customer, company, delivered_only=ignore_outstanding_sales_order
+	)
 
 	DeliveryNote = frappe.qb.DocType("Delivery Note")
 	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
@@ -911,32 +900,88 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 
 
+def get_sales_order_outstanding(customer, company, delivered_only=False):
+	from frappe.query_builder.functions import Sum
+
+	SalesOrder = frappe.qb.DocType("Sales Order")
+	query = (
+		frappe.qb.from_(SalesOrder)
+		.where(SalesOrder.customer == customer)
+		.where(SalesOrder.company == company)
+		.where(SalesOrder.docstatus == 1)
+		.where(SalesOrder.per_billed < 100)
+		.where(SalesOrder.status != "Closed")
+	)
+
+	if delivered_only:
+		SalesOrderItem = frappe.qb.DocType("Sales Order Item")
+		Greatest = CustomFunction("GREATEST", ["a", "b"])
+		# Billing ahead of delivery is already in the ledger, so only the delivered excess counts.
+		unbilled_delivered_share = Greatest(
+			SalesOrderItem.delivered_qty / SalesOrderItem.qty
+			- SalesOrderItem.billed_amt / SalesOrderItem.amount,
+			0,
+		)
+		query = (
+			query.join(SalesOrderItem)
+			.on(SalesOrderItem.parent == SalesOrder.name)
+			.select(
+				Sum(
+					unbilled_delivered_share
+					* SalesOrderItem.base_net_amount
+					/ SalesOrder.base_net_total
+					* SalesOrder.base_grand_total
+				)
+			)
+			.where(SalesOrder.base_net_total > 0)
+			.where(SalesOrderItem.amount > 0)
+			.where(SalesOrderItem.delivered_qty > 0)
+		)
+	else:
+		query = query.select(Sum(SalesOrder.base_grand_total * (100 - SalesOrder.per_billed) / 100))
+
+	res = query.run()
+	return flt(res[0][0]) if res and res[0][0] is not None else 0.0
+
+
 def get_credit_limit(customer, company):
-	credit_limit = None
+	return get_credit_limit_settings(customer, company)[0]
+
+
+def is_sales_order_credit_check_bypassed(customer, company):
+	return get_credit_limit_settings(customer, company)[1]
+
+
+def get_credit_limit_settings(customer, company):
+	credit_limit, bypass = 0.0, False
 
 	if customer:
-		credit_limit = frappe.db.get_value(
+		customer_limit = frappe.db.get_value(
 			"Customer Credit Limit",
 			{"parent": customer, "parenttype": "Customer", "company": company},
-			"credit_limit",
+			["credit_limit", "bypass_credit_limit_check"],
+			as_dict=True,
 		)
+		if customer_limit:
+			credit_limit = flt(customer_limit.credit_limit)
+			bypass = bool(customer_limit.bypass_credit_limit_check)
 
 		if not credit_limit:
 			customer_group = frappe.get_cached_value("Customer", customer, "customer_group")
-
-			result = frappe.db.get_values(
+			group_limit = frappe.db.get_value(
 				"Customer Credit Limit",
 				{"parent": customer_group, "parenttype": "Customer Group", "company": company},
-				fieldname=["credit_limit", "bypass_credit_limit_check"],
+				["credit_limit", "bypass_credit_limit_check"],
 				as_dict=True,
 			)
-			if result and not result[0].bypass_credit_limit_check:
-				credit_limit = result[0].credit_limit
+			if group_limit:
+				credit_limit = flt(group_limit.credit_limit)
+				bypass = bypass or bool(group_limit.bypass_credit_limit_check)
 
 	if not credit_limit:
-		credit_limit = frappe.get_cached_value("Company", company, "credit_limit")
+		credit_limit = flt(frappe.get_cached_value("Company", company, "credit_limit"))
 
-	return flt(credit_limit)
+	return credit_limit, bypass
 
 
 @frappe.whitelist()

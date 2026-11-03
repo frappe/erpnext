@@ -86,10 +86,13 @@ class TestDeliveryNote(ERPNextTestSuite):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=11, basic_rate=100)
 
 		# A submitted standalone delivery is already in customer outstanding, so it is not counted twice.
-		create_delivery_note(customer=customer.name, qty=6, rate=100)
+		create_delivery_note(customer=customer.name, qty=3, rate=100)
 
-		so = make_sales_order(customer=customer.name, qty=5, rate=100)
-		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 5)
+		# Earlier unbilled deliveries against Sales Orders still count once the order check is bypassed.
+		so = make_sales_order(customer=customer.name, qty=4, rate=100)
+		create_dn_against_so(so.name, 4)
+		so = make_sales_order(customer=customer.name, qty=4, rate=100)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 4)
 
 	def test_customer_outstanding_uses_delivery_base_net_amount(self):
 		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
@@ -1868,14 +1871,14 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=10)
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].delivery_note = dn.name
 		si.items[0].dn_detail = dn.items[0].name
 		si.items[0].sales_order = so.name

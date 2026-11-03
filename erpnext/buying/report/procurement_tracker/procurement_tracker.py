@@ -8,6 +8,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import get_qb_filter_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
@@ -135,8 +136,9 @@ def apply_filters_on_query(filters, parent, child, query):
 	if filters.get("company"):
 		query = query.where(parent.company == filters.get("company"))
 
-	if filters.get("cost_center"):
-		query = query.where(child.cost_center == filters.get("cost_center"))
+	cost_center_condition = get_qb_filter_condition(child.cost_center, filters.get("cost_center"))
+	if cost_center_condition is not None:
+		query = query.where(cost_center_condition)
 
 	if filters.get("project"):
 		query = query.where(child.project == filters.get("project"))
