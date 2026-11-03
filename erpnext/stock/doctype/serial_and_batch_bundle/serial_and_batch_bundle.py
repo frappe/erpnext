@@ -2975,6 +2975,22 @@ def get_reserved_voucher_details(kwargs):
 			)
 		)
 
+	if kwargs.get("sabb_voucher_type") in ("Delivery Note", "Sales Invoice") and any(
+		reserved_voucher_details
+	):
+		# bundle components are reserved against the Sales Order's packed item rows
+		reserved_voucher_details.extend(
+			frappe.get_all(
+				"Packed Item",
+				filters={
+					"parenttype": "Sales Order",
+					"parent_detail_docname": ("in", reserved_voucher_details),
+					"item_code": kwargs.get("item_code"),
+				},
+				pluck="name",
+			)
+		)
+
 	return reserved_voucher_details
 
 
