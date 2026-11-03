@@ -1938,6 +1938,43 @@ class TestPricingRule(ERPNextTestSuite):
 					self.assertFalse(order.items[0].pricing_rules)
 					order.cancel()
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_replace_rate_rule_without_item_price(self):
+		item = make_item("_Test Rate Rule Replacement", {"is_stock_item": 0}).name
+		make_item_pricing_rule(
+			item, rate_or_discount="Rate", rate=40, applicable_for="Customer", customer="_Test Customer"
+		)
+		replacement = make_item_pricing_rule(
+			item,
+			discount_percentage=10,
+			applicable_for="Customer",
+			customer="_Test Customer 1",
+		)
+		for discount_type in ("Discount Percentage", "Discount Amount"):
+			with self.subTest(discount_type=discount_type):
+				replacement.rate_or_discount = discount_type
+				replacement.discount_amount = 4 if discount_type == "Discount Amount" else 0
+				replacement.save()
+				order = make_sales_order(item_code=item, qty=1, do_not_submit=True)
+				self.assertEqual(order.items[0].rate, 40)
+				self.assertFalse(frappe.db.exists("Item Price", {"item_code": item}))
+				order.customer = "_Test Customer 1"
+				order.customer_address = None
+				order.shipping_address_name = None
+				order.contact_person = None
+				args = order.as_dict()
+				args.price_list = order.selling_price_list
+				result = apply_price_list(frappe.as_json(args), doc=frappe.as_json(order))["children"][0]
+				self.assertEqual(result.price_list_rate, 40)
+				self.assertEqual(result.discount_amount, 4)
+				order.save().reload()
+				self.assertEqual(order.items[0].price_list_rate, 40)
+				self.assertEqual(order.items[0].rate, 36)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [replacement.name])
+				order.submit()
+				self.assertEqual(order.grand_total, 36)
+				order.cancel()
+
 	def test_pricing_rule_of_another_item_is_not_applied_on_save(self):
 		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
 		other_item = make_item("PR Recheck Other Item", {"is_stock_item": 0}).name
