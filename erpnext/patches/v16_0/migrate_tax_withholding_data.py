@@ -39,18 +39,7 @@ def execute():
 	):
 		return
 
-	# On a re-run, documents and withholding accounts created after the first run belong to the new flow
-	created_before = (
-		frappe.db.get_value(
-			"Patch Log",
-			{"patch": ("like", "erpnext.patches.v16_0.migrate_tax_withholding_data%")},
-			"creation",
-			order_by="creation asc",
-		)
-		or now()
-	)
-
-	tds_accounts = get_tds_accounts(created_before)
+	tds_accounts = get_tds_accounts()
 	if not tds_accounts:
 		return
 
@@ -95,7 +84,7 @@ def execute():
 	# Migrate data from each document type
 	# Purchase Invoice migration also handles Payment Entry TDS (allocated and unallocated)
 	paid_journals = set()
-	for suppliers in get_supplier_groups(column_cache, party_tax_id_cache, created_before):
+	for suppliers in get_supplier_groups(column_cache, party_tax_id_cache):
 		purchase_migrator = PurchaseInvoiceMigrator(
 			tds_accounts,
 			tax_rate_map,
@@ -103,23 +92,19 @@ def execute():
 			party_tax_id_cache,
 			party_categories,
 			skip_docs,
-			created_before,
 			suppliers,
 		)
 		purchase_migrator.migrate()
 		paid_journals.update(
 			name for doctype, name in purchase_migrator.tds_paid_by_other if doctype == "Journal Entry"
 		)
-	migrate_sales_invoices(
-		tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
-	)
+	migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs)
 	migrate_journal_entries(
 		tds_accounts,
 		tax_rate_map,
 		column_cache,
 		party_tax_id_cache,
 		skip_docs,
-		created_before,
 		paid_journals,
 		party_categories,
 	)
@@ -129,7 +114,7 @@ def execute():
 	copy_category_to_items_for_sales(column_cache)
 
 
-def get_supplier_groups(column_cache, party_tax_id_cache, created_before):
+def get_supplier_groups(column_cache, party_tax_id_cache):
 	"""Suppliers in groups of about BATCH_SIZE purchase invoices, with the suppliers of a PAN together"""
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pe = frappe.qb.DocType("Payment Entry")
@@ -139,7 +124,6 @@ def get_supplier_groups(column_cache, party_tax_id_cache, created_before):
 		frappe.qb.from_(pi)
 		.select(pi.supplier, Count("*"))
 		.where(pi.docstatus == 1)
-		.where(pi.creation < created_before)
 		.groupby(pi.supplier)
 		.run()
 	):
@@ -150,7 +134,6 @@ def get_supplier_groups(column_cache, party_tax_id_cache, created_before):
 		.select(pe.party)
 		.distinct()
 		.where(pe.docstatus == 1)
-		.where(pe.creation < created_before)
 		.where(pe.party_type == "Supplier")
 		.where(pe.apply_tds == 1)
 		.run()
@@ -206,14 +189,11 @@ def get_column_cache():
 	}
 
 
-def get_tds_accounts(created_before):
+def get_tds_accounts():
 	twa = frappe.qb.DocType("Tax Withholding Account")
 
 	result = (
-		frappe.qb.from_(twa)
-		.select(twa.account, twa.company, twa.parent.as_("category"))
-		.where(twa.creation < created_before)
-		.run(as_dict=True)
+		frappe.qb.from_(twa).select(twa.account, twa.company, twa.parent.as_("category")).run(as_dict=True)
 	)
 
 	if not result:
@@ -292,6 +272,15 @@ def get_docs_with_entries():
 		):
 			if doctype and name:
 				docs.add((doctype, name))
+
+	# Entries the user overrode on the new flow are theirs, even where they removed all of them
+	for doctype in ("Purchase Invoice", "Sales Invoice", "Journal Entry", "Payment Entry"):
+		docs.update(
+			(doctype, name)
+			for name in frappe.get_all(
+				doctype, filters={"override_tax_withholding_entries": 1, "docstatus": 1}, pluck="name"
+			)
+		)
 
 	return docs
 
@@ -476,7 +465,6 @@ class PurchaseInvoiceMigrator:
 		party_tax_id_cache,
 		party_categories,
 		skip_docs,
-		created_before,
 		suppliers,
 	):
 		self.tds_accounts = tds_accounts
@@ -485,7 +473,6 @@ class PurchaseInvoiceMigrator:
 		self.party_tax_id_cache = party_tax_id_cache
 		self.party_categories = party_categories
 		self.skip_docs = skip_docs
-		self.created_before = created_before
 		self.suppliers = suppliers
 
 		# Build TDS account set
@@ -590,7 +577,6 @@ class PurchaseInvoiceMigrator:
 				ptc.base_tax_amount_after_discount_amount,
 			)
 			.where(pi.docstatus == 1)
-			.where(pi.creation < self.created_before)
 			.where(pi.supplier.isin(self.suppliers))
 			.where(tds_row)
 			.run(as_dict=True)
@@ -610,7 +596,6 @@ class PurchaseInvoiceMigrator:
 					.on(ptc.parent == pi.name)
 					.select(ptc.parent)
 					.where(pi.docstatus == 1)
-					.where(pi.creation < self.created_before)
 					.where(pi.supplier.isin(self.suppliers))
 					.where(tds_row)
 				)
@@ -643,7 +628,6 @@ class PurchaseInvoiceMigrator:
 			.where(at.parenttype == "Purchase Invoice")
 			.where(at.reference_type == "Payment Entry")
 			.where(pi.docstatus == 1)
-			.where(pi.creation < self.created_before)
 			.where(pi.supplier.isin(self.suppliers))
 			.run(as_dict=True)
 		)
@@ -671,7 +655,6 @@ class PurchaseInvoiceMigrator:
 				atc.add_deduct_tax,
 			)
 			.where(pe.docstatus == 1)
-			.where(pe.creation < self.created_before)
 			.where(pe.party_type == "Supplier")
 			.where(pe.party.isin(self.suppliers))
 			.where(pe.apply_tds == 1)
@@ -696,7 +679,6 @@ class PurchaseInvoiceMigrator:
 				pi.conversion_rate,
 			)
 			.where(pi.docstatus == 1)
-			.where(pi.creation < self.created_before)
 			.where(pi.supplier.isin(self.suppliers))
 			.where(pi.is_opening == "No")
 			.where(pi.apply_tds == 1)
@@ -1195,9 +1177,7 @@ class PurchaseInvoiceMigrator:
 # =============================================================================
 
 
-def migrate_sales_invoices(
-	tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs, created_before
-):
+def migrate_sales_invoices(tds_accounts, tax_rate_map, column_cache, party_tax_id_cache, skip_docs):
 	"""
 	Migrate Sales Invoice TCS data.
 
@@ -1253,7 +1233,6 @@ def migrate_sales_invoices(
 			tcs_gl.account,
 		)
 		.where(si.docstatus == 1)
-		.where(si.creation < created_before)
 		.where(si.is_opening == "No")
 		# Without a category or a TCS row there is no rate, so the invoice would be skipped below
 		.where((IfNull(cust.tax_withholding_category, "") != "") | tcs_gl.account.isnotnull())
@@ -1393,7 +1372,6 @@ def migrate_journal_entries(
 	column_cache,
 	party_tax_id_cache,
 	skip_docs,
-	created_before,
 	paid_journals,
 	party_categories,
 ):
@@ -1434,7 +1412,6 @@ def migrate_journal_entries(
 		.where(gle.voucher_type == "Journal Entry")
 		.where(gle.is_cancelled == 0)
 		.where(je.docstatus == 1)
-		.where(je.creation < created_before)
 		.where(gle.account.isin(list(all_tds_accounts)))
 		.run(as_dict=True)
 	)
@@ -1587,7 +1564,6 @@ def migrate_journal_entries(
 			Sum(jea.credit - jea.debit).as_("amount"),
 		)
 		.where(je.docstatus == 1)
-		.where(je.creation < created_before)
 		.where(je.is_opening == "No")
 		.where(je.apply_tds == 1)
 		.where(IfNull(je.tax_withholding_category, "") != "")
