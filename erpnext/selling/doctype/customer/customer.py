@@ -561,14 +561,10 @@ def get_loyalty_programs(doc):
 	for loyalty_program in loyalty_programs:
 		if (
 			not loyalty_program.customer_group
-			or doc.customer_group
-			in get_nested_links(
-				"Customer Group", loyalty_program.customer_group, doc.flags.ignore_permissions
-			)
+			or doc.customer_group in get_nested_links("Customer Group", loyalty_program.customer_group)
 		) and (
 			not loyalty_program.customer_territory
-			or doc.territory
-			in get_nested_links("Territory", loyalty_program.customer_territory, doc.flags.ignore_permissions)
+			or doc.territory in get_nested_links("Territory", loyalty_program.customer_territory)
 		):
 			lp_details.append(loyalty_program.name)
 
@@ -576,13 +572,8 @@ def get_loyalty_programs(doc):
 
 
 def get_nested_links(link_doctype, link_name, ignore_permissions=False):
-	from frappe.desk.treeview import _get_children
-
-	links = [link_name]
-	for d in _get_children(link_doctype, link_name, ignore_permissions):
-		links.append(d.value)
-
-	return links
+	# ignore_permissions is kept for existing callers; eligibility must not depend on the viewer
+	return [link_name, *frappe.db.get_descendants(link_doctype, link_name)]
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
