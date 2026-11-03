@@ -20,13 +20,13 @@ export function useRun(workOrder) {
 		readings: {},
 		seeded: {},
 		preview: {},
-		previewing: {},
+		pending: {},
 		replan: {},
 	});
 	const now = ref(Date.now());
 	const capacity = {};
 	const previewTimers = {};
-	const previewRequests = {};
+	let previewSeq = 0;
 	let offset = 0;
 
 	const timer = setInterval(() => (now.value = Date.now()), 1000);
@@ -103,6 +103,8 @@ export function useRun(workOrder) {
 			local.actual[stage.idx] = Object.fromEntries(
 				stage.items.map((row) => [row.name, row.is_input ? row.waiting_qty : row.required_qty])
 			);
+			clearTimeout(previewTimers[stage.idx]);
+			delete local.pending[stage.idx];
 			delete local.preview[stage.idx];
 			local.replan[stage.idx] = true;
 			if (stage.phase === "ready") schedulePreview(stage, 0);
@@ -199,12 +201,11 @@ export function useRun(workOrder) {
 
 	function schedulePreview(stage, delay = PREVIEW_MS) {
 		clearTimeout(previewTimers[stage.idx]);
-		local.previewing[stage.idx] = true;
-		previewTimers[stage.idx] = setTimeout(() => previewLot(stage), delay);
+		const request = (local.pending[stage.idx] = ++previewSeq);
+		previewTimers[stage.idx] = setTimeout(() => previewLot(stage, request), delay);
 	}
 
-	async function previewLot(stage) {
-		const request = (previewRequests[stage.idx] = {});
+	async function previewLot(stage, request) {
 		const replan = local.replan[stage.idx];
 		const actual = local.actual[stage.idx];
 		const inputs = stage.items.filter((row) => row.is_input).map((row) => row.name);
@@ -214,7 +215,7 @@ export function useRun(workOrder) {
 				job_card: stage.job_card.name,
 				quantities: replan ? Object.fromEntries(inputs.map((name) => [name, actual[name]])) : actual,
 			});
-			if (previewRequests[stage.idx] !== request) return;
+			if (local.pending[stage.idx] !== request) return;
 			if (replan) {
 				stage.items
 					.filter((row) => !row.is_input)
@@ -223,7 +224,7 @@ export function useRun(workOrder) {
 			}
 			local.preview[stage.idx] = preview;
 		} finally {
-			if (previewRequests[stage.idx] === request) local.previewing[stage.idx] = false;
+			if (local.pending[stage.idx] === request) delete local.pending[stage.idx];
 		}
 	}
 
@@ -249,7 +250,7 @@ export function useRun(workOrder) {
 	const plannedOf = (stage, row) => previewOf(stage)?.items[row.name]?.planned_qty ?? row.required_qty;
 	const usedOf = (stage, row) => previewOf(stage)?.items[row.name]?.qty ?? row.transferred_qty;
 	const isOff = (stage, row) => !!previewOf(stage)?.items[row.name]?.is_off;
-	const isPreviewing = (stage) => !!local.previewing[stage.idx];
+	const isPreviewing = (stage) => !!local.pending[stage.idx];
 
 	return {
 		state,
