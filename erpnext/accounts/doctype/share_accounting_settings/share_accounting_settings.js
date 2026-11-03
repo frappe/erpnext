@@ -7,7 +7,7 @@ const ROOT_TYPES = {
 	share_capital_account: ["Equity", "Liability"],
 	securities_premium_account: ["Equity", "Liability"],
 	treasury_shares_account: ["Equity", "Liability"],
-	treasury_adjustment_account: ["Equity", "Liability"],
+	treasury_gain_loss_account: ["Equity", "Liability"],
 };
 
 frappe.ui.form.on("Share Accounting Settings", {

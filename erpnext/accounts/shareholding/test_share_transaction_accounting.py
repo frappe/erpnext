@@ -131,6 +131,32 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			{row.account: (row.debit, row.credit) for row in draft.get_accounting_preview()}, expected
 		)
 
+	def test_equity_accounts_default_from_settings_and_can_be_changed(self):
+		issue = self.issue_ten_shares()
+		self.assertEqual(issue.share_capital_account, self.share_capital_account)
+		self.assertEqual(issue.securities_premium_account, self.securities_premium_account)
+		self.assertIsNone(issue.treasury_shares_account)
+
+		other_capital_account = self.create_equity_account("Test Preference Share Capital")
+		changed = self.create_transaction(
+			transaction_type="Issue",
+			to_shareholder=self.create_shareholder(),
+			from_share_number=11,
+			to_share_number=20,
+			face_value_per_share=10,
+			rate_per_share=12,
+			share_capital_account=other_capital_account,
+		)
+		self.assert_gl_rows(
+			"Share Transaction",
+			changed.name,
+			{
+				self.clearing_account: (120, 0),
+				other_capital_account: (0, 100),
+				self.securities_premium_account: (0, 20),
+			},
+		)
+
 	def test_treasury_cost_drives_buyback_reissue_and_retirement_entries(self):
 		original_holder = self.create_shareholder()
 		new_holder = self.create_shareholder()
@@ -174,7 +200,7 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			{
 				self.clearing_account: (32, 0),
 				self.treasury_shares_account: (0, 28),
-				self.treasury_adjustment_account: (0, 4),
+				self.treasury_gain_loss_account: (0, 4),
 			},
 		)
 
@@ -192,7 +218,7 @@ class TestShareTransactionAccounting(ShareholdingTestCase):
 			{
 				self.share_capital_account: (30, 0),
 				self.treasury_shares_account: (0, 42),
-				self.treasury_adjustment_account: (12, 0),
+				self.treasury_gain_loss_account: (12, 0),
 			},
 		)
 

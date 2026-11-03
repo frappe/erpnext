@@ -39,7 +39,7 @@ class ShareholdingTestCase(IntegrationTestCase):
 		self.share_capital_account = self.create_equity_account("Test Share Capital")
 		self.securities_premium_account = self.create_equity_account("Test Securities Premium")
 		self.treasury_shares_account = self.create_equity_account("Test Treasury Shares")
-		self.treasury_adjustment_account = self.create_equity_account("Test Treasury Gain Loss")
+		self.treasury_gain_loss_account = self.create_equity_account("Test Treasury Gain Loss")
 		self.clearing_account = self.create_equity_account("Test Share Clearing")
 		self.share_class = self.create_share_class()
 		settings_name = frappe.db.get_value("Share Accounting Settings", {"company": self.company})
@@ -57,7 +57,7 @@ class ShareholdingTestCase(IntegrationTestCase):
 				"share_capital_account": self.share_capital_account,
 				"securities_premium_account": self.securities_premium_account,
 				"treasury_shares_account": self.treasury_shares_account,
-				"treasury_adjustment_account": self.treasury_adjustment_account,
+				"treasury_gain_loss_account": self.treasury_gain_loss_account,
 			}
 		)
 		settings.save()

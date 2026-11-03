@@ -9,7 +9,19 @@ const PREVIEW_TRIGGERS = [
 	"rate_per_share",
 	"clearing_account",
 	"bank_account",
+	"share_capital_account",
+	"securities_premium_account",
+	"treasury_shares_account",
+	"treasury_gain_loss_account",
 ];
+
+const EQUITY_ACCOUNTS_BY_TYPE = {
+	Issue: ["share_capital_account", "securities_premium_account"],
+	Buyback: ["treasury_shares_account"],
+	Reissue: ["treasury_shares_account", "treasury_gain_loss_account"],
+	Retirement: ["share_capital_account", "treasury_shares_account", "treasury_gain_loss_account"],
+};
+const EQUITY_ACCOUNT_FIELDS = [...new Set(Object.values(EQUITY_ACCOUNTS_BY_TYPE).flat())];
 
 frappe.ui.form.on("Share Transaction", {
 	refresh(frm) {
@@ -27,18 +39,24 @@ frappe.ui.form.on("Share Transaction", {
 		frm.trigger("set_accounting_defaults");
 	},
 
+	transaction_type(frm) {
+		frm.trigger("set_accounting_defaults");
+	},
+
 	async set_accounting_defaults(frm) {
 		if (!frm.doc.company || frm.doc.docstatus) return;
 		const { message } = await frappe.db.get_value("Share Accounting Settings", frm.doc.company, [
 			"accounting_mode",
 			"clearing_account",
 			"default_bank_account",
+			...EQUITY_ACCOUNT_FIELDS,
 		]);
 		if (!message) return;
 		await frm.set_value({
 			accounting_mode: message.accounting_mode,
 			clearing_account: message.clearing_account,
 			bank_account: frm.doc.bank_account || message.default_bank_account,
+			...get_equity_account_values(frm, message),
 		});
 	},
 
@@ -52,6 +70,9 @@ frappe.ui.form.on("Share Transaction", {
 	setup(frm) {
 		frm.set_query("clearing_account", () => get_account_query(frm));
 		frm.set_query("bank_account", () => get_account_query(frm));
+		EQUITY_ACCOUNT_FIELDS.forEach((fieldname) => {
+			frm.set_query(fieldname, () => get_account_query(frm, ["Equity", "Liability"]));
+		});
 	},
 
 	add_payment_entry_button(frm) {
@@ -97,15 +118,26 @@ PREVIEW_TRIGGERS.forEach((fieldname) => {
 	});
 });
 
-function get_account_query(frm) {
-	return {
-		filters: {
-			company: frm.doc.company,
-			is_group: 0,
-			disabled: 0,
-			account_type: ["not in", ["Receivable", "Payable"]],
-		},
+function get_account_query(frm, root_types) {
+	const filters = {
+		company: frm.doc.company,
+		is_group: 0,
+		disabled: 0,
+		account_type: ["not in", ["Receivable", "Payable"]],
 	};
+	if (root_types) filters.root_type = ["in", root_types];
+	return { filters };
+}
+
+function get_equity_account_values(frm, settings) {
+	// Keep accounts the user already picked for this transaction type.
+	const used = EQUITY_ACCOUNTS_BY_TYPE[frm.doc.transaction_type] || [];
+	return Object.fromEntries(
+		EQUITY_ACCOUNT_FIELDS.map((fieldname) => [
+			fieldname,
+			used.includes(fieldname) ? frm.doc[fieldname] || settings[fieldname] : null,
+		])
+	);
 }
 
 function make_payment_entry(frm) {
@@ -164,7 +196,7 @@ function make_payment_entry(frm) {
 
 function get_mode_of_payment_account(frm, mode_of_payment) {
 	return frappe.xcall(
-		"erpnext.accounts.shareholding.share_transaction_accounting.get_mode_of_payment_account",
+		"erpnext.accounts.shareholding.share_settlement.get_mode_of_payment_account",
 		{
 			mode_of_payment,
 			company: frm.doc.company,

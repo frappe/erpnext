@@ -33,7 +33,7 @@
   "securities_premium_amount",
   "treasury_cost_per_share",
   "treasury_cost",
-  "treasury_adjustment_amount",
+  "treasury_gain_loss_amount",
   "accounting_section",
   "accounting_mode",
   "clearing_account",
@@ -43,6 +43,12 @@
   "reference_no",
   "reference_date",
   "payment_entry",
+  "equity_accounts_section",
+  "share_capital_account",
+  "securities_premium_account",
+  "column_break_equity_accounts",
+  "treasury_shares_account",
+  "treasury_gain_loss_account",
   "accounting_impact_section",
   "accounting_preview",
   "accounting_dimensions_section",
@@ -245,7 +251,7 @@
   },
   {
    "description": "Positive values credit the treasury gain / loss account; negative values debit it.",
-   "fieldname": "treasury_adjustment_amount",
+   "fieldname": "treasury_gain_loss_amount",
    "fieldtype": "Currency",
    "label": "Treasury Gain / Loss (+ Credit / - Debit)",
    "options": "currency",
@@ -256,7 +262,7 @@
   {
    "fieldname": "accounting_section",
    "fieldtype": "Section Break",
-   "label": "Accounting",
+   "label": "Payment",
    "depends_on": "eval:doc.transaction_type && doc.transaction_type != 'Transfer'"
   },
   {
@@ -321,6 +327,45 @@
    "depends_on": "eval:doc.payment_entry"
   },
   {
+   "depends_on": "eval:doc.transaction_type && doc.transaction_type != 'Transfer'",
+   "description": "Filled from Share Accounting Settings. You can change them before you submit.",
+   "fieldname": "equity_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Equity Accounts"
+  },
+  {
+   "depends_on": "eval:['Issue', 'Retirement'].includes(doc.transaction_type)",
+   "fieldname": "share_capital_account",
+   "fieldtype": "Link",
+   "label": "Share Capital Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:['Issue'].includes(doc.transaction_type)",
+   "fieldname": "securities_premium_account",
+   "fieldtype": "Link",
+   "label": "Securities Premium Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_equity_accounts",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:['Buyback', 'Retirement', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "treasury_shares_account",
+   "fieldtype": "Link",
+   "label": "Treasury Shares Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:['Retirement', 'Reissue'].includes(doc.transaction_type)",
+   "fieldname": "treasury_gain_loss_account",
+   "fieldtype": "Link",
+   "label": "Treasury Gain / Loss Account",
+   "options": "Account"
+  },
+  {
    "fieldname": "accounting_impact_section",
    "fieldtype": "Section Break",
    "label": "Accounting Impact",
@@ -364,7 +409,7 @@
  "icon": "exchange",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-20 00:00:00.000000",
+ "modified": "2026-11-03 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Transaction",

@@ -13,7 +13,7 @@ ACCOUNT_ROOT_TYPES = {
 	"share_capital_account": {"Equity", "Liability"},
 	"securities_premium_account": {"Equity", "Liability"},
 	"treasury_shares_account": {"Equity", "Liability"},
-	"treasury_adjustment_account": {"Equity", "Liability"},
+	"treasury_gain_loss_account": {"Equity", "Liability"},
 }
 ACCOUNT_FIELDS = tuple(ACCOUNT_ROOT_TYPES)
 DISTINCT_ACCOUNT_FIELDS = tuple(field for field in ACCOUNT_FIELDS if field != "default_bank_account")

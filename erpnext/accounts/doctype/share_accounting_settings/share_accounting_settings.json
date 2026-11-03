@@ -6,8 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "settlement_section",
+  "column_break_mode",
   "accounting_mode",
+  "settlement_section",
   "clearing_account",
   "column_break_settlement",
   "default_bank_account",
@@ -16,10 +17,11 @@
   "securities_premium_account",
   "column_break_equity",
   "treasury_shares_account",
-  "treasury_adjustment_account"
+  "treasury_gain_loss_account"
  ],
  "fields": [
   {
+   "description": "Each company has one Share Accounting Settings record.",
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -29,13 +31,12 @@
    "unique": 1
   },
   {
-   "fieldname": "settlement_section",
-   "fieldtype": "Section Break",
-   "label": "Settlement"
+   "fieldname": "column_break_mode",
+   "fieldtype": "Column Break"
   },
   {
    "default": "Direct",
-   "description": "Direct: a Payment Entry is created and submitted with the Share Transaction. Clearing: the amount stays in the Clearing Account until Accounts creates the Payment Entry.",
+   "description": "Direct: the Payment Entry is created and submitted when you submit the Share Transaction.\nClearing: the amount stays in the Clearing Account. Accounts creates the Payment Entry later with Create > Payment Entry.",
    "fieldname": "accounting_mode",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -44,7 +45,13 @@
    "reqd": 1
   },
   {
-   "description": "Share Transactions post to this account first. The Payment Entry moves the money between this account and the bank.",
+   "description": "Accounts that receive or pay the money for a Share Transaction.",
+   "fieldname": "settlement_section",
+   "fieldtype": "Section Break",
+   "label": "Settlement Accounts"
+  },
+  {
+   "description": "Share Transactions post the amount to this account. The Payment Entry then moves the amount between this account and the bank or cash account.",
    "fieldname": "clearing_account",
    "fieldtype": "Link",
    "label": "Clearing Account",
@@ -56,7 +63,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Pre-fills the Bank or Cash Account on Share Transactions. It can be changed on each transaction.",
+   "description": "Pre-fills the Bank or Cash Account on Share Transactions. You can change it on each transaction.",
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
    "label": "Default Bank or Cash Account",
@@ -64,19 +71,20 @@
    "options": "Account"
   },
   {
+   "description": "Default equity accounts for Share Transactions. You can change them on each Share Transaction before you submit it.",
    "fieldname": "equity_accounts_section",
    "fieldtype": "Section Break",
    "label": "Equity Accounts"
   },
   {
-   "description": "Credited at face value on Issue. Debited at face value on Retirement.",
+   "description": "Credited with the face value on Issue. Debited with the face value on Retirement.",
    "fieldname": "share_capital_account",
    "fieldtype": "Link",
    "label": "Share Capital Account",
    "options": "Account"
   },
   {
-   "description": "Credited with the amount received above face value on Issue.",
+   "description": "Credited with the amount above the face value on Issue.",
    "fieldname": "securities_premium_account",
    "fieldtype": "Link",
    "label": "Securities Premium Account",
@@ -87,22 +95,22 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Debited with the buyback cost. Credited when treasury shares are reissued or retired.",
+   "description": "Debited with the buyback cost. Credited with the treasury cost on Reissue or Retirement.",
    "fieldname": "treasury_shares_account",
    "fieldtype": "Link",
    "label": "Treasury Shares Account",
    "options": "Account"
   },
   {
-   "description": "Receives the difference between treasury cost and the reissue price, or between treasury cost and face value on Retirement. It never affects Profit and Loss.",
-   "fieldname": "treasury_adjustment_account",
+   "description": "Records the difference between the treasury cost and the reissue price, or between the treasury cost and the face value on Retirement. Use an equity account: this difference does not go to Profit and Loss.",
+   "fieldname": "treasury_gain_loss_account",
    "fieldtype": "Link",
    "label": "Treasury Gain / Loss Account",
    "options": "Account"
   }
  ],
  "links": [],
- "modified": "2026-10-20 00:00:00.000000",
+ "modified": "2026-11-03 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Accounting Settings",

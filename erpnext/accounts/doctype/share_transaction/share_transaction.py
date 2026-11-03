@@ -15,7 +15,11 @@ from erpnext.accounts.shareholding.share_ranges import (
 	get_face_value_per_share,
 	range_has_coverage,
 )
-from erpnext.accounts.shareholding.share_transaction_accounting import TransactionAccounting
+from erpnext.accounts.shareholding.share_settlement import TransactionSettlement
+from erpnext.accounts.shareholding.share_transaction_accounting import (
+	ACCOUNTING_TRANSACTION_TYPES,
+	TransactionAccounting,
+)
 
 TRANSACTION_FOLIOS = {
 	"Issue": (("to_folio", 1),),
@@ -25,7 +29,6 @@ TRANSACTION_FOLIOS = {
 	"Reissue": (("from_folio", -1), ("to_folio", 1)),
 }
 
-ACCOUNTING_TRANSACTION_TYPES = {"Issue", "Buyback", "Retirement", "Reissue"}
 REVERSED_FIELDS = (
 	"from_share_number",
 	"to_share_number",
@@ -39,7 +42,7 @@ REVERSED_FIELDS = (
 )
 
 
-class ShareTransaction(TransactionAccounting, Document):
+class ShareTransaction(TransactionAccounting, TransactionSettlement, Document):
 	def validate(self):
 		if self.docstatus == 0:
 			self.payment_entry = None
