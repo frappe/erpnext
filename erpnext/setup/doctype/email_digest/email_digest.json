@@ -299,7 +299,7 @@
    "label": "Add Quote"
   },
   {
-   "description": "Note: Email will not be sent to disabled users",
+   "description": "Financial digests are sent only to enabled System Users with read access to the company and all records behind the enabled financial sections.",
    "fieldname": "recipients",
    "fieldtype": "Table MultiSelect",
    "label": "Recipients",

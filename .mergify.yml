@@ -90,12 +90,6 @@ queue_rules:
     merge_method: merge
     queue_conditions: *pr_checks
     merge_conditions: *suite_checks
-  - name: alone
-    batch_size: 1
-    max_checks_retries: 1
-    merge_method: merge
-    queue_conditions: *pr_checks
-    merge_conditions: *suite_checks
 
 merge_queue:
   max_parallel_checks: 2

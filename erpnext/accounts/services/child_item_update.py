@@ -206,6 +206,7 @@ class ChildItemUpdater:
 			PaymentScheduleService(parent).set_payment_schedule()
 
 		if self.parent_doctype == "Purchase Order":
+			parent.set_last_purchase_rate()
 			parent.validate_minimum_order_qty()
 			parent.validate_budget()
 			if parent.is_against_so():
