@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.setup.utils import get_exchange_rate
 
 # internal key for opportunities without a sales stage, distinct from any real stage name
@@ -15,6 +16,8 @@ NO_SALES_STAGE = "__no_sales_stage"
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return OpportunitySummaryBySalesStage(filters).run()
 
 
