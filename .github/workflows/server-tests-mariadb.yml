@@ -4,6 +4,8 @@ on:
   repository_dispatch:
     types: [frappe-framework-change]
   pull_request:
+    paths-ignore:
+      - '**/locale/main.pot'
   workflow_dispatch:
     inputs:
       user:
