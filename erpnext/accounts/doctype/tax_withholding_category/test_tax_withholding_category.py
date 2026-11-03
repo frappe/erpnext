@@ -479,6 +479,42 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.assertGreater(len(pi1.taxes), 0)
 		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
 
+		# More exemption than the threshold, as migrated history can hold, leaves none to use
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier3", rate=5000)
+		pi2.apply_tds = 1
+		pi2.save()
+		pi2.override_tax_withholding_entries = 1
+		pi2.tax_withholding_entries[0].withholding_amount = 0
+		pi2.tax_withholding_entries[0].under_withheld_reason = "Threshold Exemption"
+		pi2.save()
+		pi2.submit()
+		invoices.append(pi2)
+
+		pi3 = create_purchase_invoice(supplier="Test TDS Supplier3", rate=10000)
+		pi3.apply_tds = 1
+		pi3.save()
+		pi3.submit()
+		invoices.append(pi3)
+
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi3.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi3.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi3.name, expected_entries)
+		self.assertEqual(pi3.taxes[0].tax_amount, 1000)
+
 		self.cleanup_invoices(invoices)
 
 	def test_cumulative_threshold_tcs_on_gross_amount(self):

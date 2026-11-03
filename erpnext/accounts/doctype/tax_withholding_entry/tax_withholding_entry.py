@@ -704,7 +704,8 @@ class TaxWithholdingController:
 			.run()
 		)
 
-		return category.cumulative_threshold - result.get("Settled", 0)
+		# Migrated or overridden entries can exempt more than the threshold
+		return max(0, category.cumulative_threshold - result.get("Settled", 0))
 
 	def _base_threshold_query(self, category):
 		entry = frappe.qb.DocType(DOCTYPE)
