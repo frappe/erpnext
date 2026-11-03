@@ -830,15 +830,17 @@ class Asset(AccountsController):
 	def set_status(self, status=None):
 		"""Get and update status"""
 		if not status:
-			status = self.get_maintenance_status() or self.get_status()
+			status = self.get_maintenance_status(self.get_status())
 		self.db_set("status", status)
 
-	def get_maintenance_status(self) -> str | None:
+	def get_maintenance_status(self, status: str) -> str:
 		"""Out of Order during a pending repair, In Maintenance while maintenance is due."""
 		if self.has_pending_repair():
 			return "Out of Order"
-		if self.has_due_maintenance():
+		# a fully depreciated asset has nothing left to depreciate, so it keeps that status
+		if status != "Fully Depreciated" and self.has_due_maintenance():
 			return "In Maintenance"
+		return status
 
 	def has_due_maintenance(self) -> bool:
 		if self.docstatus != 1 or self.disposal_date or not self.maintenance_required:
@@ -1195,13 +1197,7 @@ def update_maintenance_status():
 	)
 
 	for asset in assets:
-		asset = frappe.get_doc("Asset", asset.name)
-		if asset.has_pending_repair():
-			asset.set_status("Out of Order")
-		elif has_due_maintenance(asset.name):
-			asset.set_status("In Maintenance")
-		else:
-			asset.set_status()
+		frappe.get_doc("Asset", asset.name).set_status()
 
 
 def has_due_maintenance(asset_name: str) -> bool:
