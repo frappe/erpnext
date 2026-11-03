@@ -3,6 +3,7 @@ import re
 import sqlite3
 
 import frappe
+from frappe import _
 from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError
 
 MINIMUM_TERM_LENGTH = 3
@@ -17,6 +18,15 @@ MINIMUM_SQLITE_VERSION = (3, 45, 0)
 def sqlite_supports_tokenizer() -> bool:
 	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
 	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
+
+
+def validate_sqlite_version():
+	if not sqlite_supports_tokenizer():
+		frappe.throw(
+			_("Item Search Index needs SQLite {0} or later. This server has SQLite {1}.").format(
+				".".join(map(str, MINIMUM_SQLITE_VERSION)), sqlite3.sqlite_version
+			)
+		)
 
 
 def get_searched_fieldnames() -> list[str]:
