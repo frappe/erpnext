@@ -9,10 +9,12 @@ from frappe.model.document import Document
 from frappe.utils import add_days, cint, formatdate, get_datetime, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
 
 from .mapper import (
+	get_existing_customer_name,
 	get_ordered_items,
 )
 
@@ -174,6 +176,10 @@ class Quotation(SellingController):
 		self.validate_valid_till()
 		self.validate_revision()
 		self.validate_lead()
+		if self.coupon_code:
+			customer = get_existing_customer_name(self.quotation_to, self.party_name)
+			validate_coupon_code(self.coupon_code, customer)
+
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
@@ -285,26 +291,38 @@ class Quotation(SellingController):
 		return "Ordered"
 
 	def get_valid_items(self):
-		"""
-		Filters out items in an alternatives set that were not ordered.
-		"""
+		"""Collapse each alternatives set to its ordered row, or keep the main row if none was ordered."""
 
 		def is_in_sales_order(row):
-			in_sales_order = bool(
+			return bool(
 				frappe.db.exists(
 					"Sales Order Item",
 					{"quotation_item": row.name, "item_code": row.item_code, "docstatus": 1},
 				)
 			)
-			return in_sales_order
 
-		def can_map(row) -> bool:
-			if row.is_alternative or row.has_alternative_item:
-				return is_in_sales_order(row)
+		valid_items = []
+		alternatives_set = []
 
-			return True
+		def collapse_set():
+			if not alternatives_set:
+				return
+			ordered_rows = [row for row in alternatives_set if is_in_sales_order(row)]
+			valid_items.extend(ordered_rows or alternatives_set[:1])
 
-		return list(filter(can_map, self.get("items")))
+		for row in self.get("items"):
+			if row.has_alternative_item:
+				collapse_set()
+				alternatives_set = [row]
+			elif row.is_alternative:
+				alternatives_set.append(row)
+			else:
+				collapse_set()
+				alternatives_set = []
+				valid_items.append(row)
+
+		collapse_set()
+		return valid_items
 
 	def is_fully_ordered(self):
 		return self.get_ordered_status() == "Ordered"
@@ -350,6 +368,9 @@ class Quotation(SellingController):
 	):
 		self.check_permission("write")
 
+		if self.docstatus != 1:
+			frappe.throw(_("Only a submitted Quotation can be set as Lost."))
+
 		if not (self.is_fully_ordered() or self.is_partially_ordered() or self.has_ordered_versions):
 			if not lost_reasons_list:
 				frappe.throw(_("Please select at least one Lost Reason"))
@@ -388,6 +409,8 @@ class Quotation(SellingController):
 
 	def on_update_after_submit(self):
 		if self.has_value_changed("is_active"):
+			if self.is_active:
+				self.deactivate_other_versions()
 			self.update_opportunity("Quotation" if self.is_active else "Open")
 			self.update_lead()
 
@@ -404,7 +427,8 @@ class Quotation(SellingController):
 		self.update_latest_revision()
 
 	def deactivate_other_versions(self):
-		if not (self.revision_of and self.is_active):
+		# Only one version may be active at a time, whether this is the original or a revision.
+		if not self.is_active:
 			return
 
 		self.update_other_versions({"is_active": 1}, {"is_active": 0})
@@ -457,7 +481,9 @@ class Quotation(SellingController):
 		return [version for version in self.get_other_versions({}) if get_version_order(version) > own_order]
 
 	def validate_can_be_revised(self):
-		if self.status in ("Lost", "Ordered"):
+		# Ordered qty cannot cross into a new version (orders link to the original's rows),
+		# so a quotation with any ordered qty must not be revised.
+		if self.status in ("Lost", "Ordered", "Partially Ordered"):
 			frappe.throw(_("Cannot revise a Quotation with status {0}.").format(_(self.status)))
 
 	def get_other_versions(self, filters: dict, ignore_permissions: bool = True) -> list[frappe._dict]:
@@ -480,6 +506,28 @@ class Quotation(SellingController):
 		self.update_opportunity("Open")
 		self.update_lead()
 		self.update_latest_revision()
+		self.reactivate_latest_version()
+
+	def reactivate_latest_version(self):
+		"""On cancel, if no version is left active, reactivate the latest remaining one."""
+		original = self.revision_of or self.name
+		versions = frappe.get_all(
+			"Quotation",
+			filters={"docstatus": 1, "name": ["!=", self.name], "status": ["!=", "Lost"]},
+			or_filters={"name": original, "revision_of": original},
+			fields=["name", "is_active", "transaction_date", "creation"],
+		)
+		if not versions or any(version.is_active for version in versions):
+			return
+
+		latest = max(versions, key=get_version_order)
+		frappe.db.set_value("Quotation", latest.name, "is_active", 1)
+
+		# refresh the reactivated version's own CRM links (not this cancelled one's),
+		# so the opportunity and lead reflect the version that is active again
+		latest_doc = frappe.get_doc("Quotation", latest.name)
+		latest_doc.update_opportunity("Quotation")
+		latest_doc.update_lead()
 
 	def carry_forward_communication(self):
 		from erpnext.crm.utils import copy_comments, link_communications

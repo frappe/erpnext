@@ -84,7 +84,7 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 			}
 			row = frappe.model.add_child(frm.doc, "Timesheet Detail", "time_logs");
 			row.activity_type = args.activity_type;
-			row.from_time = frappe.datetime.get_datetime_as_string();
+			row.from_time = frappe.datetime.get_datetime_as_string(frappe.datetime.system_datetime());
 			row.project = args.project;
 			row.task = args.task;
 			row.expected_hours = args.expected_hours;
@@ -120,7 +120,7 @@ erpnext.timesheet.control_timer = function (frm, dialog, row, timestamp = 0) {
 		grid_row.doc.project = args.project;
 		grid_row.doc.task = args.task;
 		grid_row.doc.expected_hours = args.expected_hours;
-		grid_row.doc.to_time = frappe.datetime.get_datetime_as_string();
+		grid_row.doc.to_time = frappe.datetime.get_datetime_as_string(frappe.datetime.system_datetime());
 		grid_row.refresh();
 		frm.dirty();
 		frm.save();

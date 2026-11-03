@@ -7,6 +7,9 @@ from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as 
 from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
 from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1686,6 +1689,15 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.skip_transfer = 1
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.submit()
+
+	def test_variant_without_bom_uses_template_bom(self):
+		variant, template_bom = make_subcontracted_variant()
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": variant.name, "fg_item_qty": 5}]
+
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+
+		self.assertEqual(scio.items[0].bom, template_bom.name)
 
 
 def create_delivered_so_scio():

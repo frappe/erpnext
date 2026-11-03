@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.utils import flt, now_datetime, nowdate
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.budget.budget import (
 	BudgetError,
@@ -415,17 +415,15 @@ class TestBudget(ERPNextTestSuite):
 		set_total_expense_zero(nowdate(), "cost_center")
 
 		budget = make_budget(budget_against="Cost Center", do_not_save=False, submit_budget=True)
-		month = now_datetime().month
-		if month > 9:
-			month = 9
+		posting_date = get_fiscal_year(nowdate())[1]
 
-		for _i in range(month + 1):
+		for _i in range(2):
 			jv = make_journal_entry(
 				"_Test Account Cost for Goods Sold - _TC",
 				"_Test Bank - _TC",
 				20000,
 				"_Test Cost Center - _TC",
-				posting_date=nowdate(),
+				posting_date=posting_date,
 				submit=True,
 			)
 
@@ -444,18 +442,16 @@ class TestBudget(ERPNextTestSuite):
 		set_total_expense_zero(nowdate(), "project")
 
 		budget = make_budget(budget_against="Project", do_not_save=False, submit_budget=True)
-		month = now_datetime().month
-		if month > 9:
-			month = 9
+		posting_date = get_fiscal_year(nowdate())[1]
 
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
-		for _i in range(month + 1):
+		for _i in range(2):
 			jv = make_journal_entry(
 				"_Test Account Cost for Goods Sold - _TC",
 				"_Test Bank - _TC",
 				20000,
 				"_Test Cost Center - _TC",
-				posting_date=nowdate(),
+				posting_date=posting_date,
 				submit=True,
 				project=project,
 			)

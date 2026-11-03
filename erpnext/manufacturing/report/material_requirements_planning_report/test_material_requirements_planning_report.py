@@ -13,6 +13,7 @@ from erpnext.manufacturing.doctype.production_plan.test_production_plan import m
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.report.material_requirements_planning_report.material_requirements_planning_report import (
 	MaterialRequirementsPlanningReport,
+	convert_to_daily_bucket_data,
 	execute,
 	get_item_lead_time,
 	make_order,
@@ -725,6 +726,57 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rm_row = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))[plan.rm_item]
 
 		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
+
+	def test_mps_data_matches_any_selected_warehouse(self):
+		plan = make_mrp_plan(self)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		for warehouses, expected in (([WAREHOUSE, WIP_WAREHOUSE], [plan.fg_item]), ([WIP_WAREHOUSE], [])):
+			with self.subTest(warehouses=warehouses):
+				report = MaterialRequirementsPlanningReport(
+					{
+						"from_date": mps.from_date,
+						"to_date": mps.to_date,
+						"warehouse": warehouses,
+						"mps": mps.name,
+					}
+				)
+				self.assertEqual([row.item_code for row in report.get_mps_data()], expected)
+
+	def test_rows_carry_a_single_warehouse_with_multiple_selected(self):
+		# a list in the hidden Link column breaks the link title lookup of the whole report
+		from frappe.desk.query_report import run
+
+		plan = make_mrp_plan(self)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		result = run(
+			"Material Requirements Planning Report",
+			filters={
+				"company": COMPANY,
+				"from_date": mps.from_date,
+				"to_date": mps.to_date,
+				"warehouse": [WAREHOUSE, WIP_WAREHOUSE],
+				"mps": mps.name,
+				"type_of_material": "All",
+				"add_safety_stock": 0,
+			},
+		)
+		rows = {row.item_code: row for row in result["result"] if row.get("item_code")}
+		self.assertEqual(rows[plan.rm_item].warehouse, WAREHOUSE)
+
+	def test_daily_forecast_buckets_keep_the_forecast_warehouse(self):
+		for frequency in ("Monthly", "Weekly"):
+			with self.subTest(frequency=frequency):
+				row = frappe._dict(
+					frequency=frequency,
+					item_code="_Test Item",
+					delivery_date=today(),
+					qty=30,
+					parent_warehouse=WAREHOUSE,
+				)
+				buckets = convert_to_daily_bucket_data([row])
+				self.assertTrue(buckets)
+				self.assertEqual({bucket.parent_warehouse for bucket in buckets}, {WAREHOUSE})
 
 
 def make_chart_row(delivery_date, planned_qty=1):

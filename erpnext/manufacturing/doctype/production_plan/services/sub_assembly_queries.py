@@ -17,7 +17,6 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 
 
 def get_sub_assembly_items(
-	sub_assembly_items,
 	bin_details,
 	bom_no,
 	bom_data,
@@ -39,7 +38,6 @@ def get_sub_assembly_items(
 			parent_item_code,
 			bom_no,
 			bom_data,
-			sub_assembly_items,
 			bin_details,
 			to_produce_qty,
 			company,
@@ -50,7 +48,6 @@ def get_sub_assembly_items(
 		)
 		if d.value:
 			get_sub_assembly_items(
-				sub_assembly_items,
 				bin_details,
 				d.value,
 				bom_data,
@@ -67,7 +64,6 @@ def _add_sub_assembly_child(
 	parent_item_code,
 	bom_no,
 	bom_data,
-	sub_assembly_items,
 	bin_details,
 	to_produce_qty,
 	company,
@@ -78,7 +74,7 @@ def _add_sub_assembly_child(
 ):
 	required_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 	stock_qty = _resolve_available_sub_assembly(
-		d, required_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
+		d, required_qty, bin_details, company, warehouse, skip_available
 	)
 	if not d.is_phantom_item:
 		bom_data.append(
@@ -89,19 +85,17 @@ def _add_sub_assembly_child(
 	return stock_qty
 
 
-def _resolve_available_sub_assembly(
-	d, stock_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
-):
+def _resolve_available_sub_assembly(d, stock_qty, bin_details, company, warehouse, skip_available):
 	if warehouse and d.item_code not in bin_details:
 		bins = get_bin_details(d, company, for_warehouse=warehouse)
 		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
-	if skip_available and d.item_code not in sub_assembly_items:
-		return _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details)
+	if skip_available:
+		return _consume_projected_qty(d, stock_qty, bin_details)
 	return stock_qty
 
 
-def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
+def _consume_projected_qty(d, stock_qty, bin_details):
 	bin_dict = bin_details[d.item_code]
 	available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
 	if available_qty <= 0:
@@ -112,7 +106,6 @@ def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
 		return 0
 
 	bin_dict.available_qty = 0
-	sub_assembly_items.append(d.item_code)
 	return stock_qty - available_qty
 
 

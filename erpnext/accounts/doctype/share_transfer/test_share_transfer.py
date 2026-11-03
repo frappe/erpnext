@@ -85,6 +85,99 @@ class TestShareTransfer(ERPNextTestSuite):
 			st = frappe.get_doc(d)
 			st.submit()
 
+	def test_fractional_rate_submission_after_reload(self):
+		for rate, amount in ((10.1, 30.3), (0.1, 0.3), (10.25, 30.75)):
+			with self.subTest(rate=rate):
+				doc = frappe.get_doc(
+					{
+						"doctype": "Share Transfer",
+						"transfer_type": "Issue",
+						"date": "2018-01-06",
+						"to_shareholder": "SH-00001",
+						"share_type": "Equity",
+						"from_no": 501,
+						"to_no": 503,
+						"no_of_shares": 3,
+						"rate": rate,
+						"amount": rate * 3,
+						"company": "_Test Company",
+						"asset_account": "Cash - _TC",
+						"equity_or_liability_account": "Creditors - _TC",
+					}
+				).insert()
+				self.assertEqual(doc.amount, amount)
+				doc.reload()
+				self.assertEqual(doc.amount, amount)
+				doc.save()
+				doc.reload()
+				doc.submit()
+				doc.reload()
+				self.assertEqual(doc.docstatus, 1)
+				self.assertEqual(doc.amount, amount)
+				doc.cancel()
+				self.assertEqual(doc.docstatus, 2)
+
+	def test_issue_rejects_overlapping_share_ranges(self):
+		issue = frappe.get_doc(
+			{
+				"doctype": "Share Transfer",
+				"transfer_type": "Issue",
+				"date": "2018-01-06",
+				"to_shareholder": "SH-00001",
+				"share_type": "Equity",
+				"from_no": 600,
+				"to_no": 700,
+				"no_of_shares": 101,
+				"rate": 10,
+				"company": "_Test Company",
+				"asset_account": "Cash - _TC",
+				"equity_or_liability_account": "Creditors - _TC",
+			}
+		).submit()
+
+		for from_no, to_no in (
+			(550, 750),
+			(550, 650),
+			(650, 750),
+			(625, 675),
+			(600, 700),
+			(550, 600),
+			(700, 750),
+		):
+			with self.subTest(from_no=from_no, to_no=to_no):
+				duplicate = frappe.copy_doc(issue)
+				duplicate.update(
+					{
+						"to_shareholder": "SH-00002",
+						"to_folio_no": frappe.db.get_value("Shareholder", "SH-00002", "folio_no"),
+						"from_no": from_no,
+						"to_no": to_no,
+						"no_of_shares": to_no - from_no + 1,
+						"amount": 0,
+					}
+				)
+				with self.assertRaisesRegex(frappe.DuplicateEntryError, "The shares already exist"):
+					duplicate.submit()
+
+		self.assertEqual(
+			[(row.from_no, row.to_no) for row in issue.get_company_shareholder().share_balance],
+			[(1, 400), (600, 700)],
+		)
+		self.assertEqual(
+			[(row.from_no, row.to_no) for row in frappe.get_doc("Shareholder", "SH-00002").share_balance],
+			[(101, 200), (201, 400)],
+		)
+
+		for from_no, to_no in ((550, 599), (701, 750)):
+			with self.subTest(from_no=from_no, to_no=to_no):
+				adjacent = frappe.copy_doc(issue)
+				adjacent.update(
+					{"from_no": from_no, "to_no": to_no, "no_of_shares": to_no - from_no + 1, "amount": 0}
+				)
+				adjacent.submit()
+				self.assertEqual(adjacent.docstatus, 1)
+				adjacent.cancel()
+
 	def test_shareholders_stay_protected_after_buyback(self):
 		from frappe.client import set_value
 

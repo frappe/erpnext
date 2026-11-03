@@ -646,13 +646,16 @@ class DisassembleStockEntry(BaseStockEntry):
 		self._set_serial_batch_bundle_for_disassembly_row(row, serial_nos, batches)
 
 	def _collect_available_batches(self, batch_details, transfer_qty):
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		batches, qty = defaultdict(float), transfer_qty
 		for batch_no, batch_qty in batch_details.items():
 			if qty <= 0:
 				break
-			batch_qty = abs(batch_qty)
+			batch_qty = flt(batch_qty, precision)
+			if batch_qty <= 0:
+				continue
 			if batch_qty <= qty:
-				batches[batch_no], qty = batch_qty, qty - batch_qty
+				batches[batch_no], qty = batch_qty, flt(qty - batch_qty, precision)
 			else:
 				batches[batch_no], qty = qty, 0
 		return batches
@@ -736,7 +739,7 @@ def _add_inward_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] += row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] += abs(qty)
 	_extend_serial_nos_from_row(item_data, row)
 
 
@@ -751,7 +754,7 @@ def _deduct_consumed_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] -= row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] -= abs(qty)
 	_remove_serial_nos_from_available(item_data, row)
 
 

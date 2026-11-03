@@ -9,6 +9,7 @@ from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
 from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import add_months, formatdate, getdate, sbool, today
+from frappe.utils.password import get_decrypted_password
 from plaid.errors import ItemError
 
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
@@ -268,10 +269,12 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 		related_bank = frappe.db.get_values(
 			"Bank Account", bank_account, ["bank", "integration_id"], as_dict=True
 		)
-		access_token = frappe.db.get_value("Bank", related_bank[0].bank, "plaid_access_token")
+		access_token = get_decrypted_password(
+			"Bank", related_bank[0].bank, "plaid_access_token", raise_exception=False
+		)
 		account_id = related_bank[0].integration_id
 	else:
-		access_token = frappe.db.get_value("Bank", bank, "plaid_access_token")
+		access_token = get_decrypted_password("Bank", bank, "plaid_access_token", raise_exception=False)
 		account_id = None
 
 	plaid = PlaidConnector(access_token)
@@ -372,10 +375,15 @@ def enqueue_synchronization():
 
 
 @frappe.whitelist(methods=["POST"])
-def get_link_token_for_update(access_token: str):
-	# `access_token` is caller-supplied and is used to mint a link token at Plaid, so this creates
-	# state at the provider even though it writes nothing here.
+def get_link_token_for_update(bank: str):
+	# mints a link token at Plaid, so this creates state at the provider even though it writes
+	# nothing here.
 	frappe.has_permission("Plaid Settings", throw=True)
+	frappe.has_permission("Bank", "read", bank, throw=True)
+
+	access_token = get_decrypted_password("Bank", bank, "plaid_access_token", raise_exception=False)
+	if not access_token:
+		frappe.throw(_("Bank {0} is not linked with Plaid").format(bank))
 
 	plaid = PlaidConnector(access_token)
 	return plaid.get_link_token(update_mode=True)

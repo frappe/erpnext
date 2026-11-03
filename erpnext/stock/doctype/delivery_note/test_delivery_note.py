@@ -86,10 +86,13 @@ class TestDeliveryNote(ERPNextTestSuite):
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=11, basic_rate=100)
 
 		# A submitted standalone delivery is already in customer outstanding, so it is not counted twice.
-		create_delivery_note(customer=customer.name, qty=6, rate=100)
+		create_delivery_note(customer=customer.name, qty=3, rate=100)
 
-		so = make_sales_order(customer=customer.name, qty=5, rate=100)
-		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 5)
+		# Earlier unbilled deliveries against Sales Orders still count once the order check is bypassed.
+		so = make_sales_order(customer=customer.name, qty=4, rate=100)
+		create_dn_against_so(so.name, 4)
+		so = make_sales_order(customer=customer.name, qty=4, rate=100)
+		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name, 4)
 
 	def test_customer_outstanding_uses_delivery_base_net_amount(self):
 		from erpnext.selling.doctype.customer.customer import get_customer_outstanding
@@ -554,9 +557,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(gle_warehouse_amount, stock_value_difference)
 
-		# hack because new_doc isn't considering is_return portion of status_updater
-		returned = frappe.get_doc("Delivery Note", dn1.name)
-		returned.update_prevdoc_status()
 		dn.load_from_db()
 
 		# Check if Original DN updated
@@ -588,6 +588,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.per_billed, 0)
 
 		dn1.cancel()
+		# cancelling the return now reverses returned_qty on the original DN, so refresh before cancel
+		dn.load_from_db()
 		dn.cancel()
 
 	def test_sales_return_for_non_bundled_items_full(self):
@@ -623,9 +625,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn1.items[0].dn_detail = dn.items[0].name
 		dn1.submit()
 
-		# hack because new_doc isn't considering is_return portion of status_updater
-		returned = frappe.get_doc("Delivery Note", dn1.name)
-		returned.update_prevdoc_status()
 		dn.load_from_db()
 
 		# Check if Original DN updated
@@ -765,7 +764,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 		create_stock_reconciliation(
 			item_code="_Test Item Home Desktop 100",
@@ -773,7 +772,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 
 		dn = create_delivery_note(
@@ -844,7 +843,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 		create_stock_reconciliation(
 			item_code="_Test Item Home Desktop 100",
@@ -852,7 +851,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account="Stock Adjustment - TCP1",
+			expense_account="Temporary Opening - TCP1",
 		)
 
 		actual_qty = get_qty_after_transaction(warehouse="Stores - TCP1")
@@ -1045,6 +1044,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.check_serial_no_values(serial_no, {"warehouse": ""})
 
+		# the return updated per_returned on the original DN, so refresh before cancelling it
+		dn.load_from_db()
 		dn.cancel()
 
 		self.check_serial_no_values(
@@ -1110,14 +1111,14 @@ class TestDeliveryNote(ERPNextTestSuite):
 				item_code="_Test Item",
 				warehouse=warehouse,
 				company=company,
-				expense_account="Stock Adjustment - TCP1",
+				expense_account="Temporary Opening - TCP1",
 				qty=500,
 				rate=100,
 			)
 			create_stock_reconciliation(
 				item_code="_Test Item Home Desktop 100",
 				company=company,
-				expense_account="Stock Adjustment - TCP1",
+				expense_account="Temporary Opening - TCP1",
 				warehouse=warehouse,
 				qty=500,
 				rate=100,
@@ -1870,14 +1871,14 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=10)
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].delivery_note = dn.name
 		si.items[0].dn_detail = dn.items[0].name
 		si.items[0].sales_order = so.name
@@ -3462,7 +3463,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(so.per_billed, 0)
 		self.assertEqual(so.per_delivered, 0)
 		self.assertEqual(so.items[0].delivered_qty, 0)
-		self.assertEqual(so.items[0].returned_qty, 0)
+		# delivered_qty is the net; returned_qty is the gross returned (full return of 2)
+		self.assertEqual(so.items[0].returned_qty, 2)
 
 		# Cancelling the credit note should restore the billed amount on the Sales Order.
 		credit_note.cancel()

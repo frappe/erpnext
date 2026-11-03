@@ -843,15 +843,6 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "total_amount"
 			)
 		else:
-			# Serialize concurrent valuations of this (item, warehouse) on postgres. MariaDB's
-			# grouped FOR UPDATE + gap locks do this via the history reads below; postgres has no
-			# gap locks, and row-locking the whole history writes a lock marker on every tuple --
-			# a txn-scoped advisory lock (released at commit/rollback) serializes without either.
-			if frappe.db.db_type == "postgres":
-				frappe.db.transaction_advisory_lock(
-					("batch-valuation", self.sle.item_code, self.sle.warehouse)
-				)
-
 			self.stock_value_change = 0.0
 			self.batch_avg_rate = defaultdict(float)
 			self.available_qty = defaultdict(float)
@@ -982,9 +973,6 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		if self.stock_closing_from_datetime:
 			conditions &= child.posting_datetime >= self.stock_closing_from_datetime
 
-		# MariaDB carries a row lock on the grouped query below; on postgres the caller
-		# (calculate_avg_rate) serializes via a txn-scoped advisory lock on (item, warehouse)
-		# instead of row-locking the whole history (FOR UPDATE is invalid with GROUP BY there).
 		query = (
 			frappe.qb.from_(child)
 			.select(
@@ -1529,22 +1517,31 @@ class SerialBatchCreation:
 		if self.get("voucher_type"):
 			voucher_type = self.get("voucher_type")
 
+		serial_no_values = frappe._dict(
+			warehouse=self.warehouse,
+			company=self.company,
+			item_code=self.item_code,
+			item_name=self.item_name,
+			description=self.description,
+			status="Active",
+			reference_doctype=voucher_type,
+			reference_name=voucher_no,
+			posting_date=frappe.db.get_value(voucher_type, voucher_no, "posting_date"),
+			batch_no=self.batch_no,
+		)
+
 		obj = NamingSeries(self.serial_no_series)
-		current_value = obj.get_current_value()
+		current_value = obj.get_current_value(serial_no_values)
 
 		def get_series(partial_series, digits):
 			return f"{current_value:0{digits}d}"
 
-		posting_date = frappe.db.get_value(
-			voucher_type,
-			voucher_no,
-			"posting_date",
-		)
-
 		serial_ids = SerialBatchIdentity("Serial No").get_new_names(abs(cint(self.actual_qty)))
 		for serial_id in serial_ids:
 			current_value += 1
-			serial_no = parse_naming_series(self.serial_no_series, number_generator=get_series)
+			serial_no = parse_naming_series(
+				self.serial_no_series, doc=serial_no_values, number_generator=get_series
+			)
 
 			sr_nos.append(serial_id)
 			serial_nos_details.append(
@@ -1555,16 +1552,7 @@ class SerialBatchCreation:
 					now(),
 					frappe.session.user,
 					frappe.session.user,
-					self.warehouse,
-					self.company,
-					self.item_code,
-					self.item_name,
-					self.description,
-					"Active",
-					voucher_type,
-					voucher_no,
-					posting_date,
-					self.batch_no,
+					*serial_no_values.values(),
 				)
 			)
 
@@ -1576,16 +1564,7 @@ class SerialBatchCreation:
 				"modified",
 				"owner",
 				"modified_by",
-				"warehouse",
-				"company",
-				"item_code",
-				"item_name",
-				"description",
-				"status",
-				"reference_doctype",
-				"reference_name",
-				"posting_date",
-				"batch_no",
+				*serial_no_values,
 			]
 
 			try:
@@ -1600,7 +1579,7 @@ class SerialBatchCreation:
 				)
 				raise
 
-		obj.update_counter(current_value)
+		obj.update_counter(current_value, serial_no_values)
 
 		return sr_nos
 

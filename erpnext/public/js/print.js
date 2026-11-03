@@ -64,8 +64,8 @@ function open_company_details_dialog(data, current_doctype) {
 
 function build_dialog_fields(data) {
 	return [
-		make_field(__("Company Logo"), "company_logo", "Attach Image", data.company_logo),
-		make_field(__("Website"), "website", "Data", data.website),
+		make_field(__("Company Logo"), "company_logo", "Attach Image", data.company_logo, false),
+		make_field(__("Website"), "website", "Data", data.website, false),
 		make_field(__("Phone No"), "phone_no", "Data", data.phone_no),
 		{
 			label: __("Email"),
@@ -90,7 +90,7 @@ function build_dialog_fields(data) {
 		make_field(__("Address Line 1"), "address_line1", "Data", data.address_line),
 		make_field(__("Address Line 2"), "address_line2", "Data", data.address_line, false),
 		make_field(__("City"), "city", "Data", data.address_line),
-		make_field(__("State"), "state", "Data", data.address_line, false),
+		make_field(__("State/Province"), "state", "Data", data.address_line, false),
 		{
 			label: __("Country"),
 			fieldname: "country",

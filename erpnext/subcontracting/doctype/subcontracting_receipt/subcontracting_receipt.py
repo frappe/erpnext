@@ -159,6 +159,9 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.throw(_("Posting Date cannot be a future date"))
 
 		super().validate()
+		self.validate_item_stock_uom_is_integer(
+			"item_code", ["qty", "received_qty", "rejected_qty"], "Subcontracting Receipt Item"
+		)
 
 		self.set_missing_values()
 		self.validate_with_previous_doc()

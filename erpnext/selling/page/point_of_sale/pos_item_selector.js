@@ -398,7 +398,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			let stock_uom = $item.attr("data-stock-uom");
 
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
-			batch_no = batch_no === "undefined" ? undefined : batch_no;
+			batch_no = ["undefined", "null"].includes(batch_no) ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 			rate =

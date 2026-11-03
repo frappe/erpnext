@@ -38,6 +38,7 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_report_summary as get_pl_summary,
 )
+from erpnext.accounts.report.trial_balance.trial_balance import validate_company_permission
 from erpnext.accounts.report.utils import convert, convert_to_presentation_currency, get_rate_as_at
 from erpnext.accounts.utils import get_zero_cutoff
 
@@ -50,6 +51,9 @@ def execute(filters=None):
 
 	fiscal_year = get_fiscal_year_data(filters.get("from_fiscal_year"), filters.get("to_fiscal_year"))
 	company_list, companies = get_companies(filters)
+	for company in company_list:
+		validate_company_permission(company)
+
 	company_columns = get_company_columns(company_list, filters)
 	columns = get_columns(company_columns)
 

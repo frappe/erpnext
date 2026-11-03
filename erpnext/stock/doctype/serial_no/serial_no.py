@@ -136,19 +136,19 @@ class SerialNo(StockController):
 				)
 
 
-def get_available_serial_nos(serial_no_series, qty, item_code) -> list[str]:
+def get_available_serial_nos(serial_no_series, qty, item_code, doc=None) -> list[str]:
 	serial_nos = []
 	for _i in range(cint(qty)):
-		serial_nos.append(get_new_serial_number(serial_no_series, item_code))
+		serial_nos.append(get_new_serial_number(serial_no_series, item_code, doc))
 
 	return serial_nos
 
 
-def get_new_serial_number(series, item_code):
-	sr_no = make_autoname(series, "Serial No")
+def get_new_serial_number(series, item_code, doc=None):
+	sr_no = make_autoname(series, "Serial No", doc)
 	identity = SerialBatchIdentity("Serial No")
 	while identity.get_records(item_code, [sr_no], ["name"]):
-		sr_no = make_autoname(series, "Serial No")
+		sr_no = make_autoname(series, "Serial No", doc)
 	return sr_no
 
 

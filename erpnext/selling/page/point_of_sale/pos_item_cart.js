@@ -207,6 +207,7 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$component.on("click", ".add-discount-wrapper", () => {
+			if (!this.allow_discount_change) return;
 			const can_edit_discount = this.$add_discount_elem.find(".edit-discount-btn").length;
 
 			if (!this.discount_field || can_edit_discount) this.show_discount_control();
@@ -396,6 +397,7 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	show_discount_control() {
+		if (!this.allow_discount_change) return;
 		this.$add_discount_elem.css({ padding: "0px", border: "none" });
 		this.$add_discount_elem.html(`<div class="add-discount-field"></div>`);
 		const me = this;
@@ -660,14 +662,7 @@ erpnext.PointOfSale.ItemCart = class {
 		function get_description_html() {
 			if (item_data.description) {
 				if (item_data.description.indexOf("<div>") != -1) {
-					try {
-						item_data.description = $(item_data.description).text();
-					} catch (error) {
-						item_data.description = item_data.description
-							.replace(/<div>/g, " ")
-							.replace(/<\/div>/g, " ")
-							.replace(/ +/g, " ");
-					}
+					item_data.description = frappe.utils.html2text(item_data.description);
 				}
 				item_data.description = frappe.ellipsis(item_data.description, 45);
 				return `<div class="item-desc">${frappe.utils.escape_html(item_data.description)}</div>`;
@@ -733,7 +728,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 	highlight_checkout_btn(toggle) {
 		if (toggle) {
-			this.$add_discount_elem.css("display", "flex");
+			this.$add_discount_elem.css("display", this.allow_discount_change ? "flex" : "none");
 			this.$cart_container.find(".checkout-btn").css({
 				"background-color": "var(--btn-primary)",
 				color: "var(--neutral)",

@@ -47,6 +47,19 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSubcontractingReceipt(ERPNextTestSuite):
+	def test_finished_good_qty_must_be_whole_number(self):
+		from unittest.mock import patch
+
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.submit()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 2.5
+
+		with patch.object(type(scr), "set_items_received_qty"):
+			self.assertRaises(UOMMustBeIntegerError, scr.save)
+
 	def test_project_is_carried_over_from_subcontracting_order(self):
 		project = make_project({"project_name": "_Test SCR Project"}).name
 		po = make_subcontracted_purchase_order(project)

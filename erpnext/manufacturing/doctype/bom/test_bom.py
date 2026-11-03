@@ -1463,7 +1463,7 @@ class TestBOM(ERPNextTestSuite):
 		bom.items[1].percentage = 60
 		bom.with_operations = 1
 		bom.track_semi_finished_goods = 1
-		self.assertRaisesRegex(frappe.ValidationError, "Produce an Item at Each Operation", bom.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Produce Item per Operation", bom.insert)
 
 	@timeout
 	def test_final_operation_must_produce_the_bom_item(self):

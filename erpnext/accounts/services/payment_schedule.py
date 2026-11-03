@@ -92,6 +92,7 @@ class PaymentScheduleService:
 			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
+			keep_settled = doc.docstatus == 1 and getattr(doc, "_action", None) != "submit"
 			for d in doc.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
@@ -100,18 +101,29 @@ class PaymentScheduleService:
 					d.base_payment_amount = flt(
 						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
 					)
-					d.outstanding = d.payment_amount
-					d.base_outstanding = d.base_payment_amount
 				elif not d.invoice_portion:
 					d.base_payment_amount = flt(
 						d.payment_amount * doc.get("conversion_rate"), d.precision("base_payment_amount")
 					)
-					d.base_outstanding = d.base_payment_amount
+				self.set_term_outstanding(d, keep_settled)
 		else:
 			self.fetch_payment_terms_from_order(
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			doc.ignore_default_payment_terms_template = 1
+
+	def set_term_outstanding(self, term, keep_settled: bool) -> None:
+		settled = base_settled = 0
+		if keep_settled:
+			settled = flt(term.paid_amount) + flt(term.discounted_amount)
+			base_settled = flt(term.base_paid_amount) + flt(term.discounted_amount) * flt(
+				self.doc.get("conversion_rate")
+			)
+
+		term.outstanding = flt(term.payment_amount - settled, term.precision("outstanding"))
+		term.base_outstanding = flt(
+			term.base_payment_amount - base_settled, term.precision("base_outstanding")
+		)
 
 	def get_order_details(self) -> tuple:
 		doc = self.doc
@@ -169,6 +181,9 @@ class PaymentScheduleService:
 				"mode_of_payment": schedule.mode_of_payment,
 				"description": schedule.description,
 				"paid_amount": schedule.paid_amount,
+				"discount_type": schedule.discount_type,
+				"discount": schedule.discount,
+				"discount_date": schedule.discount_date,
 			}
 
 			if automatically_fetch_payment_terms:
@@ -192,18 +207,32 @@ class PaymentScheduleService:
 					schedule.precision("base_payment_amount"),
 				)
 				payment_schedule["outstanding"] = payment_schedule["payment_amount"]
+				if schedule.discount_type == "Amount" and schedule.invoice_portion:
+					payment_schedule["discount"] = (
+						flt(
+							flt(schedule.discount)
+							* payment_schedule["payment_amount"]
+							/ schedule.payment_amount,
+							schedule.precision("payment_amount"),
+						)
+						if schedule.payment_amount
+						else 0
+					)
 			else:
 				payment_schedule["base_payment_amount"] = flt(
 					schedule.base_payment_amount * doc.get("conversion_rate"),
 					schedule.precision("base_payment_amount"),
 				)
 
-			if schedule.discount_type == "Percentage":
-				payment_schedule["discount_type"] = schedule.discount_type
-				payment_schedule["discount"] = schedule.discount
-
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.payment_amount * doc.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
+				payment_schedule["outstanding"] = schedule.payment_amount
+
+			payment_schedule["base_outstanding"] = payment_schedule["base_payment_amount"]
 
 			doc.append("payment_schedule", payment_schedule)
 

@@ -46,14 +46,21 @@ class ItemTaxTemplate(Document):
 		check_list = []
 		for d in self.get("taxes"):
 			if d.tax_type:
-				account_type, account_company = frappe.get_cached_value(
-					"Account", d.tax_type, ["account_type", "company"]
+				account_type, account_company, is_group = frappe.get_cached_value(
+					"Account", d.tax_type, ["account_type", "company", "is_group"]
 				)
 
 				if account_company != self.company:
 					frappe.throw(
 						_("Item Tax Row {0}: Account must belong to Company - {1}").format(
 							d.idx, frappe.bold(self.company)
+						)
+					)
+
+				if is_group:
+					frappe.throw(
+						_("Item Tax Row {0}: Account {1} is a group account").format(
+							d.idx, frappe.bold(d.tax_type)
 						)
 					)
 

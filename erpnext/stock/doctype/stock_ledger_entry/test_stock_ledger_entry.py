@@ -49,21 +49,6 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertAlmostEqual(rate, 10.01, delta=0.01)
 
-	def test_stock_write_takes_sle_advisory_gate(self):
-		if frappe.db.db_type != "postgres":
-			self.skipTest("advisory locks are a PostgreSQL feature")
-
-		item = make_item(properties={"is_stock_item": 1}).name
-
-		def held_advisory_locks():
-			return frappe.db.sql(
-				"SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND pid = pg_backend_pid()"
-			)[0][0]
-
-		before = held_advisory_locks()
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=10)
-		self.assertGreater(held_advisory_locks(), before)
-
 	def test_negative_stock_fallback_rate_ignores_later_entries(self):
 		item = make_item(properties={"allow_negative_stock": 1, "valuation_rate": 80}).name
 		warehouse = "_Test Warehouse - _TC"

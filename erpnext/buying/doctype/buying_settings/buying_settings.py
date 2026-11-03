@@ -43,7 +43,6 @@ class BuyingSettings(Document):
 		role_to_override_stop_action: DF.Link | None
 		set_landed_cost_based_on_purchase_invoice_rate: DF.Check
 		set_valuation_rate_for_rejected_materials: DF.Check
-		show_pay_button: DF.Check
 		supp_master_name: DF.Literal["Supplier Name", "Naming Series", "Auto Name"]
 		supplier_group: DF.Link | None
 		use_transaction_date_exchange_rate: DF.Check

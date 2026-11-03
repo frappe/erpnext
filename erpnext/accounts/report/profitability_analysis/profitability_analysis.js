@@ -90,7 +90,7 @@ frappe.query_reports["Profitability Analysis"] = {
 
 			column.link_onclick =
 				"frappe.query_reports['Profitability Analysis'].open_profit_and_loss_statement(" +
-				JSON.stringify(data) +
+				erpnext.financial_statements.to_onclick_arg(data) +
 				")";
 			column.is_tree = true;
 		}

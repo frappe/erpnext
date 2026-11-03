@@ -5,9 +5,8 @@ import copy
 import gc
 import gzip
 import json
-from collections import deque
-from contextlib import nullcontext
-from itertools import islice
+from heapq import heappop, heappush, nsmallest
+from itertools import count
 
 import frappe
 from frappe import _, bold, scrub
@@ -66,6 +65,32 @@ REPOST_SLE_QUEUE_FIELDS = (
 
 class NegativeStockError(frappe.ValidationError):
 	pass
+
+
+class RepostQueue:
+	"""Stock ledger entries waiting to be reposted, popped in posting order.
+
+	Entries with the same posting datetime and creation pop in the order they were added.
+	"""
+
+	def __init__(self, sles=None):
+		self._heap = []
+		self._counter = count()
+		self.extend(sles or [])
+
+	def extend(self, sles):
+		for sle in sles:
+			key = (get_datetime(sle.posting_datetime), get_datetime(sle.creation), next(self._counter))
+			heappush(self._heap, (*key, sle))
+
+	def popleft(self):
+		return heappop(self._heap)[-1]
+
+	def peek(self, n):
+		return [entry[-1] for entry in nsmallest(n, self._heap)]
+
+	def __len__(self):
+		return len(self._heap)
 
 
 class SerialNoExistsInFutureTransaction(frappe.ValidationError):
@@ -220,7 +245,6 @@ def make_sl_entries(
 	from erpnext.controllers.stock_controller import future_sle_exists, invalidate_future_sle_cache
 
 	if sl_entries:
-		acquire_sle_processing_gates(sl_entries)
 		validate_stock_frozen_by_closing_entry(sl_entries)
 		mark_stock_closing_outdated(sl_entries)
 
@@ -405,47 +429,6 @@ def make_entry(
 	return sle
 
 
-# A repost waits this long for another repost's per-(item, warehouse) gate before giving up. Kept
-# well under the 1800s repost job timeout so a wait can't burn the whole budget, and short enough
-# that a contended worker re-queues (recoverable QueryTimeoutError) and frees the slot for other
-# items instead of pinning it.
-REPOST_LOCK_TIMEOUT = 300
-
-
-def repost_gate(item_code, warehouse):
-	"""Serialize concurrent background reposts of the same (item, warehouse) with a session-level
-	advisory lock taken before the inner `... for update` row locks, so they take turns instead of
-	racing into a lock-order deadlock. Row locks still enforce correctness; this only cuts the
-	deadlock/retry churn. Scope is repost-vs-repost only -- the synchronous repost_current_voucher
-	submit path is deliberately not gated (blocking a submit behind a background repost would be a
-	worse regression) and keeps relying on the existing deadlock retry. Postgres only: MariaDB
-	keeps the plain deadlock-retry path."""
-	# hasattr keeps this a graceful opt-in: on an ERPNext predating frappe.db.advisory_lock, fall
-	# back to no gate rather than raising and marking the Repost Item Valuation permanently Failed.
-	if frappe.db.db_type == "postgres" and hasattr(frappe.db, "advisory_lock"):
-		# Tuple key: a colon in item_code/warehouse can't collide two distinct pairs onto one lock.
-		return frappe.db.advisory_lock(("stock_repost", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
-	return nullcontext()
-
-
-def acquire_sle_processing_gates(sl_entries):
-	"""Sorted so two vouchers touching the same pairs can't take the gates in opposite order."""
-	for pair in sorted({(d.get("item_code"), d.get("warehouse")) for d in sl_entries}):
-		sle_processing_gate(*pair)
-
-
-def sle_processing_gate(item_code, warehouse):
-	"""Serialize all stock writes for an (item, warehouse) on postgres. MariaDB gets this from the
-	gap locks its previous-SLE locking reads take (which also block, then reveal, concurrent
-	inserts); postgres locking reads never see rows another transaction is inserting, so without
-	this gate two concurrent writers compute from the same stale previous SLE and the loser's Bin
-	write is lost. Txn-scoped and re-entrant; released at commit/rollback. hasattr keeps a frappe
-	predating transaction_advisory_lock on the status quo (serialization-failure retries) instead
-	of breaking every stock submission."""
-	if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
-		frappe.db.transaction_advisory_lock(("stock-sle", item_code, warehouse), timeout=REPOST_LOCK_TIMEOUT)
-
-
 def repost_future_sle(
 	items_to_be_repost=None,
 	voucher_type=None,
@@ -478,25 +461,24 @@ def repost_future_sle(
 
 		item_code = items_to_be_repost[index].get("item_code")
 		warehouse = items_to_be_repost[index].get("warehouse")
-		with repost_gate(item_code, warehouse):
-			obj = update_entries_after(
-				{
-					"item_code": item_code,
-					"warehouse": warehouse,
-					"posting_date": items_to_be_repost[index].get("posting_date"),
-					"posting_time": items_to_be_repost[index].get("posting_time"),
-					"creation": items_to_be_repost[index].get("creation"),
-					"current_idx": index,
-					"items_to_be_repost": items_to_be_repost,
-					"repost_doc": doc,
-					"repost_affected_transaction": repost_affected_transaction,
-					"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
-					"item_wh_first_reposted": item_wh_first_reposted,
-				},
-				allow_zero_rate=allow_zero_rate,
-				allow_negative_stock=allow_negative_stock,
-				via_landed_cost_voucher=via_landed_cost_voucher,
-			)
+		obj = update_entries_after(
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": items_to_be_repost[index].get("posting_date"),
+				"posting_time": items_to_be_repost[index].get("posting_time"),
+				"creation": items_to_be_repost[index].get("creation"),
+				"current_idx": index,
+				"items_to_be_repost": items_to_be_repost,
+				"repost_doc": doc,
+				"repost_affected_transaction": repost_affected_transaction,
+				"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
+				"item_wh_first_reposted": item_wh_first_reposted,
+			},
+			allow_zero_rate=allow_zero_rate,
+			allow_negative_stock=allow_negative_stock,
+			via_landed_cost_voucher=via_landed_cost_voucher,
+		)
 
 		index += 1
 
@@ -824,8 +806,6 @@ class update_entries_after:
 		if self.args.sle_id:
 			self.args["name"] = self.args.sle_id
 
-		sle_processing_gate(self.item_code, self.args.warehouse)
-
 		self.prev_sle_dict = frappe._dict({})
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.set_precision()
@@ -946,7 +926,7 @@ class update_entries_after:
 			self.raise_exceptions()
 
 	def initialize_reposting(self):
-		self._sles = []
+		self._sles = RepostQueue()
 		self._sle_batch = {}
 		self.distinct_sles = set()
 		self.distinct_dependant_item_wh = set()
@@ -976,7 +956,7 @@ class update_entries_after:
 		}
 
 	def _get_future_entries_to_repost(self, item_wh_sles):
-		sles = []
+		sles = RepostQueue()
 
 		for sle in item_wh_sles:
 			if (sle.item_code, sle.warehouse) not in self.distinct_dependant_item_wh:
@@ -984,13 +964,10 @@ class update_entries_after:
 
 			sles.extend(self.get_future_entries_to_repost(sle))
 
-		return self.sort_sles(sles)
+		return sles
 
 	def repost_stock_ledgers(self, item_wh_sles=None):
 		self._sles = self._get_future_entries_to_repost(item_wh_sles)
-
-		if not isinstance(self._sles, deque):
-			self._sles = deque(self._sles)
 
 		i = 0
 		while self._sles:
@@ -1044,11 +1021,13 @@ class update_entries_after:
 			return sle
 
 		names = [queued_sle.name]
-		for row in islice(self._sles, 0, REPOST_SLE_BATCH_SIZE - 1):
+		for row in self._sles.peek(REPOST_SLE_BATCH_SIZE - 1):
 			if row.name not in self.distinct_sles:
 				names.append(row.name)
 
-		self._sle_batch = {row.name: row for row in get_sle_entries_by_names(names)}
+		missing = [name for name in names if name not in self._sle_batch]
+		self._sle_batch.update({row.name: row for row in get_sle_entries_by_names(missing)})
+		self._sle_batch = {name: self._sle_batch[name] for name in names if name in self._sle_batch}
 
 		return self._sle_batch.pop(queued_sle.name, None)
 
@@ -1062,8 +1041,6 @@ class update_entries_after:
 		)
 
 	def include_dependant_sle_in_reposting(self, sle):
-		repost_dependant_sle = False
-
 		# For a Manufacture/Repack entry the consumed row points at the finished good row,
 		# so the dependants picked up here are the finished goods produced by this entry.
 		# Reposting them here makes any queued repost for the same item-warehouse at a
@@ -1084,7 +1061,6 @@ class update_entries_after:
 			if item_wh_key in self.distinct_dependant_item_wh:
 				continue
 
-			repost_dependant_sle = True
 			self.distinct_dependant_item_wh.add(item_wh_key)
 			self._sles.extend(self.get_future_entries_to_repost(depend_sle))
 
@@ -1094,11 +1070,6 @@ class update_entries_after:
 					depend_sle.posting_datetime
 					or get_combine_datetime(depend_sle.posting_date, depend_sle.posting_time),
 				)
-
-		if repost_dependant_sle:
-			self._sles = deque(self.sort_sles(self._sles))
-			# the queue order changed, the prefetched window is no longer the next batch
-			self._sle_batch = {}
 
 	def repost_stock_ledger_entry(self, sle):
 		if isinstance(sle, dict):
@@ -1999,7 +1970,7 @@ class update_entries_after:
 		In case of Stock Entry, also calculate FG Item rate and total incoming/outgoing amount
 		"""
 		if sle.voucher_type == "Stock Reconciliation":
-			if flt(sle.actual_qty) <= 0 and not self.args.get("sle_id"):
+			if not self.args.get("sle_id"):
 				self.update_rate_on_stock_reconciliation(sle)
 			return
 
@@ -2116,7 +2087,7 @@ class update_entries_after:
 		# rows and the pre-reconciliation ledger balance for non-serial rows).
 		frappe.get_lazy_doc(
 			"Stock Reconciliation", sle.voucher_no, for_update=True
-		).recalculate_difference_amount_from_ledger()
+		).recalculate_difference_amount_from_ledger(sle.voucher_detail_no)
 
 	@staticmethod
 	def get_incoming_value_for_serial_nos(sle, serial_nos):
@@ -2781,7 +2752,14 @@ def get_valuation_rate(
 			+ "</li>"
 		)
 		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
-		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		if fallbacks:
+			sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		else:
+			sub_solutions += (
+				"<li>"
+				+ _("Enter the Incoming Rate (Costing) in the {0} Item table.").format(voucher_type)
+				+ "</li></ul>"
+			)
 		msg = message + solutions + sub_solutions + "</li>"
 
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
