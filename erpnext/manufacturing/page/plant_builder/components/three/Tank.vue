@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { SWATCH } from "../../lib/machines";
+import { useFacing } from "../../lib/scene";
 
 const props = defineProps({
 	x: Number,
@@ -13,19 +14,21 @@ const props = defineProps({
 	open: Boolean,
 	active: Boolean,
 	bare: Boolean,
-	segments: { type: Number, default: 18 },
+	segments: { type: Number, default: null },
 });
 
 const px = (n) => `${n}px`;
 
+const count = computed(() => props.segments ?? Math.max(6, Math.min(16, Math.round(props.r / 3.5))));
+const facing = useFacing(() => Array.from({ length: count.value }, (_, i) => (360 / count.value) * i), -0.3);
 const strips = computed(() => {
-	const n = props.segments;
+	const n = count.value;
 	const w = 2 * props.r * Math.tan(Math.PI / n) + 1;
 	return Array.from({ length: n }, (_, i) => {
 		const a = (360 / n) * i;
 		const shade = 0.3 * (1 - Math.cos(((a - 150) * Math.PI) / 180)) * 0.5;
-		return { i, a, w, shade };
-	});
+		return { i, a, w, shadow: `linear-gradient(rgba(17, 17, 17, ${shade}), rgba(17, 17, 17, ${shade}))` };
+	}).filter((s) => facing.value & (1 << s.i));
 });
 
 const fill = computed(() => SWATCH[props.liquid] ?? SWATCH.gray);
@@ -54,23 +57,23 @@ const surfaceZ = computed(() => Math.max(1, (props.level / 100) * props.h));
 		<div
 			v-for="s in strips"
 			:key="s.i"
-			class="absolute left-0 top-0"
-			:style="{ transform: `rotateZ(${s.a}deg) translateY(${r}px)`, transformStyle: 'preserve-3d' }"
+			class="absolute overflow-hidden bg-surface-gray-3"
+			:style="{
+				left: px(-s.w / 2),
+				top: px(-h),
+				width: px(s.w),
+				height: px(h),
+				transformOrigin: 'center bottom',
+				transform: `rotateZ(${s.a}deg) translateY(${r}px) rotateX(-90deg)`,
+				backgroundImage: s.shadow,
+			}"
 		>
 			<div
-				class="absolute overflow-hidden bg-surface-gray-3"
-				:style="{
-					left: px(-s.w / 2),
-					top: px(-h),
-					width: px(s.w),
-					height: px(h),
-					transformOrigin: 'center bottom',
-					transform: 'rotateX(-90deg)',
-				}"
-			>
-				<div class="absolute inset-x-0 bottom-0" :class="fill" :style="{ height: `${level}%` }" />
-				<div class="absolute inset-0 bg-surface-gray-9" :style="{ opacity: s.shade }" />
-			</div>
+				v-if="level > 0"
+				class="absolute inset-x-0 bottom-0"
+				:class="fill"
+				:style="{ height: `${level}%`, backgroundImage: s.shadow }"
+			/>
 		</div>
 		<div
 			v-if="open && level > 0"

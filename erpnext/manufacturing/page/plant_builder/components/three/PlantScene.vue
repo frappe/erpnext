@@ -24,6 +24,7 @@ const layout = computed(() => buildLayout(props.plant));
 const tags = computed(() => buildTags(props.plant, layout.value, props.view, props.live));
 
 const stage = ref(null);
+const hovered = ref(null);
 const { viewName, rot, tilt, zoom, dragging, animateTo, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
 
 const { width, height } = useElementSize(stage);
@@ -49,13 +50,34 @@ function project(t) {
 	const y2 = y1 * Math.cos(a) - t.z * Math.sin(a);
 	const z2 = y1 * Math.sin(a) + t.z * Math.cos(a);
 	const f = PERSPECTIVE / (PERSPECTIVE - z2);
-	return {
-		left: `${center.value.x + scale.value * x1 * f}px`,
-		top: `${center.value.y + scale.value * y2 * f}px`,
-	};
+	return { x: center.value.x + scale.value * x1 * f, y: center.value.y + scale.value * y2 * f };
 }
 
-const placedTags = computed(() => (width.value ? tags.value.map((t) => ({ ...t, style: project(t) })) : []));
+const tagRank = (t) => (t.active ? 0 : t.id.startsWith("s") ? 1 : t.id === "fg" ? 2 : 3);
+const tagWidth = (t) =>
+	Math.min(256, 26 + 7.5 * Math.max((t.title || "").length, String(t.sub || "").length));
+
+function clearOf(kept, t) {
+	const half = tagWidth(t) / 2 + 4;
+	const box = { left: t.at.x - half, right: t.at.x + half, top: t.at.y - 56, bottom: t.at.y + 2 };
+	if (
+		kept.some((k) => box.left < k.right && box.right > k.left && box.top < k.bottom && box.bottom > k.top)
+	)
+		return false;
+	kept.push(box);
+	return true;
+}
+
+const placedTags = computed(() => {
+	if (!width.value) return [];
+	const kept = [];
+	return tags.value
+		.map((t) => ({ ...t, at: project(t) }))
+		.filter((t) => t.active || t.id === hovered.value)
+		.sort((a, b) => tagRank(a) - tagRank(b))
+		.filter((t) => clearOf(kept, t))
+		.map((t) => ({ ...t, style: { left: `${t.at.x}px`, top: `${t.at.y}px` } }));
+});
 
 const floorStyle = computed(() => ({
 	left: `${center.value.x}px`,
@@ -64,6 +86,7 @@ const floorStyle = computed(() => ({
 	height: `${layout.value.H}px`,
 	transform: `translate(-50%, -50%) scale(${scale.value}) rotateX(${tilt.value}deg) rotateZ(${rot.value}deg)`,
 	transformStyle: "preserve-3d",
+	willChange: "transform",
 }));
 
 const grid = {
@@ -87,7 +110,10 @@ const grid = {
 			@pointerdown="onDown"
 			@wheel.prevent="onWheel"
 		>
-			<div class="absolute rounded-5 border border-outline-gray-3 bg-surface-base" :style="floorStyle">
+			<div
+				class="pointer-events-none absolute rounded-5 border border-outline-gray-3 bg-surface-base"
+				:style="floorStyle"
+			>
 				<div class="pointer-events-none absolute inset-0 rounded-5 text-ink-gray-2" :style="grid" />
 				<PlantFloor
 					:plant="plant"
@@ -96,6 +122,7 @@ const grid = {
 					:rot="rot"
 					:tilt="tilt"
 					:k="1 / scale"
+					@hover="hovered = dragging ? null : $event"
 				/>
 			</div>
 		</div>
@@ -103,15 +130,14 @@ const grid = {
 		<div
 			v-for="t in placedTags"
 			:key="t.id"
-			class="pointer-events-none absolute flex h-6 max-w-[15rem] -translate-x-1/2 -translate-y-full items-center gap-1.5 rounded-4 border bg-surface-base px-2 shadow-sm"
+			class="pointer-events-none absolute max-w-[16rem] -translate-x-1/2 -translate-y-full rounded-6 border bg-surface-base px-3 py-1.5 shadow-md"
 			:class="t.active ? 'border-outline-gray-7' : 'border-outline-gray-2'"
 			:style="t.style"
 		>
-			<span
-				class="max-w-[8rem] shrink-0 truncate whitespace-nowrap text-xs font-medium text-ink-gray-8"
-				>{{ t.title }}</span
-			>
-			<span class="min-w-0 truncate text-xs tabular-nums text-ink-gray-5">{{ t.sub }}</span>
+			<p class="truncate whitespace-nowrap text-sm font-medium text-ink-gray-8">{{ t.title }}</p>
+			<p v-if="t.sub" class="truncate whitespace-nowrap text-sm tabular-nums text-ink-gray-6">
+				{{ t.sub }}
+			</p>
 		</div>
 
 		<div class="absolute left-3 top-3">

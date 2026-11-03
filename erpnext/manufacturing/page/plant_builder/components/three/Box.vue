@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from "vue";
+import { useFacing } from "../../lib/scene";
 
 const props = defineProps({
 	x: { type: Number, default: 0 },
@@ -44,6 +45,7 @@ const TONES = {
 };
 
 const t = computed(() => TONES[props.tone] ?? TONES.steel);
+const facing = useFacing([90, -90, 180, 0]);
 const px = (n) => `${n}px`;
 </script>
 
@@ -65,6 +67,7 @@ const px = (n) => `${n}px`;
 			:style="{ transform: `translateZ(${h}px)` }"
 		/>
 		<div
+			v-if="facing & 1"
 			class="absolute left-0 top-0 border"
 			:class="[t.side, t.edge]"
 			:style="{
@@ -75,6 +78,7 @@ const px = (n) => `${n}px`;
 			}"
 		/>
 		<div
+			v-if="facing & 2"
 			class="absolute top-0 border"
 			:class="[t.side, t.edge]"
 			:style="{
@@ -86,6 +90,7 @@ const px = (n) => `${n}px`;
 			}"
 		/>
 		<div
+			v-if="facing & 4"
 			class="absolute left-0 border"
 			:class="[t.side, t.edge]"
 			:style="{
@@ -97,6 +102,7 @@ const px = (n) => `${n}px`;
 			}"
 		/>
 		<div
+			v-if="facing & 8"
 			class="absolute left-0 border"
 			:class="[t.front, t.edge]"
 			:style="{
