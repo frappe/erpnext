@@ -12,21 +12,36 @@ export function useOrbitCamera() {
 	const [rot, tilt] = VIEWS["3d"].map((angle) => ref(angle));
 	const viewName = ref("3d");
 	const zoom = ref(1);
+	const pan = ref({ x: 0, y: 0 });
 	const dragging = ref(false);
-	const orbit = { on: false, x: 0, y: 0, moved: 0 };
+	const orbit = { on: false, panning: false, x: 0, y: 0, moved: 0 };
 	provide(CAMERA, { rot, tilt });
 
 	const animateTo = (toRot, toTilt) => turnCamera(rot, tilt, toRot, toTilt);
 	const zoomBy = (step) => (zoom.value = clamp(zoom.value + step, 0.5, 3));
-	const onWheel = (e) => zoomBy(-e.deltaY * 0.0015);
+	const panBy = (dx, dy) => (pan.value = { x: pan.value.x + dx, y: pan.value.y + dy });
+
+	function onWheel(e) {
+		const sideways = e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY);
+		if (sideways) panBy(-(e.deltaX || e.deltaY), 0);
+		else zoomBy(-e.deltaY * 0.0015);
+	}
 
 	function setView(name) {
 		viewName.value = name;
 		animateTo(...VIEWS[name]);
 	}
 
+	function fit() {
+		zoom.value = 1;
+		pan.value = { x: 0, y: 0 };
+		setView("3d");
+	}
+
 	function onDown(e) {
-		if (e.button === 0) Object.assign(orbit, { on: true, x: e.clientX, y: e.clientY, moved: 0 });
+		if (e.button > 2) return;
+		const panning = e.button !== 0 || e.shiftKey;
+		Object.assign(orbit, { on: true, panning, x: e.clientX, y: e.clientY, moved: 0 });
 	}
 
 	useEventListener(window, "pointermove", (e) => {
@@ -35,8 +50,12 @@ export function useOrbitCamera() {
 		const dy = e.clientY - orbit.y;
 		orbit.moved += Math.abs(dx) + Math.abs(dy);
 		dragging.value = orbit.moved > 4;
-		rot.value += dx * 0.35;
-		tilt.value = clamp(tilt.value - dy * 0.3, 0, 80);
+		if (orbit.panning) {
+			panBy(dx, dy);
+		} else {
+			rot.value += dx * 0.35;
+			tilt.value = clamp(tilt.value - dy * 0.3, 0, 80);
+		}
 		Object.assign(orbit, { x: e.clientX, y: e.clientY });
 	});
 	useEventListener(window, "pointerup", () => {
@@ -44,7 +63,7 @@ export function useOrbitCamera() {
 		dragging.value = false;
 	});
 
-	return { viewName, rot, tilt, zoom, dragging, animateTo, setView, zoomBy, onWheel, onDown };
+	return { viewName, rot, tilt, zoom, pan, dragging, animateTo, setView, fit, zoomBy, onWheel, onDown };
 }
 
 export function useFacing(normals, margin = 0.01) {

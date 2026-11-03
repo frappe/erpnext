@@ -20,15 +20,15 @@ const FLOOR = 480;
 const CENTRE = FLOOR / 2;
 
 const stage = ref(null);
-const { viewName, rot, tilt, zoom, dragging, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
+const { viewName, rot, tilt, zoom, pan, dragging, setView, zoomBy, onWheel, onDown } = useOrbitCamera();
 
 const { width, height } = useElementSize(stage);
 useClock(stage);
 
 const scale = computed(() => clamp(Math.min(width.value, height.value) / 760, 0.4, 2) * zoom.value);
 const floorStyle = computed(() => ({
-	left: `${width.value / 2}px`,
-	top: `${height.value / 2 + 40}px`,
+	left: `${width.value / 2 + pan.value.x}px`,
+	top: `${height.value / 2 + 40 + pan.value.y}px`,
 	width: `${FLOOR}px`,
 	height: `${FLOOR}px`,
 	transform: `translate(-50%, -50%) scale(${scale.value}) rotateX(${tilt.value}deg) rotateZ(${rot.value}deg)`,
@@ -66,6 +66,7 @@ const outline = computed(() => {
 			:class="dragging ? 'cursor-grabbing' : 'cursor-grab'"
 			:style="{ perspective: '2200px', touchAction: 'none' }"
 			@pointerdown="onDown"
+			@contextmenu.prevent
 			@wheel.prevent="onWheel"
 		>
 			<div class="absolute rounded-5 border border-outline-gray-3 bg-surface-base" :style="floorStyle">
@@ -111,16 +112,24 @@ const outline = computed(() => {
 				class="flex items-center gap-0.5 rounded-4 border border-outline-gray-2 bg-surface-base p-0.5"
 			>
 				<Tooltip :text="__('Zoom out')"
-					><Button variant="ghost" icon="lucide-zoom-out" @click="zoomBy(-0.2)"
+					><Button
+						variant="ghost"
+						:aria-label="__('Zoom out')"
+						icon="lucide-zoom-out"
+						@click="zoomBy(-0.2)"
 				/></Tooltip>
 				<Tooltip :text="__('Zoom in')"
-					><Button variant="ghost" icon="lucide-zoom-in" @click="zoomBy(0.2)"
+					><Button
+						variant="ghost"
+						:aria-label="__('Zoom in')"
+						icon="lucide-zoom-in"
+						@click="zoomBy(0.2)"
 				/></Tooltip>
 			</div>
 		</div>
 
 		<p class="pointer-events-none absolute bottom-3 left-3 text-xs text-ink-gray-5">
-			{{ __("Drag to rotate · Scroll to zoom") }}
+			{{ __("Drag to rotate · Shift + drag to move · Scroll to zoom") }}
 		</p>
 	</div>
 </template>
