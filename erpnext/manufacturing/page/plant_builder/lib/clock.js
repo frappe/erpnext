@@ -1,4 +1,5 @@
 import { onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import { holdMotion } from "./motion";
 
 export const clock = ref(0);
 export const levels = reactive({});
@@ -37,7 +38,10 @@ export function useClock(elementRef) {
 	onBeforeUnmount(() => scenes.delete(elementRef.value));
 }
 
-export const holdClock = (held) => (state.held = held);
+export function holdClock(held) {
+	state.held = held;
+	holdMotion(held);
+}
 
 export function tween(key, to, ms, linear = false) {
 	const from = levels[key] ?? 0;

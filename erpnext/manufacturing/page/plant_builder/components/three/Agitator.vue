@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from "vue";
-import { clock } from "../../lib/clock";
+import { vLoop } from "../../lib/motion";
 
 const props = defineProps({
 	x: Number,
@@ -10,18 +10,29 @@ const props = defineProps({
 	size: { type: Number, default: 52 },
 });
 
-const angle = computed(() => (props.running ? (clock.value * 540) % 360 : 0));
+const spin = computed(() =>
+	props.running
+		? {
+				keyframes: [
+					{ transform: `translateZ(${props.z}px) rotateZ(0deg)` },
+					{ transform: `translateZ(${props.z}px) rotateZ(360deg)` },
+				],
+				duration: 667,
+		  }
+		: null
+);
 </script>
 
 <template>
 	<div
+		v-loop="spin"
 		class="absolute"
 		:style="{
 			left: `${x}px`,
 			top: `${y}px`,
 			width: 0,
 			height: 0,
-			transform: `translateZ(${z}px) rotateZ(${angle}deg)`,
+			transform: `translateZ(${z}px)`,
 			transformStyle: 'preserve-3d',
 		}"
 	>
