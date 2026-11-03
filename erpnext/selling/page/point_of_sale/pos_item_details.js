@@ -205,6 +205,30 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.make_auto_serial_selection_btn(item);
 
 		this.bind_custom_control_change_event();
+		this.make_batch_selection_btn(item);
+	}
+
+	make_batch_selection_btn(item) {
+		if (!item.has_batch_no || this.events.get_frm().doc.is_return) return;
+
+		$('<button type="button" class="btn btn-sm btn-secondary add-batch-btn"></button>')
+			.text(__("Add Another Batch"))
+			.appendTo(this.$form_container)
+			.on("click", () => {
+				frappe.prompt(
+					{
+						fieldname: "batch_no",
+						fieldtype: "Link",
+						label: __("Batch"),
+						options: "Batch",
+						reqd: 1,
+						get_query: () => this.batch_no_control.df.get_query(),
+					},
+					({ batch_no }) => this.events.add_batch_item(item, batch_no),
+					__("Add Another Batch"),
+					__("Add")
+				);
+			});
 	}
 
 	get_form_fields(item) {
