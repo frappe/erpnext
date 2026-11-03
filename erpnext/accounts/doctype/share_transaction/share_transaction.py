@@ -201,22 +201,7 @@ class ShareTransaction(TransactionAccounting, TransactionSettlement, Document):
 
 	def set_face_value(self):
 		if self.transaction_type == "Issue":
-			if flt(self.face_value_per_share) <= 0:
-				frappe.throw(_("Face Value Per Share must be greater than zero for an Issue."))
-
-			existing_face_value = frappe.db.get_value(
-				"Share Ledger Entry",
-				{"company": self.company, "share_class": self.share_class, "face_value_per_share": [">", 0]},
-				"face_value_per_share",
-				order_by="posting_sequence asc",
-				for_update=True,
-			)
-			if existing_face_value is not None and flt(existing_face_value) != flt(self.face_value_per_share):
-				frappe.throw(
-					_("Face Value Per Share must remain {0} for this company and share class.").format(
-						frappe.bold(existing_face_value)
-					)
-				)
+			self.validate_issue_face_value()
 			return
 
 		self.face_value_per_share = get_face_value_per_share(
@@ -227,6 +212,24 @@ class ShareTransaction(TransactionAccounting, TransactionSettlement, Document):
 			to_share_number=self.to_share_number,
 			allow_unknown=self.transaction_type != "Retirement",
 		)
+
+	def validate_issue_face_value(self):
+		if flt(self.face_value_per_share) <= 0:
+			frappe.throw(_("Face Value Per Share must be greater than zero for an Issue."))
+
+		existing_face_value = frappe.db.get_value(
+			"Share Ledger Entry",
+			{"company": self.company, "share_class": self.share_class, "face_value_per_share": [">", 0]},
+			"face_value_per_share",
+			order_by="posting_sequence asc",
+			for_update=True,
+		)
+		if existing_face_value is not None and flt(existing_face_value) != flt(self.face_value_per_share):
+			frappe.throw(
+				_("Face Value Per Share must remain {0} for this company and share class.").format(
+					frappe.bold(existing_face_value)
+				)
+			)
 
 	def validate_ownership(self):
 		if self.transaction_type == "Issue":
@@ -260,20 +263,22 @@ class ShareTransaction(TransactionAccounting, TransactionSettlement, Document):
 		)
 		for folio_field, direction in TRANSACTION_FOLIOS[self.transaction_type]:
 			share_folio = self.get(folio_field)
-			treasury_cost_change = 0
-			if share_folio in treasury_folios:
-				if self.transaction_type == "Buyback":
-					treasury_cost_change = flt(self.treasury_cost)
-				elif self.transaction_type in {"Retirement", "Reissue"}:
-					treasury_cost_change = -flt(self.treasury_cost)
-
 			create_ledger_entry(
 				transaction=self,
 				share_folio=share_folio,
 				quantity_change=direction * self.number_of_shares,
 				posting_date=self.posting_date,
-				treasury_cost_change=treasury_cost_change,
+				treasury_cost_change=self.get_treasury_cost_change(share_folio in treasury_folios),
 			)
+
+	def get_treasury_cost_change(self, is_treasury_folio):
+		if not is_treasury_folio:
+			return 0
+		if self.transaction_type == "Buyback":
+			return flt(self.treasury_cost)
+		if self.transaction_type in {"Retirement", "Reissue"}:
+			return -flt(self.treasury_cost)
+		return 0
 
 	def create_reversal_entries(self):
 		original_entries = self.get_original_ledger_entries()

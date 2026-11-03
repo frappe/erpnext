@@ -26,40 +26,15 @@ def run_backfill(fail_on_unresolved=True):
 
 	transfers = get_submitted_transfers()
 	if not transfers:
-		unstaged_balances = (
-			frappe.db.table_exists("Share Balance", cached=False)
-			and not frappe.db.table_exists("Shareholding Legacy Balance Staging", cached=False)
-			and frappe.db.exists("Share Balance", {"parenttype": "Shareholder"})
-		)
-		staged_balances = (
-			frappe.db.table_exists("Shareholding Legacy Staging", cached=False)
-			and frappe.db.table_exists("Shareholding Legacy Balance Staging", cached=False)
-			and frappe.db.sql(
-				"""
-			select balance.name
-			from `tabShareholding Legacy Balance Staging` balance
-			inner join `tabShareholding Legacy Staging` holder on holder.name = balance.parent
-			where holder.is_company = 0 and balance.is_company = 0
-			limit 1
-			"""
-			)
-		)
-		if unstaged_balances or staged_balances:
+		if has_legacy_balances():
 			message = "Legacy balances exist without submitted Share Transfers; approve an opening balance."
 			if fail_on_unresolved:
 				frappe.throw(_(message))
-			frappe.log_error(message=message, title="Shareholding Legacy Backfill Pending")
-			print(message)
+			report_pending_backfill(message)
 		return
 
 	try:
-		for doctype in ("Share Class", "Share Folio", "Share Ledger Entry"):
-			if not frappe.db.table_exists(doctype, cached=False):
-				frappe.throw(_("Cannot migrate Share Transfers before {0} is available.").format(doctype))
-		for table in ("Shareholding Legacy Staging", "Shareholding Legacy Balance Staging"):
-			if not frappe.db.table_exists(table, cached=False):
-				frappe.throw(_("Cannot migrate Share Transfers without the {0} snapshot.").format(table))
-
+		validate_backfill_tables()
 		classes = get_class_mappings()
 		folios = get_folios()
 		validate_no_new_postings(transfers)
@@ -68,14 +43,48 @@ def run_backfill(fail_on_unresolved=True):
 	except frappe.ValidationError as exc:
 		if fail_on_unresolved:
 			raise
-		message = (
+		report_pending_backfill(
 			f"Legacy Share Transfer backfill is pending: {exc}. "
 			"New Share Transactions are blocked for affected companies until this is resolved."
 		)
-		frappe.log_error(message=message, title="Shareholding Legacy Backfill Pending")
-		print(message)
 		return
 	post_legacy_movements(prepared)
+
+
+def has_legacy_balances():
+	unstaged_balances = (
+		frappe.db.table_exists("Share Balance", cached=False)
+		and not frappe.db.table_exists("Shareholding Legacy Balance Staging", cached=False)
+		and frappe.db.exists("Share Balance", {"parenttype": "Shareholder"})
+	)
+	staged_balances = (
+		frappe.db.table_exists("Shareholding Legacy Staging", cached=False)
+		and frappe.db.table_exists("Shareholding Legacy Balance Staging", cached=False)
+		and frappe.db.sql(
+			"""
+		select balance.name
+		from `tabShareholding Legacy Balance Staging` balance
+		inner join `tabShareholding Legacy Staging` holder on holder.name = balance.parent
+		where holder.is_company = 0 and balance.is_company = 0
+		limit 1
+		"""
+		)
+	)
+	return bool(unstaged_balances or staged_balances)
+
+
+def validate_backfill_tables():
+	for doctype in ("Share Class", "Share Folio", "Share Ledger Entry"):
+		if not frappe.db.table_exists(doctype, cached=False):
+			frappe.throw(_("Cannot migrate Share Transfers before {0} is available.").format(doctype))
+	for table in ("Shareholding Legacy Staging", "Shareholding Legacy Balance Staging"):
+		if not frappe.db.table_exists(table, cached=False):
+			frappe.throw(_("Cannot migrate Share Transfers without the {0} snapshot.").format(table))
+
+
+def report_pending_backfill(message):
+	frappe.log_error(message=message, title="Shareholding Legacy Backfill Pending")
+	print(message)
 
 
 def get_submitted_transfers():
@@ -139,33 +148,41 @@ def prepare_transfers(transfers, classes, folios):
 					transfer.share_type, transfer.company, transfer.name
 				)
 			)
-		start, end = cint(transfer.from_no), cint(transfer.to_no)
-		if start <= 0 or end < start or cint(transfer.no_of_shares) != end - start + 1:
-			frappe.throw(_("Share Transfer {0} has an invalid share-number range.").format(transfer.name))
-		if not transfer.date:
-			frappe.throw(_("Share Transfer {0} has no posting date.").format(transfer.name))
-
-		if transfer.transfer_type == "Issue":
-			source, destination = None, transfer.to_shareholder
-		elif transfer.transfer_type == "Transfer":
-			source, destination = transfer.from_shareholder, transfer.to_shareholder
-		elif transfer.transfer_type == "Purchase":
-			source, destination = transfer.from_shareholder, None
-		else:
-			frappe.throw(_("Share Transfer {0} has an unsupported transaction type.").format(transfer.name))
-		if source == destination or (source and (transfer.company, source) not in folios):
-			frappe.throw(_("Share Transfer {0} has an invalid source folio.").format(transfer.name))
-		if destination and (transfer.company, destination) not in folios:
-			frappe.throw(_("Share Transfer {0} has no destination folio.").format(transfer.name))
-		if not destination and not source:
-			frappe.throw(_("Share Transfer {0} has no shareholder.").format(transfer.name))
-
+		start, end = validate_transfer_range(transfer)
+		source, destination = get_transfer_parties(transfer, folios)
 		try:
 			ownership[key] = move_range(ownership[key], start, end, source, destination)
 		except ValueError as exc:
 			frappe.throw(_("Share Transfer {0} cannot be replayed: {1}").format(transfer.name, str(exc)))
 		prepared.append((transfer, share_class, source, destination, folios))
 	return prepared, ownership
+
+
+def validate_transfer_range(transfer):
+	start, end = cint(transfer.from_no), cint(transfer.to_no)
+	if start <= 0 or end < start or cint(transfer.no_of_shares) != end - start + 1:
+		frappe.throw(_("Share Transfer {0} has an invalid share-number range.").format(transfer.name))
+	if not transfer.date:
+		frappe.throw(_("Share Transfer {0} has no posting date.").format(transfer.name))
+	return start, end
+
+
+def get_transfer_parties(transfer, folios):
+	if transfer.transfer_type == "Issue":
+		source, destination = None, transfer.to_shareholder
+	elif transfer.transfer_type == "Transfer":
+		source, destination = transfer.from_shareholder, transfer.to_shareholder
+	elif transfer.transfer_type == "Purchase":
+		source, destination = transfer.from_shareholder, None
+	else:
+		frappe.throw(_("Share Transfer {0} has an unsupported transaction type.").format(transfer.name))
+	if source == destination or (source and (transfer.company, source) not in folios):
+		frappe.throw(_("Share Transfer {0} has an invalid source folio.").format(transfer.name))
+	if destination and (transfer.company, destination) not in folios:
+		frappe.throw(_("Share Transfer {0} has no destination folio.").format(transfer.name))
+	if not destination and not source:
+		frappe.throw(_("Share Transfer {0} has no shareholder.").format(transfer.name))
+	return source, destination
 
 
 def move_range(ranges, start, end, source, destination):

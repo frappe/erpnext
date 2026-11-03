@@ -195,13 +195,10 @@ function make_payment_entry(frm) {
 }
 
 function get_mode_of_payment_account(frm, mode_of_payment) {
-	return frappe.xcall(
-		"erpnext.accounts.shareholding.share_settlement.get_mode_of_payment_account",
-		{
-			mode_of_payment,
-			company: frm.doc.company,
-		}
-	);
+	return frappe.xcall("erpnext.accounts.shareholding.share_settlement.get_mode_of_payment_account", {
+		mode_of_payment,
+		company: frm.doc.company,
+	});
 }
 
 function get_preview_html(frm, rows) {

@@ -96,7 +96,10 @@ class TestShareholdingRegressions(ShareholdingTestCase):
 			reissue.cancel()
 
 		sequences = frappe.get_all(
-			"Share Ledger Entry", filters={"company": self.company}, pluck="posting_sequence", order_by="creation"
+			"Share Ledger Entry",
+			filters={"company": self.company},
+			pluck="posting_sequence",
+			order_by="creation",
 		)
 		self.assertEqual(sequences, sorted(set(sequences)))
 		retirement = self.create_transaction(

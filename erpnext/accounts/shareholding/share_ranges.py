@@ -24,29 +24,10 @@ def range_has_coverage(
 	entries = get_range_entries(
 		company, share_class, from_share_number, to_share_number, share_folio, exclude_transaction
 	)
-	if expected_coverage == 0:
-		reversed_entries = {entry.reversal_of for entry in entries if entry.is_reversal}
-		if any(
-			entry.transaction_type == "Issue"
-			and not entry.is_reversal
-			and entry.quantity_change > 0
-			and entry.name not in reversed_entries
-			for entry in entries
-		):
-			return False
-
-	start = cint(from_share_number)
-	end = cint(to_share_number)
-	events = defaultdict(int)
-	events[start] += 0
-	events[end + 1] += 0
-	for entry in entries:
-		entry_start = max(start, cint(entry.from_share_number))
-		entry_end = min(end, cint(entry.to_share_number))
-		direction = 1 if cint(entry.quantity_change) > 0 else -1
-		events[entry_start] += direction
-		events[entry_end + 1] -= direction
-
+	# Retired numbers have zero coverage but must never be issued again.
+	if expected_coverage == 0 and has_active_issue(entries):
+		return False
+	events = get_coverage_events(entries, cint(from_share_number), cint(to_share_number))
 	coverage = 0
 	points = sorted(events)
 	for index, point in enumerate(points[:-1]):
@@ -54,6 +35,29 @@ def range_has_coverage(
 		if points[index + 1] > point and coverage != expected_coverage:
 			return False
 	return True
+
+
+def has_active_issue(entries):
+	reversed_entries = {entry.reversal_of for entry in entries if entry.is_reversal}
+	return any(
+		entry.transaction_type == "Issue"
+		and not entry.is_reversal
+		and entry.quantity_change > 0
+		and entry.name not in reversed_entries
+		for entry in entries
+	)
+
+
+def get_coverage_events(entries, start, end):
+	"""Return the change in coverage at each share-number boundary."""
+	events = defaultdict(int)
+	events[start] += 0
+	events[end + 1] += 0
+	for entry in entries:
+		direction = 1 if cint(entry.quantity_change) > 0 else -1
+		events[max(start, cint(entry.from_share_number))] += direction
+		events[min(end, cint(entry.to_share_number)) + 1] -= direction
+	return events
 
 
 def get_face_value_per_share(
@@ -66,20 +70,7 @@ def get_face_value_per_share(
 	of each share number contributes to its face value.
 	"""
 	entries = get_range_entries(company, share_class, from_share_number, to_share_number, share_folio)
-
-	start = cint(from_share_number)
-	end = cint(to_share_number)
-	events = defaultdict(lambda: defaultdict(int))
-	events[start]
-	events[end + 1]
-	for entry in entries:
-		entry_start = max(start, cint(entry.from_share_number))
-		entry_end = min(end, cint(entry.to_share_number))
-		face_value = flt(entry.face_value_per_share)
-		direction = 1 if cint(entry.quantity_change) > 0 else -1
-		events[entry_start][face_value] += direction
-		events[entry_end + 1][face_value] -= direction
-
+	events = get_face_value_events(entries, cint(from_share_number), cint(to_share_number))
 	active = defaultdict(int)
 	selected_face_value = None
 	points = sorted(events)
@@ -88,22 +79,39 @@ def get_face_value_per_share(
 			active[face_value] += change
 		if points[index + 1] <= point:
 			continue
-		current = [value for value, quantity in active.items() if quantity]
-		if (
-			len(current) != 1
-			or active[current[0]] != 1
-			or current[0] < 0
-			or (current[0] == 0 and not allow_unknown)
-		):
-			frappe.throw(_("Could not determine the face value for the selected share range."))
-		if selected_face_value is None:
-			selected_face_value = current[0]
-		elif selected_face_value != current[0]:
+		face_value = get_single_face_value(active, allow_unknown)
+		if selected_face_value is not None and selected_face_value != face_value:
 			frappe.throw(
 				_("The selected range contains shares with different face values. Use separate transactions.")
 			)
+		selected_face_value = face_value
 
 	return selected_face_value
+
+
+def get_face_value_events(entries, start, end):
+	"""Return the change in holding per face value at each share-number boundary."""
+	events = defaultdict(lambda: defaultdict(int))
+	events[start]
+	events[end + 1]
+	for entry in entries:
+		face_value = flt(entry.face_value_per_share)
+		direction = 1 if cint(entry.quantity_change) > 0 else -1
+		events[max(start, cint(entry.from_share_number))][face_value] += direction
+		events[min(end, cint(entry.to_share_number)) + 1][face_value] -= direction
+	return events
+
+
+def get_single_face_value(active, allow_unknown):
+	current = [value for value, quantity in active.items() if quantity]
+	if (
+		len(current) != 1
+		or active[current[0]] != 1
+		or current[0] < 0
+		or (current[0] == 0 and not allow_unknown)
+	):
+		frappe.throw(_("Could not determine the face value for the selected share range."))
+	return current[0]
 
 
 def money(value, currency):

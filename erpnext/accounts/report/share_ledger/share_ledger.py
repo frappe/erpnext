@@ -93,6 +93,4 @@ def get_data(filters):
 	query = apply_report_filters(query, entry, folio, filters)
 	if not cint(filters.get("include_reversals", 1)):
 		query = query.where(entry.is_reversal == 0)
-	return query.orderby(folio.shareholder, entry.posting_date, entry.posting_sequence).run(
-		as_dict=True
-	)
+	return query.orderby(folio.shareholder, entry.posting_date, entry.posting_sequence).run(as_dict=True)
