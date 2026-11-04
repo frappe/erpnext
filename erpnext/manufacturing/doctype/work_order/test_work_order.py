@@ -4287,6 +4287,47 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertCountEqual(used_serials[rm_item], rm_serials)
 		self.assertCountEqual(used_serials[fg_item], fg_serials)
 
+	def test_partial_disassembly_of_auto_batched_finished_good(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		wip_wh = "_Test Warehouse - _TC"
+		rm_item = make_item("Test RM for Partial Batched Disassembly", {"is_stock_item": 1}).name
+		fg_item = make_item(
+			"Test Batch FG for Partial Disassembly",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBPD-FG-.###",
+			},
+		).name
+		bom = make_bom(item=fg_item, quantity=1, raw_materials=[rm_item], rm_qty=2)
+		wo = make_wo_order_test_record(
+			production_item=fg_item, qty=3, bom_no=bom.name, skip_transfer=1, source_warehouse=wip_wh
+		)
+		make_stock_entry_test_record(
+			item_code=rm_item, purpose="Material Receipt", target=wip_wh, qty=6, basic_rate=100
+		)
+
+		se_manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 3))
+		se_manufacture.insert()
+		se_manufacture.submit()
+		se_manufacture.reload()
+		fg_row = next(row for row in se_manufacture.items if row.item_code == fg_item)
+		fg_batch = get_batch_from_bundle(fg_row.serial_and_batch_bundle)
+
+		disassembly = frappe.get_doc(
+			make_stock_entry(wo.name, "Disassemble", 2, source_stock_entry=se_manufacture.name)
+		)
+		disassembly.save()
+		disassembly.submit()
+		disassembly.reload()
+
+		fg_row = next(row for row in disassembly.items if row.item_code == fg_item)
+		self.assertEqual(get_batch_from_bundle(fg_row.serial_and_batch_bundle), fg_batch)
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
