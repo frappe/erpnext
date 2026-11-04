@@ -9,6 +9,7 @@ from frappe.utils import add_days, add_months, today
 from erpnext import get_company_currency
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.get_item_details import get_blanket_order_details
 
 from .blanket_order import make_order
 
@@ -208,6 +209,38 @@ class TestBlanketOrder(FrappeTestCase):
 
 		untyped = new_blanket_order(blanket_order_type=None)
 		self.assertRaises(frappe.MandatoryError, untyped.insert)
+
+	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_blanket_order_lookup_skips_fully_ordered_order(self):
+		item = make_item("_Test Blanket Order Lookup Item", {"is_stock_item": 1}).name
+		used_up = make_blanket_order(blanket_order_type="Purchasing", quantity=10, rate=100, item_code=item)
+		po = make_purchase_order_against(used_up, qty=10)
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.submit()
+		open_order = make_blanket_order(
+			blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item
+		)
+
+		details = get_purchase_blanket_order_details(open_order, item)
+		self.assertEqual(details.blanket_order, open_order.name)
+		self.assertEqual(details.blanket_order_rate, 90)
+
+	@change_settings("Buying Settings", {"blanket_order_allowance": 10})
+	def test_blanket_order_lookup_keeps_order_within_allowance(self):
+		item = make_item("_Test Blanket Order Allowance Lookup Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item)
+		po = make_purchase_order_against(bo, qty=100)
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.submit()
+
+		self.assertEqual(get_purchase_blanket_order_details(bo, item).blanket_order, bo.name)
+
+	def test_blanket_order_lookup_skips_order_not_started(self):
+		item = make_item("_Test Blanket Order Not Started Lookup Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item)
+		bo.db_set("from_date", add_days(today(), 30))
+
+		self.assertFalse(get_purchase_blanket_order_details(bo, item))
 
 	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
@@ -410,3 +443,15 @@ def new_blanket_order(blanket_order_type):
 	bo.to_date = add_months(bo.from_date, months=12)
 	bo.append("items", {"item_code": "_Test Item", "qty": 10, "rate": 100})
 	return bo
+
+
+def get_purchase_blanket_order_details(blanket_order, item_code):
+	return get_blanket_order_details(
+		{
+			"company": "_Test Company",
+			"supplier": blanket_order.supplier,
+			"doctype": "Purchase Order",
+			"item_code": item_code,
+			"transaction_date": today(),
+		}
+	)
