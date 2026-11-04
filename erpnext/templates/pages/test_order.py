@@ -14,7 +14,7 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 MAKE_PAYMENT_REQUEST = "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request"
 MAKE_PORTAL_PURCHASE_INVOICE = (
-	"erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice_from_portal"
+	"erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal"
 )
 
 
