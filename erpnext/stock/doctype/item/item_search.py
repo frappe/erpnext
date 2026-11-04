@@ -93,29 +93,40 @@ class ItemSearch(SQLiteSearch):
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
 
 	def index_exists(self) -> bool:
-		"""A table missing a searched column cannot answer for it, so it reports itself absent.
+		"""A table missing a searched column, or built for another SQLite, cannot answer, so it
+		reports itself absent.
 
 		The searched fields come from the Item meta, so a site that adds one leaves an older table
-		short. Callers fall back and the builder replaces it. One connection: this runs on every save.
+		short. A SQLite upgrade or downgrade changes whether the tokenizer or Python folds accents.
+		Callers fall back and the builder replaces it. One connection: this runs on every save.
 		"""
 		if not os.path.exists(self.db_path):
 			return False
 
-		return set(self.schema["text_fields"]) <= self.get_indexed_columns()
+		columns, definition = self.get_index_table()
+		return (
+			set(self.schema["text_fields"]) <= columns
+			and ("remove_diacritics" in definition) == has_diacritics_option()
+		)
 
-	def get_indexed_columns(self) -> set[str]:
-		"""Columns the built table carries, empty when there is no table."""
+	def get_index_table(self) -> tuple[set[str], str]:
+		"""Columns and CREATE statement of the built table, empty when there is no table."""
 		try:
 			connection = self._get_connection(read_only=True)
 		except SQLiteSearchIndexMissingError:
-			return set()
+			return set(), ""
 
 		try:
-			return {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+			definition = connection.execute(
+				"SELECT sql FROM sqlite_master WHERE name = 'search_fts'"
+			).fetchone()
+			columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
 		except sqlite3.Error:
-			return set()
+			return set(), ""
 		finally:
 			connection.close()
+
+		return columns, definition["sql"] if definition else ""
 
 	def get_documents_paginated(self, doctype, *args, **kwargs):
 		"""Preload the batch's barcodes: reading them per document would be one query each."""
