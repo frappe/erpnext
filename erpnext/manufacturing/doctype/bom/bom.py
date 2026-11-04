@@ -549,22 +549,26 @@ class BOM(WebsiteGenerator):
 
 	def update_parent_cost(self):
 		if self.total_cost:
-			cost = self.total_cost / self.quantity
+			cost = self.total_cost / get_good_qty(self)
 
-			frappe.db.sql(
-				"""update `tabBOM Item` set rate=%s, amount=stock_qty*%s
-				where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
-				(cost, cost, self.name),
-			)
+			bom_item = frappe.qb.DocType("BOM Item")
+			(
+				frappe.qb.update(bom_item)
+				.set(bom_item.rate, cost)
+				.set(bom_item.amount, bom_item.stock_qty * cost)
+				.where(
+					(bom_item.bom_no == self.name) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM")
+				)
+			).run()
 
 	def get_bom_unitcost(self, bom_no):
-		bom = frappe.db.sql(
-			"""select name, base_total_cost/quantity as unit_cost from `tabBOM`
-			where is_active = 1 and name = %s""",
-			bom_no,
-			as_dict=1,
-		)
-		return bom and bom[0]["unit_cost"] or 0
+		bom_table = frappe.qb.DocType("BOM")
+		bom = (
+			frappe.qb.from_(bom_table)
+			.select(bom_table.base_total_cost, bom_table.quantity, bom_table.process_loss_qty)
+			.where((bom_table.is_active == 1) & (bom_table.name == bom_no))
+		).run(as_dict=1)
+		return flt(bom[0].base_total_cost) / get_good_qty(bom[0]) if bom else 0
 
 	def manage_default_bom(self):
 		"""Uncheck others if current one is selected as default or
@@ -1792,6 +1796,11 @@ def _get_unit_operating_cost(bom_no, unit_costs):
 
 	unit_costs[bom_no] = cost
 	return cost
+
+
+def get_good_qty(bom):
+	good_qty = flt(bom.quantity) - flt(bom.process_loss_qty)
+	return good_qty if good_qty > 0 else flt(bom.quantity) or 1
 
 
 def get_scrap_items_from_sub_assemblies(bom_no, company, qty, scrap_items=None):
