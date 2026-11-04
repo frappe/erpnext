@@ -88,6 +88,7 @@ class SubcontractingController(StockController):
 		if self.doctype == "Subcontracting Receipt":
 			rejected_return_rows = self.get_rejected_return_rows()
 			return_rates = self.get_consumed_rates_for_return()
+			original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
 			for row in self.supplied_items:
 				kwargs = frappe._dict(
 					{
@@ -108,15 +109,19 @@ class SubcontractingController(StockController):
 				)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 				rate = 0.0 if row.reference_name in rejected_return_rows else _get_incoming_rate(kwargs)
 =======
+=======
+				return_rate = return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
+>>>>>>> 967a69f (fix: keep the receipt rate for split return rows)
 				if (
 					row.reference_name in rejected_return_rows
 					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
 				):
 					rate = 0.0
-				elif (row.reference_name, row.rm_item_code) in return_rates:
-					rate = return_rates[(row.reference_name, row.rm_item_code)]
+				elif return_rate is not None:
+					rate = return_rate
 				else:
 					rate = _get_incoming_rate(kwargs)
 >>>>>>> f77285c (fix(subcontracting): value returned raw materials at the rate consumed in the original receipt)
@@ -130,7 +135,7 @@ class SubcontractingController(StockController):
 			self.calculate_items_qty_and_amount()
 
 	def get_consumed_rates_for_return(self):
-		"""Rate each raw material was consumed at in the returned receipt, keyed by (return item row, raw material)."""
+		"""Rate each raw material was consumed at in the returned receipt, keyed by (receipt item row, raw material)."""
 		if not (self.is_return and self.return_against):
 			return {}
 
@@ -148,8 +153,7 @@ class SubcontractingController(StockController):
 			.groupby(supplied_item.reference_name, supplied_item.rm_item_code)
 		).run(as_dict=True)
 
-		return_rows = {row.subcontracting_receipt_item: row.name for row in self.items}
-		return {(return_rows.get(row.reference_name), row.rm_item_code): flt(row.rate) for row in rows}
+		return {(row.reference_name, row.rm_item_code): flt(row.rate) for row in rows}
 
 	def get_rejected_return_rows(self):
 		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
