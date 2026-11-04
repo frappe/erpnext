@@ -352,6 +352,7 @@ class WorkOrder(Document):
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
 
+		self.set_required_item_amounts()
 		WorkOrderStockReservation(self).enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
@@ -1216,6 +1217,9 @@ class WorkOrder(Document):
 
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
 		return RequiredItemsService(self).set_required_items(reset_only_qty, reset_source_warehouse)
+
+	def set_required_item_amounts(self):
+		return RequiredItemsService(self).set_required_item_amounts()
 
 	def update_transferred_qty_for_required_items(self):
 		return RequiredItemsService(self).update_transferred_qty_for_required_items()

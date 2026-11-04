@@ -162,6 +162,10 @@ class RequiredItemsService:
 			"operation_row_id": item.operation_row_id,
 		}
 
+	def set_required_item_amounts(self):
+		for d in self.doc.get("required_items"):
+			d.amount = flt(flt(d.rate) * flt(d.required_qty), d.precision("amount"))
+
 	def update_transferred_qty_for_required_items(self):
 		if self.doc.skip_transfer:
 			return
