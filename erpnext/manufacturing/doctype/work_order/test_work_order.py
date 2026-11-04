@@ -4883,6 +4883,35 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(entry.fg_completed_qty, 5)
 		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "produced_qty"), 5)
 
+	def test_closed_work_order_keeps_produced_qty_on_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+		so = make_sales_order(item_code=fg_item, qty=10, rate=100)
+		wo = make_review_work_order(
+			fg_item, bom.name, 10, skip_transfer=1, sales_order=so.name, sales_order_item=so.items[0].name
+		)
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
+		manufacture.submit()
+		close_work_order(wo.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 4)
+		self.assertEqual(get_work_order_items(so.name)[0]["pending_qty"], 6)
+		self.assertRaises(
+			OverProductionError,
+			make_review_work_order,
+			fg_item,
+			bom.name,
+			10,
+			sales_order=so.name,
+			sales_order_item=so.items[0].name,
+		)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
@@ -5307,6 +5336,76 @@ def make_wo_order_test_record(**args):
 	return wo_order
 
 
+def make_review_bom(fg_item, rows, quantity=1, operations=None, **kwargs):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": fg_item,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": quantity,
+			"rm_cost_as_per": "Valuation Rate",
+			"with_operations": 1 if operations else 0,
+			"items": rows,
+			"operations": operations or [],
+			**kwargs,
+		}
+	)
+	bom.insert()
+	bom.submit()
+	return bom
+
+
+def make_review_operation(hour_rate=600):
+	workstation = make_workstation(
+		workstation=f"_Test WO Review Workstation {frappe.generate_hash(length=6)}", hour_rate=hour_rate
+	)
+	operation = make_operation(
+		operation=f"_Test WO Review Operation {frappe.generate_hash(length=6)}",
+		workstation=workstation.name,
+	)
+	return operation.name, workstation.name
+
+
+def make_review_work_order(fg_item, bom_no, qty, submit=True, **kwargs):
+	wo = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"production_item": fg_item,
+			"bom_no": bom_no,
+			"qty": qty,
+			"company": "_Test Company",
+			"source_warehouse": "_Test Warehouse - _TC",
+			"wip_warehouse": "_Test Warehouse 1 - _TC",
+			"fg_warehouse": "_Test Warehouse 2 - _TC",
+			"planned_start_date": now(),
+			**kwargs,
+		}
+	)
+	wo.get_items_and_operations_from_bom()
+	wo.insert()
+	if submit:
+		wo.submit()
+	return wo
+
+
+def complete_review_job_card(work_order, qty, hours_ago=2):
+	job_card = frappe.get_doc("Job Card", {"work_order": work_order})
+	start = add_to_date(now(), hours=-hours_ago)
+	job_card.for_quantity = qty
+	job_card.append(
+		"time_logs",
+		{
+			"from_time": start,
+			"to_time": add_to_date(start, minutes=30),
+			"completed_qty": qty,
+			"time_in_mins": 30,
+		},
+	)
+	job_card.submit()
+	return job_card
+
+
 test_records = frappe.get_test_records("Work Order")
 
 
@@ -5344,45 +5443,3 @@ def make_transfer_based_work_order(components, process_loss_percentage=0):
 	)
 	frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
 	return work_order, raw_materials
-
-
-def make_review_bom(fg_item, rows, quantity=1, operations=None, **kwargs):
-	bom = frappe.get_doc(
-		{
-			"doctype": "BOM",
-			"item": fg_item,
-			"company": "_Test Company",
-			"currency": "INR",
-			"quantity": quantity,
-			"rm_cost_as_per": "Valuation Rate",
-			"with_operations": 1 if operations else 0,
-			"items": rows,
-			"operations": operations or [],
-			**kwargs,
-		}
-	)
-	bom.insert()
-	bom.submit()
-	return bom
-
-
-def make_review_work_order(fg_item, bom_no, qty, submit=True, **kwargs):
-	wo = frappe.get_doc(
-		{
-			"doctype": "Work Order",
-			"production_item": fg_item,
-			"bom_no": bom_no,
-			"qty": qty,
-			"company": "_Test Company",
-			"source_warehouse": "_Test Warehouse - _TC",
-			"wip_warehouse": "_Test Warehouse 1 - _TC",
-			"fg_warehouse": "_Test Warehouse 2 - _TC",
-			"planned_start_date": now(),
-			**kwargs,
-		}
-	)
-	wo.get_items_and_operations_from_bom()
-	wo.insert()
-	if submit:
-		wo.submit()
-	return wo

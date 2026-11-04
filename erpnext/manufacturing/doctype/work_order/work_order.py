@@ -391,11 +391,17 @@ class WorkOrder(Document):
 
 	def validate_work_order_against_so(self):
 		# already ordered qty
-		ordered_qty_against_so = frappe.db.sql(
-			"""select sum(qty - process_loss_qty) from `tabWork Order`
-			where production_item = %s and sales_order = %s and docstatus < 2 and status != 'Closed' and name != %s""",
-			(self.production_item, self.sales_order, self.name),
-		)[0][0]
+		wo = frappe.qb.DocType("Work Order")
+		ordered_qty_against_so = (
+			frappe.qb.from_(wo)
+			.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+			.where(
+				(wo.production_item == self.production_item)
+				& (wo.sales_order == self.sales_order)
+				& (wo.docstatus < 2)
+				& (wo.name != self.name)
+			)
+		).run()[0][0]
 
 		total_qty = flt(ordered_qty_against_so) + flt(self.qty)
 
@@ -959,15 +965,7 @@ class WorkOrder(Document):
 				# product bundle is 0 (product bundle allows 0 qty for items)
 				total_bundle_qty = 1
 
-		cond = "product_bundle_item = %s" if self.product_bundle_item else "production_item = %s"
-
-		qty = frappe.db.sql(
-			f""" select sum(qty) from
-			`tabWork Order` where sales_order = %s and docstatus = 1 and status <> 'Closed' and {cond}
-			""",
-			(self.sales_order, (self.product_bundle_item or self.production_item)),
-			as_list=1,
-		)
+		qty = self.get_work_order_qty_against_sales_order()
 
 		work_order_qty = qty[0][0] if qty and qty[0][0] else 0
 		frappe.db.set_value(
@@ -976,6 +974,20 @@ class WorkOrder(Document):
 			"work_order_qty",
 			flt(work_order_qty / total_bundle_qty, 2),
 		)
+
+	def get_work_order_qty_against_sales_order(self):
+		wo = frappe.qb.DocType("Work Order")
+		query = (
+			frappe.qb.from_(wo)
+			.select(Sum(qty_against_sales_order(wo, wo.qty)))
+			.where((wo.sales_order == self.sales_order) & (wo.docstatus == 1))
+		)
+		if self.product_bundle_item:
+			query = query.where(wo.product_bundle_item == self.product_bundle_item)
+		else:
+			query = query.where(wo.production_item == self.production_item)
+
+		return query.run(as_list=1)
 
 	def update_work_order_qty_in_combined_so(self):
 		total_bundle_qty = 1
@@ -1732,6 +1744,10 @@ def set_work_order_ops(name: str):
 	po = frappe.get_doc("Work Order", name)
 	po.set_work_order_operations()
 	po.save()
+
+
+def qty_against_sales_order(wo, open_qty):
+	return Case().when(wo.status == "Closed", wo.produced_qty).else_(open_qty)
 
 
 @frappe.whitelist()
