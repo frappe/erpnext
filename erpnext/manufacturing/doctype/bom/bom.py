@@ -1018,7 +1018,29 @@ class BOM(WebsiteGenerator):
 			if save:
 				ch.db_insert()
 
+	def validate_child_boms_on_reactivation(self):
+		if not self.is_active or not self.has_value_changed("is_active"):
+			return
+
+		child_boms = {row.bom_no for row in self.items if row.bom_no}
+		if not child_boms:
+			return
+
+		unusable = frappe.get_all(
+			"BOM",
+			filters={"name": ("in", list(child_boms))},
+			or_filters={"is_active": 0, "docstatus": ("!=", 1)},
+			pluck="name",
+		)
+		if unusable:
+			frappe.throw(
+				_("Cannot activate BOM {0} because sub-assembly BOMs {1} are not active").format(
+					frappe.bold(self.name), ", ".join(frappe.bold(bom) for bom in unusable)
+				)
+			)
+
 	def validate_bom_links(self):
+		self.validate_child_boms_on_reactivation()
 		if not self.is_active:
 			act_pbom = frappe.db.sql(
 				"""select distinct bom_item.parent from `tabBOM Item` bom_item
