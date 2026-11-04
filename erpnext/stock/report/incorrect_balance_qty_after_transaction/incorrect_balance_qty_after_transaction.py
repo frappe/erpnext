@@ -28,8 +28,9 @@ def get_data(filters):
 def validate_data(itewise_balance_qty):
 	res = []
 	precision = cint(frappe.db.get_default("float_precision")) or 2
+	reconciled_qty = get_reconciled_qty(itewise_balance_qty)
 	for _key, data in itewise_balance_qty.items():
-		row = get_incorrect_data(data, precision)
+		row = get_incorrect_data(data, precision, reconciled_qty)
 		if row:
 			res.append(row)
 			res.append({})
@@ -37,12 +38,34 @@ def validate_data(itewise_balance_qty):
 	return res
 
 
-def get_incorrect_data(data, precision):
+def get_reconciled_qty(itewise_balance_qty):
+	names = [
+		row.voucher_detail_no
+		for data in itewise_balance_qty.values()
+		for row in data
+		if row.voucher_type == "Stock Reconciliation" and row.voucher_detail_no
+	]
+	if not names:
+		return {}
+
+	return dict(
+		frappe.get_all(
+			"Stock Reconciliation Item",
+			filters={"name": ("in", names)},
+			fields=["name", "qty"],
+			as_list=True,
+		)
+	)
+
+
+def get_incorrect_data(data, precision, reconciled_qty):
 	balance_qty = 0.0
 	for row in data:
 		balance_qty += row.actual_qty
 		if row.voucher_type == "Stock Reconciliation" and not row.batch_no:
 			balance_qty = flt(row.qty_after_transaction)
+			if not row.actual_qty and row.voucher_detail_no in reconciled_qty:
+				balance_qty = flt(reconciled_qty[row.voucher_detail_no])
 
 		row.expected_balance_qty = balance_qty
 		difference = abs(flt(flt(row.expected_balance_qty) - flt(row.qty_after_transaction), precision))
@@ -65,6 +88,7 @@ def get_stock_ledger_entries(report_filters):
 		"warehouse",
 		"qty_after_transaction",
 		"batch_no",
+		"voucher_detail_no",
 	]
 
 	for field in ["warehouse", "item_code", "company"]:
