@@ -40,6 +40,7 @@ class RepostItemValuation(Document):
 		amended_from: DF.Link | None
 		based_on: DF.Literal["Transaction", "Item and Warehouse"]
 		company: DF.Link | None
+		created_by_scheduler: DF.Check
 		current_index: DF.Int
 		error_log: DF.LongText | None
 		gl_reposting_index: DF.Int

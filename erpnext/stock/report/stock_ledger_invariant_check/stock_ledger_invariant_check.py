@@ -51,9 +51,10 @@ def get_stock_ledger_entries(filters):
 	)
 
 
-def add_invariant_check_fields(sles, filters):
-	balance_qty = 0.0
-	balance_stock_value = 0.0
+def add_invariant_check_fields(sles, filters, opening_sle=None):
+	opening_sle = opening_sle or frappe._dict()
+	balance_qty = flt(opening_sle.qty_after_transaction)
+	balance_stock_value = flt(opening_sle.stock_value)
 
 	valuation_method = get_valuation_method(filters.item_code)
 
