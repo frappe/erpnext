@@ -8194,6 +8194,7 @@ class TestWorkOrder(ERPNextTestSuite):
 			serials_per_batch[batch_no] = serials_per_batch.get(batch_no, 0) + 1
 		self.assertEqual(sorted(serials_per_batch.values()), [2, 2])
 
+<<<<<<< HEAD
 	def consume_two_row_reservations(self, skip_transfer):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
@@ -8216,6 +8217,23 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo = make_review_work_order(fg_item, bom.name, 4, reserve_stock=1, skip_transfer=skip_transfer)
 		if not skip_transfer:
 			frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+=======
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"allow_editing_of_items_and_quantities_in_work_order": 0}
+	)
+	def test_required_item_amount_follows_qty_change(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False)
+		self.assertEqual(wo.required_items[0].amount, 500)
+
+		wo.qty = 8
+		wo.save()
+		self.assertEqual(wo.required_items[0].amount, 800)
+
+>>>>>>> 9395737 (test(manufacturing): work order item amount follows qty change)
 
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": wo.name}, order_by="sequence_id, creation", pluck="name"
