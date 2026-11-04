@@ -410,6 +410,7 @@ class SerialBatchBundleService:
 		if not reference_ids:
 			return
 
+		reference_field = field
 		child_doctype = self.doc.doctype + " Item"
 		if table_name == "packed_items":
 			field = "parent_detail_docname"
@@ -420,7 +421,7 @@ class SerialBatchBundleService:
 		for row in self.doc.get(table_name):
 			value = row.get(field)
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
-				value = self.get_value_for_packed_item(row)
+				value = self.get_value_for_packed_item(row, reference_field)
 				if not value:
 					continue
 
@@ -440,11 +441,10 @@ class SerialBatchBundleService:
 						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
 					)
 
-	def get_value_for_packed_item(self, row):
+	def get_value_for_packed_item(self, row, reference_field):
 		parent_items = self.doc.get("items", {"name": row.parent_detail_docname})
 		if parent_items:
-			ref = parent_items[0].get("dn_detail")
-			return (row.item_code, ref)
+			return (row.item_code, parent_items[0].get(reference_field))
 
 		return None
 
