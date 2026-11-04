@@ -126,11 +126,7 @@ class SubcontractingController(StockController):
 					"rate"
 				),
 			)
-			.where(
-				(supplied_item.parent == self.return_against)
-				& (supplied_item.parenttype == "Subcontracting Receipt")
-				& (supplied_item.consumed_qty != 0)
-			)
+			.where((supplied_item.parent == self.return_against) & (supplied_item.consumed_qty != 0))
 			.groupby(supplied_item.reference_name, supplied_item.rm_item_code)
 		).run(as_dict=True)
 
