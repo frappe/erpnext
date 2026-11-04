@@ -135,6 +135,20 @@ class TestBlanketOrder(FrappeTestCase):
 		po.submit()
 		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 96)
 
+	def test_order_must_match_blanket_order_party_and_type(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+
+		other_party = make_purchase_order_against(bo, qty=4)
+		other_party.supplier = "_Test Supplier 1"
+		self.assertRaisesRegex(frappe.ValidationError, "is for", other_party.insert)
+
+		selling_bo = make_blanket_order(blanket_order_type="Selling", quantity=100)
+		wrong_type = make_purchase_order_against(bo, qty=4)
+		wrong_type.items[0].blanket_order = selling_bo.name
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be used on", wrong_type.insert)
+
+		make_purchase_order_against(bo, qty=4).insert()
+
 	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg", "is_stock_item": 0}).name
