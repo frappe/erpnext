@@ -2134,7 +2134,7 @@ class JobCard(Document):
 		self.set_for_quantity(kwargs)
 
 		self.pending_qty = flt(kwargs.pending_qty)
-		self.process_loss_qty = flt(kwargs.process_loss_qty)
+		self.process_loss_qty = flt(self.process_loss_qty) + flt(kwargs.process_loss_qty)
 
 		self.add_completion_time_logs(kwargs)
 
@@ -2143,11 +2143,13 @@ class JobCard(Document):
 
 	def set_for_quantity(self, kwargs):
 		"""Qty to Manufacture of the completion dialog covers the current cycle only,
-		so the qty completed by the earlier cycles of this job card is kept."""
+		so the qty completed and lost by the earlier cycles of this job card is kept."""
 		if not flt(kwargs.for_quantity):
 			return
 
-		self.for_quantity = flt(self.total_completed_qty) + flt(kwargs.for_quantity)
+		self.for_quantity = (
+			flt(self.total_completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity)
+		)
 
 	def validate_docstatus(self):
 		if self.docstatus == 2:
