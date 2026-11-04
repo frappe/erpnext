@@ -1396,7 +1396,7 @@ class StockController(AccountsController):
 			frappe.throw(_("Internal transfers can only be done in company's default currency"))
 
 	def validate_packed_items(self):
-		if self.doctype in ("Sales Invoice", "Delivery Note Item") and self.get("packed_items"):
+		if self.doctype == "Sales Invoice" and self.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
 
 	def validate_internal_transfer_qty(self):
@@ -1467,9 +1467,8 @@ class StockController(AccountsController):
 			)
 			.where((parent_tab.name == self.__inter_company_reference) & (parent_tab.docstatus == 1))
 		)
-
 		if parent_doctype == "Delivery Note":
-			query = query.select(child_tab.returned_qty, child_tab.conversion_factor)
+			query = query.select(child_tab.returned_qty, child_tab.stock_qty, child_tab.conversion_factor)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
@@ -1477,7 +1476,25 @@ class StockController(AccountsController):
 			returned_qty = flt(row.get("returned_qty")) / (flt(row.get("conversion_factor")) or 1)
 			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - returned_qty
 
+		if parent_doctype == "Delivery Note":
+			self.add_component_transfer_qty(item_wise_transfer_qty, self.__inter_company_reference, data)
+
 		return item_wise_transfer_qty
+
+	def add_component_transfer_qty(self, item_wise_transfer_qty, delivery_note, bundle_rows):
+		from erpnext.stock.doctype.delivery_note.delivery_note import get_pending_component_qty
+
+		bundle_rows = {row.name: row for row in bundle_rows}
+		for packed in frappe.get_all(
+			"Packed Item",
+			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
+			fields=["name", "item_code", "qty", "parent_detail_docname"],
+		):
+			if bundle_row := bundle_rows.get(packed.parent_detail_docname):
+				item_wise_transfer_qty.pop((bundle_row.name, bundle_row.item_code), None)
+				item_wise_transfer_qty[(packed.name, packed.item_code)] += get_pending_component_qty(
+					packed, bundle_row
+				)
 
 	def get_item_wise_inter_received_qty(self):
 		child_doctype = self.doctype + " Item"
@@ -1507,6 +1524,7 @@ class StockController(AccountsController):
 		else:
 			query = query.select(
 				child_tab.delivery_note_item.as_("name"),
+				child_tab.delivery_note_packed_item,
 			)
 
 			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
@@ -1514,11 +1532,14 @@ class StockController(AccountsController):
 		query = query.where(parent_tab.name != self.name)
 		item_wise_received_qty = defaultdict(float)
 		for row in query.run(as_dict=True):
-			item_wise_received_qty[(row.name, row.item_code)] += flt(row.qty)
+			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
+				row.qty
+			)
 
 		reference_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
 		for row in self.items:
-			item_wise_received_qty[(row.get(reference_field), row.item_code)] += flt(row.qty)
+			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
 
 		return item_wise_received_qty
 
