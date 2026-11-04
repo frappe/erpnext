@@ -42,7 +42,14 @@ from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.production_plan.services.reservation import reserve_received_stock
 from erpnext.projects.doctype.project.project import update_purchase_cost
-from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
+	get_billed_amount_against_po,
+	get_billed_amount_against_pr,
+	get_billed_amounts,
+	get_purchase_receipts_against_po_details,
+	is_billed_by_qty,
+	set_qty_and_amount_net_of_returns,
+)
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	cancel_stock_reservation_entries,
 )
@@ -355,16 +362,17 @@ class PurchaseInvoice(BuyingController):
 		if self.is_internal_transfer() or not erpnext.is_perpetual_inventory_enabled(self.company):
 			return
 
+		if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"):
+			return
+
 		stock_items = self.get_stock_items()
 		receipts = {
 			item.purchase_receipt
 			for item in self.items
 			if item.purchase_receipt and item.item_code in stock_items
 		}
+		receipts.update(self.get_receipts_billed_through_order(stock_items))
 		if not receipts:
-			return
-
-		if frappe.db.get_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate"):
 			return
 
 		mismatched = [
@@ -391,6 +399,44 @@ class PurchaseInvoice(BuyingController):
 				get_link_to_form("Buying Settings", "Buying Settings", _("Buying Settings")),
 			)
 		)
+
+	def get_receipts_billed_through_order(self, stock_items):
+		if self.update_stock or self.is_return:
+			return set()
+
+		po_details = list(
+			{
+				item.po_detail
+				for item in self.items
+				if item.po_detail and not item.pr_detail and item.item_code in stock_items
+			}
+		)
+		if not po_details:
+			return set()
+
+		pr_items = get_purchase_receipts_against_po_details(po_details)
+		if not pr_items:
+			return set()
+
+		po_billed_amounts = get_billed_amount_against_po(po_details)
+		pr_billed_amounts = get_billed_amount_against_pr([item.name for item in pr_items])
+		for item in self.items:
+			if item.pr_detail:
+				pr_billed_amounts[item.pr_detail] = pr_billed_amounts.get(item.pr_detail, 0) + flt(
+					item.amount
+				)
+			elif item.po_detail in po_details:
+				billed = po_billed_amounts.setdefault(item.po_detail, {"billed_amt": 0, "billed_qty": 0})
+				billed["billed_amt"] += flt(item.amount)
+				billed["billed_qty"] += flt(item.qty)
+
+		set_qty_and_amount_net_of_returns(pr_items)
+		billed_amounts = get_billed_amounts(pr_items, po_billed_amounts, pr_billed_amounts)
+		return {
+			item.parent
+			for item in pr_items
+			if flt(billed_amounts[item.name] - flt(item.billed_amt), self.precision("amount", "items")) > 0
+		}
 
 	def validate_invoice_hold(self):
 		if self.is_return:
