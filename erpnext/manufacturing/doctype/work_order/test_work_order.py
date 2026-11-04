@@ -8301,7 +8301,27 @@ class TestWorkOrder(ERPNextTestSuite):
 		row = wo.required_items[1]
 		self.assertEqual(row.rate, flt(10 * bom.plc_conversion_rate, row.precision("rate")))
 
+<<<<<<< HEAD
 >>>>>>> eb85473 (test(manufacturing): added work order item rate is in company currency)
+=======
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"allow_editing_of_items_and_quantities_in_work_order": 1}
+	)
+	def test_item_changed_before_first_save_gets_fresh_rate(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		changed_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 250}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		wo = frappe.new_doc(
+			"Work Order", production_item=fg_item, bom_no=bom.name, qty=5, company="_Test Company"
+		)
+		wo.get_items_and_operations_from_bom()
+		wo.required_items[0].item_code = changed_item
+		wo.insert()
+		self.assertEqual((wo.required_items[0].rate, wo.required_items[0].amount), (250, 1250))
+
+>>>>>>> fb7ab06 (test(manufacturing): item changed before first save gets fresh rate)
 
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": wo.name}, order_by="sequence_id, creation", pluck="name"
