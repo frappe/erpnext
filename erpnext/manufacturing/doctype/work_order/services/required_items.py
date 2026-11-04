@@ -15,7 +15,10 @@ from frappe.utils import cint, flt
 from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
+from erpnext.manufacturing.doctype.work_order.mapper import (
+	check_if_scrap_warehouse_mandatory,
+	get_raw_material_rate,
+)
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	CONSUMPTION_PURPOSES,
 	WorkOrderStockReservation,
@@ -161,6 +164,27 @@ class RequiredItemsService:
 			"include_item_in_manufacturing": item.include_item_in_manufacturing,
 			"operation_row_id": item.operation_row_id,
 		}
+
+	def set_rate_for_edited_items(self):
+		"""Fetch rate afresh for rows whose item was added or changed by hand."""
+		previous = self.doc.get_doc_before_save()
+		previous_items = {d.name: d.item_code for d in previous.required_items} if previous else {}
+		bom_items = get_bom_items_as_dict(
+			self.doc.bom_no, self.doc.company, fetch_exploded=self.doc.use_multi_level_bom
+		)
+		edited_rows = [
+			d for d in self.doc.get("required_items") if _is_edited_item(d, previous_items, bom_items)
+		]
+		if not edited_rows:
+			return
+
+		bom_doc = frappe.get_cached_doc("BOM", self.doc.bom_no)
+		for d in edited_rows:
+			d.rate = flt(get_raw_material_rate(d, self.doc, bom_doc), d.precision("rate"))
+
+	def set_required_item_amounts(self):
+		for d in self.doc.get("required_items"):
+			d.amount = flt(flt(d.rate) * flt(d.required_qty), d.precision("amount"))
 
 	def update_transferred_qty_for_required_items(self):
 		if self.doc.skip_transfer:
@@ -547,6 +571,12 @@ class RequiredItemsService:
 			"is_additional_item": 1,
 			"voucher_detail_reference": row.name,
 		}
+
+
+def _is_edited_item(row, previous_items, bom_items):
+	if row.name in previous_items:
+		return previous_items[row.name] != row.item_code
+	return not row.rate or not _find_bom_item(bom_items, row)
 
 
 def _find_bom_item(item_dict, row):

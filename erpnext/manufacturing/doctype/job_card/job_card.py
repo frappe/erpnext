@@ -1011,8 +1011,6 @@ class JobCard(Document):
 				"item_name": d.item_name,
 				"description": d.description,
 				"required_qty": (d.required_qty * flt(self.for_quantity)) / flt(operation_qty or doc.qty),
-				"rate": d.rate,
-				"amount": d.amount,
 			},
 		)
 
