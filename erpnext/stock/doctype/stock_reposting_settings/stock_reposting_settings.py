@@ -25,6 +25,7 @@ class StockRepostingSettings(Document):
 		]
 		notify_reposting_error_to_role: DF.Link | None
 		start_time: DF.Time | None
+		stock_ledger_audit_frequency: DF.Literal["Every 3 Days", "Every 7 Days"]
 	# end: auto-generated types
 
 	def validate(self):

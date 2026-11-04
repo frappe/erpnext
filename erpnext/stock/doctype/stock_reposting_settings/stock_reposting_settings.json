@@ -16,7 +16,9 @@
   "item_based_reposting",
   "do_not_fetch_incoming_rate_from_serial_no",
   "errors_notification_section",
-  "notify_reposting_error_to_role"
+  "notify_reposting_error_to_role",
+  "auto_reposting_section",
+  "stock_ledger_audit_frequency"
  ],
  "fields": [
   {
@@ -74,12 +76,25 @@
    "fieldname": "do_not_fetch_incoming_rate_from_serial_no",
    "fieldtype": "Check",
    "label": "Do not fetch incoming rate from Serial No"
+  },
+  {
+   "fieldname": "auto_reposting_section",
+   "fieldtype": "Section Break",
+   "label": "Auto Reposting of Incorrect Valuation"
+  },
+  {
+   "default": "Every 3 Days",
+   "description": "How often the scheduler checks the stock ledger entries of the current fiscal year. For each item and warehouse with an incorrect entry, it creates a Repost Item Valuation from that entry.",
+   "fieldname": "stock_ledger_audit_frequency",
+   "fieldtype": "Select",
+   "label": "Stock Ledger Audit Frequency",
+   "options": "Every 3 Days\nEvery 7 Days"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-05-15 12:59:34.392491",
+ "modified": "2026-11-04 09:36:20.505899",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
