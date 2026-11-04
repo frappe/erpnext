@@ -629,17 +629,13 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 			"bio": emp.bio,
 		}
 	)
-	emp.db_set("user_id", email)
-	user.append_roles("Employee")
+	# Linking the User in emp.save() syncs its status, Employee role and user permissions.
+	user.flags.no_welcome_mail = emp.status != "Active"
 	user.insert()
 
 	emp.user_id = user.name
 	emp.create_user_permission = cint(create_user_permission)
 	emp.save()
-
-	if cint(create_user_permission):
-		add_user_permission("Employee", emp.name, user.name)
-		add_user_permission("Company", emp.company, user.name)
 
 	return user.name
 

@@ -370,6 +370,23 @@ class TestEmployee(ERPNextTestSuite):
 			employee_doc.department = None
 			self.assertRaises(frappe.PermissionError, employee_doc.save)
 
+	def test_create_user_for_left_employee_is_disabled(self):
+		from erpnext.setup.doctype.employee.employee import create_user
+
+		employee = new_employee("")
+		employee.update({"first_name": "Former Employee", "status": "Left", "relieving_date": "2024-01-01"})
+		employee.insert()
+
+		user = create_user(employee.name, "employee-left-created@example.com", create_user_permission=1)
+
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
+		self.assertIn("Employee", frappe.get_roles(user))
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Employee", "for_value": employee.name, "user": user}
+			)
+		)
+
 	def test_disabled_department_cannot_be_assigned(self):
 		department = frappe.get_doc(
 			{
