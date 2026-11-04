@@ -231,7 +231,6 @@ class Item(Document):
 		if self.is_new():
 			self.validate_opening_stock()
 		self.validate_shelf_life()
-		self.validate_valuation_rate()
 		self.check_for_active_boms()
 		self.fill_customer_code()
 		self.check_item_tax()
@@ -455,10 +454,6 @@ class Item(Document):
 					self.get_label_from_fieldname("shelf_life_in_days")
 				)
 			)
-
-	def validate_valuation_rate(self):
-		if flt(self.valuation_rate) < 0:
-			frappe.throw(_("{0} cannot be negative").format(self.get_label_from_fieldname("valuation_rate")))
 
 	def clear_retain_sample(self):
 		if not self.has_batch_no:
