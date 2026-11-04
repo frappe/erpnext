@@ -496,9 +496,12 @@ class Quotation(SellingController):
 			ignore_permissions=ignore_permissions,
 		)
 
+	def before_cancel(self):
+		super().before_cancel()
+		# cleared before save so the removal reaches the database
+		self.lost_reasons = []
+
 	def on_cancel(self):
-		if self.lost_reasons:
-			self.lost_reasons = []
 		super().on_cancel()
 
 		# update enquiry status

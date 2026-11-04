@@ -1104,7 +1104,7 @@ def search_for_transfer_transaction(transaction_id: str | int):
 	return None
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def auto_reconcile_vouchers(
 	bank_account: str,
 	from_date: str | date | None = None,

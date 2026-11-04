@@ -3391,9 +3391,11 @@ class ERPNextTestSuite(unittest.TestCase):
 	def set_user(self, user: str):
 		try:
 			old_user = frappe.session.user
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- test helper restores the user
 			frappe.set_user(user)
 			yield
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- test helper restores the user
 			frappe.set_user(old_user)
 
 

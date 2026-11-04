@@ -140,7 +140,7 @@ def pause_job_for_doc(docname: str | None = None):
 			frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Paused")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def trigger_job_for_doc(docname: str | None = None):
 	"""
 	Trigger background job

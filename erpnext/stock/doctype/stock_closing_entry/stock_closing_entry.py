@@ -338,7 +338,13 @@ class StockClosingEntry(Document):
 		self.validate_no_pending_reposts()
 
 		self.db_set("status", "In Progress")
-		enqueue(prepare_closing_stock_balance, name=self.name, queue="long", timeout=1500)
+		enqueue(
+			prepare_closing_stock_balance,
+			name=self.name,
+			queue="long",
+			timeout=1500,
+			enqueue_after_commit=True,
+		)
 		frappe.msgprint(
 			_(
 				"Stock Closing Entry {0} has been queued for processing, the system will take some time to complete it."
