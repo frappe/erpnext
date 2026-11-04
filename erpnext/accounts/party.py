@@ -1198,6 +1198,7 @@ def add_party_account(party_type, party, company, account):
 
 
 def render_address(address, check_permissions=True):
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- calls a local function
 	return frappe.call(_render_address, address, check_permissions=check_permissions)
 
 

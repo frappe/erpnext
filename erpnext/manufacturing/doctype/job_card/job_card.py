@@ -1978,6 +1978,7 @@ class JobCard(Document):
 
 	def set_employees(self):
 		self.employee = []
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-child-tables-while-iterating -- appends to employee, not time_logs
 		for item in self.time_logs:
 			if not any(d.employee == item.employee for d in self.employee):
 				self.append("employee", {"employee": item.employee, "completed_qty": 0.0})
