@@ -54,12 +54,23 @@ class CostCenterAllocation(Document):
 		self._skip_from_date_validation = False
 
 	def validate(self):
+		self.validate_allocation_percentages()
 		self.validate_total_allocation_percentage()
 		if not self._skip_from_date_validation:
 			self.validate_from_date_based_on_existing_gle()
 		self.validate_backdated_allocation()
 		self.validate_main_cost_center()
 		self.validate_child_cost_centers()
+
+	def validate_allocation_percentages(self):
+		for row in self.get("allocation_percentages", []):
+			if flt(row.percentage) <= 0:
+				frappe.throw(
+					_("Row #{0}: Percentage (%) for Cost Center {1} must be greater than 0").format(
+						row.idx, frappe.bold(row.cost_center)
+					),
+					WrongPercentageAllocation,
+				)
 
 	def validate_total_allocation_percentage(self):
 		total_percentage = sum(
