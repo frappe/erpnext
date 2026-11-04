@@ -12,6 +12,11 @@ from frappe.utils import flt, getdate
 
 from erpnext.stock.doctype.item.item import get_item_defaults
 
+ORDER_DOCTYPES_BY_TYPE = {
+	"Selling": ("Sales Order", "Quotation"),
+	"Purchasing": ("Purchase Order",),
+}
+
 FULFILLED_QTY_FIELD = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}
 
 ORDER_TYPE_BY_DOCTYPE = {
@@ -49,10 +54,28 @@ class BlanketOrder(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		if not self.blanket_order_type:
+			return
+
+		self.validate_party()
 		self.validate_dates()
 		self.validate_duplicate_items()
 		self.validate_item_qty()
 		self.set_party_item_code()
+
+	def validate_party(self):
+		party_field = "customer" if self.blanket_order_type == "Selling" else "supplier"
+		if not self.get(party_field):
+			frappe.throw(
+				_("{0} is mandatory for a {1} Blanket Order").format(
+					_(self.meta.get_label(party_field)), _(self.blanket_order_type)
+				),
+				frappe.MandatoryError,
+			)
+
+		other_party_field = "supplier" if party_field == "customer" else "customer"
+		self.set(other_party_field, None)
+		self.set(f"{other_party_field}_name", None)
 
 	def before_update_after_submit(self):
 		self.validate_dates()
@@ -198,6 +221,11 @@ class BlanketOrder(Document):
 @frappe.whitelist()
 def make_order(source_name):
 	doctype = frappe.flags.args.doctype
+	blanket_order_type = frappe.db.get_value("Blanket Order", source_name, "blanket_order_type")
+	if doctype not in ORDER_DOCTYPES_BY_TYPE.get(blanket_order_type, ()):
+		frappe.throw(
+			_("A {0} cannot be made from a {1} Blanket Order").format(_(doctype), _(blanket_order_type))
+		)
 
 	def update_doc(source_doc, target_doc, source_parent):
 		if doctype == "Quotation":
