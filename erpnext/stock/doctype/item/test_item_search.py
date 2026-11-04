@@ -58,6 +58,52 @@ class TestItemSearchSetting(ERPNextTestSuite):
 				self.assertRaises(frappe.ValidationError, global_defaults.save)
 
 
+class TestItemSearchOnOldSQLite(ERPNextTestSuite):
+	"""SQLite 3.34 to 3.44 has the trigram tokenizer without remove_diacritics."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.patches = [
+			patch.object(ItemSearch, "is_search_enabled", return_value=True),
+			patch.object(sqlite3, "sqlite_version_info", (3, 40, 1)),
+		]
+		for active in cls.patches:
+			active.start()
+
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-CRÈME-7782",
+				"item_name": "Crème Filter",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		cls.search = ItemSearch(db_name="item_search_old_sqlite.db")
+		cls.search.drop_index()
+		cls.search.build_index()
+
+	@classmethod
+	def tearDownClass(cls):
+		cls.search.drop_index()
+		for active in cls.patches:
+			active.stop()
+		super().tearDownClass()
+
+	def test_the_index_uses_plain_trigram(self):
+		self.assertEqual(self.search.schema["tokenizer"], "trigram")
+
+	def test_an_accented_item_is_found_by_an_unaccented_term(self):
+		self.assertIn("ZZ-CRÈME-7782", self.candidates("creme-7782"))
+
+	def test_a_differently_accented_term_finds_the_item(self):
+		self.assertIn("ZZ-CRÈME-7782", self.candidates("crême filter"))
+
+	def candidates(self, txt):
+		return self.search.get_candidate_item_codes(txt, ["name", "item_code", "item_name"])
+
+
 class TestItemSearchIndex(ERPNextTestSuite):
 	@classmethod
 	def setUpClass(cls):
