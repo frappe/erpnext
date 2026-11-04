@@ -51607,7 +51607,7 @@ msgstr ""
 #: erpnext/regional/doctype/uae_vat_settings/uae_vat_settings.py:49
 #, python-brace-format
 msgid "Row #{0}: Account {1} does not belong to company {2}"
-msgstr "第 {0} 行 ：科目 {1} 不是公司 {3} 的有效科目"
+msgstr "第 {0} 行 ：科目 {1} 不是公司 {2} 的有效科目"
 
 #: erpnext/assets/doctype/asset_category/asset_category.py:130
 #, python-brace-format
@@ -52883,7 +52883,7 @@ msgstr "行号#{idx}：{schedule_date}不能早于{transaction_date}"
 #: erpnext/assets/doctype/asset_category/asset_category.py:90
 #, python-brace-format
 msgid "Row #{}: Currency of {} - {} doesn't matches company currency."
-msgstr "第{0}行: 货币 {} 与公司本币不匹配"
+msgstr "第{}行: 货币 {} - {} 与公司本币不匹配"
 
 #: erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:136
 #, python-brace-format
@@ -53115,7 +53115,7 @@ msgstr ""
 #: erpnext/controllers/accounts_controller.py:3809
 #, python-brace-format
 msgid "Row {0}: Cost Center {1} does not belong to Company {2}"
-msgstr "第 {0} 行 ：成本中心 {1} 不是公司 {3} 的有效成本中心"
+msgstr "第 {0} 行 ：成本中心 {1} 不是公司 {2} 的有效成本中心"
 
 #: erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py:191
 #, python-brace-format
@@ -59684,7 +59684,7 @@ msgstr "已取消工单{0}的库存预留"
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:476
 #, python-brace-format
 msgid "Stock not available for Item {0} in Warehouse {1}."
-msgstr "物料 {0} 在仓库 {2} 中无可预留数量"
+msgstr "物料 {0} 在仓库 {1} 中无可预留数量"
 
 #: erpnext/stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1457
 #, python-brace-format
