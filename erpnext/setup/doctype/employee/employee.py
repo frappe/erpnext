@@ -6,8 +6,10 @@ from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
 	add_user_permission,
 	get_doc_permissions,
+	get_user_permissions,
 	remove_user_permission,
 )
+from frappe.query_builder import Criterion
 from frappe.utils import cint, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
@@ -422,6 +424,67 @@ def validate_employee_role(doc, method=None, ignore_emp_check=False):
 			_("User {0}: Removed Employee Self Service role as there is no mapped employee.").format(doc.name)
 		)
 		doc.get("roles").remove(doc.get("roles", {"role": "Employee Self Service"})[0])
+
+
+def has_permission(doc, ptype=None, user=None, **kwargs):
+	# Every permission type: print and email also show the whole record.
+	user = user or frappe.session.user
+	if doc.get("user_id") == user or not is_limited_to_linked_employee(user):
+		return True
+
+	lft, rgt = cint(doc.get("lft")), cint(doc.get("rgt"))
+	return any(
+		cint(linked.lft) <= lft and rgt <= cint(linked.rgt) and lft
+		for linked in get_linked_employee_bounds(user)
+	)
+
+
+def get_permission_query_conditions(user=None, doctype=None):
+	"""Show the linked Employee and its reportees, as an Employee User Permission does."""
+	user = user or frappe.session.user
+	if not is_limited_to_linked_employee(user):
+		return None
+
+	Employee = frappe.qb.DocType("Employee")
+	return Criterion.any(
+		[Employee.user_id == user]
+		+ [
+			(Employee.lft >= linked.lft) & (Employee.rgt <= linked.rgt)
+			for linked in get_linked_employee_bounds(user)
+		]
+	)
+
+
+def get_linked_employee_bounds(user):
+	return frappe.get_all("Employee", filters={"user_id": user}, fields=["lft", "rgt"])
+
+
+def is_limited_to_linked_employee(user):
+	"""True when only the Employee role gives the user access to Employee records.
+
+	Employee User Permissions (Create User Permission) already limit the user to their record and its
+	reportees, so they apply unchanged.
+	"""
+	roles = frappe.get_roles(user)
+	if "Employee" not in roles or has_employee_user_permission(user):
+		return False
+
+	# The cached meta includes Custom DocPerm.
+	return not any(
+		perm.role in roles
+		and perm.role != "Employee"
+		and (perm.read or perm.select)
+		and not perm.if_owner
+		and not perm.permlevel
+		for perm in frappe.get_meta("Employee").permissions
+	)
+
+
+def has_employee_user_permission(user):
+	return any(
+		not permission.get("applicable_for") or permission.get("applicable_for") == "Employee"
+		for permission in get_user_permissions(user).get("Employee", [])
+	)
 
 
 def get_employee_email(employee_doc):

@@ -211,6 +211,51 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+	def test_employee_role_reads_only_linked_employee(self):
+		from frappe.www.printview import validate_print_permission
+
+		from erpnext.tests.permission_test_utils import as_user
+
+		user = "employee-read-own@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=0)
+		other_employee = make_employee(
+			"employee-read-other@example.com", company="_Test Company", create_user_permission=0
+		)
+
+		reportee = make_employee(
+			"employee-read-reportee@example.com",
+			company="_Test Company",
+			create_user_permission=0,
+			reports_to=employee,
+		)
+
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Employee", "read", employee))
+			self.assertTrue(frappe.has_permission("Employee", "read", reportee))
+			for ptype in ("read", "print", "email"):
+				self.assertFalse(frappe.has_permission("Employee", ptype, other_employee))
+			# Print view accepts read or print access.
+			self.assertRaises(
+				frappe.PermissionError, validate_print_permission, frappe.get_doc("Employee", other_employee)
+			)
+			# A document sent from the client has no tree position.
+			self.assertFalse(frappe.has_permission("Employee", "read", frappe.new_doc("Employee")))
+			self.assertEqual(sorted(frappe.get_list("Employee", pluck="name")), sorted([employee, reportee]))
+
+	def test_other_employee_roles_keep_employee_access(self):
+		from erpnext.tests.permission_test_utils import as_user
+
+		other_employee = make_employee("employee-lookup-other@example.com", company="_Test Company")
+		for role in ("Accounts User", "HR User"):
+			user = f"employee-lookup-{frappe.scrub(role)}@example.com"
+			make_employee(user, company="_Test Company", create_user_permission=0)
+			frappe.get_doc("User", user).add_roles(role)
+
+			with as_user(user):
+				# Select-only roles pick other employees in link fields, e.g. on a Journal Entry.
+				self.assertTrue(frappe.has_permission("Employee", "select", other_employee))
+				self.assertIn(other_employee, frappe.get_list("Employee", pluck="name"))
+
 	def test_disabled_department_cannot_be_assigned(self):
 		department = frappe.get_doc(
 			{
