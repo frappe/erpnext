@@ -611,7 +611,7 @@ def send_emails(document_name: str, from_scheduler: bool = False, posting_date: 
 		return False
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_auto_email():
 	frappe.has_permission("Process Statement Of Accounts", throw=True)
 	for report, date_field in (("General Ledger", "to_date"), ("Accounts Receivable", "posting_date")):
