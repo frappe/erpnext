@@ -147,24 +147,39 @@ def get_last_purchase_rate():
 			(
 				frappe.qb.from_(po)
 				.from_(po_item)
-				.select(po_item.item_code, po.transaction_date.as_("posting_date"), po_item.base_rate)
+				.select(
+					po_item.item_code,
+					po.transaction_date.as_("posting_date"),
+					(po_item.base_rate / po_item.conversion_factor).as_("base_rate"),
+					po_item.creation,
+				)
 				.where((po.name == po_item.parent) & (po.docstatus == 1))
 			)
 			+ (
 				frappe.qb.from_(pr)
 				.from_(pr_item)
-				.select(pr_item.item_code, pr.posting_date, pr_item.base_rate)
+				.select(
+					pr_item.item_code,
+					pr.posting_date,
+					(pr_item.base_rate / pr_item.conversion_factor).as_("base_rate"),
+					pr_item.creation,
+				)
 				.where((pr.name == pr_item.parent) & (pr.docstatus == 1))
 			)
 			+ (
 				frappe.qb.from_(pi)
 				.from_(pi_item)
-				.select(pi_item.item_code, pi.posting_date, pi_item.base_rate)
+				.select(
+					pi_item.item_code,
+					pi.posting_date,
+					(pi_item.base_rate / pi_item.conversion_factor).as_("base_rate"),
+					pi_item.creation,
+				)
 				.where((pi.name == pi_item.parent) & (pi.docstatus == 1) & (pi.update_stock == 1))
 			)
 		)
 		.select("*")
-		.orderby("item_code", "posting_date")
+		.orderby("item_code", "posting_date", "creation")
 	)
 
 	for d in query.run(as_dict=True):
