@@ -95,13 +95,13 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 				msg=f"Exepcted false from : {case}",
 			)
 
-	def make_queued_item_repost(self, item_code, posting_date):
+	def make_queued_item_repost(self, item_code, posting_date, warehouse="_Test Warehouse - _TC"):
 		repost = frappe.new_doc("Repost Item Valuation")
 		repost.update(
 			{
 				"based_on": "Item and Warehouse",
 				"item_code": item_code,
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": warehouse,
 				"company": "_Test Company",
 				"posting_date": posting_date,
 				"posting_time": "00:00:00",
@@ -1291,6 +1291,48 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(reposted.count(fg_sle.name), 1)
 		self.assertEqual(fg_sle.stock_value, (3000 / 20) * 5 + (4000 / 20) * 5)
+
+	def test_transfer_target_queued_before_the_transfer_is_reposted_once(self):
+		source, target = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, target=source, qty=10, rate=100, posting_date=add_days(today(), -10))
+		make_stock_entry(
+			item_code=item, source=source, target=target, qty=5, posting_date=add_days(today(), -6)
+		)
+		make_stock_entry(item_code=item, source=target, qty=2, posting_date=add_days(today(), -3))
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			make_stock_entry(
+				item_code=item, target=source, qty=10, rate=200, posting_date=add_days(today(), -8)
+			)
+
+		rivs = [
+			self.make_queued_item_repost(item, add_days(today(), -8), source),
+			self.make_queued_item_repost(item, add_days(today(), -7), target),
+		]
+
+		reposted = []
+		original_repost = update_entries_after.repost_stock_ledger_entry
+
+		def record_repost(self, sle):
+			reposted.append(sle.name)
+			return original_repost(self, sle)
+
+		with patch.object(update_entries_after, "repost_stock_ledger_entry", record_repost):
+			execute_reposting_entry(rivs[0].name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Repost Item Valuation", riv.name, "status") for riv in rivs],
+			["Completed", "Skipped"],
+		)
+		target_sles = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item, "warehouse": target, "is_cancelled": 0},
+			fields=["name", "stock_value"],
+			order_by="posting_datetime",
+		)
+		self.assertEqual(sorted(reposted.count(sle.name) for sle in target_sles), [1, 1])
+		self.assertEqual([sle.stock_value for sle in target_sles], [5 * 150, 3 * 150])
 
 	def test_earlier_repost_of_same_item_wh_is_not_merged(self):
 		warehouse = "_Test Warehouse - _TC"
