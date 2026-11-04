@@ -396,6 +396,7 @@ def update_item_variant_settings():
 def add_uom_data():
 	# add UOMs
 	uoms = json.loads(
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 		open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read()
 	)
 	for d in uoms:
@@ -409,6 +410,7 @@ def add_uom_data():
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 		open(
 			frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")
 		).read()

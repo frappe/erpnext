@@ -57,10 +57,12 @@ def malformed_names():
 @contextmanager
 def as_user(email):
 	previous = frappe.session.user
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- test helper restores the user
 	frappe.set_user(email)
 	try:
 		yield email
 	finally:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- test helper restores the user
 		frappe.set_user(previous)
 		frappe.clear_cache(user=email)
 

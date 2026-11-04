@@ -38,10 +38,12 @@ PORTAL_PAYABLE_DOCTYPES = ("Sales Order", "Sales Invoice")
 def run_as_administrator():
 	previous_session = frappe._dict(frappe.session)
 	previous_form_dict = frappe.local.form_dict
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- gateway callback books the payment, restored in finally
 	frappe.set_user("Administrator")
 	try:
 		yield
 	finally:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- gateway callback books the payment, restored in finally
 		frappe.set_user(previous_session.user)
 		frappe.local.session.update(previous_session)
 		frappe.local.form_dict = previous_form_dict

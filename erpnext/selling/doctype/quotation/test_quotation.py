@@ -805,6 +805,14 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.order_lost_reason, "Too expensive")
 		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [self.lost_reason])
 
+	def test_cancel_clears_lost_reasons(self):
+		quotation = make_quotation()
+		quotation.declare_enquiry_lost([{"lost_reason": self.lost_reason}], [], "Too expensive")
+
+		quotation.reload().cancel()
+
+		self.assertFalse(quotation.reload().lost_reasons)
+
 	def test_setting_a_revision_as_lost_sets_other_versions_as_lost(self):
 		quotation = make_quotation()
 		revision = make_revision(quotation.name)

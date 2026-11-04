@@ -103,7 +103,7 @@ class EmailDigest(Document):
 			)
 		)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def send(self):
 		self._send()
 
@@ -125,11 +125,13 @@ class EmailDigest(Document):
 		original_session = frappe._dict(frappe.session)
 		original_form = frappe.local.form_dict
 		try:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- renders as each recipient, restored in finally
 			frappe.set_user(recipient)
 			if not self.can_receive_financial_cards():
 				return
 			message = self.get_msg_html()
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- renders as each recipient, restored in finally
 			frappe.set_user(original_session.user)
 			frappe.local.session.update(original_session)
 			frappe.local.form_dict = original_form

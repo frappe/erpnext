@@ -1066,6 +1066,7 @@ def update_transactions_annual_history(company, commit=False):
 	frappe.db.set_value("Company", company, "transactions_annual_history", json.dumps(transactions_history))
 
 	if commit and not frappe.in_test:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 		frappe.db.commit()
 
 
@@ -1079,6 +1080,7 @@ def cache_companies_monthly_sales_history():
 			update_company_current_month_sales(company)
 
 	if not frappe.in_test:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 		frappe.db.commit()
 
 

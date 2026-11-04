@@ -50,6 +50,7 @@ def after_install():
 	update_pegged_currencies()
 	set_default_print_formats()
 	toggle_hidden_fields()
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
 	frappe.db.commit()
 
 

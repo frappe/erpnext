@@ -210,7 +210,7 @@ class RepostAccountingLedger(Document):
 		if self.scheduled_job and is_job_enqueued(_repost_job_id(self.name)):
 			frappe.throw(_("Reposting is still in progress in background."))
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def start_repost(self):
 		if self.docstatus != 1:
 			frappe.throw(_("Reposting can be started only for submitted document."))
@@ -382,6 +382,7 @@ def _record_repost_failure(repost_doc, commit=False) -> None:
 	)
 
 	if commit:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 		frappe.db.commit()
 
 
