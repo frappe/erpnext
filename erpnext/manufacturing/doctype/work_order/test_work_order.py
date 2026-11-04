@@ -7660,6 +7660,92 @@ class TestWorkOrder(ERPNextTestSuite):
 			[(sub_assembly_bom.name, 120), (fg_bom.name, 60)],
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_multi_level_bom_fetches_sub_assembly_operations_without_fg_operations(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		sub_assembly_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 30}],
+		)
+		fg_bom = make_review_bom(
+			fg_item, [{"item_code": sub_assembly, "qty": 2, "bom_no": sub_assembly_bom.name}]
+		)
+		self.assertFalse(fg_bom.with_operations)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 5, submit=False, use_multi_level_bom=1)
+		self.assertEqual(
+			[(row.bom, row.operation, row.time_in_mins) for row in wo.operations],
+			[(sub_assembly_bom.name, operation, 300)],
+		)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 5, submit=False, use_multi_level_bom=0)
+		self.assertEqual(wo.operations, [])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 1, "set_op_cost_and_secondary_items_from_sub_assemblies": 0},
+	)
+	def test_multi_level_bom_keeps_fg_based_operating_cost(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		sub_assembly_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "hour_rate": 120}
+			],
+		)
+		fg_bom = make_review_bom(
+			fg_item,
+			[{"item_code": sub_assembly, "qty": 1, "bom_no": sub_assembly_bom.name}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=100,
+		)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 1, use_multi_level_bom=1, skip_transfer=1)
+		complete_review_job_card(wo.name, 1)
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		self.assertEqual(sum(row.amount for row in stock_entry.additional_costs), 160)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 1, "set_op_cost_and_secondary_items_from_sub_assemblies": 0},
+	)
+	def test_multi_level_bom_keeps_fg_based_operating_cost_of_every_level(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		leaf_item, mid_item, fg_item = (make_item(properties={"is_stock_item": 1}).name for _ in range(3))
+		operation, workstation = make_review_operation()
+		leaf_bom = make_review_bom(
+			leaf_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "hour_rate": 120}
+			],
+		)
+		mid_bom = make_review_bom(
+			mid_item,
+			[{"item_code": leaf_item, "qty": 1, "bom_no": leaf_bom.name}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=50,
+		)
+		fg_bom = make_review_bom(
+			fg_item,
+			[{"item_code": mid_item, "qty": 1, "bom_no": mid_bom.name}],
+			fg_based_operating_cost=1,
+			operating_cost_per_bom_quantity=100,
+		)
+
+		wo = make_review_work_order(fg_item, fg_bom.name, 1, use_multi_level_bom=1, skip_transfer=1)
+		complete_review_job_card(wo.name, 1)
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		self.assertEqual(sum(row.amount for row in stock_entry.additional_costs), 210)
+
 	def test_planned_qty_leaves_out_process_loss(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
