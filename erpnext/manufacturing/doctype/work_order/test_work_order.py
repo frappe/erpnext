@@ -8233,7 +8233,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.save()
 		self.assertEqual(wo.required_items[0].amount, 800)
 
+<<<<<<< HEAD
 >>>>>>> 9395737 (test(manufacturing): work order item amount follows qty change)
+=======
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"allow_editing_of_items_and_quantities_in_work_order": 1}
+	)
+	def test_edited_required_items_get_fresh_rate(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		changed_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 250}).name
+		added_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 40}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False)
+		wo.required_items[0].item_code = changed_item
+		wo.append(
+			"required_items",
+			{"item_code": added_item, "required_qty": 2, "source_warehouse": "_Test Warehouse - _TC"},
+		)
+		wo.save()
+		self.assertEqual([(d.rate, d.amount) for d in wo.required_items], [(250, 1250), (40, 80)])
+
+>>>>>>> a649d08 (test(manufacturing): edited work order items get fresh rate)
 
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": wo.name}, order_by="sequence_id, creation", pluck="name"
