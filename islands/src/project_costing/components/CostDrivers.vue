@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { TabButtons, Tooltip } from "frappe-ui";
 import { BarChart, ChartCard } from "frappe-ui/charts";
 
+import { LABOUR_DRIVERS, driverRows } from "../costing.js";
 import { useFormat } from "../format.js";
 
 const props = defineProps({
@@ -12,29 +13,19 @@ const props = defineProps({
 const __ = window.__;
 const format = useFormat();
 
-// What each tab lists, the text for a row with no name, and the text when it is empty.
+// What each tab lists, and the text for a row with no name.
 const DIMENSIONS = {
-	activities: {
-		label: __("Activity"),
-		unnamed: __("No activity type"),
-		empty: __("No timesheets against this project yet"),
-	},
-	employees: {
-		label: __("Employee"),
-		unnamed: __("No employee"),
-		empty: __("No timesheets against this project yet"),
-	},
-	suppliers: { label: __("Supplier"), empty: __("No purchase invoices against this project yet") },
-	items: { label: __("Item"), empty: __("No stock consumed against this project yet") },
+	activities: { label: __("Activity"), unnamed: __("No activity type") },
+	employees: { label: __("Employee"), unnamed: __("No employee") },
+	suppliers: { label: __("Supplier") },
+	items: { label: __("Item") },
 };
-const LABOUR = ["activities", "employees"];
 
-const drivers = computed(() => props.view.drivers || {});
-
-// A tab shows only when the user may read its documents, which the server marks with null.
+// A tab shows only when it has something to draw: the user may read its documents, which the
+// server marks with null otherwise, and the project has rows for it.
 const tabs = computed(() =>
 	Object.entries(DIMENSIONS)
-		.filter(([key]) => drivers.value[key] != null)
+		.filter(([key]) => driverRows(props.view, key).length)
 		.map(([key, dimension]) => ({ value: key, label: dimension.label }))
 );
 // Activities first; a user who may not read timesheets starts on the first tab they have.
@@ -46,23 +37,19 @@ const tab = computed({
 });
 
 // Labour by person or activity reveals costing rates, so without them it shows hours.
-const hours_only = computed(() => LABOUR.includes(tab.value) && !props.view.access.labour);
+const hours_only = computed(() => LABOUR_DRIVERS.includes(tab.value) && !props.view.access.labour);
 const measure = computed(() => (hours_only.value ? "hours" : "amount"));
 
-// In cost, an activity whose hours all lack a costing rate has nothing to draw, so it is left out
-// rather than shown as an empty bar; the Cost to date card says how many hours that is.
 const rows = computed(() =>
-	(drivers.value[tab.value] || [])
-		.filter((row) => hours_only.value || row.amount)
-		.map((row) => ({
-			...row,
-			name: row.label || row.name || DIMENSIONS[tab.value].unnamed,
-		}))
+	driverRows(props.view, tab.value).map((row) => ({
+		...row,
+		name: row.label || row.name || DIMENSIONS[tab.value].unnamed,
+	}))
 );
 
 // Hours or invoice counts ride along in the tooltip, in their own unit.
 const tooltip_columns = computed(() => {
-	if (LABOUR.includes(tab.value) && !hours_only.value)
+	if (LABOUR_DRIVERS.includes(tab.value) && !hours_only.value)
 		return [{ name: "hours", label: __("Hours"), format: format.number }];
 	if (tab.value === "suppliers") return [{ name: "documents", label: __("Invoices") }];
 	return [];
@@ -96,9 +83,6 @@ const value_format = (value) =>
 			</template>
 			<template #actions>
 				<TabButtons v-model="tab" :options="tabs" size="sm" />
-			</template>
-			<template #empty>
-				<span class="text-sm text-ink-gray-5">{{ DIMENSIONS[tab].empty }}</span>
 			</template>
 		</BarChart>
 	</ChartCard>
