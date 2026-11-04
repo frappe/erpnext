@@ -27,6 +27,7 @@ from erpnext.projects.doctype.project.project import update_consumed_material_co
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
+	get_reposting_data,
 	is_transfer_stock_entry,
 	repost_future_sle,
 )
@@ -325,6 +326,7 @@ class RepostItemValuation(Document):
 			"name": self.name,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
+			"repost_started_at": self.get_repost_started_at(),
 		}
 
 		frappe.db.sql(
@@ -338,9 +340,17 @@ class RepostItemValuation(Document):
 				and docstatus = 1
 				and status = 'Queued'
 				and based_on = 'Item and Warehouse'
+				and creation <= %(repost_started_at)s
 				""",
 			filters,
 		)
+
+	def get_repost_started_at(self):
+		return self.flags.repost_started_at or now()
+
+	def get_saved_repost_started_at(self):
+		if self.reposting_data_file:
+			return get_reposting_data(self.reposting_data_file).get("repost_started_at")
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
@@ -375,6 +385,7 @@ def repost(doc):
 		# This is to avoid TooManyWritesError in case of large reposts
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
+		doc.flags.repost_started_at = doc.get_saved_repost_started_at() or now()
 		doc.set_status("In Progress")
 		if not frappe.flags.in_test:
 			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status

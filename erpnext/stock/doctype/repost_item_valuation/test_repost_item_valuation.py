@@ -16,11 +16,12 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
+	repost,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
-from erpnext.stock.utils import PendingRepostingError
+from erpnext.stock.utils import PendingRepostingError, get_combine_datetime
 
 
 class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
@@ -86,6 +87,65 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 				in_configured_timeslot(repost_settings, case.get("current_time")),
 				msg=f"Exepcted false from : {case}",
 			)
+
+	def make_queued_item_repost(self, item_code, posting_date):
+		repost = frappe.new_doc("Repost Item Valuation")
+		repost.update(
+			{
+				"based_on": "Item and Warehouse",
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"company": "_Test Company",
+				"posting_date": posting_date,
+				"posting_time": "00:00:00",
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
+		return repost
+
+	def test_repost_queued_after_start_is_not_skipped(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		queued_during_run = self.make_queued_item_repost(item_code, add_days(today(), -8))
+
+		running.deduplicate_similar_repost()
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
+	def test_resumed_repost_keeps_its_first_start_time(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		stock_ledger.update_args_in_repost_item_valuation(running, 0, [], set())
+		queued_during_run = self.make_queued_item_repost(item_code, add_days(today(), -8))
+
+		running.flags.repost_started_at = None
+		repost(running)
+		running.deduplicate_similar_repost()
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
+
+	def test_dependant_repost_keeps_requests_queued_after_start(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
+		running.flags.repost_started_at = add_to_date(now(), seconds=-60)
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		queued_during_run = self.make_queued_item_repost(fg_item, add_days(today(), -8))
+
+		stock_ledger.skip_reposts_covered_by_dependant_repost(
+			running,
+			{(fg_item, "_Test Warehouse - _TC"): get_combine_datetime(add_days(today(), -10), "00:00:00")},
+		)
+
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
+		)
 
 	def test_clear_old_logs(self):
 		# create 10 logs
