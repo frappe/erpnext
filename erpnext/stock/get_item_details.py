@@ -873,58 +873,47 @@ def _get_item_tax_template_from_item_group(args, item_group, out=None):
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 	if out is None:
 		out = {}
-	taxes_with_validity = []
-	taxes_with_no_validity = []
+	taxes = sorted(get_applicable_item_taxes(args, taxes), key=get_item_tax_priority, reverse=True)
+	category_templates = [
+		tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(args.get("tax_category"))
+	]
 
+	if for_validate:
+		return category_templates
+
+	# do not change if already a valid template
+	if args.get("item_tax_template") in (category_templates or {t.item_tax_template for t in taxes}):
+		out["item_tax_template"] = args.get("item_tax_template")
+		return args.get("item_tax_template")
+
+	if category_templates:
+		out["item_tax_template"] = category_templates[0]
+		return category_templates[0]
+	return None
+
+
+def get_applicable_item_taxes(args, taxes) -> list:
+	validation_date = getdate(
+		args.get("bill_date") or args.get("posting_date") or args.get("transaction_date")
+	)
+	applicable_taxes = []
 	for tax in taxes:
 		disabled, tax_company = frappe.get_cached_value(
 			"Item Tax Template", tax.item_tax_template, ["disabled", "company"]
 		)
-		if not disabled and tax_company == args["company"]:
-			if tax.valid_from or tax.maximum_net_rate:
-				# In purchase Invoice first preference will be given to supplier invoice date
-				# if supplier date is not present then posting date
+		if (
+			not disabled
+			and tax_company == args["company"]
+			and get_item_tax_valid_from(tax) <= validation_date
+			and is_within_valid_range(args, tax)
+		):
+			applicable_taxes.append(tax)
 
-				validation_date = (
-					args.get("bill_date") or args.get("posting_date") or args.get("transaction_date")
-				)
+	return applicable_taxes
 
-				if get_item_tax_valid_from(tax) <= getdate(validation_date) and is_within_valid_range(
-					args, tax
-				):
-					taxes_with_validity.append(tax)
-			else:
-				taxes_with_no_validity.append(tax)
 
-	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key=get_item_tax_valid_from, reverse=True)
-	else:
-		taxes = taxes_with_no_validity
-
-	if for_validate:
-		return [
-			tax.item_tax_template
-			for tax in taxes
-			if (
-				cstr(tax.tax_category) == cstr(args.get("tax_category"))
-				and (tax.item_tax_template not in taxes)
-			)
-		]
-
-	# all templates have validity and no template is valid
-	if not taxes_with_validity and (not taxes_with_no_validity):
-		return None
-
-	# do not change if already a valid template
-	if args.get("item_tax_template") in {t.item_tax_template for t in taxes}:
-		out["item_tax_template"] = args.get("item_tax_template")
-		return args.get("item_tax_template")
-
-	for tax in taxes:
-		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
-			out["item_tax_template"] = tax.item_tax_template
-			return tax.item_tax_template
-	return None
+def get_item_tax_priority(tax) -> tuple:
+	return get_item_tax_valid_from(tax), flt(tax.maximum_net_rate) > 0
 
 
 def get_item_tax_valid_from(tax) -> datetime.date:
