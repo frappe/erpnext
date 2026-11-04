@@ -832,7 +832,12 @@ erpnext.work_order = {
 	},
 
 	set_default_warehouse: function (frm) {
+<<<<<<< HEAD
 		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
+=======
+		if (frm.doc.company && !frm.doc.wip_warehouse) {
+			let company = frm.doc.company;
+>>>>>>> 46696ec (fix(manufacturing): set default WIP warehouse on work order made from BOM)
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
 				callback: function (r) {
