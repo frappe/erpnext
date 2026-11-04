@@ -315,7 +315,12 @@ class WorkOrder(Document):
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
 
+<<<<<<< HEAD
 		self.enable_auto_reserve_stock()
+=======
+		self.set_required_item_amounts()
+		WorkOrderStockReservation(self).enable_auto_reserve_stock()
+>>>>>>> dafe900 (fix(manufacturing): recompute work order item amount on save)
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
 
@@ -2697,10 +2702,18 @@ class WorkOrder(Document):
 			# Reserve the final product for the sales order.
 			item_details = self.get_so_details()
 
+<<<<<<< HEAD
 		for item in item_details:
 			qty_to_reserve = flt(item.stock_qty) - flt(item.stock_reserved_qty + item.delivered_qty)
 			if qty_to_reserve <= 0:
 				continue
+=======
+	def set_required_item_amounts(self):
+		return RequiredItemsService(self).set_required_item_amounts()
+
+	def update_transferred_qty_for_required_items(self):
+		return RequiredItemsService(self).update_transferred_qty_for_required_items()
+>>>>>>> dafe900 (fix(manufacturing): recompute work order item amount on save)
 
 			warehouse = item.warehouse
 			if (
