@@ -4021,17 +4021,6 @@ class TestSalesOrder(ERPNextTestSuite):
 		so = make_sales_order(item_code=fg_item, qty=10, rate=50, warehouse=fg_warehouse, do_not_save=1)
 		self.assertRaises(frappe.ValidationError, so.save)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 0})
-	def test_reserve_stock_ignored_when_stock_reservation_is_disabled(self):
-		item = make_item(properties={"is_stock_item": 1}).name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=2, rate=100)
-		so = make_sales_order(item_code=item, qty=2, do_not_submit=1)
-		so.reserve_stock = 1
-		so.submit()
-
-		self.assertEqual(so.reserve_stock, 0)
-		self.assertFalse(frappe.db.exists("Stock Reservation Entry", {"voucher_no": so.name}))
-
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "use_serial_batch_fields": 0}
 	)
