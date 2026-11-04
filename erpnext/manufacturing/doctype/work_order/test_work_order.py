@@ -4894,6 +4894,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 0})
 	def test_reserve_stock_ignored_when_stock_reservation_is_disabled(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
@@ -4913,6 +4914,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Stock Reservation Entry", {"voucher_no": wo.name}))
 
 >>>>>>> c427c01 (test: Work Order does not reserve stock when stock reservation is disabled)
+=======
+>>>>>>> 7282a70 (test: drop reserve stock tests)
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings",
 		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},

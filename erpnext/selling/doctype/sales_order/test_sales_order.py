@@ -3799,6 +3799,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, so.save)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	def test_sales_team_allocated_percentage_tolerates_floating_point_drift(self):
 		# 10.0 + 58.02 + 31.98 accumulates to 100.00000000000001 in binary floating point
 		so = make_sales_order(do_not_save=True)
@@ -3822,6 +3823,8 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertFalse(frappe.db.exists("Stock Reservation Entry", {"voucher_no": so.name}))
 >>>>>>> d9dc7c3 (test: Sales Order does not reserve stock when stock reservation is disabled)
 
+=======
+>>>>>>> 7282a70 (test: drop reserve stock tests)
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "use_serial_batch_fields": 0}
 	)
