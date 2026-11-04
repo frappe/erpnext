@@ -26,7 +26,7 @@ from erpnext.stock.doctype.item.item import (
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details, get_item_tax_template
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -319,33 +319,6 @@ class TestItem(ERPNextTestSuite):
 				json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template]
 			)
 
-<<<<<<< HEAD
-=======
-		data = expected_item_tax_template[-2]
-		details = get_item_details(
-			frappe._dict(
-				{
-					"item_code": data["item_code"],
-					"tax_category": data["tax_category"],
-					"company": "_Test Company",
-					"price_list": "_Test Price List",
-					"currency": "INR",
-					"doctype": "Sales Order",
-					"conversion_rate": 1,
-					"price_list_currency": "INR",
-					"plc_conversion_rate": 1,
-					"order_type": "Sales",
-					"customer": "_Test Customer",
-					"conversion_factor": 1,
-					"price_list_uom_dependant": 1,
-					"ignore_pricing_rule": 1,
-				}
-			)
-		)
-
-		self.assertEqual(details.item_tax_template, data["item_tax_template"])
-		self.assertEqual(json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template])
-
 	def test_item_follows_item_group_tax_changes(self):
 		item_group = frappe.get_doc(
 			{
@@ -364,7 +337,6 @@ class TestItem(ERPNextTestSuite):
 		ctx = frappe._dict(item_code=item.name, tax_category="", company="_Test Company")
 		self.assertEqual(get_item_tax_template(ctx), "_Test Account Excise Duty @ 12 - _TC")
 
->>>>>>> c941940 (test(stock): item follows item group tax changes)
 	def test_item_defaults(self):
 		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
 		make_item(
