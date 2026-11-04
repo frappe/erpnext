@@ -88,9 +88,15 @@ class TestBOM(FrappeTestCase):
 		bom = frappe.get_doc("BOM", {"item": "_Test FG Item 2", "is_default": 1})
 		self.assertEqual(_get_default_bom_in_item(), bom.name)
 
+		next_default = frappe.db.get_value(
+			"BOM",
+			{"item": "_Test FG Item 2", "docstatus": 1, "is_active": 1, "name": ("!=", bom.name)},
+			"name",
+			order_by="creation desc",
+		)
 		bom.is_active = 0
 		bom.save()
-		self.assertEqual(_get_default_bom_in_item(), "")
+		self.assertEqual(_get_default_bom_in_item(), cstr(next_default))
 
 		bom.is_active = 1
 		bom.is_default = 1
@@ -1101,6 +1107,23 @@ class TestBOM(FrappeTestCase):
 
 		parent = make_bom(item=fg_item, raw_materials=[sub_item])
 		self.assertAlmostEqual(parent.items[0].rate, sub_bom.total_cost / 9, places=2)
+
+	def test_cancelling_the_default_bom_promotes_another_active_bom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item("_Test Default BOM RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item("_Test Default BOM FG", {"is_stock_item": 1}).name
+		first = make_bom(item=fg_item, raw_materials=[rm_item])
+		second = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2, do_not_save=True)
+		second.is_default = 0
+		second.insert()
+		second.submit()
+		self.assertEqual(frappe.db.get_value("Item", fg_item, "default_bom"), first.name)
+
+		first.reload()
+		first.cancel()
+		self.assertEqual(frappe.db.get_value("Item", fg_item, "default_bom"), second.name)
+		self.assertEqual(frappe.db.get_value("BOM", second.name, "is_default"), 1)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
