@@ -2786,6 +2786,11 @@ def set_unreserved_serial_no_filter(filters, kwargs) -> bool:
 	return True
 
 
+def get_batch_expiry_date_column(serial_no):
+	batch = frappe.qb.DocType("Batch")
+	return frappe.qb.from_(batch).select(batch.expiry_date).where(batch.name == serial_no.batch_no)
+
+
 def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
 	doctype = frappe.qb.DocType("Serial No")
 
@@ -2794,6 +2799,9 @@ def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
 
 	if kwargs.based_on == "LIFO":
 		query = query.orderby(order_by_column, order=frappe.query_builder.Order.desc)
+	elif kwargs.based_on == "Expiry":
+		expiry_date = Coalesce(get_batch_expiry_date_column(doctype), doctype.amc_expiry_date, "9999-12-31")
+		query = query.orderby(expiry_date).orderby(doctype.creation)
 	else:
 		query = query.orderby(order_by_column)
 
