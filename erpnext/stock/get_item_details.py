@@ -889,7 +889,9 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 					args.get("bill_date") or args.get("posting_date") or args.get("transaction_date")
 				)
 
-				if getdate(tax.valid_from) <= getdate(validation_date) and is_within_valid_range(args, tax):
+				if get_item_tax_valid_from(tax) <= getdate(validation_date) and is_within_valid_range(
+					args, tax
+				):
 					taxes_with_validity.append(tax)
 			else:
 				taxes_with_no_validity.append(tax)
