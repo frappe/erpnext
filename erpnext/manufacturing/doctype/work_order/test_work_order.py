@@ -8255,7 +8255,53 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.save()
 		self.assertEqual([(d.rate, d.amount) for d in wo.required_items], [(250, 1250), (40, 80)])
 
+<<<<<<< HEAD
 >>>>>>> a649d08 (test(manufacturing): edited work order items get fresh rate)
+=======
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"allow_editing_of_items_and_quantities_in_work_order": 1}
+	)
+	def test_added_required_item_rate_is_in_company_currency(self):
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": f"_Test USD Buying {frappe.generate_hash(length=6)}",
+				"currency": "USD",
+				"buying": 1,
+			}
+		).insert()
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		added_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		for item_code, rate in ((rm_item, 2), (added_item, 10)):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"price_list": price_list.name,
+					"item_code": item_code,
+					"price_list_rate": rate,
+				}
+			).insert()
+
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list.name,
+			currency="USD",
+			conversion_rate=80,
+		)
+		wo = make_review_work_order(fg_item, bom.name, 1, submit=False)
+		wo.append(
+			"required_items",
+			{"item_code": added_item, "required_qty": 1, "source_warehouse": "_Test Warehouse - _TC"},
+		)
+		wo.save()
+
+		row = wo.required_items[1]
+		self.assertEqual(row.rate, flt(10 * bom.plc_conversion_rate, row.precision("rate")))
+
+>>>>>>> eb85473 (test(manufacturing): added work order item rate is in company currency)
 
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": wo.name}, order_by="sequence_id, creation", pluck="name"
