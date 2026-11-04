@@ -157,12 +157,22 @@ def get_billed_amount_against_pr(pr_items: list) -> dict:
 	if not pr_items:
 		return {}
 
+	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
 		frappe.qb.from_(purchase_invoice_item)
+		.inner_join(purchase_invoice)
+		.on(purchase_invoice_item.parent == purchase_invoice.name)
 		.select(fn.Sum(purchase_invoice_item.amount).as_("billed_amt"), purchase_invoice_item.pr_detail)
-		.where((purchase_invoice_item.pr_detail.isin(pr_items)) & (purchase_invoice_item.docstatus == 1))
+		.where(
+			(purchase_invoice_item.pr_detail.isin(pr_items))
+			& (purchase_invoice_item.docstatus == 1)
+			& (
+				(purchase_invoice.is_return == 0)
+				| (purchase_invoice.update_billed_amount_in_purchase_receipt == 1)
+			)
+		)
 		.groupby(purchase_invoice_item.pr_detail)
 	).run(as_dict=1)
 

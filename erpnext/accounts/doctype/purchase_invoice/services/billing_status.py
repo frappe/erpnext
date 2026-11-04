@@ -101,10 +101,18 @@ class BillingStatusService:
 		pr_details = [d.get("pr_detail") for d in self.doc.get("items") if d.get("pr_detail")]
 		if pr_details:
 			doctype = frappe.qb.DocType("Purchase Invoice Item")
+			invoice = frappe.qb.DocType("Purchase Invoice")
 			query = (
 				frappe.qb.from_(doctype)
+				.inner_join(invoice)
+				.on(invoice.name == doctype.parent)
 				.select(doctype.pr_detail, Sum(doctype.amount))
-				.where(doctype.pr_detail.isin(pr_details) & doctype.docstatus == 1)
+				.where(
+					(doctype.pr_detail.isin(pr_details))
+					& (doctype.docstatus == 1)
+					# a debit note that does not update the receipt's billed amount is not counted
+					& ((invoice.is_return == 0) | (invoice.update_billed_amount_in_purchase_receipt == 1))
+				)
 				.groupby(doctype.pr_detail)
 			)
 
