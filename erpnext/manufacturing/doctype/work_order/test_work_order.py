@@ -22,8 +22,12 @@ from frappe.utils import (
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_stock_entry_from_jc
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.manufacturing.doctype.production_plan.test_production_plan import (
+	create_production_plan,
+	make_bom,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import (
+	get_upstream_process_loss,
 	make_material_request,
 	make_stock_entry,
 	make_stock_return_entry,
@@ -469,6 +473,69 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		allow_overproduction("overproduction_percentage_for_sales_order", 0)
 
+	def test_sales_order_counts_planned_process_loss_from_production_plan(self):
+		fg_item = make_item("_Test SO Plan Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		rm_item = make_item("_Test SO Plan Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20)
+		so = make_sales_order(item_code=fg_item, qty=80)
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+		plan = create_production_plan(
+			get_items_from="Sales Order", sales_order=so, consider_process_loss=1, skip_getting_mr_items=True
+		)
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		self.assertEqual(work_order.qty, 100)
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 80)
+
+	def test_sales_order_work_order_ignores_bom_process_loss(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		fg_item = make_item("_Test SO Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		rm_item = make_item("_Test SO Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20)
+		so = make_sales_order(item_code=fg_item, qty=80)
+		allow_overproduction("overproduction_percentage_for_sales_order", 0)
+
+		self.assertEqual(get_work_order_items(so.name)[0]["pending_qty"], 80)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, sales_order=so.name, qty=81, stock_uom="Kg", do_not_save=True
+		)
+		work_order.sales_order_item = so.items[0].name
+		self.assertRaises(OverProductionError, work_order.save)
+
+	def test_sales_order_work_order_qty_follows_recorded_process_loss(self):
+		fg_item = make_item("_Test SO Recorded Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		rm_item = make_item("_Test SO Recorded Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20)
+		so = make_sales_order(item_code=fg_item, qty=80)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			sales_order=so.name,
+			qty=80,
+			stock_uom="Kg",
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+			do_not_save=True,
+		)
+		work_order.sales_order_item = so.items[0].name
+		work_order.submit()
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=80, basic_rate=10
+		)
+
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 80))
+		entry.process_loss_percentage = 12.5
+		entry.process_loss_qty = 10
+		for item in entry.items:
+			if item.is_finished_item:
+				item.qty = 70
+		entry.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 70)
+
 	def test_work_order_with_non_stock_item(self):
 		items = {
 			"Finished Good Test Item For non stock": 1,
@@ -619,6 +686,58 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		self.assertEqual(work_order.get_status(), "Completed")
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 5}
+	)
+	def test_operation_targets_include_upstream_process_loss(self):
+		for operations, upstream_losses, total_loss in (
+			([(1, 95, 5), (2, 92, 3), (3, 90, 2)], [0, 5, 8], 10),
+			([(1, 95, 5), (1, 97, 3), (2, 93, 2)], [0, 0, 5], 7),
+			([(1, 95, 5), (2, 90, 10), (3, 90, 10)], [0, 5, 10], 10),
+			([(1, 100, 5), (2, 100, 0)], [0, 5], 5),
+			([(0, 95, 5), (0, 95, 5)], [0, 0], 5),
+			([(1, 0, 100), (2, 0, 0)], [0, 100], 100),
+		):
+			with self.subTest(operations=operations):
+				work_order = frappe.get_doc(
+					{
+						"doctype": "Work Order",
+						"qty": 100,
+						"operations": [
+							{
+								"sequence_id": sequence_id,
+								"completed_qty": completed_qty,
+								"process_loss_qty": process_loss_qty,
+							}
+							for sequence_id, completed_qty, process_loss_qty in operations
+						],
+					}
+				)
+				self.assertEqual(
+					[get_upstream_process_loss(work_order, row) for row in work_order.operations],
+					upstream_losses,
+				)
+				self.assertEqual(get_upstream_process_loss(work_order), total_loss)
+				work_order.update_operation_status()
+				self.assertTrue(all(row.status == "Completed" for row in work_order.operations))
+				work_order.track_semi_finished_goods = 1
+				self.assertEqual(get_upstream_process_loss(work_order), 0)
+
+	def test_operation_target_rounds_upstream_process_loss(self):
+		work_order = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"qty": 0.3,
+				"operations": [
+					{"sequence_id": 1, "completed_qty": 0.2, "process_loss_qty": 0.1},
+					{"sequence_id": 2, "completed_qty": 0, "process_loss_qty": 0.2},
+					{"sequence_id": 3},
+				],
+			}
+		)
+		work_order.update_operation_status()
+		self.assertEqual(work_order.operations[2].status, "Completed")
 
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []

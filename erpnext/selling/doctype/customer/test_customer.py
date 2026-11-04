@@ -259,6 +259,12 @@ class TestCustomer(ERPNextTestSuite):
 		customer.mobile_no = "8989889890"
 		customer.save()
 		self.assertTrue(customer.customer_primary_contact)
+
+		# another customer's contact cannot be made primary
+		other_customer = frappe.get_doc("Customer", "_Test Customer")
+		other_customer.customer_primary_contact = customer.customer_primary_contact
+		self.assertRaises(frappe.ValidationError, other_customer.save)
+
 		frappe.delete_doc("Customer", customer.name)
 
 	def test_disabled_customer(self):
@@ -397,6 +403,14 @@ class TestCustomer(ERPNextTestSuite):
 		)
 
 	def test_customer_credit_limit_on_change(self):
+		new_customer = frappe.new_doc("Customer")
+		new_customer.customer_name = "_Test Duplicate Credit Limit"
+		new_customer.customer_group = "_Test Customer Group"
+		new_customer.territory = "_Test Territory"
+		new_customer.append("credit_limits", {"credit_limit": 100, "company": "_Test Company"})
+		new_customer.append("credit_limits", {"credit_limit": 1000000, "company": "_Test Company"})
+		self.assertRaises(frappe.ValidationError, new_customer.insert)
+
 		outstanding_amt = self.get_customer_outstanding_amount()
 		customer = frappe.get_doc("Customer", "_Test Customer")
 		customer.append(

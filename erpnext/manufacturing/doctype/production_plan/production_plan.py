@@ -31,7 +31,11 @@ from erpnext.manufacturing.doctype.production_plan.services.material_request imp
 	get_warehouse_list,
 	set_default_warehouses,
 )
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_plan_process_loss_percentage,
+)
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+	ProductionPlanStockReservation,
 	cancel_stock_reservation_entries,
 	get_reserved_qty_for_production_plan,
 	get_reserved_qty_for_sub_assembly,
@@ -88,6 +92,7 @@ class ProductionPlan(Document):
 		combine_sub_items: DF.Check
 		company: DF.Link
 		consider_minimum_order_qty: DF.Check
+		consider_process_loss: DF.Check
 		customer: DF.Link | None
 		for_warehouse: DF.Link | None
 		from_date: DF.Date | None
@@ -148,6 +153,7 @@ class ProductionPlan(Document):
 
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
+		self.set_process_loss_percentage()
 		self.calculate_total_planned_qty()
 		self.set_status()
 		self._rename_temporary_references()
@@ -251,6 +257,10 @@ class ProductionPlan(Document):
 		for item in self.po_items:
 			if not item.get("sales_order") or not item.get("material_request"):
 				item.pending_qty = item.planned_qty
+
+	def set_process_loss_percentage(self):
+		for item in self.po_items:
+			item.process_loss_percentage = get_plan_process_loss_percentage(self, item.bom_no)
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
@@ -482,22 +492,6 @@ class ProductionPlan(Document):
 		):
 			frappe.delete_doc("Work Order", d.name)
 
-	def cancel_untouched_stock_reservations(self):
-		sre_list = frappe.get_all(
-			"Stock Reservation Entry",
-			filters={
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"docstatus": 1,
-				"status": ("in", ["Reserved", "Partially Reserved"]),
-			},
-			pluck="name",
-		)
-		for sre_name in sre_list:
-			sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
-			sre_doc.flags.ignore_permissions = True
-			sre_doc.cancel()
-
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
@@ -509,7 +503,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
-			self.cancel_untouched_stock_reservations()
+			ProductionPlanStockReservation(self).release_untouched()
 			self.update_bin_qty()
 			self.delete_production_plan_schedule()
 			return

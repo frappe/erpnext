@@ -91,7 +91,12 @@ class GlobalDefaults(Document):
 	def toggle_in_words(self):
 		self.sync_property_setters(
 			IN_WORDS_DOCTYPES,
-			[("in_words", "hidden", "Check"), ("in_words", "print_hide", "Check")],
+			[("in_words", "hidden", "Check")],
+			cint(self.disable_in_words),
+		)
+		self.sync_property_setters(
+			ROUNDED_TOTAL_DOCTYPES,
+			[("in_words", "print_hide", "Check")],
 			cint(self.disable_in_words),
 		)
 

@@ -877,6 +877,53 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(reco.difference_amount, 17500)
 		self.assert_reco_difference_matches_gl(reco.name)
 
+	def test_repost_refreshes_only_the_reposted_row(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.doctype.stock_reconciliation import stock_reconciliation
+
+		warehouse = "_Test Warehouse - _TC"
+		reposted_item, other_item = self.make_item().name, self.make_item().name
+		for item_code in (reposted_item, other_item):
+			make_stock_entry(
+				item_code=item_code,
+				target=warehouse,
+				qty=100,
+				basic_rate=100,
+				posting_date=add_days(nowdate(), -5),
+			)
+
+		reco = create_stock_reconciliation(
+			item_code=reposted_item,
+			warehouse=warehouse,
+			qty=100,
+			rate=200,
+			posting_date=add_days(nowdate(), -2),
+			do_not_save=True,
+		)
+		reco.append(
+			"items", {"item_code": other_item, "warehouse": warehouse, "qty": 100, "valuation_rate": 300}
+		)
+		reco.submit()
+		reposted_row = next(row.name for row in reco.items if row.item_code == reposted_item)
+
+		with patch.object(
+			stock_reconciliation,
+			"get_row_stock_value_difference",
+			wraps=stock_reconciliation.get_row_stock_value_difference,
+		) as get_row_difference:
+			make_stock_entry(
+				item_code=reposted_item,
+				target=warehouse,
+				qty=50,
+				basic_rate=40,
+				posting_date=add_days(nowdate(), -3),
+			)
+
+		self.assertEqual({call.args[2] for call in get_row_difference.call_args_list}, {reposted_row})
+		reco.load_from_db()
+		self.assertEqual(reco.difference_amount, (20000 - 12000) + (30000 - 10000))
+		self.assert_reco_difference_matches_gl(reco.name)
+
 	def test_difference_amount_synced_with_gl_after_repost_batched(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,

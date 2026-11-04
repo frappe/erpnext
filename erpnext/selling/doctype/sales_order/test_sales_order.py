@@ -1392,7 +1392,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			)
 
 	def test_update_items_allows_existing_unconfigured_uom(self):
-		legacy_item, item = make_item(), make_item()
+		legacy_item = make_item(uoms=[{"uom": "Box", "conversion_factor": 2}])
+		item = make_item()
 		so = make_sales_order(
 			item_list=[
 				{
@@ -1405,6 +1406,9 @@ class TestSalesOrder(ERPNextTestSuite):
 				{"item_code": item.name, "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 			]
 		)
+		legacy_item.reload()
+		legacy_item.uoms = [row for row in legacy_item.uoms if row.uom != "Box"]
+		legacy_item.save()
 		trans_items = json.dumps(
 			[
 				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 100, "uom": row.uom}
@@ -1416,6 +1420,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			update_child_qty_rate("Sales Order", trans_items, so.name)
 
 		so.reload()
+		self.assertEqual(so.items[0].uom, "Box")
+		self.assertEqual(so.items[0].conversion_factor, 2)
 		self.assertEqual(so.items[1].qty, 5)
 
 	def test_update_child_preserves_conversion_factor_precision(self):
@@ -2990,12 +2996,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.insert()
@@ -3006,7 +3012,7 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.items[0].rate = so.items[0].price_list_rate = 0
 		so.save()
 		so.submit()
@@ -3014,7 +3020,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.net_total, 0)
 		self.assertEqual(so.billing_status, "Not Billed")
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.price_list = "_Test Price List"
 		si.items[0].rate = 0
 		si.items[0].price_list_rate = 0
@@ -3038,7 +3044,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.save()
 		so.submit()
 
@@ -3049,7 +3055,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn1.taxes.clear()
 		dn1.save().submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.items[0].delivery_note = dn1.name
@@ -3073,7 +3079,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.per_billed, 100)
 		self.assertEqual(so.per_delivered, 50)
 
-		cr_note = create_sales_invoice(is_return=1, qty=-1, do_not_submit=True)
+		cr_note = create_sales_invoice(is_return=1, qty=-1, uom="_Test UOM", do_not_submit=True)
 		cr_note.items[0].qty = -5
 		cr_note.items[0].sales_order = so.name
 		cr_note.items[0].so_detail = so.items[0].name
