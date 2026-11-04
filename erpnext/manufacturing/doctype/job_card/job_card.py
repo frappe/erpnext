@@ -1130,7 +1130,10 @@ class JobCard(Document):
 
 
 def get_sorted_working_hours(workstation_doc):
-	return sorted(workstation_doc.working_hours, key=lambda row: get_time(row.start_time))
+	return sorted(
+		(row for row in workstation_doc.working_hours if row.enabled),
+		key=lambda row: get_time(row.start_time),
+	)
 
 
 @frappe.whitelist()
