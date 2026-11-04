@@ -185,7 +185,7 @@ def _variant_item_args(item, wo_doc, bom_doc):
 	item_data = get_item_details(args.item_code, skip_bom_info=True)
 	args.update(item_data)
 
-	args["rate"] = _variant_item_rate(args, wo_doc, bom_doc)
+	args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 	if not args.source_warehouse:
 		default = get_item_defaults(item.get("variant_item_code"), wo_doc.company)
 		args["source_warehouse"] = default.default_warehouse
@@ -195,7 +195,7 @@ def _variant_item_args(item, wo_doc, bom_doc):
 	return args
 
 
-def _variant_item_rate(args, wo_doc, bom_doc):
+def get_raw_material_rate(args, wo_doc, bom_doc):
 	return get_bom_item_rate(
 		{
 			"company": wo_doc.company,
