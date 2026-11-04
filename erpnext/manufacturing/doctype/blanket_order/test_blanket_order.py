@@ -193,6 +193,22 @@ class TestBlanketOrder(FrappeTestCase):
 		self.assertEqual(po.items[0].blanket_order_rate, 100)
 		self.assertIn("differs from the rate", str(frappe.message_log[-1]))
 
+	def test_party_and_order_type_are_enforced(self):
+		bo = new_blanket_order(blanket_order_type="Selling")
+		bo.supplier = "_Test Supplier"
+		self.assertRaises(frappe.MandatoryError, bo.insert)
+
+		bo.customer = "_Test Customer"
+		bo.insert()
+		self.assertIsNone(bo.supplier)
+		bo.submit()
+
+		frappe.flags.args.doctype = "Purchase Order"
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be made from", make_order, bo.name)
+
+		untyped = new_blanket_order(blanket_order_type=None)
+		self.assertRaises(frappe.MandatoryError, untyped.insert)
+
 	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg", "is_stock_item": 0}).name
@@ -384,3 +400,13 @@ def receive_purchase_order(po, qty):
 
 def blanket_order_ordered_qty(bo):
 	return frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty")
+
+
+def new_blanket_order(blanket_order_type):
+	bo = frappe.new_doc("Blanket Order")
+	bo.blanket_order_type = blanket_order_type
+	bo.company = "_Test Company"
+	bo.from_date = today()
+	bo.to_date = add_months(bo.from_date, months=12)
+	bo.append("items", {"item_code": "_Test Item", "qty": 10, "rate": 100})
+	return bo
