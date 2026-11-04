@@ -21,7 +21,10 @@ from pypika import functions as fn
 from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	clear_reserve_stock_if_disabled,
+)
 
 _SCIO_FIELDS = [
 	"item_code",
@@ -82,6 +85,11 @@ class WorkOrderStockReservation:
 			),
 			title=_("Target Warehouse Reservation Error"),
 		)
+
+	def clear_reserve_stock_if_disabled(self):
+		"""Subcontracting Inward Work Orders always reserve the customer's materials."""
+		if not self.doc.subcontracting_inward_order:
+			clear_reserve_stock_if_disabled(self.doc)
 
 	def set_reserve_stock(self):
 		for row in self.doc.required_items:
