@@ -1897,6 +1897,12 @@ def _get_blanket_order_details(args):
 	if args.item_code:
 		bo = frappe.qb.DocType("Blanket Order")
 		bo_item = frappe.qb.DocType("Blanket Order Item")
+		allowance = flt(
+			frappe.db.get_single_value(
+				"Selling Settings" if args.doctype in ("Sales Order", "Quotation") else "Buying Settings",
+				"blanket_order_allowance",
+			)
+		)
 
 		query = (
 			frappe.qb.from_(bo)
@@ -1907,7 +1913,11 @@ def _get_blanket_order_details(args):
 				& (bo_item.item_code == args.item_code)
 				& (bo.docstatus == 1)
 				& (bo.name == bo_item.parent)
+				& (bo_item.ordered_qty < bo_item.qty * (1 + allowance / 100))
 			)
+			.orderby(bo.to_date)
+			.orderby(bo.name)
+			.limit(1)
 		)
 
 		if args.customer and args.doctype == "Sales Order":
@@ -1917,7 +1927,9 @@ def _get_blanket_order_details(args):
 		if args.blanket_order:
 			query = query.where(bo.name == args.blanket_order)
 		if args.transaction_date:
-			query = query.where(bo.to_date >= args.transaction_date)
+			query = query.where(
+				(bo.from_date <= args.transaction_date) & (bo.to_date >= args.transaction_date)
+			)
 
 		blanket_order_details = query.run(as_dict=True)
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ""
