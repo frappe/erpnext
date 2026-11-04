@@ -35,17 +35,14 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-<<<<<<< HEAD
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
-from erpnext.stock.get_item_details import get_conversion_factor
-=======
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
 	clear_reserve_stock_if_disabled,
 )
->>>>>>> 6f8b495 (fix(manufacturing): ignore Reserve Stock on a Production Plan when stock reservation is disabled)
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
