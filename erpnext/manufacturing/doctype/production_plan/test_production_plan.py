@@ -4484,6 +4484,31 @@ class TestProductionPlan(ERPNextTestSuite):
 		# RM Item 2 (FG1 (100) + FG2 (50) + FG4 (10) - 80 sub assembly stock)
 		self.assertEqual(mr_items_dict["RM Item 2"], 80)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 0})
+	def test_reserve_stock_ignored_when_stock_reservation_is_disabled(self):
+		warehouse = "_Test Warehouse - _TC"
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=1)
+		make_stock_entry(item_code=raw_material, target=warehouse, qty=5, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=finished_good,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for row in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", row)
+		plan.submit()
+
+		self.assertEqual(plan.reserve_stock, 0)
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", {"voucher_no": plan.name}))
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_negative_stock": 0}
 	)
