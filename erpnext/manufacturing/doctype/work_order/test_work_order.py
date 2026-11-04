@@ -7238,8 +7238,8 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(flt(row.bom_qty), 8.0)
 		# qty = (bom_secondary_qty / bom_qty) * wo_qty = (3 / 8) * 20 = 7.5
 		self.assertEqual(flt(row.qty, 6), 7.5)
-		# amount = cost * qty = 50 * 7.5 = 375
-		self.assertEqual(flt(row.amount, 6), 375.0)
+		# amount = (cost / bom_qty) * wo_qty = (50 / 8) * 20 = 125
+		self.assertEqual(flt(row.amount, 6), 125.0)
 
 	def test_secondary_items_reflect_manufacture_entry(self):
 		"""Once a manufacture entry exists, secondary items reflect what was generated, not the BOM."""
