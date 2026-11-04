@@ -242,7 +242,7 @@ def get_preview_from_template(
 	return bsi.get_preview_from_template(import_file, google_sheets_url)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def form_start_import(data_import: str):
 	bsi = frappe.get_doc("Bank Statement Import", data_import)
 	bsi.check_permission("write")
