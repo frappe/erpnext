@@ -2,53 +2,22 @@
 # See license.txt
 
 import frappe
-<<<<<<< HEAD
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.www.printview import is_visible
 
 
 class TestGlobalDefaults(FrappeTestCase):
-	def test_disable_in_words_covers_payment_and_subcontracting_receipt(self):
-		for disabled in (1, 0):
-			with self.subTest(disabled=disabled):
-				with change_settings("Global Defaults", disable_in_words=disabled):
-=======
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.www.printview import is_visible
-
-from erpnext.tests.utils import ERPNextTestSuite
-
-
-class TestGlobalDefaults(ERPNextTestSuite):
-	def test_unrelated_save_preserves_pos_profile_rounding(self):
-		defaults = frappe.get_doc("Global Defaults")
-		defaults._doc_before_save = frappe._dict(disable_rounded_total=defaults.disable_rounded_total)
-
-		with (
-			patch("frappe.db.set_default"),
-			patch("frappe.db.set_value"),
-			patch("frappe.clear_cache"),
-			patch.object(defaults, "toggle_rounded_total"),
-			patch.object(defaults, "toggle_in_words"),
-			patch.object(defaults, "set_disable_rounded_total_on_pos_profiles") as update_profiles,
-		):
-			defaults.on_update()
-			update_profiles.assert_not_called()
-
-			defaults.disable_rounded_total = 1 - int(defaults.disable_rounded_total)
-			defaults.on_update()
-			update_profiles.assert_called_once_with()
-
 	def test_disable_in_words_preserves_payment_and_subcontracting_print_defaults(self):
 		for doctype in ("Payment Entry", "Subcontracting Receipt"):
 			make_property_setter(doctype, "in_words", "print_hide", 1, "Check")
 
-		with self.change_settings("Global Defaults", disable_in_words=0):
+		with change_settings("Global Defaults", disable_in_words=0):
 			defaults = frappe.get_doc("Global Defaults")
 			for disabled in (0, 1, 0):
 				with self.subTest(disabled=disabled):
 					defaults.disable_in_words = disabled
 					defaults.save()
->>>>>>> c3f1e1e (fix(setup): preserve in-words print defaults)
 					for doctype in ("Payment Entry", "Subcontracting Receipt"):
 						field = frappe.get_meta(doctype).get_field("in_words")
 						self.assertEqual(field.hidden, disabled)
@@ -61,7 +30,7 @@ class TestGlobalDefaults(ERPNextTestSuite):
 					self.assertEqual(field.hidden, disabled)
 					self.assertEqual(field.print_hide, disabled)
 
-			defaults.hide_currency_symbol = 1 - int(defaults.hide_currency_symbol)
+			defaults.hide_currency_symbol = "No" if defaults.hide_currency_symbol == "Yes" else "Yes"
 			defaults.save()
 			for doctype in ("Payment Entry", "Subcontracting Receipt"):
 				self.assertEqual(frappe.get_meta(doctype).get_field("in_words").print_hide, 1)
@@ -71,7 +40,7 @@ class TestGlobalDefaults(ERPNextTestSuite):
 			make_property_setter(doctype, "in_words", "print_hide", 0, "Check", is_system_generated=False)
 
 		for disabled in (1, 0):
-			with self.change_settings("Global Defaults", disable_in_words=disabled):
+			with change_settings("Global Defaults", disable_in_words=disabled):
 				for doctype in ("Payment Entry", "Subcontracting Receipt"):
 					field = frappe.get_meta(doctype).get_field("in_words")
 					self.assertEqual(field.hidden, disabled)
