@@ -2037,6 +2037,16 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 	)
 
 
+def _add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card=None):
+	"""FG-based costs of the multi-level BOM tree, next to the costs of its operations."""
+	if job_card or not work_order.use_multi_level_bom:
+		return
+
+	unit_cost = get_op_cost_from_sub_assemblies(work_order.bom_no, skip_boms_with_operations=True)
+	if unit_cost:
+		_append_operating_cost(stock_entry, expense_account, unit_cost * flt(stock_entry.fg_completed_qty))
+
+
 @frappe.request_cache
 def get_component_account(parent, company):
 	return frappe.db.get_value(
@@ -2081,10 +2091,13 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 			job_card=job_card,
 		)
 
-		if not cost_added and not job_card:
+		if cost_added:
+			_add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card)
+		elif not job_card:
 			if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
 				for operation in work_order.operations:
 					_add_operation_cost(stock_entry, work_order, operation, expense_account)
+				_add_fg_based_operating_cost(stock_entry, work_order, expense_account)
 			else:
 				_append_operating_cost(
 					stock_entry, expense_account, remaining_operating_cost * flt(stock_entry.fg_completed_qty)
@@ -2324,25 +2337,30 @@ def make_variant_bom(
 	return doc
 
 
-def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0, skip_boms_with_operations=False):
+	"""Per unit operating cost of the BOM tree. Skipped BOMs are costed by Work Order operations."""
 	conversion_rate = flt(frappe.get_cached_value("BOM", bom_no, "conversion_rate")) or 1
-	return flt(op_cost) + _get_unit_operating_cost(bom_no, {}) * conversion_rate
+	unit_cost = _get_unit_operating_cost(bom_no, {}, skip_boms_with_operations)
+	return flt(op_cost) + unit_cost * conversion_rate
 
 
-def _get_unit_operating_cost(bom_no, unit_costs):
+def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False):
 	if bom_no in unit_costs:
 		return unit_costs[bom_no]
 
-	bom = frappe.get_cached_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=True)
+	bom = frappe.get_cached_value(
+		"BOM", bom_no, ["operating_cost", "quantity", "with_operations"], as_dict=True
+	)
 	quantity = flt(bom.quantity) or 1
-	cost = flt(bom.operating_cost) / quantity
+	cost = 0 if skip_boms_with_operations and bom.with_operations else flt(bom.operating_cost) / quantity
 
 	for row in frappe.get_all(
 		"BOM Item",
 		filters={"parent": bom_no, "parenttype": "BOM", "docstatus": 1, "bom_no": ("is", "set")},
 		fields=["bom_no", "stock_qty"],
 	):
-		cost += flt(row.stock_qty) / quantity * _get_unit_operating_cost(row.bom_no, unit_costs)
+		child_cost = _get_unit_operating_cost(row.bom_no, unit_costs, skip_boms_with_operations)
+		cost += flt(row.stock_qty) / quantity * child_cost
 
 	unit_costs[bom_no] = cost
 	return cost

@@ -7709,6 +7709,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		wo = make_review_work_order(fg_item, fg_bom.name, 1, use_multi_level_bom=1, skip_transfer=1)
+		complete_review_job_card(wo.name, 1)
 		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
 		self.assertEqual(sum(row.amount for row in stock_entry.additional_costs), 160)
 
@@ -7741,6 +7742,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 		wo = make_review_work_order(fg_item, fg_bom.name, 1, use_multi_level_bom=1, skip_transfer=1)
+		complete_review_job_card(wo.name, 1)
 		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
 		self.assertEqual(sum(row.amount for row in stock_entry.additional_costs), 210)
 
