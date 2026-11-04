@@ -125,40 +125,16 @@ def get_consumed_items(filters):
 
 
 def get_delivered_items(filters):
-	parent = frappe.qb.DocType("Delivery Note")
-	child = frappe.qb.DocType("Delivery Note Item")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
-		frappe.qb.from_(parent)
-		.from_(child)
-		.select(child.item_code, Sum(child.stock_qty).as_("dn_qty"))
-		.where((parent.name == child.parent) & (parent.docstatus == 1))
-		.groupby(child.item_code)
+		frappe.qb.from_(sle)
+		.select(sle.item_code, Sum(sle.actual_qty).as_("delivered_qty"))
+		.where((sle.is_cancelled == 0) & (sle.voucher_type.isin(["Delivery Note", "Sales Invoice"])))
+		.groupby(sle.item_code)
 	)
-	query = get_filtered_query(filters, parent, query)
+	query = get_filtered_query(filters, sle, query)
 
-	dn_items = query.run(as_dict=True)
-
-	parent = frappe.qb.DocType("Sales Invoice")
-	child = frappe.qb.DocType("Sales Invoice Item")
-	query = (
-		frappe.qb.from_(parent)
-		.from_(child)
-		.select(child.item_code, Sum(child.stock_qty).as_("si_qty"))
-		.where((parent.name == child.parent) & (parent.docstatus == 1) & (parent.update_stock == 1))
-		.groupby(child.item_code)
-	)
-	query = get_filtered_query(filters, parent, query)
-
-	si_items = query.run(as_dict=True)
-
-	dn_item_map = {}
-	for item in dn_items:
-		dn_item_map[item.item_code] = flt(dn_item_map.get(item.item_code)) + flt(item.dn_qty)
-
-	for item in si_items:
-		dn_item_map[item.item_code] = flt(dn_item_map.get(item.item_code)) + flt(item.si_qty)
-
-	return dn_item_map
+	return {item.item_code: -flt(item.delivered_qty) for item in query.run(as_dict=True)}
 
 
 def get_filtered_query(filters, table, query):
