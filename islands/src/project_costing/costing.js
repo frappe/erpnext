@@ -57,6 +57,19 @@ export const form_route = (doctype, name) => `Form/${doctype}/${encodeURICompone
 /** A query report's route, opened with `filters` set. */
 export const report_route = (report, filters) => `query-report/${report}?${new URLSearchParams(filters)}`;
 
+// The Top cost drivers lists counted in time logs, which show hours to users who cannot see costing rates.
+export const LABOUR_DRIVERS = ["activities", "employees"];
+
+/**
+ * The rows a Top cost drivers list draws: hours for a labour list whose costing rates the user may
+ * not see, cost otherwise. In cost, an activity whose hours all lack a costing rate has nothing to
+ * draw, so it is left out; the Cost to date card says how many hours that is.
+ */
+export function driverRows(view, key) {
+	const hours_only = LABOUR_DRIVERS.includes(key) && !view.access.labour;
+	return (view.drivers?.[key] || []).filter((row) => (hours_only ? row.hours : row.amount));
+}
+
 /**
  * The Costing tab's payload, with what the cards derive from it worked out once.
  *
