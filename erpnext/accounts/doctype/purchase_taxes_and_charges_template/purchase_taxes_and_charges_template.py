@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from erpnext.accounts.doctype.sales_taxes_and_charges_template.sales_taxes_and_charges_template import (
 	valdiate_taxes_and_charges_template,
 )
+from erpnext.controllers.accounts_controller import validate_deduct_with_valuation_category
 
 
 class PurchaseTaxesandChargesTemplate(Document):
@@ -33,6 +34,7 @@ class PurchaseTaxesandChargesTemplate(Document):
 
 	def validate(self):
 		valdiate_taxes_and_charges_template(self)
+		validate_deduct_with_valuation_category(self.taxes)
 
 	def autoname(self):
 		if self.company and self.title:
