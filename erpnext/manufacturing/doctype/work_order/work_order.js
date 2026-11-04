@@ -55,10 +55,13 @@ frappe.ui.form.on("Work Order", {
 			};
 		});
 
-		// Set query for FG Item
+		// Set query for Project
 		frm.set_query("project", function () {
 			return {
-				filters: [["Project", "status", "not in", "Completed, Cancelled"]],
+				query: "erpnext.controllers.queries.get_project_name",
+				filters: {
+					company: frm.doc.company,
+				},
 			};
 		});
 
