@@ -4,16 +4,16 @@
 from unittest.mock import patch
 
 import frappe
-from frappe.utils import add_days, get_datetime, now_datetime, today
+from frappe.utils import add_days, today
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.stock_ledger_audit import (
-	RECENT_CHANGES_DAYS,
 	StockLedgerAudit,
-	audit_recent_stock_ledger_entries,
 	audit_stock_ledger_entries,
+	audit_stock_ledger_entries_every_3_days,
+	audit_stock_ledger_entries_every_7_days,
 )
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -44,53 +44,8 @@ class TestStockLedgerAudit(ERPNextTestSuite):
 		frappe.db.set_value("Stock Ledger Entry", sle, {"stock_value": 1500, "valuation_rate": 100})
 		return sle
 
-	def make_repost(self, posting_date, run=True):
-		repost = frappe.get_doc(
-			{
-				"doctype": "Repost Item Valuation",
-				"based_on": "Item and Warehouse",
-				"item_code": self.item,
-				"warehouse": WAREHOUSE,
-				"posting_date": posting_date,
-			}
-		)
-		repost.flags.dont_run_in_test = not run
-		return repost.submit()
-
-	def move_entries_before_recent_days(self):
-		changed_on = add_days(now_datetime(), -RECENT_CHANGES_DAYS - 1)
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		(
-			frappe.qb.update(sle)
-			.set(sle.creation, changed_on)
-			.set(sle.modified, changed_on)
-			.where(sle.item_code == self.item)
-		).run()
-
-	def move_reposts_before_recent_days(self):
-		changed_on = add_days(now_datetime(), -RECENT_CHANGES_DAYS - 1)
-		repost = frappe.qb.DocType("Repost Item Valuation")
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		vouchers = frappe.qb.from_(sle).select(sle.voucher_no).where(sle.item_code == self.item)
-		(
-			frappe.qb.update(repost)
-			.set(repost.modified, changed_on)
-			.where((repost.item_code == self.item) | repost.voucher_no.isin(vouchers))
-		).run()
-
 	def run_audit(self):
-		StockLedgerAudit(COMPANY, self.from_date).audit(self.item, WAREHOUSE, get_datetime(self.from_date))
-
-	def get_recent_audit(self):
-		return StockLedgerAudit(
-			COMPANY, add_days(today(), -30), add_days(now_datetime(), -RECENT_CHANGES_DAYS)
-		)
-
-	def get_recent_start_datetime(self):
-		return self.get_recent_audit().get_audit_start_datetimes().get((self.item, WAREHOUSE))
-
-	def get_posting_datetime(self, sle):
-		return frappe.db.get_value("Stock Ledger Entry", sle, "posting_datetime")
+		StockLedgerAudit(COMPANY, self.from_date).audit(self.item, WAREHOUSE)
 
 	def get_scheduler_reposts(self):
 		return frappe.get_all(
@@ -98,6 +53,16 @@ class TestStockLedgerAudit(ERPNextTestSuite):
 			filters={"item_code": self.item, "warehouse": WAREHOUSE, "created_by_scheduler": 1},
 			fields=["name", "posting_date", "posting_time", "status"],
 		)
+
+	def assert_audit_is_queued_only_by(self, frequency, scheduled_audit, other_scheduled_audit):
+		frappe.db.set_single_value("Stock Reposting Settings", "stock_ledger_audit_frequency", frequency)
+
+		with patch("frappe.enqueue") as enqueue:
+			other_scheduled_audit()
+			self.assertFalse(enqueue.called)
+			scheduled_audit()
+
+		self.assertEqual(enqueue.call_count, frappe.db.count("Company"))
 
 	def test_incorrect_entry_is_reposted_from_its_posting_time(self):
 		sle = self.make_incorrect_entry()
@@ -130,7 +95,17 @@ class TestStockLedgerAudit(ERPNextTestSuite):
 
 	def test_item_warehouse_with_pending_repost_is_skipped(self):
 		self.make_incorrect_entry()
-		self.make_repost(today(), run=False)
+		repost = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": self.item,
+				"warehouse": WAREHOUSE,
+				"posting_date": today(),
+			}
+		)
+		repost.flags.dont_run_in_test = True
+		repost.submit()
 
 		self.run_audit()
 
@@ -161,72 +136,18 @@ class TestStockLedgerAudit(ERPNextTestSuite):
 		self.assertFalse(self.get_scheduler_reposts())
 		self.assertEqual(log_error.call_args.kwargs["reference_name"], sle)
 
-	def test_recent_audit_skips_entries_not_changed_in_recent_days(self):
-		self.make_incorrect_entry()
-		self.move_entries_before_recent_days()
-
-		self.assertIsNone(self.get_recent_start_datetime())
-		self.assertIn(
-			(self.item, WAREHOUSE), StockLedgerAudit(COMPANY, self.from_date).get_audit_start_datetimes()
-		)
-
-	def test_recent_audit_starts_from_earliest_new_entry(self):
-		old_sle = self.make_receipt(10, 100, posting_date=add_days(today(), -10))
-		frappe.db.set_value("Stock Ledger Entry", old_sle, {"stock_value": 900, "valuation_rate": 90})
-		self.move_entries_before_recent_days()
-		sle = self.make_receipt(5, 120, posting_date=add_days(today(), -5))
-		self.make_receipt(5, 130)
-
-		start_datetime = self.get_recent_start_datetime()
-		self.get_recent_audit().audit(self.item, WAREHOUSE, start_datetime)
-
-		self.assertEqual(start_datetime, self.get_posting_datetime(sle))
-		self.assertFalse(self.get_scheduler_reposts())
-
-	def test_cancelled_entry_starts_recent_audit_at_its_posting_time(self):
-		self.make_receipt(10, 100, posting_date=add_days(today(), -10))
-		sle = self.make_receipt(5, 120, posting_date=add_days(today(), -5))
-		self.make_receipt(5, 130)
-		self.move_entries_before_recent_days()
-
-		voucher_no = frappe.db.get_value("Stock Ledger Entry", sle, "voucher_no")
-		frappe.get_doc("Stock Entry", voucher_no).cancel()
-		self.move_reposts_before_recent_days()
-
-		self.assertEqual(self.get_recent_start_datetime(), self.get_posting_datetime(sle))
-
-	def test_completed_repost_starts_recent_audit_at_its_posting_date(self):
-		self.make_receipt(10, 100, posting_date=add_days(today(), -10))
-		self.make_receipt(5, 120, posting_date=add_days(today(), -5))
-		self.move_entries_before_recent_days()
-
-		self.make_repost(add_days(today(), -10))
-
-		self.assertEqual(self.get_recent_start_datetime(), get_datetime(add_days(today(), -10)))
-
-	def test_failed_repost_starts_recent_audit_at_its_posting_date(self):
-		self.make_receipt(10, 100, posting_date=add_days(today(), -10))
-		self.move_entries_before_recent_days()
-
-		repost = self.make_repost(add_days(today(), -10), run=False)
-		frappe.db.set_value("Repost Item Valuation", repost.name, "status", "Failed")
-
-		self.assertEqual(self.get_recent_start_datetime(), get_datetime(add_days(today(), -10)))
-
 	def test_audit_is_queued_for_every_company(self):
 		with patch("frappe.enqueue") as enqueue:
 			audit_stock_ledger_entries()
 
 		self.assertEqual(enqueue.call_count, frappe.db.count("Company"))
-		self.assertIsNone(enqueue.call_args.kwargs["changed_since"])
 
-	def test_recent_audit_is_queued_with_changes_of_last_7_days(self):
-		run_at = get_datetime("2026-11-10 01:00:00")
-		with (
-			patch("frappe.enqueue") as enqueue,
-			patch("erpnext.stock.stock_ledger_audit.now_datetime", return_value=run_at),
-		):
-			audit_recent_stock_ledger_entries()
+	def test_audit_is_queued_every_3_days_when_selected(self):
+		self.assert_audit_is_queued_only_by(
+			"Every 3 Days", audit_stock_ledger_entries_every_3_days, audit_stock_ledger_entries_every_7_days
+		)
 
-		self.assertEqual(enqueue.call_count, frappe.db.count("Company"))
-		self.assertEqual(enqueue.call_args.kwargs["changed_since"], get_datetime("2026-11-03 01:00:00"))
+	def test_audit_is_queued_every_7_days_when_selected(self):
+		self.assert_audit_is_queued_only_by(
+			"Every 7 Days", audit_stock_ledger_entries_every_7_days, audit_stock_ledger_entries_every_3_days
+		)
