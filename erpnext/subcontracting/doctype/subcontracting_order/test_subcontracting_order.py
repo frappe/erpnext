@@ -1229,6 +1229,27 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 0})
+	def test_reserve_stock_ignored_when_stock_reservation_is_disabled(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA4",
+				"fg_item_qty": 10,
+			}
+		]
+
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		sco.submit()
+
+		self.assertEqual(sco.reserve_stock, 0)
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", {"voucher_no": sco.name}))
+
 	def test_stock_reservation(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_details_for_voucher,
