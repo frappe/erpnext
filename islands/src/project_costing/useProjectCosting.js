@@ -27,7 +27,7 @@ export function useProjectAccounts(element, project, modified, active) {
  * them up; it also retries a load that failed. A GET, as desk keeps its CSRF token where frappe-ui
  * does not read it, and a read needs none.
  */
-function useOnScreenCall(element, url, project, modified, active = () => true) {
+export function useOnScreenCall(element, url, project, modified, active = () => true) {
 	const visible = ref(false);
 	const shown = ref(0);
 	const call = useCall({
