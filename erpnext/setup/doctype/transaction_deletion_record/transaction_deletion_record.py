@@ -656,7 +656,7 @@ class TransactionDeletionRecord(Document):
 				)
 			)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def start_deletion_tasks(self):
 		self.check_permission("write")
 
@@ -1096,6 +1096,7 @@ def process_import_template(transaction_deletion_record_name, file_url):
 	if not os.path.isfile(file_path):
 		frappe.throw(_("File not found on server"))
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
 	with open(file_path, encoding="utf-8") as f:
 		csv_content = f.read()
 
