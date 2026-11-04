@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.test_runner import make_test_records
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 from frappe.utils.nestedset import get_ancestors_of
 
@@ -503,6 +503,17 @@ class TestAccount(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, update_account_number, other, "   ")
 		self.assertEqual(frappe.get_all("Account", {"account_number": "9627011"}, pluck="name"), [owner])
 		self.assertEqual(frappe.db.get_value("Account", other, "account_name"), "Number Taker")
+
+	def test_freeze_account_without_frozen_entries_role(self):
+		with change_settings("Accounts Settings", {"frozen_accounts_modifier": None}):
+			account = frappe.get_doc("Account", "Cash - _TC")
+			account.run_method("onload")
+			self.assertFalse((account.get_onload() or {}).get("can_freeze_account"))
+
+		with change_settings("Accounts Settings", {"frozen_accounts_modifier": "Accounts Manager"}):
+			account = frappe.get_doc("Account", "Cash - _TC")
+			account.run_method("onload")
+			self.assertTrue(account.get_onload().get("can_freeze_account"))
 
 
 def _make_test_records(verbose=None):
