@@ -4,7 +4,7 @@ import json
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_months, today
+from frappe.utils import add_days, add_months, today
 
 from erpnext import get_company_currency
 from erpnext.controllers.accounts_controller import update_child_qty_rate
@@ -170,6 +170,18 @@ class TestBlanketOrder(FrappeTestCase):
 		self.assertRaisesRegex(
 			frappe.ValidationError, "cannot be ordered more than", po.update_status, "Draft"
 		)
+
+	def test_to_date_edited_after_submit_cannot_be_before_from_date(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing")
+		bo.db_set("from_date", add_days(today(), 30))
+		bo.reload()
+
+		bo.to_date = add_days(today(), 1)
+		self.assertRaises(frappe.ValidationError, bo.save)
+
+		bo.reload()
+		bo.to_date = add_days(today(), 60)
+		bo.save()
 
 	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):

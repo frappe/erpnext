@@ -54,6 +54,9 @@ class BlanketOrder(Document):
 		self.validate_item_qty()
 		self.set_party_item_code()
 
+	def before_update_after_submit(self):
+		self.validate_dates()
+
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
