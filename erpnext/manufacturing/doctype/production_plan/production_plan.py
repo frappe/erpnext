@@ -34,9 +34,6 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	get_bin_details,
 	get_plan_process_loss_percentage,
 )
-from erpnext.manufacturing.doctype.production_plan.services.plant_floor_planning import (
-	PlantFloorPlanning,
-)
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 	ProductionPlanStockReservation,
 	cancel_stock_reservation_entries,
@@ -289,9 +286,9 @@ class ProductionPlan(Document):
 					)
 				)
 
-			if not (d.bom_no or d.plant_floor):
-				frappe.throw(_("Please select BOM or Plant Floor for Item in Row {0}").format(d.idx))
-			elif d.bom_no and (d.item_code, d.bom_no) not in validated_boms:
+			if not d.bom_no:
+				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
+			elif (d.item_code, d.bom_no) not in validated_boms:
 				validate_bom_no(d.item_code, d.bom_no)
 				validated_boms.add((d.item_code, d.bom_no))
 
@@ -301,8 +298,6 @@ class ProductionPlan(Document):
 						d.idx, frappe.bold(d.item_code)
 					)
 				)
-
-		PlantFloorPlanning(self).validate()
 
 	def _rename_temporary_references(self):
 		"""po_items and sub_assembly_items items are both constructed client side without saving.
@@ -660,10 +655,7 @@ class ProductionPlan(Document):
 
 def get_schedule_signature(doc):
 	return (
-		sorted(
-			(row.name, row.item_code, row.bom_no, row.plant_floor, flt(row.planned_qty))
-			for row in doc.po_items
-		),
+		sorted((row.name, row.item_code, row.bom_no, flt(row.planned_qty)) for row in doc.po_items),
 		sorted(
 			(row.name, row.production_item, row.bom_no, flt(row.qty), row.type_of_manufacturing)
 			for row in doc.sub_assembly_items

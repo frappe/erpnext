@@ -14,7 +14,7 @@ class PlantRunState:
 		self.flow = run.get_flow()
 		self.plan = self.flow.plan
 		self.machines = {stage.workstation: stage.warehouse for stage in self.flow.stages}
-		self.stock = get_stock([run.plant_floor.warehouse, *self.machines.values()])
+		self.stock = get_stock([*self.plan.warehouses, *self.machines.values()])
 		self.broken_machines = set(
 			frappe.get_all(
 				"Workstation",
@@ -47,7 +47,7 @@ class PlantRunState:
 		values.update(
 			item_name=self.work_order.item_name,
 			stock_uom=self.work_order.stock_uom,
-			plant_floor=self.work_order.plant_floor,
+			bom_no=self.work_order.bom_no,
 			actual_start_date=self.work_order.actual_start_date,
 			actual_end_date=self.work_order.actual_end_date,
 			is_paused=any(
@@ -62,7 +62,7 @@ class PlantRunState:
 		return values
 
 	def get_charged_weight(self):
-		materials = {row.item_code for row in self.run.plant_floor.materials}
+		materials = {row.item_code for row in self.plan.raw_rows}
 		return flt(
 			sum(
 				self.flow.get_weight(row.item_code, row.transferred_qty)
@@ -80,10 +80,10 @@ class PlantRunState:
 		phase = self.get_phase(idx, card)
 		return frappe._dict(
 			idx=idx,
-			stage_name=operation.description or operation.operation,
+			stage_name=operation.operation,
 			operation=operation.operation,
 			workstation=operation.workstation,
-			machine_model=self.run.plant_floor.machine_models.get(operation.workstation),
+			machine_model=self.plan.machines.get(operation.workstation, {}).get("machine_model"),
 			sequence_id=stage.sequence_id,
 			is_packing=stage.is_packing,
 			planned_minutes=flt(operation.time_in_mins),
@@ -197,9 +197,9 @@ class PlantRunState:
 		return group_entries(rows)
 
 	def get_levels(self):
-		store = self.run.plant_floor.warehouse
+		rows = [*self.plan.raw_rows, *self.plan.packing_rows]
 		return frappe._dict(
-			store={item: qty for (item, warehouse), qty in self.stock.items() if warehouse == store},
+			store={row.item_code: self.stock.get((row.item_code, row.source_warehouse), 0) for row in rows},
 			machines={
 				workstation: self.get_machine_weight(warehouse)
 				for workstation, warehouse in self.machines.items()

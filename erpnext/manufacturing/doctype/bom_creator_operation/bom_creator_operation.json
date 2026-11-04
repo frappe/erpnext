@@ -10,10 +10,13 @@
   "operation",
   "workstation_type",
   "time_in_mins",
+  "workstation",
+  "sequence_id",
   "column_break_output",
   "output_node_id",
   "output_item",
-  "output_quantity"
+  "output_quantity",
+  "yield_percentage"
  ],
  "fields": [
   {
@@ -86,11 +89,37 @@
    "label": "Output Quantity",
    "non_negative": 1,
    "allow_on_submit": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "label": "Workstation",
+   "options": "Workstation"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "Operations with the same Sequence ID run at the same time.",
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence ID",
+   "non_negative": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "100",
+   "description": "Share of the weight that comes out of this operation.",
+   "fieldname": "yield_percentage",
+   "fieldtype": "Percent",
+   "label": "Yield",
+   "non_negative": 1,
+   "show_description_on_click": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-10-24 15:28:43.659518",
+ "modified": "2026-11-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Operation",

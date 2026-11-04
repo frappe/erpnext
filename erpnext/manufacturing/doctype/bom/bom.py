@@ -131,12 +131,11 @@ class BOM(WebsiteGenerator):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.manufacturing.doctype.bom_explosion_item.bom_explosion_item import BOMExplosionItem
 		from erpnext.manufacturing.doctype.bom_item.bom_item import BOMItem
 		from erpnext.manufacturing.doctype.bom_operation.bom_operation import BOMOperation
 		from erpnext.manufacturing.doctype.bom_secondary_item.bom_secondary_item import BOMSecondaryItem
+		from frappe.types import DF
 
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
@@ -158,6 +157,7 @@ class BOM(WebsiteGenerator):
 		description: DF.TextEditor | None
 		exploded_items: DF.Table[BOMExplosionItem]
 		fg_based_operating_cost: DF.Check
+		formula_tolerance: DF.Percent
 		has_variants: DF.Check
 		image: DF.AttachImage | None
 		inspection_required: DF.Check

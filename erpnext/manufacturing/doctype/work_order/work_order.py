@@ -52,7 +52,6 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 from erpnext.manufacturing.doctype.work_order.services.operations import (
 	OperationsService,
 )
-from erpnext.manufacturing.doctype.work_order.services.plant_floor import PlantFloorService
 from erpnext.manufacturing.doctype.work_order.services.required_items import (
 	RequiredItemsService,
 )
@@ -136,7 +135,7 @@ class WorkOrder(Document):
 		allow_alternative_item: DF.Check
 		amended_from: DF.Link | None
 		batch_size: DF.Float
-		bom_no: DF.Link | None
+		bom_no: DF.Link
 		company: DF.Link
 		corrective_operation_cost: DF.Currency
 		description: DF.TextEditor | None
@@ -160,7 +159,6 @@ class WorkOrder(Document):
 		planned_end_date: DF.Datetime | None
 		planned_operating_cost: DF.Currency
 		planned_start_date: DF.Datetime
-		plant_floor: DF.Link | None
 		process_loss_qty: DF.Float
 		produced_qty: DF.Float
 		product_bundle_item: DF.Link | None
@@ -322,19 +320,10 @@ class WorkOrder(Document):
 	def on_discard(self):
 		self.db_set("status", "Cancelled")
 
-	@property
-	def is_plant_floor_order(self) -> bool:
-		return bool(self.plant_floor and not self.bom_no)
-
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
-		elif not self.plant_floor:
-			frappe.throw(_("Set a BOM or a Plant Floor"), frappe.MandatoryError)
-
-		if self.is_plant_floor_order:
-			PlantFloorService(self).sync(None if self.is_new() else self.get_doc_before_save())
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
@@ -526,9 +515,6 @@ class WorkOrder(Document):
 				row.source_warehouse = self.source_warehouse
 
 	def reset_use_multi_level_bom(self):
-		if self.is_plant_floor_order:
-			return
-
 		previous = None if self.is_new() else self.get_doc_before_save()
 		OperationsService(self).sync_operations_with_bom(previous)
 
@@ -1204,9 +1190,6 @@ class WorkOrder(Document):
 		return OperationsService(self).calculate_operating_cost()
 
 	def set_work_order_operations(self):
-		if self.is_plant_floor_order:
-			return
-
 		return OperationsService(self).set_work_order_operations()
 
 	def set_operation_warehouses(self):
@@ -1231,18 +1214,12 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
-		if self.is_plant_floor_order:
-			return
-
 		return RequiredItemsService(self).get_items_and_operations_from_bom()
 
 	def set_available_qty(self):
 		return RequiredItemsService(self).set_available_qty()
 
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
-		if self.is_plant_floor_order:
-			return
-
 		return RequiredItemsService(self).set_required_items(reset_only_qty, reset_source_warehouse)
 
 	def set_rate_for_edited_items(self):

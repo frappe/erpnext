@@ -2111,7 +2111,7 @@ class JobCard(Document):
 		return status
 
 	def clear_breakdown(self):
-		if not self.is_paused or not frappe.get_doc("Work Order", self.work_order).is_plant_floor_order:
+		if not self.is_paused or not self.track_semi_finished_goods:
 			return
 
 		workstation = frappe.get_doc("Workstation", self.workstation)

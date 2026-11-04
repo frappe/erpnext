@@ -46,9 +46,6 @@ class SubAssemblyService:
 		self.set_default_supplier_for_subcontracting_order()
 
 	def _collect_row_sub_assembly_items(self, row, sub_assembly_items_store, bin_details, manufacturing_type):
-		if row.is_plant_floor_item:
-			return False
-
 		self._validate_sub_assembly_row(row)
 		if self._bom_tracks_semi_finished(row):
 			return False

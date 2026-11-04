@@ -4,6 +4,8 @@ from collections import defaultdict
 import frappe
 from frappe.utils import cint, flt, get_datetime, time_diff_in_seconds
 
+from erpnext.manufacturing.doctype.work_order.services.plant_run.plan import RunPlan
+
 JOB_CARD_FIELDS = [
 	"name",
 	"docstatus",
@@ -22,11 +24,10 @@ EPSILON = 0.001
 
 
 class PlantFlow:
-	def __init__(self, work_order, plant_floor):
+	def __init__(self, work_order):
 		self.work_order = work_order
-		self.plant_floor = plant_floor
-		self.plan = plant_floor.get_batch_plan(work_order.qty)
-		self.stages = self.plan.get_stages()
+		self.plan = RunPlan(work_order)
+		self.stages = self.plan.stages
 		self.cards = get_job_cards(work_order.name)
 
 	def get_stage(self, idx):
@@ -50,7 +51,7 @@ class PlantFlow:
 
 	@property
 	def balance_items(self):
-		return {row.item_code for row in self.plant_floor.materials if row.is_balance_item}
+		return self.plan.balance_items
 
 	def get_planned_quantities(self, idx):
 		return {
@@ -63,7 +64,7 @@ class PlantFlow:
 		return [self.get_input(idx, source) for source in self.get_stage(idx).inputs]
 
 	def get_input(self, idx, source):
-		warehouse = self.get_stage(source.stage_idx).warehouse
+		warehouse = source.warehouse
 		made = self.get_made_qty(source.stage_idx) * source.share
 		return frappe._dict(
 			source,

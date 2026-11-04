@@ -131,7 +131,13 @@ class ManufactureEntry:
 			if not item_dict:
 				item_dict = self.get_items_from_job_card()
 
-			backflush_based_on = self.get_backflush_based_on()
+			backflush_based_on = frappe.db.get_single_value(
+				"Manufacturing Settings", "backflush_raw_materials_based_on"
+			)
+
+			if self.bom_no:
+				if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
+					backflush_based_on = based_on
 
 			available_serial_batches = frappe._dict({})
 			if backflush_based_on != "BOM":
@@ -162,15 +168,6 @@ class ManufactureEntry:
 						set_previous_operation_serial_batch(self.stock_entry, _dict)
 
 				self.stock_entry.append("items", _dict)
-
-	def get_backflush_based_on(self):
-		if self.bom_no:
-			if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
-				return based_on
-		elif frappe.get_cached_value("Work Order", self.work_order, "plant_floor"):
-			return "Material Transferred for Manufacture"
-
-		return frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
 
 	def get_production_share(self):
 		"""Fraction of the job card's for_quantity this entry accounts for; raw materials are

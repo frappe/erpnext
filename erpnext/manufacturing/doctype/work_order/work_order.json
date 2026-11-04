@@ -15,7 +15,6 @@
   "naming_series",
   "production_item",
   "bom_no",
-  "plant_floor",
   "column_break1",
   "qty",
   "sales_order",
@@ -172,8 +171,7 @@
    "oldfieldname": "bom_no",
    "oldfieldtype": "Link",
    "options": "BOM",
-   "mandatory_depends_on": "eval:!doc.plant_floor",
-   "depends_on": "eval:!doc.plant_floor || doc.bom_no"
+   "reqd": 1
   },
   {
    "default": "0",
@@ -756,15 +754,6 @@
    "fieldname": "stock_entry_list_html",
    "fieldtype": "HTML",
    "label": "Stock Entries"
-  },
-  {
-   "depends_on": "eval:!doc.bom_no || doc.plant_floor",
-   "description": "Make the Work Order from the formula and stages of this Plant Floor. A BOM is then not needed.",
-   "fieldname": "plant_floor",
-   "fieldtype": "Link",
-   "label": "Plant Floor",
-   "options": "Plant Floor",
-   "show_description_on_click": 1
   }
  ],
  "grid_page_length": 50,
@@ -773,7 +762,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-31 11:22:22.716252",
+ "modified": "2026-10-25 15:30:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
