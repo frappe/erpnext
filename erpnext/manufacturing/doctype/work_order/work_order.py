@@ -301,8 +301,14 @@ class WorkOrder(Document):
 		self.status = self.get_status()
 		self.validate_workstation_type()
 		self.reset_use_multi_level_bom()
+<<<<<<< HEAD
 		self.set_reserve_stock()
 		self.validate_fg_warehouse_for_reservation()
+=======
+		WorkOrderStockReservation(self).clear_reserve_stock_if_disabled()
+		WorkOrderStockReservation(self).set_reserve_stock()
+		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
+>>>>>>> 088fa57 (fix(manufacturing): ignore Reserve Stock on a Work Order when stock reservation is disabled)
 		self.validate_dates()
 
 		if self.source_warehouse:
