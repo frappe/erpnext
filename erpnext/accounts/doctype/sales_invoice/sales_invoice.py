@@ -970,8 +970,8 @@ class SalesInvoice(SellingController):
 			"items": ("income_account", "expense_account", "discount_account"),
 			"taxes": ("account_head",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -2414,7 +2414,6 @@ class SalesInvoice(SellingController):
 			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
 			points_earned = cint(eligible_amount / collection_factor)
 
-<<<<<<< HEAD
 			doc = frappe.get_doc(
 				{
 					"doctype": "Loyalty Point Entry",
@@ -2526,27 +2525,6 @@ class SalesInvoice(SellingController):
 			points_to_redeem -= redeemed_points
 			if points_to_redeem < 1:  # since points_to_redeem is integer
 				break
-=======
-	def on_update_after_submit(self):
-		fields_to_check = [
-			"additional_discount_account",
-			"cash_bank_account",
-			"account_for_change_amount",
-			"write_off_account",
-			"loyalty_redemption_account",
-			"unrealized_profit_loss_account",
-			"is_opening",
-		]
-		child_tables = {
-			"items": ("income_account", "expense_account", "discount_account"),
-			"taxes": ("account_head",),
-			"payments": ("account",),
-		}
-		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if needs_repost:
-			self.validate_for_repost()
-			self.repost_accounting_entries()
->>>>>>> 1efc75a (refactor: keep needs_repost local in on_update_after_submit)
 
 	def counts_coupon_use(self):
 		# Returns and POS consolidation do not redeem the coupon again.

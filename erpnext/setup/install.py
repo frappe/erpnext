@@ -41,11 +41,8 @@ def after_install():
 	set_default_print_formats()
 	create_letter_head()
 	toggle_hidden_fields()
-<<<<<<< HEAD
 	grant_address_read_to_accounts_manager()
-=======
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
->>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 	frappe.db.commit()
 
 

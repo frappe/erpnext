@@ -119,13 +119,8 @@ class RepostPaymentLedger(Document):
 		frappe.msgprint(_("Repost started in the background"))
 
 
-<<<<<<< HEAD
-@frappe.whitelist()
-def execute_repost_payment_ledger(docname):
-=======
 @frappe.whitelist(methods=["POST"])
-def execute_repost_payment_ledger(docname: str):
->>>>>>> ebeeb64 (fix: allow only POST for whitelisted methods that send emails or enqueue jobs)
+def execute_repost_payment_ledger(docname):
 	"""Repost Payment Ledger Entries by background job."""
 
 	frappe.has_permission("Repost Payment Ledger", ptype="submit", doc=docname, throw=True)
