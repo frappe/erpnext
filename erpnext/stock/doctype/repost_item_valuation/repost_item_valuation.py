@@ -620,4 +620,14 @@ def execute_repost_item_valuation():
 	# Force-enqueues the site-wide reposting job, so it needs write on Repost Item Valuation.
 	frappe.has_permission("Repost Item Valuation", "write", throw=True)
 
+	if not in_configured_timeslot():
+		frappe.msgprint(
+			_("Reposting will start within the timeslot configured in {0}").format(
+				get_link_to_form("Stock Reposting Settings", "Stock Reposting Settings")
+			)
+		)
+		return False
+
 	frappe.get_doc("Scheduled Job Type", "repost_item_valuation.repost_entries").enqueue(force=True)
+
+	return True
