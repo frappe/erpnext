@@ -1714,7 +1714,6 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 
 	def postprocess(source, doc):
 		doc.item = item
-		doc.quantity = 1
 
 		item_data = _get_item_details(item)
 		doc.update(
@@ -1726,7 +1725,10 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 			}
 		)
 
+		mapped_rows = len(doc.items)
 		add_variant_item(variant_items, doc, source_name)
+		for row in doc.items[mapped_rows:]:
+			row.qty = flt(row.qty) * (flt(source.quantity) or 1)
 
 	doc = get_mapped_doc(
 		"BOM",
