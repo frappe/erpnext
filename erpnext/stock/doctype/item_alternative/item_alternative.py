@@ -81,6 +81,29 @@ class ItemAlternative(Document):
 			frappe.throw(_("Already record exists for the item {0}").format(self.item_code))
 
 
+def get_alternative_item_pairs(item_codes) -> set:
+	if not item_codes:
+		return set()
+
+	item_alternative = frappe.qb.DocType("Item Alternative")
+	rows = (
+		frappe.qb.from_(item_alternative)
+		.select(item_alternative.item_code, item_alternative.alternative_item_code, item_alternative.two_way)
+		.where(
+			(item_alternative.item_code.isin(item_codes))
+			| ((item_alternative.alternative_item_code.isin(item_codes)) & (item_alternative.two_way == 1))
+		)
+	).run(as_dict=True)
+
+	pairs = set()
+	for row in rows:
+		pairs.add((row.item_code, row.alternative_item_code))
+		if row.two_way:
+			pairs.add((row.alternative_item_code, row.item_code))
+
+	return pairs
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
