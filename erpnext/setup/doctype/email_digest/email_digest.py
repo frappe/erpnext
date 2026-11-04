@@ -95,6 +95,7 @@ class EmailDigest(Document):
 			as_dict=1,
 		)
 
+<<<<<<< HEAD
 		if self.recipient_list:
 			recipient_list = self.recipient_list.split("\n")
 		else:
@@ -105,6 +106,9 @@ class EmailDigest(Document):
 		frappe.response["user_list"] = user_list
 
 	@frappe.whitelist()
+=======
+	@frappe.whitelist(methods=["POST"])
+>>>>>>> ebeeb64 (fix: allow only POST for whitelisted methods that send emails or enqueue jobs)
 	def send(self):
 		# send email only to enabled users
 		valid_users = [

@@ -157,7 +157,7 @@ class ImportSupplierInvoice(Document):
 							(flt(disc_line.Percentuale.text) / 100) * (rate * qty)
 						)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def process_file_data(self):
 		self.check_permission("write")
 
