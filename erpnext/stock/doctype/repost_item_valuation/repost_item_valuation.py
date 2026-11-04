@@ -7,7 +7,16 @@ from frappe.desk.form.load import get_attachments
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
 from frappe.query_builder.functions import Max
-from frappe.utils import add_days, cint, get_link_to_form, get_weekday, getdate, now, nowtime
+from frappe.utils import (
+	add_days,
+	cint,
+	get_link_to_form,
+	get_weekday,
+	getdate,
+	now,
+	nowtime,
+	to_timedelta,
+)
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
@@ -600,10 +609,10 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 	if get_weekday() == repost_settings.limits_dont_apply_on:
 		return True
 
-	start_time = repost_settings.start_time
-	end_time = repost_settings.end_time
+	start_time = to_timedelta(repost_settings.start_time)
+	end_time = to_timedelta(repost_settings.end_time)
 
-	now_time = current_time or nowtime()
+	now_time = to_timedelta(current_time or nowtime())
 
 	if start_time < end_time:
 		return end_time >= now_time >= start_time
