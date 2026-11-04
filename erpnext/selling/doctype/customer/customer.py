@@ -685,7 +685,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_emails(customer: str, company: str):
 	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
 	currency = get_company_currency(company)

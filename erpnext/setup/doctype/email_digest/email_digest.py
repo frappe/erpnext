@@ -103,7 +103,7 @@ class EmailDigest(Document):
 			)
 		)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def send(self):
 		self._send()
 

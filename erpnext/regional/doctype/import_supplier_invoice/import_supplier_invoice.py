@@ -190,7 +190,7 @@ class ImportSupplierInvoice(Document):
 			}
 		)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def process_file_data(self):
 		self.check_permission("write")
 
