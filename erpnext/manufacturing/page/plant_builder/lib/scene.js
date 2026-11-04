@@ -1,7 +1,6 @@
 import { computed, inject, provide, ref } from "vue";
 import { useEventListener } from "@vueuse/core";
 import { machineOf, machineSize } from "./machines";
-import { YC } from "./layout";
 import { __ } from "./api";
 import { clamp, fmt, plural } from "./format";
 
@@ -140,7 +139,7 @@ function stationTag(plant, station, view, holding) {
 			active,
 		};
 	}
-	return { id: `s${station.i}`, x: station.zone.x + 205, y: YC - 30, z: 84, title, sub, active };
+	return { id: `s${station.i}`, x: station.zone.x + 205, y: station.y - 30, z: 84, title, sub, active };
 }
 
 function storeTag(item, stock) {

@@ -3,6 +3,7 @@ import { computed, inject, ref } from "vue";
 import { Badge, Button, FormControl, Switch, TextInput, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
+import { fmt } from "../../lib/format";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import {
 	READ_ONLY,
@@ -17,6 +18,8 @@ const props = defineProps({
 	stage: Object,
 	index: Number,
 	machineModel: String,
+	output: Number,
+	outputUom: String,
 	focused: Boolean,
 });
 const readOnly = inject(READ_ONLY, ref(false));
@@ -62,7 +65,7 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			</span>
 			<span class="size-4 shrink-0 text-ink-gray-6" :class="machine.icon" aria-hidden="true" />
 			<p class="min-w-0 flex-1 truncate text-base font-medium text-ink-gray-8">
-				{{ stage.stage_name || __(machine.label) }}
+				{{ stage.operation || __(machine.stage || machine.label) }}
 			</p>
 			<Badge v-if="parallel" :label="__('With Stage {0}', [index])" theme="blue" variant="subtle" />
 			<Tooltip v-if="!readOnly" :text="__('Move Up')">
@@ -95,17 +98,13 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 		</div>
 		<div class="space-y-3 p-3">
 			<div class="grid grid-cols-2 gap-3">
-				<FormControl v-model="stage.stage_name" :label="__('Stage Name')" />
+				<DeskControl v-model="stage.operation" options="Operation" :label="__('Operation')" />
 				<DeskControl
 					v-model="stage.workstation"
 					options="Workstation"
 					:label="__('Machine')"
 					:filters="workstationFilters"
 				/>
-			</div>
-			<div class="grid grid-cols-2 gap-3">
-				<DeskControl v-model="stage.operation" options="Operation" :label="__('Operation')" />
-				<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
 			</div>
 			<Switch
 				v-if="canRunInParallel"
@@ -121,15 +120,22 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					options="Item"
 					:label="__('Semi-finished Good')"
 					:filters="{ is_stock_item: 1 }"
+					:description="
+						output ? __('Makes {0} {1} for each batch', [fmt(output), outputUom || '']) : ''
+					"
 				/>
-				<FormControl
-					v-model="stage.yield_percentage"
-					type="number"
-					:label="__('Yield (%)')"
-					:description="__('Share of the weight that comes out of this stage')"
-				/>
+				<div class="grid grid-cols-2 gap-3">
+					<FormControl
+						v-model="stage.yield_percentage"
+						type="number"
+						:label="__('Yield (%)')"
+						:description="__('Share of the weight that comes out')"
+					/>
+					<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
+				</div>
 			</template>
 			<div v-else class="space-y-2">
+				<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
 				<p class="text-sm text-ink-gray-6">
 					{{ __("Packing materials, per unit of the finished good") }}
 				</p>

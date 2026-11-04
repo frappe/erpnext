@@ -127,6 +127,11 @@ class ProcessFormula:
 		return (self.output_weight - empty) / unit if unit > 0 else 0
 
 	@property
+	def charged_weight(self):
+		balance = self.balance_weight if self.balance_row else 0
+		return sum(self.get_charged(balance).values())
+
+	@property
 	def made_weight(self):
 		balance = self.balance_weight if self.balance_row else 0
 		return self.get_flows(self.get_charged(balance))[1]

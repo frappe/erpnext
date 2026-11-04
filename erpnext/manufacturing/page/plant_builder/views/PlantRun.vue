@@ -3,13 +3,13 @@ import { computed, onBeforeUnmount, onMounted, provide } from "vue";
 import { Badge, Button, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import RunPanel from "../components/run/RunPanel.vue";
-import { __, openForm, setRoute } from "../lib/api";
+import { __, openForm } from "../lib/api";
 import { levels } from "../lib/clock";
 import { machineOf } from "../lib/machines";
 import { useRun } from "../lib/run";
 import { fmt, fmtTimer, num } from "../lib/format";
 
-const props = defineProps({ plant: String, workOrder: String });
+const props = defineProps({ workOrder: String });
 const emit = defineEmits(["title", "actions"]);
 
 const run = useRun(props.workOrder);
@@ -25,6 +25,12 @@ onMounted(async () => {
 	poll = setInterval(() => isRunning.value && !run.busy.value && run.refresh(), 30000);
 });
 onBeforeUnmount(() => clearInterval(poll));
+
+function openDesign() {
+	const order = run.state.value.work_order;
+	if (order.bom_creator) openForm("BOM Creator", order.bom_creator);
+	else openForm("BOM", order.bom_no);
+}
 
 const STATUS = {
 	"Not Started": "gray",
@@ -131,8 +137,8 @@ const live = computed(() => {
 				<Button
 					variant="ghost"
 					icon-left="lucide-settings-2"
-					:label="__('Plant Setup')"
-					@click="setRoute(plant)"
+					:label="__('Process Design')"
+					@click="openDesign"
 				/>
 			</div>
 		</div>

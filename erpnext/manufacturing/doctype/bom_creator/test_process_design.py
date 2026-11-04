@@ -99,7 +99,8 @@ class TestProcessDesign(ERPNextTestSuite):
 		self.assertIn("Set the Raw Material Warehouse", result["errors"])
 		self.assertEqual(result["balance_qty"], 375)
 		self.assertIn("_Test Mixer", result["machines"])
-		self.assertEqual(result["item_names"]["_Test Tomato Paste"], "_Test Tomato Paste")
+		self.assertEqual(result["items"]["_Test Process Water"].stock_uom, "Litre")
+		self.assertEqual(result["formula_weight"], 1250)
 
 	def test_plant_builder_design_check_needs_workstation_read(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design

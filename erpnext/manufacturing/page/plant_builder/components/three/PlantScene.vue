@@ -4,7 +4,7 @@ import { useElementSize } from "@vueuse/core";
 import { Button, Progress, TabButtons, Tooltip } from "frappe-ui";
 import PlantFloor from "./PlantFloor.vue";
 import PanButtons from "./PanButtons.vue";
-import { buildLayout } from "../../lib/layout";
+import { buildFloorLayout, buildLayout } from "../../lib/layout";
 import { buildTags, useOrbitCamera } from "../../lib/scene";
 import { useClock } from "../../lib/clock";
 import { __ } from "../../lib/api";
@@ -21,7 +21,7 @@ const emit = defineEmits(["resume"]);
 
 const PERSPECTIVE = 2200;
 
-const layout = computed(() => buildLayout(props.plant));
+const layout = computed(() => (props.plant.floor ? buildFloorLayout : buildLayout)(props.plant));
 const tags = computed(() => buildTags(props.plant, layout.value, props.view, props.live));
 
 const stage = ref(null);

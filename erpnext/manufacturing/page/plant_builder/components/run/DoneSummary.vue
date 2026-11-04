@@ -54,8 +54,7 @@ const chain = computed(() => {
 });
 
 async function runAnother() {
-	const plant = order.value.plant_floor;
-	setRoute(plant, await call("make_work_order", { plant_floor: plant }));
+	setRoute("run", await call("make_work_order", { work_order: order.value.name }));
 }
 </script>
 

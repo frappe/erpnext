@@ -22,14 +22,22 @@ const SACK_LIGHT = ["gray", "cream", "blue"];
 const zones = computed(() => {
 	const L = props.layout;
 	const v = props.view;
-	const list = [
-		{ key: "store", tag: null, label: __("Raw material store"), ...L.store.zone, active: v.storeActive },
-	];
+	const list = L.store.zone
+		? [
+				{
+					key: "store",
+					tag: null,
+					label: __("Raw material store"),
+					...L.store.zone,
+					active: v.storeActive,
+				},
+		  ]
+		: [];
 	L.stations.forEach((st) =>
 		list.push({
 			key: st.stage.id,
 			tag: `s${st.i}`,
-			label: `${st.i + 1}  ${st.stage.name || __("Stage")}`,
+			label: props.plant.floor ? st.stage.name : `${st.i + 1}  ${st.stage.name || __("Stage")}`,
 			...st.zone,
 			active: v.active[st.i],
 			down: v.mode[st.i] === "down",

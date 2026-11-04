@@ -179,3 +179,25 @@ export function buildLayout(plant) {
 	const fg = pack ? { x: pack.zone.x, y: 380, w: PACK_W, h: H - 400 } : null;
 	return { W, H, store: { items, zone: { x: 20, y: 20, w: STORE_W, h: H - 40 } }, stations, pipes, fg };
 }
+
+export function buildFloorLayout(plant) {
+	const count = plant.stages.length;
+	const perRow = Math.max(1, Math.min(MAX_PER_ROW + 1, Math.ceil(Math.sqrt(count))));
+	const stations = plant.stages.map((s, i) => {
+		const slot = i % perRow;
+		const row = Math.floor(i / perRow);
+		const pack = isPackingModel(s.machine_model);
+		const x = 20 + slot * (PACK_W + 20) + (pack ? 0 : (PACK_W - PROC_W) / 2);
+		const st = station(s, i, x, { band: 0, slot, row, bandH: 0 });
+		return pack ? { ...st, zone: { ...st.zone, y: st.y - ZONE_H / 2, h: ZONE_H } } : st;
+	});
+	const rows = Math.max(1, Math.ceil(count / perRow));
+	return {
+		W: 20 + Math.min(perRow, Math.max(count, 1)) * (PACK_W + 20),
+		H: Math.max(400, YC + (rows - 1) * ROW_H + ZONE_H / 2 + 20),
+		store: { items: [], zone: null },
+		stations,
+		pipes: [],
+		fg: null,
+	};
+}

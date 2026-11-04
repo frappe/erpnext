@@ -6,11 +6,14 @@ import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, insertStage, machineModelOf } from "../../lib/plant";
+import { nextOperationId } from "../../lib/design";
 
 const props = defineProps({
 	doc: Object,
 	machines: Object,
 	catalog: { type: Array, default: () => [] },
+	outputs: { type: Object, default: () => ({}) },
+	items: { type: Object, default: () => ({}) },
 	focus: { type: Number, default: null },
 });
 const readOnly = inject(READ_ONLY, ref(false));
@@ -20,9 +23,9 @@ const models = computed(() => props.doc.stages.map((stage) => machineModelOf(sta
 const hasPacking = computed(() => models.value.some(isPackingModel));
 
 function addStage(type) {
-	const machine = machineOf(type.machine_model);
 	const stage = {
-		stage_name: __(machine.stage),
+		operation_id: nextOperationId(props.doc),
+		stage_name: "",
 		workstation: "",
 		workstation_type: type.name,
 		machine_model: type.machine_model,
@@ -60,11 +63,13 @@ const addOptions = computed(() =>
 		/>
 		<StageCard
 			v-for="(stage, i) in doc.stages"
-			:key="stage.name || i"
+			:key="stage.operation_id || i"
 			:doc="doc"
 			:stage="stage"
 			:index="i"
 			:machine-model="models[i]"
+			:output="outputs[stage.operation_id]"
+			:output-uom="items[stage.semi_finished_good]?.stock_uom"
 			:focused="focus === i"
 			@focus="emit('focus', $event)"
 		/>

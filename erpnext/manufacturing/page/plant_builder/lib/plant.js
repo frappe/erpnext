@@ -2,27 +2,6 @@ import { MATERIAL_TONES, toneFor } from "./machines";
 import { __ } from "./api";
 import { num } from "./format";
 
-export const balancePercentage = (doc) =>
-	100 -
-	(doc.materials || []).filter((m) => !m.is_balance_item).reduce((sum, m) => sum + num(m.percentage), 0);
-
-const percentageOf = (doc, row) => (row.is_balance_item ? balancePercentage(doc) : num(row.percentage));
-
-export function newPlantDoc() {
-	return {
-		floor_name: "",
-		company: window.frappe.defaults.get_default("company"),
-		production_item: "",
-		batch_size: 1000,
-		formula_tolerance: 2,
-		warehouse: "",
-		fg_warehouse: "",
-		materials: [],
-		stages: [],
-		packing_materials: [],
-	};
-}
-
 export const machineModelOf = (stage, machines) =>
 	machines[stage.workstation]?.machine_model || stage.machine_model;
 
@@ -31,14 +10,14 @@ export function toScenePlant(doc, machines, item) {
 		id: s.name || `stage-${i}`,
 		machine_model: machineModelOf(s, machines),
 		shapes: machines[s.workstation]?.shapes || [],
-		name: s.stage_name,
+		name: s.operation || s.stage_name,
 		output: s.semi_finished_good || "",
 		packaging: (doc.packing_materials || []).map((p) => p.item_name || p.item_code),
 		sequence: num(s.sequence_id),
 	}));
 	return {
 		id: doc.name || "new",
-		name: doc.floor_name,
+		name: doc.name || "",
 		product: {
 			name: item?.item_name || doc.production_item || "",
 			unit: item?.stock_uom || __("Unit"),
@@ -48,7 +27,7 @@ export function toScenePlant(doc, machines, item) {
 		materials: (doc.materials || []).map((m, i) => ({
 			id: m.item_code || `material-${i}`,
 			name: m.item_name || m.item_code || "",
-			pct: percentageOf(doc, m),
+			pct: num(m.percentage),
 			balance: !!m.is_balance_item,
 			storage: m.storage,
 			stage: num(m.stage_row_id) || 1,

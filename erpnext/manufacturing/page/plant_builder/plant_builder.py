@@ -155,19 +155,20 @@ def check_design(doc: str | dict) -> dict:
 		"outputs": {
 			cint(row.operation_id): flt(row.output_quantity * batch, 3) for row in formula.process_stages
 		},
-		"item_names": get_item_names([row.item_code for row in formula.materials]),
+		"formula_weight": flt(formula.charged_weight * batch, 3) if formula.can_compute else 0,
+		"items": get_items(
+			[row.item_code for row in formula.materials] + [row.output_item for row in formula.stages]
+		),
 	}
 
 
-def get_item_names(item_codes):
-	return dict(
-		frappe.get_all(
-			"Item",
-			filters={"name": ("in", list(filter(None, item_codes)))},
-			fields=["name", "item_name"],
-			as_list=1,
-		)
+def get_items(item_codes):
+	items = frappe.get_all(
+		"Item",
+		filters={"name": ("in", list(filter(None, item_codes)))},
+		fields=["name", "item_name", "stock_uom"],
 	)
+	return {item.name: item for item in items}
 
 
 def get_machines(workstations):
@@ -226,6 +227,30 @@ def save_machine_design(workstation_type: str, shapes: str | list) -> dict:
 	doc.set("shapes", frappe.parse_json(shapes))
 	doc.save()
 	return get_machine_design(doc.name)
+
+
+@frappe.whitelist(methods=["POST"])
+def make_work_order(work_order: str) -> str:
+	source = frappe.get_doc("Work Order", work_order)
+	source.check_permission("read")
+	copy = frappe.new_doc("Work Order")
+	copy.update(
+		{
+			field: source.get(field)
+			for field in (
+				"production_item",
+				"bom_no",
+				"qty",
+				"company",
+				"wip_warehouse",
+				"fg_warehouse",
+				"project",
+			)
+		}
+	)
+	copy.get_items_and_operations_from_bom()
+	copy.insert()
+	return copy.name
 
 
 @frappe.whitelist()
