@@ -509,7 +509,31 @@ class TestCompany(ERPNextTestSuite):
 			company.save()
 
 		company.default_in_transit_warehouse = None
+		disabled_warehouse = frappe.db.get_value(
+			"Warehouse",
+			{"company": company.name, "is_group": 0, "name": ["!=", company.default_warehouse]},
+		)
+		frappe.db.set_value("Warehouse", disabled_warehouse, "disabled", 1)
+		company.default_warehouse = disabled_warehouse
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_existing_invalid_defaults_do_not_block_unrelated_saves(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		expense_accounts = frappe.get_all(
+			"Account",
+			filters={"company": company.name, "root_type": "Expense", "is_group": 0},
+			pluck="name",
+			limit=2,
+		)
+		frappe.db.set_value("Company", company.name, "unrealized_profit_loss_account", expense_accounts[0])
 		frappe.db.set_value("Warehouse", company.default_warehouse, "disabled", 1)
+
+		company.reload()
+		company.monthly_sales_target = 100
+		company.save()
+
+		company.unrealized_profit_loss_account = expense_accounts[1]
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 

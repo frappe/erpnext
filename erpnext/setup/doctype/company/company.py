@@ -351,6 +351,9 @@ class Company(NestedSet):
 					title=_("Incorrect Warehouse"),
 				)
 
+			if not self.is_value_new_or_changed(fieldname):
+				continue
+
 			if details.disabled:
 				frappe.throw(_("{0} {1} is disabled").format(bold(label), bold(warehouse)))
 
@@ -427,33 +430,18 @@ class Company(NestedSet):
 			"default_deferred_expense_account": {},
 		}
 		for fieldname, filters in account_filters.items():
-			if account := self.get(fieldname):
-				label = self.meta.get_translated_label(fieldname)
-				details = frappe.db.get_value(
-					"Account",
-					account,
-					["company", "is_group", "disabled", "root_type", "account_type", "report_type"],
-					as_dict=True,
-				)
+			account = self.get(fieldname)
+			if not account:
+				continue
 
-				if details.disabled:
-					frappe.throw(_("Account {0} is disabled.").format(bold(account)))
+			label = self.meta.get_translated_label(fieldname)
+			if self.is_value_new_or_changed(fieldname):
+				self.validate_default_account(account, label, filters)
 
-				if details.is_group:
-					frappe.throw(_("{0}: {1} is a group account.").format(bold(label), bold(account)))
-
-				if details.company != self.name:
-					frappe.throw(_("Account {0} does not belong to company: {1}").format(account, self.name))
-
-				for key, expected in filters.items():
-					if details.get(key) not in (expected if isinstance(expected, tuple) else (expected,)):
-						frappe.throw(_("{0}: {1} has an invalid {2}").format(label, account, key))
-
+			if self.is_value_new_or_changed(fieldname) or self.currency_changed:
 				if get_account_currency(account) not in {
 					self.default_currency,
-					self.previous_default_currency
-					if getattr(self, "currency_changed", False)
-					else self.default_currency,
+					self.previous_default_currency,
 				}:
 					frappe.throw(
 						_(
@@ -462,14 +450,42 @@ class Company(NestedSet):
 					)
 
 		for fieldname in ("cost_center", "round_off_cost_center", "depreciation_cost_center"):
-			if cost_center := self.get(fieldname):
-				company, is_group = frappe.db.get_value("Cost Center", cost_center, ["company", "is_group"])
-				if company != self.name or is_group:
-					frappe.throw(
-						_("{0} must be a non-group Cost Center of {1}").format(
-							self.meta.get_translated_label(fieldname), self.name
-						)
+			cost_center = self.get(fieldname)
+			if not cost_center or not self.is_value_new_or_changed(fieldname):
+				continue
+
+			company, is_group = frappe.db.get_value("Cost Center", cost_center, ["company", "is_group"])
+			if company != self.name or is_group:
+				frappe.throw(
+					_("{0} must be a non-group Cost Center of {1}").format(
+						self.meta.get_translated_label(fieldname), self.name
 					)
+				)
+
+	def is_value_new_or_changed(self, fieldname):
+		"""Validate a default only when it is set, so existing defaults do not block unrelated saves."""
+		return self.is_new() or self.has_value_changed(fieldname)
+
+	def validate_default_account(self, account, label, filters):
+		details = frappe.db.get_value(
+			"Account",
+			account,
+			["company", "is_group", "disabled", "root_type", "account_type", "report_type"],
+			as_dict=True,
+		)
+
+		if details.disabled:
+			frappe.throw(_("Account {0} is disabled.").format(bold(account)))
+
+		if details.is_group:
+			frappe.throw(_("{0}: {1} is a group account.").format(bold(label), bold(account)))
+
+		if details.company != self.name:
+			frappe.throw(_("Account {0} does not belong to company: {1}").format(account, self.name))
+
+		for key, expected in filters.items():
+			if details.get(key) not in (expected if isinstance(expected, tuple) else (expected,)):
+				frappe.throw(_("{0}: {1} has an invalid {2}").format(label, account, key))
 
 	def validate_currency(self):
 		self.previous_default_currency = None
