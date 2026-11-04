@@ -590,6 +590,10 @@ def repost(doc):
 			},
 		)
 
+		if isinstance(e, JobTimeoutException):
+			# Job's time is up; stop the caller from starting the next entry
+			raise
+
 		if status == "Failed":
 			outgoing_email_account = frappe.get_cached_value(
 				"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
