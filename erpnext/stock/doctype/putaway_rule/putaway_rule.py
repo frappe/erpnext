@@ -182,7 +182,12 @@ def _apply_putaway_rule(
 
 		if not pending_qty or not item_code:
 			updated_table = add_row(
-				item, pending_qty, source_warehouse or item.warehouse, updated_table, serial_nos=serial_nos
+				item,
+				pending_qty,
+				source_warehouse or item.warehouse,
+				updated_table,
+				serial_nos=serial_nos,
+				keep_rejected=True,
 			)
 			continue
 
@@ -204,7 +209,9 @@ def _apply_putaway_rule(
 				# rules available, but no free space
 				items_not_accomodated.append([item_code, pending_qty])
 			else:
-				updated_table = add_row(item, pending_qty, warehouse, updated_table, serial_nos=serial_nos)
+				updated_table = add_row(
+					item, pending_qty, warehouse, updated_table, serial_nos=serial_nos, keep_rejected=True
+				)
 			continue
 
 		# maintain item/item-warehouse wise rules, to handle if item is entered twice
@@ -216,6 +223,7 @@ def _apply_putaway_rule(
 		if not item_wise_rules[key]:
 			item_wise_rules[key] = rules
 
+		keep_rejected = True
 		for rule in item_wise_rules[key]:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = (
@@ -231,8 +239,15 @@ def _apply_putaway_rule(
 					continue
 
 				updated_table = add_row(
-					item, qty_to_allocate, rule.warehouse, updated_table, rule.name, serial_nos=serial_nos
+					item,
+					qty_to_allocate,
+					rule.warehouse,
+					updated_table,
+					rule.name,
+					serial_nos=serial_nos,
+					keep_rejected=keep_rejected,
 				)
+				keep_rejected = False
 
 				pending_stock_qty -= stock_qty_to_allocate
 				pending_qty -= qty_to_allocate
@@ -331,7 +346,7 @@ def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 	return False, vacant_rules
 
 
-def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None):
+def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None, keep_rejected=False):
 	new_updated_table_row = copy.deepcopy(item)
 	new_updated_table_row.idx = 1 if not updated_table else cint(updated_table[-1].idx) + 1
 	new_updated_table_row.name = None
@@ -343,8 +358,10 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 	else:
 		new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
 		new_updated_table_row.warehouse = warehouse
-		new_updated_table_row.rejected_qty = 0
-		new_updated_table_row.received_qty = to_allocate
+		if not keep_rejected:
+			new_updated_table_row.rejected_qty = 0
+
+		new_updated_table_row.received_qty = flt(to_allocate) + flt(new_updated_table_row.rejected_qty)
 
 	if rule:
 		new_updated_table_row.putaway_rule = rule

@@ -678,6 +678,24 @@ class TestPutawayRule(FrappeTestCase):
 		)
 		self.assertEqual(get_batch_qty(batch_2, self.warehouse_1, item), 5)
 
+	def test_putaway_rule_keeps_the_rejected_qty(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=100)
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=8,
+			rejected_qty=2,
+			rejected_warehouse="_Test Rejected Warehouse - _TC",
+			apply_putaway_rule=1,
+			do_not_submit=1,
+		)
+
+		self.assertEqual(
+			[(row.warehouse, row.qty, row.rejected_qty, row.received_qty) for row in pr.items],
+			[(self.warehouse_1, 8, 2, 10)],
+		)
+
 
 def create_putaway_rule(**args):
 	args = frappe._dict(args)
