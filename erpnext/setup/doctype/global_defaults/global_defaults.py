@@ -113,20 +113,7 @@ class GlobalDefaults(Document):
 			)
 
 	def toggle_in_words(self):
-<<<<<<< HEAD
 		self.disable_in_words = cint(self.disable_in_words)
-=======
-		self.sync_property_setters(
-			IN_WORDS_DOCTYPES,
-			[("in_words", "hidden", "Check")],
-			cint(self.disable_in_words),
-		)
-		self.sync_property_setters(
-			ROUNDED_TOTAL_DOCTYPES,
-			[("in_words", "print_hide", "Check")],
-			cint(self.disable_in_words),
-		)
->>>>>>> c3f1e1e (fix(setup): preserve in-words print defaults)
 
 		# Make property setters to hide in words fields
 		for doctype in (
@@ -149,6 +136,11 @@ class GlobalDefaults(Document):
 				"Check",
 				validate_fields_for_doctype=False,
 			)
+
+			# Payment Entry and Subcontracting Receipt keep their standard print visibility
+			if doctype in ("Payment Entry", "Subcontracting Receipt"):
+				continue
+
 			make_property_setter(
 				doctype,
 				"in_words",

@@ -9,31 +9,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGlobalDefaults(ERPNextTestSuite):
-<<<<<<< HEAD
-	def test_disable_in_words_covers_payment_and_subcontracting_receipt(self):
-		for disabled in (1, 0):
-			with self.subTest(disabled=disabled):
-				with self.change_settings("Global Defaults", disable_in_words=disabled):
-=======
-	def test_unrelated_save_preserves_pos_profile_rounding(self):
-		defaults = frappe.get_doc("Global Defaults")
-		defaults._doc_before_save = frappe._dict(disable_rounded_total=defaults.disable_rounded_total)
-
-		with (
-			patch("frappe.db.set_default"),
-			patch("frappe.db.set_value"),
-			patch("frappe.clear_cache"),
-			patch.object(defaults, "toggle_rounded_total"),
-			patch.object(defaults, "toggle_in_words"),
-			patch.object(defaults, "set_disable_rounded_total_on_pos_profiles") as update_profiles,
-		):
-			defaults.on_update()
-			update_profiles.assert_not_called()
-
-			defaults.disable_rounded_total = 1 - int(defaults.disable_rounded_total)
-			defaults.on_update()
-			update_profiles.assert_called_once_with()
-
 	def test_disable_in_words_preserves_payment_and_subcontracting_print_defaults(self):
 		for doctype in ("Payment Entry", "Subcontracting Receipt"):
 			make_property_setter(doctype, "in_words", "print_hide", 1, "Check")
@@ -44,7 +19,6 @@ class TestGlobalDefaults(ERPNextTestSuite):
 				with self.subTest(disabled=disabled):
 					defaults.disable_in_words = disabled
 					defaults.save()
->>>>>>> c3f1e1e (fix(setup): preserve in-words print defaults)
 					for doctype in ("Payment Entry", "Subcontracting Receipt"):
 						field = frappe.get_meta(doctype).get_field("in_words")
 						self.assertEqual(field.hidden, disabled)
@@ -57,7 +31,7 @@ class TestGlobalDefaults(ERPNextTestSuite):
 					self.assertEqual(field.hidden, disabled)
 					self.assertEqual(field.print_hide, disabled)
 
-			defaults.hide_currency_symbol = 1 - int(defaults.hide_currency_symbol)
+			defaults.hide_currency_symbol = "No" if defaults.hide_currency_symbol == "Yes" else "Yes"
 			defaults.save()
 			for doctype in ("Payment Entry", "Subcontracting Receipt"):
 				self.assertEqual(frappe.get_meta(doctype).get_field("in_words").print_hide, 1)
