@@ -42,17 +42,12 @@ from erpnext.manufacturing.doctype.production_plan.work_order_quantities import 
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-<<<<<<< HEAD
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
-=======
-from erpnext.stock import stock_ledger
-from erpnext.stock.doctype.item.item import validate_item_uoms
->>>>>>> 2ece241 (refactor(stock): map transit dimensions through get_mapped_doc)
 from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	_get_bin_details,
