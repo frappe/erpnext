@@ -222,6 +222,37 @@ class TestWorkstation(FrappeTestCase):
 			},
 		)
 
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
+		shifts = [("13:00:00", "17:00:00"), ("08:00:00", "12:00:00")]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Early", shifts, 60, "2031-03-03 06:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 09:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Break", shifts, 60, "2031-03-03 12:30:00"),
+			[("2031-03-03 13:00:00", "2031-03-03 14:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Order", shifts, 360, "2031-03-03 08:00:00"),
+			[("2031-03-03 08:00:00", "2031-03-03 12:00:00"), ("2031-03-03 13:00:00", "2031-03-03 15:00:00")],
+		)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "allow_overtime": 0, "mins_between_operations": 10},
+	)
+	def test_start_moved_into_a_shift_is_checked_for_overlap(self):
+		shifts = [("08:00:00", "17:00:00")]
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Overlap", shifts, 60, "2031-03-05 08:00:00"),
+			[("2031-03-05 08:00:00", "2031-03-05 09:00:00")],
+		)
+		self.assertEqual(
+			schedule_one_operation("_Test WS Shift Overlap", shifts, 60, "2031-03-05 06:00:00"),
+			[("2031-03-05 09:10:00", "2031-03-05 10:10:00")],
+		)
+
 
 def make_workstation(*args, **kwargs):
 	args = args if args else kwargs
@@ -241,3 +272,39 @@ def make_workstation(*args, **kwargs):
 		return doc
 
 	return frappe.get_doc("Workstation", workstation_name)
+
+
+def schedule_one_operation(workstation_name, shifts, minutes, planned_start, holiday_list=None):
+	job_card = make_scheduled_job_card(workstation_name, shifts, minutes, planned_start, holiday_list)
+	return [(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs]
+
+
+def make_scheduled_job_card(workstation_name, shifts, minutes, planned_start, holiday_list=None, qty=1):
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	workstation = frappe.get_doc("Workstation", make_workstation(workstation_name=workstation_name).name)
+	workstation.holiday_list = holiday_list
+	workstation.set("working_hours", [])
+	for shift in shifts:
+		workstation.append(
+			"working_hours",
+			{"start_time": shift[0], "end_time": shift[1], "enabled": shift[2] if len(shift) > 2 else 1},
+		)
+	workstation.save()
+
+	operation = make_operation(operation=f"{workstation_name} Op", workstation=workstation.name).name
+	fg_item = make_item(f"{workstation_name} FG", {"is_stock_item": 1}).name
+	rm_item = make_item(f"{workstation_name} RM", {"is_stock_item": 1}).name
+	bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_submit=True)
+	bom.append(
+		"operations",
+		{"operation": operation, "workstation": workstation.name, "time_in_mins": minutes, "hour_rate": 100},
+	)
+	bom.submit()
+
+	work_order = make_wo_order_test_record(
+		item=fg_item, bom_no=bom.name, qty=qty, planned_start_date=planned_start, skip_transfer=1
+	)
+	return frappe.get_doc("Job Card", {"work_order": work_order.name})
