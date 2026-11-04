@@ -45,7 +45,7 @@ class TestItemSearchSetting(ERPNextTestSuite):
 	def test_old_sqlite_keeps_the_index_off(self):
 		with (
 			self.change_settings("Global Defaults", enable_item_search_index=1),
-			patch.object(sqlite3, "sqlite_version_info", (3, 37, 2)),
+			patch.object(sqlite3, "sqlite_version_info", (3, 31, 1)),
 		):
 			self.assertFalse(ItemSearch().is_search_enabled())
 
@@ -54,7 +54,7 @@ class TestItemSearchSetting(ERPNextTestSuite):
 			global_defaults = frappe.get_single("Global Defaults")
 			global_defaults.enable_item_search_index = 1
 
-			with patch.object(sqlite3, "sqlite_version_info", (3, 37, 2)):
+			with patch.object(sqlite3, "sqlite_version_info", (3, 31, 1)):
 				self.assertRaises(frappe.ValidationError, global_defaults.save)
 
 
