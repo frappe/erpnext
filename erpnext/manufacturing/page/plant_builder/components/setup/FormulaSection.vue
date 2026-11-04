@@ -40,7 +40,7 @@ const stageOptions = computed(() =>
 const showStage = computed(() => stageOptions.value.length > 1);
 const columns = computed(() =>
 	showStage.value
-		? "grid-cols-[1.25rem_minmax(0,1fr)_3.5rem_6.5rem_4.5rem_1.75rem]"
+		? "grid-cols-[1.25rem_minmax(0,1fr)_3rem_7.5rem_4rem_1.75rem]"
 		: "grid-cols-[1.25rem_minmax(0,1fr)_7rem_4.5rem_1.75rem]"
 );
 const stageOf = (row) => String(row.stage_row_id || 1);
