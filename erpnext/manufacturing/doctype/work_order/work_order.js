@@ -1147,7 +1147,7 @@ erpnext.work_order = {
 	},
 
 	set_default_warehouse: function (frm) {
-		if (frm.doc.company && !(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
+		if (frm.doc.company && !frm.doc.wip_warehouse) {
 			let company = frm.doc.company;
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
