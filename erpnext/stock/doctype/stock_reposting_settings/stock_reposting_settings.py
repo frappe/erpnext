@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_to_date, get_datetime, get_time_str, time_diff_in_hours
+from frappe.utils import add_to_date, get_datetime, time_diff_in_hours
 
 
 class StockRepostingSettings(Document):
@@ -44,7 +44,7 @@ class StockRepostingSettings(Document):
 		diff = time_diff_in_hours(end_time, start_time)
 
 		if diff < 10:
-			self.end_time = get_time_str(add_to_date(self.start_time, hours=10, as_datetime=True))
+			self.end_time = add_to_date(start_time, hours=10).strftime("%H:%M:%S")
 
 	@frappe.whitelist(methods=["POST"])
 	def convert_to_item_wh_reposting(self):
