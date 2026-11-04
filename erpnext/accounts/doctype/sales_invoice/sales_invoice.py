@@ -1277,8 +1277,8 @@ class SalesInvoice(SellingController):
 			"taxes": ("account_head",),
 			"payments": ("account",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
