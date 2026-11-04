@@ -12,6 +12,9 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_pooled_bin_details,
 )
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_se_from_wo
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
@@ -1100,6 +1103,104 @@ class TestProductionPlan(ERPNextTestSuite):
 		items = get_items_for_material_requests(plan.as_dict())
 
 		self.assertEqual({row.get("item_code"): row.get("warehouse") for row in items}, warehouses)
+
+	def test_raw_materials_cover_finished_good_process_loss(self):
+		rm_item = make_item("_Test PP FG Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("_Test PP FG Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], process_loss_percentage=20, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=80,
+			consider_process_loss=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual(
+			[(row.get("item_code"), row.get("required_bom_qty")) for row in items], [(rm_item, 100)]
+		)
+
+	def test_raw_materials_cover_sub_assembly_process_loss(self):
+		rm_item = make_item("_Test PP Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test PP Loss Sub", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("_Test PP Loss FG", {"is_stock_item": 1}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], process_loss_percentage=20, currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=80,
+			consider_process_loss=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.po_items[0].include_exploded_items = 1
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual(
+			[(row.get("item_code"), row.get("required_bom_qty")) for row in items], [(rm_item, 100)]
+		)
+
+	def test_plan_ignores_process_loss_unless_considered(self):
+		rm_item = make_item("_Test PP Ignored Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test PP Ignored Loss Sub", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item("_Test PP Ignored Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], process_loss_percentage=20, currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], process_loss_percentage=20, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=80, stock_uom="Kg", skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		plan.save()
+
+		self.assertEqual(plan.po_items[0].process_loss_percentage, 0)
+		self.assertEqual(
+			(plan.sub_assembly_items[0].qty, plan.sub_assembly_items[0].process_loss_percentage), (80, 0)
+		)
+		plan.po_items[0].include_exploded_items = 1
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			[(row.get("item_code"), row.get("required_bom_qty")) for row in items], [(rm_item, 80)]
+		)
+
+	def test_whole_number_sub_assembly_rounds_up_for_process_loss(self):
+		rm_item = make_item("_Test PP Whole Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test PP Whole Loss Sub", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item("_Test PP Whole Loss FG", {"is_stock_item": 1}).name
+		make_bom(
+			item=sub_item, raw_materials=[rm_item], quantity=10, process_loss_percentage=10, currency="INR"
+		)
+		make_bom(item=fg_item, raw_materials=[sub_item], currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			consider_process_loss=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+
+		row = plan.sub_assembly_items[0]
+		order_qty = ProductionPlanWorkOrderQuantities.get_order_qty(row, "production_plan_sub_assembly_item")
+		self.assertEqual((row.qty, order_qty), (10, 12))
+
+	def test_whole_number_sub_assembly_rounds_up_without_process_loss(self):
+		rm_item = make_item("_Test PP Whole Ratio RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		sub_item = make_item("_Test PP Whole Ratio Sub", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item("_Test PP Whole Ratio FG", {"is_stock_item": 1}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], currency="INR")
+		make_bom(item=fg_item, raw_materials=[sub_item], quantity=10, rm_qty=3, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=5, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+
+		self.assertEqual(plan.sub_assembly_items[0].qty, 2)
 
 	def test_transfer_type_raw_material_stays_in_stock_uom(self):
 		rm_item = make_item(
@@ -4499,6 +4600,157 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(len(reserved_entries), 0)
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 200})
+	def test_purchase_receipt_reserves_only_the_plan_shortfall(self):
+		self.assert_receipt_reserves_only_the_plan_shortfall("RM For SR Shortfall")
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 200})
+	def test_purchase_receipt_reserves_only_the_plan_shortfall_of_batches(self):
+		make_item(
+			"Batch RM For SR Shortfall",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BRMSRS-.#####"},
+		)
+		self.assert_receipt_reserves_only_the_plan_shortfall("Batch RM For SR Shortfall")
+
+	def assert_receipt_reserves_only_the_plan_shortfall(self, rm_item):
+		plan = self.make_plan_short_of_stock(rm_item)
+		self.receive_for_plan(plan, 15)
+
+		reserved_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+		reserved_qty = {row.name: row.reserved_qty for row in reserved_entries}
+		self.assertEqual(sum(reserved_qty.values()), 10)
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "stock_reserved_qty"), 10
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_receipt_hands_reserved_stock_to_submitted_work_orders(self):
+		plan = self.make_plan_short_of_stock("RM For SR Work Order Hand Off")
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.source_warehouse = work_order.wip_warehouse = "_Test Warehouse - _TC"
+		work_order.fg_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+
+		self.receive_for_plan(plan, 6)
+
+		reserved_entries = StockReservation(work_order).get_reserved_entries("Work Order", work_order.name)
+		self.assertEqual(sum({row.name: row.reserved_qty for row in reserved_entries}.values()), 10)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_receipt_skips_closed_work_orders(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
+
+		plan = self.make_plan_short_of_stock("RM For SR Closed Work Order")
+		work_order = self.submit_plan_work_order(plan)
+		close_work_order(work_order.name, "Closed")
+
+		self.receive_for_plan(plan, 6)
+
+		self.assertFalse(StockReservation(work_order).get_reserved_entries("Work Order", work_order.name))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_receipt_hand_off_updates_work_order_status(self):
+		plan = self.make_plan_short_of_stock("RM For SR Work Order Status")
+		work_order = self.submit_plan_work_order(plan)
+
+		self.receive_for_plan(plan, 6)
+
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "status"), "Stock Reserved")
+
+	def submit_plan_work_order(self, plan):
+		plan.make_work_order()
+		work_order = frappe.get_doc("Work Order", {"production_plan": plan.name})
+		work_order.source_warehouse = work_order.wip_warehouse = "_Test Warehouse - _TC"
+		work_order.fg_warehouse = "_Test Warehouse - _TC"
+		work_order.submit()
+		return work_order
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_hand_off_releases_the_plan_row(self):
+		plan = self.make_plan_short_of_stock("RM For SR Hand Off Release")
+		self.receive_for_plan(plan, 6)
+		self.submit_plan_work_order(plan)
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "stock_reserved_qty"), 0
+		)
+		self.assertEqual(
+			set(
+				frappe.get_all(
+					"Stock Reservation Entry",
+					filters={"voucher_type": "Production Plan", "voucher_no": plan.name, "docstatus": 1},
+					pluck="status",
+				)
+			),
+			{"Closed"},
+		)
+
+	def make_plan_short_of_stock(self, rm_item):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		parent_bom = create_nested_bom({f"FG For {rm_item}": {rm_item: {}}}, prefix="")
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+		plan.submit()
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+		return plan
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_purchase_invoice_with_update_stock_reserves_for_the_plan(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
+
+		plan = self.make_plan_short_of_stock("RM For SR Purchase Invoice")
+		invoice = make_purchase_invoice(self.order_for_plan(plan, 6).name)
+		invoice.update_stock = 1
+		invoice.submit()
+		self.assertEqual(self.get_plan_reserved_qty(plan), 10)
+
+		invoice.cancel()
+		self.assertEqual(self.get_plan_reserved_qty(plan), 4)
+
+	def get_plan_reserved_qty(self, plan):
+		return sum(
+			frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_type": "Production Plan", "voucher_no": plan.name, "docstatus": 1},
+				pluck="reserved_qty",
+			)
+		)
+
+	def receive_for_plan(self, plan, qty):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+
+		make_purchase_receipt(self.order_for_plan(plan, qty).name).submit()
+
+	def order_for_plan(self, plan, qty):
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_order
+
+		mr_name = frappe.db.get_value("Material Request", {"production_plan": plan.name})
+		po = make_purchase_order(mr_name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = qty
+		po.submit()
+		return po
+
 	def test_no_stock_reservation_via_purchase_receipt_when_reserve_stock_disabled(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
@@ -5278,6 +5530,7 @@ def create_production_plan(**args):
 			"skip_available_sub_assembly_item": args.skip_available_sub_assembly_item or 0,
 			"sub_assembly_warehouse": args.sub_assembly_warehouse,
 			"reserve_stock": args.reserve_stock or 0,
+			"consider_process_loss": args.consider_process_loss or 0,
 			"for_warehouse": args.for_warehouse or None,
 			"raw_material_group_warehouse": args.raw_material_group_warehouse or None,
 		}

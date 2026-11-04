@@ -580,5 +580,6 @@ def update_common_item_properties(item, location):
 	item.material_request = location.material_request
 	item.serial_no = location.serial_no
 	item.batch_no = location.batch_no
+	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name

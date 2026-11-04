@@ -204,6 +204,18 @@ class TestAsset(AssetSetup):
 					rows.append(row)
 				self.assertCountEqual(rows, [item.name for item in purchase_doc.items])
 
+	def test_purchase_amount_matches_linked_purchase_row(self):
+		for doctype in ("Purchase Receipt", "Purchase Invoice"):
+			with self.subTest(doctype=doctype):
+				purchase_doc = self.make_asset_purchase(doctype, [("Macbook Pro", 1, 100000)])
+				fieldname = frappe.scrub(doctype)
+				asset = frappe.get_doc("Asset", {fieldname: purchase_doc.name})
+
+				asset.net_purchase_amount = 600000
+				with self.assertRaisesRegex(frappe.ValidationError, "Net Purchase Amount should be"):
+					asset.save()
+				self.assertEqual(asset.purchase_amount, 100000)
+
 	def test_manual_assets_use_remaining_purchase_row_quantities(self):
 		item = create_fixed_asset_item("_Test Manual Asset Purchase", auto_create_assets=0)
 		for doctype in ("Purchase Receipt", "Purchase Invoice"):
@@ -566,6 +578,36 @@ class TestAsset(AssetSetup):
 		update_maintenance_status()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
+	def test_asset_under_due_maintenance_keeps_depreciating(self):
+		from unittest.mock import patch
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-06-06",
+			purchase_date="2020-01-01",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=3,
+			frequency_of_depreciation=10,
+			maintenance_required=1,
+			depreciation_start_date="2020-12-31",
+			submit=1,
+		)
+		# an overdue maintenance log stays open
+		with patch("erpnext.assets.doctype.asset.asset.has_due_maintenance", return_value=True):
+			update_maintenance_status()
+			self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "In Maintenance")
+
+			post_depreciation_entries(date="2021-01-01")
+
+		self.assertTrue(
+			frappe.db.get_value(
+				"Depreciation Schedule",
+				{"parent": get_asset_depr_schedule_doc(asset.name, "Active").name, "idx": 1},
+				"journal_entry",
+			)
+		)
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "In Maintenance")
 
 	def test_asset_splitting(self):
 		asset = create_asset(

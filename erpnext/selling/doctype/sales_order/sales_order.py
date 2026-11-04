@@ -25,7 +25,10 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
-from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.selling.doctype.customer.customer import (
+	check_credit_limit,
+	is_sales_order_credit_check_bypassed,
+)
 from erpnext.selling.doctype.sales_order.services.delivery_schedule import DeliveryScheduleService
 from erpnext.selling.doctype.sales_order.services.reservation import SalesOrderStockReservation
 from erpnext.selling.doctype.sales_order.services.status import StatusService
@@ -217,6 +220,7 @@ class SalesOrder(SellingController):
 
 	def onload(self) -> None:
 		super().onload()
+		self.set_proforma_onload()
 
 		if self.get("is_subcontracted"):
 			self.set_onload("can_update_items", self.can_update_items())
@@ -235,6 +239,20 @@ class SalesOrder(SellingController):
 				has_potentially_billable_items(self.name),
 			)
 			self.set_onload("has_over_deliverable_rows", self.has_over_deliverable_rows())
+
+	def set_proforma_onload(self) -> None:
+		"""Pass proforma settings to the form, since Sales Users cannot read Selling Settings."""
+		if self.docstatus == 0:
+			return
+
+		if not frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice"):
+			return
+
+		self.set_onload("enable_proforma_invoice", True)
+		self.set_onload(
+			"default_proforma_print_format",
+			frappe.db.get_single_value("Selling Settings", "default_proforma_print_format"),
+		)
 
 	def can_update_items(self) -> bool:
 		return SubcontractingService(self).can_update_items()
@@ -627,15 +645,7 @@ class SalesOrder(SellingController):
 			project.db_update()
 
 	def check_credit_limit(self):
-		# if bypass credit limit check is set to true (1) at sales order level,
-		# then we need not to check credit limit and vise versa
-		if not cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				{"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				"bypass_credit_limit_check",
-			)
-		):
+		if not is_sales_order_credit_check_bypassed(self.customer, self.company):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
@@ -922,6 +932,8 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
+		plan_item = qb.DocType("Production Plan Item")
+		precision = frappe.get_precision("Work Order", "qty")
 
 		items = []
 		item_codes = [i.item_code for i in so.items]
@@ -950,7 +962,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+						.left_join(plan_item)
+						.on(plan_item.name == wo.production_plan_item)
+						.select(Sum(qty_against_sales_order(wo, plan_item)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
@@ -959,7 +973,7 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 						)
 						.run()[0][0]
 					)
-					pending_qty = stock_qty - total_work_order_qty
+					pending_qty = flt(stock_qty - total_work_order_qty, precision)
 				else:
 					pending_qty = stock_qty
 

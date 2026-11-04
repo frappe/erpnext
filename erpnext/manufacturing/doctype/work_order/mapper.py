@@ -11,6 +11,7 @@ the controller; work_order.py re-exports them for backward compatibility.
 import json
 import math
 from functools import partial
+from itertools import groupby
 
 import frappe
 from frappe import _
@@ -404,6 +405,43 @@ def get_operation_qty(work_order, operation):
 	return flt(work_order.get("qty"))
 
 
+def get_upstream_process_loss(work_order, operation=None):
+	"""Loss before an operation, or before finished goods when no operation is supplied."""
+	if work_order.get("track_semi_finished_goods"):
+		return 0
+
+	process_loss_qty = 0
+	available_qty = None
+	for sequence_id, rows in groupby(
+		sorted(work_order.get("operations") or [], key=lambda row: cint(row.sequence_id)),
+		key=lambda row: cint(row.sequence_id),
+	):
+		if operation is not None and sequence_id >= cint(operation.get("sequence_id")):
+			break
+
+		rows = list(rows)
+		# Cap new loss at the previous output; legacy cards can repeat upstream loss.
+		process_loss_qty += max(
+			(
+				flt(row.process_loss_qty)
+				if available_qty is None
+				else min(flt(row.process_loss_qty), max(available_qty - flt(row.completed_qty), 0))
+			)
+			for row in rows
+		)
+		available_qty = min(flt(row.completed_qty) for row in rows)
+
+	return flt(process_loss_qty)
+
+
+def get_operation_target_qty(work_order, operation):
+	"""Operation qty less the process loss booked before it."""
+	return flt(
+		get_operation_qty(work_order, operation) - get_upstream_process_loss(work_order, operation),
+		operation.precision("completed_qty"),
+	)
+
+
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
 		row.batch_size = row.get("qty") or get_operation_qty(wo_doc, row)
@@ -610,12 +648,15 @@ def _pick_list_mapping(postprocess, allocation):
 
 def _allocate_material_demand(work_order, fraction):
 	"""Fraction of each (item, warehouse, operation row) group's requirement, capped
-	at the group's proportional share of the item's pending pool."""
+	at the group's proportional share of the item's pending pool. Whole number UOMs
+	round up, within the item's rounded up total and its unrounded pending qty."""
 	required_by_item = {}
 	covered_by_item = {}
 	required_by_group = {}
+	uom_by_item = {}
 	for row in work_order.required_items:
 		required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
+		uom_by_item.setdefault(row.item_code, row.stock_uom)
 		covered_by_item.setdefault(row.item_code, flt(row.requested_qty) + flt(row.picked_qty))
 		covered_by_item[row.item_code] += flt(row.transferred_qty)
 		key = _allocation_key(row)
@@ -626,6 +667,15 @@ def _allocate_material_demand(work_order, fraction):
 		for item_code, required_qty in required_by_item.items()
 	}
 
+	precision = frappe.get_precision("Work Order Item", "required_qty")
+	remaining_by_item = {
+		item_code: min(
+			_round_demand(required_qty * fraction, uom_by_item[item_code], precision),
+			pending_pool[item_code],
+		)
+		for item_code, required_qty in required_by_item.items()
+	}
+
 	allocation = {}
 	for key, required_qty in required_by_group.items():
 		item_code = key[0]
@@ -633,10 +683,20 @@ def _allocate_material_demand(work_order, fraction):
 			continue
 
 		pool_share = pending_pool[item_code] * required_qty / required_by_item[item_code]
-		qty = min(required_qty * fraction, pool_share)
+		qty = _round_demand(min(required_qty * fraction, pool_share), uom_by_item[item_code], precision)
+		qty = min(qty, remaining_by_item[item_code])
 		if qty > 0:
 			allocation[key] = qty
+			remaining_by_item[item_code] -= qty
 	return allocation
+
+
+def _round_demand(qty, stock_uom, precision):
+	"""Whole number UOMs round up even a demand below field precision. Rounding to 9
+	decimals first keeps float noise (30 * 0.1) from adding a unit."""
+	if cint(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number")):
+		return math.ceil(flt(qty, 9))
+	return flt(qty, precision)
 
 
 def _allocation_key(row):

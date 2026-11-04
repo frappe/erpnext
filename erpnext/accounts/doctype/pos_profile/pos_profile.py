@@ -11,6 +11,7 @@ from frappe.utils import get_link_to_form, now
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 
 
 class POSProfile(Document):
@@ -77,6 +78,7 @@ class POSProfile(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		validate_terms_and_conditions(self.get("tc_name"), "selling")
 		self.validate_disabled()
 		self.validate_default_profile()
 		self.validate_all_link_fields()

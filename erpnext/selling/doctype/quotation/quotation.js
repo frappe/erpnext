@@ -248,8 +248,9 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			this.frm.fields_dict.party_name.get_query = function () {
 				return { query: "erpnext.controllers.queries.lead_query" };
 			};
-		} else if (this.frm.doc.quotation_to == "Prospect") {
-			this.frm.set_df_property("party_name", "label", "Prospect");
+		} else if (this.frm.doc.quotation_to) {
+			// Prospect, CRM Deal: default search, without the Customer or Lead query
+			this.frm.set_df_property("party_name", "label", this.frm.doc.quotation_to);
 			this.frm.fields_dict.party_name.get_query = null;
 		}
 	}

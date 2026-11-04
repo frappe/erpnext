@@ -680,7 +680,8 @@ class AccountsController(TransactionBase):
 				item.service_end_date = add_days(to_date, 1)
 
 	def before_print(self, settings=None):
-		self.set_missing_terms()
+		if self.docstatus.is_draft():
+			self.set_missing_terms()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -2023,7 +2024,6 @@ def get_missing_company_details(doctype: str, docname: str):
 	)
 
 	required_fields = [
-		company_details.get("company_logo"),
 		company_details.get("phone_no"),
 		company_details.get("email"),
 	]

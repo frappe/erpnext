@@ -40,8 +40,12 @@ from erpnext.accounts.utils import (
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.manufacturing.doctype.production_plan.services.reservation import reserve_received_stock
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	cancel_stock_reservation_entries,
+)
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -236,6 +240,7 @@ class PurchaseInvoice(BuyingController):
 				"source_field": "amount",
 				"percent_join_field": "purchase_order",
 				"overflow_type": "billing",
+				"billing_flag": "update_billed_amount_in_purchase_order",
 				"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 				where name=`tabPurchase Invoice Item`.parent and (is_return=0 or update_billed_amount_in_purchase_order=1))""",
 			}
@@ -754,6 +759,7 @@ class PurchaseInvoice(BuyingController):
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
+			reserve_received_stock(self)
 
 		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction":
 			self.update_project()
@@ -832,6 +838,13 @@ class PurchaseInvoice(BuyingController):
 				if is_cwip_accounting_enabled(asset_category):
 					return 1
 		return 0
+
+	def before_cancel(self):
+		super().before_cancel()
+		if self.update_stock:
+			cancel_stock_reservation_entries(
+				from_voucher_type=self.doctype, from_voucher_no=self.name, notify=False
+			)
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)

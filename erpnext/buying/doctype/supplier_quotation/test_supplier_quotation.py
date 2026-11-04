@@ -345,10 +345,10 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			)
 			update_child_qty_rate("Supplier Quotation", trans_items, supplier_quotation.name)
 
-		update_qty(5)
+		update_qty(6)
 		supplier_quotation.reload()
 		self.assertEqual(supplier_quotation.items[0].conversion_factor, 2)
-		self.assertEqual(supplier_quotation.items[0].stock_qty, 10)
+		self.assertEqual(supplier_quotation.items[0].stock_qty, 12)
 
 		self.assertRaisesRegex(
 			frappe.ValidationError,
@@ -360,16 +360,24 @@ class TestPurchaseOrder(ERPNextTestSuite):
 	def test_update_items_recomputes_order_status(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
 		sq.submit()
-		self.make_order(sq, sq.items[0].qty)
-		self.assertEqual(frappe.db.get_value("Supplier Quotation", sq.name, "status"), "Ordered")
+		self.make_order(sq, 4)
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", sq.name, "status"), "Partially Ordered")
 
 		item = sq.items[0]
-		trans_items = [
-			{"item_code": item.item_code, "rate": item.rate, "qty": item.qty, "docname": item.name},
-			{"item_code": "_Test Item 2", "rate": 300, "qty": 3},
-		]
-		update_child_qty_rate("Supplier Quotation", json.dumps(trans_items), sq.name)
-		self.assertEqual(frappe.db.get_value("Supplier Quotation", sq.name, "status"), "Partially Ordered")
+		trans_items = json.dumps(
+			[{"item_code": item.item_code, "rate": item.rate, "qty": 4, "docname": item.name}]
+		)
+		update_child_qty_rate("Supplier Quotation", trans_items, sq.name)
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", sq.name, "status"), "Ordered")
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"because it is Ordered",
+			update_child_qty_rate,
+			"Supplier Quotation",
+			trans_items,
+			sq.name,
+		)
 
 	def test_update_supplier_quotation_child_remove_item(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])

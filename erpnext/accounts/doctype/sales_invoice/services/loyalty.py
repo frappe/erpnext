@@ -11,6 +11,8 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
 
+NO_EXPIRY_DATE = "9999-12-31"
+
 
 class LoyaltyService:
 	def __init__(self, doc):
@@ -48,7 +50,9 @@ class LoyaltyService:
 					"invoice": doc.name,
 					"loyalty_points": points_earned,
 					"purchase_amount": eligible_amount,
-					"expiry_date": add_days(doc.posting_date, lp_details.expiry_duration),
+					"expiry_date": add_days(doc.posting_date, lp_details.expiry_duration)
+					if lp_details.expiry_duration
+					else NO_EXPIRY_DATE,
 					"posting_date": doc.posting_date,
 				}
 			)
@@ -147,7 +151,7 @@ class LoyaltyService:
 		return abs(returned_amount[0][0]) if returned_amount[0][0] else 0
 
 
-def get_loyalty_programs(customer: str) -> list:
+def get_loyalty_programs(customer: str, set_single_program: bool = True) -> list:
 	"""Return applicable loyalty programs for the customer."""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs as _get
 
@@ -157,7 +161,7 @@ def get_loyalty_programs(customer: str) -> list:
 
 	lp_details = _get(customer_doc)
 
-	if len(lp_details) == 1:
+	if set_single_program and len(lp_details) == 1:
 		customer_doc.db_set("loyalty_program", lp_details[0])
 
 	return lp_details

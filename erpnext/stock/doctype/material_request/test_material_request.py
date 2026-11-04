@@ -214,6 +214,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 			mr.material_request_type = "Subcontracting"
 			mr.items = mr.items[:1]
 			mr.items[0].item_code = item.name
+			mr.items[0].uom = item.stock_uom
 			self.assertRaises(frappe.ValidationError, mr.insert)
 
 		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
@@ -640,7 +641,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 				"item_name": "_Test FG Item",
 				"qty": 10,
 				"schedule_date": today(),
-				"uom": "_Test UOM 1",
+				"uom": "_Test UOM",
 				"warehouse": "_Test Warehouse - _TC",
 			},
 		)
@@ -2057,6 +2058,23 @@ class TestMaterialRequest(ERPNextTestSuite):
 		)
 
 		self.assertIsNone(mr.items[0].from_warehouse)
+
+	def test_purchase_request_ignores_customer_item_restrictions(self):
+		from erpnext.selling.doctype.party_specific_item.test_party_specific_item import (
+			create_party_specific_item,
+		)
+
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value="_Test FG Item",
+		)
+		mr = make_material_request(do_not_submit=True)
+		mr.customer = "_Test Customer"
+		mr.save()
+
+		self.assertIsNone(mr.customer)
 
 
 def create_item_with_default_supplier(item_code, supplier):
