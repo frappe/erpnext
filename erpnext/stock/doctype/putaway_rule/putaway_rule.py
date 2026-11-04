@@ -15,6 +15,7 @@ from pydantic import InstanceOf
 
 from erpnext import _refuse
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import _get_stock_balance
 
 
@@ -142,6 +143,13 @@ def apply_putaway_rule(
 	return _apply_putaway_rule(doctype, items, company, sync, purpose)
 
 
+def get_row_conversion_factor(item):
+	if item.uom and item.item_code:
+		return flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor")) or 1.0
+
+	return 1.0
+
+
 def _apply_putaway_rule(
 	doctype: str,
 	items: InstanceOf[list] | str,
@@ -175,9 +183,9 @@ def _apply_putaway_rule(
 		if item.get("serial_no"):
 			serial_nos = get_serial_nos(item.get("serial_no"))
 
-		item.conversion_factor = flt(item.conversion_factor) or 1.0
+		item.conversion_factor = flt(item.conversion_factor) or get_row_conversion_factor(item)
 		pending_qty, item_code = flt(item.qty), item.item_code
-		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
+		pending_stock_qty = pending_qty * item.conversion_factor
 		uom_must_be_whole_number = frappe.get_cached_value("UOM", item.uom, "must_be_whole_number")
 
 		if not pending_qty or not item_code:
