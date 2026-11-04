@@ -159,60 +159,64 @@ const grid = {
 			</p>
 		</div>
 
-		<div class="absolute left-3 top-3">
-			<slot name="overlay" />
-		</div>
-
-		<div class="absolute right-3 top-3 flex items-center gap-2">
-			<TabButtons
-				:model-value="viewName"
-				:options="[
-					{ label: __('3D'), value: '3d' },
-					{ label: __('Top'), value: 'top' },
-					{ label: __('Front'), value: 'front' },
-				]"
-				@update:model-value="setView"
-			/>
-			<div
-				class="flex items-center gap-0.5 rounded-4 border border-outline-gray-2 bg-surface-base p-0.5"
-			>
-				<Tooltip :text="__('Rotate left')"
-					><Button
-						variant="ghost"
-						:aria-label="__('Rotate left')"
-						icon="lucide-rotate-ccw"
-						@click="animateTo(rot - 45, tilt)"
-				/></Tooltip>
-				<Tooltip :text="__('Rotate right')"
-					><Button
-						variant="ghost"
-						:aria-label="__('Rotate right')"
-						icon="lucide-rotate-cw"
-						@click="animateTo(rot + 45, tilt)"
-				/></Tooltip>
-				<Tooltip :text="__('Zoom out')"
-					><Button
-						variant="ghost"
-						:aria-label="__('Zoom out')"
-						icon="lucide-zoom-out"
-						@click="zoomBy(-0.2)"
-				/></Tooltip>
-				<Tooltip :text="__('Zoom in')"
-					><Button
-						variant="ghost"
-						:aria-label="__('Zoom in')"
-						icon="lucide-zoom-in"
-						@click="zoomBy(0.2)"
-				/></Tooltip>
-				<Tooltip :text="__('Fit plant')"
-					><Button
-						variant="ghost"
-						:aria-label="__('Fit plant')"
-						icon="lucide-scan"
-						@click="fitView"
-				/></Tooltip>
+		<div
+			class="pointer-events-none absolute inset-x-3 top-3 flex flex-wrap-reverse items-end justify-between gap-2"
+		>
+			<div v-if="$slots.overlay" class="pointer-events-auto">
+				<slot name="overlay" />
 			</div>
-			<PanButtons :pan-by="panBy" />
+			<div class="pointer-events-auto ml-auto flex max-w-full flex-wrap items-center justify-end gap-2">
+				<TabButtons
+					:model-value="viewName"
+					:options="[
+						{ label: __('3D'), value: '3d' },
+						{ label: __('Top'), value: 'top' },
+						{ label: __('Front'), value: 'front' },
+					]"
+					@update:model-value="setView"
+				/>
+				<div
+					class="flex items-center gap-0.5 rounded-4 border border-outline-gray-2 bg-surface-base p-0.5"
+				>
+					<slot name="tools" />
+					<Tooltip :text="__('Rotate left')"
+						><Button
+							variant="ghost"
+							:aria-label="__('Rotate left')"
+							icon="lucide-rotate-ccw"
+							@click="animateTo(rot - 45, tilt)"
+					/></Tooltip>
+					<Tooltip :text="__('Rotate right')"
+						><Button
+							variant="ghost"
+							:aria-label="__('Rotate right')"
+							icon="lucide-rotate-cw"
+							@click="animateTo(rot + 45, tilt)"
+					/></Tooltip>
+					<Tooltip :text="__('Zoom out')"
+						><Button
+							variant="ghost"
+							:aria-label="__('Zoom out')"
+							icon="lucide-zoom-out"
+							@click="zoomBy(-0.2)"
+					/></Tooltip>
+					<Tooltip :text="__('Zoom in')"
+						><Button
+							variant="ghost"
+							:aria-label="__('Zoom in')"
+							icon="lucide-zoom-in"
+							@click="zoomBy(0.2)"
+					/></Tooltip>
+					<Tooltip :text="__('Fit plant')"
+						><Button
+							variant="ghost"
+							:aria-label="__('Fit plant')"
+							icon="lucide-scan"
+							@click="fitView"
+					/></Tooltip>
+				</div>
+				<PanButtons :pan-by="panBy" />
+			</div>
 		</div>
 
 		<div

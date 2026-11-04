@@ -11,10 +11,11 @@ from erpnext.manufacturing.doctype.workstation_type.workstation_type import (
 	DEFAULT_WORKSTATION_TYPES,
 	create_default_workstation_types,
 	get_preset_shapes,
+	get_workstation_details,
 )
 from erpnext.manufacturing.page.plant_builder.plant_builder import (
+	add_machine_shapes,
 	get_machine_catalog,
-	get_machines,
 	save_machine_design,
 )
 from erpnext.stock.doctype.item.test_item import make_item
@@ -154,7 +155,8 @@ class TestWorkstationType(ERPNextTestSuite):
 			workstation_name="_Test WS Plant Shapes", workstation_type=workstation_type.name
 		)
 
-		shapes = get_machines((workstation.name,))[workstation.name]["shapes"]
+		machines = add_machine_shapes(get_workstation_details((workstation.name,)))
+		shapes = machines[workstation.name]["shapes"]
 		self.assertEqual([(row["shape"], row["radius"]) for row in shapes], [("Open Tank", 30)])
 
 	def test_default_workstation_types_are_added_once_and_keep_existing_ones(self):

@@ -33,10 +33,13 @@ class OperationPlan(BOMPlan):
 
 	@property
 	def produces_item_at_each_operation(self) -> bool:
-		return bool(self.design.track_semi_finished_goods)
+		return bool(self.formula)
 
 	def validate(self):
 		self.set_operation_ids()
+		if self.formula:
+			self.formula.apply()
+
 		for row in self.design.operations:
 			self.validate_operation(row)
 

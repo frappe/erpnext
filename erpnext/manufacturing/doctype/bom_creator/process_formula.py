@@ -30,11 +30,12 @@ class ProcessFormula:
 
 	@property
 	def packing_stage(self):
-		return self.stages[-1] if self.stages else None
+		last = self.stages[-1] if self.stages else None
+		return last if last and self.is_packing_machine(last) else None
 
 	@property
 	def process_stages(self):
-		return self.stages[:-1]
+		return [stage for stage in self.stages if stage is not self.packing_stage]
 
 	@property
 	def materials(self):
@@ -43,14 +44,16 @@ class ProcessFormula:
 		]
 
 	@property
+	def packing_id(self):
+		return cint(self.packing_stage.operation_id) if self.packing_stage else None
+
+	@property
 	def raw_materials(self):
-		packing_id = cint(self.packing_stage.operation_id) if self.packing_stage else None
-		return [row for row in self.materials if cint(row.operation_id) != packing_id]
+		return [row for row in self.materials if cint(row.operation_id) != self.packing_id]
 
 	@property
 	def packing_materials(self):
-		packing_id = cint(self.packing_stage.operation_id) if self.packing_stage else None
-		return [row for row in self.materials if cint(row.operation_id) == packing_id]
+		return [row for row in self.materials if cint(row.operation_id) == self.packing_id]
 
 	@property
 	def balance_row(self):
@@ -89,7 +92,7 @@ class ProcessFormula:
 		factor = flt(self.weight_factors.get(item_code))
 		return flt(qty) / factor if factor else 0
 
-	def to_stock_qty(self, item_code, weight):
+	def get_stock_qty(self, item_code, weight):
 		return flt(weight) * flt(self.weight_factors.get(item_code))
 
 	@property
@@ -97,12 +100,12 @@ class ProcessFormula:
 		return (
 			self.output_weight > 0
 			and bool(self.item.weight_uom)
-			and len(self.stages) > 1
+			and bool(self.packing_stage and self.process_stages)
 			and all(0 < flt(stage.yield_percentage) <= 100 for stage in self.process_stages)
 			and all(flt(self.weight_factors.get(row.item_code)) for row in self.raw_materials)
 		)
 
-	def get_charged(self, balance_weight=0.0):
+	def get_charged_weights(self, balance_weight=0.0):
 		charged = defaultdict(float)
 		for row in self.raw_materials:
 			weight = balance_weight if row.is_balance_item else self.get_weight(row.item_code, row.qty)
@@ -122,51 +125,48 @@ class ProcessFormula:
 
 	@property
 	def balance_weight(self):
-		empty = self.get_flows(self.get_charged(0))[1]
-		unit = self.get_flows(self.get_charged(1))[1] - empty
+		empty = self.get_flows(self.get_charged_weights(0))[1]
+		unit = self.get_flows(self.get_charged_weights(1))[1] - empty
 		return (self.output_weight - empty) / unit if unit > 0 else 0
 
 	@property
+	def charged_balance_weight(self):
+		return self.balance_weight if self.balance_row else 0
+
+	@property
 	def charged_weight(self):
-		balance = self.balance_weight if self.balance_row else 0
-		return sum(self.get_charged(balance).values())
+		return sum(self.get_charged_weights(self.charged_balance_weight).values())
 
 	@property
 	def made_weight(self):
-		balance = self.balance_weight if self.balance_row else 0
-		return self.get_flows(self.get_charged(balance))[1]
+		return self.get_flows(self.get_charged_weights(self.charged_balance_weight))[1]
 
 	def apply(self):
-		self.remove_stage_inputs()
 		self.set_sequence_ids()
 		self.set_material_uoms()
 		if not self.can_compute:
 			return
 
-		balance = self.balance_weight if self.balance_row else 0
+		balance = self.charged_balance_weight
 		if self.balance_row:
-			qty = self.to_stock_qty(self.balance_row.item_code, balance)
+			qty = self.get_stock_qty(self.balance_row.item_code, balance)
 			self.balance_row.qty = flt(max(qty, 0), QTY_PRECISION)
 
-		flows = self.get_flows(self.get_charged(balance))[0]
+		flows = self.get_flows(self.get_charged_weights(balance))[0]
 		for stage in self.process_stages:
 			if stage.output_item:
 				weight = flows[cint(stage.operation_id)][1]
-				stage.output_quantity = flt(self.to_stock_qty(stage.output_item, weight), QTY_PRECISION)
+				stage.output_quantity = flt(self.get_stock_qty(stage.output_item, weight), QTY_PRECISION)
 		self.packing_stage.output_quantity = 1
-
-	def remove_stage_inputs(self):
-		for row in list(self.design.materials):
-			if not cint(row.bom_node_id) and row.from_operation_id:
-				self.design.remove(row)
 
 	def set_sequence_ids(self):
 		if not any(cint(stage.sequence_id) for stage in self.stages):
 			for number, stage in enumerate(self.stages, start=1):
 				stage.sequence_id = number
 
-	def set_material_uoms(self):
-		stock_uoms = dict(
+	@cached_property
+	def stock_uoms(self):
+		return dict(
 			frappe.get_all(
 				"Item",
 				filters={"name": ("in", [row.item_code for row in self.materials if row.item_code])},
@@ -174,9 +174,11 @@ class ProcessFormula:
 				as_list=True,
 			)
 		)
+
+	def set_material_uoms(self):
 		for row in self.materials:
-			if row.item_code:
-				row.uom = stock_uoms.get(row.item_code)
+			if row.item_code and not row.uom:
+				row.uom = self.stock_uoms.get(row.item_code)
 
 	def get_stage_inputs(self):
 		inputs = []
@@ -193,7 +195,22 @@ class ProcessFormula:
 			*self.get_product_problems(),
 			*self.get_formula_problems(),
 			*self.get_stage_problems(),
+			*self.get_material_row_problems(),
 		]
+
+	def get_material_row_problems(self):
+		problems = []
+		if any(not cint(row.bom_node_id) and row.from_operation_id for row in self.design.materials):
+			problems.append(
+				_(
+					"Remove the stage outputs from the materials. Each stage passes its output on by Sequence ID."
+				)
+			)
+		for row in self.materials:
+			stock_uom = self.stock_uoms.get(row.item_code)
+			if row.uom and stock_uom and row.uom != stock_uom:
+				problems.append(_("Use the stock UOM {0} for {1}").format(stock_uom, row.item_code))
+		return problems
 
 	def get_product_problems(self):
 		problems = []
@@ -251,14 +268,22 @@ class ProcessFormula:
 
 	def get_stage_problems(self):
 		problems = []
-		if len(self.stages) < 2:
+		if not self.process_stages:
 			problems.append(_("Add at least one process stage before packing"))
-		if self.packing_stage and not self.is_packing_machine(self.packing_stage):
+		if self.stages and not self.packing_stage:
 			problems.append(_("End with exactly one packing stage, a Filling Line or a Bagging Line"))
 		if any(self.is_packing_machine(stage) for stage in self.process_stages):
 			problems.append(_("Only the last stage can pack the finished good"))
 		if self.packing_stage and not self.packing_materials:
 			problems.append(_("Add at least one packing material"))
+
+		outputs = [stage.output_item for stage in self.process_stages if stage.output_item]
+		for item_code in sorted({item for item in outputs if outputs.count(item) > 1}):
+			problems.append(
+				_("{0} is made by more than one stage. Give each stage its own semi-finished good.").format(
+					item_code
+				)
+			)
 
 		for number, stage in enumerate(self.stages, start=1):
 			problems.extend(self.get_problems_for_stage(number, stage))
@@ -276,7 +301,7 @@ class ProcessFormula:
 			return problems
 
 		if not 0 < flt(stage.yield_percentage) <= 100:
-			problems.append(_("Stage {0} yield must be between 1 and 100%").format(number))
+			problems.append(_("Stage {0} needs a yield above 0% and up to 100%").format(number))
 		return problems + self.get_unit_problems([stage.output_item])
 
 	def get_sequence_problems(self):

@@ -6,7 +6,7 @@ import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, insertStage, machineModelOf } from "../../lib/plant";
-import { nextOperationId } from "../../lib/design";
+import { num } from "../../lib/format";
 
 const props = defineProps({
 	doc: Object,
@@ -24,8 +24,7 @@ const hasPacking = computed(() => models.value.some(isPackingModel));
 
 function addStage(type) {
 	const stage = {
-		operation_id: nextOperationId(props.doc),
-		stage_name: "",
+		operation_id: Math.max(0, ...props.doc.stages.map((stage) => num(stage.operation_id))) + 1,
 		workstation: "",
 		workstation_type: type.name,
 		machine_model: type.machine_model,

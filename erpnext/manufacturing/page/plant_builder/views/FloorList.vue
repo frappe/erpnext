@@ -40,7 +40,7 @@ function meta(floor) {
 				<p class="max-w-[680px] flex-1 text-p-base text-ink-gray-7">
 					{{
 						__(
-							"A plant floor is where your machines stand. Add machines to a floor to see them in 3D and what each one is running. Make the recipe in BOM Creator with Process Manufacturing, then run its Work Orders here."
+							"A plant floor is where your machines stand. Add machines to a floor to see them in 3D and what each one is running. Design the process in BOM Creator with Process Manufacturing, then run its Work Orders here."
 						)
 					}}
 				</p>

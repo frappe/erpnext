@@ -5,6 +5,7 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 
+from erpnext.manufacturing.doctype.bom_creator.test_process_design import make_machine
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
 from erpnext.manufacturing.doctype.work_order.test_plant_run import make_ketchup_work_order, minutes_ago
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -66,6 +67,17 @@ class TestPlantFloor(ERPNextTestSuite):
 
 		job = get_floor(floor)["machines"][0].job
 		self.assertEqual((job.work_order, job.operation), (work_order.name, "_Test Mixer Operation"))
+
+	def test_only_floor_writers_move_machines(self):
+		make_machine("Mixer", "Mixer")
+		floor = make_floor()
+		reader = create_user("plant-floor-machine-reader@example.com", "Manufacturing User")
+		with self.set_user(reader.name):
+			self.assertRaises(frappe.PermissionError, set_machine_floor, "_Test Mixer", floor)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Choose the Plant Floor", set_machine_floor, "_Test Mixer"
+		)
 
 	def test_floor_is_read_only_without_plant_floor_write(self):
 		floor = make_floor()

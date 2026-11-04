@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, provide, ref, watch } from "vue";
-import { ScrollArea, Switch } from "frappe-ui";
+import { Button, ScrollArea, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SetupStatus from "../components/setup/SetupStatus.vue";
 import FormulaSection from "../components/setup/FormulaSection.vue";
@@ -14,7 +14,7 @@ import { num } from "../lib/format";
 const props = defineProps({ design: Object, readOnly: Boolean });
 const emit = defineEmits(["change"]);
 
-const HEADER_FIELDS = ["item_code", "qty", "company", "raw_material_warehouse", "formula_tolerance"];
+const HEADER_FIELDS = ["item_code", "qty", "raw_material_warehouse"];
 
 const catalog = ref(null);
 const doc = ref(null);
@@ -24,7 +24,7 @@ const focus = ref(null);
 const readOnly = computed(() => props.readOnly);
 provide(READ_ONLY, readOnly);
 
-let emittedKey = rowsKey(designRows(props.design));
+let emittedKey = null;
 let checkTimer = null;
 
 const typeModels = computed(() =>
@@ -32,20 +32,21 @@ const typeModels = computed(() =>
 );
 const header = (design) => HEADER_FIELDS.map((field) => design[field] ?? "").join("|");
 
+function load() {
+	doc.value = fromDesign(props.design, typeModels.value);
+	emittedKey = rowsKey(toDesign(doc.value));
+}
+
 onMounted(async () => {
 	catalog.value = (await call("get_machine_catalog")).workstation_types;
-	doc.value = fromDesign(props.design, typeModels.value);
+	load();
 	check();
 });
 
 watch(
 	() => [rowsKey(designRows(props.design)), header(props.design)],
 	([incoming], [, before]) => {
-		emittedKey = incoming;
-		const local = doc.value && rowsKey(toDesign(doc.value));
-		if (doc.value && (incoming !== local || header(props.design) !== before)) {
-			doc.value = fromDesign(props.design, typeModels.value);
-		}
+		if (doc.value && (incoming !== emittedKey || header(props.design) !== before)) load();
 		scheduleCheck();
 	}
 );
@@ -53,13 +54,10 @@ watch(
 watch(
 	doc,
 	(value) => {
-		if (!value) return;
-		const rows = toDesign(value);
-		const key = rowsKey(rows);
-		if (key !== emittedKey) {
-			emittedKey = key;
-			emit("change", rows);
-		}
+		const key = value && rowsKey(toDesign(value));
+		if (!value || key === emittedKey || readOnly.value) return;
+		emittedKey = key;
+		emit("change", toDesign(value));
 		scheduleCheck();
 	},
 	{ deep: true }
@@ -74,7 +72,7 @@ async function check() {
 	if (!doc.value) return;
 	const values = Object.fromEntries(HEADER_FIELDS.map((field) => [field, props.design[field]]));
 	const result = await call("check_design", {
-		doc: { ...values, track_semi_finished_goods: 1, ...toDesign(doc.value) },
+		doc: { ...values, ...toDesign(doc.value) },
 	});
 	data.value = result;
 	const balance = doc.value.materials.find((row) => row.is_balance_item);
@@ -115,7 +113,7 @@ const view = computed(() => previewView(scenePlant.value, animate.value, focus.v
 			<ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-5 pb-16">
 				<fieldset :disabled="readOnly" class="m-0 min-w-0 space-y-8 border-0 p-0">
 					<SetupStatus :errors="data.errors" />
-					<FormulaSection :doc="doc" :data="data" :machines="data.machines" />
+					<FormulaSection :doc="doc" :data="data" />
 					<StagesSection
 						:doc="doc"
 						:machines="data.machines"
@@ -130,20 +128,15 @@ const view = computed(() => previewView(scenePlant.value, animate.value, focus.v
 		</aside>
 		<div class="relative min-w-0 flex-1 bg-surface-gray-1">
 			<PlantScene :plant="scenePlant" :view="view">
-				<template #overlay>
-					<div class="w-80 rounded-5 border border-outline-gray-2 bg-surface-base p-4 shadow-sm">
-						<p class="text-base-semibold text-ink-gray-8">{{ __("Built from your design") }}</p>
-						<p class="mt-1 text-p-sm text-ink-gray-6">
-							{{
-								__(
-									"Tanks, machines and pipes follow your formula and stages. Hover a stage on the left to find it here."
-								)
-							}}
-						</p>
-						<div class="mt-3">
-							<Switch v-model="animate" :label="__('Animate Machines')" />
-						</div>
-					</div>
+				<template #tools>
+					<Tooltip :text="animate ? __('Stop Machines') : __('Animate Machines')">
+						<Button
+							variant="ghost"
+							:aria-label="animate ? __('Stop Machines') : __('Animate Machines')"
+							:icon="animate ? 'lucide-pause' : 'lucide-play'"
+							@click="animate = !animate"
+						/>
+					</Tooltip>
 				</template>
 			</PlantScene>
 		</div>

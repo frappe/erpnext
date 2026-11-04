@@ -54,7 +54,7 @@ const chain = computed(() => {
 });
 
 async function runAnother() {
-	setRoute("run", await call("make_work_order", { work_order: order.value.name }));
+	setRoute("run", await call("repeat_work_order", { work_order: order.value.name }));
 }
 </script>
 
