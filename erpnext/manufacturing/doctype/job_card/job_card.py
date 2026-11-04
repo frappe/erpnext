@@ -1097,7 +1097,18 @@ class JobCard(Document):
 
 	def validate_work_order(self):
 		if self.is_work_order_closed():
+<<<<<<< HEAD
 			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
+=======
+			frappe.throw(_("You cannot make any changes to Job Card since Work Order is closed."))
+
+	def set_employees(self):
+		self.employee = []
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-child-tables-while-iterating -- appends to employee, not time_logs
+		for item in self.time_logs:
+			if not any(d.employee == item.employee for d in self.employee):
+				self.append("employee", {"employee": item.employee, "completed_qty": 0.0})
+>>>>>>> 3b75a14 (chore: ignore reviewed semgrep false positives)
 
 	def is_work_order_closed(self):
 		if self.work_order:
