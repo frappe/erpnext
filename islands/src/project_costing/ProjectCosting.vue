@@ -12,7 +12,7 @@ import CostTrend from "./components/CostTrend.vue";
 import KpiCards from "./components/KpiCards.vue";
 import { accountsReports } from "./accounts.js";
 import { hiddenFor } from "./access.js";
-import { report_route, toView } from "./costing.js";
+import { driverRows, report_route, toView } from "./costing.js";
 import { createFormat, provideFormat } from "./format.js";
 import { kpisFor } from "./kpis.js";
 import { useProjectAccounts, useProjectCosting } from "./useProjectCosting.js";
@@ -56,8 +56,12 @@ const hidden = computed(() => {
 	return accounts.data && !accounts.data.access.budgets ? [__("Budget records")] : [];
 });
 const failed = computed(() => mode.value === "project" && Object.keys(costing.data?.errors || {}).length > 0);
-// A list the user may not read comes back as null; with none left, the card goes.
-const has_drivers = computed(() => Object.values(view.value?.drivers || {}).some((list) => list != null));
+// A card with nothing to draw goes: no source with an amount, or no driver list with a row the user
+// may see.
+const has_sources = computed(() => view.value?.sources.some((source) => source.amount > 0));
+const has_drivers = computed(() =>
+	Object.keys(view.value?.drivers || {}).some((key) => driverRows(view.value, key).length)
+);
 // A closed project without an estimate has nothing to track and nothing to set.
 const tracking = computed(() => view.value.has_estimate || !view.value.closed);
 const can_set_estimate = computed(() => !props.read_only && !view.value?.closed);
@@ -171,8 +175,12 @@ function new_timesheet() {
 					/>
 					<CostTrend :class="tracking ? 'lg:col-span-3' : 'lg:col-span-5'" :view="view" />
 				</div>
-				<div class="grid gap-5 lg:grid-cols-2">
-					<CostBreakdown :view="view" />
+				<div
+					v-if="has_sources || has_drivers"
+					class="grid gap-5"
+					:class="has_sources && has_drivers && 'lg:grid-cols-2'"
+				>
+					<CostBreakdown v-if="has_sources" :view="view" />
 					<CostDrivers v-if="has_drivers" :view="view" />
 				</div>
 				<BillingCard v-if="!view.internal && view.billing" :view="view" />
