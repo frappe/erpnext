@@ -3795,6 +3795,25 @@ class TestDeliveryNote(FrappeTestCase):
 		so.reload()
 		self.assertEqual(so.items[0].stock_reserved_qty, 1)
 
+	def test_delivery_note_made_from_invoice_is_not_billed_again(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+			make_delivery_note as make_dn_from_invoice,
+		)
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		invoice = create_sales_invoice(qty=5, rate=500)
+		delivery_note = make_dn_from_invoice(invoice.name)
+		delivery_note.insert()
+		delivery_note.submit()
+
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, delivery_note.name)
+
+		second_invoice = create_sales_invoice(qty=5, rate=500, do_not_save=True)
+		second_invoice.items[0].delivery_note = delivery_note.name
+		second_invoice.items[0].dn_detail = delivery_note.items[0].name
+		self.assertRaises(frappe.ValidationError, second_invoice.insert)
+
 
 def make_so_with_reserved_produced_serial_no():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
