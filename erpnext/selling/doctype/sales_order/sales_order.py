@@ -41,6 +41,7 @@ from erpnext.selling.doctype.customer.customer import (
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
@@ -765,8 +766,9 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_reserved_stock(self):
-		"""Clean reserved stock flag for non-stock Item"""
+		"""Uncheck Reserve Stock when stock reservation is disabled, and on non-stock items."""
 
+		clear_reserve_stock_if_disabled(self)
 		enable_stock_reservation = frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
 
 		for item in self.items:

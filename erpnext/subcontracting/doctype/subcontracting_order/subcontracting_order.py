@@ -10,16 +10,6 @@ from frappe.utils import flt
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-<<<<<<< HEAD
-=======
-from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-	StockReservation,
-	clear_reserve_stock_if_disabled,
-	get_stock_reservation_entries_for_voucher,
-	has_reserved_stock,
-)
->>>>>>> 222268d (fix(subcontracting): ignore Reserve Stock on a Subcontracting Order when stock reservation is disabled)
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
 
@@ -114,7 +104,6 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
-		clear_reserve_stock_if_disabled(self)
 
 	def on_submit(self):
 		self.update_status()

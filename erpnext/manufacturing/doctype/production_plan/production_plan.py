@@ -27,63 +27,11 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
-<<<<<<< HEAD
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin
-=======
-
-# Backward-compatible re-exports (moved to mapper.py / services/).
-from erpnext.manufacturing.doctype.production_plan.mapper import (
-	get_so_details,
-	sales_order_query,
-)
-from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-	MaterialRequestService,
-	download_raw_materials,
-	get_bin_details,
-	get_exploded_items,
-	get_item_data,
-	get_items_for_material_requests,
-	get_material_request_items,
-	get_materials_from_other_locations,
-	get_raw_materials_of_sub_assembly_items,
-	get_sales_orders,
-	get_subitems,
-	get_uom_conversion_factor,
-	get_warehouse_list,
-	set_default_warehouses,
-)
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
-	get_plan_process_loss_percentage,
-)
-from erpnext.manufacturing.doctype.production_plan.services.reservation import (
-	ProductionPlanStockReservation,
-	cancel_stock_reservation_entries,
-	get_reserved_qty_for_production_plan,
-	get_reserved_qty_for_sub_assembly,
-	make_stock_reservation_entries,
-	reserve_stock_for_production_plan,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
-	SalesOrderSourcingService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
-	SubAssemblyService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
-	WorkOrderCreationService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
-	ProductionPlanWorkOrderQuantities,
-)
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-	clear_reserve_stock_if_disabled,
-)
-from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
->>>>>>> 6f8b495 (fix(manufacturing): ignore Reserve Stock on a Production Plan when stock reservation is disabled)
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -171,63 +119,6 @@ class ProductionPlan(Document):
 		self.validate_data()
 		self.validate_sales_orders()
 		self.validate_material_request_type()
-<<<<<<< HEAD
-=======
-		self.validate_raw_material_group_warehouse()
-		if self.for_warehouse:
-			validate_warehouse_company(self.for_warehouse, self.company)
-		clear_reserve_stock_if_disabled(self)
-		self.enable_auto_reserve_stock()
-
-	def on_update(self):
-		self.clear_stale_schedule()
-
-	def clear_stale_schedule(self):
-		previous = self.get_doc_before_save()
-		if self.docstatus or not previous:
-			return
-
-		if get_schedule_signature(previous) == get_schedule_signature(self):
-			return
-
-		if frappe.db.exists("Production Plan Schedule", {"production_plan": self.name}):
-			self.delete_production_plan_schedule()
-			frappe.msgprint(
-				_("The items of the plan changed, so its schedule was cleared. Use Schedule Items again."),
-				alert=True,
-			)
-
-	def validate_raw_material_group_warehouse(self):
-		if not self.raw_material_group_warehouse:
-			return
-
-		group = frappe.db.get_value(
-			"Warehouse",
-			{"name": self.raw_material_group_warehouse, "is_group": 1, "company": self.company},
-			["lft", "rgt"],
-			as_dict=True,
-		)
-		if not group:
-			frappe.throw(
-				_("{0} must be a group warehouse of company {1}.").format(
-					frappe.bold(_("Raw Material Group Warehouse")), frappe.bold(self.company)
-				)
-			)
-
-		if self.for_warehouse and not frappe.db.exists(
-			"Warehouse",
-			{"name": self.for_warehouse, "is_group": 0, "lft": (">", group.lft), "rgt": ("<", group.rgt)},
-		):
-			frappe.throw(
-				_("For Warehouse {0} must be a non-group warehouse under {1}.").format(
-					frappe.bold(self.for_warehouse), frappe.bold(self.raw_material_group_warehouse)
-				)
-			)
-
-	def enable_auto_reserve_stock(self):
-		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
-			self.reserve_stock = 1
->>>>>>> 6f8b495 (fix(manufacturing): ignore Reserve Stock on a Production Plan when stock reservation is disabled)
 
 	def validate_material_request_type(self):
 		for row in self.get("mr_items"):
