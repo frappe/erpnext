@@ -30,7 +30,6 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import (
-	get_bom_item_rate,
 	get_bom_items_as_dict,
 	validate_bom_no,
 )
@@ -319,7 +318,10 @@ class WorkOrder(Document):
 			"Manufacturing Settings", "allow_editing_of_items_and_quantities_in_work_order"
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		else:
+			self.set_rate_for_edited_items()
 
+		self.set_required_item_amounts()
 		self.enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
@@ -2087,6 +2089,23 @@ class WorkOrder(Document):
 
 			self.set_available_qty()
 
+	def set_rate_for_edited_items(self):
+		"""Fetch rate afresh for rows whose item was added or changed by hand."""
+		previous = self.get_doc_before_save()
+		previous_items = {d.name: d.item_code for d in previous.required_items} if previous else {}
+		bom_items = get_bom_items_as_dict(self.bom_no, self.company, fetch_exploded=self.use_multi_level_bom)
+		edited_rows = [d for d in self.get("required_items") if is_edited_item(d, previous_items, bom_items)]
+		if not edited_rows:
+			return
+
+		bom_doc = frappe.get_cached_doc("BOM", self.bom_no)
+		for d in edited_rows:
+			d.rate = flt(get_raw_material_rate(d, self, bom_doc), d.precision("rate"))
+
+	def set_required_item_amounts(self):
+		for d in self.get("required_items"):
+			d.amount = flt(flt(d.rate) * flt(d.required_qty), d.precision("amount"))
+
 	def update_transferred_qty_for_required_items(self):
 		if self.skip_transfer:
 			return
@@ -3360,17 +3379,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		item_data = get_item_details(args.item_code, skip_bom_info=True)
 		args.update(item_data)
 
-		args["rate"] = get_bom_item_rate(
-			{
-				"company": wo_doc.company,
-				"item_code": args.get("item_code"),
-				"qty": args.get("required_qty"),
-				"uom": args.get("stock_uom"),
-				"stock_uom": args.get("stock_uom"),
-				"conversion_factor": 1,
-			},
-			bom_doc,
-		)
+		args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 
 		if not args.source_warehouse:
 			args["source_warehouse"] = get_item_defaults(
@@ -3387,6 +3396,23 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 			existing_row.update(args)
 		else:
 			wo_doc.append(table_name, args)
+
+
+def get_raw_material_rate(args, wo_doc, bom_doc):
+	"""Rate in company currency, costed the way the BOM costs its raw materials."""
+	rate = bom_doc.get_rm_rate(
+		{
+			"company": wo_doc.company,
+			"item_code": args.get("item_code"),
+			"qty": args.get("required_qty"),
+			"uom": args.get("stock_uom"),
+			"stock_uom": args.get("stock_uom"),
+			"conversion_factor": 1,
+			"source_warehouse": args.get("source_warehouse"),
+		},
+		notify=False,
+	)
+	return rate * flt(bom_doc.conversion_rate or 1)
 
 
 def get_template_rm_item(wo_doc, item_code):
@@ -3575,6 +3601,12 @@ def split_item_qty(rows, qty, qty_by_row):
 		qty_by_row[row.name] = share
 		remaining_qty -= share
 	qty_by_row[rows[-1].name] = remaining_qty
+
+
+def is_edited_item(row, previous_items, bom_items):
+	if row.name in previous_items:
+		return previous_items[row.name] != row.item_code
+	return not row.rate or not find_bom_item(bom_items, row)
 
 
 def find_bom_item(item_dict, row):
