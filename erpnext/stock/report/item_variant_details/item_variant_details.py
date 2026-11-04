@@ -4,7 +4,10 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.query_builder.functions import Avg, IfNull
+from frappe.utils import flt, today
+
+import erpnext
 
 
 def execute(filters=None):
@@ -32,6 +35,7 @@ def get_data(item):
 	stock_details_map = get_stock_details_map(variant_list)
 	buying_price_map = get_buying_price_map(variant_list)
 	selling_price_map = get_selling_price_map(variant_list)
+	currency = get_report_currency()
 	attr_val_map = get_attribute_values_map(variant_list)
 
 	attributes = frappe.db.get_all(
@@ -61,6 +65,7 @@ def get_data(item):
 			item_dict["current_stock"] = item_dict["in_production"] = 0
 
 		item_dict["avg_buying_price_list_rate"] = buying_price_map.get(name) or 0
+		item_dict["currency"] = currency
 		item_dict["avg_selling_price_list_rate"] = selling_price_map.get(name) or 0
 
 		item_dicts.append(item_dict)
@@ -96,12 +101,14 @@ def get_columns(item):
 			"fieldname": "avg_buying_price_list_rate",
 			"label": _("Avg. Buying Price List Rate"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{
 			"fieldname": "avg_selling_price_list_rate",
 			"label": _("Avg. Selling Price List Rate"),
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 150,
 		},
 		{"fieldname": "current_stock", "label": _("Current Stock"), "fieldtype": "Float", "width": 120},
@@ -167,39 +174,40 @@ def get_stock_details_map(variant_list):
 
 
 def get_buying_price_map(variant_list):
-	buying = frappe.db.get_all(
-		"Item Price",
-		fields=[
-			"avg(price_list_rate) as avg_rate",
-			"item_code",
-		],
-		filters={"item_code": ["in", variant_list], "buying": 1},
-		group_by="item_code",
-	)
-
-	buying_price_map = {}
-	for row in buying:
-		buying_price_map[row.get("item_code")] = row.get("avg_rate")
-
-	return buying_price_map
+	return get_price_map(variant_list, "buying")
 
 
 def get_selling_price_map(variant_list):
-	selling = frappe.db.get_all(
-		"Item Price",
-		fields=[
-			"avg(price_list_rate) as avg_rate",
-			"item_code",
-		],
-		filters={"item_code": ["in", variant_list], "selling": 1},
-		group_by="item_code",
-	)
+	return get_price_map(variant_list, "selling")
 
-	selling_price_map = {}
-	for row in selling:
-		selling_price_map[row.get("item_code")] = row.get("avg_rate")
 
-	return selling_price_map
+def get_price_map(variant_list, price_type):
+	item_price = frappe.qb.DocType("Item Price")
+	item = frappe.qb.DocType("Item")
+	rows = (
+		frappe.qb.from_(item_price)
+		.inner_join(item)
+		.on(item.name == item_price.item_code)
+		.select(item_price.item_code, Avg(item_price.price_list_rate))
+		.where(
+			(item_price.item_code.isin(variant_list))
+			& (item_price[price_type] == 1)
+			& (item_price.currency == get_report_currency())
+			& (IfNull(item_price.customer, "") == "")
+			& (IfNull(item_price.supplier, "") == "")
+			& ((IfNull(item_price.uom, "") == "") | (item_price.uom == item.stock_uom))
+			& (item_price.valid_from.isnull() | (item_price.valid_from <= today()))
+			& (item_price.valid_upto.isnull() | (item_price.valid_upto >= today()))
+		)
+		.groupby(item_price.item_code)
+	).run()
+
+	return dict(rows)
+
+
+def get_report_currency():
+	company = erpnext.get_default_company()
+	return (company and erpnext.get_company_currency(company)) or frappe.db.get_default("currency")
 
 
 def get_attribute_values_map(variant_list):
