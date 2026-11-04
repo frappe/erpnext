@@ -873,7 +873,7 @@ def _get_item_tax_template_from_item_group(args, item_group, out=None):
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 	if out is None:
 		out = {}
-	taxes = sorted(get_applicable_item_taxes(args, taxes), key=get_item_tax_priority, reverse=True)
+	taxes = get_latest_item_taxes(get_applicable_item_taxes(args, taxes))
 	category_templates = [
 		tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(args.get("tax_category"))
 	]
@@ -910,6 +910,18 @@ def get_applicable_item_taxes(args, taxes) -> list:
 			applicable_taxes.append(tax)
 
 	return applicable_taxes
+
+
+def get_latest_item_taxes(taxes) -> list:
+	latest_priority = {}
+	latest_taxes = []
+	for tax in sorted(taxes, key=get_item_tax_priority, reverse=True):
+		priority = get_item_tax_priority(tax)
+		key = (tax.get("parenttype"), tax.get("parent"), cstr(tax.tax_category))
+		if latest_priority.setdefault(key, priority) == priority:
+			latest_taxes.append(tax)
+
+	return latest_taxes
 
 
 def get_item_tax_priority(tax) -> tuple:
