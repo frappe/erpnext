@@ -143,16 +143,10 @@ class Employee(NestedSet):
 		self.set_preferred_email()
 		self.validate_preferred_email()
 
+		if previous_user_id := self.get_previous_user_id():
+			self.validate_user_access(previous_user_id)
 		if self.user_id:
 			self.validate_user_details()
-		else:
-			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
-			if existing_user_id:
-				self.validate_user_access(existing_user_id)
-				user = frappe.get_doc("User", existing_user_id)
-				validate_employee_role(user, ignore_emp_check=True)
-				user.save(ignore_permissions=True)
-				remove_user_permission("Employee", self.name, existing_user_id, ignore_permissions=True)
 
 	def after_rename(self, old, new, merge):
 		self.db_set("employee", new)
@@ -205,6 +199,7 @@ class Employee(NestedSet):
 
 	def on_update(self):
 		self.update_nsm_model()
+		self.release_previous_user()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -227,6 +222,40 @@ class Employee(NestedSet):
 			create_user_permission=self.create_user_permission,
 		)
 
+	def get_previous_user_id(self):
+		"""Return the User that this save unlinks or replaces."""
+		previous = self.get_doc_before_save()
+		if previous and previous.user_id and previous.user_id != self.user_id:
+			return previous.user_id
+
+	def release_previous_user(self):
+		"""Remove the access this Employee gave the User it no longer links to."""
+		if not (previous_user_id := self.get_previous_user_id()):
+			return
+
+		previous = self.get_doc_before_save()
+		if previous.create_user_permission:
+			self.remove_user_permissions(previous_user_id, previous.company)
+		else:
+			remove_user_permission("Employee", self.name, previous_user_id, ignore_permissions=True)
+
+		user = frappe.get_doc("User", previous_user_id)
+		# The saved Employee no longer links to the User, so this checks only other employees.
+		validate_employee_role(user)
+		user.save(ignore_permissions=True)
+
+	def remove_user_permissions(self, user, company, include_employee=True):
+		"""Remove the User Permissions that Create User Permission adds."""
+		if include_employee:
+			remove_user_permission("Employee", self.name, user, ignore_permissions=True)
+
+		# Another Employee of the same User and Company still needs the Company restriction.
+		if not frappe.db.exists(
+			"Employee",
+			{"user_id": user, "company": company, "create_user_permission": 1, "name": ("!=", self.name)},
+		):
+			remove_user_permission("Company", company, user, ignore_permissions=True)
+
 	def update_user_permissions(self):
 		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
 			return
@@ -236,8 +265,7 @@ class Employee(NestedSet):
 		)
 
 		if employee_user_permission_exists and not self.create_user_permission:
-			remove_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
-			remove_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
+			self.remove_user_permissions(self.user_id, self.company)
 		elif not employee_user_permission_exists and self.create_user_permission:
 			add_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
 			add_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
