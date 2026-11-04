@@ -51,7 +51,6 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 )
 =======
 from erpnext.stock import stock_ledger
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import validate_item_uoms
 >>>>>>> 2ece241 (refactor(stock): map transit dimensions through get_mapped_doc)
 from erpnext.stock.get_item_details import (
@@ -5167,6 +5166,20 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = get_remaining_qty_in_row_uom(source_doc)
+		map_target_dimensions_to_source(source_doc, target_doc)
+
+	def map_target_dimensions_to_source(source_doc, target_doc):
+		# the stock sits in transit with the outward entry's target dimensions,
+		# so the end transit entry must take it out from there
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+		for dimension in get_inventory_dimensions():
+			fieldname = dimension.source_fieldname
+			if fieldname.startswith("to_") or not target_doc.meta.has_field(f"to_{fieldname}"):
+				continue
+
+			target_doc.set(fieldname, source_doc.get(f"to_{fieldname}"))
+			target_doc.set(f"to_{fieldname}", None)
 
 	def get_remaining_qty_in_row_uom(source_doc):
 		remaining_qty = get_remaining_transfer_qty(source_doc)
@@ -5179,13 +5192,6 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 			return qty
 
 		return remaining_qty / conversion_factor
-
-	# the stock sits in transit with the outward entry's target dimensions
-	dimensions = [
-		d.source_fieldname
-		for d in get_inventory_dimensions()
-		if frappe.get_meta("Stock Entry Detail").has_field(f"to_{d.source_fieldname}")
-	]
 
 	doclist = get_mapped_doc(
 		"Stock Entry",
@@ -5207,9 +5213,7 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 					"parent": "against_stock_entry",
 					"serial_no": "serial_no",
 					"batch_no": "batch_no",
-					**{f"to_{fieldname}": fieldname for fieldname in dimensions},
 				},
-				"field_no_map": [*dimensions, *(f"to_{fieldname}" for fieldname in dimensions)],
 				"postprocess": update_item,
 				"condition": lambda doc: get_remaining_transfer_qty(doc) > 0,
 			},
