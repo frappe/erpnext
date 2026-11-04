@@ -526,8 +526,8 @@ class StockEntry(StockController):
 			if row.serial_no or row.batch_no or row.serial_and_batch_bundle:
 				continue
 
-			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			key = row.item_code if row.t_warehouse else (row.item_code, row.s_warehouse)
+			materials = available_materials.get(key)
 			if not materials:
 				continue
 
@@ -4549,7 +4549,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 			key = (row.item_code, row.s_warehouse)
 
 		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-			key = (row.item_code, row.s_warehouse or row.warehouse)
+			key = _get_disassembly_material_key(row)
 
 		if key not in available_materials:
 			available_materials.setdefault(
@@ -4601,6 +4601,19 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 						item_data.serial_nos.remove(serial_no)
 
 	return available_materials
+
+
+def _get_disassembly_material_key(row):
+	"""Components can return to a warehouse other than the one they were consumed from, so they
+	match by item. Finished and secondary items match by the warehouse they are in."""
+	if row.purpose == "Manufacture":
+		is_component = bool(row.s_warehouse)
+	else:
+		is_component = not row.s_warehouse
+
+	if is_component:
+		return row.item_code
+	return (row.item_code, row.s_warehouse or row.warehouse)
 
 
 def get_stock_entry_data(work_order, stock_entry_doc=None):
