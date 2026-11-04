@@ -24,7 +24,6 @@ from frappe.utils import (
 from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import (
-	get_bom_item_rate,
 	get_bom_items_as_dict,
 	validate_bom_no,
 )
@@ -177,11 +176,7 @@ class WorkOrder(Document):
 		else:
 			self.set_rate_for_edited_items()
 
-<<<<<<< HEAD
-=======
 		self.set_required_item_amounts()
-		WorkOrderStockReservation(self).enable_auto_reserve_stock()
->>>>>>> dafe900 (fix(manufacturing): recompute work order item amount on save)
 		self.validate_operations_sequence()
 
 	def validate_dates(self):
@@ -1305,6 +1300,23 @@ class WorkOrder(Document):
 
 			self.set_available_qty()
 
+	def set_rate_for_edited_items(self):
+		"""Fetch rate afresh for rows whose item was added or changed by hand."""
+		previous = self.get_doc_before_save()
+		previous_items = {d.name: d.item_code for d in previous.required_items} if previous else {}
+		bom_items = get_bom_items_as_dict(self.bom_no, self.company, fetch_exploded=self.use_multi_level_bom)
+		edited_rows = [d for d in self.get("required_items") if is_edited_item(d, previous_items, bom_items)]
+		if not edited_rows:
+			return
+
+		bom_doc = frappe.get_cached_doc("BOM", self.bom_no)
+		for d in edited_rows:
+			d.rate = flt(get_raw_material_rate(d, self, bom_doc), d.precision("rate"))
+
+	def set_required_item_amounts(self):
+		for d in self.get("required_items"):
+			d.amount = flt(flt(d.rate) * flt(d.required_qty), d.precision("amount"))
+
 	def update_transferred_qty_for_required_items(self):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
@@ -1456,244 +1468,6 @@ class WorkOrder(Document):
 		bom.set_bom_material_details()
 		return bom
 
-<<<<<<< HEAD
-=======
-	def get_consumed_items_for_bom(self):
-		sed = frappe.qb.DocType("Stock Entry Detail")
-		se = frappe.qb.DocType("Stock Entry")
-		return (
-			frappe.qb.from_(sed)
-			.inner_join(se)
-			.on(se.name == sed.parent)
-			.select(sed.item_code, sed.s_warehouse, Sum(sed.transfer_qty).as_("qty"))
-			.where(
-				(se.purpose == "Manufacture")
-				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
-				& (se.docstatus == 1)
-				& (se.work_order == self.name)
-			)
-			.groupby(sed.item_code, sed.s_warehouse)
-			.orderby(Min(sed.idx))
-			.run(as_dict=1)
-		)
-
-	def get_bom_operation_rows(self, bom_qty):
-		source_operations = self.get_source_bom_operations()
-		sources_by_name = {d.name: d for sources in source_operations.values() for d in sources}
-		occurrence = {}
-		rows = []
-		for operation in self.operations:
-			source = self.get_source_bom_operation(operation, source_operations, sources_by_name, occurrence)
-			rows.append(self.get_bom_operation_row(operation, bom_qty, source))
-
-		return rows
-
-	def get_source_bom_operation(self, operation, source_operations, sources_by_name, occurrence):
-		if operation.get("bom_operation"):
-			source = sources_by_name.get(operation.bom_operation)
-			if source and (source.parent, source.operation) != (
-				operation.bom or self.bom_no,
-				operation.operation,
-			):
-				source = None
-		else:
-			key = (operation.bom or self.bom_no, operation.operation)
-			idx = occurrence[key] = occurrence.get(key, -1) + 1
-			sources = source_operations.get(key, [])
-			source = sources[idx] if idx < len(sources) else None
-
-		return source if source and source.keeps_own_time else None
-
-	def get_source_bom_operations(self):
-		operations = frappe.get_all(
-			"BOM Operation",
-			filters={"parent": self.bom_no, "parenttype": "BOM"},
-			fields=["name", "parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
-			order_by="idx",
-		)
-		batch_based = set(
-			frappe.get_all(
-				"Operation",
-				filters={
-					"name": ("in", list({d.operation for d in operations}) or [""]),
-					"create_job_card_based_on_batch_size": 1,
-				},
-				pluck="name",
-			)
-		)
-
-		source_operations = {}
-		for d in operations:
-			d.keeps_own_time = cint(d.fixed_time) or (d.operation in batch_based and flt(d.batch_size))
-			source_operations.setdefault((d.parent, d.operation), []).append(d)
-		return source_operations
-
-	def get_bom_operation_row(self, operation, bom_qty, source=None):
-		row = {}
-		for fieldname in _BOM_OPERATION_FIELDS_FROM_WORK_ORDER:
-			row[fieldname] = operation.get(fieldname)
-
-		if source:
-			row.update(
-				{
-					"time_in_mins": source.time_in_mins,
-					"fixed_time": source.fixed_time,
-					"batch_size": source.batch_size,
-				}
-			)
-			return row
-
-		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
-			completed_qty = flt(operation.completed_qty) * flt(self.qty) / get_operation_qty(self, operation)
-			time_per_unit = flt(operation.actual_operation_time) / completed_qty
-		else:
-			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
-
-		row["time_in_mins"] = time_per_unit * flt(bom_qty)
-		if operation.bom and operation.bom != self.bom_no:
-			row["batch_size"] = flt(bom_qty) or 1
-		return row
-
-	def calculate_operating_cost(self):
-		return OperationsService(self).calculate_operating_cost()
-
-	def set_work_order_operations(self):
-		return OperationsService(self).set_work_order_operations()
-
-	def set_operation_warehouses(self):
-		return OperationsService(self).set_operation_warehouses()
-
-	def update_operation_status(self, operation_id=None):
-		return OperationsService(self).update_operation_status(operation_id)
-
-	def set_actual_dates(self):
-		return OperationsService(self).set_actual_dates()
-
-	def create_job_card_from_wo(self):
-		return OperationsService(self).create_job_card()
-
-	def update_required_items(self):
-		RequiredItemsService(self).update_required_items()
-		if self.status == "Closed":
-			self.update_subcontracting_inward_order_received_items()
-
-	def update_reserved_qty_for_production(self, items=None):
-		return RequiredItemsService(self).update_reserved_qty_for_production(items)
-
-	@frappe.whitelist()
-	def get_items_and_operations_from_bom(self):
-		return RequiredItemsService(self).get_items_and_operations_from_bom()
-
-	def set_available_qty(self):
-		return RequiredItemsService(self).set_available_qty()
-
-	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
-		return RequiredItemsService(self).set_required_items(reset_only_qty, reset_source_warehouse)
-
-	def set_rate_for_edited_items(self):
-		return RequiredItemsService(self).set_rate_for_edited_items()
-
-	def set_required_item_amounts(self):
-		return RequiredItemsService(self).set_required_item_amounts()
-
-	def update_transferred_qty_for_required_items(self):
-		return RequiredItemsService(self).update_transferred_qty_for_required_items()
-
-	def refresh_material_transferred_for_manufacturing(self):
-		return RequiredItemsService(self).refresh_material_transferred_for_manufacturing()
-
-	def update_returned_qty(self):
-		return RequiredItemsService(self).update_returned_qty()
-
-	def update_consumed_qty_for_required_items(self):
-		return RequiredItemsService(self).update_consumed_qty_for_required_items()
-
-	def remove_additional_items(self, stock_entry):
-		return RequiredItemsService(self).remove_additional_items(stock_entry)
-
-	def add_additional_items(self, stock_entry):
-		return RequiredItemsService(self).add_additional_items(stock_entry)
-
-	def validate_work_order_against_so(self):
-		return StatusService(self).validate_work_order_against_so()
-
-	def update_status(self, status=None):
-		return StatusService(self).update_status(status)
-
-	def get_status(self, status=None):
-		return StatusService(self).get_status(status)
-
-	def update_work_order_qty(self):
-		return StatusService(self).update_work_order_qty()
-
-	def update_disassembled_qty(self, qty, is_cancel=False):
-		return StatusService(self).update_disassembled_qty(qty, is_cancel)
-
-	def get_transferred_or_manufactured_qty(self, purpose, fieldname):
-		return StatusService(self).get_transferred_or_manufactured_qty(purpose, fieldname)
-
-	def set_process_loss_qty(self):
-		return StatusService(self).set_process_loss_qty()
-
-	def update_production_plan_status(self):
-		return StatusService(self).update_production_plan_status()
-
-	def update_planned_qty(self):
-		return StatusService(self).update_planned_qty()
-
-	def set_produced_qty_for_sub_assembly_item(self):
-		return StatusService(self).set_produced_qty_for_sub_assembly_item()
-
-	def update_ordered_qty(self):
-		return StatusService(self).update_ordered_qty()
-
-	def update_work_order_qty_in_sales_orders(self):
-		return StatusService(self).update_work_order_qty_in_sales_orders()
-
-	def update_work_order_qty_in_so(self):
-		return StatusService(self).update_work_order_qty_in_so()
-
-	def update_work_order_qty_in_combined_so(self):
-		return StatusService(self).update_work_order_qty_in_combined_so()
-
-	def update_completed_qty_in_material_request(self):
-		return StatusService(self).update_completed_qty_in_material_request()
-
-
-def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty."""
-	work_order = frappe.qb.DocType("Work Order")
-	work_order_item = frappe.qb.DocType("Work Order Item")
-	return dict(
-		frappe.qb.from_(work_order_item)
-		.join(work_order)
-		.on(work_order.name == work_order_item.parent)
-		.select(
-			work_order_item.item_code,
-			Sum(
-				Case()
-				.when(
-					(work_order.status == "Closed")
-					& (work_order_item.transferred_qty > work_order_item.consumed_qty),
-					work_order_item.transferred_qty - work_order_item.returned_qty,
-				)
-				.when(
-					work_order.status == "Closed",
-					work_order_item.consumed_qty - work_order_item.returned_qty,
-				)
-				.else_(work_order_item.required_qty)
-			),
-		)
-		.where(
-			(work_order.docstatus == 1)
-			& (work_order.subcontracting_inward_order_item == scio_item_name)
-			& (work_order_item.item_code.isin(rm_item_codes))
-		)
-		.groupby(work_order_item.item_code)
-		.run()
-	)
-
->>>>>>> dafe900 (fix(manufacturing): recompute work order item amount on save)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -1836,17 +1610,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		item_data = get_item_details(args.item_code, skip_bom_info=True)
 		args.update(item_data)
 
-		args["rate"] = get_bom_item_rate(
-			{
-				"company": wo_doc.company,
-				"item_code": args.get("item_code"),
-				"qty": args.get("required_qty"),
-				"uom": args.get("stock_uom"),
-				"stock_uom": args.get("stock_uom"),
-				"conversion_factor": 1,
-			},
-			bom_doc,
-		)
+		args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 
 		if not args.source_warehouse:
 			args["source_warehouse"] = get_item_defaults(
@@ -1863,6 +1627,29 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 			existing_row.update(args)
 		else:
 			wo_doc.append(table_name, args)
+
+
+def get_raw_material_rate(args, wo_doc, bom_doc):
+	"""Rate in company currency, costed the way the BOM costs its raw materials."""
+	rate = bom_doc.get_rm_rate(
+		{
+			"company": wo_doc.company,
+			"item_code": args.get("item_code"),
+			"qty": args.get("required_qty"),
+			"uom": args.get("stock_uom"),
+			"stock_uom": args.get("stock_uom"),
+			"conversion_factor": 1,
+			"source_warehouse": args.get("source_warehouse"),
+		},
+		notify=False,
+	)
+	return rate * flt(bom_doc.conversion_rate or 1)
+
+
+def is_edited_item(row, previous_items, bom_items):
+	if row.name in previous_items:
+		return previous_items[row.name] != row.item_code
+	return not row.rate or row.item_code not in bom_items
 
 
 def get_template_rm_item(wo_doc, item_code):
