@@ -656,7 +656,7 @@ class TransactionDeletionRecord(Document):
 				)
 			)
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def start_deletion_tasks(self):
 		self.check_permission("write")
 

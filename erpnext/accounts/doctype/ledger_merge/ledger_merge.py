@@ -56,8 +56,13 @@ class LedgerMerge(Document):
 		return False
 
 
+<<<<<<< HEAD
 @frappe.whitelist()
 def form_start_merge(docname):
+=======
+@frappe.whitelist(methods=["POST"])
+def form_start_merge(docname: str):
+>>>>>>> 96675df (fix: allow only POST for methods that start imports, merges, reposts and deletions)
 	lm_doc = frappe.get_doc("Ledger Merge", docname)
 	lm_doc.check_permission("write")
 	return lm_doc.start_merge()
