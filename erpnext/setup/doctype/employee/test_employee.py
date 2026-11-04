@@ -387,6 +387,37 @@ class TestEmployee(ERPNextTestSuite):
 			)
 		)
 
+	def test_hr_roles_create_employee_users(self):
+		from erpnext.setup.doctype.employee.employee import create_user
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for role in ("HR User", "HR Manager"):
+			hr_user = make_fenced_user(f"employee-create-{frappe.scrub(role)}@example.com", [role])
+			employee = new_employee("")
+			employee.first_name = role
+			employee.insert()
+
+			with as_user(hr_user):
+				user = create_user(
+					employee.name,
+					f"employee-created-by-{frappe.scrub(role)}@example.com",
+					create_user_permission=1,
+				)
+
+				automatic = new_employee("")
+				automatic.update(
+					{
+						"first_name": f"Auto {role}",
+						"personal_email": f"employee-auto-created-by-{frappe.scrub(role)}@example.com",
+						"create_user_automatically": 1,
+						"create_user_permission": 1,
+					}
+				)
+				automatic.insert()
+
+			for created_user in (user, automatic.reload().user_id):
+				self.assertIn("Employee", frappe.get_roles(created_user))
+
 	def test_disabled_department_cannot_be_assigned(self):
 		department = frappe.get_doc(
 			{

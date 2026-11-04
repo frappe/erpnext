@@ -631,7 +631,8 @@ def create_user(employee: str, email: str | None = None, create_user_permission:
 	)
 	# Linking the User in emp.save() syncs its status, Employee role and user permissions.
 	user.flags.no_welcome_mail = emp.status != "Active"
-	user.insert()
+	# Write access to the Employee authorizes this User, which gets only the Employee role.
+	user.insert(ignore_permissions=True)
 
 	emp.user_id = user.name
 	emp.create_user_permission = cint(create_user_permission)
