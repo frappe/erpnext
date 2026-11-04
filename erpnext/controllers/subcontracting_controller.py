@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
@@ -73,6 +74,7 @@ class SubcontractingController(StockController):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
 			rejected_return_rows = self.get_rejected_return_rows()
+			return_rates = self.get_consumed_rates_for_return()
 			for row in self.supplied_items:
 				kwargs = frappe._dict(
 					{
@@ -92,12 +94,15 @@ class SubcontractingController(StockController):
 					}
 				)
 
-				rate = (
-					0.0
-					if row.reference_name in rejected_return_rows
+				if (
+					row.reference_name in rejected_return_rows
 					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
-					else _get_incoming_rate(kwargs)
-				)
+				):
+					rate = 0.0
+				elif (row.reference_name, row.rm_item_code) in return_rates:
+					rate = return_rates[(row.reference_name, row.rm_item_code)]
+				else:
+					rate = _get_incoming_rate(kwargs)
 				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
@@ -106,6 +111,32 @@ class SubcontractingController(StockController):
 
 		if rate_changed:
 			self.calculate_items_qty_and_amount()
+
+	def get_consumed_rates_for_return(self):
+		"""Rate each raw material was consumed at in the returned receipt, keyed by (return item row, raw material)."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+		rows = (
+			frappe.qb.from_(supplied_item)
+			.select(
+				supplied_item.reference_name,
+				supplied_item.rm_item_code,
+				(Sum(supplied_item.rate * supplied_item.consumed_qty) / Sum(supplied_item.consumed_qty)).as_(
+					"rate"
+				),
+			)
+			.where(
+				(supplied_item.parent == self.return_against)
+				& (supplied_item.parenttype == "Subcontracting Receipt")
+				& (supplied_item.consumed_qty != 0)
+			)
+			.groupby(supplied_item.reference_name, supplied_item.rm_item_code)
+		).run(as_dict=True)
+
+		return_rows = {row.subcontracting_receipt_item: row.name for row in self.items}
+		return {(return_rows.get(row.reference_name), row.rm_item_code): flt(row.rate) for row in rows}
 
 	def get_rejected_return_rows(self):
 		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
