@@ -821,9 +821,7 @@ class JobCard(Document):
 				"Kindly cancel the Manufacturing Entries first against the work order {0}."
 			).format(frappe.bold(get_link_to_form("Work Order", self.work_order)))
 
-			frappe.throw(
-				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
-			)
+			frappe.throw(first_part_msg + " " + second_part_msg, JobCardCancelError, title=_("Error"))
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, time_in_mins, wo):
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")

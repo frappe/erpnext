@@ -79,6 +79,7 @@ def execute():
 	]
 
 	for dt in doctypes:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		for d in frappe.db.sql(
 			f"""select name, parenttype, parent, item_code, item_tax_rate from `tab{dt} Item`
 								where ifnull(item_tax_rate, '') not in ('', '{{}}')

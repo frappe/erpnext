@@ -16,12 +16,14 @@ def execute():
 		):
 			continue
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f"""
 				UPDATE `tab{doctype}`
 				SET is_cancelled = 0
 				where is_cancelled in ('', 'No') or is_cancelled is NULL"""
 		)
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f"""
 				UPDATE `tab{doctype}`

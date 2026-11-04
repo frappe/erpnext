@@ -30,6 +30,7 @@ def handle_appointment_booking_disabled():
 		raise frappe.Redirect
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
 	handle_appointment_booking_disabled()
@@ -41,6 +42,7 @@ def get_appointment_settings():
 	return settings
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
 	handle_appointment_booking_disabled()
