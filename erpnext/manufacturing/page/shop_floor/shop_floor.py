@@ -83,7 +83,7 @@ WORK_ORDER_FIELDS = [
 	"planned_start_date",
 	"sales_order",
 	"bom_no",
-	"plant_floor",
+	"track_semi_finished_goods",
 ]
 
 

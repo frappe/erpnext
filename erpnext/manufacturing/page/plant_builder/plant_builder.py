@@ -1,113 +1,177 @@
-from collections import Counter
-
 import frappe
 from frappe.permissions import has_permission
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
-from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_workstation_details
+from erpnext.manufacturing.doctype.bom_creator.process_formula import ProcessFormula
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
-from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_preset_shapes
+from erpnext.manufacturing.doctype.workstation_type.workstation_type import (
+	get_preset_shapes,
+	get_workstation_details,
+)
 
-PLANT_FIELDS = ["name", "floor_name", "production_item", "batch_size", "modified"]
+FLOOR_FIELDS = ["name", "floor_name", "company", "warehouse", "modified"]
+OPEN_WORK_ORDER_STATUSES = ("Draft", "Not Started", "In Process", "On Hold")
 
 
 @frappe.whitelist()
-def get_plants() -> list[dict]:
-	plants = frappe.get_list("Plant Floor", fields=PLANT_FIELDS, order_by="modified desc")
-	stages = frappe.get_all(
-		"Plant Floor Stage",
-		filters={"parent": ("in", [plant.name for plant in plants])},
-		fields=["parent", "stage_name", "workstation"],
-		order_by="idx",
+def get_floors() -> list[dict]:
+	floors = frappe.get_list("Plant Floor", fields=FLOOR_FIELDS, order_by="modified desc")
+	machines = get_floor_machines([floor.name for floor in floors])
+	for floor in floors:
+		floor.machines = [machine for machine in machines.values() if machine.plant_floor == floor.name]
+	return floors
+
+
+@frappe.whitelist()
+def get_floor(name: str) -> dict:
+	floor = frappe.get_doc("Plant Floor", name)
+	floor.check_permission("read")
+	return get_floor_data(floor)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_floor(doc: str | dict) -> dict:
+	values = frappe.parse_json(doc)
+	if values.get("name") and frappe.db.exists("Plant Floor", values.name):
+		floor = frappe.get_doc("Plant Floor", values.name)
+		floor.update({field: values.get(field) for field in ("company", "warehouse")})
+		floor.save()
+	else:
+		floor = frappe.get_doc({**values, "doctype": "Plant Floor"}).insert()
+	return get_floor_data(floor)
+
+
+@frappe.whitelist(methods=["POST"])
+def set_machine_floor(workstation: str, plant_floor: str | None = None) -> dict:
+	machine = frappe.get_doc("Workstation", workstation)
+	floor = plant_floor or machine.plant_floor
+	frappe.get_doc("Plant Floor", floor).check_permission("read")
+	machine.plant_floor = plant_floor
+	machine.save()
+	return get_floor(floor)
+
+
+def get_floor_data(floor):
+	machines = get_floor_machines([floor.name])
+	for machine in machines.values():
+		machine.shapes = get_machine_shapes(machine)
+	return {
+		"doc": floor.as_dict(),
+		"is_saved": bool(floor.get("creation")),
+		"can_write": can_write("Plant Floor", floor),
+		"machines": list(machines.values()),
+		"work_orders": get_open_work_orders(list(machines)),
+	}
+
+
+def get_floor_machines(floors):
+	if not floors:
+		return {}
+
+	names = frappe.get_list(
+		"Workstation", filters={"plant_floor": ("in", floors)}, pluck="name", order_by="creation"
 	)
-	models = get_workstation_details(tuple({row.workstation for row in stages}))
-	materials = Counter(
+	details = get_workstation_details(tuple(names))
+	floor_of = dict(
 		frappe.get_all(
-			"Plant Floor Material",
-			filters={"parent": ("in", [plant.name for plant in plants])},
-			pluck="parent",
+			"Workstation", filters={"name": ("in", names)}, fields=["name", "plant_floor"], as_list=1
 		)
 	)
-	for plant in plants:
-		plant.stages = [
-			{
-				"stage_name": row.stage_name,
-				"machine_model": models.get(row.workstation, {}).get("machine_model"),
-			}
-			for row in stages
-			if row.parent == plant.name
-		]
-		plant.material_count = materials[plant.name]
-		plant.item = get_item(plant.production_item)
-	return plants
+	jobs = get_running_jobs(names)
+	for name, machine in details.items():
+		machine.update(plant_floor=floor_of.get(name), job=jobs.get(name))
+	return {name: details[name] for name in names if name in details}
+
+
+def get_running_jobs(workstations):
+	if not workstations:
+		return {}
+
+	cards = frappe.get_all(
+		"Job Card",
+		filters={
+			"workstation": ("in", workstations),
+			"docstatus": 0,
+			"status": ("in", ["Work In Progress", "On Hold"]),
+		},
+		fields=["name", "workstation", "work_order", "operation", "status", "is_paused"],
+		order_by="modified desc",
+	)
+	jobs = {}
+	for card in cards:
+		jobs.setdefault(card.workstation, card)
+	return jobs
+
+
+def get_open_work_orders(workstations):
+	if not workstations:
+		return []
+
+	work_order = frappe.qb.DocType("Work Order")
+	operation = frappe.qb.DocType("Work Order Operation")
+	names = (
+		frappe.qb.from_(work_order)
+		.join(operation)
+		.on(operation.parent == work_order.name)
+		.select(work_order.name)
+		.distinct()
+		.where(
+			operation.workstation.isin(workstations)
+			& (work_order.docstatus < 2)
+			& work_order.status.isin(OPEN_WORK_ORDER_STATUSES)
+			& (work_order.track_semi_finished_goods == 1)
+		)
+	).run(pluck=True)
+	return frappe.get_list(
+		"Work Order",
+		filters={"name": ("in", names)},
+		fields=["name", "production_item", "item_name", "qty", "produced_qty", "status", "stock_uom"],
+		order_by="creation desc",
+	)
+
+
+def can_write(doctype, doc):
+	if not doc.get("creation"):
+		return bool(has_permission(doctype, "create", print_logs=False))
+	return bool(has_permission(doctype, "write", doc, print_logs=False))
 
 
 @frappe.whitelist()
-def get_plant(name: str) -> dict:
-	plant_floor = frappe.get_doc("Plant Floor", name)
-	plant_floor.check_permission("read")
-	return get_plant_data(plant_floor)
-
-
-@frappe.whitelist()
-def check_plant(doc: str | dict) -> dict:
-	plant_floor = frappe.get_doc({**frappe.parse_json(doc), "doctype": "Plant Floor"})
-	frappe.has_permission("Plant Floor", "read", throw=True)
-	for workstation in {row.workstation for row in plant_floor.stages if row.workstation}:
+def check_design(doc: str | dict) -> dict:
+	frappe.has_permission("BOM Creator", "read", throw=True)
+	design = frappe.get_doc({**frappe.parse_json(doc), "doctype": "BOM Creator"})
+	formula = ProcessFormula(design)
+	for workstation in {row.workstation for row in formula.stages if row.workstation}:
 		frappe.has_permission("Workstation", doc=workstation, throw=True)
-	plant_floor.set_row_numbers()
-	set_item_names(plant_floor)
-	return get_plant_data(plant_floor)
+	formula.apply()
+	batch = flt(design.qty) or 1
+	return {
+		"errors": formula.get_problems(),
+		"item": get_item(design.item_code),
+		"machines": get_machines(tuple(row.workstation for row in formula.stages if row.workstation)),
+		"weight_factors": formula.weight_factors,
+		"balance_qty": flt(formula.balance_row.qty * batch, 3) if formula.balance_row else None,
+		"outputs": {
+			cint(row.operation_id): flt(row.output_quantity * batch, 3) for row in formula.process_stages
+		},
+		"item_names": get_item_names([row.item_code for row in formula.materials]),
+	}
 
 
-def set_item_names(plant_floor):
-	rows = [*plant_floor.materials, *plant_floor.packing_materials]
-	names = dict(
+def get_item_names(item_codes):
+	return dict(
 		frappe.get_all(
 			"Item",
-			filters={"name": ("in", [row.item_code for row in rows if row.item_code])},
+			filters={"name": ("in", list(filter(None, item_codes)))},
 			fields=["name", "item_name"],
 			as_list=1,
 		)
 	)
-	for row in rows:
-		row.item_name = names.get(row.item_code)
-
-
-@frappe.whitelist(methods=["POST"])
-def save_plant(doc: str | dict) -> dict:
-	values = frappe.parse_json(doc)
-	if values.get("name") and frappe.db.exists("Plant Floor", values.name):
-		plant_floor = frappe.get_doc("Plant Floor", values.name)
-		plant_floor.update(values)
-		plant_floor.save()
-	else:
-		plant_floor = frappe.get_doc({**values, "doctype": "Plant Floor"}).insert()
-	return get_plant_data(plant_floor)
-
-
-def get_plant_data(plant_floor):
-	errors = plant_floor.setup_errors
-	return {
-		"doc": plant_floor.as_dict(),
-		"is_saved": bool(plant_floor.get("creation")),
-		"can_write": can_write(plant_floor),
-		"item": get_item(plant_floor.production_item),
-		"machines": get_machines(tuple({row.workstation for row in plant_floor.stages})),
-		"errors": errors,
-		"plan": None if errors else plant_floor.get_batch_plan().as_dict(),
-	}
-
-
-def can_write(plant_floor):
-	if not plant_floor.get("creation"):
-		return bool(has_permission("Plant Floor", "create", print_logs=False))
-	return bool(has_permission("Plant Floor", "write", plant_floor, print_logs=False))
 
 
 def get_machines(workstations):
-	machines = get_workstation_details(workstations)
+	machines = get_workstation_details(tuple(sorted(set(workstations))))
 	for machine in machines.values():
 		machine.shapes = get_machine_shapes(machine)
 	return machines
@@ -144,12 +208,6 @@ def get_machine_catalog() -> dict:
 
 
 @frappe.whitelist()
-def get_workstation(name: str) -> dict:
-	frappe.has_permission("Workstation", doc=name, throw=True)
-	return get_machines((name,)).get(name)
-
-
-@frappe.whitelist()
 def get_machine_design(workstation_type: str) -> dict:
 	doc = frappe.get_doc("Workstation Type", workstation_type)
 	doc.check_permission("read")
@@ -170,24 +228,24 @@ def save_machine_design(workstation_type: str, shapes: str | list) -> dict:
 	return get_machine_design(doc.name)
 
 
-@frappe.whitelist(methods=["POST"])
-def make_work_order(plant_floor: str, qty: float | None = None) -> str:
-	plant_floor = frappe.get_doc("Plant Floor", plant_floor)
-	plant_floor.check_permission("read")
-	return plant_floor.make_work_order(qty).name
-
-
 @frappe.whitelist()
 def get_run(work_order: str) -> dict:
 	run = get_plant_run(work_order, "read")
-	return {**PlantRunState(run).as_dict(), "plant": get_plant_data(run.plant_floor)}
+	state = PlantRunState(run)
+	plan = state.plan
+	return {
+		**state.as_dict(),
+		"plant": {
+			"doc": plan.get_plant_doc(),
+			"machines": get_machines(tuple(plan.machines)),
+			"item": get_item(run.work_order.production_item),
+		},
+	}
 
 
 def get_plant_run(work_order, ptype):
 	frappe.has_permission("Work Order", ptype, doc=work_order, throw=True)
-	run = PlantRun(work_order)
-	run.plant_floor.check_permission("read")
-	return run
+	return PlantRun(work_order)
 
 
 @frappe.whitelist(methods=["POST"])

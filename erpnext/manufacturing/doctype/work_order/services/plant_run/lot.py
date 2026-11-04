@@ -22,7 +22,7 @@ class Lot:
 
 	@cached_property
 	def tolerance(self):
-		return flt(self.flow.plant_floor.formula_tolerance)
+		return self.flow.plan.tolerance
 
 	@cached_property
 	def share(self):

@@ -7,14 +7,12 @@ import json
 import math
 
 import frappe
-from frappe.query_builder import Order
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.get_item_details import get_default_bom
 
 
 def get_planned_process_loss_percentage(bom_no):
@@ -149,54 +147,16 @@ def get_warehouse_list(warehouses):
 
 
 @frappe.whitelist()
-def get_item_data(item_code: str, company: str | None = None):
+def get_item_data(item_code: str):
 	frappe.has_permission("Item", "read", throw=True)
 
-	plant_floor = (
-		None if get_default_bom(item_code) else get_plant_floors([item_code], company).get(item_code)
-	)
-	item_details = get_item_details(item_code, skip_bom_info=bool(plant_floor))
+	item_details = get_item_details(item_code)
 
 	return {
 		"bom_no": item_details.get("bom_no"),
-		"plant_floor": plant_floor,
 		"stock_uom": item_details.get("stock_uom"),
 		"description": item_details.get("description"),
 	}
-
-
-def get_plant_floors(item_codes, company):
-	if not item_codes:
-		return {}
-
-	plant_floor = frappe.qb.DocType("Plant Floor")
-	rows = (
-		frappe.qb.from_(plant_floor)
-		.select(plant_floor.name, plant_floor.production_item)
-		.where(
-			plant_floor.production_item.isin(list(item_codes))
-			& is_plant_floor_of_company(plant_floor, company)
-		)
-		.orderby(plant_floor.modified, order=Order.desc)
-	).run(as_dict=True)
-
-	plant_floors = {}
-	for row in rows:
-		plant_floors.setdefault(row.production_item, row.name)
-	return plant_floors
-
-
-def plant_floor_exists(item_code, company):
-	plant_floor = frappe.qb.DocType("Plant Floor")
-	return ExistsCriterion(
-		frappe.qb.from_(plant_floor)
-		.select(plant_floor.name)
-		.where((plant_floor.production_item == item_code) & is_plant_floor_of_company(plant_floor, company))
-	)
-
-
-def is_plant_floor_of_company(plant_floor, company):
-	return IfNull(plant_floor.company, company) == company
 
 
 def set_default_warehouses(row, default_warehouses):
@@ -219,11 +179,7 @@ def get_sales_orders(self):
 		bom_subquery = bom_subquery.where(self.get_bom_item_condition() or bom.item == so_item.item_code)
 
 	packed_subquery = _packed_item_subquery(bom, so, so_item)
-	query = query.where(
-		ExistsCriterion(bom_subquery)
-		| ExistsCriterion(packed_subquery)
-		| plant_floor_exists(so_item.item_code, self.company)
-	)
+	query = query.where(ExistsCriterion(bom_subquery) | ExistsCriterion(packed_subquery))
 	return query.run(as_dict=True)
 
 

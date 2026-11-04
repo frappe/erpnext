@@ -16,17 +16,15 @@ class MachineBusyError(frappe.ValidationError):
 class PlantRun:
 	def __init__(self, work_order: str):
 		self.work_order = frappe.get_doc("Work Order", work_order)
-		if not self.work_order.is_plant_floor_order:
-			frappe.throw(_("Work Order {0} is not made from a Plant Floor").format(work_order))
-
-	@property
-	def plant_floor(self):
-		if not hasattr(self, "_plant_floor"):
-			self._plant_floor = frappe.get_doc("Plant Floor", self.work_order.plant_floor)
-		return self._plant_floor
+		if not self.work_order.track_semi_finished_goods:
+			frappe.throw(
+				_(
+					"Work Order {0} does not make an item at each operation, so the Plant Builder cannot run it"
+				).format(work_order)
+			)
 
 	def get_flow(self):
-		return PlantFlow(self.work_order, self.plant_floor)
+		return PlantFlow(self.work_order)
 
 	def get_open_job_card(self, stage_idx):
 		card = self.get_flow().get_open_card(stage_idx)

@@ -26,9 +26,6 @@ def add_additional_cost(stock_entry, work_order, job_card=None):
 
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=None):
-	if not work_order.bom_no:
-		return
-
 	bom = frappe.get_doc("BOM", work_order.bom_no)
 	table = _bom_items_table(work_order, job_card)
 	rows = bom.get(table)

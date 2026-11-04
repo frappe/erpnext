@@ -15,6 +15,7 @@ class BOMCreatorMaterial(Document):
 
 		bom_node_id: DF.Int
 		from_operation_id: DF.Int
+		is_balance_item: DF.Check
 		item_code: DF.Link | None
 		operation_id: DF.Int
 		parent: DF.Data
@@ -22,6 +23,7 @@ class BOMCreatorMaterial(Document):
 		parenttype: DF.Data
 		part_node_id: DF.Int
 		qty: DF.Float
+		storage: DF.Literal["Tank", "Silo", "Sacks"]
 		uom: DF.Link | None
 	# end: auto-generated types
 

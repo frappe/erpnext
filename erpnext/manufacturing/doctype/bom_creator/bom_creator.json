@@ -18,6 +18,8 @@
   "design_file",
   "track_semi_finished_goods",
   "qty",
+  "raw_material_warehouse",
+  "formula_tolerance",
   "design_view_section",
   "design_view",
   "items",
@@ -94,7 +96,8 @@
    "fieldtype": "Attach",
    "label": "Design File",
    "description": "STEP file (.step or .stp) or CSV file. A CSV file needs a Level or Item Number column, a Part Number or Part Name column, and a Quantity column.",
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "depends_on": "eval:!doc.track_semi_finished_goods"
   },
   {
    "allow_on_submit": 1,
@@ -102,8 +105,8 @@
    "depends_on": "eval:!doc.is_phantom",
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
-   "label": "Produce Item per Operation",
-   "description": "Each operation makes an item that a later operation can use. The last operation makes the finished good.",
+   "label": "Process Manufacturing",
+   "description": "Make the finished good in stages from a formula. Each stage runs on a machine and makes an item that the next stage uses. Turn it off to build the BOM from parts or a design file.",
    "show_description_on_click": 1
   },
   {
@@ -114,7 +117,7 @@
    "default": "1",
    "non_negative": 1,
    "allow_on_submit": 1,
-   "description": "The BOM of the finished good is made for this quantity. Part quantities are for one finished good.",
+   "description": "The batch size. The BOM of the finished good is made for this quantity.",
    "show_description_on_click": 1,
    "depends_on": "track_semi_finished_goods"
   },
@@ -386,6 +389,27 @@
   {
    "fieldname": "remarks_section",
    "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "track_semi_finished_goods",
+   "description": "Raw materials of the formula are taken from this warehouse.",
+   "fieldname": "raw_material_warehouse",
+   "fieldtype": "Link",
+   "label": "Raw Material Warehouse",
+   "options": "Warehouse",
+   "show_description_on_click": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "2",
+   "depends_on": "track_semi_finished_goods",
+   "description": "How far, in percent, the quantity used of each raw material can be from the formula when a stage runs.",
+   "fieldname": "formula_tolerance",
+   "fieldtype": "Percent",
+   "label": "Formula Tolerance",
+   "non_negative": 1,
+   "show_description_on_click": 1
   }
  ],
  "icon": "list-plus",
@@ -402,7 +426,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-10-25 15:30:00.000000",
+ "modified": "2026-11-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",

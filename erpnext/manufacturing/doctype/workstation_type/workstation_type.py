@@ -154,6 +154,29 @@ def get_workstations(workstation_type):
 	return [workstation.name for workstation in workstations]
 
 
+def get_workstation_details(workstations):
+	if not workstations:
+		return {}
+
+	workstation = frappe.qb.DocType("Workstation")
+	workstation_type = frappe.qb.DocType("Workstation Type")
+	rows = (
+		frappe.qb.from_(workstation)
+		.left_join(workstation_type)
+		.on(workstation_type.name == workstation.workstation_type)
+		.select(
+			workstation.name,
+			workstation.warehouse,
+			workstation.workstation_type,
+			workstation.status,
+			workstation.batch_capacity,
+			workstation_type.machine_model,
+		)
+		.where(workstation.name.isin(workstations))
+	).run(as_dict=True)
+	return {row.name: row for row in rows}
+
+
 def create_default_workstation_types():
 	for values in frappe.get_file_json(DEFAULT_WORKSTATION_TYPES):
 		if not frappe.db.exists("Workstation Type", values["workstation_type"]):
