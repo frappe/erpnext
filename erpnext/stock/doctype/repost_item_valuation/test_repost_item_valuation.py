@@ -105,6 +105,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		)
 		repost.flags.dont_run_in_test = True
 		repost.submit()
+		self.addCleanup(frappe.db.delete, "Repost Item Valuation", repost.name)
 		return repost
 
 	def test_repost_queued_after_start_is_not_skipped(self):
