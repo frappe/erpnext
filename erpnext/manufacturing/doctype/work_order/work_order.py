@@ -270,9 +270,10 @@ class WorkOrder(Document):
 				],
 			).run(as_dict=True)
 			secondary_items = [item for item in secondary_items if item.item_code]
+			precision = frappe.get_precision("Work Order Additional Item", "amount")
 			for item in secondary_items:
 				item["qty"] = (item.qty / item.bom_qty) * self.qty
-				item["amount"] = flt(item.amount) * item.qty
+				item["amount"] = flt(flt(item.amount) * self.qty / item.bom_qty, precision)
 			return secondary_items
 
 	@property
