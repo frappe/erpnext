@@ -13,7 +13,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
+from frappe.utils import date_diff, get_datetime, getdate, now_datetime, time_diff_in_seconds
 from frappe.utils.user import is_website_user
 
 
@@ -66,7 +66,13 @@ class Issue(Document):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
 
-		if not self.raised_by:
+		# a web form saves with ignore_permissions, so its submitter is never trusted with these fields
+		if is_website_user() or frappe.flags.in_web_form:
+			self.restore_staff_only_fields()
+
+		if frappe.flags.in_web_form and self.is_new():
+			self.raised_by = frappe.session.user
+		elif not self.raised_by:
 			self.raised_by = frappe.session.user
 
 		self.set_lead_contact(self.raised_by)
@@ -76,6 +82,12 @@ class Issue(Document):
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
+
+	def restore_staff_only_fields(self):
+		"""Customer and status are set by the support team, not by portal or web form users."""
+		doc_before_save = self.get_doc_before_save()
+		self.customer = doc_before_save.customer if doc_before_save else None
+		self.status = doc_before_save.status if doc_before_save else "Open"
 
 	def set_lead_contact(self, email_id):
 		import email.utils
@@ -117,7 +129,6 @@ class Issue(Document):
 		communication.flags.ignore_mandatory = True
 		communication.save()
 
-	@frappe.whitelist()
 	def get_timeline_communications(self, after=None):
 		"""Return the Communications on this Issue's timeline, split by how they are attached.
 
@@ -150,6 +161,7 @@ class Issue(Document):
 
 		return set(referenced), set(linked)
 
+	@frappe.whitelist(methods=["POST"])
 	def split_issue(self, subject: str, communication_id: str):
 		from copy import deepcopy
 
@@ -273,7 +285,9 @@ def set_multiple_status(names, status):
 @frappe.whitelist(methods=["POST"])
 def set_status(name, status):
 	frappe.has_permission("Issue", "write", name, throw=True)
-	frappe.db.set_value("Issue", name, "status", status)
+	issue = frappe.get_doc("Issue", name)
+	issue.status = status
+	issue.save()
 
 
 def auto_close_tickets():
@@ -323,7 +337,7 @@ def make_task(source_name, target_doc=None):
 	return get_mapped_doc("Issue", source_name, {"Issue": {"doctype": "Task"}}, target_doc)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_issue_from_communication(communication: str, ignore_communication_links: bool = False):
 	"""raise a issue from email"""
 
@@ -379,7 +393,7 @@ def calculate_first_response_time(issue, first_responded_on):
 		"Service Level Agreement", issue.service_level_agreement
 	).support_and_resolution
 
-	if issue_creation_date.day == first_responded_on.day:
+	if getdate(issue_creation_date) == getdate(first_responded_on):
 		if is_work_day(issue_creation_date, support_hours):
 			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
 

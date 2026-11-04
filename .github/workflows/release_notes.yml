@@ -35,6 +35,7 @@ jobs:
         private-key: ${{ secrets.FRAPPE_BOT_PRIVATE_KEY }}
         permission-contents: write
     - name: Update notes
+      shell: bash
       run: |
         NEW_NOTES=$(gh api --method POST -H "Accept: application/vnd.github+json"  /repos/frappe/erpnext/releases/generate-notes  -f tag_name=$RELEASE_TAG | jq -r '.body' | sed  -E '/^\* (chore|ci|test|docs|style)/d' )
         RELEASE_ID=$(gh api -H "Accept: application/vnd.github+json" /repos/frappe/erpnext/releases/tags/$RELEASE_TAG | jq -r '.id')

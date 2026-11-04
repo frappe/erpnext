@@ -60,7 +60,7 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertTrue(len(pln.mr_items), 2)
 
 		for row in pln.mr_items:
-			row.schedule_date = add_to_date(nowdate(), days=10)
+			row.db_set("schedule_date", add_to_date(nowdate(), days=10))
 
 		pln.make_material_request()
 		pln.reload()
@@ -123,7 +123,7 @@ class TestProductionPlan(FrappeTestCase):
 	def test_production_plan_material_request_skips_zero_qty_items(self):
 		pln = create_production_plan(item_code="Test Production Item 1")
 		zero_qty_item, requested_item = pln.mr_items
-		zero_qty_item.quantity = "0"
+		zero_qty_item.db_set("quantity", 0)
 
 		pln.make_material_request()
 
@@ -136,6 +136,39 @@ class TestProductionPlan(FrappeTestCase):
 			material_request_items,
 			[{"item_code": requested_item.item_code, "qty": requested_item.quantity}],
 		)
+
+	def test_material_request_uses_the_stored_plan_rows(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		stored_qty = {row.name: row.quantity for row in pln.mr_items}
+
+		posted = frappe.get_doc({**pln.as_dict(), "__islocal": 1})
+		for row in posted.mr_items:
+			row.quantity = 999
+		posted.append("mr_items", {**posted.mr_items[0].as_dict(), "name": None, "quantity": 500})
+		posted.make_material_request()
+
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": pln.name},
+			fields=["material_request_plan_item", "qty"],
+		)
+		self.assertEqual({row.material_request_plan_item: row.qty for row in requested}, stored_qty)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Save the Production Plan",
+			frappe.new_doc("Production Plan").make_material_request,
+		)
+
+	def test_material_request_needs_production_plan_write_access(self):
+		pln = create_production_plan(item_code="Test Production Item 1")
+		user = create_user_without_production_plan_access()
+		frappe.share.add("Production Plan", pln.name, user, read=1)
+
+		with self.set_user(user):
+			plan = frappe.get_doc("Production Plan", pln.name)
+			self.assertRaises(frappe.PermissionError, plan.make_material_request)
+
+		self.assertFalse(frappe.db.exists("Material Request Item", {"production_plan": pln.name}))
 
 	def test_production_plan_start_date(self):
 		"Test if Work Order has same Planned Start Date as Prod Plan."

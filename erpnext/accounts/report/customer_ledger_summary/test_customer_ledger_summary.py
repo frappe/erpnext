@@ -304,3 +304,51 @@ class TestCustomerLedgerSummary(FrappeTestCase, AccountsTestMixin):
 					f"Field {field} does not match expected value. "
 					f"Expected: {expected_value}, Got: {actual_value}",
 				)
+
+	def test_company_without_permission_is_refused(self):
+		user = "test_cls_company_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "CLS", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", user)
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				execute,
+				{"company": self.company, "from_date": today(), "to_date": today()},
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_amounts_follow_gl_entry_permissions(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		other_receivable = create_account(
+			account_name="_Test CLS Receivable",
+			company=self.company,
+			parent_account="Accounts Receivable - _TC",
+			account_type="Receivable",
+		)
+		self.create_sales_invoice()
+		permitted_receivable, self.debit_to = self.debit_to, other_receivable
+		self.create_sales_invoice()
+
+		user = "test_cls_account_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "CLS", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission(
+			"Account", permitted_receivable, user, applicable_for="GL Entry"
+		)
+
+		frappe.set_user(user)
+		try:
+			report = execute({"company": self.company, "from_date": today(), "to_date": today()})[1]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([(row.party, row.invoiced_amount) for row in report], [(self.customer, 1000.0)])

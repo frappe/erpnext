@@ -84,7 +84,7 @@ frappe.tour["Routing"] = [
 	},
 	{
 		fieldname: "operations",
-		title: "BOM Operations",
+		title: __("BOM Operations"),
 		description: __(
 			"Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n\n After that, set the Operation Time in minutes and the table will calculate the Operation Costs based on the Hourly Rate and Operation Time."
 		),

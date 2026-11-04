@@ -326,6 +326,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		# Cleanup data
 		return_dn.cancel()
+		dn.reload()
 		dn.cancel()
 		lcv.cancel()
 		pr.cancel()
@@ -428,6 +429,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 
 		# Cleanup data
 		return_dn.cancel()
+		dn.reload()
 		dn.cancel()
 		lcv.cancel()
 		pr.cancel()

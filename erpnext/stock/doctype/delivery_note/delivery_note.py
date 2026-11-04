@@ -208,38 +208,45 @@ class DeliveryNote(SellingController):
 				"keyword": "Delivered",
 			},
 		]
-		if cint(self.is_return):
-			self.status_updater.extend(
-				[
-					{
-						"source_dt": "Delivery Note Item",
-						"target_dt": "Sales Order Item",
-						"join_field": "so_detail",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Sales Order",
-						"source_field": "-1 * qty * conversion_factor",
-						"target_conversion_factor": "conversion_factor",
-						"second_source_dt": "Sales Invoice Item",
-						"second_source_field": "-1 * qty * conversion_factor",
-						"second_join_field": "so_detail",
-						"extra_cond": """ and exists (select name from `tabDelivery Note`
-					where name=`tabDelivery Note Item`.parent and is_return=1)""",
-						"second_source_extra_cond": """ and exists (select name from `tabSales Invoice`
-					where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)""",
-					},
-					{
-						"source_dt": "Delivery Note Item",
-						"target_dt": "Delivery Note Item",
-						"join_field": "dn_detail",
-						"target_field": "returned_qty",
-						"target_parent_dt": "Delivery Note",
-						"target_parent_field": "per_returned",
-						"target_ref_field": "stock_qty",
-						"source_field": "-1 * stock_qty",
-						"percent_join_field_parent": "return_against",
-					},
-				]
-			)
+
+	def update_status_updater_args(self):
+		"""Attach return updaters at submit/cancel, since `make_return_doc` sets `is_return` after `__init__`."""
+		# guard against a second append when one object is submitted and then cancelled
+		if not cint(self.is_return) or self.flags.get("return_updaters_added"):
+			return
+
+		self.flags.return_updaters_added = True
+		self.status_updater.extend(
+			[
+				{
+					"source_dt": "Delivery Note Item",
+					"target_dt": "Sales Order Item",
+					"join_field": "so_detail",
+					"target_field": "returned_qty",
+					"target_parent_dt": "Sales Order",
+					"source_field": "-1 * qty * conversion_factor",
+					"target_conversion_factor": "conversion_factor",
+					"second_source_dt": "Sales Invoice Item",
+					"second_source_field": "-1 * qty * conversion_factor",
+					"second_join_field": "so_detail",
+					"extra_cond": """ and exists (select name from `tabDelivery Note`
+				where name=`tabDelivery Note Item`.parent and is_return=1)""",
+					"second_source_extra_cond": """ and exists (select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)""",
+				},
+				{
+					"source_dt": "Delivery Note Item",
+					"target_dt": "Delivery Note Item",
+					"join_field": "dn_detail",
+					"target_field": "returned_qty",
+					"target_parent_dt": "Delivery Note",
+					"target_parent_field": "per_returned",
+					"target_ref_field": "stock_qty",
+					"source_field": "-1 * stock_qty",
+					"percent_join_field_parent": "return_against",
+				},
+			]
+		)
 
 	def onload(self):
 		super().onload()
@@ -466,7 +473,6 @@ class DeliveryNote(SellingController):
 
 	def on_submit(self):
 		self.validate_packed_qty()
-		self.update_pick_list_status()
 
 		# Check for Approving Authority
 		frappe.get_doc("Authorization Control").validate_approving_authority(
@@ -474,7 +480,9 @@ class DeliveryNote(SellingController):
 		)
 
 		# update delivered qty in sales order
+		self.update_status_updater_args()
 		self.update_prevdoc_status()
+		self.update_pick_list_status()
 		self.update_billing_status()
 
 		if not self.is_return:
@@ -510,6 +518,7 @@ class DeliveryNote(SellingController):
 		self.check_sales_order_on_hold_or_close("against_sales_order")
 		self.check_next_docstatus()
 
+		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
@@ -637,27 +646,30 @@ class DeliveryNote(SellingController):
 					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		if self.per_billed == 100:
 			return
 
 		extra_amount = 0
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				fieldname="bypass_credit_limit_check",
-			)
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
 			for d in self.get("items"):
 				if not d.against_sales_invoice:
 					validate_against_credit_limit = True
-					extra_amount = self.base_grand_total
-					break
+					# Submitted rows are already in customer outstanding, directly or via the Sales Order.
+					if self.docstatus == 0 and self.base_net_total:
+						extra_amount += d.base_net_amount / self.base_net_total * self.base_grand_total
+			if validate_against_credit_limit and not self.base_net_total:
+				# Customer outstanding excludes zero-net deliveries, including their freight charges.
+				extra_amount = self.base_grand_total
 		else:
 			for d in self.get("items"):
 				if not (d.against_sales_order or d.against_sales_invoice):

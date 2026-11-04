@@ -2,7 +2,10 @@
 # For license information, please see license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate
 
 
 class Driver(Document):
@@ -31,4 +34,6 @@ class Driver(Document):
 		transporter: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if self.issuing_date and self.expiry_date and getdate(self.expiry_date) < getdate(self.issuing_date):
+			frappe.throw(_("The licence expiry date cannot precede its issuing date."))

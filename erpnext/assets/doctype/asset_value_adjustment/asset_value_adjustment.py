@@ -135,21 +135,15 @@ class AssetValueAdjustment(Document):
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
 		for dimension in accounting_dimensions:
-			if dimension.get("mandatory_for_bs"):
-				credit_entry.update(
-					{
-						dimension["fieldname"]: self.get(dimension["fieldname"])
-						or dimension.get("default_dimension")
-					}
-				)
+			value = self.get(dimension["fieldname"])
+			# Dimension defaults and mandatory flags are set per company; explicit values always apply
+			is_own_company = dimension.get("company") == self.company
 
-			if dimension.get("mandatory_for_pl"):
-				debit_entry.update(
-					{
-						dimension["fieldname"]: self.get(dimension["fieldname"])
-						or dimension.get("default_dimension")
-					}
-				)
+			if value or (is_own_company and dimension.get("mandatory_for_bs")):
+				credit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
+
+			if value or (is_own_company and dimension.get("mandatory_for_pl")):
+				debit_entry[dimension["fieldname"]] = value or dimension.get("default_dimension")
 
 		je.append("accounts", credit_entry)
 		je.append("accounts", debit_entry)
@@ -183,6 +177,7 @@ class AssetValueAdjustment(Document):
 				get_link_to_form(self.get("doctype"), self.get("name")),
 			)
 		elif self.docstatus == 2:
+			asset_value = asset.get_value_after_depreciation(self.finance_book)
 			notes = _(
 				"This schedule was created when Asset {0}'s Asset Value Adjustment {1} was cancelled."
 			).format(
@@ -220,8 +215,7 @@ class AssetValueAdjustment(Document):
 
 	def get_adjusted_salvage_value_amount(self, row, difference_amount):
 		if row.expected_value_after_useful_life:
-			salvage_value_adjustment = (difference_amount * row.salvage_value_percentage) / 100
-			return flt(salvage_value_adjustment if self.docstatus == 1 else -1 * salvage_value_adjustment)
+			return flt((difference_amount * row.salvage_value_percentage) / 100)
 
 
 @frappe.whitelist()

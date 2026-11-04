@@ -184,8 +184,7 @@ class PaymentLedger:
 			dict(
 				label=_("Party Type"),
 				fieldname="party_type",
-				fieldtype="Link",
-				options="DocType",
+				fieldtype="Select",
 				width="100",
 			)
 		)
@@ -196,8 +195,7 @@ class PaymentLedger:
 			dict(
 				label=_("Voucher Type"),
 				fieldname="voucher_type",
-				fieldtype="Link",
-				options="DocType",
+				fieldtype="Select",
 				width="100",
 			)
 		)
@@ -214,8 +212,7 @@ class PaymentLedger:
 			dict(
 				label=_("Against Voucher Type"),
 				fieldname="against_voucher_type",
-				fieldtype="Link",
-				options="DocType",
+				fieldtype="Select",
 				width="100",
 			)
 		)

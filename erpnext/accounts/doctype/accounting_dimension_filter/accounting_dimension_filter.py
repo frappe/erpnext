@@ -103,6 +103,13 @@ def get_dimension_filter_map():
 	return frappe.flags.dimension_filter_map
 
 
+def get_dimension_label(meta, fieldname):
+	"""Translated label of the dimension field, or the unscrubbed fieldname when the field no longer exists."""
+	if meta.has_field(fieldname):
+		return meta.get_translated_label(fieldname)
+	return frappe.unscrub(fieldname)
+
+
 def build_map(map_object, dimension, account, filter_value, allow_or_restrict, is_mandatory):
 	map_object.setdefault(
 		(dimension, account),
