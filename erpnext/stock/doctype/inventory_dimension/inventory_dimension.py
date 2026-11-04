@@ -393,6 +393,7 @@ def get_inventory_dimensions():
 				"source_fieldname",
 				"reference_document as doctype",
 				"validate_negative_stock",
+				"name as dimension_name",
 			],
 		)
 
