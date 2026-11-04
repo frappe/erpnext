@@ -1,6 +1,7 @@
 import os
 import re
 import sqlite3
+import unicodedata
 
 import frappe
 from frappe import _
@@ -11,17 +12,33 @@ CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
 QUEUE_PREFIX = "Item:"
 BARCODE_COLUMN = "barcodes"
-TOKENIZER = "trigram remove_diacritics 1"
-MINIMUM_SQLITE_VERSION = (3, 45, 0)
+MINIMUM_SQLITE_VERSION = (3, 34, 0)
+DIACRITICS_SQLITE_VERSION = (3, 45, 0)
 
 
-def sqlite_supports_tokenizer() -> bool:
-	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
+def has_trigram_tokenizer() -> bool:
 	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
 
 
+def has_diacritics_option() -> bool:
+	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
+	return sqlite3.sqlite_version_info >= DIACRITICS_SQLITE_VERSION
+
+
+def get_tokenizer() -> str:
+	return "trigram remove_diacritics 1" if has_diacritics_option() else "trigram"
+
+
+def fold_diacritics(text: str) -> str:
+	"""Strip accents in Python where the tokenizer cannot."""
+	if has_diacritics_option():
+		return text
+
+	return "".join(char for char in unicodedata.normalize("NFKD", text) if not unicodedata.combining(char))
+
+
 def validate_sqlite_version():
-	if not sqlite_supports_tokenizer():
+	if not has_trigram_tokenizer():
 		frappe.throw(
 			_("Item Search Index needs SQLite {0} or later. This server has SQLite {1}.").format(
 				".".join(map(str, MINIMUM_SQLITE_VERSION)), sqlite3.sqlite_version
@@ -59,7 +76,7 @@ class ItemSearch(SQLiteSearch):
 			}
 		}
 		self.INDEX_SCHEMA = {
-			"tokenizer": TOKENIZER,
+			"tokenizer": get_tokenizer(),
 			"text_fields": [
 				"title",
 				"content",
@@ -117,17 +134,17 @@ class ItemSearch(SQLiteSearch):
 		if document is None:
 			return None
 
-		document[BARCODE_COLUMN] = self.get_barcode_text(doc.name)
+		document[BARCODE_COLUMN] = fold_diacritics(self.get_barcode_text(doc.name))
 		return document
 
 	def _process_content(self, content):
-		"""Store values verbatim.
+		"""Store values verbatim, except accents folded on SQLite older than 3.45.
 
 		item_query rechecks every candidate with LIKE against the column in MariaDB, so the
 		indexed text has to be what that column holds. The framework's cleaning collapses
 		whitespace and replaces a URL with "[link]", which would lose those rows.
 		"""
-		return "" if content is None else str(content)
+		return "" if content is None else fold_diacritics(str(content))
 
 	def get_barcode_text(self, item_code: str) -> str:
 		"""Always a string: a text column left unset drops the document from the index entirely."""
@@ -139,7 +156,7 @@ class ItemSearch(SQLiteSearch):
 	def is_search_enabled(self) -> bool:
 		"""Off unless Global Defaults opts in, since building reads every Item, and off on SQLite
 		that cannot build the tokenizer."""
-		return sqlite_supports_tokenizer() and bool(
+		return has_trigram_tokenizer() and bool(
 			frappe.get_single_value("Global Defaults", "enable_item_search_index")
 		)
 
@@ -201,7 +218,7 @@ def build_match_query(txt: str) -> str | None:
 	if "\\" in txt:
 		return None
 
-	fragments = [fragment.strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
+	fragments = [fold_diacritics(fragment).strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
 	usable = [fragment for fragment in fragments if len(fragment) >= MINIMUM_TERM_LENGTH]
 	if not usable:
 		return None
