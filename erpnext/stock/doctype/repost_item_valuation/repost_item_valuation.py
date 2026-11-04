@@ -368,6 +368,7 @@ def repost(doc):
 
 		doc.set_status("In Progress")
 		if not frappe.flags.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		if (
@@ -440,6 +441,7 @@ def repost(doc):
 				doc.set_status("Failed")
 	finally:
 		if not frappe.flags.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 

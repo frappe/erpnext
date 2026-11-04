@@ -27,6 +27,7 @@ def get_address_templates():
 	def get_file_content(file_name):
 		"""Convert 'united_states.html' to '/path/to/united_states.html'."""
 		full_path = os.path.join(template_dir, file_name)
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 		with open(full_path) as f:
 			content = f.read()
 		return content

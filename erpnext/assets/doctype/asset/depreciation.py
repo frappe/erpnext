@@ -103,6 +103,7 @@ def post_depreciation_entries(date=None):
 		set_depr_entry_posting_status_for_failed_assets(failed_asset_names)
 		notify_depr_entry_posting_error(failed_asset_names, error_log_names)
 
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 	frappe.db.commit()
 
 

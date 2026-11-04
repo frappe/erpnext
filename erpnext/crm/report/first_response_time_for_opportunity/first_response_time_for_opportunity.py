@@ -12,7 +12,7 @@ def execute(filters=None):
 		{
 			"fieldname": "first_response_time",
 			"fieldtype": "Duration",
-			"label": "First Response Time",
+			"label": _("First Response Time"),
 			"width": 300,
 		},
 	]
