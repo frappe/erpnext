@@ -483,6 +483,7 @@ def repost_sl_entries(doc):
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
 			doc=doc,
+			allow_zero_rate=doc.allow_zero_rate,
 		)
 	else:
 		repost_future_sle(
@@ -499,6 +500,7 @@ def repost_sl_entries(doc):
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
 			doc=doc,
+			allow_zero_rate=doc.allow_zero_rate,
 		)
 
 
