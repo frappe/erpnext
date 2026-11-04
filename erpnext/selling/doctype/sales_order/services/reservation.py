@@ -21,7 +21,7 @@ class SalesOrderStockReservation:
 		self.doc = doc
 
 	def validate_reserved_stock(self) -> None:
-		"""Clean reserved stock flag for non-stock Item"""
+		"""Uncheck Reserve Stock when stock reservation is disabled, and on non-stock items."""
 
 		clear_reserve_stock_if_disabled(self.doc)
 		enable_stock_reservation = frappe.get_single_value("Stock Settings", "enable_stock_reservation")
