@@ -108,3 +108,12 @@ class TestItemwiseRecommendedReorderLevel(FrappeTestCase):
 		)
 		self.assertEqual(self.consumed_today(raw_material) - before[raw_material], expected_rm)
 		self.assertEqual(self.consumed_today(finished_good), before[finished_good])
+
+	def test_from_date_after_to_date_is_refused_with_the_right_message(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"From Date must be before To Date",
+			self.run_report,
+			from_date="2026-06-10",
+			to_date="2026-06-01",
+		)
