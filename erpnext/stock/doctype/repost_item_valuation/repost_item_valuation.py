@@ -367,7 +367,13 @@ def repost(doc):
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
 		doc.set_status("In Progress")
+<<<<<<< HEAD
 		if not frappe.flags.in_test:
+=======
+		mark_closing_entries_outdated(doc.company, doc.posting_date)
+		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 			frappe.db.commit()
 
 		if (
@@ -435,7 +441,12 @@ def repost(doc):
 				notify_error_to_stock_managers(doc, message)
 				doc.set_status("Failed")
 	finally:
+<<<<<<< HEAD
 		if not frappe.flags.in_test:
+=======
+		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 			frappe.db.commit()
 
 

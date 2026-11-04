@@ -40,6 +40,7 @@ class LedgerMerge(Document):
 
 		job_id = f"ledger_merge::{self.name}"
 		if not is_job_enqueued(job_id):
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-enqueue-without-after-commit -- user action, nothing written before the enqueue
 			enqueue(
 				start_merge,
 				queue="default",
@@ -73,7 +74,13 @@ def start_merge(docname):
 					ledger_merge.account,
 				)
 				row.db_set("merged", 1)
+<<<<<<< HEAD
 				frappe.db.commit()
+=======
+				if not frappe.in_test:
+					# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+					frappe.db.commit()
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 				successful_merges += 1
 				frappe.publish_realtime(
 					"ledger_merge_progress",

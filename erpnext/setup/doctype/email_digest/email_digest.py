@@ -110,12 +110,53 @@ class EmailDigest(Document):
 	@frappe.whitelist(methods=["POST"])
 >>>>>>> ebeeb64 (fix: allow only POST for whitelisted methods that send emails or enqueue jobs)
 	def send(self):
+<<<<<<< HEAD
 		# send email only to enabled users
 		valid_users = [
 			p[0]
 			for p in frappe.db.sql(
 				"""select name from `tabUser`
 			where enabled=1"""
+=======
+		self._send()
+
+	def _send(self, continue_on_error=False):
+		valid_users = self.get_eligible_recipients()
+		for row in self.recipients:
+			if row.recipient not in valid_users:
+				continue
+			frappe.db.savepoint("email_digest_recipient")
+			try:
+				self.send_to_recipient(row.recipient)
+			except Exception:
+				frappe.db.rollback(save_point="email_digest_recipient")
+				if not continue_on_error:
+					raise
+				frappe.log_error(title=f"Email Digest {self.name} failed for {row.recipient}")
+
+	def send_to_recipient(self, recipient):
+		original_session = frappe._dict(frappe.session)
+		original_form = frappe.local.form_dict
+		try:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- renders as each recipient, restored in finally
+			frappe.set_user(recipient)
+			if not self.can_receive_financial_cards():
+				return
+			message = self.get_msg_html()
+		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- renders as each recipient, restored in finally
+			frappe.set_user(original_session.user)
+			frappe.local.session.update(original_session)
+			frappe.local.form_dict = original_form
+		if message:
+			frappe.sendmail(
+				recipients=recipient,
+				subject=_("{0} Digest").format(_(self.frequency)),
+				message=message,
+				reference_doctype=self.doctype,
+				reference_name=self.name,
+				unsubscribe_message=_("Unsubscribe from this Email Digest"),
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 			)
 		]
 

@@ -346,6 +346,7 @@ def get_count_on(account, fieldname, date):
 		else:
 			cond.append(f"""gle.account = {frappe.db.escape(account)} """)
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- values are escaped
 		entries = frappe.db.sql(
 			"""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
@@ -1534,7 +1535,12 @@ def repost_gle_for_stock_vouchers(
 			else:
 				_delete_accounting_ledger_entries(voucher_type, voucher_no)
 
+<<<<<<< HEAD
 		if not frappe.flags.in_test:
+=======
+		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 			frappe.db.commit()
 
 		if repost_doc:

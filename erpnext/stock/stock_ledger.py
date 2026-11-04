@@ -408,7 +408,12 @@ def update_args_in_repost_item_valuation(
 		}
 	)
 
+<<<<<<< HEAD
 	if not frappe.flags.in_test:
+=======
+	if not frappe.in_test:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 		frappe.db.commit()
 
 	frappe.publish_realtime(
@@ -449,6 +454,7 @@ def create_json_gz_file(data, doc, file_name=None) -> str:
 
 		path = file_doc.get_full_path()
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
 		with open(path, "wb") as f:
 			f.write(compressed_content)
 

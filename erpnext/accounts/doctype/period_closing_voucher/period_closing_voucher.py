@@ -470,6 +470,142 @@ class PeriodClosingVoucher(AccountsController):
 			{"voucher_type": "Period Closing Voucher", "voucher_no": self.name, "is_cancelled": 0},
 		)
 
+<<<<<<< HEAD
+=======
+	def get_data_for_mapreduce(self):
+		return self.generate_tasks_for_normal_balance() + self.generate_tasks_for_opening_balance()
+
+	def get_period_range_for_tasks(self, start_date, end_date, step_size, report_type, balance_type):
+		start_date = getdate(start_date)
+		end_date = getdate(end_date)
+
+		# split period into date ranges
+		curr_date = getdate(start_date)
+		date_splits = []
+		while True:
+			next_date = getdate(add_days(curr_date, step_size))
+			if next_date < end_date:
+				date_splits.append(
+					{
+						"from_date": str(curr_date),
+						"to_date": str(next_date),
+						"pcv": self.name,
+						"report_type": report_type,
+						"balance_type": balance_type,
+					}
+				)
+				curr_date = getdate(add_days(next_date, 1))
+			else:
+				date_splits.append(
+					{
+						"from_date": str(curr_date),
+						"to_date": str(end_date),
+						"pcv": self.name,
+						"report_type": report_type,
+						"balance_type": balance_type,
+					}
+				)
+				break
+
+		return date_splits
+
+	def generate_tasks_for_normal_balance(self):
+		# estimation can be wrong by a factor of 2
+		gl = qb.DocType("GL Entry")
+		raw_query = (
+			qb.from_(gl)
+			.select(Count(gl.star))
+			.where(
+				gl.is_cancelled.eq(0) & gl.posting_date.between(self.period_start_date, self.period_end_date)
+			)
+			.get_sql()
+		)
+
+		# estimation can be wrong by a factor of 2
+		correction_factor = 2
+		if frappe.db.db_type == "postgres":
+			analyzer = frappe.json.loads(
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
+				(
+					frappe.db.sql(
+						f"explain (format json) {raw_query}",
+					)
+				)[0][0]
+			)
+
+			estimated_count = analyzer[0].get("Plan").get("Plans")[0].get("Plan Rows") * correction_factor
+		else:
+			estimated_count = (
+				cint(
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
+					frappe.db.sql(
+						f"explain {raw_query}",
+						as_dict=True,
+					)[0].rows
+				)
+				* correction_factor
+			)
+
+		job_count = (
+			1 if estimated_count / 2000000 < 1 else ceil(estimated_count / 2000000)
+		)  # conservative chunk size
+		days = (getdate(self.period_end_date) - getdate(self.period_start_date)).days
+		step_size = 1 if days / job_count < 1 else ceil(days / job_count)
+		return self.get_period_range_for_tasks(
+			self.period_start_date, self.period_end_date, step_size, "Balance Sheet", "Normal Balance"
+		) + self.get_period_range_for_tasks(
+			self.period_start_date, self.period_end_date, step_size, "Profit and Loss", "Normal Balance"
+		)
+
+	def generate_tasks_for_opening_balance(self):
+		tasks = []
+		if self.is_first_period_closing_voucher():
+			gl = qb.DocType("GL Entry")
+			min = qb.from_(gl).select(Min(gl.posting_date)).run()[0][0]
+			max = qb.from_(gl).select(Max(gl.posting_date)).run()[0][0]
+
+			raw_query = (
+				qb.from_(gl)
+				.select(Count(gl.star))
+				.where(gl.is_cancelled.eq(0) & gl.is_opening.eq("Yes") & gl.posting_date.between(min, max))
+				.get_sql()
+			)
+
+			# estimation can be wrong by a factor of 2
+			correction_factor = 2
+			if frappe.db.db_type == "postgres":
+				analyzer = frappe.json.loads(
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
+					(
+						frappe.db.sql(
+							f"explain (format json) {raw_query}",
+						)
+					)[0][0]
+				)
+
+				estimated_count = analyzer[0].get("Plan").get("Plans")[0].get("Plan Rows") * correction_factor
+			else:
+				estimated_count = (
+					cint(
+						# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- explains a query built with frappe.qb
+						frappe.db.sql(
+							f"explain {raw_query};",
+							as_dict=True,
+						)[0].rows
+					)
+					* correction_factor
+				)
+
+			job_count = (
+				1 if estimated_count / 2000000 < 1 else ceil(estimated_count / 2000000)
+			)  # conservative chunk size
+			days = (getdate(self.period_end_date) - getdate(self.period_start_date)).days
+			step_size = 1 if days / job_count < 1 else ceil(days / job_count)
+			tasks = self.get_period_range_for_tasks(min, max, step_size, "Balance Sheet", "Opening Balance")
+
+		return tasks
+
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 
 def process_gl_and_closing_entries(doc):
 	from erpnext.accounts.general_ledger import make_gl_entries

@@ -468,4 +468,10 @@ def rename_temporarily_named_docs(doctype):
 					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- hook paths come from hooks.py
 					frappe.call(hook, newname=newname, oldname=oldname)
 
+<<<<<<< HEAD
 		frappe.db.commit()
+=======
+		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+			frappe.db.commit()
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)

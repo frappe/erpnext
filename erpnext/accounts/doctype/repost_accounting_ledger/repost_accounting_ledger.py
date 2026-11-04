@@ -384,6 +384,7 @@ def _record_repost_failure(repost_doc, commit=False) -> None:
 	)
 
 	if commit:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 		frappe.db.commit()
 
 

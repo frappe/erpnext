@@ -162,6 +162,7 @@ class ImportSupplierInvoice(Document):
 		self.check_permission("write")
 
 		self.db_set("status", "Processing File Data", notify=True, commit=True)
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-enqueue-without-after-commit -- status is committed before the enqueue
 		frappe.enqueue_doc(self.doctype, self.name, "import_xml_data", queue="long", timeout=3600)
 
 	def publish(self, title, message, count, total):

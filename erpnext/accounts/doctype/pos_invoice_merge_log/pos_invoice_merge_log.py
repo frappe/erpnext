@@ -646,9 +646,16 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			closing_entry.db_set("error_message", error_message)
 		raise
 
+<<<<<<< HEAD
 	finally:
 		frappe.db.commit()
 		frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
+=======
+		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+			frappe.db.commit()
+			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 
 
 def cancel_merge_logs(merge_logs, closing_entry=None):
@@ -676,9 +683,27 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			closing_entry.db_set("error_message", error_message)
 		raise
 
+<<<<<<< HEAD
 	finally:
 		frappe.db.commit()
 		frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
+=======
+		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+			frappe.db.commit()
+			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
+
+
+def set_closing_entry_status_after_failure(closing_entry, status, error_message):
+	docstatus = frappe.db.get_value("POS Closing Entry", closing_entry.name, "docstatus")
+	if not docstatus:
+		return
+
+	if isinstance(error_message, list):
+		error_message = json.dumps(error_message)
+
+	closing_entry.db_set({"status": "Failed" if docstatus == 2 else status, "error_message": error_message})
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 
 
 def enqueue_job(job, **kwargs):

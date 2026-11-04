@@ -833,7 +833,12 @@ def update_transactions_annual_history(company, commit=False):
 	transactions_history = get_all_transactions_annual_history(company)
 	frappe.db.set_value("Company", company, "transactions_annual_history", json.dumps(transactions_history))
 
+<<<<<<< HEAD
 	if commit:
+=======
+	if commit and not frappe.in_test:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 		frappe.db.commit()
 
 
@@ -846,7 +851,13 @@ def cache_companies_monthly_sales_history():
 		if refresh_total_monthly_sales:
 			update_company_current_month_sales(company)
 
+<<<<<<< HEAD
 	frappe.db.commit()
+=======
+	if not frappe.in_test:
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
+		frappe.db.commit()
+>>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 
 
 def _should_refresh_total_monthly_sales():
