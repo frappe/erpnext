@@ -1674,7 +1674,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertTrue(any("was set to today" in m.get("message") for m in alerts))
 
 	def test_make_purchase_orders_by_supplier_fetches_supplier_price(self):
-		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_orders_by_supplier
 
 		item_code = create_item("_Test MR Supplier Priced Item").name
 		mr = make_material_request_for_items([item_code])
