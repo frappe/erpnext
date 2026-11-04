@@ -635,8 +635,8 @@ class DisassembleStockEntry(BaseStockEntry):
 	def _set_serial_batch_for_disassembly_from_available_materials(self):
 		available_materials = get_available_materials(self.doc.work_order, self.doc)
 		for row in self.doc.items:
-			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			key = row.item_code if row.t_warehouse else (row.item_code, row.s_warehouse)
+			materials = available_materials.get(key)
 			if materials:
 				self._apply_available_material_bundle(row, materials)
 
@@ -717,10 +717,23 @@ def sort_serial_nos_by_number(available_materials):
 
 def _get_material_key(row, stock_entry_doc):
 	if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-		return (row.item_code, row.s_warehouse or row.warehouse)
+		return _get_disassembly_material_key(row)
 	if row.purpose != "Material Transfer for Manufacture":
 		return (row.item_code, row.s_warehouse)
 	return (row.item_code, row.warehouse)
+
+
+def _get_disassembly_material_key(row):
+	"""Components can return to a warehouse other than the one they were consumed from, so they
+	match by item. Finished and secondary items match by the warehouse they are in."""
+	if row.purpose == "Manufacture":
+		is_component = bool(row.s_warehouse)
+	else:
+		is_component = not row.s_warehouse
+
+	if is_component:
+		return row.item_code
+	return (row.item_code, row.s_warehouse or row.warehouse)
 
 
 def _update_material_qty(item_data, row, stock_entry_doc):
