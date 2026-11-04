@@ -6,7 +6,7 @@ from decimal import Decimal
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, format_date, getdate
+from frappe.utils import add_days, flt, format_date, get_link_to_form, getdate
 
 
 class MainCostCenterCantBeChild(frappe.ValidationError):
@@ -26,6 +26,10 @@ class WrongPercentageAllocation(frappe.ValidationError):
 
 
 class InvalidDateError(frappe.ValidationError):
+	pass
+
+
+class DuplicateCostCenterAllocation(frappe.ValidationError):
 	pass
 
 
@@ -58,6 +62,7 @@ class CostCenterAllocation(Document):
 		self.validate_total_allocation_percentage()
 		if not self._skip_from_date_validation:
 			self.validate_from_date_based_on_existing_gle()
+		self.validate_duplicate_allocation()
 		self.validate_backdated_allocation()
 		self.validate_main_cost_center()
 		self.validate_child_cost_centers()
@@ -99,6 +104,26 @@ class CostCenterAllocation(Document):
 					).format(last_gle_date, self.main_cost_center),
 					InvalidDateError,
 				)
+
+	def validate_duplicate_allocation(self):
+		duplicate_allocation = frappe.db.get_value(
+			"Cost Center Allocation",
+			{
+				"main_cost_center": self.main_cost_center,
+				"valid_from": self.valid_from,
+				"name": ("!=", self.name),
+				"docstatus": 1,
+			},
+		)
+		if duplicate_allocation:
+			frappe.throw(
+				_("Cost Center Allocation {0} for {1} is already valid from {2}").format(
+					get_link_to_form("Cost Center Allocation", duplicate_allocation),
+					frappe.bold(self.main_cost_center),
+					frappe.bold(format_date(self.valid_from)),
+				),
+				DuplicateCostCenterAllocation,
+			)
 
 	def validate_backdated_allocation(self):
 		# Check if there are any future existing allocation records against the main cost center
