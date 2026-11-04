@@ -22,12 +22,14 @@ def validate_status(status, options):
 
 status_map = {
 	"Lead": [
+		["Open", "eval:self.status in ('Opportunity', 'Quotation', 'Lost Quotation')"],
 		["Lost Quotation", "has_lost_quotation"],
 		["Opportunity", "has_opportunity"],
 		["Quotation", "has_quotation"],
 		["Converted", "has_customer"],
 	],
 	"Opportunity": [
+		["Open", "eval:self.status=='Quotation'"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Lost", "has_lost_quotation"],
 		["Quotation", "has_active_quotation"],
@@ -344,6 +346,19 @@ class StatusUpdater(Document):
 			# a later return can lower the installation limit below an already-installed qty;
 			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
 			skip_on_cancel = self.docstatus == 2 and args.get("overflow_type") == "installation"
+
+			if self.get("is_return") and args.get("overflow_type") == "billing":
+				if args.get("billing_flag") and not self.get(args["billing_flag"]):
+					# the return never changes the order's billed amount
+					items_to_validate = []
+				elif self.docstatus != 2:
+					# a return row lowers billing unless its rate is negative, so check only rows that add to it;
+					# use qty and rate since the stored amount is stale when one field is set through the api
+					items_to_validate = [
+						d
+						for d in items_to_validate
+						if flt(d.child_doc.get("qty")) * flt(d.child_doc.get("rate")) > 0
+					]
 
 			if items_to_validate and not skip_on_cancel:
 				pp_sub_assembly_items = [

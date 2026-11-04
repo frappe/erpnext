@@ -1215,6 +1215,7 @@ class JobCard(Document):
 				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
 					work_order, process_loss_qty=work_order.process_loss_qty
 				)
+			work_order.update_work_order_qty_in_sales_orders()
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
@@ -1285,6 +1286,7 @@ class JobCard(Document):
 
 		if wo.track_semi_finished_goods:
 			wo.set_process_loss_qty()
+			wo.update_work_order_qty_in_sales_orders()
 
 		wo.status = wo.get_status()
 		wo.save()
@@ -1319,7 +1321,7 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.qty))
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
 			.where(
 				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
 			)
@@ -1351,7 +1353,7 @@ class JobCard(Document):
 					frappe.qb.from_(sed)
 					.join(se)
 					.on(sed.parent == se.name)
-					.select(sed.job_card_item, Sum(sed.qty))
+					.select(sed.job_card_item, Sum(sed.transfer_qty))
 					.where(
 						(sed.job_card_item.isin(job_card_items))
 						& (se.docstatus == 1)

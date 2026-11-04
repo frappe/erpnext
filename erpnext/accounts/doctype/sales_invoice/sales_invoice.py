@@ -11,7 +11,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
-from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate, strip_html
 from frappe.utils.data import comma_and
 
 import erpnext
@@ -283,6 +283,7 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
+				"billing_flag": "update_billed_amount_in_sales_order",
 				"extra_cond": """ and exists(select name from `tabSales Invoice`
 				where name=`tabSales Invoice Item`.parent and (is_return=0 or update_billed_amount_in_sales_order=1))""",
 			}
@@ -815,13 +816,14 @@ class SalesInvoice(SellingController):
 		)
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value(
-			"Customer Credit Limit",
-			filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-			fieldname=["bypass_credit_limit_check"],
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
@@ -1324,15 +1326,28 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_mandatory_pos_fields(self):
-		if frappe.db.get_single_value("POS Settings", "invoice_type") != self.doctype:
+		if frappe.db.get_single_value("POS Settings", "invoice_type") != self.doctype or (
+			self.doctype == "Sales Invoice" and self.flags.is_consolidated
+		):
 			return
 
 		mandatory_fields = frappe.get_all(
 			"POS Field",
 			filters={"parent": "POS Settings", "parenttype": "POS Settings", "reqd": 1},
-			fields=["fieldname", "label"],
+			fields=["fieldname", "label", "fieldtype"],
 		)
-		missing_fields = [_(field.label) for field in mandatory_fields if not self.get(field.fieldname)]
+		missing_fields = []
+		for field in mandatory_fields:
+			if field.fieldtype == "Check" or not self.meta.has_field(field.fieldname):
+				continue
+
+			value = self.get(field.fieldname)
+			value = "" if value in (None, []) else cstr(value)
+			if field.fieldtype == "Text Editor" and "<img" in value:
+				continue
+
+			if not strip_html(value).strip():
+				missing_fields.append(_(field.label))
 		if not missing_fields:
 			return
 
@@ -2482,9 +2497,7 @@ class SalesInvoice(SellingController):
 
 		points_to_redeem = self.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			if lp_entry.invoice_type != self.doctype or lp_entry.invoice == self.name:
-				# redeemption should be done against same doctype
-				# also it shouldn't be against itself
+			if lp_entry.invoice == self.name:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			if available_points > points_to_redeem:
@@ -3349,17 +3362,18 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer):
+def get_loyalty_programs(customer: str):
 	"""sets applicable loyalty program to the customer or returns a list of applicable programs"""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs
 
+	frappe.has_permission("Customer", "read", customer, throw=True)
 	customer = frappe.get_doc("Customer", customer)
 	if customer.loyalty_program:
 		return [customer.loyalty_program]
 
 	lp_details = get_loyalty_programs(customer)
 
-	if len(lp_details) == 1:
+	if len(lp_details) == 1 and customer.has_permission("write"):
 		customer.db_set("loyalty_program", lp_details[0])
 		return lp_details
 	else:

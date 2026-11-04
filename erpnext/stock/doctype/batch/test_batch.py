@@ -647,6 +647,23 @@ class TestBatch(ERPNextTestSuite):
 			frappe.set_value("Stock Settings", "Stock Settings", "naming_series_prefix", original_prefix)
 			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", use_naming_series)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"use_naming_series": 1, "naming_series_prefix": "batch-.{item}.-"}
+	)
+	def test_naming_series_prefix_with_fieldname(self):
+		batch = self.make_new_batch("_Test Stock Item For Batch Fieldname")
+		self.assertTrue(batch.batch_id.startswith("BATCH-_Test Stock Item For Batch Fieldname-"))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"use_naming_series": 1, "naming_series_prefix": "batch-.{item}.-"}
+	)
+	def test_naming_series_prefix_with_fieldname_reverts_on_delete(self):
+		batch = self.make_new_batch("_Test Stock Item For Batch Fieldname Revert")
+		batch.delete()
+
+		new_batch = self.make_new_batch("_Test Stock Item For Batch Fieldname Revert")
+		self.assertEqual(new_batch.batch_id, batch.batch_id)
+
 	def make_new_batch(self, item_name=None, batch_id=None, do_not_insert=0):
 		batch = frappe.new_doc("Batch")
 		item = self.make_batch_item(item_name)

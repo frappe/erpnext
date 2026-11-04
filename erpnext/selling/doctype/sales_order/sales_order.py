@@ -35,7 +35,10 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_sales_orders,
 )
-from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.selling.doctype.customer.customer import (
+	check_credit_limit,
+	is_sales_order_credit_check_bypassed,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -640,15 +643,7 @@ class SalesOrder(SellingController):
 			project.db_update()
 
 	def check_credit_limit(self):
-		# if bypass credit limit check is set to true (1) at sales order level,
-		# then we need not to check credit limit and vise versa
-		if not cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				{"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				"bypass_credit_limit_check",
-			)
-		):
+		if not is_sales_order_credit_check_bypassed(self.customer, self.company):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
@@ -1993,6 +1988,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
+		target.incoterm = ""
+		target.named_place = ""
 		target.payment_schedule = []
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
@@ -2419,6 +2416,8 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 		so.check_permission("read")
 
 		wo = qb.DocType("Work Order")
+		plan_item = qb.DocType("Production Plan Item")
+		precision = frappe.get_precision("Work Order", "qty")
 
 		items = []
 		item_codes = [i.item_code for i in so.items]
@@ -2441,7 +2440,9 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
+						.left_join(plan_item)
+						.on(plan_item.name == wo.production_plan_item)
+						.select(Sum(qty_against_sales_order(wo, plan_item)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
@@ -2450,7 +2451,7 @@ def get_work_order_items(sales_order: str, for_raw_material_request: int = 0):
 						)
 						.run()[0][0]
 					)
-					pending_qty = stock_qty - total_work_order_qty
+					pending_qty = flt(stock_qty - total_work_order_qty, precision)
 				else:
 					pending_qty = stock_qty
 

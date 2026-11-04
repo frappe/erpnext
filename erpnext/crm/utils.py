@@ -4,6 +4,9 @@ from frappe.model.document import Document
 from frappe.utils import cstr, now, today
 from pypika import functions
 
+# pre-sales statuses an event today moves to Open; others (Converted, Lost, ...) are kept
+STATUSES_REOPENED_BY_EVENT = {"Lead": ("Lead", "Replied", "Interested"), "Opportunity": ("Replied",)}
+
 
 def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 	if doc.is_disabled:
@@ -11,32 +14,32 @@ def disable_opportunity_creation_on_contact_us_disabled(doc, method):
 
 
 def update_lead_phone_numbers(contact, method):
-	if contact.phone_nos:
-		contact_lead = contact.get_link_for("Lead")
-		if contact_lead:
-			phone = mobile_no = contact.phone_nos[0].phone
+	"""Copy the contact's phone and mobile number to its Lead, including ones cleared on edit."""
+	lead = contact.get_link_for("Lead")
+	if not (lead and (contact.phone_nos or had_phone_numbers(contact))):
+		return
 
-			if len(contact.phone_nos) > 1:
-				# get the default phone number
-				primary_phones = [
-					phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_phone
-				]
-				if primary_phones:
-					phone = primary_phones[0]
+	numbers = get_lead_phone_numbers(contact)
+	current = frappe.db.get_value("Lead", lead, list(numbers), as_dict=True)
+	if changed := {
+		field: number for field, number in numbers.items() if (current.get(field) or "") != number
+	}:
+		frappe.db.set_value("Lead", lead, changed, update_modified=False)
+		link_existing_conversations_of_lead(lead)
 
-				# get the default mobile number
-				primary_mobile_nos = [
-					phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_mobile_no
-				]
-				if primary_mobile_nos:
-					mobile_no = primary_mobile_nos[0]
 
-			lead = frappe.get_doc("Lead", contact_lead)
-			numbers_changed = (lead.phone, lead.mobile_no) != (phone, mobile_no)
-			lead.db_set("phone", phone)
-			lead.db_set("mobile_no", mobile_no)
-			if numbers_changed:
-				link_existing_conversations_of_lead(lead.name)
+def get_lead_phone_numbers(contact) -> dict[str, str]:
+	"""The primary phone and mobile number, or the first number for both when none is marked primary."""
+	if contact.phone or contact.mobile_no or not contact.phone_nos:
+		return {"phone": contact.phone or "", "mobile_no": contact.mobile_no or ""}
+
+	first_number = contact.phone_nos[0].phone
+	return {"phone": first_number, "mobile_no": first_number}
+
+
+def had_phone_numbers(contact) -> bool:
+	previous = contact.get_doc_before_save()
+	return bool(previous and previous.phone_nos)
 
 
 def link_existing_conversations_of_lead(lead: str):
@@ -106,7 +109,7 @@ def link_communications_with_prospect(communication, method):
 
 
 def update_modified_timestamp(communication, method):
-	if communication.reference_doctype and communication.reference_name:
+	if communication.reference_doctype in ("Lead", "Opportunity") and communication.reference_name:
 		if communication.sent_or_received == "Received" and frappe.db.get_single_value(
 			"CRM Settings", "update_timestamp_on_new_communication"
 		):
@@ -275,7 +278,12 @@ def open_leads_opportunities_based_on_todays_event():
 	data = query.run(as_dict=True)
 
 	for d in data:
-		frappe.db.set_value(d.reference_doctype, d.reference_docname, "status", "Open")
+		frappe.db.set_value(
+			d.reference_doctype,
+			{"name": d.reference_docname, "status": ("in", STATUSES_REOPENED_BY_EVENT[d.reference_doctype])},
+			"status",
+			"Open",
+		)
 
 
 class CRMNote(Document):

@@ -4,6 +4,7 @@
 import frappe
 from frappe.utils import random_string
 
+from erpnext.selling.doctype.customer.customer import get_credit_limit, is_sales_order_credit_check_bypassed
 from erpnext.selling.report.customer_credit_balance.customer_credit_balance import get_details
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -36,7 +37,7 @@ class TestCustomerCreditBalance(ERPNextTestSuite):
 		row = rows[0]
 		self.assertEqual(row.name, customer.name)
 		self.assertEqual(row.customer_name, customer_name)
-		self.assertEqual(row.bypass_credit_limit_check, 1)
+		self.assertTrue(is_sales_order_credit_check_bypassed(customer.name, company))
 
 	def test_get_details_excludes_other_company_credit_limit(self):
 		# Credit limit child row exists, but for a different company than the filter,
@@ -64,7 +65,7 @@ class TestCustomerCreditBalance(ERPNextTestSuite):
 		self.assertEqual(len(rows), 0)
 
 	def test_get_details_lists_customer_with_group_level_limit(self):
-		# limit on the group (not the customer) must still list the customer
+		# limit on the group (not the customer) must still list the customer, even with the order bypass on
 		company = "_Test Company"
 		group_name = "_Test Credit Group " + random_string(8)
 
@@ -73,7 +74,9 @@ class TestCustomerCreditBalance(ERPNextTestSuite):
 				"doctype": "Customer Group",
 				"customer_group_name": group_name,
 				"parent_customer_group": "All Customer Groups",
-				"credit_limits": [{"company": company, "credit_limit": 50000}],
+				"credit_limits": [
+					{"company": company, "credit_limit": 50000, "bypass_credit_limit_check": 1}
+				],
 			}
 		).insert()
 
@@ -89,6 +92,8 @@ class TestCustomerCreditBalance(ERPNextTestSuite):
 		rows = get_details(frappe._dict(company=company, customer=customer.name))
 		self.assertEqual(len(rows), 1)
 		self.assertEqual(rows[0].name, customer.name)
+		self.assertEqual(get_credit_limit(customer.name, company), 50000)
+		self.assertTrue(is_sales_order_credit_check_bypassed(customer.name, company))
 
 	def test_get_details_lists_customer_with_company_wide_limit(self):
 		# a company-wide limit (no customer or group limit) must still list the customer

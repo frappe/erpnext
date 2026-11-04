@@ -455,11 +455,12 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
 
-def make_entry(args, adv_adj, update_outstanding, from_repost=False):
+def make_entry(args, adv_adj, update_outstanding, from_repost=False, *, from_reversal=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
+	gle.flags.from_reversal = from_reversal
 	gle.flags.adv_adj = adv_adj
 	gle.flags.update_outstanding = update_outstanding or "Yes"
 	gle.flags.notify_update = False
@@ -611,6 +612,9 @@ def make_round_off_gle(gl_map, debit_credit_diff, trx_cur_debit_credit_diff, pre
 					debit_credit_diff -= flt(d.debit) - flt(d.credit)
 				else:
 					debit_credit_diff += flt(d.credit)
+				trx_cur_debit_credit_diff -= flt(d.debit_in_transaction_currency) - flt(
+					d.credit_in_transaction_currency
+				)
 				round_off_account_exists = True
 
 		debit_credit_diff = flt(debit_credit_diff, precision)
@@ -833,7 +837,7 @@ def make_reverse_gl_entries(
 				new_gle["posting_date"] = posting_date
 
 			if any([debit, credit, debit_in_account_currency, credit_in_account_currency]):
-				make_entry(new_gle, adv_adj, "Yes")
+				make_entry(new_gle, adv_adj, "Yes", from_reversal=True)
 
 
 def check_freezing_date(posting_date, company, adv_adj=False):
