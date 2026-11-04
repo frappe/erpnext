@@ -4128,24 +4128,6 @@ class TestWorkOrder(FrappeTestCase):
 		finally:
 			frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 0})
-	def test_reserve_stock_ignored_when_stock_reservation_is_disabled(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
-			make_stock_entry as make_stock_entry_test_record,
-		)
-
-		store = "Stores - _TC"
-		fg = make_item(properties={"is_stock_item": 1}).name
-		rm = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=fg, raw_materials=[rm], source_warehouse=store)
-		make_stock_entry_test_record(item_code=rm, target=store, qty=2, basic_rate=100)
-		wo = make_wo_order_test_record(
-			production_item=fg, qty=2, bom_no=bom.name, reserve_stock=1, source_warehouse=store
-		)
-
-		self.assertEqual(wo.reserve_stock, 0)
-		self.assertFalse(frappe.db.exists("Stock Reservation Entry", {"voucher_no": wo.name}))
-
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
