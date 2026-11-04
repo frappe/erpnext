@@ -77,6 +77,7 @@ def delete_company(company):
 
 def read_data_file_using_hooks(doctype):
 	path = os.path.join(os.path.dirname(__file__), "demo_data")
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 	with open(os.path.join(path, doctype + ".json")) as f:
 		data = f.read()
 

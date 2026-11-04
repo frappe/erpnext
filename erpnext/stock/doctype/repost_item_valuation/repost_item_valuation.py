@@ -677,6 +677,7 @@ def repost(doc):
 		doc.set_status("In Progress")
 		mark_closing_entries_outdated(doc.company, doc.posting_date)
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		if (
@@ -744,6 +745,7 @@ def repost(doc):
 				doc.set_status("Failed")
 	finally:
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 
