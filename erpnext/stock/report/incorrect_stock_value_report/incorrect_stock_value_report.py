@@ -92,6 +92,8 @@ def get_data(report_filters):
 				data.expected_stock_value = expected_stock_value
 				result.append(data)
 
+			prev_stock_value = expected_stock_value
+
 	return result
 
 
