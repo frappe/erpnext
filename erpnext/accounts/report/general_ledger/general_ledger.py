@@ -201,6 +201,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
 		)
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- filters use placeholders; fields come from config
 	gl_entries = frappe.db.sql(
 		f"""
 		select

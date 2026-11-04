@@ -684,6 +684,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			raise
 
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 
@@ -718,6 +719,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			raise
 
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 

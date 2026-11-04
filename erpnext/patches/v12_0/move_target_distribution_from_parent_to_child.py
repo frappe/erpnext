@@ -10,6 +10,7 @@ def execute():
 	frappe.reload_doc("core", "doctype", "prepared_report")
 
 	for d in ["Sales Person", "Sales Partner", "Territory"]:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			"""
             UPDATE `tab{child_doc}`, `tab{parent_doc}`
