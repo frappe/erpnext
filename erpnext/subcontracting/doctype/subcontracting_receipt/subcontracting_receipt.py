@@ -548,7 +548,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if secondary_item.valuation_type == "Manual":
 			if not flt(secondary_item.stock_qty):
 				return 0
-			return flt(secondary_item.cost) / flt(secondary_item.stock_qty)
+			return flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
 
 		if secondary_item.valuation_type == "Valuation Rate":
 			rate = get_valuation_rate(
@@ -560,7 +560,7 @@ class SubcontractingReceipt(SubcontractingController):
 				company=self.company,
 			)
 			if not rate and secondary_item.stock_qty:
-				rate = flt(secondary_item.cost) / flt(secondary_item.stock_qty)
+				rate = flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
 			return rate
 
 		return self.get_percentage_secondary_rate(item, secondary_item.cost_allocation_per, qty, own_cost)
