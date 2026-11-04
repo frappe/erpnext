@@ -649,7 +649,6 @@ frappe.ui.form.on("Work Order Item", {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, {
 							required_qty: row.required_qty || 1,
-							rate: 0,
 							item_name: r.message.item_name,
 							description: r.message.description,
 							source_warehouse: r.message.default_warehouse,
