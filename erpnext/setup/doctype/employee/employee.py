@@ -168,7 +168,9 @@ class Employee(NestedSet):
 
 		self.validate_for_enabled_user_id()
 		self.validate_duplicate_user_id()
-		if any(self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")):
+		if any(
+			self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")
+		) or (self.create_user_permission and self.has_value_changed("company")):
 			self.validate_user_access()
 
 	def validate_user_access(self, user: str | None = None):
@@ -257,8 +259,19 @@ class Employee(NestedSet):
 			remove_user_permission("Company", company, user, ignore_permissions=True)
 
 	def update_user_permissions(self):
-		if not self.has_value_changed("user_id") and not self.has_value_changed("create_user_permission"):
+		if not any(
+			self.has_value_changed(field) for field in ("user_id", "create_user_permission", "company")
+		):
 			return
+
+		previous = self.get_doc_before_save()
+		if (
+			previous
+			and previous.user_id == self.user_id
+			and previous.create_user_permission
+			and previous.company != self.company
+		):
+			self.remove_user_permissions(self.user_id, previous.company, include_employee=False)
 
 		employee_user_permission_exists = frappe.db.exists(
 			"User Permission", {"allow": "Employee", "for_value": self.name, "user": self.user_id}
@@ -266,7 +279,8 @@ class Employee(NestedSet):
 
 		if employee_user_permission_exists and not self.create_user_permission:
 			self.remove_user_permissions(self.user_id, self.company)
-		elif not employee_user_permission_exists and self.create_user_permission:
+		elif self.create_user_permission:
+			# add_user_permission skips a User Permission that exists.
 			add_user_permission("Employee", self.name, self.user_id, ignore_permissions=True)
 			add_user_permission("Company", self.company, self.user_id, ignore_permissions=True)
 

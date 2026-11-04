@@ -332,6 +332,44 @@ class TestEmployee(ERPNextTestSuite):
 
 		self.assertIn("Employee", frappe.get_roles(user))
 
+	def test_changing_company_replaces_company_user_permission(self):
+		user = "employee-company-change@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		employee_doc = frappe.get_doc("Employee", employee)
+		employee_doc.company = "_Test Company 1"
+		employee_doc.department = None
+		employee_doc.save()
+
+		def has_company_permission(company):
+			return frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": company, "user": user}
+			)
+
+		self.assertFalse(has_company_permission("_Test Company"))
+		self.assertTrue(has_company_permission("_Test Company 1"))
+		# The Employee restriction also limits HR documents of other doctypes to this employee.
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission",
+				{"allow": "Employee", "for_value": employee, "user": user, "apply_to_all_doctypes": 1},
+			)
+		)
+
+	def test_hr_user_cannot_move_admin_user_restrictions_to_another_company(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-moved-manager@example.com", ["System Manager"])
+		frappe.db.delete("Employee", {"user_id": manager})
+		employee = make_employee(manager, company="_Test Company", create_user_permission=1)
+
+		with as_user(hr_user):
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.company = "_Test Company 1"
+			employee_doc.department = None
+			self.assertRaises(frappe.PermissionError, employee_doc.save)
+
 	def test_disabled_department_cannot_be_assigned(self):
 		department = frappe.get_doc(
 			{
