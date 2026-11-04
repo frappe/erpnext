@@ -4649,6 +4649,106 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 0)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 200})
+	def test_purchase_receipt_reserves_only_the_plan_shortfall(self):
+		self.assertEqual(self.receive_more_than_plan_shortfall("RM For SR Shortfall"), 10)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 200})
+	def test_purchase_receipt_reserves_only_the_plan_shortfall_of_batches(self):
+		make_item(
+			"Batch RM For SR Shortfall",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BRMSRS-.#####"},
+		)
+		self.assertEqual(self.receive_more_than_plan_shortfall("Batch RM For SR Shortfall"), 10)
+
+	def receive_more_than_plan_shortfall(self, rm_item):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		parent_bom = create_nested_bom({f"FG For {rm_item}": {rm_item: {}}}, prefix="")
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+		plan.submit()
+		return self.receive_more_than_plan_needs(plan)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_order_allowance": 200})
+	def test_purchase_receipt_ignores_sub_assembly_reservations_of_the_same_item(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		sub_assembly_item = "Sub Assembly For SR Shortfall"
+		parent_bom = create_nested_bom(
+			{
+				"FG For SR Shortfall Sub Assembly": {
+					sub_assembly_item: {"RM For SR Shortfall Sub Assembly": {}}
+				}
+			},
+			prefix="",
+		)
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=sub_assembly_item, target=warehouse, qty=4, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			sub_assembly_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.get_sub_assembly_items()
+		plan.append(
+			"mr_items",
+			{
+				"item_code": sub_assembly_item,
+				"warehouse": warehouse,
+				"quantity": 10,
+				"required_bom_qty": 10,
+				"material_request_type": "Purchase",
+				"uom": "_Test UOM",
+				"conversion_factor": 1,
+			},
+		)
+		plan.save()
+		plan.submit()
+
+		self.assertEqual(self.receive_more_than_plan_needs(plan), 14)
+
+	def receive_more_than_plan_needs(self, plan):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+
+		mr_name = frappe.db.get_value("Material Request", {"production_plan": plan.name})
+		po = make_purchase_order(mr_name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 15
+		po.submit()
+		make_purchase_receipt(po.name).submit()
+
+		reserved_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
+		return sum({row.name: row.reserved_qty for row in reserved_entries}.values())
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_hand_off_releases_the_plan_row(self):
 		warehouse = "_Test Warehouse - _TC"
 		raw_material = make_item(properties={"is_stock_item": 1}).name

@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _, throw
@@ -1057,6 +1058,7 @@ class PurchaseReceipt(BuyingController):
 		production_plan_items = []
 		self.reload()
 
+		unreserved_qty = self.get_unreserved_qty_for_production_plans(reservable_plans)
 		docnames = []
 		for row in self.items:
 			if row.material_request_item and row.material_request_item in production_plan_references:
@@ -1064,9 +1066,17 @@ class PurchaseReceipt(BuyingController):
 				if _ref.production_plan not in reservable_plans:
 					continue
 
+				key = (_ref.production_plan, row.item_code)
+				qty_to_reserve = flt(min(row.stock_qty, unreserved_qty[key]), row.precision("stock_qty"))
+				if qty_to_reserve <= 0:
+					continue
+
+				unreserved_qty[key] -= qty_to_reserve
 				docnames.append(_ref.production_plan)
-				row.update(
+				item = row.as_dict()
+				item.update(
 					{
+						"stock_qty": qty_to_reserve,
 						"voucher_type": "Production Plan",
 						"voucher_no": _ref.production_plan,
 						"voucher_detail_no": _ref.material_request_plan_item,
@@ -1077,7 +1087,7 @@ class PurchaseReceipt(BuyingController):
 					}
 				)
 
-				production_plan_items.append(row)
+				production_plan_items.append(item)
 
 		if not production_plan_items:
 			return
@@ -1088,6 +1098,41 @@ class PurchaseReceipt(BuyingController):
 			sre.transfer_reservation_entries_to(
 				docnames, from_doctype="Production Plan", to_doctype="Work Order"
 			)
+
+	def get_unreserved_qty_for_production_plans(self, plans: set) -> defaultdict:
+		unreserved_qty = defaultdict(float)
+
+		mr_item = frappe.qb.DocType("Material Request Plan Item")
+		required = (
+			frappe.qb.from_(mr_item)
+			.select(mr_item.parent, mr_item.item_code, Sum(mr_item.required_bom_qty))
+			.where(mr_item.parent.isin(list(plans)))
+			.groupby(mr_item.parent, mr_item.item_code)
+		).run()
+		for plan, item_code, qty in required:
+			unreserved_qty[(plan, item_code)] += flt(qty)
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		reserved = (
+			frappe.qb.from_(sre)
+			.select(sre.voucher_no, sre.item_code, Sum(sre.reserved_qty))
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == "Production Plan")
+				& sre.voucher_no.isin(list(plans))
+				& (
+					sre.voucher_detail_no.isin(
+						frappe.qb.from_(mr_item).select(mr_item.name).where(mr_item.parent.isin(list(plans)))
+					)
+					| (sre.from_voucher_type == "Purchase Receipt")
+				)
+			)
+			.groupby(sre.voucher_no, sre.item_code)
+		).run()
+		for plan, item_code, qty in reserved:
+			unreserved_qty[(plan, item_code)] -= flt(qty)
+
+		return unreserved_qty
 
 	def get_reservable_production_plans(self, production_plan_references) -> set:
 		"""Production Plans that opted into stock reservation (``reserve_stock``).
