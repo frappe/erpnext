@@ -1,9 +1,7 @@
-import base64
-import hashlib
-import hmac
 from urllib.parse import urlparse
 
 import frappe
+<<<<<<< HEAD
 from frappe import _
 
 
@@ -25,6 +23,8 @@ def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 		return fn
 
 	return innerfn
+=======
+>>>>>>> 4bf929c (fix: remove unused webhook validation and tracking URL helpers)
 
 
 def get_webhook_address(connector_name, method, exclude_uri=False, force_https=False):
@@ -45,12 +45,3 @@ def get_webhook_address(connector_name, method, exclude_uri=False, force_https=F
 	server_url = f"{scheme}://{netloc}/api/method/{endpoint}"
 
 	return server_url
-
-
-def get_tracking_url(carrier, tracking_number):
-	# Return the formatted Tracking URL.
-	tracking_url = ""
-	url_reference = frappe.get_value("Parcel Service", carrier, "url_reference")
-	if url_reference:
-		tracking_url = frappe.render_template(url_reference, {"tracking_number": tracking_number})
-	return tracking_url
