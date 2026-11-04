@@ -19,6 +19,7 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	repost,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError, get_combine_datetime
@@ -189,6 +190,18 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		repost(repost_doc)
 
 		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost_doc.name, "status"), "Completed")
+
+	def test_repost_refused_inside_stock_freeze(self):
+		frappe.db.savepoint("stock_freeze_test")
+		self.addCleanup(frappe.clear_document_cache, "Stock Settings", "Stock Settings")
+		self.addCleanup(frappe.db.rollback, save_point="stock_freeze_test")
+		frappe.db.set_single_value(
+			"Stock Settings", {"stock_frozen_upto": add_days(today(), -12), "stock_auth_role": ""}
+		)
+
+		self.assertRaises(
+			StockFreezeError, self.make_queued_item_repost, "_Test Item", add_days(today(), -20)
+		)
 
 	def test_clear_old_logs(self):
 		# create 10 logs
