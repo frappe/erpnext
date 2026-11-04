@@ -1605,8 +1605,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 	def update_item(source, target, source_parent):
-		if source_parent.doctype == "Delivery Note" and source.received_qty:
-			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
+		if source_parent.doctype == "Delivery Note":
+			target.qty = get_pending_receipt_qty(source)
 
 		if source_parent.doctype == "Purchase Receipt":
 			target.qty = flt(source.qty) - flt(accepted_returns.get(source.name))
@@ -1655,10 +1655,15 @@ def has_pending_inter_company_qty(item, doctype: str, accepted_returns: dict | N
 	if doctype == "Purchase Receipt":
 		return flt(item.qty) - flt((accepted_returns or {}).get(item.name)) > 0
 
-	return item.received_qty < item.qty + item.returned_qty
+	return get_pending_receipt_qty(item) > 0
 
 
 def get_accepted_returned_qty(receipt) -> dict:
 	from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_returned_qty_of_rows
 
 	return get_returned_qty_of_rows([d.name for d in receipt.items])
+
+
+def get_pending_receipt_qty(item) -> float:
+	returned_qty = flt(item.get("returned_qty")) / (flt(item.get("conversion_factor")) or 1)
+	return flt(item.qty) - returned_qty - flt(item.get("received_qty"))

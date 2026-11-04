@@ -1404,9 +1404,9 @@ class StockController(AccountsController):
 			return
 
 		self.__inter_company_reference = (
-			self.get("inter_company_reference")
+			self.get("inter_company_invoice_reference")
 			if self.doctype == "Purchase Invoice"
-			else self.get("inter_company_invoice_reference")
+			else self.get("inter_company_reference")
 		)
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
@@ -1433,13 +1433,16 @@ class StockController(AccountsController):
 				)
 
 			if recevied_qty > flt(transferred_qty, precision):
+				from erpnext.controllers.status_updater import OverAllowanceError
+
 				frappe.throw(
 					_("For Item {0} cannot be received more than {1} qty against the {2} {3}").format(
 						bold(key[1]),
 						bold(flt(transferred_qty, precision)),
 						bold(parent_doctype),
 						get_link_to_form(parent_doctype, self.__inter_company_reference),
-					)
+					),
+					OverAllowanceError,
 				)
 
 	def get_item_wise_inter_transfer_qty(self):
@@ -1465,10 +1468,14 @@ class StockController(AccountsController):
 			.where((parent_tab.name == self.__inter_company_reference) & (parent_tab.docstatus == 1))
 		)
 
+		if parent_doctype == "Delivery Note":
+			query = query.select(child_tab.returned_qty, child_tab.conversion_factor)
+
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+			returned_qty = flt(row.get("returned_qty")) / (flt(row.get("conversion_factor")) or 1)
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - returned_qty
 
 		return item_wise_transfer_qty
 
@@ -1504,12 +1511,16 @@ class StockController(AccountsController):
 
 			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
 
-		data = query.run(as_dict=True)
-		item_wise_transfer_qty = defaultdict(float)
-		for row in data:
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+		query = query.where(parent_tab.name != self.name)
+		item_wise_received_qty = defaultdict(float)
+		for row in query.run(as_dict=True):
+			item_wise_received_qty[(row.name, row.item_code)] += flt(row.qty)
 
-		return item_wise_transfer_qty
+		reference_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
+		for row in self.items:
+			item_wise_received_qty[(row.get(reference_field), row.item_code)] += flt(row.qty)
+
+		return item_wise_received_qty
 
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled
