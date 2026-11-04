@@ -391,7 +391,9 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 		new_updated_table_row.putaway_rule = rule
 
 	if serial_nos:
-		new_updated_table_row.serial_no = get_serial_nos_to_allocate(serial_nos, to_allocate)
+		new_updated_table_row.serial_no = get_serial_nos_to_allocate(
+			serial_nos, flt(to_allocate) * flt(new_updated_table_row.conversion_factor or 1)
+		)
 
 	# legacy serial / batch fields rebuild the bundle on save; a picked bundle is split later
 	if item.get("use_serial_batch_fields") or item.get("serial_no") or item.get("batch_no"):
