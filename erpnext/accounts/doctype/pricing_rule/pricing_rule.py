@@ -10,7 +10,7 @@ import re
 import frappe
 from frappe import _, throw
 from frappe.model.document import Document
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_link_to_form
 
 # the transactions the pricing engine is called for, from transaction.js and the POS
 PRICING_TRANSACTION_DOCTYPES = frozenset(
@@ -33,6 +33,34 @@ PRICING_TRANSACTION_DOCTYPES = frozenset(
 		# no client sends this one, but set_transaction_type below still branches on it
 		"Opportunity",
 	}
+)
+
+PRICING_ROW_FIELDS = (
+	"item_code",
+	"qty",
+	"uom",
+	"conversion_factor",
+	"price_list_rate",
+	"warehouse",
+	"pricing_rules",
+)
+
+PRICING_PARENT_FIELDS = (
+	"company",
+	"currency",
+	"coupon_code",
+	"customer",
+	"supplier",
+	"party_name",
+	"customer_group",
+	"supplier_group",
+	"territory",
+	"campaign",
+	"sales_partner",
+	"selling_price_list",
+	"buying_price_list",
+	"posting_date",
+	"transaction_date",
 )
 
 apply_on_dict = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}
@@ -436,7 +464,6 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
-		get_pricing_rules,
 		get_product_discount_rule,
 	)
 
@@ -491,16 +518,14 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 			rule != coupon_pricing_rule and frappe.get_cached_value("Pricing Rule", rule, "coupon_code_based")
 			for rule in applied_rules
 		)
-	pricing_rules = (
-		applied_rules
-		if for_validate and args.get("pricing_rules") and not coupon_changed
-		else get_pricing_rules(args, doc)
-	)
+	pricing_rules = select_pricing_rules(args, doc, for_validate)
 
 	selected_rules = {
 		rule if isinstance(rule, str) else rule.get("name") for rule in (pricing_rules or []) if rule
 	}
 	removed_rules = [rule for rule in applied_rules if rule not in selected_rules]
+	if for_validate:
+		notify_removed_pricing_rules(args, removed_rules)
 
 	removed_rate_rules = [
 		rule
@@ -634,6 +659,43 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 		)
 
 	return item_details
+
+
+def select_pricing_rules(args, doc, for_validate):
+	from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules, get_pricing_rules
+
+	if for_validate and args.get("pricing_rules") and is_row_unchanged_since_save(args, doc):
+		return get_applied_pricing_rules(args.get("pricing_rules"))
+
+	return get_pricing_rules(args, doc)
+
+
+def is_row_unchanged_since_save(args, doc):
+	doc_before_save = doc and doc.get("_action") == "submit" and doc.get_doc_before_save()
+	if not doc_before_save:
+		return False
+
+	row = next((d for d in doc.get("items") or [] if d.name == args.child_docname), None)
+	row_before_save = row and next(
+		(d for d in doc_before_save.get("items") or [] if d.name == row.name), None
+	)
+	if not row_before_save:
+		return False
+
+	return not any(row.get(field) != row_before_save.get(field) for field in PRICING_ROW_FIELDS) and not any(
+		doc.has_value_changed(field) for field in PRICING_PARENT_FIELDS if doc.meta.has_field(field)
+	)
+
+
+def notify_removed_pricing_rules(args, removed_rules):
+	for pricing_rule in removed_rules:
+		frappe.msgprint(
+			_("Row {0}: Pricing Rule {1} no longer applies to item {2} and has been removed").format(
+				args.idx, get_link_to_form("Pricing Rule", pricing_rule), frappe.bold(args.item_code)
+			),
+			title=_("Pricing Rule Removed"),
+			indicator="orange",
+		)
 
 
 def update_args_for_pricing_rule(args):
