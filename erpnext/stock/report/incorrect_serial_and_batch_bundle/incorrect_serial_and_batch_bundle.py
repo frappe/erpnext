@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 
 
 def execute(filters: dict | None = None):
@@ -67,6 +68,7 @@ def get_unlinked_serial_batch_bundles(filters) -> list[list]:
 
 	SABB = frappe.qb.DocType("Serial and Batch Bundle")
 	SLE = frappe.qb.DocType("Stock Ledger Entry")
+	POS = frappe.qb.DocType("POS Invoice")
 	ignore_voycher_types = [
 		"Installation Note",
 		"Job Card",
@@ -78,6 +80,8 @@ def get_unlinked_serial_batch_bundles(filters) -> list[list]:
 		frappe.qb.from_(SABB)
 		.left_join(SLE)
 		.on(SABB.name == SLE.serial_and_batch_bundle)
+		.left_join(POS)
+		.on((SABB.voucher_type == "POS Invoice") & (POS.name == SABB.voucher_no))
 		.select(
 			SABB.name,
 			SABB.voucher_type,
@@ -90,6 +94,7 @@ def get_unlinked_serial_batch_bundles(filters) -> list[list]:
 			& (SABB.docstatus == 1)
 			& (SABB.is_cancelled == 0)
 			& (SABB.voucher_type.notin(ignore_voycher_types))
+			& (IfNull(POS.docstatus, 0) != 1)
 		)
 	)
 
