@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.rename_doc import get_link_fields
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull
 
@@ -211,6 +212,7 @@ class PromotionalScheme(Document):
 
 	def on_update(self):
 		self.validate()
+		self.remove_pricing_rules_of_deleted_slabs()
 		pricing_rules = (
 			frappe.get_all(
 				"Pricing Rule",
@@ -221,6 +223,26 @@ class PromotionalScheme(Document):
 			or {}
 		)
 		self.update_pricing_rules(pricing_rules)
+
+	def remove_pricing_rules_of_deleted_slabs(self):
+		slabs = [d.name for d in self.price_discount_slabs + self.product_discount_slabs]
+		pricing_rules = frappe.get_all(
+			"Pricing Rule",
+			filters={
+				"promotional_scheme": self.name,
+				"promotional_scheme_id": ["not in", slabs],
+			},
+			fields=["name", "disable"],
+		)
+		if not pricing_rules:
+			return
+
+		used_pricing_rules = get_linked_pricing_rules([d.name for d in pricing_rules])
+		for pricing_rule in pricing_rules:
+			if pricing_rule.name not in used_pricing_rules:
+				frappe.delete_doc("Pricing Rule", pricing_rule.name)
+			elif not pricing_rule.disable:
+				frappe.db.set_value("Pricing Rule", pricing_rule.name, "disable", 1)
 
 	def validate_mixed_with_recursion(self):
 		if self.mixed_conditions:
@@ -264,6 +286,28 @@ def raise_for_transaction_exists(name):
 	msg += "Kindly disable this Promotional Scheme and create new for new Applicable For."
 
 	frappe.throw(_(msg), TransactionExists)
+
+
+def get_linked_pricing_rules(pricing_rules):
+	linked_pricing_rules = set()
+	for link_field in get_link_fields("Pricing Rule"):
+		if link_field.issingle is None:
+			continue
+
+		if link_field.issingle:
+			linked_pricing_rules.add(frappe.db.get_single_value(link_field.parent, link_field.fieldname))
+			continue
+
+		linked_pricing_rules.update(
+			frappe.get_all(
+				link_field.parent,
+				filters={link_field.fieldname: ["in", pricing_rules]},
+				pluck=link_field.fieldname,
+				distinct=True,
+			)
+		)
+
+	return linked_pricing_rules
 
 
 def get_pricing_rules(doc, rules=None):
