@@ -314,6 +314,8 @@ class WorkOrder(Document):
 			"Manufacturing Settings", "allow_editing_of_items_and_quantities_in_work_order"
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		else:
+			self.set_rate_for_edited_items()
 
 <<<<<<< HEAD
 		self.enable_auto_reserve_stock()
@@ -2703,11 +2705,17 @@ class WorkOrder(Document):
 			item_details = self.get_so_details()
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		for item in item_details:
 			qty_to_reserve = flt(item.stock_qty) - flt(item.stock_reserved_qty + item.delivered_qty)
 			if qty_to_reserve <= 0:
 				continue
 =======
+=======
+	def set_rate_for_edited_items(self):
+		return RequiredItemsService(self).set_rate_for_edited_items()
+
+>>>>>>> 3bec18d (fix(manufacturing): fetch rate for edited work order items)
 	def set_required_item_amounts(self):
 		return RequiredItemsService(self).set_required_item_amounts()
 
