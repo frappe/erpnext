@@ -187,8 +187,7 @@ def _apply_putaway_rule(
 	sync = bool(sync and frappe.parse_json(sync))
 
 	items_not_accomodated, updated_table = [], []
-	item_wise_rules = defaultdict(list)
-	rules_by_source = {}
+	item_wise_rules = {}
 
 	for item in items:
 		if isinstance(item, dict):
@@ -215,12 +214,9 @@ def _apply_putaway_rule(
 			)
 			continue
 
-		source_key = (item_code, source_warehouse)
-		if source_key not in rules_by_source:
-			rules_by_source[source_key] = get_ordered_putaway_rules(
-				item_code, company, source_warehouse=source_warehouse
-			)
-		at_capacity, rules = rules_by_source[source_key]
+		if item_code not in item_wise_rules:
+			item_wise_rules[item_code] = get_item_putaway_rules(item_code, company)
+		at_capacity, rules = select_vacant_rules(item_wise_rules[item_code], source_warehouse)
 
 		if not rules:
 			warehouse = (
@@ -238,17 +234,8 @@ def _apply_putaway_rule(
 				)
 			continue
 
-		# maintain item/item-warehouse wise rules, to handle if item is entered twice
-		# in the table, due to different price, etc.
-		key = item_code
-		if doctype == "Stock Entry" and purpose == "Material Transfer" and source_warehouse:
-			key = (item_code, source_warehouse)
-
-		if not item_wise_rules[key]:
-			item_wise_rules[key] = rules
-
 		keep_rejected = True
-		for rule in item_wise_rules[key]:
+		for rule in rules:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = (
 					flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty
@@ -338,36 +325,33 @@ def _items_changed(old, new, doctype: str) -> bool:
 
 def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 	"""Returns an ordered list of putaway rules to apply on an item."""
-	filters = {"item_code": item_code, "company": company, "disable": 0}
-	if source_warehouse:
-		filters.update({"warehouse": ["!=", source_warehouse]})
+	return select_vacant_rules(get_item_putaway_rules(item_code, company), source_warehouse)
 
+
+def get_item_putaway_rules(item_code, company):
 	rules = frappe.get_all(
 		"Putaway Rule",
 		fields=["name", "item_code", "stock_capacity", "priority", "warehouse"],
-		filters=filters,
+		filters={"item_code": item_code, "company": company, "disable": 0},
 		order_by="priority asc, capacity desc",
 	)
+	for rule in rules:
+		balance_qty = _get_stock_balance(rule.item_code, rule.warehouse, nowdate())
+		rule["free_space"] = max(flt(rule.stock_capacity) - flt(balance_qty), 0)
 
+	return rules
+
+
+def select_vacant_rules(rules, source_warehouse=None):
+	rules = [rule for rule in rules if rule.warehouse != source_warehouse]
 	if not rules:
 		return False, None
 
-	vacant_rules = []
-	for rule in rules:
-		balance_qty = _get_stock_balance(rule.item_code, rule.warehouse, nowdate())
-		free_space = flt(rule.stock_capacity) - flt(balance_qty)
-		if free_space > 0:
-			rule["free_space"] = free_space
-			vacant_rules.append(rule)
-
+	vacant_rules = [rule for rule in rules if rule.free_space > 0]
 	if not vacant_rules:
-		# After iterating through rules, if no rules are left
-		# then there is not enough space left in any rule
 		return True, None
 
-	vacant_rules = sorted(vacant_rules, key=lambda i: (i["priority"], -i["free_space"]))
-
-	return False, vacant_rules
+	return False, sorted(vacant_rules, key=lambda rule: (rule.priority, -rule.free_space))
 
 
 def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None, keep_rejected=False):
