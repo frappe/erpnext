@@ -4931,6 +4931,149 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
 
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 1, "allow_editing_of_items_and_quantities_in_work_order": 0},
+	)
+	def test_draft_work_order_rows_follow_qty_and_bom_changes(self):
+		first_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		second_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		other_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": first_item, "qty": 1, "operation": operation},
+				{"item_code": second_item, "qty": 1},
+			],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		other_bom = make_review_bom(fg_item, [{"item_code": other_item, "qty": 2}])
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False)
+		self.assertEqual([row.time_in_mins for row in wo.operations], [50])
+
+		wo.qty = 20
+		wo.save()
+		self.assertEqual([row.required_qty for row in wo.required_items], [20, 20])
+		self.assertEqual([row.time_in_mins for row in wo.operations], [200])
+
+		wo.qty = 10
+		wo.get_items_and_operations_from_bom()
+		wo.save()
+		self.assertEqual([row.time_in_mins for row in wo.operations], [100])
+
+		wo.operations[0].workstation = _workstation
+		wo.save()
+		wo.qty = 20
+		wo.save()
+		self.assertEqual(
+			[(row.workstation, row.time_in_mins) for row in wo.operations], [(_workstation, 200)]
+		)
+
+		wo.bom_no = other_bom.name
+		wo.save()
+		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
+		self.assertEqual(wo.operations, [])
+
+	def test_draft_qty_change_keeps_fixed_time_of_sub_assembly_operations(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		fixed_operation, workstation = make_review_operation()
+		operation, _workstation = make_review_operation()
+		sub_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{
+					"operation": fixed_operation,
+					"workstation": workstation,
+					"time_in_mins": 30,
+					"fixed_time": 1,
+				}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": sub_assembly, "qty": 1, "bom_no": sub_bom.name}],
+			operations=[{"operation": operation, "workstation": _workstation, "time_in_mins": 10}],
+		)
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False, use_multi_level_bom=1)
+		self.assertEqual(
+			sorted((row.operation, row.time_in_mins) for row in wo.operations),
+			sorted([(fixed_operation, 30), (operation, 50)]),
+		)
+
+		wo.qty = 10
+		wo.save()
+		self.assertEqual(
+			sorted((row.operation, row.time_in_mins) for row in wo.operations),
+			sorted([(fixed_operation, 30), (operation, 100)]),
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_qty_change_scales_a_normal_row_of_a_repeated_fixed_operation(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1},
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		before = [row.time_in_mins for row in wo.operations]
+
+		wo.qty = 4
+		wo.save()
+
+		self.assertEqual(before, [30, 20])
+		self.assertEqual([row.time_in_mins for row in wo.operations], [30, 40])
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_qty_change_keeps_every_copy_of_a_shared_child_fixed_operation(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		child_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		child_bom = make_review_bom(
+			child_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 15, "fixed_time": 1}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		for _copy in range(2):
+			wo.append(
+				"operations",
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"bom": child_bom.name,
+					"time_in_mins": 15,
+					"sequence_id": len(wo.operations) + 1,
+				},
+			)
+		wo.save()
+
+		wo.qty = 4
+		wo.save()
+
+		self.assertEqual([row.time_in_mins for row in wo.operations], [40, 15, 15])
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (

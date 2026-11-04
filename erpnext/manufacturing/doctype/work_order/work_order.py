@@ -220,12 +220,44 @@ class WorkOrder(Document):
 				row.source_warehouse = self.source_warehouse
 
 	def reset_use_multi_level_bom(self):
-		if self.is_new():
+		previous = None if self.is_new() else self.get_doc_before_save()
+		self.sync_operations_with_bom(previous)
+
+	def sync_operations_with_bom(self, previous):
+		if previous is None:
 			return
 
-		before_save_obj = self.get_doc_before_save()
-		if before_save_obj.use_multi_level_bom != self.use_multi_level_bom:
+		if previous.bom_no != self.bom_no or previous.use_multi_level_bom != self.use_multi_level_bom:
 			self.get_items_and_operations_from_bom()
+		elif flt(previous.qty) != flt(self.qty) and flt(previous.qty):
+			self.scale_saved_operation_time(previous)
+
+	def scale_saved_operation_time(self, previous):
+		saved_rows = {row.name: row for row in previous.get("operations")}
+		fixed_flags = self.get_fixed_time_flags()
+		occurrence = {}
+		for d in self.get("operations"):
+			key = (d.bom or self.bom_no, d.operation)
+			idx = occurrence[key] = occurrence.get(key, -1) + 1
+			flags = fixed_flags.get(key, [])
+			is_fixed = flags[idx % len(flags)] if flags else False
+			saved = saved_rows.get(d.name)
+			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
+				continue
+			d.time_in_mins = flt(saved.time_in_mins) * flt(self.qty) / flt(previous.qty)
+		self.calculate_operating_cost()
+
+	def get_fixed_time_flags(self):
+		boms = {d.bom or self.bom_no for d in self.get("operations")}
+		flags = {}
+		for row in frappe.get_all(
+			"BOM Operation",
+			filters={"parent": ["in", list(boms)], "parenttype": "BOM"},
+			fields=["parent", "operation", "fixed_time"],
+			order_by="idx",
+		):
+			flags.setdefault((row.parent, row.operation), []).append(cint(row.fixed_time))
+		return flags
 
 	def validate_workstation_type(self):
 		if not self.docstatus.is_submitted():
