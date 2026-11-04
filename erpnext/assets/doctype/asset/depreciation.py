@@ -99,20 +99,12 @@ def post_depreciation_entries(date=None):
 			error_log = frappe.log_error(e)
 			error_log_names.append(error_log.name)
 
-<<<<<<< HEAD
 	if failed_asset_names:
 		set_depr_entry_posting_status_for_failed_assets(failed_asset_names)
 		notify_depr_entry_posting_error(failed_asset_names, error_log_names)
 
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 	frappe.db.commit()
-=======
-	if failed_assets:
-		set_depr_entry_posting_status_for_failed_assets(failed_assets)
-		notify_depr_entry_posting_error(failed_assets, error_logs)
-	if not frappe.in_test:
-		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
-		frappe.db.commit()
->>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 
 
 def get_depreciable_asset_depr_schedules_data(date):

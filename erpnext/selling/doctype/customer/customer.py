@@ -665,15 +665,10 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			)
 
 
-<<<<<<< HEAD
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_emails(args):
 	args = json.loads(args)
 	customer, company = cstr(args.get("customer")), cstr(args.get("company"))
-=======
-@frappe.whitelist(methods=["POST"])
-def send_emails(customer: str, company: str):
->>>>>>> ebeeb64 (fix: allow only POST for whitelisted methods that send emails or enqueue jobs)
 	frappe.has_permission("Customer", ptype="email", doc=customer, throw=True)
 	currency = get_company_currency(company)
 	outstanding = get_customer_outstanding(

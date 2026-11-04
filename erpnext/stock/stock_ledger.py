@@ -408,12 +408,8 @@ def update_args_in_repost_item_valuation(
 		}
 	)
 
-<<<<<<< HEAD
 	if not frappe.flags.in_test:
-=======
-	if not frappe.in_test:
 		# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
->>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 		frappe.db.commit()
 
 	frappe.publish_realtime(

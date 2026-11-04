@@ -486,56 +486,6 @@ def get_doctypes_to_be_ignored():
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-=======
-def export_to_delete_template(name: str):
-	"""Export To Delete list as CSV via URL access"""
-	frappe.only_for("System Manager")
-	doc = frappe.get_doc("Transaction Deletion Record", name)
-	doc.check_permission("read")
-	return doc.export_to_delete_template_method()
-
-
-@frappe.whitelist()
-def process_import_template(transaction_deletion_record_name: str, file_url: str):
-	"""Import CSV template and populate To Delete list"""
-	import os
-
-	doc = frappe.get_doc("Transaction Deletion Record", transaction_deletion_record_name)
-	doc.check_permission("write")
-
-	if not file_url or ".." in file_url:
-		frappe.throw(_("Invalid file URL"))
-
-	try:
-		file_doc = frappe.get_doc("File", {"file_url": file_url})
-	except frappe.DoesNotExistError:
-		frappe.throw(_("File not found"))
-
-	if (
-		file_doc.attached_to_doctype != "Transaction Deletion Record"
-		or file_doc.attached_to_name != transaction_deletion_record_name
-	):
-		frappe.throw(_("File does not belong to this Transaction Deletion Record"))
-
-	if not file_doc.file_name or not file_doc.file_name.lower().endswith(".csv"):
-		frappe.throw(_("Only CSV files are allowed"))
-
-	file_path = file_doc.get_full_path()
-
-	if not os.path.isfile(file_path):
-		frappe.throw(_("File not found on server"))
-
-	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
-	with open(file_path, encoding="utf-8") as f:
-		csv_content = f.read()
-
-	return doc.import_to_delete_template_method(csv_content)
-
-
-@frappe.whitelist()
-@request_cache
->>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 def is_deletion_doc_running(company: str | None = None, err_msg: str | None = None):
 	if not company:
 		return

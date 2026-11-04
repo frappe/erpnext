@@ -179,28 +179,7 @@ class Item(Document):
 				self.add_price(default.default_price_list)
 
 		if self.opening_stock:
-<<<<<<< HEAD
 			self.set_opening_stock()
-=======
-			if self.opening_stock > 10000 and self.has_serial_no:
-				frappe.enqueue(
-					self.set_opening_stock,
-					queue="long",
-					timeout=600,
-					job_name=f"set_opening_stock_for_{self.name}",
-					enqueue_after_commit=True,
-				)
-				frappe.msgprint(
-					_(
-						"Opening stock creation has been queued and will be created in the background. Please check the Stock Reconciliation after some time."
-					),
-					indicator="orange",
-					alert=True,
-				)
-
-			else:
-				self.set_opening_stock()
->>>>>>> e53129c (fix: enqueue submit and insert jobs after commit)
 
 	def validate(self):
 		if not self.item_name:

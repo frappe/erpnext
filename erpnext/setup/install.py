@@ -38,12 +38,7 @@ def after_install():
 	hide_workspaces()
 	update_roles()
 	update_pegged_currencies()
-<<<<<<< HEAD
-=======
-	set_default_print_formats()
-	toggle_hidden_fields()
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
->>>>>>> ea74742 (chore: ignore reviewed semgrep warnings with reasons)
 	frappe.db.commit()
 
 
