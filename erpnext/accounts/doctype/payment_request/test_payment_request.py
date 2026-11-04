@@ -1061,6 +1061,33 @@ class TestPaymentRequest(FrappeTestCase):
 			1,
 		)
 
+	def test_make_payment_request_checks_submit_and_cancel_permission(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		so = make_sales_order(qty=1, rate=1000)
+		existing_pr = make_payment_request(
+			dt="Sales Order", dn=so.name, mute_email=1, submit_doc=1, return_doc=1
+		)
+
+		with self.set_user(get_accounts_user()):
+			self.assertRaises(
+				frappe.PermissionError,
+				make_payment_request,
+				dt="Sales Invoice",
+				dn=si.name,
+				mute_email=1,
+				submit_doc=1,
+			)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_payment_request,
+				dt="Sales Order",
+				dn=so.name,
+				submit_doc=1,
+				order_type="Shopping Cart",
+			)
+
+		self.assertEqual(frappe.db.get_value("Payment Request", existing_pr.name, "status"), "Requested")
+
 
 def make_shopping_cart_order(customer, rate=1000):
 	so = make_sales_order(customer=customer, qty=1, rate=rate, do_not_save=True)
@@ -1068,3 +1095,15 @@ def make_shopping_cart_order(customer, rate=1000):
 	so.save()
 	so.submit()
 	return so
+
+
+def get_accounts_user():
+	accounts_user = "accounts-user@example.com"
+	if not frappe.db.exists("User", accounts_user):
+		user = frappe.new_doc("User")
+		user.email = accounts_user
+		user.first_name = "Accounts"
+		user.send_welcome_email = 0
+		user.add_roles("Accounts User")
+
+	return accounts_user

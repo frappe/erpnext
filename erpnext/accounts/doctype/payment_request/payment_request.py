@@ -763,6 +763,7 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			if pr.get("__unsaved"):
 				pr.insert(ignore_permissions=True)
+			pr.flags.ignore_permissions = False
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
@@ -838,7 +839,7 @@ def get_irequest_status(payment_requests: None | list = None) -> list:
 	return res
 
 
-def cancel_old_payment_requests(ref_dt, ref_dn):
+def cancel_old_payment_requests(ref_dt, ref_dn, ignore_permissions=False):
 	PR = frappe.qb.DocType("Payment Request")
 
 	if res := (
@@ -855,7 +856,7 @@ def cancel_old_payment_requests(ref_dt, ref_dn):
 		else:
 			for x in res:
 				doc = frappe.get_doc("Payment Request", x.name)
-				doc.flags.ignore_permissions = True
+				doc.flags.ignore_permissions = ignore_permissions
 				doc.cancel()
 
 				if ireqs := get_irequests_of_payment_request(doc.name):
