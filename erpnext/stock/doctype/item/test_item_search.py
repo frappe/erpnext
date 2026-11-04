@@ -100,6 +100,12 @@ class TestItemSearchOnOldSQLite(ERPNextTestSuite):
 	def test_a_differently_accented_term_finds_the_item(self):
 		self.assertIn("ZZ-CRÈME-7782", self.candidates("crême filter"))
 
+	def test_an_upgrade_past_3_45_reports_the_index_as_absent(self):
+		"""The table holds folded text, and the query on newer SQLite is no longer folded."""
+		self.assertTrue(self.search.index_exists())
+		with patch.object(sqlite3, "sqlite_version_info", (3, 45, 0)):
+			self.assertFalse(ItemSearch(db_name="item_search_old_sqlite.db").index_exists())
+
 	def candidates(self, txt):
 		return self.search.get_candidate_item_codes(txt, ["name", "item_code", "item_name"])
 
