@@ -10,6 +10,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 	get_sre_reserved_qty_details_for_voucher,
 )
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
@@ -22,6 +23,7 @@ class SalesOrderStockReservation:
 	def validate_reserved_stock(self) -> None:
 		"""Clean reserved stock flag for non-stock Item"""
 
+		clear_reserve_stock_if_disabled(self.doc)
 		enable_stock_reservation = frappe.get_single_value("Stock Settings", "enable_stock_reservation")
 
 		for item in self.doc.items:
