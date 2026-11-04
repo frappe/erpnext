@@ -493,7 +493,7 @@ def get_columns(filters):
 	if filters.get("group_by") in ["Asset Category", "Location"]:
 		return [
 			{
-				"label": _("{}").format(filters.get("group_by")),
+				"label": _(filters.get("group_by")),
 				"fieldtype": "Link",
 				"fieldname": frappe.scrub(filters.get("group_by")),
 				"options": filters.get("group_by"),

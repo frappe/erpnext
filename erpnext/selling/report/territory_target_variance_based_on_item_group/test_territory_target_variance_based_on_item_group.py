@@ -311,14 +311,12 @@ def check_group_target(test, doctype, name_field, execute_report):
 	group.save()
 	parent_field = "parent_" + frappe.scrub(doctype)
 	middle = frappe.get_doc(
-		dict(
-			doctype=doctype,
-			is_group=1,
-			**{name_field: frappe.generate_hash(length=10), parent_field: group.name},
-		)
+		doctype=doctype,
+		is_group=1,
+		**{name_field: frappe.generate_hash(length=10), parent_field: group.name},
 	).insert()
 	leaf = frappe.get_doc(
-		dict(doctype=doctype, **{name_field: frappe.generate_hash(length=10), parent_field: middle.name})
+		doctype=doctype, **{name_field: frappe.generate_hash(length=10), parent_field: middle.name}
 	).insert()
 	order = make_sales_order(rate=700, qty=1, do_not_submit=True)
 	field = frappe.scrub(doctype)
