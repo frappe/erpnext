@@ -3592,6 +3592,58 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			4500,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_rejected_qty_of_batched_finished_good_has_no_value(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		fg_item = make_item(
+			"_Test Batched Subcontracted FG Rejected",
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BSFGR-.####",
+			},
+		).name
+		rm_item = make_item("_Test RM Batched Subcontracted FG Rejected", {"is_stock_item": 1}).name
+		service_item = make_item("_Test Service Batched Subcontracted FG Rejected", {"is_stock_item": 0}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		rejected_warehouse = create_warehouse("_Test Rejected Warehouse Batched Subcontracted FG")
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": 10,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = rejected_warehouse
+		scr.save()
+		scr.submit()
+
+		rejected_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(rejected_value, 0)
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
