@@ -4,6 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Avg, IfNull
 from frappe.utils import flt, today
 
@@ -150,6 +152,10 @@ def get_open_sales_orders_count(variants_list):
 
 
 def get_stock_details_map(variant_list):
+	bin_filters = [{"item_code": ["in", variant_list]}]
+	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
+		bin_filters.append({"warehouse": ["in", warehouses]})
+
 	stock_details = frappe.db.get_all(
 		"Bin",
 		fields=[
@@ -158,7 +164,7 @@ def get_stock_details_map(variant_list):
 			"sum(projected_qty) as projected_qty",
 			"item_code",
 		],
-		filters={"item_code": ["in", variant_list]},
+		filters=bin_filters,
 		group_by="item_code",
 	)
 

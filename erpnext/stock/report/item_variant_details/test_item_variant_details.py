@@ -79,3 +79,33 @@ class TestItemVariantDetails(FrappeTestCase):
 		price_columns = [column for column in columns if column["fieldname"].startswith("avg_")]
 		self.assertEqual({column.get("options") for column in price_columns}, {"currency"})
 		self.assertEqual(row.get("currency"), get_report_currency())
+
+	def get_current_stock_for_restricted_user(self, applicable_for=None):
+		from frappe.permissions import add_user_permission
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Small"})
+		variant.insert(ignore_if_duplicate=True)
+		for warehouse, qty in (("Stores - _TC", 18), ("Finished Goods - _TC", 7)):
+			make_stock_entry(item_code=variant.name, to_warehouse=warehouse, qty=qty, rate=100)
+
+		user = "variant-details-warehouse@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Variant Details", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc("User", user).add_roles("Stock Manager", "Sales User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
+
+		frappe.set_user(user)
+		try:
+			rows = self.run_report(item="_Test Variant Item")
+		finally:
+			frappe.set_user("Administrator")
+
+		return next(row for row in rows if row.get("variant_name") == variant.name).get("current_stock")
+
+	def test_current_stock_counts_only_permitted_warehouses(self):
+		self.assertEqual(self.get_current_stock_for_restricted_user(), 7)
+
+	def test_permission_for_another_doctype_does_not_limit_current_stock(self):
+		self.assertEqual(self.get_current_stock_for_restricted_user(applicable_for="Purchase Order"), 25)
