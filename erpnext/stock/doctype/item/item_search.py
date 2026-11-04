@@ -1,15 +1,48 @@
 import os
 import re
 import sqlite3
+import unicodedata
 
 import frappe
+from frappe import _
 from frappe.search.sqlite_search import SQLiteSearch, SQLiteSearchIndexMissingError
 
 MINIMUM_TERM_LENGTH = 3
 CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
 BARCODE_COLUMN = "barcodes"
-TOKENIZER = "trigram remove_diacritics 1"
+MINIMUM_SQLITE_VERSION = (3, 34, 0)
+DIACRITICS_SQLITE_VERSION = (3, 45, 0)
+
+
+def has_trigram_tokenizer() -> bool:
+	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
+
+
+def has_diacritics_option() -> bool:
+	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
+	return sqlite3.sqlite_version_info >= DIACRITICS_SQLITE_VERSION
+
+
+def get_tokenizer() -> str:
+	return "trigram remove_diacritics 1" if has_diacritics_option() else "trigram"
+
+
+def fold_diacritics(text: str) -> str:
+	"""Strip accents in Python where the tokenizer cannot."""
+	if has_diacritics_option():
+		return text
+
+	return "".join(char for char in unicodedata.normalize("NFKD", text) if not unicodedata.combining(char))
+
+
+def validate_sqlite_version():
+	if not has_trigram_tokenizer():
+		frappe.throw(
+			_("Item Search Index needs SQLite {0} or later. This server has SQLite {1}.").format(
+				".".join(map(str, MINIMUM_SQLITE_VERSION)), sqlite3.sqlite_version
+			)
+		)
 
 
 def get_searched_fieldnames() -> list[str]:
@@ -42,7 +75,7 @@ class ItemSearch(SQLiteSearch):
 			}
 		}
 		self.INDEX_SCHEMA = {
-			"tokenizer": TOKENIZER,
+			"tokenizer": get_tokenizer(),
 			"text_fields": [
 				"title",
 				"content",
@@ -59,29 +92,40 @@ class ItemSearch(SQLiteSearch):
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
 
 	def index_exists(self) -> bool:
-		"""A table missing a searched column cannot answer for it, so it reports itself absent.
+		"""A table missing a searched column, or built for another SQLite, cannot answer, so it
+		reports itself absent.
 
 		The searched fields come from the Item meta, so a site that adds one leaves an older table
-		short. Callers fall back and the builder replaces it. One connection: this runs on every save.
+		short. A SQLite upgrade or downgrade changes whether the tokenizer or Python folds accents.
+		Callers fall back and the builder replaces it. One connection: this runs on every save.
 		"""
 		if not os.path.exists(self.db_path):
 			return False
 
-		return set(self.schema["text_fields"]) <= self.get_indexed_columns()
+		columns, definition = self.get_index_table()
+		return (
+			set(self.schema["text_fields"]) <= columns
+			and ("remove_diacritics" in definition) == has_diacritics_option()
+		)
 
-	def get_indexed_columns(self) -> set[str]:
-		"""Columns the built table carries, empty when there is no table."""
+	def get_index_table(self) -> tuple[set[str], str]:
+		"""Columns and CREATE statement of the built table, empty when there is no table."""
 		try:
 			connection = self._get_connection(read_only=True)
 		except SQLiteSearchIndexMissingError:
-			return set()
+			return set(), ""
 
 		try:
-			return {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+			definition = connection.execute(
+				"SELECT sql FROM sqlite_master WHERE name = 'search_fts'"
+			).fetchone()
+			columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
 		except sqlite3.Error:
-			return set()
+			return set(), ""
 		finally:
 			connection.close()
+
+		return columns, definition["sql"] if definition else ""
 
 	def get_documents_paginated(self, doctype, *args, **kwargs):
 		"""Preload the batch's barcodes: reading them per document would be one query each."""
@@ -100,17 +144,17 @@ class ItemSearch(SQLiteSearch):
 		if document is None:
 			return None
 
-		document[BARCODE_COLUMN] = self.get_barcode_text(doc.name)
+		document[BARCODE_COLUMN] = fold_diacritics(self.get_barcode_text(doc.name))
 		return document
 
 	def _process_content(self, content):
-		"""Store values verbatim.
+		"""Store values verbatim, except accents folded on SQLite older than 3.45.
 
 		item_query rechecks every candidate with LIKE against the column in MariaDB, so the
 		indexed text has to be what that column holds. The framework's cleaning collapses
 		whitespace and replaces a URL with "[link]", which would lose those rows.
 		"""
-		return "" if content is None else str(content)
+		return "" if content is None else fold_diacritics(str(content))
 
 	def get_barcode_text(self, item_code: str) -> str:
 		"""Always a string: a text column left unset drops the document from the index entirely."""
@@ -120,8 +164,11 @@ class ItemSearch(SQLiteSearch):
 		return get_barcodes_by_item([item_code]).get(item_code, "")
 
 	def is_search_enabled(self) -> bool:
-		"""Off unless Global Defaults opts in: building reads every Item, which is not free."""
-		return bool(frappe.get_single_value("Global Defaults", "enable_item_search_index"))
+		"""Off unless Global Defaults opts in, since building reads every Item, and off on SQLite
+		that cannot build the tokenizer."""
+		return has_trigram_tokenizer() and bool(
+			frappe.get_single_value("Global Defaults", "enable_item_search_index")
+		)
 
 	def get_search_filters(self) -> dict:
 		return {}
@@ -172,7 +219,7 @@ def build_match_query(txt: str) -> str | None:
 	if "\\" in txt:
 		return None
 
-	fragments = [fragment.strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
+	fragments = [fold_diacritics(fragment).strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
 	usable = [fragment for fragment in fragments if len(fragment) >= MINIMUM_TERM_LENGTH]
 	if not usable:
 		return None
