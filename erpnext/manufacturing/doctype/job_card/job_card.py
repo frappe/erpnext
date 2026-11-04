@@ -943,6 +943,7 @@ class JobCard(Document):
 					)
 				)
 
+<<<<<<< HEAD
 			if self.is_corrective_job_card or self.is_own_material(d):
 				self.append(
 					"items",
@@ -957,6 +958,25 @@ class JobCard(Document):
 						"amount": d.amount,
 					},
 				)
+=======
+		if d.operation_row_id and self.operation_row_id:
+			if self.operation_row_id != d.operation_row_id:
+				return
+		elif self.get("operation") != d.operation:
+			return
+
+		self.append(
+			"items",
+			{
+				"item_code": d.item_code,
+				"source_warehouse": self.source_warehouse or d.source_warehouse,
+				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+				"item_name": d.item_name,
+				"description": d.description,
+				"required_qty": (d.required_qty * flt(self.for_quantity)) / flt(operation_qty or doc.qty),
+			},
+		)
+>>>>>>> d57d3a0 (refactor(manufacturing): drop rate and amount not on job card item)
 
 	def before_save(self):
 		self.set_expected_and_actual_time()
