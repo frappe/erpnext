@@ -16,6 +16,7 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	clear_reserve_stock_if_disabled,
 	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
 )
@@ -138,6 +139,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		clear_reserve_stock_if_disabled(self)
 
 	def on_submit(self):
 		self.update_status()
