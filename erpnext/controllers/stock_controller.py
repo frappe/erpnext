@@ -270,7 +270,7 @@ class StockController(AccountsController):
 
 	def get_item_wise_inventory_account_map(self):
 		inventory_account_map = frappe._dict()
-		for table in ["items", "packed_items", "supplied_items"]:
+		for table in ["items", "packed_items", "supplied_items", "stock_items"]:
 			if not self.get(table):
 				continue
 
@@ -708,10 +708,29 @@ class StockController(AccountsController):
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
 				parent_rows = self.get("items", {"name": row.parent_detail_docname}) or []
 				for d in parent_rows:
-					if d.get(field) and not d.get(bundle_field):
+					if (
+						d.get(field)
+						and not d.get(bundle_field)
+						and not self.is_legacy_packed_item(row, d.get(field))
+					):
 						reference_ids.append(d.get(field))
 
 		return field, reference_ids
+
+	def is_legacy_packed_item(self, row, source_parent_detail_docname):
+		"""Packed items delivered before v15 have serial / batch fields, but no bundle to return
+		against. make_bundle_using_old_serial_batch_fields handles them."""
+		if not (row.serial_no or row.batch_no):
+			return False
+
+		return not frappe.db.exists(
+			"Packed Item",
+			{
+				"parent_detail_docname": source_parent_detail_docname,
+				"item_code": row.item_code,
+				"serial_and_batch_bundle": ("is", "set"),
+			},
+		)
 
 	@frappe.request_cache
 	def is_serial_batch_item(self, item_code) -> bool:
@@ -1801,9 +1820,10 @@ class StockController(AccountsController):
 			else:
 				frappe.msgprint(msg, alert=True, indicator="orange")
 
-	def update_blanket_order(self):
-		blanket_orders = sorted({d.blanket_order for d in self.items if d.blanket_order})
-		for blanket_order in blanket_orders:
+	def update_blanket_order(self, extra_blanket_orders=()):
+		"""Refresh ordered qty of the blanket orders on the items and of `extra_blanket_orders`."""
+		blanket_orders = {d.blanket_order for d in self.items if d.blanket_order}
+		for blanket_order in sorted(blanket_orders.union(extra_blanket_orders)):
 			frappe.get_doc("Blanket Order", blanket_order, for_update=True).update_ordered_qty()
 
 	def validate_customer_provided_item(self):
@@ -2093,6 +2113,11 @@ class StockController(AccountsController):
 		)
 
 		if self.docstatus == 2:
+			# nothing to repost when the cancelled voucher never touched the stock ledger
+			if not frappe.db.exists(
+				"Stock Ledger Entry", {"voucher_type": self.doctype, "voucher_no": self.name}
+			):
+				return
 			force = True
 
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self):
@@ -2560,7 +2585,7 @@ def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str
 	return [item for item in items if item.get("item_code") in inspection_required_items]
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_quality_inspections(
 	company: str, doctype: str, docname: str, items: str | list, inspection_type: str
 ):

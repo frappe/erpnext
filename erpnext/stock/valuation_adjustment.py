@@ -736,9 +736,12 @@ class AdjustmentNetting:
 	"""
 
 	def __init__(self, by_lot: bool = False):
+		# cancelled ones too: a snapshot synced before the cancel still holds their entries
 		self.vouchers = set(
 			frappe.get_all(
-				"Stock Reconciliation", filters={"purpose": ADJUSTMENT_ENTRY, "docstatus": 1}, pluck="name"
+				"Stock Reconciliation",
+				filters={"purpose": ADJUSTMENT_ENTRY, "docstatus": ("!=", 0)},
+				pluck="name",
 			)
 		)
 		self.lot_changes = get_adjustment_lot_changes(self.vouchers) if by_lot and self.vouchers else {}

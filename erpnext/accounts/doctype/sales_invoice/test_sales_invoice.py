@@ -29,6 +29,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
+from erpnext.controllers.status_updater import OverAllowanceError
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -72,6 +73,56 @@ class TestSalesInvoice(ERPNextTestSuite):
 		for company in frappe.get_all("Company", pluck="name"):
 			frappe.db.set_value("Company", company, "accounts_frozen_till_date", None)
 		frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"round_row_wise_tax": 0})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
+	@ERPNextTestSuite.change_settings(
+		"System Settings", {"currency_precision": 2, "rounding_method": "Commercial Rounding"}
+	)
+	def test_opening_invoice_with_tax_group_rounding(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Opening Inclusive Tax",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 21}],
+			}
+		).insert()
+		frappe.db.set_value("Company", "_Test Company", "round_off_for_opening", None)
+
+		for round_off_configured in (False, True):
+			with self.subTest(round_off_configured=round_off_configured):
+				si = self._create_opening_invoice_with_inclusive_tax()
+				si.items[1].item_tax_template = template.name
+				si.save()
+				self.assertEqual(si.net_total, 131.16)
+				self.assertEqual(si.taxes[0].tax_amount, 13.83)
+				self.assertEqual(si.taxes[0].total, 144.99)
+				self.assertEqual(si.grand_total, 145)
+				self.assertEqual(si.rounding_adjustment, 0)
+
+				if not round_off_configured:
+					with self.assertRaisesRegex(frappe.ValidationError, "Please set.*Round Off for Opening"):
+						si.submit()
+					self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": si.name}))
+					continue
+
+				self._create_opening_roundoff_account(si.company)
+				si.submit()
+				self.assertCountEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"voucher_no": si.name, "is_cancelled": False},
+						fields=["account", "debit", "credit", "is_opening"],
+						as_list=True,
+					),
+					[
+						("Debtors - _TC", 145, 0, "Yes"),
+						("Temporary Opening - _TC", 0, 131.16, "Yes"),
+						("_Test Account Service Tax - _TC", 0, 13.83, "Yes"),
+						("Round Off for Opening - _TC", 0, 0.01, "Yes"),
+					],
+				)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -405,6 +456,83 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
+	@ERPNextTestSuite.change_settings(
+		"System Settings",
+		{"number_format": "#,###.##", "currency_precision": 2, "rounding_method": "Commercial Rounding"},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_inclusive_tax_net_amount_rounding(self):
+		for item_values, tax_rate, round_row_wise_tax, discount, net_total, tax_amount in (
+			([(1, 379)] * 2, 21, 0, 0, 626.45, 131.55),
+			([(1, 379)] * 20, 21, 0, 0, 6264.46, 1315.54),
+			([(1, 379)] * 2, 21, 1, 0, 626.44, 131.56),
+			([(1, 379)] * 2, 21, 0, 10, 563.80, 118.40),
+			([(1, 379)] * 20, 21, 0, 10, 5638.02, 1183.98),
+			([(1, 379)] * 2, 21, 1, 10, 563.80, 118.40),
+			([(100, 50)], 14, 0, 2, 4298.25, 601.75),
+			([(20, 800), (10, 1000)], 7, 0, 0, 24299.07, 1700.93),
+			([(20, 800), (10, 1000)], 7, 1, 0, 24299.06, 1700.94),
+		):
+			with (
+				self.subTest(
+					items=item_values,
+					tax_rate=tax_rate,
+					round_row_wise_tax=round_row_wise_tax,
+					discount=discount,
+				),
+				self.change_settings("Accounts Settings", round_row_wise_tax=round_row_wise_tax),
+			):
+				si = create_sales_invoice(qty=item_values[0][0], rate=item_values[0][1], do_not_save=True)
+				si.disable_rounded_total = 1
+				si.apply_discount_on = "Grand Total"
+				si.additional_discount_percentage = discount
+				for idx, (qty, rate) in enumerate(item_values[1:], start=2):
+					si.append("items", {**si.items[0].as_dict(), "idx": idx, "qty": qty, "rate": rate})
+				si.append(
+					"taxes",
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Service Tax - _TC",
+						"description": f"Tax {tax_rate}%",
+						"rate": tax_rate,
+						"included_in_print_rate": 1,
+					},
+				)
+				si.insert()
+				si.submit()
+				si.reload()
+
+				self.assertEqual(si.net_total, net_total)
+				self.assertEqual(flt(sum(item.net_amount for item in si.items), 2), net_total)
+				grand_total = flt(sum(qty * rate for qty, rate in item_values) * (1 - discount / 100), 2)
+				self.assertEqual(si.taxes[0].tax_amount_after_discount_amount, tax_amount)
+				self.assertEqual(si.total_taxes_and_charges, tax_amount)
+				self.assertEqual(flt(si.net_total + si.total_taxes_and_charges, 2), grand_total)
+				self.assertEqual(si.taxes[0].total, grand_total)
+				self.assertEqual(si.grand_total, grand_total)
+				self.assertEqual(si.outstanding_amount, si.grand_total)
+				self.assertEqual(si.rounding_adjustment, 0)
+				if discount and not round_row_wise_tax:
+					self.assertEqual(
+						flt(sum(item.distributed_discount_amount for item in si.items), 2),
+						flt(
+							sum(qty * rate for qty, rate in item_values) / (1 + tax_rate / 100) - net_total, 2
+						),
+					)
+				self.assertCountEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"voucher_type": si.doctype, "voucher_no": si.name},
+						fields=["account", "debit", "credit"],
+						as_list=True,
+					),
+					[
+						("Debtors - _TC", grand_total, 0),
+						("Sales - _TC", 0, net_total),
+						("_Test Account Service Tax - _TC", 0, tax_amount),
+					],
+				)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
 	def test_inclusive_tax_zero_decimal_currency(self):
 		"""Tax-included prices in zero-decimal currencies (e.g. JPY) must not produce
@@ -486,14 +614,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		# With currency_precision=0:
 		# Item 1: 50,000 / 1.10 = 45,454.545 → net 45,455, tax 4,545
-		# Item 2: 30,000 / 1.10 = 27,272.727 → net 27,273, tax 2,727
-		# Per-item: net + tax = gross holds (45455+4545=50000, 27273+2727=30000)
-		# Accumulated tax rounds separately: flt(7272.72, 0) = 7273
-		# adjust_grand_total_for_inclusive_tax patches grand_total back to 80000
+		# Cumulative net: 80,000 / 1.10 = 72,727.272 → 72,727
+		# Item 2 absorbs the rounding difference: 72,727 - 45,455 = 27,272
 		self.assertEqual(si.items[0].net_amount, 45455)
-		self.assertEqual(si.items[1].net_amount, 27273)
-		self.assertEqual(si.net_total, 72728)
+		self.assertEqual(si.items[1].net_amount, 27272)
+		self.assertEqual(si.net_total, 72727)
 		self.assertEqual(si.taxes[0].tax_amount, 7273)
+		self.assertEqual(si.taxes[0].total, 80000)
 		self.assertEqual(si.grand_total, 80000)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"number_format": "#,###", "currency_precision": 0})
@@ -1928,7 +2055,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
 	def test_gle_made_when_asset_is_returned(self):
-		asset = create_asset(item_code="Macbook Pro")
+		asset = create_asset(item_code="Macbook Pro", submit=1)
 
 		si = create_sales_invoice(item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000)
 		return_si = create_sales_invoice(
@@ -2604,7 +2731,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.save()
 		si.submit()
 		self.assertEqual(si.net_total, si.base_net_total)
-		self.assertEqual(si.net_total, 4007.15)
+		self.assertEqual(si.net_total, 4007.16)
 		self.assertEqual(si.grand_total, 4488.02)
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
 		self.assertEqual(si.rounding_adjustment, -0.02)
@@ -2616,8 +2743,8 @@ class TestSalesInvoice(ERPNextTestSuite):
 				[si.debit_to, 4488.0, 0.0],
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
-				["Sales - _TC", 0.0, 4007.15],
-				[round_off_account, 0.01, 0.0],
+				["Sales - _TC", 0.0, 4007.16],
+				[round_off_account, 0.02, 0.0],
 			]
 		)
 
@@ -3754,7 +3881,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		expected_values = [
 			["2020-06-30", 1366.12, 1366.12],
 			["2021-06-30", 20000.0, 21366.12],
-			["2021-09-30", 5041.34, 26407.46],
+			["2021-09-30", 5041.1, 26407.22],
 		]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
@@ -3785,7 +3912,7 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		asset.load_from_db()
 
-		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30041.15, 60041.15]]
+		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
 
 		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
@@ -4205,6 +4332,125 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		with self.assertRaises(frappe.ValidationError):
 			si.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	def test_return_against_over_billed_so_is_not_blocked(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+		so_detail = so.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		for update_billed_amount in (0, 1):
+			return_si = make_sales_return(si.name)
+			return_si.items[0].qty = -1
+			return_si.update_billed_amount_in_sales_order = update_billed_amount
+			return_si.insert()
+			return_si.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1350)
+
+		# cancelling a return adds the billing back, so it is still checked
+		with self.assertRaises(OverAllowanceError):
+			return_si.cancel()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_row_with_negative_rate_is_checked_for_over_billing(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.insert()
+		si.submit()
+
+		# qty -1 at rate -100 adds 100 to the fully billed order line
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.update_billed_amount_in_sales_order = 1
+		return_si.insert()
+		with self.assertRaises(OverAllowanceError):
+			return_si.submit()
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_without_update_billed_amount_skips_over_billing_check(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+		so_detail = so.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		# with the flag off the return never touches the order's billing, even at a negative rate
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.update_billed_amount_in_sales_order = 0
+		return_si.insert()
+		return_si.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+		return_si.cancel()
+		self.assertEqual(return_si.docstatus, 2)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so_detail, "billed_amt"), 1500)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"over_billing_allowance": 0, "role_allowed_to_over_bill": "Accounts Manager"}
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1})
+	def test_return_rate_correction_through_set_value_is_not_blocked(self):
+		from frappe.client import set_value
+
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_si_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=10, rate=100)
+		si = make_si_from_so(so.name)
+		si.items[0].rate = 150
+		si.insert()
+		si.submit()
+
+		# a user with the over billing role saves a draft return at a negative rate
+		return_si = make_sales_return(si.name)
+		return_si.items[0].qty = -1
+		return_si.items[0].rate = -100
+		return_si.insert()
+		self.assertEqual(return_si.items[0].amount, 100)
+
+		# from here on nobody may over bill
+		frappe.db.set_single_value("Accounts Settings", "role_allowed_to_over_bill", None)
+
+		# correcting the rate through the api saves the row before its amount is recomputed
+		set_value("Sales Invoice Item", return_si.items[0].name, "rate", 150)
+		return_si.reload()
+		self.assertEqual(return_si.items[0].rate, 150)
+		self.assertEqual(return_si.items[0].amount, -150)
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings",
@@ -4886,17 +5132,16 @@ class TestSalesInvoice(ERPNextTestSuite):
 				"included_in_print_rate": True,
 			},
 		)
-		# there will be 0.01 precision loss between Dr and Cr
-		# caused by 'included_in_print_tax' option
 		si.save()
 		return si
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_rounding_validation_for_opening_with_inclusive_tax(self):
 		si = self._create_opening_invoice_with_inclusive_tax()
-		# 'Round Off for Opening' not set in Company master
-		# Ledger level validation must be thrown
-		self.assertRaises(frappe.ValidationError, si.submit)
+		# Cumulative net rounding avoids a loss requiring 'Round Off for Opening'.
+		si.submit()
+		self.assertEqual(si.net_total, 138.10)
+		self.assertEqual(si.taxes[0].total, si.grand_total)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_ledger_entries_on_opening_invoice_with_rounding_loss_by_inclusive_tax(self):
@@ -4914,10 +5159,9 @@ class TestSalesInvoice(ERPNextTestSuite):
 		expected = [
 			{"account": "_Test Account Service Tax - _TC", "debit": 0.0, "credit": 6.9, "is_opening": "Yes"},
 			{"account": "Debtors - _TC", "debit": 145.0, "credit": 0.0, "is_opening": "Yes"},
-			{"account": "Round Off for Opening - _TC", "debit": 0.0, "credit": 0.01, "is_opening": "Yes"},
-			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.09, "is_opening": "Yes"},
+			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.10, "is_opening": "Yes"},
 		]
-		self.assertEqual(len(actual), 4)
+		self.assertEqual(len(actual), 3)
 		self.assertEqual(expected, actual)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_common_party_accounting": True})

@@ -29,8 +29,65 @@ class TestLeadDetailsReport(ERPNextTestSuite):
 			}
 		).insert()
 
-		filters = frappe._dict(
-			company="_Test Company", from_date=add_days(today(), -1), to_date=add_days(today(), 1)
-		)
-		row = next(r for r in get_data(filters) if r.get("name") == lead.name)
+		row = next(r for r in get_data(make_filters()) if r.get("name") == lead.name)
 		self.assertEqual(row.get("address"), "221B Baker Street")
+
+	def test_territory_group_includes_child_territories(self):
+		lead = make_lead(territory="_Test Territory India")
+
+		names = [row.name for row in get_data(make_filters(territory="All Territories"))]
+		self.assertIn(lead.name, names)
+
+	def test_lead_with_two_addresses_is_listed_once(self):
+		lead = make_lead()
+		for city in ("Mysuru", "Hubballi"):
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": city,
+					"address_line1": "1 Main Road",
+					"city": city,
+					"country": "India",
+					"is_primary_address": city == "Hubballi",
+					"links": [{"link_doctype": "Lead", "link_name": lead.name}],
+				}
+			).insert()
+
+		rows = [row for row in get_data(make_filters()) if row.name == lead.name]
+		self.assertEqual([row.city for row in rows], ["Hubballi"])
+
+	def test_disabled_primary_address_is_skipped(self):
+		lead = make_lead()
+		for city, disabled in (("Mysuru", 1), ("Hubballi", 0)):
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": city,
+					"address_line1": "1 Main Road",
+					"city": city,
+					"country": "India",
+					"is_primary_address": city == "Mysuru",
+					"disabled": disabled,
+					"links": [{"link_doctype": "Lead", "link_name": lead.name}],
+				}
+			).insert()
+
+		rows = [row for row in get_data(make_filters()) if row.name == lead.name]
+		self.assertEqual([row.city for row in rows], ["Hubballi"])
+
+	def test_lead_without_company_is_listed(self):
+		lead = make_lead(company=None)
+
+		self.assertIn(lead.name, [row.name for row in get_data(make_filters())])
+
+
+def make_lead(**fields):
+	return frappe.get_doc(
+		{"doctype": "Lead", "lead_name": "_Test Lead Details", "company": "_Test Company", **fields}
+	).insert()
+
+
+def make_filters(**filters):
+	return frappe._dict(
+		company="_Test Company", from_date=add_days(today(), -1), to_date=add_days(today(), 1), **filters
+	)

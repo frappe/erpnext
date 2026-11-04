@@ -17,6 +17,7 @@
   "posting_date",
   "company",
   "mode_of_payment",
+  "bank_account",
   "party_section",
   "party_type",
   "party",
@@ -26,7 +27,6 @@
   "apply_tds",
   "tax_withholding_category",
   "column_break_11",
-  "bank_account",
   "party_bank_account",
   "contact_person",
   "contact_email",
@@ -34,10 +34,13 @@
   "paid_from",
   "paid_from_account_type",
   "paid_from_account_currency",
+  "reference_no",
   "column_break_18",
   "paid_to",
   "paid_to_account_type",
   "paid_to_account_currency",
+  "reference_date",
+  "clearance_date",
   "payment_amounts_section",
   "paid_amount",
   "paid_amount_after_tax",
@@ -54,6 +57,7 @@
   "get_outstanding_invoices",
   "get_outstanding_orders",
   "references",
+  "payment_term_discounts_calculated",
   "section_break_34",
   "total_allocated_amount",
   "base_total_allocated_amount",
@@ -76,11 +80,6 @@
   "ignore_tax_withholding_threshold",
   "override_tax_withholding_entries",
   "tax_withholding_entries",
-  "transaction_references",
-  "reference_no",
-  "column_break_23",
-  "reference_date",
-  "clearance_date",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -222,10 +221,9 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
-   "label": "Accounts"
+   "label": "Accounts and Transaction Details"
   },
   {
    "bold": 1,
@@ -410,11 +408,6 @@
    "options": "Payment Entry Deduction"
   },
   {
-   "fieldname": "transaction_references",
-   "fieldtype": "Section Break",
-   "label": "Transaction ID"
-  },
-  {
    "bold": 1,
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
@@ -424,10 +417,6 @@
    "in_standard_filter": 1,
    "label": "Cheque/Reference No",
    "mandatory_depends_on": "eval:(doc.paid_from_account_type == 'Bank' || doc.paid_to_account_type == 'Bank')"
-  },
-  {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
   },
   {
    "bold": 1,
@@ -537,7 +526,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
    "fieldname": "bank_account",
    "fieldtype": "Link",
    "label": "Company Bank Account",
@@ -787,6 +776,15 @@
    "fieldname": "auto_repeat_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "default": "0",
+   "fieldname": "payment_term_discounts_calculated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Payment Term Discounts Calculated",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -802,7 +800,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-11-04 13:22:40.103864",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

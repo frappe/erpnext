@@ -1395,7 +1395,9 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		bom_no, bom_operation_cost = frappe.db.get_value(
-			"BOM", {"item": "_Test FG Item 2", "is_default": 1, "docstatus": 1}, ["name", "operating_cost"]
+			"BOM",
+			{"item": "_Test FG Item 2", "is_default": 1, "docstatus": 1},
+			["name", "base_operating_cost"],
 		)
 
 		work_order = frappe.new_doc("Work Order")
@@ -1457,6 +1459,42 @@ class TestStockEntry(ERPNextTestSuite):
 		stock_entry.items[0].qty = 0.002
 		with self.assertRaises(frappe.ValidationError):
 			stock_entry._validate_no_excess_transfer()
+
+	def test_tracked_consumption_deducts_matching_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import (
+			_deduct_consumed_batch_qty,
+			_deduct_consumed_material,
+		)
+
+		serial_buckets = [
+			frappe._dict(qty=2, serial_nos=["SERIAL-1", "SERIAL-2"]),
+			frappe._dict(qty=2, serial_nos=["SERIAL-3", "SERIAL-4"]),
+		]
+		_deduct_consumed_material(serial_buckets, frappe._dict(qty=1, serial_no="SERIAL-3"))
+		self.assertEqual([bucket.qty for bucket in serial_buckets], [2, 1])
+		self.assertEqual(serial_buckets[1].serial_nos, ["SERIAL-4"])
+
+		batch_buckets = [
+			frappe._dict(qty=2, batch_details={"BATCH-1": 2}),
+			frappe._dict(qty=3, batch_details={"BATCH-2": 3}),
+		]
+		_deduct_consumed_batch_qty(batch_buckets, "BATCH-2", 1)
+		self.assertEqual([bucket.qty for bucket in batch_buckets], [2, 2])
+		self.assertEqual(batch_buckets[1].batch_details["BATCH-2"], 2)
+
+	def test_consumption_prefers_exact_attribution_bucket(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import _get_consumption_buckets
+
+		alternative = frappe._dict(original_item="REQUIRED-ITEM")
+		direct = frappe._dict(original_item=None)
+		available_materials = {("ITEM", "WIP", "REQUIRED-ITEM"): alternative, ("ITEM", "WIP", None): direct}
+
+		self.assertEqual(
+			_get_consumption_buckets(available_materials, ("ITEM", "WIP", None)), [direct, alternative]
+		)
+		self.assertEqual(
+			_get_consumption_buckets(available_materials, ("ITEM", "WIP", "REQUIRED-ITEM")), [alternative]
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_work_order_manufacture_with_material_consumption(self):
@@ -4502,6 +4540,184 @@ class TestStockEntry(ERPNextTestSuite):
 
 		self.assertEqual([(d.item_code, d.basic_amount) for d in manufacture.items], [(fg_item, 600)])
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Completed")
+
+	def test_disassembly_returns_each_consumed_batch_once(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		warehouse = "_Test Warehouse - _TC"
+		for typed_batch_no in (1, 0):
+			rm_item = make_item(
+				properties={
+					"is_stock_item": 1,
+					"has_batch_no": 1,
+					"create_new_batch": 1,
+					"batch_number_series": "DISB-.#####",
+				}
+			).name
+			fg_item = make_item(properties={"is_stock_item": 1}).name
+			make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100)
+			batches = [
+				get_batch_from_bundle(
+					make_stock_entry(item_code=rm_item, target=warehouse, qty=5, basic_rate=100)
+					.items[0]
+					.serial_and_batch_bundle
+				)
+				for _ in range(2)
+			]
+			wo = make_wo_order_test_record(item=fg_item, qty=10, skip_transfer=1, source_warehouse=warehouse)
+
+			for batch_no in batches:
+				manufacture = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 5))
+				if typed_batch_no:
+					rm_row = next(row for row in manufacture.items if row.item_code == rm_item)
+					rm_row.use_serial_batch_fields = 1
+					rm_row.batch_no = batch_no
+				manufacture.insert().submit()
+
+			returned = []
+			for _ in range(2):
+				disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 5))
+				disassembly.insert().submit()
+				rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+				returned.append(get_batch_from_bundle(rm_row.serial_and_batch_bundle))
+
+			self.assertEqual(sorted(returned), sorted(batches))
+			for batch_no in batches:
+				self.assertEqual(get_batch_qty(batch_no, warehouse, rm_item), 5)
+
+	def test_disassembly_after_material_transfer_returns_consumed_batches(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "DIST-.#####",
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100)
+		batches = [
+			get_batch_from_bundle(
+				make_stock_entry(item_code=rm_item, target=warehouse, qty=5, basic_rate=100)
+				.items[0]
+				.serial_and_batch_bundle
+			)
+			for _ in range(2)
+		]
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=10, source_warehouse=warehouse, wip_warehouse="Work In Progress - _TC"
+		)
+		frappe.get_doc(
+			make_wo_stock_entry(wo.name, "Material Transfer for Manufacture", 10)
+		).insert().submit()
+		for _ in range(2):
+			frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 5)).insert().submit()
+
+		returned = []
+		for _ in range(2):
+			disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 5))
+			disassembly.insert().submit()
+			rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+			returned.append(get_batch_from_bundle(rm_row.serial_and_batch_bundle))
+
+		self.assertEqual(sorted(returned), sorted(batches))
+
+	def test_disassembly_picks_finished_serial_nos_from_its_source_warehouse(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		warehouse, other_warehouse = "_Test Warehouse - _TC", "Stores - _TC"
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "DISFG-.#####"}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100)
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=2, basic_rate=100)
+		wo = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=1, source_warehouse=warehouse)
+
+		frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1)).insert().submit()
+		wo.db_set("fg_warehouse", other_warehouse)
+		manufacture = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", 1)).insert()
+		manufacture.submit()
+		manufacture.reload()
+		fg_row = next(row for row in manufacture.items if row.item_code == fg_item)
+
+		disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 1))
+		disassembly.insert().submit()
+		disassembled_row = next(row for row in disassembly.items if row.item_code == fg_item)
+
+		self.assertEqual(disassembled_row.s_warehouse, other_warehouse)
+		self.assertEqual(
+			get_serial_nos_from_bundle(disassembled_row.serial_and_batch_bundle),
+			get_serial_nos_from_bundle(fg_row.serial_and_batch_bundle),
+		)
+
+	def test_disassembly_skips_batch_left_with_rounding_residue(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "DISR-.#####",
+				"stock_uom": "Kg",
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(
+			item=fg_item, raw_materials=[rm_item], source_warehouse=warehouse, rate=100, do_not_submit=True
+		)
+		bom.items[0].qty = 0.1
+		bom.submit()
+		first_batch, second_batch = (
+			get_batch_from_bundle(
+				make_stock_entry(item_code=rm_item, target=warehouse, qty=1, basic_rate=100)
+				.items[0]
+				.serial_and_batch_bundle
+			)
+			for _ in range(2)
+		)
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=6, skip_transfer=1, source_warehouse=warehouse, bom_no=bom.name
+		)
+
+		# 0.1 + 0.2 of the first batch leaves a float residue once 0.3 is disassembled
+		for fg_qty, batch_no in ((1, first_batch), (2, first_batch), (3, second_batch)):
+			manufacture = frappe.get_doc(make_wo_stock_entry(wo.name, "Manufacture", fg_qty))
+			rm_row = next(row for row in manufacture.items if row.item_code == rm_item)
+			rm_row.use_serial_batch_fields = 1
+			rm_row.batch_no = batch_no
+			manufacture.insert().submit()
+
+		returned = []
+		for _ in range(2):
+			disassembly = frappe.get_doc(make_wo_stock_entry(wo.name, "Disassemble", 3))
+			disassembly.insert().submit()
+			rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+			returned.append(get_batch_from_bundle(rm_row.serial_and_batch_bundle))
+
+		self.assertEqual(returned, [first_batch, second_batch])
 
 	def test_disassemble_entry_without_wo(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom

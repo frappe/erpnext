@@ -41,6 +41,9 @@
   "over_delivery_receipt_allowance",
   "column_break_wugd",
   "over_billing_allowance",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
   "section_break_11",
   "brand",
   "description",
@@ -196,7 +199,6 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
-   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -1105,6 +1107,29 @@
    "fieldname": "item_prices_column",
    "fieldtype": "Column Break",
    "label": "Item Prices"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "description": "If checked, this Item is only available for transactions in the companies listed below.",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "options": "Company Restriction",
+   "depends_on": "eval:doc.restrict_to_companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "permlevel": 1
   }
  ],
  "icon": "package",
@@ -1112,7 +1137,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-10-19 12:00:00.000000",
+ "modified": "2026-10-30 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1174,6 +1199,12 @@
    "role": "Desk User",
    "select": 1,
    "share": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Item Manager",
+   "write": 1
   }
  ],
  "quick_entry": 1,

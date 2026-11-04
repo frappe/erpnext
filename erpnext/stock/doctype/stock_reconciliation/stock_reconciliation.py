@@ -1215,7 +1215,7 @@ class StockReconciliation(StockController):
 			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
 			d.amount_difference = flt(d.amount) - flt(d.current_amount)
 
-	def recalculate_difference_amount_from_ledger(self):
+	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
 
 		Submitted reconciliations freeze ``difference_amount`` and the per-row current values at
@@ -1223,49 +1223,49 @@ class StockReconciliation(StockController):
 		Entries and rebuild the GL from them. Without this sync the document keeps showing stale figures
 		that no longer match the GL entries. Anchoring ``amount_difference`` to the row's summed
 		``stock_value_difference`` keeps the document and the GL consistent by construction.
+
+		With ``voucher_detail_no``, only that row is refreshed and the total is summed from all rows.
 		"""
 		if self.purpose == ADJUSTMENT_ENTRY:
 			AdjustmentEntry(self).set_difference_amount_from_ledger()
 			return
 
-		difference_amount = 0.0
-
 		for row in self.items:
-			stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
-			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+			if voucher_detail_no in (None, row.name):
+				self.set_row_values_from_ledger(row)
 
-			if self.is_adjustment_row(row):
-				self.set_adjustment_row_values(row, amount_difference)
-				difference_amount += amount_difference
-				continue
-
-			amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
-			current_amount = flt(amount - amount_difference, row.precision("current_amount"))
-
-			current_qty = self.get_current_qty_from_ledger(row)
-			current_valuation_rate = (
-				flt(current_amount / current_qty, row.precision("current_valuation_rate"))
-				if current_qty
-				else 0.0
-			)
-
-			row.db_set(
-				{
-					"amount": amount,
-					"current_qty": current_qty,
-					"current_valuation_rate": current_valuation_rate,
-					"current_amount": current_amount,
-					"quantity_difference": flt(row.qty) - current_qty,
-					"amount_difference": amount_difference,
-				},
-				update_modified=False,
-			)
-
-			difference_amount += amount_difference
-
+		difference_amount = sum(flt(row.amount_difference) for row in self.items)
 		self.db_set(
 			"difference_amount",
 			flt(difference_amount, self.precision("difference_amount")),
+			update_modified=False,
+		)
+
+	def set_row_values_from_ledger(self, row: StockReconciliationItem):
+		stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
+		amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+
+		if self.is_adjustment_row(row):
+			self.set_adjustment_row_values(row, amount_difference)
+			return
+
+		amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
+		current_amount = flt(amount - amount_difference, row.precision("current_amount"))
+
+		current_qty = self.get_current_qty_from_ledger(row)
+		current_valuation_rate = (
+			flt(current_amount / current_qty, row.precision("current_valuation_rate")) if current_qty else 0.0
+		)
+
+		row.db_set(
+			{
+				"amount": amount,
+				"current_qty": current_qty,
+				"current_valuation_rate": current_valuation_rate,
+				"current_amount": current_amount,
+				"quantity_difference": flt(row.qty) - current_qty,
+				"amount_difference": amount_difference,
+			},
 			update_modified=False,
 		)
 
@@ -1641,18 +1641,17 @@ def get_stock_balance_for(
 			"use_serial_batch_fields": row.use_serial_batch_fields if row else use_serial_batch_fields,
 		}
 
-	# TODO: fetch only selected batch's values
 	data = _get_stock_balance(
 		item_code,
 		warehouse,
 		posting_date,
 		posting_time,
 		with_valuation_rate=True,
-		with_serial_no=has_serial_no,
+		with_serial_no=has_serial_no and not has_batch_no,
 		inventory_dimensions_dict=inventory_dimensions_dict,
 	)
 
-	if has_serial_no:
+	if has_serial_no and not has_batch_no:
 		qty, rate, serial_nos = data
 	else:
 		qty, rate = data
@@ -1670,6 +1669,20 @@ def get_stock_balance_for(
 			)
 			or 0
 		)
+
+		if has_serial_no:
+			serial_no_details = get_available_serial_nos(
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": warehouse,
+						"posting_datetime": combine_datetime(posting_date, posting_time),
+						"ignore_warehouse": 1,
+						"has_batch_no": 1,
+					}
+				)
+			)
+			serial_nos = "\n".join(d.serial_no for d in serial_no_details if d.batch_no == batch_no)
 
 		if row and row.use_serial_batch_fields and row.batch_no and (qty or row.current_qty):
 			rate = _get_incoming_rate(

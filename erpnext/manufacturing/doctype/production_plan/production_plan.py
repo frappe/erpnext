@@ -78,6 +78,7 @@ class ProductionPlan(Document):
 		combine_sub_items: DF.Check
 		company: DF.Link
 		consider_minimum_order_qty: DF.Check
+		consider_process_loss: DF.Check
 		customer: DF.Link | None
 		for_warehouse: DF.Link | None
 		from_date: DF.Date | None
@@ -138,6 +139,7 @@ class ProductionPlan(Document):
 
 	def validate(self):
 		self.set_pending_qty_in_row_without_reference()
+		self.set_process_loss_percentage()
 		self.calculate_total_planned_qty()
 		self.set_status()
 		self._rename_temporary_references()
@@ -223,6 +225,10 @@ class ProductionPlan(Document):
 		for item in self.po_items:
 			if not item.get("sales_order") or not item.get("material_request"):
 				item.pending_qty = item.planned_qty
+
+	def set_process_loss_percentage(self):
+		for item in self.po_items:
+			item.process_loss_percentage = get_plan_process_loss_percentage(self, item.bom_no)
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
@@ -937,7 +943,12 @@ class ProductionPlan(Document):
 		pending = ProductionPlanWorkOrderQuantities(self.name).get_pending_quantities(self)
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
-				subcontracted_po.setdefault(row.supplier, []).append(row)
+				order_qty = ProductionPlanWorkOrderQuantities.get_order_qty(
+					row, "production_plan_sub_assembly_item"
+				)
+				subcontracted_po.setdefault(row.supplier, []).append(
+					frappe._dict(row.as_dict(), qty=order_qty)
+				)
 				continue
 
 			if row.type_of_manufacturing == "Material Request":
@@ -1233,10 +1244,13 @@ class ProductionPlan(Document):
 				bin_details,
 				row.bom_no,
 				bom_data,
-				row.planned_qty,
+				get_qty_before_process_loss(
+					row.planned_qty, get_plan_process_loss_percentage(self, row.bom_no), row.stock_uom
+				),
 				self.company,
 				warehouse=self.sub_assembly_warehouse,
 				skip_available_sub_assembly_item=self.skip_available_sub_assembly_item,
+				consider_process_loss=self.consider_process_loss,
 			)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
@@ -1570,6 +1584,39 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 	return item_details
 
 
+def get_planned_process_loss_percentage(bom_no):
+	"""BOM process loss % to add to the quantity, 0 when the BOM loses everything."""
+	return get_planned_loss_percentage(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
+
+
+def get_plan_process_loss_percentage(plan, bom_no):
+	"""BOM process loss % a Production Plan orders for, 0 unless it considers process loss."""
+	if not plan.get("consider_process_loss"):
+		return 0
+	return get_planned_process_loss_percentage(bom_no)
+
+
+def get_planned_loss_percentage(loss_percentage):
+	"""Process loss % to plan for, 0 when everything is lost."""
+	loss_percentage = flt(loss_percentage)
+	return loss_percentage if loss_percentage < 100 else 0
+
+
+def get_qty_before_process_loss(qty, loss_percentage, uom):
+	"""Quantity to make so that `qty` is left after `loss_percentage` process loss."""
+	loss_percentage = get_planned_loss_percentage(loss_percentage)
+	if not loss_percentage:
+		return flt(qty)
+	return round_up_to_whole_unit(flt(qty) / (1 - loss_percentage / 100), uom)
+
+
+def round_up_to_whole_unit(qty, uom):
+	"""A fraction of a whole number UOM cannot be made, so make the next whole unit."""
+	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
+		return ceil(flt(qty, frappe.get_precision("Work Order", "qty")))
+	return qty
+
+
 def get_uom_conversion_factor(item_code, uom):
 	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
 	conversion_factor = frappe.db.get_value(
@@ -1656,6 +1703,13 @@ def get_subitems(
 			_merge_subitem(item_details, d)
 
 		if explode:
+			qty = (
+				d.qty
+				if d.is_phantom_item
+				else get_qty_before_process_loss(
+					d.qty, get_plan_process_loss_percentage(doc, child_bom), d.stock_uom
+				)
+			)
 			get_subitems(
 				doc,
 				data,
@@ -1664,7 +1718,7 @@ def get_subitems(
 				company,
 				include_non_stock_items,
 				include_subcontracted_items,
-				d.qty,
+				qty,
 			)
 	return {key: value for key, value in item_details.items() if not value.get("is_phantom_item")}
 
@@ -2111,7 +2165,9 @@ def get_items_for_material_requests(
 
 			sub_assembly_items[
 				(d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
-			] += d.get("qty")
+			] += get_qty_before_process_loss(
+				d.get("qty"), d.get("process_loss_percentage"), d.get("stock_uom")
+			)
 		sub_assembly_items = {k[:2]: v for k, v in sub_assembly_items.items()}
 
 	requested_sub_assemblies = get_requested_sub_assemblies(doc)
@@ -2127,6 +2183,9 @@ def get_items_for_material_requests(
 		)
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
+		if data.get("bom_no") and not data.get("required_qty"):
+			loss_percentage = get_plan_process_loss_percentage(doc, data.get("bom_no"))
+			planned_qty = get_qty_before_process_loss(planned_qty, loss_percentage, data.get("stock_uom"))
 		ignore_existing_ordered_qty = data.get("ignore_existing_ordered_qty") or ignore_existing_ordered_qty
 
 		item_details = {}
@@ -2423,6 +2482,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
+	consider_process_loss=False,
 ):
 	data = get_bom_children(parent=bom_no)
 	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
@@ -2447,6 +2507,10 @@ def get_sub_assembly_items(
 					stock_qty -= available_qty
 
 			if not d.is_phantom_item:
+				d.process_loss_percentage = (
+					get_planned_process_loss_percentage(d.value) if consider_process_loss else 0
+				)
+				stock_qty = round_up_to_whole_unit(stock_qty, d.stock_uom)
 				bom_data.append(
 					frappe._dict(
 						{
@@ -2463,11 +2527,13 @@ def get_sub_assembly_items(
 							"indent": indent,
 							"stock_qty": flt(stock_qty, precision),
 							"required_qty": flt(required_qty, precision),
+							"process_loss_percentage": d.process_loss_percentage,
 							"projected_qty": bin_details.get(d.item_code, {}).get("projected_qty", 0),
 							"main_bom": bom_no,
 						}
 					)
 				)
+				stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage, d.stock_uom)
 
 			if d.value:
 				get_sub_assembly_items(
@@ -2479,6 +2545,7 @@ def get_sub_assembly_items(
 					warehouse,
 					indent=indent + 1,
 					skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+					consider_process_loss=consider_process_loss,
 				)
 
 
@@ -2534,10 +2601,7 @@ def _get_material_request_plan_query(item_code):
 		.select(
 			table.name.as_("production_plan"),
 			child.warehouse,
-			Sum(
-				Case().when(child.quantity == 0, child.required_bom_qty).else_(child.quantity)
-				* child.conversion_factor
-			).as_("reserved_qty"),
+			Sum(child.required_bom_qty).as_("reserved_qty"),
 		)
 		.where(_is_open_plan(table) & (child.item_code == item_code))
 		.groupby(table.name, child.warehouse)
@@ -2789,7 +2853,7 @@ def reserve_stock_for_production_plan(doc, items=None, table_name=None, notify=F
 		if table_name and table_name != child_table_name:
 			continue
 
-		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name], notify=notify)
+		sre = StockReservation(doc, items=items, kwargs=mapper[child_table_name])
 		if doc.docstatus == 1:
 			sre_created = sre.make_stock_reservation_entries()
 			if sre_created:

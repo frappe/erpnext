@@ -1318,18 +1318,37 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
 
 	def test_sales_order_with_fully_returned_delivery_uses_valuation_rate(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		item = create_item("_Test Gross Profit Returned Delivery Item").name
 		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=2, basic_rate=100)
 		so = make_sales_order(
-			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=2
+			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=2, rate=100
 		)
 		dnote = make_delivery_note(so.name).submit()
+		# full return restores the stock and leaves the summed delivered qty for the SO line at zero
 		make_sales_return(dnote.name).submit()
-		sinv = make_sales_invoice(so.name).submit()
+
+		# a fully returned SO has nothing left to bill, so link the invoice row to the SO line directly
+		# to exercise the zero-delivered-qty fallback to the valuation rate
+		sinv = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item_code=item,
+			qty=2,
+			rate=100,
+			warehouse=self.warehouse,
+			cost_center=self.cost_center,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=True,
+		)
+		sinv.items[0].sales_order = so.name
+		sinv.items[0].so_detail = so.items[0].name
+		sinv.submit()
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 200)
 

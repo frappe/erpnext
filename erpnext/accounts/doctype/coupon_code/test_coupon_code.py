@@ -3,9 +3,16 @@
 import unittest
 
 import frappe
+from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.selling.doctype.quotation import quotation as mapper
+from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
@@ -113,6 +120,264 @@ def test_create_test_data():
 
 
 class TestCouponCode(ERPNextTestSuite):
+	def test_multiple_coupons_for_one_pricing_rule(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		second_coupon = frappe.copy_doc(coupon)
+		second_coupon.coupon_name = "_Test Second Coupon"
+		second_coupon.coupon_code = "SECOND30"
+		second_coupon.insert()
+
+		for name in (coupon.name, second_coupon.name):
+			with self.subTest(coupon=name):
+				order = self.make_coupon_order(coupon_code=name, do_not_save=True).insert()
+				self.assertEqual(order.items[0].rate, 3500)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [coupon.pricing_rule])
+				order.submit()
+				self.assertEqual(frappe.db.get_value("Coupon Code", name, "used"), 1)
+
+	def test_change_coupon_on_server_save(self):
+		frappe.db.set_single_value("Selling Settings", "allow_multiple_items", 1)
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		for discount_type, expected_rate in (
+			("Discount Percentage", 4250),
+			("Discount Amount", 4250),
+			("Product", 5000),
+		):
+			with self.subTest(discount_type=discount_type):
+				order = self.make_coupon_order(do_not_save=True).insert()
+				self.assertEqual(order.items[0].rate, 3500)
+				rule = frappe.copy_doc(frappe.get_doc("Pricing Rule", coupon.pricing_rule))
+				if discount_type == "Product":
+					rule.price_or_product_discount = "Product"
+					rule.same_item = 1
+					rule.free_qty = 1
+				else:
+					rule.rate_or_discount = discount_type
+					rule.discount_percentage = 15
+					rule.discount_amount = 750
+				rule.insert()
+				replacement = frappe.copy_doc(coupon)
+				replacement.coupon_name = f"_Test Replacement {discount_type}"
+				replacement.coupon_code = f"REPLACE-{discount_type}"
+				replacement.pricing_rule = rule.name
+				replacement.insert()
+				order.coupon_code = replacement.name
+				order.save()
+				self.assertEqual(order.items[0].rate, expected_rate)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [rule.name])
+				self.assertEqual(sum(row.is_free_item for row in order.items), discount_type == "Product")
+				if discount_type == "Product":
+					next_rule = frappe.copy_doc(rule)
+					next_rule.same_item = 0
+					next_rule.free_item = "_Test Item"
+					next_rule.insert()
+					next_coupon = frappe.copy_doc(replacement)
+					next_coupon.coupon_name = "_Test Next Product Coupon"
+					next_coupon.coupon_code = "NEXT-PRODUCT"
+					next_coupon.pricing_rule = next_rule.name
+					next_coupon.insert()
+					for active_coupon in (next_coupon, replacement, next_coupon):
+						order.coupon_code = active_coupon.name
+						order.save()
+						self.assertEqual(
+							[row.pricing_rules for row in order.items if row.is_free_item],
+							[active_coupon.pricing_rule],
+						)
+				order.coupon_code = None
+				order.save()
+				self.assertEqual(order.items[0].rate, 5000)
+				self.assertEqual(order.items[0].discount_percentage, 0)
+				self.assertFalse(order.items[0].pricing_rules)
+				self.assertFalse(any(row.is_free_item for row in order.items))
+				order.submit()
+				self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 0)
+				self.assertEqual(frappe.db.get_value("Coupon Code", replacement.name, "used"), 0)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_replace_rate_coupon(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		rule = frappe.get_doc("Pricing Rule", coupon.pricing_rule)
+		rule.rate_or_discount = "Rate"
+		rule.rate = 4000
+		rule.save()
+		for discount_type, expected_rate in (
+			("Discount Percentage", 4250),
+			("Discount Amount", 4250),
+			("Rate", 4500),
+			(None, 5000),
+		):
+			with self.subTest(discount_type=discount_type):
+				order = self.make_coupon_order(do_not_save=True).insert()
+				self.assertEqual(order.items[0].rate, 4000)
+				if discount_type:
+					replacement_rule = frappe.copy_doc(rule)
+					replacement_rule.rate_or_discount = discount_type
+					replacement_rule.discount_percentage = 15
+					replacement_rule.discount_amount = 750
+					replacement_rule.rate = 4500
+					replacement_rule.insert()
+					replacement = frappe.copy_doc(coupon)
+					replacement.coupon_name = f"_Test Rate Replacement {discount_type}"
+					replacement.coupon_code = f"RATE-{discount_type}"
+					replacement.pricing_rule = replacement_rule.name
+					replacement.insert()
+					order.coupon_code = replacement.name
+				else:
+					order.coupon_code = None
+
+				args = order.as_dict()
+				args.price_list = order.selling_price_list
+				result = apply_pricing_rule(frappe.as_json(args), frappe.as_json(order))[0]
+				self.assertEqual(result.price_list_rate, 4500 if discount_type == "Rate" else 5000)
+				order.save()
+				self.assertEqual(order.items[0].rate, expected_rate)
+				self.assertEqual(order.grand_total, expected_rate)
+				order.submit()
+				invoice = make_sales_invoice(order.name).insert().submit()
+				self.assertEqual(invoice.grand_total, expected_rate)
+				self.assertEqual(invoice.outstanding_amount, expected_rate)
+				entries = frappe.get_all(
+					"GL Entry", filters={"voucher_no": invoice.name}, fields=["debit", "credit"]
+				)
+				self.assertEqual(sum(entry.debit for entry in entries), expected_rate)
+				self.assertEqual(sum(entry.credit for entry in entries), expected_rate)
+				self.assertEqual(
+					frappe.db.get_value("Payment Ledger Entry", {"voucher_no": invoice.name}, "amount"),
+					expected_rate,
+				)
+				invoice.reload().cancel()
+				self.assertFalse(
+					frappe.db.exists("GL Entry", {"voucher_no": invoice.name, "is_cancelled": 0})
+				)
+				self.assertFalse(
+					frappe.db.exists("Payment Ledger Entry", {"voucher_no": invoice.name, "delinked": 0})
+				)
+				order.reload().cancel()
+
+		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
+			apply_pricing_rule(frappe.as_json(args), frappe.as_json(order))
+
+		order = self.make_coupon_order(do_not_save=True).insert()
+		for price in frappe.get_all("Item Price", filters={"item_code": "_Test Tesla Car"}, pluck="name"):
+			frappe.delete_doc("Item Price", price)
+		order.coupon_code = None
+		with self.assertRaisesRegex(frappe.ValidationError, "Set an Item Price"):
+			order.save()
+
+	def test_copied_order_uses_selected_coupon(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		rule = frappe.copy_doc(frappe.get_doc("Pricing Rule", coupon.pricing_rule))
+		rule.discount_percentage = 10
+		rule.insert()
+		replacement = frappe.copy_doc(coupon)
+		replacement.coupon_name = "_Test Copied Order Coupon"
+		replacement.coupon_code = "COPY10"
+		replacement.pricing_rule = rule.name
+		replacement.insert()
+		order = self.make_coupon_order(do_not_save=True).insert()
+		for selected_coupon, expected_rate in ((replacement.name, 4500), (None, 5000), (coupon.name, 3500)):
+			with self.subTest(coupon=selected_coupon):
+				copied_order = frappe.copy_doc(order)
+				copied_order.coupon_code = selected_coupon
+				copied_order.insert()
+				self.assertEqual(copied_order.items[0].rate, expected_rate)
+				self.assertEqual(order.items[0].rate, 3500)
+
+	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
+	def test_gift_card_customer(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		coupon.coupon_type = "Gift Card"
+		coupon.customer = "_Test Customer"
+		coupon.save()
+
+		order = self.make_coupon_order(do_not_save=True)
+		order.customer = "_Test Customer 1"
+		with self.assertRaisesRegex(frappe.ValidationError, "Gift Card.*customer"):
+			order.insert()
+		self.make_coupon_order(do_not_save=True).insert()
+
+		opening = create_opening_entry(
+			make_pos_profile(warehouse="Stores - _TC"), frappe.session.user, get_obj=True
+		)
+		for make_invoice in (create_sales_invoice, create_pos_invoice):
+			for customer in ("_Test Customer 1", coupon.customer):
+				with self.subTest(doctype=make_invoice.__name__, customer=customer):
+					invoice = make_invoice(
+						customer=customer,
+						item_code="_Test Tesla Car",
+						warehouse="Stores - _TC",
+						rate=5000,
+						do_not_save=True,
+					)
+					invoice.coupon_code = coupon.name
+					if customer == coupon.customer:
+						invoice.insert()
+					else:
+						with self.assertRaisesRegex(frappe.ValidationError, "Gift Card.*customer"):
+							invoice.insert()
+
+		opening.cancel()
+
+		for party_type, customer_field, values in (
+			("Lead", "lead_name", {"first_name": "Gift Card Lead"}),
+			("Prospect", "prospect_name", {"company_name": "Gift Card Prospect", "company": "_Test Company"}),
+		):
+			with self.subTest(party_type=party_type):
+				party = frappe.get_doc({"doctype": party_type, **values}).insert()
+				for customer in (None, coupon.customer, "_Test Customer 1"):
+					frappe.get_doc("Customer", coupon.customer).update({customer_field: None}).save()
+					if customer:
+						frappe.get_doc("Customer", customer).update({customer_field: party.name}).save()
+					quotation = make_quotation(do_not_save=True)
+					quotation.quotation_to = party_type
+					quotation.party_name = party.name
+					quotation.coupon_code = coupon.name
+					if customer == coupon.customer:
+						quotation.insert()
+						quotation.submit()
+						self.assertEqual(mapper.make_sales_order(quotation.name).customer, customer)
+					else:
+						with self.assertRaisesRegex(frappe.ValidationError, "Gift Card.*customer"):
+							quotation.insert()
+
+	def test_quotation_coupon_validity(self):
+		coupon = frappe.get_doc("Coupon Code", "SAVE30")
+		for values, message in (
+			({"valid_from": add_days(today(), 1)}, "validity has not started"),
+			({"valid_upto": add_days(today(), -1)}, "validity has expired"),
+			({"used": 1}, "no longer valid"),
+		):
+			with self.subTest(values=values):
+				coupon.update({"valid_from": None, "valid_upto": None, "used": 0})
+				coupon.update(values)
+				coupon.save()
+				quotation = make_quotation(do_not_save=True)
+				quotation.coupon_code = coupon.name
+				with self.assertRaisesRegex(frappe.ValidationError, message):
+					quotation.insert()
+
+		coupon.used = 0
+		coupon.save()
+		quotation = make_quotation(do_not_save=True)
+		quotation.coupon_code = coupon.name
+		quotation.insert()
+		quotation.submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 0)
+
+	def test_generated_coupon_codes_do_not_collide(self):
+		coupons = []
+		for name in ("Summer Savings 2026", "Summer Savings 2027"):
+			coupon = frappe.copy_doc(frappe.get_doc("Coupon Code", "SAVE30"))
+			coupon.coupon_type = "Promotional"
+			coupon.coupon_name = name
+			coupon.coupon_code = None
+			coupon.insert()
+			coupons.append(coupon)
+
+		self.assertEqual(coupons[0].coupon_code, "SUMMERSA")
+		self.assertTrue(coupons[1].coupon_code.startswith("SUMMERSA"))
+		self.assertNotEqual(coupons[0].coupon_code, coupons[1].coupon_code)
+
 	def setUp(self):
 		test_create_test_data()
 
@@ -310,7 +575,7 @@ class TestCouponCode(ERPNextTestSuite):
 		# Clean up
 		coupon.delete()
 
-	def make_coupon_order(self, qty=1, coupon_code="SAVE30"):
+	def make_coupon_order(self, qty=1, coupon_code="SAVE30", do_not_save=False):
 		order = make_sales_order(
 			company="_Test Company",
 			warehouse="Stores - _TC",
@@ -322,4 +587,4 @@ class TestCouponCode(ERPNextTestSuite):
 			do_not_save=True,
 		)
 		order.coupon_code = coupon_code
-		return order.insert().submit()
+		return order if do_not_save else order.insert().submit()

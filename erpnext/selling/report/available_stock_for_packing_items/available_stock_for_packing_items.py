@@ -7,6 +7,8 @@ from frappe.permissions import get_allowed_docs_for_doctype, get_user_permission
 from frappe.query_builder.functions import Sum
 from frappe.utils import floor, flt
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
 	if not filters:
@@ -71,15 +73,19 @@ def get_item_details(item_codes):
 def get_item_warehouse_quantity_map():
 	pb = frappe.qb.DocType("Product Bundle")
 	pbi = frappe.qb.DocType("Product Bundle Item")
-	bundle_components = (
+	query = (
 		frappe.qb.from_(pbi)
 		.inner_join(pb)
 		.on(pbi.parent == pb.name)
 		.select(pb.new_item_code.as_("parent"), pbi.item_code, Sum(pbi.qty).as_("qty"))
 		.where(pb.disabled == 0)
 		.groupby(pb.new_item_code, pbi.item_code)
-		.run(as_dict=True)
 	)
+
+	if condition := get_allowed_masters_condition(pb.new_item_code, "Item"):
+		query = query.where(condition)
+
+	bundle_components = query.run(as_dict=True)
 
 	if not bundle_components:
 		return {}

@@ -8,6 +8,8 @@ from frappe.query_builder import CustomFunction
 from frappe.utils import cint
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 
 def execute(filters=None):
 	columns = get_columns()
@@ -154,7 +156,7 @@ def get_territories(filters):
 
 
 def get_items(filters):
-	filters_dict = {"disabled": 0, "is_stock_item": 1}
+	filters_dict = {"disabled": 0, "is_stock_item": 1, "has_variants": 0}
 
 	if filters.get("item_group"):
 		item_groups = [filters["item_group"], *get_descendants_of("Item Group", filters["item_group"])]
@@ -163,10 +165,14 @@ def get_items(filters):
 	if filters.get("item"):
 		filters_dict.update({"name": filters["item"]})
 
+	item_filters = [filters_dict]
+	if condition := get_allowed_masters_condition(frappe.qb.DocType("Item").name, "Item"):
+		item_filters.append(condition)
+
 	items = frappe.get_all(
 		"Item",
 		fields=["name", "item_group", "item_name", "item_code"],
-		filters=filters_dict,
+		filters=item_filters,
 		order_by="name",
 	)
 

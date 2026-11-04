@@ -20,6 +20,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
 
 
 class SubcontractingOrder(SubcontractingController):
@@ -371,15 +372,6 @@ class SubcontractingOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
-
 				items.append(
 					{
 						"item_code": item.name,
@@ -389,7 +381,7 @@ class SubcontractingOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": bom,
+						"bom": get_finished_good_bom(item),
 						"purchase_order_item": si.purchase_order_item,
 						"material_request": si.material_request,
 						"material_request_item": si.material_request_item,
@@ -549,7 +541,7 @@ class SubcontractingOrder(SubcontractingController):
 
 				reservation_items.append(data)
 
-			sre = StockReservation(self, items=reservation_items, notify=True)
+			sre = StockReservation(self, items=reservation_items)
 			if is_transfer:
 				sre.transfer_reservation_entries_to(
 					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"

@@ -142,6 +142,7 @@ def _get_party_details(
 	if not ignore_permissions:
 		ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
 		frappe.has_permission(party_type, ptype, party, throw=True)
+		validate_party_company(party_type, party.name, company)
 
 	currency = party.get("default_currency") or currency or get_company_currency(company)
 
@@ -197,6 +198,17 @@ def _get_party_details(
 		party_details["tax_category"] = frappe.get_value("POS Profile", pos_profile, "tax_category")
 
 	return party_details
+
+
+def validate_party_company(party_type, party, company):
+	if not company or party_type not in ("Customer", "Supplier"):
+		return
+
+	from erpnext.stock.doctype.company_restriction.company_restriction import (
+		validate_masters_for_company,
+	)
+
+	validate_masters_for_company(party_type, [party], company)
 
 
 def set_address_details(
@@ -890,6 +902,13 @@ def validate_party_frozen_disabled(company, party_type, party_name):
 def validate_account_party_type(self):
 	if self.is_cancelled:
 		return
+
+	if (
+		not self.flags.from_reversal
+		and self.party_type
+		and not frappe.db.exists("Party Type", self.party_type)
+	):
+		frappe.throw(_("{0} is not a valid Party Type").format(self.party_type))
 
 	if self.party_type and self.party:
 		account_type = frappe.get_cached_value("Account", self.account, "account_type")

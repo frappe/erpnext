@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from pypika.terms import ExistsCriterion
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+
 SALES_DOCTYPES = ("Sales Invoice", "Sales Order", "Delivery Note", "POS Invoice")
 
 
@@ -54,6 +56,9 @@ def get_data(filters=None):
 	)
 	for doctype in SALES_DOCTYPES:
 		query = query.where(ExistsCriterion(get_submitted_sales(customer, doctype, company)).negate())
+
+	if condition := get_allowed_masters_condition(customer.name, "Customer"):
+		query = query.where(condition)
 
 	return query.run(as_dict=True)
 

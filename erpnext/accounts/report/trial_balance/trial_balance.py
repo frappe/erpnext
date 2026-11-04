@@ -38,10 +38,16 @@ value_fields = (
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
 	return columns, data
+
+
+def validate_company_permission(company: str | None) -> None:
+	if company and not frappe.has_permission("Company", "select", company):
+		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
 def validate_filters(filters):
@@ -603,6 +609,7 @@ def execute_snapshot_report(filters):
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
+		validate_company_permission(filters.company)
 		validate_filters(filters)
 		columns = get_columns()
 		data = get_data_duckdb(filters, conn)

@@ -65,6 +65,21 @@ class TestTemplateUtils(ERPNextTestSuite):
 		self.assertEqual(own, ("Customer", "_Test Customer"))
 		self.assertEqual(colleague, "Lead")
 
+	def test_contact_us_lead_from_a_named_guest_sender(self):
+		frappe.db.set_single_value("CRM Settings", "enable_opportunity_creation_from_contact_us", 1)
+		self.addCleanup(frappe.db.set_default, "company", frappe.db.get_default("company"))
+		frappe.db.set_default("company", "_Test Company")
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user("Guest")
+		send_message("Ravi Kumar <_test_contact_us_ravi@example.com>", "Need a quote")
+		frappe.set_user("Administrator")
+
+		lead = frappe.db.get_value(
+			"Lead", {"email_id": "_test_contact_us_ravi@example.com"}, ["name", "lead_owner"], as_dict=True
+		)
+		self.assertTrue(lead)
+		self.assertFalse(lead.lead_owner)
+
 	def test_contact_us_subject_is_stored_as_plain_text(self):
 		frappe.db.set_single_value("CRM Settings", "enable_opportunity_creation_from_contact_us", 1)
 		self.addCleanup(frappe.db.set_default, "company", frappe.db.get_default("company"))

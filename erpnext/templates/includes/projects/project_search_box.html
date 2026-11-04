@@ -18,7 +18,7 @@ frappe.ready(function() {
 	}
 	var thread = null;
 	function findResult(t) {
-		window.location.href="/projects?project={{doc.name}}&q=" + t;
+		window.location.href="/projects?project={{doc.name}}&q=" + encodeURIComponent(t);
 	}
 
 	$("#project-search").keyup(function() {

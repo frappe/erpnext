@@ -8,6 +8,8 @@ import frappe.defaults
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint
 
+from erpnext.stock.doctype.item.item_search import validate_sqlite_version
+
 keydict = {
 	# "key in defaults": "key in Global Defaults"
 	"company": "default_company",
@@ -41,6 +43,10 @@ class GlobalDefaults(Document):
 		hide_currency_symbol: DF.Literal["", "No", "Yes"]
 		use_posting_datetime_for_naming_documents: DF.Check
 	# end: auto-generated types
+
+	def validate(self):
+		if self.has_value_changed("enable_item_search_index") and self.enable_item_search_index:
+			validate_sqlite_version()
 
 	def on_update(self):
 		"""update defaults"""
@@ -125,6 +131,8 @@ class GlobalDefaults(Document):
 			"Purchase Order",
 			"Purchase Invoice",
 			"Purchase Receipt",
+			"Payment Entry",
+			"Subcontracting Receipt",
 		):
 			make_property_setter(
 				doctype,

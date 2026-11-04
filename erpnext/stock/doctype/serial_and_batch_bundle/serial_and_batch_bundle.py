@@ -137,7 +137,7 @@ class SerialandBatchBundle(Document):
 			self.validate_serial_no_status()
 
 		self.set_is_outward()
-		self.calculate_total_qty()
+		self.calculate_total_qty(save=False)
 		self.set_warehouse()
 
 		if self.voucher_type != "Stock Entry" or not self.voucher_no or self.docstatus == 1:
@@ -636,7 +636,7 @@ class SerialandBatchBundle(Document):
 	def get_legacy_valuation_rate_for_return_entry(
 		self, return_against, return_against_voucher_detail_no, return_warehouse=None
 	):
-		"""Return the original line's incoming rate per serial no / batch from the SLE, for legacy receipts with no bundle."""
+		"""Return the original line's rate per serial no / batch from the SLE, for legacy entries with no bundle."""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if not (self.has_serial_no or self.has_batch_no):
@@ -645,7 +645,9 @@ class SerialandBatchBundle(Document):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		query = (
 			frappe.qb.from_(sle)
-			.select(sle.serial_no, sle.batch_no, sle.incoming_rate)
+			.select(
+				sle.serial_no, sle.batch_no, sle.incoming_rate, sle.actual_qty, sle.stock_value_difference
+			)
 			.where(
 				(sle.voucher_no == return_against)
 				& (sle.voucher_detail_no == return_against_voucher_detail_no)
@@ -660,18 +662,21 @@ class SerialandBatchBundle(Document):
 
 		data = []
 		for d in query.run(as_dict=True):
+			incoming_rate = d.incoming_rate
+			if d.actual_qty < 0:
+				# An outgoing entry (e.g. a delivery) has no incoming rate, use its outgoing value
+				incoming_rate = abs(d.stock_value_difference / d.actual_qty)
+
 			if d.serial_no:
 				for serial_no in get_serial_nos(d.serial_no):
 					data.append(
 						frappe._dict(
-							{"serial_no": serial_no, "batch_no": d.batch_no, "incoming_rate": d.incoming_rate}
+							{"serial_no": serial_no, "batch_no": d.batch_no, "incoming_rate": incoming_rate}
 						)
 					)
 			elif d.batch_no:
 				data.append(
-					frappe._dict(
-						{"serial_no": None, "batch_no": d.batch_no, "incoming_rate": d.incoming_rate}
-					)
+					frappe._dict({"serial_no": None, "batch_no": d.batch_no, "incoming_rate": incoming_rate})
 				)
 
 		return data
@@ -1940,13 +1945,10 @@ class SerialandBatchBundle(Document):
 	def get_available_qty_from_sabb(self):
 		batches = [d.batch_no for d in self.entries if d.batch_no]
 
-		sle = frappe.qb.DocType("Stock Ledger Entry")
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
 		query = (
 			frappe.qb.from_(child)
-			.inner_join(sle)
-			.on(child.parent == sle.serial_and_batch_bundle)
 			.select(
 				child.batch_no,
 				child.qty,
@@ -1955,7 +1957,6 @@ class SerialandBatchBundle(Document):
 			)
 			.where(
 				(child.item_code == self.item_code)
-				& (sle.is_cancelled == 0)
 				& (child.warehouse == self.warehouse)
 				& (child.is_cancelled == 0)
 				& (child.batch_no.isin(batches))
@@ -2721,7 +2722,9 @@ def get_available_serial_nos(kwargs):
 
 	ignore_serial_nos = []
 	if reserved_entries:
-		if kwargs.get("sabb_voucher_type") == "Delivery Note" and kwargs.get("against_sales_order"):
+		if kwargs.get("sabb_voucher_type") in ("Delivery Note", "Sales Invoice") and kwargs.get(
+			"against_sales_order"
+		):
 			reserved_voucher_details = [kwargs.get("against_sales_order")]
 		else:
 			reserved_voucher_details = get_reserved_voucher_details(kwargs)
@@ -2880,32 +2883,28 @@ def get_non_expired_batches(batches):
 
 
 def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
-	serial_nos = set()
+	serial_nos = Counter()
 	data = get_stock_ledgers_for_serial_nos(kwargs)
 
 	bundle_wise_serial_nos = get_bundle_wise_serial_nos(data, kwargs)
 	for d in data:
 		if d.serial_and_batch_bundle:
-			if sns := bundle_wise_serial_nos.get(d.serial_and_batch_bundle):
-				if d.actual_qty > 0:
-					serial_nos.update(sns)
-				else:
-					serial_nos.difference_update(sns)
-
+			sns = bundle_wise_serial_nos.get(d.serial_and_batch_bundle, [])
 		elif d.serial_no:
 			sns = parse_serial_nos(d.serial_no)
-			if d.actual_qty > 0:
-				serial_nos.update(sns)
-			else:
-				serial_nos.difference_update(sns)
+		else:
+			continue
 
-	serial_nos = list(serial_nos)
+		if d.actual_qty > 0:
+			serial_nos.update(sns)
+		else:
+			# Keep outward balances when the inward entry has a later posting time.
+			serial_nos.subtract(sns)
 
-	for serial_no in ignore_serial_nos:
-		if serial_no in serial_nos:
-			serial_nos.remove(serial_no)
-
-	return serial_nos
+	ignore_serial_nos = set(ignore_serial_nos)
+	return [
+		serial_no for serial_no, qty in serial_nos.items() if qty > 0 and serial_no not in ignore_serial_nos
+	]
 
 
 def get_bundle_wise_serial_nos(data, kwargs):
@@ -2939,24 +2938,32 @@ def get_reserved_voucher_details(kwargs):
 
 	field_mapper = {
 		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
+		"Sales Invoice": [["Sales Invoice Item", "sales_order"]],
 		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_inward_order"]],
 		"Work Order": [["Work Order", "production_plan"], ["Work Order", "subcontracting_inward_order"]],
+		"Pick List": [["Pick List", "work_order"]],
 	}.get(kwargs.get("sabb_voucher_type"))
 
 	if not field_mapper or not kwargs.get("sabb_voucher_no"):
 		return reserved_voucher_details
 
+	voucher_item_filters = {
+		"name": kwargs.get("sabb_voucher_detail_no"),
+		"parent": kwargs.get("sabb_voucher_no"),
+		"docstatus": ("<", 2),
+	}
 	voucher_based_filters = {
-		"Delivery Note": {
-			"name": kwargs.get("sabb_voucher_detail_no"),
-			"parent": kwargs.get("sabb_voucher_no"),
-			"docstatus": ("<", 2),
-		},
+		"Delivery Note": voucher_item_filters,
+		"Sales Invoice": voucher_item_filters,
 		"Stock Entry": {
 			"name": kwargs.get("sabb_voucher_no"),
 			"docstatus": ("<", 2),
 		},
 		"Work Order": {
+			"name": kwargs.get("sabb_voucher_no"),
+			"docstatus": ("<", 2),
+		},
+		"Pick List": {
 			"name": kwargs.get("sabb_voucher_no"),
 			"docstatus": ("<", 2),
 		},
@@ -3159,7 +3166,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			POS_Invoice_Item.serial_and_batch_bundle,
 		)
 		.where(
-			(POS_Invoice.consolidated_invoice.isnull())
+			(Coalesce(POS_Invoice.consolidated_invoice, "") == "")
 			& (POS_Invoice.docstatus == 1)
 			& (POS_Invoice_Item.item_code == kwargs.item_code)
 		)

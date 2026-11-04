@@ -1,10 +1,12 @@
 frappe.listview_settings["Supplier Quotation"] = {
 	add_fields: ["supplier", "base_grand_total", "status", "company", "currency"],
 	get_indicator: function (doc) {
-		if (doc.status === "Ordered") {
+		if (doc.status === "Submitted") {
+			return [__("Submitted"), "blue", "status,=,Submitted"];
+		} else if (doc.status === "Partially Ordered") {
+			return [__("Partially Ordered"), "yellow", "status,=,Partially Ordered"];
+		} else if (doc.status === "Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];
-		} else if (doc.status === "Rejected") {
-			return [__("Lost"), "gray", "status,=,Lost"];
 		} else if (doc.status === "Expired") {
 			return [__("Expired"), "gray", "status,=,Expired"];
 		}

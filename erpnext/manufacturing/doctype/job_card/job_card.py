@@ -1215,6 +1215,7 @@ class JobCard(Document):
 				ProductionPlanWorkOrderQuantities(work_order.production_plan).validate_work_order(
 					work_order, process_loss_qty=work_order.process_loss_qty
 				)
+			work_order.update_work_order_qty_in_sales_orders()
 			work_order.db_set("status", work_order.get_status())
 
 	def update_corrective_in_work_order(self, wo):
@@ -1285,6 +1286,7 @@ class JobCard(Document):
 
 		if wo.track_semi_finished_goods:
 			wo.set_process_loss_qty()
+			wo.update_work_order_qty_in_sales_orders()
 
 		wo.status = wo.get_status()
 		wo.save()
@@ -1319,7 +1321,7 @@ class JobCard(Document):
 			frappe.qb.from_(sed)
 			.join(se)
 			.on(sed.parent == se.name)
-			.select(sed.job_card_item, Sum(sed.qty))
+			.select(sed.job_card_item, Sum(sed.transfer_qty))
 			.where(
 				(sed.job_card_item.isin(jc_item_names)) & (se.docstatus == 1) & (se.purpose == "Manufacture")
 			)
@@ -1351,7 +1353,7 @@ class JobCard(Document):
 					frappe.qb.from_(sed)
 					.join(se)
 					.on(sed.parent == se.name)
-					.select(sed.job_card_item, Sum(sed.qty))
+					.select(sed.job_card_item, Sum(sed.transfer_qty))
 					.where(
 						(sed.job_card_item.isin(job_card_items))
 						& (se.docstatus == 1)
@@ -1462,10 +1464,11 @@ class JobCard(Document):
 			return cint(row.operation_row_id) == cint(self.operation_row_id)
 		return row.operation == self.operation
 
-	def set_requested_qty(self):
+	def get_requested_qty_by_item(self):
+		"""Stock qty per job card item in submitted, unstopped Material Requests."""
 		mr = frappe.qb.DocType("Material Request")
 		mr_item = frappe.qb.DocType("Material Request Item")
-		requested = frappe._dict(
+		return frappe._dict(
 			(
 				frappe.qb.from_(mr_item)
 				.inner_join(mr)
@@ -1476,6 +1479,32 @@ class JobCard(Document):
 			).run()
 		)
 
+	def validate_incoming_material_demand(self, material_request):
+		"""Reject requests beyond an item's required qty; callers must hold the
+		job card row lock (for_update=True)."""
+		if frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer"):
+			return
+
+		incoming = {}
+		for row in material_request.items:
+			incoming[row.job_card_item] = incoming.get(row.job_card_item, 0.0) + flt(row.stock_qty)
+
+		requested = self.get_requested_qty_by_item()
+		for item in self.items:
+			if item.name not in incoming:
+				continue
+
+			pending = flt(item.required_qty) - flt(requested.get(item.name))
+			if flt(incoming[item.name] - pending, item.precision("required_qty")) > 0:
+				frappe.throw(
+					_("Only {0} {1} of {2} is pending to request in Job Card {3}.").format(
+						max(pending, 0.0), item.stock_uom, item.item_code, self.name
+					),
+					title=_("Exceeds Pending Qty"),
+				)
+
+	def set_requested_qty(self):
+		requested = self.get_requested_qty_by_item()
 		items = [d for d in self.items if flt(d.required_qty) > 0]
 		requested_fraction = (
 			min(flt(requested.get(d.name)) / flt(d.required_qty) for d in items) if items else 0.0
@@ -2252,11 +2281,20 @@ def get_operations(doctype: str, txt: str, searchfield: str, start: int, page_le
 @frappe.whitelist()
 def make_material_request(source_name: str, target_doc: str | dict | Document | None = None):
 	shortages = get_shortages_to_request(source_name)
+	pending = get_pending_qty_to_request(source_name)
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 
 	def update_item(obj, target, source_parent):
 		target.warehouse = source_parent.wip_warehouse
 		if shortages is not None:
 			target.qty = shortages[obj.name]
+		if pending[obj.name] > 0:
+			target.qty = min(flt(target.qty), pending[obj.name])
+
+	def can_request(row):
+		if shortages is not None and row.name not in shortages:
+			return False
+		return allow_excess_transfer or pending[row.name] > 0
 
 	def set_missing_values(source, target):
 		target.material_request_type = "Material Transfer"
@@ -2275,7 +2313,7 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 				"doctype": "Material Request Item",
 				"field_map": {"required_qty": "qty", "uom": "stock_uom", "name": "job_card_item"},
 				"postprocess": update_item,
-				"condition": lambda row: shortages is None or row.name in shortages,
+				"condition": can_request,
 			},
 		},
 		target_doc,
@@ -2283,6 +2321,16 @@ def make_material_request(source_name: str, target_doc: str | dict | Document | 
 	)
 
 	return doclist
+
+
+def get_pending_qty_to_request(job_card):
+	"""Qty per item still open to request."""
+	doc = frappe.get_doc("Job Card", job_card)
+	requested = doc.get_requested_qty_by_item()
+	return {
+		item.name: flt(flt(item.required_qty) - flt(requested.get(item.name)), item.precision("required_qty"))
+		for item in doc.items
+	}
 
 
 def get_shortages_to_request(job_card):

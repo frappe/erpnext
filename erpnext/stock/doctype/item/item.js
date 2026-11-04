@@ -42,7 +42,17 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
+	restrict_to_companies(frm) {
+		if (!frm.doc.restrict_to_companies) {
+			frm.set_value("allowed_companies", []);
+		}
+	},
+
 	setup: function (frm) {
+		frm.set_query("item_group", () => ({ filters: { is_group: 0 } }));
+		frm.set_query("allowed_companies", () => ({
+			query: "erpnext.stock.doctype.company_restriction.company_restriction.company_query",
+		}));
 		frm.add_fetch("attribute", "numeric_values", "numeric_values");
 		frm.add_fetch("attribute", "from_range", "from_range");
 		frm.add_fetch("attribute", "to_range", "to_range");
