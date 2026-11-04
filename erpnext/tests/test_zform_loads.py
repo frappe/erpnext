@@ -27,8 +27,7 @@ class TestFormLoads(ERPNextTestSuite):
 
 	def assertFormLoad(self, doctype, docname):
 		# reset previous response
-		# nosemgrep: frappe-semgrep-rules.rules.frappe-overriding-local-proxies -- resets the response between form loads
-		frappe.response = frappe._dict({"docs": []})
+		frappe.local.response = frappe._dict({"docs": []})
 		frappe.response.docinfo = None
 
 		try:
