@@ -482,6 +482,8 @@ class BOM(WebsiteGenerator):
 					rate = flt(self.get_bom_unitcost(arg["bom_no"])) * (arg.get("conversion_factor") or 1)
 				else:
 					rate = get_bom_item_rate(arg, self)
+					if self.rm_cost_as_per == "Price List":
+						rate = flt(rate) * flt(self.plc_conversion_rate or 1)
 
 					if not rate:
 						if self.rm_cost_as_per == "Price List":
@@ -496,7 +498,7 @@ class BOM(WebsiteGenerator):
 								_("{0} not found for item {1}").format(self.rm_cost_as_per, arg["item_code"]),
 								alert=True,
 							)
-		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
+		return flt(rate) / (self.conversion_rate or 1)
 
 	@frappe.whitelist()
 	def update_cost(self, update_parent=True, from_child_bom=False, update_hour_rate=True, save=True):
