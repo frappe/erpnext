@@ -41,3 +41,70 @@ class TestItemwiseRecommendedReorderLevel(FrappeTestCase):
 		row = self.find_row(self.run_report(), components[0])
 
 		self.assertEqual(flt(row[8]), 5)
+
+	def test_purchase_returns_are_not_consumption(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=10, posting_date="2026-06-02")
+		purchase_return = make_purchase_return(receipt.name)
+		purchase_return.items[0].qty = -2
+		purchase_return.items[0].received_qty = -2
+		purchase_return.posting_date = "2026-06-03"
+		purchase_return.set_posting_time = 1
+		purchase_return.submit()
+
+		row = self.find_row(self.run_report(), item)
+
+		self.assertEqual(flt(row[7]), 0)
+
+	def consumed_today(self, item_code):
+		from frappe.utils import today
+
+		row = self.find_row(self.run_report(from_date=today(), to_date=today()), item_code)
+		return flt(row[7]) if row else 0
+
+	def test_subcontracting_receipt_consumption_counts_but_its_return_does_not(self):
+		import copy
+
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_rm_items,
+			get_subcontracting_order,
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_stock_in_entry,
+			make_stock_transfer_entry,
+			make_subcontracted_items,
+		)
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			make_subcontracting_receipt,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		receipt = make_subcontracting_receipt(sco.name)
+		receipt.save()
+		raw_material = receipt.supplied_items[0].rm_item_code
+		finished_good = receipt.items[0].item_code
+		before = {item: self.consumed_today(item) for item in (raw_material, finished_good)}
+
+		receipt.submit()
+		make_return_doc("Subcontracting Receipt", receipt.name).submit()
+
+		expected_rm = sum(
+			row.consumed_qty for row in receipt.supplied_items if row.rm_item_code == raw_material
+		)
+		self.assertEqual(self.consumed_today(raw_material) - before[raw_material], expected_rm)
+		self.assertEqual(self.consumed_today(finished_good), before[finished_good])
