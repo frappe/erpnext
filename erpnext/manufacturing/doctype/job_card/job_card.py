@@ -447,10 +447,10 @@ class JobCard(Document):
 		allow_overtime = cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime"))
 
 		for _day in range(366):
+			start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
 			if not working_hours or allow_overtime:
 				return None
 
-			start_date = self.adjust_start_date_for_holiday(workstation_doc, row)
 			if slot_end := self.move_start_into_working_slot(working_hours, row, start_date):
 				return slot_end
 
