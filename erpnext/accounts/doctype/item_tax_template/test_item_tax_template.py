@@ -1,18 +1,59 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, today
 
 from erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates import (
 	execute as backfill_not_applicable,
 )
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.get_item_details import get_item_tax_template
+
+COMPANY = "_Test Company"
+TAX_ACCOUNT = "_Test Account VAT - _TC"
 
 
-class TestItemTaxTemplate(unittest.TestCase):
-	pass
+class TestItemTaxTemplate(FrappeTestCase):
+	def make_template(self, rows, title="_Test ITT"):
+		doc = frappe.new_doc("Item Tax Template")
+		doc.title = f"{title} {frappe.generate_hash(length=6)}"
+		doc.company = COMPANY
+		for account, rate, not_applicable in rows:
+			doc.append(
+				"taxes",
+				{"tax_type": account, "tax_rate": rate, "not_applicable": not_applicable},
+			)
+		return doc
+
+	def make_tax_template(self, rate):
+		return self.make_template([(TAX_ACCOUNT, rate, 0)]).insert().name
+
+	def make_item_with_taxes(self, taxes):
+		return make_item(properties={"taxes": taxes}).name
+
+	def get_template_for(self, item_code, **kwargs):
+		ctx = {"item_code": item_code, "company": COMPANY, "posting_date": today(), "tax_category": None}
+		ctx.update(kwargs)
+		return get_item_tax_template(ctx)
+
+	def make_tax_category(self, title):
+		if not frappe.db.exists("Tax Category", title):
+			frappe.get_doc({"doctype": "Tax Category", "title": title}).insert()
+		return title
+
+	def test_dated_and_rate_band_rows_together(self):
+		template_18 = self.make_tax_template(18)
+		template_5 = self.make_tax_template(5)
+		item_code = self.make_item_with_taxes(
+			[
+				{"item_tax_template": template_18, "valid_from": add_days(today(), -10)},
+				{"item_tax_template": template_5, "minimum_net_rate": 0, "maximum_net_rate": 1000},
+			]
+		)
+
+		self.assertEqual(self.get_template_for(item_code, base_net_rate=500), template_18)
 
 
 class TestGermanNotApplicableBackfill(FrappeTestCase):
