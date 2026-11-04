@@ -61,6 +61,7 @@ class TestPaymentRequest(FrappeTestCase):
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
+	@change_settings("Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1})
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
 		so_inr.disable_rounded_total = 1
@@ -987,3 +988,83 @@ class TestPaymentRequest(FrappeTestCase):
 
 		send_email.assert_called_once()
 		self.assertEqual(pr.email_to, "customer@example.com")
+
+	def test_gateway_payment_authorization_books_payment(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		pr.run_method("on_payment_authorized", "Pending")
+		pr.reload()
+		self.assertEqual(pr.status, "Requested")
+
+		pr.run_method("on_payment_authorized", "Completed")
+		pr.reload()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
+
+	def test_gateway_payment_authorization_as_guest_books_payment(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		so = make_shopping_cart_order("_Test Customer")
+		order_pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		with self.set_user("Guest"):
+			for name in (pr.name, order_pr.name):
+				frappe.get_doc("Payment Request", name).run_method("on_payment_authorized", "Completed")
+				self.assertEqual(frappe.session.user, "Guest")
+
+		self.assertEqual(frappe.db.get_value("Payment Request", pr.name, "status"), "Paid")
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 0)
+		self.assertEqual(frappe.db.get_value("Payment Request", order_pr.name, "status"), "Paid")
+		self.assertTrue(frappe.db.exists("Sales Invoice Item", {"sales_order": so.name, "docstatus": 1}))
+
+	def test_repeated_gateway_payment_authorization_is_ignored(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+			payment_gateway_account="_Test Gateway - INR - _TC",
+		)
+
+		pr.run_method("on_payment_authorized", "Completed")
+		pr.reload()
+		pr.run_method("on_payment_authorized", "Completed")
+
+		self.assertEqual(
+			frappe.db.count("Payment Entry Reference", {"payment_request": pr.name, "docstatus": 1}),
+			1,
+		)
+
+
+def make_shopping_cart_order(customer, rate=1000):
+	so = make_sales_order(customer=customer, qty=1, rate=rate, do_not_save=True)
+	so.order_type = "Shopping Cart"
+	so.save()
+	so.submit()
+	return so
