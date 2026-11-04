@@ -832,7 +832,7 @@ erpnext.work_order = {
 	},
 
 	set_default_warehouse: function (frm) {
-		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
+		if (!frm.doc.wip_warehouse) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
 				callback: function (r) {
