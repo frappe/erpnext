@@ -38,7 +38,10 @@ from erpnext.manufacturing.doctype.production_plan.work_order_quantities import 
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	clear_reserve_stock_if_disabled,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -150,6 +153,7 @@ class ProductionPlan(Document):
 		self.validate_raw_material_group_warehouse()
 		if self.for_warehouse:
 			validate_warehouse_company(self.for_warehouse, self.company)
+		clear_reserve_stock_if_disabled(self)
 		self.enable_auto_reserve_stock()
 
 	def validate_raw_material_group_warehouse(self):
