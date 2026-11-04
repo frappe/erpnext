@@ -4143,8 +4143,10 @@ class TestStockEntry(FrappeTestCase):
 
 	def test_disassembly_after_material_transfer_returns_consumed_batches(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
 
 		warehouse = "_Test Warehouse - _TC"
 		rm_item = make_item(
@@ -4185,8 +4187,10 @@ class TestStockEntry(FrappeTestCase):
 
 	def test_disassembly_picks_finished_serial_nos_from_its_source_warehouse(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
 
 		warehouse, other_warehouse = "_Test Warehouse - _TC", "Stores - _TC"
 		rm_item = make_item(properties={"is_stock_item": 1}).name
