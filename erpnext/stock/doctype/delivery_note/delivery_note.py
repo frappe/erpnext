@@ -1627,37 +1627,61 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
 			target.set("use_serial_batch_fields", 1)
 
-	doclist = get_mapped_doc(
-		doctype,
-		source_name,
-		{
-			doctype: {
-				"doctype": target_doctype,
-				"postprocess": update_details,
-				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
-			},
-			doctype + " Item": {
-				"doctype": target_doctype + " Item",
-				"field_map": {
-					source_document_warehouse_field: target_document_warehouse_field,
-					"name": "delivery_note_item",
-					"purchase_order": "purchase_order",
-					"purchase_order_item": "purchase_order_item",
-					"material_request": "material_request",
-					"Material_request_item": "material_request_item",
-				},
-				"field_no_map": ["warehouse"],
-				"condition": lambda item: get_pending_receipt_qty(item) > 0,
-				"postprocess": update_item,
-			},
+	bundle_rows = {d.parent_detail_docname: d for d in source_doc.get("packed_items") or []}
+	bundle_rows = {d.name: d for d in source_doc.items if d.name in bundle_rows}
+	table_maps = {
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 		},
-		target_doc,
-		set_missing_values,
-	)
+		doctype + " Item": {
+			"doctype": target_doctype + " Item",
+			"field_map": {
+				source_document_warehouse_field: target_document_warehouse_field,
+				"name": "delivery_note_item",
+				"purchase_order": "purchase_order",
+				"purchase_order_item": "purchase_order_item",
+				"material_request": "material_request",
+				"Material_request_item": "material_request_item",
+			},
+			"field_no_map": ["warehouse"],
+			"condition": lambda item: get_pending_receipt_qty(item) > 0 and item.name not in bundle_rows,
+			"postprocess": update_item,
+		},
+	}
+	if doctype == "Delivery Note" and bundle_rows:
+		table_maps["Packed Item"] = get_component_receipt_map(bundle_rows)
 
-	return doclist
+	return get_mapped_doc(doctype, source_name, table_maps, target_doc, set_missing_values)
 
 
 def get_pending_receipt_qty(item) -> float:
 	returned_qty = flt(item.get("returned_qty")) / (flt(item.get("conversion_factor")) or 1)
 	return flt(item.qty) - returned_qty - flt(item.get("received_qty"))
+
+
+def get_component_receipt_map(bundle_rows: dict) -> dict:
+	def update_component(source, target, source_parent):
+		target.qty = get_pending_component_qty(source, bundle_rows[source.parent_detail_docname])
+		target.rate = flt(source.incoming_rate)
+		if source.get("use_serial_batch_fields") or source.get("serial_no") or source.get("batch_no"):
+			target.set("use_serial_batch_fields", 1)
+
+	return {
+		"doctype": "Purchase Receipt Item",
+		"field_map": {"target_warehouse": "from_warehouse", "name": "delivery_note_packed_item"},
+		"field_no_map": ["warehouse"],
+		"condition": lambda packed: packed.parent_detail_docname in bundle_rows
+		and get_pending_component_qty(packed, bundle_rows[packed.parent_detail_docname]) > 0,
+		"postprocess": update_component,
+	}
+
+
+def get_pending_component_qty(packed_item, bundle_row) -> float:
+	bundle_qty = flt(bundle_row.stock_qty or bundle_row.qty)
+	if not bundle_qty:
+		return 0.0
+
+	kept_share = 1 - flt(bundle_row.returned_qty) / bundle_qty
+	return flt(packed_item.qty) * kept_share - flt(packed_item.get("received_qty"))
