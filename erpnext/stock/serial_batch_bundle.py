@@ -123,30 +123,63 @@ class SerialBatchBundle:
 		):
 			return True
 
-	def make_serial_batch_no_bundle_for_material_transfer(self):
-		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
+	def get_transit_package(self) -> str | None:
+		if self.sle.is_cancelled or self.sle.voucher_type not in ["Delivery Note", "Sales Invoice"]:
+			return None
 
-		bundle = frappe.db.get_value(
-			"Stock Entry Detail", self.sle.voucher_detail_no, "serial_and_batch_bundle"
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_no": self.sle.voucher_no,
+				"voucher_detail_no": self.sle.voucher_detail_no,
+				"item_code": self.sle.item_code,
+				"actual_qty": ("<", 0),
+				"is_cancelled": 0,
+				"serial_and_batch_bundle": ("is", "set"),
+			},
+			"serial_and_batch_bundle",
+			order_by="creation desc",
 		)
 
-		if bundle:
-			new_bundle_id = make_bundle_for_material_transfer(
-				is_new=False,
-				docstatus=1,
-				voucher_type=self.sle.voucher_type,
-				voucher_no=self.sle.voucher_no,
-				serial_and_batch_bundle=bundle,
-				warehouse=self.sle.warehouse,
-				type_of_transaction="Inward" if self.sle.actual_qty > 0 else "Outward",
-				do_not_submit=0,
-			)
-			self.sle.db_set({"serial_and_batch_bundle": new_bundle_id})
+	def make_serial_batch_no_bundle_for_material_transfer(self, bundle):
+		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
+
+		if not bundle:
+			return
+
+		new_bundle_id = make_bundle_for_material_transfer(
+			is_new=False,
+			docstatus=1,
+			voucher_type=self.sle.voucher_type,
+			voucher_no=self.sle.voucher_no,
+			serial_and_batch_bundle=bundle,
+			warehouse=self.sle.warehouse,
+			type_of_transaction="Inward" if self.sle.actual_qty > 0 else "Outward",
+			do_not_submit=0,
+		)
+		self.sle.db_set({"serial_and_batch_bundle": new_bundle_id})
 
 	def make_serial_batch_no_bundle(self):
+		if self.sle.actual_qty > 0 and (transit_package := self.get_transit_package()):
+			self.make_serial_batch_no_bundle_for_material_transfer(transit_package)
+
+			if self.child_doctype != "Packed Item":
+				frappe.db.set_value(
+					self.child_doctype,
+					self.sle.voucher_detail_no,
+					"serial_and_batch_bundle",
+					self.sle.serial_and_batch_bundle,
+				)
+
+			return
+
 		self.validate_item()
 		if self.sle.actual_qty > 0 and self.is_material_transfer():
-			self.make_serial_batch_no_bundle_for_material_transfer()
+			self.make_serial_batch_no_bundle_for_material_transfer(
+				frappe.db.get_value(
+					"Stock Entry Detail", self.sle.voucher_detail_no, "serial_and_batch_bundle"
+				)
+			)
 			return
 
 		sn_doc = SerialBatchCreation(
@@ -317,6 +350,7 @@ class SerialBatchBundle:
 					)
 					and self.sle.actual_qty < 0
 				)
+				or (self.sle.actual_qty > 0 and self.get_transit_package())
 			)
 		):
 			self.make_serial_batch_no_bundle()
@@ -1266,6 +1300,9 @@ class SerialBatchCreation:
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
 
+		if self.has_serial_no and not self.get("serial_nos"):
+			kwargs["sales_order_item"] = self.get_sales_order_item()
+
 		if (
 			self.has_serial_no
 			and self.has_batch_no
@@ -1283,6 +1320,11 @@ class SerialBatchCreation:
 				kwargs["posting_datetime"] = self.get("posting_datetime")
 
 			self.batches = get_available_batches(kwargs)
+
+	def get_sales_order_item(self) -> str | None:
+		"""Sales Order row the delivered row is against, so its reserved serial nos are picked."""
+		if self.get("voucher_type") in ("Delivery Note", "Sales Invoice") and self.get("voucher_detail_no"):
+			return frappe.db.get_value(f"{self.voucher_type} Item", self.voucher_detail_no, "so_detail")
 
 	def set_auto_serial_batch_entries_for_inward(self):
 		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):

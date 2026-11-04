@@ -302,8 +302,7 @@ def get_columns(filters):
 			{
 				"label": _("Transaction Type"),
 				"fieldname": "transaction_type",
-				"fieldtype": "Link",
-				"options": "DocType",
+				"fieldtype": "Select",
 				"width": 130,
 			},
 			{

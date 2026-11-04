@@ -1,6 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -129,6 +131,29 @@ class TestItemWiseSalesHistory(FrappeTestCase):
 
 		data = execute(frappe._dict({"company": "_Test Company"}))[1]
 		self.assertIn(so.name, {row["sales_order"] for row in data})
+
+	@patch(
+		"erpnext.selling.report.item_wise_sales_history.item_wise_sales_history.get_default_company",
+		return_value="_Test Company",
+		create=True,
+	)
+	def test_report_uses_default_company_when_filter_is_missing(self, _get_default_company):
+		so = make_sales_order(transaction_date="2026-06-01")
+
+		data = execute(frappe._dict())[1]
+		self.assertIn(so.name, {row["sales_order"] for row in data})
+
+	@patch(
+		"erpnext.selling.report.item_wise_sales_history.item_wise_sales_history.get_default_company",
+		return_value=None,
+		create=True,
+	)
+	def test_report_returns_no_data_when_no_default_exists(self, _get_default_company):
+		make_sales_order(transaction_date="2026-06-01")
+
+		_columns, data, _message, chart = execute(frappe._dict())
+		self.assertEqual(data, [])
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [])
 
 	def test_customer_group_taken_from_the_order(self):
 		so = make_sales_order(transaction_date="2026-06-01")

@@ -46,4 +46,8 @@ def get_party_specific_items(party):
 	):
 		field = "name" if rule.restrict_based_on == "Item" else frappe.scrub(rule.restrict_based_on)
 		allowed_items[field].append(rule.based_on_value)
+	if allowed_items.get("name"):
+		allowed_items["name"].extend(
+			frappe.get_all("Item", filters={"variant_of": ["in", allowed_items["name"]]}, pluck="name")
+		)
 	return allowed_items

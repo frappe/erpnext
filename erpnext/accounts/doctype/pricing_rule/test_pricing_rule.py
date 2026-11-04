@@ -3,6 +3,7 @@
 
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -13,7 +14,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import apply_price_list, get_item_details
 
 
 class TestPricingRule(FrappeTestCase):
@@ -48,10 +49,10 @@ class TestPricingRule(FrappeTestCase):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -144,10 +145,10 @@ class TestPricingRule(FrappeTestCase):
 				"item_code": "_Test FG Item 2",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -192,10 +193,10 @@ class TestPricingRule(FrappeTestCase):
 				"item_group": "Products",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -232,10 +233,10 @@ class TestPricingRule(FrappeTestCase):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -299,10 +300,10 @@ class TestPricingRule(FrappeTestCase):
 				"item_code": "Test Variant PRT",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Order",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -440,6 +441,24 @@ class TestPricingRule(FrappeTestCase):
 		self.assertEqual(item.rate_with_margin, 1100)
 		self.assertEqual(item.discount_amount, 110)
 		self.assertEqual(item.rate, 990)
+
+	def test_typed_rate_stays_when_no_pricing_rule_is_applied(self):
+		# A coupon based rule without its coupon is considered but not applied: the row holds "[]".
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		pricing_rule = make_pricing_rule(selling=1, discount_percentage=10)
+		pricing_rule.db_set("coupon_code_based", 1)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 100
+		si.items[0].rate = 120
+		si.payment_schedule = []
+		si.insert(ignore_permissions=True)
+		self.assertEqual(si.items[0].rate, 120)
+
+		si.save()
+		si.submit()
+		self.assertEqual(si.items[0].rate, 120)
+		self.assertEqual(si.items[0].margin_rate_or_amount, 20)
 
 	def test_pricing_rule_for_product_discount_on_same_item(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -585,10 +604,10 @@ class TestPricingRule(FrappeTestCase):
 				"item_code": "_Test Item",
 				"company": "_Test Company",
 				"price_list": "_Test Price List",
-				"currency": "_Test Currency",
+				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -599,6 +618,85 @@ class TestPricingRule(FrappeTestCase):
 		details = get_item_details(args)
 
 		self.assertTrue(details)
+
+	def test_condition_filters_item_rule_before_group_rule_selection(self):
+		group = frappe.get_doc(doctype="Item Group", item_group_name="_Test Conditional Pricing Group")
+		group.insert()
+		item = make_item("_Test Conditional Pricing Item", {"item_group": group.name, "is_stock_item": 0})
+		group_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Conditional Group Rule",
+				"company": "_Test Company",
+				"selling": 1,
+				"apply_on": "Item Group",
+				"item_groups": [{"item_group": group.name}],
+				"currency": "INR",
+				"price_or_product_discount": "Price",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 10,
+				"apply_multiple_pricing_rules": 1,
+				"has_priority": 1,
+				"priority": 3,
+			}
+		).insert()
+		item_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test Conditional Item Rule",
+				"company": "_Test Company",
+				"selling": 1,
+				"apply_on": "Item Code",
+				"items": [{"item_code": item.name}],
+				"currency": "INR",
+				"price_or_product_discount": "Price",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 2,
+				"condition": "customer == '_Test Customer 1'",
+			}
+		).insert()
+
+		order = make_sales_order(
+			item_code=item.name, customer="_Test Customer", price_list_rate=100, do_not_submit=True
+		)
+		self.assertEqual(order.items[0].rate, 90)
+		self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [group_rule.name])
+		order.items[0].qty = 2
+		order.save()
+		self.assertEqual(order.items[0].rate, 90)
+		self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [group_rule.name])
+
+		order = make_sales_order(
+			item_code=item.name, customer="_Test Customer 1", price_list_rate=100, do_not_submit=True
+		)
+		self.assertEqual(order.items[0].rate, 98)
+		self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [item_rule.name])
+
+		item_rule.coupon_code_based = 1
+		item_rule.save()
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Conditional Coupon",
+				"coupon_code": "CONDITIONALPRICING",
+				"pricing_rule": item_rule.name,
+				"valid_from": "2014-01-01",
+				"maximum_use": 10,
+			}
+		).insert()
+		for customer, selected_coupon, expected_rule, expected_rate in (
+			("_Test Customer", coupon.name, group_rule.name, 90),
+			("_Test Customer 1", coupon.name, item_rule.name, 98),
+			("_Test Customer 1", None, group_rule.name, 90),
+		):
+			with self.subTest(customer=customer, coupon=selected_coupon):
+				order = make_sales_order(
+					item_code=item.name, customer=customer, price_list_rate=100, do_not_save=True
+				)
+				order.coupon_code = selected_coupon
+				order.insert()
+				self.assertEqual(order.items[0].rate, expected_rate)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [expected_rule])
 
 	def test_pricing_rule_for_condition(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -1001,7 +1099,7 @@ class TestPricingRule(FrappeTestCase):
 				"currency": "USD",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -1021,7 +1119,7 @@ class TestPricingRule(FrappeTestCase):
 				"currency": "INR",
 				"doctype": "Sales Invoice",
 				"conversion_rate": 1,
-				"price_list_currency": "_Test Currency",
+				"price_list_currency": "INR",
 				"plc_conversion_rate": 1,
 				"order_type": "Sales",
 				"customer": "_Test Customer",
@@ -1171,6 +1269,85 @@ class TestPricingRule(FrappeTestCase):
 
 		si.submit()
 		self.assertEqual(si.additional_discount_percentage, 4)
+
+	def test_coupon_transaction_discount_without_tracking(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		pricing_rule = make_pricing_rule(
+			selling=1,
+			apply_on="Transaction",
+			price_or_product_discount="Price",
+			discount_percentage=50,
+		)
+		pricing_rule.coupon_code_based = 1
+		pricing_rule.apply_discount_on = "Grand Total"
+		pricing_rule.save()
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test Legacy Transaction Coupon",
+				"coupon_code": "LEGACYTRANSACTION",
+				"pricing_rule": pricing_rule.name,
+			}
+		).insert()
+
+		for discount_percentage, discount_amount in [(50, 0), (0, 100)]:
+			pricing_rule.rate_or_discount = (
+				"Discount Percentage" if discount_percentage else "Discount Amount"
+			)
+			pricing_rule.discount_percentage = discount_percentage
+			pricing_rule.discount_amount = discount_amount
+			pricing_rule.save()
+
+			# An unused coupon must not change a manual discount or its basis.
+			doc = create_sales_invoice(qty=3, rate=1000, do_not_save=True)
+			doc.apply_discount_on = "Net Total"
+			doc.additional_discount_percentage = 20
+			doc.insert()
+			doc.reload()
+			self.assertEqual(doc.additional_discount_percentage, 20)
+			self.assertEqual(doc.discount_amount, 600)
+			self.assertEqual(doc.apply_discount_on, "Net Total")
+
+			for manual_discount in [None, 200]:
+				with self.subTest(discount_percentage=discount_percentage, manual_discount=manual_discount):
+					doc = make_sales_order(qty=3, rate=1000, do_not_save=True)
+					doc.coupon_code = coupon.name
+					# Reproduce orders saved before transaction rules were tracked.
+					with patch("erpnext.accounts.doctype.pricing_rule.utils.set_transaction_pricing_rules"):
+						doc.insert()
+					doc.reload()
+					self.assertFalse(doc.pricing_rules)
+					self.assertEqual(doc.discount_amount, 1500 if discount_percentage else 100)
+
+					doc.coupon_code = None
+					if manual_discount is not None:
+						doc.additional_discount_percentage = 0
+						doc.discount_amount = manual_discount
+					doc.save()
+					doc.reload()
+					self.assertEqual(doc.additional_discount_percentage, 0)
+					self.assertEqual(doc.discount_amount, manual_discount or 0)
+					self.assertEqual(doc.grand_total, 3000 - (manual_discount or 0))
+					self.assertEqual(sum(d.payment_amount for d in doc.payment_schedule), doc.grand_total)
+
+		# Selecting an inapplicable coupon does not make a manual discount belong to that rule.
+		for apply_on in ["Transaction", "Item Code"]:
+			pricing_rule.apply_on = apply_on
+			pricing_rule.min_qty = 10 if apply_on == "Transaction" else 0
+			if apply_on == "Item Code":
+				pricing_rule.append("items", {"item_code": "_Test Item 2"})
+			pricing_rule.save()
+			doc = make_sales_order(qty=3, rate=1000, do_not_save=True)
+			doc.coupon_code = coupon.name
+			doc.apply_discount_on = "Grand Total"
+			doc.discount_amount = 100
+			doc.insert()
+			doc.reload()
+			doc.coupon_code = None
+			doc.save()
+			doc.reload()
+			self.assertEqual(doc.discount_amount, 100)
+			self.assertEqual(doc.grand_total, 2900)
 
 	def test_transaction_discount_replaced_by_another_pricing_rule(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -1668,6 +1845,118 @@ class TestPricingRule(FrappeTestCase):
 
 		debit_note.delete()
 		pi.cancel()
+
+	@change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_remove_rate_rule_without_item_price(self):
+		for has_item_price in (False, True):
+			item = make_item(
+				f"_Test Rate Rule Removal {has_item_price}", {"is_stock_item": 0, "stock_uom": "Nos"}
+			).name
+			rule = frappe.get_doc(
+				doctype="Pricing Rule",
+				title="Rate rule removal",
+				company="_Test Company",
+				currency="INR",
+				selling=1,
+				apply_on="Item Code",
+				items=[{"item_code": item}],
+				price_or_product_discount="Price",
+				rate_or_discount="Rate",
+				rate=40,
+				min_qty=5,
+				applicable_for="Customer",
+				customer="_Test Customer",
+			).insert()
+			if has_item_price:
+				frappe.get_doc(
+					doctype="Item Price", item_code=item, price_list="_Test Price List", price_list_rate=60
+				).insert()
+
+			for changed_field in ("customer", "qty"):
+				with self.subTest(has_item_price=has_item_price, changed_field=changed_field):
+					order = make_sales_order(
+						item_code=item, qty=5, selling_price_list="_Test Price List", do_not_submit=True
+					)
+					self.assertEqual(order.items[0].rate, 40)
+					self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [rule.name])
+					self.assertEqual(frappe.db.count("Item Price", {"item_code": item}), int(has_item_price))
+					if changed_field == "customer":
+						order.customer = "_Test Customer 1"
+						order.customer_address = None
+						order.shipping_address_name = None
+						order.contact_person = None
+					else:
+						order.items[0].qty = 1
+
+					args = order.as_dict()
+					args.price_list = order.selling_price_list
+					result = apply_price_list(frappe.as_json(args), doc=frappe.as_json(order))["children"][0]
+					self.assertFalse(result.pricing_rules)
+					self.assertEqual(result.rate, 60 if has_item_price else 40)
+					order.items[0].update(result)
+					order.save().reload()
+					self.assertFalse(order.items[0].pricing_rules)
+					self.assertEqual(order.items[0].rate, 60 if has_item_price else 40)
+					order.submit()
+					self.assertFalse(order.items[0].pricing_rules)
+					order.cancel()
+
+	@change_settings("Stock Settings", {"auto_insert_price_list_rate_if_missing": 0})
+	def test_replace_rate_rule_without_item_price(self):
+		item = make_item("_Test Rate Rule Replacement", {"is_stock_item": 0, "stock_uom": "Nos"}).name
+		frappe.get_doc(
+			doctype="Pricing Rule",
+			title="Customer rate",
+			company="_Test Company",
+			currency="INR",
+			selling=1,
+			apply_on="Item Code",
+			items=[{"item_code": item}],
+			price_or_product_discount="Price",
+			rate_or_discount="Rate",
+			rate=40,
+			applicable_for="Customer",
+			customer="_Test Customer",
+		).insert()
+		replacement = frappe.get_doc(
+			doctype="Pricing Rule",
+			title="Customer discount",
+			company="_Test Company",
+			currency="INR",
+			selling=1,
+			apply_on="Item Code",
+			items=[{"item_code": item}],
+			price_or_product_discount="Price",
+			rate_or_discount="Discount Percentage",
+			discount_percentage=10,
+			applicable_for="Customer",
+			customer="_Test Customer 1",
+		).insert()
+		for discount_type in ("Discount Percentage", "Discount Amount"):
+			with self.subTest(discount_type=discount_type):
+				replacement.rate_or_discount = discount_type
+				replacement.discount_amount = 4 if discount_type == "Discount Amount" else 0
+				replacement.save()
+				order = make_sales_order(item_code=item, qty=1, do_not_submit=True)
+				self.assertEqual(order.items[0].rate, 40)
+				self.assertFalse(frappe.db.exists("Item Price", {"item_code": item}))
+				order.customer = "_Test Customer 1"
+				order.customer_address = None
+				order.shipping_address_name = None
+				order.contact_person = None
+				args = order.as_dict()
+				args.price_list = order.selling_price_list
+				result = apply_price_list(frappe.as_json(args), doc=frappe.as_json(order))["children"][0]
+				self.assertEqual(result.price_list_rate, 40)
+				self.assertEqual(result.discount_amount, 4)
+				order.items[0].update(result)
+				order.save().reload()
+				self.assertEqual(order.items[0].price_list_rate, 40)
+				self.assertEqual(order.items[0].rate, 36)
+				self.assertEqual(frappe.parse_json(order.items[0].pricing_rules), [replacement.name])
+				order.submit()
+				self.assertEqual(order.grand_total, 36)
+				order.cancel()
 
 
 test_dependencies = ["Campaign"]

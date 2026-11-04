@@ -55,3 +55,17 @@ class TestSalesPartnerTargetVarianceBasedOnItemGroup(FrappeTestCase):
 			[flt(value, 2) for value in (row.total_target, row.total_achieved, row.total_variance)],
 			[50, 20, -30],
 		)
+
+	def test_company_filter_excludes_other_company_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_company_filter,
+		)
+
+		check_company_filter(self, "Sales Partner", "partner_name", execute)
+
+	def test_duplicate_target_inputs_count_actuals_once(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_duplicate_targets,
+		)
+
+		check_duplicate_targets(self, "Sales Partner", "partner_name", execute)

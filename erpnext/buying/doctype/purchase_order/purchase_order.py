@@ -208,6 +208,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
+		self.set_last_purchase_rate()
 		self.check_on_hold_or_closed_status()
 
 		self.validate_uom_is_integer("uom", "qty")
@@ -229,6 +230,19 @@ class PurchaseOrder(BuyingController):
 		)
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.set_missing_terms()
+
+	def set_last_purchase_rate(self):
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return
+
+		for d in self.get("items"):
+			if d.item_code:
+				d.last_purchase_rate = flt(
+					item_last_purchase_rate(
+						self.name, self.conversion_rate, d.item_code, d.conversion_factor
+					),
+					d.precision("last_purchase_rate"),
+				)
 
 	def set_has_unit_price_items(self):
 		"""
@@ -461,9 +475,10 @@ class PurchaseOrder(BuyingController):
 						"Item", d.item_code, "last_purchase_rate"
 					)
 					if item_last_purchase_rate:
-						d.base_price_list_rate = (
-							d.base_rate
-						) = d.price_list_rate = d.rate = d.last_purchase_rate = item_last_purchase_rate
+						d.base_price_list_rate = d.base_rate = item_last_purchase_rate * (
+							flt(d.conversion_factor) or 1.0
+						)
+						d.price_list_rate = d.rate = d.last_purchase_rate = d.base_rate / conversion_rate
 
 	# Check for Closed status
 	def check_on_hold_or_closed_status(self):
@@ -735,7 +750,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 	else:
 		item_last_purchase_rate = frappe.get_cached_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
-			return item_last_purchase_rate
+			return item_last_purchase_rate * (flt(conversion_factor) or 1.0) / conversion_rate
 
 
 @frappe.whitelist(methods=["POST"])
@@ -853,6 +868,8 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 		"Portal User", {"parenttype": "Supplier", "parent": doc.supplier}, pluck="user"
 	):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+	for item in [item for item in doc.items if not item.qty]:
+		doc.remove(item)
 	doc.save()
 	frappe.db.commit()
 	frappe.response["type"] = "redirect"
@@ -891,11 +908,18 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		billed_qty = flt(billed_qty_by_item.get(po_item.name), po_item.precision("qty"))
 		return billed_qty + flt(mapped_qty_by_item.get(po_item.name, 0))
 
+	def is_qty_billed_below_amount(po_item):
+		return (
+			po_item.name not in mapped_qty_by_item
+			and po_item.qty <= get_billed_and_mapped_qty(po_item)
+			and abs(flt(po_item.billed_amt)) < abs(flt(po_item.amount))
+		)
+
 	def update_item(obj, target, source_parent):
 		target.qty = (
 			0
 			if is_unit_price_row(obj, has_unit_price_items)
-			else flt(obj.qty) - get_billed_and_mapped_qty(obj)
+			else max(flt(obj.qty) - get_billed_and_mapped_qty(obj), 0)
 		)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
@@ -937,7 +961,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"condition": lambda doc: (
 				doc.name not in mapped_qty_by_item
 				if is_unit_price_row(doc, has_unit_price_items)
-				else doc.qty > get_billed_and_mapped_qty(doc)
+				else doc.qty > get_billed_and_mapped_qty(doc) or is_qty_billed_below_amount(doc)
 			)
 			and select_item(doc),
 		},

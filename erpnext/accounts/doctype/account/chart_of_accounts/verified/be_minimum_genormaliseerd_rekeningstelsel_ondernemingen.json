@@ -602,9 +602,7 @@
                 },
                 "account_number": "37"
             },
-            "Geleverde voorraad, niet gefactureerd": {
-                "account_type": "Stock Delivered But Not Billed"
-            }
+            "Geleverde voorraad, niet gefactureerd": {}
         },
         "KLASSE 4 : VORDERINGEN OP TEN HOOGSTE ÉÉN JAAR": {
             "root_type": "Asset",

@@ -1,10 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import re
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_datetime
 
 
 class ChequePrintTemplate(Document):
@@ -37,6 +39,7 @@ class ChequePrintTemplate(Document):
 		message_to_show: DF.Data | None
 		payer_name_from_left_edge: DF.Float
 		payer_name_from_top_edge: DF.Float
+		print_format_creation: DF.Datetime | None
 		scanned_cheque: DF.Attach | None
 		signatory_from_left_edge: DF.Float
 		signatory_from_top_edge: DF.Float
@@ -46,9 +49,10 @@ class ChequePrintTemplate(Document):
 	pass
 
 
-@frappe.whitelist()
-def create_or_update_cheque_print_format(template_name):
+@frappe.whitelist(methods=["POST"])
+def create_or_update_cheque_print_format(template_name: str):
 	frappe.only_for("System Manager")
+	doc = frappe.get_doc("Cheque Print Template", template_name)
 
 	if not frappe.db.exists("Print Format", template_name):
 		cheque_print = frappe.new_doc("Print Format")
@@ -64,9 +68,19 @@ def create_or_update_cheque_print_format(template_name):
 	else:
 		cheque_print = frappe.get_doc("Print Format", template_name)
 
-	doc = frappe.get_doc("Cheque Print Template", template_name)
+	account_payee = ""
+	if doc.is_account_payable:
+		account_payee = """
+		<span style="top:{acc_pay_dist_from_top_edge}cm; left:{acc_pay_dist_from_left_edge}cm;
+			border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">
+				{{{{ {message_to_show} | e }}}}
+		</span>""".format(
+			acc_pay_dist_from_top_edge=doc.acc_pay_dist_from_top_edge,
+			acc_pay_dist_from_left_edge=doc.acc_pay_dist_from_left_edge,
+			message_to_show=frappe.as_json(doc.message_to_show or _("Account Pay Only"), ensure_ascii=False),
+		)
 
-	cheque_print.html = """
+	cheque_html = """
 <style>
 	.print-format {{
 		padding: 0px;
@@ -79,17 +93,14 @@ def create_or_update_cheque_print_format(template_name):
 </style>
 <div style="position: relative; top:{starting_position_from_top_edge}cm">
 	<div style="width:{cheque_width}cm;height:{cheque_height}cm;">
-		<span style="top:{acc_pay_dist_from_top_edge}cm; left:{acc_pay_dist_from_left_edge}cm;
-			border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">
-				{message_to_show}
-		</span>
+		{account_payee}
 		<span style="top:{date_dist_from_top_edge}cm; left:{date_dist_from_left_edge}cm;
 			position: absolute;">
 			{{{{ frappe.utils.formatdate(doc.reference_date) or '' }}}}
 		</span>
 		<span style="top:{acc_no_dist_from_top_edge}cm;left:{acc_no_dist_from_left_edge}cm;
 			position: absolute;  min-width: 6cm;">
-			{{{{ doc.account_no or '' }}}}
+			{{{{ (doc.bank_account_no or '') | e }}}}
 		</span>
 		<span style="top:{payer_name_from_top_edge}cm;left: {payer_name_from_left_edge}cm;
 			position: absolute;  min-width: 6cm;">
@@ -98,11 +109,14 @@ def create_or_update_cheque_print_format(template_name):
 		<span style="top:{amt_in_words_from_top_edge}cm; left:{amt_in_words_from_left_edge}cm;
 			position: absolute; display: block; width: {amt_in_word_width}cm;
 			line-height:{amt_in_words_line_spacing}cm; word-wrap: break-word;">
-				{{{{frappe.utils.money_in_words(doc.base_paid_amount or doc.base_received_amount)}}}}
+				{{{{ frappe.utils.money_in_words(
+					doc.received_amount if doc.payment_type == "Receive" else doc.paid_amount,
+					doc.paid_to_account_currency if doc.payment_type == "Receive" else doc.paid_from_account_currency
+				) }}}}
 		</span>
 		<span style="top:{amt_in_figures_from_top_edge}cm;left: {amt_in_figures_from_left_edge}cm;
 			position: absolute; min-width: 4cm;">
-			{{{{doc.get_formatted("base_paid_amount") or doc.get_formatted("base_received_amount")}}}}
+			{{{{doc.get_formatted("received_amount" if doc.payment_type == "Receive" else "paid_amount")}}}}
 		</span>
 		<span style="top:{signatory_from_top_edge}cm;left: {signatory_from_left_edge}cm;
 			position: absolute;  min-width: 6cm;">
@@ -115,9 +129,7 @@ def create_or_update_cheque_print_format(template_name):
 		else 0.0,
 		cheque_width=doc.cheque_width,
 		cheque_height=doc.cheque_height,
-		acc_pay_dist_from_top_edge=doc.acc_pay_dist_from_top_edge,
-		acc_pay_dist_from_left_edge=doc.acc_pay_dist_from_left_edge,
-		message_to_show=doc.message_to_show if doc.message_to_show else _("Account Pay Only"),
+		account_payee=account_payee,
 		date_dist_from_top_edge=doc.date_dist_from_top_edge,
 		date_dist_from_left_edge=doc.date_dist_from_left_edge,
 		acc_no_dist_from_top_edge=doc.acc_no_dist_from_top_edge,
@@ -134,8 +146,137 @@ def create_or_update_cheque_print_format(template_name):
 		signatory_from_left_edge=doc.signatory_from_left_edge,
 	)
 
+	if not cheque_print.is_new():
+		if doc.print_format_creation:
+			is_generated_format = get_datetime(doc.print_format_creation) == get_datetime(
+				cheque_print.creation
+			)
+		else:
+			is_generated_format = (
+				cheque_print.standard == "No"
+				and cheque_print.custom_format
+				and cheque_print.print_format_type == "Jinja"
+				and not cheque_print.raw_printing
+				and get_cheque_print_format_signature(cheque_print.html, doc.message_to_show)
+				== get_cheque_print_format_signature(cheque_html, doc.message_to_show)
+			)
+
+		if not doc.has_print_format or cheque_print.doc_type != "Payment Entry" or not is_generated_format:
+			frappe.throw(
+				_(
+					"Print Format {0} already exists and could not be identified as generated by this template. "
+					"Rename the existing Print Format before continuing."
+				).format(frappe.bold(template_name)),
+				title=_("Print Format Conflict"),
+			)
+
+	cheque_print.html = cheque_html
 	cheque_print.save(ignore_permissions=True)
 
-	frappe.db.set_value("Cheque Print Template", template_name, "has_print_format", 1)
+	frappe.db.set_value(
+		"Cheque Print Template",
+		template_name,
+		{"has_print_format": 1, "print_format_creation": cheque_print.creation},
+	)
 
 	return cheque_print
+
+
+def get_cheque_print_format_signature(html, message_to_show=None):
+	# Legacy formats have no identity. Ignore template settings, but preserve custom markup.
+	dimension = r"-?\d+(?:\.\d+)?(?:e[+-]?\d+)?"
+	message = r'{{ "(?:[^"\\]|\\.)*" \| e }}|[^<>{}]*'
+	if message_to_show:
+		message += "|" + re.escape(message_to_show)
+
+	html = re.sub(
+		rf'<span style="top:{dimension}cm; left:{dimension}cm;'
+		r'\n\t{3}border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">'
+		r"\n\t{4}(?:" + message + r")\n\t{2}</span>",
+		"",
+		html or "",
+		count=1,
+	)
+	html = re.sub(rf"(?<![\w-])(top|left|width|height|line-height): ?{dimension}cm", r"\1:0cm", html)
+	html = re.sub(r"\s+", " ", html).strip()
+	html = re.sub(r">\s+<", "><", html)
+
+	# These expressions were generated by earlier ERPNext versions.
+	for previous, current in {
+		"{{ doc.account_no or '' }}": "{{ (doc.bank_account_no or '') | e }}",
+		"{{frappe.utils.money_in_words(doc.base_paid_amount or doc.base_received_amount)}}": "{{doc.in_words}}",
+		"{{frappe.utils.money_in_words(doc.base_paid_amount or doc.base_received_amount, doc.company_currency)}}": "{{doc.in_words}}",
+		"{{ frappe.utils.money_in_words( "
+		'doc.received_amount if doc.payment_type == "Receive" else doc.paid_amount, '
+		'doc.paid_to_account_currency if doc.payment_type == "Receive" else doc.paid_from_account_currency '
+		") }}": "{{doc.in_words}}",
+		'{{doc.get_formatted("base_paid_amount") or doc.get_formatted("base_received_amount")}}': '{{doc.get_formatted("received_amount" if doc.payment_type == "Receive" else "paid_amount")}}',
+	}.items():
+		html = html.replace(previous, current)
+
+	return html
+
+
+def update_existing_cheque_print_formats():
+	frappe.only_for("System Manager")
+
+	template_names = frappe.get_all("Cheque Print Template", pluck="name")
+	if not template_names:
+		return
+
+	default_messages = None
+	for template_name in frappe.get_all(
+		"Print Format",
+		filters={
+			"name": ["in", template_names],
+			"doc_type": "Payment Entry",
+			"standard": "No",
+			"custom_format": 1,
+			"print_format_type": "Jinja",
+			"raw_printing": 0,
+		},
+		pluck="name",
+	):
+		print_format = frappe.get_doc("Print Format", template_name)
+		# Only migrate a region that still matches the saved message, preserving custom markup.
+		message = re.search(
+			r'border-bottom: solid 1px;border-top:solid 1px; width:2cm;text-align: center; position: absolute;">\n\t{4}'
+			r"(?P<message>.*)"
+			r"\n\t{2}</span>\n\t{2}<span[^>]*>\n\t{3}{{ frappe\.utils\.formatdate\(doc\.reference_date\) or '' }}",
+			print_format.html or "",
+			flags=re.DOTALL,
+		)
+		saved_message = frappe.db.get_value("Cheque Print Template", template_name, "message_to_show")
+		if not saved_message and default_messages is None:
+			default_messages = {"Account Pay Only"}
+			default_messages.update(
+				_("Account Pay Only", lang=language) for language in frappe.get_all("Language", pluck="name")
+			)
+
+		for message_text in [saved_message] if saved_message else default_messages:
+			escaped_message = "{{ " + frappe.as_json(message_text, ensure_ascii=False) + " | e }}"
+			if message and message["message"] in (message_text, escaped_message):
+				break
+		else:
+			frappe.log_error(
+				title=_("Cheque Print Format Requires Review"),
+				message=_(
+					"The account-payee message in Print Format {0} could not be identified unambiguously. "
+					"Its HTML has been preserved. "
+					"Review and escape the message in its custom HTML, or regenerate the format "
+					"using Update Print Format."
+				).format(print_format.name),
+				reference_doctype="Print Format",
+				reference_name=print_format.name,
+			)
+			continue
+
+		if message["message"] == escaped_message:
+			continue
+
+		print_format.html = (
+			print_format.html[: message.start("message")]
+			+ escaped_message
+			+ print_format.html[message.end("message") :]
+		)
+		print_format.save()

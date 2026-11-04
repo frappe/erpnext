@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+from erpnext.setup.doctype.target_detail.target_detail import validate_targets
+
 
 class Territory(NestedSet):
 	# begin: auto-generated types
@@ -32,6 +34,7 @@ class Territory(NestedSet):
 	nsm_parent_field = "parent_territory"
 
 	def validate(self):
+		validate_targets(self.get("targets"))
 		if not self.parent_territory:
 			self.parent_territory = get_root_of("Territory")
 

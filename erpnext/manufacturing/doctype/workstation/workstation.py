@@ -173,7 +173,7 @@ class Workstation(Document):
 
 		return schedule_date
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def start_job(self, job_card: str, from_time: DateTimeLikeObject, employee: str):
 		doc = frappe.get_doc("Job Card", job_card)
 		doc.check_permission("write")
@@ -183,7 +183,7 @@ class Workstation(Document):
 
 		return doc
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def complete_job(self, job_card: str, qty: float, to_time: DateTimeLikeObject):
 		doc = frappe.get_doc("Job Card", job_card)
 		doc.check_permission("submit")
@@ -202,7 +202,7 @@ class Workstation(Document):
 @frappe.whitelist()
 def get_job_cards(workstation):
 	if frappe.has_permission("Job Card", "read"):
-		jc_data = frappe.get_all(
+		jc_data = frappe.get_list(
 			"Job Card",
 			fields=[
 				"name",

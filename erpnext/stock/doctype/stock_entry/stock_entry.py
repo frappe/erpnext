@@ -36,6 +36,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock import stock_ledger
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -43,8 +44,8 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
 from erpnext.stock.get_item_details import (
+	_get_bin_details,
 	get_barcode_data,
-	get_bin_details,
 	get_conversion_factor,
 	get_default_cost_center,
 )
@@ -209,7 +210,7 @@ class StockEntry(StockController):
 
 	def update_items_from_bin_details(self):
 		for item in self.get("items"):
-			item.update(get_bin_details(item.item_code, item.s_warehouse))
+			item.update(_get_bin_details(item.item_code, item.s_warehouse))
 
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
@@ -323,13 +324,15 @@ class StockEntry(StockController):
 				continue
 
 			if self.check_invalid_serial_batch_nos_for_finished_good_item(row):
+				had_selection = row.serial_no or row.batch_no or row.serial_and_batch_bundle
 				self.reset_serial_batch_on_fg_row(row)
-				frappe.msgprint(
-					_(
-						"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
-						" because the previously selected serial/batch does not belong to this Work Order."
-					).format(row.idx, frappe.bold(self.work_order))
-				)
+				if had_selection:
+					frappe.msgprint(
+						_(
+							"Row {0}: Serial/Batch has been reset to values linked with Work Order {1}"
+							" because the previously selected serial/batch does not belong to this Work Order."
+						).format(row.idx, frappe.bold(self.work_order))
+					)
 
 	def check_invalid_serial_batch_nos_for_finished_good_item(self, row) -> bool:
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -531,14 +534,18 @@ class StockEntry(StockController):
 			batches = defaultdict(float)
 			serial_nos = []
 			qty = row.transfer_qty
+			precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 			for batch_no, batch_qty in materials.batch_details.items():
 				if qty <= 0:
 					break
 
-				batch_qty = abs(batch_qty)
+				batch_qty = flt(batch_qty, precision)
+				if batch_qty <= 0:
+					continue
+
 				if batch_qty <= qty:
 					batches[batch_no] = batch_qty
-					qty -= batch_qty
+					qty = flt(qty - batch_qty, precision)
 				else:
 					batches[batch_no] = qty
 					qty = 0
@@ -1103,11 +1110,12 @@ class StockEntry(StockController):
 		expected_by_name, expected_by_item = {}, defaultdict(float)
 		for source_row, qty in expected_rows:
 			if source_row.get("name"):
-				expected_by_name[source_row.name] = qty
+				expected_by_name[source_row.name] = (qty, flt(source_row.conversion_factor))
 			expected_by_item[source_row.item_code] += qty
 
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		tolerance = _qty_tolerance(precision)
+		qty_precision = frappe.get_precision("Stock Entry Detail", "qty")
 		self.validate_no_missing_components(expected_rows, precision, tolerance)
 
 		for row in self.items:
@@ -1115,9 +1123,9 @@ class StockEntry(StockController):
 				continue  # covered by validate_finished_good_consumption
 
 			if row.ste_detail and row.ste_detail in expected_by_name:
-				expected = expected_by_name[row.ste_detail]
+				expected, conversion_factor = expected_by_name[row.ste_detail]
 			elif row.item_code in expected_by_item:
-				expected = expected_by_item[row.item_code]
+				expected, conversion_factor = expected_by_item[row.item_code], 1
 			else:
 				frappe.throw(
 					_(
@@ -1127,6 +1135,8 @@ class StockEntry(StockController):
 					title=_("Invalid Disassembly Item"),
 				)
 
+			# rows are populated with qty rounded in the source UOM, so expect the same rounding
+			expected = flt(expected / conversion_factor, qty_precision) * conversion_factor
 			if abs(flt(row.transfer_qty, precision) - flt(expected, precision)) > tolerance:
 				frappe.throw(
 					_(
@@ -1268,7 +1278,13 @@ class StockEntry(StockController):
 					and ifnull(s_warehouse,'')='' """.format(", ".join(["%s" * len(other_ste)]), "%s"),
 				args,
 			)[0][0]
-			if fg_qty_already_entered and fg_qty_already_entered >= qty:
+			allowance_percentage = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "overproduction_percentage_for_work_order"
+				)
+			)
+			allowed_qty = flt(qty) + (allowance_percentage / 100 * flt(qty))
+			if fg_qty_already_entered and fg_qty_already_entered >= allowed_qty:
 				frappe.throw(
 					_("Stock Entries already created for Work Order {0}: {1}").format(
 						self.work_order, ", ".join(other_ste)
@@ -1561,6 +1577,8 @@ class StockEntry(StockController):
 					raise_error_if_no_rate=raise_error_if_no_rate,
 					batch_no=d.batch_no,
 					serial_and_batch_bundle=d.serial_and_batch_bundle,
+					posting_datetime=get_combine_datetime(self.posting_date, self.posting_time),
+					creation=self.first_sle_creation,
 				)
 
 			# do not round off basic rate to avoid precision loss
@@ -1580,6 +1598,16 @@ class StockEntry(StockController):
 				).format(frappe.bold(items[0]))
 
 			frappe.msgprint(message, alert=True)
+
+	@property
+	def first_sle_creation(self):
+		"""Creation of this entry's earliest ledger entry, if it has posted any yet."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": self.name, "voucher_type": self.doctype, "is_cancelled": 0},
+			"creation",
+			order_by="creation asc",
+		)
 
 	def has_consumption_basis(self) -> bool:
 		"""Whether the cost of the consumed items is known, even when that cost is zero."""
@@ -2170,20 +2198,45 @@ class StockEntry(StockController):
 				)
 
 	def update_stock_ledger(self, allow_negative_stock=False):
-		sl_entries = []
+		"""On submit, post the source legs, recalculate once for bundles picked while posting them,
+		then post the target legs. Only the second call updates batch qty, for the whole voucher."""
+		source_entries, target_entries = [], []
 		finished_item_row = self.get_finished_item_row()
+		self.get_sle_for_source_warehouse(source_entries, finished_item_row)
+		self.get_sle_for_target_warehouse(target_entries, finished_item_row)
 
-		# make sl entries for source warehouse first
-		self.get_sle_for_source_warehouse(sl_entries, finished_item_row)
-
-		# SLE for target warehouse
-		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-
-		# reverse sl entries if cancel
 		if self.docstatus == 2:
-			sl_entries.reverse()
+			self.make_sl_entries(
+				(source_entries + target_entries)[::-1], allow_negative_stock=allow_negative_stock
+			)
+			return
 
-		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+		stock_ledger.make_sl_entries(source_entries, allow_negative_stock)
+		if self.recalculate_for_bundles_picked_while_posting():
+			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
+			for sle in target_entries:
+				sle.incoming_rate = valuation_rates[sle.voucher_detail_no]
+
+		self.make_sl_entries(target_entries, allow_negative_stock=allow_negative_stock)
+
+	def recalculate_for_bundles_picked_while_posting(self) -> bool:
+		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""
+		if not frappe.db.exists(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"actual_qty": ("<", 0),
+				"auto_created_serial_and_batch_bundle": 1,
+				"is_cancelled": 0,
+			},
+		):
+			return False
+
+		self.reload()
+		self.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		self.db_update_all()
+		return True
 
 	def get_finished_item_row(self):
 		finished_item_row = None
@@ -2546,6 +2599,7 @@ class StockEntry(StockController):
 		self.items = []
 
 		if self.outgoing_stock_entry and self.purpose == "Material Transfer":
+			erpnext.require_permission("Stock Entry", self.outgoing_stock_entry)
 			doc = frappe.get_doc("Stock Entry", self.outgoing_stock_entry)
 
 			if doc.per_transferred == 100:
@@ -3009,6 +3063,8 @@ class StockEntry(StockController):
 		self.update_batches_to_be_consume(batches, row, qty)
 
 		if not row.batches_to_be_consume:
+			if not existing_row:
+				self.add_finished_goods(args, item)
 			return
 
 		_id = create_serial_and_batch_bundle(
@@ -4118,9 +4174,9 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 
 	# Get operating cost from BOM if not found in work_order.
 	if not operating_cost_per_unit and bom_no:
-		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
+		bom = frappe.db.get_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
-			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+			operating_cost_per_unit = flt(bom.base_operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
 
@@ -4397,7 +4453,7 @@ def get_warehouse_details(args):
 
 
 @frappe.whitelist()
-def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
+def validate_sample_quantity(item_code: str, sample_quantity: int, qty: float, batch_no: str | None = None):
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
@@ -4417,12 +4473,15 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no=None):
 		sample_quantity = 0
 	qty_diff = max_retain_qty - retainted_qty
 	if cint(sample_quantity) > cint(qty_diff):
-		frappe.msgprint(
-			_("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
+		if batch_no:
+			message = _("Maximum Samples - {0} can be retained for Batch {1} and Item {2}.").format(
 				max_retain_qty, batch_no, item_code
-			),
-			alert=True,
-		)
+			)
+		else:
+			message = _("Maximum Samples - {0} can be retained for Item {1}.").format(
+				max_retain_qty, item_code
+			)
+		frappe.msgprint(message, alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
 
@@ -4520,7 +4579,7 @@ def add_transferred_material(item_data, row):
 
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] += abs(qty)
 
 	if row.serial_no:
 		item_data.serial_nos.extend(get_serial_nos(row.serial_no))
@@ -4555,7 +4614,7 @@ def deduct_consumed_material(buckets, row):
 	if row.batch_no:
 		batches = {row.batch_no: flt(row.qty)}
 	else:
-		batches = {batch_no: -flt(qty) for batch_no, qty in (row.batch_nos or {}).items()}
+		batches = {batch_no: abs(flt(qty)) for batch_no, qty in (row.batch_nos or {}).items()}
 
 	for batch_no, qty in batches.items():
 		remaining_qty = deduct_consumed_batch_qty(buckets, batch_no, qty, remaining_qty)

@@ -728,6 +728,9 @@ class JobCard(Document):
 			)
 
 	def set_expected_and_actual_time(self):
+		if not self.time_logs:
+			self.actual_start_date = self.actual_end_date = None
+
 		for child_table, start_field, end_field, time_required in [
 			("scheduled_time_logs", "expected_start_date", "expected_end_date", "time_required"),
 			("time_logs", "actual_start_date", "actual_end_date", "total_time_in_mins"),
@@ -889,7 +892,7 @@ class JobCard(Document):
 					frappe.qb.from_(sed)
 					.join(se)
 					.on(sed.parent == se.name)
-					.select(sed.job_card_item, Sum(sed.qty))
+					.select(sed.job_card_item, Sum(sed.transfer_qty))
 					.where(
 						(sed.job_card_item.isin(job_card_items))
 						& (se.docstatus == 1)

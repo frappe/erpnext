@@ -701,6 +701,7 @@ frappe.ui.form.on("Asset", {
 				purchase_doc_name: frm.doc.purchase_receipt || frm.doc.purchase_invoice,
 				item_code: frm.doc.item_code,
 				doctype: doctype,
+				asset: frm.is_new() ? null : frm.doc.name,
 			},
 			callback: (r) => {
 				if (r.message) {

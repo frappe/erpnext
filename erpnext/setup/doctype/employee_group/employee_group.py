@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -20,4 +22,7 @@ class EmployeeGroup(Document):
 		employee_list: DF.Table[EmployeeGroupTable]
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		employees = [row.employee for row in self.employee_list if row.employee]
+		if len(employees) != len(set(employees)):
+			frappe.throw(_("An employee can only appear once in an Employee Group"))
