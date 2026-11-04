@@ -218,6 +218,7 @@ class Item(Document):
 					queue="long",
 					timeout=600,
 					job_name=f"set_opening_stock_for_{self.name}",
+					enqueue_after_commit=True,
 				)
 				frappe.msgprint(
 					_(
