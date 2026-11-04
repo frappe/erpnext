@@ -560,7 +560,8 @@ def _job_card_core_values(work_order, row, qty):
 
 
 def _job_card_warehouse_values(work_order, row, qty):
-	if work_order.track_semi_finished_goods and row.get("wip_warehouse"):
+	moves_material = not work_order.skip_transfer or work_order.from_wip_warehouse
+	if work_order.track_semi_finished_goods and moves_material and row.get("wip_warehouse"):
 		wip_warehouse = row.get("wip_warehouse")
 	elif not work_order.skip_transfer or work_order.from_wip_warehouse:
 		wip_warehouse = work_order.wip_warehouse or row.get("wip_warehouse")

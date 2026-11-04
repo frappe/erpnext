@@ -190,6 +190,19 @@ class TestPlantRun(ERPNextTestSuite):
 			PlantRun(second.name).start()
 		self.assertEqual(PlantRunState(PlantRun(second.name)).as_dict().stages[1].phase, "ready")
 
+	def test_stage_waits_while_capacity_planning_reserves_its_machine(self):
+		stock_ketchup_materials()
+		bom = make_ketchup_bom(make_ketchup_design())
+		with self.change_settings("Manufacturing Settings", {"disable_capacity_planning": 0}):
+			first = make_process_work_order(bom, 1000)
+			first.submit()
+			second = make_process_work_order(bom, 1000)
+			PlantRun(second.name).start()
+
+			mixer = PlantRun(second.name).get_open_job_card(1)
+			self.assertFalse(mixer.time_logs)
+			self.assertRaisesRegex(MachineBusyError, "reserved", PlantRun(second.name).start, mixer.name)
+
 	def test_parallel_stages_feed_the_stage_after_them(self):
 		work_order = make_process_work_order(make_ketchup_bom(make_parallel_ketchup_design()), 2000)
 		stock_ketchup_materials()

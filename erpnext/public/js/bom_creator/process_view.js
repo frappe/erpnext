@@ -1,18 +1,4 @@
 const ISLAND = "erpnext.page.plant-builder";
-const OPERATION_FIELDS = [
-	"operation_id",
-	"operation",
-	"workstation",
-	"workstation_type",
-	"time_in_mins",
-	"output_item",
-	"yield_percentage",
-	"sequence_id",
-];
-const MATERIAL_FIELDS = ["operation_id", "item_code", "qty", "is_balance_item", "storage"];
-const HEADER_FIELDS = ["name", "item_code", "qty", "company", "raw_material_warehouse", "formula_tolerance"];
-
-const pick = (row, fields) => Object.fromEntries(fields.map((field) => [field, row[field] ?? null]));
 
 export class ProcessView {
 	constructor(view) {
@@ -41,13 +27,14 @@ export class ProcessView {
 	}
 
 	get_props() {
-		const doc = this.frm.doc;
+		const design = {
+			...this.frm.doc,
+			items: [],
+			operations: this.get_rows("operations"),
+			materials: this.get_rows("materials"),
+		};
 		return {
-			design: {
-				...pick(doc, HEADER_FIELDS),
-				operations: this.get_rows("operations").map((row) => pick(row, OPERATION_FIELDS)),
-				materials: this.get_rows("materials").map((row) => pick(row, MATERIAL_FIELDS)),
-			},
+			design: JSON.parse(JSON.stringify(design)),
 			readOnly: !this.view.is_editable(),
 			onChange: (rows) => this.set_rows(rows),
 		};
@@ -59,14 +46,17 @@ export class ProcessView {
 		);
 	}
 
-	set_rows({ operations, materials }) {
-		for (const [table, rows] of [
-			["operations", operations],
-			["materials", materials],
-		]) {
-			const kept = (this.frm.doc[table] || []).filter((row) => cint(row.bom_node_id));
-			this.frm.doc[table] = kept;
-			rows.forEach((values) => this.frm.add_child(table, values));
+	set_rows(rows) {
+		for (const table of ["operations", "materials"]) {
+			const managed = this.get_rows(table);
+			const by_name = Object.fromEntries(managed.map((row) => [row.name, row]));
+			const others = (this.frm.doc[table] || []).filter((row) => !managed.includes(row));
+			const ordered = rows[table].map((values) => {
+				const row = by_name[values.name] || this.frm.add_child(table);
+				return Object.assign(row, { ...values, name: row.name });
+			});
+			this.frm.doc[table] = [...others, ...ordered];
+			this.frm.doc[table].forEach((row, index) => (row.idx = index + 1));
 		}
 		this.frm.dirty();
 	}

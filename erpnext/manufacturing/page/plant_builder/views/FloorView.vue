@@ -129,7 +129,7 @@ const live = computed(() => ({
 							<SectionHead
 								:title="__('Floor')"
 								:description="
-									__('Where the machines stand and the store they take materials from.')
+									__('Where the machines stand, and the main store of the floor.')
 								"
 							/>
 							<div class="grid grid-cols-2 gap-3">
@@ -204,12 +204,12 @@ const live = computed(() => ({
 										:theme="statusOf(machine).theme"
 										variant="subtle"
 									/>
-									<Tooltip v-if="!readOnly" :text="__('Take off this floor')">
+									<Tooltip v-if="!readOnly" :text="__('Remove from Floor')">
 										<Button
 											variant="ghost"
 											size="sm"
 											icon="lucide-x"
-											:aria-label="__('Take off this floor')"
+											:aria-label="__('Remove from Floor')"
 											@click="setFloor(machine.name, null)"
 										/>
 									</Tooltip>

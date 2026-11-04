@@ -34,7 +34,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "The store of this floor. Raw materials and packing materials are kept here.",
+   "description": "The main store of this floor.",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",

@@ -1,8 +1,10 @@
 import frappe
+from frappe import _
 from frappe.permissions import has_permission
 from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom_creator.process_formula import ProcessFormula
+from erpnext.manufacturing.doctype.work_order.mapper import make_work_order
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import (
@@ -45,21 +47,24 @@ def save_floor(doc: str | dict) -> dict:
 @frappe.whitelist(methods=["POST"])
 def set_machine_floor(workstation: str, plant_floor: str | None = None) -> dict:
 	machine = frappe.get_doc("Workstation", workstation)
-	floor = plant_floor or machine.plant_floor
-	frappe.get_doc("Plant Floor", floor).check_permission("read")
+	floors = [floor for floor in (plant_floor, machine.plant_floor) if floor]
+	if not floors:
+		frappe.throw(_("Choose the Plant Floor of {0}").format(frappe.bold(workstation)))
+
+	for floor in floors:
+		frappe.get_doc("Plant Floor", floor).check_permission("write")
 	machine.plant_floor = plant_floor
 	machine.save()
-	return get_floor(floor)
+	return get_floor(floors[0])
 
 
 def get_floor_data(floor):
-	machines = get_floor_machines([floor.name])
-	for machine in machines.values():
-		machine.shapes = get_machine_shapes(machine)
+	machines = add_machine_shapes(get_floor_machines([floor.name]))
+	ptype = "write" if floor.get("creation") else "create"
 	return {
 		"doc": floor.as_dict(),
 		"is_saved": bool(floor.get("creation")),
-		"can_write": can_write("Plant Floor", floor),
+		"can_write": bool(has_permission("Plant Floor", ptype, floor, print_logs=False)),
 		"machines": list(machines.values()),
 		"work_orders": get_open_work_orders(list(machines)),
 	}
@@ -69,26 +74,27 @@ def get_floor_machines(floors):
 	if not floors:
 		return {}
 
-	names = frappe.get_list(
-		"Workstation", filters={"plant_floor": ("in", floors)}, pluck="name", order_by="creation"
-	)
-	details = get_workstation_details(tuple(names))
 	floor_of = dict(
-		frappe.get_all(
-			"Workstation", filters={"name": ("in", names)}, fields=["name", "plant_floor"], as_list=1
+		frappe.get_list(
+			"Workstation",
+			filters={"plant_floor": ("in", floors)},
+			fields=["name", "plant_floor"],
+			order_by="creation",
+			as_list=1,
 		)
 	)
-	jobs = get_running_jobs(names)
+	details = get_workstation_details(tuple(floor_of))
+	jobs = get_running_jobs(list(floor_of))
 	for name, machine in details.items():
-		machine.update(plant_floor=floor_of.get(name), job=jobs.get(name))
-	return {name: details[name] for name in names if name in details}
+		machine.update(plant_floor=floor_of[name], job=jobs.get(name))
+	return {name: details[name] for name in floor_of if name in details}
 
 
 def get_running_jobs(workstations):
 	if not workstations:
 		return {}
 
-	cards = frappe.get_all(
+	cards = frappe.get_list(
 		"Job Card",
 		filters={
 			"workstation": ("in", workstations),
@@ -131,12 +137,6 @@ def get_open_work_orders(workstations):
 	)
 
 
-def can_write(doctype, doc):
-	if not doc.get("creation"):
-		return bool(has_permission(doctype, "create", print_logs=False))
-	return bool(has_permission(doctype, "write", doc, print_logs=False))
-
-
 @frappe.whitelist()
 def check_design(doc: str | dict) -> dict:
 	frappe.has_permission("BOM Creator", "read", throw=True)
@@ -148,12 +148,12 @@ def check_design(doc: str | dict) -> dict:
 	batch = flt(design.qty) or 1
 	return {
 		"errors": formula.get_problems(),
-		"item": get_item(design.item_code),
-		"machines": get_machines(tuple(row.workstation for row in formula.stages if row.workstation)),
+		"item": formula.item,
+		"machines": add_machine_shapes(formula.machines),
 		"weight_factors": formula.weight_factors,
-		"balance_qty": flt(formula.balance_row.qty * batch, 3) if formula.balance_row else None,
+		"balance_qty": flt(flt(formula.balance_row.qty) * batch, 3) if formula.balance_row else None,
 		"outputs": {
-			cint(row.operation_id): flt(row.output_quantity * batch, 3) for row in formula.process_stages
+			cint(row.operation_id): flt(flt(row.output_quantity) * batch, 3) for row in formula.process_stages
 		},
 		"formula_weight": flt(formula.charged_weight * batch, 3) if formula.can_compute else 0,
 		"items": get_items(
@@ -163,7 +163,7 @@ def check_design(doc: str | dict) -> dict:
 
 
 def get_items(item_codes):
-	items = frappe.get_all(
+	items = frappe.get_list(
 		"Item",
 		filters={"name": ("in", list(filter(None, item_codes)))},
 		fields=["name", "item_name", "stock_uom"],
@@ -171,8 +171,7 @@ def get_items(item_codes):
 	return {item.name: item for item in items}
 
 
-def get_machines(workstations):
-	machines = get_workstation_details(tuple(sorted(set(workstations))))
+def add_machine_shapes(machines):
 	for machine in machines.values():
 		machine.shapes = get_machine_shapes(machine)
 	return machines
@@ -182,15 +181,6 @@ def get_machine_shapes(machine):
 	if not machine.workstation_type:
 		return get_preset_shapes(machine.machine_model)
 	return frappe.get_cached_doc("Workstation Type", machine.workstation_type).machine_shapes
-
-
-def get_item(item_code):
-	if not item_code:
-		return None
-
-	return frappe.get_cached_value(
-		"Item", item_code, ["item_name", "stock_uom", "weight_per_unit", "weight_uom"], as_dict=True
-	)
 
 
 @frappe.whitelist()
@@ -230,27 +220,15 @@ def save_machine_design(workstation_type: str, shapes: str | list) -> dict:
 
 
 @frappe.whitelist(methods=["POST"])
-def make_work_order(work_order: str) -> str:
+def repeat_work_order(work_order: str) -> str:
 	source = frappe.get_doc("Work Order", work_order)
 	source.check_permission("read")
-	copy = frappe.new_doc("Work Order")
-	copy.update(
-		{
-			field: source.get(field)
-			for field in (
-				"production_item",
-				"bom_no",
-				"qty",
-				"company",
-				"wip_warehouse",
-				"fg_warehouse",
-				"project",
-			)
-		}
+	repeat = make_work_order(
+		source.bom_no, source.production_item, source.qty, source.company, source.project
 	)
-	copy.get_items_and_operations_from_bom()
-	copy.insert()
-	return copy.name
+	repeat.update({"wip_warehouse": source.wip_warehouse, "fg_warehouse": source.fg_warehouse})
+	repeat.insert()
+	return repeat.name
 
 
 @frappe.whitelist()
@@ -262,8 +240,8 @@ def get_run(work_order: str) -> dict:
 		**state.as_dict(),
 		"plant": {
 			"doc": plan.get_plant_doc(),
-			"machines": get_machines(tuple(plan.machines)),
-			"item": get_item(run.work_order.production_item),
+			"machines": add_machine_shapes(plan.machines),
+			"item": plan.item,
 		},
 	}
 

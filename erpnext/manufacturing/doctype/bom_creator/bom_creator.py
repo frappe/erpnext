@@ -15,7 +15,6 @@ from erpnext.manufacturing.doctype.bom_creator.item_matcher import ItemMatcher
 from erpnext.manufacturing.doctype.bom_creator.material_cost import MaterialCost
 from erpnext.manufacturing.doctype.bom_creator.operation_plan import OperationPlan
 from erpnext.manufacturing.doctype.bom_creator.part_tree_plan import PartTreePlan
-from erpnext.manufacturing.doctype.bom_creator.process_formula import ProcessFormula
 from erpnext.manufacturing.doctype.bom_creator.step_file import read_step_file
 
 DESIGN_FILE_READERS = {"step": read_step_file, "stp": read_step_file, "csv": read_bom_csv_file}
@@ -41,10 +40,13 @@ class BOMCreator(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
+		from frappe.types import DF
+
 		from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
 		from erpnext.manufacturing.doctype.bom_creator_material.bom_creator_material import BOMCreatorMaterial
-		from erpnext.manufacturing.doctype.bom_creator_operation.bom_creator_operation import BOMCreatorOperation
-		from frappe.types import DF
+		from erpnext.manufacturing.doctype.bom_creator_operation.bom_creator_operation import (
+			BOMCreatorOperation,
+		)
 
 		amended_from: DF.Link | None
 		buying_price_list: DF.Link | None
@@ -77,7 +79,9 @@ class BOMCreator(Document):
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		routing: DF.Link | None
 		set_rate_based_on_warehouse: DF.Check
-		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Superseded", "Cancelled"]
+		status: DF.Literal[
+			"Draft", "Submitted", "In Progress", "Completed", "Failed", "Superseded", "Cancelled"
+		]
 		track_semi_finished_goods: DF.Check
 		uom: DF.Link | None
 	# end: auto-generated types
@@ -92,7 +96,6 @@ class BOMCreator(Document):
 		self.validate_part_models()
 		self.validate_existing_boms()
 		self.validate_finished_good()
-		self.set_process_formula()
 		OperationPlan(self).validate()
 		self.set_revision_changes()
 		MaterialCost(self).set_costs()
@@ -111,7 +114,6 @@ class BOMCreator(Document):
 		self.set_part_structure()
 		self.validate_part_models()
 		self.validate_existing_boms()
-		self.set_process_formula()
 		OperationPlan(self).validate()
 		self.set_revision_changes()
 		MaterialCost(self).set_costs()
@@ -155,10 +157,6 @@ class BOMCreator(Document):
 
 		if not self.design_name:
 			frappe.throw(_("Set the Design Name or the Finished Good."), title=_("Missing Design Name"))
-
-	def set_process_formula(self):
-		if self.track_semi_finished_goods:
-			ProcessFormula(self).apply()
 
 	def validate_finished_good(self):
 		if self.is_phantom and self.track_semi_finished_goods:

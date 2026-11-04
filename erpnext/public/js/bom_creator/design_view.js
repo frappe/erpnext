@@ -45,8 +45,8 @@ export class DesignView {
 					display: flex; gap: var(--margin-lg); height: 560px; margin-bottom: var(--margin-md);
 				}
 				.bom-creator-view.without-model { height: auto; }
-				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .frappe-control,
-				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .form-group {
+				.bom-creator-view :is(.design-item-cell, .design-uom-cell) .frappe-control,
+				.bom-creator-view :is(.design-item-cell, .design-uom-cell) .form-group {
 					width: 100%; margin: 0;
 				}
 				.bom-creator-view .form-control {
@@ -186,7 +186,7 @@ export class DesignView {
 		const operations = this.frm.doc.operations || [];
 		const minutes = operations.reduce((total, row) => total + flt(row.time_in_mins), 0);
 		return [
-			__("{0} stages", [operations.length]),
+			operations.length === 1 ? __("1 stage") : __("{0} stages", [operations.length]),
 			__("{0} minutes", [format_number(minutes, null, 0)]),
 			this.get_cost_summary(),
 		].filter(Boolean);

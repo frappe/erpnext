@@ -54,14 +54,38 @@ class TestProcessDesign(ERPNextTestSuite):
 		design = make_ketchup_design()
 		design.materials[1].is_balance_item = 0
 		design.materials[1].qty = 0.1
-		design.operations[2].workstation = "_Test Mixer"
-		problems = ProcessFormula(design).get_problems()
-
 		self.assertIn(
 			"The formula makes 860.0 Kg but the batch needs 1000.0 Kg. Change a quantity or pick a balance item.",
+			ProcessFormula(design).get_problems(),
+		)
+
+		design.operations[2].workstation = "_Test Mixer"
+		problems = ProcessFormula(design).get_problems()
+		self.assertIn("End with exactly one packing stage, a Filling Line or a Bagging Line", problems)
+
+	def test_each_stage_makes_its_own_semi_finished_good(self):
+		design = make_ketchup_design()
+		design.operations[1].output_item = "_Test Ketchup Pre-mix"
+
+		self.assertIn(
+			"_Test Ketchup Pre-mix is made by more than one stage. Give each stage its own semi-finished good.",
+			ProcessFormula(design).get_problems(),
+		)
+
+	def test_formula_keeps_rows_it_cannot_use_and_reports_them(self):
+		design = make_ketchup_design()
+		design.append("materials", {"operation_id": 2, "from_operation_id": 1, "qty": 0.625})
+		design.materials[0].uom = "Gram"
+		design.save()
+
+		self.assertEqual(design.materials[0].uom, "Gram")
+		self.assertTrue([row for row in design.materials if row.from_operation_id])
+		problems = design.get_bom_plan().get_problems()
+		self.assertIn(
+			"Remove the stage outputs from the materials. Each stage passes its output on by Sequence ID.",
 			problems,
 		)
-		self.assertIn("End with exactly one packing stage, a Filling Line or a Bagging Line", problems)
+		self.assertIn("Use the stock UOM Kg for _Test Tomato Paste", problems)
 
 	def test_parallel_stages_split_the_next_stage_inputs(self):
 		design = make_parallel_ketchup_design()
@@ -101,6 +125,16 @@ class TestProcessDesign(ERPNextTestSuite):
 		self.assertIn("_Test Mixer", result["machines"])
 		self.assertEqual(result["items"]["_Test Process Water"].stock_uom, "Litre")
 		self.assertEqual(result["formula_weight"], 1250)
+
+	def test_plant_builder_checks_a_design_it_cannot_compute_yet(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design
+
+		design = make_ketchup_design().as_dict()
+		design.operations[0].update(yield_percentage=0, output_quantity=None)
+		result = check_design(design)
+
+		self.assertIn("Stage 1 needs a yield above 0% and up to 100%", result["errors"])
+		self.assertEqual(result["outputs"][1], 0)
 
 	def test_plant_builder_design_check_needs_workstation_read(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design

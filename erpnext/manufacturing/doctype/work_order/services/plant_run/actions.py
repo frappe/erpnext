@@ -2,6 +2,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, now_datetime
 
+from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_transfer_entry
 from erpnext.manufacturing.doctype.work_order.mapper import create_job_card
 from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import PlantFlow
@@ -70,9 +71,23 @@ class PlantRun:
 		return [card for card in cards if card and not card.started_at]
 
 	@staticmethod
-	def start_job_card(job_card):
-		if not job_card.time_logs:
+	def start_job_card(job_card, wait_if_reserved=False):
+		if job_card.time_logs:
+			return
+
+		try:
+			frappe.db.savepoint("start_stage")
 			job_card.start_timer(start_time=now_datetime())
+		except OverlapError:
+			frappe.db.rollback(save_point="start_stage")
+			frappe.clear_last_message()
+			if not wait_if_reserved:
+				frappe.throw(
+					_(
+						"{0} is reserved for another Job Card by capacity planning. Start this stage when its slot is free, or turn off capacity planning in Manufacturing Settings."
+					).format(frappe.bold(job_card.workstation)),
+					MachineBusyError,
+				)
 
 	def pause(self):
 		running = [job_card for job_card in self.get_running_job_cards() if not job_card.is_paused]
@@ -184,7 +199,7 @@ class PlantRun:
 		for card in self.get_startable_cards(self.get_flow()):
 			job_card = frappe.get_doc("Job Card", card.name)
 			if not self.get_busy_job_cards(job_card) and not is_broken_down(job_card.workstation):
-				self.start_job_card(job_card)
+				self.start_job_card(job_card, wait_if_reserved=True)
 
 	def validate_machine_is_free(self, job_card):
 		if is_broken_down(job_card.workstation):

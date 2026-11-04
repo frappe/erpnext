@@ -8,11 +8,7 @@ import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH, isPackingModel } from "../../l
 import { READ_ONLY, machineModelOf } from "../../lib/plant";
 import { fmt, num, round } from "../../lib/format";
 
-const props = defineProps({
-	doc: Object,
-	data: { type: Object, default: () => ({}) },
-	machines: { type: Object, default: () => ({}) },
-});
+const props = defineProps({ doc: Object, data: { type: Object, default: () => ({}) } });
 const readOnly = inject(READ_ONLY, ref(false));
 
 const materials = computed(() => props.doc.materials);
@@ -38,7 +34,7 @@ const summary = computed(() => ({
 const stageOptions = computed(() =>
 	props.doc.stages
 		.map((stage, i) => ({ stage, label: String(i + 1), value: String(i + 1) }))
-		.filter(({ stage }) => !isPackingModel(machineModelOf(stage, props.machines)))
+		.filter(({ stage }) => !isPackingModel(machineModelOf(stage, props.data.machines || {})))
 		.map(({ label, value }) => ({ label, value }))
 );
 const showStage = computed(() => stageOptions.value.length > 1);
@@ -110,7 +106,7 @@ const add = () =>
 			</div>
 			<div
 				v-for="(row, i) in materials"
-				:key="i"
+				:key="row.name || i"
 				class="grid h-11 items-center gap-2 px-2"
 				:class="columns"
 			>

@@ -58,10 +58,6 @@ frappe.ui.form.on("BOM Creator", {
 		frm.design_view?.render();
 	},
 
-	formula_tolerance(frm) {
-		frm.design_view?.render();
-	},
-
 	qty(frm) {
 		frm.design_view?.render();
 	},

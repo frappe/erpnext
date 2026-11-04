@@ -1,6 +1,8 @@
 import { num } from "./format";
+import { isPackingModel } from "./machines";
 
 const OPERATION_FIELDS = [
+	"name",
 	"operation_id",
 	"operation",
 	"workstation",
@@ -10,7 +12,7 @@ const OPERATION_FIELDS = [
 	"yield_percentage",
 	"sequence_id",
 ];
-const MATERIAL_FIELDS = ["operation_id", "item_code", "qty", "is_balance_item", "storage"];
+const MATERIAL_FIELDS = ["name", "operation_id", "item_code", "qty", "is_balance_item", "storage"];
 
 const pick = (row, fields) => Object.fromEntries(fields.map((field) => [field, row[field] ?? null]));
 
@@ -22,7 +24,8 @@ export function fromDesign(design, typeModels = {}) {
 		semi_finished_good: row.output_item,
 		machine_model: typeModels[row.workstation_type] || null,
 	}));
-	const packingId = stages.at(-1)?.operation_id;
+	const last = stages.at(-1);
+	const packingId = isPackingModel(last?.machine_model) ? last.operation_id : undefined;
 	const stageOf = (row) => stages.findIndex((stage) => stage.operation_id === row.operation_id) + 1 || 1;
 	const rows = design.materials || [];
 	return {
@@ -32,6 +35,7 @@ export function fromDesign(design, typeModels = {}) {
 		materials: rows
 			.filter((row) => row.operation_id !== packingId)
 			.map((row) => ({
+				name: row.name,
 				item_code: row.item_code,
 				qty: num(row.qty) * batch,
 				is_balance_item: row.is_balance_item ? 1 : 0,
@@ -40,7 +44,7 @@ export function fromDesign(design, typeModels = {}) {
 			})),
 		packing_materials: rows
 			.filter((row) => row.operation_id === packingId)
-			.map((row) => ({ item_code: row.item_code, qty_per_unit: num(row.qty) })),
+			.map((row) => ({ name: row.name, item_code: row.item_code, qty_per_unit: num(row.qty) })),
 	};
 }
 
@@ -61,6 +65,7 @@ export function toDesign(doc) {
 			qty: num(row.qty) / batch,
 		})),
 		...doc.packing_materials.map((row) => ({
+			name: row.name,
 			operation_id: packingId ?? null,
 			item_code: row.item_code,
 			qty: num(row.qty_per_unit),
@@ -77,9 +82,6 @@ export function designRows(design) {
 		materials: (design.materials || []).map((row) => pick(row, MATERIAL_FIELDS)),
 	};
 }
-
-export const nextOperationId = (doc) =>
-	Math.max(0, ...doc.stages.map((stage) => num(stage.operation_id))) + 1;
 
 const NUMBERS = ["operation_id", "time_in_mins", "yield_percentage", "sequence_id", "qty", "is_balance_item"];
 
