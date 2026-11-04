@@ -6,10 +6,13 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder.functions import Sum
+from frappe.query_builder import Case
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, getdate
 
 from erpnext.stock.doctype.item.item import get_item_defaults
+
+FULFILLED_QTY_FIELD = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}
 
 ORDER_TYPE_BY_DOCTYPE = {
 	"Sales Order": ("Selling", "customer"),
@@ -104,17 +107,20 @@ class BlanketOrder(Document):
 
 		trans = frappe.qb.DocType(ref_doctype)
 		trans_item = frappe.qb.DocType(f"{ref_doctype} Item")
+		fulfilled_qty = IfNull(trans_item[FULFILLED_QTY_FIELD[ref_doctype]], 0) * trans_item.conversion_factor
+		ordered_qty = (
+			Case().when(trans.status.isin(["Stopped", "Closed"]), fulfilled_qty).else_(trans_item.stock_qty)
+		)
 
 		item_ordered_qty = frappe._dict(
 			(
 				frappe.qb.from_(trans_item)
 				.from_(trans)
-				.select(trans_item.item_code, Sum(trans_item.stock_qty).as_("qty"))
+				.select(trans_item.item_code, Sum(ordered_qty).as_("qty"))
 				.where(
 					(trans.name == trans_item.parent)
 					& (trans_item.blanket_order == self.name)
 					& (trans.docstatus == 1)
-					& (trans.status.notin(["Stopped", "Closed"]))
 				)
 				.groupby(trans_item.item_code)
 			).run()
@@ -221,3 +227,19 @@ def validate_against_blanket_order(order_doc):
 			bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 			bo_doc.validate_order_matches(order_doc)
 			bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
+
+
+def validate_reopen_against_blanket_order(order_doc):
+	fulfilled_field = FULFILLED_QTY_FIELD[order_doc.doctype]
+	order_data = {}
+	for item in order_doc.get("items"):
+		if item.blanket_order:
+			pending_qty = (flt(item.qty) - flt(item.get(fulfilled_field))) * (
+				flt(item.conversion_factor) or 1
+			)
+			item_data = order_data.setdefault(item.blanket_order, {})
+			item_data[item.item_code] = item_data.get(item.item_code, 0) + max(pending_qty, 0)
+
+	for bo_name, item_data in sorted(order_data.items()):
+		bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
+		bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
