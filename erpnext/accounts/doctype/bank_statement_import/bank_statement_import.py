@@ -93,6 +93,7 @@ class BankStatementImport(DataImport):
 
 		job_id = f"bank_statement_import::{self.name}"
 		if not is_job_enqueued(job_id):
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-enqueue-without-after-commit -- user action, nothing written before the enqueue
 			enqueue(
 				start_import,
 				queue="default",
@@ -349,6 +350,7 @@ def write_files(import_file, data):
 	extension = extension.lstrip(".")
 
 	if extension == "csv":
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
 		with open(full_file_path, "w", newline="") as file:
 			writer = csv.writer(file)
 			writer.writerows(data)

@@ -42,6 +42,7 @@ def validate_desk_user():
 		frappe.throw(_("You are not permitted to access this page."), frappe.PermissionError)
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- developer mode only
 @frappe.whitelist(methods=["POST"], allow_guest=True)
 def get_context_for_dev():
 	if not frappe.conf.developer_mode:

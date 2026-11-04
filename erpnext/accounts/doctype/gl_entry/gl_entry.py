@@ -494,4 +494,5 @@ def rename_temporarily_named_docs(doctype):
 					frappe.call(hook, newname=newname, oldname=oldname)
 
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
