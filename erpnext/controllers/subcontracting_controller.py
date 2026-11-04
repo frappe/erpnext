@@ -768,8 +768,8 @@ class SubcontractingController(StockController):
 
 				self.set_rate_for_supplied_items(rm_obj, item_row)
 			elif self.backflush_based_on == "BOM":
-				self.set_batch_for_supplied_items()
 				self.update_rate_for_supplied_items()
+				self.set_batch_for_supplied_items()
 
 	def set_batch_for_supplied_items(self):
 		from erpnext.stock.get_item_details import get_filtered_serial_nos
