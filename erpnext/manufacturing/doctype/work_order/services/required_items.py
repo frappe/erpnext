@@ -169,7 +169,12 @@ class RequiredItemsService:
 		"""Fetch rate afresh for rows whose item was added or changed by hand."""
 		previous = self.doc.get_doc_before_save()
 		previous_items = {d.name: d.item_code for d in previous.required_items} if previous else {}
-		edited_rows = [d for d in self.doc.get("required_items") if _is_edited_item(d, previous_items)]
+		bom_items = get_bom_items_as_dict(
+			self.doc.bom_no, self.doc.company, fetch_exploded=self.doc.use_multi_level_bom
+		)
+		edited_rows = [
+			d for d in self.doc.get("required_items") if _is_edited_item(d, previous_items, bom_items)
+		]
 		if not edited_rows:
 			return
 
@@ -568,10 +573,10 @@ class RequiredItemsService:
 		}
 
 
-def _is_edited_item(row, previous_items):
+def _is_edited_item(row, previous_items, bom_items):
 	if row.name in previous_items:
 		return previous_items[row.name] != row.item_code
-	return not row.rate
+	return not row.rate or not _find_bom_item(bom_items, row)
 
 
 def _find_bom_item(item_dict, row):
