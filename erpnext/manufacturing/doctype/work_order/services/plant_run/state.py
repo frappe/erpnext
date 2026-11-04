@@ -48,6 +48,7 @@ class PlantRunState:
 			item_name=self.work_order.item_name,
 			stock_uom=self.work_order.stock_uom,
 			bom_no=self.work_order.bom_no,
+			bom_creator=self.plan.bom.bom_creator,
 			actual_start_date=self.work_order.actual_start_date,
 			actual_end_date=self.work_order.actual_end_date,
 			is_paused=any(

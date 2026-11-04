@@ -11,8 +11,8 @@ defineProps({ errors: { type: Array, default: () => [] } });
 			<p class="text-base font-medium text-ink-gray-8">
 				{{
 					errors.length === 1
-						? __("1 thing to fix before running")
-						: __("{0} things to fix before running", [errors.length])
+						? __("1 thing to fix before creating BOMs")
+						: __("{0} things to fix before creating BOMs", [errors.length])
 				}}
 			</p>
 		</div>
@@ -24,6 +24,6 @@ defineProps({ errors: { type: Array, default: () => [] } });
 	</div>
 	<div v-else class="flex h-9 items-center gap-2 rounded-5 bg-surface-green-1 px-3">
 		<span class="lucide-circle-check size-4 text-ink-green-5" aria-hidden="true" />
-		<p class="text-sm text-ink-gray-7">{{ __("Ready to run a Work Order") }}</p>
+		<p class="text-sm text-ink-gray-7">{{ __("Ready to create BOMs") }}</p>
 	</div>
 </template>

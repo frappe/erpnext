@@ -1,19 +1,23 @@
 <script setup>
 import { computed } from "vue";
-import PlantList from "./views/PlantList.vue";
-import PlantSetup from "./views/PlantSetup.vue";
+import FloorList from "./views/FloorList.vue";
+import FloorView from "./views/FloorView.vue";
 import PlantRun from "./views/PlantRun.vue";
 import MachineDesigner from "./views/MachineDesigner.vue";
+import ProcessDesign from "./views/ProcessDesign.vue";
 
 const props = defineProps({
 	route: { type: Array, default: () => [] },
 	query: { type: Object, default: () => ({}) },
+	design: { type: Object, default: null },
+	readOnly: Boolean,
 });
-const emit = defineEmits(["title", "actions"]);
+const emit = defineEmits(["title", "actions", "change"]);
 
-const plant = computed(() => (props.route[0] ? decodeURIComponent(props.route[0]) : null));
-const workOrder = computed(() => (props.route[1] ? decodeURIComponent(props.route[1]) : null));
-const machine = computed(() => (props.route[2] === "design" ? decodeURIComponent(props.route[1]) : null));
+const part = (index) => (props.route[index] ? decodeURIComponent(props.route[index]) : null);
+const machine = computed(() => (props.route[2] === "design" ? part(1) : null));
+const workOrder = computed(() => (props.route[0] === "run" && props.route.length === 2 ? part(1) : null));
+const floor = computed(() => (props.route.length === 1 ? part(0) : null));
 const chrome = {
 	onTitle: (title) => emit("title", title),
 	onActions: (actions) => emit("actions", actions),
@@ -26,15 +30,15 @@ function selectNumber(event) {
 
 <template>
 	<div class="flex h-full flex-col bg-surface-base text-ink-gray-9" @focusin="selectNumber">
-		<MachineDesigner v-if="machine" :key="machine" :name="machine" v-bind="chrome" />
-		<PlantRun
-			v-else-if="plant && workOrder"
-			:key="workOrder"
-			:plant="plant"
-			:work-order="workOrder"
-			v-bind="chrome"
+		<ProcessDesign
+			v-if="design"
+			:design="design"
+			:read-only="readOnly"
+			@change="emit('change', $event)"
 		/>
-		<PlantSetup v-else-if="plant" :key="plant" :name="plant" v-bind="chrome" />
-		<PlantList v-else v-bind="chrome" />
+		<MachineDesigner v-else-if="machine" :key="machine" :name="machine" v-bind="chrome" />
+		<PlantRun v-else-if="workOrder" :key="workOrder" :work-order="workOrder" v-bind="chrome" />
+		<FloorView v-else-if="floor" :key="floor" :name="floor" v-bind="chrome" />
+		<FloorList v-else v-bind="chrome" />
 	</div>
 </template>
