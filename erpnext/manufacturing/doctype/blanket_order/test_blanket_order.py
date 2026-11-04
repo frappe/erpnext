@@ -189,6 +189,55 @@ class TestBlanketOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 0)
 
+	def test_update_items_cannot_raise_qty_past_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=50)
+		po.submit()
+		row = po.items[0]
+
+		self.assertRaises(frappe.ValidationError, update_purchase_order_row_qty, po, row, 250)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 50)
+
+		update_purchase_order_row_qty(po, row, 100)
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 100)
+
+	@change_settings("Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1})
+	def test_update_items_checks_the_net_change(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=50)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 50})
+		po.submit()
+
+		payload = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": qty,
+				"rate": row.rate,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"schedule_date": str(row.schedule_date),
+			}
+			for row, qty in zip(po.items, (40, 60), strict=True)
+		]
+		update_child_qty_rate("Purchase Order", json.dumps(payload), po.name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Purchase Order Item", row.name, "qty") for row in po.items], [40, 60]
+		)
+
+	@change_settings("Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1})
+	def test_update_items_counts_the_qty_of_deleted_rows(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=80)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 20})
+		po.submit()
+
+		update_purchase_order_row_qty(po, po.items[0], 100)
+
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 100)
+		self.assertFalse(frappe.db.exists("Purchase Order Item", po.items[1].name))
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
