@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import unittest
-
 import frappe
 from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
+from frappe.utils.nestedset import get_ancestors_of
 
 from erpnext.accounts.doctype.account.account import (
 	InvalidAccountMergeError,
@@ -18,7 +18,7 @@ from erpnext.stock import get_company_default_inventory_account, get_warehouse_a
 test_dependencies = ["Company"]
 
 
-class TestAccount(unittest.TestCase):
+class TestAccount(FrappeTestCase):
 	def test_rename_account(self):
 		if not frappe.db.exists("Account", "1210 - Debtors - _TC"):
 			acc = frappe.new_doc("Account")
@@ -350,6 +350,27 @@ class TestAccount(unittest.TestCase):
 
 		balance = get_balance_on(account="Test Percent Account %5 - _TC", date=nowdate())
 		self.assertEqual(balance, 0)
+
+	def test_merge_group_into_its_grandchild(self):
+		company = "_Test Company"
+		top = create_account(
+			account_name="Merge Top", is_group=1, parent_account="Current Assets - _TC", company=company
+		)
+		middle = create_account(account_name="Merge Middle", is_group=1, parent_account=top, company=company)
+		bottom = create_account(
+			account_name="Merge Bottom", is_group=1, parent_account=middle, company=company
+		)
+		ledger = create_account(account_name="Merge Ledger", parent_account=bottom, company=company)
+
+		merge_account(top, bottom)
+
+		self.assertEqual(frappe.db.get_value("Account", bottom, "parent_account"), "Current Assets - _TC")
+		self.assertEqual(frappe.db.get_value("Account", middle, "parent_account"), bottom)
+		self.assertEqual(get_ancestors_of("Account", middle)[0], bottom)
+		self.assertEqual(
+			get_ancestors_of("Account", ledger)[:3],
+			[bottom, "Current Assets - _TC", "Application of Funds (Assets) - _TC"],
+		)
 
 
 def _make_test_records(verbose=None):
