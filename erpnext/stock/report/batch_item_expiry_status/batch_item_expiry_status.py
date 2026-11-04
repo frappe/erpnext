@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Date
 from frappe.utils import date_diff, today
 
 from erpnext.accounts.report.utils import validate_date_range
@@ -78,8 +77,10 @@ def get_batch_details(filters):
 		.where(
 			(batch.disabled == 0)
 			& (batch.batch_qty > 0)
-			& ((Date(batch.creation) >= filters["from_date"]) & (Date(batch.creation) <= filters["to_date"]))
+			& (batch.expiry_date >= filters["from_date"])
+			& (batch.expiry_date <= filters["to_date"])
 		)
+		.orderby(batch.expiry_date)
 		.orderby(batch.creation)
 	)
 
