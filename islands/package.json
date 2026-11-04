@@ -1,0 +1,29 @@
+{
+	"name": "erpnext-islands",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"postinstall": "patch-package --patch-dir node_modules/@framework/ui/patches",
+		"build": "node build.js --production",
+		"dev": "node build.js --watch"
+	},
+	"dependencies": {
+		"@framework/ui": "link:../../frappe/ui",
+		"frappe-ui": "1.0.2",
+		"vue": "^3.5.14",
+		"vue-router": "^4.2.2"
+	},
+	"devDependencies": {
+		"@vitejs/plugin-vue": "^6.0.0",
+		"autoprefixer": "^10.4.2",
+		"patch-package": "^8.0.0",
+		"postcss": "^8.4.5",
+		"tailwindcss": "^3.4.3",
+		"typescript": "^5.8.3",
+		"vite": "8.0.13"
+	},
+	"resolutions": {
+		"reka-ui": "2.10.1"
+	}
+}
