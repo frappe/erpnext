@@ -1155,6 +1155,37 @@ class TestPaymentRequest(FrappeTestCase):
 			mute_email=1,
 		)
 
+	def test_payment_request_party_follows_reference(self):
+		si = create_sales_invoice(qty=1, rate=1000)
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			party_type="Customer",
+			party="_Test Customer 1",
+			party_name="_Test Customer 1",
+			make_sales_invoice=1,
+			mute_email=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.party, si.customer)
+		self.assertEqual(pr.party_name, si.customer_name)
+		self.assertFalse(pr.make_sales_invoice)
+
+		pr.party = "_Test Customer 1"
+		self.assertRaisesRegex(frappe.ValidationError, "is not the Customer of", pr.save)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not valid for Sales Invoice",
+			make_payment_request,
+			dt="Sales Invoice",
+			dn=create_sales_invoice(qty=1, rate=1000).name,
+			party_type="Supplier",
+			mute_email=1,
+			submit_doc=1,
+		)
+
 
 def make_shopping_cart_order(customer, rate=1000):
 	so = make_sales_order(customer=customer, qty=1, rate=rate, do_not_save=True)
