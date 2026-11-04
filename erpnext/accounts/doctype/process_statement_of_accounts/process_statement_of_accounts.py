@@ -346,6 +346,7 @@ def get_html(doc, filters, entry, col, res, ageing):
 		if letter_head.get("footer"):
 			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
 			letter_head["footer"] = frappe.render_template(letter_head["footer"], {"doc": doc})
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti -- template is a file path or a Print Format
 	html = frappe.render_template(
 		template_path,
 		{
