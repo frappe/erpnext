@@ -150,6 +150,28 @@ class TestBlanketOrder(FrappeTestCase):
 		make_purchase_order_against(bo, qty=4).insert()
 
 	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_closed_order_keeps_its_received_qty(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=100)
+		po.submit()
+		receive_purchase_order(po, 80)
+
+		po.reload()
+		po.update_status("Closed")
+		self.assertEqual(blanket_order_ordered_qty(bo), 80)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"cannot be ordered more than",
+			make_purchase_order_against(bo, qty=30).submit,
+		)
+
+		make_purchase_order_against(bo, qty=20).submit()
+		po.reload()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be ordered more than", po.update_status, "Draft"
+		)
+
+	@change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg", "is_stock_item": 0}).name
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=1, item_code=item)
@@ -327,3 +349,16 @@ def make_box_item(item_code):
 			"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
 		},
 	).name
+
+
+def receive_purchase_order(po, qty):
+	from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+
+	receipt = make_purchase_receipt(po.name)
+	receipt.items[0].qty = qty
+	receipt.submit()
+	return receipt
+
+
+def blanket_order_ordered_qty(bo):
+	return frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty")
