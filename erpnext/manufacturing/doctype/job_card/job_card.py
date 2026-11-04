@@ -2147,8 +2147,9 @@ class JobCard(Document):
 		if not flt(kwargs.for_quantity):
 			return
 
-		self.for_quantity = (
-			flt(self.total_completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity)
+		self.for_quantity = flt(
+			flt(self.total_completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity),
+			self.precision("for_quantity"),
 		)
 
 	def validate_docstatus(self):
