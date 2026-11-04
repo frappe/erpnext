@@ -147,6 +147,28 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			frappe.db.get_value("Repost Item Valuation", queued_during_run.name, "status"), "Queued"
 		)
 
+	def test_restart_only_failed_reposts(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
+		repost.db_set("status", "Completed")
+		self.assertRaises(frappe.ValidationError, repost.restart_reposting)
+
+		repost.db_set("status", "Failed")
+		repost.restart_reposting()
+		self.assertEqual(frappe.db.get_value("Repost Item Valuation", repost.name, "status"), "Queued")
+
+	def test_restart_checks_the_saved_status(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		repost = self.make_queued_item_repost(item_code, add_days(today(), -5))
+		repost.db_set({"status": "Completed", "current_index": 1})
+		repost.status = "Failed"
+
+		self.assertRaises(frappe.ValidationError, repost.restart_reposting)
+		self.assertEqual(
+			frappe.db.get_value("Repost Item Valuation", repost.name, ["status", "current_index"]),
+			("Completed", 1),
+		)
+
 	def test_clear_old_logs(self):
 		# create 10 logs
 		for i in range(1, 20):
