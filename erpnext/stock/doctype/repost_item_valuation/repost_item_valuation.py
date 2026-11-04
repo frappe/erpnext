@@ -24,6 +24,7 @@ import erpnext
 from erpnext.accounts.general_ledger import validate_accounting_period
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
 from erpnext.projects.doctype.project.project import update_consumed_material_cost_for_vouchers
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import check_stock_frozen_date
 from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
@@ -94,6 +95,7 @@ class RepostItemValuation(Document):
 		self.set_status(write=False)
 		self.reset_field_values()
 		self.validate_accounts_freeze()
+		check_stock_frozen_date(self.posting_date)
 		self.reset_recreate_stock_ledgers()
 		self.validate_recreate_stock_ledgers()
 
