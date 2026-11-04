@@ -3505,6 +3505,93 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr.supplied_items[0].inv_site, "Site 1")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_finished_good_revalued_after_all_supplied_batches(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		set_backflush_based_on("BOM")
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SCR-FG-REVAL-.###",
+			}
+		).name
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SCR-RM-REVAL-.###",
+			}
+		).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		warehouse = "_Test Warehouse - _TC"
+		posting_date = add_days(today(), -3)
+		receipts = [
+			make_purchase_receipt(
+				item_code=rm_item, qty=10, rate=rate, warehouse=warehouse, posting_date=posting_date
+			)
+			for rate in (100, 200)
+		]
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": warehouse,
+					"item_code": service_item,
+					"qty": 20,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 20,
+				}
+			]
+		)
+		for receipt in receipts:
+			transfer = make_stock_entry(
+				item_code=rm_item,
+				qty=10,
+				source=warehouse,
+				target=sco.supplier_warehouse,
+				batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+				purpose="Send to Subcontractor",
+				do_not_save=True,
+			)
+			transfer.subcontracting_order = sco.name
+			transfer.items[0].subcontracted_item = fg_item
+			transfer.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		# revalue the batch of the last supplied row, the one a repost reaches last
+		last_batch = scr.supplied_items[-1].batch_no
+		receipt = next(
+			r for r in receipts if get_batch_from_bundle(r.items[0].serial_and_batch_bundle) == last_batch
+		)
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, "_Test Company", charges=500)
+
+		scr.reload()
+		fg_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "item_code": fg_item, "is_cancelled": 0},
+			["stock_value_difference", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		self.assertEqual(scr.items[0].amount, 4500)
+		self.assertEqual(fg_sle.stock_value_difference, 4500)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", fg_sle.serial_and_batch_bundle, "total_amount"),
+			4500,
+		)
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)

@@ -1276,6 +1276,9 @@ class SubcontractingController(StockController):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
+		# supplied items first, so a repost revalues them before the finished goods made from them
+		self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
 		for item in self.get("items"):
 			if item.item_code in stock_items and item.warehouse:
 				scr_qty = flt(item.qty) * flt(item.conversion_factor)
@@ -1305,7 +1308,6 @@ class SubcontractingController(StockController):
 						)
 					)
 
-		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,
