@@ -876,6 +876,71 @@ class TestBOM(FrappeTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
 			bom.insert()
 
+	def test_update_cost_saves_the_stored_bom_not_the_posted_one(self):
+		import json
+
+		from frappe.handler import run_doc_method
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item("_Test BOM Posted RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item("_Test BOM Posted FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_submit=True)
+
+		posted = bom.as_dict()
+		posted["quantity"] = 50
+		posted["items"][0]["qty"] = 999
+		posted["items"][0]["rate"] = 0
+
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+
+		def call_update_cost():
+			frappe.local.response = frappe._dict(docs=[])
+			run_doc_method(
+				"update_cost",
+				docs=json.dumps(posted, default=str),
+				args=json.dumps({"update_parent": True, "save": True, "from_child_bom": False}),
+			)
+
+		with self.set_user(make_user_with_roles("bom-stock-reader@example.com", "Stock User")):
+			self.assertRaises(frappe.PermissionError, call_update_cost)
+
+		call_update_cost()
+		self.assertEqual(frappe.db.get_value("BOM", bom.name, "quantity"), 1)
+		self.assertEqual(frappe.db.get_value("BOM Item", {"parent": bom.name}, "qty"), 1)
+
+	def test_update_cost_without_save_writes_nothing(self):
+		import json
+
+		from frappe.handler import run_doc_method
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item("_Test BOM Preview RM", {"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item("_Test BOM Preview FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], with_operations=1, do_not_save=True)
+		bom.append(
+			"operations",
+			{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 60},
+		)
+		bom.insert()
+
+		posted = bom.as_dict()
+		posted["operations"][0]["time_in_mins"] = 999
+
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+		frappe.local.response = frappe._dict(docs=[])
+		with self.set_user(make_user_with_roles("bom-preview-reader@example.com", "Stock User")):
+			run_doc_method(
+				"update_cost",
+				docs=json.dumps(posted, default=str),
+				args=json.dumps({"update_parent": False, "save": False, "from_child_bom": True}),
+			)
+
+		self.assertEqual(frappe.db.get_value("BOM Operation", {"parent": bom.name}, "time_in_mins"), 60)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
@@ -1039,3 +1104,23 @@ def make_template_bom_with_box_row():
 		template_rm=template_rm.item_code,
 		rm_variant=variants[template_rm.item_code],
 	)
+
+
+def make_user_with_roles(email, *roles):
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": email.split("@")[0],
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+
+	user = frappe.get_doc("User", email)
+	if existing := [row.role for row in user.roles]:
+		user.remove_roles(*existing)
+	if roles:
+		user.add_roles(*roles)
+
+	return email

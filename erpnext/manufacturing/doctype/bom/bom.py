@@ -741,7 +741,7 @@ class BOM(WebsiteGenerator):
 
 	def calculate_cost(self, save_updates=False, update_hour_rate=False):
 		"""Calculate bom totals"""
-		self.calculate_op_cost(update_hour_rate)
+		self.calculate_op_cost(update_hour_rate, save=save_updates)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_sm_cost(save=save_updates)
 		if save_updates:
@@ -758,14 +758,14 @@ class BOM(WebsiteGenerator):
 		if self.total_cost != old_cost:
 			self.flags.cost_updated = True
 
-	def calculate_op_cost(self, update_hour_rate=False):
+	def calculate_op_cost(self, update_hour_rate=False, save=True):
 		"""Update workstation rate and calculates totals"""
 		self.operating_cost = 0
 		self.base_operating_cost = 0
 		if self.get("with_operations"):
 			for d in self.get("operations"):
 				if d.workstation:
-					self.update_rate_and_time(d, update_hour_rate)
+					self.update_rate_and_time(d, update_hour_rate, save)
 
 				operating_cost = d.operating_cost
 				base_operating_cost = d.base_operating_cost
@@ -783,7 +783,7 @@ class BOM(WebsiteGenerator):
 			self.operating_cost = total_operating_cost
 			self.base_operating_cost = flt(total_operating_cost * self.conversion_rate, 2)
 
-	def update_rate_and_time(self, row, update_hour_rate=False):
+	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
 		if not row.hour_rate or update_hour_rate:
 			hour_rate = flt(frappe.get_cached_value("Workstation", row.workstation, "hour_rate"))
 
@@ -801,7 +801,7 @@ class BOM(WebsiteGenerator):
 				row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
 				row.base_cost_per_unit = row.base_operating_cost / (row.batch_size or 1.0)
 
-		if update_hour_rate:
+		if update_hour_rate and save:
 			row.db_update()
 
 	def calculate_rm_cost(self, save=False):
