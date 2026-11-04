@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, flt, nowdate
+from frappe.utils import cint, cstr, flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext import _refuse, get_company_currency
@@ -657,15 +657,8 @@ def make_payment_request(**args):
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
 	if not grand_total:
 		frappe.throw(_("Payment Entry is already created"))
-	if args.loyalty_points and args.dt == "Sales Order":
-		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
-
-		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
-		frappe.db.set_value(
-			"Sales Order", args.dn, "loyalty_points", int(args.loyalty_points), update_modified=False
-		)
-		frappe.db.set_value("Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False)
-		grand_total = grand_total - loyalty_amount
+	if args.loyalty_points and ref_doc.doctype == "Sales Order":
+		grand_total -= apply_loyalty_points(ref_doc, cint(args.loyalty_points))
 
 	# fetches existing payment request `grand_total` amount
 	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc)
@@ -775,6 +768,59 @@ def make_payment_request(**args):
 		return pr
 
 	return pr.as_dict()
+
+
+def apply_loyalty_points(sales_order, loyalty_points: int) -> float:
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+
+	if sales_order.order_type != "Shopping Cart":
+		frappe.throw(_("Loyalty Points can be redeemed in a Payment Request only for Shopping Cart orders"))
+
+	sales_order.check_permission("write")
+	loyalty_amount = validate_loyalty_points(sales_order, loyalty_points)
+	if loyalty_amount is None:
+		frappe.throw(_("Customer {0} is not enrolled in a Loyalty Program").format(sales_order.customer))
+
+	validate_loyalty_points_used_in_other_orders(sales_order, loyalty_points)
+	sales_order.db_set(
+		{"loyalty_points": loyalty_points, "loyalty_amount": loyalty_amount}, update_modified=False
+	)
+	return loyalty_amount
+
+
+def validate_loyalty_points_used_in_other_orders(sales_order, loyalty_points: int):
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
+
+	loyalty_program = frappe.db.get_value("Customer", sales_order.customer, "loyalty_program")
+	available_points = cint(
+		get_loyalty_details(sales_order.customer, loyalty_program, company=sales_order.company).get(
+			"loyalty_points"
+		)
+	)
+
+	so = frappe.qb.DocType("Sales Order")
+	points_in_other_orders = (
+		frappe.qb.from_(so)
+		.select(Sum(so.loyalty_points))
+		.where(
+			(so.customer == sales_order.customer)
+			& (so.company == sales_order.company)
+			& (so.order_type == "Shopping Cart")
+			& (so.docstatus == 1)
+			& (so.per_billed == 0)
+			& (so.status != "Closed")
+			& (so.name != sales_order.name)
+		)
+		.run()[0][0]
+	)
+
+	free_points = max(available_points - cint(points_in_other_orders), 0)
+	if loyalty_points > free_points:
+		frappe.throw(
+			_(
+				"Only {0} Loyalty Points of Customer {1} are free. The other points are used in open Shopping Cart orders."
+			).format(free_points, sales_order.customer)
+		)
 
 
 def get_amount(ref_doc, payment_account=None):
