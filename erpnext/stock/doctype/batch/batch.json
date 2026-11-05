@@ -81,7 +81,6 @@
    "read_only": 1
   },
   {
-   "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
    "label": "Manufacturing Date"
@@ -218,7 +217,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-11-08 17:41:32.143345",
+ "modified": "2026-11-09 06:30:38.743658",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
