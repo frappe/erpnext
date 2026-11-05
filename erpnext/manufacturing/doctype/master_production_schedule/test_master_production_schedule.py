@@ -173,14 +173,28 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_mps, items=[make_mps_row(uom="Box")])
 		make_mps(items=[make_mps_row(uom="_Test UOM 1")])
 
+	def test_row_bom_must_belong_to_the_item(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-def make_mps_row(**values):
+		item, other_item, raw_material = (
+			make_item(f"_Test MPS BOM {name}", {"is_stock_item": 1}).name for name in ("FG", "Other", "RM")
+		)
+		other_bom = make_bom(item=other_item, raw_materials=[raw_material]).name
+		self.assertRaises(
+			frappe.ValidationError, make_mps, items=[make_mps_row(item_code=item, bom_no=other_bom)]
+		)
+
+		bom = make_bom(item=item, raw_materials=[raw_material]).name
+		make_mps(items=[make_mps_row(item_code=item, bom_no=bom)])
+
+
+def make_mps_row(item_code="_Test Item", **values):
 	return {
-		"item_code": "_Test Item",
+		"item_code": item_code,
 		"warehouse": "_Test Warehouse - _TC",
 		"delivery_date": add_days(today(), 10),
 		"planned_qty": 1,
-		"uom": "_Test UOM",
+		"uom": frappe.get_cached_value("Item", item_code, "stock_uom"),
 		**values,
 	}
 
