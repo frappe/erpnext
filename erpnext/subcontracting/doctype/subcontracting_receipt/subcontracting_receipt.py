@@ -205,6 +205,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+<<<<<<< HEAD
+=======
+
+		self.validate_returned_serial_batches()
+		self.update_stock_reservation_entries()
+>>>>>>> ce0dcd7 (fix(subcontracting): validate the raw materials a return sends back)
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
