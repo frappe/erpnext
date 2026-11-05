@@ -473,9 +473,11 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"validate_consumed_qty": 0,
 		},
 	)
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_return_sends_back_no_more_than_the_receipt_consumed(self):
 		sco = make_order_with_two_batches_transferred()
 		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
 		scr.supplied_items[0].consumed_qty = 5
 		scr.save()
 		scr.submit()
