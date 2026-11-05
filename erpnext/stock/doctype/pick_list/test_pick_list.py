@@ -30,6 +30,9 @@ test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
 
 
 class TestPickList(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_bundle_picked_qty_converts_component_uom(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
@@ -2101,3 +2104,25 @@ class TestPickList(FrappeTestCase):
 		pick_list = create_pick_list(sales_order.name)
 
 		self.assertEqual(sum(row.qty for row in pick_list.locations), 2)
+
+	def test_sales_order_row_cannot_be_picked_beyond_its_qty(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item_code in (item, other_item):
+			make_stock_entry(item=item_code, to_warehouse="_Test Warehouse - _TC", qty=30, basic_rate=100)
+
+		sales_order = make_sales_order(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=10, do_not_submit=1
+		)
+		sales_order.append("items", {**sales_order.items[0].as_dict(), "name": None, "item_code": other_item})
+		sales_order.submit()
+
+		pick_lists = []
+		for _pick in range(2):
+			pick_list = create_pick_list(sales_order.name)
+			pick_list.locations = [row for row in pick_list.locations if row.item_code == item]
+			pick_list.save()
+			pick_lists.append(pick_list)
+
+		pick_lists[0].submit()
+		self.assertRaises(frappe.ValidationError, pick_lists[1].submit)
