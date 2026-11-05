@@ -5275,6 +5275,66 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "lead_time"), 1440)
 
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_amended_work_order_reuses_serial_and_batch_nos(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.db.set_value(
+			"Item",
+			fg_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": f"{fg_item}.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{fg_item}-B.#####",
+			},
+		)
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 3)
+		wo.cancel()
+
+		amended = frappe.copy_doc(wo)
+		amended.update({"amended_from": wo.name, "docstatus": 0, "status": "Draft"})
+		amended.insert()
+		amended.submit()
+
+		serial_nos = frappe.get_all("Serial No", filters={"item_code": fg_item}, pluck="work_order")
+		batches = frappe.get_all("Batch", filters={"item": fg_item}, pluck="reference_name")
+		self.assertEqual(serial_nos, [amended.name] * 3)
+		self.assertEqual(batches, [amended.name])
+
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_amended_work_order_fills_reused_batches_before_new_ones(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.db.set_value(
+			"Item",
+			fg_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": f"{fg_item}.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{fg_item}-B.#####",
+			},
+		)
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 2, batch_size=2)
+		wo.cancel()
+
+		amended = frappe.copy_doc(wo)
+		amended.update({"amended_from": wo.name, "docstatus": 0, "status": "Draft", "qty": 4})
+		amended.insert()
+		amended.submit()
+
+		serials_per_batch = {}
+		for batch_no in frappe.get_all("Serial No", filters={"item_code": fg_item}, pluck="batch_no"):
+			serials_per_batch[batch_no] = serials_per_batch.get(batch_no, 0) + 1
+		self.assertEqual(sorted(serials_per_batch.values()), [2, 2])
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
