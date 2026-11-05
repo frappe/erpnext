@@ -746,12 +746,43 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def validate_transfer_qty(self):
-		if not self.is_corrective_job_card and self.items and self.transferred_qty < self.for_quantity:
+		if (
+			not self.is_corrective_job_card
+			and self.items
+			and (self.transferred_qty < self.for_quantity or self.has_short_transferred_material())
+		):
 			frappe.throw(
 				_(
 					"Materials needs to be transferred to the work in progress warehouse for the job card {0}"
 				).format(self.name)
 			)
+
+	def has_short_transferred_material(self):
+		if not (self.work_order and flt(self.for_quantity)):
+			return False
+
+		wo_qty = flt(frappe.db.get_value("Work Order", self.work_order, "qty"))
+		if not wo_qty:
+			return False
+
+		wo_items = frappe.get_all(
+			"Work Order Item",
+			filters={"parent": self.work_order, "parenttype": "Work Order", "operation": self.operation},
+			fields=["item_code", "required_qty"],
+		)
+		transferred = dict(
+			frappe.get_all(
+				"Job Card Item",
+				filters={"parent": self.name, "parenttype": "Job Card"},
+				fields=["item_code", "transferred_qty"],
+				as_list=True,
+			)
+		)
+		for row in wo_items:
+			expected = flt(row.required_qty) / wo_qty * flt(self.for_quantity)
+			if flt(transferred.get(row.item_code), 6) < flt(expected, 6):
+				return True
+		return False
 
 	def validate_job_card(self):
 		if self.work_order and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped":
