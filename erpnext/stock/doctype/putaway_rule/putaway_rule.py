@@ -357,10 +357,14 @@ def _split_bundles(rows, doctype: str):
 		if row.get("serial_and_batch_bundle"):
 			rows_by_bundle[row.get("serial_and_batch_bundle")].append(row)
 
-	for bundle_name, bundle_rows in rows_by_bundle.items():
-		bundle = frappe.get_doc("Serial and Batch Bundle", bundle_name)
+	precision = frappe.get_precision("Serial and Batch Bundle", "total_qty")
+	for bundle in frappe.get_all(
+		"Serial and Batch Bundle",
+		filters={"name": ("in", list(rows_by_bundle))},
+		fields=["name", "total_qty", "warehouse", "type_of_transaction"],
+	):
+		bundle_rows = rows_by_bundle[bundle.name]
 		qtys = [abs(flt(row.get(qty_field))) for row in bundle_rows]
-		precision = bundle.precision("total_qty")
 
 		if (
 			len(bundle_rows) == 1
@@ -372,6 +376,7 @@ def _split_bundles(rows, doctype: str):
 		):
 			continue
 
+		bundle = frappe.get_doc("Serial and Batch Bundle", bundle.name)
 		slices = _slice_entries(bundle.entries, qtys, precision)
 		for idx, (row, share) in enumerate(zip(bundle_rows, slices, strict=True)):
 			if not share:
