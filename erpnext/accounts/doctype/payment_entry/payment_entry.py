@@ -499,6 +499,27 @@ class PaymentEntry(AccountsController):
 				doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
 				doc.delink_advance_entries(self.name)
 
+<<<<<<< HEAD
+=======
+	def trigger_invoice_update_for_subscriptions(self):
+		invoice_names = set()
+		for ref in self.references:
+			if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+				invoice_names.add((ref.reference_doctype, ref.reference_name))
+
+		for doctype, name in invoice_names:
+			if not frappe.db.get_value(doctype, name, "subscription"):
+				continue
+
+			frappe.db.savepoint("subscription_update")
+			try:
+				doc = frappe.get_doc(doctype, name)
+				doc.refresh_subscription_status()
+			except Exception:
+				frappe.db.rollback(save_point="subscription_update")
+				frappe.log_error(_("Failed to update subscription status for {0} {1}").format(doctype, name))
+
+>>>>>>> 4ac0582 (perf(payment entry): load only invoices linked to a subscription to refresh it)
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
 			for field in (
