@@ -2650,10 +2650,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertTrue(returned_values)
 		self.assertEqual(sum(returned_values), 0)
 
-<<<<<<< HEAD
-=======
 	def test_rejected_return_books_no_service_cost(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
@@ -2687,7 +2685,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertFalse({account: net for account, net in net_by_account.items() if flt(net, 2)})
 
 	def test_rejected_return_moved_to_accepted_warehouse_gets_service_cost(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
@@ -2716,77 +2714,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_return.save()
 		self.assertEqual(scr_return.items[0].service_cost_per_qty, scr.items[0].service_cost_per_qty)
 
-	def test_rejected_return_of_standard_cost_raw_materials_matches_the_ledger(self):
-		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
-			create_item_standard_cost,
-			create_standard_cost_item,
-			ensure_ppv_account,
-		)
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
-			make_subcontract_return_against_rejected_warehouse,
-		)
-
-		company = "_Test Company with perpetual inventory"
-		ensure_ppv_account(company)
-		raw_material = create_standard_cost_item().name
-		create_item_standard_cost(
-			raw_material, rate=50, company=company, effective_date=add_days(today(), -1)
-		)
-		finished_good = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
-		make_bom(item=finished_good, raw_materials=[raw_material], company=company, currency="INR")
-
-		sco = get_subcontracting_order(
-			company=company,
-			warehouse="Stores - TCP1",
-			supplier_warehouse="Work In Progress - TCP1",
-			service_items=[
-				{
-					"warehouse": "Stores - TCP1",
-					"item_code": "Subcontracted Service Item 7",
-					"qty": 10,
-					"rate": 100,
-					"fg_item": finished_good,
-					"fg_item_qty": 10,
-				}
-			],
-		)
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].rejected_qty = 2
-		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
-		scr.save()
-		scr.submit()
-
-		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
-		scr_return.save()
-		scr_return.reload()
-		scr_return.submit()
-
-		stock_value = sum(
-			frappe.get_all(
-				"Stock Ledger Entry",
-				filters={"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
-				pluck="stock_value_difference",
-			)
-		)
-		supplier_warehouse_account = get_inventory_account(company, scr_return.supplier_warehouse)
-		gl_value = sum(
-			gle.debit - gle.credit
-			for gle in get_gl_entries("Subcontracting Receipt", scr_return.name)
-			if gle.account == supplier_warehouse_account
-		)
-		self.assertTrue(stock_value)
-		self.assertEqual(gl_value, stock_value)
-
->>>>>>> e7dab2e (test: subcontracting return of rejected items books no service cost)
 	def test_purchase_receipt_maps_all_receipt_rows(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_purchase_receipt,
