@@ -99,11 +99,12 @@ class SubcontractingController(StockController):
 				is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
 				return_rate = None
 				if self.is_return and not is_standard_cost:
-					# rows with serial nos or batches already carry the rate they were consumed at
+					key = (original_rows.get(row.reference_name), row.rm_item_code)
+					# rows with the consumed serial nos or batches already carry the rate they were consumed at
 					return_rate = (
 						row.rate
-						if row.serial_and_batch_bundle
-						else return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
+						if row.serial_and_batch_bundle and key in self.returnable_serial_batches
+						else return_rates.get(key)
 					)
 				if row.reference_name in rejected_return_rows and not is_standard_cost:
 					rate = 0.0
