@@ -1316,16 +1316,10 @@ class SalesInvoice(SellingController):
 
 	@frappe.whitelist()
 	def is_subcontracted(self):
-		if not self.has_subcontracted:
+		sales_orders = [item.sales_order for item in self.items if item.sales_order]
+		if not self.has_subcontracted and sales_orders:
 			self.has_subcontracted = bool(
-				frappe.get_cached_value(
-					"Sales Order",
-					{
-						"name": ["in", [item.sales_order for item in self.items if item.sales_order]],
-						"is_subcontracted": 1,
-					},
-					"name",
-				)
+				frappe.db.exists("Sales Order", {"name": ["in", sales_orders], "is_subcontracted": 1})
 			)
 		if self.has_subcontracted:
 			self.update_stock = 0
