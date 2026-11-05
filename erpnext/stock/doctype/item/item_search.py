@@ -233,7 +233,8 @@ def quote_fragment(fragment: str) -> str:
 
 
 def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
-	"""Barcodes of each item, joined into the one string the index column holds."""
+	"""Barcodes of each item, joined into the one string the index column holds. Empty for an item
+	without any, so a preloaded batch answers for every item in it."""
 	if not item_codes:
 		return {}
 
@@ -243,7 +244,7 @@ def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
 		fields=["parent", "barcode"],
 	)
 
-	barcodes = {}
+	barcodes = dict.fromkeys(item_codes, "")
 	for row in rows:
 		barcodes[row.parent] = f"{barcodes.get(row.parent, '')} {row.barcode}".strip()
 
