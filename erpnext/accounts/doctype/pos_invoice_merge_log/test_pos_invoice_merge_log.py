@@ -10,12 +10,16 @@ from frappe.tests.utils import change_settings
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+	make_closing_entry_from_opening,
+)
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
+from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
@@ -43,6 +47,26 @@ def perpetual_inventory(company):
 		yield
 	finally:
 		frappe.local.enable_perpetual_inventory[company] = previous
+
+
+@contextmanager
+def pos_session():
+	frappe.db.sql("delete from `tabPOS Invoice`")
+	try:
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		yield frappe._dict(user=test_user, pos_profile=pos_profile, opening_entry=opening_entry)
+	finally:
+		frappe.set_user("Administrator")
+		frappe.db.sql("delete from `tabPOS Profile`")
+		frappe.db.sql("delete from `tabPOS Invoice`")
+
+
+def close_pos_session(session):
+	closing_entry = make_closing_entry_from_opening(session.opening_entry)
+	closing_entry.insert().submit()
+	session.opening_entry = create_opening_entry(session.pos_profile, session.user.name)
+	return closing_entry
 
 
 def sell_over_the_counter(lines, discount_percentage=0):
@@ -737,3 +761,51 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.db.set_value("Company", "_Test Company", "default_inventory_account", inventory_account)
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
+
+	def test_cancel_cancels_every_consolidated_credit_note(self):
+		with pos_session() as session:
+			first_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+			close_pos_session(session)
+
+			second_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+			close_pos_session(session)
+
+			refund_over_the_counter(first_sale, qty=-1)
+			refund_over_the_counter(second_sale, qty=-1)
+			closing_entry = close_pos_session(session)
+
+			consolidated_invoices = [
+				frappe.db.get_value("POS Invoice", sale.name, "consolidated_invoice")
+				for sale in (first_sale, second_sale)
+			]
+			credit_notes = frappe.get_all(
+				"Sales Invoice",
+				filters={"is_return": 1, "return_against": ["in", consolidated_invoices]},
+				pluck="name",
+			)
+			self.assertEqual(len(credit_notes), 2)
+
+			closing_entry.reload()
+			closing_entry.cancel()
+
+			for credit_note in credit_notes:
+				self.assertEqual(frappe.db.get_value("Sales Invoice", credit_note, "docstatus"), 2)
+
+	def test_every_consolidated_credit_note_needs_the_closing_entry_cancelled(self):
+		with pos_session() as session:
+			first_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+			close_pos_session(session)
+
+			second_sale = sell_over_the_counter([("_Test Item", 2, 500)])
+			close_pos_session(session)
+
+			refunds = [refund_over_the_counter(sale, qty=-1) for sale in (first_sale, second_sale)]
+			close_pos_session(session)
+
+			for refund in refunds:
+				credit_note = frappe.get_doc(
+					"Sales Invoice", frappe.db.get_value("POS Invoice", refund.name, "consolidated_invoice")
+				)
+				self.assertRaisesRegex(
+					frappe.ValidationError, "you need to cancel the POS Closing Entry", credit_note.cancel
+				)
