@@ -31,6 +31,7 @@ BATCH_SLOT_DATE_INDEX = 3
 BATCH_SLOT_VALUE_INDEX = 4
 
 AVERAGE_AGE_COLUMN = 6
+PURCHASE_VOUCHER_TYPES = ("Purchase Receipt", "Purchase Invoice")
 MAX_CHART_ITEMS = 10
 
 
@@ -310,6 +311,7 @@ class FIFOSlots:
 
 		# prepare single sle voucher detail lookup
 		self.prepare_stock_reco_voucher_wise_count()
+		self.subcontracting_returns = self._get_subcontracting_returns()
 		self.float_precision = get_float_precision()
 
 		if stock_ledger_entries is None:
@@ -804,6 +806,10 @@ class FIFOSlots:
 		index = -1 if from_end else 0
 		qty_to_pop = abs(row.actual_qty)
 		stock_value = abs(row.stock_value_difference)
+		if qty_to_pop and self._is_return_entry(row):
+			qty_to_pop, stock_value = self._consume_slots_at_return_rate(
+				fifo_queue, transfer_key, qty_to_pop, stock_value, from_end
+			)
 
 		while qty_to_pop:
 			slot = fifo_queue[index] if fifo_queue else [0, None, 0]
@@ -829,6 +835,45 @@ class FIFOSlots:
 				)
 				qty_to_pop = 0
 				stock_value = 0
+
+	def _get_subcontracting_returns(self) -> set:
+		return set(
+			frappe.get_all(
+				"Subcontracting Receipt",
+				filters={"is_return": 1, "docstatus": 1, "company": self.filters.get("company")},
+				pluck="name",
+			)
+		)
+
+	def _is_return_entry(self, row: dict) -> bool:
+		if row.voucher_type in PURCHASE_VOUCHER_TYPES:
+			return True
+
+		return row.voucher_type == "Subcontracting Receipt" and row.voucher_no in self.subcontracting_returns
+
+	def _consume_slots_at_return_rate(
+		self, fifo_queue: list, transfer_key: tuple, qty_to_pop: float, stock_value: float, from_end: bool
+	) -> tuple[float, float]:
+		return_rate = stock_value / qty_to_pop
+		for slot in list(reversed(fifo_queue)) if from_end else list(fifo_queue):
+			slot_qty = flt(slot[FIFO_QTY_INDEX])
+			if slot_qty <= 0 or abs(flt(slot[FIFO_VALUE_INDEX]) / slot_qty - return_rate) > 0.01:
+				continue
+
+			qty = min(slot_qty, qty_to_pop)
+			value = flt(slot[FIFO_VALUE_INDEX]) * qty / slot_qty
+			slot[FIFO_QTY_INDEX] = slot_qty - qty
+			slot[FIFO_VALUE_INDEX] = flt(slot[FIFO_VALUE_INDEX]) - value
+			if not slot[FIFO_QTY_INDEX]:
+				fifo_queue.remove(slot)
+
+			self.transferred_item_details[transfer_key].append([qty, slot[FIFO_DATE_INDEX], value])
+			qty_to_pop -= qty
+			stock_value -= value
+			if not qty_to_pop:
+				break
+
+		return qty_to_pop, stock_value
 
 	def _adjust_incoming_transfer_qty(
 		self,
