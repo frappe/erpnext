@@ -1943,7 +1943,7 @@ class update_entries_after:
 	def get_returned_supplied_item_rate(sle):
 		scr = frappe.get_doc("Subcontracting Receipt", sle.voucher_no)
 		row = scr.getone("supplied_items", {"name": sle.voucher_detail_no})
-		return scr.get_supplied_item_rates([row])[row.name]
+		return scr.get_supplied_item_rates([row])[0]
 
 	def is_unvalued_rejected_material(self, sle):
 		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""

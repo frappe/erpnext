@@ -75,8 +75,7 @@ class SubcontractingController(StockController):
 		if self.doctype == "Subcontracting Receipt":
 			precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 			rates = self.get_supplied_item_rates(self.supplied_items)
-			for row in self.supplied_items:
-				rate = rates[row.name]
+			for row, rate in zip(self.supplied_items, rates, strict=True):
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
 					row.amount = flt(row.consumed_qty) * flt(rate)
@@ -86,23 +85,23 @@ class SubcontractingController(StockController):
 			self.calculate_items_qty_and_amount()
 
 	def get_supplied_item_rates(self, rows):
-		"""Rate of each supplied item row by row name; a return takes back the rate the returned receipt consumed at."""
+		"""Rate of each supplied item row, in order; a return takes back the rate the returned receipt consumed at."""
 		rejected_return_rows = self.get_rejected_return_rows()
 		return_rates = self.get_consumed_rates_for_return()
 		original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
 
-		rates = {}
+		rates = []
 		for row in rows:
 			return_rate = return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
 			if (
 				row.reference_name in rejected_return_rows
 				and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
 			):
-				rates[row.name] = 0.0
+				rates.append(0.0)
 			elif return_rate is not None:
-				rates[row.name] = return_rate
+				rates.append(return_rate)
 			else:
-				rates[row.name] = _get_incoming_rate(self.get_supplied_item_rate_args(row))
+				rates.append(_get_incoming_rate(self.get_supplied_item_rate_args(row)))
 
 		return rates
 
