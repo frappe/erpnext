@@ -29,7 +29,10 @@ function selectNumber(event) {
 </script>
 
 <template>
-	<div class="flex h-full flex-col bg-surface-base text-ink-gray-9" @focusin="selectNumber">
+	<div
+		class="flex h-full flex-col bg-surface-base text-ink-gray-9 [&_input[type=number]::-webkit-inner-spin-button]:appearance-none [&_input[type=number]::-webkit-outer-spin-button]:appearance-none [&_input[type=number]]:[appearance:textfield]"
+		@focusin="selectNumber"
+	>
 		<ProcessDesign
 			v-if="design"
 			:design="design"

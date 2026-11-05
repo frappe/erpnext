@@ -1,6 +1,6 @@
 <script setup>
 import { computed, inject, ref } from "vue";
-import { Button, FormControl, TextInput, Tooltip } from "frappe-ui";
+import { Button, FormControl, Select, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import StageMaterials from "./StageMaterials.vue";
 import { __ } from "../../lib/api";
@@ -46,19 +46,20 @@ const stageOptions = computed(() =>
 		.map((stage, i) => ({ label: stageLabel(stage, i), stageNo: i + 1 }))
 		.filter((_, i) => i !== props.index && i !== props.packingIndex)
 );
-const runsWithOptions = computed(() => [
-	{ label: __("None"), value: "" },
-	...stageOptions.value.map((option) => ({ label: option.label, value: String(option.stageNo) })),
-]);
+const moveOptions = computed(() =>
+	stages.value
+		.map((stage, i) => ({ label: stageLabel(stage, i), stageNo: i + 1 }))
+		.filter((_, i) => i !== props.index)
+);
 const runsWith = computed(() => {
 	const other = groupOf(stages.value, props.index).find((stage) => stage !== props.stage);
-	return other ? String(stages.value.indexOf(other) + 1) : "";
+	return other ? String(stages.value.indexOf(other) + 1) : null;
 });
+const runsWithOptions = computed(() => [
+	...stageOptions.value.map((option) => ({ label: option.label, value: String(option.stageNo) })),
+	...(runsWith.value ? [{ label: __("No other stage"), value: "" }] : []),
+]);
 const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? Number(value) - 1 : null);
-
-const packing = computed(() => props.doc.packing_materials);
-const addPacking = () => packing.value.push({ item_code: "", qty_per_unit: 1 });
-const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 1);
 </script>
 
 <template>
@@ -118,11 +119,13 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			</div>
 			<template v-if="!isPacking">
 				<div class="grid grid-cols-2 gap-3">
-					<DeskControl
+					<Select
 						:model-value="runsWith"
-						fieldtype="Select"
 						:options="runsWithOptions"
+						variant="outline"
 						:label="__('Runs With')"
+						:placeholder="__('No other stage')"
+						:disabled="readOnly || !stageOptions.length"
 						@update:model-value="setRunsWithStage"
 					/>
 					<FormControl
@@ -159,36 +162,12 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					variant="outline"
 					:label="__('Minutes')"
 				/>
-				<p class="text-sm text-ink-gray-6">
-					{{ __("Packing materials, per unit of the finished good") }}
-				</p>
-				<div
-					v-for="(row, i) in packing"
-					:key="row.name || i"
-					class="grid grid-cols-[minmax(0,1fr)_5rem_1.75rem] items-center gap-2"
-				>
-					<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
-					<TextInput
-						v-model="row.qty_per_unit"
-						type="number"
-						size="sm"
-						class="[&_input]:bg-surface-base [&_input]:text-right"
-					/>
-					<Button
-						v-if="!readOnly"
-						variant="ghost"
-						size="sm"
-						icon="lucide-x"
-						:aria-label="__('Remove')"
-						@click="removePacking(row)"
-					/>
-				</div>
-				<Button
-					v-if="!readOnly"
-					size="sm"
-					icon-left="lucide-plus"
-					:label="__('Add Packing Material')"
-					@click="addPacking"
+				<StageMaterials
+					:doc="doc"
+					:data="data"
+					:stage-no="index + 1"
+					:packing-no="packingIndex + 1"
+					:stage-options="moveOptions"
 				/>
 			</div>
 		</div>
