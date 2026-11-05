@@ -43,12 +43,19 @@ const error = computed(() => {
 	return "";
 });
 
-const lastOutput = computed(() => [...plan.value.stages].reverse().find((s) => !s.is_packing));
-const facts = computed(() => [
-	[__("Bulk needed"), `${fmt(round(plan.value.output_weight))} ${plan.value.weight_uom}`],
-	[__("Weight lost across stages"), `${fmt(round(100 - plan.value.process_yield, 1))}%`],
-	[__("Formula batch to charge"), `${fmt(round(plan.value.input_weight))} ${plan.value.weight_uom}`],
-]);
+const losses = computed(() =>
+	plan.value.stages
+		.filter((stage) => !stage.is_packing && stage.input_weight > stage.output_weight)
+		.map((stage) => {
+			const loss = stage.input_weight - stage.output_weight;
+			return {
+				label: stage.stage_name,
+				value: `${fmt(round(loss))} ${plan.value.weight_uom} · ${fmt(
+					round((loss / stage.input_weight) * 100, 1)
+				)}%`,
+			};
+		})
+);
 const badge = computed(() =>
 	started.value ? { label: __("Started"), theme: "green" } : { label: __("Not Started"), theme: "gray" }
 );
@@ -72,19 +79,19 @@ const subtitle = computed(() =>
 				v-model="qty"
 				type="number"
 				:label="__('{0} to Make', [plural(unit)])"
-				:description="
-					__('Each {0} holds {1} {2}', [unit, fmt(plan.weight_per_unit), plan.weight_uom])
-				"
 				:error="error"
 			/>
-			<div class="space-y-1.5 rounded-4 bg-surface-gray-1 p-3">
-				<div
-					v-for="[label, value] in facts"
-					:key="label"
-					class="flex items-center justify-between gap-3 text-sm"
-				>
-					<span class="truncate text-ink-gray-6">{{ label }}</span>
-					<span class="shrink-0 tabular-nums text-ink-gray-8">{{ value }}</span>
+			<div v-if="losses.length">
+				<p class="mb-1 text-sm text-ink-gray-5">{{ __("Process Loss") }}</p>
+				<div class="space-y-1.5 rounded-4 bg-surface-gray-1 p-3">
+					<div
+						v-for="row in losses"
+						:key="row.label"
+						class="flex items-center justify-between gap-3 text-sm"
+					>
+						<span class="truncate text-ink-gray-6">{{ row.label }}</span>
+						<span class="shrink-0 tabular-nums text-ink-gray-8">{{ row.value }}</span>
+					</div>
 				</div>
 			</div>
 			<div>
