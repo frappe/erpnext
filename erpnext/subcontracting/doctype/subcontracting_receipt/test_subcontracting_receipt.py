@@ -446,6 +446,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(scr_return.supplied_items[0].rate, scr.supplied_items[0].rate)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_return_of_receipt_without_consumed_bundle_keeps_consumed_rate(self):
+		sco = make_order_with_two_batches_transferred()
+		for _ in range(2):
+			scr = make_subcontracting_receipt(sco.name)
+			scr.items[0].qty = 5
+			scr.save()
+			scr.submit()
+
+		# receipts made before serial and batch bundles have no bundle on the consumed rows
+		frappe.db.set_value(
+			"Subcontracting Receipt Supplied Item",
+			scr.supplied_items[0].name,
+			"serial_and_batch_bundle",
+			None,
+		)
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2, do_not_submit=True)
+
+		self.assertEqual(scr_return.supplied_items[0].rate, scr.supplied_items[0].rate)
+
 	def test_return_cannot_send_back_batches_already_returned(self):
 		sco = make_order_with_two_batches_transferred()
 		scr = make_subcontracting_receipt(sco.name)
