@@ -3756,6 +3756,42 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (10, 0))
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_process_loss_of_first_sub_operation_is_kept_while_next_is_pending(self):
+		workstation = make_jc_review_workstation()
+		cutting = make_jc_review_operation(workstation)
+		welding = make_jc_review_operation(workstation)
+		operation = make_jc_review_operation(
+			workstation, sub_operations=[{"operation": cutting}, {"operation": welding}]
+		)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+		)
+
+		job_card = frappe.get_doc("Job Card", get_jc_review_job_cards(wo.name)[0].name)
+		start = "2031-03-03 08:00:00"
+		job_card.start_timer(start_time=start)
+		job_card.complete_job_card(
+			end_time=add_to_date(start, minutes=30),
+			sub_operation=cutting,
+			for_quantity=10,
+			qty=9,
+			process_loss_qty=1,
+		)
+		job_card.reload()
+		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (0, 1))
+
+		job_card.start_timer(start_time=add_to_date(start, minutes=40))
+		job_card.complete_job_card(
+			end_time=add_to_date(start, minutes=70), sub_operation=welding, for_quantity=9, qty=9
+		)
+		job_card.reload()
+		self.assertEqual(
+			(job_card.for_quantity, job_card.total_completed_qty, job_card.process_loss_qty), (10, 9, 1)
+		)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_operation_cost_uses_each_job_card_workstation_rate(self):
 		first_workstation = make_jc_review_workstation(hour_rate=600)
 		second_workstation = make_jc_review_workstation(hour_rate=1200)

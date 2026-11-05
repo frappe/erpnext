@@ -1147,6 +1147,10 @@ class JobCard(Document):
 		return False
 
 	def set_process_loss(self):
+		# qty of a pending sub operation is not lost yet, so keep the loss booked so far
+		if any(row.status != "Complete" for row in self.sub_operations):
+			return
+
 		precision = self.precision("total_completed_qty")
 		should_set_process_loss = self.total_completed_qty or self.process_loss_qty
 
