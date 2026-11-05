@@ -245,24 +245,39 @@ class SubcontractingController(StockController):
 
 			bundle = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
 			precision = row.precision("consumed_qty")
-			if flt(abs(row.consumed_qty), precision) == flt(abs(bundle.total_qty), precision):
-				continue
+			if flt(abs(row.consumed_qty), precision) != flt(abs(bundle.total_qty), precision):
+				self.repick_return_bundle(row, bundle, identities)
 
-			# keep the row on the batch and rate it was made for
-			group_key = (bundle.entries[0].batch_no, bundle.entries[0].incoming_rate)
-			group = self.allocate_returnable_serial_batches(
-				[identity for identity in identities if (identity.batch_no, identity.rate) == group_key],
-				abs(row.consumed_qty),
-				precision,
-			).get(group_key)
-
-			self.__remove_serial_and_batch_bundle(row)
-			row.serial_and_batch_bundle = None
-			row.consumed_qty = -flt(group.qty, precision) if group else 0
-			if group:
-				row.serial_and_batch_bundle = self.make_supplied_item_bundle(
-					row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, group_key[1]
+	def repick_return_bundle(self, row, bundle, identities):
+		"""Remake the bundle of an edited return row, from the batch and rate it was made for."""
+		precision = row.precision("consumed_qty")
+		qty = flt(abs(row.consumed_qty), precision)
+		group_key = (bundle.entries[0].batch_no, bundle.entries[0].incoming_rate)
+		group = self.allocate_returnable_serial_batches(
+			[identity for identity in identities if (identity.batch_no, identity.rate) == group_key],
+			qty,
+			precision,
+		).get(group_key)
+		available = flt(group.qty, precision) if group else 0
+		if available < qty:
+			frappe.throw(
+				_(
+					"Row #{0}: only {1} of raw material {2} at this batch and rate is left to return against {3}. Use Reset Raw Materials Table to pick the raw materials again."
+				).format(
+					row.idx,
+					available,
+					frappe.bold(row.rm_item_code),
+					get_link_to_form(self.doctype, self.return_against),
 				)
+			)
+
+		self.__remove_serial_and_batch_bundle(row)
+		row.serial_and_batch_bundle = None
+		row.consumed_qty = -qty
+		if group:
+			row.serial_and_batch_bundle = self.make_supplied_item_bundle(
+				row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, group_key[1]
+			)
 
 	def validate_returned_serial_batches(self):
 		"""Serial nos and batches a return sends back must be ones the receipt consumed and no return got back."""
