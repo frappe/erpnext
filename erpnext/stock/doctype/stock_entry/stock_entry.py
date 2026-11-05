@@ -680,6 +680,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if any(d.s_warehouse for d in self.get("items")):
 			return True
 
+		return self.is_rm_cost_from_consumption_entries()
+
+	def is_rm_cost_from_consumption_entries(self) -> bool:
+		"""Whether the consumption entries replace the raw materials of this entry."""
 		settings = frappe.get_single("Manufacturing Settings")
 		if settings.material_consumption and settings.get_rm_cost_from_consumption_entry and self.work_order:
 			return bool(self.get_consumption_entries())
