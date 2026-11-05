@@ -1415,14 +1415,21 @@ def check_stock_uom_with_bin(item, stock_uom):
 				).format(item)
 			)
 
-	bin_list = frappe.db.sql(
-		"""
-			select * from `tabBin` where item_code = %s
-				and (reserved_qty > 0 or ordered_qty > 0 or indented_qty > 0 or planned_qty > 0)
-				and stock_uom != %s
-			""",
-		(item, stock_uom),
-		as_dict=1,
+	bin_list = frappe.get_all(
+		"Bin",
+		filters={"item_code": item, "stock_uom": ["!=", stock_uom]},
+		or_filters=[
+			["reserved_qty", ">", 0],
+			["ordered_qty", ">", 0],
+			["indented_qty", ">", 0],
+			["planned_qty", ">", 0],
+			["reserved_qty_for_production", ">", 0],
+			["reserved_qty_for_sub_contract", ">", 0],
+			["reserved_qty_for_production_plan", ">", 0],
+			["reserved_stock", ">", 0],
+		],
+		pluck="name",  # only used as an existence check below
+		limit=1,
 	)
 
 	if bin_list:
