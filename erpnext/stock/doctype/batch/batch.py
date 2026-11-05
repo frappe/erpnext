@@ -161,6 +161,7 @@ class Batch(Document):
 	def validate(self):
 		self.item_has_batch_enabled()
 		self.set_batchwise_valuation()
+		self.validate_from_to_dates("manufacturing_date", "expiry_date")
 
 	def item_has_batch_enabled(self):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:

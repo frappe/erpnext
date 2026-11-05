@@ -66,11 +66,21 @@ def get_bin_details(
 	row: str | dict, company: str, for_warehouse: str | None = None, all_warehouse: bool = False
 ):
 	frappe.has_permission("Production Plan", "read", throw=True)
+	row = frappe.parse_json(row)
+	return _get_bin_details(row, company, for_warehouse, all_warehouse, ignore_permissions=False)
 
-	row = frappe._dict(frappe.parse_json(row))
 
+@frappe.whitelist()
+def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
+	frappe.has_permission("Production Plan", "read", throw=True)
+	row = frappe.parse_json(row)
+	return aggregate_bin_details(_get_bin_details(row, company, for_warehouse, ignore_permissions=False))
+
+
+def _get_bin_details(row, company, for_warehouse=None, all_warehouse=False, ignore_permissions=True):
+	row = frappe._dict(row)
 	bin = frappe.qb.DocType("Bin")
-	subquery = _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse)
+	subquery = _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse, ignore_permissions)
 	query = (
 		frappe.qb.from_(bin)
 		.select(bin.warehouse, *_bin_qty_columns(bin))
@@ -80,14 +90,11 @@ def get_bin_details(
 	return query.run(as_dict=True)
 
 
-@frappe.whitelist()
-def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
-	return aggregate_bin_details(get_bin_details(row, company, for_warehouse))
-
-
-def _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse):
+def _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse, ignore_permissions):
 	wh = frappe.qb.DocType("Warehouse")
-	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
+	subquery = frappe.qb.get_query("Warehouse", fields=["name"], ignore_permissions=ignore_permissions).where(
+		wh.company == company
+	)
 
 	warehouse = ""
 	if not all_warehouse:
