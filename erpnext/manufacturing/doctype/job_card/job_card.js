@@ -528,9 +528,13 @@ frappe.ui.form.on("Job Card", {
 				fieldname: "sub_operation",
 				options: "Operation",
 				get_query() {
-					const non_completed = frm.doc.sub_operations.filter((d) => d.status === "Pending");
+					const target_qty = flt(
+						frm.doc.for_quantity - frm.doc.process_loss_qty,
+						precision("for_quantity", frm.doc)
+					);
+					const pending = frm.doc.sub_operations.filter((d) => flt(d.completed_qty) < target_qty);
 					return {
-						filters: { name: ["in", non_completed.map((d) => d.sub_operation)] },
+						filters: { name: ["in", pending.map((d) => d.sub_operation)] },
 					};
 				},
 				reqd: 1,
