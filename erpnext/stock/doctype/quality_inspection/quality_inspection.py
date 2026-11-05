@@ -361,17 +361,18 @@ class QualityInspection(Document):
 		"""Parse new readings in the user's number format and store them in one fixed format.
 
 		Stored readings are in that format, so any user reads them the same. Old ones the
-		migration could not convert are parsed again."""
+		migration could not convert are parsed again. A reading that means another number
+		in the stored format is refused, as it may be a stored reading the user edited."""
 		number_format = get_reading_number_format()
 		decimal_str, comma_str = get_reading_separators(number_format)
 		before_save = self.get_doc_before_save()
 
 		for reading in self.readings:
-			if not cint(reading.numeric) or cint(reading.manual_inspection):
+			if not is_number_checked(reading):
 				continue
 
 			stored = before_save and before_save.get("readings", {"name": reading.name})
-			stored = stored[0] if stored else None
+			stored = stored[0] if stored and is_number_checked(stored[0]) else None
 
 			for i in range(1, 11):
 				field = "reading_" + str(i)
@@ -379,7 +380,8 @@ class QualityInspection(Document):
 				if value is None or not value.strip():
 					continue
 
-				if stored and stored.get(field) == value and parse_reading(value, ".", "") is not None:
+				stored_number = parse_reading(value, ".", "")
+				if stored and stored.get(field) == value and stored_number is not None:
 					continue
 
 				number = parse_reading(value, decimal_str, comma_str)
@@ -394,6 +396,14 @@ class QualityInspection(Document):
 							frappe.bold(number_format.string),
 							frappe.bold(decimal_str),
 						),
+						title=_("Invalid Reading"),
+					)
+
+				if stored_number not in (None, number):
+					frappe.throw(
+						_(
+							"Row #{0}: Reading {1} {2} can be read in more than one way. Enter it without thousands separators."
+						).format(reading.idx, i, frappe.bold(value)),
 						title=_("Invalid Reading"),
 					)
 
@@ -689,3 +699,8 @@ def format_reading(number: float) -> str:
 def parse_float(num: str) -> float:
 	"""Stored reading as a float."""
 	return flt(parse_reading(num, ".", ""))
+
+
+def is_number_checked(reading) -> bool:
+	"""Numeric reading whose status is set from its values."""
+	return bool(cint(reading.numeric) and not cint(reading.manual_inspection))
