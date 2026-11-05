@@ -1046,6 +1046,7 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 
 	pr_items = [pr_detail.name for pr_detail in pr_details]
 	pr_items_billed_amount = get_billed_amount_against_pr(pr_items)
+	set_amount_net_of_returns(pr_details)
 
 	updated_pr = []
 	for pr_item in pr_details:
@@ -1055,8 +1056,8 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
-			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
+		if billed_against_po and billed_amt_agianst_pr < pr_item.net_amount:
+			pending_to_bill = flt(pr_item.net_amount) - billed_amt_agianst_pr
 			if pending_to_bill <= billed_against_po:
 				billed_amt_agianst_pr += pending_to_bill
 				billed_against_po -= pending_to_bill
@@ -1086,6 +1087,16 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 	return updated_pr
 
 
+def set_amount_net_of_returns(pr_details):
+	returned_qty_map = {}
+	if not frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+		returned_qty_map = get_returned_qty_of_rows([pr_detail.name for pr_detail in pr_details])
+
+	for pr_detail in pr_details:
+		returned_qty = flt(returned_qty_map.get(pr_detail.name))
+		pr_detail.net_amount = flt(pr_detail.amount) - returned_qty * flt(pr_detail.rate)
+
+
 def get_purchase_receipts_against_po_details(po_details):
 	# Get Purchase Receipts against Purchase Order Items
 
@@ -1100,6 +1111,7 @@ def get_purchase_receipts_against_po_details(po_details):
 			purchase_receipt_item.name,
 			purchase_receipt_item.parent,
 			purchase_receipt_item.amount,
+			purchase_receipt_item.rate,
 			purchase_receipt_item.billed_amt,
 			purchase_receipt_item.purchase_order_item,
 		)
@@ -1357,7 +1369,12 @@ def adjust_incoming_rate_for_pr(doc):
 
 
 def get_item_wise_returned_qty(pr_doc):
-	items = [d.name for d in pr_doc.items]
+	return get_returned_qty_of_rows([d.name for d in pr_doc.items])
+
+
+def get_returned_qty_of_rows(items):
+	if not items:
+		return frappe._dict()
 
 	return frappe._dict(
 		frappe.get_all(
