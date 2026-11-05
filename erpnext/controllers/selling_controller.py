@@ -54,6 +54,7 @@ class SellingController(StockController):
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
+		self.validate_price_list_country()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_auto_repeat_subscription_dates()
@@ -68,6 +69,15 @@ class SellingController(StockController):
 
 		self.calculate_commission()
 		self.calculate_contribution()
+
+	def validate_price_list_country(self):
+		from erpnext.stock.doctype.price_list.price_list import validate_price_list_country
+
+		if self.get("is_return") or not self.get("customer_address"):
+			return
+
+		country = frappe.db.get_value("Address", self.customer_address, "country")
+		validate_price_list_country(self.get("selling_price_list"), country)
 
 	def validate_standalone_serial_nos_customer(self):
 		if not self.is_return or self.return_against:
