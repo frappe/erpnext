@@ -10,9 +10,11 @@ from frappe.query_builder.functions import Coalesce, NullIf
 from frappe.utils import formatdate, get_link_to_form
 
 from erpnext import get_region
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	return VATAuditReport(filters).run()
 
 

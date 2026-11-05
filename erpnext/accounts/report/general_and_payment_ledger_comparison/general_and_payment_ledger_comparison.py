@@ -6,6 +6,8 @@ from frappe import _, qb
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Sum
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 class General_Payment_Ledger_Comparison:
 	"""
@@ -278,6 +280,7 @@ class General_Payment_Ledger_Comparison:
 
 
 def execute(filters=None):
+	validate_date_range(filters, "period_start_date", "period_end_date")
 	columns, data = [], []
 
 	rpt = General_Payment_Ledger_Comparison(filters)
