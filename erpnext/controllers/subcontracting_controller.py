@@ -9,13 +9,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-<<<<<<< HEAD
-from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt, get_link_to_form
-=======
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import cint, escape_html, flt, get_link_to_form
->>>>>>> 78d9e38 (fix(subcontracting): return the serial nos and batches the receipt consumed)
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -109,17 +104,8 @@ class SubcontractingController(StockController):
 					}
 				)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-				return_rate = return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
-				if row.reference_name in rejected_return_rows:
-=======
-=======
-				# the stock ledger values Standard Cost items at the standard rate
-				is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
->>>>>>> c24fa1b (fix: value returned Standard Cost raw materials at the standard rate on submit)
 				return_rate = None
-				if self.is_return and not is_standard_cost:
+				if self.is_return:
 					key = (original_rows.get(row.reference_name), row.rm_item_code)
 					# rows with the consumed serial nos or batches already carry the rate they were consumed at
 					return_rate = (
@@ -127,15 +113,7 @@ class SubcontractingController(StockController):
 						if row.serial_and_batch_bundle and key in self.returnable_serial_batches
 						else return_rates.get(key)
 					)
-<<<<<<< HEAD
-				if (
-					row.reference_name in rejected_return_rows
-					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
-				):
->>>>>>> 78d9e38 (fix(subcontracting): return the serial nos and batches the receipt consumed)
-=======
-				if row.reference_name in rejected_return_rows and not is_standard_cost:
->>>>>>> c24fa1b (fix: value returned Standard Cost raw materials at the standard rate on submit)
+				if row.reference_name in rejected_return_rows:
 					rate = 0.0
 				elif return_rate is not None:
 					rate = return_rate
@@ -292,16 +270,11 @@ class SubcontractingController(StockController):
 			identity = (key, entry.serial_no, entry.batch_no)
 			available[identity] = available.get(identity, 0.0) - abs(entry.qty)
 			if flt(available[identity], precision) < 0:
-				label = (
-					SerialBatchIdentity("Serial No").get_label(entry.serial_no)
-					if entry.serial_no
-					else SerialBatchIdentity("Batch").get_label(entry.batch_no)
-				)
 				frappe.throw(
 					_(
 						"{0} of raw material {1} was not consumed by {2} or was already returned. Use Reset Raw Materials Table to pick the raw materials again."
 					).format(
-						frappe.bold(label),
+						frappe.bold(entry.serial_no or entry.batch_no),
 						frappe.bold(key[1]),
 						get_link_to_form(self.doctype, self.return_against),
 					)
