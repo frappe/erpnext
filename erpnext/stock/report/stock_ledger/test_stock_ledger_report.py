@@ -354,3 +354,38 @@ class TestStockLedgerReport(FrappeTestCase):
 			opening_rows[0]["qty_after_transaction"],
 			sum(sle.qty_after_transaction for sle in sle_rows),
 		)
+
+	def test_opening_of_a_warehouse_the_user_may_not_read_is_hidden(self):
+		from frappe.permissions import add_user_permission
+
+		item = "_Test Item"
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 20,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -5),
+				}
+			],
+		)
+		user = create_user("stock-ledger-opening@example.com", "Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user.name)
+
+		with self.set_user(user.name):
+			rows = self.run_report(item)
+
+		self.assertEqual(rows, [])
+
+	def test_item_group_filter_lists_only_permitted_items(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.report.stock_ledger.stock_ledger import get_items
+
+		user = create_user("stock-ledger-item-group@example.com", "Stock User")
+		add_user_permission("Item", "_Test Item", user.name)
+		with self.set_user(user.name):
+			items = get_items(frappe._dict(item_group="_Test Item Group"))
+
+		self.assertEqual(items, ["_Test Item"])

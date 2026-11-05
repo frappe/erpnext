@@ -7,6 +7,8 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cint, flt, get_datetime
 from pypika import Order
@@ -27,6 +29,9 @@ def execute(filters=None):
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
 	items = get_items(filters)
+	if items == [] or not apply_permitted_warehouses(filters):
+		return columns, []
+
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
 
@@ -527,12 +532,12 @@ def get_items(filters):
 		):
 			conditions.append(condition)
 
-	items = []
+	items = None
 	if conditions:
 		for condition in conditions:
 			query = query.where(condition)
 
-		items = [r[0] for r in query.run()]
+		items = frappe.get_list("Item", filters={"name": ("in", query.run(pluck=True) or [""])}, pluck="name")
 
 	return items
 
@@ -590,6 +595,15 @@ def get_sle_conditions(filters):
 
 
 def get_opening_balance_from_batch(filters, columns, sl_entries):
+	batch_item = frappe.db.get_value("Batch", filters.batch_no, "item")
+	if batch_item and not frappe.has_permission("Item", "read", batch_item):
+		return {
+			"item_code": _("'Opening'"),
+			"qty_after_transaction": 0.0,
+			"valuation_rate": 0.0,
+			"stock_value": 0.0,
+		}
+
 	query_filters = {
 		"batch_no": filters.batch_no,
 		"docstatus": 1,
@@ -751,6 +765,23 @@ def get_opening_balance(filters, columns, sl_entries, inv_dimension_wise_value=N
 		"valuation_rate": valuation_rate,
 		"stock_value": total_stock_value,
 	}
+
+
+def apply_permitted_warehouses(filters):
+	permitted = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
+	if not permitted:
+		return True
+
+	if filters.get("warehouse"):
+		selected = set(get_matching_warehouses(filters.warehouse))
+		permitted = [warehouse for warehouse in permitted if warehouse in selected]
+
+	filters.warehouse = frappe.get_all(
+		"Warehouse", filters={"name": ("in", permitted or [""]), "is_group": 0}, pluck="name"
+	)
+	return bool(filters.warehouse)
 
 
 def get_matching_warehouses(warehouses):
