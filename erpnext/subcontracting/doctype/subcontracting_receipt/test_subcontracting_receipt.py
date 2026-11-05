@@ -1577,6 +1577,39 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(gl_value, 2), flt(stock_value, 2))
 
+	def test_supplied_items_keep_their_own_rates(self):
+		company = "_Test Company with perpetual inventory"
+		raw_materials = [make_item(properties={"is_stock_item": 1}).name for _ in range(2)]
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=raw_materials, company=company, currency="INR")
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=[
+				{
+					"warehouse": "Stores - TCP1",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 10,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			],
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		for row, rate in zip(rm_items, (100, 200), strict=True):
+			row["rate"] = rate
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		expected_rates = {row["item_code"]: row["rate"] for row in rm_items}
+		self.assertEqual({row.rm_item_code: row.rate for row in scr.supplied_items}, expected_rates)
+
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
 		set_backflush_based_on("BOM")
 
