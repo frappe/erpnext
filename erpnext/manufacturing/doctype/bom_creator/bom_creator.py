@@ -119,7 +119,7 @@ class BOMCreator(Document):
 				has_completed = False
 				break
 
-		if not frappe.get_cached_value("BOM", {"bom_creator": self.name, "item": self.item_code}, "name"):
+		if not frappe.db.exists("BOM", {"bom_creator": self.name, "item": self.item_code, "docstatus": 1}):
 			has_completed = False
 
 		if has_completed:
@@ -363,7 +363,7 @@ class BOMCreator(Document):
 
 	def create_bom(self, row, production_item_wise_rm):
 		bom_creator_item = row.name if row.name != self.name else ""
-		if frappe.db.exists(
+		existing_bom = frappe.db.get_value(
 			"BOM",
 			{
 				"bom_creator": self.name,
@@ -371,7 +371,9 @@ class BOMCreator(Document):
 				"bom_creator_item": bom_creator_item,
 				"docstatus": 1,
 			},
-		):
+		)
+		if existing_bom:
+			production_item_wise_rm[(row.item_code, row.name)].bom_no = existing_bom
 			return
 
 		bom = frappe.new_doc("BOM")

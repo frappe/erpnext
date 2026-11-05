@@ -488,6 +488,48 @@ class TestBOMCreator(FrappeTestCase):
 
 		self.assertEqual(doc.items[0].rate, 100)
 
+	def test_cancelling_the_top_bom_reopens_the_creator(self):
+		make_item("Gravel Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Gravel Bike BOM Status",
+			company="_Test Company",
+			item_code="Gravel Bike",
+			qty=1,
+			currency="INR",
+		)
+		doc.add_item(fg_item="Gravel Bike", fg_reference_id=doc.name, item_code="Frame", qty=1)
+		doc.reload()
+		doc.submit()
+		doc.create_boms()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
+
+		top_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Gravel Bike", "docstatus": 1})
+		top_bom.cancel()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Submitted")
+
+	def test_recreated_bom_keeps_its_own_sub_assembly(self):
+		doc, _first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM Recreated Children")
+		doc.submit()
+		doc.create_boms()
+
+		top_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Bicycle", "docstatus": 1})
+		seat_bom = frappe.get_doc("BOM", {"bom_creator": doc.name, "item": "Seat Assembly", "docstatus": 1})
+		second_wheel_bom = frappe.db.get_value(
+			"BOM", {"bom_creator": doc.name, "bom_creator_item": second_wheel, "docstatus": 1}
+		)
+		top_bom.cancel()
+		seat_bom.cancel()
+
+		doc.reload()
+		doc.create_boms()
+		new_seat_bom = frappe.get_doc(
+			"BOM", {"bom_creator": doc.name, "item": "Seat Assembly", "docstatus": 1}
+		)
+		self.assertEqual(
+			[row.bom_no for row in new_seat_bom.items if row.item_code == "Wheel Assembly"],
+			[second_wheel_bom],
+		)
+
 
 def create_items():
 	raw_materials = [
