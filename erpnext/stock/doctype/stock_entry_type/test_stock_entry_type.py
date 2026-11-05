@@ -58,3 +58,7 @@ class TestStockEntryType(FrappeTestCase):
 		for name in standard_types:
 			self.assertEqual(frappe.db.get_value("Stock Entry Type", name, "add_to_transit"), 0)
 		self.assertEqual(frappe.db.get_value("Stock Entry Type", custom_type, "add_to_transit"), 1)
+
+	def test_standard_type_cannot_be_deleted(self):
+		self.assertRaises(frappe.ValidationError, frappe.delete_doc, "Stock Entry Type", "Disassemble")
+		self.assertTrue(frappe.db.exists("Stock Entry Type", "Disassemble"))
