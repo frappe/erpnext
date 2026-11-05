@@ -720,9 +720,14 @@ class SubcontractingReceipt(SubcontractingController):
 		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
 
 		received_qty_ratios = self.get_received_qty_ratios_for_return()
+		rejected_return_rows = self.get_rejected_return_rows()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.secondary_item_type and not item.valuation_type:
+				# rejected qty is received without service cost
+				if item.name in rejected_return_rows:
+					item.service_cost_per_qty = 0.0
+
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
