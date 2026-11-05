@@ -9,6 +9,7 @@ from erpnext.selling.doctype.product_bundle.test_product_bundle import make_prod
 from erpnext.stock.doctype.delivery_note.delivery_note import make_packing_slip
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestPackingSlip(FrappeTestCase):
@@ -117,3 +118,23 @@ def create_items():
 		items.append(make_item(properties=properties).name)
 
 	return items
+
+
+class TestPackingSlipReferences(FrappeTestCase):
+	def make_draft_delivery_note(self, qty=5, **kwargs):
+		item_code = make_item(properties={"is_stock_item": 1, **kwargs}).name
+		if frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
+		return create_delivery_note(item_code=item_code, qty=qty, do_not_submit=True)
+
+	def test_row_must_belong_to_slip_delivery_note_and_item(self):
+		dn_a = self.make_draft_delivery_note()
+		dn_b = self.make_draft_delivery_note()
+
+		slip = make_packing_slip(dn_a.name)
+		slip.items[0].dn_detail = dn_b.items[0].name
+		self.assertRaises(frappe.ValidationError, slip.insert)
+
+		slip = make_packing_slip(dn_a.name)
+		slip.items[0].item_code = dn_b.items[0].item_code
+		self.assertRaises(frappe.ValidationError, slip.insert)
