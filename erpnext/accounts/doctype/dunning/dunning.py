@@ -147,6 +147,11 @@ class Dunning(AccountsController):
 					"party_account_currency",
 					"docstatus",
 					"is_return",
+					"is_opening",
+					"due_date",
+					"conversion_rate",
+					"grand_total",
+					"rounded_total",
 					"outstanding_amount",
 				],
 				limit_page_length=0,
@@ -186,7 +191,7 @@ class Dunning(AccountsController):
 		for name, invoice in invoices.items():
 			schedule_outstanding.update(get_payment_schedule_outstanding(invoice, invoice_schedules[name]))
 
-		seen_schedules = set()
+		seen_references = set()
 		invoice_outstanding = {}
 
 		for row in self.overdue_payments:
@@ -203,40 +208,57 @@ class Dunning(AccountsController):
 					)
 
 			schedule = schedules.get(row.payment_schedule)
-			if not schedule or schedule.parent != row.sales_invoice:
-				frappe.throw(
-					_("Row #{0}: Payment Schedule must belong to the selected Sales Invoice.").format(row.idx)
-				)
-			if row.payment_schedule in seen_schedules:
-				frappe.throw(
-					_("Row #{0}: Payment Schedule is already included in this Dunning.").format(row.idx)
-				)
-			seen_schedules.add(row.payment_schedule)
-
-			for field in ("payment_term", "mode_of_payment", "payment_amount", "invoice_portion"):
-				if field in ("payment_amount", "invoice_portion"):
-					matches = flt(row.get(field), row.precision(field)) == flt(
-						schedule.get(field), row.precision(field)
-					)
-				else:
-					matches = (row.get(field) or "") == (schedule.get(field) or "")
-				if not matches:
+			if row.payment_schedule or invoice.is_opening != "Yes" or invoice_schedules[invoice.name]:
+				if not schedule or schedule.parent != row.sales_invoice:
 					frappe.throw(
-						_("Row #{0}: {1} must match the Payment Schedule.").format(
-							row.idx, _(row.meta.get_label(field))
+						_("Row #{0}: Payment Schedule must belong to the selected Sales Invoice.").format(
+							row.idx
 						)
 					)
 
+			reference = schedule or invoice
+			reference_type = _("Payment Schedule") if schedule else _("Sales Invoice")
+			reference_key = (row.sales_invoice, row.payment_schedule or "")
+			if reference_key in seen_references:
+				frappe.throw(
+					_("Row #{0}: {1} is already included in this Dunning.").format(row.idx, reference_type)
+				)
+			seen_references.add(reference_key)
+
+			if schedule:
+				for field in ("payment_term", "mode_of_payment", "payment_amount", "invoice_portion"):
+					if field in ("payment_amount", "invoice_portion"):
+						matches = flt(row.get(field), row.precision(field)) == flt(
+							schedule.get(field), row.precision(field)
+						)
+					else:
+						matches = (row.get(field) or "") == (schedule.get(field) or "")
+					if not matches:
+						frappe.throw(
+							_("Row #{0}: {1} must match the Payment Schedule.").format(
+								row.idx, _(row.meta.get_label(field))
+							)
+						)
+			else:
+				row.payment_term = None
+				row.mode_of_payment = None
+				row.payment_amount = invoice.rounded_total or invoice.grand_total
+				row.invoice_portion = 100
+
 			if (
 				not row.due_date
-				or not schedule.due_date
-				or getdate(row.due_date) != getdate(schedule.due_date)
+				or not reference.due_date
+				or getdate(row.due_date) != getdate(reference.due_date)
 			):
-				frappe.throw(_("Row #{0}: Due Date must match the Payment Schedule.").format(row.idx))
-			if getdate(schedule.due_date) >= getdate(self.posting_date):
+				frappe.throw(_("Row #{0}: Due Date must match the {1}.").format(row.idx, reference_type))
+			if getdate(reference.due_date) >= getdate(self.posting_date):
 				frappe.throw(
 					_("Row #{0}: Payment must be overdue on the Dunning Posting Date.").format(row.idx)
 				)
+
+			outstanding = (
+				schedule_outstanding[schedule.name] if schedule else get_invoice_outstanding(invoice)
+			)
 
 			invoice_outstanding[row.sales_invoice] = invoice_outstanding.get(row.sales_invoice, 0) + flt(
 				row.outstanding
@@ -245,7 +267,7 @@ class Dunning(AccountsController):
 				flt(row.outstanding, row.precision("outstanding")) <= 0
 				or flt(invoice.outstanding_amount) <= 0
 				or flt(row.outstanding, row.precision("outstanding"))
-				> flt(schedule_outstanding[schedule.name], row.precision("outstanding"))
+				> flt(outstanding, row.precision("outstanding"))
 				or (
 					invoice.party_account_currency == invoice.currency
 					and flt(invoice_outstanding[row.sales_invoice], row.precision("outstanding"))
@@ -302,7 +324,8 @@ class Dunning(AccountsController):
 			past_dunnings = frappe.get_all(
 				"Overdue Payment",
 				filters={
-					"payment_schedule": row.payment_schedule,
+					"sales_invoice": row.sales_invoice,
+					"payment_schedule": row.payment_schedule or ("is", "not set"),
 					"parent": ("!=", row.parent),
 					"docstatus": 1,
 				},
@@ -432,6 +455,13 @@ class Dunning(AccountsController):
 		self.language = letter_text.language if letter_text else self.language
 
 
+def get_invoice_outstanding(invoice):
+	"""Return the invoice balance in its transaction currency."""
+	if invoice.party_account_currency != invoice.currency:
+		return flt(invoice.outstanding_amount) / flt(invoice.conversion_rate)
+	return flt(invoice.outstanding_amount)
+
+
 def get_payment_schedule_outstanding(invoice, payment_schedule, in_account_currency=False):
 	"""Apply payments without term allocations to the oldest installments first."""
 	outstanding = {row.name: flt(row.outstanding) for row in payment_schedule}
@@ -511,7 +541,11 @@ def update_linked_dunnings(doc, previous_outstanding_amount):
 		has_outstanding = False
 		for overdue_payment in dunning.overdue_payments:
 			invoice_outstanding = invoice_outstanding_amounts[overdue_payment.sales_invoice]
-			ps_outstanding = ps_outstanding_amounts.get(overdue_payment.payment_schedule, 0)
+			ps_outstanding = (
+				ps_outstanding_amounts.get(overdue_payment.payment_schedule, 0)
+				if overdue_payment.payment_schedule
+				else invoice_outstanding
+			)
 			has_outstanding = invoice_outstanding > 0 and ps_outstanding > 0
 			if has_outstanding:
 				break
@@ -622,6 +656,8 @@ def get_current_outstanding(overdue_payment, in_account_currency=False) -> float
 			invoice, payment_schedule, in_account_currency=in_account_currency
 		)
 		outstanding = min(outstanding, schedule_outstanding.get(overdue_payment.payment_schedule, 0))
+	elif not in_account_currency:
+		outstanding = min(outstanding, get_invoice_outstanding(invoice))
 
 	if flt(invoice.outstanding_amount) <= 0 or outstanding <= 0:
 		return 0.0
