@@ -763,6 +763,48 @@ class TestPutawayRule(ERPNextTestSuite):
 	def bundle_qty(self, bundle):
 		return abs(frappe.db.get_value("Serial and Batch Bundle", bundle, "total_qty"))
 
+	def test_putaway_rule_preview_refuses_a_bundle_the_user_cannot_read(self):
+		"""The preview copies the bundle for the caller, so it must not copy one they cannot read."""
+		from frappe.core.doctype.user.test_user import test_user
+		from frappe.permissions import add_permission, update_permission_property
+
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+
+		role = "_Test Putaway Bundle Owner"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
+
+		for doctype in ("Stock Entry", "Item", "Serial and Batch Bundle"):
+			add_permission(doctype, role)
+			for right in ("read", "write", "create"):
+				update_permission_property(doctype, role, 0, right, 1)
+		update_permission_property("Serial and Batch Bundle", role, 0, "if_owner", 1)
+		frappe.clear_cache()
+
+		item, (_batch_1, batch_2) = self.make_item_with_two_batches()
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=2)
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target="Finished Goods - _TC",
+			batch_no=batch_2,
+			purpose="Material Transfer",
+			do_not_submit=1,
+		)
+
+		with test_user(first_name="putaway-bundle-owner", roles=[role]) as user, self.set_user(user.name):
+			self.assertRaises(
+				frappe.PermissionError,
+				apply_putaway_rule,
+				"Stock Entry",
+				frappe.as_json([row.as_dict() for row in stock_entry.items]),
+				stock_entry.company,
+				sync=True,
+				purpose="Material Transfer",
+			)
+
 	def test_putaway_rule_moves_the_receipt_bundle_to_the_rule_warehouse(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
