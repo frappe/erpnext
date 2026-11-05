@@ -6265,6 +6265,20 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 			qty=8, rejected_qty=2, rejected_warehouse="_Test Rejected Warehouse - _TC", rate=100
 		)
 
+	@change_settings("Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 0})
+	def test_po_invoice_split_over_receipts_nets_their_returns(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		purchase_order = create_purchase_order(qty=10, rate=100, transaction_date=add_days(today(), -1))
+		first, second = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
+		self.submit_receipt_return(first, 2)
+		make_invoice_against_order(purchase_order.name, qty=8, rate=100)
+
+		self.assertEqual(
+			[frappe.db.get_value("Purchase Receipt", pr.name, "per_billed") for pr in (first, second)],
+			[100, 100],
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -6412,6 +6426,38 @@ def get_items(**args):
 			"cost_center": args.cost_center or "Main - _TC",
 		},
 	]
+
+
+def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
+	from erpnext.buying.doctype.purchase_order.purchase_order import (
+		make_purchase_receipt as make_receipt_from_order,
+	)
+
+	receipt_docs = []
+	for qty, posting_time in receipts:
+		pr = make_receipt_from_order(purchase_order)
+		pr.set_posting_time = 1
+		pr.posting_date = add_days(today(), -1)
+		pr.posting_time = posting_time
+		pr.items[0].received_qty = qty
+		pr.items[0].qty = qty
+		pr.submit()
+		receipt_docs.append(pr)
+
+	return receipt_docs
+
+
+def make_invoice_against_order(purchase_order: str, qty: float, rate: float):
+	from erpnext.buying.doctype.purchase_order.purchase_order import (
+		make_purchase_invoice as make_invoice_from_order,
+	)
+
+	pi = make_invoice_from_order(purchase_order)
+	pi.items[0].qty = qty
+	pi.items[0].rate = rate
+	pi.submit()
+
+	return pi
 
 
 def make_purchase_receipt(**args):
