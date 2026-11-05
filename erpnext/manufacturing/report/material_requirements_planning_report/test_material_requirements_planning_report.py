@@ -596,6 +596,16 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
 		self.assertEqual(rows[plan.rm_item].required_qty, 20)
 
+	def test_purchase_order_qty_ignores_float_noise_of_the_bom_ratio(self):
+		plan = make_mrp_plan(self, planned_qty=27)
+		make_bom(item=plan.fg_item, quantity=3, raw_materials=[plan.rm_item], rm_qty=7, rate=100)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		purchase_order = get_created_order(plan.mps, "Purchase Order")
+		self.assertEqual(purchase_order.items[0].qty, 63)
+
 	def test_sales_order_in_the_mps_is_not_added_again(self):
 		plan = make_mrp_plan(self)
 		make_mrp_sales_order(plan.fg_item, 10, add_days(today(), 30))
