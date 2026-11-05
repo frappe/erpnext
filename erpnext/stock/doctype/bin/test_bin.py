@@ -1,11 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.utils import _create_bin
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.stock_balance import update_bin_qty
+from erpnext.stock.utils import _create_bin, get_bin
 
 
 class TestBin(FrappeTestCase):
@@ -27,6 +31,27 @@ class TestBin(FrappeTestCase):
 		self.assertEqual(bin.item_code, item_code)
 
 		frappe.db.rollback()
+
+	def test_update_bin_qty_keeps_stock_movement_after_read(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		def get_bin_then_issue(item, wh):
+			bin = get_bin(item, wh)
+			make_stock_entry(item_code=item, source=wh, qty=4)
+			return bin
+
+		with patch("erpnext.stock.utils.get_bin", side_effect=get_bin_then_issue):
+			update_bin_qty(item_code, warehouse, {"ordered_qty": 5})
+
+		bin = frappe.db.get_value(
+			"Bin",
+			{"item_code": item_code, "warehouse": warehouse},
+			["actual_qty", "projected_qty"],
+			as_dict=1,
+		)
+		self.assertEqual((bin.actual_qty, bin.projected_qty), (6, 11))
 
 	def test_repost_resets_bin_without_sle(self):
 		"""A repost must zero the bin when the ledger is empty, e.g. after entries were deleted."""
