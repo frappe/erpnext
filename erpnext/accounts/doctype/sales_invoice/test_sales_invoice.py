@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
+from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
 from erpnext.accounts.doctype.sales_invoice.services.pos import (
 	POSService,
 	get_all_mode_of_payments,
@@ -4118,8 +4119,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertTrue(schedule.journal_entry)
 
 	def test_fixed_asset_sale_validations(self):
-		from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
-
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=0, submit=1)
 
 		def asset_invoice(asset_name, **kwargs):
@@ -4148,9 +4147,59 @@ class TestSalesInvoice(ERPNextTestSuite):
 				self.assertRaises(frappe.ValidationError, FixedAssetService(si).validate_fixed_asset)
 				frappe.db.set_value("Asset", asset.name, "status", "Submitted")
 
-	def test_fixed_asset_restore_note_text(self):
-		from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
 
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Row #2: Asset .* is already added in another row",
+			si.insert,
+		)
+
+	def test_return_can_reference_asset_on_multiple_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro",
+			asset=asset.name,
+			qty=1,
+			rate=25000,
+			is_return=1,
+			return_against="_Test Legacy Sales Invoice",
+			do_not_save=True,
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		FixedAssetService(si).validate_fixed_asset()
+
+	def test_fixed_asset_restore_note_text(self):
 		asset = frappe._dict(doctype="Asset", name="_Test Asset For Note")
 		si = create_sales_invoice(do_not_save=True)
 
