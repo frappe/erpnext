@@ -859,6 +859,40 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 				400,
 			)
 
+	def test_consolidated_invoice_keeps_pos_invoice_write_off(self):
+		with pos_session() as session:
+			session.pos_profile.allow_partial_payment = 1
+			session.pos_profile.save()
+
+			sales = []
+			for _ in range(2):
+				sale = create_pos_invoice(pos_profile=session.pos_profile.name, rate=1000, do_not_submit=1)
+				sale.write_off_amount = 10
+				sale.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 990})
+				sale.save().submit()
+				sales.append(sale)
+
+			close_pos_session(session)
+
+			consolidated_invoice = frappe.get_doc(
+				"Sales Invoice", frappe.db.get_value("POS Invoice", sales[0].name, "consolidated_invoice")
+			)
+			self.assertEqual(consolidated_invoice.write_off_amount, 20)
+			self.assertEqual(consolidated_invoice.outstanding_amount, 0)
+			self.assertEqual(consolidated_invoice.status, "Paid")
+			self.assertEqual(
+				frappe.get_all(
+					"GL Entry",
+					filters={
+						"voucher_no": consolidated_invoice.name,
+						"account": "_Test Write Off - _TC",
+						"is_cancelled": 0,
+					},
+					pluck="debit",
+				),
+				[20],
+			)
+
 	def test_copy_of_consolidated_invoice_computes_its_own_change_amount(self):
 		with pos_session() as session:
 			sale = create_pos_invoice(rate=900, do_not_submit=1)
