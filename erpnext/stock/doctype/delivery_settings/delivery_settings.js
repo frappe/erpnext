@@ -2,5 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Delivery Settings", {
-	refresh: function (frm) {},
+	setup: function (frm) {
+		frm.set_query("dispatch_attachment", () => {
+			return {
+				filters: { doc_type: "Delivery Note" },
+			};
+		});
+	},
 });
