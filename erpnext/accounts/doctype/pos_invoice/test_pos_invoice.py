@@ -1375,6 +1375,18 @@ class TestPOSInvoice(unittest.TestCase):
 		pos.insert().submit()
 		self.assertEqual((pos.change_amount, pos.base_change_amount, pos.status), (5, 5, "Paid"))
 
+	def test_return_updates_status_of_original(self):
+		pos = create_pos_invoice(qty=2, rate=100, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200})
+		pos.insert().submit()
+
+		pos_return = make_sales_return(pos.name)
+		pos_return.insert().submit()
+		self.assertEqual(frappe.db.get_value("POS Invoice", pos.name, "status"), "Credit Note Issued")
+
+		pos_return.cancel()
+		self.assertEqual(frappe.db.get_value("POS Invoice", pos.name, "status"), "Paid")
+
 
 def make_stock_item_with_qty(qty, allow_negative_stock=0):
 	item_code = make_item(properties={"is_stock_item": 1, "allow_negative_stock": allow_negative_stock}).name
