@@ -6,6 +6,14 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestSerialAndBatchSummary(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def run_report(self, **extra):
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import execute
+
+		return execute(frappe._dict(extra))[1]
+
 	def test_serial_filter_needs_voucher_and_item_read(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_serial_nos
@@ -41,3 +49,19 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 			self.assertRaises(
 				frappe.PermissionError, get_serial_nos, "Serial No", "", "name", 0, 10, voucher_filters
 			)
+
+	def test_group_warehouse_includes_its_warehouses(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import execute
+
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=2, basic_rate=100)
+		group = frappe.db.get_value("Warehouse", "Stores - _TC", "parent_warehouse")
+
+		columns, data = execute(
+			frappe._dict(voucher_no=[se.name], voucher_type="Stock Entry", warehouse=group)
+		)[:2]
+
+		self.assertEqual(len(data), 2)
+		self.assertIn("warehouse", [column.get("fieldname") for column in columns])
+		self.assertEqual({row.warehouse for row in data}, {"Stores - _TC"})
