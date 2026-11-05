@@ -868,6 +868,22 @@ class TestItem(FrappeTestCase):
 		raw_material.stock_uom = "Kg"
 		self.assertRaises(frappe.ValidationError, raw_material.save)
 
+	def test_item_default_accounts_follow_the_company(self):
+		for field, account in (
+			("default_discount_account", "Cost of Goods Sold - _TC1"),
+			("deferred_expense_account", "Cost of Goods Sold - _TC1"),
+		):
+			item = make_item(
+				properties={
+					"is_stock_item": 1,
+					"item_defaults": [
+						{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}
+					],
+				}
+			)
+			item.item_defaults[0].set(field, account)
+			self.assertRaisesRegex(frappe.ValidationError, "doesn't belong to Company", item.save)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):

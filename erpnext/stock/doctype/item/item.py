@@ -1561,14 +1561,13 @@ def update_variants(variants, template, publish_progress=True):
 
 
 def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> None:
+	company_links = [
+		(df.options, df.fieldname)
+		for df in frappe.get_meta("Item Default").get_link_fields()
+		if df.options in ("Warehouse", "Cost Center", "Account")
+	]
 	for item_default in item_defaults:
-		for doctype, field in [
-			["Warehouse", "default_warehouse"],
-			["Cost Center", "buying_cost_center"],
-			["Cost Center", "selling_cost_center"],
-			["Account", "expense_account"],
-			["Account", "income_account"],
-		]:
+		for doctype, field in company_links:
 			if item_default.get(field):
 				company = frappe.db.get_value(doctype, item_default.get(field), "company", cache=True)
 				if company and company != item_default.company:
