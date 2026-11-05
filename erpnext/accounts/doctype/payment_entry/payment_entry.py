@@ -701,6 +701,7 @@ class PaymentEntry(AccountsController):
 			):
 				ref_details.update({"exchange_rate": reference_exchange_details.exchange_rate})
 
+			values = {}
 			for field, value in ref_details.items():
 				if d.exchange_gain_loss and self.docstatus != 0 and self.get("_action") != "submit":
 					# for cases where gain/loss is booked into invoice
@@ -710,10 +711,12 @@ class PaymentEntry(AccountsController):
 					continue
 
 				if field == "exchange_rate" or not d.get(field) or force:
-					if self.get("_action") in ("submit", "cancel"):
-						d.db_set(field, value)
-					else:
-						d.set(field, value)
+					values[field] = value
+
+			if values and self.get("_action") in ("submit", "cancel"):
+				d.db_set(values)
+			else:
+				d.update(values)
 
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
