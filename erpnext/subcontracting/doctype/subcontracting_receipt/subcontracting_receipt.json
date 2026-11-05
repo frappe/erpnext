@@ -557,7 +557,8 @@
    "no_copy": 1,
    "options": "Subcontracting Receipt",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_39",
@@ -679,7 +680,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-28 13:04:52.771908",
+ "modified": "2026-11-05 18:17:30.203037",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
