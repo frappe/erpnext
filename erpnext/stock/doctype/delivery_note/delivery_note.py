@@ -1280,7 +1280,7 @@ def make_shipment(source_name, target_doc=None):
 					"contact_person": "delivery_contact_name",
 					"contact_email": "delivery_contact_email",
 				},
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "is_return": ["=", 0]},
 			},
 		},
 		target_doc,
