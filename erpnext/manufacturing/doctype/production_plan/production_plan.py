@@ -1156,6 +1156,12 @@ def get_mr_item_planned_qty_query(mr_item):
 	)
 
 
+def round_up_whole_uom(quantity, uom):
+	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
+		return ceil(quantity)
+	return quantity
+
+
 def get_mr_purchase_uom(row):
 	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
 	if (
@@ -1486,9 +1492,6 @@ def get_material_request_items(
 
 			required_qty = required_qty / row["conversion_factor"]
 
-	if frappe.db.get_value("UOM", row["purchase_uom"], "must_be_whole_number"):
-		required_qty = ceil(required_qty)
-
 	if include_safety_stock:
 		required_qty += flt(row["safety_stock"])
 
@@ -1503,7 +1506,7 @@ def get_material_request_items(
 		return {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": required_qty / conversion_factor,
+			"quantity": round_up_whole_uom(required_qty / conversion_factor, uom),
 			"conversion_factor": conversion_factor,
 			"required_bom_qty": row.get("qty"),
 			"stock_uom": row.get("stock_uom"),
@@ -1911,10 +1914,6 @@ def get_materials_from_other_locations(
 ):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 
-	stock_uom, purchase_uom = frappe.db.get_value(
-		"Item", item.get("item_code"), ["stock_uom", "purchase_uom"]
-	)
-
 	locations = get_available_item_locations(
 		item.get("item_code"),
 		warehouses,
@@ -1956,10 +1955,7 @@ def get_materials_from_other_locations(
 		if consider_minimum_order_qty:
 			required_qty = max(required_qty, flt(item.get("min_order_qty")))
 
-		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
-			required_qty = ceil(required_qty)
-
-		item["quantity"] = required_qty / item.get("conversion_factor")
+		item["quantity"] = round_up_whole_uom(required_qty / item.get("conversion_factor"), item.get("uom"))
 
 		new_mr_items.append(item)
 
