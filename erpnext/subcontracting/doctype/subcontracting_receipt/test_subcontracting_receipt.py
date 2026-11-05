@@ -334,10 +334,65 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
+<<<<<<< HEAD
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_batch_return_uses_accepted_receipt_rate(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+=======
+	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "valuation_method": "FIFO"}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 30,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+
+		receipts = []
+		for rate in (100, 300):
+			sco = get_subcontracting_order(service_items=service_items)
+			rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rate}]
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+			scr = make_subcontracting_receipt(sco.name)
+			scr.save()
+			scr.submit()
+			receipts.append(scr)
+
+		self.assertEqual(receipts[1].items[0].rate, 330)
+		scr_return = make_return_subcontracting_receipt(scr_name=receipts[1].name, qty=-2)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -660)
+
+	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].process_loss_qty = 2
+		scr.save()
+		scr.submit()
+>>>>>>> da20181 (test: value a Subcontracting Receipt return at the returned receipt's rate)
 
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
