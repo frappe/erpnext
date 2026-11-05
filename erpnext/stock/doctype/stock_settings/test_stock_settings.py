@@ -113,3 +113,21 @@ class TestStockSettings(FrappeTestCase):
 			frappe.db.get_single_value("Stock Settings", "role_allowed_to_over_deliver_receive"),
 			"Stock Manager",
 		)
+
+	def test_hiding_barcode_field_keeps_item_barcodes(self):
+		settings = frappe.get_doc("Stock Settings")
+		settings.show_barcode_field = 1
+		settings.save()
+		settings.show_barcode_field = 0
+		settings.save()
+
+		def is_hidden(doctype, fieldname):
+			return frappe.db.get_value(
+				"Property Setter",
+				{"doc_type": doctype, "field_name": fieldname, "property": "hidden"},
+				"value",
+			)
+
+		self.assertEqual(is_hidden("Delivery Note", "scan_barcode"), "1")
+		self.assertNotEqual(is_hidden("Item", "barcodes"), "1")
+		self.assertNotEqual(is_hidden("Job Card", "barcode"), "1")
