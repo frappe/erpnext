@@ -431,34 +431,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 <<<<<<< HEAD
 =======
 	def test_return_sends_back_batches_consumed_by_the_receipt(self):
-		rm_item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "SCR-RM-RET-OWN-.####",
-			}
-		).name
-		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
-		make_bom(item=fg_item, raw_materials=[rm_item])
-		sco = get_subcontracting_order(
-			service_items=[
-				{
-					"warehouse": "_Test Warehouse - _TC",
-					"item_code": "Subcontracted Service Item 1",
-					"qty": 10,
-					"rate": 50,
-					"fg_item": fg_item,
-					"fg_item_qty": 10,
-				}
-			]
-		)
-		rm_item_row = get_rm_items(sco.supplied_items)[0]
-		rm_items = [{**rm_item_row, "qty": 5, "rate": 100}, {**rm_item_row, "qty": 5, "rate": 300}]
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
-		)
+		sco = make_order_with_two_batches_transferred()
 		for _ in range(2):
 			scr = make_subcontracting_receipt(sco.name)
 			scr.items[0].qty = 5
@@ -472,6 +445,18 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			get_batch_from_bundle(scr.supplied_items[0].serial_and_batch_bundle),
 		)
 		self.assertEqual(scr_return.supplied_items[0].rate, scr.supplied_items[0].rate)
+
+	def test_return_cannot_send_back_batches_already_returned(self):
+		sco = make_order_with_two_batches_transferred()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+		first_return, second_return = (
+			make_return_subcontracting_receipt(scr_name=scr.name, qty=-5, do_not_submit=True)
+			for _ in range(2)
+		)
+		first_return.submit()
+
+		self.assertRaises(frappe.ValidationError, second_return.submit)
 
 	def test_standard_cost_raw_material_return_uses_current_standard_rate(self):
 		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
@@ -3083,6 +3068,39 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			"stock_value_difference",
 		)
 		self.assertEqual(rejected_value, 0)
+
+
+def make_order_with_two_batches_transferred():
+	"""Subcontracting Order for 10 whose raw material was sent in two batches, 5 at 100 and 5 at 300."""
+	rm_item = make_item(
+		properties={
+			"is_stock_item": 1,
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "SCR-RM-RET-OWN-.####",
+		}
+	).name
+	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+	make_bom(item=fg_item, raw_materials=[rm_item])
+	sco = get_subcontracting_order(
+		service_items=[
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 50,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			}
+		]
+	)
+	rm_item_row = get_rm_items(sco.supplied_items)[0]
+	rm_items = [{**rm_item_row, "qty": 5, "rate": 100}, {**rm_item_row, "qty": 5, "rate": 300}]
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+	)
+	return sco
 
 
 def make_return_subcontracting_receipt(**args):
