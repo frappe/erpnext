@@ -102,3 +102,14 @@ class TestStockSettings(FrappeTestCase):
 				},
 			)
 		)
+
+	def test_over_delivery_role_kept_with_zero_allowance(self):
+		settings = frappe.get_doc("Stock Settings")
+		settings.over_delivery_receipt_allowance = 0
+		settings.role_allowed_to_over_deliver_receive = "Stock Manager"
+		settings.save()
+
+		self.assertEqual(
+			frappe.db.get_single_value("Stock Settings", "role_allowed_to_over_deliver_receive"),
+			"Stock Manager",
+		)
