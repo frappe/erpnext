@@ -628,17 +628,17 @@ class SerialandBatchBundle(Document):
 		returned = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
 		consumed = frappe.qb.DocType("Subcontracting Receipt Supplied Item").as_("consumed")
 		item = frappe.qb.DocType("Subcontracting Receipt Item")
+		original = frappe.qb.DocType("Subcontracting Receipt Item").as_("original")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 
 		bundle_data = (
 			frappe.qb.from_(returned)
 			.join(item)
 			.on(item.name == returned.reference_name)
+			.join(original)
+			.on(original.name == item.subcontracting_receipt_item)
 			.join(consumed)
-			.on(
-				(consumed.reference_name == item.subcontracting_receipt_item)
-				& (consumed.rm_item_code == returned.rm_item_code)
-			)
+			.on((consumed.reference_name == original.name) & (consumed.rm_item_code == returned.rm_item_code))
 			.join(entry)
 			.on(entry.parent == consumed.serial_and_batch_bundle)
 			.select(entry.serial_no, entry.batch_no, entry.incoming_rate)
@@ -646,6 +646,8 @@ class SerialandBatchBundle(Document):
 				(returned.name == self.voucher_detail_no)
 				& (consumed.parent == return_against)
 				& (entry.docstatus == 1)
+				# returned rejected goods bring raw materials back at the row rate, see get_rejected_return_rows
+				& (item.warehouse != Coalesce(original.rejected_warehouse, ""))
 			)
 			.orderby(consumed.idx)
 			.orderby(entry.idx)
