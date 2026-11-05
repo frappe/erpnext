@@ -525,24 +525,17 @@ class SubcontractingReceipt(SubcontractingController):
 				else:
 					scrap_cost_map[item.reference_name] = item.amount
 
-<<<<<<< HEAD
-		total_qty = total_amount = 0
-		for item in self.get("items") or []:
-			if not item.is_scrap_item:
-=======
-		received_qty_ratios = self.get_received_qty_ratios_for_return()
 		rejected_return_rows = self.get_rejected_return_rows()
 		returned_service_costs = self.get_returned_service_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
-			if not item.secondary_item_type and not item.valuation_type:
+			if not item.is_scrap_item:
 				# rejected qty is received without service cost
 				if item.name in returned_service_costs:
 					item.service_cost_per_qty = (
 						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
 					)
 
->>>>>>> 4b3f8e0 (fix(subcontracting): book no service cost on return of rejected items)
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -571,9 +564,6 @@ class SubcontractingReceipt(SubcontractingController):
 			self.total_qty = total_qty
 			self.total = total_amount
 
-<<<<<<< HEAD
-	def validate_scrap_items(self):
-=======
 	def get_returned_service_costs(self) -> dict[str, float]:
 		"""Service cost per qty of the returned receipt row, for each return row."""
 		if not (self.is_return and self.return_against):
@@ -593,22 +583,7 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.subcontracting_receipt_item in service_costs
 		}
 
-	def get_received_qty_ratios_for_return(self) -> dict[str, float]:
-		"""Received qty per accepted qty of the original row, for each return row of accepted qty."""
-		if not (self.is_return and self.return_against):
-			return {}
-
-		original_rows = {
-			row.name: row
-			for row in frappe.get_all(
-				"Subcontracting Receipt Item",
-				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
-				fields=["name", "qty", "received_qty", "rejected_warehouse"],
-			)
-		}
-
-		ratios = {}
->>>>>>> f03ecb8 (fix(subcontracting): restore service cost of a return row moved out of the rejected warehouse)
+	def validate_scrap_items(self):
 		for item in self.items:
 			if item.is_scrap_item:
 				if not item.qty:
