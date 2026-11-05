@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import render_address
@@ -18,7 +20,7 @@ from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate
 from erpnext.utilities.transaction_base import get_whole_number_uoms
 
@@ -325,102 +327,179 @@ class BuyingController(SubcontractingController):
 
 	# update valuation rate
 	def update_valuation_rate(self, reset_outgoing_rate=True):
-		"""
-		item_tax_amount is the total tax amount applied on that item
-		stored for valuation
-
-		TODO: rename item_tax_amount to valuation_tax_amount
-		"""
-		stock_and_asset_items = []
+		"""Update each stock item's tax and valuation amounts."""
 		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
-
-		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
-		last_item_idx = 1
-
-		total_rejected_qty = 0
-		for d in self.get("items"):
-			if d.item_code and d.item_code in stock_and_asset_items:
-				stock_and_asset_items_qty += flt(d.qty)
-				total_rejected_qty += flt(d.get("rejected_qty", 0))
-				stock_and_asset_items_amount += flt(d.base_net_amount)
-				last_item_idx = d.idx
-
-		total_valuation_amount = sum(
-			flt(d.base_tax_amount_after_discount_amount) * (-1 if d.get("add_deduct_tax") == "Deduct" else 1)
-			for d in self.get("taxes")
-			if d.category in ["Valuation", "Valuation and Total"]
+		tax_accounts, total_valuation_amount, actual_tax_amount, stock_tax_amount = self.get_tax_details()
+		actual_charge_per_item = self.distribute_actual_tax_amount(
+			stock_and_asset_items, actual_tax_amount, stock_tax_amount
 		)
+		last_item_idx = max((row.idx for row in self.get("items")), default=1)
 
-		valuation_amount_adjustment = total_valuation_amount
-		for i, item in enumerate(self.get("items")):
-			if (
-				item.item_code
-				and (item.qty or item.get("rejected_qty"))
-				and item.item_code in stock_and_asset_items
-			):
-				if stock_and_asset_items_qty:
-					item_proportion = (
-						flt(item.base_net_amount) / stock_and_asset_items_amount
-						if stock_and_asset_items_amount
-						else flt(item.qty) / stock_and_asset_items_qty
-					)
-				elif total_rejected_qty:
-					item_proportion = flt(item.get("rejected_qty")) / flt(total_rejected_qty)
+		for index, item in enumerate(self.get("items")):
+			if not item.item_code or not (item.qty or item.get("rejected_qty")):
+				item.valuation_rate = 0.0
+				continue
 
-				if i == (last_item_idx - 1):
-					item.item_tax_amount = flt(
-						valuation_amount_adjustment, self.precision("item_tax_amount", item)
-					)
-				else:
-					item.item_tax_amount = flt(
-						item_proportion * total_valuation_amount, self.precision("item_tax_amount", item)
-					)
-					valuation_amount_adjustment -= item.item_tax_amount
+			if index == last_item_idx - 1:
+				item_tax_amount = total_valuation_amount
+			else:
+				item_tax_amount = self.get_item_tax_amount(item, tax_accounts)
+				total_valuation_amount -= item_tax_amount
 
-				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
-				if flt(item.conversion_factor) == 0.0:
-					item.conversion_factor = (
-						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
-					)
+			if item.item_code not in stock_and_asset_items:
+				item.valuation_rate = 0.0
+				continue
 
-				net_rate = item.base_net_amount
-				if item.sales_incoming_rate:  # for internal transfer
-					net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
-
-				if (
-					not net_rate
-					and item.get("rejected_qty")
-					and frappe.get_single_value(
-						"Buying Settings", "set_valuation_rate_for_rejected_materials"
-					)
-				):
-					net_rate = item.rejected_qty * item.base_net_rate
-
-				qty_in_stock_uom = (
-					get_stock_qty(item, item.qty)
-					or get_stock_qty(item, item.rejected_qty)
-					or flt(item.qty) * flt(item.conversion_factor)
+			item.item_tax_amount = flt(
+				item_tax_amount + actual_charge_per_item.get(item.idx, 0.0),
+				self.precision("item_tax_amount", item),
+			)
+			self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
+			if flt(item.conversion_factor) == 0.0:
+				item.conversion_factor = (
+					get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 				)
 
-				if self.get("is_old_subcontracting_flow"):
-					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
-					item.valuation_rate = (
-						net_rate
-						+ item.item_tax_amount
-						+ item.rm_supp_cost
-						+ flt(item.landed_cost_voucher_amount)
-					) / qty_in_stock_uom
-				else:
-					item.valuation_rate = (
-						net_rate
-						+ item.item_tax_amount
-						+ flt(item.landed_cost_voucher_amount)
-						+ flt(item.get("amount_difference_with_purchase_invoice"))
-					) / qty_in_stock_uom
+			net_rate = item.base_net_amount
+			if item.sales_incoming_rate:
+				net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
+			if (
+				not net_rate
+				and item.get("rejected_qty")
+				and frappe.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+			):
+				net_rate = item.rejected_qty * item.base_net_rate
+
+			qty_in_stock_uom = (
+				get_stock_qty(item, item.qty)
+				or get_stock_qty(item, item.rejected_qty)
+				or flt(item.qty) * flt(item.conversion_factor)
+			)
+			if self.get("is_old_subcontracting_flow"):
+				item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
+				item.valuation_rate = (
+					net_rate + item.item_tax_amount + item.rm_supp_cost + flt(item.landed_cost_voucher_amount)
+				) / qty_in_stock_uom
 			else:
-				item.valuation_rate = 0.0
+				item.valuation_rate = (
+					net_rate
+					+ item.item_tax_amount
+					+ flt(item.landed_cost_voucher_amount)
+					+ flt(item.get("amount_difference_with_purchase_invoice"))
+				) / qty_in_stock_uom
 
 		update_regional_item_valuation_rate(self)
+
+	def get_tax_details(self):
+		tax_accounts = []
+		total_valuation_amount = 0.0
+		actual_tax_amount = 0.0
+		stock_tax_amount = 0.0
+
+		for tax in self.get("taxes"):
+			if tax.category not in ("Valuation", "Valuation and Total"):
+				continue
+
+			multiplier = -1 if tax.get("add_deduct_tax") == "Deduct" else 1
+			amount = flt(tax.base_tax_amount_after_discount_amount) * multiplier
+			if tax.charge_type == "On Net Total":
+				total_valuation_amount += amount
+				tax_accounts.append((tax.account_head, multiplier))
+			elif tax.charge_type == "Actual" and tax.get("allocate_full_amount_to_stock_items"):
+				stock_tax_amount += amount
+			elif tax.charge_type != "On Item Quantity":
+				actual_tax_amount += amount
+
+		return tax_accounts, total_valuation_amount, actual_tax_amount, stock_tax_amount
+
+	def get_item_tax_amount(self, item, tax_accounts):
+		item_tax_amount = 0.0
+		if item.item_tax_rate:
+			tax_details = json.loads(item.item_tax_rate)
+			for account, multiplier in tax_accounts:
+				rate = tax_details.get(account, 0)
+				if rate == NOT_APPLICABLE_TAX:
+					continue
+				net_rate = item.base_net_amount
+				if item.sales_incoming_rate:
+					net_rate = item.qty * item.sales_incoming_rate
+				item_tax_amount += flt(net_rate) * flt(rate) / 100 * multiplier
+		return item_tax_amount
+
+	def distribute_actual_tax_amount(self, stock_and_asset_items, actual_tax_amount, stock_tax_amount):
+		all_items = [row for row in self.get("items") if row.item_code]
+		stock_items = [row for row in all_items if row.item_code in stock_and_asset_items]
+		charge_per_item = {}
+		self._spread_charge_over_items(charge_per_item, actual_tax_amount, all_items)
+		self._spread_charge_over_items(charge_per_item, stock_tax_amount, stock_items)
+		for tax in self.get("taxes"):
+			if tax.charge_type == "On Item Quantity" and tax.category in ("Valuation", "Valuation and Total"):
+				for item_idx, amount in self.get_quantity_based_tax_amounts(tax).items():
+					charge_per_item[item_idx] = charge_per_item.get(item_idx, 0.0) + amount
+		return charge_per_item
+
+	def get_quantity_based_tax_amounts(self, tax):
+		if self.get("_item_wise_tax_details"):
+			return {
+				row.item.idx: flt(row.amount)
+				for row in self.get("_item_wise_tax_details")
+				if row.tax.idx == tax.idx
+			}
+
+		item_indices = {item.name: item.idx for item in self.get("items")}
+		return {
+			item_indices[row.item_row]: flt(row.amount)
+			for row in self.get("item_wise_tax_details") or []
+			if row.tax_row == tax.name
+		}
+
+	def _spread_charge_over_items(self, charge_per_item, total_charge, items):
+		if not total_charge or not items:
+			return
+		total_amount = sum(flt(row.base_net_amount) for row in items)
+		total_qty = sum(flt(row.qty) for row in items)
+		if not total_amount and not total_qty:
+			return
+
+		remaining = total_charge
+		for row in items[:-1]:
+			proportion = flt(row.base_net_amount) / total_amount if total_amount else flt(row.qty) / total_qty
+			charge = flt(proportion * total_charge, self.precision("item_tax_amount", row))
+			charge_per_item[row.idx] = charge_per_item.get(row.idx, 0.0) + charge
+			remaining -= charge
+
+		last_item = items[-1]
+		charge_per_item[last_item.idx] = charge_per_item.get(last_item.idx, 0.0) + flt(
+			remaining, self.precision("item_tax_amount", last_item)
+		)
+
+	def get_capitalized_valuation_tax(self):
+		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
+		all_items = [row for row in self.get("items") if row.item_code]
+		stock_item_indices = {row.idx for row in all_items if row.item_code in stock_and_asset_items}
+		capitalized = {}
+		for tax in self.get("taxes"):
+			if tax.category not in ("Valuation", "Valuation and Total"):
+				continue
+			amount = flt(tax.base_tax_amount_after_discount_amount) * (
+				-1 if tax.get("add_deduct_tax") == "Deduct" else 1
+			)
+			if not amount:
+				continue
+			if tax.charge_type == "On Item Quantity":
+				amount = sum(
+					charge
+					for item_idx, charge in self.get_quantity_based_tax_amounts(tax).items()
+					if item_idx in stock_item_indices
+				)
+			elif tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
+				charge_per_item = {}
+				self._spread_charge_over_items(charge_per_item, amount, all_items)
+				amount = sum(
+					charge for item_idx, charge in charge_per_item.items() if item_idx in stock_item_indices
+				)
+			capitalized[tax.name] = amount
+		return capitalized
 
 	def set_incoming_rate(self):
 		"""
