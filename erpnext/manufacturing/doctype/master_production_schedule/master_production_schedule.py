@@ -72,12 +72,11 @@ class MasterProductionSchedule(Document):
 		self.validate_items()
 
 	def validate_items(self):
-		for row in self.items:
-			if row.item_code and row.uom:
-				get_conversion_factor(row.item_code, row.uom, throw_if_missing=True)
+		for item_code, uom in {(row.item_code, row.uom) for row in self.items if row.item_code and row.uom}:
+			get_conversion_factor(item_code, uom, throw_if_missing=True)
 
-			if row.bom_no:
-				validate_bom_no(row.item_code, row.bom_no)
+		for item_code, bom_no in {(row.item_code, row.bom_no) for row in self.items if row.bom_no}:
+			validate_bom_no(item_code, bom_no)
 
 	def validate_sales_forecast_not_used(self):
 		if not self.sales_forecast:
