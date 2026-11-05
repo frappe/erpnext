@@ -51,7 +51,8 @@
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
    "label": "Process Loss Qty",
-   "non_negative": 1
+   "non_negative": 1,
+   "read_only": 1
   },
   {
    "fieldname": "employee",

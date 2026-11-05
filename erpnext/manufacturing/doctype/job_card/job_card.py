@@ -967,7 +967,7 @@ class JobCard(Document):
 		if operation_deatils.completed_qty:
 			row.completed_qty = operation_deatils.completed_qty
 
-		row.process_loss_qty = operation_deatils.process_loss_qty
+		row.process_loss_qty = flt(operation_deatils.process_loss_qty, row.precision("process_loss_qty"))
 
 	def update_time_logs(self, row):
 		self.append(
@@ -2020,7 +2020,7 @@ class JobCard(Document):
 
 					if kwargs.get("completed_qty") is not None:
 						row.completed_qty = kwargs.completed_qty
-						row.process_loss_qty = flt(kwargs.process_loss_qty)
+						row.process_loss_qty = flt(kwargs.process_loss_qty, row.precision("process_loss_qty"))
 					row.db_update()
 		else:
 			self.add_time_logs_for_employess(kwargs)
@@ -2073,7 +2073,7 @@ class JobCard(Document):
 
 			if kwargs.employees[-1].get("employee") == row.employee:
 				row.completed_qty = kwargs.completed_qty
-				row.process_loss_qty = flt(kwargs.process_loss_qty)
+				row.process_loss_qty = flt(kwargs.process_loss_qty, row.precision("process_loss_qty"))
 
 			row.db_update()
 
