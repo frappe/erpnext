@@ -1853,8 +1853,8 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
-			warehouse = warehouse or details.get("source_warehouse") or details.get("default_warehouse")
-			bin_dict = _get_bin_details(details, doc.company, warehouse)
+			row_warehouse = warehouse or details.get("source_warehouse") or details.get("default_warehouse")
+			bin_dict = _get_bin_details(details, doc.company, row_warehouse)
 			bin_dict = bin_dict[0] if bin_dict else {}
 
 			if details.qty > 0:
@@ -1865,7 +1865,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 					company,
 					ignore_existing_ordered_qty,
 					include_safety_stock,
-					warehouse,
+					row_warehouse,
 					bin_dict,
 					consumed_qty,
 				)
