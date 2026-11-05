@@ -411,10 +411,17 @@ $.extend(erpnext.utils, {
 				let accounting_dimensions = r.message[0];
 				accounting_dimensions.forEach((dimension) => {
 					let filter = filters.find((el) => el.fieldname === dimension["fieldname"]);
+					let fieldname = dimension["fieldname"];
+
+					if (filter && filter.fieldtype !== "MultiSelectList") {
+						fieldname = frappe.query_reports[report_name].dimension_filter_aliases?.[fieldname];
+						if (!fieldname) return;
+						filter = null;
+					}
 
 					if (!filter) {
 						filter = {
-							fieldname: dimension["fieldname"],
+							fieldname,
 							label: __(dimension["label"]),
 							fieldtype: "MultiSelectList",
 							get_data: function (txt) {
