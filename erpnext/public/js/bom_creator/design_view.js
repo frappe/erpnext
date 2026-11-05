@@ -63,6 +63,10 @@ export class DesignView {
 				.bom-creator-view.process-view .design-body { flex: none; height: 680px; max-height: none; overflow: hidden;
 					border: 1px solid var(--border-color); border-radius: var(--radius-md); }
 				.bom-creator-view .design-process { height: 100%; }
+				.bom-creator-view .design-process .link-btn {
+					top: 1px; right: 1px; height: calc(100% - 2px); padding: 0 6px;
+					background-color: var(--fg-color); border-radius: 0 7px 7px 0;
+				}
 				.bom-creator-view .design-model {
 					flex: 0 0 34%; position: relative; border: 1px solid var(--border-color);
 					border-radius: var(--radius-md); overflow: hidden; background: var(--subtle-fg);
