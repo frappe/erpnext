@@ -817,7 +817,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 
 def is_rejected(voucher_type, voucher_detail_no, warehouse):
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 		return warehouse == frappe.get_cached_value(
 			voucher_type + " Item", voucher_detail_no, "rejected_warehouse"
 		)
