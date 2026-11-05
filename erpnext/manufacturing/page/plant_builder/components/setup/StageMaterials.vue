@@ -11,20 +11,38 @@ const props = defineProps({
 	doc: Object,
 	data: { type: Object, default: () => ({}) },
 	stageNo: Number,
+	packingNo: { type: Number, default: 0 },
 	stageOptions: { type: Array, default: () => [] },
 });
 const readOnly = inject(READ_ONLY, ref(false));
 
 const all = computed(() => props.doc.materials);
+const packing = computed(() => props.doc.packing_materials);
+const isPacking = computed(() => props.stageNo === props.packingNo);
+const batch = computed(() => num(props.doc.batch_size) || 1);
 const stageOf = (row) => num(row.stage_row_id) || 1;
-const materials = computed(() => all.value.filter((row) => stageOf(row) === props.stageNo));
+const materials = computed(() =>
+	isPacking.value ? packing.value : all.value.filter((row) => stageOf(row) === props.stageNo)
+);
 const balanceRow = computed(() => materials.value.find((row) => row.is_balance_item));
 const factorOf = (row) => num(props.data.weight_factors?.[row.item_code]);
 const weightOf = (row) => (factorOf(row) ? num(row.qty) / factorOf(row) : 0);
 const totalWeight = computed(() => all.value.reduce((sum, row) => sum + weightOf(row), 0));
 const percentageOf = (row) => (totalWeight.value ? round((weightOf(row) / totalWeight.value) * 100, 3) : 0);
 const uomOf = (row) => props.data.items?.[row.item_code]?.stock_uom || "";
-const toneOf = (row) => SWATCH[MATERIAL_TONES[all.value.indexOf(row) % MATERIAL_TONES.length]];
+const toneOf = (row) =>
+	isPacking.value
+		? "bg-surface-gray-3"
+		: SWATCH[MATERIAL_TONES[all.value.indexOf(row) % MATERIAL_TONES.length]];
+
+const qtyOf = (row) => {
+	if (isPacking.value) return round(num(row.qty_per_unit) * batch.value, 3);
+	return row.is_balance_item ? round(row.qty, 3) : row.qty;
+};
+function setQty(row, value) {
+	if (isPacking.value) row.qty_per_unit = num(value) / batch.value;
+	else row.qty = value;
+}
 
 function setPercentage(row, value) {
 	const batchWeight = num(props.data.formula_weight) || totalWeight.value;
@@ -32,26 +50,54 @@ function setPercentage(row, value) {
 	row.qty = round((num(value) / 100) * batchWeight * factorOf(row), 3);
 }
 
-const columns = "grid-cols-[1rem_minmax(0,1fr)_7.5rem_3.75rem_1.75rem]";
+const columns = computed(() =>
+	isPacking.value
+		? "grid-cols-[1rem_minmax(0,1fr)_8rem_1.75rem]"
+		: "grid-cols-[1rem_minmax(0,1fr)_8rem_3.5rem_1.75rem]"
+);
 
-const setBalance = (row) => all.value.forEach((m) => (m.is_balance_item = m === row ? 1 : 0));
-const remove = (row) => all.value.splice(all.value.indexOf(row), 1);
+const setBalance = (row, on) => all.value.forEach((m) => (m.is_balance_item = on && m === row ? 1 : 0));
+const remove = (row) => materials.value.splice(materials.value.indexOf(row), 1);
+
+function moveTo(row, stageNo) {
+	if (!isPacking.value && stageNo !== props.packingNo) {
+		row.stage_row_id = stageNo;
+		return;
+	}
+	remove(row);
+	if (isPacking.value) {
+		all.value.push({
+			item_code: row.item_code,
+			qty: num(row.qty_per_unit) * batch.value,
+			is_balance_item: 0,
+			stage_row_id: stageNo,
+			storage: "Tank",
+		});
+	} else {
+		packing.value.push({ item_code: row.item_code, qty_per_unit: num(row.qty) / batch.value });
+	}
+}
+
 const rowMenu = (row) => [
-	{
-		group: __("Storage"),
-		options: STORAGE_OPTIONS.map((option) => ({
-			label: __(option.label),
-			icon: row.storage === option.value ? "lucide-check" : undefined,
-			onClick: () => (row.storage = option.value),
-		})),
-	},
+	...(isPacking.value
+		? []
+		: [
+				{
+					group: __("Storage"),
+					options: STORAGE_OPTIONS.map((option) => ({
+						label: __(option.label),
+						icon: row.storage === option.value ? "lucide-check" : undefined,
+						onClick: () => (row.storage = option.value),
+					})),
+				},
+		  ]),
 	...(props.stageOptions.length
 		? [
 				{
 					group: __("Move to Stage"),
 					options: props.stageOptions.map((option) => ({
 						label: option.label,
-						onClick: () => (row.stage_row_id = option.stageNo),
+						onClick: () => moveTo(row, option.stageNo),
 					})),
 				},
 		  ]
@@ -59,12 +105,31 @@ const rowMenu = (row) => [
 	{
 		group: __("Formula"),
 		options: [
-			{ label: __("Use as Balance"), icon: "lucide-scale", onClick: () => setBalance(row) },
+			...(isPacking.value
+				? []
+				: [
+						row.is_balance_item
+							? {
+									label: __("Stop Using as Balance"),
+									icon: "lucide-pencil",
+									onClick: () => setBalance(row, false),
+							  }
+							: {
+									label: __("Use as Balance"),
+									icon: "lucide-scale",
+									onClick: () => setBalance(row, true),
+							  },
+				  ]),
 			{ label: __("Remove"), icon: "lucide-trash-2", onClick: () => remove(row) },
 		],
 	},
 ];
-const add = () =>
+
+function add() {
+	if (isPacking.value) {
+		packing.value.push({ item_code: "", qty_per_unit: 1 });
+		return;
+	}
 	all.value.push({
 		item_code: "",
 		qty: 0,
@@ -72,6 +137,7 @@ const add = () =>
 		stage_row_id: props.stageNo,
 		storage: "Tank",
 	});
+}
 </script>
 
 <template>
@@ -85,7 +151,7 @@ const add = () =>
 				<span />
 				<span>{{ __("Item") }}</span>
 				<span class="text-right">{{ __("Quantity") }}</span>
-				<span class="text-right">%</span>
+				<span v-if="!isPacking" class="text-right">%</span>
 				<span />
 			</div>
 			<div
@@ -97,24 +163,28 @@ const add = () =>
 				<span
 					class="size-4 rounded-full border border-outline-gray-3"
 					:class="toneOf(row)"
-					:title="__(row.storage || 'Tank')"
+					:title="isPacking ? '' : __(row.storage || 'Tank')"
 				/>
 				<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
 				<TextInput
-					:model-value="row.is_balance_item ? round(row.qty, 3) : row.qty"
+					:model-value="qtyOf(row)"
 					type="number"
 					size="sm"
 					class="[&_input]:text-right"
-					:class="{ '[&_input]:bg-surface-base': !row.is_balance_item }"
+					:class="{
+						'[&_input]:bg-surface-base': !row.is_balance_item,
+						'[&_input]:pr-12': uomOf(row),
+					}"
 					:disabled="!!row.is_balance_item"
 					:title="row.is_balance_item ? __('Balance item') : uomOf(row)"
-					@update:model-value="row.qty = $event"
+					@update:model-value="setQty(row, $event)"
 				>
 					<template v-if="uomOf(row)" #suffix>
 						<span class="text-xs text-ink-gray-5">{{ uomOf(row) }}</span>
 					</template>
 				</TextInput>
 				<TextInput
+					v-if="!isPacking"
 					:model-value="percentageOf(row)"
 					type="number"
 					size="sm"
@@ -130,9 +200,10 @@ const add = () =>
 		</div>
 		<p v-if="balanceRow" class="text-xs text-ink-gray-5">
 			{{
-				__("{0} tops the batch up to the weight the formula needs", [
-					data.items?.[balanceRow.item_code]?.item_name || __("The balance item"),
-				])
+				__(
+					"{0} is the balance item. Its quantity is worked out so the batch makes the finished good weight after each stage's yield.",
+					[data.items?.[balanceRow.item_code]?.item_name || __("The balance item")]
+				)
 			}}
 		</p>
 		<Button
