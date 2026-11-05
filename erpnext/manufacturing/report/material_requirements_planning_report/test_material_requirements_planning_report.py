@@ -738,6 +738,81 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
 
+<<<<<<< HEAD
+=======
+	def test_mps_data_matches_any_selected_warehouse(self):
+		plan = make_mrp_plan(self)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		for warehouses, expected in (([WAREHOUSE, WIP_WAREHOUSE], [plan.fg_item]), ([WIP_WAREHOUSE], [])):
+			with self.subTest(warehouses=warehouses):
+				report = MaterialRequirementsPlanningReport(
+					{
+						"from_date": mps.from_date,
+						"to_date": mps.to_date,
+						"warehouse": warehouses,
+						"mps": mps.name,
+					}
+				)
+				self.assertEqual([row.item_code for row in report.get_mps_data()], expected)
+
+	def test_rows_carry_a_single_warehouse_with_multiple_selected(self):
+		# a list in the hidden Link column breaks the link title lookup of the whole report
+		from frappe.desk.query_report import run
+
+		plan = make_mrp_plan(self)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		result = run(
+			"Material Requirements Planning Report",
+			filters={
+				"company": COMPANY,
+				"from_date": mps.from_date,
+				"to_date": mps.to_date,
+				"warehouse": [WAREHOUSE, WIP_WAREHOUSE],
+				"mps": mps.name,
+				"type_of_material": "All",
+				"add_safety_stock": 0,
+			},
+		)
+		rows = {row.item_code: row for row in result["result"] if row.get("item_code")}
+		self.assertEqual(rows[plan.rm_item].warehouse, WAREHOUSE)
+
+	def test_daily_forecast_buckets_keep_the_forecast_warehouse(self):
+		for frequency in ("Monthly", "Weekly"):
+			with self.subTest(frequency=frequency):
+				row = frappe._dict(
+					frequency=frequency,
+					item_code="_Test Item",
+					delivery_date=today(),
+					qty=30,
+					parent_warehouse=WAREHOUSE,
+				)
+				buckets = convert_to_daily_bucket_data([row])
+				self.assertTrue(buckets)
+				self.assertEqual({bucket.parent_warehouse for bucket in buckets}, {WAREHOUSE})
+
+	def test_sales_order_of_an_mps_item_used_in_a_bom_is_counted_once(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		delivery_date = add_days(today(), 30)
+		make_mrp_sales_order(plan.rm_item, 5, delivery_date)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.append(
+			"items",
+			{
+				"item_code": plan.rm_item,
+				"warehouse": WAREHOUSE,
+				"delivery_date": delivery_date,
+				"planned_qty": 5,
+				"uom": frappe.get_cached_value("Item", plan.rm_item, "stock_uom"),
+			},
+		)
+		mps.save()
+
+		rows = get_mrp_row_list(mps)
+		rm_rows = sorted((row.indent, row.required_qty) for row in rows if row.item_code == plan.rm_item)
+		self.assertEqual(rm_rows, [(0, 5), (1, 10)])
+
+>>>>>>> 78e4242 (test: count Sales Orders of an MPS item used in a BOM once)
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
