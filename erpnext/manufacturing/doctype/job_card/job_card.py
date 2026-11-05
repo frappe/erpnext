@@ -2029,18 +2029,22 @@ class JobCard(Document):
 		self.save()
 
 	def add_time_logs_for_employess(self, kwargs):
+		if not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
+			self.update_latest_time_log_qty(kwargs)
+			self.set_status(update_status=True)
+			return
+
 		update_status = False
 		kwargs.employees = kwargs.employees or [frappe._dict(employee=None)]
+		# picked before any log is closed, so the cycle's qty goes on one log
+		cycle_log = next((row for row in reversed(self.time_logs) if not row.to_time), None)
 
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
 			if kwargs.from_time and not kwargs.to_time:
 				self.add_new_time_log_for_employee(kwargs)
-			elif not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
-				self.update_completed_qty_for_employee(kwargs)
-				update_status = True
 			else:
-				self.close_time_log_for_employee(kwargs)
+				self.close_time_log_for_employee(kwargs, cycle_log)
 				update_status = True
 
 			self.set_status(update_status=update_status)
@@ -2053,15 +2057,15 @@ class JobCard(Document):
 		row.db_update()
 		self.db_set("status", "Work In Progress")
 
-	def update_completed_qty_for_employee(self, kwargs):
-		for row in self.time_logs:
-			if row.employee != kwargs.employee:
-				continue
+	def update_latest_time_log_qty(self, kwargs):
+		"""Without an end time the qty is for the current cycle, so only the latest time log gets it."""
+		if not self.time_logs:
+			return
 
-			row.completed_qty = kwargs.completed_qty
-			row.db_update()
+		self.time_logs[-1].completed_qty = kwargs.completed_qty
+		self.time_logs[-1].db_update()
 
-	def close_time_log_for_employee(self, kwargs):
+	def close_time_log_for_employee(self, kwargs, cycle_log):
 		for row in self.time_logs:
 			if row.to_time or row.employee != kwargs.employee:
 				continue
@@ -2071,7 +2075,7 @@ class JobCard(Document):
 			if kwargs.get("sub_operation"):
 				row.operation = kwargs.get("sub_operation")
 
-			if kwargs.employees[-1].get("employee") == row.employee:
+			if row is cycle_log:
 				row.completed_qty = kwargs.completed_qty
 				row.process_loss_qty = flt(kwargs.process_loss_qty, row.precision("process_loss_qty"))
 
