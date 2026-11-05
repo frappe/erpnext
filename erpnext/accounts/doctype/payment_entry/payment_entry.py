@@ -1422,7 +1422,9 @@ class PaymentEntry(AccountsController):
 	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
-		frappe.db.delete("Payment Entry Reference", {"parent": self.name, "allocated_amount": 0})
+		# A new document has no rows yet; the delete would only take gap locks that deadlock concurrent inserts.
+		if not self.is_new():
+			frappe.db.delete("Payment Entry Reference", {"parent": self.name, "allocated_amount": 0})
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
