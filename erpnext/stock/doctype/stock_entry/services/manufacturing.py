@@ -545,7 +545,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self.add_raw_materials_based_on_transfer()
 
 	def raw_materials_already_consumed(self) -> bool:
-		if not self.doc.work_order:
+		"""Whether the consumption entries replace the raw materials of this entry."""
+		if not (
+			self.doc.work_order
+			and frappe.db.get_single_value("Manufacturing Settings", "get_rm_cost_from_consumption_entry")
+		):
 			return False
 
 		return bool(
