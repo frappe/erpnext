@@ -1488,19 +1488,15 @@ class SubcontractingController(StockController):
 				scr_qty = flt(item.qty) * flt(item.conversion_factor)
 
 				if scr_qty:
-					sle = self.get_sl_entries(item, {"actual_qty": flt(scr_qty)})
-					rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
-					incoming_rate = flt(item.rate, rate_db_precision)
-					sle.update(
-						{
-							"incoming_rate": incoming_rate,
-							"recalculate_rate": 1,
-						}
-					)
-					if self.is_return and not is_serial_no_wise_valuation_disabled(item.item_code):
+					sle = self.get_sl_entries(item, {"actual_qty": flt(scr_qty), "recalculate_rate": 1})
+					if self.is_return:
+						# take the finished good out at the rate the returned receipt brought it in
 						sle.outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, item.item_code, self.return_against, item_row=item
 						)
+					else:
+						rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
+						sle.incoming_rate = flt(item.rate, rate_db_precision)
 					sl_entries.append(sle)
 
 				if flt(item.rejected_qty) != 0:
