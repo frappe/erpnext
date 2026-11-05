@@ -675,6 +675,7 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ("Quality Inspection",)
 		self.update_work_order()
 		self.set_transferred_qty()
 
