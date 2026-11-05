@@ -1621,7 +1621,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 
 		if table_name != "required_items":
 			# bom rows are costed per row uom, work order rows per stock uom
-			args["rate"] = flt(args.rate) * flt(args.conversion_factor)
+			args["rate"] = flt(args.rate * args.conversion_factor, frappe.get_precision("BOM Item", "rate"))
 			wo_doc.append(table_name, args)
 			continue
 
@@ -1636,7 +1636,9 @@ def _variant_row_qty(item_code, item, stock_uom):
 	"""The dialog qty is in the template row's uom; the work order needs the stock qty."""
 	uom = item.get("uom") or stock_uom
 	conversion_factor = flt(get_conversion_factor(item_code, uom)["conversion_factor"])
-	stock_qty = flt(item.get("qty")) * conversion_factor
+	stock_qty = flt(
+		flt(item.get("qty")) * conversion_factor, frappe.get_precision("Work Order Item", "required_qty")
+	)
 	return {
 		"qty": flt(item.get("qty")),  # for bom
 		"uom": uom,
