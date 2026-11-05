@@ -753,6 +753,96 @@ class TestItem(FrappeTestCase):
 
 		self.assertEqual(variants[0], variants[1])
 
+	def test_standard_rate_price_goes_to_a_selling_list(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 500,
+				"item_defaults": [{"company": "_Test Company", "default_price_list": "Standard Buying"}],
+			}
+		).name
+		self.assertFalse(frappe.db.exists("Item Price", {"item_code": item, "price_list": "Standard Buying"}))
+		self.assertTrue(frappe.db.exists("Item Price", {"item_code": item, "selling": 1}))
+
+		if not frappe.db.exists("Price List", "_Test Second Buying List"):
+			frappe.get_doc(
+				{
+					"doctype": "Price List",
+					"price_list_name": "_Test Second Buying List",
+					"buying": 1,
+					"currency": "INR",
+				}
+			).insert()
+		shared = make_item(
+			properties={
+				"is_stock_item": 0,
+				"standard_rate": 300,
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"default_warehouse": "_Test Warehouse - _TC",
+						"default_price_list": "Standard Buying",
+					},
+					{
+						"company": "_Test Company 1",
+						"default_warehouse": "_Test Warehouse 2 - _TC1",
+						"default_price_list": "_Test Second Buying List",
+					},
+				],
+			}
+		).name
+		self.assertEqual(frappe.db.count("Item Price", {"item_code": shared}), 1)
+
+		template = make_item(
+			properties={"has_variants": 1, "standard_rate": 700, "attributes": [{"attribute": "Test Size"}]}
+		)
+		self.assertFalse(frappe.db.exists("Item Price", {"item_code": template.name}))
+
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@change_settings("Accounts Settings", {"allow_stale": 1})
+	def test_standard_rate_price_uses_the_selling_exchange_rate(self):
+		if not frappe.db.exists("Currency", "TSR"):
+			frappe.get_doc({"doctype": "Currency", "currency_name": "TSR", "enabled": 1}).insert()
+
+		if not frappe.db.exists("Price List", "_Test Selling TSR Standard Rate List"):
+			frappe.get_doc(
+				{
+					"doctype": "Price List",
+					"price_list_name": "_Test Selling TSR Standard Rate List",
+					"selling": 1,
+					"currency": "TSR",
+				}
+			).insert()
+
+		for days, rate, for_buying, for_selling in ((-5, 80, 0, 1), (-1, 90, 1, 0)):
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": add_days(today(), days),
+					"from_currency": "TSR",
+					"to_currency": "INR",
+					"exchange_rate": rate,
+					"for_buying": for_buying,
+					"for_selling": for_selling,
+				}
+			).insert()
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 800,
+				"item_defaults": [
+					{"company": "_Test Company", "default_price_list": "_Test Selling TSR Standard Rate List"}
+				],
+			}
+		).name
+		price = frappe.db.get_value(
+			"Item Price",
+			{"item_code": item, "price_list": "_Test Selling TSR Standard Rate List"},
+			"price_list_rate",
+		)
+		self.assertEqual(price, 10)
+
 	def make_numeric_template(self):
 		frappe.flags.attribute_values = None
 		if not frappe.db.exists("Item Attribute", "Test Item Depth"):
