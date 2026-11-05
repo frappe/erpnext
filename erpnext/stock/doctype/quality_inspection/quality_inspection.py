@@ -351,29 +351,18 @@ class QualityInspection(Document):
 			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
 
 	def inspect_and_set_status(self):
-		before_save = self.get_doc_before_save()
-		stored_readings = {reading.name: reading for reading in before_save.readings} if before_save else {}
-
 		for reading in self.readings:
-			stored = stored_readings.get(reading.name)
-			unchanged = bool(stored)
-			if unchanged:
-				for field in READING_STATUS_FIELDS:
-					if reading.get(field) != stored.get(field):
-						unchanged = False
-						break
-
-			if unchanged:
-				# Re-reading an unchanged value in the current user's locale can change its meaning.
-				reading.status = stored.status
+			if reading.manual_inspection:  # dont auto set status if manual
 				continue
 
-			if not reading.manual_inspection:  # dont auto set status if manual
-				if reading.formula_based_criteria:
-					self.set_status_based_on_acceptance_formula(reading)
-				else:
-					# if not formula based check acceptance values set
-					self.set_status_based_on_acceptance_values(reading)
+			if stored := self.get_unchanged_stored_reading(reading):
+				# the current user's number format may read the stored values differently
+				reading.status = stored.status
+			elif reading.formula_based_criteria:
+				self.set_status_based_on_acceptance_formula(reading)
+			else:
+				# if not formula based check acceptance values set
+				self.set_status_based_on_acceptance_values(reading)
 
 		if not self.manual_inspection:
 			self.status = "Accepted"
@@ -425,6 +414,13 @@ class QualityInspection(Document):
 						),
 						title=_("Invalid Reading"),
 					)
+
+	def get_unchanged_stored_reading(self, reading):
+		"""Reading as last saved, or None if it is new or its status inputs changed."""
+		before_save = self.get_doc_before_save()
+		stored = before_save and before_save.get("readings", {"name": reading.name})
+		if stored and all(reading.get(field) == stored[0].get(field) for field in READING_STATUS_FIELDS):
+			return stored[0]
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
