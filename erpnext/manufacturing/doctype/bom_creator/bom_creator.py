@@ -197,6 +197,8 @@ class BOMCreator(Document):
 						"stock_uom": row.stock_uom,
 						"conversion_factor": row.conversion_factor,
 						"sourced_by_supplier": row.sourced_by_supplier,
+						"set_rate_based_on_warehouse": self.set_rate_based_on_warehouse,
+						"warehouse": self.default_warehouse,
 					},
 					self,
 				)
