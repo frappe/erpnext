@@ -1890,15 +1890,12 @@ class JobCard(Document):
 		self.save()
 
 	def add_time_logs_for_employess(self, kwargs):
-<<<<<<< HEAD
-		row = None
-=======
 		if not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
 			self.update_latest_time_log_qty(kwargs)
 			self.set_status(update_status=True)
 			return
 
->>>>>>> ba41e09 (fix(manufacturing): set a qty-only completion once and pick logs by position)
+		row = None
 		update_status = False
 		kwargs.employees = kwargs.employees or [frappe._dict(employee=None)]
 		# picked before any log is closed, so the cycle's qty goes on one log
@@ -1907,37 +1904,13 @@ class JobCard(Document):
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
 			if kwargs.from_time and not kwargs.to_time:
-<<<<<<< HEAD
 				if kwargs.get("qty") is not None:
 					kwargs.completed_qty = kwargs.qty
 
 				row = self.append("time_logs", kwargs)
 				row.db_update()
 				self.db_set("status", "Work In Progress")
-			elif not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-				self.update_latest_time_log_qty(kwargs)
->>>>>>> ad669c8 (fix(manufacturing): update only the job card's latest time log when completing without end time)
-=======
-				self.update_cycle_time_log_qty(cycle_log, kwargs)
->>>>>>> 09f429f (fix(manufacturing): pick the cycle's time log before closing open logs)
-				update_status = True
-				for row in self.time_logs:
-					if row.employee != kwargs.employee:
-						continue
-
-					row.completed_qty = kwargs.completed_qty
-					row.db_update()
-=======
-				self.add_new_time_log_for_employee(kwargs)
->>>>>>> ba41e09 (fix(manufacturing): set a qty-only completion once and pick logs by position)
 			else:
-<<<<<<< HEAD
-=======
-				self.close_time_log_for_employee(kwargs, cycle_log)
->>>>>>> 09f429f (fix(manufacturing): pick the cycle's time log before closing open logs)
 				update_status = True
 				for row in self.time_logs:
 					if row.to_time or row.employee != kwargs.employee:
@@ -1948,47 +1921,20 @@ class JobCard(Document):
 					if kwargs.get("sub_operation"):
 						row.operation = kwargs.get("sub_operation")
 
-					if kwargs.employees[-1].get("employee") == row.employee:
+					if row is cycle_log:
 						row.completed_qty = kwargs.completed_qty
 
 					row.db_update()
 
 			self.set_status(update_status=update_status)
 
-<<<<<<< HEAD
-=======
-	def add_new_time_log_for_employee(self, kwargs):
-		if kwargs.get("qty") is not None:
-			kwargs.completed_qty = kwargs.qty
-
-		row = self.append("time_logs", kwargs)
-		row.db_update()
-		self.db_set("status", "Work In Progress")
-
 	def update_latest_time_log_qty(self, kwargs):
-		"""Without an end time the qty is for the current cycle, so only the latest time log gets it."""
 		if not self.time_logs:
 			return
 
 		self.time_logs[-1].completed_qty = kwargs.completed_qty
 		self.time_logs[-1].db_update()
 
-	def close_time_log_for_employee(self, kwargs, cycle_log):
-		for row in self.time_logs:
-			if row.to_time or row.employee != kwargs.employee:
-				continue
-
-			row.to_time = kwargs.to_time
-			row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
-			if kwargs.get("sub_operation"):
-				row.operation = kwargs.get("sub_operation")
-
-			if row is cycle_log:
-				row.completed_qty = kwargs.completed_qty
-
-			row.db_update()
-
->>>>>>> 21685f5 (fix(manufacturing): update only the latest time log when completing without end time)
 	def update_workstation_status(self):
 		job_cards = frappe.get_all(
 			"Job Card",
