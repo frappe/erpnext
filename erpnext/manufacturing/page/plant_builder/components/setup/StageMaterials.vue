@@ -1,24 +1,30 @@
 <script setup>
 import { computed, inject, ref } from "vue";
-import { Badge, Button, Dropdown, TextInput } from "frappe-ui";
-import SectionHead from "./SectionHead.vue";
+import { Button, Dropdown, TextInput } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
 import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH } from "../../lib/machines";
 import { READ_ONLY } from "../../lib/plant";
-import { fmt, num, round } from "../../lib/format";
+import { num, round } from "../../lib/format";
 
-const props = defineProps({ doc: Object, data: { type: Object, default: () => ({}) } });
+const props = defineProps({
+	doc: Object,
+	data: { type: Object, default: () => ({}) },
+	stageNo: Number,
+	stageOptions: { type: Array, default: () => [] },
+});
 const readOnly = inject(READ_ONLY, ref(false));
 
-const materials = computed(() => props.doc.materials);
+const all = computed(() => props.doc.materials);
+const stageOf = (row) => num(row.stage_row_id) || 1;
+const materials = computed(() => all.value.filter((row) => stageOf(row) === props.stageNo));
 const balanceRow = computed(() => materials.value.find((row) => row.is_balance_item));
-const weightUom = computed(() => props.data.item?.weight_uom || "");
 const factorOf = (row) => num(props.data.weight_factors?.[row.item_code]);
 const weightOf = (row) => (factorOf(row) ? num(row.qty) / factorOf(row) : 0);
-const totalWeight = computed(() => materials.value.reduce((sum, row) => sum + weightOf(row), 0));
+const totalWeight = computed(() => all.value.reduce((sum, row) => sum + weightOf(row), 0));
 const percentageOf = (row) => (totalWeight.value ? round((weightOf(row) / totalWeight.value) * 100, 3) : 0);
 const uomOf = (row) => props.data.items?.[row.item_code]?.stock_uom || "";
+const toneOf = (row) => SWATCH[MATERIAL_TONES[all.value.indexOf(row) % MATERIAL_TONES.length]];
 
 function setPercentage(row, value) {
 	const batchWeight = num(props.data.formula_weight) || totalWeight.value;
@@ -26,15 +32,10 @@ function setPercentage(row, value) {
 	row.qty = round((num(value) / 100) * batchWeight * factorOf(row), 3);
 }
 
-const summary = computed(() => ({
-	label: `${fmt(round(totalWeight.value))} ${weightUom.value}`.trim(),
-	theme: balanceRow.value && num(balanceRow.value.qty) <= 0 ? "red" : "gray",
-}));
+const columns = "grid-cols-[1rem_minmax(0,1fr)_7.5rem_3.75rem_1.75rem]";
 
-const columns = "grid-cols-[1.25rem_minmax(0,1fr)_8rem_4.5rem_1.75rem]";
-
-const setBalance = (row) => materials.value.forEach((m) => (m.is_balance_item = m === row ? 1 : 0));
-const remove = (row) => materials.value.splice(materials.value.indexOf(row), 1);
+const setBalance = (row) => all.value.forEach((m) => (m.is_balance_item = m === row ? 1 : 0));
+const remove = (row) => all.value.splice(all.value.indexOf(row), 1);
 const rowMenu = (row) => [
 	{
 		group: __("Storage"),
@@ -44,6 +45,17 @@ const rowMenu = (row) => [
 			onClick: () => (row.storage = option.value),
 		})),
 	},
+	...(props.stageOptions.length
+		? [
+				{
+					group: __("Move to Stage"),
+					options: props.stageOptions.map((option) => ({
+						label: option.label,
+						onClick: () => (row.stage_row_id = option.stageNo),
+					})),
+				},
+		  ]
+		: []),
 	{
 		group: __("Formula"),
 		options: [
@@ -53,35 +65,25 @@ const rowMenu = (row) => [
 	},
 ];
 const add = () =>
-	materials.value.push({
+	all.value.push({
 		item_code: "",
 		qty: 0,
-		is_balance_item: materials.value.length ? 0 : 1,
-		stage_row_id: 1,
+		is_balance_item: all.value.length ? 0 : 1,
+		stage_row_id: props.stageNo,
 		storage: "Tank",
 	});
 </script>
 
 <template>
-	<section class="space-y-3">
-		<SectionHead
-			:title="__('Formula')"
-			:description="__('Raw materials for one batch. Type a quantity or a share of the batch weight.')"
-		>
-			<Badge
-				v-if="materials.length && weightUom"
-				:label="summary.label"
-				:theme="summary.theme"
-				variant="subtle"
-			/>
-		</SectionHead>
+	<div v-if="materials.length || !readOnly" class="space-y-2">
+		<p class="text-xs text-ink-gray-5">{{ __("Raw Materials") }}</p>
 		<div
 			v-if="materials.length"
 			class="divide-y divide-outline-gray-1 rounded-5 border border-outline-gray-2"
 		>
 			<div class="grid h-8 items-center gap-2 px-2 text-xs text-ink-gray-5" :class="columns">
 				<span />
-				<span>{{ __("Raw Material") }}</span>
+				<span>{{ __("Item") }}</span>
 				<span class="text-right">{{ __("Quantity") }}</span>
 				<span class="text-right">%</span>
 				<span />
@@ -94,7 +96,7 @@ const add = () =>
 			>
 				<span
 					class="size-4 rounded-full border border-outline-gray-3"
-					:class="SWATCH[MATERIAL_TONES[i % MATERIAL_TONES.length]]"
+					:class="toneOf(row)"
 					:title="__(row.storage || 'Tank')"
 				/>
 				<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
@@ -126,20 +128,19 @@ const add = () =>
 				</Dropdown>
 			</div>
 		</div>
-		<div class="flex items-center gap-3">
-			<Button v-if="!readOnly" icon-left="lucide-plus" :label="__('Add Material')" @click="add" />
-			<p class="min-w-0 truncate text-xs text-ink-gray-5">
-				<template v-if="balanceRow">
-					{{
-						__("{0} tops the batch up to the weight the formula needs", [
-							data.items?.[balanceRow.item_code]?.item_name || __("The balance item"),
-						])
-					}}
-				</template>
-				<template v-else>{{
-					__("No balance item, so the quantities must make the batch exactly")
-				}}</template>
-			</p>
-		</div>
-	</section>
+		<p v-if="balanceRow" class="text-xs text-ink-gray-5">
+			{{
+				__("{0} tops the batch up to the weight the formula needs", [
+					data.items?.[balanceRow.item_code]?.item_name || __("The balance item"),
+				])
+			}}
+		</p>
+		<Button
+			v-if="!readOnly"
+			size="sm"
+			icon-left="lucide-plus"
+			:label="__('Add Raw Material')"
+			@click="add"
+		/>
+	</div>
 </template>
