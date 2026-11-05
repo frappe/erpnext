@@ -2902,8 +2902,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			4500,
 		)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_rejected_qty_of_batched_finished_good_has_no_value(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
