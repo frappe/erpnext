@@ -1364,6 +1364,9 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
+	if doc.status == "Closed":
+		frappe.throw(_("Purchase Receipt {0} is closed and cannot be invoiced").format(frappe.bold(doc.name)))
+
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 	for ref, qty in get_qty_already_mapped(target_doc, "pr_detail").items():
@@ -1524,6 +1527,9 @@ def update_purchase_receipt_status(docname, status):
 	frappe.has_permission("Purchase Receipt", "submit", docname, throw=True)
 
 	pr = frappe.get_doc("Purchase Receipt", docname)
+	if pr.docstatus != 1:
+		frappe.throw(_("Only a submitted Purchase Receipt can be closed or reopened"))
+
 	pr.update_status(status)
 
 

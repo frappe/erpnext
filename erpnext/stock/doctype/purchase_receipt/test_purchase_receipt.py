@@ -6631,6 +6631,21 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 			delivery_note = make_inter_company_delivery_note(rejected_receipt.name)
 			self.assertEqual([row.qty for row in delivery_note.items], [8])
 
+	def test_closed_receipt_cannot_be_invoiced(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status
+
+		draft_receipt = make_purchase_receipt(qty=1, do_not_submit=1)
+		self.assertRaises(
+			frappe.ValidationError, update_purchase_receipt_status, draft_receipt.name, "Closed"
+		)
+
+		receipt = make_purchase_receipt(qty=4, rate=100)
+		invoice = make_purchase_invoice(receipt.name)
+		update_purchase_receipt_status(receipt.name, "Closed")
+
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice, receipt.name)
+		self.assertRaises(frappe.ValidationError, invoice.insert)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
