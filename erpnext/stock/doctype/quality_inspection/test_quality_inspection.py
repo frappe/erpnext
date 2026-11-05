@@ -456,6 +456,40 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.delete()
 		dn.delete()
 
+	def test_stored_reading_keeps_status_in_another_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 0, "max_value": 1, "reading_1": "1.5"}]
+		with user_number_format("#,###.##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_submit=True
+			)
+		self.assertEqual(qa.readings[0].status, "Rejected")
+
+		with user_number_format("#.###,##"):
+			qa.reload()
+			qa.submit()
+
+		self.assertEqual(qa.readings[0].status, "Rejected")
+		self.assertEqual(qa.status, "Rejected")
+
+	def test_edited_row_readings_are_checked_in_the_user_number_format(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 0, "max_value": 2, "reading_1": "1.5"}]
+		with user_number_format("#,###.##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_submit=True
+			)
+
+		with user_number_format("#.###,##"):
+			qa.reload()
+			qa.readings[0].max_value = 1.2
+
+			self.assertRaises(frappe.ValidationError, qa.save)
+
 	def test_parse_reading_in_every_number_format(self):
 		accepted = [
 			("#,###.##", "1.15", 1.15),
