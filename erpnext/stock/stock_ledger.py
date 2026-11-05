@@ -1008,6 +1008,7 @@ class update_entries_after:
 
 			if sle.dependant_sle_voucher_detail_no:
 				self.include_dependant_sle_in_reposting(sle)
+				self.include_returned_supplied_items_in_reposting(sle)
 				self.update_item_wh_wise_last_posted_sle(sle)
 
 			if i % 2000 == 0:
@@ -1059,19 +1060,31 @@ class update_entries_after:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
 		for depend_sle in dependant_sles:
-			item_wh_key = (depend_sle.item_code, depend_sle.warehouse)
-			if item_wh_key in self.distinct_dependant_item_wh:
+			if not self.queue_item_wh_entries(depend_sle):
 				continue
-
-			self.distinct_dependant_item_wh.add(item_wh_key)
-			self._sles.extend(self.get_future_entries_to_repost(depend_sle))
 
 			if produced_by_manufacture:
 				self.reposted_dependant_item_wh.setdefault(
-					item_wh_key,
+					(depend_sle.item_code, depend_sle.warehouse),
 					depend_sle.posting_datetime
 					or get_combine_datetime(depend_sle.posting_date, depend_sle.posting_time),
 				)
+
+	def include_returned_supplied_items_in_reposting(self, sle):
+		"""A receipt's return can bring the raw material back to another supplier warehouse."""
+		if sle.voucher_type == "Subcontracting Receipt" and flt(sle.actual_qty) < 0:
+			for return_sle in get_returned_supplied_item_sles(sle):
+				self.queue_item_wh_entries(return_sle)
+
+	def queue_item_wh_entries(self, sle):
+		"""Queue the item-warehouse's entries from `sle` on, once per repost; False if already queued."""
+		item_wh_key = (sle.item_code, sle.warehouse)
+		if item_wh_key in self.distinct_dependant_item_wh:
+			return False
+
+		self.distinct_dependant_item_wh.add(item_wh_key)
+		self._sles.extend(self.get_future_entries_to_repost(sle))
+		return True
 
 	def repost_stock_ledger_entry(self, sle):
 		if isinstance(sle, dict):
@@ -2635,6 +2648,33 @@ def get_sle_by_voucher_detail_no(voucher_detail_no):
 		},
 		fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime", "creation"],
 	)
+
+
+def get_returned_supplied_item_sles(sle):
+	"""Entries that bring back the raw material of `sle` in the returns of its Subcontracting Receipt."""
+	ledger = frappe.qb.DocType("Stock Ledger Entry")
+	receipt = frappe.qb.DocType("Subcontracting Receipt")
+
+	return (
+		frappe.qb.from_(ledger)
+		.join(receipt)
+		.on(receipt.name == ledger.voucher_no)
+		.select(
+			ledger.item_code,
+			ledger.warehouse,
+			ledger.posting_date,
+			ledger.posting_time,
+			ledger.posting_datetime,
+			ledger.creation,
+		)
+		.where(
+			(ledger.voucher_type == "Subcontracting Receipt")
+			& (ledger.item_code == sle.item_code)
+			& (ledger.actual_qty > 0)
+			& (ledger.is_cancelled == 0)
+			& (receipt.return_against == sle.voucher_no)
+		)
+	).run(as_dict=True)
 
 
 def get_prior_ledger_condition(table, posting_datetime, creation):
