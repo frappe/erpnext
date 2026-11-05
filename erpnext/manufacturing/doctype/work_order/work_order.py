@@ -65,6 +65,17 @@ class SerialNoQtyError(frappe.ValidationError):
 	pass
 
 
+_BOM_OPERATION_FIELDS_FROM_WORK_ORDER = (
+	"operation",
+	"workstation",
+	"workstation_type",
+	"description",
+	"hour_rate",
+	"sequence_id",
+	"batch_size",
+)
+
+
 class WorkOrder(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -1527,29 +1538,105 @@ class WorkOrder(Document):
 
 	@frappe.whitelist()
 	def make_bom(self):
-		data = frappe.db.sql(
-			""" select sed.item_code, sed.qty, sed.s_warehouse
-			from `tabStock Entry Detail` sed, `tabStock Entry` se
-			where se.name = sed.parent and se.purpose = 'Manufacture'
-			and (sed.t_warehouse is null or sed.t_warehouse = '') and se.docstatus = 1
-			and se.work_order = %s""",
-			(self.name),
-			as_dict=1,
-		)
-
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
 		bom.conversion_rate = 1
+		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
-		for d in data:
+		for d in self.get_consumed_items_for_bom():
 			bom.append("items", {"item_code": d.item_code, "qty": d.qty, "source_warehouse": d.s_warehouse})
 
 		if self.operations:
-			bom.set("operations", self.operations)
 			bom.with_operations = 1
+			for row in self.get_bom_operation_rows(bom.quantity):
+				bom.append("operations", row)
 
 		bom.set_bom_material_details()
 		return bom
+
+	def get_consumed_items_for_bom(self):
+		sed = frappe.qb.DocType("Stock Entry Detail")
+		se = frappe.qb.DocType("Stock Entry")
+		return (
+			frappe.qb.from_(sed)
+			.inner_join(se)
+			.on(se.name == sed.parent)
+			.select(sed.item_code, sed.s_warehouse, Sum(sed.transfer_qty).as_("qty"))
+			.where(
+				(se.purpose == "Manufacture")
+				& (sed.t_warehouse.isnull() | (sed.t_warehouse == ""))
+				& (se.docstatus == 1)
+				& (se.work_order == self.name)
+			)
+			.groupby(sed.item_code, sed.s_warehouse)
+			.orderby(Min(sed.idx))
+			.run(as_dict=1)
+		)
+
+	def get_bom_operation_rows(self, bom_qty):
+		source_operations = self.get_source_bom_operations()
+		occurrence = {}
+		rows = []
+		for operation in self.operations:
+			key = (operation.bom or self.bom_no, operation.operation)
+			idx = occurrence[key] = occurrence.get(key, -1) + 1
+			sources = source_operations.get(key, [])
+			source = sources[idx] if idx < len(sources) else None
+			if source and not source.keeps_own_time:
+				source = None
+
+			rows.append(self.get_bom_operation_row(operation, bom_qty, source))
+
+		return rows
+
+	def get_source_bom_operations(self):
+		operations = frappe.get_all(
+			"BOM Operation",
+			filters={"parent": self.bom_no, "parenttype": "BOM"},
+			fields=["parent", "operation", "time_in_mins", "fixed_time", "batch_size"],
+			order_by="idx",
+		)
+		batch_based = set(
+			frappe.get_all(
+				"Operation",
+				filters={
+					"name": ("in", list({d.operation for d in operations}) or [""]),
+					"create_job_card_based_on_batch_size": 1,
+				},
+				pluck="name",
+			)
+		)
+
+		source_operations = {}
+		for d in operations:
+			d.keeps_own_time = cint(d.fixed_time) or (d.operation in batch_based and flt(d.batch_size))
+			source_operations.setdefault((d.parent, d.operation), []).append(d)
+		return source_operations
+
+	def get_bom_operation_row(self, operation, bom_qty, source=None):
+		row = {}
+		for fieldname in _BOM_OPERATION_FIELDS_FROM_WORK_ORDER:
+			row[fieldname] = operation.get(fieldname)
+
+		if source:
+			row.update(
+				{
+					"time_in_mins": source.time_in_mins,
+					"fixed_time": source.fixed_time,
+					"batch_size": source.batch_size,
+				}
+			)
+			return row
+
+		if flt(operation.completed_qty) and flt(operation.actual_operation_time):
+			time_per_unit = flt(operation.actual_operation_time) / flt(operation.completed_qty)
+		else:
+			time_per_unit = flt(operation.time_in_mins) / flt(self.qty)
+
+		row["time_in_mins"] = time_per_unit * flt(bom_qty)
+		if operation.bom and operation.bom != self.bom_no:
+			row["batch_size"] = flt(bom_qty) or 1
+		return row
 
 
 @frappe.whitelist()
