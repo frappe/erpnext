@@ -475,16 +475,24 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 	will search in group (Customer Group / Supplier Group),
 	finally will return default."""
 
-	def account_perm_check(account):
-		ptype = "select" if frappe.only_has_select_perm("Account") else "read"
-		if frappe.has_permission("Account", ptype, account):
-			return
+	account = find_party_account(party_type, party, company)
+	if account:
+		check_account_permission(account)
 
-		# Using custom message to prevent data leak in case of `apply_strict_permission` is enabled.
-		frappe.throw(
-			_("User don't have permissions to select/read this account."), exc=frappe.PermissionError
-		)
+	if include_advance and party and party_type in ["Customer", "Supplier", "Student"]:
+		advance_account = get_party_advance_account(party_type, party, company)
 
+		if advance_account:
+			check_account_permission(advance_account)
+			return [account, advance_account]
+
+		return [account]
+
+	return account
+
+
+def find_party_account(party_type, party, company):
+	"""Resolve the account after the caller has authorized access to the party."""
 	if not party_type:
 		frappe.throw(_("Party Type is mandatory"))
 	if not company:
@@ -529,19 +537,16 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 			default_account_name = "default_" + account_type.lower() + "_account"
 			account = frappe.get_cached_value("Company", company, default_account_name)
 
-	if account:
-		account_perm_check(account)
-
-	if include_advance and party and party_type in ["Customer", "Supplier", "Student"]:
-		advance_account = get_party_advance_account(party_type, party, company)
-
-		if advance_account:
-			account_perm_check(advance_account)
-			return [account, advance_account]
-
-		return [account]
-
 	return account
+
+
+def check_account_permission(account):
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if frappe.has_permission("Account", ptype, account):
+		return
+
+	# Using custom message to prevent data leak in case of `apply_strict_permission` is enabled.
+	frappe.throw(_("User don't have permissions to select/read this account."), exc=frappe.PermissionError)
 
 
 def get_party_advance_account(party_type, party, company):
