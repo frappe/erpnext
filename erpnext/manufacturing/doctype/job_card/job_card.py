@@ -2060,7 +2060,8 @@ class JobCard(Document):
 			if kwargs.get("sub_operation"):
 				row.operation = kwargs.get("sub_operation")
 
-			if kwargs.employees[-1].get("employee") == row.employee:
+			# the cycle's qty goes on one row, the latest, as without an end time
+			if row is self.time_logs[-1]:
 				row.completed_qty = kwargs.completed_qty
 
 			row.db_update()
