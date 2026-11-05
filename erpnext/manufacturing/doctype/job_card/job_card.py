@@ -1260,6 +1260,8 @@ def make_time_log(args):
 
 @frappe.whitelist()
 def get_operation_details(work_order, operation):
+	frappe.has_permission("Work Order", "read", doc=work_order, throw=True)
+
 	if work_order and operation:
 		return frappe.get_all(
 			"Work Order Operation",
@@ -1273,6 +1275,8 @@ def get_operations(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("work_order"):
 		frappe.msgprint(_("Please select a Work Order first."))
 		return []
+
+	frappe.has_permission("Work Order", "read", doc=filters.get("work_order"), throw=True)
 	args = {"parent": filters.get("work_order")}
 	if txt:
 		args["operation"] = ("like", f"%{txt}%")
@@ -1435,9 +1439,9 @@ def get_job_details(start: str, end: str, filters: str | None = None):
 		"Work In Progress": "#D3D3D3",
 	}
 
-	from frappe.desk.reportview import get_filters_cond
+	from frappe.desk.reportview import get_filters_cond, get_match_cond
 
-	conditions = get_filters_cond("Job Card", filters, [])
+	conditions = get_filters_cond("Job Card", filters, []) + get_match_cond("Job Card")
 
 	job_cards = frappe.db.sql(
 		f""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
