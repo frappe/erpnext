@@ -18,7 +18,7 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	query_filters = {"docstatus": ("<", 2)}
+	query_filters = {"docstatus": 1}
 
 	fields = [
 		"name",
