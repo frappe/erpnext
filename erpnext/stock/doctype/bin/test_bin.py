@@ -68,6 +68,53 @@ class TestBin(FrappeTestCase):
 		bin = frappe.db.get_value("Bin", bin_name, ["actual_qty", "projected_qty"], as_dict=1)
 		self.assertEqual((bin.actual_qty, bin.projected_qty), (10, 10))
 
+	def test_stock_manager_can_recalculate_qty(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin.db_set("actual_qty", 0)
+
+		user = create_user("test_bin_recalculate@example.com", "Stock Manager")
+		frappe.set_user(user.name)
+		try:
+			bin.reload()
+			bin.recalculate_qty()
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(frappe.db.get_value("Bin", bin.name, "actual_qty"), 10)
+
+	def test_recalculate_qty_ignores_client_supplied_fields(self):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100)
+
+		bin = frappe.get_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		reserved_stock = bin.reserved_stock
+		bin.reserved_stock = 999
+		bin.actual_qty = 999
+		bin.recalculate_qty()
+
+		values = frappe.db.get_value("Bin", bin.name, ["reserved_stock", "actual_qty"], as_dict=1)
+		self.assertEqual(values.reserved_stock, reserved_stock)
+		self.assertEqual(values.actual_qty, 10)
+
+	def test_bin_column_update_clears_cached_bin(self):
+		from erpnext.stock.doctype.bin.bin import update_bin_columns
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		bin = _create_bin(item_code, "_Test Warehouse - _TC")
+		frappe.get_cached_doc("Bin", bin.name)
+
+		update_bin_columns(bin.name, {"ordered_qty": 5})
+
+		cached_bin = frappe.get_cached_doc("Bin", bin.name)
+		self.assertEqual((cached_bin.ordered_qty, cached_bin.projected_qty), (5, 5))
+
 	def test_repost_resets_bin_without_sle(self):
 		"""A repost must zero the bin when the ledger is empty, e.g. after entries were deleted."""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
