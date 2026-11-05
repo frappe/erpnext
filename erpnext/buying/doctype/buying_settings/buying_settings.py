@@ -86,7 +86,11 @@ def is_rejected_material_valued(voucher_type: str, voucher_detail_no: str | None
 	warehouse. A Purchase Receipt books rejected material against Stock Received But Not Billed, so
 	the supplier still owes an invoice for it, and Buying Settings decides. A stock updating Purchase
 	Invoice pays for it only when it bills the received qty, which is what the settings ask for.
+	A Subcontracting Receipt books the whole cost on the accepted qty, so its rejected material has none.
 	"""
+	if voucher_type == "Subcontracting Receipt":
+		return False
+
 	if is_material_from_in_transit_warehouse(voucher_type, voucher_detail_no):
 		return True
 
