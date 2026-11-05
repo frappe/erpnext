@@ -1522,7 +1522,8 @@ def get_purchase_order_item(item, warehouse=None):
 		frappe.get_precision("Purchase Order Item", "qty"),
 	)
 	if is_whole_number(uom):
-		qty = math.ceil(qty)
+		# a demand too small for the qty precision still needs one unit
+		qty = max(math.ceil(qty), 1)
 
 	return {
 		"item_code": item.item_code,
