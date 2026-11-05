@@ -236,15 +236,15 @@ class Employee(NestedSet):
 			return
 
 		previous = self.get_doc_before_save()
-		if previous.create_user_permission:
-			self.remove_user_permissions(previous_user_id, previous.company)
-		else:
-			remove_user_permission("Employee", self.name, previous_user_id, ignore_permissions=True)
-
-		user = frappe.get_doc("User", previous_user_id)
+		self.remove_user_access(previous_user_id, previous.company, previous.create_user_permission)
 		# The saved Employee no longer links to the User, so this checks only other employees.
-		validate_employee_role(user)
-		user.save(ignore_permissions=True)
+		remove_employee_role(previous_user_id)
+
+	def remove_user_access(self, user, company, create_user_permission):
+		if create_user_permission:
+			self.remove_user_permissions(user, company)
+		else:
+			remove_user_permission("Employee", self.name, user, ignore_permissions=True)
 
 	def remove_user_permissions(self, user, company, include_employee=True):
 		"""Remove the User Permissions that Create User Permission adds."""
@@ -450,6 +450,13 @@ class Employee(NestedSet):
 	def on_trash(self):
 		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
+		if self.user_id:
+			self.validate_user_access()
+			self.remove_user_access(self.user_id, self.company, self.create_user_permission)
+
+	def after_delete(self):
+		if self.user_id:
+			remove_employee_role(self.user_id)
 
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
@@ -471,6 +478,13 @@ def get_admin_roles() -> set[str]:
 			perm.role for perm in frappe.get_meta(doctype).permissions if perm.write and not perm.permlevel
 		)
 	return roles
+
+
+def remove_employee_role(user_id):
+	"""Remove the Employee roles from the User when no Employee links to it."""
+	user = frappe.get_doc("User", user_id)
+	validate_employee_role(user)
+	user.save(ignore_permissions=True)
 
 
 def validate_employee_role(doc, method=None, ignore_emp_check=False):
