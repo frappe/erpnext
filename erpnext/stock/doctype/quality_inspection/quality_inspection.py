@@ -473,3 +473,31 @@ def parse_float(num: str) -> float:
 		num = num.replace("#$", ".")
 
 	return flt(num)
+
+
+def validate_qi_reference(doc, row, item_code=None):
+	if not row.get("quality_inspection"):
+		return
+
+	qi = frappe.db.get_value(
+		"Quality Inspection",
+		row.quality_inspection,
+		["reference_type", "reference_name", "item_code"],
+		as_dict=True,
+	)
+	if not qi:
+		return
+
+	if qi.reference_type != doc.doctype or qi.reference_name != doc.name:
+		frappe.throw(
+			_(
+				"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
+			).format(row.idx, frappe.bold(doc.doctype), frappe.bold(doc.name))
+		)
+
+	if qi.item_code != (item_code or row.item_code):
+		frappe.throw(
+			_("Row #{0}: Please select a valid Quality Inspection with Item Code {1}.").format(
+				row.idx, frappe.bold(item_code or row.item_code)
+			)
+		)
