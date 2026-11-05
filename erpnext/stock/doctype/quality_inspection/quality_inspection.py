@@ -21,6 +21,19 @@ from erpnext.stock.services.quality_inspection_service import (
 	QI_OUTGOING_PURPOSES,
 )
 
+READING_STATUS_FIELDS = (
+	"specification",
+	"numeric",
+	"manual_inspection",
+	"formula_based_criteria",
+	"acceptance_formula",
+	"min_value",
+	"max_value",
+	"value",
+	"reading_value",
+	*(f"reading_{i}" for i in range(1, 11)),
+)
+
 
 class QualityInspection(Document):
 	# begin: auto-generated types
@@ -338,7 +351,23 @@ class QualityInspection(Document):
 			frappe.get_lazy_doc(self.reference_type, self.reference_name).notify_update()
 
 	def inspect_and_set_status(self):
+		before_save = self.get_doc_before_save()
+		stored_readings = {reading.name: reading for reading in before_save.readings} if before_save else {}
+
 		for reading in self.readings:
+			stored = stored_readings.get(reading.name)
+			unchanged = bool(stored)
+			if unchanged:
+				for field in READING_STATUS_FIELDS:
+					if reading.get(field) != stored.get(field):
+						unchanged = False
+						break
+
+			if unchanged:
+				# Re-reading an unchanged value in the current user's locale can change its meaning.
+				reading.status = stored.status
+				continue
+
 			if not reading.manual_inspection:  # dont auto set status if manual
 				if reading.formula_based_criteria:
 					self.set_status_based_on_acceptance_formula(reading)
