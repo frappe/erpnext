@@ -564,6 +564,51 @@ class TestPutawayRule(FrappeTestCase):
 		self.assertEqual(stock_entry.items[0].serial_and_batch_bundle, picked_bundle)
 		self.assertEqual(get_batch_qty(batch_2, self.warehouse_1, item), 5)
 
+	def test_putaway_rule_preview_leaves_the_saved_bundle_alone(self):
+		"""The form's checkbox previews the split; the saved row must keep its full bundle."""
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+
+		item, (_batch_1, batch_2) = self.make_item_with_two_batches()
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=2)
+
+		stock_entry = make_stock_entry(
+			item_code=item,
+			qty=5,
+			source="_Test Warehouse - _TC",
+			target="Finished Goods - _TC",
+			batch_no=batch_2,
+			purpose="Material Transfer",
+			do_not_submit=1,
+		)
+		picked_bundle = stock_entry.items[0].serial_and_batch_bundle
+
+		rows = apply_putaway_rule(
+			"Stock Entry",
+			frappe.as_json([row.as_dict() for row in stock_entry.items]),
+			stock_entry.company,
+			sync=True,
+			purpose="Material Transfer",
+		)
+
+		self.assertEqual(
+			[(row.t_warehouse, row.qty) for row in rows], [(self.warehouse_1, 3), (self.warehouse_2, 2)]
+		)
+		bundles = [row.serial_and_batch_bundle for row in rows]
+		self.assertNotIn(picked_bundle, bundles)
+		self.assertEqual([get_batch_from_bundle(bundle) for bundle in bundles], [batch_2, batch_2])
+		self.assertEqual([self.bundle_qty(bundle) for bundle in bundles], [3, 2])
+		self.assertEqual(self.bundle_qty(picked_bundle), 5)
+
+		stock_entry.reload()
+		stock_entry.submit()
+		self.assertEqual(stock_entry.items[0].serial_and_batch_bundle, picked_bundle)
+		self.assertEqual(get_batch_qty(batch_2, "Finished Goods - _TC", item), 5)
+
+	def bundle_qty(self, bundle):
+		return abs(frappe.db.get_value("Serial and Batch Bundle", bundle, "total_qty"))
+
 	def test_putaway_rule_moves_the_receipt_bundle_to_the_rule_warehouse(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
