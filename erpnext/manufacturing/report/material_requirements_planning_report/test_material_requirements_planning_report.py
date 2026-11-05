@@ -632,6 +632,16 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		purchase_order = get_created_order(plan.mps, "Purchase Order")
 		self.assertEqual((purchase_order.items[0].qty, purchase_order.items[0].uom), (2, "Box"))
 
+	def test_purchase_order_qty_ignores_float_noise_of_a_large_order(self):
+		plan = make_mrp_plan(self, planned_qty=27000000)
+		make_bom(item=plan.fg_item, quantity=3, raw_materials=[plan.rm_item], rm_qty=7, rate=100)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		purchase_order = get_created_order(plan.mps, "Purchase Order")
+		self.assertEqual(purchase_order.items[0].qty, 63000000)
+
 	def test_sales_order_in_the_mps_is_not_added_again(self):
 		plan = make_mrp_plan(self)
 		make_mrp_sales_order(plan.fg_item, 10, add_days(today(), 30))
