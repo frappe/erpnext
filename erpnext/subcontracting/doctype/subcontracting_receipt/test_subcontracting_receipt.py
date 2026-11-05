@@ -1521,6 +1521,62 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			)
 		)
 
+	def test_return_stock_gl_matches_ledger_after_reposting(self):
+		company = "_Test Company with perpetual inventory"
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], company=company, currency="INR")
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=[
+				{
+					"warehouse": "Stores - TCP1",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 10,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			],
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+		scr_return = make_return_subcontracting_receipt(
+			scr_name=scr.name, qty=-10, supplier_warehouse=scr.supplier_warehouse
+		)
+		make_stock_entry(
+			item_code=rm_item,
+			qty=10,
+			target=rm_items[0]["warehouse"],
+			basic_rate=500,
+			posting_date=add_days(today(), -2),
+			company=company,
+		)
+
+		stock_value = sum(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": scr_return.name, "is_cancelled": 0},
+				pluck="stock_value_difference",
+			)
+		)
+		stock_accounts = {
+			get_inventory_account(company, warehouse)
+			for warehouse in (scr_return.supplier_warehouse, scr_return.items[0].warehouse)
+		}
+		gl_value = sum(
+			gle.debit - gle.credit
+			for gle in get_gl_entries(scr_return.doctype, scr_return.name, skip_cancelled=True)
+			if gle.account in stock_accounts
+		)
+		self.assertEqual(flt(gl_value, 2), flt(stock_value, 2))
+
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
 		set_backflush_based_on("BOM")
 
