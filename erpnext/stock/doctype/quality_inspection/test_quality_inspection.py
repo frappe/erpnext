@@ -317,6 +317,30 @@ class TestQualityInspection(FrappeTestCase):
 		delivery_note.items[0].quality_inspection = qa.name
 		self.assertRaises(frappe.ValidationError, delivery_note.insert)
 
+	@change_settings("Stock Settings", {"action_if_quality_inspection_is_not_submitted": "Stop"})
+	def test_second_qi_does_not_take_over_inspected_row(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value("Item", "_Test Item with QA", "inspection_required_before_purchase", 1)
+		receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		first = create_quality_inspection(
+			reference_type="Purchase Receipt", reference_name=receipt.name, inspection_type="Incoming"
+		)
+		receipt.reload()
+		receipt.submit()
+
+		second = create_quality_inspection(
+			reference_type="Purchase Receipt",
+			reference_name=receipt.name,
+			inspection_type="Incoming",
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, second.save)
+		self.assertEqual(
+			frappe.db.get_value("Purchase Receipt Item", receipt.items[0].name, "quality_inspection"),
+			first.name,
+		)
+
 	def test_job_card_qi_keeps_manually_rejected_reading(self):
 		create_quality_inspection_parameter("Finish")
 		parameter = {"specification": "Finish", "numeric": 0, "value": "OK"}
