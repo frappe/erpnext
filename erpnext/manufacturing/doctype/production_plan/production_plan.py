@@ -1438,31 +1438,44 @@ def get_subitems(
 		if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
 			continue
 
-		if not data.get("include_exploded_items") or not child_bom:
-			if d.item_code in item_details:
-				item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
-			else:
-				if not d.conversion_factor and d.purchase_uom:
-					d.conversion_factor = get_uom_conversion_factor(d.item_code, d.purchase_uom)
+		explode = (
+			data.get("include_exploded_items")
+			and child_bom
+			and _should_explode_subitem(d, include_subcontracted_items)
+			and d.qty > 0
+		)
+		if not explode:
+			_merge_subitem(item_details, d)
+			continue
 
-				item_details[d.item_code] = d
-
-		if data.get("include_exploded_items") and child_bom:
-			if (
-				d.default_material_request_type in ["Manufacture", "Purchase"] and not d.is_sub_contracted
-			) or (d.is_sub_contracted and include_subcontracted_items):
-				if d.qty > 0:
-					get_subitems(
-						doc,
-						data,
-						item_details,
-						child_bom,
-						company,
-						include_non_stock_items,
-						include_subcontracted_items,
-						d.qty,
-					)
+		get_subitems(
+			doc,
+			data,
+			item_details,
+			child_bom,
+			company,
+			include_non_stock_items,
+			include_subcontracted_items,
+			d.qty,
+		)
 	return item_details
+
+
+def _merge_subitem(item_details, d):
+	if d.item_code in item_details:
+		item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
+		return
+
+	if not d.conversion_factor and d.purchase_uom:
+		d.conversion_factor = get_uom_conversion_factor(d.item_code, d.purchase_uom)
+	item_details[d.item_code] = d
+
+
+def _should_explode_subitem(d, include_subcontracted_items):
+	return bool(
+		(d.default_material_request_type in ["Manufacture", "Purchase"] and not d.is_sub_contracted)
+		or (d.is_sub_contracted and include_subcontracted_items)
+	)
 
 
 def get_material_request_items(
