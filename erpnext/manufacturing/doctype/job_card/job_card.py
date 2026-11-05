@@ -1890,15 +1890,24 @@ class JobCard(Document):
 		self.save()
 
 	def add_time_logs_for_employess(self, kwargs):
+<<<<<<< HEAD
 		row = None
+=======
+		if not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
+			self.update_latest_time_log_qty(kwargs)
+			self.set_status(update_status=True)
+			return
+
+>>>>>>> ba41e09 (fix(manufacturing): set a qty-only completion once and pick logs by position)
 		update_status = False
 		kwargs.employees = kwargs.employees or [frappe._dict(employee=None)]
-		# picked before any row is closed, so the cycle's qty goes on exactly one row
-		cycle_log = self.get_cycle_time_log(kwargs)
+		# picked before any log is closed, so the cycle's qty goes on one log
+		cycle_log = next((row for row in reversed(self.time_logs) if not row.to_time), None)
 
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
 			if kwargs.from_time and not kwargs.to_time:
+<<<<<<< HEAD
 				if kwargs.get("qty") is not None:
 					kwargs.completed_qty = kwargs.qty
 
@@ -1921,6 +1930,9 @@ class JobCard(Document):
 
 					row.completed_qty = kwargs.completed_qty
 					row.db_update()
+=======
+				self.add_new_time_log_for_employee(kwargs)
+>>>>>>> ba41e09 (fix(manufacturing): set a qty-only completion once and pick logs by position)
 			else:
 <<<<<<< HEAD
 =======
@@ -1953,17 +1965,13 @@ class JobCard(Document):
 		row.db_update()
 		self.db_set("status", "Work In Progress")
 
-	def get_cycle_time_log(self, kwargs):
-		"""Time log that holds the current cycle's qty: the one started last, among the open ones when closing."""
-		rows = [row for row in self.time_logs if not (kwargs.to_time and row.to_time)]
-		return max(rows, key=lambda row: (get_datetime(row.from_time), row.idx), default=None)
-
-	def update_cycle_time_log_qty(self, cycle_log, kwargs):
-		if not cycle_log:
+	def update_latest_time_log_qty(self, kwargs):
+		"""Without an end time the qty is for the current cycle, so only the latest time log gets it."""
+		if not self.time_logs:
 			return
 
-		cycle_log.completed_qty = kwargs.completed_qty
-		cycle_log.db_update()
+		self.time_logs[-1].completed_qty = kwargs.completed_qty
+		self.time_logs[-1].db_update()
 
 	def close_time_log_for_employee(self, kwargs, cycle_log):
 		for row in self.time_logs:
