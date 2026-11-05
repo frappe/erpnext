@@ -37,6 +37,7 @@ export class ProcessView {
 			design: JSON.parse(JSON.stringify(design)),
 			readOnly: !this.view.is_editable(),
 			onChange: (rows) => this.set_rows(rows),
+			onUpdate: (values) => this.frm.set_value(values),
 		};
 	}
 
@@ -59,5 +60,6 @@ export class ProcessView {
 			this.frm.doc[table].forEach((row, index) => (row.idx = index + 1));
 		}
 		this.frm.dirty();
+		this.view.render_summary(true);
 	}
 }

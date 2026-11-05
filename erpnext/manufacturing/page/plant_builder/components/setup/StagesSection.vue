@@ -56,7 +56,7 @@ const addOptions = computed(() =>
 			:title="__('Process Stages')"
 			:description="
 				__(
-					'Each stage is one machine that makes a semi-finished good. It takes the output of the stage before it, or of every stage that runs with it. The last stage packs the finished good.'
+					'Each stage is one machine that makes a semi-finished good from its raw materials and the output of the stages before it. Stages that run with each other start at the same time. The last stage packs the finished good.'
 				)
 			"
 		/>
@@ -69,6 +69,8 @@ const addOptions = computed(() =>
 			:machine-model="models[i]"
 			:output="outputs[stage.operation_id]"
 			:output-uom="items[stage.semi_finished_good]?.stock_uom"
+			:items="items"
+			:packing-index="models.findIndex(isPackingModel)"
 			:focused="focus === i"
 			@focus="emit('focus', $event)"
 		/>

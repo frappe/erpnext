@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, provide, ref, watch } from "vue";
-import { Button, ScrollArea, Tooltip } from "frappe-ui";
+import { Button, FormControl, ScrollArea, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SetupStatus from "../components/setup/SetupStatus.vue";
 import FormulaSection from "../components/setup/FormulaSection.vue";
@@ -12,7 +12,7 @@ import { previewView } from "../lib/scene";
 import { num } from "../lib/format";
 
 const props = defineProps({ design: Object, readOnly: Boolean });
-const emit = defineEmits(["change"]);
+const emit = defineEmits(["change", "update"]);
 
 const HEADER_FIELDS = ["item_code", "qty", "raw_material_warehouse"];
 
@@ -112,6 +112,28 @@ const view = computed(() => previewView(scenePlant.value, animate.value, focus.v
 		<aside class="flex w-[32rem] shrink-0 flex-col border-r border-outline-gray-2">
 			<ScrollArea class="min-h-0 flex-1" viewport-class="px-5 pt-5 pb-16">
 				<fieldset :disabled="readOnly" class="m-0 min-w-0 space-y-8 border-0 p-0">
+					<div class="grid grid-cols-2 gap-3">
+						<FormControl
+							:model-value="design.qty"
+							type="number"
+							variant="outline"
+							:label="__('Finished Good Quantity')"
+							:debounce="500"
+							@update:model-value="emit('update', { qty: num($event) })"
+						>
+							<template v-if="data.item?.stock_uom" #suffix>
+								<span class="text-xs text-ink-gray-5">{{ data.item.stock_uom }}</span>
+							</template>
+						</FormControl>
+						<FormControl
+							:model-value="design.formula_tolerance"
+							type="number"
+							variant="outline"
+							:label="__('Formula Tolerance (%)')"
+							:debounce="500"
+							@update:model-value="emit('update', { formula_tolerance: num($event) })"
+						/>
+					</div>
 					<SetupStatus :errors="data.errors" />
 					<FormulaSection :doc="doc" :data="data" />
 					<StagesSection

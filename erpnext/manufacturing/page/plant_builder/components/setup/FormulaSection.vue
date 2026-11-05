@@ -4,8 +4,8 @@ import { Badge, Button, Dropdown, TextInput } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
-import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH, isPackingModel } from "../../lib/machines";
-import { READ_ONLY, machineModelOf } from "../../lib/plant";
+import { MATERIAL_TONES, STORAGE_OPTIONS, SWATCH } from "../../lib/machines";
+import { READ_ONLY } from "../../lib/plant";
 import { fmt, num, round } from "../../lib/format";
 
 const props = defineProps({ doc: Object, data: { type: Object, default: () => ({}) } });
@@ -31,20 +31,7 @@ const summary = computed(() => ({
 	theme: balanceRow.value && num(balanceRow.value.qty) <= 0 ? "red" : "gray",
 }));
 
-const stageOptions = computed(() =>
-	props.doc.stages
-		.map((stage, i) => ({ stage, label: String(i + 1), value: String(i + 1) }))
-		.filter(({ stage }) => !isPackingModel(machineModelOf(stage, props.data.machines || {})))
-		.map(({ label, value }) => ({ label, value }))
-);
-const showStage = computed(() => stageOptions.value.length > 1);
-const columns = computed(() =>
-	showStage.value
-		? "grid-cols-[1.25rem_minmax(0,1fr)_3rem_7.5rem_4rem_1.75rem]"
-		: "grid-cols-[1.25rem_minmax(0,1fr)_7rem_4.5rem_1.75rem]"
-);
-const stageOf = (row) => String(row.stage_row_id || 1);
-const setStage = (row, value) => (row.stage_row_id = Number(value) || 1);
+const columns = "grid-cols-[1.25rem_minmax(0,1fr)_8rem_4.5rem_1.75rem]";
 
 const setBalance = (row) => materials.value.forEach((m) => (m.is_balance_item = m === row ? 1 : 0));
 const remove = (row) => materials.value.splice(materials.value.indexOf(row), 1);
@@ -79,11 +66,7 @@ const add = () =>
 	<section class="space-y-3">
 		<SectionHead
 			:title="__('Formula')"
-			:description="
-				__(
-					'Raw materials for one batch and the stage that takes each one. Type a quantity or a share of the batch weight.'
-				)
-			"
+			:description="__('Raw materials for one batch. Type a quantity or a share of the batch weight.')"
 		>
 			<Badge
 				v-if="materials.length && weightUom"
@@ -99,7 +82,6 @@ const add = () =>
 			<div class="grid h-8 items-center gap-2 px-2 text-xs text-ink-gray-5" :class="columns">
 				<span />
 				<span>{{ __("Raw Material") }}</span>
-				<span v-if="showStage">{{ __("Stage") }}</span>
 				<span class="text-right">{{ __("Quantity") }}</span>
 				<span class="text-right">%</span>
 				<span />
@@ -116,42 +98,27 @@ const add = () =>
 					:title="__(row.storage || 'Tank')"
 				/>
 				<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
-				<DeskControl
-					v-if="showStage"
-					:model-value="stageOf(row)"
-					fieldtype="Select"
-					:options="stageOptions"
-					@update:model-value="setStage(row, $event)"
-				/>
-				<span
-					v-if="row.is_balance_item"
-					class="truncate text-right text-sm tabular-nums text-ink-gray-6"
-					:title="__('Balance item')"
-				>
-					{{ fmt(row.qty) }} {{ uomOf(row) }}
-				</span>
 				<TextInput
-					v-else
-					v-model="row.qty"
+					:model-value="row.is_balance_item ? round(row.qty, 3) : row.qty"
 					type="number"
 					size="sm"
-					class="[&_input]:bg-surface-base [&_input]:text-right"
-					:title="uomOf(row)"
+					class="[&_input]:text-right"
+					:class="{ '[&_input]:bg-surface-base': !row.is_balance_item }"
+					:disabled="!!row.is_balance_item"
+					:title="row.is_balance_item ? __('Balance item') : uomOf(row)"
+					@update:model-value="row.qty = $event"
 				>
 					<template v-if="uomOf(row)" #suffix>
 						<span class="text-xs text-ink-gray-5">{{ uomOf(row) }}</span>
 					</template>
 				</TextInput>
-				<span v-if="row.is_balance_item" class="text-right text-sm tabular-nums text-ink-gray-6">
-					{{ fmt(percentageOf(row)) }}
-				</span>
 				<TextInput
-					v-else
 					:model-value="percentageOf(row)"
 					type="number"
 					size="sm"
-					class="[&_input]:bg-surface-base [&_input]:text-right"
-					:disabled="!factorOf(row)"
+					class="[&_input]:text-right"
+					:class="{ '[&_input]:bg-surface-base': !row.is_balance_item }"
+					:disabled="!!row.is_balance_item || !factorOf(row)"
 					@update:model-value="setPercentage(row, $event)"
 				/>
 				<Dropdown v-if="!readOnly" :options="rowMenu(row)">
