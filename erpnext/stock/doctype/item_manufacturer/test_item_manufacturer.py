@@ -16,21 +16,23 @@ class TestItemManufacturer(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def make_row(self, manufacturer, part_no, is_default=0):
+	def make_row(self, manufacturer, part_no, is_default=0, item_code=None):
 		return frappe.get_doc(
 			{
 				"doctype": "Item Manufacturer",
-				"item_code": self.item_code,
+				"item_code": item_code or self.item_code,
 				"manufacturer": manufacturer,
 				"manufacturer_part_no": part_no,
 				"is_default": is_default,
 			}
 		).insert()
 
-	def get_item_default(self):
+	def get_item_default(self, item_code=None):
 		return tuple(
 			frappe.db.get_value(
-				"Item", self.item_code, ["default_item_manufacturer", "default_manufacturer_part_no"]
+				"Item",
+				item_code or self.item_code,
+				["default_item_manufacturer", "default_manufacturer_part_no"],
 			)
 		)
 
@@ -47,5 +49,44 @@ class TestItemManufacturer(FrappeTestCase):
 
 		row.update({"manufacturer": "_Test IM Maker 2", "manufacturer_part_no": "Q-9", "is_default": 0})
 		row.save()
+
+		self.assertEqual(self.get_item_default(), (None, None))
+
+	def test_moving_default_row_clears_only_old_item_default(self):
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		row = self.make_row("_Test IM Maker 1", "P-1", is_default=1)
+		self.make_row("_Test IM Maker 1", "P-1", is_default=1, item_code=other_item)
+
+		row.update({"item_code": other_item, "manufacturer_part_no": "P-2", "is_default": 0})
+		row.save()
+
+		self.assertEqual(self.get_item_default(), (None, None))
+		self.assertEqual(self.get_item_default(other_item), ("_Test IM Maker 1", "P-1"))
+
+	def test_moving_row_as_default_updates_both_items(self):
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		row = self.make_row("_Test IM Maker 1", "P-1", is_default=1)
+
+		row.update({"item_code": other_item, "manufacturer_part_no": "P-2"})
+		row.save()
+
+		self.assertEqual(self.get_item_default(), (None, None))
+		self.assertEqual(self.get_item_default(other_item), ("_Test IM Maker 1", "P-2"))
+
+	def test_deleting_default_row_clears_item_default(self):
+		row = self.make_row("_Test IM Maker 1", "P-1", is_default=1)
+		row.delete()
+
+		self.assertEqual(self.get_item_default(), (None, None))
+
+	def test_default_needs_item_write_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		user = create_user("test_item_manufacturer@example.com", "Stock User")
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(frappe.PermissionError, self.make_row, "_Test IM Maker 2", "SU-1", 1)
+		finally:
+			frappe.set_user("Administrator")
 
 		self.assertEqual(self.get_item_default(), (None, None))
