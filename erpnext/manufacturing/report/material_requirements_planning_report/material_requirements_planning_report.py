@@ -1507,8 +1507,7 @@ def get_purchase_order_item(item, warehouse=None):
 	if is_whole_number(uom):
 		qty = math.ceil(qty)
 		# float noise can push an exact multiple of the conversion factor past a whole number
-		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
-		if flt((qty - 1) * conversion_factor - stock_qty, precision) >= 0:
+		if math.isclose((qty - 1) * conversion_factor, stock_qty):
 			qty -= 1
 
 	return {
