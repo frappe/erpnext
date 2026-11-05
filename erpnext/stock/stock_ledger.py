@@ -1527,7 +1527,7 @@ class update_entries_after:
 			or self.has_landed_cost_based_on_pi(sle)
 			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
 			or is_manufactured_finished_good(sle)
-			or (self.repost_doc and self.repost_doc.get("recalculate_valuation_rate"))
+			or self.recalculates_voucher(sle)
 		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 
@@ -1646,6 +1646,14 @@ class update_entries_after:
 
 		additional_cost = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "additional_cost")
 		return abs(flt(outward_value)) + flt(additional_cost)
+
+	def recalculates_voucher(self, sle):
+		return bool(
+			self.repost_doc
+			and self.repost_doc.get("recalculate_valuation_rate")
+			and sle.voucher_type == self.repost_doc.voucher_type
+			and sle.voucher_no == self.repost_doc.voucher_no
+		)
 
 	def has_landed_cost_based_on_pi(self, sle):
 		if sle.voucher_type == "Purchase Receipt" and frappe.db.get_single_value(
