@@ -2289,7 +2289,7 @@ class AccountsController(TransactionBase):
 
 		return amount, base_amount
 
-	def make_discount_gl_entries(self, gl_entries):
+	def make_discount_gl_entries(self, gl_entries, deferred_return_items=None):
 		if self.doctype == "Purchase Invoice":
 			enable_discount_accounting = cint(
 				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
@@ -2320,7 +2320,7 @@ class AccountsController(TransactionBase):
 							else item.deferred_expense_account
 						)
 					else:
-						income_or_expense_account = self.get_item_income_account(item)
+						income_or_expense_account = self.get_item_income_account(item, deferred_return_items)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
