@@ -19,6 +19,41 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGrossProfit(ERPNextTestSuite):
+	def test_dimension_filter_preserves_native_sales_invoice_filter(self):
+		dimension = frappe.get_doc(
+			{"doctype": "Accounting Dimension", "document_type": "Sales Invoice"}
+		).insert()
+		self.addCleanup(dimension.delete)
+		self.assertEqual(dimension.fieldname, "sales_invoice")
+
+		invoice_with_dimension = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		invoice_with_blank_dimension = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		invoice_with_dimension.insert()
+		invoice_with_blank_dimension.insert()
+		invoice_with_dimension.items[0].sales_invoice = invoice_with_blank_dimension.name
+		invoice_with_dimension.save().submit()
+		invoice_with_blank_dimension.submit()
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=invoice_with_dimension.posting_date,
+			to_date=invoice_with_dimension.posting_date,
+			group_by="Invoice",
+		)
+
+		filters.sales_invoice = invoice_with_dimension.name
+		vouchers = {row.get("sales_invoice") for row in execute(filters)[1] if row.get("indent") == 0}
+		self.assertEqual(vouchers, {invoice_with_dimension.name})
+
+		filters.pop("sales_invoice")
+		filters.accounting_dimension_sales_invoice = [invoice_with_blank_dimension.name]
+		vouchers = {row.get("sales_invoice") for row in execute(filters)[1] if row.get("indent") == 0}
+		self.assertEqual(vouchers, {invoice_with_dimension.name})
+
+		filters.accounting_dimension_sales_invoice = [BLANK_ACCOUNTING_DIMENSION]
+		vouchers = {row.get("sales_invoice") for row in execute(filters)[1] if row.get("indent") == 0}
+		self.assertEqual(vouchers, {invoice_with_blank_dimension.name})
+
 	def test_blank_and_multiple_tree_filters(self):
 		invoice = self.create_sales_invoice()
 		for fieldname, doctype in (("warehouse", "Warehouse"), ("item_group", "Item Group")):
