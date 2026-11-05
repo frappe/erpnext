@@ -14,13 +14,15 @@ from frappe.utils.xlsxutils import handle_html
 from pypika.terms import Bracket, LiteralValue, Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
-from erpnext.accounts.report.utils import get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns, validate_date_range
 from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import (
 	get_customer_details,
 )
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return _execute(filters)
 
 
