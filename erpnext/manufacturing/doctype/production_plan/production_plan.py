@@ -18,7 +18,6 @@ from erpnext.manufacturing.doctype.production_plan.mapper import (
 from erpnext.manufacturing.doctype.production_plan.services.material_request import (
 	MaterialRequestService,
 	download_raw_materials,
-	get_bin_details,
 	get_exploded_items,
 	get_item_data,
 	get_items_for_material_requests,
@@ -32,6 +31,7 @@ from erpnext.manufacturing.doctype.production_plan.services.material_request imp
 	set_default_warehouses,
 )
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_bin_details,
 	get_plan_process_loss_percentage,
 )
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
