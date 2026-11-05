@@ -1263,7 +1263,7 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 	ip = frappe.qb.DocType("Item Price")
 	query = (
 		frappe.qb.from_(ip)
-		.select(ip.name, ip.price_list_rate, ip.uom)
+		.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit)
 		.where(
 			(ip.item_code == item_code)
 			& (ip.price_list == args.get("price_list"))
@@ -1352,9 +1352,8 @@ def get_price_list_rate_for(args, item_code):
 	item_price_data = 0
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
-		desired_qty = args.get("qty")
-		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
-			item_price_data = price_list_rate
+		if desired_qty := args.get("qty"):
+			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
 	else:
 		# Without ignore_party this repeats the query above, which found nothing
 		general_price_list_rate = args.get("ignore_party") and get_item_price(
@@ -1377,6 +1376,15 @@ def get_price_list_rate_for(args, item_code):
 			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0][1]
+
+
+def get_prices_fitting_packing_unit(item_prices, desired_qty):
+	for item_price in item_prices:
+		packing_unit = flt(item_price[3])
+		if not packing_unit or flt(desired_qty) % packing_unit == 0:
+			return [item_price]
+
+	return []
 
 
 def check_packing_list(price_list_rate_name, desired_qty, item_code):
