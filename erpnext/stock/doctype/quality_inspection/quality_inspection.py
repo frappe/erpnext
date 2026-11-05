@@ -631,12 +631,12 @@ def make_quality_inspection(source_name: str, target_doc: str | dict | Document 
 	return doc
 
 
-def get_reading_number_format() -> NumberFormat:
+def get_reading_number_format(user: str | None = None) -> NumberFormat:
 	"""Number format the user enters readings in.
 
 	User defaults fall back to the global default, so this is the same format the
 	user's desk formats numbers with."""
-	number_format = frappe.defaults.get_user_default("number_format")
+	number_format = frappe.defaults.get_user_default("number_format", user)
 	if number_format not in NUMBER_FORMAT_MAP:
 		number_format = "#,###.##"
 
