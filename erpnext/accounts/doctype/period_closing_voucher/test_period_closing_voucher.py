@@ -2,11 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import unittest
+from unittest.mock import patch
 
 import frappe
-from frappe.tests.utils import change_settings
-from frappe.utils import today
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import formatdate, today
 
 from erpnext.accounts.doctype.finance_book.test_finance_book import create_finance_book
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -15,10 +15,17 @@ from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class TestPeriodClosingVoucher(unittest.TestCase):
+class TestPeriodClosingVoucher(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
 		frappe.db.set_single_value("Accounts Settings", "use_legacy_controller_for_pcv", 1)
+		create_company()
+		for doctype in ("GL Entry", "Period Closing Voucher"):
+			table = frappe.qb.DocType(doctype)
+			frappe.qb.from_(table).delete().where(table.company == "Test PCV Company").run()
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_closing_entry(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
@@ -330,7 +337,9 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		repost_doc.posting_date = today()
 		repost_doc.save()
 
-	def make_period_closing_voucher(self, posting_date, submit=True):
+	def make_period_closing_voucher(
+		self, posting_date, submit=True, period_start_date=None, period_end_date=None
+	):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 		fy = get_fiscal_year(posting_date, company="Test PCV Company")
@@ -338,8 +347,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			{
 				"doctype": "Period Closing Voucher",
 				"transaction_date": posting_date or today(),
-				"period_start_date": fy[1],
-				"period_end_date": fy[2],
+				"period_start_date": period_start_date or fy[1],
+				"period_end_date": period_end_date or fy[2],
 				"company": "Test PCV Company",
 				"fiscal_year": fy[0],
 				"cost_center": cost_center,
@@ -400,6 +409,55 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		)[0]
 
 		self.assertEqual(totals_after_cancel.total_debit, totals_after_cancel.total_credit)
+
+	def make_income_entry(self, posting_date, amount, income_account="Sales - TPC"):
+		return make_journal_entry(
+			posting_date=posting_date,
+			amount=amount,
+			account1="Cash - TPC",
+			account2=income_account,
+			cost_center=create_cost_center("Test Cost Center 1"),
+			company="Test PCV Company",
+			submit=True,
+		)
+
+	def test_partly_closed_previous_year_blocks_closing_next_year(self):
+		self.make_income_entry("2021-02-10", 1000)
+		self.make_income_entry("2021-06-15", 700)
+		self.make_period_closing_voucher(
+			posting_date="2021-02-28", period_start_date="2021-01-01", period_end_date="2021-02-28"
+		)
+
+		with self.assertRaisesRegex(frappe.ValidationError, f"from <strong>{formatdate('2021-03-01')}"):
+			self.make_period_closing_voucher(posting_date="2022-12-31")
+
+		self.make_period_closing_voucher(
+			posting_date="2021-12-31", period_start_date="2021-03-01", period_end_date="2021-12-31"
+		)
+		self.make_period_closing_voucher(posting_date="2022-12-31")
+
+	def test_unclosed_earlier_year_blocks_closing(self):
+		self.make_income_entry("2021-06-15", 500)
+
+		with self.assertRaisesRegex(frappe.ValidationError, f"from <strong>{formatdate('2021-06-15')}"):
+			self.make_period_closing_voucher(posting_date="2023-12-31")
+
+		self.make_period_closing_voucher(posting_date="2021-12-31")
+		self.make_period_closing_voucher(posting_date="2023-12-31")
+
+	def make_period_closing_voucher_in_background(self, posting_date):
+		with patch.object(frappe.db, "estimate_count", return_value=100_001), patch("frappe.enqueue"):
+			return self.make_period_closing_voucher(posting_date=posting_date)
+
+	def test_incomplete_previous_closing_blocks_next_closing(self):
+		self.make_income_entry("2021-03-15", 1000)
+		pending_pcv = self.make_period_closing_voucher_in_background(posting_date="2021-12-31")
+		self.assertEqual(pending_pcv.gle_processing_status, "In Progress")
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, f"{pending_pcv.name}.*GL Entry Processing Status"
+		):
+			self.make_period_closing_voucher(posting_date="2022-12-31")
 
 
 def create_company():
