@@ -1211,11 +1211,11 @@ class WorkOrder(Document):
 				)
 				.run(as_dict=True)
 			)
+			start_date = data[0].start_date
+			end_date = data[0].end_date if self.status == "Completed" else None
+			lead_time = flt(time_diff_in_hours(end_date, start_date) * 60) if start_date and end_date else 0
 			self.db_set(
-				{
-					"actual_start_date": data[0].start_date,
-					"actual_end_date": data[0].end_date if self.status == "Completed" else None,
-				}
+				{"actual_start_date": start_date, "actual_end_date": end_date, "lead_time": lead_time}
 			)
 
 		self.set_lead_time()
