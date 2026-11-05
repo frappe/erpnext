@@ -13,6 +13,9 @@ class TestBOMCreator(FrappeTestCase):
 	def setUp(self) -> None:
 		create_items()
 
+	def tearDown(self) -> None:
+		frappe.db.rollback()
+
 	def test_bom_sub_assembly(self):
 		final_product = "Bicycle"
 		make_item(
@@ -235,6 +238,17 @@ class TestBOMCreator(FrappeTestCase):
 		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
 		self.assertEqual(len(data), 2)
 
+	def test_repeated_sub_assembly_is_costed_with_its_own_raw_materials(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Repeated Costing")
+		rows = {row.name: row for row in doc.items}
+		rate = {row.item_code: row.rate for row in doc.items if not row.is_expandable}
+
+		self.assertEqual(rows[first_wheel].amount, rate["Rim"] + rate["Spokes"])
+		self.assertEqual(rows[second_wheel].amount, rate["Hub"])
+		self.assertEqual(
+			doc.raw_material_cost, rate["Frame"] + rate["Rim"] + rate["Spokes"] + rate["Seat"] + rate["Hub"]
+		)
+
 
 def create_items():
 	raw_materials = [
@@ -293,3 +307,44 @@ def make_bom_creator(**kwargs):
 	doc.save()
 
 	return doc
+
+
+def add_test_sub_assembly(doc, fg_item, fg_reference_id, item_code, raw_materials):
+	doc.add_sub_assembly(
+		fg_item=fg_item,
+		fg_reference_id=fg_reference_id,
+		bom_item={
+			"item_code": item_code,
+			"qty": 1,
+			"items": [{"item_code": item, "qty": 1} for item in raw_materials],
+		},
+	)
+	doc.reload()
+
+	return next(
+		row.name for row in doc.items if row.item_code == item_code and row.fg_reference_id == fg_reference_id
+	)
+
+
+def make_repeated_sub_assembly_bom(name):
+	final_product = "Bicycle"
+	make_item(final_product, {"item_group": "Raw Material", "stock_uom": "Nos"})
+
+	doc = make_bom_creator(
+		name=name,
+		company="_Test Company",
+		item_code=final_product,
+		qty=1,
+		rm_cosy_as_per="Valuation Rate",
+		currency="INR",
+		plc_conversion_rate=1,
+		conversion_rate=1,
+	)
+
+	frame = add_test_sub_assembly(doc, final_product, doc.name, "Frame Assembly", ["Frame"])
+	first_wheel = add_test_sub_assembly(doc, "Frame Assembly", frame, "Wheel Assembly", ["Rim", "Spokes"])
+
+	seat = add_test_sub_assembly(doc, final_product, doc.name, "Seat Assembly", ["Seat"])
+	second_wheel = add_test_sub_assembly(doc, "Seat Assembly", seat, "Wheel Assembly", ["Hub"])
+
+	return doc, first_wheel, second_wheel

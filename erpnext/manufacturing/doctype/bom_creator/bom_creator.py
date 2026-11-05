@@ -1,7 +1,7 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _
@@ -156,18 +156,17 @@ class BOMCreator(Document):
 		self.submit()
 
 	def set_rate_for_items(self):
-		amount = self.get_raw_material_cost()
-		self.raw_material_cost = amount
-
-	def get_raw_material_cost(self, fg_item=None, amount=0):
-		if not fg_item:
-			fg_item = self.item_code
-
+		children = defaultdict(list)
 		for row in self.items:
-			if row.fg_item != fg_item:
-				continue
+			children[row.fg_reference_id].append(row)
 
-			if not row.is_expandable:
+		self.raw_material_cost = self.get_raw_material_cost(self.name, children, set())
+
+	def get_raw_material_cost(self, parent_id, children, visited):
+		visited.add(parent_id)
+		amount = 0
+		for row in children.get(parent_id, []):
+			if not row.is_expandable or row.name in visited:
 				row.rate = get_bom_item_rate(
 					{
 						"company": self.company,
@@ -185,8 +184,7 @@ class BOMCreator(Document):
 				row.amount = flt(row.rate) * flt(row.qty)
 
 			else:
-				row.amount = 0.0
-				row.amount = self.get_raw_material_cost(row.item_code, row.amount)
+				row.amount = self.get_raw_material_cost(row.name, children, visited)
 				row.rate = flt(row.amount) / (flt(row.qty) * flt(row.conversion_factor))
 
 			amount += flt(row.amount)
