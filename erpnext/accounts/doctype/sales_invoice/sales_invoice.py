@@ -2154,6 +2154,7 @@ class SalesInvoice(SellingController):
 				self.status = "Draft"
 			return
 
+<<<<<<< HEAD
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
 		total = get_total_in_party_account_currency(self)
 
@@ -2295,6 +2296,14 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 				_("{0} not allowed to transact with {1}. Please change the Company.").format(
 					_(partytype), company
 				)
+=======
+	@frappe.whitelist()
+	def is_subcontracted(self):
+		sales_orders = [item.sales_order for item in self.items if item.sales_order]
+		if not self.has_subcontracted and sales_orders:
+			self.has_subcontracted = bool(
+				frappe.db.exists("Sales Order", {"name": ["in", sales_orders], "is_subcontracted": 1})
+>>>>>>> 59fec75 (perf(sales invoice): check subcontracted sales orders only when items have one)
 			)
 
 
