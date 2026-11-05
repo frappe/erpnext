@@ -1133,7 +1133,9 @@ class PaymentEntry(AccountsController):
 		else:
 			self.status = "Draft"
 
-		self.db_set("status", self.status, update_modified=True)
+		# Insert saves the status; an update of the missing row would only take gap locks
+		if not self.is_new():
+			self.db_set("status", self.status, update_modified=True)
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
