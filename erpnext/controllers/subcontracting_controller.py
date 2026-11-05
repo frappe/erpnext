@@ -251,6 +251,55 @@ class SubcontractingController(StockController):
 		else:
 			self.remove(rm_obj)
 
+	def validate_returned_serial_batches(self):
+		"""Serial nos and batches a return sends back must be ones the receipt consumed and no return got back."""
+		returnable = self.get_returnable_serial_batches()
+		receipt_items = {row.name: row.subcontracting_receipt_item for row in self.items}
+		# read from the database: bundles made from serial no and batch fields on submit are not on the rows
+		bundle_keys = {
+			row.serial_and_batch_bundle: (receipt_items.get(row.reference_name), row.rm_item_code)
+			for row in frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"parent": self.name, "serial_and_batch_bundle": ("is", "set")},
+				fields=["serial_and_batch_bundle", "reference_name", "rm_item_code"],
+			)
+		}
+		if not (returnable and bundle_keys):
+			return
+
+		available = {
+			(key, identity.serial_no, identity.batch_no): identity.qty
+			for key, identities in returnable.items()
+			for identity in identities
+		}
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ("in", list(bundle_keys))},
+			fields=["parent", "serial_no", "batch_no", "qty"],
+		):
+			key = bundle_keys[entry.parent]
+			if key not in returnable:
+				continue
+
+			identity = (key, entry.serial_no, entry.batch_no)
+			available[identity] = available.get(identity, 0.0) - abs(entry.qty)
+			if flt(available[identity], precision) < 0:
+				label = (
+					SerialBatchIdentity("Serial No").get_label(entry.serial_no)
+					if entry.serial_no
+					else SerialBatchIdentity("Batch").get_label(entry.batch_no)
+				)
+				frappe.throw(
+					_(
+						"{0} of raw material {1} was not consumed by {2} or was already returned. Use Reset Raw Materials Table to pick the raw materials again."
+					).format(
+						frappe.bold(label),
+						frappe.bold(key[1]),
+						get_link_to_form(self.doctype, self.return_against),
+					)
+				)
+
 	def get_rejected_return_rows(self):
 		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
 		if not self.is_return:
