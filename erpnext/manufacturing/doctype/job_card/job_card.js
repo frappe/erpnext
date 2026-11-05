@@ -803,7 +803,11 @@ frappe.ui.form.on("Job Card", {
 		const { time_logs, status } = doc;
 
 		// ── Determine which action buttons to show ────────────────────────
-		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const accounted_qty = flt(
+			doc.total_completed_qty + doc.process_loss_qty,
+			precision("for_quantity", doc)
+		);
+		const has_remaining_qty = doc.for_quantity > accounted_qty;
 		const pending_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
 		const materials_ready = doc.skip_material_transfer || doc.is_corrective_job_card || !pending_transfer;
