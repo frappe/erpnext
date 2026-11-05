@@ -525,9 +525,21 @@ class SubcontractingReceipt(SubcontractingController):
 				else:
 					scrap_cost_map[item.reference_name] = item.amount
 
+<<<<<<< HEAD
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.is_scrap_item:
+=======
+		received_qty_ratios = self.get_received_qty_ratios_for_return()
+		rejected_return_rows = self.get_rejected_return_rows()
+		total_qty = total_amount = 0
+		for item in self.get("items") or []:
+			if not item.secondary_item_type and not item.valuation_type:
+				# rejected qty is received without service cost
+				if item.name in rejected_return_rows:
+					item.service_cost_per_qty = 0.0
+
+>>>>>>> 4b3f8e0 (fix(subcontracting): book no service cost on return of rejected items)
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
