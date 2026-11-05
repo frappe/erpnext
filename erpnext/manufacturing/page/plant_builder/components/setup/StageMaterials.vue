@@ -35,19 +35,31 @@ const toneOf = (row) =>
 		? "bg-surface-gray-3"
 		: SWATCH[MATERIAL_TONES[all.value.indexOf(row) % MATERIAL_TONES.length]];
 
+const draft = ref(null);
+const shown = (row, field, value) =>
+	draft.value?.row === row && draft.value.field === field ? draft.value.text : value;
+function edit(row, field, text, apply) {
+	draft.value = { row, field, text };
+	if (text !== "" && Number.isFinite(Number(text))) apply(row, num(text));
+}
+const stopEditing = () => (draft.value = null);
+
 const qtyOf = (row) => {
 	if (isPacking.value) return round(num(row.qty_per_unit) * batch.value, 3);
-	return row.is_balance_item ? round(row.qty, 3) : row.qty;
+	return round(num(row.qty), 3);
 };
 function setQty(row, value) {
-	if (isPacking.value) row.qty_per_unit = num(value) / batch.value;
+	if (isPacking.value) row.qty_per_unit = value / batch.value;
 	else row.qty = value;
 }
 
 function setPercentage(row, value) {
+	const others = totalWeight.value - weightOf(row);
+	const hasBalance = all.value.some((m) => m.is_balance_item && m !== row);
+	if (!factorOf(row) || value < 0 || (!hasBalance && value >= 100)) return;
 	const batchWeight = num(props.data.formula_weight) || totalWeight.value;
-	if (!factorOf(row) || !batchWeight || num(value) === percentageOf(row)) return;
-	row.qty = round((num(value) / 100) * batchWeight * factorOf(row), 3);
+	const weight = hasBalance ? (value / 100) * batchWeight : (value / (100 - value)) * others;
+	row.qty = round(weight * factorOf(row), 6);
 }
 
 const columns = computed(() =>
@@ -57,7 +69,10 @@ const columns = computed(() =>
 );
 
 const setBalance = (row, on) => all.value.forEach((m) => (m.is_balance_item = on && m === row ? 1 : 0));
-const remove = (row) => materials.value.splice(materials.value.indexOf(row), 1);
+function remove(row) {
+	const rows = isPacking.value ? packing.value : all.value;
+	rows.splice(rows.indexOf(row), 1);
+}
 
 function moveTo(row, stageNo) {
 	if (!isPacking.value && stageNo !== props.packingNo) {
@@ -167,7 +182,7 @@ function add() {
 				/>
 				<DeskControl v-model="row.item_code" options="Item" :filters="{ is_stock_item: 1 }" />
 				<TextInput
-					:model-value="qtyOf(row)"
+					:model-value="shown(row, 'qty', qtyOf(row))"
 					type="number"
 					size="sm"
 					class="[&_input]:text-right"
@@ -177,7 +192,8 @@ function add() {
 					}"
 					:disabled="!!row.is_balance_item"
 					:title="row.is_balance_item ? __('Balance item') : uomOf(row)"
-					@update:model-value="setQty(row, $event)"
+					@update:model-value="edit(row, 'qty', $event, setQty)"
+					@blur="stopEditing"
 				>
 					<template v-if="uomOf(row)" #suffix>
 						<span class="text-xs text-ink-gray-5">{{ uomOf(row) }}</span>
@@ -185,13 +201,14 @@ function add() {
 				</TextInput>
 				<TextInput
 					v-if="!isPacking"
-					:model-value="percentageOf(row)"
+					:model-value="shown(row, 'percentage', percentageOf(row))"
 					type="number"
 					size="sm"
 					class="[&_input]:text-right"
 					:class="{ '[&_input]:bg-surface-base': !row.is_balance_item }"
 					:disabled="!!row.is_balance_item || !factorOf(row)"
-					@update:model-value="setPercentage(row, $event)"
+					@update:model-value="edit(row, 'percentage', $event, setPercentage)"
+					@blur="stopEditing"
 				/>
 				<Dropdown v-if="!readOnly" :options="rowMenu(row)">
 					<Button variant="ghost" size="sm" icon="lucide-ellipsis" :aria-label="__('More')" />

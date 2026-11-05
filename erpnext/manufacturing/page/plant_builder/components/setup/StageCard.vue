@@ -135,7 +135,13 @@ const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? 
 						:label="__('Minutes')"
 					/>
 				</div>
-				<StageMaterials :doc="doc" :data="data" :stage-no="index + 1" :stage-options="stageOptions" />
+				<StageMaterials
+					:doc="doc"
+					:data="data"
+					:stage-no="index + 1"
+					:packing-no="packingIndex + 1"
+					:stage-options="moveOptions"
+				/>
 				<div class="grid grid-cols-2 gap-3">
 					<DeskControl
 						v-model="stage.semi_finished_good"
