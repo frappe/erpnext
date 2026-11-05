@@ -5335,6 +5335,22 @@ class TestWorkOrder(FrappeTestCase):
 			serials_per_batch[batch_no] = serials_per_batch.get(batch_no, 0) + 1
 		self.assertEqual(sorted(serials_per_batch.values()), [2, 2])
 
+	def test_negative_batch_size_is_refused(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Batch Size cannot be negative",
+			make_review_work_order,
+			fg_item,
+			bom.name,
+			10,
+			submit=False,
+			batch_size=-1,
+		)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
