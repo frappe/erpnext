@@ -1,12 +1,12 @@
 <script setup>
 import { computed, inject, ref } from "vue";
-import { Badge, Button, Dropdown } from "frappe-ui";
+import { Button, Dropdown } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, insertStage, machineModelOf } from "../../lib/plant";
-import { fmt, num, round } from "../../lib/format";
+import { num } from "../../lib/format";
 
 const props = defineProps({
 	doc: Object,
@@ -22,13 +22,6 @@ const emit = defineEmits(["focus"]);
 const models = computed(() => props.doc.stages.map((stage) => machineModelOf(stage, props.machines)));
 const hasPacking = computed(() => models.value.some(isPackingModel));
 const items = computed(() => props.data.items || {});
-const weightUom = computed(() => props.data.item?.weight_uom || "");
-const batchWeight = computed(() =>
-	props.doc.materials.reduce((sum, row) => {
-		const factor = num(props.data.weight_factors?.[row.item_code]);
-		return sum + (factor ? num(row.qty) / factor : 0);
-	}, 0)
-);
 
 function addStage(type) {
 	const stage = {
@@ -60,14 +53,7 @@ const addOptions = computed(() =>
 
 <template>
 	<section class="space-y-3">
-		<SectionHead :title="__('Process Stages')">
-			<Badge
-				v-if="doc.materials.length && weightUom"
-				:label="`${fmt(round(batchWeight))} ${weightUom}`"
-				:title="__('Raw material weight for one batch')"
-				variant="subtle"
-			/>
-		</SectionHead>
+		<SectionHead :title="__('Process Stages')" />
 		<StageCard
 			v-for="(stage, i) in doc.stages"
 			:key="stage.operation_id || i"
