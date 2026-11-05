@@ -165,7 +165,7 @@ class JobCard(Document):
 			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
 	def validate_job_card_qty(self):
-		if not (self.operation_id and self.work_order):
+		if self.is_corrective_job_card or not (self.operation_id and self.work_order):
 			return
 
 		wo_qty = flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
@@ -185,6 +185,7 @@ class JobCard(Document):
 				"work_order": self.work_order,
 				"operation_id": self.operation_id,
 				"docstatus": ["!=", 2],
+				"is_corrective_job_card": 0,
 			},
 			as_list=1,
 		)
@@ -1484,6 +1485,8 @@ def make_corrective_job_card(source_name, operation=None, for_operation=None, ta
 		target.is_corrective_job_card = 1
 		target.operation = operation
 		target.for_operation = for_operation
+		target.total_completed_qty = 0
+		target.process_loss_qty = 0
 
 		target.set("time_logs", [])
 		target.set("employee", [])
