@@ -4393,19 +4393,33 @@ class StockEntry(StockController, SubcontractingInwardController):
 		wo_data = frappe.db.get_value(
 			"Work Order",
 			self.work_order,
-			["qty", "produced_qty", "material_transferred_for_manufacturing as trans_qty"],
+			[
+				"qty",
+				"produced_qty",
+				"process_loss_qty",
+				"material_transferred_for_manufacturing as trans_qty",
+			],
 			as_dict=1,
 		)
 
+		transferred_qty = flt(wo_data.trans_qty)
+		pending_qty_to_mfg = transferred_qty - flt(wo_data.produced_qty) - flt(wo_data.process_loss_qty)
+		fg_completed_qty = flt(self.fg_completed_qty)
+		fg_precision = self.precision("fg_completed_qty")
+		if not self.is_return and (flt(pending_qty_to_mfg, fg_precision) <= 0 or not fg_completed_qty):
+			return
+
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for _key, row in available_materials.items():
-			remaining_qty_to_produce = flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
-			if remaining_qty_to_produce <= 0 and not self.is_return:
-				continue
+			# a material is only covered by the entries that consumed it
+			pending_qty = transferred_qty - sum(row.consumed_for.values())
+			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, fg_precision) <= 0:
+				# an entry for all that is pending consumes what is left
+				pending_qty = fg_completed_qty
 
 			qty = flt(row.qty)
 			if not self.is_return:
-				qty = (flt(row.qty) * flt(self.fg_completed_qty)) / remaining_qty_to_produce
+				qty = (flt(row.qty) * fg_completed_qty) / pending_qty
 
 			item = row.item_details
 			if cint(frappe.get_cached_value("UOM", item.stock_uom, "must_be_whole_number")):
@@ -5783,7 +5797,12 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 			buckets = _get_consumption_buckets(available_materials, key) or [
 				_get_available_material(available_materials, key, row)
 			]
+			available_qty = [bucket.qty for bucket in buckets]
 			_deduct_consumed_material(buckets, row)
+			if row.purpose != "Material Transfer for Manufacture":
+				for bucket, qty in zip(buckets, available_qty, strict=True):
+					if bucket.qty != qty:
+						bucket.consumed_for[row.name] = flt(row.fg_completed_qty)
 
 	return available_materials
 
@@ -5804,7 +5823,13 @@ def _get_disassembly_material_key(row):
 def _get_available_material(available_materials, key, row):
 	if key not in available_materials:
 		available_materials[key] = frappe._dict(
-			{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
+			{
+				"item_details": row,
+				"batch_details": defaultdict(float),
+				"qty": 0,
+				"serial_nos": [],
+				"consumed_for": {},
+			}
 		)
 
 	return available_materials[key]
@@ -5896,6 +5921,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 			stock_entry.purpose,
 			stock_entry.is_return,
 			stock_entry.name,
+			stock_entry.fg_completed_qty,
 		)
 		.where(
 			(stock_entry.name == stock_entry_detail.parent)
