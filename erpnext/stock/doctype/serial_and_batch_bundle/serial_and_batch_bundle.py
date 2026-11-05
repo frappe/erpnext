@@ -916,8 +916,10 @@ class SerialandBatchBundle(Document):
 			if batches and valuation_method in ("FIFO", "LIFO"):
 				stock_queue = parse_json(prev_sle.stock_queue)
 
-		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
-			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		# a Subcontracting Receipt books the whole cost on the accepted qty, so its rejected material has none
+		set_valuation_rate_for_rejected_materials = (
+			self.voucher_type != "Subcontracting Receipt"
+			and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
 
 		transfer_rates = self.get_transfer_rates()
