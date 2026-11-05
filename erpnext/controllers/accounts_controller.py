@@ -2373,7 +2373,7 @@ class AccountsController(TransactionBase):
 
 		return amount, base_amount
 
-	def make_discount_gl_entries(self, gl_entries):
+	def make_discount_gl_entries(self, gl_entries, deferred_return_items=None):
 		enable_discount_accounting = cint(
 			frappe.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
@@ -2382,7 +2382,7 @@ class AccountsController(TransactionBase):
 			for item in self.get("items"):
 				if item.get("discount_amount") and item.get("discount_account"):
 					discount_amount = item.discount_amount * item.qty
-					income_account = self.get_item_income_account(item)
+					income_account = self.get_item_income_account(item, deferred_return_items)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
