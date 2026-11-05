@@ -26,6 +26,9 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_job_card,
 	make_work_order,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	make_stock_entry as make_stock_entry_for_work_order,
+)
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.patches.v16_0.set_stock_uom_in_job_card import execute as set_stock_uom_in_job_card
 from erpnext.stock.doctype.item.test_item import create_item

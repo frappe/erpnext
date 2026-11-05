@@ -1972,18 +1972,7 @@ class JobCard(Document):
 			kwargs = frappe._dict(kwargs)
 
 		self.set_for_quantity(kwargs)
-<<<<<<< HEAD
 		self.validate_complete_job_card_qty(kwargs)
-=======
-
-		self.pending_qty = flt(kwargs.pending_qty)
-		self.process_loss_qty = flt(self.process_loss_qty) + flt(kwargs.process_loss_qty)
-
-		self.add_completion_time_logs(kwargs)
-
-		if kwargs.auto_submit:
-			self.auto_submit_job_card(kwargs.auto_submit)
->>>>>>> 06ab7d4 (fix(manufacturing): keep the process loss of earlier cycles when completing a job card)
 
 	def set_for_quantity(self, kwargs):
 		"""Qty to Manufacture of the completion dialog covers the current cycle only,
@@ -2019,7 +2008,7 @@ class JobCard(Document):
 		self.validate_completion_qty_split(kwargs)
 
 		self.pending_qty = flt(kwargs.pending_qty)
-		self.process_loss_qty = flt(kwargs.process_loss_qty)
+		self.process_loss_qty = flt(self.process_loss_qty) + flt(kwargs.process_loss_qty)
 
 		if kwargs.end_time:
 			self.add_time_logs(
