@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -725,7 +725,7 @@ class MaterialRequirementsPlanningReport:
 		parent_doctype = frappe.qb.DocType("Sales Order")
 		so_item = frappe.qb.DocType("Sales Order Item")
 		doctype = frappe.qb.DocType("Packed Item")
-		pending_qty = so_item.qty - IfNull(so_item.delivered_qty, 0)
+		pending_qty = so_item.qty - so_item.delivered_qty
 
 		query = (
 			frappe.qb.from_(parent_doctype)
@@ -742,7 +742,6 @@ class MaterialRequirementsPlanningReport:
 			.where(
 				(doctype.docstatus == 1)
 				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
-				& (so_item.qty > 0)
 				& (pending_qty > 0)
 			)
 		)
