@@ -128,17 +128,15 @@ def get_materials_by_work_order(work_orders):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
-	wo = frappe.qb.DocType("Work Order")
-	query = (
-		frappe.qb.from_(wo)
-		.select(wo.name)
-		.where((wo.name.like(f"{txt}%")) & (wo.produced_qty > 0) & (wo.docstatus == 1))
-		.orderby(wo.name)
-		.limit(page_len)
-		.offset(start)
-	)
-
+	work_order_filters = {"name": ["like", f"{txt}%"]}
 	if filters.get("bom_no"):
-		query = query.where(wo.bom_no == filters.get("bom_no"))
+		work_order_filters["bom_no"] = filters.get("bom_no")
 
-	return query.run(as_list=True)
+	return get_produced_work_orders(
+		["name"],
+		work_order_filters,
+		order_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+	)

@@ -9,7 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
-from erpnext.manufacturing.report.bom_variance_report.bom_variance_report import execute
+from erpnext.manufacturing.report.bom_variance_report.bom_variance_report import execute, get_work_orders
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 
@@ -146,3 +146,21 @@ class TestBOMVarianceReport(FrappeTestCase):
 			len([row for row in data if row.get("raw_material_code")]),
 			len(self.raw_materials) * len(work_orders),
 		)
+
+	def test_work_order_search_follows_permissions(self):
+		permitted = self.create_produced_work_order(ordered_qty=2, produced_qty=2)
+		hidden = self.create_produced_work_order(ordered_qty=2, produced_qty=2)
+
+		def search(user):
+			with self.set_user(user):
+				rows = get_work_orders("Work Order", "", "name", 0, 1000, {"bom_no": self.bom_no})
+			return {row[0] for row in rows}
+
+		restricted = create_user("bom-variance-search@example.com", "Manufacturing User")
+		add_user_permission("Work Order", permitted.name, restricted.name)
+		names = search(restricted.name)
+		self.assertIn(permitted.name, names)
+		self.assertNotIn(hidden.name, names)
+
+		accounts_user = create_user("bom-variance-accounts@example.com", "Accounts User")
+		self.assertRaises(frappe.PermissionError, search, accounts_user.name)
