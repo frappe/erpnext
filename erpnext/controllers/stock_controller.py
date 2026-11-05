@@ -237,17 +237,22 @@ class StockController(AccountsController):
 							)
 						)
 
-			if is_material_issue:
-				continue
-
 			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
-				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
-				self.validate_batch_not_expired(d.idx, d.batch_no, expiry_date)
+				expiry_date, disabled = frappe.get_cached_value(
+					"Batch", d.get("batch_no"), ["expiry_date", "disabled"]
+				)
+				self.validate_batch_is_usable(
+					d.idx, d.batch_no, None if is_material_issue else expiry_date, disabled
+				)
 
-		if not is_material_issue:
-			self.validate_outward_bundle_batches()
+		self.validate_outward_bundle_batches(check_expiry=not is_material_issue)
 
-	def validate_batch_not_expired(self, idx, batch_no, expiry_date):
+	def validate_batch_is_usable(self, idx, batch_no, expiry_date, disabled):
+		if disabled:
+			frappe.throw(
+				_("Row #{0}: The batch {1} is disabled.").format(idx, get_link_to_form("Batch", batch_no))
+			)
+
 		if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
 			frappe.throw(
 				_("Row #{0}: The batch {1} has already expired.").format(
@@ -256,20 +261,29 @@ class StockController(AccountsController):
 				BatchExpiredError,
 			)
 
-	def validate_outward_bundle_batches(self):
+	def validate_outward_bundle_batches(self, check_expiry=True, rows=None, qty_field="qty"):
 		if self.get("is_return") or not self.get("posting_date") or self.docstatus == 2:
 			return
 
+		if rows is None:
+			rows = (self.get("items") or []) + (self.get("packed_items") or [])
+
 		row_idx_by_bundle = {
 			d.serial_and_batch_bundle: d.idx
-			for d in self.get("items")
-			if d.get("serial_and_batch_bundle") and flt(d.get("qty")) > 0
+			for d in rows
+			if d.get("serial_and_batch_bundle") and flt(d.get(qty_field)) > 0
 		}
 		if not row_idx_by_bundle:
 			return
 
-		for row in get_expired_outward_bundle_batches(list(row_idx_by_bundle), self.posting_date):
-			self.validate_batch_not_expired(row_idx_by_bundle[row.bundle], row.batch_no, row.expiry_date)
+		posting_date = self.posting_date if check_expiry else None
+		for row in get_unusable_outward_bundle_batches(list(row_idx_by_bundle), posting_date):
+			self.validate_batch_is_usable(
+				row_idx_by_bundle[row.bundle],
+				row.batch_no,
+				row.expiry_date if check_expiry else None,
+				row.disabled,
+			)
 
 	def clean_serial_nos(self):
 		from erpnext.stock.doctype.serial_no.serial_no import clean_serial_no_string
@@ -2148,7 +2162,7 @@ def make_bundle_for_material_transfer(**kwargs):
 	return bundle_doc.name
 
 
-def get_expired_outward_bundle_batches(bundles, posting_date):
+def get_unusable_outward_bundle_batches(bundles, posting_date):
 	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	entry = frappe.qb.DocType("Serial and Batch Entry")
 	batch = frappe.qb.DocType("Batch")
@@ -2159,11 +2173,18 @@ def get_expired_outward_bundle_batches(bundles, posting_date):
 		.on(entry.parent == bundle.name)
 		.join(batch)
 		.on(entry.batch_no == batch.name)
-		.select(bundle.name.as_("bundle"), entry.batch_no, batch.expiry_date)
+		.select(bundle.name.as_("bundle"), entry.batch_no, batch.expiry_date, batch.disabled)
 		.where(
 			bundle.name.isin(bundles)
 			& (bundle.type_of_transaction == "Outward")
-			& (batch.expiry_date < getdate(posting_date))
+			& (unusable_batch_condition(batch, posting_date))
 		)
 		.run(as_dict=True)
 	)
+
+
+def unusable_batch_condition(batch, posting_date):
+	if not posting_date:
+		return batch.disabled == 1
+
+	return (batch.expiry_date < getdate(posting_date)) | (batch.disabled == 1)
