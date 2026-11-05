@@ -226,11 +226,8 @@ class SubcontractingController(StockController):
 				row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, rate
 			)
 
-		# any qty the receipt did not consume stays on the row without serial nos or batches
-		if flt(qty, precision):
-			rm_obj.consumed_qty = -flt(qty, precision)
-		else:
-			self.remove(rm_obj)
+		# a return sends back no more than the receipt consumed
+		self.remove(rm_obj)
 
 	def validate_returned_serial_batches(self):
 		"""Serial nos and batches a return sends back must be ones the receipt consumed and no return got back."""
