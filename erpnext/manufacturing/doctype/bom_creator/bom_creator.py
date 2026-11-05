@@ -129,8 +129,22 @@ class BOMCreator(Document):
 		self.set_status(True)
 
 	def set_conversion_factor(self):
+		item_codes = list({row.item_code for row in self.items if not row.conversion_factor})
+		uom_factors = {}
+		if item_codes:
+			uom_factors = {
+				(row.parent, row.uom): row.conversion_factor
+				for row in frappe.get_all(
+					"UOM Conversion Detail",
+					filters={"parent": ("in", item_codes), "parenttype": "Item"},
+					fields=["parent", "uom", "conversion_factor"],
+				)
+			}
+
 		for row in self.items:
-			row.conversion_factor = 1.0
+			if not row.conversion_factor:
+				row.conversion_factor = flt(uom_factors.get((row.item_code, row.uom))) or 1.0
+			row.stock_qty = flt(row.qty) * flt(row.conversion_factor)
 
 	def before_submit(self):
 		self.validate_fields()
@@ -348,8 +362,13 @@ class BOMCreator(Document):
 
 	@frappe.whitelist()
 	def edit_qty(self, docname: str, qty: float):
-		if not frappe.db.exists("BOM Creator Item", {"name": docname, "parent": self.name}):
+		if docname != self.name and not frappe.db.exists(
+			"BOM Creator Item", {"name": docname, "parent": self.name}
+		):
 			frappe.throw(_("BOM Creator Item {0} does not exist").format(docname))
+
+		if docname == self.name:
+			self.qty = flt(qty)
 
 		for row in self.items:
 			if row.name == docname:
