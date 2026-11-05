@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, today
+from frappe.utils import get_datetime, getdate, today
 
 from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.report.stock_analytics.stock_analytics import (
@@ -33,23 +33,13 @@ def get_columns(period_columns):
 
 
 def get_work_orders(filters):
-	from_date = filters.get("from_date")
-	to_date = filters.get("to_date")
+	date_range = [get_datetime(filters.get("from_date")), get_datetime(filters.get("to_date"))]
 
-	WorkOrder = frappe.qb.DocType("Work Order")
-
-	return (
-		frappe.qb.from_(WorkOrder)
-		.select(WorkOrder.creation, WorkOrder.actual_end_date, WorkOrder.planned_end_date, WorkOrder.status)
-		.where(
-			(WorkOrder.docstatus == 1)
-			& (WorkOrder.company == filters.get("company"))
-			& (
-				(WorkOrder.creation.between(from_date, to_date))
-				| (WorkOrder.actual_end_date.between(from_date, to_date))
-			)
-		)
-		.run(as_dict=True)
+	return frappe.get_list(
+		"Work Order",
+		fields=["creation", "actual_end_date", "planned_end_date", "status"],
+		filters={"docstatus": 1, "company": filters.get("company")},
+		or_filters={"creation": ["between", date_range], "actual_end_date": ["between", date_range]},
 	)
 
 
