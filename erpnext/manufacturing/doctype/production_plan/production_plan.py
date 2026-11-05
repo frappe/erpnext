@@ -756,6 +756,7 @@ class ProductionPlan(Document):
 	def make_work_order(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
 
+		self.validate_plan_is_open()
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse()
@@ -771,6 +772,16 @@ class ProductionPlan(Document):
 
 		if not po_list:
 			frappe.msgprint(_("No Purchase Orders were created"))
+
+	def validate_plan_is_open(self):
+		status = (
+			frappe.db.get_value("Production Plan", self.name, "status") if not self.is_new() else self.status
+		)
+		if status in ("Closed", "Completed"):
+			frappe.throw(
+				_("Production Plan {0} is {1}").format(frappe.bold(self.name), _(status)),
+				frappe.InvalidStatusError,
+			)
 
 	def make_work_order_for_finished_goods(self, wo_list, default_warehouses):
 		items_data = self.get_production_items()
@@ -996,6 +1007,7 @@ class ProductionPlan(Document):
 		self.load_from_db()
 		self.check_permission("write")
 		self.submit_material_request = submit_material_request
+		self.validate_plan_is_open()
 
 	@frappe.whitelist()
 	def get_sub_assembly_items(self, manufacturing_type=None):
