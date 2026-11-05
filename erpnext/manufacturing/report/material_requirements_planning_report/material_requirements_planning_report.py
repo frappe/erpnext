@@ -864,7 +864,20 @@ class MaterialRequirementsPlanningReport:
 			else:
 				query = query.where(doctype[field] == value)
 
-		return query.run(as_dict=True)
+		rows = query.run(as_dict=True)
+		for row in rows:
+			item_uom = get_item_uom(row.item_code)
+			stock_uom = item_uom.stock_uom
+			selected_uom = row.uom or stock_uom
+			conversion_factor = (
+				flt(get_conversion_factor(row.item_code, selected_uom).get("conversion_factor")) or 1.0
+			)
+			row.planned_qty = flt(row.planned_qty) * conversion_factor
+			row.uom = stock_uom
+			if selected_uom != stock_uom:
+				row.mps_uom = selected_uom
+
+		return rows
 
 	def get_items_from_mps(self, mps_data):
 		items = []
@@ -1492,7 +1505,7 @@ def make_purchase_orders(purchase_orders, company, warehouse=None, mps=None):
 
 
 def get_purchase_order_item(item, warehouse=None):
-	uom = item.purchase_uom or item.uom
+	uom = item.get("mps_uom") or item.purchase_uom or item.uom
 	if not uom:
 		uom_details = get_item_uom(item.item_code)
 		uom = uom_details.purchase_uom or uom_details.stock_uom
