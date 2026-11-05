@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
+
 SLE_FIELDS = (
 	"name",
 	"item_code",
@@ -27,6 +29,7 @@ SLE_FIELDS = (
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data
