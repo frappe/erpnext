@@ -2,7 +2,7 @@ import datetime
 
 import frappe
 from frappe import _dict
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils.data import add_to_date, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -127,3 +127,50 @@ class TestStockAnalyticsReport(FrappeTestCase):
 		cols, data = stock_analytics(filters)
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [10, 10, 15])
+
+	@change_settings("System Settings", {"first_day_of_the_week": "Sunday"})
+	def test_weekly_entries_fall_in_the_week_that_contains_them(self):
+		self.generate_stock([(3, datetime.date(2026, 8, 16))])
+		filters = _dict(
+			range="Weekly",
+			from_date=datetime.date(2026, 8, 2),
+			to_date=datetime.date(2026, 8, 29),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		cols, data = stock_analytics(filters)
+
+		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 0, 3, 3])
+
+	@change_settings("System Settings", {"first_day_of_the_week": "Sunday"})
+	def test_weekly_columns_across_a_year_have_unique_labels(self):
+		filters = _dict(
+			range="Weekly",
+			from_date=datetime.date(2022, 1, 1),
+			to_date=datetime.date(2022, 12, 31),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		labels = [column["label"] for column in stock_analytics(filters)[0][5:]]
+
+		self.assertEqual(len(labels), len(set(labels)))
+
+	@change_settings("System Settings", {"first_day_of_the_week": "Sunday"})
+	def test_weeks_across_the_new_year_keep_their_own_balance(self):
+		self.generate_stock([(3, datetime.date(2023, 1, 1))])
+		filters = _dict(
+			range="Weekly",
+			from_date=datetime.date(2022, 12, 25),
+			to_date=datetime.date(2023, 1, 1),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		cols, data = stock_analytics(filters)
+
+		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 3])
