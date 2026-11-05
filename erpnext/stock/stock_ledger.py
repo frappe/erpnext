@@ -1046,7 +1046,7 @@ class update_entries_after:
 	def start_pending_item_wh(self):
 		"""Queue each pending item-warehouse once the repost reaches its posting datetime.
 
-		One that an earlier entry already queued as a dependant is covered from that earlier point.
+		One that an earlier entry already queued is covered from that earlier point.
 		"""
 		started = False
 		while self.pending_item_wh and (
@@ -1054,16 +1054,8 @@ class update_entries_after:
 			or get_datetime(self.pending_item_wh[0].posting_datetime)
 			<= get_datetime(self._sles.first().posting_datetime)
 		):
-			pending = self.pending_item_wh.popleft()
-			item_wh_key = (pending.item_code, pending.warehouse)
-			if item_wh_key in self.distinct_dependant_item_wh:
-				continue
-
-			self.distinct_dependant_item_wh.add(item_wh_key)
-			self._sles.extend(self.get_future_entries_to_repost(pending))
-			# resume from here if a checkpoint is saved before its first entry is reposted
-			self.item_wh_wise_last_posted_sle[item_wh_key] = pending
-			started = True
+			if self.queue_item_wh_from(self.pending_item_wh.popleft()):
+				started = True
 
 		if started:
 			# the queue order changed, the prefetched window is no longer the next batch
