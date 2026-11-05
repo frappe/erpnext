@@ -161,6 +161,7 @@ def _apply_putaway_rule(
 	sync (optional): Sync with client side only for client side calls
 	"""
 	items = frappe.parse_json(items)
+	sync = bool(sync and frappe.parse_json(sync))
 
 	items_not_accomodated, updated_table = [], []
 	item_wise_rules = {}
@@ -251,11 +252,11 @@ def _apply_putaway_rule(
 		show_unassigned_items_message(items_not_accomodated)
 
 	if updated_table and _items_changed(items, updated_table, doctype):
-		_split_bundles(updated_table, doctype)
+		_split_bundles(updated_table, doctype, keep_original=not sync)
 		frappe.msgprint(_("Applied putaway rules."), alert=True)
 		return updated_table
 
-	if sync and frappe.parse_json(sync):  # sync with client side
+	if sync:  # sync with client side
 		return items
 
 
@@ -366,8 +367,8 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 	return updated_table
 
 
-def _split_bundles(rows, doctype: str):
-	"""Give every row made from one source row its share of the picked bundle."""
+def _split_bundles(rows, doctype: str, keep_original: bool = True):
+	"""Give every row made from one source row its share of the picked bundle; the preview copies them all."""
 	qty_field = "transfer_qty" if doctype == "Stock Entry" else "stock_qty"
 	warehouse_field = "t_warehouse" if doctype == "Stock Entry" else "warehouse"
 
@@ -402,7 +403,7 @@ def _split_bundles(rows, doctype: str):
 				row.serial_and_batch_bundle = ""
 				continue
 
-			doc = bundle if idx == 0 else frappe.copy_doc(bundle, ignore_no_copy=False)
+			doc = bundle if idx == 0 and keep_original else frappe.copy_doc(bundle, ignore_no_copy=False)
 			doc.set("entries", [])
 			for entry in share:
 				doc.append("entries", entry)
