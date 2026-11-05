@@ -187,6 +187,14 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		bom = make_bom(item=item, raw_materials=[raw_material]).name
 		make_mps(items=[make_mps_row(item_code=item, bom_no=bom)])
 
+	def test_to_date_covers_every_row(self):
+		mps = make_mps(items=[make_mps_row(delivery_date=add_days(today(), 30))])
+		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 30)))
+
+		mps.append("items", make_mps_row(delivery_date=add_days(today(), 40)))
+		mps.save()
+		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 40)))
+
 
 def make_mps_row(item_code="_Test Item", **values):
 	return {
