@@ -139,6 +139,18 @@ def apply_putaway_rule(
 	if not frappe.has_permission("Item", "read"):
 		return
 
+	items = frappe.parse_json(items)
+	bundles = {item.get("serial_and_batch_bundle") for item in items if item.get("serial_and_batch_bundle")}
+	if bundles:  # the preview copies them for the caller
+		readable = frappe.get_list(
+			"Serial and Batch Bundle",
+			filters={"name": ("in", list(bundles))},
+			pluck="name",
+			limit_page_length=0,
+		)
+		if len(readable) < len(bundles):
+			_refuse()
+
 	return _apply_putaway_rule(doctype, items, company, sync, purpose)
 
 
