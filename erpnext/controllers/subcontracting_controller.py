@@ -95,18 +95,17 @@ class SubcontractingController(StockController):
 					}
 				)
 
+				# the stock ledger values Standard Cost items at the standard rate
+				is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
 				return_rate = None
-				if self.is_return:
+				if self.is_return and not is_standard_cost:
 					# rows with serial nos or batches already carry the rate they were consumed at
 					return_rate = (
 						row.rate
 						if row.serial_and_batch_bundle
 						else return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
 					)
-				if (
-					row.reference_name in rejected_return_rows
-					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
-				):
+				if row.reference_name in rejected_return_rows and not is_standard_cost:
 					rate = 0.0
 				elif return_rate is not None:
 					rate = return_rate
@@ -122,8 +121,7 @@ class SubcontractingController(StockController):
 			self.calculate_items_qty_and_amount()
 
 	def get_consumed_rates_for_return(self):
-		"""Rate each raw material was consumed at in the returned receipt, keyed by (receipt item row, raw material).
-		Standard Cost items are left out: the stock ledger values them at the standard rate."""
+		"""Rate each raw material was consumed at in the returned receipt, keyed by (receipt item row, raw material)."""
 		if not (self.is_return and self.return_against):
 			return {}
 
@@ -141,11 +139,7 @@ class SubcontractingController(StockController):
 			.groupby(supplied_item.reference_name, supplied_item.rm_item_code)
 		).run(as_dict=True)
 
-		return {
-			(row.reference_name, row.rm_item_code): flt(row.rate)
-			for row in rows
-			if get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
-		}
+		return {(row.reference_name, row.rm_item_code): flt(row.rate) for row in rows}
 
 	def get_returnable_serial_batches(self):
 		"""Serial nos and batches the returned receipt consumed that no return has brought back yet,
