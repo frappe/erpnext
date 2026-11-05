@@ -552,3 +552,4 @@ erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
 erpnext.patches.v16_0.set_lost_on_in_opportunity
 erpnext.patches.v16_0.share_assigned_appointments_with_agents
 erpnext.patches.v16_0.set_base_change_amount_on_pos_invoices
+erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
