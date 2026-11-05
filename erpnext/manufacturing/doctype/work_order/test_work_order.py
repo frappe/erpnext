@@ -5351,6 +5351,23 @@ class TestWorkOrder(FrappeTestCase):
 			batch_size=-1,
 		)
 
+	def test_stock_entry_helpers_follow_work_order_user_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		allowed = make_review_work_order(fg_item, bom.name, 5)
+		restricted = make_review_work_order(fg_item, bom.name, 7)
+		user = create_user("wo-stock-entry-restricted@example.com", "Manufacturing User", "Stock User")
+		add_user_permission("Work Order", allowed.name, user.name)
+
+		with self.set_user(user.name):
+			self.assertEqual(make_stock_entry(allowed.name, "Manufacture")["fg_completed_qty"], 5)
+			self.assertRaises(frappe.PermissionError, make_stock_entry, restricted.name, "Manufacture")
+			self.assertRaises(frappe.PermissionError, make_stock_return_entry, restricted.name)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (

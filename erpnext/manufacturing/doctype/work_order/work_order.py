@@ -1953,6 +1953,7 @@ def make_stock_entry(
 	source_stock_entry: str | None = None,
 ):
 	work_order = frappe.get_doc("Work Order", work_order_id)
+	work_order.check_permission("read")
 	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 		wip_warehouse = work_order.wip_warehouse
 	else:
@@ -2373,11 +2374,11 @@ def get_reserved_qty_for_production(
 def make_stock_return_entry(work_order):
 	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
 
+	wo_doc = frappe.get_doc("Work Order", work_order)
+	wo_doc.check_permission("read")
 	non_consumed_items = get_available_materials(work_order)
 	if not non_consumed_items:
 		return
-
-	wo_doc = frappe.get_cached_doc("Work Order", work_order)
 
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry.from_bom = 1
