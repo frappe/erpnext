@@ -137,6 +137,49 @@ class TestTrialBalanceForParty(ERPNextTestSuite):
 		self.assertEqual({row["party"] for row in data[:-1]}, {"_Test Customer 1"})
 		self.assertEqual(data[-1]["debit"], 10000)
 
+	def test_company_without_permission_is_refused(self):
+		user = "test_tbp_company_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", user)
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(frappe.PermissionError, self.run_report)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_balances_follow_gl_entry_permissions(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		other_receivable = create_account(
+			account_name="_Test TBP Receivable",
+			company="_Test Company",
+			parent_account="Accounts Receivable - _TC",
+			account_type="Receivable",
+		)
+		create_sales_invoice(customer="_Test Customer", qty=1, rate=10000, posting_date="2026-06-01")
+		create_sales_invoice(
+			customer="_Test Customer", qty=1, rate=6000, posting_date="2026-06-01", debit_to=other_receivable
+		)
+
+		user = "test_tbp_account_permission@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "TBP", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Account", "Debtors - _TC", user)
+
+		frappe.set_user(user)
+		try:
+			row = self.party_row("_Test Customer")
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(row["debit"], 10000)
+
 	def test_alternative_finance_book_entries_excluded(self):
 		customer = "_Test Customer"
 		create_sales_invoice(customer=customer, qty=1, rate=10000, posting_date="2026-06-01")
