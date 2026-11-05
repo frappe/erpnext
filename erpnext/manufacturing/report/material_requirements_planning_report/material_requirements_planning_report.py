@@ -865,10 +865,8 @@ class MaterialRequirementsPlanningReport:
 				query = query.where(doctype[field] == value)
 
 		rows = query.run(as_dict=True)
-		precision = frappe.get_precision("Master Production Schedule Item", "planned_qty")
 		for row in rows:
-			conversion_factor = get_conversion_factor(row.item_code, row.uom).get("conversion_factor")
-			row.planned_qty = flt(row.planned_qty * conversion_factor, precision)
+			row.planned_qty *= get_uom_conversion_factor(row.item_code, row.uom)
 
 		return rows
 
@@ -1504,12 +1502,14 @@ def get_purchase_order_item(item, warehouse=None):
 		uom = uom_details.purchase_uom or uom_details.stock_uom
 
 	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
-	qty = flt(
-		max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor,
-		frappe.get_precision("Purchase Order Item", "qty"),
-	)
+	stock_qty = max(flt(item.required_qty), flt(item.min_order_qty))
+	qty = stock_qty / conversion_factor
 	if is_whole_number(uom):
 		qty = math.ceil(qty)
+		# float noise can push an exact multiple of the conversion factor past a whole number
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		if flt((qty - 1) * conversion_factor - stock_qty, precision) >= 0:
+			qty -= 1
 
 	return {
 		"item_code": item.item_code,
@@ -1549,6 +1549,11 @@ def make_work_orders(work_orders, company, warehouse=None, mps=None):
 @frappe.request_cache
 def get_item_uom(item_code):
 	return frappe.get_cached_value("Item", item_code, ["stock_uom", "purchase_uom"], as_dict=True)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom).get("conversion_factor")
 
 
 @frappe.request_cache
