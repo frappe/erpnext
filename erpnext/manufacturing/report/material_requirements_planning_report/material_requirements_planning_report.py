@@ -756,7 +756,7 @@ class MaterialRequirementsPlanningReport:
 			.inner_join(doctype)
 			.on(so_item.name == doctype.parent_detail_docname)
 			.select(
-				(doctype.qty * doctype.conversion_factor * pending_qty / so_item.qty).as_("qty"),
+				(doctype.qty * pending_qty / so_item.qty).as_("qty"),
 				doctype.item_code,
 				doctype.item_name,
 				so_item.delivery_date,
