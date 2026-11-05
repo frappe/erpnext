@@ -1332,8 +1332,7 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 			target.conversion_factor = 1
 
 		pending_rm_qty = flt(source.required_qty) - flt(source.transferred_qty)
-		if pending_rm_qty > 0:
-			target.qty = pending_rm_qty
+		target.qty = pending_rm_qty if pending_rm_qty > 0 else flt(source.required_qty)
 
 	def set_missing_values(source, target):
 		if not source.items:
@@ -1358,6 +1357,7 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 				and frappe.get_cached_value("Item", item.item_code, "allow_alternative_item")
 			)
 
+	allow_excess_transfer = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 	doclist = get_mapped_doc(
 		"Job Card",
 		source_name,
@@ -1374,7 +1374,8 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 					"name": "job_card_item",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.required_qty > 0,
+				"condition": lambda doc: flt(doc.required_qty) > 0
+				and (allow_excess_transfer or flt(doc.required_qty) > flt(doc.transferred_qty)),
 			},
 		},
 		target_doc,
