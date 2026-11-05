@@ -202,8 +202,20 @@ class SubcontractingController(StockController):
 
 	def set_serial_batch_for_return(self, rm_obj, identities):
 		"""Send back the serial nos and batches the returned receipt consumed, one row per batch and rate."""
-		qty = abs(rm_obj.consumed_qty)
 		precision = rm_obj.precision("consumed_qty")
+		groups = self.allocate_returnable_serial_batches(identities, abs(rm_obj.consumed_qty), precision)
+		for (_batch_no, rate), group in groups.items():
+			row = self.append(self.raw_material_table, rm_obj.as_dict(no_default_fields=True))
+			row.consumed_qty = -flt(group.qty, precision)
+			row.serial_and_batch_bundle = self.make_supplied_item_bundle(
+				row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, rate
+			)
+
+		# a return sends back no more than the receipt consumed
+		self.remove(rm_obj)
+
+	def allocate_returnable_serial_batches(self, identities, qty, precision):
+		"""Take qty from the returnable serial nos and batches, grouped by batch and rate."""
 		groups = defaultdict(lambda: frappe._dict(qty=0.0, serial_nos=[], batches=defaultdict(float)))
 		for identity in identities:
 			allocated = min(qty, identity.qty)
@@ -219,15 +231,38 @@ class SubcontractingController(StockController):
 			else:
 				group.batches[identity.batch_no] += allocated
 
-		for (_batch_no, rate), group in groups.items():
-			row = self.append(self.raw_material_table, rm_obj.as_dict(no_default_fields=True))
-			row.consumed_qty = -flt(group.qty, precision)
-			row.serial_and_batch_bundle = self.make_supplied_item_bundle(
-				row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, rate
-			)
+		return groups
 
-		# a return sends back no more than the receipt consumed
-		self.remove(rm_obj)
+	def update_edited_return_bundles(self):
+		"""Pick the serial nos and batches again for return rows whose consumed qty was edited."""
+		receipt_items = {row.name: row.subcontracting_receipt_item for row in self.items}
+		for row in self.supplied_items:
+			identities = self.returnable_serial_batches.get(
+				(receipt_items.get(row.reference_name), row.rm_item_code)
+			)
+			if not (row.serial_and_batch_bundle and identities):
+				continue
+
+			bundle = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+			precision = row.precision("consumed_qty")
+			if flt(abs(row.consumed_qty), precision) == flt(abs(bundle.total_qty), precision):
+				continue
+
+			# keep the row on the batch and rate it was made for
+			group_key = (bundle.entries[0].batch_no, bundle.entries[0].incoming_rate)
+			group = self.allocate_returnable_serial_batches(
+				[identity for identity in identities if (identity.batch_no, identity.rate) == group_key],
+				abs(row.consumed_qty),
+				precision,
+			).get(group_key)
+
+			self.__remove_serial_and_batch_bundle(row)
+			row.serial_and_batch_bundle = None
+			row.consumed_qty = -flt(group.qty, precision) if group else 0
+			if group:
+				row.serial_and_batch_bundle = self.make_supplied_item_bundle(
+					row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, group_key[1]
+				)
 
 	def validate_returned_serial_batches(self):
 		"""Serial nos and batches a return sends back must be ones the receipt consumed and no return got back."""
@@ -1230,10 +1265,11 @@ class SubcontractingController(StockController):
 			)
 
 	def __modify_serial_and_batch_bundle(self):
-		if self.is_new() or self.get("is_return"):
+		if self.is_new() or self.doctype != "Subcontracting Receipt":
 			return
 
-		if self.doctype != "Subcontracting Receipt":
+		if self.is_return:
+			self.update_edited_return_bundles()
 			return
 
 		for item_row in self.items:
