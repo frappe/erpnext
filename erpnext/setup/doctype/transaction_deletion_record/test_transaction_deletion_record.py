@@ -281,6 +281,21 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			tdr.insert()
 
+	def test_update_naming_series_keeps_other_doctype_counters(self):
+		prefix = f"TDR{frappe.generate_hash(length=6)}-"
+		series = frappe.qb.DocType("Series")
+		for doctype, current in (("", 5), ("Task", 7), ("Note", 9)):
+			frappe.qb.into(series).columns("name", "doctype", "current").insert(
+				prefix, doctype, current
+			).run()
+
+		frappe.new_doc("Transaction Deletion Record").update_naming_series(prefix + ".####", "Task")
+
+		counters = dict(
+			frappe.qb.from_(series).select(series.doctype, series.current).where(series.name == prefix).run()
+		)
+		self.assertEqual(counters, {"": 0, "Task": 0, "Note": 9})
+
 	def test_get_naming_series_prefix_with_dot(self):
 		"""Test prefix extraction for standard dot-separated naming series"""
 		from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
