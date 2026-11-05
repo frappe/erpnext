@@ -12,7 +12,7 @@ from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
-from frappe.utils import ceil, cint, floor, flt, get_link_to_form
+from frappe.utils import ceil, cint, cstr, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
@@ -1532,19 +1532,11 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 	pick_list.check_permission("read")
 	validate_item_locations(pick_list)
 	sales_dict = dict()
-	sales_orders = []
 	delivery_note = None
-	for location in pick_list.locations:
-		if location.sales_order:
-			sales_orders.append(
-				frappe.db.get_value(
-					"Sales Order", location.sales_order, ["customer", "name as sales_order"], as_dict=True
-				)
-			)
+	sales_orders = get_sales_order_headers({location.sales_order for location in pick_list.locations})
 
-	group_key = lambda so: so["customer"]  # noqa
-	for customer, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
-		sales_dict[customer] = {row.sales_order for row in rows}
+	for key, rows in groupby(sorted(sales_orders, key=get_header_key), key=get_header_key):
+		sales_dict[key] = {row.sales_order for row in rows}
 
 	if sales_dict:
 		delivery_note = create_dn_with_so(sales_dict, pick_list)
@@ -1556,6 +1548,87 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 
 	frappe.msgprint(_("Delivery Note(s) created for the Pick List"))
 	return delivery_note
+
+
+SALES_ORDER_HEADER_FIELDS = (
+	"customer",
+	"company_address",
+	"dispatch_address_name",
+	"shipping_address_name",
+	"customer_address",
+	"currency",
+	"selling_price_list",
+	"taxes_and_charges",
+	"apply_discount_on",
+	"additional_discount_percentage",
+	"discount_amount",
+	"tc_name",
+	"terms",
+	"payment_terms_template",
+)
+
+SALES_ORDER_TAX_KEY_FIELDS = (
+	"charge_type",
+	"account_head",
+	"rate",
+	"row_id",
+	"included_in_print_rate",
+	"cost_center",
+)
+
+
+def get_header_key(sales_order):
+	key = tuple(cstr(sales_order.get(field)) for field in SALES_ORDER_HEADER_FIELDS)
+	key += (
+		tuple(
+			tuple(cstr(tax.get(field)) for field in SALES_ORDER_TAX_KEY_FIELDS) for tax in sales_order.taxes
+		),
+	)
+	if has_order_specific_amounts(sales_order):
+		key += (sales_order.sales_order,)
+
+	return key
+
+
+def has_order_specific_amounts(sales_order):
+	if flt(sales_order.discount_amount) and not flt(sales_order.additional_discount_percentage):
+		return True
+
+	return any(tax.charge_type == "Actual" for tax in sales_order.taxes)
+
+
+def get_sales_order_headers(sales_orders):
+	sales_orders = [so for so in sales_orders if so]
+	if not sales_orders:
+		return []
+
+	headers = frappe.get_all(
+		"Sales Order",
+		filters={"name": ("in", sales_orders)},
+		fields=["name as sales_order", *SALES_ORDER_HEADER_FIELDS],
+	)
+	taxes = get_sales_order_taxes(sales_orders)
+	for header in headers:
+		header.taxes = taxes.get(header.sales_order, [])
+
+	return headers
+
+
+def get_sales_order_taxes(sales_orders):
+	tax = frappe.qb.DocType("Sales Taxes and Charges")
+	rows = (
+		frappe.qb.from_(tax)
+		.select(tax.parent, *[tax[field] for field in SALES_ORDER_TAX_KEY_FIELDS])
+		.where((tax.parenttype == "Sales Order") & (tax.parent.isin(sales_orders)))
+		.orderby(tax.parent)
+		.orderby(tax.idx)
+	).run(as_dict=True)
+
+	taxes = {}
+	for row in rows:
+		taxes.setdefault(row.parent, []).append(row)
+
+	return taxes
 
 
 def create_dn_wo_so(pick_list, delivery_note=None, selected_locations=None):
@@ -1623,11 +1696,11 @@ def create_dn_for_pick_lists(
 
 
 def create_dn_with_so(sales_dict, pick_list):
-	"""Create Delivery Note for each customer (based on SO) in a Pick List."""
+	"""Create Delivery Note for each order header (based on SO) in a Pick List."""
 	delivery_note = None
 
-	for customer in sales_dict:
-		delivery_note = create_dn_from_so(pick_list, sales_dict[customer], None)
+	for key in sales_dict:
+		delivery_note = create_dn_from_so(pick_list, sales_dict[key], None)
 		if delivery_note:
 			delivery_note.flags.ignore_mandatory = True
 			# updates packed_items on save
