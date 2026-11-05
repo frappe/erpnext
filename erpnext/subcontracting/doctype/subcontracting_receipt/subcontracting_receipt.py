@@ -218,6 +218,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
+		self.validate_returned_serial_batches()
 		self.update_stock_reservation_entries()
 		self.update_stock_ledger()
 		self.validate_consumed_batches()
