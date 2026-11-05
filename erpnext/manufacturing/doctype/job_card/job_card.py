@@ -2026,7 +2026,7 @@ class JobCard(Document):
 			if kwargs.from_time and not kwargs.to_time:
 				self.add_new_time_log_for_employee(kwargs)
 			elif not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
-				self.update_completed_qty_for_employee(kwargs)
+				self.update_latest_time_log_qty(kwargs)
 				update_status = True
 			else:
 				self.close_time_log_for_employee(kwargs)
@@ -2042,13 +2042,13 @@ class JobCard(Document):
 		row.db_update()
 		self.db_set("status", "Work In Progress")
 
-	def update_completed_qty_for_employee(self, kwargs):
-		rows = [row for row in self.time_logs if row.employee == kwargs.employee]
-		if not rows:
+	def update_latest_time_log_qty(self, kwargs):
+		"""Without an end time the qty is for the current cycle, so only the latest time log gets it."""
+		if not self.time_logs:
 			return
 
-		rows[-1].completed_qty = kwargs.completed_qty
-		rows[-1].db_update()
+		self.time_logs[-1].completed_qty = kwargs.completed_qty
+		self.time_logs[-1].db_update()
 
 	def close_time_log_for_employee(self, kwargs):
 		for row in self.time_logs:
