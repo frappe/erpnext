@@ -65,3 +65,14 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 		self.assertEqual(len(data), 2)
 		self.assertIn("warehouse", [column.get("fieldname") for column in columns])
 		self.assertEqual({row.warehouse for row in data}, {"Stores - _TC"})
+
+	def test_qty_column_is_shown_for_serial_items(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import execute
+
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=1, basic_rate=100)
+
+		columns = execute(frappe._dict(item_code=item, voucher_no=[se.name], voucher_type="Stock Entry"))[0]
+
+		self.assertIn("qty", [column.get("fieldname") for column in columns])
