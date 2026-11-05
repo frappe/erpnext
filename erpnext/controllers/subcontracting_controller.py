@@ -92,22 +92,31 @@ class SubcontractingController(StockController):
 				)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 				return_rate = return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
 				if row.reference_name in rejected_return_rows:
 =======
+=======
+				# the stock ledger values Standard Cost items at the standard rate
+				is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
+>>>>>>> c24fa1b (fix: value returned Standard Cost raw materials at the standard rate on submit)
 				return_rate = None
-				if self.is_return:
+				if self.is_return and not is_standard_cost:
 					# rows with serial nos or batches already carry the rate they were consumed at
 					return_rate = (
 						row.rate
 						if row.serial_and_batch_bundle
 						else return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
 					)
+<<<<<<< HEAD
 				if (
 					row.reference_name in rejected_return_rows
 					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
 				):
 >>>>>>> 78d9e38 (fix(subcontracting): return the serial nos and batches the receipt consumed)
+=======
+				if row.reference_name in rejected_return_rows and not is_standard_cost:
+>>>>>>> c24fa1b (fix: value returned Standard Cost raw materials at the standard rate on submit)
 					rate = 0.0
 				elif return_rate is not None:
 					rate = return_rate
