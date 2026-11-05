@@ -1428,6 +1428,10 @@ class update_entries_after:
 
 	def get_dynamic_incoming_outgoing_rate(self, sle):
 		# Get updated incoming/outgoing rate from transaction
+		if sle.voucher_type == "Stock Entry" and flt(sle.actual_qty) < 0:
+			sle.outgoing_rate = 0
+			return
+
 		if (
 			sle.recalculate_rate
 			or self.has_landed_cost_based_on_pi(sle)
