@@ -10,8 +10,8 @@ from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	_get_bin_details,
 	aggregate_bin_details,
-	get_bin_details,
 	get_planned_process_loss_percentage,
 	get_qty_before_process_loss,
 	get_uom_conversion_factor,
@@ -99,7 +99,7 @@ def _add_sub_assembly_child(
 
 def _resolve_available_sub_assembly(d, stock_qty, bin_details, company, warehouse, skip_available):
 	if warehouse and d.item_code not in bin_details:
-		bins = get_bin_details(d, company, for_warehouse=warehouse)
+		bins = _get_bin_details(d, company, for_warehouse=warehouse)
 		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
 	if skip_available:

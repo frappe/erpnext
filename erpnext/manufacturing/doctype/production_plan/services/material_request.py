@@ -25,8 +25,8 @@ from erpnext.manufacturing.doctype.production_plan.services.bom_explosion import
 	get_subitems,
 )
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	_get_bin_details,
 	aggregate_bin_details,
-	get_bin_details,
 	get_item_data,
 	get_plan_process_loss_percentage,
 	get_qty_before_process_loss,
@@ -520,9 +520,9 @@ def _mr_item_for_details(
 	is_transfer,
 ):
 	"""When transferring, size the shortage on For Warehouse alone so group stock is not counted twice."""
-	# get_bin_details scopes to the warehouse's descendants, returning one row per
+	# _get_bin_details scopes to the warehouse's descendants, returning one row per
 	# child warehouse; sum them so a group warehouse reflects combined child stock.
-	bins = get_bin_details(details, doc.company, warehouse)
+	bins = _get_bin_details(details, doc.company, warehouse)
 	bin_dict = aggregate_bin_details(bins)
 	if details.qty <= 0:
 		return None
@@ -988,7 +988,7 @@ def _raw_material_row(d):
 
 def _append_other_warehouse_bins(item_list, d, doc):
 	row = {"item_code": d.get("item_code")}
-	for bin_dict in get_bin_details(row, doc.company, all_warehouse=True):
+	for bin_dict in _get_bin_details(row, doc.company, all_warehouse=True):
 		if d.get("warehouse") == bin_dict.get("warehouse"):
 			continue
 
