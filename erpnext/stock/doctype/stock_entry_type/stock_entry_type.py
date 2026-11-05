@@ -38,6 +38,10 @@ class StockEntryType(Document):
 		if self.add_to_transit and self.purpose != "Material Transfer":
 			self.add_to_transit = 0
 
+	def on_trash(self):
+		if self.is_standard:
+			frappe.throw(_("Standard Stock Entry Type {0} cannot be deleted").format(frappe.bold(self.name)))
+
 	def validate_add_to_transit(self):
 		if self.is_standard and self.add_to_transit:
 			frappe.throw(
