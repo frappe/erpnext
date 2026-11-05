@@ -626,6 +626,47 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 			[(2, "Box", 12, 24)],
 		)
 
+	def test_mps_qty_in_another_uom_is_ordered_in_that_uom(self):
+		uom = frappe.get_doc(
+			{"doctype": "UOM", "uom_name": "_Test MRP Tenth Pack", "must_be_whole_number": 1}
+		).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": uom.name, "conversion_factor": 0.1}],
+				"item_defaults": [
+					{"company": COMPANY, "default_warehouse": WAREHOUSE, "default_supplier": SUPPLIER}
+				],
+			}
+		).name
+		mps = frappe.get_doc(
+			{
+				"doctype": "Master Production Schedule",
+				"company": COMPANY,
+				"posting_date": today(),
+				"from_date": today(),
+				"parent_warehouse": WAREHOUSE,
+				"items": [
+					{
+						"item_code": item,
+						"warehouse": WAREHOUSE,
+						"delivery_date": add_days(today(), 30),
+						"planned_qty": 3,
+						"uom": uom.name,
+					}
+				],
+			}
+		).insert()
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=mps.name)
+
+		purchase_order = get_created_order(mps.name, "Purchase Order")
+		self.assertEqual(
+			[(row.qty, row.uom, row.stock_qty) for row in purchase_order.items], [(3, uom.name, 0.3)]
+		)
+
 	def test_safety_stock_is_ordered_once_and_only_when_stock_is_short(self):
 		def make_plan_with_safety_stock():
 			plan = make_mrp_plan(self)
