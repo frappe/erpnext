@@ -1060,12 +1060,16 @@ class update_entries_after:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
 		for depend_sle in dependant_sles:
-			if not self.queue_item_wh_entries(depend_sle):
+			item_wh_key = (depend_sle.item_code, depend_sle.warehouse)
+			if item_wh_key in self.distinct_dependant_item_wh:
 				continue
+
+			self.distinct_dependant_item_wh.add(item_wh_key)
+			self._sles.extend(self.get_future_entries_to_repost(depend_sle))
 
 			if produced_by_manufacture:
 				self.reposted_dependant_item_wh.setdefault(
-					(depend_sle.item_code, depend_sle.warehouse),
+					item_wh_key,
 					depend_sle.posting_datetime
 					or get_combine_datetime(depend_sle.posting_date, depend_sle.posting_time),
 				)
@@ -1074,17 +1078,24 @@ class update_entries_after:
 		"""A receipt's return can bring the raw material back to another supplier warehouse."""
 		if sle.voucher_type == "Subcontracting Receipt" and flt(sle.actual_qty) < 0:
 			for return_sle in get_returned_supplied_item_sles(sle):
-				self.queue_item_wh_entries(return_sle)
+				self.queue_returned_supplied_item(return_sle)
 
-	def queue_item_wh_entries(self, sle):
-		"""Queue the item-warehouse's entries from `sle` on, once per repost; False if already queued."""
-		item_wh_key = (sle.item_code, sle.warehouse)
-		if item_wh_key in self.distinct_dependant_item_wh:
-			return False
+	def queue_returned_supplied_item(self, return_sle):
+		"""Queue the return's item-warehouse from the return on, unless it is already queued from an earlier point.
+
+		The return can be far ahead of the receipt, so its position is saved for a resumed repost.
+		"""
+		item_wh_key = (return_sle.item_code, return_sle.warehouse)
+		queued_from = self.item_wh_wise_last_posted_sle.get(item_wh_key)
+		is_queued_later = queued_from and get_datetime(queued_from.posting_datetime) > get_datetime(
+			return_sle.posting_datetime
+		)
+		if item_wh_key in self.distinct_dependant_item_wh and not is_queued_later:
+			return
 
 		self.distinct_dependant_item_wh.add(item_wh_key)
-		self._sles.extend(self.get_future_entries_to_repost(sle))
-		return True
+		self._sles.extend(self.get_future_entries_to_repost(return_sle))
+		self.update_item_wh_wise_last_posted_sle(return_sle)
 
 	def repost_stock_ledger_entry(self, sle):
 		if isinstance(sle, dict):
