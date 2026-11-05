@@ -1,12 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from functools import cached_property
+
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
 import erpnext
-from erpnext.accounts.deferred_revenue import get_already_booked_amount
+from erpnext.accounts.deferred_revenue import get_already_booked_amounts
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
@@ -412,37 +414,49 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 		if not self.doc.return_against or not item.sales_invoice_item:
 			return item.income_account
 
+		if item.name in self.deferred_return_items:
+			return item.deferred_revenue_account
+		return item.income_account
+
+	@cached_property
+	def deferred_return_items(self):
+		items = [item for item in self.doc.items if item.enable_deferred_revenue and item.sales_invoice_item]
 		frappe.db.get_value("Sales Invoice", self.doc.return_against, "name", for_update=True)
 		# Stock reposting composes entries before replacing the existing ledger.
-		if frappe.db.exists(
-			"GL Entry",
-			{
-				"voucher_type": "Sales Invoice",
-				"voucher_no": self.doc.name,
-				"voucher_detail_no": item.name,
-				"account": item.deferred_revenue_account,
-				"is_cancelled": 0,
-			},
-		):
-			return item.deferred_revenue_account
+		entries = {
+			(entry.voucher_detail_no, entry.account)
+			for entry in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": "Sales Invoice", "voucher_no": self.doc.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "account"],
+			)
+		}
+		deferred_items = {
+			item.name for item in items if (item.name, item.deferred_revenue_account) in entries
+		}
+		items = [item for item in items if item.name not in deferred_items]
+		if not items:
+			return deferred_items
 
 		invoice = frappe.get_cached_doc("Sales Invoice", self.doc.return_against)
-		for original_item in invoice.items:
-			if original_item.name != item.sales_invoice_item:
-				continue
+		original_names = {item.sales_invoice_item for item in items}
+		original_items = {
+			item.name: item
+			for item in invoice.items
+			if item.name in original_names and item.enable_deferred_revenue
+		}
+		booked_amounts = get_already_booked_amounts(invoice, list(original_items.values()))
+		# Keep the existing treatment once recognition has started, including draft journals.
+		for item in items:
+			original_item = original_items.get(item.sales_invoice_item)
 			if (
-				not original_item.enable_deferred_revenue
-				or original_item.deferred_revenue_account != item.deferred_revenue_account
+				original_item
+				and original_item.deferred_revenue_account == item.deferred_revenue_account
+				and not any(booked_amounts[original_item.name])
 			):
-				break
+				deferred_items.add(item.name)
 
-			booked_amount, booked_account_amount = get_already_booked_amount(invoice, original_item)
-			# Keep the existing treatment once recognition has started, including reserved draft journals.
-			if not booked_amount and not booked_account_amount:
-				return original_item.deferred_revenue_account
-			break
-
-		return item.income_account
+		return deferred_items
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		doc = self.doc
