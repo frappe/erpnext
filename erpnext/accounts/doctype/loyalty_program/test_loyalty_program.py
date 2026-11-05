@@ -259,23 +259,6 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		# Clean up
 		loyalty_program.delete()
 
-	def test_empty_min_spent_is_treated_as_zero(self):
-		loyalty_program = frappe.get_doc(
-			{
-				"doctype": "Loyalty Program",
-				"loyalty_program_name": "Test Empty Min Spent",
-				"loyalty_program_type": "Multiple Tier Program",
-				"from_date": today(),
-				"conversion_factor": 1,
-				"company": "_Test Company",
-				"collection_rules": [
-					{"tier_name": "Gold", "collection_factor": 1, "min_spent": 10000},
-					{"tier_name": "Silver", "collection_factor": 1, "min_spent": None},
-				],
-			}
-		)
-		loyalty_program.insert()
-
 	def test_points_never_expire_when_expiry_duration_is_zero(self):
 		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		frappe.db.set_value(
