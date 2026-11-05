@@ -690,6 +690,30 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertRaises(frappe.ValidationError, riv.save)
 
+	def test_recalculate_valuation_rate_not_allowed_for_stock_entry_with_source_warehouse(self):
+		item = self.make_item().name
+		fg = self.make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item, target=warehouse, qty=10, rate=100)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=1)
+		repack = make_stock_entry(item_code=item, source=warehouse, qty=1, purpose="Repack", do_not_save=True)
+		repack.append("items", {"item_code": fg, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1})
+		repack.submit()
+
+		for entry in (issue, repack):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Transaction",
+				voucher_type=entry.doctype,
+				voucher_no=entry.name,
+				recalculate_valuation_rate=1,
+				posting_date=entry.posting_date,
+				posting_time=entry.posting_time,
+			)
+			with self.subTest(purpose=entry.purpose):
+				self.assertRaises(frappe.ValidationError, riv.save)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
