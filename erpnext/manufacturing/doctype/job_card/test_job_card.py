@@ -13,6 +13,7 @@ from frappe.utils.data import add_to_date, now, today
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
 	OperationMismatchError,
+	OperationSequenceError,
 	OverlapError,
 	make_corrective_job_card,
 	make_material_request,
@@ -1676,6 +1677,29 @@ class TestJobCard(FrappeTestCase):
 		job_card.reload()
 		job_card.append("time_logs", jc_review_log("2031-03-07 08:00:00", 60, 10))
 		self.assertRaisesRegex(frappe.ValidationError, "Materials needs to be transferred", job_card.submit)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_earlier_operation_cannot_be_undone_after_the_next_one(self):
+		workstation = make_jc_review_workstation()
+		cutting = make_jc_review_operation(workstation)
+		welding = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[
+				{"operation": cutting, "workstation": workstation, "time_in_mins": 60},
+				{"operation": welding, "workstation": workstation, "time_in_mins": 60},
+			],
+			skip_transfer=1,
+		)
+
+		first_card, second_card = get_jc_review_job_cards(wo.name)
+		first_card.append("time_logs", jc_review_log("2031-03-08 08:00:00", 60, 10))
+		first_card.submit()
+		second_card.append("time_logs", jc_review_log("2031-03-08 10:00:00", 60, 10))
+		second_card.submit()
+
+		self.assertRaises(OperationSequenceError, first_card.cancel)
 
 
 def create_bom_with_multiple_operations():
