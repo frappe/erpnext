@@ -378,27 +378,24 @@ class QualityInspection(Document):
 		"""Reject newly entered readings that are not numbers in the user's format.
 
 		They would otherwise be misread rather than refused, silently rejecting an
-		inspection whose readings are in fact within the acceptance range. Readings
-		already stored are left alone, so a document entered by a user in one locale
-		stays saveable and submittable by a user in another."""
+		inspection whose readings are in fact within the acceptance range. Unchanged
+		rows keep their stored status and are left alone, so a document entered by a
+		user in one locale stays saveable and submittable by a user in another."""
 		number_format = get_reading_number_format()
 		decimal_str, comma_str = get_reading_separators(number_format)
-		before_save = self.get_doc_before_save()
 
 		for reading in self.readings:
-			if not cint(reading.numeric) or cint(reading.manual_inspection):
+			if (
+				not cint(reading.numeric)
+				or cint(reading.manual_inspection)
+				or self.get_unchanged_stored_reading(reading)
+			):
 				continue
-
-			stored = before_save and before_save.get("readings", {"name": reading.name})
-			stored = stored[0] if stored else None
 
 			for i in range(1, 11):
 				field = "reading_" + str(i)
 				value = reading.get(field)
 				if value is None or not value.strip():
-					continue
-
-				if stored and stored.get(field) == value:
 					continue
 
 				if parse_reading(value, decimal_str, comma_str) is None:
