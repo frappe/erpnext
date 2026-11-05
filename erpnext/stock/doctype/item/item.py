@@ -513,7 +513,7 @@ class Item(Document):
 					)
 					if item_barcode.barcode_type:
 						barcode_type = convert_erpnext_to_barcodenumber(
-							item_barcode.barcode_type.upper(), item_barcode.barcode
+							item_barcode.barcode_type.replace("-", "").upper(), item_barcode.barcode
 						)
 						if barcode_type in barcodenumber.barcodes():
 							if not barcodenumber.check_code(barcode_type, item_barcode.barcode):
@@ -1202,12 +1202,7 @@ def convert_erpnext_to_barcodenumber(erpnext_number, barcode):
 
 		return erpnext_number
 
-	convert = {
-		"UPC-A": "UPCA",
-		"CODE-39": "CODE39",
-		"ISBN-10": "ISBN10",
-		"ISBN-13": "ISBN13",
-	}
+	convert = {"UPCA": "UPC"}
 
 	if erpnext_number in convert:
 		return convert[erpnext_number]
