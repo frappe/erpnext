@@ -17,11 +17,11 @@ from erpnext.controllers.sales_and_purchase_return import (
 	is_rejected_subcontracting_return,
 )
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_auto_batch_nos,
 	get_available_serial_nos,
+	get_batch_qty_for_stock,
 	get_voucher_wise_serial_batch_from_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -1077,7 +1077,7 @@ class SubcontractingController(StockController):
 							consumed_qty -= d.get("qty")
 
 	def batch_has_not_available(self, batch_no, qty_required):
-		batch_qty = get_batch_qty(batch_no, self.supplier_warehouse, consider_negative_batches=True)
+		batch_qty = get_batch_qty_for_stock(batch_no, self.supplier_warehouse, consider_negative_batches=True)
 
 		return batch_qty < qty_required
 
