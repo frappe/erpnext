@@ -571,6 +571,44 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, -2 * receipts[1].items[0].rate)
 
+	def test_moving_average_return_takes_the_finished_good_out_at_the_running_rate(self):
+		moving_average = {"is_stock_item": 1, "valuation_method": "Moving Average"}
+		rm_item = make_item(properties=moving_average).name
+		fg_item = make_item(properties={**moving_average, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse - _TC", qty=5, basic_rate=500)
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 5,
+					"rate": 30,
+					"fg_item": fg_item,
+					"fg_item_qty": 5,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name).submit()
+		running_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": scr.name, "item_code": fg_item}, "valuation_rate"
+		)
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, flt(-2 * running_rate, 2))
+
 	def test_standard_cost_raw_material_return_uses_current_standard_rate(self):
 		from erpnext.stock.doctype.item_standard_cost.test_item_standard_cost import (
 			create_item_standard_cost,
