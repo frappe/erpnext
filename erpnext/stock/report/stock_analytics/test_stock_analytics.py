@@ -21,6 +21,9 @@ class TestStockAnalyticsReport(FrappeTestCase):
 		self.item = make_item().name
 		self.warehouse = "_Test Warehouse - _TC"
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def assert_single_item_report(self, movement, expected_buckets):
 		self.generate_stock(movement)
 		filters = _dict(
@@ -174,3 +177,44 @@ class TestStockAnalyticsReport(FrappeTestCase):
 		cols, data = stock_analytics(filters)
 
 		self.compare_analytics_row(frappe._dict(data[0]), cols, [0, 3])
+
+	def get_quantity_for_restricted_user(self, applicable_for=None):
+		from frappe.permissions import add_user_permission
+
+		make_stock_entry(
+			item=self.item, to_warehouse="Stores - _TC", qty=10, posting_date=datetime.date(2026, 8, 5)
+		)
+		make_stock_entry(
+			item=self.item, to_warehouse="Finished Goods - _TC", qty=2, posting_date=datetime.date(2026, 8, 5)
+		)
+		user = "stock-analytics-warehouse@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Analytics", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc("User", user).add_roles("Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user, applicable_for=applicable_for)
+
+		filters = _dict(
+			range="Monthly",
+			from_date=datetime.date(2026, 8, 1),
+			to_date=datetime.date(2026, 8, 28),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+		frappe.set_user(user)
+		try:
+			cols, data = stock_analytics(filters)
+		finally:
+			frappe.set_user("Administrator")
+
+		return cols, frappe._dict(data[0])
+
+	def test_rows_count_only_permitted_warehouses(self):
+		cols, row = self.get_quantity_for_restricted_user()
+		self.compare_analytics_row(row, cols, [2])
+
+	def test_permission_for_another_doctype_does_not_limit_rows(self):
+		cols, row = self.get_quantity_for_restricted_user(applicable_for="Purchase Order")
+		self.compare_analytics_row(row, cols, [12])
