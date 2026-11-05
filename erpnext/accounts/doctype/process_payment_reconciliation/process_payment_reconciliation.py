@@ -130,10 +130,25 @@ def is_job_running(job_name: str) -> bool:
 	return False
 
 
+def is_submitted(docname: str) -> bool:
+	return frappe.db.get_value("Process Payment Reconciliation", docname, "docstatus") == 1
+
+
+def validate_submitted(docname: str) -> None:
+	if not is_submitted(docname):
+		frappe.throw(_("Process Payment Reconciliation {0} is not submitted.").format(frappe.bold(docname)))
+
+
 @frappe.whitelist()
 def pause_job_for_doc(docname: str | None = None):
 	if docname:
 		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
+		validate_submitted(docname)
+		if frappe.db.get_value("Process Payment Reconciliation", docname, "status") not in (
+			"Queued",
+			"Running",
+		):
+			frappe.throw(_("Only a queued or running reconciliation can be paused."))
 		frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Paused")
 		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": docname})
 		if log:
@@ -149,6 +164,7 @@ def trigger_job_for_doc(docname: str | None = None):
 		return
 
 	frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
+	validate_submitted(docname)
 
 	if not frappe.get_single_value("Accounts Settings", "auto_reconcile_payments"):
 		frappe.throw(
@@ -212,7 +228,7 @@ def trigger_reconciliation_for_queued_docs():
 		all_queued = frappe.db.get_all(
 			"Process Payment Reconciliation",
 			filters={"docstatus": 1, "status": "Queued"},
-			order_by="creation desc",
+			order_by="creation asc",
 			as_list=1,
 		)
 
@@ -228,6 +244,15 @@ def trigger_reconciliation_for_queued_docs():
 		for x in all_queued:
 			doc = frappe.get_doc("Process Payment Reconciliation", x)
 			filters = get_filters_as_tuple(fields, doc)
+			if is_any_doc_running(
+				{
+					"company": doc.company,
+					"party_type": doc.party_type,
+					"party": doc.party,
+					"receivable_payable_account": doc.receivable_payable_account,
+				}
+			):
+				continue
 			if filters not in unique_filters:
 				unique_filters.add(filters)
 				docs_to_trigger.append(doc.name)
@@ -246,7 +271,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 	"""
 	Identify current state of document and execute next tasks in background
 	"""
-	if doc:
+	if doc and is_submitted(doc):
 		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": doc})
 		if not log:
 			log = frappe.new_doc("Process Payment Reconciliation Log")
@@ -341,7 +366,7 @@ def fetch_and_allocate(doc: str) -> None:
 	Fetch Invoices and Payments based on filters applied. FIFO ordering is used for allocation.
 	"""
 
-	if doc:
+	if doc and is_submitted(doc):
 		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": doc})
 		if log:
 			if not frappe.db.get_value("Process Payment Reconciliation Log", log, "allocated"):
@@ -394,7 +419,7 @@ def fetch_and_allocate(doc: str) -> None:
 
 
 def reconcile(doc: None | str = None) -> None:
-	if doc:
+	if doc and is_submitted(doc):
 		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": doc})
 		if log:
 			res = frappe.get_all(
@@ -488,11 +513,13 @@ def reconcile(doc: None | str = None) -> None:
 							"Failed",
 						)
 				finally:
-					if reconciled_entries == total_allocations:
+					# a document cancelled while this batch ran keeps its Cancelled status
+					submitted = is_submitted(doc)
+					if submitted and reconciled_entries == total_allocations:
 						frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Reconciled")
 						frappe.db.set_value("Process Payment Reconciliation Log", log, "reconciled", 1)
 						frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
-					else:
+					elif submitted:
 						if frappe.db.get_value("Process Payment Reconciliation", doc, "status") != "Paused":
 							# trigger next batch in job
 							# generate reconcile job name

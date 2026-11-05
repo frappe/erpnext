@@ -13,7 +13,11 @@ from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation impo
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	fetch_and_allocate,
 	get_pr_instance,
+	pause_job_for_doc,
 	reconcile,
+	reconcile_based_on_filters,
+	trigger_job_for_doc,
+	trigger_reconciliation_for_queued_docs,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.customer.test_customer import make_customer
@@ -206,3 +210,66 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		self.assertEqual(invoice.reload().outstanding_amount, 0)
 		self.assertEqual(advance.reload().unallocated_amount, 0)
 		self.assertEqual(backdated_invoice.reload().outstanding_amount, 600)
+
+	def test_cancelled_document_stops_its_jobs(self):
+		doc = self.make_ppr().insert().submit()
+		frappe.get_doc(
+			{
+				"doctype": "Process Payment Reconciliation Log",
+				"process_pr": doc.name,
+				"status": "Running",
+				"allocated": 1,
+				"total_allocations": 0,
+				"reconciled_entries": 0,
+			}
+		).insert()
+		doc.cancel()
+
+		with patch("frappe.enqueue") as enqueue:
+			reconcile_based_on_filters(doc.name)
+			fetch_and_allocate(doc.name)
+			reconcile(doc.name)
+
+		enqueue.assert_not_called()
+		self.assertEqual(doc.reload().status, "Cancelled")
+
+	def test_only_submitted_documents_can_be_paused_or_started(self):
+		draft = self.make_ppr().insert()
+		self.assertRaises(frappe.ValidationError, pause_job_for_doc, draft.name)
+		self.assertRaises(frappe.ValidationError, trigger_job_for_doc, draft.name)
+		self.assertNotEqual(draft.reload().status, "Paused")
+
+		submitted = self.make_ppr().insert().submit()
+		pause_job_for_doc(submitted.name)
+		self.assertEqual(submitted.reload().status, "Paused")
+		# a paused document cannot be paused again
+		self.assertRaises(frappe.ValidationError, pause_job_for_doc, submitted.name)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"auto_reconcile_payments": 1, "reconciliation_queue_size": 5}
+	)
+	def test_queued_documents_wait_for_a_running_one(self):
+		module = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation"
+		running = self.make_ppr().insert().submit()
+		running.db_set("status", "Running")
+		waiting = self.make_ppr().insert().submit()
+
+		other_customer = make_customer("_Test Reconciliation Queue Order")
+		first = self.make_ppr()
+		first.party = other_customer
+		first.insert().submit()
+		second = self.make_ppr()
+		second.party = other_customer
+		second.insert().submit()
+
+		with (
+			patch(f"{module}.is_scheduler_inactive", return_value=False),
+			patch(f"{module}.trigger_job_for_doc") as trigger,
+		):
+			trigger_reconciliation_for_queued_docs()
+
+		triggered = [call.args[0] for call in trigger.call_args_list]
+		self.assertNotIn(waiting.name, triggered)
+		# the oldest of two documents with the same filters goes first
+		self.assertIn(first.name, triggered)
+		self.assertNotIn(second.name, triggered)
