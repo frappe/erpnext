@@ -47,8 +47,9 @@ def execute(filters: Filters = None) -> tuple:
 	return columns, data, None, chart_data
 
 
-def get_age_ranges(age_range: str) -> list[str]:
-	return [num.strip() for num in age_range.split(",") if num.strip().isdigit()]
+def get_age_ranges(age_range: str | None) -> list[str]:
+	ranges = [num.strip() for num in (age_range or "30, 60, 90").split(",") if num.strip().isdigit()]
+	return sorted(ranges, key=cint)
 
 
 def get_float_precision() -> int:

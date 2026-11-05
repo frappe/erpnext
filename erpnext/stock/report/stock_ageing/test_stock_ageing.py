@@ -2331,6 +2331,12 @@ class TestStockAgeing(FrappeTestCase):
 	def test_permission_for_another_doctype_does_not_limit_item_rows(self):
 		self.assertEqual(self.get_available_qty_for_restricted_user(applicable_for="Purchase Order"), [9])
 
+	def test_age_ranges_default_and_are_sorted(self):
+		from erpnext.stock.report.stock_ageing.stock_ageing import get_age_ranges
+
+		self.assertEqual(get_age_ranges(None), ["30", "60", "90"])
+		self.assertEqual(get_age_ranges("90, 30, 60"), ["30", "60", "90"])
+
 
 def generate_item_and_item_wh_wise_slots(filters, sle):
 	"Return results with and without 'show_warehouse_wise_stock'"
