@@ -796,6 +796,26 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertRaises(frappe.ValidationError, riv.save)
 
+	def test_repost_ignores_stale_outgoing_rate_on_stock_entry(self):
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, rate=100)
+		transfer = make_stock_entry(
+			item_code=item, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=4
+		)
+		filters = {"voucher_no": transfer.name, "actual_qty": ("<", 0), "is_cancelled": 0}
+		frappe.db.set_value("Stock Ledger Entry", filters, "outgoing_rate", 500)
+
+		frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=transfer.doctype,
+			voucher_no=transfer.name,
+			posting_date=transfer.posting_date,
+			posting_time=transfer.posting_time,
+		).submit()
+
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", filters, "stock_value_difference"), -400)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
