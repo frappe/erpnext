@@ -879,26 +879,29 @@ class PaymentEntry(AccountsController):
 			return ("Purchase Order", "Purchase Invoice", "Journal Entry", "Payment Entry")
 
 	def validate_paid_invoices(self):
-		no_oustanding_refs = {}
-
-		for d in self.get("references"):
-			if not d.allocated_amount:
+		for doctype in ("Sales Invoice", "Purchase Invoice"):
+			names = {
+				d.reference_name
+				for d in self.references
+				if d.allocated_amount and d.reference_doctype == doctype
+			}
+			if not names:
 				continue
 
-			if d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-				outstanding_amount, is_return = frappe.db.get_value(
-					d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"]
-				)
-				if outstanding_amount <= 0 and not is_return:
-					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
+			paid_invoices = frappe.get_all(
+				doctype,
+				filters={"name": ["in", list(names)], "outstanding_amount": ["<=", 0], "is_return": 0},
+				pluck="name",
+			)
+			if not paid_invoices:
+				continue
 
-		for reference_doctype, references in no_oustanding_refs.items():
 			frappe.msgprint(
 				_(
 					"References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 				).format(
-					frappe.bold(comma_and([d.reference_name for d in references])),
-					_(reference_doctype),
+					frappe.bold(comma_and(paid_invoices)),
+					_(doctype),
 				)
 				+ "<br><br>"
 				+ _("If this is undesirable please cancel the corresponding Payment Entry."),
