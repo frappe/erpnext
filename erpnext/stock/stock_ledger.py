@@ -1935,7 +1935,7 @@ class update_entries_after:
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def is_return_purchase_entry(self, sle):
-		if sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"]:
+		if sle.voucher_type in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 			return frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return")
 
 		return False
