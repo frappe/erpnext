@@ -1357,8 +1357,14 @@ def get_price_list_rate_for(args, item_code):
 		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
+<<<<<<< HEAD
 		general_price_list_rate = get_item_price(
 			item_price_args, item_code, ignore_party=args.get("ignore_party")
+=======
+		# Without ignore_party this repeats the query above, which found nothing
+		general_price_list_rate = ctx.get("ignore_party") and get_item_price(
+			pctx, item_code, ignore_party=True
+>>>>>>> 027cf94 (perf(item details): skip repeating the item price query when party is not ignored)
 		)
 
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
