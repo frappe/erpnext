@@ -597,21 +597,19 @@ class ProductionPlan(Document):
 		self.update_sales_order()
 
 	def update_sales_order(self):
-		sales_orders = [row.sales_order for row in self.po_items if row.sales_order]
-		if sales_orders:
-			so_wise_planned_qty = self.get_so_wise_planned_qty(sales_orders)
+		so_items = {
+			(row.sales_order, row.sales_order_item)
+			for row in self.po_items + self.prod_plan_references
+			if row.sales_order and row.sales_order_item
+		}
+		if not so_items:
+			return
 
-			for row in self.po_items:
-				if not row.sales_order and not row.sales_order_item:
-					continue
-
-				key = (row.sales_order, row.sales_order_item)
-				frappe.db.set_value(
-					"Sales Order Item",
-					row.sales_order_item,
-					"production_plan_qty",
-					flt(so_wise_planned_qty.get(key)),
-				)
+		so_wise_planned_qty = self.get_so_wise_planned_qty(list({key[0] for key in so_items}))
+		for key in so_items:
+			frappe.db.set_value(
+				"Sales Order Item", key[1], "production_plan_qty", flt(so_wise_planned_qty.get(key))
+			)
 
 	@staticmethod
 	def get_so_wise_planned_qty(sales_orders):
@@ -627,9 +625,11 @@ class ProductionPlan(Document):
 			group_by="sales_order, sales_order_item",
 		)
 
+		data += get_planned_qty_of_references(sales_orders)
+
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
-			so_wise_planned_qty[key] = row.qty
+			so_wise_planned_qty[key] = flt(so_wise_planned_qty.get(key)) + flt(row.qty)
 
 		return so_wise_planned_qty
 
@@ -1139,6 +1139,61 @@ class ProductionPlan(Document):
 		)
 		all_work_orders_completed = all(s == "Completed" for s in wo_status)
 		return all_work_orders_completed
+
+
+def get_planned_qty_of_references(sales_orders):
+	plans = get_plans_with_references(sales_orders)
+	if not plans:
+		return []
+
+	reference = frappe.qb.DocType("Production Plan Item Reference")
+	references = (
+		frappe.qb.from_(reference)
+		.select(
+			reference.parent,
+			reference.item_reference,
+			reference.sales_order,
+			reference.sales_order_item,
+			reference.qty,
+		)
+		.where(reference.parent.isin(plans))
+		.orderby(reference.idx)
+	).run(as_dict=True)
+	planned_qty = get_planned_qty_by_order_row(plans)
+
+	allocated = []
+	for row in references:
+		key = (row.parent, row.item_reference)
+		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
+		planned_qty[key] = planned_qty.get(key, 0) - qty
+		allocated.append(
+			frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+		)
+	return allocated
+
+
+def get_plans_with_references(sales_orders):
+	reference = frappe.qb.DocType("Production Plan Item Reference")
+	plan = frappe.qb.DocType("Production Plan")
+	return (
+		frappe.qb.from_(reference)
+		.join(plan)
+		.on(plan.name == reference.parent)
+		.select(reference.parent)
+		.distinct()
+		.where(reference.sales_order.isin(sales_orders) & (plan.docstatus == 1))
+	).run(pluck=True)
+
+
+def get_planned_qty_by_order_row(plans):
+	plan_item = frappe.qb.DocType("Production Plan Item")
+	rows = (
+		frappe.qb.from_(plan_item)
+		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
+		.where(plan_item.parent.isin(plans))
+		.groupby(plan_item.parent, plan_item.sales_order_item)
+	).run(as_dict=True)
+	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}
 
 
 @frappe.whitelist()
