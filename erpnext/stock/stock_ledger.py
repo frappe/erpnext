@@ -2057,7 +2057,7 @@ class update_entries_after:
 		if self.skip_serial_batch_valuation:
 			return False
 
-		if sle.voucher_type in ["Purchase Invoice", "Purchase Receipt"]:
+		if sle.voucher_type in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 			return frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return")
 
 		return False
