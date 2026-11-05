@@ -1011,8 +1011,6 @@ class TestWorkOrder(FrappeTestCase):
 
 		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
 
-<<<<<<< HEAD
-=======
 	def test_partial_entries_consume_all_transferred_materials(self):
 		consumption = "Material Consumption for Manufacture"
 		for loss, continuous, steps in (
@@ -1021,7 +1019,7 @@ class TestWorkOrder(FrappeTestCase):
 		):
 			with (
 				self.subTest(loss=loss, continuous=continuous),
-				self.change_settings(
+				change_settings(
 					"Manufacturing Settings",
 					{
 						"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
@@ -1040,7 +1038,7 @@ class TestWorkOrder(FrappeTestCase):
 
 				self.assertEqual(get_bin(raw_materials[0], work_order.wip_warehouse).actual_qty, 0)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Manufacturing Settings",
 		{
 			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
@@ -1072,50 +1070,6 @@ class TestWorkOrder(FrappeTestCase):
 		for item in raw_materials:
 			self.assertEqual(get_bin(item, work_order.wip_warehouse).actual_qty, 0)
 
-	@ERPNextTestSuite.change_settings(
-		"Manufacturing Settings",
-		{
-			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
-			"material_consumption": 1,
-		},
-	)
-	def test_material_consumption_mixed_with_manufacture(self):
-		consumption = "Material Consumption for Manufacture"
-		for manufacture_consumes_second_material in (0, 1):
-			with self.subTest(manufacture_consumes_second_material=manufacture_consumes_second_material):
-				work_order, raw_materials = make_transfer_based_work_order(2)
-				first_consumption = frappe.get_doc(make_stock_entry(work_order.name, consumption, 5))
-				first_consumption.remove(
-					next(row for row in first_consumption.items if row.item_code == raw_materials[1])
-				)
-				first_consumption.submit()
-
-				manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
-				if manufacture_consumes_second_material:
-					manufacture.append(
-						"items",
-						{
-							"item_code": raw_materials[1],
-							"qty": 5,
-							"s_warehouse": work_order.wip_warehouse,
-							"uom": "Kg",
-							"conversion_factor": 1,
-						},
-					)
-				manufacture.submit()
-
-				last_consumption = frappe.get_doc(make_stock_entry(work_order.name, consumption, 5))
-				self.assertEqual(
-					{row.item_code: row.qty for row in last_consumption.items if row.s_warehouse},
-					{raw_materials[0]: 5, raw_materials[1]: 10 - 5 * manufacture_consumes_second_material},
-				)
-				last_consumption.submit()
-				frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5)).submit()
-				for item in raw_materials:
-					self.assertEqual(get_bin(item, work_order.wip_warehouse).actual_qty, 0)
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
->>>>>>> 793357c (test(manufacturing): consume transferred materials over partial and staged entries)
 	def test_partial_material_consumption(self):
 		frappe.db.set_single_value("Manufacturing Settings", "material_consumption", 1)
 		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
@@ -5131,9 +5085,9 @@ def make_wo_order_test_record(**args):
 	return wo_order
 
 
-<<<<<<< HEAD
 test_records = frappe.get_test_records("Work Order")
-=======
+
+
 def make_transfer_based_work_order(components, process_loss_percentage=0):
 	"""Work Order for 10 Kg with 10 Kg of each raw material transferred."""
 	company = "_Test Company with perpetual inventory"
@@ -5151,9 +5105,9 @@ def make_transfer_based_work_order(components, process_loss_percentage=0):
 		quantity=10,
 		raw_materials=raw_materials,
 		rm_qty=10,
-		process_loss_percentage=process_loss_percentage,
 		do_not_save=True,
 	)
+	bom.process_loss_percentage = process_loss_percentage
 	bom.insert()
 	bom.submit()
 	work_order = make_wo_order_test_record(
@@ -5168,60 +5122,6 @@ def make_transfer_based_work_order(components, process_loss_percentage=0):
 	)
 	frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
 	return work_order, raw_materials
-
-
-def make_partially_reserved_work_order(rm_item, rm_properties=None):
-	"""Work Order needing 10 of `rm_item`, submitted with 4 on hand, then 26 more received."""
-	from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
-		make_stock_entry as make_stock_entry_test_record,
-	)
-
-	source_warehouse = "Stores - _TC"
-	production_item = make_item(properties={"is_stock_item": 1}).name
-	make_item(rm_item, {"is_stock_item": 1, **(rm_properties or {})})
-	make_bom(item=production_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
-
-	make_stock_entry_test_record(item_code=rm_item, target=source_warehouse, qty=4, basic_rate=100)
-	wo = make_wo_order_test_record(
-		item=production_item, qty=10, reserve_stock=1, source_warehouse=source_warehouse
-	)
-	make_stock_entry_test_record(item_code=rm_item, target=source_warehouse, qty=26, basic_rate=100)
-	return wo
-
-
-def make_batch_reserved_work_order(rm_item, batch_qtys):
-	"""Work Order reserving one batch of `rm_item` per qty in `batch_qtys`, in that order."""
-	source_warehouse = "Stores - _TC"
-	production_item = make_item(properties={"is_stock_item": 1}).name
-	make_item(rm_item, {"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1})
-	make_bom(item=production_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
-
-	batches = []
-	for qty in batch_qtys:
-		receipt = test_stock_entry.make_stock_entry(
-			item_code=rm_item, target=source_warehouse, qty=qty, basic_rate=100
-		)
-		batches.append(get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle))
-
-	wo = make_wo_order_test_record(
-		item=production_item, qty=sum(batch_qtys), reserve_stock=1, source_warehouse=source_warehouse
-	)
-	return wo, batches
-
-
-def get_unreserved_items(wo):
-	"""Rows the Reserve dialog sends: the unreserved qty of each required item."""
-	wo.reload()
-	return [
-		{
-			"work_order_item": row.name,
-			"item_code": row.item_code,
-			"warehouse": row.source_warehouse,
-			"required_qty": row.required_qty - row.stock_reserved_qty,
-		}
-		for row in wo.required_items
-	]
->>>>>>> 793357c (test(manufacturing): consume transferred materials over partial and staged entries)
 
 
 def make_review_bom(fg_item, rows, quantity=1, operations=None, **kwargs):
