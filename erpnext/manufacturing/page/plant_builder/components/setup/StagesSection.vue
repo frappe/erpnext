@@ -60,14 +60,7 @@ const addOptions = computed(() =>
 
 <template>
 	<section class="space-y-3">
-		<SectionHead
-			:title="__('Process Stages')"
-			:description="
-				__(
-					'Each stage is one machine that makes a semi-finished good from its own raw materials and the output of the stages before it. Stages that run with each other start at the same time. The last stage packs the finished good.'
-				)
-			"
-		>
+		<SectionHead :title="__('Process Stages')">
 			<Badge
 				v-if="doc.materials.length && weightUom"
 				:label="`${fmt(round(batchWeight))} ${weightUom}`"

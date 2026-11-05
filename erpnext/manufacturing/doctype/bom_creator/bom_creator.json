@@ -106,7 +106,7 @@
    "fieldname": "track_semi_finished_goods",
    "fieldtype": "Check",
    "label": "Process Manufacturing",
-   "description": "Make the finished good in stages from a formula. Each stage runs on a machine and makes an item that the next stage uses. Turn it off to build the BOM from parts or a design file.",
+   "description": "Make the finished good in stages from a formula. Each stage is one machine that makes a semi-finished good from its own raw materials and the output of the stages before it. Stages that run with each other start at the same time. The last stage packs the finished good. Turn it off to build the BOM from parts or a design file.",
    "show_description_on_click": 1
   },
   {
@@ -428,7 +428,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-11-05 12:00:00.000000",
+ "modified": "2026-11-05 17:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
