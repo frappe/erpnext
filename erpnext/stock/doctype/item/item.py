@@ -631,7 +631,7 @@ class Item(Document):
 		if merge:
 			self.validate_properties_before_merge(new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
-			self.delete_old_bins(old_name)
+			self.delete_old_bins(old_name, new_name)
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
@@ -667,8 +667,14 @@ class Item(Document):
 						update_modified=False,
 					)
 
-	def delete_old_bins(self, old_name):
-		frappe.db.delete("Bin", {"item_code": old_name})
+	def delete_old_bins(self, old_name, new_name=None):
+		if not new_name:
+			frappe.db.delete("Bin", {"item_code": old_name})
+			return
+
+		target_warehouses = frappe.get_all("Bin", filters={"item_code": new_name}, pluck="warehouse")
+		if target_warehouses:
+			frappe.db.delete("Bin", {"item_code": old_name, "warehouse": ("in", target_warehouses)})
 
 	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
 		records = frappe.db.sql(
@@ -754,11 +760,19 @@ class Item(Document):
 			distinct=True,
 		)
 
+		bin_warehouses = set(frappe.get_all("Bin", filters={"item_code": new_name}, pluck="warehouse"))
+
 		# Delete all existing bins to avoid duplicate bins for the same item and warehouse
 		frappe.db.delete("Bin", {"item_code": new_name})
 
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
+
+		for warehouse in bin_warehouses - set(repost_stock_for_warehouses):
+			repost_stock(new_name, warehouse, only_bin=True)
+
+		for warehouse in bin_warehouses | set(repost_stock_for_warehouses):
+			rebuild_bin_reservations(new_name, warehouse)
 
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", existing_allow_negative_stock)
 
@@ -1413,6 +1427,15 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		query = query.orderby(parent_doc.transaction_date, parent_doc.name, order=Order.desc)
 
 	return query.run(as_dict=1)
+
+
+def rebuild_bin_reservations(item_code, warehouse):
+	from erpnext.stock.utils import get_or_make_bin
+
+	bin_doc = frappe.get_doc("Bin", get_or_make_bin(item_code, warehouse))
+	bin_doc.update_reserved_qty_for_sub_contracting()
+	bin_doc.update_reserved_stock()
+	bin_doc.update_reserved_qty_for_production()
 
 
 def check_stock_uom_with_bin(item, stock_uom):
