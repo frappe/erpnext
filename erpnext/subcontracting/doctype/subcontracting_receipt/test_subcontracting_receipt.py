@@ -466,6 +466,24 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr_return.supplied_items[0].rate, scr.supplied_items[0].rate)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract",
+			"validate_consumed_qty": 0,
+		},
+	)
+	def test_return_sends_back_no_more_than_the_receipt_consumed(self):
+		sco = make_order_with_two_batches_transferred()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.supplied_items[0].consumed_qty = 5
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-10)
+
+		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -5)
+
 	def test_return_cannot_send_back_batches_already_returned(self):
 		sco = make_order_with_two_batches_transferred()
 		scr = make_subcontracting_receipt(sco.name)
