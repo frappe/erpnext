@@ -6,7 +6,7 @@ from collections import OrderedDict, defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import cint, flt
+from frappe.utils import cint, cstr, flt
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 
@@ -134,22 +134,38 @@ class BOMCreator(Document):
 		self.set_status()
 
 	def set_reference_id(self):
-		parent_reference = {row.idx: row.name for row in self.items}
+		rows_by_name = {row.name: row for row in self.items}
+		rows_by_idx = {row.idx: row for row in self.items}
+		edited_rows = self.get_rows_with_edited_parent()
 
 		for row in self.items:
-			ref_id = ""
-
-			if row.parent_row_no:
-				ref_id = parent_reference.get(cint(row.parent_row_no))
-
-			# Check whether the reference id of the FG Item has correct or not
-			if row.fg_reference_id and row.fg_reference_id == ref_id:
+			parent = rows_by_name.get(row.fg_reference_id)
+			if parent and parent.name != row.name and row.name not in edited_rows:
+				row.parent_row_no = str(parent.idx)
 				continue
 
-			if row.parent_row_no:
-				row.fg_reference_id = ref_id
+			if row.fg_reference_id == self.name:
+				row.parent_row_no = ""
+				continue
+
+			parent = rows_by_idx.get(cint(row.parent_row_no)) if row.parent_row_no else None
+			if parent and parent.name != row.name:
+				row.fg_reference_id = parent.name
 			elif row.fg_item == self.item_code:
 				row.fg_reference_id = self.name
+				row.parent_row_no = ""
+
+	def get_rows_with_edited_parent(self):
+		before = self.get_doc_before_save()
+		if not before:
+			return set()
+
+		old_parent_row_no = {row.name: cstr(row.parent_row_no) for row in before.items}
+		return {
+			row.name
+			for row in self.items
+			if row.name in old_parent_row_no and cstr(row.parent_row_no) != old_parent_row_no[row.name]
+		}
 
 	@frappe.whitelist()
 	def add_boms(self):

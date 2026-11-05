@@ -289,6 +289,43 @@ class TestBOMCreator(FrappeTestCase):
 			["Frame Assembly"],
 		)
 
+	def test_deleting_a_grid_row_keeps_the_tree(self):
+		make_item("Scooter", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Scooter BOM Grid Delete",
+			company="_Test Company",
+			item_code="Scooter",
+			qty=1,
+			currency="INR",
+		)
+		frame = add_test_sub_assembly(doc, "Scooter", doc.name, "Frame Assembly", ["Frame", "Fork"])
+		seat = add_test_sub_assembly(doc, "Scooter", doc.name, "Seat Assembly", ["Seat"])
+
+		doc.items = [row for row in doc.items if row.item_code != "Frame"]
+		for idx, row in enumerate(doc.items, start=1):
+			row.idx = idx
+		doc.save()
+		doc.reload()
+
+		self.assertEqual(child_items(doc, frame), ["Fork"])
+		self.assertEqual(child_items(doc, seat), ["Seat"])
+
+		doc.submit()
+		doc.create_boms()
+		self.assertEqual(frappe.db.get_value("BOM Creator", doc.name, "status"), "Completed")
+
+	def test_parent_row_edit_moves_a_material_between_repeated_sub_assemblies(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Moved Material")
+		first_wheel_idx = next(row.idx for row in doc.items if row.name == first_wheel)
+		hub = next(row for row in doc.items if row.item_code == "Hub")
+
+		hub.parent_row_no = str(first_wheel_idx)
+		doc.save()
+		doc.reload()
+
+		self.assertEqual(child_items(doc, first_wheel), ["Hub", "Rim", "Spokes"])
+		self.assertEqual(child_items(doc, second_wheel), [])
+
 
 def create_items():
 	raw_materials = [
@@ -388,3 +425,7 @@ def make_repeated_sub_assembly_bom(name):
 	second_wheel = add_test_sub_assembly(doc, "Seat Assembly", seat, "Wheel Assembly", ["Hub"])
 
 	return doc, first_wheel, second_wheel
+
+
+def child_items(doc, parent):
+	return sorted(row.item_code for row in doc.items if row.fg_reference_id == parent)
