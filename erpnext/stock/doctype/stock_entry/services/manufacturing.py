@@ -799,9 +799,8 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			pending_qty = transferred_qty - sum(material.consumed_for.values())
 			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, precision) <= 0:
 				# an entry for all that is pending consumes what is left
-				self._append_transfer_based_rm(material, fg_completed_qty)
-			elif flt(pending_qty, precision) > 0:
-				self._append_transfer_based_rm(material, pending_qty)
+				pending_qty = fg_completed_qty
+			self._append_transfer_based_rm(material, pending_qty)
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
