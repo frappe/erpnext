@@ -1383,6 +1383,29 @@ class TestPOSInvoice(unittest.TestCase):
 		make_merge_log_for(pos)
 		self.assertEqual(frappe.db.get_value("Coupon Code", coupon.name, "used"), 1)
 
+	def test_write_off_counts_as_paid(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 990})
+		pos.insert()
+		pos.submit()
+		self.assertEqual((pos.paid_amount, pos.status), (990, "Paid"))
+
+	def test_write_off_comparisons_are_rounded(self):
+		with change_settings("Global Defaults", {"disable_rounded_total": 1}):
+			pos = create_pos_invoice(rate=10.80, do_not_save=1)
+			pos.write_off_amount = 0.10
+			pos.append("payments", {"mode_of_payment": "Cash", "amount": 10.70})
+			pos.insert().submit()
+			self.assertEqual((pos.paid_amount, pos.status), (10.70, "Paid"))
+
+	def test_payment_and_write_off_above_total_gives_change(self):
+		pos = create_pos_invoice(rate=1000, do_not_save=1)
+		pos.write_off_amount = 10
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 995})
+		pos.insert().submit()
+		self.assertEqual((pos.change_amount, pos.base_change_amount, pos.status), (5, 5, "Paid"))
+
 
 def make_stock_item_with_qty(qty, allow_negative_stock=0):
 	item_code = make_item(properties={"is_stock_item": 1, "allow_negative_stock": allow_negative_stock}).name
