@@ -1517,7 +1517,10 @@ def get_purchase_order_item(item, warehouse=None):
 		uom = uom_details.purchase_uom or uom_details.stock_uom
 
 	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
-	qty = max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor
+	qty = flt(
+		max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor,
+		frappe.get_precision("Purchase Order Item", "qty"),
+	)
 	if is_whole_number(uom):
 		qty = math.ceil(qty)
 
@@ -1534,6 +1537,7 @@ def get_purchase_order_item(item, warehouse=None):
 def make_work_orders(work_orders, company, warehouse=None, mps=None):
 	for item in work_orders:
 		uom = get_item_uom(item.item_code).stock_uom
+		item.required_qty = flt(item.required_qty, frappe.get_precision("Work Order", "qty"))
 		if is_whole_number(uom):
 			item.required_qty = math.ceil(item.required_qty)
 
