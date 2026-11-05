@@ -1479,14 +1479,13 @@ class SubcontractingController(StockController):
 
 				if scr_qty:
 					sle = self.get_sl_entries(item, {"actual_qty": flt(scr_qty), "recalculate_rate": 1})
-					if self.is_return:
-						# take the finished good out at the rate the returned receipt brought it in
+					if not self.is_return:
+						rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
+						sle.incoming_rate = flt(item.rate, rate_db_precision)
+					elif self.is_returned_at_receipt_rate(item.item_code):
 						sle.outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, item.item_code, self.return_against, item_row=item
 						)
-					else:
-						rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
-						sle.incoming_rate = flt(item.rate, rate_db_precision)
 					sl_entries.append(sle)
 
 				if flt(item.rejected_qty) != 0:
@@ -1508,7 +1507,18 @@ class SubcontractingController(StockController):
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
+<<<<<<< HEAD
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
+=======
+	def is_returned_at_receipt_rate(self, item_code):
+		"""Same rule a repost uses for a return, so both give the same value."""
+		if is_serial_no_wise_valuation_disabled(item_code):
+			return False
+
+		return get_valuation_method(item_code, self.company) != "Moving Average"
+
+	def get_supplied_items_cost(self, item_row_id):
+>>>>>>> 86ae937 (fix(subcontracting): keep Moving Average returns at the running rate)
 		supplied_items_cost = 0.0
 		for item in self.get("supplied_items"):
 			if item.reference_name == item_row_id:
