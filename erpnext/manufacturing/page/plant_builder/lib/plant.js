@@ -37,52 +37,45 @@ export function toScenePlant(doc, machines, item) {
 	};
 }
 
-export const runsWithStageAbove = (stages, i) =>
-	i > 0 && num(stages[i].sequence_id) > 0 && stages[i].sequence_id === stages[i - 1].sequence_id;
+export const groupOf = (stages, i) =>
+	stages.filter((stage) => num(stage.sequence_id) === num(stages[i].sequence_id));
 
-function setSequences(stages, parallel) {
+function arrange(doc, stages) {
+	const order = [...stages].sort((a, b) => num(a.sequence_id) - num(b.sequence_id));
+	const positionOf = (no) => order.indexOf(doc.stages[no - 1]) + 1 || 1;
+	(doc.materials || []).forEach((row) => (row.stage_row_id = positionOf(num(row.stage_row_id) || 1)));
 	let sequence = 0;
-	stages.forEach((stage, i) => (stage.sequence_id = i > 0 && parallel[i] ? sequence : ++sequence));
-}
-
-function changeStages(doc, change, stageOf) {
-	const parallel = doc.stages.map((_, i) => runsWithStageAbove(doc.stages, i));
-	change(doc.stages, parallel);
-	(doc.materials || []).forEach((row) => (row.stage_row_id = stageOf(num(row.stage_row_id) || 1)));
-	setSequences(doc.stages, parallel);
-}
-
-export function setRunsWithStageAbove(doc, index, value) {
-	changeStages(
-		doc,
-		(_, parallel) => (parallel[index] = value),
-		(no) => no
+	const sequences = order.map((stage, i) =>
+		i && num(stage.sequence_id) === num(order[i - 1].sequence_id) ? sequence : ++sequence
 	);
+	order.forEach((stage, i) => (stage.sequence_id = sequences[i]));
+	doc.stages.splice(0, doc.stages.length, ...order);
+}
+
+export function setRunsWith(doc, index, other) {
+	const stage = doc.stages[index];
+	stage.sequence_id = other === null ? num(stage.sequence_id) + 0.5 : num(doc.stages[other].sequence_id);
+	arrange(doc, doc.stages);
 }
 
 export function moveStage(doc, from, to) {
-	const order = doc.stages.map((_, i) => i + 1);
-	const move = (list) => list.splice(to, 0, ...list.splice(from, 1));
-	changeStages(
-		doc,
-		(stages, parallel) => [stages, parallel, order].forEach(move),
-		(no) => order.indexOf(no) + 1
-	);
+	const stages = [...doc.stages];
+	[stages[from], stages[to]] = [stages[to], stages[from]];
+	[stages[from].sequence_id, stages[to].sequence_id] = [stages[to].sequence_id, stages[from].sequence_id];
+	arrange(doc, stages);
 }
 
 export function insertStage(doc, index, stage) {
-	changeStages(
-		doc,
-		(stages, parallel) => (stages.splice(index, 0, stage), parallel.splice(index, 0, false)),
-		(no) => (no > index ? no + 1 : no)
-	);
+	const stages = [...doc.stages];
+	stage.sequence_id = index ? num(stages[index - 1].sequence_id) + 0.5 : 0.5;
+	stages.splice(index, 0, stage);
+	arrange(doc, stages);
 }
 
 export function removeStage(doc, index) {
-	changeStages(
+	arrange(
 		doc,
-		(stages, parallel) => (stages.splice(index, 1), parallel.splice(index, 1)),
-		(no) => (no === index + 1 ? 1 : no > index + 1 ? no - 1 : no)
+		doc.stages.filter((_, i) => i !== index)
 	);
 }
 

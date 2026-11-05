@@ -12,7 +12,7 @@ const props = defineProps({
 	design: { type: Object, default: null },
 	readOnly: Boolean,
 });
-const emit = defineEmits(["title", "actions", "change"]);
+const emit = defineEmits(["title", "actions", "change", "update"]);
 
 const part = (index) => (props.route[index] ? decodeURIComponent(props.route[index]) : null);
 const machine = computed(() => (props.route[2] === "design" ? part(1) : null));
@@ -35,6 +35,7 @@ function selectNumber(event) {
 			:design="design"
 			:read-only="readOnly"
 			@change="emit('change', $event)"
+			@update="emit('update', $event)"
 		/>
 		<MachineDesigner v-else-if="machine" :key="machine" :name="machine" v-bind="chrome" />
 		<PlantRun v-else-if="workOrder" :key="workOrder" :work-order="workOrder" v-bind="chrome" />

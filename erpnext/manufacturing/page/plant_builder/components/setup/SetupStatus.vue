@@ -22,8 +22,4 @@ defineProps({ errors: { type: Array, default: () => [] } });
 			</li>
 		</ul>
 	</div>
-	<div v-else class="flex h-9 items-center gap-2 rounded-5 bg-surface-green-1 px-3">
-		<span class="lucide-circle-check size-4 text-ink-green-5" aria-hidden="true" />
-		<p class="text-sm text-ink-gray-7">{{ __("Ready to create BOMs") }}</p>
-	</div>
 </template>

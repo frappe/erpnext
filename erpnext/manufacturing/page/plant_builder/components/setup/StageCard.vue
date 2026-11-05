@@ -1,17 +1,11 @@
 <script setup>
 import { computed, inject, ref } from "vue";
-import { Badge, Button, FormControl, Switch, TextInput, Tooltip } from "frappe-ui";
+import { Button, FormControl, MultiSelect, TextInput, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import { __ } from "../../lib/api";
-import { fmt } from "../../lib/format";
+import { fmt, num } from "../../lib/format";
 import { isPackingModel, machineOf } from "../../lib/machines";
-import {
-	READ_ONLY,
-	moveStage,
-	removeStage,
-	runsWithStageAbove,
-	setRunsWithStageAbove,
-} from "../../lib/plant";
+import { READ_ONLY, groupOf, moveStage, removeStage, setRunsWith } from "../../lib/plant";
 
 const props = defineProps({
 	doc: Object,
@@ -20,6 +14,8 @@ const props = defineProps({
 	machineModel: String,
 	output: Number,
 	outputUom: String,
+	items: { type: Object, default: () => ({}) },
+	packingIndex: { type: Number, default: -1 },
 	focused: Boolean,
 });
 const readOnly = inject(READ_ONLY, ref(false));
@@ -40,11 +36,43 @@ const workstationFilters = computed(() =>
 
 const move = (offset) => moveStage(props.doc, props.index, props.index + offset);
 const remove = () => removeStage(props.doc, props.index);
-const canRunInParallel = computed(() => !isPacking.value && props.index > 0);
-const parallel = computed({
-	get: () => runsWithStageAbove(stages.value, props.index),
-	set: (value) => setRunsWithStageAbove(props.doc, props.index, value),
+const stageLabel = (stage, i) => {
+	const machine = machineOf(stage.machine_model);
+	return `${i + 1}. ${stage.operation || __(machine.stage || machine.label)}`;
+};
+const runsWithOptions = computed(() => [
+	{ label: __("None"), value: "" },
+	...stages.value
+		.map((stage, i) => ({ label: stageLabel(stage, i), value: String(i + 1) }))
+		.filter((_, i) => i !== props.index && i !== props.packingIndex),
+]);
+const runsWith = computed(() => {
+	const other = groupOf(stages.value, props.index).find((stage) => stage !== props.stage);
+	return other ? String(stages.value.indexOf(other) + 1) : "";
 });
+const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? Number(value) - 1 : null);
+
+const stageNo = computed(() => props.index + 1);
+const stageOf = (row) => num(row.stage_row_id) || 1;
+const materialOptions = computed(() =>
+	props.doc.materials
+		.filter((row) => row.item_code)
+		.map((row) => ({
+			label: props.items[row.item_code]?.item_name || row.item_code,
+			value: row.item_code,
+			description: stageOf(row) === stageNo.value ? "" : __("Stage {0}", [stageOf(row)]),
+			disabled: stageNo.value === 1 && stageOf(row) === 1,
+		}))
+);
+const materials = computed(() =>
+	props.doc.materials.filter((row) => row.item_code && stageOf(row) === stageNo.value)
+);
+function setMaterials(values) {
+	props.doc.materials.forEach((row) => {
+		if (values.includes(row.item_code)) row.stage_row_id = stageNo.value;
+		else if (stageOf(row) === stageNo.value) row.stage_row_id = 1;
+	});
+}
 const packing = computed(() => props.doc.packing_materials);
 const addPacking = () => packing.value.push({ item_code: "", qty_per_unit: 1 });
 const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 1);
@@ -67,7 +95,6 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			<p class="min-w-0 flex-1 truncate text-base font-medium text-ink-gray-8">
 				{{ stage.operation || __(machine.stage || machine.label) }}
 			</p>
-			<Badge v-if="parallel" :label="__('With Stage {0}', [index])" theme="blue" variant="subtle" />
 			<Tooltip v-if="!readOnly" :text="__('Move Up')">
 				<Button
 					variant="ghost"
@@ -106,15 +133,30 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					:filters="workstationFilters"
 				/>
 			</div>
-			<Switch
-				v-if="canRunInParallel"
-				v-model="parallel"
-				:label="__('Run with the Stage Above')"
-				:description="
-					__('Both stages run at the same time. The next stage takes the output of both.')
-				"
-			/>
 			<template v-if="!isPacking">
+				<div class="grid grid-cols-2 gap-3">
+					<MultiSelect
+						:model-value="materials.map((row) => row.item_code)"
+						:options="materialOptions"
+						variant="outline"
+						:label="__('Raw Materials')"
+						:placeholder="__('Search')"
+						:disabled="readOnly"
+						@update:model-value="setMaterials"
+					>
+						<template #summary="{ selectedOptions }">
+							{{ selectedOptions.map((option) => option.label).join(", ") || __("None") }}
+						</template>
+						<template #footer />
+					</MultiSelect>
+					<DeskControl
+						:model-value="runsWith"
+						fieldtype="Select"
+						:options="runsWithOptions"
+						:label="__('Runs With')"
+						@update:model-value="setRunsWithStage"
+					/>
+				</div>
 				<DeskControl
 					v-model="stage.semi_finished_good"
 					options="Item"
@@ -128,14 +170,25 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 					<FormControl
 						v-model="stage.yield_percentage"
 						type="number"
+						variant="outline"
 						:label="__('Yield (%)')"
 						:description="__('Share of the weight that comes out')"
 					/>
-					<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
+					<FormControl
+						v-model="stage.time_in_mins"
+						type="number"
+						variant="outline"
+						:label="__('Minutes')"
+					/>
 				</div>
 			</template>
 			<div v-else class="space-y-2">
-				<FormControl v-model="stage.time_in_mins" type="number" :label="__('Minutes')" />
+				<FormControl
+					v-model="stage.time_in_mins"
+					type="number"
+					variant="outline"
+					:label="__('Minutes')"
+				/>
 				<p class="text-sm text-ink-gray-6">
 					{{ __("Packing materials, per unit of the finished good") }}
 				</p>

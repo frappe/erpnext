@@ -17,9 +17,6 @@
   "company",
   "design_file",
   "track_semi_finished_goods",
-  "qty",
-  "raw_material_warehouse",
-  "formula_tolerance",
   "design_view_section",
   "design_view",
   "items",
@@ -41,6 +38,9 @@
   "item_group",
   "project",
   "routing",
+  "raw_material_warehouse",
+  "qty",
+  "formula_tolerance",
   "column_break_details",
   "part_number",
   "is_phantom",
@@ -119,7 +119,8 @@
    "allow_on_submit": 1,
    "description": "The batch size. The BOM of the finished good is made for this quantity.",
    "show_description_on_click": 1,
-   "depends_on": "track_semi_finished_goods"
+   "depends_on": "track_semi_finished_goods",
+   "hidden": 1
   },
   {
    "fieldname": "design_view_section",
@@ -409,7 +410,8 @@
    "fieldtype": "Percent",
    "label": "Formula Tolerance",
    "non_negative": 1,
-   "show_description_on_click": 1
+   "show_description_on_click": 1,
+   "hidden": 1
   }
  ],
  "icon": "list-plus",
@@ -426,7 +428,7 @@
    "group": "Revisions"
   }
  ],
- "modified": "2026-11-04 12:00:00.000000",
+ "modified": "2026-11-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
