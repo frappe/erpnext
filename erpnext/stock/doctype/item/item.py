@@ -202,6 +202,7 @@ class Item(Document):
 		self.check_item_tax()
 		self.validate_barcode()
 		self.validate_warehouse_for_reorder()
+		self.validate_deferred_months()
 		self.update_bom_item_desc()
 
 		self.validate_variant()
@@ -373,6 +374,11 @@ class Item(Document):
 					self.get_label_from_fieldname("shelf_life_in_days")
 				)
 			)
+
+	def validate_deferred_months(self):
+		for fieldname in ("no_of_months", "no_of_months_exp"):
+			if cint(self.get(fieldname)) < 0:
+				frappe.throw(_("{0} cannot be negative").format(self.get_label_from_fieldname(fieldname)))
 
 	def clear_retain_sample(self):
 		if not self.has_batch_no:
