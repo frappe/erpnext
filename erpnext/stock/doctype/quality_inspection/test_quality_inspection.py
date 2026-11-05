@@ -475,6 +475,20 @@ class TestQualityInspection(ERPNextTestSuite):
 		self.assertEqual(qa.readings[0].status, "Rejected")
 		self.assertEqual(qa.status, "Rejected")
 
+	def test_reading_that_means_another_number_in_the_stored_format_is_refused(self):
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		create_quality_inspection_parameter("Density")
+
+		readings = [{"specification": "Density", "min_value": 1, "max_value": 2, "reading_1": "1,234"}]
+		with user_number_format("#.###,##"):
+			qa = create_quality_inspection(
+				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_submit=True
+			)
+			self.assertEqual(qa.readings[0].reading_1, "1.234")
+
+			qa.readings[0].reading_1 = "1.235"
+			self.assertRaises(frappe.ValidationError, qa.save)
+
 	def test_parse_reading_in_every_number_format(self):
 		accepted = [
 			("#,###.##", "1.15", 1.15),
