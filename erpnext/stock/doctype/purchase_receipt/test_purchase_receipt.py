@@ -35,6 +35,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPurchaseReceipt(ERPNextTestSuite):
 	def setUp(self):
+		# Database rollback does not reset the perpetual-inventory cache.
+		self.addCleanup(setattr, frappe.local, "enable_perpetual_inventory", {})
 		frappe.local.future_sle = {}
 		self.load_test_records("Purchase Receipt")
 
