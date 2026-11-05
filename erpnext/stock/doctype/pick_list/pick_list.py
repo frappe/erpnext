@@ -14,6 +14,7 @@ from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
 from frappe.utils import ceil, cint, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
+from pypika.terms import ExistsCriterion
 
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
@@ -888,6 +889,7 @@ class PickList(TransactionBase):
 				& (pi.status != "Completed")
 				& (pi.status != "Cancelled")
 				& (pi_item.docstatus != 2)
+				& ExistsCriterion(get_delivered_sales_order_item_query(pi_item)).negate()
 			)
 		)
 
@@ -1169,6 +1171,15 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	# update available locations for the item
 	item_location_map[item_doc.item_code] = available_locations
 	return locations
+
+
+def get_delivered_sales_order_item_query(pi_item):
+	so_item = frappe.qb.DocType("Sales Order Item")
+	return (
+		frappe.qb.from_(so_item)
+		.select(so_item.name)
+		.where((so_item.name == pi_item.sales_order_item) & (so_item.delivered_qty >= so_item.qty))
+	)
 
 
 def get_available_item_locations(
@@ -1547,7 +1558,7 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 	return delivery_note
 
 
-def create_dn_wo_so(pick_list, delivery_note=None):
+def create_dn_wo_so(pick_list, delivery_note=None, selected_locations=None):
 	if not delivery_note:
 		delivery_note = frappe.new_doc("Delivery Note")
 
@@ -1564,7 +1575,9 @@ def create_dn_wo_so(pick_list, delivery_note=None):
 			"parent": "",
 		},
 	}
-	map_pl_locations(pick_list, item_table_mapper_without_so, delivery_note)
+	map_pl_locations(
+		pick_list, item_table_mapper_without_so, delivery_note, selected_locations=selected_locations
+	)
 
 	return delivery_note
 
@@ -1604,7 +1617,7 @@ def create_dn_for_pick_lists(
 		if isinstance(delivery_note, str):
 			delivery_note = frappe.get_doc(frappe.parse_json(delivery_note))
 
-		delivery_note = create_dn_wo_so(pick_list, delivery_note)
+		delivery_note = create_dn_wo_so(pick_list, delivery_note, set(kwargs.get("filtered_children") or []))
 
 	return delivery_note
 
@@ -1628,11 +1641,6 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=No
 	if not sales_order_list:
 		return delivery_note
 
-	def select_item(d):
-		filtered_items = kwargs.get("filtered_children", [])
-		child_filter = d.name in filtered_items if filtered_items else True
-		return child_filter
-
 	item_table_mapper = {
 		"doctype": "Delivery Note Item",
 		"field_map": {
@@ -1640,27 +1648,31 @@ def create_dn_from_so(pick_list, sales_order_list, delivery_note=None, kwargs=No
 			"name": "so_detail",
 			"parent": "against_sales_order",
 		},
-		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-		and doc.delivered_by_supplier != 1
-		and select_item(doc),
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1,
 	}
+	selected_locations = set((kwargs or {}).get("filtered_children") or [])
 
-	kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
+	mapper_kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
 
 	delivery_note = create_delivery_note_from_sales_order(
-		next(iter(sales_order_list)), delivery_note, kwargs=kwargs
+		next(iter(sales_order_list)), delivery_note, kwargs=mapper_kwargs
 	)
 
 	if not delivery_note:
 		return
 
 	for so in sales_order_list:
-		map_pl_locations(pick_list, item_table_mapper, delivery_note, so)
+		map_pl_locations(pick_list, item_table_mapper, delivery_note, so, selected_locations)
 
 	return delivery_note
 
 
-def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
+def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None, selected_locations=None):
+	sales_order_items = (
+		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
+	)
+	condition = item_mapper.get("condition")
+
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
@@ -1668,10 +1680,12 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 		if flt(location.picked_qty) - flt(location.delivered_qty) <= 0:
 			continue
 
-		if location.sales_order_item:
-			sales_order_item = frappe.get_doc("Sales Order Item", location.sales_order_item)
-		else:
-			sales_order_item = None
+		if selected_locations and location.name not in selected_locations:
+			continue
+
+		sales_order_item = sales_order_items.get(location.sales_order_item)
+		if sales_order_item and condition and not condition(sales_order_item):
+			continue
 
 		source_doc = sales_order_item or location
 
@@ -1690,7 +1704,11 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 
 			update_delivery_note_item(source_doc, dn_item, delivery_note)
 
-	add_product_bundles_to_delivery_note(pick_list, delivery_note, item_mapper, sales_order)
+	if sales_order:
+		add_product_bundles_to_delivery_note(
+			pick_list, delivery_note, item_mapper, sales_order, selected_locations
+		)
+
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.company = pick_list.company
@@ -1699,13 +1717,21 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 
 
 def add_product_bundles_to_delivery_note(
-	pick_list: "PickList", delivery_note, item_mapper, sales_order=None
+	pick_list: "PickList", delivery_note, item_mapper, sales_order=None, selected_locations=None
 ) -> None:
 	"""Add product bundles found in pick list to delivery note.
 
 	When mapping pick list items, the bundle item itself isn't part of the
 	locations. Dynamically fetch and add parent bundle item into DN."""
 	product_bundles = pick_list._get_product_bundles()
+	if selected_locations:
+		selected_bundles = {
+			row.sales_order_item
+			for row in pick_list.locations
+			if row.product_bundle_item and row.name in selected_locations
+		}
+		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+
 	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
 
 	for so_row, value in product_bundles.items():
