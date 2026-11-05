@@ -36,7 +36,6 @@ const meta = computed(() => {
 });
 
 const canStart = computed(() => props.stage.can_start && run.state.value.work_order.docstatus === 1);
-const hasInputs = computed(() => props.stage.items.some((row) => row.is_input));
 const status = computed(() => {
 	if (canStart.value) return "active";
 	return { waiting: "waiting", done: "done" }[props.stage.phase] ?? "active";
@@ -86,13 +85,10 @@ const subtitle = computed(() => {
 	return lot > 1 ? `${__("Lot {0}", [lot])} · ${workstation}` : workstation;
 });
 const preview = computed(() => run.previewOf(props.stage));
-const lotOutput = computed(() => {
+const makes = computed(() => {
 	const output = props.stage.output;
-	return __("This lot makes about {0} {1} {2}", [
-		fmt(preview.value.output_qty),
-		output.uom,
-		output.item_name,
-	]);
+	const qty = preview.value?.output_qty ?? (output.expected_qty || output.planned_qty);
+	return { name: output.item_name || output.item_code, qty: `${fmt(round(qty, 3))} ${output.uom || ""}` };
 });
 const inputErrors = computed(() => (props.stage.phase === "ready" && preview.value?.errors) || []);
 const canConsume = computed(
@@ -136,8 +132,20 @@ const canConsume = computed(
 				:stage="stage"
 				:editable="stage.phase === 'ready' && !run.paused.value"
 			/>
+			<div
+				v-if="stage.phase !== 'review' && stage.output.item_code"
+				class="flex items-center gap-2 rounded-4 bg-surface-gray-1 px-3 py-2"
+			>
+				<span class="lucide-package-check size-4 shrink-0 text-ink-gray-6" aria-hidden="true" />
+				<div class="min-w-0 flex-1">
+					<p class="text-xs text-ink-gray-5">{{ __("Makes") }}</p>
+					<p class="truncate text-sm font-medium text-ink-gray-8" :title="makes.name">
+						{{ makes.name }}
+					</p>
+				</div>
+				<p class="shrink-0 text-sm font-medium tabular-nums text-ink-gray-8">{{ makes.qty }}</p>
+			</div>
 			<template v-if="stage.phase === 'ready'">
-				<p v-if="hasInputs && preview" class="text-p-sm text-ink-gray-6">{{ lotOutput }}</p>
 				<p v-for="error in inputErrors" :key="error" class="text-p-sm text-ink-red-5">{{ error }}</p>
 				<Button
 					variant="solid"
