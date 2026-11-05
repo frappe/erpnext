@@ -1544,7 +1544,7 @@ def make_work_orders(work_orders, company, warehouse=None, mps=None):
 	for item in work_orders:
 		uom = get_item_uom(item.item_code).stock_uom
 		if is_whole_number(uom):
-			item.required_qty = math.ceil(item.required_qty)
+			item.required_qty = math.ceil(flt(item.required_qty, frappe.get_precision("Work Order", "qty")))
 
 		wo = frappe.new_doc("Work Order")
 		wo.production_item = item.item_code
