@@ -17,6 +17,46 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.debit_to = "Debtors - _TC"
 		self.cost_center = "Main - _TC"
 
+	def test_blank_cost_center_gl_balance(self):
+		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+			BLANK_ACCOUNTING_DIMENSION,
+		)
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.accounts.report.accounts_payable_summary.accounts_payable_summary import (
+			execute as execute_payable,
+		)
+
+		for make_invoice, run_report, party_type, party in (
+			(create_sales_invoice, execute, "Customer", self.customer),
+			(make_purchase_invoice, execute_payable, "Supplier", "_Test Supplier"),
+		):
+			blank_invoice = make_invoice(qty=1, rate=100, cost_center=self.cost_center)
+			named_invoice = make_invoice(qty=1, rate=200, cost_center=self.cost_center)
+			for doctype in ("GL Entry", "Payment Ledger Entry"):
+				frappe.db.set_value(
+					doctype, {"voucher_no": named_invoice.name}, "cost_center", self.cost_center
+				)
+			parent_cost_center = frappe.db.get_value("Cost Center", self.cost_center, "parent_cost_center")
+			filters = frappe._dict(
+				company=self.company, report_date=today(), range="30, 60, 90, 120", show_gl_balance=1
+			)
+			for blank_value in (None, ""):
+				for doctype in ("GL Entry", "Payment Ledger Entry"):
+					frappe.db.set_value(
+						doctype, {"voucher_no": blank_invoice.name}, "cost_center", blank_value
+					)
+				for selected, expected in (
+					([BLANK_ACCOUNTING_DIMENSION], 100),
+					([parent_cost_center], 200),
+					([BLANK_ACCOUNTING_DIMENSION, parent_cost_center], 300),
+				):
+					with self.subTest(party_type=party_type, blank_value=blank_value, selected=selected):
+						filters.cost_center = selected
+						rows = [row for row in run_report(filters.copy())[1] if row.party == party]
+						self.assertEqual(len(rows), 1)
+						self.assertEqual(rows[0].gl_balance, expected)
+						self.assertEqual(rows[0].outstanding, expected)
+
 	def test_01_receivable_summary_output(self):
 		"""
 		Test for Invoices, Paid, Advance and Outstanding
