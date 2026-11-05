@@ -5,6 +5,7 @@ import frappe
 from frappe.utils import add_days, flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_invoices
 from erpnext.accounts.doctype.journal_entry.mapper import get_payment_entry_against_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
@@ -303,6 +304,120 @@ class TestInvoiceDiscounting(ERPNextTestSuite):
 
 		inv.reload()
 		self.assertEqual(inv.outstanding_amount, 0)
+
+	def get_accounts(self):
+		return dict(
+			accounts_receivable_credit=self.ar_credit,
+			accounts_receivable_discounted=self.ar_discounted,
+			accounts_receivable_unpaid=self.ar_unpaid,
+			short_term_loan=self.short_term_loan,
+			bank_charges_account=self.bank_charges_account,
+			bank_account=self.bank_account,
+		)
+
+	def test_draft_and_repeated_invoices_are_refused(self):
+		draft = create_sales_invoice(rate=300, do_not_submit=True)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is not submitted",
+			create_invoice_discounting,
+			[draft.name],
+			**self.get_accounts(),
+		)
+
+		inv = create_sales_invoice(rate=300)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"is added more than once",
+			create_invoice_discounting,
+			[inv.name, inv.name],
+			**self.get_accounts(),
+		)
+
+	def test_foreign_currency_invoice_on_company_currency_receivable(self):
+		inv = create_sales_invoice(rate=100, currency="USD", conversion_rate=80)
+		self.assertEqual(inv.party_account_currency, "INR")
+		self.assertEqual(inv.outstanding_amount, 8000)
+
+		inv_disc = create_invoice_discounting([inv.name], **self.get_accounts())
+		gle = get_gl_entries("Invoice Discounting", inv_disc.name)
+		amounts = {(d.account, d.debit, d.credit) for d in gle}
+		self.assertEqual(amounts, {(inv.debit_to, 0, 8000), (self.ar_credit, 8000, 0)})
+
+	def test_foreign_currency_receivable_is_refused(self):
+		inv = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			rate=100,
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Only invoices receivable in the company currency",
+			create_invoice_discounting,
+			[inv.name],
+			do_not_submit=True,
+			**self.get_accounts(),
+		)
+
+	def test_close_after_loan_end_date_moves_unpaid_invoice(self):
+		inv = create_sales_invoice(rate=700)
+		inv_disc = create_invoice_discounting(
+			[inv.name], start=add_days(nowdate(), -80), period=60, **self.get_accounts()
+		)
+		je = inv_disc.create_disbursement_entry()
+		je.posting_date = nowdate()
+		je.submit()
+
+		je = inv_disc.close_loan()
+		rows = {
+			(d.account, flt(d.debit_in_account_currency), flt(d.credit_in_account_currency))
+			for d in je.accounts
+		}
+		self.assertIn((self.ar_discounted, 0, 700), rows)
+		self.assertIn((self.ar_unpaid, 700, 0), rows)
+
+	def test_get_invoices_filters_company(self):
+		inv = create_sales_invoice(rate=400)
+		self.assertIn(inv.name, [d.sales_invoice for d in get_invoices({"company": "_Test Company"})])
+		self.assertNotIn(inv.name, [d.sales_invoice for d in get_invoices({"company": "_Test Company 1"})])
+
+	def test_get_invoices_applies_sales_invoice_permissions(self):
+		from frappe.permissions import add_user_permission
+
+		inv = create_sales_invoice(rate=400)
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test_invoice_discounting@example.com",
+				"first_name": "Test",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+		user.add_roles("Accounts Manager")
+		add_user_permission("Customer", "_Test Customer 1", user.name)
+
+		with self.set_user(user.name):
+			self.assertNotIn(inv.name, [d.sales_invoice for d in get_invoices({"company": "_Test Company"})])
+
+	def test_cancel_reverses_posted_entries(self):
+		self.check_cancel_reverses_posted_entries()
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_cancel_reverses_posted_entries_in_immutable_ledger(self):
+		self.check_cancel_reverses_posted_entries()
+
+	def check_cancel_reverses_posted_entries(self):
+		inv = create_sales_invoice(rate=500)
+		inv_disc = create_invoice_discounting([inv.name], **self.get_accounts())
+		inv_disc.cancel()
+
+		gle = get_gl_entries("Invoice Discounting", inv_disc.name)
+		self.assertEqual(len(gle), 4)
+		for account in (inv.debit_to, self.ar_credit):
+			self.assertEqual(sum(d.debit - d.credit for d in gle if d.account == account), 0)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", inv.name, "is_discounted"), 0)
 
 
 def create_invoice_discounting(invoices, **args):
