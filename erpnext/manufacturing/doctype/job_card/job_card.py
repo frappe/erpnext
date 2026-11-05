@@ -2130,8 +2130,8 @@ class JobCard(Document):
 		self.validate_complete_job_card_qty(kwargs)
 		self.set_for_quantity(kwargs)
 
-		self.pending_qty = flt(kwargs.pending_qty)
 		self.process_loss_qty = flt(self.process_loss_qty) + flt(kwargs.process_loss_qty)
+		self.pending_qty = self.get_pending_qty_after_cycle(kwargs)
 
 		self.add_completion_time_logs(kwargs)
 
@@ -2144,10 +2144,39 @@ class JobCard(Document):
 		if not flt(kwargs.for_quantity):
 			return
 
+		completed_qty = self.total_completed_qty
+		if sub_operation := self.get_cycle_sub_operation(kwargs):
+			# a sub operation behind another one only works on qty the card already took in
+			if flt(sub_operation.completed_qty) < max(flt(row.completed_qty) for row in self.sub_operations):
+				return
+
+			completed_qty = sub_operation.completed_qty
+
 		self.for_quantity = flt(
-			flt(self.total_completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity),
+			flt(completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity),
 			self.precision("for_quantity"),
 		)
+
+	def get_pending_qty_after_cycle(self, kwargs):
+		"""With sub operations the cycle's pending qty covers that sub operation only,
+		so the job card's pending qty is what its slowest sub operation has left."""
+		sub_operation = self.get_cycle_sub_operation(kwargs)
+		if not sub_operation:
+			return flt(kwargs.pending_qty)
+
+		completed_qty = min(
+			flt(row.completed_qty) + (flt(kwargs.qty) if row is sub_operation else 0.0)
+			for row in self.sub_operations
+		)
+		return max(
+			flt(self.for_quantity - completed_qty - self.process_loss_qty, self.precision("pending_qty")), 0.0
+		)
+
+	def get_cycle_sub_operation(self, kwargs):
+		if not kwargs.sub_operation:
+			return
+
+		return next((row for row in self.sub_operations if row.sub_operation == kwargs.sub_operation), None)
 
 	def validate_docstatus(self):
 		if self.docstatus == 2:
