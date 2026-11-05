@@ -1929,6 +1929,40 @@ class JobCard(Document):
 
 			self.set_status(update_status=update_status)
 
+<<<<<<< HEAD
+=======
+	def add_new_time_log_for_employee(self, kwargs):
+		if kwargs.get("qty") is not None:
+			kwargs.completed_qty = kwargs.qty
+
+		row = self.append("time_logs", kwargs)
+		row.db_update()
+		self.db_set("status", "Work In Progress")
+
+	def update_completed_qty_for_employee(self, kwargs):
+		rows = [row for row in self.time_logs if row.employee == kwargs.employee]
+		if not rows:
+			return
+
+		rows[-1].completed_qty = kwargs.completed_qty
+		rows[-1].db_update()
+
+	def close_time_log_for_employee(self, kwargs):
+		for row in self.time_logs:
+			if row.to_time or row.employee != kwargs.employee:
+				continue
+
+			row.to_time = kwargs.to_time
+			row.time_in_mins = time_diff_in_minutes(row.to_time, row.from_time)
+			if kwargs.get("sub_operation"):
+				row.operation = kwargs.get("sub_operation")
+
+			if kwargs.employees[-1].get("employee") == row.employee:
+				row.completed_qty = kwargs.completed_qty
+
+			row.db_update()
+
+>>>>>>> 21685f5 (fix(manufacturing): update only the latest time log when completing without end time)
 	def update_workstation_status(self):
 		job_cards = frappe.get_all(
 			"Job Card",
