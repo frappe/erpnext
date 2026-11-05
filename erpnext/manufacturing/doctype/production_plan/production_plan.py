@@ -10,7 +10,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder import Case
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull, Max, Sum
 from frappe.utils import (
 	add_days,
 	ceil,
@@ -1155,6 +1155,18 @@ def get_mr_item_planned_qty_query(mr_item):
 	)
 
 
+def get_requested_sub_assemblies(doc):
+	requested_sub_assemblies = {}
+	for row in doc.get("sub_assembly_items") or []:
+		row = frappe._dict(row)
+		if row.type_of_manufacturing == "Material Request":
+			requested_sub_assemblies.setdefault(row.production_plan_item, set()).add(
+				(row.production_item, row.bom_no)
+			)
+
+	return requested_sub_assemblies
+
+
 def round_up_whole_uom(quantity, uom):
 	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
 		return ceil(quantity)
@@ -1403,6 +1415,7 @@ def get_subitems(
 			item.is_sub_contracted_item.as_("is_sub_contracted"),
 			bom_item.source_warehouse,
 			item.default_bom.as_("default_bom"),
+			Max(bom_item.bom_no).as_("line_bom_no"),
 			bom_item.description.as_("description"),
 			bom_item.stock_uom.as_("stock_uom"),
 			item.min_order_qty.as_("min_order_qty"),
@@ -1421,7 +1434,11 @@ def get_subitems(
 	).run(as_dict=True)
 
 	for d in items:
-		if not data.get("include_exploded_items") or not d.default_bom:
+		child_bom = d.line_bom_no or d.default_bom
+		if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
+			continue
+
+		if not data.get("include_exploded_items") or not child_bom:
 			if d.item_code in item_details:
 				item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
 			else:
@@ -1430,7 +1447,7 @@ def get_subitems(
 
 				item_details[d.item_code] = d
 
-		if data.get("include_exploded_items") and d.default_bom:
+		if data.get("include_exploded_items") and child_bom:
 			if (
 				d.default_material_request_type in ["Manufacture", "Purchase"] and not d.is_sub_contracted
 			) or (d.is_sub_contracted and include_subcontracted_items):
@@ -1439,7 +1456,7 @@ def get_subitems(
 						doc,
 						data,
 						item_details,
-						d.default_bom,
+						child_bom,
 						company,
 						include_non_stock_items,
 						include_subcontracted_items,
@@ -1734,11 +1751,22 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	sub_assembly_items = defaultdict(int)
 	if doc.get("skip_available_sub_assembly_item") and doc.get("sub_assembly_items"):
 		for d in doc.get("sub_assembly_items"):
+			if d.get("type_of_manufacturing") == "Material Request":
+				continue
+
 			sub_assembly_items[(d.get("production_item"), d.get("bom_no"))] += d.get("qty")
 
+	requested_sub_assemblies = get_requested_sub_assemblies(doc)
+	all_requested = set().union(*requested_sub_assemblies.values())
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
+
+		data["requested_sub_assemblies"] = (
+			all_requested
+			if doc.get("combine_sub_items")
+			else requested_sub_assemblies.get(data.get("name"), set())
+		)
 
 		planned_qty = data.get("required_qty") or data.get("planned_qty")
 		ignore_existing_ordered_qty = data.get("ignore_existing_ordered_qty") or ignore_existing_ordered_qty
@@ -1772,7 +1800,11 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 							planned_qty=planned_qty,
 						)
 
-				elif data.get("include_exploded_items") and include_subcontracted_items:
+				elif (
+					data.get("include_exploded_items")
+					and include_subcontracted_items
+					and not data.get("requested_sub_assemblies")
+				):
 					# fetch exploded items from BOM
 					item_details = get_exploded_items(
 						item_details,
