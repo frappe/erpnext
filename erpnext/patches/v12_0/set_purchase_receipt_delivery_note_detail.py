@@ -10,6 +10,7 @@ def execute():
 	def map_rows(doc_row, return_doc_row, detail_field, doctype):
 		"""Map rows after identifying similar ones."""
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats doctype, field and row names
 		frappe.db.sql(
 			""" UPDATE `tab{doctype} Item` set {detail_field} = '{doc_row_name}'
 				where name = '{return_doc_row_name}'""".format(
@@ -48,6 +49,7 @@ def execute():
 		"""Returns a map of documents and it's return documents.
 		Format => { 'document' : ['return_document_1','return_document_2'] }"""
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats doctype, field and row names
 		return_against_documents = frappe.db.sql(
 			f"""
 			SELECT

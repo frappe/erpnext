@@ -235,13 +235,15 @@ class StockLedgerEntry(Document):
 			mismatches = []
 			for dimension in dimensions:
 				fieldname = dimension.fieldname
-				expected_value = values.get(fieldname)
-				if expected_value != self.get(fieldname):
+				# a blank value and NULL both mean the dimension is not set
+				expected_value = values.get(fieldname) or None
+				actual_value = self.get(fieldname) or None
+				if expected_value != actual_value:
 					mismatches.append(
 						_('{0}: expected "{1}", got "{2}"').format(
 							dimension.dimension_name,
 							expected_value or _("Not Set"),
-							self.get(fieldname),
+							actual_value or _("Not Set"),
 						)
 					)
 

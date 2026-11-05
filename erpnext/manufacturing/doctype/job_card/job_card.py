@@ -34,7 +34,10 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-from erpnext.manufacturing.doctype.work_order.work_order import get_operation_qty
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	get_operation_qty,
+	get_upstream_process_loss,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -953,8 +956,6 @@ class JobCard(Document):
 						"item_name": d.item_name,
 						"description": d.description,
 						"required_qty": (d.required_qty * flt(self.for_quantity)) / operation_qty,
-						"rate": d.rate,
-						"amount": d.amount,
 					},
 				)
 
@@ -1249,9 +1250,7 @@ class JobCard(Document):
 				"Kindly cancel the Manufacturing Entries first against the work order {0}."
 			).format(frappe.bold(get_link_to_form("Work Order", self.work_order)))
 
-			frappe.throw(
-				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
-			)
+			frappe.throw(first_part_msg + " " + second_part_msg, JobCardCancelError, title=_("Error"))
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, pending_qty, time_in_mins, wo):
 		jc = frappe.qb.DocType("Job Card")
@@ -1521,7 +1520,9 @@ class JobCard(Document):
 			min_qty = []
 			precision = self.precision("total_completed_qty")
 			for d in doc.operations:
-				completed_qty = (flt(d.completed_qty) + flt(d.process_loss_qty)) * flt(doc.qty)
+				completed_qty = (
+					flt(d.completed_qty) + flt(d.process_loss_qty) + get_upstream_process_loss(doc, d)
+				) * flt(doc.qty)
 				completed_qty = flt(completed_qty / get_operation_qty(doc, d), precision)
 				if completed_qty:
 					min_qty.append(completed_qty)
@@ -1847,6 +1848,7 @@ class JobCard(Document):
 
 	def set_employees(self):
 		self.employee = []
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-child-tables-while-iterating -- appends to employee, not time_logs
 		for item in self.time_logs:
 			if not any(d.employee == item.employee for d in self.employee):
 				self.append("employee", {"employee": item.employee, "completed_qty": 0.0})

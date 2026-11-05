@@ -529,6 +529,7 @@ def repost(doc):
 		doc.set_status("In Progress")
 		mark_closing_entries_outdated(doc.company, doc.posting_date)
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		if (
@@ -590,6 +591,10 @@ def repost(doc):
 			},
 		)
 
+		if isinstance(e, JobTimeoutException):
+			# Job's time is up; stop the caller from starting the next entry
+			raise
+
 		if status == "Failed":
 			outgoing_email_account = frappe.get_cached_value(
 				"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
@@ -600,6 +605,7 @@ def repost(doc):
 				doc.set_status("Failed")
 	finally:
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 

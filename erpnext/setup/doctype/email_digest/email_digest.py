@@ -104,7 +104,7 @@ class EmailDigest(Document):
 
 		frappe.response["user_list"] = user_list
 
-	@frappe.whitelist()
+	@frappe.whitelist(methods=["POST"])
 	def send(self):
 		# send email only to enabled users
 		valid_users = [

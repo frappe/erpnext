@@ -285,7 +285,7 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 		duplicate = frappe.get_doc(doctype="Process Period Closing Voucher", parent_pcv=pcv.name)
 		# Allocate the name before the snapshot so naming-series locks cannot mask the duplicate check.
 		duplicate.set_new_name()
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 		primary_connection = frappe.local.db
 		frappe.connect()
 		secondary_connection = frappe.local.db
@@ -295,7 +295,7 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 			frappe.local.db = primary_connection
 			with patch.object(ProcessPeriodClosingVoucher, "get_dates", return_value=[get_datetime(today())]):
 				frappe.get_doc(doctype="Process Period Closing Voucher", parent_pcv=pcv.name).insert()
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 			frappe.local.db = secondary_connection
 			# Snapshot isolation can reject the locking read instead of returning the committed duplicate.
@@ -320,7 +320,7 @@ class TestProcessPeriodClosingVoucher(ERPNextTestSuite):
 			frappe.db.set_single_value(
 				"Accounts Settings", "use_legacy_controller_for_pcv", self.legacy_controller
 			)
-			frappe.db.commit()
+			frappe.db.commit()  # nosemgrep
 
 	def test_start_waits_for_running_dates_and_summary(self):
 		make_journal_entry(

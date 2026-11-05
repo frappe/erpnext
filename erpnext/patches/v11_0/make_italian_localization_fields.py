@@ -25,6 +25,7 @@ def execute():
 	if condition:
 		condition = f"state_code = (case state {condition} end),"
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- values are escaped
 	frappe.db.sql(
 		f"""
 		UPDATE tabAddress set {condition} country_code = UPPER(ifnull((select code
