@@ -1342,7 +1342,12 @@ class PurchaseInvoice(BuyingController):
 				self.update_gross_purchase_amount_for_linked_assets(item)
 
 	def get_provisional_accounts(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			get_order_billing_provisional_reversals,
+		)
+
 		self.provisional_accounts = frappe._dict()
+		self.order_provisional_reversals = get_order_billing_provisional_reversals(self)
 		linked_purchase_receipts = set([d.purchase_receipt for d in self.items if d.purchase_receipt])
 		if not linked_purchase_receipts:
 			return
@@ -1401,6 +1406,19 @@ class PurchaseInvoice(BuyingController):
 					reverse=1,
 					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("rate")) * conversion_rate,
 				)
+			return
+
+		for row, qty in self.order_provisional_reversals.get(item.name, []):
+			post_provisional_gl_entry(
+				self,
+				item,
+				gl_entries,
+				self.posting_date,
+				row.provisional_expense_account,
+				reverse=1,
+				item_amount=qty * flt(row.rate) * flt(row.conversion_rate),
+				pr_detail=row.name,
+			)
 
 	def update_gross_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(

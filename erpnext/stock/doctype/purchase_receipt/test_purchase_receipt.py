@@ -6356,6 +6356,153 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 		invoice.cancel()
 		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), -1000)
 
+	def make_provisional_purchase_order(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+			setup_provisional_accounting,
+			toggle_provisional_accounting_setting,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		setup_provisional_accounting()
+		self.addCleanup(toggle_provisional_accounting_setting)
+		return create_purchase_order(
+			item_code="_Test Non Stock Item", qty=10, rate=200, transaction_date=add_days(today(), -1)
+		)
+
+	def test_order_invoice_skips_receipt_qty_billed_directly(self):
+		purchase_order = self.make_provisional_purchase_order()
+		(receipt,) = make_receipts_against_order(purchase_order.name, ((6, "08:00"),))
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.submit()
+
+		order_invoice = make_invoice_against_order(purchase_order.name, qty=4, rate=200)
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name, order_invoice.name), 0)
+
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoice_with_a_receipt_row_reverses_the_provision_once(self):
+		purchase_order = self.make_provisional_purchase_order()
+		receipt = self.make_receipt_at_rate(purchase_order.name, 10, 100, "08:00")
+		invoice = make_purchase_invoice(receipt.name)
+		invoice.items[0].qty = 4
+		order_row = invoice.items[0].as_dict(no_default_fields=True)
+		order_row.update({"qty": 6, "purchase_receipt": None, "pr_detail": None})
+		invoice.append("items", order_row)
+		invoice.submit()
+
+		self.assertEqual(self.get_provisional_balance(receipt.name, invoice.name), 0)
+
+	def test_order_invoices_reverse_receipt_provisional_entries(self):
+		purchase_order = self.make_provisional_purchase_order()
+		receipts = make_receipts_against_order(purchase_order.name, ((6, "08:00"), (4, "10:00")))
+		vouchers = [pr.name for pr in receipts]
+
+		for qty, balance in ((7, -600), (3, 0)):
+			vouchers.append(make_invoice_against_order(purchase_order.name, qty=qty, rate=200).name)
+			self.assertEqual(self.get_provisional_balance(*vouchers), balance)
+
+	def test_order_credit_note_restores_the_provision(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		purchase_order = self.make_provisional_purchase_order()
+		receipt = self.make_receipt_at_rate(purchase_order.name, 10, 200, "08:00")
+		invoice = make_invoice_against_order(purchase_order.name, qty=10, rate=200)
+		credit_note = make_return_doc("Purchase Invoice", invoice.name)
+		credit_note.submit()
+
+		self.assertEqual(
+			self.get_provisional_balance(receipt.name, invoice.name, credit_note.name),
+			self.get_provisional_balance(receipt.name),
+		)
+
+	@change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoice_clears_the_provision_of_returned_receipts(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		purchase_order = self.make_provisional_purchase_order()
+		first = self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00")
+		receipt_return = make_return_doc("Purchase Receipt", first.name)
+		receipt_return.items[0].update({"qty": -2, "received_qty": -2})
+		receipt_return.submit()
+		second = self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00")
+
+		invoice = make_invoice_against_order(purchase_order.name, qty=8, rate=200)
+
+		self.assertEqual(
+			self.get_provisional_balance(first.name, receipt_return.name, second.name, invoice.name), 0
+		)
+
+	@change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (100, 200))
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+		credit_note = make_return_doc("Purchase Invoice", vouchers[-1])
+		credit_note.submit()
+
+		self.assertEqual(self.get_provisional_balance(*vouchers, credit_note.name), -600)
+
+	@change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoice_after_a_cancelled_one_clears_the_whole_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (200, 100))
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def bill_order_again_after_cancelling_its_first_invoice(self, purchase_order, rates):
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order, 6, rates[0], "08:00").name,
+			self.make_receipt_at_rate(purchase_order, 4, rates[1], "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+		vouchers.append(make_invoice_against_order(purchase_order, qty=6, rate=200).name)
+
+		return vouchers
+
+	@change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	@change_settings("Buying Settings", {"maintain_same_rate": 0})
+	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as make_invoice_from_order,
+		)
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00").name,
+			self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00").name,
+		]
+		drafts = []
+		for qty in (3, 7):
+			invoice = make_invoice_from_order(purchase_order.name)
+			invoice.items[0].update({"qty": qty, "rate": 200})
+			drafts.append(invoice.insert())
+
+		for invoice in reversed(drafts):
+			invoice.submit()
+			vouchers.append(invoice.name)
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_receipt as make_receipt_from_order,
+		)
+
+		receipt = make_receipt_from_order(purchase_order)
+		receipt.set_posting_time = 1
+		receipt.posting_date = add_days(today(), -1)
+		receipt.posting_time = posting_time
+		receipt.items[0].update({"received_qty": qty, "qty": qty, "rate": rate})
+		receipt.submit()
+		return receipt
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
