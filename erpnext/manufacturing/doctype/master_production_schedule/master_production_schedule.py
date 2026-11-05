@@ -114,17 +114,14 @@ class MasterProductionSchedule(Document):
 				)
 
 	def set_to_date(self):
+		dates = [row.delivery_date for row in self.items if row.delivery_date]
 		if self.to_date:
-			return
+			dates.append(self.to_date)
+		else:
+			dates.extend(self.get_sales_forecast_data())
 
-		for row in self.items:
-			if not self.to_date or getdate(row.delivery_date) > getdate(self.to_date):
-				self.to_date = row.delivery_date
-
-		forecast_delivery_dates = self.get_sales_forecast_data()
-		for date in forecast_delivery_dates:
-			if not self.to_date or getdate(date) > getdate(self.to_date):
-				self.to_date = date
+		if dates:
+			self.to_date = max(getdate(date) for date in dates)
 
 	def get_sales_forecast_data(self):
 		if not self.sales_forecast:
