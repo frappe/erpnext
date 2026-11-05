@@ -1006,6 +1006,9 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		later_riv.load_from_db()
 		self.assertEqual(later_riv.status, "Skipped")
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Reposting Settings", {"item_based_reposting": 1, "enable_parallel_reposting": 1}
+	)
 	def test_repost_covering_earlier_date_is_not_skipped(self):
 		"""A repost for the finished good that starts before the manufacture entry still
 		has work to do, so it must survive."""
