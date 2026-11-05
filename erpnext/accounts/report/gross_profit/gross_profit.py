@@ -1254,11 +1254,14 @@ class GrossProfitGenerator:
 			)
 
 		for dim in get_accounting_dimensions(as_list=False) or []:
-			if self.filters.get(dim.fieldname):
+			dimension_filter = self.filters.get(f"accounting_dimension_{dim.fieldname}")
+			if dimension_filter is None and dim.fieldname != "sales_invoice":
+				dimension_filter = self.filters.get(dim.fieldname)
+			if dimension_filter:
 				query = query.where(
 					get_dimension_filter_condition(
 						SalesInvoiceItem[dim.fieldname],
-						self.filters[dim.fieldname],
+						dimension_filter,
 						dim.document_type,
 					)
 				)
