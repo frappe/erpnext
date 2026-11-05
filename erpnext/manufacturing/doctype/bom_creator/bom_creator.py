@@ -301,7 +301,7 @@ class BOMCreator(Document):
 		}
 		"""
 
-		self.db_set("status", "In Progress")
+		self.db_set({"status": "In Progress", "error_log": None})
 		production_item_wise_rm = OrderedDict({})
 		production_item_wise_rm.setdefault(
 			(self.item_code, self.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
