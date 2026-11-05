@@ -104,6 +104,14 @@ const scenePlant = computed(() => {
 	);
 });
 const view = computed(() => previewView(scenePlant.value, animate.value, focus.value));
+
+const batchKey = ref(0);
+function setBatchSize(value) {
+	if (num(value) > 0) emit("update", { qty: num(value) });
+}
+function restoreBatchSize(event) {
+	if (num(event.target.value) <= 0) batchKey.value++;
+}
 </script>
 
 <template>
@@ -113,12 +121,14 @@ const view = computed(() => previewView(scenePlant.value, animate.value, focus.v
 				<fieldset :disabled="readOnly" class="m-0 min-w-0 space-y-8 border-0 p-0">
 					<div class="grid grid-cols-2 gap-3">
 						<FormControl
+							:key="batchKey"
 							:model-value="design.qty"
 							type="number"
 							variant="outline"
 							:label="__('Finished Good Quantity')"
 							:debounce="500"
-							@update:model-value="emit('update', { qty: num($event) })"
+							@update:model-value="setBatchSize"
+							@blur="restoreBatchSize"
 						>
 							<template v-if="data.item?.stock_uom" #suffix>
 								<span class="text-xs text-ink-gray-5">{{ data.item.stock_uom }}</span>
