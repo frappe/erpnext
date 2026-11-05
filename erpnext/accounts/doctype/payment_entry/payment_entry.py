@@ -602,6 +602,13 @@ class PaymentEntry(AccountsController):
 				invoice_names.add((ref.reference_doctype, ref.reference_name))
 
 		for doctype, name in invoice_names:
+<<<<<<< HEAD
+=======
+			if not frappe.db.get_value(doctype, name, "subscription"):
+				continue
+
+			frappe.db.savepoint("subscription_update")
+>>>>>>> 4ac0582 (perf(payment entry): load only invoices linked to a subscription to refresh it)
 			try:
 				doc = frappe.get_doc(doctype, name)
 				doc.refresh_subscription_status()
