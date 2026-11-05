@@ -1,19 +1,19 @@
 <script setup>
 import { computed, inject, ref } from "vue";
-import { Button, Dropdown } from "frappe-ui";
+import { Badge, Button, Dropdown } from "frappe-ui";
 import SectionHead from "./SectionHead.vue";
 import StageCard from "./StageCard.vue";
 import { __ } from "../../lib/api";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, insertStage, machineModelOf } from "../../lib/plant";
-import { num } from "../../lib/format";
+import { fmt, num, round } from "../../lib/format";
 
 const props = defineProps({
 	doc: Object,
 	machines: Object,
 	catalog: { type: Array, default: () => [] },
 	outputs: { type: Object, default: () => ({}) },
-	items: { type: Object, default: () => ({}) },
+	data: { type: Object, default: () => ({}) },
 	focus: { type: Number, default: null },
 });
 const readOnly = inject(READ_ONLY, ref(false));
@@ -21,6 +21,14 @@ const emit = defineEmits(["focus"]);
 
 const models = computed(() => props.doc.stages.map((stage) => machineModelOf(stage, props.machines)));
 const hasPacking = computed(() => models.value.some(isPackingModel));
+const items = computed(() => props.data.items || {});
+const weightUom = computed(() => props.data.item?.weight_uom || "");
+const batchWeight = computed(() =>
+	props.doc.materials.reduce((sum, row) => {
+		const factor = num(props.data.weight_factors?.[row.item_code]);
+		return sum + (factor ? num(row.qty) / factor : 0);
+	}, 0)
+);
 
 function addStage(type) {
 	const stage = {
@@ -56,10 +64,17 @@ const addOptions = computed(() =>
 			:title="__('Process Stages')"
 			:description="
 				__(
-					'Each stage is one machine that makes a semi-finished good from its raw materials and the output of the stages before it. Stages that run with each other start at the same time. The last stage packs the finished good.'
+					'Each stage is one machine that makes a semi-finished good from its own raw materials and the output of the stages before it. Stages that run with each other start at the same time. The last stage packs the finished good.'
 				)
 			"
-		/>
+		>
+			<Badge
+				v-if="doc.materials.length && weightUom"
+				:label="`${fmt(round(batchWeight))} ${weightUom}`"
+				:title="__('Raw material weight for one batch')"
+				variant="subtle"
+			/>
+		</SectionHead>
 		<StageCard
 			v-for="(stage, i) in doc.stages"
 			:key="stage.operation_id || i"
@@ -69,7 +84,7 @@ const addOptions = computed(() =>
 			:machine-model="models[i]"
 			:output="outputs[stage.operation_id]"
 			:output-uom="items[stage.semi_finished_good]?.stock_uom"
-			:items="items"
+			:data="data"
 			:packing-index="models.findIndex(isPackingModel)"
 			:focused="focus === i"
 			@focus="emit('focus', $event)"
@@ -77,7 +92,7 @@ const addOptions = computed(() =>
 		<Dropdown v-if="addOptions.length && !readOnly" :options="addOptions">
 			<Button icon-left="lucide-plus" :label="__('Add Stage')" />
 		</Dropdown>
-		<p v-else class="text-p-sm text-ink-gray-5">
+		<p v-else-if="!readOnly" class="text-p-sm text-ink-gray-5">
 			{{ __("Set a Machine Model on a Workstation Type to add stages for it.") }}
 		</p>
 	</section>

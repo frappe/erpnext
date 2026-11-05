@@ -3,7 +3,6 @@ import { computed, onMounted, provide, ref, watch } from "vue";
 import { Button, FormControl, ScrollArea, Tooltip } from "frappe-ui";
 import PlantScene from "../components/three/PlantScene.vue";
 import SetupStatus from "../components/setup/SetupStatus.vue";
-import FormulaSection from "../components/setup/FormulaSection.vue";
 import StagesSection from "../components/setup/StagesSection.vue";
 import { __, call } from "../lib/api";
 import { READ_ONLY, toScenePlant } from "../lib/plant";
@@ -135,13 +134,12 @@ const view = computed(() => previewView(scenePlant.value, animate.value, focus.v
 						/>
 					</div>
 					<SetupStatus :errors="data.errors" />
-					<FormulaSection :doc="doc" :data="data" />
 					<StagesSection
 						:doc="doc"
 						:machines="data.machines"
 						:catalog="catalog"
 						:outputs="data.outputs"
-						:items="data.items"
+						:data="data"
 						:focus="focus"
 						@focus="focus = $event"
 					/>

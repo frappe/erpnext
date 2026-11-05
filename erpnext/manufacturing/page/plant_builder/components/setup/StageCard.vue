@@ -1,9 +1,10 @@
 <script setup>
 import { computed, inject, ref } from "vue";
-import { Button, FormControl, MultiSelect, TextInput, Tooltip } from "frappe-ui";
+import { Button, FormControl, TextInput, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
+import StageMaterials from "./StageMaterials.vue";
 import { __ } from "../../lib/api";
-import { fmt, num } from "../../lib/format";
+import { fmt } from "../../lib/format";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, groupOf, moveStage, removeStage, setRunsWith } from "../../lib/plant";
 
@@ -14,7 +15,7 @@ const props = defineProps({
 	machineModel: String,
 	output: Number,
 	outputUom: String,
-	items: { type: Object, default: () => ({}) },
+	data: { type: Object, default: () => ({}) },
 	packingIndex: { type: Number, default: -1 },
 	focused: Boolean,
 });
@@ -40,11 +41,14 @@ const stageLabel = (stage, i) => {
 	const machine = machineOf(stage.machine_model);
 	return `${i + 1}. ${stage.operation || __(machine.stage || machine.label)}`;
 };
+const stageOptions = computed(() =>
+	stages.value
+		.map((stage, i) => ({ label: stageLabel(stage, i), stageNo: i + 1 }))
+		.filter((_, i) => i !== props.index && i !== props.packingIndex)
+);
 const runsWithOptions = computed(() => [
 	{ label: __("None"), value: "" },
-	...stages.value
-		.map((stage, i) => ({ label: stageLabel(stage, i), value: String(i + 1) }))
-		.filter((_, i) => i !== props.index && i !== props.packingIndex),
+	...stageOptions.value.map((option) => ({ label: option.label, value: String(option.stageNo) })),
 ]);
 const runsWith = computed(() => {
 	const other = groupOf(stages.value, props.index).find((stage) => stage !== props.stage);
@@ -52,27 +56,6 @@ const runsWith = computed(() => {
 });
 const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? Number(value) - 1 : null);
 
-const stageNo = computed(() => props.index + 1);
-const stageOf = (row) => num(row.stage_row_id) || 1;
-const materialOptions = computed(() =>
-	props.doc.materials
-		.filter((row) => row.item_code)
-		.map((row) => ({
-			label: props.items[row.item_code]?.item_name || row.item_code,
-			value: row.item_code,
-			description: stageOf(row) === stageNo.value ? "" : __("Stage {0}", [stageOf(row)]),
-			disabled: stageNo.value === 1 && stageOf(row) === 1,
-		}))
-);
-const materials = computed(() =>
-	props.doc.materials.filter((row) => row.item_code && stageOf(row) === stageNo.value)
-);
-function setMaterials(values) {
-	props.doc.materials.forEach((row) => {
-		if (values.includes(row.item_code)) row.stage_row_id = stageNo.value;
-		else if (stageOf(row) === stageNo.value) row.stage_row_id = 1;
-	});
-}
 const packing = computed(() => props.doc.packing_materials);
 const addPacking = () => packing.value.push({ item_code: "", qty_per_unit: 1 });
 const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 1);
@@ -135,20 +118,6 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 			</div>
 			<template v-if="!isPacking">
 				<div class="grid grid-cols-2 gap-3">
-					<MultiSelect
-						:model-value="materials.map((row) => row.item_code)"
-						:options="materialOptions"
-						variant="outline"
-						:label="__('Raw Materials')"
-						:placeholder="__('Search')"
-						:disabled="readOnly"
-						@update:model-value="setMaterials"
-					>
-						<template #summary="{ selectedOptions }">
-							{{ selectedOptions.map((option) => option.label).join(", ") || __("None") }}
-						</template>
-						<template #footer />
-					</MultiSelect>
 					<DeskControl
 						:model-value="runsWith"
 						fieldtype="Select"
@@ -156,29 +125,30 @@ const removePacking = (row) => packing.value.splice(packing.value.indexOf(row), 
 						:label="__('Runs With')"
 						@update:model-value="setRunsWithStage"
 					/>
+					<FormControl
+						v-model="stage.time_in_mins"
+						type="number"
+						variant="outline"
+						:label="__('Minutes')"
+					/>
 				</div>
-				<DeskControl
-					v-model="stage.semi_finished_good"
-					options="Item"
-					:label="__('Semi-finished Good')"
-					:filters="{ is_stock_item: 1 }"
-					:description="
-						output ? __('Makes {0} {1} for each batch', [fmt(output), outputUom || '']) : ''
-					"
-				/>
+				<StageMaterials :doc="doc" :data="data" :stage-no="index + 1" :stage-options="stageOptions" />
 				<div class="grid grid-cols-2 gap-3">
+					<DeskControl
+						v-model="stage.semi_finished_good"
+						options="Item"
+						:label="__('Semi-finished Good')"
+						:filters="{ is_stock_item: 1 }"
+						:description="
+							output ? __('Makes {0} {1} for each batch', [fmt(output), outputUom || '']) : ''
+						"
+					/>
 					<FormControl
 						v-model="stage.yield_percentage"
 						type="number"
 						variant="outline"
 						:label="__('Yield (%)')"
 						:description="__('Share of the weight that comes out')"
-					/>
-					<FormControl
-						v-model="stage.time_in_mins"
-						type="number"
-						variant="outline"
-						:label="__('Minutes')"
 					/>
 				</div>
 			</template>
