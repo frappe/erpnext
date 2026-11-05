@@ -34,7 +34,10 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
-from erpnext.manufacturing.doctype.work_order.work_order import get_operation_qty
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	get_operation_qty,
+	get_upstream_process_loss,
+)
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
@@ -1144,6 +1147,10 @@ class JobCard(Document):
 		return False
 
 	def set_process_loss(self):
+		# qty of a pending sub operation is not lost yet, so keep the loss booked so far
+		if any(row.status != "Complete" for row in self.sub_operations):
+			return
+
 		precision = self.precision("total_completed_qty")
 		should_set_process_loss = self.total_completed_qty or self.process_loss_qty
 
@@ -1517,7 +1524,9 @@ class JobCard(Document):
 			min_qty = []
 			precision = self.precision("total_completed_qty")
 			for d in doc.operations:
-				completed_qty = (flt(d.completed_qty) + flt(d.process_loss_qty)) * flt(doc.qty)
+				completed_qty = (
+					flt(d.completed_qty) + flt(d.process_loss_qty) + get_upstream_process_loss(doc, d)
+				) * flt(doc.qty)
 				completed_qty = flt(completed_qty / get_operation_qty(doc, d), precision)
 				if completed_qty:
 					min_qty.append(completed_qty)
@@ -1973,11 +1982,14 @@ class JobCard(Document):
 
 	def set_for_quantity(self, kwargs):
 		"""Qty to Manufacture of the completion dialog covers the current cycle only,
-		so the qty completed by the earlier cycles of this job card is kept."""
+		so the qty completed and lost by the earlier cycles of this job card is kept."""
 		if not flt(kwargs.for_quantity):
 			return
 
-		self.for_quantity = flt(self.total_completed_qty) + flt(kwargs.for_quantity)
+		self.for_quantity = flt(
+			flt(self.total_completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity),
+			self.precision("for_quantity"),
+		)
 
 	def validate_docstatus(self):
 		if self.docstatus == 2:
@@ -2002,7 +2014,7 @@ class JobCard(Document):
 		self.validate_completion_qty_split(kwargs)
 
 		self.pending_qty = flt(kwargs.pending_qty)
-		self.process_loss_qty = flt(kwargs.process_loss_qty)
+		self.process_loss_qty = flt(self.process_loss_qty) + flt(kwargs.process_loss_qty)
 
 		if kwargs.end_time:
 			self.add_time_logs(

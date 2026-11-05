@@ -401,7 +401,10 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	complete_job_card(frm) {
-		let pending_qty = frm.doc.for_quantity - frm.doc.total_completed_qty;
+		let pending_qty = flt(
+			frm.doc.for_quantity - frm.doc.total_completed_qty - frm.doc.process_loss_qty,
+			precision("for_quantity", frm.doc)
+		);
 		if (frm.doc.pending_qty > 0) {
 			pending_qty = frm.doc.pending_qty;
 		}

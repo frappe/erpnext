@@ -26,9 +26,13 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_job_card,
 	make_work_order,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	make_stock_entry as make_stock_entry_for_work_order,
+)
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.patches.v16_0.set_stock_uom_in_job_card import execute as set_stock_uom_in_job_card
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_entry.stock_entry import OperationsNotCompleteError
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1449,6 +1453,179 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(flt(job_card.for_quantity), 5)
 		self.assertEqual(flt(job_card.total_completed_qty), 5)
 		self.assertEqual(flt(job_card.process_loss_qty), 0)
+
+	def test_completion_keeps_process_loss_across_cycles(self):
+		work_order = self.make_two_operation_work_order(qty=10)
+		first, second = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+			)
+		)
+
+		first.append("time_logs", {"from_time": "2024-03-03 08:00:00"})
+		first.save()
+		first.complete_job_card(
+			qty=4,
+			for_quantity=10,
+			pending_qty=5,
+			process_loss_qty=1,
+			end_time="2024-03-03 09:00:00",
+		)
+
+		first.reload()
+		self.assertEqual(flt(first.for_quantity), 10)
+		self.assertEqual(flt(first.total_completed_qty), 4)
+		self.assertEqual(flt(first.process_loss_qty), 1)
+		self.assertEqual(flt(first.pending_qty), 5)
+
+		# The second cycle takes up the pending qty and adds its own loss to the first cycle's.
+		first.append("time_logs", {"from_time": "2024-03-03 10:00:00"})
+		first.save()
+		first.complete_job_card(
+			qty=4,
+			for_quantity=5,
+			pending_qty=0,
+			process_loss_qty=1,
+			end_time="2024-03-03 11:00:00",
+		)
+
+		first.reload()
+		self.assertEqual(flt(first.for_quantity), 10)
+		self.assertEqual(flt(first.total_completed_qty), 8)
+		self.assertEqual(flt(first.process_loss_qty), 2)
+		self.assertEqual(flt(first.pending_qty), 0)
+
+		first.submit()
+		operation = frappe.db.get_value(
+			"Work Order Operation",
+			first.operation_id,
+			["completed_qty", "process_loss_qty", "pending_qty"],
+			as_dict=True,
+		)
+		self.assertEqual(flt(operation.completed_qty), 8)
+		self.assertEqual(flt(operation.process_loss_qty), 2)
+		self.assertEqual(flt(operation.pending_qty), 0)
+
+		second.append("time_logs", {"from_time": "2024-03-03 12:00:00"})
+		second.save()
+		second.complete_job_card(
+			qty=8,
+			for_quantity=8,
+			pending_qty=0,
+			process_loss_qty=0,
+			end_time="2024-03-03 13:00:00",
+		)
+		second.reload()
+		second.submit()
+
+		# The manufacture entry for the full order qty books the loss and closes the order.
+		stock_entry = frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
+		stock_entry.submit()
+		self.assertEqual(flt(stock_entry.process_loss_qty), 2)
+		self.assertEqual(sum(row.qty for row in stock_entry.items if row.is_finished_item), 8)
+
+		work_order.reload()
+		self.assertEqual(flt(work_order.produced_qty), 8)
+		self.assertEqual(flt(work_order.process_loss_qty), 2)
+		self.assertEqual(work_order.status, "Completed")
+
+	def test_upstream_process_loss_in_manufacturing(self):
+		for upstream_qty, upstream_output, downstream_qty, downstream_output, manufacture_entries in (
+			(100, 95, 95, 95, [(100, 5, 95)]),
+			(100, 95, 95, 90, [(50, 10, 40), (50, 0, 50)]),
+			(50, 45, 50, 45, [(50, 5, 45)]),
+			(50, 45, 45, 45, [(50, 5, 45)]),
+		):
+			with self.subTest(
+				upstream_qty=upstream_qty, downstream_qty=downstream_qty, output=downstream_output
+			):
+				work_order = self.make_two_operation_work_order(qty=100)
+				job_cards = frappe.get_all(
+					"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+				)
+				for index, (for_quantity, completed_qty) in enumerate(
+					((upstream_qty, upstream_output), (downstream_qty, downstream_output))
+				):
+					job_card = frappe.get_doc("Job Card", job_cards[index])
+					job_card.for_quantity = for_quantity
+					job_card.append(
+						"time_logs",
+						{
+							"from_time": add_to_date("2024-03-01 08:00:00", hours=index),
+							"to_time": add_to_date("2024-03-01 08:00:00", hours=index, minutes=30),
+							"completed_qty": completed_qty,
+						},
+					)
+					job_card.save()
+					job_card.submit()
+
+				work_order.reload()
+				self.assertEqual(
+					[row.status for row in work_order.operations],
+					["Completed" if upstream_qty == 100 else "Work in Progress"] * 2,
+				)
+				self.assertEqual(work_order.show_create_job_card_button(), upstream_qty < 100)
+				if upstream_qty == 100:
+					# Simulate the stored operation status of an existing work order after upgrading.
+					work_order.operations[1].db_set("status", "Work in Progress")
+					work_order = frappe.get_doc("Work Order", work_order.name)
+					work_order.run_method("onload")
+					work_order.expected_delivery_date = add_to_date(today(), days=1)
+					work_order.save()
+					self.assertEqual(
+						str(work_order.reload().expected_delivery_date), add_to_date(today(), days=1)
+					)
+					self.assertEqual(work_order.operations[1].status, "Work in Progress")
+
+				frappe.get_doc("BOM", work_order.bom_no).db_set("process_loss_percentage", 10)
+				entries = []
+				for qty, loss, finished_qty in manufacture_entries:
+					stock_entry = frappe.get_doc(
+						make_stock_entry_for_work_order(work_order.name, "Manufacture", qty)
+					)
+					stock_entry.submit()
+					self.assertEqual(stock_entry.process_loss_qty, loss)
+					self.assertEqual(
+						sum(row.qty for row in stock_entry.items if row.is_finished_item), finished_qty
+					)
+					ledger = frappe.db.get_value(
+						"Stock Ledger Entry",
+						{
+							"voucher_no": stock_entry.name,
+							"item_code": work_order.production_item,
+							"is_cancelled": 0,
+						},
+						["actual_qty", "stock_value_difference"],
+						as_dict=True,
+					)
+					self.assertEqual(ledger.actual_qty, finished_qty)
+					self.assertEqual(ledger.stock_value_difference, qty * 200)
+					entries.append(stock_entry)
+
+				if upstream_qty < 100:
+					# v16 checks the operations while it fetches the items
+					with self.assertRaises(OperationsNotCompleteError):
+						frappe.get_doc(
+							make_stock_entry_for_work_order(work_order.name, "Manufacture", 5)
+						).submit()
+				else:
+					self.assertEqual(work_order.reload().status, "Completed")
+
+				work_order.reload()
+				self.assertEqual(work_order.produced_qty, downstream_output)
+				self.assertEqual(work_order.process_loss_qty, sum(row[1] for row in manufacture_entries))
+				self.assertEqual(
+					frappe.db.count("Stock Entry", {"work_order": work_order.name, "docstatus": 1}),
+					len(entries),
+				)
+				for entry in reversed(entries):
+					entry.cancel()
+				self.assertEqual(work_order.reload().produced_qty, 0)
+				self.assertEqual(work_order.process_loss_qty, 0)
+				for name in reversed(job_cards):
+					frappe.get_doc("Job Card", name).cancel()
+				self.assertTrue(all(row.status == "Pending" for row in work_order.reload().operations))
 
 	def test_op_cost_calculation(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (
@@ -3577,6 +3754,42 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.assertEqual([row.completed_qty for row in job_card.sub_operations], [10, 10])
 		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (10, 0))
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_process_loss_of_first_sub_operation_is_kept_while_next_is_pending(self):
+		workstation = make_jc_review_workstation()
+		cutting = make_jc_review_operation(workstation)
+		welding = make_jc_review_operation(workstation)
+		operation = make_jc_review_operation(
+			workstation, sub_operations=[{"operation": cutting}, {"operation": welding}]
+		)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+		)
+
+		job_card = frappe.get_doc("Job Card", get_jc_review_job_cards(wo.name)[0].name)
+		start = "2031-03-03 08:00:00"
+		job_card.start_timer(start_time=start)
+		job_card.complete_job_card(
+			end_time=add_to_date(start, minutes=30),
+			sub_operation=cutting,
+			for_quantity=10,
+			qty=9,
+			process_loss_qty=1,
+		)
+		job_card.reload()
+		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (0, 1))
+
+		job_card.start_timer(start_time=add_to_date(start, minutes=40))
+		job_card.complete_job_card(
+			end_time=add_to_date(start, minutes=70), sub_operation=welding, for_quantity=9, qty=9
+		)
+		job_card.reload()
+		self.assertEqual(
+			(job_card.for_quantity, job_card.total_completed_qty, job_card.process_loss_qty), (10, 9, 1)
+		)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_operation_cost_uses_each_job_card_workstation_rate(self):
