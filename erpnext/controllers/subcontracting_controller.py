@@ -249,14 +249,54 @@ class SubcontractingController(StockController):
 			identities = self.returnable_serial_batches.get(
 				(receipt_items.get(row.reference_name), row.rm_item_code)
 			)
-			if not (row.serial_and_batch_bundle and identities):
+			if not row.serial_and_batch_bundle:
 				continue
 
 			precision = row.precision("consumed_qty")
-			if flt(abs(row.consumed_qty), precision) != flt(
+			if flt(abs(row.consumed_qty), precision) == flt(
 				abs(bundle_qty[row.serial_and_batch_bundle]), precision
 			):
+				continue
+
+			if identities:
 				self.repick_return_bundle(row, identities)
+			else:
+				self.shrink_return_bundle(row)
+
+	def shrink_return_bundle(self, row):
+		"""Cut an edited return row without consumed bundles to pick from down to the batches it holds."""
+		precision = row.precision("consumed_qty")
+		qty = flt(abs(row.consumed_qty), precision)
+		if not qty:
+			frappe.throw(_("Row #{0}: Consumed Qty cannot be 0, delete the row instead.").format(row.idx))
+
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": row.serial_and_batch_bundle},
+			fields=["serial_no", "batch_no", "qty"],
+			order_by="idx",
+		)
+		identities = [
+			frappe._dict(serial_no=entry.serial_no, batch_no=entry.batch_no, qty=abs(entry.qty), rate=None)
+			for entry in entries
+		]
+		groups = self.allocate_returnable_serial_batches(identities, qty, precision).values()
+		available = flt(sum(group.qty for group in groups), precision)
+		if available < qty:
+			frappe.throw(
+				_(
+					"Row #{0}: only {1} of raw material {2} can be returned on this row. Use Reset Raw Materials Table to pick the raw materials again."
+				).format(row.idx, available, frappe.bold(row.rm_item_code))
+			)
+
+		self.__remove_serial_and_batch_bundle(row)
+		row.consumed_qty = -qty
+		row.serial_and_batch_bundle = self.make_supplied_item_bundle(
+			row.rm_item_code,
+			row.consumed_qty,
+			[serial_no for group in groups for serial_no in group.serial_nos],
+			{batch_no: batch_qty for group in groups for batch_no, batch_qty in group.batches.items()},
+		)
 
 	def repick_return_bundle(self, row, identities):
 		"""Remake the bundle of an edited return row, from the batch and rate it was made for."""
