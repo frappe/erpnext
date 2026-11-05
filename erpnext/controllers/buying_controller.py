@@ -27,7 +27,10 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
+	TermsTemplateError,
+	validate_terms_and_conditions,
+)
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import validate_item_uoms
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -110,7 +113,11 @@ class BuyingController(SubcontractingController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_buying_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("buying"):
-				self.set_missing_terms()
+				try:
+					self.set_missing_terms()
+				except TermsTemplateError:
+					# The error is already shown; keep the draft openable so other terms can be picked.
+					pass
 
 	def validate_posting_date_with_po(self):
 		po_list = {x.purchase_order for x in self.items if x.purchase_order}

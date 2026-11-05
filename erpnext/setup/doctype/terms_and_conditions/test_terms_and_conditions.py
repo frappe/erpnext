@@ -29,6 +29,16 @@ class TestTermsAndConditions(UnitTestCase):
 						"Full terms for Acme at https://example.com/terms." + extension,
 					)
 
+	def test_template_errors_name_the_terms(self):
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import TermsTemplateError
+
+		for terms in ("{{ frappe.get_doc('User', 'Administrator') }}", "{% if %}"):
+			with self.subTest(terms=terms), patch("frappe.get_cached_doc") as get_doc:
+				get_doc.return_value.terms = terms
+				get_doc.return_value.disabled = 0
+				with self.assertRaisesRegex(TermsTemplateError, "Broken terms"):
+					get_terms_and_conditions("Broken terms", {"customer": "Acme"})
+
 	def test_applicable_modules_without_hrms(self):
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import TermsandConditions
 
@@ -389,6 +399,36 @@ class TestTermsTransactionValidation(IntegrationTestCase):
 		company.reload()
 		company.save()
 		self.assertEqual(company.default_selling_terms, terms.name)
+
+	def test_draft_with_broken_template_can_be_opened(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import TermsTemplateError
+
+		self.addCleanup(frappe.db.rollback)
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title=f"Broken terms {frappe.generate_hash(length=8)}",
+			selling=1,
+			buying=1,
+			terms="{{ frappe.get_doc('User', 'Administrator') }}",
+		).insert()
+
+		order = make_sales_order(do_not_save=True)
+		order.tc_name = terms.name
+		order.terms = None
+		order.insert()
+		order.reload()
+		frappe.clear_messages()
+		order.run_method("onload")
+		self.assertFalse(order.terms)
+		self.assertIn("could not be rendered", str(frappe.get_message_log()))
+		self.assertRaises(TermsTemplateError, order.run_method, "before_print")
+
+		purchase_order = create_purchase_order(do_not_save=True)
+		purchase_order.tc_name = terms.name
+		purchase_order.terms = None
+		self.assertRaises(TermsTemplateError, purchase_order.insert)
 
 	def test_draft_with_disabled_terms_can_be_opened_and_corrected(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
