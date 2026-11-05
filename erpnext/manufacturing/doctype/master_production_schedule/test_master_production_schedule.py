@@ -169,6 +169,21 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual(mps.items[0].cumulative_lead_time, 24)
 
+	def test_row_uom_needs_a_conversion_factor(self):
+		self.assertRaises(frappe.ValidationError, make_mps, items=[make_mps_row(uom="Box")])
+		make_mps(items=[make_mps_row(uom="_Test UOM 1")])
+
+
+def make_mps_row(**values):
+	return {
+		"item_code": "_Test Item",
+		"warehouse": "_Test Warehouse - _TC",
+		"delivery_date": add_days(today(), 10),
+		"planned_qty": 1,
+		"uom": "_Test UOM",
+		**values,
+	}
+
 
 def make_lead_time(item_code, **values):
 	frappe.db.delete("Item Lead Time", {"item_code": item_code})
@@ -188,6 +203,7 @@ def make_mps(**args):
 			"select_items": [{"item_code": item} for item in args.select_items or []],
 			"sales_orders": [{"sales_order": name} for name in args.sales_orders or []],
 			"material_requests": [{"material_request": name} for name in args.material_requests or []],
+			"items": args.get("items") or [],
 		}
 	)
 	mps.insert()
