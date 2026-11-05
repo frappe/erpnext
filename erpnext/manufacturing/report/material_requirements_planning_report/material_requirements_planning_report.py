@@ -925,8 +925,11 @@ class MaterialRequirementsPlanningReport:
 
 		for row in self.mps_data:
 			key = (row.item_code, row.get("bom_no"))
+			if not row.get("bom_no") or key in item_wise_rm_details:
+				continue
+
 			item_data = item_wise_rm_details[row.item_code]
-			if row.get("bom_no") and row.bom_no != item_data.bom_no and key not in item_wise_rm_details:
+			if row.bom_no != item_data.bom_no:
 				item_wise_rm_details[key] = frappe._dict(
 					item_data, bom_no=row.bom_no, raw_materials=self.get_raw_materials(row.bom_no)
 				)
