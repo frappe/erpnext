@@ -4,13 +4,17 @@ import frappe
 from frappe import _
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Count, Date
-from frappe.utils import cint, flt, get_datetime, getdate, now_datetime
+from frappe.utils import cint, cstr, flt, get_datetime, getdate, now_datetime
 from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.job_card.job_card import get_workstation_minutes
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	get_status_color,
 	get_time_logs,
+)
+from erpnext.stock.doctype.quality_inspection.quality_inspection import (
+	get_reading_number_format,
+	get_reading_separators,
 )
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
@@ -265,6 +269,8 @@ def submit_quality_inspection(job_card: str, readings: str | None = None):
 	qi.inspected_by = frappe.session.user
 	qi.get_item_specification_details()  # load readings from the template
 
+	# readings come from a number input, so "." is the decimal; QI parses them in the user's format
+	decimal_str = get_reading_separators(get_reading_number_format())[0]
 	for reading in qi.readings:
 		entry = reading_map.get(reading.specification)
 		if not entry:
@@ -274,7 +280,7 @@ def submit_quality_inspection(job_card: str, readings: str | None = None):
 			# Measured value → let the Quality Inspection judge it against min/max or the formula.
 			if value not in (None, ""):
 				reading.reading_value = value
-				reading.reading_1 = value
+				reading.reading_1 = cstr(value).replace(".", decimal_str)
 		else:
 			# Qualitative check → the operator's explicit pass/fail wins.
 			reading.manual_inspection = 1
