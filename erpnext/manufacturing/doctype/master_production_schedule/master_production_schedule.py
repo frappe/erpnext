@@ -10,6 +10,11 @@ from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_json
 
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
+<<<<<<< HEAD
+=======
+from erpnext.manufacturing.scheduling.plan_adapter import get_days_needed
+from erpnext.stock.get_item_details import get_conversion_factor
+>>>>>>> 7754616 (fix(manufacturing): validate the UOM conversion of Master Production Schedule rows)
 
 
 class MasterProductionSchedule(Document):
@@ -66,6 +71,12 @@ class MasterProductionSchedule(Document):
 		self.set_to_date()
 		self.validate_company()
 		self.validate_sales_forecast_not_used()
+		self.validate_items()
+
+	def validate_items(self):
+		for row in self.items:
+			if row.item_code and row.uom:
+				get_conversion_factor(row.item_code, row.uom, throw_if_missing=True)
 
 	def validate_sales_forecast_not_used(self):
 		if not self.sales_forecast:
