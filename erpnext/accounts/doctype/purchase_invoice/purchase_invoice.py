@@ -904,6 +904,7 @@ class PurchaseInvoice(BuyingController):
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 		if self.docstatus == 1:
+			self.cancel_provisional_entries()
 			if not gl_entries:
 				gl_entries = self.get_gl_entries()
 
@@ -1382,22 +1383,23 @@ class PurchaseInvoice(BuyingController):
 			}
 
 	def make_provisional_gl_entry(self, gl_entries, item):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import post_provisional_gl_entry
+
 		if item.purchase_receipt:
 			pr_item = self.provisional_accounts.get(item.pr_detail, {})
 			if pr_item.get("has_provisional_entry"):
-				purchase_receipt_doc = frappe.get_cached_doc("Purchase Receipt", item.purchase_receipt)
+				conversion_rate = frappe.get_cached_value(
+					"Purchase Receipt", item.purchase_receipt, "conversion_rate"
+				)
 
-				# Intentionally passing purchase invoice item to handle partial billing
-				purchase_receipt_doc.add_provisional_gl_entry(
+				post_provisional_gl_entry(
+					self,
 					item,
 					gl_entries,
 					self.posting_date,
 					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(
-						(min(item.qty, pr_item.get("qty")) * pr_item.get("rate"))
-						* purchase_receipt_doc.get("conversion_rate")
-					),
+					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("rate")) * conversion_rate,
 				)
 
 	def update_gross_purchase_amount_for_linked_assets(self, item):

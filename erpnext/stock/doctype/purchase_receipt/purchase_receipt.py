@@ -821,49 +821,8 @@ class PurchaseReceipt(BuyingController):
 	def add_provisional_gl_entry(
 		self, item, gl_entries, posting_date, provisional_account, reverse=0, item_amount=None
 	):
-		credit_currency = get_account_currency(provisional_account)
-		expense_account = item.expense_account
-		debit_currency = get_account_currency(item.expense_account)
-		remarks = self.get("remarks") or _("Accounting Entry for Service")
-		multiplication_factor = 1
-		amount = item.base_amount
-
-		if reverse:
-			multiplication_factor = -1
-			# Post reverse entry for previously posted amount
-			amount = item_amount
-			expense_account = frappe.db.get_value(
-				"Purchase Receipt Item", {"name": item.get("pr_detail")}, ["expense_account"]
-			)
-
-		self.add_gl_entry(
-			gl_entries=gl_entries,
-			account=provisional_account,
-			cost_center=item.cost_center,
-			debit=0.0,
-			credit=multiplication_factor * amount,
-			remarks=remarks,
-			against_account=expense_account,
-			account_currency=credit_currency,
-			project=item.project,
-			voucher_detail_no=item.name,
-			item=item,
-			posting_date=posting_date,
-		)
-
-		self.add_gl_entry(
-			gl_entries=gl_entries,
-			account=expense_account,
-			cost_center=item.cost_center,
-			debit=multiplication_factor * amount,
-			credit=0.0,
-			remarks=remarks,
-			against_account=provisional_account,
-			account_currency=debit_currency,
-			project=item.project,
-			voucher_detail_no=item.name,
-			item=item,
-			posting_date=posting_date,
+		post_provisional_gl_entry(
+			self, item, gl_entries, posting_date, provisional_account, reverse, item_amount
 		)
 
 	def is_landed_cost_booked_for_any_item(self) -> bool:
@@ -1719,3 +1678,52 @@ def make_lcv(doctype, docname):
 	landed_cost_voucher.get_items_from_purchase_receipts()
 
 	return landed_cost_voucher.as_dict()
+
+
+def post_provisional_gl_entry(
+	doc, item, gl_entries, posting_date, provisional_account, reverse=0, item_amount=None, pr_detail=None
+):
+	credit_currency = get_account_currency(provisional_account)
+	expense_account = item.expense_account
+	debit_currency = get_account_currency(item.expense_account)
+	remarks = doc.get("remarks") or _("Accounting Entry for Service")
+	multiplication_factor = 1
+	amount = item.base_amount
+
+	if reverse:
+		multiplication_factor = -1
+		# Post reverse entry for previously posted amount
+		amount = item_amount
+		expense_account = frappe.db.get_value(
+			"Purchase Receipt Item", {"name": pr_detail or item.get("pr_detail")}, ["expense_account"]
+		)
+
+	doc.add_gl_entry(
+		gl_entries=gl_entries,
+		account=provisional_account,
+		cost_center=item.cost_center,
+		debit=0.0,
+		credit=multiplication_factor * amount,
+		remarks=remarks,
+		against_account=expense_account,
+		account_currency=credit_currency,
+		project=item.project,
+		voucher_detail_no=item.name,
+		item=item,
+		posting_date=posting_date,
+	)
+
+	doc.add_gl_entry(
+		gl_entries=gl_entries,
+		account=expense_account,
+		cost_center=item.cost_center,
+		debit=multiplication_factor * amount,
+		credit=0.0,
+		remarks=remarks,
+		against_account=provisional_account,
+		account_currency=debit_currency,
+		project=item.project,
+		voucher_detail_no=item.name,
+		item=item,
+		posting_date=posting_date,
+	)
