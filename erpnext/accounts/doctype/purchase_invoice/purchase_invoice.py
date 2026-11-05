@@ -1431,7 +1431,9 @@ class PurchaseInvoice(BuyingController):
 			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
-			purchase_amount = flt(item.valuation_rate) * asset.asset_quantity
+			purchase_amount = (
+				flt(item.valuation_rate) * flt(item.conversion_factor or 1) * asset.asset_quantity
+			)
 			frappe.db.set_value(
 				"Asset",
 				asset.name,

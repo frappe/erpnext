@@ -6573,6 +6573,34 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 		)
 		self.assertEqual(srbnb_debit, 400)
 
+	def test_assets_bought_in_a_purchase_uom_carry_the_full_value(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		asset_item = make_auto_asset_item(
+			"Test Asset Item Bought In Packs", uoms=[{"uom": "Box", "conversion_factor": 4}]
+		)
+
+		receipt = make_purchase_receipt(
+			item_code=asset_item, qty=1, rate=40000, uom="Box", stock_uom="Nos", conversion_factor=4
+		)
+
+		self.assertEqual(
+			frappe.get_all(
+				"Asset", filters={"purchase_receipt": receipt.name}, pluck="gross_purchase_amount"
+			),
+			[40000],
+		)
+
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, receipt.company, charges=400)
+		self.assertEqual(
+			frappe.get_all(
+				"Asset", filters={"purchase_receipt": receipt.name}, pluck="gross_purchase_amount"
+			),
+			[40400],
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -6739,6 +6767,24 @@ def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:
 		receipt_docs.append(pr)
 
 	return receipt_docs
+
+
+def make_auto_asset_item(item_code: str, **properties) -> str:
+	from erpnext.assets.doctype.asset.test_asset import create_asset_data
+
+	create_asset_data()
+	return make_item(
+		item_code,
+		{
+			"is_stock_item": 0,
+			"stock_uom": "Nos",
+			"is_fixed_asset": 1,
+			"auto_create_assets": 1,
+			"asset_category": "Computers",
+			"asset_naming_series": "ABC.###",
+			**properties,
+		},
+	).name
 
 
 def make_invoice_against_order(purchase_order: str, qty: float, rate: float):
