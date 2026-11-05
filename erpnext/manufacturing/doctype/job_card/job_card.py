@@ -291,7 +291,7 @@ class JobCard(Document):
 			return False
 
 		# sorting overlapping job cards as per from_time
-		time_logs = sorted(time_logs, key=lambda x: x.get("from_time"))
+		time_logs = sorted(merge_time_logs_per_job_card(time_logs), key=lambda x: x.get("from_time"))
 		# alloted_capacity has key number starting from 1. Key number will increment by 1 if non sequential job card found
 		# if key number reaches/crosses to production_capacity means capacity is full and overlap error generated
 		# this will store last to_time of sequential job cards
@@ -363,9 +363,7 @@ class JobCard(Document):
 			if not open_job_cards and doctype == "Job Card Scheduled Time":
 				return []
 
-			if doctype == "Job Card Time Log":
-				query = query.where(jctl.employee == args.get("employee"))
-			else:
+			if doctype == "Job Card Scheduled Time":
 				query = query.where(jc.name.isin(open_job_cards))
 
 		if doctype == "Job Card Time Log":
@@ -1273,6 +1271,18 @@ def make_stock_entry(source_name: str, target_doc: Document | str | None = None)
 	)
 
 	return doclist
+
+
+def merge_time_logs_per_job_card(time_logs):
+	time_logs = [frappe._dict(log) for log in time_logs]
+	merged = [log for log in time_logs if not log.name]
+	for name in dict.fromkeys(log.name for log in time_logs if log.name):
+		for log in sorted((log for log in time_logs if log.name == name), key=lambda log: log.from_time):
+			if merged and merged[-1].name == name and log.from_time < merged[-1].to_time:
+				merged[-1].to_time = max(merged[-1].to_time, log.to_time)
+			else:
+				merged.append(log)
+	return merged
 
 
 def time_diff_in_minutes(string_ed_date, string_st_date):
