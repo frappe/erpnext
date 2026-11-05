@@ -238,7 +238,7 @@ frappe.ui.form.on("Company", {
 							label: __("Please enter the company name to confirm"),
 							reqd: 1,
 							description: __(
-								"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. This action cannot be undone.",
+								"Please make sure you really want to delete all the transactions for {0}. Your master data will remain as it is. Naming series counters will not be reset. This action cannot be undone.",
 								[frappe.utils.bold(frm.doc.name)]
 							),
 						},
