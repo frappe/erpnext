@@ -14,8 +14,6 @@ const allowed_print_formats = doctype_list.flatMap((doctype) =>
 );
 const allowed_letterheads = ["Company Letterhead", "Company Letterhead - Grey"];
 
-const checked_documents = new Set();
-
 const preview = frappe.ui.form.PrintView.prototype.preview;
 frappe.ui.form.PrintView.prototype.preview = function () {
 	preview.call(this);
@@ -23,11 +21,12 @@ frappe.ui.form.PrintView.prototype.preview = function () {
 };
 
 function check_company_details(doctype, docname) {
-	const key = `${doctype}:${docname}`;
-	if (!doctype_list.includes(doctype) || checked_documents.has(key)) return;
+	// kept for the session, so the reload after Save does not ask again
+	const key = `company_details_checked:${doctype}:${docname}`;
+	if (!doctype_list.includes(doctype) || sessionStorage.getItem(key)) return;
 	if (!should_fetch_company_details()) return;
 
-	checked_documents.add(key);
+	sessionStorage.setItem(key, "1");
 	fetch_company_details(doctype, docname);
 }
 
