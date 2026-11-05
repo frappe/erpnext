@@ -1684,6 +1684,42 @@ class TestMaterialRequest(ERPNextTestSuite):
 		alerts = [m for m in frappe.get_message_log() if m.get("alert")]
 		self.assertTrue(any("was set to today" in m.get("message") for m in alerts))
 
+	def test_make_purchase_orders_by_supplier_fetches_supplier_price(self):
+		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
+
+		item_code = create_item("_Test MR Supplier Priced Item").name
+		mr = make_material_request_for_items([item_code])
+		self.assertFalse(mr.items[0].rate)
+
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": "Standard Buying",
+				"supplier": "_Test Supplier",
+				"price_list_rate": 125,
+			}
+		).insert()
+
+		with self.change_settings("Buying Settings", {"buying_price_list": "Standard Buying"}):
+			purchase_orders = make_purchase_orders_by_supplier(
+				mr.name,
+				[
+					{
+						"material_request_item": mr.items[0].name,
+						"item_code": item_code,
+						"qty": 10,
+						"supplier": "_Test Supplier",
+					}
+				],
+			)
+
+		row = frappe.get_doc("Purchase Order", purchase_orders[0]).items[0]
+		self.assertEqual(row.price_list_rate, 125)
+		self.assertEqual(row.rate, 125)
+		self.assertEqual(row.amount, 1250)
+		self.assertEqual(row.material_request_item, mr.items[0].name)
+
 	def test_make_purchase_orders_by_supplier_invalid_rows(self):
 		from erpnext.stock.doctype.material_request.mapper import make_purchase_orders_by_supplier
 

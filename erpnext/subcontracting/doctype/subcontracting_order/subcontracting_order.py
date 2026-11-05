@@ -13,8 +13,10 @@ from frappe.utils import flt
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	clear_reserve_stock_if_disabled,
 	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
 )
@@ -137,6 +139,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		clear_reserve_stock_if_disabled(self)
 
 	def on_submit(self):
 		self.update_status()
@@ -549,14 +552,10 @@ class SubcontractingOrder(SubcontractingController):
 
 				reservation_items.append(data)
 
-			sre = StockReservation(self, items=reservation_items)
 			if is_transfer:
-				sre.transfer_reservation_entries_to(
-					self.production_plan, from_doctype="Production Plan", to_doctype="Subcontracting Order"
-				)
-			else:
-				if sre.make_stock_reservation_entries():
-					frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
+				hand_off_reserved_stock(self.production_plan, self.doctype, reservation_items)
+			elif StockReservation(self, items=reservation_items).make_stock_reservation_entries():
+				frappe.msgprint(_("Stock Reservation Entries created"), alert=True, indicator="blue")
 
 	def has_unreserved_stock(self) -> bool:
 		for item in self.get("supplied_items"):

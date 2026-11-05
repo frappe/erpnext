@@ -1277,8 +1277,8 @@ class SalesInvoice(SellingController):
 			"taxes": ("account_head",),
 			"payments": ("account",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -1362,7 +1362,8 @@ def get_bank_cash_account(mode_of_payment: str, company: str) -> dict:
 def get_loyalty_programs(customer: str) -> list:
 	from .services.loyalty import get_loyalty_programs as _get
 
-	return _get(customer)
+	frappe.has_permission("Customer", "read", customer, throw=True)
+	return _get(customer, set_single_program=frappe.has_permission("Customer", "write", customer))
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

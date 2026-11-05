@@ -23,10 +23,13 @@ from erpnext.accounts.report.utils import (
 	get_taxes_query,
 	get_values_for_columns,
 	get_with_descendants,
+	validate_date_range,
 )
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return _execute(filters)
 
 

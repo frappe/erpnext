@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
@@ -72,33 +73,9 @@ class SubcontractingController(StockController):
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
-			rejected_return_rows = self.get_rejected_return_rows()
-			for row in self.supplied_items:
-				kwargs = frappe._dict(
-					{
-						"item_code": row.rm_item_code,
-						"warehouse": self.supplier_warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
-						"qty": flt(row.consumed_qty) * (-1 if not self.is_return else 1),
-						"voucher_type": self.doctype,
-						"voucher_no": self.name,
-						"company": self.company,
-						"serial_and_batch_bundle": row.serial_and_batch_bundle,
-						"voucher_detail_no": row.name,
-						"batch_no": row.batch_no,
-						"serial_no": row.serial_no,
-						"use_serial_batch_fields": row.use_serial_batch_fields,
-					}
-				)
-
-				rate = (
-					0.0
-					if row.reference_name in rejected_return_rows
-					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
-					else _get_incoming_rate(kwargs)
-				)
-				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
+			precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
+			rates = self.get_supplied_item_rates(self.supplied_items)
+			for row, rate in zip(self.supplied_items, rates, strict=True):
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
 					row.amount = flt(row.consumed_qty) * flt(rate)
@@ -106,6 +83,213 @@ class SubcontractingController(StockController):
 
 		if rate_changed:
 			self.calculate_items_qty_and_amount()
+
+	def get_supplied_item_rates(self, rows):
+		"""Rate of each supplied item row, in order; a return takes back the rate the returned receipt consumed at."""
+		rejected_return_rows = self.get_rejected_return_rows()
+		return_rates = self.get_consumed_rates_for_return()
+		original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
+
+		# set while validating; a repost loads the receipt without it
+		returnable_serial_batches = self.get("returnable_serial_batches") or {}
+
+		rates = []
+		for row in rows:
+			# the stock ledger values Standard Cost items at the standard rate
+			is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
+			return_rate = None
+			if self.is_return and not is_standard_cost:
+				key = (original_rows.get(row.reference_name), row.rm_item_code)
+				# rows with the consumed serial nos or batches already carry the rate they were consumed at
+				return_rate = (
+					row.rate
+					if row.serial_and_batch_bundle and key in returnable_serial_batches
+					else return_rates.get(key)
+				)
+			if row.reference_name in rejected_return_rows and not is_standard_cost:
+				rates.append(0.0)
+			elif return_rate is not None:
+				rates.append(return_rate)
+			else:
+				rates.append(_get_incoming_rate(self.get_supplied_item_rate_args(row)))
+
+		return rates
+
+	def get_supplied_item_rate_args(self, row):
+		return frappe._dict(
+			{
+				"item_code": row.rm_item_code,
+				"warehouse": self.supplier_warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"qty": flt(row.consumed_qty) * (-1 if not self.is_return else 1),
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company,
+				"serial_and_batch_bundle": row.serial_and_batch_bundle,
+				"voucher_detail_no": row.name,
+				"batch_no": row.batch_no,
+				"serial_no": row.serial_no,
+				"use_serial_batch_fields": row.use_serial_batch_fields,
+			}
+		)
+
+	def get_consumed_rates_for_return(self):
+		"""Rate each raw material was consumed at in the returned receipt, keyed by (receipt item row, raw material)."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+		rows = (
+			frappe.qb.from_(supplied_item)
+			.select(
+				supplied_item.reference_name,
+				supplied_item.rm_item_code,
+				(Sum(supplied_item.rate * supplied_item.consumed_qty) / Sum(supplied_item.consumed_qty)).as_(
+					"rate"
+				),
+			)
+			.where((supplied_item.parent == self.return_against) & (supplied_item.consumed_qty != 0))
+			.groupby(supplied_item.reference_name, supplied_item.rm_item_code)
+		).run(as_dict=True)
+
+		return {(row.reference_name, row.rm_item_code): flt(row.rate) for row in rows}
+
+	def get_returnable_serial_batches(self):
+		"""Serial nos and batches the returned receipt consumed that no return has brought back yet,
+		keyed by (receipt item row, raw material)."""
+		if not (self.doctype == "Subcontracting Receipt" and self.is_return and self.return_against):
+			return {}
+
+		receipt = frappe.qb.DocType("Subcontracting Receipt")
+		item = frappe.qb.DocType("Subcontracting Receipt Item")
+		supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		rows = (
+			frappe.qb.from_(supplied_item)
+			.join(receipt)
+			.on(receipt.name == supplied_item.parent)
+			.join(item)
+			.on(item.name == supplied_item.reference_name)
+			.join(entry)
+			.on(entry.parent == supplied_item.serial_and_batch_bundle)
+			.select(
+				Coalesce(item.subcontracting_receipt_item, item.name).as_("receipt_item"),
+				supplied_item.rm_item_code,
+				entry.serial_no,
+				entry.batch_no,
+				entry.qty,
+				entry.incoming_rate,
+			)
+			.where(
+				((receipt.name == self.return_against) | (receipt.return_against == self.return_against))
+				& (receipt.name != self.name)
+				& (receipt.docstatus == 1)
+			)
+			.orderby(supplied_item.idx)
+			.orderby(entry.idx)
+		).run(as_dict=True)
+
+		returnable = {}
+		# consumption is outward (negative) and goes first, so returns only count against it
+		for row in sorted(rows, key=lambda row: row.qty > 0):
+			key = (row.receipt_item, row.rm_item_code)
+			if row.qty < 0:
+				identity = returnable.setdefault(key, {}).setdefault(
+					(row.serial_no, row.batch_no),
+					frappe._dict(
+						serial_no=row.serial_no, batch_no=row.batch_no, qty=0.0, rate=row.incoming_rate
+					),
+				)
+			else:
+				identity = returnable.get(key, {}).get((row.serial_no, row.batch_no))
+
+			if identity:
+				identity.qty -= row.qty
+
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		return {
+			key: [identity for identity in identities.values() if flt(identity.qty, precision) > 0]
+			for key, identities in returnable.items()
+		}
+
+	def set_serial_batch_for_return(self, rm_obj, identities):
+		"""Send back the serial nos and batches the returned receipt consumed, one row per batch and rate."""
+		qty = abs(rm_obj.consumed_qty)
+		precision = rm_obj.precision("consumed_qty")
+		groups = defaultdict(lambda: frappe._dict(qty=0.0, serial_nos=[], batches=defaultdict(float)))
+		for identity in identities:
+			allocated = min(qty, identity.qty)
+			if flt(allocated, precision) <= 0:
+				continue
+
+			identity.qty -= allocated
+			qty -= allocated
+			group = groups[(identity.batch_no, identity.rate)]
+			group.qty += allocated
+			if identity.serial_no:
+				group.serial_nos.append(identity.serial_no)
+			else:
+				group.batches[identity.batch_no] += allocated
+
+		for (_batch_no, rate), group in groups.items():
+			row = self.append(self.raw_material_table, rm_obj.as_dict(no_default_fields=True))
+			row.consumed_qty = -flt(group.qty, precision)
+			row.serial_and_batch_bundle = self.make_supplied_item_bundle(
+				row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, rate
+			)
+
+		# a return sends back no more than the receipt consumed
+		self.remove(rm_obj)
+
+	def validate_returned_serial_batches(self):
+		"""Serial nos and batches a return sends back must be ones the receipt consumed and no return got back."""
+		returnable = self.get_returnable_serial_batches()
+		receipt_items = {row.name: row.subcontracting_receipt_item for row in self.items}
+		# read from the database: bundles made from serial no and batch fields on submit are not on the rows
+		bundle_keys = {
+			row.serial_and_batch_bundle: (receipt_items.get(row.reference_name), row.rm_item_code)
+			for row in frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"parent": self.name, "serial_and_batch_bundle": ("is", "set")},
+				fields=["serial_and_batch_bundle", "reference_name", "rm_item_code"],
+			)
+		}
+		if not (returnable and bundle_keys):
+			return
+
+		available = {
+			(key, identity.serial_no, identity.batch_no): identity.qty
+			for key, identities in returnable.items()
+			for identity in identities
+		}
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ("in", list(bundle_keys))},
+			fields=["parent", "serial_no", "batch_no", "qty"],
+		):
+			key = bundle_keys[entry.parent]
+			if key not in returnable:
+				continue
+
+			identity = (key, entry.serial_no, entry.batch_no)
+			available[identity] = available.get(identity, 0.0) - abs(entry.qty)
+			if flt(available[identity], precision) < 0:
+				label = (
+					SerialBatchIdentity("Serial No").get_label(entry.serial_no)
+					if entry.serial_no
+					else SerialBatchIdentity("Batch").get_label(entry.batch_no)
+				)
+				frappe.throw(
+					_(
+						"{0} of raw material {1} was not consumed by {2} or was already returned. Use Reset Raw Materials Table to pick the raw materials again."
+					).format(
+						frappe.bold(label),
+						frappe.bold(key[1]),
+						get_link_to_form(self.doctype, self.return_against),
+					)
+				)
 
 	def get_rejected_return_rows(self):
 		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
@@ -684,15 +868,19 @@ class SubcontractingController(StockController):
 		elif self.available_materials.get(key) and self.available_materials[key]["batch_no"]:
 			batches = self.__get_batch_nos_for_bundle(qty, key)
 
+		return self.make_supplied_item_bundle(rm_obj.rm_item_code, qty, serial_nos, batches)
+
+	def make_supplied_item_bundle(self, rm_item_code, qty, serial_nos, batches, incoming_rate=None):
 		bundle = SerialBatchCreation(
 			frappe._dict(
 				{
 					"company": self.company,
-					"item_code": rm_obj.rm_item_code,
+					"item_code": rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"qty": qty,
 					"serial_nos": serial_nos,
 					"batches": batches,
+					"incoming_rate": incoming_rate,
 					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": "Subcontracting Receipt",
 					"do_not_submit": True,
@@ -758,6 +946,11 @@ class SubcontractingController(StockController):
 			setattr(
 				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
 			)
+
+			return_key = (item_row.get("subcontracting_receipt_item"), rm_obj.rm_item_code)
+			if return_key in self.returnable_serial_batches:
+				self.set_serial_batch_for_return(rm_obj, self.returnable_serial_batches[return_key])
+				return
 
 			if use_serial_batch_fields:
 				rm_obj.use_serial_batch_fields = 1
@@ -1050,7 +1243,7 @@ class SubcontractingController(StockController):
 			)
 
 	def __modify_serial_and_batch_bundle(self):
-		if self.is_new():
+		if self.is_new() or self.get("is_return"):
 			return
 
 		if self.doctype != "Subcontracting Receipt":
@@ -1103,6 +1296,7 @@ class SubcontractingController(StockController):
 		self.__get_subcontract_orders()
 		self.__get_pending_qty_to_receive()
 		self.get_available_materials()
+		self.returnable_serial_batches = self.get_returnable_serial_batches()
 		self.__remove_changed_rows()
 		self.__set_supplied_or_received_items()
 		self.__modify_serial_and_batch_bundle()
@@ -1266,6 +1460,7 @@ class SubcontractingController(StockController):
 						{
 							"item_code": item.rm_item_code,
 							"incoming_rate": item.rate if self.is_return else 0,
+							"recalculate_rate": cint(self.is_return),
 							"warehouse": self.supplier_warehouse,
 							"actual_qty": -1 * flt(item.consumed_qty, item.precision("consumed_qty")),
 							"dependant_sle_voucher_detail_no": item.reference_name,
@@ -1279,6 +1474,9 @@ class SubcontractingController(StockController):
 
 		sl_entries = []
 		stock_items = self.get_stock_items()
+
+		# supplied items first, so a repost revalues them before the finished goods made from them
+		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 
 		for item in self.get("items"):
 			if item.item_code in stock_items and item.warehouse:
@@ -1309,7 +1507,6 @@ class SubcontractingController(StockController):
 						)
 					)
 
-		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,

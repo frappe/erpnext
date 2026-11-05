@@ -543,7 +543,14 @@ class MasterProductionSchedule(Document):
 		self.enqueue_mrp_creation()
 
 	def enqueue_mrp_creation(self):
-		frappe.enqueue_doc("Master Production Schedule", self.name, "make_mrp", queue="long", timeout=1800)
+		frappe.enqueue_doc(
+			"Master Production Schedule",
+			self.name,
+			"make_mrp",
+			queue="long",
+			timeout=1800,
+			enqueue_after_commit=True,
+		)
 
 		frappe.msgprint(
 			_("MRP Log documents are being created in the background."),

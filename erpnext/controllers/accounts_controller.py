@@ -2059,7 +2059,7 @@ def get_missing_company_details(doctype: str, docname: str):
 	required_fields.append(company_address)
 	required_fields.append(address_line)
 
-	if all(required_fields):
+	if all(required_fields) and not needs_optional_company_details(company, company_details):
 		return False
 	return {
 		"company_logo": company_details.get("company_logo"),
@@ -2071,6 +2071,19 @@ def get_missing_company_details(doctype: str, docname: str):
 		"company_address": company_address,
 		"name": docname,
 	}
+
+
+def needs_optional_company_details(company, company_details):
+	from frappe.model.utils.user_settings import get_user_settings
+
+	if company_details.get("company_logo") and company_details.get("website"):
+		return False
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		return False
+
+	skipped = frappe.parse_json(get_user_settings("Company")).get("skipped_print_details") or []
+	return company not in skipped
 
 
 @frappe.whitelist(methods=["POST"])

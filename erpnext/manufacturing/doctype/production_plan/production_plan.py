@@ -35,6 +35,7 @@ from erpnext.manufacturing.doctype.production_plan.services.planning_queries imp
 	get_plan_process_loss_percentage,
 )
 from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+	ProductionPlanStockReservation,
 	cancel_stock_reservation_entries,
 	get_reserved_qty_for_production_plan,
 	get_reserved_qty_for_sub_assembly,
@@ -52,6 +53,9 @@ from erpnext.manufacturing.doctype.production_plan.services.work_order_planning 
 )
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
+)
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 )
 from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -163,6 +167,7 @@ class ProductionPlan(Document):
 		self.validate_raw_material_group_warehouse()
 		if self.for_warehouse:
 			validate_warehouse_company(self.for_warehouse, self.company)
+		clear_reserve_stock_if_disabled(self)
 		self.enable_auto_reserve_stock()
 
 	def on_update(self):
@@ -491,22 +496,6 @@ class ProductionPlan(Document):
 		):
 			frappe.delete_doc("Work Order", d.name)
 
-	def cancel_untouched_stock_reservations(self):
-		sre_list = frappe.get_all(
-			"Stock Reservation Entry",
-			filters={
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"docstatus": 1,
-				"status": ("in", ["Reserved", "Partially Reserved"]),
-			},
-			pluck="name",
-		)
-		for sre_name in sre_list:
-			sre_doc = frappe.get_doc("Stock Reservation Entry", sre_name)
-			sre_doc.flags.ignore_permissions = True
-			sre_doc.cancel()
-
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
@@ -518,7 +507,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
-			self.cancel_untouched_stock_reservations()
+			ProductionPlanStockReservation(self).release_untouched()
 			self.update_bin_qty()
 			self.delete_production_plan_schedule()
 			return

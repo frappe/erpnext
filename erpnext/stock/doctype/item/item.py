@@ -218,6 +218,7 @@ class Item(Document):
 					queue="long",
 					timeout=600,
 					job_name=f"set_opening_stock_for_{self.name}",
+					enqueue_after_commit=True,
 				)
 				frappe.msgprint(
 					_(
@@ -944,19 +945,6 @@ class Item(Document):
 				self.append(
 					"item_defaults",
 					{"company": defaults.get("company"), "default_warehouse": defaults.default_warehouse},
-				)
-
-		if not self.taxes and item_group.taxes:
-			for tax in item_group.taxes:
-				self.append(
-					"taxes",
-					{
-						"item_tax_template": tax.item_tax_template,
-						"tax_category": tax.tax_category,
-						"valid_from": tax.valid_from,
-						"minimum_net_rate": tax.minimum_net_rate,
-						"maximum_net_rate": tax.maximum_net_rate,
-					},
 				)
 
 	def update_variants(self):

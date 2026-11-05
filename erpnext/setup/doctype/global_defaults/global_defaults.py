@@ -9,6 +9,8 @@ import frappe.defaults
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.utils import cint
 
+from erpnext.stock.doctype.item.item_search import validate_sqlite_version
+
 keydict = {
 	# "key in defaults": "key in Global Defaults"
 	"company": "default_company",
@@ -56,6 +58,10 @@ class GlobalDefaults(Document):
 		use_posting_datetime_for_naming_documents: DF.Check
 	# end: auto-generated types
 
+	def validate(self):
+		if self.has_value_changed("enable_item_search_index") and self.enable_item_search_index:
+			validate_sqlite_version()
+
 	def on_update(self):
 		"""update defaults"""
 		for key in keydict:
@@ -91,7 +97,12 @@ class GlobalDefaults(Document):
 	def toggle_in_words(self):
 		self.sync_property_setters(
 			IN_WORDS_DOCTYPES,
-			[("in_words", "hidden", "Check"), ("in_words", "print_hide", "Check")],
+			[("in_words", "hidden", "Check")],
+			cint(self.disable_in_words),
+		)
+		self.sync_property_setters(
+			ROUNDED_TOTAL_DOCTYPES,
+			[("in_words", "print_hide", "Check")],
 			cint(self.disable_in_words),
 		)
 

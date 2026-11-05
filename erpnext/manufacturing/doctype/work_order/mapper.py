@@ -19,7 +19,6 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
-from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -185,7 +184,7 @@ def _variant_item_args(item, wo_doc, bom_doc):
 	item_data = get_item_details(args.item_code, skip_bom_info=True)
 	args.update(item_data)
 
-	args["rate"] = _variant_item_rate(args, wo_doc, bom_doc)
+	args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 	if not args.source_warehouse:
 		default = get_item_defaults(item.get("variant_item_code"), wo_doc.company)
 		args["source_warehouse"] = default.default_warehouse
@@ -195,8 +194,9 @@ def _variant_item_args(item, wo_doc, bom_doc):
 	return args
 
 
-def _variant_item_rate(args, wo_doc, bom_doc):
-	return get_bom_item_rate(
+def get_raw_material_rate(args, wo_doc, bom_doc):
+	"""Rate in company currency, costed the way the BOM costs its raw materials."""
+	rate = bom_doc.get_rm_rate(
 		{
 			"company": wo_doc.company,
 			"item_code": args.get("item_code"),
@@ -204,9 +204,11 @@ def _variant_item_rate(args, wo_doc, bom_doc):
 			"uom": args.get("stock_uom"),
 			"stock_uom": args.get("stock_uom"),
 			"conversion_factor": 1,
+			"source_warehouse": args.get("source_warehouse"),
 		},
-		bom_doc,
+		notify=False,
 	)
+	return rate * flt(bom_doc.conversion_rate or 1)
 
 
 def get_template_rm_item(wo_doc, item_code):

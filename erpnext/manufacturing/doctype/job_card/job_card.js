@@ -439,7 +439,10 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	complete_job_card(frm) {
-		let pending_qty = frm.doc.for_quantity - frm.doc.total_completed_qty;
+		let pending_qty = flt(
+			frm.doc.for_quantity - frm.doc.total_completed_qty - frm.doc.process_loss_qty,
+			precision("for_quantity", frm.doc)
+		);
 		if (frm.doc.pending_qty > 0) {
 			pending_qty = frm.doc.pending_qty;
 		}
@@ -563,9 +566,13 @@ frappe.ui.form.on("Job Card", {
 				fieldname: "sub_operation",
 				options: "Operation",
 				get_query() {
-					const non_completed = frm.doc.sub_operations.filter((d) => d.status === "Pending");
+					const target_qty = flt(
+						frm.doc.for_quantity - frm.doc.process_loss_qty,
+						precision("for_quantity", frm.doc)
+					);
+					const pending = frm.doc.sub_operations.filter((d) => flt(d.completed_qty) < target_qty);
 					return {
-						filters: { name: ["in", non_completed.map((d) => d.sub_operation)] },
+						filters: { name: ["in", pending.map((d) => d.sub_operation)] },
 					};
 				},
 				reqd: 1,
@@ -800,7 +807,11 @@ frappe.ui.form.on("Job Card", {
 		const { time_logs, status } = doc;
 
 		// ── Determine which action buttons to show ────────────────────────
-		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const accounted_qty = flt(
+			doc.total_completed_qty + doc.process_loss_qty,
+			precision("for_quantity", doc)
+		);
+		const has_remaining_qty = doc.for_quantity > accounted_qty;
 		const pending_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
 		const materials_ready = doc.skip_material_transfer || doc.is_corrective_job_card || !pending_transfer;

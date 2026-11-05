@@ -21,6 +21,7 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
 from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
+from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
 from erpnext.accounts.doctype.sales_invoice.services.pos import (
 	POSService,
 	get_all_mode_of_payments,
@@ -4118,8 +4119,6 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertTrue(schedule.journal_entry)
 
 	def test_fixed_asset_sale_validations(self):
-		from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
-
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=0, submit=1)
 
 		def asset_invoice(asset_name, **kwargs):
@@ -4148,9 +4147,59 @@ class TestSalesInvoice(ERPNextTestSuite):
 				self.assertRaises(frappe.ValidationError, FixedAssetService(si).validate_fixed_asset)
 				frappe.db.set_value("Asset", asset.name, "status", "Submitted")
 
-	def test_fixed_asset_restore_note_text(self):
-		from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
 
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Row #2: Asset .* is already added in another row",
+			si.insert,
+		)
+
+	def test_return_can_reference_asset_on_multiple_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro",
+			asset=asset.name,
+			qty=1,
+			rate=25000,
+			is_return=1,
+			return_against="_Test Legacy Sales Invoice",
+			do_not_save=True,
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		FixedAssetService(si).validate_fixed_asset()
+
+	def test_fixed_asset_restore_note_text(self):
 		asset = frappe._dict(doctype="Asset", name="_Test Asset For Note")
 		si = create_sales_invoice(do_not_save=True)
 
@@ -4796,6 +4845,38 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		si.reload()
 		self.assertTrue(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle))
+
+	def test_credit_note_returns_packed_serial_and_batch_items(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		batch_item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SI-PKD-B-.#####"}
+		).name
+		serial_item = make_item(properties={"has_serial_no": 1, "serial_no_series": "SI-PKD-S-.#####"}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [batch_item, serial_item], qty=2)
+		for item_code in (batch_item, serial_item):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+
+		si = create_sales_invoice(item_code=bundle_item, warehouse=warehouse, update_stock=1, qty=1)
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.submit()
+		si.reload()
+		credit_note.reload()
+
+		for row, returned_row in zip(si.packed_items, credit_note.packed_items, strict=True):
+			if row.item_code == batch_item:
+				self.assertEqual(
+					get_batch_from_bundle(returned_row.serial_and_batch_bundle),
+					get_batch_from_bundle(row.serial_and_batch_bundle),
+				)
+			else:
+				self.assertEqual(
+					sorted(get_serial_nos_from_bundle(returned_row.serial_and_batch_bundle)),
+					sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)),
+				)
 
 	def test_sales_invoice_with_disabled_account(self):
 		try:

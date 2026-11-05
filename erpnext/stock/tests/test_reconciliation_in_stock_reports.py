@@ -443,7 +443,10 @@ class TestStockReportsAfterAnAdjustmentEntry(ValuationFixTestCase, StockReportTe
 		for scenario, item_code, expected in self.make_adjusted_ledgers():
 			with self.subTest(scenario=scenario):
 				(row,) = self.get_stock_balance(
-					item_code, from_date=add_days(today(), 1), warehouse=[ADJUSTED_WAREHOUSE]
+					item_code,
+					from_date=add_days(today(), 1),
+					to_date=add_days(today(), 1),
+					warehouse=[ADJUSTED_WAREHOUSE],
 				)
 				self.assertBalanceRow(row, expected.balance, expected.balance)
 

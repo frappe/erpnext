@@ -10,6 +10,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 	get_sre_reserved_qty_details_for_voucher,
 )
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
@@ -20,8 +21,9 @@ class SalesOrderStockReservation:
 		self.doc = doc
 
 	def validate_reserved_stock(self) -> None:
-		"""Clean reserved stock flag for non-stock Item"""
+		"""Uncheck Reserve Stock when stock reservation is disabled, and on non-stock items."""
 
+		clear_reserve_stock_if_disabled(self.doc)
 		enable_stock_reservation = frappe.get_single_value("Stock Settings", "enable_stock_reservation")
 
 		for item in self.doc.items:
@@ -114,10 +116,16 @@ class SalesOrderStockReservation:
 			if not frappe.db.exists("Sales Order Item", item.get("sales_order_item"))
 		]
 
+		packed_item_warehouses = {d.name: d.warehouse for d in self.doc.packed_items}
 		for item in packed_items:
 			items_details.remove(item)
 			item["qty"] = item.pop("qty_to_reserve")
 			item["from_voucher_type"] = from_voucher_type
+			if not from_voucher_type:
+				# a manual reservation of a component is made in its packed row's warehouse
+				item["warehouse"] = packed_item_warehouses.get(
+					item.get("sales_order_item"), item.get("warehouse")
+				)
 
 			picked_bundle = item.pop("serial_and_batch_bundle", None)
 			if picked_bundle:
