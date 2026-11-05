@@ -2247,6 +2247,95 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
+<<<<<<< HEAD
+=======
+	def test_rejected_return_brings_back_raw_materials_at_zero_value(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.save()
+		scr.submit()
+
+		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		scr_return.save()
+		scr_return.reload()
+		scr_return.submit()
+
+		returned_values = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
+			pluck="stock_value_difference",
+		)
+		self.assertTrue(returned_values)
+		self.assertEqual(sum(returned_values), 0)
+
+	def test_recalculate_valuation_rate_keeps_rejected_material_unvalued(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		pr = make_purchase_receipt(
+			item_code=sco.items[0].item_code,
+			qty=1,
+			rate=50,
+			company=sco.company,
+			warehouse="Finished Goods - TCP1",
+			posting_date=add_days(today(), -2),
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.submit()
+
+		frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=pr.doctype,
+			voucher_no=pr.name,
+			recalculate_valuation_rate=1,
+			posting_date=pr.posting_date,
+			posting_time=pr.posting_time,
+		).submit()
+
+		rejected_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "warehouse": "Finished Goods - TCP1", "is_cancelled": 0},
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual((rejected_sle.incoming_rate, rejected_sle.stock_value_difference), (0, 0))
+
+>>>>>>> 8f97b9d (test: repost keeps rejected Subcontracting Receipt material unvalued)
 	def test_rejected_return_books_no_service_cost(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
