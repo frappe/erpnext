@@ -6545,6 +6545,34 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 		self.assertEqual(sorted(stock_value), [200, 900])
 		self.assertEqual(srbnb_credit, 1000)
 
+	def test_landed_cost_of_returned_goods_is_not_posted_to_srbnb(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		company = "_Test Company with perpetual inventory"
+		receipt = make_purchase_receipt(
+			company=company,
+			warehouse=create_warehouse("_Test In-ward Warehouse", company=company),
+			qty=10,
+			rate=100,
+		)
+		create_landed_cost_voucher("Purchase Receipt", receipt.name, company, charges=100)
+
+		receipt_return = make_purchase_return(receipt.name)
+		receipt_return.items[0].update({"qty": -4, "received_qty": -4})
+		receipt_return.insert()
+		frappe.get_doc("Purchase Receipt", receipt_return.name).submit()
+
+		srbnb_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
+		srbnb_debit = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": receipt_return.name, "account": srbnb_account, "is_cancelled": 0},
+			"sum(debit)",
+		)
+		self.assertEqual(srbnb_debit, 400)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

@@ -692,7 +692,7 @@ class PurchaseReceipt(BuyingController):
 					or stock_asset_rbnb
 				)
 
-				if self.is_return and item.expense_account:
+				if self.is_return and item.expense_account and item.expense_account != stock_asset_rbnb:
 					loss_account = item.expense_account
 
 				cost_center = item.cost_center or frappe.get_cached_value(
