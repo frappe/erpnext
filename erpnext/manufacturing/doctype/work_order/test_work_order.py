@@ -5074,6 +5074,27 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual([row.time_in_mins for row in wo.operations], [40, 15, 15])
 
+	def test_status_change_accepts_only_its_own_statuses(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		draft = make_review_work_order(fg_item, bom.name, 10, submit=False)
+
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be set to", stop_unstop, wo.name, "Closed")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be set to", close_work_order, wo.name, "Not Started"
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Only a submitted", close_work_order, draft.name, "Closed"
+		)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Not Started")
+		self.assertEqual(frappe.db.get_value("Work Order", draft.name, "status"), "Draft")
+
+		wo.cancel()
+		self.assertRaisesRegex(frappe.ValidationError, "Only a submitted", stop_unstop, wo.name, "Stopped")
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Cancelled")
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (

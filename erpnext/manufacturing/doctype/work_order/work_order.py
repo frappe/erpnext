@@ -1778,6 +1778,14 @@ def set_work_order_ops(name: str):
 	po.save()
 
 
+def validate_status_change(work_order, status, allowed_statuses):
+	if status not in allowed_statuses:
+		frappe.throw(_("Work Order status cannot be set to {0}").format(frappe.bold(status)))
+
+	if work_order.docstatus != 1:
+		frappe.throw(_("Only a submitted Work Order can be closed, stopped or resumed"))
+
+
 def qty_against_sales_order(wo, open_qty):
 	return Case().when(wo.status == "Closed", wo.produced_qty).else_(open_qty)
 
@@ -1876,7 +1884,7 @@ def get_default_warehouse():
 
 
 @frappe.whitelist(methods=["POST"])
-def stop_unstop(work_order, status):
+def stop_unstop(work_order: str, status: str):
 	"""Called from client side on Stop/Unstop event"""
 
 	frappe.has_permission("Work Order", "write", throw=True)
@@ -1885,6 +1893,7 @@ def stop_unstop(work_order, status):
 	# a caller restricted to one company stop another company's orders
 	pro_order = frappe.get_doc("Work Order", work_order)
 	pro_order.check_permission("write")
+	validate_status_change(pro_order, status, ("Stopped", "Resumed"))
 
 	if pro_order.status == "Closed":
 		frappe.throw(_("Closed Work Order can not be stopped or Re-opened"))
@@ -1932,12 +1941,13 @@ def make_job_card(work_order, operations):
 
 
 @frappe.whitelist(methods=["POST"])
-def close_work_order(work_order, status):
+def close_work_order(work_order: str, status: str):
 	frappe.has_permission("Work Order", "write", throw=True)
 
 	# doctype level above, record level here — see stop_unstop()
 	work_order = frappe.get_doc("Work Order", work_order)
 	work_order.check_permission("write")
+	validate_status_change(work_order, status, ("Closed",))
 	if work_order.get("operations"):
 		job_cards = frappe.get_list(
 			"Job Card",
