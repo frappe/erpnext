@@ -628,10 +628,8 @@ class JobCard(Document):
 				if operation_deatils.employee:
 					row.completed_time = row.completed_time / len(set(operation_deatils.employee))
 
-					if operation_deatils.completed_qty:
-						row.completed_qty = operation_deatils.completed_qty / len(
-							set(operation_deatils.employee)
-						)
+				if operation_deatils.completed_qty:
+					row.completed_qty = operation_deatils.completed_qty
 			else:
 				row.status = "Pending"
 				row.completed_time = 0.0
