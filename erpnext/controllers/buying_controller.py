@@ -460,6 +460,15 @@ class BuyingController(SubcontractingController):
 
 		update_regional_item_valuation_rate(self)
 
+	def get_rejected_valuation_rate(self, row) -> float:
+		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
+			return 0.0
+
+		if self.is_internal_transfer() or not flt(row.qty):
+			return flt(row.valuation_rate)
+
+		return flt(row.base_net_rate) / (flt(row.conversion_factor) or 1.0)
+
 	def set_incoming_rate(self):
 		"""
 		Override item rate with incoming rate for internal stock transfer
@@ -764,9 +773,7 @@ class BuyingController(SubcontractingController):
 						sl_entries.append(from_warehouse_sle)
 
 			if flt(d.rejected_qty) != 0:
-				valuation_rate_for_rejected_item = 0.0
-				if frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
-					valuation_rate_for_rejected_item = d.valuation_rate
+				valuation_rate_for_rejected_item = self.get_rejected_valuation_rate(d)
 
 				sl_entries.append(
 					self.get_sl_entries(
