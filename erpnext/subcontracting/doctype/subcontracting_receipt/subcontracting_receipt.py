@@ -720,9 +720,17 @@ class SubcontractingReceipt(SubcontractingController):
 		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
 
 		received_qty_ratios = self.get_received_qty_ratios_for_return()
+		rejected_return_rows = self.get_rejected_return_rows()
+		returned_service_costs = self.get_returned_service_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.secondary_item_type and not item.valuation_type:
+				# rejected qty is received without service cost
+				if item.name in returned_service_costs:
+					item.service_cost_per_qty = (
+						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
+					)
+
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -772,6 +780,25 @@ class SubcontractingReceipt(SubcontractingController):
 		else:
 			self.total_qty = total_qty
 			self.total = total_amount
+
+	def get_returned_service_costs(self) -> dict[str, float]:
+		"""Service cost per qty of the returned receipt row, for each return row."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		service_costs = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
+				fields=["name", "service_cost_per_qty"],
+				as_list=True,
+			)
+		)
+		return {
+			item.name: service_costs[item.subcontracting_receipt_item]
+			for item in self.items
+			if item.subcontracting_receipt_item in service_costs
+		}
 
 	def get_received_qty_ratios_for_return(self) -> dict[str, float]:
 		"""Received qty per accepted qty of the original row, for each return row of accepted qty."""
