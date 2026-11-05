@@ -1156,6 +1156,16 @@ def get_mr_item_planned_qty_query(mr_item):
 	)
 
 
+def get_mr_purchase_uom(row):
+	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
+	if (
+		row.get("default_material_request_type") == "Purchase"
+		and item_details.purchase_uom
+		and item_details.purchase_uom != item_details.stock_uom
+	):
+		return item_details.purchase_uom
+
+
 def get_planned_qty_of_references(sales_orders):
 	plans = get_plans_with_references(sales_orders)
 	if not plans:
@@ -1482,17 +1492,12 @@ def get_material_request_items(
 	if include_safety_stock:
 		required_qty += flt(row["safety_stock"])
 
-	item_details = frappe.get_cached_value("Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1)
-
+	purchase_uom = get_mr_purchase_uom(row)
 	conversion_factor = 1.0
-	if (
-		row.get("default_material_request_type") == "Purchase"
-		and item_details.purchase_uom
-		and item_details.purchase_uom != item_details.stock_uom
-	):
-		conversion_factor = (
-			get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
-		)
+	if purchase_uom:
+		conversion_factor = get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
+
+	uom = purchase_uom or row.get("stock_uom")
 
 	if flt(row.get("qty")) > 0:
 		return {
@@ -1515,7 +1520,7 @@ def get_material_request_items(
 			"material_request_type": row.get("default_material_request_type"),
 			"sales_order": sales_order,
 			"description": row.get("description"),
-			"uom": row.get("purchase_uom") or row.get("stock_uom"),
+			"uom": uom,
 			"main_item_code": row.get("main_bom_item"),
 		}
 
