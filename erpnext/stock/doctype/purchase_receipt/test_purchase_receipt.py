@@ -2901,6 +2901,64 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(stock_qty[transit_warehouse], -12)
 		self.assertEqual(stock_qty[to_warehouse], 12)
 
+	def test_rejected_batch_material_of_a_receipt_bought_in_another_uom(self):
+		"""Accepted and rejected packages of an ordinary receipt are both sized in stock UOM."""
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			make_serial_batch_bundle,
+		)
+
+		item_doc = make_item(
+			"_Test Box Batch Item For Ordinary Rejection",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BOXO-.####"},
+		)
+		make_uom_conversion_factor("Box", "Nos", 10)
+
+		pr = make_purchase_receipt(
+			item_code=item_doc.name,
+			qty=5,
+			rejected_qty=1,
+			uom="Box",
+			stock_uom="Nos",
+			conversion_factor=10,
+			rate=100,
+			do_not_save=True,
+		)
+		row = pr.items[0]
+
+		for qty_field, warehouse, package_field in (
+			("qty", row.warehouse, "serial_and_batch_bundle"),
+			("rejected_qty", row.rejected_warehouse, "rejected_serial_and_batch_bundle"),
+		):
+			stock_qty = flt(row.get(qty_field)) * 10
+			batch = make_new_batch(item_code=item_doc.name, batch_id=frappe.generate_hash(length=10))
+			package = make_serial_batch_bundle(
+				{
+					"item_code": item_doc.name,
+					"warehouse": warehouse,
+					"voucher_type": "Purchase Receipt",
+					"qty": stock_qty,
+					"rate": 100,
+					"batches": frappe._dict({batch.name: stock_qty}),
+					"do_not_submit": True,
+				}
+			)
+			row.set(package_field, package.name)
+
+		pr.submit()
+		pr.reload()
+
+		moved_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+		self.assertEqual(moved_qty[row.warehouse], 50)
+		self.assertEqual(moved_qty[row.rejected_warehouse], 10)
+
 	def test_rejected_package_of_a_transfer_bought_in_another_uom(self):
 		"""The package of rejected material is sized in stock UOM, like every other package."""
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
