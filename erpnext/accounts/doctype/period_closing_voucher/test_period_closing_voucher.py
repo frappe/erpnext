@@ -558,6 +558,26 @@ class TestPeriodClosingVoucher(FrappeTestCase):
 			1000,
 		)
 
+	@change_settings("Accounts Settings", {"frozen_accounts_modifier": None})
+	def test_closing_account_must_be_usable_ledger_of_company(self):
+		self.make_income_entry("2021-03-15", 1000)
+		pcv = self.make_period_closing_voucher(posting_date="2021-12-31", submit=False)
+
+		cases = [
+			("Equity - TPC", {}, "cannot be a group account"),
+			("Retained Earnings - _TC", {}, "does not belong to Company"),
+			(pcv.closing_account_head, {"disabled": 1}, "is disabled"),
+			(pcv.closing_account_head, {"disabled": 0, "freeze_account": "Yes"}, "is frozen"),
+		]
+		for account, values, message in cases:
+			with self.subTest(account=account, values=values):
+				if values:
+					frappe.db.set_value("Account", account, values)
+
+				pcv.reload()
+				pcv.closing_account_head = account
+				self.assertRaisesRegex(frappe.ValidationError, message, pcv.save)
+
 
 def create_company():
 	company = frappe.get_doc(
