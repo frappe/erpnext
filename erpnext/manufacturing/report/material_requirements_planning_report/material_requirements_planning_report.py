@@ -1517,13 +1517,11 @@ def get_purchase_order_item(item, warehouse=None):
 		uom = uom_details.purchase_uom or uom_details.stock_uom
 
 	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
-	qty = flt(
+	qty = round_order_qty(
 		max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor,
+		uom,
 		frappe.get_precision("Purchase Order Item", "qty"),
 	)
-	if is_whole_number(uom):
-		# a demand too small for the qty precision still needs one unit
-		qty = max(math.ceil(qty), 1)
 
 	return {
 		"item_code": item.item_code,
@@ -1538,9 +1536,7 @@ def get_purchase_order_item(item, warehouse=None):
 def make_work_orders(work_orders, company, warehouse=None, mps=None):
 	for item in work_orders:
 		uom = get_item_uom(item.item_code).stock_uom
-		item.required_qty = flt(item.required_qty, frappe.get_precision("Work Order", "qty"))
-		if is_whole_number(uom):
-			item.required_qty = math.ceil(item.required_qty)
+		item.required_qty = round_order_qty(item.required_qty, uom, frappe.get_precision("Work Order", "qty"))
 
 		wo = frappe.new_doc("Work Order")
 		wo.production_item = item.item_code
@@ -1569,6 +1565,14 @@ def get_item_uom(item_code):
 @frappe.request_cache
 def is_whole_number(uom):
 	return frappe.get_cached_value("UOM", uom, "must_be_whole_number")
+
+
+def round_order_qty(qty, uom, precision):
+	"""Round up for a whole-number UOM; 9 decimals drop float noise but keep a demand below `precision`."""
+	if is_whole_number(uom):
+		return math.ceil(flt(qty, 9))
+
+	return flt(qty, precision)
 
 
 def split_forecast_qty(rows, qty):
