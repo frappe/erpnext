@@ -1604,10 +1604,11 @@ class TestJobCard(ERPNextTestSuite):
 					entries.append(stock_entry)
 
 				if upstream_qty < 100:
-					extra_entry = frappe.get_doc(
-						make_stock_entry_for_work_order(work_order.name, "Manufacture", 5)
-					)
-					self.assertRaises(OperationsNotCompleteError, extra_entry.submit)
+					# v16 checks the operations while it fetches the items
+					with self.assertRaises(OperationsNotCompleteError):
+						frappe.get_doc(
+							make_stock_entry_for_work_order(work_order.name, "Manufacture", 5)
+						).submit()
 				else:
 					self.assertEqual(work_order.reload().status, "Completed")
 
