@@ -129,7 +129,7 @@ def add_fifo_fields(sle, prev_sle, currency_precision=None):
 	fifo_value = 0.0
 	for qty, rate in queue:
 		fifo_qty += qty
-		fifo_value += qty * rate
+		fifo_value += qty * flt(rate)
 
 	sle.fifo_queue_qty = fifo_qty
 	sle.fifo_stock_value = fifo_value
