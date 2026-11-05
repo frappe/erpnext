@@ -24,6 +24,10 @@ class TestWarehouse(FrappeTestCase):
 		if not frappe.get_value("Item", "_Test Item"):
 			make_test_records("Item")
 
+	def tearDown(self):
+		frappe.db.rollback()
+		super().tearDown()
+
 	def test_parent_warehouse(self):
 		parent_warehouse = frappe.get_doc("Warehouse", "_Test Warehouse Group - _TC")
 		self.assertEqual(parent_warehouse.is_group, 1)
@@ -120,6 +124,22 @@ class TestWarehouse(FrappeTestCase):
 		self.assertTrue({inheriting, explicit, disabled} <= set(warehouses))
 		self.assertNotIn(other, warehouses)
 		self.assertNotIn("_Test Warehouse - _TC1", warehouses)
+
+	def test_group_flag_cannot_be_flipped_by_save(self):
+		item = create_item("_Test Group Flip Item")
+		warehouse = create_warehouse("_Test Group Flip Stock WH")
+		make_stock_entry(item_code=item.name, target=warehouse, qty=5, basic_rate=100)
+
+		doc = frappe.get_doc("Warehouse", warehouse)
+		doc.is_group = 1
+		self.assertRaises(frappe.ValidationError, doc.save)
+
+		group = create_warehouse("_Test Group Flip Parent WH", {"is_group": 1})
+		create_warehouse("_Test Group Flip Child WH", {"parent_warehouse": group})
+
+		doc = frappe.get_doc("Warehouse", group)
+		doc.is_group = 0
+		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_get_children(self):
 		company = "_Test Company"

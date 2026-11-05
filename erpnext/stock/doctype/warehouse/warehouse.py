@@ -64,7 +64,18 @@ class Warehouse(NestedSet):
 	def validate(self):
 		self.validate_warehouse_account()
 		self.validate_inventory_account()
+		self.validate_group_conversion()
 		self.warn_about_multiple_warehouse_account()
+
+	def validate_group_conversion(self):
+		if self.is_new() or not self.has_value_changed("is_group"):
+			return
+
+		if self.is_group and self.check_if_sle_exists():
+			throw(_("Warehouses with existing transaction can not be converted to group."))
+
+		if not self.is_group and self.check_if_child_exists():
+			throw(_("Warehouses with child nodes cannot be converted to ledger"))
 
 	def validate_warehouse_account(self):
 		if self.account and self.company:
@@ -96,7 +107,7 @@ class Warehouse(NestedSet):
 		get_warehouse_account(warehouse)
 
 	def on_update(self):
-		self.update_nsm_model()
+		super().on_update()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
