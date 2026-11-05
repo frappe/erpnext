@@ -1704,6 +1704,61 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 				5000,
 			)
 
+	def test_transfer_before_return_to_another_supplier_warehouse_after_reposting(self):
+		company = "_Test Company with perpetual inventory"
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], company=company, currency="INR")
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=[
+				{
+					"warehouse": "Stores - TCP1",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 10,
+					"rate": 10,
+					"fg_item": fg_item,
+					"fg_item_qty": 10,
+				}
+			],
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		source = rm_items[0]["warehouse"]
+		make_stock_entry(item_code=rm_item, qty=5, target=source, basic_rate=100, company=company)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		# moves the raw material into the return's warehouse between the receipt and its return
+		transfer = make_stock_entry(
+			item_code=rm_item, qty=5, source=source, target="Finished Goods - TCP1", company=company
+		)
+		make_return_subcontracting_receipt(
+			scr_name=scr.name, qty=-10, supplier_warehouse="Finished Goods - TCP1"
+		)
+
+		make_stock_entry(
+			item_code=rm_item,
+			qty=15,
+			target=source,
+			basic_rate=500,
+			posting_date=add_days(today(), -2),
+			company=company,
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": transfer.name, "warehouse": "Finished Goods - TCP1", "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			2500,
+		)
+
 	def test_return_stock_gl_matches_ledger_after_reposting(self):
 		company = "_Test Company with perpetual inventory"
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
