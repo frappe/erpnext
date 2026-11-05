@@ -597,3 +597,50 @@ class TestStockLedgerReport(FrappeTestCase):
 		opening = execute(filters)[1][0]
 
 		self.assertEqual(opening["qty_after_transaction_box"], 1.7)
+
+	def test_reconciliation_first_in_the_range_shows_its_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+		create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=15, rate=100, posting_date=add_days(today(), -2)
+		)
+
+		rows = self.run_report(item, from_date=add_days(today(), -5))
+		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
+
+		self.assertEqual(reconciliation["in_qty"], 5)
+
+	def test_reconciliation_after_opening_stock_on_from_date_shows_its_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		from_date = add_days(today(), -2)
+		for qty, posting_time, purpose in ((25, "10:00:00", "Opening Stock"), (30, "12:00:00", None)):
+			create_stock_reconciliation(
+				item_code=item,
+				warehouse=WAREHOUSE,
+				qty=qty,
+				rate=100,
+				posting_date=from_date,
+				posting_time=posting_time,
+				purpose=purpose,
+			)
+
+		rows = self.run_report(item, from_date=from_date)
+		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
+
+		self.assertEqual(reconciliation["in_qty"], 5)
