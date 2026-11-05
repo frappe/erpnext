@@ -6,8 +6,12 @@ from frappe import _
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cstr
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	columns = get_columns(filters)
 	data = (
