@@ -5218,6 +5218,22 @@ class TestWorkOrder(FrappeTestCase):
 			[(row.time_in_mins, cint(row.fixed_time)) for row in new_bom.operations], [(30, 1), (20, 0)]
 		)
 
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_sales_order_row_work_order_qty_is_per_row(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		so = make_sales_order(item_code=fg_item, qty=5, rate=100, do_not_submit=True)
+		so.append("items", {**so.items[0].as_dict(), "name": None, "idx": None, "qty": 3})
+		so.submit()
+
+		for row in so.items:
+			make_review_work_order(fg_item, bom.name, row.qty, sales_order=so.name, sales_order_item=row.name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Sales Order Item", row.name, "work_order_qty") for row in so.items], [5, 3]
+		)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (

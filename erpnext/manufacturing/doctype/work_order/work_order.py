@@ -1028,7 +1028,9 @@ class WorkOrder(Document):
 		if self.product_bundle_item:
 			query = query.where(wo.product_bundle_item == self.product_bundle_item)
 		else:
-			query = query.where(wo.production_item == self.production_item)
+			query = query.where(
+				(wo.production_item == self.production_item) & (wo.sales_order_item == self.sales_order_item)
+			)
 
 		return query.run(as_list=1)
 
