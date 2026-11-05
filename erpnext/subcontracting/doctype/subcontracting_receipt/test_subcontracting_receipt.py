@@ -1700,6 +1700,53 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertNotEqual(scr.supplied_items[0].rate, prev_cost)
 		self.assertEqual(scr.supplied_items[0].rate, sr.items[0].valuation_rate)
 
+	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
+		from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+		lifo = {"is_stock_item": 1, "valuation_method": "LIFO"}
+		rm_item = make_item(properties=lifo).name
+		fg_item = make_item(properties={**lifo, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		receipts = []
+		for rate in (100, 300):
+			sco = get_subcontracting_order(
+				service_items=[
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"item_code": "Subcontracted Service Item 1",
+						"qty": 5,
+						"rate": 30,
+						"fg_item": fg_item,
+						"fg_item_qty": 5,
+					}
+				]
+			)
+			rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rate}]
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+			)
+			receipts.append(make_subcontracting_receipt(sco.name).submit())
+
+		scr_return = make_return_subcontracting_receipt(scr_name=receipts[0].name, qty=-2)
+		create_repost_item_valuation_entry(
+			{
+				"voucher_type": scr_return.doctype,
+				"voucher_no": scr_return.name,
+				"posting_date": scr_return.posting_date,
+				"posting_time": scr_return.posting_time,
+				"company": scr_return.company,
+			}
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * receipts[0].items[0].rate)
+
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
 		set_backflush_based_on("BOM")
 
