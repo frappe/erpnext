@@ -4,6 +4,7 @@
 
 import copy
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _
@@ -261,6 +262,7 @@ def _apply_putaway_rule(
 		show_unassigned_items_message(items_not_accomodated)
 
 	if updated_table and _items_changed(items, updated_table, doctype):
+		_split_bundles(updated_table, doctype)
 		items[:] = updated_table
 		frappe.msgprint(_("Applied putaway rules."), alert=True)
 
@@ -364,10 +366,85 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 			serial_nos, flt(to_allocate) * flt(new_updated_table_row.conversion_factor or 1)
 		)
 
-	new_updated_table_row.serial_and_batch_bundle = ""
+	# legacy serial / batch fields rebuild the bundle on save; a picked bundle is split later
+	if item.get("use_serial_batch_fields") or item.get("serial_no") or item.get("batch_no"):
+		new_updated_table_row.serial_and_batch_bundle = ""
+
+	if not keep_rejected:
+		new_updated_table_row.rejected_serial_and_batch_bundle = ""
 
 	updated_table.append(new_updated_table_row)
 	return updated_table
+
+
+def _split_bundles(rows, doctype: str):
+	"""Give every row made from one source row its share of the picked bundle."""
+	qty_field = "transfer_qty" if doctype == "Stock Entry" else "stock_qty"
+	warehouse_field = "t_warehouse" if doctype == "Stock Entry" else "warehouse"
+
+	rows_by_bundle = defaultdict(list)
+	for row in rows:
+		if row.get("serial_and_batch_bundle"):
+			rows_by_bundle[row.get("serial_and_batch_bundle")].append(row)
+
+	for bundle_name, bundle_rows in rows_by_bundle.items():
+		bundle = frappe.get_doc("Serial and Batch Bundle", bundle_name)
+		qtys = [abs(flt(row.get(qty_field))) for row in bundle_rows]
+		precision = bundle.precision("total_qty")
+
+		if (
+			len(bundle_rows) == 1
+			and not flt(qtys[0] - abs(flt(bundle.total_qty)), precision)
+			and (
+				bundle.type_of_transaction == "Outward"
+				or bundle.warehouse == bundle_rows[0].get(warehouse_field)
+			)
+		):
+			continue
+
+		slices = _slice_entries(bundle.entries, qtys, precision)
+		for idx, (row, share) in enumerate(zip(bundle_rows, slices, strict=True)):
+			if not share:
+				row.serial_and_batch_bundle = ""
+				continue
+
+			doc = bundle if idx == 0 else frappe.copy_doc(bundle, ignore_no_copy=False)
+			doc.set("entries", [])
+			for entry in share:
+				doc.append("entries", entry)
+
+			if doc.type_of_transaction == "Inward":
+				doc.warehouse = row.get(warehouse_field)
+
+			doc.save()
+			row.serial_and_batch_bundle = doc.name
+
+
+def _slice_entries(entries, qtys, precision):
+	"""Cut bundle entries into one slice per qty, in bundle order; a batch entry may straddle two slices."""
+	slices = []
+	idx, left = 0, 0.0
+
+	for qty in qtys:
+		share, need = [], flt(qty, precision)
+		while need > 0 and idx < len(entries):
+			entry = entries[idx]
+			if not left:
+				left = abs(flt(entry.qty))
+
+			take = min(left, need)
+			row = entry.as_dict(no_default_fields=True)
+			row["qty"] = take
+			share.append(row)
+
+			left = flt(left - take, precision)
+			need = flt(need - take, precision)
+			if not left:
+				idx += 1
+
+		slices.append(share)
+
+	return slices
 
 
 def show_unassigned_items_message(items_not_accomodated):
