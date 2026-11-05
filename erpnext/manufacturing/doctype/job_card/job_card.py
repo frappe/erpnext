@@ -239,11 +239,13 @@ class JobCard(Document):
 
 				if d.from_time and d.to_time:
 					d.time_in_mins = time_diff_in_hours(d.to_time, d.from_time) * 60
-					self.total_time_in_mins += d.time_in_mins
 
 				if d.completed_qty and not self.sub_operations:
 					self.total_completed_qty += d.completed_qty
 
+			self.total_time_in_mins = flt(
+				get_workstation_minutes(self.time_logs), self.precision("total_time_in_mins")
+			)
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
 		for row in self.sub_operations:
@@ -817,6 +819,11 @@ class JobCard(Document):
 
 				self.set(end_field, max(time_list))
 
+			if child_table == "time_logs":
+				time_in_mins = flt(
+					get_workstation_minutes(self.time_logs), self.precision("total_time_in_mins")
+				)
+
 			self.set(time_required, time_in_mins)
 
 	def set_process_loss(self):
@@ -1325,6 +1332,34 @@ def merge_time_logs_per_job_card(time_logs):
 			else:
 				merged.append(log)
 	return merged
+
+
+def get_workstation_minutes(time_logs):
+	intervals, minutes = [], 0.0
+	for row in time_logs:
+		if row.from_time and (row.to_time or flt(row.time_in_mins)):
+			start = get_datetime(row.from_time)
+			end = (
+				get_datetime(row.to_time)
+				if row.to_time
+				else add_to_date(start, minutes=flt(row.time_in_mins))
+			)
+			intervals.append((start, end))
+		else:
+			minutes += flt(row.time_in_mins)
+
+	current_start = current_end = None
+	for start, end in sorted(intervals):
+		if current_end and start <= current_end:
+			current_end = max(current_end, end)
+			continue
+		if current_end:
+			minutes += time_diff_in_minutes(current_end, current_start)
+		current_start, current_end = start, end
+
+	if current_end:
+		minutes += time_diff_in_minutes(current_end, current_start)
+	return minutes
 
 
 def time_diff_in_minutes(string_ed_date, string_st_date):
