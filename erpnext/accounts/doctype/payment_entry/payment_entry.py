@@ -732,7 +732,7 @@ class PaymentEntry(AccountsController):
 				if field == "exchange_rate" or not d.get(field) or force:
 					values[field] = value
 
-			if values and self.get("_action") in ("submit", "cancel"):
+			if values and self.get("_action") in ("submit", "cancel") and not d.is_new():
 				d.db_set(values)
 			else:
 				d.update(values)
