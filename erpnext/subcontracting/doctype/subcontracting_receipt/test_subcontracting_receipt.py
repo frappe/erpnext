@@ -1645,6 +1645,65 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			)
 		)
 
+	def test_earlier_return_to_another_supplier_warehouse_after_reposting(self):
+		company = "_Test Company with perpetual inventory"
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], company=company, currency="INR")
+		sco = get_subcontracting_order(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=[
+				{
+					"warehouse": "Stores - TCP1",
+					"item_code": "Subcontracted Service Item 7",
+					"qty": 20,
+					"rate": 10,
+					"fg_item": fg_item,
+					"fg_item_qty": 20,
+				}
+			],
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+		receipts = []
+		for _i in range(2):
+			scr = make_subcontracting_receipt(sco.name)
+			scr.items[0].qty = 10
+			scr.save()
+			scr.submit()
+			receipts.append(scr)
+
+		# the second receipt is returned first, so its return comes before the first receipt's
+		returns = [
+			make_return_subcontracting_receipt(
+				scr_name=scr.name, qty=-10, supplier_warehouse="Finished Goods - TCP1"
+			)
+			for scr in reversed(receipts)
+		]
+
+		make_stock_entry(
+			item_code=rm_item,
+			qty=20,
+			target=rm_items[0]["warehouse"],
+			basic_rate=500,
+			posting_date=add_days(today(), -2),
+			company=company,
+		)
+
+		for scr_return in returns:
+			self.assertEqual(
+				frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_no": scr_return.name, "item_code": rm_item, "is_cancelled": 0},
+					"stock_value_difference",
+				),
+				5000,
+			)
+
 	def test_return_stock_gl_matches_ledger_after_reposting(self):
 		company = "_Test Company with perpetual inventory"
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
