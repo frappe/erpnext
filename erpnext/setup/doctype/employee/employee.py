@@ -248,15 +248,38 @@ class Employee(NestedSet):
 
 	def remove_user_permissions(self, user, company, include_employee=True):
 		"""Remove the User Permissions that Create User Permission adds."""
+		company_permission = self.get_added_company_permission(user, company)
 		if include_employee:
 			remove_user_permission("Employee", self.name, user, ignore_permissions=True)
 
 		# Another Employee of the same User and Company still needs the Company restriction.
-		if not frappe.db.exists(
+		if company_permission and not frappe.db.exists(
 			"Employee",
 			{"user_id": user, "company": company, "create_user_permission": 1, "name": ("!=", self.name)},
 		):
-			remove_user_permission("Company", company, user, ignore_permissions=True)
+			frappe.delete_doc("User Permission", company_permission, force=True, ignore_permissions=True)
+
+	def get_added_company_permission(self, user, company):
+		"""Return the Company User Permission that Create User Permission added for this Employee.
+
+		User Permission does not record who made it. Create User Permission adds the Employee permission
+		first, so a Company permission made before it was set up by hand.
+		"""
+		employee_permission_created = frappe.db.get_value(
+			"User Permission", {"allow": "Employee", "for_value": self.name, "user": user}, "creation"
+		)
+		if not employee_permission_created:
+			return None
+
+		return frappe.db.get_value(
+			"User Permission",
+			{
+				"allow": "Company",
+				"for_value": company,
+				"user": user,
+				"creation": (">=", employee_permission_created),
+			},
+		)
 
 	def update_user_permissions(self):
 		if not any(

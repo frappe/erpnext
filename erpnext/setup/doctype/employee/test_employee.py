@@ -356,6 +356,27 @@ class TestEmployee(ERPNextTestSuite):
 			)
 		)
 
+	def test_unticking_user_permission_keeps_company_permission_made_by_hand(self):
+		from frappe.permissions import add_user_permission
+
+		user = "employee-manual-company-permission@example.com"
+		make_user(user)
+		add_user_permission("Company", "_Test Company", user)
+		employee = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		employee_doc = frappe.get_doc("Employee", employee)
+		employee_doc.create_user_permission = 0
+		employee_doc.save()
+
+		self.assertFalse(
+			frappe.db.exists("User Permission", {"allow": "Employee", "for_value": employee, "user": user})
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": "_Test Company", "user": user}
+			)
+		)
+
 	def test_hr_user_cannot_move_admin_user_restrictions_to_another_company(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
@@ -541,7 +562,7 @@ def new_employee(user_id: str):
 	)
 
 
-def make_employee(user, company=None, **kwargs):
+def make_user(user):
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc(
 			{
@@ -553,6 +574,10 @@ def make_employee(user, company=None, **kwargs):
 				"roles": [{"doctype": "Has Role", "role": "Employee"}],
 			}
 		).insert()
+
+
+def make_employee(user, company=None, **kwargs):
+	make_user(user)
 
 	if not frappe.db.get_value("Employee", {"user_id": user}):
 		employee = frappe.get_doc(
