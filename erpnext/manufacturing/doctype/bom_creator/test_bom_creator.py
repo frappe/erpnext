@@ -417,6 +417,54 @@ class TestBOMCreator(FrappeTestCase):
 		)
 		self.assertEqual((row.bom_no or "", row.do_not_explode), ("", 1))
 
+	def test_rates_are_converted_to_the_creator_currency(self):
+		make_item("Cargo Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		make_item("_Test BOM Creator USD RM", {"item_group": "Raw Material", "valuation_rate": 800})
+		doc = make_bom_creator(
+			name="Cargo Bike BOM USD",
+			company="_Test Company",
+			item_code="Cargo Bike",
+			qty=1,
+			currency="USD",
+			conversion_rate=80,
+			rm_cost_as_per="Valuation Rate",
+		)
+		doc.add_item(
+			fg_item="Cargo Bike", fg_reference_id=doc.name, item_code="_Test BOM Creator USD RM", qty=1
+		)
+		doc.reload()
+
+		self.assertEqual(doc.items[0].rate, 10)
+		self.assertEqual(doc.raw_material_cost, 10)
+
+	def test_currency_change_refreshes_the_exchange_rate(self):
+		if not frappe.db.exists("Currency", "TSR"):
+			frappe.get_doc({"doctype": "Currency", "currency_name": "TSR", "enabled": 1}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": frappe.utils.today(),
+				"from_currency": "TSR",
+				"to_currency": "INR",
+				"exchange_rate": 50,
+				"for_buying": 1,
+				"for_selling": 1,
+			}
+		).insert()
+
+		make_item("Cargo Bike Currency", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		doc = make_bom_creator(
+			name="Cargo Bike BOM Currency Change",
+			company="_Test Company",
+			item_code="Cargo Bike Currency",
+			qty=1,
+			currency="USD",
+			conversion_rate=80,
+		)
+		doc.currency = "TSR"
+		doc.save()
+		self.assertEqual(doc.conversion_rate, 50)
+
 
 def create_items():
 	raw_materials = [
