@@ -431,6 +431,18 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		set_allow_partial_payment(self.pos_profile, 0)
 
+	def test_collecting_more_than_outstanding_updates_change_amounts(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos_inv = create_pos_invoice(pos_profile=self.pos_profile.name, rate=110, do_not_save=True)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 40})
+		pos_inv.insert().submit()
+
+		pos_inv.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 80}])
+		pos_inv.reload()
+
+		self.assertEqual((pos_inv.paid_amount, pos_inv.outstanding_amount), (120, 0))
+		self.assertEqual((pos_inv.change_amount, pos_inv.base_change_amount), (10, 10))
+
 	def test_multi_payment_for_partly_paid_invoices(self):
 		set_allow_partial_payment(self.pos_profile, 1)
 
