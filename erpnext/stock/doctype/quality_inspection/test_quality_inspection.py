@@ -299,6 +299,24 @@ class TestQualityInspection(FrappeTestCase):
 
 		se.delete()
 
+	def test_qi_of_another_document_or_item_is_refused(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		frappe.db.set_value(
+			"Item",
+			"_Test Item with QA",
+			{"inspection_required_before_purchase": 1, "inspection_required_before_delivery": 1},
+		)
+		other_receipt = make_purchase_receipt(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Purchase Receipt", reference_name=other_receipt.name, inspection_type="Incoming"
+		)
+
+		delivery_note = create_delivery_note(item_code="_Test Item with QA", do_not_save=True)
+		delivery_note.items[0].quality_inspection = qa.name
+		self.assertRaises(frappe.ValidationError, delivery_note.insert)
+
 	def test_job_card_qi_keeps_manually_rejected_reading(self):
 		create_quality_inspection_parameter("Finish")
 		parameter = {"specification": "Finish", "numeric": 0, "value": "OK"}
