@@ -2043,12 +2043,12 @@ class JobCard(Document):
 		self.db_set("status", "Work In Progress")
 
 	def update_completed_qty_for_employee(self, kwargs):
-		for row in self.time_logs:
-			if row.employee != kwargs.employee:
-				continue
+		rows = [row for row in self.time_logs if row.employee == kwargs.employee]
+		if not rows:
+			return
 
-			row.completed_qty = kwargs.completed_qty
-			row.db_update()
+		rows[-1].completed_qty = kwargs.completed_qty
+		rows[-1].db_update()
 
 	def close_time_log_for_employee(self, kwargs):
 		for row in self.time_logs:
