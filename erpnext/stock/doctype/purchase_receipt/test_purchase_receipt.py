@@ -35,6 +35,8 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
+		# Database rollback does not reset the perpetual-inventory cache.
+		self.addCleanup(setattr, frappe.local, "enable_perpetual_inventory", {})
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
 	def test_purchase_receipt_skips_validation(self):
