@@ -7,6 +7,8 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, NullIf, Sum
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 KEY_LENGTH = 8
 
 
@@ -415,6 +417,8 @@ class General_Payment_Ledger_Comparison:
 
 
 def execute(filters=None):
+	validate_date_range(filters, "period_start_date", "period_end_date")
+
 	columns, data = [], []
 
 	rpt = General_Payment_Ledger_Comparison(filters)
