@@ -73,39 +73,10 @@ class SubcontractingController(StockController):
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
-			rejected_return_rows = self.get_rejected_return_rows()
-			return_rates = self.get_consumed_rates_for_return()
-			original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
+			precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
+			rates = self.get_supplied_item_rates(self.supplied_items)
 			for row in self.supplied_items:
-				kwargs = frappe._dict(
-					{
-						"item_code": row.rm_item_code,
-						"warehouse": self.supplier_warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
-						"qty": flt(row.consumed_qty) * (-1 if not self.is_return else 1),
-						"voucher_type": self.doctype,
-						"voucher_no": self.name,
-						"company": self.company,
-						"serial_and_batch_bundle": row.serial_and_batch_bundle,
-						"voucher_detail_no": row.name,
-						"batch_no": row.batch_no,
-						"serial_no": row.serial_no,
-						"use_serial_batch_fields": row.use_serial_batch_fields,
-					}
-				)
-
-				return_rate = return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
-				if (
-					row.reference_name in rejected_return_rows
-					and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
-				):
-					rate = 0.0
-				elif return_rate is not None:
-					rate = return_rate
-				else:
-					rate = _get_incoming_rate(kwargs)
-				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
+				rate = rates[row.name]
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
 					row.amount = flt(row.consumed_qty) * flt(rate)
@@ -113,6 +84,46 @@ class SubcontractingController(StockController):
 
 		if rate_changed:
 			self.calculate_items_qty_and_amount()
+
+	def get_supplied_item_rates(self, rows):
+		"""Rate of each supplied item row by row name; a return takes back the rate the returned receipt consumed at."""
+		rejected_return_rows = self.get_rejected_return_rows()
+		return_rates = self.get_consumed_rates_for_return()
+		original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
+
+		rates = {}
+		for row in rows:
+			return_rate = return_rates.get((original_rows.get(row.reference_name), row.rm_item_code))
+			if (
+				row.reference_name in rejected_return_rows
+				and get_valuation_method(row.rm_item_code, self.company) != "Standard Cost"
+			):
+				rates[row.name] = 0.0
+			elif return_rate is not None:
+				rates[row.name] = return_rate
+			else:
+				rates[row.name] = _get_incoming_rate(self.get_supplied_item_rate_args(row))
+
+		return rates
+
+	def get_supplied_item_rate_args(self, row):
+		return frappe._dict(
+			{
+				"item_code": row.rm_item_code,
+				"warehouse": self.supplier_warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"qty": flt(row.consumed_qty) * (-1 if not self.is_return else 1),
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company,
+				"serial_and_batch_bundle": row.serial_and_batch_bundle,
+				"voucher_detail_no": row.name,
+				"batch_no": row.batch_no,
+				"serial_no": row.serial_no,
+				"use_serial_batch_fields": row.use_serial_batch_fields,
+			}
+		)
 
 	def get_consumed_rates_for_return(self):
 		"""Rate each raw material was consumed at in the returned receipt, keyed by (receipt item row, raw material).
@@ -1299,6 +1310,7 @@ class SubcontractingController(StockController):
 						{
 							"item_code": item.rm_item_code,
 							"incoming_rate": item.rate if self.is_return else 0,
+							"recalculate_rate": cint(self.is_return),
 							"warehouse": self.supplier_warehouse,
 							"actual_qty": -1 * flt(item.consumed_qty, item.precision("consumed_qty")),
 							"dependant_sle_voucher_detail_no": item.reference_name,
