@@ -218,3 +218,10 @@ class TestStockAnalyticsReport(FrappeTestCase):
 	def test_permission_for_another_doctype_does_not_limit_rows(self):
 		cols, row = self.get_quantity_for_restricted_user(applicable_for="Purchase Order")
 		self.compare_analytics_row(row, cols, [12])
+
+	def test_period_ranges_reach_the_to_date(self):
+		filters = _dict(range="Weekly", from_date="2026-03-30", to_date="2027-03-31")
+
+		ranges = get_period_date_ranges(filters)
+
+		self.assertEqual(getdate(ranges[-1][1]), getdate("2027-03-31"))
