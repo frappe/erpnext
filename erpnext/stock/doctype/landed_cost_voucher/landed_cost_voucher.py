@@ -162,6 +162,7 @@ class LandedCostVoucher(Document):
 				)
 
 	def validate_expense_accounts(self):
+		self.validate_charge_account_types()
 		if not is_perpetual_inventory_enabled(self.company):
 			return
 
@@ -180,6 +181,22 @@ class LandedCostVoucher(Document):
 					),
 					title=_("Incorrect Account"),
 					exc=IncorrectCompanyValidationError,
+				)
+
+	def validate_charge_account_types(self):
+		for row in self.taxes:
+			if not row.expense_account:
+				continue
+
+			account_type, is_group = frappe.get_cached_value(
+				"Account", row.expense_account, ["account_type", "is_group"]
+			)
+			if account_type == "Stock" or is_group:
+				frappe.throw(
+					_("Row {0}: Account {1} cannot be used for landed cost charges").format(
+						row.idx, frappe.bold(row.expense_account)
+					),
+					title=_("Incorrect Account"),
 				)
 
 	def set_total_taxes_and_charges(self):
