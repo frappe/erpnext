@@ -1332,6 +1332,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
+	accepted_returns = get_accepted_returned_qty(source_doc) if doctype == "Purchase Receipt" else {}
 
 	def set_missing_values(source, target):
 		target.conversion_rate = target.plc_conversion_rate = 0
@@ -1348,6 +1349,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				target.append("taxes", tax)
 
 		if not target.get("items"):
+			if target.doctype == "Delivery Note":
+				frappe.throw(_("All items have already been delivered"))
+
 			frappe.throw(_("All items have already been received"))
 
 	def update_details(source_doc, target_doc, source_parent):
@@ -1451,6 +1455,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if source_parent.doctype == "Delivery Note" and source.received_qty:
 			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
 
+		if source_parent.doctype == "Purchase Receipt":
+			target.qty = flt(source.qty) - flt(accepted_returns.get(source.name))
+
 		if source.get("use_serial_batch_fields"):
 			target.set("use_serial_batch_fields", 1)
 
@@ -1463,6 +1470,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		{
 			doctype: {
 				"doctype": target_doctype,
+				"validation": {"docstatus": ["=", 1]},
 				"postprocess": update_details,
 				"field_no_map": [*CROSS_PARTY_FIELD_NO_MAP, "set_warehouse"],
 			},
@@ -1477,7 +1485,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 					"Material_request_item": "material_request_item",
 				},
 				"field_no_map": ["warehouse"],
-				"condition": lambda item: item.received_qty < item.qty + item.returned_qty,
+				"condition": lambda item: has_pending_inter_company_qty(item, doctype, accepted_returns),
 				"postprocess": update_item,
 			},
 		},
@@ -1486,3 +1494,16 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+def has_pending_inter_company_qty(item, doctype: str, accepted_returns: dict | None = None) -> bool:
+	if doctype == "Purchase Receipt":
+		return flt(item.qty) - flt((accepted_returns or {}).get(item.name)) > 0
+
+	return item.received_qty < item.qty + item.returned_qty
+
+
+def get_accepted_returned_qty(receipt) -> dict:
+	from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_returned_qty_of_rows
+
+	return get_returned_qty_of_rows([d.name for d in receipt.items])

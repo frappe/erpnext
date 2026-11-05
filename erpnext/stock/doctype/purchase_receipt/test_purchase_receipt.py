@@ -1,6 +1,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import patch
+
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
@@ -6600,6 +6602,34 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 			),
 			[40400],
 		)
+
+	def test_inter_company_delivery_note_maps_the_kept_qty_of_a_submitted_receipt(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_inter_company_delivery_note
+
+		receipt = make_purchase_receipt(qty=5, rate=100)
+		self.submit_receipt_return(receipt, 2)
+		draft_receipt = make_purchase_receipt(qty=3, rate=100, do_not_submit=1)
+
+		with (
+			patch("erpnext.accounts.doctype.sales_invoice.sales_invoice.validate_inter_company_transaction"),
+			patch(
+				"erpnext.accounts.doctype.sales_invoice.sales_invoice.get_inter_company_details",
+				return_value=frappe._dict(company="_Test Company", party="_Test Customer"),
+			),
+		):
+			delivery_note = make_inter_company_delivery_note(receipt.name)
+			self.assertEqual([row.qty for row in delivery_note.items], [3])
+			self.assertRaises(frappe.ValidationError, make_inter_company_delivery_note, draft_receipt.name)
+
+			boxed_receipt = make_purchase_receipt(qty=5, rate=100, uom="_Test UOM 1", conversion_factor=4)
+			self.submit_receipt_return(boxed_receipt, 1)
+			delivery_note = make_inter_company_delivery_note(boxed_receipt.name)
+			self.assertEqual([row.qty for row in delivery_note.items], [4])
+
+			rejected_receipt = self.make_receipt_with_rejected_qty()
+			self.submit_receipt_return(rejected_receipt, 2, from_rejected_warehouse=True)
+			delivery_note = make_inter_company_delivery_note(rejected_receipt.name)
+			self.assertEqual([row.qty for row in delivery_note.items], [8])
 
 
 def prepare_data_for_internal_transfer():
