@@ -4,7 +4,7 @@ import { Button, FormControl, Select, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import StageMaterials from "./StageMaterials.vue";
 import { __ } from "../../lib/api";
-import { fmt, num, round } from "../../lib/format";
+import { fmt, num } from "../../lib/format";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, groupOf, moveStage, removeStage, setRunsWith } from "../../lib/plant";
 
@@ -60,9 +60,6 @@ const runsWithOptions = computed(() => [
 	...(runsWith.value ? [{ label: __("No other stage"), value: "" }] : []),
 ]);
 const finishedGood = computed(() => props.data.item || {});
-const finishedWeight = computed(() =>
-	round(num(finishedGood.value.weight_per_unit) * num(props.doc.batch_size), 3)
-);
 const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? Number(value) - 1 : null);
 </script>
 
@@ -192,17 +189,9 @@ const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? 
 					{{ finishedGood.item_name || doc.production_item }}
 				</p>
 			</div>
-			<div class="shrink-0 text-right">
-				<p class="text-sm font-medium tabular-nums text-ink-gray-8">
-					{{ fmt(num(doc.batch_size)) }} {{ finishedGood.stock_uom || "" }}
-				</p>
-				<p
-					v-if="finishedWeight && finishedGood.weight_uom"
-					class="text-xs tabular-nums text-ink-gray-5"
-				>
-					{{ fmt(finishedWeight) }} {{ finishedGood.weight_uom }}
-				</p>
-			</div>
+			<p class="shrink-0 text-sm font-medium tabular-nums text-ink-gray-8">
+				{{ fmt(num(doc.batch_size)) }} {{ finishedGood.stock_uom || "" }}
+			</p>
 		</div>
 	</div>
 </template>
