@@ -778,6 +778,18 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				self.assertTrue(buckets)
 				self.assertEqual({bucket.parent_warehouse for bucket in buckets}, {WAREHOUSE})
 
+	def test_sales_orders_of_other_items_are_left_out_when_no_mps_row_is_in_range(self):
+		plan = make_mrp_plan(self)
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		make_mrp_sales_order(other_item, 3, add_days(today(), 15))
+
+		rows = get_mrp_row_list(
+			frappe.get_doc("Master Production Schedule", plan.mps),
+			from_date=add_days(today(), 11),
+			to_date=add_days(today(), 20),
+		)
+		self.assertFalse([row for row in rows if row.item_code == other_item])
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(
