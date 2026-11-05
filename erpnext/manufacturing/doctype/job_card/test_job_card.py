@@ -1268,16 +1268,19 @@ class TestJobCard(ERPNextTestSuite):
 			"Job Card", filters={"work_order": wo_doc.name}, fields=["name"], order_by="sequence_id"
 		)
 
-		for index, row in enumerate(job_cards):
+		for index, (row, for_quantity, process_loss_qty) in enumerate(
+			zip(job_cards, (10, 7), (3, 0), strict=True)
+		):
 			jc = frappe.get_doc("Job Card", row.name)
 			from_time = add_to_date(now(), minutes=index * 40)
+			jc.for_quantity = for_quantity
 			jc.append(
 				"time_logs",
 				{"from_time": from_time, "to_time": add_to_date(from_time, minutes=30), "completed_qty": 7},
 			)
 			jc.save()
 			jc.submit()
-			self.assertEqual(jc.process_loss_qty, 3)
+			self.assertEqual(jc.process_loss_qty, process_loss_qty)
 
 		se1 = frappe.get_doc(make_stock_entry_for_wo(wo_doc.name, "Manufacture", 5))
 		se1.submit()
