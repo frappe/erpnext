@@ -195,6 +195,9 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 	if not has_filter_permissions(filters):
 		return []
 
+	if not frappe.has_permission("Serial No", "select"):
+		return []
+
 	query_filters = {}
 
 	if txt:
@@ -229,6 +232,9 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 	if not has_filter_permissions(filters):
+		return []
+
+	if not frappe.has_permission("Batch", "select"):
 		return []
 
 	query_filters = {}
