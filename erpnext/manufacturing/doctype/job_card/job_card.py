@@ -1890,9 +1890,16 @@ class JobCard(Document):
 		self.save()
 
 	def add_time_logs_for_employess(self, kwargs):
+		if not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
+			self.update_latest_time_log_qty(kwargs)
+			self.set_status(update_status=True)
+			return
+
 		row = None
 		update_status = False
 		kwargs.employees = kwargs.employees or [frappe._dict(employee=None)]
+		# picked before any log is closed, so the cycle's qty goes on one log
+		cycle_log = next((row for row in reversed(self.time_logs) if not row.to_time), None)
 
 		for employee in kwargs.employees:
 			kwargs.employee = employee.get("employee")
@@ -1903,14 +1910,6 @@ class JobCard(Document):
 				row = self.append("time_logs", kwargs)
 				row.db_update()
 				self.db_set("status", "Work In Progress")
-			elif not kwargs.from_time and not kwargs.to_time and kwargs.get("completed_qty") is not None:
-				update_status = True
-				for row in self.time_logs:
-					if row.employee != kwargs.employee:
-						continue
-
-					row.completed_qty = kwargs.completed_qty
-					row.db_update()
 			else:
 				update_status = True
 				for row in self.time_logs:
@@ -1922,12 +1921,19 @@ class JobCard(Document):
 					if kwargs.get("sub_operation"):
 						row.operation = kwargs.get("sub_operation")
 
-					if kwargs.employees[-1].get("employee") == row.employee:
+					if row is cycle_log:
 						row.completed_qty = kwargs.completed_qty
 
 					row.db_update()
 
 			self.set_status(update_status=update_status)
+
+	def update_latest_time_log_qty(self, kwargs):
+		if not self.time_logs:
+			return
+
+		self.time_logs[-1].completed_qty = kwargs.completed_qty
+		self.time_logs[-1].db_update()
 
 	def update_workstation_status(self):
 		job_cards = frappe.get_all(
