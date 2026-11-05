@@ -142,6 +142,7 @@ class JobCard(Document):
 		self.validate_time_logs()
 		self.set_status()
 		self.validate_operation_id()
+		self.set_hour_rate()
 		self.validate_sequence_id()
 		self.set_sub_operations()
 		self.update_sub_operation_status()
@@ -149,6 +150,18 @@ class JobCard(Document):
 
 	def on_update(self):
 		self.validate_job_card_qty()
+
+	def set_hour_rate(self):
+		if self.is_corrective_job_card or not (self.workstation and self.operation_id):
+			return
+
+		operation = frappe.db.get_value(
+			"Work Order Operation", self.operation_id, ["workstation", "hour_rate"], as_dict=True
+		)
+		if operation and operation.workstation == self.workstation and flt(operation.hour_rate):
+			self.hour_rate = operation.hour_rate
+		else:
+			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
 
 	def validate_job_card_qty(self):
 		if not (self.operation_id and self.work_order):
@@ -824,7 +837,6 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, time_in_mins, wo):
-		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType("Job Card Time Log")
 
@@ -848,10 +860,6 @@ class JobCard(Document):
 				data.actual_operation_time = time_in_mins
 				data.actual_start_time = time_data[0].start_time if time_data else None
 				data.actual_end_time = time_data[0].end_time if time_data else None
-				if data.get("workstation") != self.workstation:
-					# workstations can change in a job card
-					data.workstation = self.workstation
-					data.hour_rate = flt(workstation_hour_rate)
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status(self.operation_id)
