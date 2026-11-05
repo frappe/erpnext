@@ -4,7 +4,7 @@ import { Button, FormControl, Select, Tooltip } from "frappe-ui";
 import DeskControl from "../DeskControl.vue";
 import StageMaterials from "./StageMaterials.vue";
 import { __ } from "../../lib/api";
-import { fmt } from "../../lib/format";
+import { fmt, num, round } from "../../lib/format";
 import { isPackingModel, machineOf } from "../../lib/machines";
 import { READ_ONLY, groupOf, moveStage, removeStage, setRunsWith } from "../../lib/plant";
 
@@ -59,6 +59,10 @@ const runsWithOptions = computed(() => [
 	...stageOptions.value.map((option) => ({ label: option.label, value: String(option.stageNo) })),
 	...(runsWith.value ? [{ label: __("No other stage"), value: "" }] : []),
 ]);
+const finishedGood = computed(() => props.data.item || {});
+const finishedWeight = computed(() =>
+	round(num(finishedGood.value.weight_per_unit) * num(props.doc.batch_size), 3)
+);
 const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? Number(value) - 1 : null);
 </script>
 
@@ -175,6 +179,29 @@ const setRunsWithStage = (value) => setRunsWith(props.doc, props.index, value ? 
 					:packing-no="packingIndex + 1"
 					:stage-options="moveOptions"
 				/>
+			</div>
+		</div>
+		<div
+			v-if="isPacking && doc.production_item"
+			class="flex h-12 items-center gap-2 border-t border-outline-gray-1 px-3"
+		>
+			<span class="lucide-package-check size-4 shrink-0 text-ink-gray-6" aria-hidden="true" />
+			<div class="min-w-0 flex-1">
+				<p class="text-xs text-ink-gray-5">{{ __("Finished Good") }}</p>
+				<p class="truncate text-sm font-medium text-ink-gray-8">
+					{{ finishedGood.item_name || doc.production_item }}
+				</p>
+			</div>
+			<div class="shrink-0 text-right">
+				<p class="text-sm font-medium tabular-nums text-ink-gray-8">
+					{{ fmt(num(doc.batch_size)) }} {{ finishedGood.stock_uom || "" }}
+				</p>
+				<p
+					v-if="finishedWeight && finishedGood.weight_uom"
+					class="text-xs tabular-nums text-ink-gray-5"
+				>
+					{{ fmt(finishedWeight) }} {{ finishedGood.weight_uom }}
+				</p>
 			</div>
 		</div>
 	</div>
