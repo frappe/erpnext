@@ -1,5 +1,5 @@
 <script setup>
-import { inject } from "vue";
+import { computed, inject, ref, watch } from "vue";
 import { Alert, ScrollArea } from "frappe-ui";
 import PlanStep from "./PlanStep.vue";
 import StageStep from "./StageStep.vue";
@@ -8,6 +8,26 @@ import EntryLog from "./EntryLog.vue";
 import { __ } from "../../lib/api";
 
 const run = inject("run");
+const steps = ref([]);
+const running = computed(() =>
+	run.stages.value
+		.filter(run.isActive)
+		.map((stage) => stage.idx)
+		.join()
+);
+
+watch(
+	running,
+	(value) => {
+		const index = run.stages.value.findIndex(run.isActive);
+		const step = value && steps.value[index]?.$el;
+		const viewport = step?.closest("[data-reka-scroll-area-viewport]");
+		if (!viewport) return;
+		const top = step.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+		viewport.scrollTo({ top: viewport.scrollTop + top - 16, behavior: "smooth" });
+	},
+	{ flush: "post", immediate: true }
+);
 </script>
 
 <template>
@@ -29,6 +49,7 @@ const run = inject("run");
 					v-for="(stage, i) in run.stages.value"
 					:key="stage.idx"
 					:stage="stage"
+					:ref="(step) => (steps[i] = step)"
 					:index="i"
 				/>
 			</div>
