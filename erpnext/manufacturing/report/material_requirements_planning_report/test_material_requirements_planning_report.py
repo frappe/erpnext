@@ -606,6 +606,19 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		purchase_order = get_created_order(plan.mps, "Purchase Order")
 		self.assertEqual(purchase_order.items[0].qty, 63)
 
+	def test_purchase_order_orders_one_unit_of_a_large_whole_number_uom(self):
+		plan = make_mrp_plan(self, planned_qty=1, rm_qty=2)
+		item = frappe.get_doc("Item", plan.rm_item)
+		item.append("uoms", {"uom": "Box", "conversion_factor": 5000})
+		item.purchase_uom = "Box"
+		item.save()
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=plan.mps)
+
+		purchase_order = get_created_order(plan.mps, "Purchase Order")
+		self.assertEqual((purchase_order.items[0].qty, purchase_order.items[0].uom), (1, "Box"))
+
 	def test_sales_order_in_the_mps_is_not_added_again(self):
 		plan = make_mrp_plan(self)
 		make_mrp_sales_order(plan.fg_item, 10, add_days(today(), 30))
