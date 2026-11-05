@@ -7,9 +7,14 @@ def get_operating_cost_account(company):
 		"Company", company, ["default_operating_cost_account", "default_expense_account"], as_dict=True
 	)
 
-	return company_details.get("default_operating_cost_account") or company_details.get(
-		"default_expense_account"
+	account = company_details.default_operating_cost_account or company_details.default_expense_account
+
+	# The component only accepts non-group Expense accounts of the same company.
+	# Older defaults can be anything (e.g. a stock account as COGS), so skip those.
+	is_valid_expense_account = account and frappe.db.exists(
+		"Account", {"name": account, "company": company, "root_type": "Expense", "is_group": 0}
 	)
+	return account if is_valid_expense_account else None
 
 
 def execute():
