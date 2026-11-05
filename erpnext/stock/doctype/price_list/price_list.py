@@ -32,6 +32,24 @@ class PriceList(Document):
 		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
 
+		self.validate_currency_change()
+
+	def validate_currency_change(self):
+		if self.is_new() or not self.has_value_changed("currency"):
+			return
+
+		if item_prices := frappe.db.count("Item Price", {"price_list": self.name}):
+			throw(
+				_(
+					"Currency of Price List {0} cannot be changed because it has {1} Item Prices in {2}. Create a new Price List for {3} instead."
+				).format(
+					frappe.bold(self.name),
+					item_prices,
+					frappe.bold(self.get_doc_before_save().currency),
+					frappe.bold(self.currency),
+				)
+			)
+
 	def on_update(self):
 		self.set_default_if_missing()
 		self.update_item_price()
