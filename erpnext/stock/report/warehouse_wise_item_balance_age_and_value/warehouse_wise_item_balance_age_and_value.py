@@ -7,6 +7,9 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, flt, getdate
 
@@ -34,6 +37,8 @@ def execute(filters=None):
 	validate_filters(filters)
 
 	columns = get_columns(filters)
+	if not apply_permitted_warehouses(filters):
+		return columns, []
 
 	items = get_items(filters)
 	sle = get_stock_ledger_entries(filters, items)
@@ -93,6 +98,22 @@ def execute(filters=None):
 	return columns, data
 
 
+def apply_permitted_warehouses(filters):
+	permitted = get_allowed_docs_for_doctype(
+		get_user_permissions().get("Warehouse", []), "Stock Ledger Entry"
+	)
+	if not permitted:
+		return True
+
+	permitted = frappe.get_all("Warehouse", filters={"name": ("in", permitted), "is_group": 0}, pluck="name")
+	if filters.get("warehouse"):
+		selected = {warehouse.name for warehouse in get_warehouse_list(filters)}
+		permitted = [warehouse for warehouse in permitted if warehouse in selected]
+
+	filters["warehouse"] = permitted
+	return bool(permitted)
+
+
 def get_itemwise_brand(items):
 	return frappe.get_all("Item", filters={"name": ("in", items)}, fields=["name", "brand"], as_list=1)
 
@@ -122,7 +143,8 @@ def validate_filters(filters):
 
 
 def get_warehouse_list(filters):
-	if not filters.get("warehouse"):
+	warehouses = filters.get("warehouse")
+	if not warehouses:
 		return frappe.get_all(
 			"Warehouse",
 			filters={"company": filters.get("company"), "is_group": 0},
@@ -130,13 +152,21 @@ def get_warehouse_list(filters):
 			order_by="name",
 		)
 
+	if isinstance(warehouses, str):
+		warehouses = [warehouses]
+
+	subtrees = frappe.get_all("Warehouse", filters={"name": ("in", warehouses)}, fields=["lft", "rgt"])
+	if not subtrees:
+		return []
+
 	warehouse = frappe.qb.DocType("Warehouse")
-	lft, rgt = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"])
+	condition = Criterion.any([(warehouse.lft >= row.lft) & (warehouse.rgt <= row.rgt) for row in subtrees])
 
 	return (
 		frappe.qb.from_(warehouse)
-		.select("name")
-		.where((warehouse.lft >= lft) & (warehouse.rgt <= rgt))
+		.select(warehouse.name)
+		.where(condition)
+		.orderby(warehouse.name)
 		.run(as_dict=True)
 	)
 
