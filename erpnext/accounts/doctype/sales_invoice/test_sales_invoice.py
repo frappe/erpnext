@@ -2110,6 +2110,34 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(debit_amount, 10.0)
 		self.assertEqual(incoming_rate, 10.0)
 
+	def test_incoming_rate_entered_on_saved_stand_alone_credit_note(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item_code = make_item_for_si("_Test Item Saved Credit Note Rate").name
+		return_si = create_sales_invoice(
+			item=item_code,
+			is_return=1,
+			update_stock=1,
+			qty=-1,
+			rate=100,
+			incoming_rate=10,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			do_not_submit=True,
+		)
+
+		return_si.items[0].warehouse = create_warehouse(
+			"_Test Credit Note Warehouse", company="_Test Company with perpetual inventory"
+		)
+		return_si.items[0].incoming_rate = 20
+		return_si.save()
+
+		self.assertEqual(return_si.items[0].incoming_rate, 20)
+
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.apply_discount_on = "Net Total"
