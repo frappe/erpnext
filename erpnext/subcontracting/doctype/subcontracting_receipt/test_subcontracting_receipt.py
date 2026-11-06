@@ -590,6 +590,31 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		over_return.items[0].qty = -2
 		self.assertRaises(StockOverReturnError, over_return.save)
 
+	def test_rejected_return_is_capped_by_the_returned_qty(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 3
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = create_warehouse("_Test SCR Over Return Rejected Warehouse")
+		scr.save()
+		scr.submit()
+
+		# process loss lowers the received qty, but not the qty taken out of the rejected warehouse
+		over_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		over_return.items[0].qty = -3
+		over_return.items[0].process_loss_qty = 1
+		self.assertRaises(StockOverReturnError, over_return.save)
+
 	def test_subcontracting_receipt_no_gl_entry(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 		sco = get_subcontracting_order()
