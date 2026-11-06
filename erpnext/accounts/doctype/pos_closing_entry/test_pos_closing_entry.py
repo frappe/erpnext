@@ -2,6 +2,7 @@
 # See license.txt
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 
@@ -359,6 +360,52 @@ class TestPOSClosingEntry(unittest.TestCase):
 		expected = {row.mode_of_payment: row.expected_amount for row in closing_entry.payment_reconciliation}
 		self.assertEqual(expected, {"Cash": 90, self.card_mode: 0})
 
+	def test_closing_refuses_session_invoices_left_out(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+		self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
+
+	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+		closing_entry.db_set("status", "Failed")
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+
+		with patch(consolidate) as consolidate_pos_invoices:
+			with self.assertRaises(frappe.ValidationError) as context:
+				closing_entry.retry()
+			consolidate_pos_invoices.assert_not_called()
+
+		self.assertIn(late_sale.name, str(context.exception))
+
+	def test_missing_invoices_message_lists_first_ten(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sales = [make_paid_pos_invoice([("Cash", 90)]).name for _ in range(11)]
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			closing_entry.submit()
+
+		message = str(context.exception)
+		self.assertIn("and 1 more", message)
+		self.assertEqual(sum(name in message for name in late_sales), 10)
+
 
 def init_user_and_profile(**args):
 	user = "test@example.com"
@@ -393,3 +440,12 @@ def get_test_item_qty(pos_profile):
 		"actual_qty"
 	)
 	return test_item_qty
+
+
+def make_paid_pos_invoice(payments, **args):
+	pos_invoice = create_pos_invoice(rate=90, do_not_submit=1, **args)
+	for mode_of_payment, amount in payments:
+		pos_invoice.append("payments", {"mode_of_payment": mode_of_payment, "amount": amount})
+	pos_invoice.save()
+	pos_invoice.submit()
+	return pos_invoice
