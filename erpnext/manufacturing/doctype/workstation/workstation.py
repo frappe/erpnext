@@ -50,6 +50,7 @@ class Workstation(Document):
 			WorkstationWorkingHour,
 		)
 
+		batch_capacity: DF.Float
 		description: DF.Text | None
 		disabled: DF.Check
 		holiday_list: DF.Link | None

@@ -358,11 +358,12 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.set_qty_based_on_percentage",
-   "description": "This component absorbs the percentage remaining after all other percentage rows",
+   "depends_on": "eval:parent.set_qty_based_on_percentage || parent.track_semi_finished_goods",
+   "description": "This component absorbs the percentage remaining after all other percentage rows, or tops a Plant Builder batch up to its weight",
    "fieldname": "is_balance_item",
    "fieldtype": "Check",
-   "label": "Is Balance Item"
+   "label": "Is Balance Item",
+   "show_description_on_click": 1
   },
   {
    "fieldname": "section_break_zpik",
@@ -378,7 +379,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-23 16:10:42.455422",
+ "modified": "2026-11-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

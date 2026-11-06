@@ -1,0 +1,66 @@
+{
+ "shapes": {
+  "Box": {"finish": "Steel", "size": {"width": 40, "depth": 40, "height": 40}},
+  "Tank": {"finish": "Product", "size": {"radius": 40, "height": 100}},
+  "Open Tank": {"finish": "Product", "size": {"radius": 40, "height": 80}},
+  "Band": {"finish": "Heat", "size": {"radius": 44, "height": 12}},
+  "Agitator": {"size": {"radius": 20}},
+  "Steam": {"finish": "Steel", "size": {}},
+  "Bubbles": {"size": {"height": 80}},
+  "Fizz": {"size": {"radius": 40, "height": 100}},
+  "Flow Strip": {"finish": "Product", "size": {"width": 60, "depth": 8}}
+ },
+ "presets": {
+  "Mixer": [
+   {"shape": "Tank", "finish": "Product", "radius": 56, "height": 140, "shows_level": 1, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "z": 140, "width": 28, "depth": 28, "height": 22, "shakes": 1},
+   {"shape": "Agitator", "z": 163, "radius": 26, "shakes": 1}
+  ],
+  "Steam Kettle": [
+   {"shape": "Open Tank", "finish": "Product", "radius": 62, "height": 110, "shows_level": 1},
+   {"shape": "Bubbles", "height": 110},
+   {"shape": "Steam", "finish": "Steel", "z": 110}
+  ],
+  "Reactor": [
+   {"shape": "Tank", "finish": "Product", "radius": 50, "height": 170, "shows_level": 1},
+   {"shape": "Band", "finish": "Heat", "z": 34, "radius": 54, "height": 16},
+   {"shape": "Box", "finish": "Dark", "z": 170, "width": 16, "depth": 16, "height": 16},
+   {"shape": "Steam", "finish": "Steel", "z": 186, "is_small": 1}
+  ],
+  "Fermenter": [
+   {"shape": "Tank", "finish": "Product", "radius": 46, "height": 180, "shows_level": 1},
+   {"shape": "Box", "finish": "Dark", "z": 180, "width": 12, "depth": 12, "height": 12},
+   {"shape": "Fizz", "radius": 46, "height": 180}
+  ],
+  "Mill": [
+   {"shape": "Box", "finish": "Steel", "x": -13, "width": 96, "depth": 72, "height": 54, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "x": 46, "z": 8, "width": 22, "depth": 32, "height": 30, "shakes": 1},
+   {"shape": "Open Tank", "finish": "Product", "x": -25, "z": 54, "radius": 24, "height": 36, "shows_level": 1, "shakes": 1},
+   {"shape": "Agitator", "x": 46, "z": 39, "radius": 15, "shakes": 1},
+   {"shape": "Steam", "finish": "Steel", "x": -25, "z": 90, "is_small": 1, "shakes": 1}
+  ],
+  "Dryer": [
+   {"shape": "Box", "finish": "Steel", "x": 10, "z": 10, "width": 160, "depth": 64, "height": 58, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "x": -55, "width": 10, "depth": 56, "height": 10, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "x": 75, "width": 10, "depth": 56, "height": 10, "shakes": 1},
+   {"shape": "Box", "finish": "Dark", "x": -80, "z": 14, "width": 20, "depth": 36, "height": 36, "shakes": 1},
+   {"shape": "Flow Strip", "finish": "Amber", "x": 10, "z": 69, "width": 152, "depth": 56, "shakes": 1},
+   {"shape": "Steam", "finish": "Steel", "x": 74, "z": 68, "shakes": 1}
+  ],
+  "Cooler": [
+   {"shape": "Box", "finish": "Dark", "width": 84, "depth": 64, "height": 8},
+   {"shape": "Box", "finish": "Plate", "x": -30, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": -10, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": 10, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Plate", "x": 30, "z": 8, "width": 9, "depth": 56, "height": 82},
+   {"shape": "Box", "finish": "Steel", "z": 90, "width": 84, "depth": 8, "height": 8},
+   {"shape": "Flow Strip", "finish": "Blue", "z": 98.5, "width": 84, "depth": 8},
+   {"shape": "Steam", "finish": "Blue", "z": 92, "is_small": 1}
+  ],
+  "Machine": [
+   {"shape": "Box", "finish": "Steel", "width": 88, "depth": 72, "height": 80},
+   {"shape": "Box", "finish": "Dark", "z": 80, "width": 60, "depth": 44, "height": 12},
+   {"shape": "Flow Strip", "finish": "Product", "z": 92.5, "width": 60, "depth": 8}
+  ]
+ }
+}

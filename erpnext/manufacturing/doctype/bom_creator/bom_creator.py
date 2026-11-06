@@ -57,8 +57,9 @@ class BOMCreator(Document):
 		design_file: DF.Attach | None
 		design_name: DF.Data | None
 		error_log: DF.Text | None
+		formula_tolerance: DF.Percent
 		is_phantom: DF.Check
-		item_code: DF.Link | None
+		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
 		items: DF.Table[BOMCreatorItem]
@@ -72,6 +73,7 @@ class BOMCreator(Document):
 		project: DF.Link | None
 		qty: DF.Float
 		raw_material_cost: DF.Currency
+		raw_material_warehouse: DF.Link | None
 		remarks: DF.TextEditor | None
 		revision: DF.Int
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
@@ -158,7 +160,7 @@ class BOMCreator(Document):
 
 	def validate_finished_good(self):
 		if self.is_phantom and self.track_semi_finished_goods:
-			frappe.throw(_("A phantom BOM cannot use 'Produce Item per Operation'."))
+			frappe.throw(_("A phantom BOM cannot use 'Process Manufacturing'."))
 
 		if not self.item_code:
 			return

@@ -1,10 +1,16 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from pathlib import Path
+
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import flt
+
+MACHINE_SHAPES = frappe.get_file_json(Path(__file__).with_name("machine_shapes.json"))
+PACKING_MACHINE_MODELS = ("Filling Line", "Bagging Line")
+DEFAULT_WORKSTATION_TYPES = Path(__file__).with_name("default_workstation_types.json")
 
 
 class WorkstationType(Document):
@@ -17,15 +23,55 @@ class WorkstationType(Document):
 		from frappe.types import DF
 
 		from erpnext.manufacturing.doctype.workstation_cost.workstation_cost import WorkstationCost
+		from erpnext.manufacturing.doctype.workstation_type_shape.workstation_type_shape import (
+			WorkstationTypeShape,
+		)
 
 		description: DF.SmallText | None
 		hour_rate: DF.Currency
+		machine_model: DF.Literal[
+			"",
+			"Mixer",
+			"Steam Kettle",
+			"Reactor",
+			"Fermenter",
+			"Mill",
+			"Dryer",
+			"Cooler",
+			"Filling Line",
+			"Bagging Line",
+		]
+		shapes: DF.Table[WorkstationTypeShape]
 		workstation_costs: DF.Table[WorkstationCost]
 		workstation_type: DF.Data
 	# end: auto-generated types
 
 	def validate(self):
 		self.validate_duplicate_operating_component()
+		self.validate_shapes()
+
+	@property
+	def machine_shapes(self) -> list[dict]:
+		if self.shapes:
+			return [
+				row.as_dict(no_default_fields=True, no_child_table_fields=True, no_private_properties=True)
+				for row in self.shapes
+			]
+		return get_preset_shapes(self.machine_model)
+
+	@frappe.whitelist(methods=["POST"])
+	def copy_preset_shapes(self):
+		self.set("shapes", get_preset_shapes(self.machine_model))
+
+	def validate_shapes(self):
+		for row in self.shapes:
+			for field in MACHINE_SHAPES["shapes"].get(row.shape, {}).get("size", {}):
+				if flt(row.get(field)) <= 0:
+					frappe.throw(
+						_("Row {0}: {1} needs a {2} greater than zero").format(
+							row.idx, _(row.shape), _(row.meta.get_label(field))
+						)
+					)
 
 	def validate_duplicate_operating_component(self):
 		components = []
@@ -92,6 +138,10 @@ class WorkstationType(Document):
 		return [name for name, rows in workstation_costs.items() if get_cost_map(rows) == costs]
 
 
+def get_preset_shapes(machine_model: str | None = None) -> list[dict]:
+	return [dict(row) for row in MACHINE_SHAPES["presets"].get(machine_model or "Machine", [])]
+
+
 def get_cost_map(rows):
 	return {row.operating_component: flt(row.operating_cost) for row in rows}
 
@@ -102,3 +152,32 @@ def get_workstations(workstation_type):
 	)
 
 	return [workstation.name for workstation in workstations]
+
+
+def get_workstation_details(workstations):
+	if not workstations:
+		return {}
+
+	workstation = frappe.qb.DocType("Workstation")
+	workstation_type = frappe.qb.DocType("Workstation Type")
+	rows = (
+		frappe.qb.from_(workstation)
+		.left_join(workstation_type)
+		.on(workstation_type.name == workstation.workstation_type)
+		.select(
+			workstation.name,
+			workstation.warehouse,
+			workstation.workstation_type,
+			workstation.status,
+			workstation.batch_capacity,
+			workstation_type.machine_model,
+		)
+		.where(workstation.name.isin(workstations))
+	).run(as_dict=True)
+	return {row.name: row for row in rows}
+
+
+def create_default_workstation_types():
+	for values in frappe.get_file_json(DEFAULT_WORKSTATION_TYPES):
+		if not frappe.db.exists("Workstation Type", values["workstation_type"]):
+			frappe.get_doc({"doctype": "Workstation Type", **values}).insert(ignore_permissions=True)

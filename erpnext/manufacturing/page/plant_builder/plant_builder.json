@@ -1,0 +1,30 @@
+{
+ "content": null,
+ "creation": "2026-10-31 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-03 09:40:55.551117",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "plant-builder",
+ "owner": "Administrator",
+ "page_name": "plant-builder",
+ "roles": [
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Plant Builder",
+ "type": "Frappe UI"
+}
