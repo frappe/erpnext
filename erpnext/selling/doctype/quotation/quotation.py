@@ -284,6 +284,9 @@ class Quotation(SellingController):
 			frappe.throw(_("Only a submitted Quotation can be set as Lost."))
 
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
+			if not lost_reasons_list:
+				frappe.throw(_("Please select at least one Lost Reason"))
+
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			self.db_set("status", "Lost")
@@ -321,9 +324,12 @@ class Quotation(SellingController):
 		self.update_opportunity("Quotation")
 		self.update_lead()
 
+	def before_cancel(self):
+		super().before_cancel()
+		# cleared before save so the removal reaches the database
+		self.lost_reasons = []
+
 	def on_cancel(self):
-		if self.lost_reasons:
-			self.lost_reasons = []
 		super().on_cancel()
 
 		# update enquiry status

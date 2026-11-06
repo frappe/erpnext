@@ -27,6 +27,7 @@ from erpnext.accounts.report.financial_statements import (
 	filter_out_zero_value_rows,
 	get_fiscal_year_data,
 	sort_accounts,
+	validate_dates,
 )
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (
 	get_chart_data as get_pl_chart_data,
@@ -46,6 +47,9 @@ def execute(filters=None):
 
 	if not filters.get("company"):
 		return columns, data, message, chart
+
+	if filters.get("filter_based_on") == "Date Range":
+		validate_dates(filters.get("period_start_date"), filters.get("period_end_date"))
 
 	fiscal_year = get_fiscal_year_data(filters.get("from_fiscal_year"), filters.get("to_fiscal_year"))
 	company_list, companies = get_companies(filters)

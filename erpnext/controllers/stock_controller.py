@@ -452,6 +452,7 @@ class StockController(AccountsController):
 		if not reference_ids:
 			return
 
+		reference_field = field
 		child_doctype = self.doctype + " Item"
 		if table_name == "packed_items":
 			field = "parent_detail_docname"
@@ -462,7 +463,7 @@ class StockController(AccountsController):
 		for row in self.get(table_name):
 			value = row.get(field)
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
-				value = self.get_value_for_packed_item(row)
+				value = self.get_value_for_packed_item(row, reference_field)
 				if not value:
 					continue
 
@@ -482,11 +483,10 @@ class StockController(AccountsController):
 						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
 					)
 
-	def get_value_for_packed_item(self, row):
+	def get_value_for_packed_item(self, row, reference_field):
 		parent_items = self.get("items", {"name": row.parent_detail_docname})
 		if parent_items:
-			ref = parent_items[0].get("dn_detail")
-			return (row.item_code, ref)
+			return (row.item_code, parent_items[0].get(reference_field))
 
 		return None
 
@@ -1541,6 +1541,11 @@ class StockController(AccountsController):
 		)
 
 		if self.docstatus == 2:
+			# nothing to repost when the cancelled voucher never touched the stock ledger
+			if not frappe.db.exists(
+				"Stock Ledger Entry", {"voucher_type": self.doctype, "voucher_no": self.name}
+			):
+				return
 			force = True
 
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self):
@@ -1602,6 +1607,21 @@ class StockController(AccountsController):
 			gl_entry.update({"posting_date": posting_date})
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
+
+	def get_on_hold_or_closed_reference(self, ref_doctype, ref_fieldname):
+		names = [d.get(ref_fieldname) for d in self.get("items") if d.get(ref_fieldname)]
+		if not names:
+			return None
+
+		statuses = dict(
+			frappe.get_all(
+				ref_doctype,
+				filters={"name": ("in", list(set(names))), "status": ("in", ["Closed", "On Hold"])},
+				fields=["name", "status"],
+				as_list=True,
+			)
+		)
+		return next(((name, statuses[name]) for name in names if name in statuses), None)
 
 
 @frappe.whitelist()
