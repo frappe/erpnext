@@ -62,6 +62,9 @@ class MaterialRequirementsPlanningReport:
 		return data, chart
 
 	def add_non_planned_orders(self, items):
+		if not items:
+			return
+
 		_adhoc_so_details = frappe._dict({})
 
 		so = frappe.qb.DocType("Sales Order")
@@ -85,8 +88,7 @@ class MaterialRequirementsPlanningReport:
 			)
 		)
 
-		if items:
-			query = query.where(so_item.item_code.isin(items))
+		query = query.where(so_item.item_code.isin(items))
 
 		if self.filters.get("warehouse"):
 			warehouses = [self.filters.get("warehouse")]
