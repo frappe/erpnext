@@ -3166,7 +3166,15 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	if kwargs.get("ignore_voucher_nos"):
 		pos_invoices = pos_invoices.where(POS_Invoice.name.notin(kwargs.get("ignore_voucher_nos")))
 
+	if kwargs.get("warehouse"):
+		warehouses = kwargs.warehouse if isinstance(kwargs.warehouse, list) else [kwargs.warehouse]
+		pos_invoices = pos_invoices.where(POS_Invoice_Item.warehouse.isin(warehouses))
+
 	pos_invoices = pos_invoices.run(as_dict=True)
+
+	batch_nos = kwargs.get("batch_no") or []
+	if isinstance(batch_nos, str):
+		batch_nos = [batch_nos]
 
 	ids = [
 		pos_invoice.serial_and_batch_bundle
@@ -3176,6 +3184,9 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	if ids:
 		for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+			if batch_nos and d.batch_no not in batch_nos:
+				continue
+
 			key = (d.batch_no, d.warehouse)
 			if key not in pos_batches:
 				pos_batches[key] = frappe._dict(
@@ -3189,10 +3200,10 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	# POS invoices having batch without bundle (to handle old POS invoices)
 	for row in pos_invoices:
-		if not row.batch_no:
+		if not row.batch_no or row.serial_and_batch_bundle in ids:
 			continue
 
-		if kwargs.get("batch_no") and row.batch_no != kwargs.get("batch_no"):
+		if batch_nos and row.batch_no not in batch_nos:
 			continue
 
 		key = (row.batch_no, row.warehouse)
