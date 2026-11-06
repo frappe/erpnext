@@ -891,7 +891,11 @@ class MaterialRequirementsPlanningReport:
 			else:
 				query = query.where(doctype[field] == value)
 
-		return query.run(as_dict=True)
+		rows = query.run(as_dict=True)
+		for row in rows:
+			row.planned_qty *= get_uom_conversion_factor(row.item_code, row.uom)
+
+		return rows
 
 	def get_items_from_mps(self, mps_data):
 		items = []
@@ -1534,9 +1538,14 @@ def get_purchase_order_item(item, warehouse=None):
 		uom = uom_details.purchase_uom or uom_details.stock_uom
 
 	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
-	qty = max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor
+	stock_qty = max(flt(item.required_qty), flt(item.min_order_qty))
+	qty = stock_qty / conversion_factor
 	if is_whole_number(uom):
 		qty = math.ceil(qty)
+		# float noise can push an exact multiple of the conversion factor past a whole number
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		if flt((qty - 1) * conversion_factor - stock_qty, precision) >= 0:
+			qty -= 1
 
 	return {
 		"item_code": item.item_code,
@@ -1552,7 +1561,7 @@ def make_work_orders(work_orders, company, warehouse=None, mps=None):
 	for item in work_orders:
 		uom = get_item_uom(item.item_code).stock_uom
 		if is_whole_number(uom):
-			item.required_qty = math.ceil(item.required_qty)
+			item.required_qty = math.ceil(flt(item.required_qty, frappe.get_precision("Work Order", "qty")))
 
 		wo = frappe.new_doc("Work Order")
 		wo.production_item = item.item_code
@@ -1576,6 +1585,11 @@ def make_work_orders(work_orders, company, warehouse=None, mps=None):
 @frappe.request_cache
 def get_item_uom(item_code):
 	return frappe.get_cached_value("Item", item_code, ["stock_uom", "purchase_uom"], as_dict=True)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom).get("conversion_factor")
 
 
 @frappe.request_cache
