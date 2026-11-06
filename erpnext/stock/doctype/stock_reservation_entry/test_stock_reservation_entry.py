@@ -779,7 +779,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_delivery_consumes_bundle_component_picked_from_other_warehouse(self) -> None:
 		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
-		from erpnext.stock.doctype.pick_list.mapper import create_delivery_note
+		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 
 		other_warehouse = "_Test Warehouse 1 - _TC"
 		bundle, components = create_product_bundle(quantities=[2], warehouse=self.warehouse)
@@ -850,7 +850,14 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	def test_second_delivery_of_serial_reserved_bundle_takes_undelivered_serials(self) -> None:
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
-		serial_item = make_item(properties=SR_ITEM_PROPERTIES["serial"])
+		serial_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_rate": 200,
+				"has_serial_no": 1,
+				"serial_no_series": "SRSI-.#####",
+			}
+		)
 		create_material_receipt({serial_item.name: serial_item}, self.warehouse, qty=2)
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		make_product_bundle(bundle, [serial_item.name])
