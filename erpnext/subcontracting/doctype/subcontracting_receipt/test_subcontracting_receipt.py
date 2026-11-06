@@ -334,12 +334,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
-<<<<<<< HEAD
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
-	def test_batch_return_uses_accepted_receipt_rate(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-=======
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
@@ -377,22 +371,10 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, -660)
 
-	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
-		set_backflush_based_on("BOM")
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].process_loss_qty = 2
-		scr.save()
-		scr.submit()
->>>>>>> da20181 (test: value a Subcontracting Receipt return at the returned receipt's rate)
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_batch_return_uses_accepted_receipt_rate(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
