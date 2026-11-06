@@ -230,7 +230,7 @@ class InventoryDimension(Document):
 			)
 			and not field_exists("Stock Ledger Entry", self.target_fieldname)
 		):
-			dimension_field = dimension_fields[1]
+			dimension_field = dimension_fields[1].copy()
 			dimension_field["mandatory_depends_on"] = ""
 			dimension_field["reqd"] = 0
 			dimension_field["fieldname"] = self.target_fieldname
