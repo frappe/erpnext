@@ -1255,6 +1255,14 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(get_requested_qty(reorder_item()), [15])
 		self.assertEqual(get_requested_qty(reorder_item() or []), [])
 
+	def test_customer_provided_request_refuses_other_items(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			make_material_request,
+			item_code="_Test Item",
+			material_request_type="Customer Provided",
+		)
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
