@@ -805,6 +805,22 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
 
+	def test_float_noise_in_qty_does_not_round_up_chart_and_lead_time(self):
+		qty = 7 / 3 * 27  # 63.00000000000001
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		chart = report.get_detailed_view_chart_data([make_chart_row(add_days(today(), 1), planned_qty=qty)])
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [63])
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{"doctype": "Item Lead Time", "item_code": item, "manufacturing_time_in_mins": 160}
+		).insert()
+		row = frappe._dict(
+			item_code=item, type_of_material="Manufacture", required_qty=qty, delivery_date=today()
+		)
+		report.set_lead_time(row)
+		self.assertEqual(row.lead_time, 7)
+
 	def test_sales_order_of_an_mps_item_used_in_a_bom_is_counted_once(self):
 		plan = make_mrp_plan(self, rm_qty=1)
 		delivery_date = add_days(today(), 30)
