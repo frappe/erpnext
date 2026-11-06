@@ -113,7 +113,7 @@ class SalesPerson(NestedSet):
 			unfinished = (
 				transaction.status.notin(("Completed", "Closed"))
 				if doctype == "Sales Order"
-				else (transaction.status != "Closed") & (transaction.per_billed < 100)
+				else transaction.status.isin(("To Bill", "Partially Billed"))
 			)
 			linked_transactions = (
 				frappe.qb.from_(transaction)
