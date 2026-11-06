@@ -43,14 +43,10 @@ def get_warehouse_wise_balance(filters: StockBalanceFilter) -> list[SLEntry]:
 
 
 def get_warehouses(report_filters: StockBalanceFilter):
-	filters = {"company": report_filters.company, "disabled": 0}
-	if report_filters.get("show_disabled_warehouses"):
-		filters["disabled"] = ("in", [0, report_filters.show_disabled_warehouses])
-
 	return frappe.get_all(
 		"Warehouse",
 		fields=["name", "parent_warehouse", "is_group", "disabled"],
-		filters=filters,
+		filters={"company": report_filters.company},
 		order_by="lft",
 	)
 
@@ -65,7 +61,10 @@ def get_data(filters: StockBalanceFilter):
 	update_indent(warehouses)
 	set_balance_in_parent(warehouses)
 
-	return warehouses
+	if filters.get("show_disabled_warehouses"):
+		return warehouses
+
+	return [warehouse for warehouse in warehouses if not warehouse.disabled or warehouse.stock_balance]
 
 
 def update_indent(warehouses):
