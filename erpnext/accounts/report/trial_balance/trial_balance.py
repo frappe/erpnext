@@ -39,6 +39,7 @@ value_fields = (
 
 
 def execute(filters=None):
+	validate_company_permission(filters.company)
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
