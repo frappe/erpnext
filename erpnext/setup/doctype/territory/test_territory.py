@@ -1,10 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-<<<<<<< HEAD
-import frappe
-=======
-
 import frappe
 from frappe.utils.nestedset import get_root_of
 
@@ -18,4 +14,3 @@ class TestTerritory(ERPNextTestSuite):
 				root = frappe.get_doc(doctype, get_root_of(doctype))
 				root.save()
 				self.assertFalse(root.get(root.nsm_parent_field))
->>>>>>> fc90701 (test: save the root tree records)

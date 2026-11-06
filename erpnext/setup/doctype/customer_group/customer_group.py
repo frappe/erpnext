@@ -6,11 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet
 
-<<<<<<< HEAD
-=======
-from erpnext.accounts.party import validate_party_accounts
 from erpnext.setup.utils import set_root_as_default_parent
->>>>>>> 0e78d62 (fix(setup): save the root group of Supplier Group, Customer Group, Territory and Sales Person)
 from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 
 
@@ -41,27 +37,7 @@ class CustomerGroup(NestedSet):
 	nsm_parent_field = "parent_customer_group"
 
 	def validate(self):
-<<<<<<< HEAD
-		if not self.parent_customer_group:
-			self.parent_customer_group = get_root_of("Customer Group")
-=======
 		set_root_as_default_parent(self)
-		if frappe.db.exists("Customer", self.name):
-			frappe.throw(_("A Customer exists with the same name: {0}").format(self.name), frappe.NameError)
-		if (
-			self.is_group
-			and not self.is_new()
-			and not frappe.db.get_value("Customer Group", self.name, "is_group")
-			and frappe.db.exists("Customer", {"customer_group": self.name})
-		):
-			frappe.throw(_("Cannot make Customer Group {0} a group while it has customers").format(self.name))
-		validate_party_accounts(self)
-		companies = set()
-		for limit in self.credit_limits:
-			if limit.company in companies:
-				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company))
-			companies.add(limit.company)
->>>>>>> 0e78d62 (fix(setup): save the root group of Supplier Group, Customer Group, Territory and Sales Person)
 		self.validate_currency_for_receivable_and_advance_account()
 		validate_default_price_list_side(self.default_price_list, "selling")
 
