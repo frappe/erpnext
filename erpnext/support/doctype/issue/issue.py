@@ -285,7 +285,9 @@ def set_multiple_status(names, status):
 @frappe.whitelist(methods=["POST"])
 def set_status(name, status):
 	frappe.has_permission("Issue", "write", name, throw=True)
-	frappe.db.set_value("Issue", name, "status", status)
+	issue = frappe.get_doc("Issue", name)
+	issue.status = status
+	issue.save()
 
 
 def auto_close_tickets():
@@ -391,7 +393,7 @@ def calculate_first_response_time(issue, first_responded_on):
 		"Service Level Agreement", issue.service_level_agreement
 	).support_and_resolution
 
-	if issue_creation_date.day == first_responded_on.day:
+	if getdate(issue_creation_date) == getdate(first_responded_on):
 		if is_work_day(issue_creation_date, support_hours):
 			start_time, end_time = get_working_hours(issue_creation_date, support_hours)
 

@@ -661,8 +661,6 @@ class JobCard(Document):
 						"item_name": d.item_name,
 						"description": d.description,
 						"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
-						"rate": d.rate,
-						"amount": d.amount,
 					},
 				)
 
@@ -821,9 +819,7 @@ class JobCard(Document):
 				"Kindly cancel the Manufacturing Entries first against the work order {0}."
 			).format(frappe.bold(get_link_to_form("Work Order", self.work_order)))
 
-			frappe.throw(
-				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
-			)
+			frappe.throw(first_part_msg + " " + second_part_msg, JobCardCancelError, title=_("Error"))
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, time_in_mins, wo):
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
@@ -892,7 +888,7 @@ class JobCard(Document):
 					frappe.qb.from_(sed)
 					.join(se)
 					.on(sed.parent == se.name)
-					.select(sed.job_card_item, Sum(sed.qty))
+					.select(sed.job_card_item, Sum(sed.transfer_qty))
 					.where(
 						(sed.job_card_item.isin(job_card_items))
 						& (se.docstatus == 1)
