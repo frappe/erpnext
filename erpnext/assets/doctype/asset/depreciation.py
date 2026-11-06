@@ -103,6 +103,7 @@ def post_depreciation_entries(date=None):
 		set_depr_entry_posting_status_for_failed_assets(failed_asset_names)
 		notify_depr_entry_posting_error(failed_asset_names, error_log_names)
 
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 	frappe.db.commit()
 
 
@@ -628,7 +629,13 @@ def disposal_happens_in_the_future(posting_date_of_disposal):
 
 
 def get_gl_entries_on_asset_regain(
-	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
+	asset,
+	selling_amount=0,
+	finance_book=None,
+	voucher_type=None,
+	voucher_no=None,
+	date=None,
+	disposal_values: dict | None = None,
 ):
 	if not date:
 		date = getdate()
@@ -642,7 +649,7 @@ def get_gl_entries_on_asset_regain(
 		disposal_account,
 		value_after_depreciation,
 		gross_asset_value,
-	) = get_asset_details(asset, finance_book)
+	) = get_asset_details(asset, finance_book, disposal_values)
 
 	gl_entries = [
 		asset.get_gl_dict(
@@ -682,7 +689,13 @@ def get_gl_entries_on_asset_regain(
 
 
 def get_gl_entries_on_asset_disposal(
-	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None, date=None
+	asset,
+	selling_amount=0,
+	finance_book=None,
+	voucher_type=None,
+	voucher_no=None,
+	date=None,
+	disposal_values: dict | None = None,
 ):
 	if not date:
 		date = getdate()
@@ -696,7 +709,7 @@ def get_gl_entries_on_asset_disposal(
 		disposal_account,
 		value_after_depreciation,
 		gross_asset_value,
-	) = get_asset_details(asset, finance_book)
+	) = get_asset_details(asset, finance_book, disposal_values)
 
 	gl_entries = [
 		asset.get_gl_dict(
@@ -739,11 +752,12 @@ def get_gl_entries_on_asset_disposal(
 	return gl_entries
 
 
-def get_asset_details(asset, finance_book=None):
-	value_after_depreciation = asset.get_value_after_depreciation(finance_book)
-	gross_asset_value = get_gross_asset_value(asset, finance_book)
+def get_asset_details(asset, finance_book=None, disposal_values: dict | None = None):
+	disposal_values = disposal_values or get_asset_disposal_values(asset, finance_book)
+	value_after_depreciation = flt(disposal_values["value_after_depreciation"])
+	gross_asset_value = flt(disposal_values["gross_asset_value"])
 	accumulated_depr_amount = flt(
-		gross_asset_value - flt(value_after_depreciation), asset.precision("gross_purchase_amount")
+		gross_asset_value - value_after_depreciation, asset.precision("gross_purchase_amount")
 	)
 
 	fixed_asset_account, accumulated_depr_account, _ = get_depreciation_accounts(
@@ -762,6 +776,14 @@ def get_asset_details(asset, finance_book=None):
 		value_after_depreciation,
 		gross_asset_value,
 	)
+
+
+def get_asset_disposal_values(asset, finance_book: str | None = None) -> dict:
+	"""Current value after depreciation and gross value of the asset, used to post its disposal."""
+	return {
+		"value_after_depreciation": asset.get_value_after_depreciation(finance_book),
+		"gross_asset_value": get_gross_asset_value(asset, finance_book),
+	}
 
 
 def get_gross_asset_value(asset, finance_book: str | None = None) -> float:

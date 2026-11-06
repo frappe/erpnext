@@ -40,6 +40,7 @@ def execute():
 		if doctype == "Sales Invoice":
 			cond = " AND parent_doc.update_stock = 1"
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 		data = frappe.db.sql(
 			f""" SELECT parent_doc.name as name, child_doc.name as child_name
 			FROM
@@ -54,12 +55,14 @@ def execute():
 
 		if data:
 			names = [d.child_name for d in data]
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 			frappe.db.sql(
 				""" UPDATE `tab{} Item` set target_warehouse = null
 				WHERE name in ({}) """.format(doctype, ",".join(["%s"] * len(names))),
 				tuple(names),
 			)
 
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 			frappe.db.sql(
 				""" UPDATE `tabPacked Item` set target_warehouse = null
 				WHERE parenttype = '{}' and parent_detail_docname in ({})

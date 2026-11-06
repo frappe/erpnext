@@ -8,6 +8,8 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.utils import QueryBuilder
 from frappe.utils.data import comma_or
 
+from erpnext.accounts.report.utils import validate_date_range
+
 SALES_TRANSACTION_DOCTYPES = ["Sales Order", "Sales Invoice", "Delivery Note", "POS Invoice"]
 
 
@@ -43,6 +45,7 @@ class SalesPartnerSummaryReport:
 		return self.columns, self.data
 
 	def validate_filters(self):
+		validate_date_range(self.filters)
 		if not self.filters.get("doctype"):
 			frappe.throw(_("Please select the document type first."))
 
