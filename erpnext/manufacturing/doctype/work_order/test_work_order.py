@@ -8471,6 +8471,82 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo.insert()
 		self.assertEqual((wo.required_items[0].rate, wo.required_items[0].amount), (250, 1250))
 
+<<<<<<< HEAD
+=======
+	def test_variant_work_order_requires_the_template_row_in_stock_uom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import make_template_bom_with_box_row
+
+		data = make_template_bom_with_box_row()
+		variant_items = [
+			{"item_code": data.template_rm, "variant_item_code": data.rm_variant, "qty": 4, "uom": "Box"}
+		]
+		wo = make_work_order(
+			data.bom, data.variant, 2, "_Test Company", variant_items=variant_items, use_multi_level_bom=0
+		)
+		wo.wip_warehouse = wo.fg_warehouse = "_Test Warehouse - _TC"
+		wo.insert()
+
+		row = wo.required_items[0]
+		self.assertEqual((row.item_code, row.required_qty, row.stock_uom), (data.rm_variant, 40, "Nos"))
+		self.assertEqual((row.rate, row.amount), (5, 200))
+
+	def test_bom_that_only_consumes_the_item_is_rejected(self):
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material])
+
+		wo = make_wo_order_test_record(production_item=raw_material, bom_no=bom.name, do_not_save=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			wo.insert()
+
+
+def prepare_data_for_fg_conversion_test(qty=10, stock_uom=None):
+	suffix = f" {stock_uom}" if stock_uom else ""
+	properties = {"is_stock_item": 1, "stock_uom": stock_uom or "Nos"}
+	fg_item = make_item(f"_Test FG Conversion Item{suffix}", {**properties, "allow_alternative_item": 1}).name
+	alt_item = make_item(f"_Test FG Conversion Alt Item{suffix}", properties).name
+	other_item = make_item(f"_Test FG Conversion Other Item{suffix}", properties).name
+	rm_item = make_item(f"_Test FG Conversion RM{suffix}", {**properties, "valuation_rate": 100}).name
+
+	frappe.db.set_value("Item", fg_item, "allow_alternative_item", 1)
+	if not frappe.db.exists("Item Alternative", {"item_code": fg_item, "alternative_item_code": alt_item}):
+		frappe.get_doc(
+			{"doctype": "Item Alternative", "item_code": fg_item, "alternative_item_code": alt_item}
+		).insert()
+
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": fg_item,
+			"currency": "INR",
+			"quantity": 1,
+			"company": "_Test Company",
+		}
+	)
+	bom.append("items", {"item_code": rm_item, "qty": 1})
+	bom.insert()
+	bom.submit()
+
+	wo_order = make_wo_order_test_record(
+		production_item=fg_item,
+		bom_no=bom.name,
+		qty=qty,
+		stock_uom=stock_uom,
+		skip_transfer=1,
+		source_warehouse="_Test Warehouse - _TC",
+	)
+
+	test_stock_entry.make_stock_entry(
+		item_code=rm_item, target="_Test Warehouse - _TC", qty=qty, basic_rate=100
+	)
+
+	manufacture_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", qty))
+	manufacture_entry.insert()
+	manufacture_entry.submit()
+
+	return wo_order, alt_item, other_item
+
+>>>>>>> 639fca9167 (Merge pull request #64463 from mihir-kandoi/fix/issue-64454)
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

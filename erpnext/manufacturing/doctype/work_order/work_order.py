@@ -30,6 +30,7 @@ from pypika import functions as fn
 from pypika.terms import ExistsCriterion
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
+<<<<<<< HEAD
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_items_as_dict,
 	validate_bom_no,
@@ -39,6 +40,10 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 	get_mins_between_operations,
 )
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+=======
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+>>>>>>> 639fca9167 (Merge pull request #64463 from mihir-kandoi/fix/issue-64454)
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -296,7 +301,7 @@ class WorkOrder(Document):
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
-			validate_bom_no(self.production_item, self.bom_no)
+			validate_production_bom(self.production_item, self.bom_no)
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
