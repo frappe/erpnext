@@ -198,6 +198,8 @@ class TestLoyaltyProgram(unittest.TestCase):
 			self.assertTrue(d.get("loyalty_points"))
 
 	def test_points_never_expire_when_expiry_duration_is_zero(self):
+		frappe.db.savepoint("points_never_expire")
+		self.addCleanup(frappe.db.rollback, save_point="points_never_expire")
 		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		frappe.db.set_value(
 			"Loyalty Program",
