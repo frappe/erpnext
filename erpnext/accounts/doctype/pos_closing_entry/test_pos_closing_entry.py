@@ -336,24 +336,43 @@ class TestPOSClosingEntry(unittest.TestCase):
 		closing_entry.submit()
 		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
 
-	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+	def test_cancel_with_ten_merge_logs_unconsolidates_after_commit(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		customers = make_customers(10)
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		for customer in customers:
+			make_paid_pos_invoice([("Cash", 90)], customer=customer)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		self.assertTrue(enqueue.call_args.kwargs["enqueue_after_commit"])
+		self.assertEqual(closing_entry.ignore_linked_doctypes, ("POS Invoice Merge Log", "Sales Invoice"))
+		merge_logs = enqueue.call_args.kwargs["merge_logs"]
+		self.assertEqual(len(merge_logs), 10)
+		enqueue.call_args.args[0](
+			merge_logs=merge_logs, closing_entry=enqueue.call_args.kwargs["closing_entry"]
+		)
+
+		for merge_log in merge_logs:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_cancel_without_queue_keeps_back_link_check(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 		make_paid_pos_invoice([("Cash", 90)])
 		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
 
-		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
-		with patch(consolidate):
-			closing_entry.submit()
-		closing_entry.db_set("status", "Failed")
-		late_sale = make_paid_pos_invoice([("Cash", 90)])
-
-		with patch(consolidate) as consolidate_pos_invoices:
-			with self.assertRaises(frappe.ValidationError) as context:
-				closing_entry.retry()
-			consolidate_pos_invoices.assert_not_called()
-
-		self.assertIn(late_sale.name, str(context.exception))
+		closing_entry.cancel()
+		self.assertFalse(closing_entry.get("ignore_linked_doctypes"))
 
 	def test_missing_invoices_message_lists_first_ten(self):
 		make_stock_entry(target="_Test Warehouse - _TC", qty=11, basic_rate=100)
@@ -412,3 +431,23 @@ def make_paid_pos_invoice(payments, **args):
 	pos_invoice.save()
 	pos_invoice.submit()
 	return pos_invoice
+
+
+def make_customers(count):
+	customers = []
+	for index in range(count):
+		customer_name = f"_Test POS Closing Customer {index + 1}"
+		customer = frappe.db.get_value("Customer", {"customer_name": customer_name}) or (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": customer_name,
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+				}
+			)
+			.insert()
+			.name
+		)
+		customers.append(customer)
+	return customers
