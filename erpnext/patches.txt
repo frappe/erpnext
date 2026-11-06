@@ -466,12 +466,5 @@ execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", upda
 execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
 execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
 execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
-<<<<<<< HEAD
 erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
-=======
-erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
-erpnext.patches.v16_0.share_assigned_appointments_with_agents
-erpnext.patches.v16_0.link_receipt_reservations_to_production_plan_rows
-erpnext.patches.v16_0.merge_grey_letter_head_into_company_letter_head
 erpnext.patches.v16_0.set_recalculate_rate_on_subcontracting_return_raw_materials
->>>>>>> 41f62cae1d (Merge pull request #64204 from mihir-kandoi/fix/issue-64186)
