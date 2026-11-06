@@ -244,8 +244,8 @@ class TestSalesTeam(ERPNextTestSuite):
 		self.assertFalse(self.person.enabled)
 
 	def test_disable_allows_returned_and_credited_delivery_note(self):
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return as make_credit_note
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice, make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return as make_credit_note
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice, make_sales_return
 
 		delivery = self.make_transaction("Delivery Note")
 		delivery.submit()
