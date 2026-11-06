@@ -3448,7 +3448,7 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		pe.cancel()
 		pr.reload()
-		self.assertEqual(pr.status, "Paid")  # TODO: this might be a bug
+		self.assertEqual(pr.status, "Requested")
 		so.reload()  # reload
 		# regardless, since the references have already "handed-over" to SI,
 		# the SO keeps its historical state at the time of hand over
