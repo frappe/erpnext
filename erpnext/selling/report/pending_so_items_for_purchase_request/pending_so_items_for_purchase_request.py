@@ -6,11 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	if filters.get("from_date") and filters.get("to_date") and filters.from_date > filters.to_date:
-		frappe.throw(_("From Date cannot be greater than To Date"))
+	validate_date_range(filters)
 
 	columns = get_columns()
 	data = get_data(filters)

@@ -11,6 +11,7 @@ from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start,
 from frappe.utils import get_first_day as get_first_day_of_month
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -20,6 +21,8 @@ OPENING_KEY = "_opening"
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	is_reposting_item_valuation_in_progress()
 	filters = frappe._dict(filters or {})
 	period_columns = get_period_columns(filters)

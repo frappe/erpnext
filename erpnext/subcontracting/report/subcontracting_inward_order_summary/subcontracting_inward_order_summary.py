@@ -1,10 +1,13 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.subcontracting.report.utils import get_inward_order_columns, get_inward_order_filters
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return get_columns(), get_data(filters)
 
 
