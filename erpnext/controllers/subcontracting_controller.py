@@ -12,6 +12,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form
 
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -23,7 +24,11 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import _get_incoming_rate, get_valuation_method
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	get_valuation_method,
+	is_serial_no_wise_valuation_disabled,
+)
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
 
 
@@ -1492,6 +1497,10 @@ class SubcontractingController(StockController):
 							"recalculate_rate": 1,
 						}
 					)
+					if self.is_return and not is_serial_no_wise_valuation_disabled(item.item_code):
+						sle.outgoing_rate = get_rate_for_return(
+							self.doctype, self.name, item.item_code, self.return_against, item_row=item
+						)
 					sl_entries.append(sle)
 
 				if flt(item.rejected_qty) != 0:

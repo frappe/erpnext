@@ -223,3 +223,4 @@ def _postprocess_variant_bom(source, doc, item, variant_items, source_name):
 	add_variant_item(variant_items, doc, source_name)
 	for row in doc.items[mapped_rows:]:
 		row.qty = flt(row.qty) * (flt(source.quantity) or 1)
+		row.stock_qty = flt(row.qty * row.conversion_factor, row.precision("stock_qty"))
