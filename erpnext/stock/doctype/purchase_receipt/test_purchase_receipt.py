@@ -726,6 +726,51 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			returned[0] + returned[1], get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
 		)
 
+	def test_return_rows_against_same_row_pick_the_remaining_batch_qty(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batches = [
+			frappe.get_doc(
+				{"doctype": "Batch", "item": item_code, "batch_id": frappe.generate_hash(length=10)}
+			)
+			.insert()
+			.name
+			for _ in range(2)
+		]
+
+		pr = make_purchase_receipt(item_code=item_code, qty=10, do_not_submit=True)
+		pr.items[0].use_serial_batch_fields = 0
+		pr.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"warehouse": pr.items[0].warehouse,
+					"qty": 10,
+					"batches": {batches[0]: 5, batches[1]: 5},
+					"voucher_type": "Purchase Receipt",
+					"do_not_submit": True,
+					"posting_date": pr.posting_date,
+					"posting_time": pr.posting_time,
+				}
+			)
+		).name
+		pr.submit()
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items[0].qty = return_pr.items[0].received_qty = -3
+		return_pr.append("items", {**return_pr.items[0].as_dict(), "name": None, "idx": None})
+		return_pr.items[1].qty = return_pr.items[1].received_qty = -7
+		return_pr.submit()
+
+		returned = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ["in", [row.serial_and_batch_bundle for row in return_pr.items]]},
+			fields=["batch_no", {"SUM": "qty", "as": "qty"}],
+			group_by="batch_no",
+		)
+		self.assertEqual({row.batch_no: row.qty for row in returned}, {batches[0]: -5, batches[1]: -5})
+
 	def test_purchase_return_for_multi_uom(self):
 		item_code = "_Test Purchase Return For Multi-UOM"
 		if not frappe.db.exists("Item", item_code):
