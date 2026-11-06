@@ -136,23 +136,27 @@ class AuthorizationControl(TransactionBase):
 			auth_value = total
 		elif based_on == "Customerwise Discount":
 			if doc_obj:
-				if doc_obj.doctype == "Sales Invoice":
-					customer = doc_obj.customer
+				if doc_obj.doctype == "Quotation":
+					customer = doc_obj.party_name if doc_obj.quotation_to == "Customer" else None
 				else:
-					customer = doc_obj.customer_name
-				add_cond = f" and master_name = {frappe.db.escape(customer)}"
-		if based_on == "Itemwise Discount":
+					customer = doc_obj.get("customer")
+				if not customer:
+					return
+				add_cond += f" and master_name = {frappe.db.escape(customer)}"
+		if based_on in ("Itemwise Discount", "Item Group wise Discount"):
 			if doc_obj:
 				for t in doc_obj.get("items"):
-					self.validate_auth_rule(
-						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_code
-					)
-		elif based_on == "Item Group wise Discount":
-			if doc_obj:
-				for t in doc_obj.get("items"):
-					self.validate_auth_rule(
-						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_group
-					)
+					discount = flt(t.discount_percentage)
+					if flt(t.price_list_rate):
+						discount = max(
+							discount,
+							flt(
+								100 * (1 - flt(t.rate) / flt(t.price_list_rate)),
+								t.precision("discount_percentage"),
+							),
+						)
+					master_name = t.item_code if based_on == "Itemwise Discount" else t.item_group
+					self.validate_auth_rule(doctype_name, discount, based_on, add_cond, company, master_name)
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
 
@@ -164,11 +168,11 @@ class AuthorizationControl(TransactionBase):
 		if doc_obj:
 			price_list_rate, base_rate = 0, 0
 			for d in doc_obj.get("items"):
-				if d.base_rate:
+				if d.base_price_list_rate or d.base_rate:
 					price_list_rate += (flt(d.base_price_list_rate) or flt(d.base_rate)) * flt(d.qty)
 					base_rate += flt(d.base_rate) * flt(d.qty)
-			if doc_obj.get("discount_amount"):
-				base_rate -= flt(doc_obj.discount_amount)
+			if doc_obj.get("base_discount_amount"):
+				base_rate -= flt(doc_obj.base_discount_amount)
 
 			if price_list_rate:
 				av_dis = 100 - flt(base_rate * 100 / price_list_rate)
@@ -186,9 +190,9 @@ class AuthorizationControl(TransactionBase):
 			x[0]
 			for x in frappe.db.sql(
 				"""select distinct based_on from `tabAuthorization Rule`
-			where transaction = %s and system_user = %s
+			where transaction = %s and system_user = %s and based_on in %s
 			and (company = %s or ifnull(company,'')='') and docstatus != 2""",
-				(doctype_name, session["user"], company),
+				(doctype_name, session["user"], tuple(final_based_on), company),
 			)
 		]
 
