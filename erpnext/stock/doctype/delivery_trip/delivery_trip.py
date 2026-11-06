@@ -423,7 +423,8 @@ def get_default_address(out, name):
 
 @frappe.whitelist()
 def get_contact_display(contact: str):
-	frappe.has_permission("Contact", "read", doc=contact, throw=True)
+	if not frappe.has_permission("Contact", "read", doc=contact):
+		check_contact_customer_permission(contact)
 
 	contact_info = frappe.db.get_value(
 		"Contact", contact, ["first_name", "last_name", "phone", "mobile_no"], as_dict=1
@@ -437,6 +438,22 @@ def get_contact_display(contact: str):
 	)
 
 	return contact_info.html
+
+
+def check_contact_customer_permission(contact):
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	customers = (
+		frappe.qb.from_(dynamic_link)
+		.select(dynamic_link.link_name)
+		.where(
+			(dynamic_link.parenttype == "Contact")
+			& (dynamic_link.parent == contact)
+			& (dynamic_link.link_doctype == "Customer")
+		)
+		.run(pluck=True)
+	)
+	if not any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers):
+		frappe.throw(_("Not permitted to view Contact {0}").format(contact), frappe.PermissionError)
 
 
 def sanitize_address(address):
@@ -464,6 +481,11 @@ def notify_customers(delivery_trip):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 	delivery_trip.check_permission()
 
+	dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
+	if not dispatch_template_name:
+		frappe.throw(_("Missing email template for dispatch. Please set one in Delivery Settings."))
+
+	dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 	context = delivery_trip.as_dict()
 
 	if delivery_trip.driver:
@@ -486,9 +508,6 @@ def notify_customers(delivery_trip):
 		if contact_info and contact_info.email_id:
 			context.update(stop.as_dict())
 			context.update(contact_info)
-
-			dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
-			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 
 			frappe.sendmail(
 				recipients=contact_info.email_id,
@@ -527,7 +546,7 @@ def get_attachments(delivery_stop):
 
 @frappe.whitelist()
 def get_driver_email(driver: str):
-	frappe.has_permission("Driver", "read", doc=driver, throw=True)
+	frappe.has_permission("Driver", "select", doc=driver, throw=True)
 
 	employee = frappe.db.get_value("Driver", driver, "employee")
 	email = None

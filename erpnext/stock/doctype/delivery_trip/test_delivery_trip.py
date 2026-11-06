@@ -11,6 +11,7 @@ from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.delivery_note.delivery_note import make_delivery_trip
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
+	get_contact_display,
 	get_driver_email,
 	notify_customers,
 )
@@ -225,6 +226,45 @@ class TestDeliveryTrip(FrappeTestCase):
 			"Delivery Note", delivery_note.name, ["lr_no", "vehicle_no", "driver"], as_dict=True
 		)
 		self.assertEqual((values.lr_no, values.vehicle_no, values.driver), ("LR-777", "MH12AB1234", None))
+
+	def make_delivery_user(self, role):
+		email = f"delivery-trip-{frappe.scrub(role)}@example.com"
+		if not frappe.db.exists("User", email):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": email,
+					"first_name": role,
+					"send_welcome_email": 0,
+					"roles": [{"role": role}],
+				}
+			).insert(ignore_permissions=True)
+		return email
+
+	def test_delivery_roles_can_use_the_trip_form(self):
+		contact = get_contact_and_address("_Test Customer")
+		delivery_note = self.make_delivery_note_with_address()
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for role in ("Stock User", "Fulfillment User"):
+			frappe.set_user(self.make_delivery_user(role))
+			self.assertTrue(get_contact_display(contact.contact_person.parent))
+			self.assertIn("email", get_driver_email(self.delivery_trip.driver))
+
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.company = delivery_note.company
+		trip.delivery_stops = []
+		trip.append(
+			"delivery_stops",
+			{
+				"customer": "_Test Customer",
+				"address": contact.shipping_address.parent,
+				"delivery_note": delivery_note.name,
+			},
+		)
+		trip.insert()
+		trip.submit()
+		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "lr_no"), trip.name)
 
 
 def create_address(driver):
