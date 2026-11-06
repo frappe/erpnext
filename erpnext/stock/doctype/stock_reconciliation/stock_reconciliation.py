@@ -1038,6 +1038,12 @@ class StockReconciliation(StockController):
 
 		if not self.expense_account:
 			frappe.throw(_("Please enter Expense Account"))
+		elif frappe.get_cached_value("Account", self.expense_account, "account_type") == "Stock":
+			frappe.throw(
+				_("Difference Account {0} cannot be a Stock account").format(
+					frappe.bold(self.expense_account)
+				)
+			)
 		elif self.purpose == "Opening Stock" or not frappe.db.get_all(
 			"Stock Ledger Entry", filters={"company": self.company, "is_cancelled": 0}, limit=1
 		):
