@@ -1784,6 +1784,61 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, -2 * receipts[0].items[0].rate)
 
+	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_rate(self):
+		from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+		fifo = {"is_stock_item": 1, "valuation_method": "FIFO"}
+		rm_item = make_item(properties=fifo).name
+		fg_item = make_item(properties={**fifo, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		receipts = []
+		for rate, rejected_qty in ((100, 0), (300, 1)):
+			sco = get_subcontracting_order(
+				service_items=[
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"item_code": "Subcontracted Service Item 1",
+						"qty": 5,
+						"rate": 30,
+						"fg_item": fg_item,
+						"fg_item_qty": 5,
+					}
+				]
+			)
+			rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rate}]
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+			)
+			scr = make_subcontracting_receipt(sco.name)
+			scr.rejected_warehouse = "_Test Warehouse 1 - _TC"
+			scr.items[0].qty = 5 - rejected_qty
+			scr.items[0].rejected_qty = rejected_qty
+			receipts.append(scr.submit())
+
+		scr_return = make_return_doc("Subcontracting Receipt", receipts[1].name)
+		scr_return.supplier_warehouse = "_Test Warehouse 1 - _TC"
+		scr_return.items[0].qty = -2
+		scr_return.items[0].rejected_qty = 0
+		scr_return.submit()
+		create_repost_item_valuation_entry(
+			{
+				"voucher_type": scr_return.doctype,
+				"voucher_no": scr_return.name,
+				"posting_date": scr_return.posting_date,
+				"posting_time": scr_return.posting_time,
+				"company": scr_return.company,
+			}
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * receipts[1].items[0].rate)
+
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
 		set_backflush_based_on("BOM")
 
