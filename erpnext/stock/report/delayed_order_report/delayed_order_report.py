@@ -4,10 +4,13 @@
 
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.report.delayed_item_report.delayed_item_report import DelayedItemReport
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 
 	columns, data = DelayedOrderReport(filters).run()
