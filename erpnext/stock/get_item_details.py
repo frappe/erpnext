@@ -858,21 +858,11 @@ def get_item_tax_template(args, item=None, out=None):
 	return item_tax_template
 
 
-<<<<<<< HEAD
 def _get_item_tax_template_from_item_group(args, item_group, out=None):
-	from frappe.utils.nestedset import get_ancestors_of
-
-	ancestors = get_ancestors_of("Item Group", item_group)
-	for group in [item_group, *ancestors]:
-		group_doc = frappe.get_cached_doc("Item Group", group)
-		item_tax_template = _get_item_tax_template(args, group_doc.taxes, out)
-=======
-def _get_item_tax_template_from_item_group(ctx, item_group, out=None):
 	"""Return the first tax template found walking up from `item_group` to the root."""
 	while item_group:
 		group_doc = frappe.get_cached_doc("Item Group", item_group)
-		item_tax_template = _get_item_tax_template(ctx, group_doc.taxes, out)
->>>>>>> 0023eb9 (perf(item details): walk cached item groups to find the tax template)
+		item_tax_template = _get_item_tax_template(args, group_doc.taxes, out)
 		if item_tax_template:
 			return item_tax_template
 		item_group = group_doc.parent_item_group
@@ -1366,14 +1356,9 @@ def get_price_list_rate_for(args, item_code):
 		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
-<<<<<<< HEAD
-		general_price_list_rate = get_item_price(
-			item_price_args, item_code, ignore_party=args.get("ignore_party")
-=======
 		# Without ignore_party this repeats the query above, which found nothing
-		general_price_list_rate = ctx.get("ignore_party") and get_item_price(
-			pctx, item_code, ignore_party=True
->>>>>>> 027cf94 (perf(item details): skip repeating the item price query when party is not ignored)
+		general_price_list_rate = args.get("ignore_party") and get_item_price(
+			item_price_args, item_code, ignore_party=True
 		)
 
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
