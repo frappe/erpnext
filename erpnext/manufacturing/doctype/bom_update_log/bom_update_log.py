@@ -130,6 +130,7 @@ def run_replace_bom_job(
 		doc.db_set("status", "In Progress")
 
 		if not frappe.flags.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		frappe.db.auto_commit_on_many_writes = 1

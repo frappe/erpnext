@@ -6,8 +6,12 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import date_diff, flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = {}
 
