@@ -197,6 +197,88 @@ class TestBatch(ERPNextTestSuite):
 			# Set user to session user
 			frappe.set_user(session_user)
 
+	def test_pos_reserved_batch_qty_of_other_warehouse_is_ignored(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
+			init_user_and_profile,
+		)
+		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		item_code = "_Test POS Batch Warehouse Item"
+		batch_no = "TestBatch-POS-WH 01"
+		create_batch_item_with_batch(item_code, batch_no)
+		for warehouse, qty in (("_Test Warehouse 1 - _TC", 3), ("_Test Warehouse - _TC", 7)):
+			make_stock_entry(
+				target=warehouse,
+				item_code=item_code,
+				qty=qty,
+				basic_rate=100,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+
+		session_user = frappe.session.user
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+		pos_inv = create_pos_invoice(
+			item=item_code, rate=300, qty=2, warehouse="_Test Warehouse - _TC", do_not_save=1
+		)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 600})
+		pos_inv.items[0].use_serial_batch_fields = 1
+		pos_inv.items[0].batch_no = batch_no
+		pos_inv.submit()
+		frappe.set_user(session_user)
+
+		batches = get_batch_qty(
+			item_code=item_code, warehouse="_Test Warehouse 1 - _TC", consider_negative_batches=1
+		)
+		self.assertEqual(
+			[(d.batch_no, d.warehouse, d.qty) for d in batches], [(batch_no, "_Test Warehouse 1 - _TC", 3)]
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_pos_reserved_bundle_qty_of_other_batch_is_ignored(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
+			init_user_and_profile,
+		)
+		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_batch_item_with_batch,
+		)
+
+		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
+		item_code = "_Test POS Batch Bundle Item"
+		batch_1 = "TestBatch-POS-SABB 01"
+		create_batch_item_with_batch(item_code, batch_1)
+		batch_2 = "TestBatch-POS-SABB 02"
+		create_batch_item_with_batch(item_code, batch_2)
+		for batch_no in (batch_1, batch_2):
+			make_stock_entry(
+				target="_Test Warehouse - _TC",
+				item_code=item_code,
+				qty=5,
+				basic_rate=100,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+
+		session_user = frappe.session.user
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+		pos_inv = create_pos_invoice(item=item_code, rate=300, qty=2, do_not_save=1)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 600})
+		pos_inv.items[0].batch_no = batch_2
+		pos_inv.submit()
+		frappe.set_user(session_user)
+
+		batches = get_batch_qty(batch_no=batch_1, item_code=item_code, consider_negative_batches=1)
+		self.assertEqual([(d.batch_no, d.qty) for d in batches], [(batch_1, 5)])
+
 	def test_stock_entry_incoming(self):
 		"""Test batch creation via Stock Entry (Work Order)"""
 
