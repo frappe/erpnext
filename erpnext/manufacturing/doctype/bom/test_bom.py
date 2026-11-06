@@ -1999,6 +1999,17 @@ class TestBOM(ERPNextTestSuite):
 		step_items = [(row.item_code, row.qty) for row in bom.items if row.operation_row_id == 1]
 		self.assertEqual(step_items, [(second_rm, 5)])
 
+	def test_sub_bom_that_only_consumes_the_row_item_is_rejected(self):
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		sub_bom = make_usd_bom(sub_assembly, [{"item_code": raw_material, "qty": 1}])
+
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			make_usd_bom(
+				make_item(properties={"is_stock_item": 1}).name,
+				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
+			)
+
 
 def make_stage_items():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
