@@ -584,6 +584,7 @@ def update_status(name, status):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None, args=None):
+	validate_request_not_stopped(source_name)
 	if args is None:
 		args = {}
 	if isinstance(args, str):
@@ -644,6 +645,8 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = obj.ordered_qty or obj.received_qty
 		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
@@ -680,6 +683,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 
 @frappe.whitelist()
 def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=None):
+	validate_request_not_stopped(source_name)
 	mr = source_name
 
 	supplier_items = get_items_based_on_default_supplier(args.get("supplier"))
@@ -812,6 +816,8 @@ def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filte
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
+	validate_request_not_stopped(source_name)
+
 	def postprocess(source, target_doc):
 		set_missing_values(source, target_doc)
 
@@ -830,6 +836,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 					"parent": "material_request",
 					"sales_order": "sales_order",
 				},
+				"condition": lambda doc: flt(doc.ordered_qty or doc.received_qty) < flt(doc.stock_qty),
 			},
 		},
 		target_doc,
@@ -842,6 +849,8 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
@@ -1032,7 +1041,7 @@ def create_pick_list(source_name, target_doc=None):
 			"Material Request": {
 				"doctype": "Pick List",
 				"field_map": {"material_request_type": "purpose"},
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {"docstatus": ["=", 1], "material_request_type": ["=", "Material Transfer"]},
 			},
 			"Material Request Item": {
 				"doctype": "Pick List Item",
