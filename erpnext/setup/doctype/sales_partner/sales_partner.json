@@ -195,11 +195,7 @@
  "icon": "handshake",
  "idx": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-09-16 11:42:07.000000",
-=======
  "modified": "2026-11-06 01:16:48.000000",
->>>>>>> d2a26d7 (fix(selling): show published Sales Partner pages to website visitors)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Partner",
