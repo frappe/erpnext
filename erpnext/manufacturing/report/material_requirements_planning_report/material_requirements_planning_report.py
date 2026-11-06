@@ -37,6 +37,7 @@ def execute(filters: dict | None = None):
 class MaterialRequirementsPlanningReport:
 	def __init__(self, filters):
 		self.filters = filters
+		self.qty_precision = frappe.get_precision("Master Production Schedule Item", "planned_qty")
 
 	def generate_mrp(self):
 		self.fg_items = []
@@ -327,7 +328,7 @@ class MaterialRequirementsPlanningReport:
 				)
 
 			demand_supply_data = chart_data[delivery_date]
-			demand_supply_data.demand += math.ceil(flt(row.planned_qty))
+			demand_supply_data.demand += math.ceil(flt(row.planned_qty, self.qty_precision))
 			demand_supply_data.supply += (
 				flt(row.in_hand_qty) + flt(row.po_ordered_qty) + flt(row.wo_ordered_qty)
 			)
@@ -339,7 +340,7 @@ class MaterialRequirementsPlanningReport:
 			value = chart_data[row]
 
 			demand_data.append(math.ceil(flt(value.demand)))
-			supply_data.append(math.ceil(flt(value.supply)))
+			supply_data.append(math.ceil(flt(value.supply, self.qty_precision)))
 
 		return {
 			"data": {
@@ -396,7 +397,7 @@ class MaterialRequirementsPlanningReport:
 						)
 
 					demand_supply_data = chart_data[row.from_date]
-					demand_supply_data.demand += math.ceil(flt(d.planned_qty))
+					demand_supply_data.demand += math.ceil(flt(d.planned_qty, self.qty_precision))
 					demand_supply_data.supply += (
 						flt(d.in_hand_qty) + flt(d.po_ordered_qty) + flt(d.wo_ordered_qty)
 					)
@@ -408,7 +409,7 @@ class MaterialRequirementsPlanningReport:
 			value = chart_data[row]
 
 			demand_data.append(math.ceil(flt(value.demand)))
-			supply_data.append(math.ceil(flt(value.supply)))
+			supply_data.append(math.ceil(flt(value.supply, self.qty_precision)))
 
 		return {
 			"data": {
@@ -518,7 +519,9 @@ class MaterialRequirementsPlanningReport:
 		return data
 
 	def set_lead_time(self, row):
-		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
+		lead_time = get_item_lead_time(
+			row.item_code, row.type_of_material, flt(row.required_qty, self.qty_precision)
+		)
 		row.lead_time = math.ceil(lead_time)
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
 
