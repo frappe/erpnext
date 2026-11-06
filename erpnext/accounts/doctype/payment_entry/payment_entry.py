@@ -599,6 +599,7 @@ class PaymentEntry(AccountsController):
 			):
 				ref_details.update({"exchange_rate": reference_exchange_details.exchange_rate})
 
+			values = {}
 			for field, value in ref_details.items():
 				if d.exchange_gain_loss and self.docstatus != 0 and self.get("_action") != "submit":
 					# for cases where gain/loss is booked into invoice
@@ -608,7 +609,12 @@ class PaymentEntry(AccountsController):
 					continue
 
 				if field == "exchange_rate" or not d.get(field) or force:
-					d.db_set(field, value)
+					values[field] = value
+
+			if values and not self.is_new():
+				d.db_set(values)
+			else:
+				d.update(values)
 
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
@@ -752,26 +758,29 @@ class PaymentEntry(AccountsController):
 			return ("Purchase Order", "Purchase Invoice", "Journal Entry", "Payment Entry")
 
 	def validate_paid_invoices(self):
-		no_oustanding_refs = {}
-
-		for d in self.get("references"):
-			if not d.allocated_amount:
+		for doctype in ("Sales Invoice", "Purchase Invoice"):
+			names = {
+				d.reference_name
+				for d in self.references
+				if d.allocated_amount and d.reference_doctype == doctype
+			}
+			if not names:
 				continue
 
-			if d.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-				outstanding_amount, is_return = frappe.get_cached_value(
-					d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"]
-				)
-				if outstanding_amount <= 0 and not is_return:
-					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
+			paid_invoices = frappe.get_all(
+				doctype,
+				filters={"name": ["in", list(names)], "outstanding_amount": ["<=", 0], "is_return": 0},
+				pluck="name",
+			)
+			if not paid_invoices:
+				continue
 
-		for reference_doctype, references in no_oustanding_refs.items():
 			frappe.msgprint(
 				_(
 					"References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
 				).format(
-					frappe.bold(comma_and([d.reference_name for d in references])),
-					_(reference_doctype),
+					frappe.bold(comma_and(paid_invoices)),
+					_(doctype),
 				)
 				+ "<br><br>"
 				+ _("If this is undesirable please cancel the corresponding Payment Entry."),
@@ -1025,7 +1034,9 @@ class PaymentEntry(AccountsController):
 		else:
 			self.status = "Draft"
 
-		self.db_set("status", self.status, update_modified=True)
+		# Insert saves the status; an update of the missing row would only take gap locks
+		if not self.is_new():
+			self.db_set("status", self.status, update_modified=True)
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -1378,11 +1389,13 @@ class PaymentEntry(AccountsController):
 	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
-		frappe.db.sql(
-			"""delete from `tabPayment Entry Reference`
-			where parent = %s and allocated_amount = 0""",
-			self.name,
-		)
+		# A new document has no rows yet; the delete would only take gap locks that deadlock concurrent inserts.
+		if not self.is_new():
+			frappe.db.sql(
+				"""delete from `tabPayment Entry Reference`
+				where parent = %s and allocated_amount = 0""",
+				self.name,
+			)
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
@@ -2660,6 +2673,9 @@ def get_currency_data(outstanding_invoices: list, company: str | None = None) ->
 
 	for doctype in ["Sales Invoice", "Purchase Invoice", "Sales Order", "Purchase Order"]:
 		invoices = [x.voucher_no for x in outstanding_invoices if x.voucher_type == doctype]
+		if not invoices:
+			continue
+
 		for x in frappe.db.get_all(
 			doctype,
 			filters={"name": ["in", invoices]},
