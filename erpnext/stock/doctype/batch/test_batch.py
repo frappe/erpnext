@@ -208,7 +208,8 @@ class TestBatch(FrappeTestCase):
 		)
 
 		item_code = "_Test POS Batch Warehouse Item"
-		batch_no = create_batch_item_with_batch(item_code, "TestBatch-POS-WH 01")
+		batch_no = "TestBatch-POS-WH 01"
+		create_batch_item_with_batch(item_code, batch_no)
 		for warehouse, qty in (("_Test Warehouse 1 - _TC", 3), ("_Test Warehouse - _TC", 7)):
 			make_stock_entry(
 				target=warehouse,
@@ -251,8 +252,10 @@ class TestBatch(FrappeTestCase):
 		)
 
 		item_code = "_Test POS Batch Bundle Item"
-		batch_1 = create_batch_item_with_batch(item_code, "TestBatch-POS-SABB 01")
-		batch_2 = create_batch_item_with_batch(item_code, "TestBatch-POS-SABB 02")
+		batch_1 = "TestBatch-POS-SABB 01"
+		create_batch_item_with_batch(item_code, batch_1)
+		batch_2 = "TestBatch-POS-SABB 02"
+		create_batch_item_with_batch(item_code, batch_2)
 		for batch_no in (batch_1, batch_2):
 			make_stock_entry(
 				target="_Test Warehouse - _TC",
