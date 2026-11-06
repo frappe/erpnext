@@ -353,7 +353,7 @@ class SerialBatchBundleService:
 
 		self.make_bundle_for_non_rejected_qty(table_name)
 
-		if self.doc.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+		if self.doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 			self.make_bundle_for_rejected_qty(table_name)
 
 	def make_bundle_for_rejected_qty(self, table_name=None):
@@ -476,7 +476,10 @@ class SerialBatchBundleService:
 					qty_field == "qty"
 					and not row.get("return_qty_from_rejected_warehouse")
 					or qty_field == "rejected_qty"
-					and (row.get("return_qty_from_rejected_warehouse") or row.get("rejected_warehouse"))
+					and (
+						row.get("return_qty_from_rejected_warehouse")
+						or (row.get("rejected_warehouse") and row.get("rejected_qty"))
+					)
 				)
 				and not row.get("use_serial_batch_fields")
 				and not row.get(bundle_field)
