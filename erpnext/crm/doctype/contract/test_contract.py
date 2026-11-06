@@ -1,13 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
+from unittest.mock import patch
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, nowdate
 
+from erpnext.crm.doctype.contract.contract import update_status_for_contracts
 
-class TestContract(unittest.TestCase):
+
+class TestContract(FrappeTestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabContract`")
 		self.contract_doc = get_contract()
@@ -42,6 +45,13 @@ class TestContract(unittest.TestCase):
 		self.contract_doc.is_signed = True
 		self.contract_doc.start_date = add_days(nowdate(), 1)
 		self.contract_doc.end_date = add_days(nowdate(), 2)
+		self.contract_doc.insert()
+
+		self.assertEqual(self.contract_doc.status, "Inactive")
+
+	def test_open_ended_contract_starting_later_is_inactive(self):
+		self.contract_doc.is_signed = True
+		self.contract_doc.start_date = add_days(nowdate(), 30)
 		self.contract_doc.insert()
 
 		self.assertEqual(self.contract_doc.status, "Inactive")
@@ -99,6 +109,41 @@ class TestContract(unittest.TestCase):
 		self.contract_doc.save()
 
 		self.assertEqual(self.contract_doc.fulfilment_status, "Lapsed")
+
+	def test_daily_job_lapses_fulfilment_after_the_deadline(self):
+		contract = self.make_signed_contract(fulfilment_deadline=nowdate())
+		self.assertEqual(contract.fulfilment_status, "Unfulfilled")
+
+		with patch("erpnext.crm.doctype.contract.contract.nowdate", return_value=add_days(nowdate(), 1)):
+			update_status_for_contracts()
+		self.assertEqual(frappe.db.get_value("Contract", contract.name, "fulfilment_status"), "Lapsed")
+
+	def test_fulfilment_terms_cannot_be_replaced_after_submit(self):
+		contract = self.make_signed_contract()
+		contract.fulfilment_terms = []
+		contract.append("fulfilment_terms", {"requirement": "Nothing", "fulfilled": 1})
+		self.assertRaises(frappe.UpdateAfterSubmitError, contract.save)
+
+		contract.reload()
+		contract.fulfilment_terms[0].fulfilled = 1
+		contract.save()
+		self.assertEqual(contract.fulfilment_status, "Fulfilled")
+
+	def make_signed_contract(self, **fields):
+		self.contract_doc.update(
+			{
+				"is_signed": 1,
+				"signee": "Test Signee",
+				"signed_on": frappe.utils.now_datetime(),
+				"start_date": nowdate(),
+				"requires_fulfilment": 1,
+				**fields,
+			}
+		)
+		self.contract_doc.append("fulfilment_terms", {"requirement": "Deliver 10 tables"})
+		self.contract_doc.insert()
+		self.contract_doc.submit()
+		return self.contract_doc
 
 
 def get_contract():
