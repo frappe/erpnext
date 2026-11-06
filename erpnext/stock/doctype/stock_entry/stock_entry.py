@@ -1557,7 +1557,9 @@ class StockEntry(StockController):
 						has_consumption_basis or self.has_manually_rated_finished_items()
 					)
 				elif self.purpose == "Repack":
-					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
+					d.basic_rate = self.get_basic_rate_for_repacked_items(
+						finished_item_qty, outgoing_items_cost
+					)
 					# Repack rate comes from consumed source-warehouse rows, not consumption entries
 					rate_derived_from_consumption = any(item.s_warehouse for item in self.get("items"))
 
@@ -1703,22 +1705,11 @@ class StockEntry(StockController):
 		)
 
 	def get_basic_rate_for_repacked_items(self, finished_item_qty, outgoing_items_cost):
-		finished_items = [
-			d.item_code for d in self.get("items") if d.is_finished_item and not d.set_basic_rate_manually
-		]
-		if len(finished_items) == 1:
-			return flt(outgoing_items_cost / finished_item_qty)
-		else:
-			unique_finished_items = set(finished_items)
-			if unique_finished_items:
-				total_fg_qty = sum(
-					[
-						flt(d.transfer_qty)
-						for d in self.items
-						if d.is_finished_item and not d.set_basic_rate_manually
-					]
-				)
-				return flt(outgoing_items_cost / total_fg_qty)
+		cost_left = outgoing_items_cost - self.get_manually_rated_finished_items()[1]
+		if self.flags.via_repost:
+			cost_left = max(cost_left, 0)
+
+		return flt(cost_left / finished_item_qty) if finished_item_qty else 0.0
 
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
