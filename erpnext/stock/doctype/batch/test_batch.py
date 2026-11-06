@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.exceptions import ValidationError
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
@@ -678,7 +678,7 @@ class TestBatch(FrappeTestCase):
 
 		self.assertEqual("BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle))
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_pos_reserved_batch_with_bundle_is_counted_once(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
 			init_user_and_profile,
@@ -689,7 +689,6 @@ class TestBatch(FrappeTestCase):
 			create_batch_item_with_batch,
 		)
 
-		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 		item_code = "_Test POS Batch Bundle Once Item"
 		batch_no = create_batch_item_with_batch(item_code, "TestBatch-POS-Once 01")
 		make_stock_entry(
