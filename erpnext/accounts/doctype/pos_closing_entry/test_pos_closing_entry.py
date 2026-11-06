@@ -400,6 +400,42 @@ class TestPOSClosingEntry(unittest.TestCase):
 			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
 		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
 
+	def test_retry_runs_only_on_failed_closing_entry(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate) as consolidate_pos_invoices:
+			self.assertRaises(frappe.ValidationError, closing_entry.retry)
+			consolidate_pos_invoices.assert_not_called()
+
+			closing_entry.db_set("status", "Failed")
+			closing_entry.status = "Submitted"
+			closing_entry.retry()
+			consolidate_pos_invoices.assert_called_once()
+
+	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+		closing_entry.db_set("status", "Failed")
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+
+		with patch(consolidate) as consolidate_pos_invoices:
+			with self.assertRaises(frappe.ValidationError) as context:
+				closing_entry.retry()
+			consolidate_pos_invoices.assert_not_called()
+
+		self.assertIn(late_sale.name, str(context.exception))
+
 	def test_cancel_without_queue_keeps_back_link_check(self):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
