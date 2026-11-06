@@ -4206,7 +4206,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 			if entry.valuation_type == "Manual":
 				entry.manual_rate = (
-					flt(bom_row.cost) / flt(bom_row.stock_qty) if flt(bom_row.get("stock_qty")) else 0
+					flt(bom_row.base_cost) / flt(bom_row.stock_qty) if flt(bom_row.get("stock_qty")) else 0
 				)
 			item_dict[get_secondary_item_key(row)] = entry
 
@@ -4225,7 +4225,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 			for row in frappe.get_all(
 				"BOM Secondary Item",
 				filters={"name": ("in", names)},
-				fields=["name", "valuation_type", "cost", "stock_qty"],
+				fields=["name", "valuation_type", "base_cost", "stock_qty"],
 			)
 		}
 
