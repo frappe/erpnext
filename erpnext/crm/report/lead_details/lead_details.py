@@ -6,8 +6,12 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Concat_ws, Date
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 

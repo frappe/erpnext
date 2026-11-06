@@ -311,6 +311,10 @@ def update_stock(ctx, out, doc=None):
 			}
 		)
 
+		if out.has_serial_no:
+			# the serial nos reserved for the Sales Order row, and their batch, are picked first
+			kwargs["sales_order_item"] = ctx.get("so_detail")
+
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
 
@@ -1726,9 +1730,9 @@ def get_price_list_currency_and_exchange_rate(args):
 	if not args.price_list:
 		return {}
 
-	if args.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"]:
+	if args.doctype in sales_doctypes:
 		args.update({"exchange_rate": "for_selling"})
-	elif args.doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+	elif args.doctype in purchase_doctypes:
 		args.update({"exchange_rate": "for_buying"})
 
 	price_list_details = get_price_list_details(args.price_list)

@@ -11,7 +11,10 @@ from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -38,6 +41,7 @@ from erpnext.accounts.utils import (
 )
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
+	get_asset_disposal_values,
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
@@ -53,6 +57,7 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -254,6 +259,7 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
+				"billing_flag": "update_billed_amount_in_sales_order",
 				"extra_cond": """ and exists(select name from `tabSales Invoice`
 				where name=`tabSales Invoice Item`.parent and (is_return=0 or update_billed_amount_in_sales_order=1))""",
 			}
@@ -388,8 +394,15 @@ class SalesInvoice(SellingController):
 		if self.doctype != "Sales Invoice":
 			return
 
+		seen_assets = set()
 		for d in self.get("items"):
 			if d.is_fixed_asset:
+				if d.asset and not self.is_return:
+					if d.asset in seen_assets:
+						frappe.throw(
+							_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset)
+						)
+					seen_assets.add(d.asset)
 				if d.asset:
 					if not self.is_return:
 						asset_status, asset_docstatus = frappe.db.get_value(
@@ -518,6 +531,8 @@ class SalesInvoice(SellingController):
 
 		if not self.is_return:
 			self.process_asset_depreciation()
+
+		self.set_asset_disposal_values()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
@@ -709,13 +724,14 @@ class SalesInvoice(SellingController):
 				)
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value(
-			"Customer Credit Limit",
-			filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-			fieldname=["bypass_credit_limit_check"],
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
@@ -820,8 +836,8 @@ class SalesInvoice(SellingController):
 			"items": ("income_account", "expense_account", "discount_account"),
 			"taxes": ("account_head",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -1174,23 +1190,17 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def update_current_stock(self):
+		bin_qty_map = get_bin_qty_map(self.get("items") + self.get("packed_items"))
+
 		for d in self.get("items"):
 			if d.item_code and d.warehouse:
-				bin = frappe.db.sql(
-					"select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
-					(d.item_code, d.warehouse),
-					as_dict=1,
-				)
-				d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
+				bin_data = bin_qty_map.get((d.item_code, d.warehouse))
+				d.actual_qty = flt(bin_data.actual_qty) if bin_data else 0
 
 		for d in self.get("packed_items"):
-			bin = frappe.db.sql(
-				"select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s",
-				(d.item_code, d.warehouse),
-				as_dict=1,
-			)
-			d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
-			d.projected_qty = bin and flt(bin[0]["projected_qty"]) or 0
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
+			d.actual_qty = flt(bin_data.actual_qty) if bin_data else 0
+			d.projected_qty = flt(bin_data.projected_qty) if bin_data else 0
 
 	def update_packing_list(self):
 		if self.doctype == "POS Invoice" or (
@@ -1380,6 +1390,22 @@ class SalesInvoice(SellingController):
 			self.restore_asset()
 
 		self.update_asset()
+
+	def set_asset_disposal_values(self) -> None:
+		"""Store the asset values the sale or return entries are built from, so a repost reproduces them."""
+		if self.is_internal_transfer():
+			return
+
+		for item in self.get("items"):
+			if item.is_fixed_asset and item.asset:
+				asset = frappe.get_doc("Asset", item.asset)
+				values = get_asset_disposal_values(asset, item.finance_book)
+				item.db_set(
+					{
+						"asset_value_after_depreciation": values["value_after_depreciation"],
+						"asset_gross_value": values["gross_asset_value"],
+					}
+				)
 
 	def depreciate_asset_on_sale(self):
 		"""
@@ -1673,6 +1699,7 @@ class SalesInvoice(SellingController):
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		asset = frappe.get_cached_doc("Asset", item.asset)
+		disposal_values = get_stored_asset_disposal_values(item)
 
 		if self.is_return:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
@@ -1682,6 +1709,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 		else:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -1691,6 +1719,7 @@ class SalesInvoice(SellingController):
 				self.get("doctype"),
 				self.get("name"),
 				self.get("posting_date"),
+				disposal_values,
 			)
 
 		for gle in fixed_asset_gl_entries:
@@ -2111,9 +2140,7 @@ class SalesInvoice(SellingController):
 
 		points_to_redeem = self.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			if lp_entry.invoice_type != self.doctype or lp_entry.invoice == self.name:
-				# redeemption should be done against same doctype
-				# also it shouldn't be against itself
+			if lp_entry.invoice == self.name:
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			if available_points > points_to_redeem:
@@ -2918,17 +2945,18 @@ def update_address(doc, address_field, address_display_field, address_name):
 
 
 @frappe.whitelist()
-def get_loyalty_programs(customer):
+def get_loyalty_programs(customer: str):
 	"""sets applicable loyalty program to the customer or returns a list of applicable programs"""
 	from erpnext.selling.doctype.customer.customer import get_loyalty_programs
 
+	frappe.has_permission("Customer", "read", customer, throw=True)
 	customer = frappe.get_doc("Customer", customer)
 	if customer.loyalty_program:
 		return [customer.loyalty_program]
 
 	lp_details = get_loyalty_programs(customer)
 
-	if len(lp_details) == 1:
+	if len(lp_details) == 1 and customer.has_permission("write"):
 		customer.db_set("loyalty_program", lp_details[0])
 		return lp_details
 	else:
@@ -3071,6 +3099,22 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
 
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
+
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))
 		target.validate()
@@ -3139,3 +3183,14 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 			message += " " + ", ".join(payment_entries_link) + " "
 			message += _("to unallocate the amount of this Return Invoice before cancelling it.")
 			frappe.throw(message)
+
+
+def get_stored_asset_disposal_values(item) -> dict | None:
+	"""Asset values stored on the row at submit, so a repost does not pick up later changes to the asset."""
+	if not flt(item.asset_gross_value):
+		return None
+
+	return {
+		"value_after_depreciation": item.asset_value_after_depreciation,
+		"gross_asset_value": item.asset_gross_value,
+	}

@@ -9,7 +9,10 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	_make_depreciation_entry,
+	make_depreciation_entry_for_all_asset_depr_schedules,
 	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
 )
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
@@ -30,6 +33,37 @@ from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment i
 class TestAssetDepreciationSchedule(FrappeTestCase):
 	def setUp(self):
 		create_asset_data()
+
+	def test_restore_after_scrap_on_last_booked_schedule_date(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			opening_accumulated_depreciation=8333.32,
+			opening_number_of_booked_depreciations=4,
+			gross_purchase_amount=125000,
+			purchase_amount=125000,
+			purchase_date="2025-09-01",
+			available_for_use_date="2025-09-01",
+			depreciation_start_date="2026-01-01",
+			total_number_of_depreciations=60,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+		make_depreciation_entry_for_all_asset_depr_schedules(asset, date="2026-10-01")
+
+		booked_entries = {
+			row.journal_entry for row in get_depr_schedule(asset.name, "Active") if row.journal_entry
+		}
+		self.assertEqual(len(booked_entries), 10)
+
+		scrap_asset(asset.name, scrap_date="2026-10-01")
+		restore_asset(asset.name)
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		self.assertEqual(len(schedule), 56)
+		self.assertEqual(len({row.schedule_date for row in schedule}), 56)
+		self.assertEqual(cstr(schedule[10].schedule_date), "2026-11-01")
+		self.assertEqual({row.journal_entry for row in schedule if row.journal_entry}, booked_entries)
+		self.assertEqual(asset.reload().get_value_after_depreciation(), 95833.38)
 
 	def test_throw_error_if_another_asset_depr_schedule_exist(self):
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)

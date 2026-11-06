@@ -46,7 +46,7 @@ def make_supplier(supplier_name, currency=None):
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = supplier_name
 		supplier.supplier_type = "Individual"
-		supplier.supplier_group = "All Supplier Groups"
+		supplier.supplier_group = "Services"
 
 		if currency:
 			supplier.default_currency = currency

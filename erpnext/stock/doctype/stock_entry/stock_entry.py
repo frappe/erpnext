@@ -508,6 +508,7 @@ class StockEntry(StockController):
 				(SE.source_stock_entry == self.source_stock_entry)
 				& (SE.purpose == "Disassemble")
 				& (SE.docstatus == 1)
+				& (SE.name != self.name)
 			)
 			.run(as_dict=True)
 		)
@@ -526,22 +527,26 @@ class StockEntry(StockController):
 			if row.serial_no or row.batch_no or row.serial_and_batch_bundle:
 				continue
 
-			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			key = row.item_code if row.t_warehouse else (row.item_code, row.s_warehouse)
+			materials = available_materials.get(key)
 			if not materials:
 				continue
 
 			batches = defaultdict(float)
 			serial_nos = []
 			qty = row.transfer_qty
+			precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 			for batch_no, batch_qty in materials.batch_details.items():
 				if qty <= 0:
 					break
 
-				batch_qty = abs(batch_qty)
+				batch_qty = flt(batch_qty, precision)
+				if batch_qty <= 0:
+					continue
+
 				if batch_qty <= qty:
 					batches[batch_no] = batch_qty
-					qty -= batch_qty
+					qty = flt(qty - batch_qty, precision)
 				else:
 					batches[batch_no] = qty
 					qty = 0
@@ -3419,19 +3424,33 @@ class StockEntry(StockController):
 		wo_data = frappe.db.get_value(
 			"Work Order",
 			self.work_order,
-			["qty", "produced_qty", "material_transferred_for_manufacturing as trans_qty"],
+			[
+				"qty",
+				"produced_qty",
+				"process_loss_qty",
+				"material_transferred_for_manufacturing as trans_qty",
+			],
 			as_dict=1,
 		)
 
+		transferred_qty = flt(wo_data.trans_qty)
+		pending_qty_to_mfg = transferred_qty - flt(wo_data.produced_qty) - flt(wo_data.process_loss_qty)
+		fg_completed_qty = flt(self.fg_completed_qty)
+		fg_precision = self.precision("fg_completed_qty")
+		if not self.is_return and (flt(pending_qty_to_mfg, fg_precision) <= 0 or not fg_completed_qty):
+			return
+
 		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for _key, row in available_materials.items():
-			remaining_qty_to_produce = flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
-			if remaining_qty_to_produce <= 0 and not self.is_return:
-				continue
+			# a material is only covered by the entries that consumed it
+			pending_qty = transferred_qty - sum(row.consumed_for.values())
+			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, fg_precision) <= 0:
+				# an entry for all that is pending consumes what is left
+				pending_qty = fg_completed_qty
 
 			qty = flt(row.qty)
 			if not self.is_return:
-				qty = (flt(row.qty) * flt(self.fg_completed_qty)) / remaining_qty_to_produce
+				qty = (flt(row.qty) * fg_completed_qty) / pending_qty
 
 			item = row.item_details
 			if cint(frappe.get_cached_value("UOM", item.stock_uom, "must_be_whole_number")):
@@ -4072,6 +4091,20 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = get_remaining_qty_in_row_uom(source_doc)
+		map_target_dimensions_to_source(source_doc, target_doc)
+
+	def map_target_dimensions_to_source(source_doc, target_doc):
+		# the stock sits in transit with the outward entry's target dimensions,
+		# so the end transit entry must take it out from there
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+		for dimension in get_inventory_dimensions():
+			fieldname = dimension.source_fieldname
+			if fieldname.startswith("to_") or not target_doc.meta.has_field(f"to_{fieldname}"):
+				continue
+
+			target_doc.set(fieldname, source_doc.get(f"to_{fieldname}"))
+			target_doc.set(f"to_{fieldname}", None)
 
 	def get_remaining_qty_in_row_uom(source_doc):
 		remaining_qty = get_remaining_transfer_qty(source_doc)
@@ -4179,9 +4212,9 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 
 	# Get operating cost from BOM if not found in work_order.
 	if not operating_cost_per_unit and bom_no:
-		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
+		bom = frappe.db.get_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
-			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+			operating_cost_per_unit = flt(bom.base_operating_cost) / flt(bom.quantity)
 
 	return operating_cost_per_unit
 
@@ -4554,13 +4587,19 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 			key = (row.item_code, row.s_warehouse)
 
 		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-			key = (row.item_code, row.s_warehouse or row.warehouse)
+			key = _get_disassembly_material_key(row)
 
 		if key not in available_materials:
 			available_materials.setdefault(
 				key,
 				frappe._dict(
-					{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
+					{
+						"item_details": row,
+						"batch_details": defaultdict(float),
+						"qty": 0,
+						"serial_nos": [],
+						"consumed_for": {},
+					}
 				),
 			)
 
@@ -4575,7 +4614,7 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 
 			elif row.batch_nos:
 				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
+					item_data.batch_details[batch_no] += abs(qty)
 
 			if row.serial_no:
 				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
@@ -4588,12 +4627,14 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
 
 			item_data.qty -= row.qty
+			if row.qty:
+				item_data.consumed_for[row.name] = flt(row.fg_completed_qty)
 			if row.batch_no:
 				item_data.batch_details[row.batch_no] -= row.qty
 
 			elif row.batch_nos:
 				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += qty
+					item_data.batch_details[batch_no] -= abs(qty)
 
 			if row.serial_no:
 				for serial_no in get_serial_nos(row.serial_no):
@@ -4606,6 +4647,19 @@ def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 						item_data.serial_nos.remove(serial_no)
 
 	return available_materials
+
+
+def _get_disassembly_material_key(row):
+	"""Components can return to a warehouse other than the one they were consumed from, so they
+	match by item. Finished and secondary items match by the warehouse they are in."""
+	if row.purpose == "Manufacture":
+		is_component = bool(row.s_warehouse)
+	else:
+		is_component = not row.s_warehouse
+
+	if is_component:
+		return row.item_code
+	return (row.item_code, row.s_warehouse or row.warehouse)
 
 
 def get_stock_entry_data(work_order, stock_entry_doc=None):
@@ -4635,6 +4689,7 @@ def get_stock_entry_data(work_order, stock_entry_doc=None):
 			stock_entry_detail.serial_no,
 			stock_entry.purpose,
 			stock_entry.name,
+			stock_entry.fg_completed_qty,
 		)
 		.where(
 			(stock_entry.name == stock_entry_detail.parent)
