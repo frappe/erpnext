@@ -62,7 +62,11 @@ class TestVATAuditReport(FrappeTestCase):
 
 	def test_user_permissions(self):
 		other_customer = frappe.get_doc(
-			{"doctype": "Customer", "customer_name": "_Test SA Customer " + frappe.generate_hash(length=6)}
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test SA Customer " + frappe.generate_hash(length=6),
+				"customer_group": "Individual",
+			}
 		).insert()
 		permitted_invoice = make_sa_sales_invoice("_Test SA VAT Item", 200.0)
 		other_invoice = make_sa_sales_invoice("_Test SA VAT Item", 200.0, customer=other_customer.name)
