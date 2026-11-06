@@ -4800,6 +4800,37 @@ class TestWorkOrder(FrappeTestCase):
 		transfer.items[0].update({"qty": 1, "uom": "Box", "conversion_factor": 50})
 		self.assertRaises(frappe.ValidationError, transfer.save)
 
+	def test_manufacture_cannot_be_cancelled_below_the_disassembled_qty(self):
+		rm_item = make_item("_Test Disassembled Cancel RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Disassembled Cancel FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=2,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=fg_item, target=work_order.fg_warehouse, qty=2, basic_rate=100
+		)
+
+		manufacture_entries = []
+		for _qty in range(2):
+			entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+			entry.submit()
+			manufacture_entries.append(entry)
+
+		frappe.get_doc(make_stock_entry(work_order.name, "Disassemble", 2)).submit()
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"cannot be less than the Disassembled Qty",
+			manufacture_entries[0].cancel,
+		)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
