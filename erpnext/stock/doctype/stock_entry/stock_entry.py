@@ -985,6 +985,38 @@ class StockEntry(StockController):
 				frappe.throw(_("Atleast one warehouse is mandatory"))
 
 		self.validate_transit_warehouses()
+		self.validate_stock_in_rows()
+
+	def validate_stock_in_rows(self):
+		rows = [item for item in self.items if item.against_stock_entry and item.ste_detail]
+		if not rows:
+			return
+
+		outward_rows = get_outward_rows([item.ste_detail for item in rows])
+		for item in rows:
+			outward_row = outward_rows.get(item.ste_detail)
+			if not outward_row:
+				continue
+
+			if item.item_code != outward_row.item_code:
+				frappe.throw(
+					_("Row #{0}: Item {1} does not match item {2} sent by {3}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(outward_row.item_code),
+						item.against_stock_entry,
+					)
+				)
+
+			if item.s_warehouse != outward_row.t_warehouse:
+				frappe.throw(
+					_("Row #{0}: Item {1} must be taken from {2}, where {3} sent it.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(outward_row.t_warehouse),
+						item.against_stock_entry,
+					)
+				)
 
 	def validate_transit_warehouses(self):
 		if not self.add_to_transit:
@@ -3828,40 +3860,32 @@ class StockEntry(StockController):
 				stock_bin = get_bin(item_code, reserve_warehouse)
 				stock_bin.update_reserved_qty_for_sub_contracting()
 
-	def update_transferred_qty(self):
-		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
-			stock_entries = {}
-			stock_entries_child_list = []
-			for d in self.items:
-				if not (d.against_stock_entry and d.ste_detail):
-					continue
+	def get_stock_in_transferred_qty(self):
+		rows = [d for d in self.items if d.against_stock_entry and d.ste_detail]
+		if not rows:
+			return {}, []
 
-				stock_entries_child_list.append(d.ste_detail)
-				transferred_qty = frappe.get_all(
-					"Stock Entry Detail",
-					fields=["sum(transfer_qty) as qty"],
-					filters={
-						"against_stock_entry": d.against_stock_entry,
-						"ste_detail": d.ste_detail,
-						"docstatus": 1,
-					},
+		ste_details = [d.ste_detail for d in rows]
+		outward_rows = get_outward_rows(ste_details)
+		transferred_qty_map = get_transferred_qty_map(ste_details)
+		stock_entries = {}
+		for d in rows:
+			transferred_qty = flt(transferred_qty_map.get(d.ste_detail))
+			outward_row = outward_rows.get(d.ste_detail, frappe._dict())
+			if d.docstatus == 1 and transferred_qty > flt(outward_row.transfer_qty):
+				frappe.throw(
+					_("Row {0}: Transferred quantity cannot be greater than the requested quantity.").format(
+						d.idx
+					)
 				)
 
-				if d.docstatus == 1:
-					transfer_qty = frappe.get_value("Stock Entry Detail", d.ste_detail, "transfer_qty")
+			stock_entries[(d.against_stock_entry, d.ste_detail)] = transferred_qty
 
-					if transferred_qty and transferred_qty[0]:
-						if transferred_qty[0].qty > transfer_qty:
-							frappe.throw(
-								_(
-									"Row {0}: Transferred quantity cannot be greater than the requested quantity."
-								).format(d.idx)
-							)
+		return stock_entries, ste_details
 
-				stock_entries[(d.against_stock_entry, d.ste_detail)] = (
-					transferred_qty[0].qty if transferred_qty and transferred_qty[0] else 0.0
-				) or 0.0
-
+	def update_transferred_qty(self):
+		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
+			stock_entries, stock_entries_child_list = self.get_stock_in_transferred_qty()
 			if not stock_entries:
 				return None
 
@@ -4147,7 +4171,11 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 			"Stock Entry": {
 				"doctype": "Stock Entry",
 				"field_map": {"name": "outgoing_stock_entry"},
-				"validation": {"docstatus": ["=", 1]},
+				"validation": {
+					"docstatus": ["=", 1],
+					"purpose": ["=", "Material Transfer"],
+					"add_to_transit": ["=", 1],
+				},
 			},
 			"Stock Entry Detail": {
 				"doctype": "Stock Entry Detail",
@@ -4465,6 +4493,28 @@ def get_expired_batch_items():
 		row.update(expired_batches.get(row.batch_no))
 
 	return expired_batches_stock
+
+
+def get_outward_rows(ste_details):
+	return {
+		row.name: row
+		for row in frappe.get_all(
+			"Stock Entry Detail",
+			filters={"name": ("in", ste_details)},
+			fields=["name", "item_code", "t_warehouse", "transfer_qty"],
+		)
+	}
+
+
+def get_transferred_qty_map(ste_details):
+	sed = frappe.qb.DocType("Stock Entry Detail")
+	return dict(
+		frappe.qb.from_(sed)
+		.select(sed.ste_detail, Sum(sed.transfer_qty))
+		.where((sed.ste_detail.isin(ste_details)) & (sed.docstatus == 1))
+		.groupby(sed.ste_detail)
+		.run()
+	)
 
 
 def get_expired_batches():
