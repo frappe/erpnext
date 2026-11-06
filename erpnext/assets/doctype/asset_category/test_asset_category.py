@@ -58,8 +58,11 @@ class TestAssetCategory(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, asset_category.insert)
 
 	def test_accounts_cannot_change_while_active_assets_exist(self):
-		asset = create_asset(asset_category="Computers", company="_Test Company", submit=1)
-		asset_category = frappe.get_doc("Asset Category", "Computers")
+		# a category of its own, so assets left by other tests do not block the last change
+		asset_category = frappe.copy_doc(frappe.get_doc("Asset Category", "Computers"))
+		asset_category.asset_category_name = "Account Change Checks"
+		asset_category.insert()
+		asset = create_asset(asset_category=asset_category.name, company="_Test Company", submit=1)
 		row = next(row for row in asset_category.accounts if row.company_name == asset.company)
 		row.fixed_asset_account = "Furnitures and Fixtures - _TC"
 		self.assertRaisesRegex(frappe.ValidationError, "Fixed Asset Account", asset_category.save)
