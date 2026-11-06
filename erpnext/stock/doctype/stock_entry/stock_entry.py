@@ -287,7 +287,7 @@ class StockEntry(StockController):
 		self.clean_serial_nos()
 		self.validate_repack_entry()
 
-		if not self.from_bom:
+		if not self.from_bom and not self.work_order:
 			self.fg_completed_qty = 0.0
 
 		self.make_serial_and_batch_bundle_for_outward()
