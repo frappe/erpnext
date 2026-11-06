@@ -729,6 +729,7 @@ class MaterialRequirementsPlanningReport:
 		parent_doctype = frappe.qb.DocType("Sales Order")
 		so_item = frappe.qb.DocType("Sales Order Item")
 		doctype = frappe.qb.DocType("Packed Item")
+		pending_qty = so_item.qty - so_item.delivered_qty
 
 		query = (
 			frappe.qb.from_(parent_doctype)
@@ -737,7 +738,7 @@ class MaterialRequirementsPlanningReport:
 			.inner_join(doctype)
 			.on(so_item.name == doctype.parent_detail_docname)
 			.select(
-				((doctype.qty) * doctype.conversion_factor).as_("qty"),
+				(doctype.qty * pending_qty / so_item.qty).as_("qty"),
 				doctype.item_code,
 				doctype.item_name,
 				so_item.delivery_date,
@@ -745,7 +746,7 @@ class MaterialRequirementsPlanningReport:
 			.where(
 				(doctype.docstatus == 1)
 				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
-				& ((so_item.qty - so_item.delivered_qty) > 0)
+				& (pending_qty > 0)
 			)
 		)
 
