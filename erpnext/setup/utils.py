@@ -260,6 +260,7 @@ def welcome_email():
 	return title
 
 
+<<<<<<< HEAD
 def identity(x, *args, **kwargs):
 	"""Used for redefining the translation function to return the string as is.
 
@@ -270,3 +271,13 @@ def identity(x, *args, **kwargs):
 	Use like this: `from erpnext.setup.utils import identity as _`
 	"""
 	return x
+=======
+def set_root_as_default_parent(doc):
+	"""Default an empty tree parent to the root, unless the doc is the root."""
+	if doc.get(doc.nsm_parent_field):
+		return
+
+	root = get_root_of(doc.doctype)
+	if root != doc.name:
+		doc.set(doc.nsm_parent_field, root)
+>>>>>>> 0e78d62 (fix(setup): save the root group of Supplier Group, Customer Group, Territory and Sales Person)
