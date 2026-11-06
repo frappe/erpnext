@@ -1737,7 +1737,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertNotEqual(scr.supplied_items[0].rate, prev_cost)
 		self.assertEqual(scr.supplied_items[0].rate, sr.items[0].valuation_rate)
 
-<<<<<<< HEAD
 	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
 		from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 
@@ -1784,7 +1783,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"stock_value_difference",
 		)
 		self.assertEqual(stock_value_difference, -2 * receipts[0].items[0].rate)
-=======
+
 	def test_return_supplied_items_cost_after_reposting(self):
 		company = "_Test Company with perpetual inventory"
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
@@ -1938,7 +1937,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		expected_rates = {row["item_code"]: row["rate"] for row in rm_items}
 		self.assertEqual({row.rm_item_code: row.rate for row in scr.supplied_items}, expected_rates)
->>>>>>> 41f62cae1d (Merge pull request #64204 from mihir-kandoi/fix/issue-64186)
 
 	def test_subcontracting_receipt_for_batch_raw_materials_without_material_transfer(self):
 		set_backflush_based_on("BOM")

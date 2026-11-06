@@ -83,50 +83,9 @@ class SubcontractingController(StockController):
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
 		if self.doctype == "Subcontracting Receipt":
-<<<<<<< HEAD
-			rejected_return_rows = self.get_rejected_return_rows()
-			return_rates = self.get_consumed_rates_for_return()
-			original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
-			for row in self.supplied_items:
-				kwargs = frappe._dict(
-					{
-						"item_code": row.rm_item_code,
-						"warehouse": self.supplier_warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
-						"qty": flt(row.consumed_qty) * (-1 if not self.is_return else 1),
-						"voucher_type": self.doctype,
-						"voucher_no": self.name,
-						"company": self.company,
-						"serial_and_batch_bundle": row.serial_and_batch_bundle,
-						"voucher_detail_no": row.name,
-						"batch_no": row.batch_no,
-						"serial_no": row.serial_no,
-						"use_serial_batch_fields": row.use_serial_batch_fields,
-					}
-				)
-
-				return_rate = None
-				if self.is_return:
-					key = (original_rows.get(row.reference_name), row.rm_item_code)
-					# rows with the consumed serial nos or batches already carry the rate they were consumed at
-					return_rate = (
-						row.rate
-						if row.serial_and_batch_bundle and key in self.returnable_serial_batches
-						else return_rates.get(key)
-					)
-				if row.reference_name in rejected_return_rows:
-					rate = 0.0
-				elif return_rate is not None:
-					rate = return_rate
-				else:
-					rate = _get_incoming_rate(kwargs)
-				precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
-=======
 			precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "rate")
 			rates = self.get_supplied_item_rates(self.supplied_items)
 			for row, rate in zip(self.supplied_items, rates, strict=True):
->>>>>>> 41f62cae1d (Merge pull request #64204 from mihir-kandoi/fix/issue-64186)
 				if flt(rate, precision) != flt(row.rate, precision):
 					row.rate = rate
 					row.amount = flt(row.consumed_qty) * flt(rate)
@@ -146,10 +105,8 @@ class SubcontractingController(StockController):
 
 		rates = []
 		for row in rows:
-			# the stock ledger values Standard Cost items at the standard rate
-			is_standard_cost = get_valuation_method(row.rm_item_code, self.company) == "Standard Cost"
 			return_rate = None
-			if self.is_return and not is_standard_cost:
+			if self.is_return:
 				key = (original_rows.get(row.reference_name), row.rm_item_code)
 				# rows with the consumed serial nos or batches already carry the rate they were consumed at
 				return_rate = (
@@ -157,7 +114,7 @@ class SubcontractingController(StockController):
 					if row.serial_and_batch_bundle and key in returnable_serial_batches
 					else return_rates.get(key)
 				)
-			if row.reference_name in rejected_return_rows and not is_standard_cost:
+			if row.reference_name in rejected_return_rows:
 				rates.append(0.0)
 			elif return_rate is not None:
 				rates.append(return_rate)
