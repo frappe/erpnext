@@ -27,6 +27,16 @@ from frappe.utils import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+<<<<<<< ours
+=======
+from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+	ProductionPlanWorkOrderQuantities,
+)
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	get_operation_qty,
+	get_upstream_process_loss,
+)
+>>>>>>> theirs
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
 
@@ -982,6 +992,61 @@ class JobCard(Document):
 		if self.status == "On Hold" and self.docstatus == 0:
 			return
 
+<<<<<<< ours
+=======
+		incoming = {}
+		for row in material_request.items:
+			incoming[row.job_card_item] = incoming.get(row.job_card_item, 0.0) + flt(row.stock_qty)
+
+		requested = self.get_requested_qty_by_item()
+		for item in self.items:
+			if item.name not in incoming:
+				continue
+
+			pending = flt(item.required_qty) - flt(requested.get(item.name))
+			if flt(incoming[item.name] - pending, item.precision("required_qty")) > 0:
+				frappe.throw(
+					_("Only {0} {1} of {2} is pending to request in Job Card {3}.").format(
+						max(pending, 0.0), item.stock_uom, item.item_code, self.name
+					),
+					title=_("Exceeds Pending Qty"),
+				)
+
+	def set_requested_qty(self):
+		requested = self.get_requested_qty_by_item()
+		items = [d for d in self.items if flt(d.required_qty) > 0]
+		requested_fraction = (
+			min(flt(requested.get(d.name)) / flt(d.required_qty) for d in items) if items else 0.0
+		)
+		self.db_set(
+			"requested_qty", flt(requested_fraction * flt(self.for_quantity), self.precision("requested_qty"))
+		)
+
+	def set_transferred_qty_in_work_order(self):
+		doc = frappe.get_doc("Work Order", self.work_order)
+
+		qty = 0.0
+		if doc.transfer_material_against == "Job Card" and not doc.skip_transfer:
+			min_qty = []
+			precision = self.precision("total_completed_qty")
+			for d in doc.operations:
+				completed_qty = (
+					flt(d.completed_qty) + flt(d.process_loss_qty) + get_upstream_process_loss(doc, d)
+				) * flt(doc.qty)
+				completed_qty = flt(completed_qty / get_operation_qty(doc, d), precision)
+				if completed_qty:
+					min_qty.append(completed_qty)
+				else:
+					min_qty = []
+					break
+
+			if min_qty:
+				qty = min(min_qty)
+
+			doc.db_set("material_transferred_for_manufacturing", qty)
+
+	def set_status(self, update_status=False):
+>>>>>>> theirs
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 
 		if self.docstatus < 2:

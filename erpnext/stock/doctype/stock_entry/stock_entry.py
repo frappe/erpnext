@@ -1215,15 +1215,22 @@ class StockEntry(StockController):
 
 	def check_if_operations_completed(self):
 		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
 		prod_order = frappe.get_doc("Work Order", self.work_order)
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 
 		for d in prod_order.get("operations"):
-			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
+			total_completed_qty = (
+				flt(self.fg_completed_qty) + flt(prod_order.produced_qty) + flt(prod_order.process_loss_qty)
+			)
 			completed_qty = (
-				d.completed_qty + d.process_loss_qty + (allowance_percentage / 100 * d.completed_qty)
+				d.completed_qty
+				+ d.process_loss_qty
+				+ get_upstream_process_loss(prod_order, d)
+				+ (allowance_percentage / 100 * d.completed_qty)
 			)
 			if flt(total_completed_qty, self.precision("fg_completed_qty")) > flt(
 				completed_qty, self.precision("fg_completed_qty")
@@ -2946,6 +2953,8 @@ class StockEntry(StockController):
 			self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
 	def set_process_loss_qty(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
 		if self.purpose not in ("Manufacture", "Repack"):
 			return
 
@@ -2966,7 +2975,10 @@ class StockEntry(StockController):
 						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
 					)
 
-		if not self.process_loss_percentage and not self.process_loss_qty:
+		has_upstream_loss = self.work_order and get_upstream_process_loss(
+			frappe.get_doc("Work Order", self.work_order)
+		)
+		if not self.process_loss_percentage and not self.process_loss_qty and not has_upstream_loss:
 			self.process_loss_percentage = frappe.get_cached_value(
 				"BOM", self.bom_no, "process_loss_percentage"
 			)
@@ -2980,6 +2992,70 @@ class StockEntry(StockController):
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
 
+<<<<<<< ours
+=======
+	def validate_job_card_pending_production(self):
+		"""A draft created before other entries were submitted must not book more than the job
+		card still has left; without this, a stale draft over-produces the finished good."""
+		if self.purpose != "Manufacture" or not self.job_card:
+			return
+
+		if self._action == "update_after_submit":
+			return
+
+		job_card = frappe.get_doc("Job Card", self.job_card)
+		if job_card.is_corrective_job_card or job_card.is_subcontracted:
+			return
+
+		if self.docstatus == 1:
+			from erpnext.manufacturing.doctype.job_card.job_card import (
+				validate_job_card_submitted_for_manufacture,
+			)
+
+			validate_job_card_submitted_for_manufacture(job_card)
+
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		pending_qty = flt(
+			flt(job_card.for_quantity)
+			- flt(job_card.pending_qty)
+			- flt(job_card.manufactured_qty)
+			- flt(job_card.get_consumed_process_loss()),
+			precision,
+		)
+		finished_qty = flt(sum(flt(d.transfer_qty) for d in self.items if d.is_finished_item), precision)
+		entry_qty = flt(finished_qty + flt(self.process_loss_qty), precision)
+
+		if entry_qty > pending_qty:
+			item_code = job_card.finished_good or job_card.production_item
+			uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+			frappe.throw(
+				_(
+					"The Job Card {0} has only {1} left to produce, but this entry books {2} ({3} finished goods and {4} process loss). Cancel or update its other manufacture entries first."
+				).format(
+					frappe.bold(self.job_card),
+					frappe.bold(f"{pending_qty} {uom}"),
+					frappe.bold(f"{entry_qty} {uom}"),
+					f"{finished_qty} {uom}",
+					f"{flt(self.process_loss_qty, precision)} {uom}",
+				)
+			)
+
+	def get_pending_process_loss_qty(self):
+		"""Loss this entry should still book: the job card's unbooked loss when the entry
+		belongs to one, else the unbooked portion of the cumulative operation loss on the work order."""
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
+		if self.job_card:
+			job_card = frappe.get_doc("Job Card", self.job_card)
+			return max(flt(job_card.process_loss_qty) - flt(job_card.get_consumed_process_loss()), 0)
+
+		if self.work_order:
+			work_order = frappe.get_doc("Work Order", self.work_order)
+			return max(get_upstream_process_loss(work_order) - flt(work_order.process_loss_qty), 0)
+
+		return 0
+
+>>>>>>> theirs
 	def set_work_order_details(self):
 		if not getattr(self, "pro_doc", None):
 			self.pro_doc = frappe._dict()

@@ -85,7 +85,11 @@ frappe.ui.form.on("Work Order", {
 
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
+<<<<<<< ours
 			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
+=======
+			return doc.status === "Completed" ? "green" : "orange";
+>>>>>>> theirs
 		});
 	},
 
@@ -361,10 +365,19 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
+<<<<<<< ours
 			if (data.completed_qty + data.process_loss_qty != frm.doc.qty) {
 				pending_qty = frm.doc.qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+=======
+			let operation_qty = erpnext.work_order.get_operation_target_qty(frm, data);
+			if (data.completed_qty + data.process_loss_qty != operation_qty) {
+				pending_qty = flt(
+					operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty),
+					precision("completed_qty", data)
+				);
+>>>>>>> theirs
 
-				if (pending_qty) {
+				if (pending_qty > 0) {
 					dialog.fields_dict.operations.df.data.push({
 						__checked: 1,
 						name: data.name,
@@ -506,6 +519,14 @@ frappe.ui.form.on("Work Order", {
 			let total_completed_qty = frm.doc.qty * frm.doc.operations.length;
 
 			frm.doc.operations.forEach((d) => {
+<<<<<<< ours
+=======
+				let operation_qty = erpnext.work_order.get_operation_target_qty(frm, d);
+				let completed_qty = operation_qty
+					? Math.min((flt(d.completed_qty) + flt(d.process_loss_qty)) / operation_qty, 1) *
+					  frm.doc.qty
+					: frm.doc.qty;
+>>>>>>> theirs
 				if (!status_wise_oprtation_data[d.status]) {
 					status_wise_oprtation_data[d.status] = [d.completed_qty, d.operation];
 				} else {
@@ -687,6 +708,21 @@ frappe.ui.form.on("Work Order Operation", {
 });
 
 erpnext.work_order = {
+<<<<<<< ours
+=======
+	get_operation_qty(frm, row) {
+		if (frm.doc.track_semi_finished_goods && flt(row.output_qty)) {
+			return flt(row.output_qty);
+		}
+
+		return flt(frm.doc.qty);
+	},
+
+	get_operation_target_qty(frm, row) {
+		return flt(frm.doc.__onload?.operation_target_qty?.[row.name] ?? this.get_operation_qty(frm, row));
+	},
+
+>>>>>>> theirs
 	set_custom_buttons: function (frm) {
 		var doc = frm.doc;
 
@@ -863,6 +899,38 @@ erpnext.work_order = {
 		return flt(max, precision("qty"));
 	},
 
+<<<<<<< ours
+=======
+	get_pending_operation_process_loss: (frm) => {
+		if (!(frm.doc.operations || []).length) {
+			return 0;
+		}
+
+		const total_loss = flt(frm.doc.__onload?.upstream_process_loss);
+		return flt(Math.max(total_loss - flt(frm.doc.process_loss_qty), 0), precision("qty"));
+	},
+
+	get_max_requestable_qty: (frm) => {
+		const required = {};
+		const covered = {};
+		(frm.doc.required_items || []).forEach((row) => {
+			required[row.item_code] = (required[row.item_code] || 0) + flt(row.required_qty);
+			if (!(row.item_code in covered)) {
+				covered[row.item_code] = flt(row.requested_qty) + flt(row.picked_qty);
+			}
+			covered[row.item_code] += flt(row.transferred_qty);
+		});
+
+		let max_fraction = 0;
+		Object.keys(required).forEach((item_code) => {
+			if (required[item_code] <= 0) return;
+			const pending = required[item_code] - covered[item_code];
+			max_fraction = Math.max(max_fraction, pending / required[item_code]);
+		});
+		return flt(max_fraction * flt(frm.doc.qty), precision("qty"));
+	},
+
+>>>>>>> theirs
 	show_disassembly_prompt: function (frm) {
 		let max_qty = flt(frm.doc.produced_qty - frm.doc.disassembled_qty);
 
