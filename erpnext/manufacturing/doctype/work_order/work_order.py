@@ -511,6 +511,9 @@ class WorkOrder(Document):
 					StockOverProductionError,
 				)
 
+			if purpose == "Manufacture":
+				self.validate_produced_qty_covers_disassembly(qty, self.precision("disassembled_qty"))
+
 			self.db_set(fieldname, qty)
 			self.set_process_loss_qty()
 
@@ -522,6 +525,16 @@ class WorkOrder(Document):
 		if self.production_plan:
 			self.set_produced_qty_for_sub_assembly_item()
 			self.update_production_plan_status()
+
+	def validate_produced_qty_covers_disassembly(self, produced_qty, precision):
+		if flt(produced_qty, precision) >= flt(self.disassembled_qty, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Manufactured Qty ({0}) cannot be less than the Disassembled Qty ({1}) of Work Order {2}. Cancel the disassembly first."
+			).format(flt(produced_qty, precision), flt(self.disassembled_qty, precision), self.name)
+		)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
 		precision = self.precision("disassembled_qty")
