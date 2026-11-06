@@ -2,13 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
-<<<<<<< ours
-=======
-import math
-from collections import defaultdict
-from functools import partial
 from itertools import groupby
->>>>>>> theirs
 
 import frappe
 from dateutil.relativedelta import relativedelta
@@ -152,115 +146,10 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
-<<<<<<< ours
-=======
-		self.set_onload("transfer_extra_materials_percentage", ms.transfer_extra_materials_percentage)
-		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
 		)
 		self.set_onload("upstream_process_loss", get_upstream_process_loss(self))
-		self.set_onload(
-			"enable_stock_reservation",
-			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
-		)
-
-		if self.bom_no:
-			if based_on := frappe.get_cached_value("BOM", self.bom_no, "backflush_based_on"):
-				self.set_onload("backflush_raw_materials_based_on", based_on)
-
-	@property
-	def secondary_items(self):
-		parent = frappe.qb.DocType("Stock Entry")
-		child = frappe.qb.DocType("Stock Entry Detail")
-		secondary_items_generated = (
-			frappe.qb.from_(parent)
-			.join(child)
-			.on(parent.name == child.parent)
-			.where(
-				(parent.work_order == self.name)
-				& (parent.docstatus == 1)
-				& ((child.secondary_item_type != "") | (Coalesce(child.valuation_type, "") != ""))
-			)
-			.select(
-				child.item_code,
-				Coalesce(child.secondary_item_type, "Scrap (Legacy)").as_("secondary_item_type"),
-				child.qty,
-				child.uom,
-				child.amount,
-			)
-			.run(as_dict=True)
-		)
-		if secondary_items_generated:
-			self.set_onload("secondary_items_generated", True)
-			return secondary_items_generated
-		else:
-			secondary_items = frappe.get_query(
-				"BOM",
-				filters={"name": self.bom_no},
-				fields=[
-					"secondary_items.item_code",
-					"secondary_items.secondary_item_type",
-					"secondary_items.qty",
-					"secondary_items.uom",
-					"secondary_items.cost as amount",
-					"quantity as bom_qty",
-				],
-			).run(as_dict=True)
-			secondary_items = [item for item in secondary_items if item.item_code]
-			precision = frappe.get_precision("Work Order Additional Item", "amount")
-			for item in secondary_items:
-				item["qty"] = (item.qty / item.bom_qty) * self.qty
-				item["amount"] = flt(flt(item.amount) * self.qty / item.bom_qty, precision)
-			return secondary_items
-
-	@property
-	def non_stock_items(self):
-		non_stock_items = frappe.get_query(
-			"BOM",
-			filters={"name": self.bom_no, "items.is_stock_item": 0, "items.is_phantom_item": 0},
-			fields=[
-				"items.item_code",
-				"items.qty",
-				"items.uom",
-				"items.base_rate as rate",
-				"items.base_amount as amount",
-				"quantity as bom_qty",
-			],
-		).run(as_dict=True)
-		for item in non_stock_items:
-			item["qty"] = (item.qty / item.bom_qty) * self.qty
-			item["amount"] = item.rate * item["qty"]
-		return non_stock_items
-
-	def show_create_job_card_button(self):
-		jc_doctype = frappe.qb.DocType("Job Card")
-		query = (
-			frappe.qb.from_(jc_doctype)
-			.select(jc_doctype.operation_id, Sum(jc_doctype.for_quantity - IfNull(jc_doctype.pending_qty, 0)))
-			.where((jc_doctype.docstatus < 2) & (jc_doctype.work_order == self.name))
-			.groupby(jc_doctype.operation_id)
-		)
-
-		operation_details = query.run(as_list=1)
-		operation_details = frappe._dict(operation_details)
-
-		for d in self.operations:
-			job_card_qty = flt(
-				get_operation_target_qty(self, d) - flt(operation_details.get(d.name)),
-				d.precision("completed_qty"),
-			)
-			if job_card_qty > 0:
-				return True
-
-		return False
-
-	def on_discard(self):
-		self.db_set("status", "Cancelled")
-
-	def before_insert(self):
-		self.enable_reserve_stock_for_produced_serial_no()
->>>>>>> theirs
 
 	def validate(self):
 		self.validate_production_item()
@@ -1201,11 +1090,7 @@ class WorkOrder(Document):
 			operation_target_qty = get_operation_target_qty(self, d)
 			if not qty and operation_target_qty:
 				d.status = "Pending"
-<<<<<<< ours
-			elif qty < flt(self.qty, precision):
-=======
 			elif qty < operation_target_qty:
->>>>>>> theirs
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
@@ -1975,15 +1860,6 @@ def close_work_order(work_order, status):
 	return work_order.status
 
 
-<<<<<<< ours
-=======
-def get_operation_qty(work_order, operation):
-	if work_order.get("track_semi_finished_goods") and flt(operation.get("output_qty")):
-		return flt(operation.get("output_qty"))
-
-	return flt(work_order.get("qty"))
-
-
 def get_upstream_process_loss(work_order, operation=None):
 	"""Loss before an operation, or before finished goods when no operation is supplied."""
 	if work_order.get("track_semi_finished_goods"):
@@ -2016,12 +1892,11 @@ def get_upstream_process_loss(work_order, operation=None):
 def get_operation_target_qty(work_order, operation):
 	"""Operation qty less the process loss booked before it."""
 	return flt(
-		get_operation_qty(work_order, operation) - get_upstream_process_loss(work_order, operation),
+		flt(work_order.get("qty")) - get_upstream_process_loss(work_order, operation),
 		operation.precision("completed_qty"),
 	)
 
 
->>>>>>> theirs
 def split_qty_based_on_batch_size(wo_doc, row, qty):
 	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
 		row.batch_size = row.get("qty") or wo_doc.qty

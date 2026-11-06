@@ -29,11 +29,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
 	close_work_order,
-<<<<<<< ours
-=======
-	get_reserved_qty_for_production,
 	get_upstream_process_loss,
->>>>>>> theirs
 	make_job_card,
 	make_stock_entry,
 	make_stock_return_entry,
@@ -655,9 +651,7 @@ class TestWorkOrder(FrappeTestCase):
 
 		self.assertEqual(work_order.get_status(), "Completed")
 
-	@ERPNextTestSuite.change_settings(
-		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 5}
-	)
+	@change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 5})
 	def test_operation_targets_include_upstream_process_loss(self):
 		for operations, upstream_losses, total_loss in (
 			([(1, 95, 5), (2, 92, 3), (3, 90, 2)], [0, 5, 8], 10),
