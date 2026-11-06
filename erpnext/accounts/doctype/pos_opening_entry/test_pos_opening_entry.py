@@ -47,6 +47,30 @@ class TestPOSOpeningEntry(unittest.TestCase):
 
 		self.assertEqual(opening_entry.status, "Open")
 
+	def test_negative_or_duplicate_opening_balance_is_refused(self):
+		test_user, pos_profile = self.init_user_and_profile()
+		for balance_details, message in (
+			([{"mode_of_payment": "Cash", "opening_amount": -500}], "cannot be negative"),
+			(
+				[
+					{"mode_of_payment": "Cash", "opening_amount": 200},
+					{"mode_of_payment": "Cash", "opening_amount": 100},
+				],
+				"added more than once",
+			),
+		):
+			opening_entry = frappe.get_doc(
+				{
+					"doctype": "POS Opening Entry",
+					"pos_profile": pos_profile.name,
+					"user": test_user.name,
+					"company": pos_profile.company,
+					"period_start_date": frappe.utils.get_datetime(),
+					"balance_details": balance_details,
+				}
+			)
+			self.assertRaisesRegex(frappe.ValidationError, message, opening_entry.insert)
+
 
 def create_opening_entry(pos_profile, user):
 	entry = frappe.new_doc("POS Opening Entry")
