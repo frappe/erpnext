@@ -682,6 +682,49 @@ class TestDunning(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
 	)
+	def test_dunning_uses_recalculated_foreign_currency_schedule_outstanding(self):
+		create_payment_terms_template_for_dunning()
+		template = frappe.get_doc("Payment Terms Template", "_Test 50-50 for Dunning")
+		template.allocate_payment_based_on_payment_terms = 0
+		template.save()
+		self.addCleanup(template.db_set, "allocate_payment_based_on_payment_terms", 1)
+
+		for payment_terms_template in (None, template.name):
+			with self.subTest(payment_terms_template=payment_terms_template):
+				invoice = create_sales_invoice(
+					posting_date=add_days(today(), -60),
+					currency="USD",
+					conversion_rate=80,
+					rate=100,
+					debit_to="Debtors - _TC",
+					do_not_save=True,
+				)
+				invoice.payment_terms_template = payment_terms_template
+				invoice.insert().submit()
+
+				partial_payment = get_payment_entry(
+					"Sales Invoice", invoice.name, bank_account="_Test Cash - _TC"
+				)
+				partial_payment.paid_amount = partial_payment.received_amount = 4000
+				partial_payment.references[0].allocated_amount = 4000
+				partial_payment.submit()
+
+				invoice.reload()
+				self.assertEqual(invoice.outstanding_amount, 4000)
+				self.assertEqual(
+					[row.outstanding for row in invoice.payment_schedule],
+					[100] if not payment_terms_template else [50, 50],
+				)
+
+				dunning = create_dunning_from_sales_invoice(invoice.name)
+				self.assertEqual(len(dunning.overdue_payments), 1)
+				self.assertEqual(dunning.overdue_payments[0].outstanding, 50)
+				dunning.submit()
+				self.assertEqual(dunning.total_outstanding, 50)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_payment_uses_receivable_currency(self):
 		create_payment_terms_template_for_dunning()
 		template = frappe.get_doc("Payment Terms Template", "_Test 50-50 for Dunning")
