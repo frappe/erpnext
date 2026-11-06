@@ -46,7 +46,9 @@ class ImportSupplierInvoice(Document):
 
 	def autoname(self):
 		if not self.name:
-			self.name = "Import Invoice on " + format_datetime(self.creation)
+			self.name = append_number_if_name_exists(
+				self.doctype, "Import Invoice on " + format_datetime(self.creation)
+			)
 
 	def import_xml_data(self):
 		self.publish("File Import", _("Processing XML Files"), 1, 3)
