@@ -99,3 +99,13 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 		columns = self.run_report_with_columns(warehouse="_Test Warehouse Group - _TC")[0]
 
 		self.assertNotIn("_Test Warehouse Group - _TC", [column.split(":")[0] for column in columns])
+
+	def test_negative_balances_are_not_filtered_as_zero(self):
+		item_code = make_item(properties={"is_stock_item": 1, "allow_negative_stock": 1}).name
+		make_stock_entry(
+			item_code=item_code, from_warehouse="Stores - _TC", qty=3, rate=50, posting_date="2026-06-01"
+		)
+
+		data = self.run_report(item_code=item_code, filter_total_zero_qty=1)
+
+		self.assertEqual([row[6] for row in data if row[0] == item_code], [-3])
