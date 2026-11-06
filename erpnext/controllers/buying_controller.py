@@ -586,13 +586,13 @@ class BuyingController(SubcontractingController):
 		(
 			tax_accounts,
 			total_valuation_amount,
-			all_item_charges,
-			stock_item_charges,
+			total_actual_tax_amount,
+			total_actual_tax_on_stock_items,
 		) = self.get_tax_details()
 
-		# Pre-compute each item's share of the "Actual" valuation charges (keyed by row idx).
+		# Pre-compute each item's share of valuation charges other than On Net Total.
 		actual_charge_per_item = self.distribute_actual_tax_amount(
-			stock_and_asset_items, all_item_charges, stock_item_charges
+			stock_and_asset_items, total_actual_tax_amount, total_actual_tax_on_stock_items
 		)
 
 		last_item_idx = max((d.idx for d in self.get("items")), default=1)
@@ -674,11 +674,8 @@ class BuyingController(SubcontractingController):
 	def get_tax_details(self):
 		tax_accounts = []
 		total_valuation_amount = 0.0
-		# Per-row "Actual" valuation charge amounts, kept separate (not pooled) so each can be
-		# distributed individually - this keeps the per-item item_tax_amount in lockstep with the
-		# per-tax-row amount capitalized in the GL (see get_capitalized_valuation_tax).
-		all_item_charges = []
-		stock_item_charges = []
+		total_actual_tax_amount = 0.0
+		total_actual_tax_on_stock_items = 0.0
 
 		for d in self.get("taxes"):
 			if d.category not in ["Valuation", "Valuation and Total"]:
@@ -691,12 +688,11 @@ class BuyingController(SubcontractingController):
 				total_valuation_amount += amount
 				tax_accounts.append((d.account_head, multiplier))
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
-				# Capitalize the full amount onto stock/asset items only (e.g. Freight)
-				stock_item_charges.append(amount)
-			else:
-				all_item_charges.append(amount)
+				total_actual_tax_on_stock_items += amount
+			elif d.charge_type != "On Item Quantity":
+				total_actual_tax_amount += amount
 
-		return tax_accounts, total_valuation_amount, all_item_charges, stock_item_charges
+		return tax_accounts, total_valuation_amount, total_actual_tax_amount, total_actual_tax_on_stock_items
 
 	def get_item_tax_amount(self, item, tax_accounts):
 		item_tax_amount = 0.0
@@ -715,27 +711,36 @@ class BuyingController(SubcontractingController):
 
 		return item_tax_amount
 
-	def distribute_actual_tax_amount(self, stock_and_asset_items, all_item_charges, stock_item_charges):
-		"""Distribute "Actual" valuation charges to each item, keyed by row idx.
-
-		Each charge is spread individually (not pooled together) so the resulting per-item
-		item_tax_amount decomposes exactly into the per-tax-row amount capitalized in the GL
-		(see get_capitalized_valuation_tax) - pooling first and spreading the aggregate can drift
-		by rounding for multiple charges over unevenly valued items. A charge in `all_item_charges`
-		is spread across every item by net amount; a non-stock item's share is computed but never
-		capitalized (e.g. a genuine tax). A charge in `stock_item_charges` (flagged
-		`allocate_full_amount_to_stock_items`) is spread across stock/asset items only, so the whole
-		charge is capitalized (e.g. Freight).
-		"""
+	def distribute_actual_tax_amount(self, stock_and_asset_items, total_on_all_items, total_on_stock_items):
+		"""Distribute valuation charges other than On Net Total, keyed by row idx."""
 		all_items = [d for d in self.get("items") if d.item_code]
 		stock_items = [d for d in all_items if d.item_code in stock_and_asset_items]
 
 		charge_per_item = {}
-		for charge in all_item_charges:
-			self._spread_charge_over_items(charge_per_item, charge, all_items)
-		for charge in stock_item_charges:
-			self._spread_charge_over_items(charge_per_item, charge, stock_items)
+		self._spread_charge_over_items(charge_per_item, total_on_all_items, all_items)
+		self._spread_charge_over_items(charge_per_item, total_on_stock_items, stock_items)
+		for tax in self.get("taxes"):
+			if tax.charge_type == "On Item Quantity" and tax.category in ("Valuation", "Valuation and Total"):
+				for item_idx, amount in self.get_quantity_based_tax_amounts(tax).items():
+					charge_per_item[item_idx] = charge_per_item.get(item_idx, 0.0) + amount
 		return charge_per_item
+
+	def get_quantity_based_tax_amounts(self, tax):
+		# Reuse the signed, rounded base amounts calculated for each item.
+		if self.get("_item_wise_tax_details"):
+			return {
+				row.item.idx: flt(row.amount)
+				for row in self.get("_item_wise_tax_details")
+				if row.tax.idx == tax.idx
+			}
+
+		# Revaluation and GL reposting can run on a saved document without recalculating taxes.
+		item_indices = {item.name: item.idx for item in self.get("items")}
+		return {
+			item_indices[row.item_row]: flt(row.amount)
+			for row in self.get("item_wise_tax_details") or []
+			if row.tax_row == tax.name
+		}
 
 	def _spread_charge_over_items(self, charge_per_item, total_charge, items):
 		"""Add each item's proportional share of `total_charge` into `charge_per_item`.
@@ -779,7 +784,13 @@ class BuyingController(SubcontractingController):
 			if not amount:
 				continue
 
-			if tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
+			if tax.charge_type == "On Item Quantity":
+				amount = sum(
+					charge
+					for item_idx, charge in self.get_quantity_based_tax_amounts(tax).items()
+					if item_idx in stock_item_idx
+				)
+			elif tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
 				# Spread across all items; only the stock/asset items' share is capitalized.
 				charge_per_item = {}
 				self._spread_charge_over_items(charge_per_item, amount, all_items)
