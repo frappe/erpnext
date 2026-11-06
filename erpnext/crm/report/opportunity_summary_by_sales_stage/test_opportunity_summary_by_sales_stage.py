@@ -24,6 +24,9 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 		create_company()
 		create_customer()
 		create_opportunity()
+		# users are created here, as saving a user commits and would drop the savepoint of a test
+		create_user("sales_stage_report_user@example.com", "Sales User")
+		create_user("sales_stage_restricted_user@example.com", "Sales User")
 
 	def setUp(self):
 		# keep each test's opportunities out of the counts of the others
@@ -82,9 +85,8 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 		self.assertEqual(expected_data, report[1])
 
 	def test_sales_user_can_run_the_report(self):
-		user = create_user("sales_stage_report_user@example.com", "Sales User")
 		filters = {"based_on": "Opportunity Owner", "data_based_on": "Number", "company": "Best Test"}
-		columns = execute_as(user.name, filters)[0]
+		columns = execute_as("sales_stage_report_user@example.com", filters)[0]
 
 		self.assertIn("Prospecting", [column["fieldname"] for column in columns])
 
@@ -93,10 +95,10 @@ class TestOpportunitySummaryBySalesStage(unittest.TestCase):
 
 		if not frappe.db.exists("Sales Stage", "Negotiation"):
 			frappe.get_doc({"doctype": "Sales Stage", "stage_name": "Negotiation"}).insert()
-		user = create_user("sales_stage_restricted_user@example.com", "Sales User")
-		add_user_permission("Sales Stage", "Prospecting", user.name)
+		user = "sales_stage_restricted_user@example.com"
+		add_user_permission("Sales Stage", "Prospecting", user)
 		filters = {"based_on": "Opportunity Owner", "data_based_on": "Number", "company": "Best Test"}
-		columns = execute_as(user.name, filters)[0]
+		columns = execute_as(user, filters)[0]
 
 		self.assertEqual(["Prospecting"], [column["fieldname"] for column in columns[1:]])
 
