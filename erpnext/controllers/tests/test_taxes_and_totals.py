@@ -4,6 +4,7 @@ from unittest.mock import patch
 import frappe
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -106,6 +107,58 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 				rule.disable = 0
 				rule.price_or_product_discount = "Price"
 				rule.save()
+
+	@ERPNextTestSuite.change_settings("System Settings", {"currency_precision": 2})
+	def test_inclusive_rounding_with_tax_groups_and_alternative_items(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Inclusive Rounding",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 10}],
+			}
+		).insert()
+		quotation = frappe.get_doc(
+			{
+				"doctype": "Quotation",
+				"company": "_Test Company",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"qty": 1,
+						"rate": 379,
+						"is_alternative": alternative,
+						"item_tax_template": template.name if rate == 10 else None,
+					}
+					for rate, alternative in [(21, 0), (21, 1), (10, 0), (21, 0), (10, 1), (10, 0), (21, 1)]
+				],
+				"taxes": [
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Service Tax - _TC",
+						"rate": 21,
+						"included_in_print_rate": 1,
+					}
+				],
+			}
+		)
+		for row_wise, expected in (
+			(0, [313.22, 313.22, 344.55, 313.23, 344.55, 344.54, 313.22]),
+			(1, [313.22, 313.22, 344.55, 313.22, 344.55, 344.55, 313.22]),
+		):
+			with (
+				self.subTest(round_row_wise_tax=row_wise),
+				self.change_settings("Accounts Settings", round_row_wise_tax=row_wise),
+			):
+				calculate_taxes_and_totals(quotation)
+				for field in ("net_amount", "net_rate", "base_net_amount", "base_net_rate"):
+					self.assertEqual([item.get(field) for item in quotation.items], expected)
+				self.assertEqual(quotation.net_total, 1315.54)
+				self.assertEqual(quotation.taxes[0].tax_amount, 200.46)
+				self.assertEqual(quotation.taxes[0].total, 1516)
+				self.assertEqual(quotation.grand_total, 1516)
 
 	def test_regional_round_off_accounts(self):
 		"""
@@ -245,3 +298,34 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(so.rounding_adjustment, 0)
 		self.assertEqual(so.base_rounded_total, 0)
 		self.assertEqual(so.base_rounding_adjustment, 0)
+
+	def test_grand_total_discount_follows_shipping_charge(self):
+		"""A lower rate moves the net total from the 100 band to the 50 band."""
+		so = self.make_sales_order_with_shipping_rule(rate=150)
+		calculate_taxes_and_totals(so)
+		so.apply_discount_on = "Grand Total"
+		so.additional_discount_percentage = 10
+		calculate_taxes_and_totals(so)
+		self.assertEqual(so.taxes[0].tax_amount, 100)
+
+		so.items[0].rate = 60
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.taxes[0].tax_amount, 50)
+		self.assertEqual(so.discount_amount, 11)
+		self.assertEqual(so.grand_total, 99)
+
+	def test_grand_total_discount_without_taxes(self):
+		so = self.make_sales_order_with_shipping_rule(rate=100)
+		so.apply_discount_on = "Grand Total"
+		so.discount_amount = 10
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.taxes[0].tax_amount, 50)
+		self.assertEqual(so.grand_total, 140)
+
+	def make_sales_order_with_shipping_rule(self, rate):
+		so = make_sales_order(qty=1, rate=rate, do_not_save=True)
+		so.set("taxes", [])
+		so.shipping_rule = create_shipping_rule("Selling", "_Test Shipping Rule - Discount").name
+		return so

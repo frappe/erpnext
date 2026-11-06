@@ -533,6 +533,7 @@ erpnext.patches.v16_0.rebuild_production_plan_requested_qty
 erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
 erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
 erpnext.patches.v16_0.recalculate_returned_delivery_note_billing_status
+erpnext.patches.v16_0.restore_in_words_print_defaults
 erpnext.patches.v16_0.apply_selling_settings_section_toggles
 erpnext.patches.v16_0.fix_ifrs_cash_flow_template_formulas
 erpnext.patches.v16_0.set_output_qty_in_work_order_operations
@@ -541,10 +542,15 @@ erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
 execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
 execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
 execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
 erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
+erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
 erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
 erpnext.patches.v16_0.set_supplier_quotation_order_status
 erpnext.patches.v16_0.set_work_order_requested_and_picked_qty
 erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
 erpnext.patches.v16_0.set_lost_on_in_opportunity
 erpnext.patches.v16_0.restore_auto_reconciliation_job
+erpnext.patches.v16_0.share_assigned_appointments_with_agents
+erpnext.patches.v16_0.set_base_change_amount_on_pos_invoices
+erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss

@@ -36,10 +36,12 @@ ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 def run_as_administrator():
 	previous_session = frappe._dict(frappe.session)
 	previous_form_dict = frappe.local.form_dict
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- gateway callback books the payment, restored in finally
 	frappe.set_user("Administrator")
 	try:
 		yield
 	finally:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-setuser -- gateway callback books the payment, restored in finally
 		frappe.set_user(previous_session.user)
 		frappe.local.session.update(previous_session)
 		frappe.local.form_dict = previous_form_dict
@@ -134,6 +136,7 @@ class PaymentRequest(Document):
 		self.validate_party(ref_doc)
 		self.validate_bank_account()
 		self.validate_print_format()
+		self.set_payment_references_within_requestable_amount(ref_doc)
 		self.validate_against_payment_reference()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
@@ -276,6 +279,22 @@ class PaymentRequest(Document):
 						self.reference_doctype
 					)
 				)
+
+	def set_payment_references_within_requestable_amount(self, ref_doc):
+		if not self.payment_reference or ref_doc.get("order_type") == "Shopping Cart":
+			return
+
+		precision = self.precision("grand_total")
+		requestable_amount = get_amount(ref_doc, self.payment_account) - flt(
+			get_existing_payment_request_amount(ref_doc)
+		)
+		excess = flt(sum(flt(row.amount) for row in self.payment_reference) - requestable_amount, precision)
+		if excess <= 0 or excess > get_payment_schedule_rounding_difference(ref_doc):
+			return
+
+		last_reference = self.payment_reference[-1]
+		last_reference.amount = flt(last_reference.amount - excess, precision)
+		self.grand_total = flt(self.grand_total - excess, precision)
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -965,6 +984,18 @@ def set_payment_references(payment_schedules):
 		)
 
 	return payment_reference
+
+
+def get_payment_schedule_rounding_difference(ref_doc):
+	if not ref_doc.get("payment_schedule"):
+		return 0
+
+	precision = ref_doc.precision("grand_total")
+	schedule_total = sum(flt(row.payment_amount, precision) for row in ref_doc.payment_schedule)
+	rounding_limit = len(ref_doc.payment_schedule) * 0.5 / 10**precision
+	return flt(
+		min(schedule_total - ref_doc.get_payment_schedule_grand_totals()[0], rounding_limit), precision
+	)
 
 
 def get_existing_payment_entry(ref_docname):

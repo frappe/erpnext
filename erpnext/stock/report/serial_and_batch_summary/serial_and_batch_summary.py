@@ -4,8 +4,11 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	data = get_data(filters)
 	columns = get_columns(filters, data)
 

@@ -636,7 +636,7 @@ class SerialandBatchBundle(Document):
 	def get_legacy_valuation_rate_for_return_entry(
 		self, return_against, return_against_voucher_detail_no, return_warehouse=None
 	):
-		"""Return the original line's incoming rate per serial no / batch from the SLE, for legacy receipts with no bundle."""
+		"""Return the original line's rate per serial no / batch from the SLE, for legacy entries with no bundle."""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if not (self.has_serial_no or self.has_batch_no):
@@ -645,7 +645,9 @@ class SerialandBatchBundle(Document):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		query = (
 			frappe.qb.from_(sle)
-			.select(sle.serial_no, sle.batch_no, sle.incoming_rate)
+			.select(
+				sle.serial_no, sle.batch_no, sle.incoming_rate, sle.actual_qty, sle.stock_value_difference
+			)
 			.where(
 				(sle.voucher_no == return_against)
 				& (sle.voucher_detail_no == return_against_voucher_detail_no)
@@ -660,18 +662,21 @@ class SerialandBatchBundle(Document):
 
 		data = []
 		for d in query.run(as_dict=True):
+			incoming_rate = d.incoming_rate
+			if d.actual_qty < 0:
+				# An outgoing entry (e.g. a delivery) has no incoming rate, use its outgoing value
+				incoming_rate = abs(d.stock_value_difference / d.actual_qty)
+
 			if d.serial_no:
 				for serial_no in get_serial_nos(d.serial_no):
 					data.append(
 						frappe._dict(
-							{"serial_no": serial_no, "batch_no": d.batch_no, "incoming_rate": d.incoming_rate}
+							{"serial_no": serial_no, "batch_no": d.batch_no, "incoming_rate": incoming_rate}
 						)
 					)
 			elif d.batch_no:
 				data.append(
-					frappe._dict(
-						{"serial_no": None, "batch_no": d.batch_no, "incoming_rate": d.incoming_rate}
-					)
+					frappe._dict({"serial_no": None, "batch_no": d.batch_no, "incoming_rate": incoming_rate})
 				)
 
 		return data
@@ -911,8 +916,10 @@ class SerialandBatchBundle(Document):
 			if batches and valuation_method in ("FIFO", "LIFO"):
 				stock_queue = parse_json(prev_sle.stock_queue)
 
-		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
-			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		# a Subcontracting Receipt books the whole cost on the accepted qty, so its rejected material has none
+		set_valuation_rate_for_rejected_materials = (
+			self.voucher_type != "Subcontracting Receipt"
+			and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
 
 		transfer_rates = self.get_transfer_rates()
@@ -2717,7 +2724,9 @@ def get_available_serial_nos(kwargs):
 
 	ignore_serial_nos = []
 	if reserved_entries:
-		if kwargs.get("sabb_voucher_type") == "Delivery Note" and kwargs.get("against_sales_order"):
+		if kwargs.get("sabb_voucher_type") in ("Delivery Note", "Sales Invoice") and kwargs.get(
+			"against_sales_order"
+		):
 			reserved_voucher_details = [kwargs.get("against_sales_order")]
 		else:
 			reserved_voucher_details = get_reserved_voucher_details(kwargs)
@@ -2931,6 +2940,7 @@ def get_reserved_voucher_details(kwargs):
 
 	field_mapper = {
 		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
+		"Sales Invoice": [["Sales Invoice Item", "sales_order"]],
 		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_inward_order"]],
 		"Work Order": [["Work Order", "production_plan"], ["Work Order", "subcontracting_inward_order"]],
 		"Pick List": [["Pick List", "work_order"]],
@@ -2939,12 +2949,14 @@ def get_reserved_voucher_details(kwargs):
 	if not field_mapper or not kwargs.get("sabb_voucher_no"):
 		return reserved_voucher_details
 
+	voucher_item_filters = {
+		"name": kwargs.get("sabb_voucher_detail_no"),
+		"parent": kwargs.get("sabb_voucher_no"),
+		"docstatus": ("<", 2),
+	}
 	voucher_based_filters = {
-		"Delivery Note": {
-			"name": kwargs.get("sabb_voucher_detail_no"),
-			"parent": kwargs.get("sabb_voucher_no"),
-			"docstatus": ("<", 2),
-		},
+		"Delivery Note": voucher_item_filters,
+		"Sales Invoice": voucher_item_filters,
 		"Stock Entry": {
 			"name": kwargs.get("sabb_voucher_no"),
 			"docstatus": ("<", 2),
@@ -3168,7 +3180,15 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	if kwargs.get("ignore_voucher_nos"):
 		pos_invoices = pos_invoices.where(POS_Invoice.name.notin(kwargs.get("ignore_voucher_nos")))
 
+	if kwargs.get("warehouse"):
+		warehouses = kwargs.warehouse if isinstance(kwargs.warehouse, list) else [kwargs.warehouse]
+		pos_invoices = pos_invoices.where(POS_Invoice_Item.warehouse.isin(warehouses))
+
 	pos_invoices = pos_invoices.run(as_dict=True)
+
+	batch_nos = kwargs.get("batch_no") or []
+	if isinstance(batch_nos, str):
+		batch_nos = [batch_nos]
 
 	ids = [
 		pos_invoice.serial_and_batch_bundle
@@ -3178,6 +3198,9 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	if ids:
 		for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+			if batch_nos and d.batch_no not in batch_nos:
+				continue
+
 			key = (d.batch_no, d.warehouse)
 			if key not in pos_batches:
 				pos_batches[key] = frappe._dict(
@@ -3191,10 +3214,10 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	# POS invoices having batch without bundle (to handle old POS invoices)
 	for row in pos_invoices:
-		if not row.batch_no:
+		if not row.batch_no or row.serial_and_batch_bundle in ids:
 			continue
 
-		if kwargs.get("batch_no") and row.batch_no != kwargs.get("batch_no"):
+		if batch_nos and row.batch_no not in batch_nos:
 			continue
 
 		key = (row.batch_no, row.warehouse)

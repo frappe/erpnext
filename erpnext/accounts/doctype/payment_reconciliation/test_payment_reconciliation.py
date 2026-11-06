@@ -1578,8 +1578,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		pe.references = []
 		pe.save().submit()
 
-		# unallocated_amount will have some rounding loss - 26.749950
-		self.assertNotEqual(pe.unallocated_amount, 26.75)
+		self.assertEqual(pe.unallocated_amount, 26.75)
 
 		pr = frappe.get_doc("Payment Reconciliation")
 		pr.company = self.company

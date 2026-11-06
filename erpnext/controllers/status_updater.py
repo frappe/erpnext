@@ -347,6 +347,19 @@ class StatusUpdater(Document):
 			# cancelling a note only reduces it, so don't re-enforce the limit on cancel
 			skip_on_cancel = self.docstatus == 2 and args.get("overflow_type") == "installation"
 
+			if self.get("is_return") and args.get("overflow_type") == "billing":
+				if args.get("billing_flag") and not self.get(args["billing_flag"]):
+					# the return never changes the order's billed amount
+					items_to_validate = []
+				elif self.docstatus != 2:
+					# a return row lowers billing unless its rate is negative, so check only rows that add to it;
+					# use qty and rate since the stored amount is stale when one field is set through the api
+					items_to_validate = [
+						d
+						for d in items_to_validate
+						if flt(d.child_doc.get("qty")) * flt(d.child_doc.get("rate")) > 0
+					]
+
 			if items_to_validate and not skip_on_cancel:
 				pp_sub_assembly_items = [
 					item.production_plan_sub_assembly_item
@@ -618,6 +631,7 @@ class StatusUpdater(Document):
 				if not args.get("second_source_extra_cond"):
 					args["second_source_extra_cond"] = ""
 
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 				args["second_source_condition"] = frappe.db.sql(
 					""" select ifnull((select sum({second_source_field})
 					from `tab{second_source_dt}`
@@ -632,6 +646,7 @@ class StatusUpdater(Document):
 					args["extra_cond"] = ""
 
 				args["source_dt_value"] = (
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 					frappe.db.sql(
 						"""
 						(select ifnull(sum({source_field}), 0)
@@ -650,6 +665,7 @@ class StatusUpdater(Document):
 				if args.get("target_conversion_factor"):
 					target_value = f"{target_value} / {args['target_conversion_factor']}"
 
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- fields come from the controller's status_updater config
 				frappe.db.sql(
 					"""update `tab{target_dt}`
 					set {target_field} = {target_value} {update_modified}

@@ -336,6 +336,7 @@ class POSInvoice(SalesInvoice):
 		map_doc(self, return_sales_invoice, table_map={"doctype": return_sales_invoice.doctype})
 		return_sales_invoice.is_created_using_pos = 1
 		return_sales_invoice.is_consolidated = 1
+		return_sales_invoice.flags.is_consolidated = True
 		return_sales_invoice.return_against = frappe.db.get_value(
 			"POS Invoice", self.return_against, "consolidated_invoice"
 		)
@@ -939,6 +940,7 @@ class POSInvoice(SalesInvoice):
 		change_amount = (
 			flt(flt(paid_amount - total), self.precision("change_amount")) if paid_amount > total else 0
 		)
+		base_change_amount = flt(change_amount * self.conversion_rate, self.precision("base_change_amount"))
 
 		pi = frappe.qb.DocType("POS Invoice")
 		query = (
@@ -947,6 +949,7 @@ class POSInvoice(SalesInvoice):
 			.set(pi.base_paid_amount, base_paid_amount)
 			.set(pi.outstanding_amount, outstanding_amount)
 			.set(pi.change_amount, change_amount)
+			.set(pi.base_change_amount, base_change_amount)
 			.where(pi.name == self.name)
 		)
 		query.run()

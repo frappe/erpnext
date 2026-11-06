@@ -36,10 +36,79 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import InvalidWarehouseCompany
+from erpnext.tests.permission_test_utils import make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSalesOrder(ERPNextTestSuite):
+	def test_maximum_discount_for_percentage_amount_and_rate(self):
+		item = make_item(properties={"is_stock_item": 0, "max_discount": 10})
+		item_price = frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "Standard Selling",
+				"price_list_rate": 100,
+			}
+		).insert()
+		user = make_fenced_user("max-discount@example.com", ["Sales User"])
+
+		with self.set_user(user):
+			for values in (
+				{"discount_percentage": 50},
+				{"discount_amount": 50},
+				{"rate": 50},
+				{"margin_type": "Percentage", "margin_rate_or_amount": 25, "discount_amount": 25},
+			):
+				with self.subTest(values=values):
+					order = make_sales_order(
+						item_list=[{"item_code": item.name, "qty": 1, **values}],
+						selling_price_list="Standard Selling",
+						do_not_save=True,
+					)
+					with self.assertRaisesRegex(frappe.ValidationError, "Maximum discount for Item"):
+						order.insert().submit()
+
+			for values, expected_rate in (
+				({"discount_percentage": 10}, 90),
+				({"discount_amount": 10}, 90),
+				({"rate": 90}, 90),
+				({"margin_type": "Percentage", "margin_rate_or_amount": 25, "discount_amount": 12.5}, 112.5),
+			):
+				with self.subTest(values=values):
+					order = make_sales_order(
+						item_list=[{"item_code": item.name, "qty": 1, **values}],
+						selling_price_list="Standard Selling",
+					)
+					self.assertEqual(order.docstatus, 1)
+					self.assertEqual(order.items[0].price_list_rate, 100)
+					self.assertEqual(order.items[0].rate, expected_rate)
+
+		item_price.price_list_rate = 0.06
+		item_price.save()
+		with self.set_user(user):
+			order = make_sales_order(
+				item_list=[{"item_code": item.name, "qty": 1, "discount_percentage": 10}],
+				selling_price_list="Standard Selling",
+			)
+			self.assertEqual(order.items[0].discount_amount, 0.01)
+			self.assertEqual(order.items[0].rate, 0.05)
+
+		for price_list_rate, rate in ((0, 50), (-100, -100)):
+			item_price.price_list_rate = price_list_rate
+			item_price.save()
+			with (
+				self.subTest(price_list_rate=price_list_rate),
+				self.change_settings("Selling Settings", {"allow_negative_rates_for_items": 1}),
+				self.set_user(user),
+			):
+				order = make_sales_order(
+					item_list=[{"item_code": item.name, "qty": 1, "rate": rate}],
+					selling_price_list="Standard Selling",
+				)
+				self.assertEqual(order.items[0].rate, rate)
+				self.assertEqual(order.items[0].discount_amount, 0)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
@@ -2376,6 +2445,48 @@ class TestSalesOrder(ERPNextTestSuite):
 				getdate(expected_delivery_dates[work_order.sales_order_item]),
 			)
 
+	def test_update_child_keeps_paid_payment_term_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+			get_payment_entry,
+		)
+
+		create_payment_terms_template()
+		for invoice_portion in (100, 0):
+			with self.subTest(invoice_portion=invoice_portion):
+				so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+				so.payment_terms_template = "Test Receivable Template"
+				so.set("payment_schedule", [])
+				so.append(
+					"payment_schedule",
+					{
+						"payment_term": "Basic Amount Receivable",
+						"due_date": so.delivery_date,
+						"invoice_portion": invoice_portion,
+						"payment_amount": 1000,
+					},
+				)
+				so.insert()
+				so.submit()
+
+				pe = get_payment_entry("Sales Order", so.name, party_amount=400)
+				pe.reference_no = "1"
+				pe.reference_date = nowdate()
+				pe.references[0].allocated_amount = 400
+				pe.insert()
+				pe.submit()
+
+				item = so.items[0]
+				trans_item = json.dumps(
+					[{"item_code": item.item_code, "qty": 1, "rate": 1000, "docname": item.name}]
+				)
+				update_child_qty_rate("Sales Order", trans_item, so.name)
+
+				term = frappe.get_doc("Sales Order", so.name).payment_schedule[0]
+				self.assertEqual(term.paid_amount, 400)
+				self.assertEqual(term.outstanding, 600)
+				self.assertEqual(term.base_outstanding, 600)
+
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
@@ -3573,6 +3684,25 @@ class TestSalesOrder(ERPNextTestSuite):
 		po.items[0].rate = 100
 		po.submit()
 		self.assertEqual(po.taxes[0].tax_amount, 2)
+
+	def test_make_purchase_order_does_not_inherit_incoterm(self):
+		for delivered_by_supplier in (0, 1):
+			with self.subTest(delivered_by_supplier=delivered_by_supplier):
+				so = make_sales_order(do_not_save=True)
+				so.incoterm = "CIF"
+				so.named_place = "Hamburg port"
+				so.items[0].delivered_by_supplier = delivered_by_supplier
+				so.items[0].supplier = "_Test Supplier"
+				so.submit()
+
+				po = make_purchase_order(so.name, selected_items=so.items)[0]
+
+				self.assertFalse(po.incoterm)
+				self.assertFalse(po.named_place)
+				self.assertEqual(po.items[0].sales_order, so.name)
+				self.assertEqual(po.supplier, "_Test Supplier")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "incoterm"), "CIF")
+				self.assertEqual(frappe.get_value("Sales Order", so.name, "named_place"), "Hamburg port")
 
 	def test_make_purchase_order_does_not_inherit_party_fields(self):
 		"""

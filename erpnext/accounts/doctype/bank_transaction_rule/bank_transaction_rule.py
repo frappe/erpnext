@@ -236,7 +236,7 @@ def scheduler_run_rule_evaluation():
 
 @frappe.whitelist(methods=["POST"])
 def run_rule_evaluation(force_evaluate: bool = False):
-	frappe.has_permission("Bank Transaction", ptype="read", throw=True)
+	frappe.has_permission("Bank Transaction", ptype="write", throw=True)
 	frappe.enqueue(method=_run_rule_evaluation, force_evaluate=force_evaluate)
 
 

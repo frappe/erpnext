@@ -42,6 +42,7 @@ def after_install():
 	create_letter_head()
 	toggle_hidden_fields()
 	grant_address_read_to_accounts_manager()
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
 	frappe.db.commit()
 
 

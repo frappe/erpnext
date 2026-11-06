@@ -684,13 +684,12 @@ class BuyingController(SubcontractingController):
 			if d.category not in ["Valuation", "Valuation and Total"]:
 				continue
 
-			amount = flt(d.base_tax_amount_after_discount_amount) * (
-				-1 if d.get("add_deduct_tax") == "Deduct" else 1
-			)
+			multiplier = -1 if d.get("add_deduct_tax") == "Deduct" else 1
+			amount = flt(d.base_tax_amount_after_discount_amount) * multiplier
 
 			if d.charge_type == "On Net Total":
 				total_valuation_amount += amount
-				tax_accounts.append(d.account_head)
+				tax_accounts.append((d.account_head, multiplier))
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Capitalize the full amount onto stock/asset items only (e.g. Freight)
 				stock_item_charges.append(amount)
@@ -703,10 +702,8 @@ class BuyingController(SubcontractingController):
 		item_tax_amount = 0.0
 		if item.item_tax_rate:
 			tax_details = json.loads(item.item_tax_rate)
-			for account, rate in tax_details.items():
-				if account not in tax_accounts:
-					continue
-
+			for account, multiplier in tax_accounts:
+				rate = tax_details.get(account, 0)
 				if rate == NOT_APPLICABLE_TAX:
 					continue
 
@@ -714,7 +711,7 @@ class BuyingController(SubcontractingController):
 				if item.sales_incoming_rate:
 					net_rate = item.qty * item.sales_incoming_rate
 
-				item_tax_amount += flt(net_rate) * flt(rate) / 100
+				item_tax_amount += flt(net_rate) * flt(rate) / 100 * multiplier
 
 		return item_tax_amount
 
@@ -1539,6 +1536,9 @@ def get_linked_asset_qty(detail_field, details, exclude_asset=None):
 
 @frappe.request_cache
 def get_purchase_expense_account(item_code, company):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
 	defaults = get_item_defaults(item_code, company)
 
 	details = frappe._dict(
@@ -1549,22 +1549,17 @@ def get_purchase_expense_account(item_code, company):
 	)
 
 	if not details.purchase_expense_account:
-		details = frappe.db.get_value(
-			"Item Default",
-			{"parent": defaults.item_group, "company": company},
-			["purchase_expense_account", "purchase_expense_contra_account"],
-			as_dict=1,
-		) or frappe._dict({})
+		details = get_item_group_defaults(item_code, company)
 
 	if not details.purchase_expense_account:
-		details = frappe.db.get_value(
-			"Item Default",
-			{"parent": defaults.brand, "company": company},
-			["purchase_expense_account", "purchase_expense_contra_account"],
-			as_dict=1,
-		)
+		details = get_brand_defaults(item_code, company)
 
-	return details or frappe._dict({})
+	return frappe._dict(
+		{
+			field: details.get(field)
+			for field in ("purchase_expense_account", "purchase_expense_contra_account")
+		}
+	)
 
 
 def get_stock_qty(row, qty) -> float:

@@ -210,6 +210,22 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertEqual(dn.packed_items[2].qty, 6)
 		self.assertEqual(dn.packed_items[3].qty, 6)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_newly_mapped_doc_with_removed_bundle_row(self):
+		"Packed items of a removed row must not move to another row with the same bundle."
+		so_items = [
+			{"item_code": self.bundle, "qty": 1, "rate": 400, "warehouse": warehouse}
+			for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+		]
+		so = make_sales_order(item_list=so_items)
+
+		dn = make_delivery_note(so.name)
+		dn.items.pop(0)
+		dn.insert()
+
+		self.assertEqual(len(dn.packed_items), 2)
+		self.assertEqual({pi.warehouse for pi in dn.packed_items}, {"_Test Warehouse 1 - _TC"})
+
 	def test_reposting_packed_items(self):
 		warehouse = "Stores - TCP1"
 		company = "_Test Company with perpetual inventory"
@@ -341,6 +357,19 @@ class TestPackedItem(ERPNextTestSuite):
 		self.assertEqual(
 			[row.warehouse for row in dn_ret.packed_items], [other_warehouse, "_Test Warehouse 2 - _TC"]
 		)
+
+	def test_mapped_docs_keep_order_packed_item_warehouse(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1, do_not_submit=True)
+		for row in so.packed_items:
+			row.warehouse = other_warehouse
+		so.save()
+		so.submit()
+
+		for target in (make_delivery_note(so.name), make_sales_invoice(so.name)):
+			self.assertEqual([row.warehouse for row in target.packed_items], [other_warehouse] * 2)
 
 	def test_amended_order_keeps_packed_item_warehouse(self):
 		other_warehouse = "_Test Warehouse 1 - _TC"

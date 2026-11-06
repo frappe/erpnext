@@ -12,6 +12,7 @@ from frappe.utils import date_diff, flt, getdate
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
@@ -42,6 +43,7 @@ def validate_filters(filters):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
 	from_date, to_date = filters.get("from_date"), filters.get("to_date")
+	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
 
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))

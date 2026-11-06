@@ -16,6 +16,7 @@ def upload_bank_statement():
 	frappe.has_permission("Bank Transaction", "create", throw=True)
 
 	if getattr(frappe, "uploaded_file", None):
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
 		with open(frappe.uploaded_file, "rb") as upfile:
 			fcontent = upfile.read()
 	else:

@@ -172,6 +172,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
+		sales_invoice.flags.is_consolidated = True
 		sales_invoice.set_posting_time = 1
 
 		if not sales_invoice.posting_date:
@@ -199,6 +200,7 @@ class POSInvoiceMergeLog(Document):
 			credit_note.return_against = key
 
 			credit_note.is_consolidated = 1
+			credit_note.flags.is_consolidated = True
 			credit_note.set_posting_time = 1
 			credit_note.posting_date = getdate(self.posting_date)
 			credit_note.posting_time = get_time(self.posting_time)
@@ -682,6 +684,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			raise
 
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 
@@ -716,6 +719,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			raise
 
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 

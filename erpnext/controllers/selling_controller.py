@@ -73,6 +73,13 @@ class SellingController(StockController):
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
 
+	def before_update_after_submit(self):
+		if self.meta.get_field("sales_team") and self.is_child_table_same("sales_team"):
+			return
+
+		self.calculate_commission()
+		self.calculate_contribution()
+
 	def validate_against_stock_reservation_entries(self):
 		if self.get("is_return") or (self.doctype == "Sales Invoice" and not cint(self.get("update_stock"))):
 			return
@@ -181,6 +188,8 @@ class SellingController(StockController):
 			)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
+			if self.get("sales_partner"):
+				party_details.pop("commission_rate", None)
 			self.update_if_missing(party_details)
 
 		elif lead:
@@ -244,6 +253,17 @@ class SellingController(StockController):
 		if not self.meta.get_field("commission_rate"):
 			return
 
+		if not self.get("sales_partner"):
+			self.commission_rate = 0
+		elif self.commission_rate is None or (
+			self.get_doc_before_save()
+			and self.has_value_changed("sales_partner")
+			and not self.has_value_changed("commission_rate")
+		):
+			self.commission_rate = (
+				frappe.get_cached_value("Sales Partner", self.sales_partner, "commission_rate") or 0
+			)
+
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
 
 		if not (0 <= self.commission_rate <= 100.0):
@@ -280,11 +300,10 @@ class SellingController(StockController):
 				self.precision("allocated_amount", sales_person),
 			)
 
-			if sales_person.commission_rate:
-				sales_person.incentives = flt(
-					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
-					self.precision("incentives", sales_person),
-				)
+			sales_person.incentives = flt(
+				sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
+				self.precision("incentives", sales_person),
+			)
 
 			total += sales_person.allocated_percentage
 
@@ -298,19 +317,58 @@ class SellingController(StockController):
 			return
 
 		sales_person_status = frappe.db.get_all(
-			"Sales Person", filters={"name": ["in", sales_persons]}, fields=["name", "enabled"]
+			"Sales Person",
+			filters={"name": ["in", sales_persons]},
+			fields=["name", "enabled", "is_group", "commission_rate"],
 		)
 
 		for row in sales_person_status:
+			if row.is_group:
+				frappe.throw(_("Sales Person {0} is a group.").format(frappe.bold(row.name)))
 			if not row.enabled:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
+
+		seen = set()
+		for row in sales_team:
+			if row.sales_person in seen:
+				frappe.throw(
+					_("Sales Person {0} is repeated in the sales team.").format(frappe.bold(row.sales_person))
+				)
+			seen.add(row.sales_person)
+			if not 0 <= flt(row.allocated_percentage) <= 100:
+				frappe.throw(_("Row #{0}: Contribution (%) must be between 0 and 100").format(row.idx))
+
+		previous = self.get_doc_before_save()
+		previous_rows = {row.name: row for row in previous.get("sales_team")} if previous else {}
+		master_rates = {row.name: flt(row.commission_rate) for row in sales_person_status}
+		return_rates = {}
+		if self.get("is_return") and self.get("return_against"):
+			source = frappe.get_doc(self.doctype, self.return_against)
+			return_rates = {row.sales_person: row.commission_rate for row in source.sales_team}
+		for row in sales_team:
+			previous_row = previous_rows.get(row.name)
+			if previous_row and previous_row.sales_person == row.sales_person:
+				commission_rate = previous_row.commission_rate
+			else:
+				commission_rate = return_rates.get(row.sales_person, master_rates[row.sales_person])
+
+			if any(not 0 <= flt(rate) <= 100 for rate in (row.commission_rate, commission_rate)):
+				frappe.throw(_("Row #{0}: Commission Rate must be between 0 and 100").format(row.idx))
+			row.commission_rate = commission_rate
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						flt(d.rate_with_margin) > 0
+						and flt(d.discount_amount)
+						> flt(flt(d.rate_with_margin) * discount / 100, d.precision("discount_amount"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
@@ -1102,9 +1160,14 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
+						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
+						# present so this never crashes on a missing bundle.
+						(
+							delivered_serial_nos,
+							delivered_batch_qty,
+						) = get_delivered_serial_batch_for_reservation(item)
 						if sre_doc.has_serial_no:
-							delivered_serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
 									entry.delivered_qty = 1  # Qty will always be 0 or 1 for Serial No.
@@ -1112,16 +1175,16 @@ class SellingController(StockController):
 									qty_can_be_deliver += 1
 									delivered_serial_nos.remove(entry.serial_no)
 						else:
-							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in delivered_batch_qty:
+								available_batch_qty = delivered_batch_qty.get(entry.batch_no, 0)
+								if available_batch_qty > 0:
 									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), delivered_batch_qty[entry.batch_no]
+										(entry.qty - entry.delivered_qty), available_batch_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
 									qty_can_be_deliver += delivered_qty
-									delivered_batch_qty[entry.batch_no] -= delivered_qty
+									delivered_batch_qty[entry.batch_no] = available_batch_qty - delivered_qty
 					else:
 						# `Delivered Qty` should be less than or equal to `Reserved Qty`.
 						qty_can_be_deliver = min(
@@ -1299,6 +1362,34 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 	child.db_set("serial_and_batch_bundle", doc.name)
 
 	return doc.name
+
+
+def get_delivered_serial_batch_for_reservation(item):
+	"""Serial nos and per-batch qty delivered by a stock row.
+
+	The detail may be stored in a Serial and Batch Bundle or directly in the row's
+	``serial_no``/``batch_no`` fields (``use_serial_batch_fields``). Reading from whichever is
+	present keeps the Stock Reservation Entry delivered-qty update independent of a bundle being
+	created -- delivering reserved serial/batch stock used to crash when the row had no bundle.
+	"""
+	serial_nos, batch_qty = [], {}
+
+	if item.get("serial_and_batch_bundle"):
+		bundle = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
+		for row in bundle.entries:
+			if row.serial_no:
+				serial_nos.append(row.serial_no)
+			if row.batch_no:
+				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
+	else:
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if item.get("serial_no"):
+			serial_nos = get_serial_nos(item.serial_no)
+		if item.get("batch_no"):
+			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
+
+	return serial_nos, batch_qty
 
 
 def get_reserved_warehouses_by_order_row(so_details: list) -> dict:

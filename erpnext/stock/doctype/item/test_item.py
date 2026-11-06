@@ -26,7 +26,7 @@ from erpnext.stock.doctype.item.item import (
 	validate_is_stock_item,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details, get_item_tax_template
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -318,6 +318,24 @@ class TestItem(ERPNextTestSuite):
 			self.assertEqual(
 				json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template]
 			)
+
+	def test_item_follows_item_group_tax_changes(self):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": f"_Test Tax Group {frappe.generate_hash(length=6)}",
+				"parent_item_group": "All Item Groups",
+				"taxes": [{"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"}],
+			}
+		).insert()
+		item = make_item(properties={"item_group": item_group.name})
+		self.assertFalse(item.taxes)
+
+		item_group.taxes[0].item_tax_template = "_Test Account Excise Duty @ 12 - _TC"
+		item_group.save()
+
+		ctx = frappe._dict(item_code=item.name, tax_category="", company="_Test Company")
+		self.assertEqual(get_item_tax_template(ctx), "_Test Account Excise Duty @ 12 - _TC")
 
 	def test_item_defaults(self):
 		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)

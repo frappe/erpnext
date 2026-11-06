@@ -1013,8 +1013,8 @@ class PickList(TransactionBase):
 			}
 		return product_bundle_qty_map
 
-	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
-		"""Compute how many full bundles can be created from picked items."""
+	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
+		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
 		possible_bundles = {}
 		for item in self.locations:
@@ -1022,8 +1022,9 @@ class PickList(TransactionBase):
 				continue
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
+				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
 				possible_bundles.setdefault(item.product_bundle_item, 0)
-				possible_bundles[item.product_bundle_item] += item.picked_qty / qty_in_bundle
+				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
@@ -1621,6 +1622,22 @@ def create_delivery_note(source_name, target_doc=None):
 
 
 @frappe.whitelist()
+def get_existing_drafts(source_name: str, target_doctype: str) -> list[str]:
+	if target_doctype not in {"Delivery Note", "Sales Invoice"}:
+		frappe.throw(_("Unsupported target document type"))
+
+	pick_list = frappe.get_doc("Pick List", source_name)
+	pick_list.check_permission("read")
+
+	return frappe.get_list(
+		target_doctype,
+		filters={"docstatus": 0, "against_pick_list": source_name},
+		pluck="name",
+		order_by="name",
+	)
+
+
+@frappe.whitelist()
 def create_delivery(
 	source_name: str, target_doc: str | dict | Document | None = None, target: str | None = None
 ):
@@ -1952,10 +1969,14 @@ def add_product_bundles_to_target(
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
-		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
-		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
-			so_row, product_bundle_qty_map[value.item_code]
+		pending_qty = pick_list._compute_picked_qty_for_bundle(
+			so_row, product_bundle_qty_map[value.item_code], pending_only=True
 		)
+		if not pending_qty:
+			continue
+
+		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
+		target_bundle_item.qty = pending_qty
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
 

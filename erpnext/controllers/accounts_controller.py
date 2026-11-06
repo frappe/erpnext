@@ -2976,6 +2976,7 @@ class AccountsController(TransactionBase):
 			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
+			keep_settled = self.docstatus == 1 and getattr(self, "_action", None) != "submit"
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
@@ -2984,18 +2985,29 @@ class AccountsController(TransactionBase):
 					d.base_payment_amount = flt(
 						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
 					)
-					d.outstanding = d.payment_amount
-					d.base_outstanding = d.base_payment_amount
 				elif not d.invoice_portion:
 					d.base_payment_amount = flt(
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
-					d.base_outstanding = d.base_payment_amount
+				self.set_term_outstanding(d, keep_settled)
 		else:
 			self.fetch_payment_terms_from_order(
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			self.ignore_default_payment_terms_template = 1
+
+	def set_term_outstanding(self, term, keep_settled: bool) -> None:
+		settled = base_settled = 0
+		if keep_settled:
+			settled = flt(term.paid_amount) + flt(term.discounted_amount)
+			base_settled = flt(term.base_paid_amount) + flt(term.discounted_amount) * flt(
+				self.get("conversion_rate")
+			)
+
+		term.outstanding = flt(term.payment_amount - settled, term.precision("outstanding"))
+		term.base_outstanding = flt(
+			term.base_payment_amount - base_settled, term.precision("base_outstanding")
+		)
 
 	def get_order_details(self):
 		if not self.get("items"):
@@ -3101,6 +3113,13 @@ class AccountsController(TransactionBase):
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.payment_amount * self.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
+				payment_schedule["outstanding"] = schedule.payment_amount
+
+			payment_schedule["base_outstanding"] = payment_schedule["base_payment_amount"]
 
 			self.append("payment_schedule", payment_schedule)
 
@@ -3143,13 +3162,6 @@ class AccountsController(TransactionBase):
 		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			return
 
-		party_account_currency = self.get("party_account_currency")
-		if not party_account_currency:
-			party_type, party = self.get_party()
-
-			if party_type and party:
-				party_account_currency = get_party_account_currency(party_type, party, self.company)
-
 		if self.get("payment_schedule"):
 			total = 0
 			base_total = 0
@@ -3157,24 +3169,7 @@ class AccountsController(TransactionBase):
 				total += flt(d.payment_amount, d.precision("payment_amount"))
 				base_total += flt(d.base_payment_amount, d.precision("base_payment_amount"))
 
-			base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
-			grand_total = flt(self.get("rounded_total") or self.grand_total)
-
-			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
-				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
-				grand_total = grand_total - flt(self.write_off_amount)
-
-			if self.get("total_advance"):
-				if party_account_currency == self.company_currency:
-					base_grand_total -= self.get("total_advance")
-					grand_total = flt(
-						base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
-					)
-				else:
-					grand_total -= self.get("total_advance")
-					base_grand_total = flt(
-						grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
-					)
+			grand_total, base_grand_total = self.get_payment_schedule_grand_totals()
 
 			if (
 				abs(
@@ -3191,6 +3186,35 @@ class AccountsController(TransactionBase):
 				frappe.throw(
 					_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total")
 				)
+
+	def get_payment_schedule_grand_totals(self):
+		party_account_currency = self.get("party_account_currency")
+		if not party_account_currency:
+			party_type, party = self.get_party()
+
+			if party_type and party:
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
+
+		base_grand_total = flt(self.get("base_rounded_total") or self.base_grand_total)
+		grand_total = flt(self.get("rounded_total") or self.grand_total)
+
+		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
+			grand_total = grand_total - flt(self.write_off_amount)
+
+		if self.get("total_advance"):
+			if party_account_currency == self.company_currency:
+				base_grand_total -= self.get("total_advance")
+				grand_total = flt(
+					base_grand_total / self.get("conversion_rate"), self.precision("grand_total")
+				)
+			else:
+				grand_total -= self.get("total_advance")
+				base_grand_total = flt(
+					grand_total * self.get("conversion_rate"), self.precision("base_grand_total")
+				)
+
+		return grand_total, base_grand_total
 
 	def is_rounded_total_disabled(self):
 		if self.meta.get_field("disable_rounded_total"):
@@ -5022,12 +5046,13 @@ def update_child_qty_rate(
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)
 	frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-		parent.doctype, parent.company, parent.base_grand_total
+		parent.doctype, parent.company, parent.base_grand_total, parent
 	)
 
 	if parent_doctype != "Supplier Quotation":
 		parent.set_payment_schedule()
 	if parent_doctype == "Purchase Order":
+		parent.set_last_purchase_rate()
 		parent.validate_minimum_order_qty()
 		parent.validate_budget()
 		if parent.is_against_so():
@@ -5208,7 +5233,6 @@ def get_missing_company_details(doctype: str, docname: str):
 	)
 
 	required_fields = [
-		company_details.get("company_logo"),
 		company_details.get("phone_no"),
 		company_details.get("email"),
 	]
@@ -5244,7 +5268,7 @@ def get_missing_company_details(doctype: str, docname: str):
 	required_fields.append(company_address)
 	required_fields.append(address_line)
 
-	if all(required_fields):
+	if all(required_fields) and not needs_optional_company_details(company, company_details):
 		return False
 	return {
 		"company_logo": company_details.get("company_logo"),
@@ -5256,6 +5280,19 @@ def get_missing_company_details(doctype: str, docname: str):
 		"company_address": company_address,
 		"name": docname,
 	}
+
+
+def needs_optional_company_details(company, company_details):
+	from frappe.model.utils.user_settings import get_user_settings
+
+	if company_details.get("company_logo") and company_details.get("website"):
+		return False
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		return False
+
+	skipped = frappe.parse_json(get_user_settings("Company")).get("skipped_print_details") or []
+	return company not in skipped
 
 
 @frappe.whitelist(methods=["POST"])

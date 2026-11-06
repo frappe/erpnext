@@ -41,8 +41,8 @@ class LoyaltyProgram(Document):
 		self.validate_lowest_tier()
 
 	def validate_lowest_tier(self):
-		tiers = sorted(self.collection_rules, key=lambda x: x.min_spent)
-		if tiers and tiers[0].min_spent != 0:
+		tiers = sorted(self.collection_rules, key=lambda x: flt(x.min_spent))
+		if tiers and flt(tiers[0].min_spent) != 0:
 			frappe.throw(
 				_(
 					"The lowest tier must have a minimum spent amount of 0. Customers need to be part of a tier as soon as they are enrolled in the program."

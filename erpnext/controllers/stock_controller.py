@@ -270,7 +270,7 @@ class StockController(AccountsController):
 
 	def get_item_wise_inventory_account_map(self):
 		inventory_account_map = frappe._dict()
-		for table in ["items", "packed_items", "supplied_items"]:
+		for table in ["items", "packed_items", "supplied_items", "stock_items"]:
 			if not self.get(table):
 				continue
 
@@ -633,6 +633,7 @@ class StockController(AccountsController):
 		if not reference_ids:
 			return
 
+		reference_field = field
 		child_doctype = self.doctype + " Item"
 		if table_name == "packed_items":
 			field = "parent_detail_docname"
@@ -643,7 +644,7 @@ class StockController(AccountsController):
 		for row in self.get(table_name):
 			value = row.get(field)
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
-				value = self.get_value_for_packed_item(row)
+				value = self.get_value_for_packed_item(row, reference_field)
 				if not value:
 					continue
 
@@ -663,11 +664,10 @@ class StockController(AccountsController):
 						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
 					)
 
-	def get_value_for_packed_item(self, row):
+	def get_value_for_packed_item(self, row, reference_field):
 		parent_items = self.get("items", {"name": row.parent_detail_docname})
 		if parent_items:
-			ref = parent_items[0].get("dn_detail")
-			return (row.item_code, ref)
+			return (row.item_code, parent_items[0].get(reference_field))
 
 		return None
 
@@ -708,10 +708,29 @@ class StockController(AccountsController):
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
 				parent_rows = self.get("items", {"name": row.parent_detail_docname}) or []
 				for d in parent_rows:
-					if d.get(field) and not d.get(bundle_field):
+					if (
+						d.get(field)
+						and not d.get(bundle_field)
+						and not self.is_legacy_packed_item(row, d.get(field))
+					):
 						reference_ids.append(d.get(field))
 
 		return field, reference_ids
+
+	def is_legacy_packed_item(self, row, source_parent_detail_docname):
+		"""Packed items delivered before v15 have serial / batch fields, but no bundle to return
+		against. make_bundle_using_old_serial_batch_fields handles them."""
+		if not (row.serial_no or row.batch_no):
+			return False
+
+		return not frappe.db.exists(
+			"Packed Item",
+			{
+				"parent_detail_docname": source_parent_detail_docname,
+				"item_code": row.item_code,
+				"serial_and_batch_bundle": ("is", "set"),
+			},
+		)
 
 	@frappe.request_cache
 	def is_serial_batch_item(self, item_code) -> bool:
@@ -2094,6 +2113,11 @@ class StockController(AccountsController):
 		)
 
 		if self.docstatus == 2:
+			# nothing to repost when the cancelled voucher never touched the stock ledger
+			if not frappe.db.exists(
+				"Stock Ledger Entry", {"voucher_type": self.doctype, "voucher_no": self.name}
+			):
+				return
 			force = True
 
 		if force or future_sle_exists(args, for_update=True) or repost_required_for_queue(self):
@@ -2881,6 +2905,8 @@ def get_item_wise_inventory_account_map(rows, company):
 def get_expenses_added_to_stock_accounts(item_code, company):
 	"""Resolves the Expenses Added To Stock account pair for an item, falling back through
 	Item Defaults -> Item Group -> Brand -> Company."""
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 	from erpnext.stock.doctype.item.item import get_item_defaults
 
 	fields = ["expenses_added_to_stock_account", "expenses_added_to_stock_contra_account"]
@@ -2889,15 +2915,12 @@ def get_expenses_added_to_stock_accounts(item_code, company):
 	details = frappe._dict({field: defaults.get(field) for field in fields})
 
 	if not details.expenses_added_to_stock_account:
-		details = frappe.db.get_value(
-			"Item Default", {"parent": defaults.item_group, "company": company}, fields, as_dict=1
-		) or frappe._dict({})
+		details = get_item_group_defaults(item_code, company)
 
-	if not details.expenses_added_to_stock_account and defaults.get("brand"):
-		details = frappe.db.get_value(
-			"Item Default", {"parent": defaults.brand, "company": company}, fields, as_dict=1
-		) or frappe._dict({})
+	if not details.expenses_added_to_stock_account:
+		details = get_brand_defaults(item_code, company)
 
+	details = frappe._dict({field: details.get(field) for field in fields})
 	for field in fields:
 		if not details.get(field):
 			details[field] = frappe.get_cached_value("Company", company, field)

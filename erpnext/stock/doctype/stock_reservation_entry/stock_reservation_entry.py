@@ -809,6 +809,12 @@ class StockReservationEntry(Document):
 		return sum(min(flt(entry.delivered_qty), flt(entry.qty)) for entry in self.sb_entries)
 
 
+def clear_reserve_stock_if_disabled(doc: Document) -> None:
+	"""Uncheck Reserve Stock on a voucher when stock reservation is disabled."""
+	if not frappe.get_single_value("Stock Settings", "enable_stock_reservation"):
+		doc.reserve_stock = 0
+
+
 def validate_stock_reservation_settings(voucher: object) -> None:
 	"""Raises an exception if `Stock Reservation` is not enabled or `Voucher Type` is not allowed."""
 
@@ -1437,13 +1443,19 @@ class StockReservation:
 			order_by="creation",
 		)
 
+		qty_to_reserve = sre.reserved_qty
 		for detail in bundle_details:
+			qty = flt(min(abs(detail.qty), qty_to_reserve), sre.precision("reserved_qty"))
+			if qty <= 0:
+				break
+
+			qty_to_reserve -= qty
 			sre.append(
 				"sb_entries",
 				{
 					"serial_no": detail.serial_no,
 					"batch_no": detail.batch_no,
-					"qty": abs(detail.qty),
+					"qty": qty,
 					"warehouse": sre.warehouse,
 				},
 			)
@@ -1605,19 +1617,16 @@ class StockReservation:
 			sre.submit()
 
 	def update_delivered_qty(self, data):
-		for name, delivered_qty in data.get("sre_names").items():
-			doctype = frappe.qb.DocType("Stock Reservation Entry")
-			query = (
-				frappe.qb.update(doctype)
-				.set(doctype.delivered_qty, doctype.delivered_qty + delivered_qty)
-				.set(
-					doctype.status,
-					Case().when((doctype.reserved_qty == doctype.delivered_qty), "Closed").else_("Reserved"),
-				)
-				.where(doctype.name == name)
+		for name, qty in data.get("sre_names").items():
+			sre = frappe.get_doc("Stock Reservation Entry", name, for_update=True)
+			delivered_qty = flt(sre.delivered_qty + qty, sre.precision("delivered_qty"))
+			sre.db_set(
+				{
+					"delivered_qty": delivered_qty,
+					"status": "Closed" if delivered_qty >= sre.reserved_qty else "Reserved",
+				}
 			)
-
-			query.run()
+			sre.update_reserved_qty_in_voucher()
 
 		if data.serial_nos or data.batches:
 			move_serial_batch_delivered_qty(data.get("sre_names"), data)
