@@ -690,7 +690,8 @@ class TestBatch(FrappeTestCase):
 		)
 
 		item_code = "_Test POS Batch Bundle Once Item"
-		batch_no = create_batch_item_with_batch(item_code, "TestBatch-POS-Once 01")
+		batch_no = "TestBatch-POS-Once 01"
+		create_batch_item_with_batch(item_code, batch_no)
 		make_stock_entry(
 			target="_Test Warehouse - _TC",
 			item_code=item_code,
