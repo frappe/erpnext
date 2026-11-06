@@ -36,45 +36,8 @@ def execute(filters: dict | None = None):
 
 class MaterialRequirementsPlanningReport:
 	def __init__(self, filters):
-<<<<<<< HEAD
 		self.filters = filters
-=======
-		self.filters = frappe._dict(filters or {})
 		self.qty_precision = frappe.get_precision("Master Production Schedule Item", "planned_qty")
-		self._warehouses = None
-		self._warehouses_with_groups = None
-
-	def get_warehouses(self, include_group_warehouses=False):
-		cache_attr = "_warehouses_with_groups" if include_group_warehouses else "_warehouses"
-		if getattr(self, cache_attr) is not None:
-			return getattr(self, cache_attr)
-
-		warehouses = get_filter_values(self.filters.get("warehouse"))
-		if not warehouses:
-			setattr(self, cache_attr, [])
-			return []
-
-		warehouse_group_map = {
-			row.name: row.is_group
-			for row in frappe.get_all(
-				"Warehouse",
-				filters={"name": ["in", warehouses]},
-				fields=["name", "is_group"],
-			)
-		}
-
-		all_warehouses = []
-		for warehouse in warehouses:
-			child_warehouses = get_child_warehouses(warehouse)
-			if include_group_warehouses or not warehouse_group_map.get(warehouse):
-				all_warehouses.extend(child_warehouses)
-			else:
-				all_warehouses.extend(w for w in child_warehouses if w != warehouse)
-
-		warehouses = list(set(all_warehouses))
-		setattr(self, cache_attr, warehouses)
-		return warehouses
->>>>>>> 1a7c0facba (Merge pull request #64450 from mihir-kandoi/fix/issue-64431)
 
 	def generate_mrp(self):
 		self.fg_items = []
