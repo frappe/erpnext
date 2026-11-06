@@ -582,6 +582,14 @@ frappe.ui.form.on("BOM", {
 						reqd: 1,
 					},
 					{
+						fieldname: "uom",
+						label: __("UOM"),
+						fieldtype: "Link",
+						options: "UOM",
+						in_list_view: 1,
+						read_only: 1,
+					},
+					{
 						fieldname: "source_warehouse",
 						label: __("Source Warehouse"),
 						fieldtype: "Link",
@@ -628,6 +636,7 @@ frappe.ui.form.on("BOM", {
 				item_code: d.item_code,
 				variant_item_code: "",
 				qty: flt(d.qty / frm.doc.quantity) * flt(bom_qty),
+				uom: d.uom,
 				source_warehouse: d.source_warehouse,
 				operation: d.operation,
 			});
