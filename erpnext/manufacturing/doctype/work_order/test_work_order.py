@@ -4831,6 +4831,28 @@ class TestWorkOrder(FrappeTestCase):
 			manufacture_entries[0].cancel,
 		)
 
+	def test_manufacture_without_from_bom_keeps_the_work_order_qty(self):
+		rm_item = make_item("_Test Without From BOM RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Without From BOM FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=5,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+
+		entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
+		entry.from_bom = 0
+		entry.submit()
+
+		self.assertEqual(entry.fg_completed_qty, 5)
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "produced_qty"), 5)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
