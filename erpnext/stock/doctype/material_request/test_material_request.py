@@ -1284,6 +1284,28 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.cancel()
 		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 0)
 
+	def test_pick_list_maps_only_the_qty_left_to_transfer(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
+
+		item_code = create_item("_Test MR Pick Transfer Item", is_stock_item=1).name
+		make_se(item_code=item_code, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		mr = make_material_request(
+			item_code=item_code,
+			material_request_type="Material Transfer",
+			from_warehouse="_Test Warehouse - _TC",
+			warehouse="_Test Warehouse 1 - _TC",
+			uom="Nos",
+		)
+
+		transfer = make_stock_entry(mr.name)
+		transfer.items[0].qty = 6
+		transfer.submit()
+
+		self.assertEqual(create_pick_list(mr.name).locations[0].qty, 4)
+
+		update_status(mr.name, "Stopped")
+		self.assertRaises(frappe.InvalidStatusError, create_pick_list, mr.name)
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):

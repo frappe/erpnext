@@ -554,6 +554,11 @@ def update_item(obj, target, source_parent):
 		target.schedule_date = None
 
 
+def validate_request_not_stopped(source_name):
+	if frappe.db.get_value("Material Request", source_name, "status") == "Stopped":
+		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
+
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 
@@ -1008,6 +1013,8 @@ def raise_work_orders(material_request: str):
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
+	validate_request_not_stopped(source_name)
+
 	def update_item(obj, target, source_parent):
 		qty = (
 			flt(flt(obj.stock_qty) - flt(obj.ordered_qty)) / target.conversion_factor
