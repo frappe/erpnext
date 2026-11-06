@@ -597,6 +597,20 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
 		self.assertEqual(rows[plan.rm_item].required_qty, 20)
 
+	def test_bom_selected_on_the_mps_row_is_used(self):
+		plan = make_mrp_plan(self)
+		default_rm = make_item(properties={"is_stock_item": 1, "is_purchase_item": 1}).name
+		make_bom(item=plan.fg_item, raw_materials=[default_rm], rate=100)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.items[0].bom_no = plan.bom
+		mps.save()
+
+		rows = get_mrp_rows(mps)
+
+		self.assertEqual(rows[plan.fg_item].bom_no, plan.bom)
+		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
+		self.assertNotIn(default_rm, rows)
+
 	def test_sales_order_in_the_mps_is_not_added_again(self):
 		plan = make_mrp_plan(self)
 		make_mrp_sales_order(plan.fg_item, 10, add_days(today(), 30))
