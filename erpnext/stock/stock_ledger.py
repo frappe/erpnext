@@ -2005,7 +2005,7 @@ class update_entries_after:
 		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""
 		from erpnext.buying.doctype.buying_settings.buying_settings import is_rejected_material_valued
 
-		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice"):
+		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 			return False
 
 		rejected_warehouse = frappe.db.get_value(
