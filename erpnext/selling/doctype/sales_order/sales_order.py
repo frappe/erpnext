@@ -1077,7 +1077,10 @@ class SalesOrder(SellingController):
 				"stock_qty": flt(row.qty) * conversion_factor,
 			}
 
-			if frappe.db.exists("Delivery Schedule Item", row.name):
+			if row.name and frappe.db.exists(
+				"Delivery Schedule Item",
+				{"name": row.name, "sales_order": self.name, "sales_order_item": item_row.name},
+			):
 				doc = frappe.get_doc("Delivery Schedule Item", row.name)
 			else:
 				doc = frappe.new_doc("Delivery Schedule Item")
