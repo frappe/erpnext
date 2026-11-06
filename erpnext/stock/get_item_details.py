@@ -1132,6 +1132,30 @@ def get_price_list_rate(args, item_doc, out=None):
 	return out
 
 
+def get_item_prices_to_auto_update(args):
+	ip = frappe.qb.DocType("Item Price")
+	query = (
+		frappe.qb.from_(ip)
+		.select(ip.name, ip.price_list_rate, ip.valid_from, ip.valid_upto)
+		.where(
+			(ip.item_code == args.item_code)
+			& (ip.price_list == args.price_list)
+			& (ip.currency == args.currency)
+			& (ip.uom == args.stock_uom)
+		)
+	)
+
+	for fieldname in ("customer", "supplier", "batch_no"):
+		query = query.where(IfNull(ip[fieldname], "").isin(["", cstr(args.get(fieldname))]))
+		query = query.orderby(IfNull(ip[fieldname], ""), order=frappe.qb.desc)
+
+	return (
+		query.orderby(ip.valid_from.isnull(), order=frappe.qb.asc)
+		.orderby(ip.valid_from, order=frappe.qb.desc)
+		.orderby(ip.creation, order=frappe.qb.desc)
+	).run(as_dict=True)
+
+
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
 	if (
@@ -1156,17 +1180,7 @@ def insert_item_price(args):
 		or getdate()
 	)
 
-	item_prices = frappe.get_all(
-		"Item Price",
-		filters={
-			"item_code": args.item_code,
-			"price_list": args.price_list,
-			"currency": args.currency,
-			"uom": args.stock_uom,
-		},
-		fields=["name", "price_list_rate", "valid_from", "valid_upto"],
-		order_by="valid_from desc, creation desc",
-	)
+	item_prices = get_item_prices_to_auto_update(args)
 	item_price = next(
 		(
 			row
