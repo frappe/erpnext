@@ -4531,6 +4531,7 @@ def get_uom_details(item_code, uom, qty):
 def get_expired_batch_items():
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 
+	frappe.has_permission("Batch", "read", throw=True)
 	expired_batches = get_expired_batches()
 	if not expired_batches:
 		return []
@@ -4547,7 +4548,14 @@ def get_expired_batch_items():
 	for row in expired_batches_stock:
 		row.update(expired_batches.get(row.batch_no))
 
-	return expired_batches_stock
+	permitted_warehouses = set(
+		frappe.get_list(
+			"Warehouse",
+			filters={"name": ("in", list({row.warehouse for row in expired_batches_stock}))},
+			pluck="name",
+		)
+	)
+	return [row for row in expired_batches_stock if row.warehouse in permitted_warehouses]
 
 
 def get_outward_rows(ste_details):
@@ -4573,13 +4581,12 @@ def get_transferred_qty_map(ste_details):
 
 
 def get_expired_batches():
-	batch = frappe.qb.DocType("Batch")
-
-	data = (
-		frappe.qb.from_(batch)
-		.select(batch.item, batch.name.as_("batch_no"), batch.stock_uom)
-		.where((batch.expiry_date <= nowdate()) & (batch.expiry_date.isnotnull()))
-	).run(as_dict=True)
+	data = frappe.get_list(
+		"Batch",
+		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"]],
+		fields=["item", "name as batch_no", "stock_uom"],
+		limit_page_length=0,
+	)
 
 	if not data:
 		return []
