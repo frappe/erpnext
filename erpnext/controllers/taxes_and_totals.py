@@ -979,7 +979,13 @@ class calculate_taxes_and_totals:
 
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
-			if self.doc.rounded_total:
+			if self.doc.rounding_adjustment:
+				# Keep the converted payable/receivable consistent with payments and returns.
+				self.doc.base_rounding_adjustment = flt(
+					self.doc.base_rounded_total - self.doc.base_grand_total,
+					self.doc.precision("base_rounding_adjustment"),
+				)
+			elif self.doc.rounded_total:
 				# converting the rounded total on its own can differ from the row-wise base total by a
 				# currency fraction; derive it from the base totals the ledger is posted with
 				self.doc.base_rounded_total = flt(
