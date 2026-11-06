@@ -711,6 +711,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 		pr.cancel()
 
+	def test_return_rows_against_same_row_pick_different_serial_nos(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=2)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items[0].qty = return_pr.items[0].received_qty = -1
+		return_pr.append("items", {**return_pr.items[0].as_dict(), "name": None, "idx": None})
+		return_pr.submit()
+
+		returned = [get_serial_nos_from_bundle(row.serial_and_batch_bundle) for row in return_pr.items]
+		self.assertCountEqual(
+			returned[0] + returned[1], get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle)
+		)
+
 	def test_purchase_return_for_multi_uom(self):
 		item_code = "_Test Purchase Return For Multi-UOM"
 		if not frappe.db.exists("Item", item_code):
