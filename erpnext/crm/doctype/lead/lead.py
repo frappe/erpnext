@@ -3,11 +3,9 @@
 
 import frappe
 from frappe import _
-from frappe.contacts.address_and_contact import (
-	delete_contact_and_address,
-	load_address_and_contact,
-)
+from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.email.inbox import link_communication_to_document
+from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, get_link_to_form, validate_email_address
 
@@ -123,8 +121,30 @@ class Lead(SellingController, CRMNote):
 
 	def on_trash(self):
 		frappe.db.set_value("Issue", {"lead": self.name}, "lead", None)
-		delete_contact_and_address(self.doctype, self.name)
+		self.delete_contact_and_address()
 		self.remove_link_from_prospect()
+
+	def delete_contact_and_address(self):
+		"""Unlink the lead's contacts and addresses, deleting those that belong to it alone.
+
+		Done without permission checks: they go with the lead, which the user may delete."""
+		for parenttype in ("Contact", "Address"):
+			links = frappe.get_all(
+				"Dynamic Link",
+				filters={"parenttype": parenttype, "link_doctype": "Lead", "link_name": self.name},
+				pluck="parent",
+			)
+			for name in links:
+				self.unlink_or_delete(frappe.get_doc(parenttype, name))
+
+	def unlink_or_delete(self, doc: Document):
+		doc.flags.ignore_permissions = True
+		if len(doc.links) == 1:
+			doc.delete(ignore_permissions=True)
+			return
+
+		doc.links = [link for link in doc.links if (link.link_doctype, link.link_name) != ("Lead", self.name)]
+		doc.save()
 
 	def set_full_name(self):
 		if self.first_name:
@@ -200,17 +220,9 @@ class Lead(SellingController, CRMNote):
 
 		for d in prospects:
 			prospect = frappe.get_doc("Prospect", d.parent)
-			if len(prospect.get("leads")) == 1:
-				prospect.delete(ignore_permissions=True)
-			else:
-				to_remove = None
-				for d in prospect.get("leads"):
-					if d.lead == self.name:
-						to_remove = d
-
-				if to_remove:
-					prospect.remove(to_remove)
-					prospect.save(ignore_permissions=True)
+			prospect.set("leads", [row for row in prospect.leads if row.lead != self.name])
+			prospect.flags.ignore_mandatory = True
+			prospect.save(ignore_permissions=True)
 
 	def get_linked_prospects(self):
 		return frappe.get_all(
