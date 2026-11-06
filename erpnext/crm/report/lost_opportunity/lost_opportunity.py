@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.report.utils import validate_date_range
 
@@ -99,7 +100,11 @@ def get_conditions(filters):
 	conditions = []
 
 	if filters.get("territory"):
-		conditions.append(" and `tabOpportunity`.territory=%(territory)s")
+		filters["territories"] = (
+			filters.get("territory"),
+			*get_descendants_of("Territory", filters.get("territory")),
+		)
+		conditions.append(" and `tabOpportunity`.territory in %(territories)s")
 
 	if filters.get("opportunity_from"):
 		conditions.append(" and `tabOpportunity`.opportunity_from=%(opportunity_from)s")
