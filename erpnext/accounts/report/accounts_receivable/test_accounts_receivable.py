@@ -1175,7 +1175,12 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
 		customer = frappe.get_doc(
-			{"doctype": "Customer", "customer_name": "Advance USD Customer", "default_currency": "USD"}
+			{
+				"doctype": "Customer",
+				"customer_name": "Advance USD Customer",
+				"customer_group": "_Test Customer Group",
+				"default_currency": "USD",
+			}
 		).insert()
 		self.customer = customer.name
 		advance = create_payment_entry(
