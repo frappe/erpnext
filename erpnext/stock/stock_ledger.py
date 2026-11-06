@@ -397,11 +397,7 @@ def repost_future_sle(
 				"repost_doc": doc,
 				"repost_affected_transaction": repost_affected_transaction,
 				"item_wh_wise_last_posted_sle": resume_item_wh_wise_last_posted_sle,
-<<<<<<< HEAD
-=======
-				"item_wh_first_reposted": item_wh_first_reposted,
 				"pending_item_wh": pending_item_wh,
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 			},
 			allow_zero_rate=allow_zero_rate,
 			allow_negative_stock=allow_negative_stock,
@@ -495,11 +491,7 @@ def update_args_in_repost_item_valuation(
 	items_to_be_repost,
 	repost_affected_transaction,
 	item_wh_wise_last_posted_sle=None,
-<<<<<<< HEAD
-=======
-	item_wh_first_reposted=None,
 	pending_item_wh=None,
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 ):
 	file_name = ""
 	if not item_wh_wise_last_posted_sle:
@@ -514,11 +506,7 @@ def update_args_in_repost_item_valuation(
 			"repost_affected_transaction": repost_affected_transaction,
 			"item_wh_wise_last_posted_sle": {str(k): v for k, v in item_wh_wise_last_posted_sle.items()}
 			or {},
-<<<<<<< HEAD
-=======
-			"item_wh_first_reposted": {str(k): v for k, v in item_wh_first_reposted.items()},
 			"pending_item_wh": list(pending_item_wh or []),
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 			"repost_started_at": doc.flags.repost_started_at,
 		},
 		doc,
@@ -1061,11 +1049,7 @@ class update_entries_after:
 			self.items_to_be_repost,
 			self.repost_affected_transaction,
 			self.item_wh_wise_last_posted_sle,
-<<<<<<< HEAD
-=======
-			self.item_wh_first_reposted,
 			self.pending_item_wh,
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 		)
 
 		if not frappe.in_test:

@@ -476,8 +476,6 @@ class RepostItemValuation(Document):
 		if self.reposting_data_file:
 			return get_reposting_data(self.reposting_data_file).get("repost_started_at")
 
-<<<<<<< HEAD
-=======
 	def merge_queued_item_reposts(self):
 		"""Carry later queued Item and Warehouse reposts of the company in this repost's walk.
 
@@ -525,22 +523,6 @@ class RepostItemValuation(Document):
 			.where(riv.name.isin(merged) & (riv.status == "Queued"))
 		).run()
 
-	def skip_reposts_covered_by_dependents(self):
-		if self.repost_only_accounting_ledgers:
-			return
-
-		coverage = get_item_wh_first_reposted_from_reposting_data(self)
-		if not coverage:
-			return
-
-		source_datetime = get_combine_datetime(self.posting_date, self.posting_time)
-		mark_covered_item_reposts(self.name, coverage, source_datetime, self.get_repost_started_at())
-
-		affected = get_affected_transactions(self)
-		if affected:
-			mark_covered_transaction_reposts(self, coverage, affected, self.get_repost_started_at())
-
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
 		if doc.get("is_internal_supplier"):
@@ -576,12 +558,6 @@ def bulk_restart_reposting(names):
 		doc.restart_reposting()
 
 	frappe.msgprint(_("Repost Item Valuation restarted for selected failed records."))
-
-
-<<<<<<< HEAD
-=======
-def repost_coverage_cache_key(name):
-	return f"riv_dependent_coverage::{name}"
 
 
 def has_failed_merged_repost(company):
@@ -637,129 +613,6 @@ def get_repost_item(row):
 	)
 
 
-def get_queued_item_reposts(source_name, item_codes, started_at=None):
-	return frappe.get_all(
-		"Repost Item Valuation",
-		filters={
-			"creation": ("<=", started_at or now()),
-			"name": ("!=", source_name),
-			"based_on": "Item and Warehouse",
-			"status": "Queued",
-			"docstatus": 1,
-			"recalculate_valuation_rate": 0,
-			"recreate_stock_ledgers": 0,
-			"via_landed_cost_voucher": 0,
-			"item_code": ("in", item_codes),
-		},
-		fields=["name", "item_code", "warehouse", "posting_date", "posting_time"],
-	)
-
-
-def mark_covered_item_reposts(source_name, coverage, source_datetime, started_at=None):
-	item_codes = {item_code for item_code, _ in coverage}
-
-	for row in get_queued_item_reposts(source_name, list(item_codes), started_at):
-		from_datetime = coverage.get((row.item_code, row.warehouse))
-		if not from_datetime:
-			continue
-
-		row_datetime = get_combine_datetime(row.posting_date, row.posting_time)
-		if get_datetime(row_datetime) < get_datetime(source_datetime):
-			continue
-
-		if get_datetime(from_datetime) <= get_datetime(row_datetime):
-			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
-
-
-def get_queued_transaction_reposts(source_name, voucher_nos, started_at=None):
-	return frappe.get_all(
-		"Repost Item Valuation",
-		filters={
-			"creation": ("<=", started_at or now()),
-			"name": ("!=", source_name),
-			"based_on": "Transaction",
-			"status": "Queued",
-			"docstatus": 1,
-			"repost_only_accounting_ledgers": 0,
-			"recalculate_valuation_rate": 0,
-			"recreate_stock_ledgers": 0,
-			"via_landed_cost_voucher": 0,
-			"voucher_no": ("in", list(voucher_nos)),
-		},
-		fields=["name", "voucher_type", "voucher_no", "posting_date", "posting_time"],
-	)
-
-
-def accumulate_repost_coverage(row_name, coverage, row_datetime):
-	cache_key = repost_coverage_cache_key(row_name)
-	acc = frappe.cache().get_value(cache_key) or {}
-
-	for key, from_datetime in coverage.items():
-		if get_datetime(from_datetime) > get_datetime(row_datetime):
-			continue
-
-		existing = acc.get(key)
-		if not existing or get_datetime(from_datetime) < get_datetime(existing):
-			acc[key] = from_datetime
-
-	frappe.cache().set_value(cache_key, acc, expires_in_sec=86400)
-	return acc
-
-
-def get_repost_items_by_voucher(rows):
-	voucher_nos = {row.voucher_no for row in rows}
-	if not voucher_nos:
-		return {}
-
-	items_by_voucher = {}
-	for sle in frappe.get_all(
-		"Stock Ledger Entry",
-		filters={"voucher_no": ("in", list(voucher_nos))},
-		fields=["voucher_type", "voucher_no", "item_code", "warehouse"],
-		distinct=True,
-	):
-		items_by_voucher.setdefault((sle.voucher_type, sle.voucher_no), set()).add(
-			(sle.item_code, sle.warehouse)
-		)
-
-	return items_by_voucher
-
-
-def is_transaction_repost_covered(items, acc, row_datetime):
-	if not items:
-		return False
-
-	for key in items:
-		covered = acc.get(key)
-		if not covered or get_datetime(covered) > get_datetime(row_datetime):
-			return False
-
-	return True
-
-
-def mark_covered_transaction_reposts(source, coverage, affected, started_at=None):
-	source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
-	voucher_nos = {voucher_no for _, voucher_no in affected}
-
-	rows = get_queued_transaction_reposts(source.name, voucher_nos, started_at)
-	items_by_voucher = get_repost_items_by_voucher(rows)
-
-	for row in rows:
-		if (row.voucher_type, row.voucher_no) not in affected:
-			continue
-
-		row_datetime = get_combine_datetime(row.posting_date, row.posting_time)
-		if get_datetime(row_datetime) < get_datetime(source_datetime):
-			continue
-
-		acc = accumulate_repost_coverage(row.name, coverage, row_datetime)
-		items = items_by_voucher.get((row.voucher_type, row.voucher_no))
-		if is_transaction_repost_covered(items, acc, row_datetime):
-			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
-			frappe.cache().delete_value(repost_coverage_cache_key(row.name))
-
-
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
 	frappe.db.add_index("Repost Item Valuation", ["voucher_no", "voucher_type", "status"], "voucher_status")
@@ -799,12 +652,8 @@ def repost(doc):
 			repost_gl_entries(doc, vouchers)
 			update_consumed_material_cost_for_vouchers(vouchers)
 
-<<<<<<< HEAD
-=======
 		doc.skip_merged_reposts()
-		doc.skip_reposts_covered_by_dependents()
 
->>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 		doc.set_status("Completed")
 		doc.db_set("reposting_data_file", None)
 		remove_attached_file(doc.name)
