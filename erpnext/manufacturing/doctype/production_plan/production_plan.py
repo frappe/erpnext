@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt
 
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 
 # Backward-compatible re-exports (moved to mapper.py / services/).
 from erpnext.manufacturing.doctype.production_plan.mapper import (
@@ -289,7 +289,7 @@ class ProductionPlan(Document):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			elif (d.item_code, d.bom_no) not in validated_boms:
-				validate_bom_no(d.item_code, d.bom_no)
+				validate_production_bom(d.item_code, d.bom_no)
 				validated_boms.add((d.item_code, d.bom_no))
 
 			if not flt(d.planned_qty):
