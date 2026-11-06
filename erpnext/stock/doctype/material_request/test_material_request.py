@@ -1263,6 +1263,27 @@ class TestMaterialRequest(FrappeTestCase):
 			material_request_type="Customer Provided",
 		)
 
+	def test_production_plan_requested_qty_follows_the_stock_qty(self):
+		plan, _mr = make_plan_request_in_boxes()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "requested_qty"), 24
+		)
+
+	def test_production_plan_requested_qty_is_rebuilt_from_submitted_requests(self):
+		from erpnext.patches.v16_0.rebuild_production_plan_requested_qty import execute
+
+		plan, mr = make_plan_request_in_boxes()
+		plan_item = plan.mr_items[0].name
+
+		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 2)
+		execute()
+		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 24)
+
+		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 2)
+		mr.cancel()
+		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 0)
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
@@ -1320,3 +1341,50 @@ def make_material_request(**args):
 
 test_dependencies = ["Currency Exchange", "BOM"]
 test_records = frappe.get_test_records("Material Request")
+
+
+def make_plan_request_in_boxes():
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+	from erpnext.stock.doctype.item.test_item import make_item
+
+	fg_item = make_item(properties={"is_stock_item": 1}).name
+	raw_material = make_item(
+		properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]}
+	)
+	bom = make_bom(item=fg_item, raw_materials=[raw_material.name], rm_qty=24)
+	plan = frappe.get_doc(
+		{
+			"doctype": "Production Plan",
+			"company": "_Test Company",
+			"posting_date": today(),
+			"po_items": [
+				{
+					"item_code": fg_item,
+					"bom_no": bom.name,
+					"planned_qty": 1,
+					"warehouse": "_Test Warehouse - _TC",
+				}
+			],
+			"mr_items": [
+				{
+					"item_code": raw_material.name,
+					"quantity": 24,
+					"uom": raw_material.stock_uom,
+					"conversion_factor": 1,
+					"warehouse": "_Test Warehouse - _TC",
+					"material_request_type": "Purchase",
+				}
+			],
+		}
+	).submit()
+	plan.make_material_request()
+
+	mr = frappe.get_doc(
+		"Material Request",
+		frappe.db.get_value(
+			"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
+		),
+	)
+	mr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2})
+	mr.submit()
+	return plan, mr
