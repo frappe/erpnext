@@ -59,6 +59,22 @@ class POSOpeningEntry(StatusUpdater):
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
 			frappe.throw(_("User {} is disabled. Please select valid user/cashier").format(self.user))
 
+		self.validate_cashier_of_pos_profile()
+
+	def validate_cashier_of_pos_profile(self):
+		cashiers = frappe.get_all(
+			"POS Profile User",
+			filters={"parent": self.pos_profile, "parenttype": "POS Profile"},
+			pluck="user",
+		)
+		if cashiers and all(cashiers) and self.user not in cashiers:
+			frappe.throw(
+				_("User {0} is not in Applicable for Users of POS Profile {1}").format(
+					frappe.bold(self.user), frappe.bold(self.pos_profile)
+				),
+				title=_("Invalid Cashier"),
+			)
+
 	def validate_payment_method_account(self):
 		invalid_modes = []
 		for d in self.balance_details:
