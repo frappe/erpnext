@@ -1410,6 +1410,16 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 	return filterd_serial_batch
 
 
+def remove_picked_serial_batches(data, picked, parent_doc):
+	"""Drop what a return row picked so later rows against the same row do not pick it again."""
+	for serial_no in picked.serial_nos:
+		data.serial_nos.pop(serial_no, None)
+
+	sign = -1 if parent_doc.get("is_internal_customer") else 1
+	for batch_no, qty in picked.batches.items():
+		data.batches[batch_no] -= sign * qty
+
+
 def get_available_batch_qty(parent_doc, batch_no, warehouse):
 	from erpnext.stock.doctype.batch.batch import get_batch_qty
 
