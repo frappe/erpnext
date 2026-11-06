@@ -1801,8 +1801,18 @@ def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 def validate_bom_no(item, bom_no):
 	"""Validate BOM No of sub-contracted items"""
 	bom = get_usable_bom(bom_no)
-	if item and not _bom_contains_item(bom, item):
-		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+	if item:
+		rm_item_exists = False
+		for d in bom.items:
+			if d.item_code.lower() == item.lower():
+				rm_item_exists = True
+		for d in bom.secondary_items:
+			if d.item_code.lower() == item.lower():
+				rm_item_exists = True
+		if _bom_produces_item(bom, item):
+			rm_item_exists = True
+		if not rm_item_exists:
+			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
 
 
 def validate_production_bom(item, bom_no):
@@ -1819,25 +1829,14 @@ def get_usable_bom(bom_no):
 	if bom.docstatus != 1:
 		if not frappe.in_test:
 			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
-<<<<<<< HEAD
-	if item:
-		rm_item_exists = False
-		for d in bom.items:
-			if d.item_code.lower() == item.lower():
-				rm_item_exists = True
-		for d in bom.secondary_items:
-			if d.item_code.lower() == item.lower():
-				rm_item_exists = True
-		if (
-			bom.item.lower() == item.lower()
-			or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
-		):
-			rm_item_exists = True
-		if not rm_item_exists:
-			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
-=======
 	return bom
->>>>>>> 639fca9167 (Merge pull request #64463 from mihir-kandoi/fix/issue-64454)
+
+
+def _bom_produces_item(bom, item):
+	return (
+		bom.item.lower() == item.lower()
+		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
+	)
 
 
 @frappe.whitelist()
@@ -1846,7 +1845,6 @@ def get_children(doctype=None, parent=None, is_root=False, **filters):
 		frappe.msgprint(_("Please select a BOM"))
 		return
 
-<<<<<<< HEAD
 	if parent:
 		frappe.form_dict.parent = parent
 
@@ -2052,18 +2050,6 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 			"has_operating_cost": 1,
 			**operation_fields,
 		},
-=======
-	return _bom_produces_item(bom, item)
-
-
-def _bom_produces_item(bom, item):
-	item_lower = item.lower()
-	# Use the original-cased `item` for the Item lookup: names are case-sensitive on Postgres,
-	# so a lowercased name would miss the record and drop the variant->template BOM match.
-	return (
-		bom.item.lower() == item_lower
-		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
->>>>>>> 639fca9167 (Merge pull request #64463 from mihir-kandoi/fix/issue-64454)
 	)
 
 
