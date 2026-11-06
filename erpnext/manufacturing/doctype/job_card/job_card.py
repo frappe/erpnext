@@ -884,7 +884,13 @@ class JobCard(Document):
 				operation_wise_completed_time.setdefault(
 					time_log.operation,
 					frappe._dict(
-						{"status": "Pending", "completed_qty": 0.0, "completed_time": 0.0, "employee": []}
+						{
+							"status": "Pending",
+							"completed_qty": 0.0,
+							"process_loss_qty": 0.0,
+							"completed_time": 0.0,
+							"employee": [],
+						}
 					),
 				)
 
@@ -897,6 +903,7 @@ class JobCard(Document):
 			if time_log.time_in_mins:
 				op_row.completed_time += time_log.time_in_mins
 				op_row.completed_qty += flt(time_log.completed_qty)
+				op_row.process_loss_qty += flt(time_log.process_loss_qty)
 
 		for row in self.sub_operations:
 			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
@@ -910,10 +917,15 @@ class JobCard(Document):
 
 				if operation_deatils.completed_qty:
 					row.completed_qty = operation_deatils.completed_qty
+
+				row.process_loss_qty = flt(
+					operation_deatils.process_loss_qty, row.precision("process_loss_qty")
+				)
 			else:
 				row.status = "Pending"
 				row.completed_time = 0.0
 				row.completed_qty = 0.0
+				row.process_loss_qty = 0.0
 
 	def update_time_logs(self, row):
 		self.append(
@@ -1926,6 +1938,7 @@ class JobCard(Document):
 
 					if kwargs.get("completed_qty") is not None:
 						row.completed_qty = kwargs.completed_qty
+						row.process_loss_qty = flt(kwargs.process_loss_qty, row.precision("process_loss_qty"))
 					row.db_update()
 		else:
 			self.add_time_logs_for_employess(kwargs)
@@ -1967,6 +1980,7 @@ class JobCard(Document):
 
 					if row is cycle_log:
 						row.completed_qty = kwargs.completed_qty
+						row.process_loss_qty = flt(kwargs.process_loss_qty, row.precision("process_loss_qty"))
 
 					row.db_update()
 
@@ -2036,10 +2050,38 @@ class JobCard(Document):
 		if not flt(kwargs.for_quantity):
 			return
 
-		self.for_quantity = flt(
-			flt(self.total_completed_qty) + flt(self.process_loss_qty) + flt(kwargs.for_quantity),
-			self.precision("for_quantity"),
+		processed_qty = flt(self.total_completed_qty) + flt(self.process_loss_qty)
+		if sub_operation := self.get_cycle_sub_operation(kwargs):
+			processed_qty = self.get_sub_operation_processed_qty(sub_operation)
+			# a sub operation behind another one only works on qty the card already took in
+			if processed_qty < max(self.get_sub_operation_processed_qty(row) for row in self.sub_operations):
+				return
+
+		self.for_quantity = flt(processed_qty + flt(kwargs.for_quantity), self.precision("for_quantity"))
+
+	def get_sub_operation_processed_qty(self, row):
+		return flt(flt(row.completed_qty) + flt(row.process_loss_qty), self.precision("for_quantity"))
+
+	def get_pending_qty_after_cycle(self, kwargs):
+		"""With sub operations the cycle's pending qty covers that sub operation only,
+		so the job card's pending qty is what its slowest sub operation has left."""
+		sub_operation = self.get_cycle_sub_operation(kwargs)
+		if not sub_operation:
+			return flt(kwargs.pending_qty)
+
+		completed_qty = min(
+			flt(row.completed_qty) + (flt(kwargs.qty) if row is sub_operation else 0.0)
+			for row in self.sub_operations
 		)
+		return max(
+			flt(self.for_quantity - completed_qty - self.process_loss_qty, self.precision("pending_qty")), 0.0
+		)
+
+	def get_cycle_sub_operation(self, kwargs):
+		if not kwargs.sub_operation:
+			return
+
+		return next((row for row in self.sub_operations if row.sub_operation == kwargs.sub_operation), None)
 
 	def validate_docstatus(self):
 		if self.docstatus == 2:
@@ -2063,13 +2105,14 @@ class JobCard(Document):
 
 		self.validate_completion_qty_split(kwargs)
 
-		self.pending_qty = flt(kwargs.pending_qty)
 		self.process_loss_qty = flt(self.process_loss_qty) + flt(kwargs.process_loss_qty)
+		self.pending_qty = self.get_pending_qty_after_cycle(kwargs)
 
 		if kwargs.end_time:
 			self.add_time_logs(
 				to_time=kwargs.end_time,
 				completed_qty=kwargs.qty,
+				process_loss_qty=kwargs.process_loss_qty,
 				employees=self.employee,
 				sub_operation=kwargs.get("sub_operation"),
 			)
