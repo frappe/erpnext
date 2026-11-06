@@ -508,7 +508,7 @@ class SellingController(StockController):
 				),
 				None,
 			)
-			if old_item and flt(old_item.incoming_rate) == flt(d.incoming_rate):
+			if old_item and (not is_standalone or flt(old_item.incoming_rate) == flt(d.incoming_rate)):
 				old_qty = flt(old_item.get("stock_qty") or old_item.get("actual_qty") or old_item.get("qty"))
 				if (
 					old_item.item_code != d.item_code
