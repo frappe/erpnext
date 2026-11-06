@@ -115,15 +115,9 @@ class PaymentRequest(Document):
 		party_account_currency: DF.Link | None
 		party_name: DF.Data | None
 		party_type: DF.Link | None
-		payment_account: DF.ReadOnly | None
-		payment_channel: DF.Literal["", "Email", "Phone", "Other"]
-		payment_gateway: DF.ReadOnly | None
-		payment_gateway_account: DF.Link | None
 		payment_order: DF.Link | None
 		payment_reference: DF.Table[PaymentReference]
 		payment_request_type: DF.Literal["Outward", "Inward"]
-		payment_url: DF.Data | None
-		phone_number: DF.Data | None
 		print_format: DF.Literal[None]
 		project: DF.Link | None
 		reference_doctype: DF.Link | None
@@ -158,12 +152,40 @@ class PaymentRequest(Document):
 			ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
 		self.validate_party(ref_doc)
+		self.validate_payment_account()
 		self.validate_bank_account()
 		self.validate_print_format()
 		self.validate_against_payment_reference()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_payment_account(self):
+		# these fields are hidden on outward requests, so staff could not correct them
+		if self.payment_request_type != "Inward":
+			return
+
+		if not self.get("payment_gateway") or not self.get("payment_account"):
+			return
+
+		# old drafts keep their gateway values after payments is uninstalled
+		if "payments" not in frappe.get_installed_apps():
+			return
+
+		if not frappe.db.exists(
+			"Payment Gateway Account",
+			{
+				"parent": self.payment_gateway,
+				"parenttype": "Payment Gateway",
+				"company": self.company,
+				"payment_account": self.payment_account,
+			},
+		):
+			frappe.throw(
+				_("Payment Account {0} is not configured under Payment Gateway {1} for company {2}").format(
+					self.payment_account, self.payment_gateway, self.company
+				)
+			)
 
 	def validate_party(self, ref_doc):
 		if not self.party_type:
@@ -284,7 +306,7 @@ class PaymentRequest(Document):
 			)
 
 		if not hasattr(ref_doc, "order_type") or ref_doc.order_type != "Shopping Cart":
-			ref_amount = get_amount(ref_doc, self.payment_account)
+			ref_amount = get_amount(ref_doc, self.get("payment_account"))
 			if not ref_amount:
 				frappe.throw(_("Payment Entry is already created"))
 
@@ -314,15 +336,17 @@ class PaymentRequest(Document):
 		if self.is_a_subscription:
 			amount = 0
 			for subscription_plan in self.subscription_plans:
-				payment_gateway = frappe.db.get_value(
-					"Subscription Plan", subscription_plan.plan, "payment_gateway"
-				)
-				if payment_gateway != self.payment_gateway_account:
-					frappe.throw(
-						_(
-							"The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
-						).format(subscription_plan.name)
+				# these are custom fields of the payments app
+				if self.meta.has_field("payment_gateway"):
+					plan_account = frappe.db.get_value(
+						"Subscription Plan", subscription_plan.plan, ["payment_gateway", "payment_account"]
 					)
+					if plan_account != (self.payment_gateway, self.payment_account):
+						frappe.throw(
+							_(
+								"The payment gateway account in plan {0} is different from the payment gateway account in this payment request"
+							).format(subscription_plan.name)
+						)
 
 				rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
 
@@ -343,7 +367,7 @@ class PaymentRequest(Document):
 		elif self.payment_request_type == "Inward":
 			self.status = "Requested"
 
-		if self.payment_request_type == "Inward" and self.payment_gateway:
+		if self.payment_request_type == "Inward" and self.get("payment_gateway"):
 			if _is_v2_gateway(self.payment_gateway):
 				# New PaymentController flow (v2 gateways)
 				self._process_v2_gateway()
@@ -575,7 +599,7 @@ class PaymentRequest(Document):
 			)
 			data.update({"company": frappe.defaults.get_defaults().company})
 
-		controller = _get_payment_gateway_controller(self.payment_gateway)
+		controller = _get_payment_gateway_controller(self.get("payment_gateway"))
 		controller.validate_transaction_currency(self.currency)
 
 		if hasattr(controller, "validate_minimum_transaction_amount"):
@@ -601,7 +625,7 @@ class PaymentRequest(Document):
 			self.set_as_paid()
 
 	def set_as_paid(self):
-		if self.payment_channel == "Phone":
+		if self.get("payment_channel") == "Phone":
 			self.db_set({"status": "Paid", "outstanding_amount": 0})
 
 		else:
@@ -642,7 +666,7 @@ class PaymentRequest(Document):
 			self.reference_doctype,
 			self.reference_name,
 			party_amount=party_amount,
-			bank_account=self.payment_account,
+			bank_account=self.get("payment_account"),
 			bank_amount=bank_amount,
 			created_from_payment_request=True,
 		)
@@ -698,7 +722,7 @@ class PaymentRequest(Document):
 		if not (
 			self.docstatus == 1
 			and self.payment_request_type == "Inward"
-			and self.payment_channel != "Phone"
+			and self.get("payment_channel") != "Phone"
 			and self.status not in ["Initiated", "Paid"]
 		):
 			frappe.throw(_("Payment Link couldn't be sent."))
@@ -739,7 +763,7 @@ class PaymentRequest(Document):
 
 		context = {
 			"doc": frappe.get_doc(self.reference_doctype, self.reference_name),
-			"payment_url": self.payment_url,
+			"payment_url": self.get("payment_url"),
 			"payment_request": self,
 		}
 
@@ -991,8 +1015,7 @@ def make_payment_request(**args):
 		subscription_plans = get_subscription_plans(ref_doc.doctype, ref_doc.name)
 		pr.update(
 			{
-				"payment_gateway_account": gateway_account.get("name"),
-				"payment_gateway": gateway_account.get("payment_gateway"),
+				"payment_gateway": gateway_account.get("parent"),
 				"payment_account": gateway_account.get("payment_account"),
 				"payment_channel": gateway_account.get("payment_channel"),
 				"payment_request_type": args.get("payment_request_type"),
@@ -1335,18 +1358,29 @@ def get_existing_payment_request_amount(ref_doc, statuses: list | None = None) -
 
 def get_gateway_details(args):  # nosemgrep
 	"""
-	Return gateway and payment account of default payment gateway
+	Return gateway and payment account of the named or default payment gateway
 	"""
-	gateway_account = args.get("payment_gateway_account", {"is_default": 1, "company": args.company})
-	return get_payment_gateway_account(gateway_account)
+	if "payments" not in frappe.get_installed_apps():
+		return
+
+	filters = {"parenttype": "Payment Gateway", "company": args.company}
+	if args.get("payment_gateway"):
+		filters["parent"] = args.payment_gateway
+		if args.get("payment_account"):
+			filters["payment_account"] = args.payment_account
+	else:
+		filters["is_default"] = 1
+
+	return get_payment_gateway_account(filters)
 
 
 def get_payment_gateway_account(filter):
 	return frappe.db.get_value(
 		"Payment Gateway Account",
 		filter,
-		["name", "payment_gateway", "payment_account", "payment_channel", "message"],
+		["parent", "payment_account", "payment_channel", "message"],
 		as_dict=1,
+		order_by="is_default desc, creation asc",
 	)
 
 
@@ -1704,3 +1738,28 @@ def get_existing_payment_references(reference_name):
 	).run(as_dict=True)
 
 	return result
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_payment_account(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	frappe.has_permission("Payment Gateway", "read", throw=True)
+
+	filters = frappe._dict(filters or {})
+	if not filters.payment_gateway:
+		return []
+
+	account = frappe.qb.DocType("Payment Gateway Account")
+	query = (
+		frappe.qb.from_(account)
+		.select(account.payment_account)
+		.where(account.parent == filters.payment_gateway)
+		.where(account.parenttype == "Payment Gateway")
+		.where(account.payment_account.like(f"%{txt}%"))
+		.limit(page_len)
+		.offset(start)
+	)
+	if filters.company:
+		query = query.where(account.company == filters.company)
+
+	return query.run()
