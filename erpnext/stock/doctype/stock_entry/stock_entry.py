@@ -1087,6 +1087,48 @@ class StockEntry(StockController):
 		self.validate_finished_good_consumption()
 		self.validate_materials_against_source()
 
+	def validate_materials_against_bom(self):
+		if not self.bom_no:
+			return
+
+		expected_qty = self.get_bom_component_qty()
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		for item_code, qty in self.get_received_component_qty().items():
+			if item_code not in expected_qty:
+				frappe.throw(
+					_("Item {0} is not part of the BOM {1} and cannot be added to this disassembly.").format(
+						frappe.bold(item_code), frappe.bold(self.bom_no)
+					),
+					title=_("Invalid Disassembly Item"),
+				)
+
+			if abs(flt(qty, precision) - flt(expected_qty[item_code], precision)) > _qty_tolerance(precision):
+				frappe.throw(
+					_("Item {0} quantity ({1} in stock UOM) does not match the BOM quantity {2}.").format(
+						frappe.bold(item_code), flt(qty, precision), flt(expected_qty[item_code], precision)
+					),
+					title=_("Invalid Disassembly Quantity"),
+				)
+
+	def get_bom_component_qty(self) -> dict:
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+
+		component_qty = defaultdict(float)
+		for row in get_bom_items_as_dict(
+			self.bom_no, self.company, qty=self.fg_completed_qty, fetch_exploded=self.use_multi_level_bom
+		).values():
+			component_qty[row.item_code] += flt(row.qty)
+
+		return component_qty
+
+	def get_received_component_qty(self) -> dict:
+		received_qty = defaultdict(float)
+		for row in self.items:
+			if row.t_warehouse and not row.is_finished_item:
+				received_qty[row.item_code] += flt(row.transfer_qty)
+
+		return received_qty
+
 	def validate_finished_good_consumption(self):
 		"""The finished good consumed (in stock UOM) must equal the quantity to disassemble."""
 		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
@@ -1109,9 +1151,7 @@ class StockEntry(StockController):
 		"""Every non-finished-good row's posted stock qty must equal the qty derived from the source."""
 		source_fg_qty = self.get_source_fg_qty()
 		if not source_fg_qty:
-			# Standalone BOM disassembly: no source entry to scale against. The finished-good
-			# invariant above still applies; raw-material amounts come from the BOM.
-			return
+			return self.validate_materials_against_bom()
 
 		progress = self.get_disassembly_progress(source_fg_qty)
 		expected_rows = [
