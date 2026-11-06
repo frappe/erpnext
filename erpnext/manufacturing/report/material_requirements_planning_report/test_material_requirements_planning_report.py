@@ -738,6 +738,27 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
 
+	def test_sales_order_of_an_mps_item_used_in_a_bom_is_counted_once(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		delivery_date = add_days(today(), 30)
+		make_mrp_sales_order(plan.rm_item, 5, delivery_date)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.append(
+			"items",
+			{
+				"item_code": plan.rm_item,
+				"warehouse": WAREHOUSE,
+				"delivery_date": delivery_date,
+				"planned_qty": 5,
+				"uom": frappe.get_cached_value("Item", plan.rm_item, "stock_uom"),
+			},
+		)
+		mps.save()
+
+		rows = get_mrp_row_list(mps)
+		rm_rows = sorted((row.indent, row.required_qty) for row in rows if row.item_code == plan.rm_item)
+		self.assertEqual(rm_rows, [(0, 5), (1, 10)])
+
 
 def make_chart_row(delivery_date, planned_qty=1):
 	return frappe._dict(

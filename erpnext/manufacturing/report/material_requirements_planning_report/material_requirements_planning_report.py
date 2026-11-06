@@ -672,6 +672,9 @@ class MaterialRequirementsPlanningReport:
 		if not self.rm_items:
 			return frappe._dict({})
 
+		# Sales Orders of MPS items are already in their MPS or non-planned rows
+		items = [item for item in self.rm_items if item not in self.fg_items]
+
 		so_details = frappe._dict({})
 
 		parent_doctype = frappe.qb.DocType("Sales Order")
@@ -692,9 +695,6 @@ class MaterialRequirementsPlanningReport:
 			)
 		)
 
-		if self.rm_items:
-			query = query.where(doctype.item_code.isin(self.rm_items))
-
 		if self.filters.get("warehouse"):
 			warehouses = [self.filters.get("warehouse")]
 			if frappe.db.get_value("Warehouse", self.filters.get("warehouse"), "is_group"):
@@ -702,7 +702,7 @@ class MaterialRequirementsPlanningReport:
 
 			query = query.where(doctype.warehouse.isin(warehouses))
 
-		data = query.run(as_dict=True)
+		data = query.where(doctype.item_code.isin(items)).run(as_dict=True) if items else []
 
 		for row in data:
 			key = (row.item_code, row.delivery_date)
