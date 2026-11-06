@@ -10,9 +10,13 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
+<<<<<<< HEAD
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.utils import get_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status
+=======
+from erpnext.controllers.sales_and_purchase_return import validate_return
+>>>>>>> 1155c5b (fix(subcontracting): cap a return by the accepted and rejected qty)
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -160,6 +164,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.set_missing_values()
 		self.validate_with_previous_doc()
+		validate_return(self)
 
 		if self.get("_action") == "submit":
 			self.validate_scrap_items()
