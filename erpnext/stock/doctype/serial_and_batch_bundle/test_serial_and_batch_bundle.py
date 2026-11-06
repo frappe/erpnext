@@ -2099,6 +2099,42 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		)
 		self.assertRaises(NegativeStockError, backdated.submit)
 
+	def test_batch_quantity_check_sums_entries_before_posting_time(self):
+		item_code = "Test Batch Quantity Before Posting Item"
+		(batch_no,) = self._setup_negative_batch_item(item_code, ["TBQBP-BATCH-001"])
+		warehouse = "_Test Warehouse - _TC"
+
+		for qty, days, is_inward in ((100, -10, True), (30, -5, False), (20, -1, True)):
+			make_stock_entry(
+				item_code=item_code,
+				qty=qty,
+				rate=100,
+				target=warehouse if is_inward else None,
+				source=None if is_inward else warehouse,
+				use_serial_batch_fields=True,
+				batch_no=batch_no,
+				posting_date=add_days(today(), days),
+				posting_time="10:00:00",
+			)
+
+		outward = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			source=warehouse,
+			use_serial_batch_fields=True,
+			batch_no=batch_no,
+			posting_date=add_days(today(), -3),
+			posting_time="10:00:00",
+		)
+		bundle = frappe.get_doc("Serial and Batch Bundle", outward.items[0].serial_and_batch_bundle)
+		posting_datetime = frappe.utils.get_datetime(bundle.posting_datetime)
+
+		self.assertEqual(bundle.get_batchwise_qty_before(posting_datetime), {batch_no: 70})
+		self.assertEqual(
+			sorted(flt(row.qty) for row in bundle.get_available_qty_from_sabb(posting_datetime)), [-10, 20]
+		)
+		self.assertEqual(bundle.get_batchwise_available_qty(), {batch_no: 80})
+
 	def make_serial_item_for_valuation(self, item_code, use_serial_no_wise_valuation):
 		return make_item(
 			item_code,
