@@ -981,6 +981,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 					{
 						"account": round_off_account,
 						"against": doc.supplier,
+						"debit_in_transaction_currency": flt(
+							doc.rounding_adjustment, doc.precision("rounding_adjustment")
+						),
 						"debit_in_account_currency": doc.base_rounding_adjustment
 						if round_off_account_currency == doc.company_currency
 						else doc.rounding_adjustment,
