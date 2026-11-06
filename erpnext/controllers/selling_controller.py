@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Min, Sum
-from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
+from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.accounts.services.taxes import _get_taxes_and_charges
@@ -635,10 +635,10 @@ class SellingController(StockController):
 					old_item.item_code != d.item_code
 					or old_item.warehouse != d.warehouse
 					or old_qty != qty
-					or old_item.serial_no != d.serial_no
+					or cstr(old_item.serial_no) != cstr(d.serial_no)
 					or get_serial_nos(old_item.serial_and_batch_bundle)
 					!= get_serial_nos(d.serial_and_batch_bundle)
-					or old_item.batch_no != d.batch_no
+					or cstr(old_item.batch_no) != cstr(d.batch_no)
 					or get_batch_nos(old_item.serial_and_batch_bundle)
 					!= get_batch_nos(d.serial_and_batch_bundle)
 				):
