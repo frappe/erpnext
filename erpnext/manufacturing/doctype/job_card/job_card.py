@@ -147,6 +147,102 @@ class JobCard(Document):
 		self.set_sub_operations()
 		self.update_sub_operation_status()
 		self.validate_work_order()
+<<<<<<< ours
+=======
+		self.set_employees()
+
+		if self.docstatus == 1:
+			self.validate_input_from_previous_operations()
+			self.validate_semi_finished_goods()
+
+	def validate_pending_qty(self):
+		precision = self.precision("total_completed_qty")
+		remaining_qty = flt(flt(self.for_quantity) - flt(self.total_completed_qty), precision)
+		if flt(self.pending_qty, precision) > 0 and flt(self.pending_qty, precision) > remaining_qty:
+			frappe.throw(
+				_("Pending Qty {0} cannot be more than the {1} left after the Total Completed Qty").format(
+					bold(self.get_qty_with_uom(self.pending_qty)), bold(self.get_qty_with_uom(remaining_qty))
+				)
+			)
+
+	def set_hour_rate(self):
+		if self.is_corrective_job_card or not (self.workstation and self.operation_id):
+			return
+
+		operation = frappe.db.get_value(
+			"Work Order Operation", self.operation_id, ["workstation", "hour_rate"], as_dict=True
+		)
+		if operation and operation.workstation == self.workstation and flt(operation.hour_rate):
+			self.hour_rate = operation.hour_rate
+		else:
+			self.hour_rate = flt(frappe.get_cached_value("Workstation", self.workstation, "hour_rate"))
+
+	def validate_semi_finished_goods(self):
+		if not self.track_semi_finished_goods or self.is_subcontracted:
+			return
+
+		if self.items and not self.transferred_qty and not self.skip_material_transfer:
+			self.throw_materials_not_moved()
+
+		if self.docstatus == 1 and not (
+			self.total_completed_qty or self.process_loss_qty or self.pending_qty
+		):
+			frappe.throw(
+				_(
+					"Job Card {0} has no completed quantity yet. Click Start Job when the work begins, then click Complete Job and enter the quantity made. After that you can submit it."
+				).format(bold(self.name)),
+				title=_("Job Not Done Yet"),
+			)
+
+	def throw_materials_not_moved(self):
+		still_to_move = [
+			_("{0}: {1} moved out of {2}").format(
+				bold(row.item_code),
+				self.get_qty_with_uom(row.transferred_qty, row.item_code),
+				self.get_qty_with_uom(row.required_qty, row.item_code),
+			)
+			for row in self.get_rows_to_move()
+		]
+
+		message = _(
+			"Move the raw materials to the Work In Progress warehouse {0} first. Click Move Materials on Job Card {1} and submit the Stock Entry it opens. Then click Start Job."
+		).format(bold(self.wip_warehouse), bold(self.name))
+
+		frappe.throw(
+			message + "<br><br>" + "<br>".join(still_to_move),
+			title=_("Raw Materials Not Moved"),
+		)
+
+	def get_rows_to_move(self):
+		return [row for row in self.items if flt(row.transferred_qty) < flt(row.required_qty)]
+
+	@frappe.whitelist()
+	def get_material_shortages(self):
+		rows = [row for row in self.get_rows_to_move() if row.source_warehouse]
+		in_stock = get_actual_qty_map(rows)
+
+		shortages = []
+		for row in rows:
+			key = (row.item_code, row.source_warehouse)
+			qty_to_move = flt(row.required_qty) - flt(row.transferred_qty)
+			available = max(flt(in_stock.get(key)), 0)
+			in_stock[key] = available - qty_to_move
+
+			if available < qty_to_move:
+				shortages.append(
+					{
+						"name": row.name,
+						"item_code": row.item_code,
+						"warehouse": row.source_warehouse,
+						"qty_to_move": qty_to_move,
+						"available_qty": available,
+						"shortage_qty": qty_to_move - available,
+						"uom": row.stock_uom or row.uom,
+					}
+				)
+
+		return shortages
+>>>>>>> theirs
 
 	def on_update(self):
 		self.validate_job_card_qty()
@@ -1096,6 +1192,175 @@ class JobCard(Document):
 					)
 				)
 
+<<<<<<< ours
+=======
+	def get_manufactured_qty_per_operation(self, operation_ids):
+		job_card = frappe.qb.DocType("Job Card")
+
+		data = (
+			frappe.qb.from_(job_card)
+			.select(job_card.operation_id, Sum(job_card.manufactured_qty))
+			.where(
+				(job_card.work_order == self.work_order)
+				& (job_card.docstatus == 1)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+				& (job_card.operation_id.isin(operation_ids))
+			)
+			.groupby(job_card.operation_id)
+		).run()
+
+		return dict(data)
+
+	def validate_later_operations(self):
+		if self.is_corrective_job_card or not (self.work_order and self.sequence_id and self.operation_id):
+			return
+
+		data = self.get_current_operation_data()
+		operation_qty = flt(data[0].completed_qty) if data else 0.0
+		later_operations = frappe.get_all(
+			"Work Order Operation",
+			filters={"parent": self.work_order, "sequence_id": (">", self.sequence_id)},
+			fields=["operation", "completed_qty", "process_loss_qty", "output_qty"],
+		)
+		if self.track_semi_finished_goods:
+			self.convert_to_current_operation_qty(later_operations, ["completed_qty"])
+
+		for row in later_operations:
+			used_qty = flt(
+				flt(row.completed_qty) + (0 if self.track_semi_finished_goods else flt(row.process_loss_qty)),
+				self.precision("total_completed_qty"),
+			)
+			if used_qty > operation_qty:
+				frappe.throw(
+					_(
+						"Operation {0} has already completed or lost {1}, more than the {2} that operation {3} would have. Cancel the Job Cards of operation {0} first."
+					).format(
+						bold(row.operation),
+						bold(self.get_qty_with_uom(used_qty)),
+						bold(self.get_qty_with_uom(operation_qty)),
+						bold(self.operation),
+					),
+					OperationSequenceError,
+				)
+
+	def get_previous_operations(self):
+		previous_operations = frappe.get_all(
+			"Work Order Operation",
+			fields=[
+				"name",
+				"operation",
+				"status",
+				"completed_qty",
+				"sequence_id",
+				"finished_good",
+				"output_qty",
+			],
+			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
+			order_by="sequence_id, idx",
+		)
+
+		if self.track_semi_finished_goods and previous_operations:
+			totals = self.get_manufactured_qty_per_operation([row.name for row in previous_operations])
+			for row in previous_operations:
+				row.manufactured_qty = flt(totals.get(row.name))
+
+			self.convert_to_current_operation_qty(previous_operations, ["completed_qty", "manufactured_qty"])
+
+		return previous_operations
+
+	def get_current_operation_completed_qty(self):
+		current_operation_qty = 0.0
+		data = self.get_current_operation_data()
+		if data and len(data) > 0:
+			current_operation_qty = flt(data[0].completed_qty)
+
+		return flt(
+			current_operation_qty + flt(self.total_completed_qty), self.precision("total_completed_qty")
+		)
+
+	def get_max_completable_qty(self):
+		if self.is_corrective_job_card or not (self.work_order and self.sequence_id):
+			return None
+
+		previous_operations = self.get_previous_operations()
+		if not previous_operations:
+			return None
+
+		qty_field = "manufactured_qty" if self.track_semi_finished_goods else "completed_qty"
+		min_completed_qty = min(flt(row.get(qty_field)) for row in previous_operations)
+
+		used_qty = (
+			self.get_current_operation_completed_qty()
+			if self.track_semi_finished_goods
+			else self.get_operation_input_qty()
+		)
+		return flt(min_completed_qty - used_qty, self.precision("total_completed_qty"))
+
+	def get_operation_input_qty(self):
+		"""Qty of the previous operation used by submitted job cards of this operation and this card's completed qty."""
+		submitted = self.get_current_operation_data()[0]
+		return flt(submitted.completed_qty) + flt(submitted.process_loss_qty) + flt(self.total_completed_qty)
+
+	def validate_input_from_previous_operations(self):
+		"""Completed qty and process loss together can't exceed what the previous operation completed."""
+		if self.is_corrective_job_card or self.track_semi_finished_goods or not self.sequence_id:
+			return
+
+		previous_operations = self.get_previous_operations()
+		if not previous_operations:
+			return
+
+		previous = min(previous_operations, key=lambda row: flt(row.completed_qty))
+		precision = self.precision("total_completed_qty")
+		input_qty = flt(self.get_operation_input_qty() + flt(self.process_loss_qty), precision)
+		if input_qty <= flt(previous.completed_qty, precision):
+			return
+
+		frappe.throw(
+			_(
+				"Job Card {0}: Completed Qty and Process Loss of operation {1} add up to {2}, but the previous operation {3} completed only {4}. Reduce {5} to {6}."
+			).format(
+				bold(self.name),
+				bold(self.operation),
+				bold(self.get_qty_with_uom(input_qty)),
+				bold(previous.operation),
+				bold(self.get_qty_with_uom(previous.completed_qty)),
+				_(self.meta.get_label("for_quantity")),
+				bold(flt(self.for_quantity - input_qty + flt(previous.completed_qty), precision)),
+			),
+			OperationSequenceError,
+		)
+
+	def validate_previous_operation_manufactured_qty(self, row, current_operation_qty):
+		manufactured_qty = flt(row.manufactured_qty)
+
+		if not manufactured_qty:
+			frappe.throw(
+				_(
+					"Job Card {0}: As per the sequence of the operations in the work order {1}, submit the manufacturing entry for the operation {2} before the operation {3}."
+				).format(
+					bold(self.name),
+					bold(get_link_to_form("Work Order", self.work_order)),
+					bold(row.operation),
+					bold(self.operation),
+				),
+				OperationSequenceError,
+			)
+
+		if manufactured_qty < current_operation_qty:
+			frappe.throw(
+				_(
+					"The completed quantity {0} of an operation {1} cannot be greater than the manufactured quantity {2} of a previous operation {3}. Submit the manufacturing entry for the operation {3} first."
+				).format(
+					bold(self.get_qty_with_uom(current_operation_qty)),
+					bold(self.operation),
+					bold(self.get_qty_with_uom(manufactured_qty, row.finished_good)),
+					bold(row.operation),
+				),
+				OperationSequenceError,
+			)
+
+>>>>>>> theirs
 	def validate_work_order(self):
 		if self.is_work_order_closed():
 			frappe.throw(_("You can't make any changes to Job Card since Work Order is closed."))
