@@ -393,7 +393,9 @@ class MaterialRequest(BuyingController):
 						)
 
 				elif self.material_request_type == "Manufacture":
-					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
+					ordered_qty = flt(mr_items_ordered_qty.get(d.name))
+					self.validate_work_order_qty(d, ordered_qty, mr_qty_allowance)
+					d.ordered_qty = ordered_qty
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
@@ -408,6 +410,22 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
+
+	def validate_work_order_qty(self, row, ordered_qty, mr_qty_allowance):
+		precision = row.precision("ordered_qty")
+		if flt(ordered_qty, precision) <= flt(row.ordered_qty, precision):
+			return
+
+		if self.status == "Stopped":
+			frappe.throw(_("Material Request {0} is stopped").format(self.name), frappe.InvalidStatusError)
+
+		allowed_qty = flt(row.stock_qty + row.stock_qty * flt(mr_qty_allowance) / 100, precision)
+		if flt(ordered_qty, precision) > allowed_qty:
+			frappe.throw(
+				_(
+					"The total Work Order quantity {0} in Material Request {1} cannot be greater than allowed requested quantity {2} for Item {3}"
+				).format(ordered_qty, self.name, allowed_qty, row.item_code)
+			)
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -891,9 +909,11 @@ def raise_work_orders(material_request: str):
 	errors = []
 	work_orders = []
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+	draft_qty = get_draft_work_order_qty(mr.name)
 
 	for d in mr.items:
-		if (d.stock_qty - d.ordered_qty) > 0:
+		pending_qty = flt(d.stock_qty - d.ordered_qty - flt(draft_qty.get(d.name)), d.precision("stock_qty"))
+		if pending_qty > 0:
 			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1, "is_active": 1}) or (
 				(variant_of := frappe.get_value("Item", d.item_code, "variant_of"))
 				and frappe.db.exists("BOM", {"item": variant_of, "is_default": 1, "is_active": 1})
@@ -902,7 +922,7 @@ def raise_work_orders(material_request: str):
 				wo_order.update(
 					{
 						"production_item": d.item_code,
-						"qty": d.stock_qty - d.ordered_qty,
+						"qty": pending_qty,
 						"fg_warehouse": d.warehouse,
 						"wip_warehouse": default_wip_warehouse,
 						"description": d.description,
@@ -1003,3 +1023,14 @@ def make_in_transit_stock_entry(source_name, in_transit_warehouse):
 		row.t_warehouse = in_transit_warehouse
 
 	return ste_doc
+
+
+def get_draft_work_order_qty(material_request):
+	work_order = frappe.qb.DocType("Work Order")
+	return frappe._dict(
+		frappe.qb.from_(work_order)
+		.select(work_order.material_request_item, Sum(work_order.qty))
+		.where((work_order.material_request == material_request) & (work_order.docstatus == 0))
+		.groupby(work_order.material_request_item)
+		.run()
+	)
