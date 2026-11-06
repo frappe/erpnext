@@ -1771,14 +1771,15 @@ class update_entries_after:
 
 	def is_unvalued_rejected_material(self, sle):
 		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""
-		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice"):
+		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 			return False
 
 		rejected_warehouse = frappe.db.get_value(
 			f"{sle.voucher_type} Item", sle.voucher_detail_no, "rejected_warehouse"
 		)
-		return sle.warehouse == rejected_warehouse and not frappe.db.get_single_value(
-			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		return sle.warehouse == rejected_warehouse and (
+			sle.voucher_type == "Subcontracting Receipt"
+			or not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
 
 	def get_moving_average_rate_for_return(self, sle):
