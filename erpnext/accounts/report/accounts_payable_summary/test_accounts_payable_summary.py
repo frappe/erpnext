@@ -18,7 +18,12 @@ class TestAccountsPayableSummary(FrappeTestCase):
 		frappe.set_user("Administrator")
 		self.maxDiff = None
 		self.company = "_Test Company"
-		self.supplier = "_Test Supplier"
+		# a supplier of its own, so entries left by other tests do not show in the summary
+		self.supplier = "_Test Payable Summary Supplier"
+		if not frappe.db.exists("Supplier", self.supplier):
+			frappe.get_doc(
+				doctype="Supplier", supplier_name=self.supplier, supplier_group="_Test Supplier Group"
+			).insert()
 
 	def tearDown(self):
 		frappe.db.rollback()
@@ -78,7 +83,9 @@ class TestAccountsPayableSummary(FrappeTestCase):
 	def test_gl_balance_ignores_customer_of_same_name(self):
 		self._make_invoice()
 		if not frappe.db.exists("Customer", self.supplier):
-			frappe.get_doc(doctype="Customer", customer_name=self.supplier).insert()
+			frappe.get_doc(
+				doctype="Customer", customer_name=self.supplier, customer_group="_Test Customer Group"
+			).insert()
 		create_sales_invoice(customer=self.supplier, rate=700)
 
 		row = execute(self._filters(show_gl_balance=True))[1][0]
