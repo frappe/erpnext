@@ -12,6 +12,8 @@ class TestCampaignEfficiency(FrappeTestCase):
 	def test_partly_ordered_quotation_counts_as_ordered(self):
 		campaign = make_campaign("_Test Campaign Eff Partly Ordered")
 		lead = make_campaign_lead(campaign)
+		make_lead_customer(lead)
+		value_before = campaign_row(campaign)["order_value"]
 		quotation = make_lead_quotation(lead.name, item_codes=["_Test Item", "_Test Item 2"])
 		quotation.submit()
 		sales_order = make_sales_order_for(quotation.name, item_code="_Test Item")
@@ -19,17 +21,13 @@ class TestCampaignEfficiency(FrappeTestCase):
 		row = campaign_row(campaign)
 		self.assertEqual(frappe.db.get_value("Quotation", quotation.name, "status"), "Partially Ordered")
 		self.assertEqual(row["order_count"], 1)
-		self.assertEqual(row["order_value"], sales_order.base_net_total)
+		self.assertEqual(row["order_value"] - value_before, sales_order.base_net_total)
 
 	def test_activity_after_conversion_is_counted(self):
-		from erpnext.crm.doctype.lead.lead import make_customer
-
 		campaign = make_campaign("_Test Campaign Eff Converted")
 		lead = make_campaign_lead(campaign, company_name="_Test Campaign Eff Converted Customer")
-		customer = make_customer(lead.name)
-		customer.customer_group = "_Test Customer Group"
-		customer.territory = "_Test Territory"
-		customer.insert()
+		customer = make_lead_customer(lead)
+		value_before = campaign_row(campaign)["order_value"]
 
 		quotation = make_lead_quotation(lead.name)
 		quotation.quotation_to = "Customer"
@@ -41,7 +39,7 @@ class TestCampaignEfficiency(FrappeTestCase):
 		row = campaign_row(campaign)
 		self.assertEqual(row["quot_count"], 1)
 		self.assertEqual(row["order_count"], 1)
-		self.assertEqual(row["order_value"], 1000)
+		self.assertEqual(row["order_value"] - value_before, 1000)
 
 	def test_leads_limited_to_user_permissions(self):
 		campaign = make_campaign("_Test Campaign Eff Permissions")
@@ -85,6 +83,8 @@ class TestCampaignEfficiency(FrappeTestCase):
 	def test_cancelled_orders_left_out(self):
 		campaign = make_campaign("_Test Campaign Eff Orders")
 		lead = make_campaign_lead(campaign)
+		make_lead_customer(lead)
+		value_before = campaign_row(campaign)["order_value"]
 		quotation = make_lead_quotation(lead.name)
 		quotation.submit()
 
@@ -94,7 +94,7 @@ class TestCampaignEfficiency(FrappeTestCase):
 
 		row = campaign_row(campaign)
 		self.assertEqual(row["order_count"], 1)
-		self.assertEqual(row["order_value"], 1000)
+		self.assertEqual(row["order_value"] - value_before, 1000)
 
 
 def make_sales_user(email: str) -> str:
@@ -117,6 +117,16 @@ def make_campaign_lead(campaign: str, **fields):
 	return frappe.get_doc(
 		{"doctype": "Lead", "lead_name": f"_Test Lead {campaign}", "campaign_name": campaign, **fields}
 	).insert()
+
+
+def make_lead_customer(lead):
+	"""Customer converted from the lead, in a group that customers can be placed in."""
+	from erpnext.crm.doctype.lead.lead import make_customer
+
+	customer = make_customer(lead.name)
+	customer.customer_group = "_Test Customer Group"
+	customer.territory = "_Test Territory"
+	return customer.insert()
 
 
 def make_lead_quotation(lead: str, item_codes: list | None = None):

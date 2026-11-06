@@ -100,8 +100,11 @@ class TestLead(unittest.TestCase):
 		from erpnext.crm.doctype.lead.lead import make_customer
 
 		lead = make_lead()
-		make_customer(lead.name).insert()
-		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
+		customers = [make_customer(lead.name), make_customer(lead.name)]
+		for customer in customers:
+			customer.customer_group = "_Test Customer Group"
+		customers[0].insert()
+		self.assertRaises(frappe.DuplicateEntryError, customers[1].insert)
 
 	def test_make_customer_from_organization(self):
 		from erpnext.crm.doctype.lead.lead import make_customer
