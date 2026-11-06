@@ -197,3 +197,24 @@ class TestSalesPartner(FrappeTestCase):
 
 		with self.assertRaisesRegex(frappe.ValidationError, "Route .* is already used"):
 			self.make_partner(route="/" + route + "/.")
+
+	def test_published_partner_address_context(self):
+		partner = self.make_partner(show_in_website=1)
+		frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": partner.name,
+				"address_type": "Office",
+				"address_line1": "12 Main Road",
+				"city": "Mumbai",
+				"country": "India",
+				"phone": "111,222",
+				"is_primary_address": 1,
+				"links": [{"link_doctype": "Sales Partner", "link_name": partner.name}],
+			}
+		).insert()
+
+		context = partner.get_context(frappe._dict())
+
+		self.assertEqual(context.partner_address, "12 Main Road\nMumbai\nIndia")
+		self.assertEqual(context.phone, "111\n222")
