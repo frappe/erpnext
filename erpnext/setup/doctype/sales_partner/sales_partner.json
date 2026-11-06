@@ -1,8 +1,7 @@
 {
-<<<<<<< HEAD
  "allow_copy": 0, 
  "allow_events_in_timeline": 0, 
- "allow_guest_to_view": 0, 
+ "allow_guest_to_view": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:partner_name", 
@@ -15,46 +14,6 @@
  "document_type": "Setup", 
  "editable_grid": 0, 
  "engine": "InnoDB", 
-=======
- "actions": [],
- "allow_guest_to_view": 1,
- "allow_import": 1,
- "allow_rename": 1,
- "autoname": "field:partner_name",
- "creation": "2013-04-12 15:34:06",
- "description": "A distributor, dealer or reseller who sells for you on commission.",
- "doctype": "DocType",
- "document_type": "Setup",
- "documentation": "https://docs.frappe.io/erpnext/user/manual/en/sales-partner",
- "engine": "InnoDB",
- "field_order": [
-  "partner_name",
-  "partner_type",
-  "territory",
-  "column_break0",
-  "commission_rate",
-  "address_contacts",
-  "address_desc",
-  "address_html",
-  "column_break1",
-  "contact_desc",
-  "contact_html",
-  "partner_target_details_section_break",
-  "targets",
-  "website",
-  "show_in_website",
-  "column_break_16",
-  "referral_code",
-  "section_break_17",
-  "route",
-  "column_break_20",
-  "logo",
-  "partner_website",
-  "section_break_22",
-  "introduction",
-  "description"
- ],
->>>>>>> d2a26d7 (fix(selling): show published Sales Partner pages to website visitors)
  "fields": [
   {
    "allow_bulk_edit": 0, 
@@ -875,7 +834,6 @@
    "translatable": 0, 
    "unique": 0
   }
-<<<<<<< HEAD
  ], 
  "has_web_view": 0, 
  "hide_heading": 0, 
@@ -888,22 +846,11 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2026-09-16 12:00:00.000000", 
+ "modified": "2026-11-06 01:16:48.000000", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 
  "owner": "Administrator", 
-=======
- ],
- "icon": "handshake",
- "idx": 1,
- "links": [],
- "modified": "2026-11-06 01:16:48.000000",
- "modified_by": "Administrator",
- "module": "Setup",
- "name": "Sales Partner",
- "owner": "Administrator",
->>>>>>> d2a26d7 (fix(selling): show published Sales Partner pages to website visitors)
  "permissions": [
   {
    "amend": 0, 

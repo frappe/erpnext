@@ -198,7 +198,6 @@ class TestSalesPartner(FrappeTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "Route .* is already used"):
 			self.make_partner(route="/" + route + "/.")
 
-<<<<<<< HEAD
 	def test_published_partner_address_context(self):
 		partner = self.make_partner(show_in_website=1)
 		frappe.get_doc(
@@ -219,7 +218,7 @@ class TestSalesPartner(FrappeTestCase):
 
 		self.assertEqual(context.partner_address, "12 Main Road\nMumbai\nIndia")
 		self.assertEqual(context.phone, "111\n222")
-=======
+
 	def test_published_partner_page_is_public(self):
 		from frappe.utils import set_request
 		from frappe.website.serve import get_response
@@ -231,4 +230,3 @@ class TestSalesPartner(FrappeTestCase):
 				with self.subTest(partner=partner.name):
 					set_request(method="GET", path=partner.route)
 					self.assertEqual(get_response().status_code, status_code)
->>>>>>> 85bf105 (test: render a published Sales Partner page for Guest)
