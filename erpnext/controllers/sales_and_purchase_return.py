@@ -1384,11 +1384,7 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 				continue
 
 			if parent_doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-				batch_qty = get_available_batch_qty(
-					parent_doc,
-					batch_no,
-					warehouse,
-				)
+				batch_qty = min(batch_qty, get_available_batch_qty(parent_doc, batch_no, warehouse))
 
 				if batch_qty <= 0:
 					unavailable_batch = batch_no
