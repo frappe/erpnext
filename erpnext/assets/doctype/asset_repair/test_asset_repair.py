@@ -422,7 +422,7 @@ def create_asset_repair(**args):
 		{
 			"asset": asset.name,
 			"asset_name": asset.asset_name,
-			"failure_date": nowdate(),
+			"failure_date": args.failure_date or nowdate(),
 			"description": "Test Description",
 			"repair_cost": 0,
 			"company": asset.company,
