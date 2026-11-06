@@ -63,6 +63,38 @@ class TestPOSClosingEntry(unittest.TestCase):
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
 
+	def test_closing_with_disabled_sales_person(self):
+		# A separate POS Profile keeps invoices that other tests leave unconsolidated out of this closing.
+		test_user, pos_profile = init_user_and_profile(
+			name=f"_Test POS Profile {frappe.generate_hash(length=8)}"
+		)
+		opening = create_opening_entry(pos_profile, test_user.name)
+		frappe.set_user("Administrator")
+		person = frappe.get_doc(
+			doctype="Sales Person",
+			sales_person_name=f"_Test Closing {frappe.generate_hash(length=10)}",
+			commission_rate=10,
+			enabled=1,
+		).insert()
+		invoice = create_pos_invoice(rate=100, do_not_submit=1, pos_profile=pos_profile.name)
+		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		invoice.append("sales_team", {"sales_person": person.name, "allocated_percentage": 100})
+		invoice.save()
+		invoice.submit()
+		person.enabled = 0
+		person.save()
+
+		closing = make_closing_entry_from_opening(opening)
+		closing.flags.in_test = True
+		closing.submit()
+		invoice.reload()
+		self.assertTrue(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+		closing.cancel()
+		invoice.reload()
+		self.assertFalse(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+
 	def test_pos_closing_without_item_code(self):
 		"""
 		Test if POS Closing Entry is created without item code
