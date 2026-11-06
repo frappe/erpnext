@@ -2670,9 +2670,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(si.rounded_total, 1701)
 		self.assertEqual(si.rounding_adjustment, -0.4)
 		self.assertEqual(si.base_grand_total, 964.69)
-		self.assertEqual(si.base_rounding_adjustment, -0.23)
-		self.assertEqual(si.base_rounded_total, 964.46)
+		self.assertEqual(si.base_rounding_adjustment, -0.22)
+		self.assertEqual(si.base_rounded_total, 964.47)
 
+		round_off_account = frappe.get_cached_value("Company", si.company, "round_off_account")
 		gl_entries = frappe.get_all(
 			"GL Entry",
 			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
@@ -2680,16 +2681,54 @@ class TestSalesInvoice(ERPNextTestSuite):
 			order_by="account asc",
 		)
 		expected_values = {
-			debit_to: [964.46, 0.0],
-			"Round Off - _TC": [0.23, 0.0],
+			debit_to: [964.47, 0.0],
+			round_off_account: [0.22, 0.0],
 			"Sales - _TC": [0.0, 964.69],
 		}
 		self.assertEqual({gle.account for gle in gl_entries}, set(expected_values))
 		for gle in gl_entries:
 			self.assertEqual([gle.debit, gle.credit], expected_values[gle.account])
-			if gle.account == "Round Off - _TC":
+			if gle.account == round_off_account:
 				# the round off account is in company currency, so both amounts are the base adjustment
-				self.assertEqual(gle.debit_in_account_currency, 0.23)
+				self.assertEqual(gle.debit_in_account_currency, 0.22)
+
+		payment = get_payment_entry(
+			si.doctype,
+			si.name,
+			bank_account="_Test Cash - _TC",
+			bank_amount=964.47,
+		)
+		payment.source_exchange_rate = si.conversion_rate
+		payment.insert()
+		payment.submit()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"account": debit_to, "voucher_no": ["in", [si.name, payment.name]], "is_cancelled": 0},
+			fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(gle.debit - gle.credit for gle in gl_entries), 0, places=2)
+		self.assertAlmostEqual(
+			sum(gle.debit_in_account_currency - gle.credit_in_account_currency for gle in gl_entries),
+			0,
+			places=2,
+		)
+		self.assertAlmostEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": si.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+			places=2,
+		)
+		payment.cancel()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1701)
+		si.cancel()
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_rounding_adjustment_2(self):
