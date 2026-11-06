@@ -25,66 +25,13 @@ from frappe.utils import (
 from frappe.utils.csvutils import build_csv_response
 from pypika.terms import ExistsCriterion
 
-<<<<<<< HEAD
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin
-=======
-from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
-
-# Backward-compatible re-exports (moved to mapper.py / services/).
-from erpnext.manufacturing.doctype.production_plan.mapper import (
-	get_so_details,
-	sales_order_query,
-)
-from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-	MaterialRequestService,
-	download_raw_materials,
-	get_exploded_items,
-	get_item_data,
-	get_items_for_material_requests,
-	get_material_request_items,
-	get_materials_from_other_locations,
-	get_raw_materials_of_sub_assembly_items,
-	get_sales_orders,
-	get_subitems,
-	get_uom_conversion_factor,
-	get_warehouse_list,
-	set_default_warehouses,
-)
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
-	get_bin_details,
-	get_plan_process_loss_percentage,
-)
-from erpnext.manufacturing.doctype.production_plan.services.reservation import (
-	ProductionPlanStockReservation,
-	cancel_stock_reservation_entries,
-	get_reserved_qty_for_production_plan,
-	get_reserved_qty_for_sub_assembly,
-	make_stock_reservation_entries,
-	reserve_stock_for_production_plan,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
-	SalesOrderSourcingService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
-	SubAssemblyService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
-	WorkOrderCreationService,
-)
-from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
-	ProductionPlanWorkOrderQuantities,
-)
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
-	clear_reserve_stock_if_disabled,
-)
-from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
->>>>>>> 639fca9167 (Merge pull request #64463 from mihir-kandoi/fix/issue-64454)
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
