@@ -61,9 +61,8 @@ def _reorder_item():
 			projected_qty = flt(item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse))
 
 		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
-			deficiency = reorder_level - projected_qty
-			if deficiency > reorder_qty:
-				reorder_qty = deficiency
+			if projected_qty + reorder_qty <= reorder_level:
+				reorder_qty += reorder_level - projected_qty
 
 			company = warehouse_company.get(kwargs.warehouse) or default_company
 

@@ -1230,6 +1230,31 @@ class TestMaterialRequest(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"), 10)
 
+	@change_settings("Stock Settings", {"auto_indent": 1, "reorder_email_notify": 0})
+	def test_reorder_raises_one_request_for_a_shortfall(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.reorder_item import reorder_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"reorder_levels": [
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"warehouse_reorder_level": 10,
+						"warehouse_reorder_qty": 5,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+
+		def get_requested_qty(requests):
+			return [d.stock_qty for mr in requests for d in mr.items if d.item_code == item_code]
+
+		self.assertEqual(get_requested_qty(reorder_item()), [15])
+		self.assertEqual(get_requested_qty(reorder_item() or []), [])
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
