@@ -1452,8 +1452,9 @@ def remove_picked_serial_batches(data, picked, parent_doc):
 		data.serial_nos.pop(serial_no, None)
 
 	sign = -1 if parent_doc.get("is_internal_customer") else 1
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for batch_no, qty in picked.batches.items():
-		data.batches[batch_no] -= sign * qty
+		data.batches[batch_no] = flt(data.batches[batch_no] - sign * qty, precision)
 
 
 def get_available_batch_qty(parent_doc, batch_no, warehouse):
