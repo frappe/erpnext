@@ -1867,22 +1867,7 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_incoming_rate_entered_on_saved_stand_alone_credit_note(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-		item_code = make_item_for_si("_Test Item Saved Credit Note Rate").name
-		return_si = create_sales_invoice(
-			item=item_code,
-			is_return=1,
-			update_stock=1,
-			qty=-1,
-			rate=100,
-			incoming_rate=10,
-			company="_Test Company with perpetual inventory",
-			warehouse="Stores - TCP1",
-			debit_to="Debtors - TCP1",
-			income_account="Sales - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			cost_center="Main - TCP1",
-			do_not_submit=True,
-		)
+		return_si = make_draft_stand_alone_credit_note()
 
 		return_si.items[0].warehouse = create_warehouse(
 			"_Test Credit Note Warehouse", company="_Test Company with perpetual inventory"
@@ -1891,6 +1876,15 @@ class TestSalesInvoice(FrappeTestCase):
 		return_si.save()
 
 		self.assertEqual(return_si.items[0].incoming_rate, 20)
+
+	def test_blank_batch_no_keeps_incoming_rate_on_stand_alone_credit_note(self):
+		return_si = make_draft_stand_alone_credit_note()
+
+		return_si.items[0].serial_no = ""
+		return_si.items[0].batch_no = ""
+		return_si.save()
+
+		self.assertEqual(return_si.items[0].incoming_rate, 10)
 
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
@@ -5668,6 +5662,24 @@ class TestSalesInvoice(FrappeTestCase):
 
 		frappe.get_doc("Purchase Invoice", purchase_invoices[0]).cancel()
 		self.assertFalse(si.get_db_value("inter_company_invoice_reference"))
+
+
+def make_draft_stand_alone_credit_note():
+	return create_sales_invoice(
+		item=make_item_for_si("_Test Item Saved Credit Note Rate").name,
+		is_return=1,
+		update_stock=1,
+		qty=-1,
+		rate=100,
+		incoming_rate=10,
+		company="_Test Company with perpetual inventory",
+		warehouse="Stores - TCP1",
+		debit_to="Debtors - TCP1",
+		income_account="Sales - TCP1",
+		expense_account="Cost of Goods Sold - TCP1",
+		cost_center="Main - TCP1",
+		do_not_submit=True,
+	)
 
 
 def make_item_for_si(item_code, properties=None):
