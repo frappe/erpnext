@@ -139,6 +139,18 @@ def apply_putaway_rule(
 	if not frappe.has_permission("Item", "read"):
 		return
 
+	items = frappe.parse_json(items)
+	bundles = {item.get("serial_and_batch_bundle") for item in items if item.get("serial_and_batch_bundle")}
+	if bundles:  # the preview copies them for the caller
+		readable = frappe.get_list(
+			"Serial and Batch Bundle",
+			filters={"name": ("in", list(bundles))},
+			pluck="name",
+			limit_page_length=0,
+		)
+		if len(readable) < len(bundles):
+			_refuse()
+
 	return _apply_putaway_rule(doctype, items, company, sync, purpose)
 
 
@@ -161,6 +173,7 @@ def _apply_putaway_rule(
 	sync (optional): Sync with client side only for client side calls
 	"""
 	items = frappe.parse_json(items)
+	sync = bool(sync and frappe.parse_json(sync))
 
 	items_not_accomodated, updated_table = [], []
 	item_wise_rules = {}
@@ -251,10 +264,11 @@ def _apply_putaway_rule(
 		show_unassigned_items_message(items_not_accomodated)
 
 	if updated_table and _items_changed(items, updated_table, doctype):
+		_split_bundles(updated_table, doctype, keep_original=not sync)
 		frappe.msgprint(_("Applied putaway rules."), alert=True)
 		return updated_table
 
-	if sync and frappe.parse_json(sync):  # sync with client side
+	if sync:  # sync with client side
 		return items
 
 
@@ -354,10 +368,85 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 			serial_nos, flt(to_allocate) * flt(new_updated_table_row.conversion_factor or 1)
 		)
 
-	new_updated_table_row.serial_and_batch_bundle = ""
+	# legacy serial / batch fields rebuild the bundle on save; a picked bundle is split later
+	if item.get("use_serial_batch_fields") or item.get("serial_no") or item.get("batch_no"):
+		new_updated_table_row.serial_and_batch_bundle = ""
+
+	if not keep_rejected:
+		new_updated_table_row.rejected_serial_and_batch_bundle = ""
 
 	updated_table.append(new_updated_table_row)
 	return updated_table
+
+
+def _split_bundles(rows, doctype: str, keep_original: bool = True):
+	"""Give every row made from one source row its share of the picked bundle; the preview copies them all."""
+	qty_field = "transfer_qty" if doctype == "Stock Entry" else "stock_qty"
+	warehouse_field = "t_warehouse" if doctype == "Stock Entry" else "warehouse"
+
+	rows_by_bundle = defaultdict(list)
+	for row in rows:
+		if row.get("serial_and_batch_bundle"):
+			rows_by_bundle[row.get("serial_and_batch_bundle")].append(row)
+
+	precision = frappe.get_precision("Serial and Batch Bundle", "total_qty")
+	for bundle in frappe.get_docs("Serial and Batch Bundle", filters={"name": ("in", list(rows_by_bundle))}):
+		bundle_rows = rows_by_bundle[bundle.name]
+		qtys = [abs(flt(row.get(qty_field))) for row in bundle_rows]
+
+		if (
+			len(bundle_rows) == 1
+			and not flt(qtys[0] - abs(flt(bundle.total_qty)), precision)
+			and (
+				bundle.type_of_transaction == "Outward"
+				or bundle.warehouse == bundle_rows[0].get(warehouse_field)
+			)
+		):
+			continue
+
+		slices = _slice_entries(bundle.entries, qtys, precision)
+		for idx, (row, share) in enumerate(zip(bundle_rows, slices, strict=True)):
+			if not share:
+				row.serial_and_batch_bundle = ""
+				continue
+
+			doc = bundle if idx == 0 and keep_original else frappe.copy_doc(bundle, ignore_no_copy=False)
+			doc.set("entries", [])
+			for entry in share:
+				doc.append("entries", entry)
+
+			if doc.type_of_transaction == "Inward":
+				doc.warehouse = row.get(warehouse_field)
+
+			doc.save()
+			row.serial_and_batch_bundle = doc.name
+
+
+def _slice_entries(entries, qtys, precision):
+	"""Cut bundle entries into one slice per qty, in bundle order; a batch entry may straddle two slices."""
+	slices = []
+	idx, left = 0, 0.0
+
+	for qty in qtys:
+		share, need = [], flt(qty, precision)
+		while need > 0 and idx < len(entries):
+			entry = entries[idx]
+			if not left:
+				left = abs(flt(entry.qty))
+
+			take = min(left, need)
+			row = entry.as_dict(no_default_fields=True)
+			row["qty"] = take
+			share.append(row)
+
+			left = flt(left - take, precision)
+			need = flt(need - take, precision)
+			if not left:
+				idx += 1
+
+		slices.append(share)
+
+	return slices
 
 
 def show_unassigned_items_message(items_not_accomodated):

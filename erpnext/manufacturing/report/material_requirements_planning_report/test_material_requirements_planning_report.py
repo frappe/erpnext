@@ -861,6 +861,18 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		report.set_lead_time(row)
 		self.assertEqual(row.lead_time, 7)
 
+	def test_sales_orders_of_other_items_are_left_out_when_no_mps_row_is_in_range(self):
+		plan = make_mrp_plan(self)
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		make_mrp_sales_order(other_item, 3, add_days(today(), 15))
+
+		rows = get_mrp_row_list(
+			frappe.get_doc("Master Production Schedule", plan.mps),
+			from_date=add_days(today(), 11),
+			to_date=add_days(today(), 20),
+		)
+		self.assertFalse([row for row in rows if row.item_code == other_item])
+
 	def test_sales_order_of_an_mps_item_used_in_a_bom_is_counted_once(self):
 		plan = make_mrp_plan(self, rm_qty=1)
 		delivery_date = add_days(today(), 30)
