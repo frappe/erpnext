@@ -1,6 +1,9 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -11,6 +14,39 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_payment_terms_filters(self):
+		invoice = self.create_sales_invoice()
+		filters = frappe._dict(
+			company=invoice.company,
+			party=self.customer,
+			from_date=invoice.posting_date,
+			to_date=invoice.posting_date,
+		)
+		for party_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+			frappe.db.set_value("Customer", self.customer, "payment_terms", party_terms)
+			for selected, matching_terms in (
+				([], (None, "", "_Test Payment Term Template", "_Test Other Payment Terms")),
+				([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+				(["_Test Payment Term Template"], ("_Test Payment Term Template",)),
+				(
+					["_Test Payment Term Template", "_Test Other Payment Terms"],
+					("_Test Payment Term Template", "_Test Other Payment Terms"),
+				),
+				(
+					[BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"],
+					(None, "", "_Test Payment Term Template"),
+				),
+				("_Test Payment Term Template", ("_Test Payment Term Template",)),
+				(
+					frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"]),
+					(None, "", "_Test Payment Term Template"),
+				),
+			):
+				with self.subTest(party_terms=party_terms, selected=selected):
+					filters.payment_terms_template = selected
+					rows = execute(filters)[1]
+					self.assertEqual(bool(rows), party_terms in matching_terms)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.customer = "_Test Customer"
@@ -61,6 +97,147 @@ class TestCustomerLedgerSummary(ERPNextTestSuite, AccountsTestMixin):
 		)
 
 		return credit_note
+
+	def test_blank_customer_group_filter(self):
+		invoice = self.create_sales_invoice()
+		group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		parent_group = frappe.db.get_value("Customer Group", group, "parent_customer_group")
+		filters = frappe._dict(
+			company=self.company,
+			party=self.customer,
+			from_date=invoice.posting_date,
+			to_date=invoice.posting_date,
+		)
+		for party_group in (None, "", group):
+			frappe.db.set_value("Customer", self.customer, "customer_group", party_group)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not party_group)),
+				([parent_group], int(bool(party_group))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_group], 1),
+			):
+				with self.subTest(party_group=party_group, groups=groups):
+					filters.customer_group = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].invoiced_amount, invoice.grand_total)
+
+	def test_blank_cost_center_filter(self):
+		blank_invoice = self.create_sales_invoice()
+		self.create_sales_invoice()
+		cost_center = blank_invoice.items[0].cost_center
+		parent_cost_center = frappe.db.get_value("Cost Center", cost_center, "parent_cost_center")
+		filters = frappe._dict(
+			company=self.company,
+			party=self.customer,
+			from_date=blank_invoice.posting_date,
+			to_date=blank_invoice.posting_date,
+		)
+
+		for blank_value in (None, ""):
+			frappe.db.set_value("GL Entry", {"voucher_no": blank_invoice.name}, "cost_center", blank_value)
+			for cost_centers, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], 1000),
+				([cost_center], 1000),
+				([BLANK_ACCOUNTING_DIMENSION, parent_cost_center], 2000),
+			):
+				with self.subTest(blank_value=blank_value, cost_centers=cost_centers):
+					filters.cost_center = cost_centers
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), 1)
+					self.assertEqual(rows[0].invoiced_amount, expected)
+
+	def test_blank_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+		parent_territory = frappe.db.get_value("Territory", territory, "parent_territory")
+		filters = frappe._dict(
+			company=self.company,
+			party=self.customer,
+			from_date=today(),
+			to_date=today(),
+		)
+
+		for customer_territory in (None, "", territory):
+			frappe.db.set_value("Customer", self.customer, "territory", customer_territory)
+			for territories, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not customer_territory)),
+				([parent_territory], int(bool(customer_territory))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_territory], 1),
+			):
+				with self.subTest(customer_territory=customer_territory, territories=territories):
+					filters.territory = territories
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].invoiced_amount, 1000)
+
+	def test_blank_sales_partner_filter(self):
+		self.create_sales_invoice()
+		partner = "_Test Sales Partner India - 1"
+		filters = frappe._dict(
+			company=self.company,
+			party=self.customer,
+			from_date=today(),
+			to_date=today(),
+		)
+
+		for customer_partner in (None, "", partner):
+			frappe.db.set_value("Customer", self.customer, "default_sales_partner", customer_partner)
+			for partners, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not customer_partner)),
+				([partner], int(bool(customer_partner))),
+				([BLANK_ACCOUNTING_DIMENSION, partner], 1),
+			):
+				with self.subTest(customer_partner=customer_partner, partners=partners):
+					filters.sales_partner = partners
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].invoiced_amount, 1000)
+
+	def test_blank_sales_person_filter(self):
+		invoice = self.create_sales_invoice()
+		filters = frappe._dict(company=self.company, party=self.customer, from_date=today(), to_date=today())
+		person = "_Test Sales Person"
+		parent_person = frappe.db.get_value("Sales Person", person, "parent_sales_person")
+		for customer_person, invoice_person in (
+			(None, None),
+			("", ""),
+			(person, None),
+			(None, person),
+			(person, person),
+		):
+			for parenttype, parent, value in (
+				("Customer", self.customer, customer_person),
+				("Sales Invoice", invoice.name, invoice_person),
+			):
+				frappe.db.delete("Sales Team", {"parenttype": parenttype, "parent": parent})
+				if value is not None:
+					frappe.get_doc(
+						{
+							"doctype": "Sales Team",
+							"parenttype": parenttype,
+							"parent": parent,
+							"parentfield": "sales_team",
+							"sales_person": value,
+							"allocated_percentage": 100,
+						}
+					).db_insert()
+			for selected, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], not customer_person or not invoice_person),
+				([parent_person], bool(customer_person or invoice_person)),
+				([BLANK_ACCOUNTING_DIMENSION, parent_person], True),
+			):
+				with self.subTest(
+					customer_person=customer_person, invoice_person=invoice_person, selected=selected
+				):
+					filters.sales_person = selected
+					rows = execute(filters)[1]
+					self.assertEqual({row.party for row in rows}, {self.customer} if expected else set())
+					self.assertEqual(
+						sum(row.invoiced_amount for row in rows), invoice.grand_total if expected else 0
+					)
 
 	def test_ledger_summary_basic_output(self):
 		filters = {"company": self.company, "from_date": today(), "to_date": today()}
