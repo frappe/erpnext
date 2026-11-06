@@ -330,7 +330,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		ldc = get_lower_deduction_certificate(inv.company, posting_date, tax_details, pan_no)
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
-			if ldc:
+			if is_return_against_invoice(inv):
+				tax_amount = get_tax_amount_on_return(inv, tax_details, parties, pan_no)
+			elif ldc:
 				limit_consumed = get_limit_consumed(ldc, parties)
 				if is_valid_certificate(ldc, posting_date, limit_consumed):
 					tax_amount = get_lower_deduction_amount(
@@ -730,21 +732,66 @@ def get_invoice_total_without_tcs(inv, tax_details):
 	return inv.grand_total - tcs_tax_row_amount
 
 
-def get_limit_consumed(ldc, parties):
-	limit_consumed = frappe.db.get_value(
-		"Purchase Invoice",
-		{
-			"supplier": ("in", parties),
-			"apply_tds": 1,
-			"docstatus": 1,
-			"tax_withholding_category": ldc.tax_withholding_category,
-			"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
-			"company": ldc.company,
-		},
-		"sum(tax_withholding_net_total)",
+def get_limit_consumed(ldc, parties, created_before=None):
+	filters = {
+		"supplier": ("in", parties),
+		"apply_tds": 1,
+		"docstatus": 1,
+		"tax_withholding_category": ldc.tax_withholding_category,
+		"posting_date": ("between", (ldc.valid_from, ldc.valid_upto)),
+		"company": ldc.company,
+	}
+	if created_before:
+		filters["creation"] = ("<", created_before)
+
+	return frappe.db.get_value("Purchase Invoice", filters, "sum(tax_withholding_net_total)")
+
+
+def is_return_against_invoice(inv) -> bool:
+	return bool(
+		inv.doctype == "Purchase Invoice"
+		and inv.get("is_return")
+		and inv.get("return_against")
+		and flt(inv.get("tax_withholding_net_total")) < 0
 	)
 
-	return limit_consumed
+
+def get_tax_amount_on_return(inv, tax_details, parties: list, pan_no: str | None) -> float:
+	"""Reverse a debit note at the certificate rate applied on the original invoice, up to the
+	amount deducted under the certificate, and at the category rate for the rest."""
+	returned_amount = -flt(inv.tax_withholding_net_total)
+	ldc_rate, ldc_amount = get_certificate_amount_to_reverse(inv, tax_details, parties, pan_no)
+	ldc_amount = min(returned_amount, ldc_amount)
+
+	return -(ldc_amount * flt(ldc_rate) + (returned_amount - ldc_amount) * tax_details.rate) / 100
+
+
+def get_certificate_amount_to_reverse(inv, tax_details, parties: list, pan_no: str | None) -> tuple:
+	"""Rate of the certificate valid on the original invoice's date, and the amount of the original
+	invoice deducted under it that earlier returns have not reversed yet."""
+	original = frappe.db.get_value(
+		"Purchase Invoice",
+		inv.return_against,
+		["posting_date", "creation", "tax_withholding_net_total"],
+		as_dict=True,
+	)
+	ldc = get_lower_deduction_certificate(inv.company, original.posting_date, tax_details, pan_no)
+	if not ldc:
+		return 0, 0
+
+	limit_left = flt(ldc.certificate_limit) - flt(
+		get_limit_consumed(ldc, parties, created_before=original.creation)
+	)
+	deducted_amount = min(flt(original.tax_withholding_net_total), max(limit_left, 0))
+	returned_earlier = -flt(
+		frappe.db.get_value(
+			"Purchase Invoice",
+			{"return_against": inv.return_against, "apply_tds": 1, "docstatus": 1},
+			"sum(tax_withholding_net_total)",
+		)
+	)
+
+	return ldc.rate, max(deducted_amount - returned_earlier, 0)
 
 
 def get_lower_deduction_amount(current_amount, limit_consumed, certificate_limit, rate, tax_details):

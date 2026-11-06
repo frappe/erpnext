@@ -12,6 +12,7 @@ from frappe.utils import cstr
 from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
@@ -143,13 +144,12 @@ def validate_filters(filters):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
-	if not filters.get("from_date") and not filters.get("to_date"):
+	if not filters.get("from_date") or not filters.get("to_date"):
 		frappe.throw(
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range(filters)
 
 	if filters.get("pos_profile") and filters.get("group_by") == _("POS Profile"):
 		frappe.throw(_("Can not filter based on POS Profile, if grouped by POS Profile"))

@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -18,6 +20,7 @@ def execute(filters=None):
 
 
 def validate_filters(filters):
+	validate_date_range(filters)
 	if not filters:
 		frappe.throw(_("Please set filters"))
 

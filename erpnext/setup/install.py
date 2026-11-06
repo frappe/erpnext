@@ -38,6 +38,7 @@ def after_install():
 	hide_workspaces()
 	update_roles()
 	update_pegged_currencies()
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
 	frappe.db.commit()
 
 

@@ -15,11 +15,14 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import _get_incoming_rate
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = frappe._dict()
 	filters.currency = frappe.get_cached_value("Company", filters.company, "default_currency")
@@ -958,7 +961,14 @@ class GrossProfitGenerator:
 
 	def get_average_buying_rate(self, row, item_code):
 		args = row
-		key = (item_code, row.warehouse)
+		key = (
+			item_code,
+			row.warehouse,
+			row.posting_date,
+			row.posting_time,
+			row.serial_and_batch_bundle,
+			row.qty,
+		)
 		if key not in self.average_buying_rate:
 			args.update(
 				{

@@ -6,6 +6,8 @@ from frappe import _
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	if not filters:
@@ -13,9 +15,9 @@ def execute(filters=None):
 	float_precision = frappe.db.get_default("float_precision")
 
 	avg_daily_outgoing = 0
-	diff = ((getdate(filters.get("to_date")) - getdate(filters.get("from_date"))).days) + 1
-	if diff <= 0:
-		frappe.throw(_("'From Date' must be after 'To Date'"))
+	from_date, to_date = getdate(filters.get("from_date")), getdate(filters.get("to_date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
+	diff = (to_date - from_date).days + 1
 
 	columns = get_columns()
 	items = get_item_info(filters)

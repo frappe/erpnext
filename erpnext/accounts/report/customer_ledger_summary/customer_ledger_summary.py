@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.trial_balance.trial_balance import validate_company_permission
+from erpnext.accounts.report.utils import validate_date_range
 
 TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
@@ -52,8 +53,7 @@ class PartyLedgerSummaryReport:
 
 		validate_company_permission(self.filters.company)
 
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
+		validate_date_range(self.filters)
 
 		self.update_hierarchical_filters()
 
