@@ -695,6 +695,32 @@ class TestProject(FrappeTestCase):
 		project.reload()
 		self.assertEqual(project.total_consumed_material_cost, 1050)
 
+	def test_additional_cost_of_stock_entry_with_project_on_header(self):
+		project = make_project({"project_name": f"_Test Header Project {frappe.generate_hash(length=6)}"})
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=10, to_warehouse="_Test Warehouse - _TC", rate=100)
+
+		transfer = make_stock_entry(
+			item_code=item,
+			qty=10,
+			from_warehouse="_Test Warehouse - _TC",
+			to_warehouse="_Test Warehouse 1 - _TC",
+			do_not_save=True,
+		)
+		transfer.project = project.name
+		transfer.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "Freight",
+				"amount": 50,
+			},
+		)
+		transfer.submit()
+
+		self.assertFalse(transfer.items[0].project)
+		self.assertEqual(project.get_stock_entry_additional_costs(), 50)
+
 	def _create_portal_user(self, email):
 		"""A user with no Project-related role, so read access can only come from
 		control_access_for_project_users() sharing the doc with them."""
