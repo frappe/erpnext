@@ -340,6 +340,43 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
+	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "valuation_method": "FIFO"}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 30,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+
+		receipts = []
+		for rate in (100, 300):
+			sco = get_subcontracting_order(service_items=service_items)
+			rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rate}]
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+			scr = make_subcontracting_receipt(sco.name)
+			scr.save()
+			scr.submit()
+			receipts.append(scr)
+
+		self.assertEqual(receipts[1].items[0].rate, 330)
+		scr_return = make_return_subcontracting_receipt(scr_name=receipts[1].name, qty=-2)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -660)
+
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
@@ -1645,6 +1682,53 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(flt(gl_value, 2), flt(stock_value, 2))
 
+	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
+		from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+		lifo = {"is_stock_item": 1, "valuation_method": "LIFO"}
+		rm_item = make_item(properties=lifo).name
+		fg_item = make_item(properties={**lifo, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+
+		receipts = []
+		for rate in (100, 300):
+			sco = get_subcontracting_order(
+				service_items=[
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"item_code": "Subcontracted Service Item 1",
+						"qty": 5,
+						"rate": 30,
+						"fg_item": fg_item,
+						"fg_item_qty": 5,
+					}
+				]
+			)
+			rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rate}]
+			itemwise_details = make_stock_in_entry(rm_items=rm_items)
+			make_stock_transfer_entry(
+				sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+			)
+			receipts.append(make_subcontracting_receipt(sco.name).submit())
+
+		scr_return = make_return_subcontracting_receipt(scr_name=receipts[0].name, qty=-2)
+		create_repost_item_valuation_entry(
+			{
+				"voucher_type": scr_return.doctype,
+				"voucher_no": scr_return.name,
+				"posting_date": scr_return.posting_date,
+				"posting_time": scr_return.posting_time,
+				"company": scr_return.company,
+			}
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * receipts[0].items[0].rate)
+
 	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_rate(self):
 		from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 
@@ -2681,6 +2765,54 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertTrue(returned_values)
 		self.assertEqual(sum(returned_values), 0)
+
+	def test_recalculate_valuation_rate_keeps_rejected_material_unvalued(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		pr = make_purchase_receipt(
+			item_code=sco.items[0].item_code,
+			qty=1,
+			rate=50,
+			company=sco.company,
+			warehouse="Finished Goods - TCP1",
+			posting_date=add_days(today(), -2),
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.submit()
+
+		frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=pr.doctype,
+			voucher_no=pr.name,
+			recalculate_valuation_rate=1,
+			posting_date=pr.posting_date,
+			posting_time=pr.posting_time,
+		).submit()
+
+		rejected_sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr.name, "warehouse": "Finished Goods - TCP1", "is_cancelled": 0},
+			["incoming_rate", "stock_value_difference"],
+			as_dict=True,
+		)
+		self.assertEqual((rejected_sle.incoming_rate, rejected_sle.stock_value_difference), (0, 0))
 
 	def test_rejected_return_books_no_service_cost(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
