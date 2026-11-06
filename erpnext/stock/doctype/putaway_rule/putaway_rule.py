@@ -383,6 +383,9 @@ def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=N
 	if item.get("use_serial_batch_fields") or item.get("serial_no") or item.get("batch_no"):
 		new_updated_table_row.serial_and_batch_bundle = ""
 
+	if not keep_rejected:
+		new_updated_table_row.rejected_serial_and_batch_bundle = ""
+
 	updated_table.append(new_updated_table_row)
 	return updated_table
 

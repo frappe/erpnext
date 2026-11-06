@@ -699,6 +699,32 @@ class TestPutawayRule(FrappeTestCase):
 		)
 		self.assertEqual(get_batch_qty(batch_2, self.warehouse_1, item), 5)
 
+	def test_putaway_rule_keeps_the_rejected_bundle_on_the_first_row_only(self):
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=3)
+		create_putaway_rule(item_code=item, warehouse=self.warehouse_2, capacity=10, priority=2)
+
+		rows = [
+			{
+				"doctype": "Purchase Receipt Item",
+				"item_code": item,
+				"qty": 5,
+				"conversion_factor": 1,
+				"warehouse": "_Test Warehouse - _TC",
+				"rejected_qty": 2,
+				"rejected_warehouse": "_Test Rejected Warehouse - _TC",
+				"rejected_serial_and_batch_bundle": "REJECTED-BUNDLE",
+			}
+		]
+		_apply_putaway_rule("Purchase Receipt", rows, "_Test Company")
+
+		self.assertEqual(
+			[(row.qty, row.rejected_qty, row.rejected_serial_and_batch_bundle) for row in rows],
+			[(3, 2, "REJECTED-BUNDLE"), (2, 0, "")],
+		)
+
 	def test_putaway_rule_keeps_the_rejected_qty(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		create_putaway_rule(item_code=item, warehouse=self.warehouse_1, capacity=100)
