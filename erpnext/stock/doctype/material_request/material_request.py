@@ -13,7 +13,7 @@ from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
@@ -479,22 +479,36 @@ class MaterialRequest(BuyingController):
 			)
 
 	def update_requested_qty_in_production_plan(self):
-		production_plans = []
-		for d in self.get("items"):
-			if d.production_plan and d.material_request_plan_item:
-				qty = d.qty if self.docstatus == 1 else 0
-				frappe.db.set_value(
-					"Material Request Plan Item", d.material_request_plan_item, "requested_qty", qty
-				)
+		items_from_pp = [d for d in self.items if d.production_plan and d.material_request_plan_item]
+		if not items_from_pp:
+			return
 
-				if d.production_plan not in production_plans:
-					production_plans.append(d.production_plan)
+		update_plan_item_requested_qty({d.material_request_plan_item for d in items_from_pp})
 
-		for production_plan in production_plans:
+		for production_plan in {d.production_plan for d in items_from_pp}:
 			doc = frappe.get_doc("Production Plan", production_plan)
 			doc.flags.ignore_permissions = True
 			doc.set_status()
 			doc.db_set("status", doc.status)
+
+
+def update_plan_item_requested_qty(plan_item_names):
+	mr_item = frappe.qb.DocType("Material Request Item")
+	plan_item = frappe.qb.DocType("Material Request Plan Item")
+	requested = (
+		frappe.qb.from_(plan_item)
+		.left_join(mr_item)
+		.on((mr_item.material_request_plan_item == plan_item.name) & (mr_item.docstatus == 1))
+		.select(
+			plan_item.name, plan_item.conversion_factor, Sum(IfNull(mr_item.stock_qty, 0)).as_("stock_qty")
+		)
+		.where(plan_item.name.isin(list(plan_item_names)))
+		.groupby(plan_item.name, plan_item.conversion_factor)
+	).run(as_dict=True)
+
+	for row in requested:
+		requested_qty = flt(row.stock_qty) / (flt(row.conversion_factor) or 1)
+		frappe.db.set_value("Material Request Plan Item", row.name, "requested_qty", requested_qty)
 
 
 def is_valid_buying_price_list(price_list: str | None) -> bool:
