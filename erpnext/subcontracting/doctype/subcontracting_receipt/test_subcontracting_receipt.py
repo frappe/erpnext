@@ -539,6 +539,60 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			get_serial_numbers_from_bundle(scr_return.items[0].serial_and_batch_bundle), [remaining]
 		)
 
+	def test_batch_return_skips_a_batch_moved_out_of_the_warehouse(self):
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
+		).name
+		make_bom(item=fg_item, raw_materials=[make_item(properties={"is_stock_item": 1}).name])
+		moved, remaining = (
+			frappe.get_doc({"doctype": "Batch", "item": fg_item, "batch_id": f"{fg_item}-{suffix}"})
+			.insert()
+			.name
+			for suffix in ("A", "B")
+		)
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 5,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 5,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
+			{
+				"item_code": fg_item,
+				"warehouse": "_Test Warehouse - _TC",
+				"voucher_type": "Subcontracting Receipt",
+				"qty": 5,
+				"rate": 100,
+				"batches": frappe._dict({moved: 2, remaining: 3}),
+				"do_not_submit": True,
+			}
+		).name
+		scr.submit()
+		make_stock_entry(
+			item_code=fg_item,
+			qty=2,
+			from_warehouse="_Test Warehouse - _TC",
+			to_warehouse="_Test Warehouse 1 - _TC",
+			batch_no=moved,
+			use_serial_batch_fields=1,
+		)
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-3)
+
+		self.assertEqual(get_batch_from_bundle(scr_return.items[0].serial_and_batch_bundle), remaining)
+
 	def test_serial_return_from_rejected_warehouse_takes_the_rejected_serial_nos(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
