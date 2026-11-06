@@ -209,6 +209,23 @@ class TestDeliveryTrip(FrappeTestCase):
 
 		self.assertRaisesRegex(frappe.ValidationError, "do not belong to Company", trip.insert)
 
+	def test_trip_keeps_the_delivery_note_transport_details(self):
+		delivery_note = self.make_delivery_note_with_address(lr_no="LR-777", vehicle_no="MH12AB1234")
+		trip = self.make_trip_for(delivery_note.name, submit=True)
+
+		values = frappe.db.get_value(
+			"Delivery Note", delivery_note.name, ["lr_no", "vehicle_no", "driver"], as_dict=True
+		)
+		self.assertEqual(
+			(values.lr_no, values.vehicle_no, values.driver), ("LR-777", "MH12AB1234", trip.driver)
+		)
+
+		trip.cancel()
+		values = frappe.db.get_value(
+			"Delivery Note", delivery_note.name, ["lr_no", "vehicle_no", "driver"], as_dict=True
+		)
+		self.assertEqual((values.lr_no, values.vehicle_no, values.driver), ("LR-777", "MH12AB1234", None))
+
 
 def create_address(driver):
 	if not frappe.db.exists("Address", {"address_title": "_Test Address for Driver"}):
