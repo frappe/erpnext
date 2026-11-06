@@ -9,6 +9,9 @@ from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	if not (filters or {}).get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
 	validate_date_range(filters)
 	columns = get_columns()
 	data = get_data(filters)
@@ -62,8 +65,7 @@ def get_data(filters):
 
 
 def apply_filters(query, filters, gle):
-	if filters.get("company"):
-		query = query.where(gle.company == filters.company)
+	query = query.where(gle.company == filters.company)
 	if filters.get("voucher_type"):
 		query = query.where(gle.voucher_type == filters.voucher_type)
 	if filters.get("from_date"):
