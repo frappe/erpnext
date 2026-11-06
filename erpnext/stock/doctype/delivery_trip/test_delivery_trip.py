@@ -29,6 +29,7 @@ class TestDeliveryTrip(FrappeTestCase):
 		self.delivery_trip = create_delivery_trip(driver, address)
 
 	def tearDown(self):
+		frappe.db.rollback()
 		frappe.db.sql("delete from `tabDriver`")
 		frappe.db.sql("delete from `tabVehicle`")
 		frappe.db.sql("delete from `tabEmail Template`")
@@ -165,6 +166,48 @@ class TestDeliveryTrip(FrappeTestCase):
 		self.delivery_trip.append("delivery_stops", {"customer": "_Test Customer"})
 
 		self.assertRaises(frappe.MandatoryError, self.delivery_trip.save)
+
+	def make_delivery_note_with_address(self, **kwargs):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		delivery_note = create_delivery_note(do_not_submit=True)
+		delivery_note.shipping_address_name = get_contact_and_address(
+			"_Test Customer"
+		).shipping_address.parent
+		delivery_note.update(kwargs)
+		delivery_note.submit()
+		return delivery_note
+
+	def make_trip_for(self, *delivery_notes, submit=False):
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.delivery_stops = []
+		for name in delivery_notes:
+			trip = make_delivery_trip(name, trip)
+		trip.insert()
+		if submit:
+			trip.submit()
+		return trip
+
+	def test_delivery_note_stays_on_one_trip(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = self.make_trip_for(delivery_note.name, submit=True)
+
+		self.assertRaises(frappe.ValidationError, self.make_trip_for, delivery_note.name)
+
+		frappe.db.set_value("Delivery Note", delivery_note.name, "lr_no", self.delivery_trip.name)
+		trip.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Delivery Note", delivery_note.name, "lr_no"), self.delivery_trip.name
+		)
+
+	def test_delivery_note_of_another_company_is_refused(self):
+		delivery_note = self.make_delivery_note_with_address()
+		trip = frappe.copy_doc(self.delivery_trip)
+		trip.delivery_stops = []
+		trip = make_delivery_trip(delivery_note.name, trip)
+		trip.company = "_Test Company 1"
+
+		self.assertRaisesRegex(frappe.ValidationError, "do not belong to Company", trip.insert)
 
 
 def create_address(driver):
