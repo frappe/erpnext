@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.contacts.address_and_contact import load_address_and_contact
+from frappe.contacts.doctype.address.address import get_default_address
 from frappe.utils import cstr, filter_strip_join, flt
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -84,10 +85,9 @@ class SalesPartner(WebsiteGenerator):
 				)
 
 	def get_context(self, context):
-		address = frappe.db.get_value(
-			"Address", {"sales_partner": self.name, "is_primary_address": 1}, "*", as_dict=True
-		)
-		if address:
+		address_name = get_default_address("Sales Partner", self.name)
+		if address_name:
+			address = frappe.db.get_value("Address", address_name, "*", as_dict=True)
 			city_state = ", ".join(filter(None, [address.city, address.state]))
 			address_rows = [
 				address.address_line1,
