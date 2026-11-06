@@ -708,6 +708,7 @@ class TestBatch(FrappeTestCase):
 		)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 600})
 		pos_inv.items[0].batch_no = batch_no
+		pos_inv.save()
 		pos_inv.submit()
 		frappe.set_user(session_user)
 		self.assertTrue(pos_inv.items[0].serial_and_batch_bundle)
