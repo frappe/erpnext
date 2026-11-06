@@ -1643,6 +1643,23 @@ class TestBOM(ERPNextTestSuite):
 		per_unit = {row.item_code: row.qty / variant_bom.quantity for row in variant_bom.items}
 		self.assertEqual(per_unit, {rm_item: 2, rm_variant.item_code: 3})
 
+	def test_variant_bom_keeps_the_template_row_uom(self):
+		data = make_template_bom_with_box_row()
+		variant_items = [
+			{"item_code": data.template_rm, "variant_item_code": data.rm_variant, "qty": 2, "uom": "Box"}
+		]
+		variant_bom = make_variant_bom(data.bom, data.bom, data.variant, variant_items=variant_items)
+
+		row = variant_bom.items[0]
+		self.assertEqual(
+			(row.item_code, row.qty, row.uom, row.conversion_factor), (data.rm_variant, 2, "Box", 10)
+		)
+		self.assertEqual((row.stock_qty, row.rate, row.amount), (20, 50, 100))
+
+		variant_bom.save()
+		row = variant_bom.items[0]
+		self.assertEqual((row.qty, row.uom, row.stock_qty, row.rate, row.amount), (2, "Box", 20, 50, 100))
+
 	def test_operating_cost_from_sub_assemblies_covers_the_whole_tree(self):
 		from erpnext.manufacturing.doctype.bom.bom import (
 			get_op_cost_from_sub_assemblies,
@@ -2075,6 +2092,38 @@ def make_usd_bom(item, items, **values):
 	bom.insert()
 	bom.submit()
 	return bom
+
+
+def make_template_bom_with_box_row():
+	"""Submitted template BOM whose only row is a template raw material of 2 Box (10 Nos each)."""
+	from erpnext.controllers.item_variant import create_variant
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+	attributes = [{"attribute": "Test Size"}]
+	template_item = make_item("_Test Variant UOM Tmpl", {"has_variants": 1, "attributes": attributes})
+	template_rm = make_item(
+		"_Test Variant UOM Tmpl RM",
+		{"has_variants": 1, "attributes": attributes, "uoms": [{"uom": "Box", "conversion_factor": 10}]},
+	)
+	variants = {}
+	for template in (template_item, template_rm):
+		variant = create_variant(template.item_code, {"Test Size": "Large"})
+		variant.valuation_rate = 5
+		variant.insert(ignore_if_duplicate=True)
+		variants[template.item_code] = variant.item_code
+
+	bom = make_bom(
+		item=template_item.item_code, raw_materials=[template_rm.item_code], currency="INR", do_not_save=True
+	)
+	bom.items[0].update({"qty": 2, "uom": "Box", "conversion_factor": 10, "stock_qty": None})
+	bom.insert()
+	bom.submit()
+	return frappe._dict(
+		bom=bom.name,
+		variant=variants[template_item.item_code],
+		template_rm=template_rm.item_code,
+		rm_variant=variants[template_rm.item_code],
+	)
 
 
 def make_box_item(item_code):
