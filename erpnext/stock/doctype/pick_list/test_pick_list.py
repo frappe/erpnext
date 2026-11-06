@@ -2458,3 +2458,19 @@ class TestPickList(FrappeTestCase):
 			}
 		)
 		self.assertRaises(frappe.ValidationError, pick_list.insert)
+
+	def test_manual_rows_without_picked_qty_are_checked_on_submit(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": 12}],
+			}
+		).insert()
+
+		self.assertRaises(frappe.ValidationError, pick_list.submit)

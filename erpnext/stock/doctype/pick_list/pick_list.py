@@ -135,19 +135,20 @@ class PickList(TransactionBase):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 		for row in self.get("locations"):
-			if not row.picked_qty:
+			row_qty = self.get_qty_to_pick(row)
+			if not row_qty:
 				continue
 
-			if row.batch_no and row.picked_qty:
+			if row.batch_no:
 				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
 
-				if row.picked_qty > batch_qty:
+				if row_qty > batch_qty:
 					frappe.throw(
 						_(
 							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}. Please restock the item."
 						).format(
 							row.idx,
-							row.picked_qty,
+							row_qty,
 							row.item_code,
 							batch_qty,
 							row.batch_no,
@@ -166,13 +167,19 @@ class PickList(TransactionBase):
 				)
 			)
 
-			if row.picked_qty > bin_qty:
+			if row_qty > bin_qty:
 				frappe.throw(
 					_(
 						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
-					).format(row.idx, row.picked_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
+					).format(row.idx, row_qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
 					title=_("Insufficient Stock"),
 				)
+
+	def get_qty_to_pick(self, row):
+		if row.picked_qty or self.scan_mode or not self.docstatus.is_submitted():
+			return flt(row.picked_qty)
+
+		return flt(row.stock_qty)
 
 	def validate_warehouses(self):
 		for location in self.locations:
