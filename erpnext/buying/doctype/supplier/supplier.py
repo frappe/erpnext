@@ -150,10 +150,21 @@ class Supplier(TransactionBase):
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
 		validate_party_accounts(self)
+		self.validate_supplier_group()
 		self.validate_internal_supplier()
 		self.validate_primary_contact_and_address()
 		self.add_role_for_user()
 		self.validate_currency_for_receivable_payable_and_advance_account()
+
+	def validate_supplier_group(self):
+		if not self.supplier_group:
+			return
+
+		if frappe.db.get_value("Supplier Group", self.supplier_group, "is_group"):
+			frappe.throw(
+				_("Cannot select a Group type Supplier Group. Please select a non-group Supplier Group."),
+				title=_("Invalid Supplier Group"),
+			)
 
 	def validate_primary_contact_and_address(self):
 		for fieldname, link_doctype in (

@@ -289,7 +289,6 @@ class AssetDepreciationSchedule(Document):
 		return getdate(asset_doc.available_for_use_date)
 
 	def clear_depr_schedule(self):
-		start = 0
 		num_of_depreciations_completed = 0
 		depr_schedule = []
 
@@ -300,12 +299,11 @@ class AssetDepreciationSchedule(Document):
 				num_of_depreciations_completed += 1
 				depr_schedule.append(schedule)
 			else:
-				start = num_of_depreciations_completed
 				break
 
 		self.depreciation_schedule = depr_schedule
 
-		return start
+		return num_of_depreciations_completed
 
 	def _make_depr_schedule(
 		self,

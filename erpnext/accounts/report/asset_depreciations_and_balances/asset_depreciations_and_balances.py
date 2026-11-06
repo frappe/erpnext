@@ -12,8 +12,11 @@ DISPOSAL_VALUE_FIELDS = {
 	"Capitalized": "value_of_capitalized_asset",
 }
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	filters.day_before_from_date = add_days(filters.from_date, -1)
 	columns, data = get_columns(filters), get_data(filters)
 	return columns, data

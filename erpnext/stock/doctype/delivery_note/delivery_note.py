@@ -21,6 +21,7 @@ from erpnext.controllers.accounts_controller import _get_taxes_and_charges, merg
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.stock_ledger import validate_reserved_stock
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -458,28 +459,14 @@ class DeliveryNote(SellingController):
 		if not (self.get("_action") and self._action != "update_after_submit"):
 			return
 
-		warehouse_item_codes = {}
-		for d in self.get("items") + self.get("packed_items"):
-			warehouse_item_codes.setdefault(d.warehouse, set()).add(d.item_code)
-
-		if not warehouse_item_codes:
-			return
-
-		bin_map = {}
-		for warehouse, item_codes in warehouse_item_codes.items():
-			for b in frappe.get_all(
-				"Bin",
-				filters={"item_code": ["in", item_codes], "warehouse": warehouse},
-				fields=["item_code", "actual_qty", "projected_qty"],
-			):
-				bin_map[(b.item_code, warehouse)] = b
+		bin_qty_map = get_bin_qty_map(self.get("items") + self.get("packed_items"))
 
 		for d in self.get("items"):
-			bin_data = bin_map.get((d.item_code, d.warehouse))
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
 			d.actual_qty = bin_data.actual_qty if bin_data else None
 
 		for d in self.get("packed_items"):
-			bin_data = bin_map.get((d.item_code, d.warehouse))
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
 			if bin_data:
 				d.actual_qty = flt(bin_data.actual_qty)
 				d.projected_qty = flt(bin_data.projected_qty)
@@ -659,27 +646,26 @@ class DeliveryNote(SellingController):
 					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		if self.per_billed == 100:
 			return
 
 		extra_amount = 0
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				fieldname="bypass_credit_limit_check",
-			)
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
 			for d in self.get("items"):
 				if not d.against_sales_invoice:
 					validate_against_credit_limit = True
-					# Only submitted standalone rows are already included in customer outstanding.
-					if (d.against_sales_order or self.docstatus == 0) and self.base_net_total:
+					# Submitted rows are already in customer outstanding, directly or via the Sales Order.
+					if self.docstatus == 0 and self.base_net_total:
 						extra_amount += d.base_net_amount / self.base_net_total * self.base_grand_total
 			if validate_against_credit_limit and not self.base_net_total:
 				# Customer outstanding excludes zero-net deliveries, including their freight charges.

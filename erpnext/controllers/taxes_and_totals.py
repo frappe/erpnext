@@ -58,25 +58,13 @@ class calculate_taxes_and_totals:
 		if not len(self.doc.items):
 			return
 
-		self.discount_amount_applied = False
 		self.need_recomputation = False
 		self.ignore_tax_template_validation = ignore_tax_template_validation
 
-		self._calculate()
-
-		if self.doc.meta.get_field("discount_amount") and not self.has_mapped_discount:
-			self.set_discount_amount()
-			self.apply_discount_amount()
+		self.calculate_discounted_totals()
 
 		if not ignore_tax_template_validation and self.need_recomputation:
 			return self.calculate(ignore_tax_template_validation=True)
-
-		# Update grand total as per cash and non trade discount
-		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
-			self.doc.grand_total -= self.doc.discount_amount
-			self.doc.base_grand_total -= self.doc.base_discount_amount
-			self.doc.rounding_adjustment = self.doc.base_rounding_adjustment = 0.0
-			self.set_rounded_total()
 
 		self.calculate_shipping_charges()
 
@@ -85,6 +73,21 @@ class calculate_taxes_and_totals:
 
 		if self.doc.meta.get_field("other_charges_calculation"):
 			self.set_item_wise_tax_breakup()
+
+	def calculate_discounted_totals(self):
+		self.discount_amount_applied = False
+		self._calculate()
+
+		if self.doc.meta.get_field("discount_amount") and not self.has_mapped_discount:
+			self.set_discount_amount()
+			self.apply_discount_amount()
+
+		# Update grand total as per cash and non trade discount
+		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
+			self.doc.grand_total -= self.doc.discount_amount
+			self.doc.base_grand_total -= self.doc.base_discount_amount
+			self.doc.rounding_adjustment = self.doc.base_rounding_adjustment = 0.0
+			self.set_rounded_total()
 
 	def _calculate(self):
 		self.validate_conversion_rate()
@@ -306,6 +309,7 @@ class calculate_taxes_and_totals:
 			item.net_amount - item.distributed_discount_amount, item.precision("net_amount")
 		)
 		item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+		item._unrounded_net_amount = None
 		self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
 	def _set_in_company_currency(self, doc, fields):
@@ -348,7 +352,10 @@ class calculate_taxes_and_totals:
 		if not any(cint(tax.included_in_print_rate) for tax in self.doc.get("taxes")):
 			return
 
+		net_totals = {}
 		for item in self.doc.items:
+			if not self.discount_amount_applied:
+				item._unrounded_net_amount = None
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			total_tax_slope = 0
 			total_tax_intercept = 0
@@ -381,7 +388,22 @@ class calculate_taxes_and_totals:
 			if not self.discount_amount_applied and item.qty and (total_tax_slope or total_tax_intercept):
 				amount = flt(item.amount) - total_tax_intercept
 
-				item.net_amount = flt(amount / (1 + total_tax_slope), item.precision("net_amount"))
+				item._unrounded_net_amount = amount / (1 + total_tax_slope)
+				item.net_amount = flt(item._unrounded_net_amount, item.precision("net_amount"))
+				if not frappe.flags.round_row_wise_tax and not (
+					self.doc.doctype == "Quotation" and item.get("is_alternative")
+				):
+					# Carry rounding between items with the same taxes, without mixing tax groups.
+					net_total = net_totals.setdefault(
+						tuple(sorted(item_tax_map.items())), frappe._dict(unrounded=0, rounded=0)
+					)
+					net_total.unrounded += item._unrounded_net_amount
+					item.net_amount = flt(
+						flt(net_total.unrounded, item.precision("net_amount")) - net_total.rounded,
+						item.precision("net_amount"),
+					)
+					net_total.rounded += item.net_amount
+
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
@@ -467,7 +489,7 @@ class calculate_taxes_and_totals:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.doc.shipping_rule)
 			shipping_rule.apply(self.doc)
 
-			self._calculate()
+			self.calculate_discounted_totals()
 
 	def calculate_taxes(self):
 		# reset value from earlier calculations
@@ -485,6 +507,7 @@ class calculate_taxes_and_totals:
 				if tax.charge_type == "Actual"
 			]
 		)
+		self.set_actual_tax_distribution()
 
 		for n, item in enumerate(self._items):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
@@ -500,7 +523,7 @@ class calculate_taxes_and_totals:
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
 					actual_tax_dict[tax.idx] -= current_tax_amount
-					if n == len(self._items) - 1:
+					if n == self._actual_tax_distribution[tax.idx].last_idx:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# net_amount is the taxable basis, it feeds no total and is always
@@ -566,6 +589,31 @@ class calculate_taxes_and_totals:
 
 			self._set_in_company_currency(tax, ["total"])
 
+	def set_actual_tax_distribution(self):
+		# Actual taxes are split only over the items they apply to
+		self._actual_tax_distribution = {}
+		item_tax_maps = [self._load_item_tax_rate(item.item_tax_rate) for item in self._items]
+
+		for tax in self.doc.taxes:
+			if tax.charge_type != "Actual":
+				continue
+
+			net_total, last_idx = 0.0, None
+			for n, item in enumerate(self._items):
+				is_applicable = self._get_tax_rate(tax, item_tax_maps[n]) != NOT_APPLICABLE_TAX
+				if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
+					is_applicable = is_applicable and item.get("apply_tds")
+
+				if is_applicable:
+					net_total += flt(item.net_amount)
+					last_idx = n
+
+			# no applicable item: keep the remainder on the last item as before
+			if last_idx is None:
+				last_idx = len(self._items) - 1
+
+			self._actual_tax_distribution[tax.idx] = frappe._dict(net_total=net_total, last_idx=last_idx)
+
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
 		# if tax/charges is for deduction, multiply by -1
@@ -605,22 +653,26 @@ class calculate_taxes_and_totals:
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-
 			if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
-				if not item.get("apply_tds") or not self.doc.tax_withholding_net_total:
-					current_tax_amount = 0.0
-				else:
-					current_net_amount = item.net_amount
-					current_tax_amount = current_net_amount * actual / self.doc.tax_withholding_net_total
-			else:
+				if not item.get("apply_tds"):
+					return current_net_amount, current_tax_amount
+
+			distribution = self._actual_tax_distribution[tax.idx]
+			if distribution.net_total:
 				current_net_amount = item.net_amount
-				current_tax_amount = (
-					current_net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
-				)
+				current_tax_amount = current_net_amount * actual / distribution.net_total
+			elif item is self._items[distribution.last_idx]:
+				# nothing to distribute over, allocate to the last applicable item
+				current_net_amount = item.net_amount
+				current_tax_amount = actual
 
 		elif tax.charge_type == "On Net Total":
 			current_net_amount = item.net_amount
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount
+			# Use unrounded net for inclusive taxes to avoid double rounding
+			if cint(tax.included_in_print_rate) and item._unrounded_net_amount is not None:
+				current_tax_amount = (tax_rate / 100.0) * item._unrounded_net_amount
+			else:
+				current_tax_amount = (tax_rate / 100.0) * item.net_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_net_amount = self.doc.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 			current_tax_amount = (tax_rate / 100.0) * current_net_amount
@@ -886,27 +938,44 @@ class calculate_taxes_and_totals:
 				return
 
 			total_for_discount_amount = self.get_total_for_discount_amount()
-			net_total = 0
-			expected_net_total = 0
+			net_totals = {}
+			use_unrounded_net = (
+				self.doc.apply_discount_on == "Grand Total"
+				and not frappe.flags.round_row_wise_tax
+				and any(cint(tax.included_in_print_rate) for tax in self.doc.get("taxes"))
+			)
 
 			if total_for_discount_amount:
 				# calculate item amount after Discount Amount
 				for item in self._items:
-					distributed_amount = (
-						flt(self.doc.discount_amount) * item.net_amount / total_for_discount_amount
+					tax_key = (
+						tuple(sorted(self._load_item_tax_rate(item.item_tax_rate).items()))
+						if use_unrounded_net
+						else None
 					)
-
-					adjusted_net_amount = item.net_amount - distributed_amount
-					expected_net_total += adjusted_net_amount
+					net_total = net_totals.setdefault(tax_key, frappe._dict(unrounded=0, rounded=0))
+					net_amount = (
+						item._unrounded_net_amount
+						if use_unrounded_net and item._unrounded_net_amount is not None
+						else item.net_amount
+					)
+					adjusted_net_amount = (
+						net_amount - flt(self.doc.discount_amount) * net_amount / total_for_discount_amount
+					)
+					item._unrounded_net_amount = adjusted_net_amount if use_unrounded_net else None
+					net_total.unrounded += adjusted_net_amount
+					distributed_amount = item.net_amount - flt(
+						adjusted_net_amount, item.precision("net_amount")
+					)
 					item.net_amount = flt(adjusted_net_amount, item.precision("net_amount"))
 					item.distributed_discount_amount = flt(
 						distributed_amount, item.precision("distributed_discount_amount")
 					)
-					net_total += item.net_amount
+					net_total.rounded += item.net_amount
 
 					# discount amount rounding adjustment
 					if rounding_difference := flt(
-						expected_net_total - net_total, self.doc.precision("net_total")
+						net_total.unrounded - net_total.rounded, self.doc.precision("net_total")
 					):
 						item.net_amount = flt(
 							item.net_amount + rounding_difference, item.precision("net_amount")
@@ -916,7 +985,7 @@ class calculate_taxes_and_totals:
 							distributed_amount - rounding_difference,
 							item.precision("distributed_discount_amount"),
 						)
-						net_total += rounding_difference
+						net_total.rounded += rounding_difference
 
 					item.net_rate = (
 						flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0

@@ -403,7 +403,7 @@ def create_payment_entry_bts(
 	return _reconcile_vouchers(bank_transaction_name, vouchers)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def auto_reconcile_vouchers(
 	bank_account: str,
 	from_date: str | date | None = None,

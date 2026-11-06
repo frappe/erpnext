@@ -133,6 +133,8 @@ class SellingController(StockController):
 			)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
+			if self.get("sales_partner"):
+				party_details.pop("commission_rate", None)
 			self.update_if_missing(party_details)
 
 		elif lead:
@@ -195,6 +197,17 @@ class SellingController(StockController):
 	def calculate_commission(self):
 		if not self.meta.get_field("commission_rate"):
 			return
+
+		if not self.get("sales_partner"):
+			self.commission_rate = 0
+		elif self.commission_rate is None or (
+			self.get_doc_before_save()
+			and self.has_value_changed("sales_partner")
+			and not self.has_value_changed("commission_rate")
+		):
+			self.commission_rate = (
+				frappe.get_cached_value("Sales Partner", self.sales_partner, "commission_rate") or 0
+			)
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
 
@@ -261,8 +274,16 @@ class SellingController(StockController):
 		for d in self.get("items"):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
+				reference_rate = flt(d.rate_with_margin or d.price_list_rate)
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						reference_rate > 0
+						and flt(d.rate, d.precision("rate"))
+						< flt(reference_rate * (1 - discount / 100), d.precision("rate"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
@@ -461,11 +482,11 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def check_sales_order_on_hold_or_close(self, ref_fieldname):
-		for d in self.get("items"):
-			if d.get(ref_fieldname):
-				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
-				if status in ("Closed", "On Hold") and not self.is_return:
-					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
+		if self.is_return:
+			return
+
+		if reference := self.get_on_hold_or_closed_reference("Sales Order", ref_fieldname):
+			frappe.throw(_("Sales Order {0} is {1}").format(*reference))
 
 	def update_reserved_qty(self):
 		so_map = {}
