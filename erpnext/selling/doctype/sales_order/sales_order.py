@@ -34,10 +34,14 @@ from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
-from erpnext.selling.doctype.customer.customer import check_credit_limit
+from erpnext.selling.doctype.customer.customer import (
+	check_credit_limit,
+	is_sales_order_credit_check_bypassed,
+)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	clear_reserve_stock_if_disabled,
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
@@ -512,15 +516,7 @@ class SalesOrder(SellingController):
 			project.db_update()
 
 	def check_credit_limit(self):
-		# if bypass credit limit check is set to true (1) at sales order level,
-		# then we need not to check credit limit and vise versa
-		if not cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				{"parent": self.customer, "parenttype": "Customer", "company": self.company},
-				"bypass_credit_limit_check",
-			)
-		):
+		if not is_sales_order_credit_check_bypassed(self.customer, self.company):
 			check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
@@ -770,8 +766,9 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_reserved_stock(self):
-		"""Clean reserved stock flag for non-stock Item"""
+		"""Uncheck Reserve Stock when stock reservation is disabled, and on non-stock items."""
 
+		clear_reserve_stock_if_disabled(self)
 		enable_stock_reservation = frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
 
 		for item in self.items:
@@ -1655,6 +1652,8 @@ def make_purchase_order(
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
+		target.incoterm = ""
+		target.named_place = ""
 		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
