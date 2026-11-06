@@ -6,8 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, formatdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	filters.day_before_from_date = add_days(filters.from_date, -1)
 	columns, data = get_columns(filters), get_data(filters)
 	return columns, data

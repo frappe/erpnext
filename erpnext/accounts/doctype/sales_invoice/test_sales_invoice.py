@@ -2319,17 +2319,21 @@ class TestSalesInvoice(FrappeTestCase):
 		si.insert()
 		return si
 
+	@change_settings("Selling Settings", {"sales_update_frequency": "Each Transaction"})
 	def test_company_monthly_sales(self):
-		existing_current_month_sales = frappe.get_cached_value(
-			"Company", "_Test Company", "total_monthly_sales"
-		)
+		from erpnext.setup.doctype.company.company import update_company_current_month_sales
+
+		company = "_Test Company"
+
+		update_company_current_month_sales(company)
+		existing_current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 
 		si = create_sales_invoice()
-		current_month_sales = frappe.get_cached_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales + si.base_grand_total)
 
 		si.cancel()
-		current_month_sales = frappe.get_cached_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
 	def test_rounding_adjustment(self):
@@ -3989,6 +3993,18 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_sales_commission(self):
 		si = frappe.copy_doc(test_records[2])
+		si.sales_partner = (
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test Invoice Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": 0,
+				}
+			)
+			.insert()
+			.name
+		)
 
 		frappe.db.set_value("Item", si.get("items")[0].item_code, "grant_commission", 1)
 		frappe.db.set_value("Item", si.get("items")[1].item_code, "grant_commission", 0)
@@ -5117,6 +5133,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertTrue(jv)
 		self.assertEqual(jv[0], si.grand_total)
 
+	@change_settings("Selling Settings", {"sales_update_frequency": "Each Transaction"})
 	def test_total_billed_amount(self):
 		si = create_sales_invoice(do_not_submit=True)
 
@@ -5132,6 +5149,7 @@ class TestSalesInvoice(FrappeTestCase):
 		doc = frappe.get_doc("Project", project.name)
 		self.assertEqual(doc.total_billed_amount, si.grand_total)
 
+	@change_settings("Selling Settings", {"sales_update_frequency": "Each Transaction"})
 	def test_total_billed_amount_with_different_projects(self):
 		# This test case is for checking the scenario where project is set at document level and for **some** child items only, not all
 		from copy import copy
@@ -5640,6 +5658,30 @@ class TestSalesInvoice(FrappeTestCase):
 
 		frappe.get_doc("Purchase Invoice", purchase_invoices[0]).cancel()
 		self.assertFalse(si.get_db_value("inter_company_invoice_reference"))
+
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "Row #2: Asset .* is already added in another row"
+		):
+			si.insert()
 
 
 def make_item_for_si(item_code, properties=None):

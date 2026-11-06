@@ -7,10 +7,12 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.setup.utils import get_exchange_rate
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	return OpportunitySummaryBySalesStage(filters).run()
 
 

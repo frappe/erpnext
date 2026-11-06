@@ -11,7 +11,10 @@ from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -390,8 +393,15 @@ class SalesInvoice(SellingController):
 		if self.doctype != "Sales Invoice":
 			return
 
+		seen_assets = set()
 		for d in self.get("items"):
 			if d.is_fixed_asset:
+				if d.asset and not self.is_return:
+					if d.asset in seen_assets:
+						frappe.throw(
+							_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset)
+						)
+					seen_assets.add(d.asset)
 				if d.asset:
 					if not self.is_return:
 						asset_status = frappe.db.get_value("Asset", d.asset, "status")
@@ -3067,6 +3077,22 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))
