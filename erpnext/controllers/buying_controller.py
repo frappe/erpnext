@@ -37,7 +37,11 @@ from erpnext.stock.get_item_details import (
 	get_item_defaults,
 )
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import _get_incoming_rate, is_serial_no_wise_valuation_disabled
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	get_valuation_method,
+	is_serial_no_wise_valuation_disabled,
+)
 from erpnext.utilities.transaction_base import get_whole_number_uoms
 
 
@@ -1267,7 +1271,7 @@ class BuyingController(SubcontractingController):
 
 				if self.is_return:
 					outgoing_rate = 0.0
-					if not is_serial_no_wise_valuation_disabled(d.item_code):
+					if self.is_return_valued_at_receipt_rate(d):
 						outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, d.item_code, self.return_against, item_row=d
 						)
@@ -1346,6 +1350,16 @@ class BuyingController(SubcontractingController):
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
+
+	def is_return_valued_at_receipt_rate(self, row):
+		"""Same rule a repost uses for a return, so both give the same value."""
+		if is_serial_no_wise_valuation_disabled(row.item_code):
+			return False
+
+		if row.get("serial_and_batch_bundle") or row.get("serial_no") or row.get("batch_no"):
+			return True
+
+		return get_valuation_method(row.item_code, self.company) != "Moving Average"
 
 	def get_package_for_target_warehouse(
 		self, item, warehouse=None, type_of_transaction=None, via_landed_cost_voucher=None
