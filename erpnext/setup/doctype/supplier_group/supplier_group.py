@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet, get_root_of
 
+from erpnext.accounts.party import validate_party_account_rows
+
 
 class SupplierGroup(NestedSet):
 	# begin: auto-generated types
@@ -33,6 +35,7 @@ class SupplierGroup(NestedSet):
 	def validate(self):
 		if not self.parent_supplier_group:
 			self.parent_supplier_group = get_root_of("Supplier Group")
+		validate_party_account_rows(self, "Supplier")
 		self.validate_currency_for_payable_and_advance_account()
 
 	def validate_currency_for_payable_and_advance_account(self):
