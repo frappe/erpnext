@@ -41,7 +41,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.stock.tests.test_utils import StockTestMixin
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
@@ -4254,6 +4254,9 @@ def make_purchase_invoice(**args):
 		taxes = get_taxes()
 		for tax in taxes:
 			pi.append("taxes", tax)
+
+	if args.return_against:
+		set_return_row_references(pi)
 
 	if not args.do_not_save:
 		pi.insert()

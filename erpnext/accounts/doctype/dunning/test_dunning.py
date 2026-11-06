@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestDunning(ERPNextTestSuite):
@@ -633,6 +633,7 @@ class TestDunning(ERPNextTestSuite):
 		credit_note = frappe.copy_doc(sales_invoice)
 		credit_note.is_return = 1
 		credit_note.return_against = sales_invoice.name
+		set_return_row_references(credit_note)
 		credit_note.update_outstanding_for_self = 0
 
 		for item in credit_note.items:
@@ -843,6 +844,7 @@ class TestDunning(ERPNextTestSuite):
 		credit_note = frappe.copy_doc(sales_invoice)
 		credit_note.is_return = 1
 		credit_note.return_against = sales_invoice.name
+		set_return_row_references(credit_note)
 		credit_note.update_outstanding_for_self = 1
 
 		for item in credit_note.items:

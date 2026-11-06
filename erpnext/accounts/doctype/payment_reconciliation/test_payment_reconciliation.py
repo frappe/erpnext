@@ -16,7 +16,7 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.setup.doctype.employee.test_employee import make_employee
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestPaymentReconciliation(ERPNextTestSuite):
@@ -1298,6 +1298,7 @@ class TestPaymentReconciliation(ERPNextTestSuite):
 		)
 		cr_note.is_return = 1
 		cr_note.return_against = si.name
+		set_return_row_references(cr_note)
 		cr_note = cr_note.save().submit()
 
 		pr = self.create_payment_reconciliation()

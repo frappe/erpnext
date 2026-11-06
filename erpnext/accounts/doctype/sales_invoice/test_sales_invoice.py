@@ -57,7 +57,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 )
 from erpnext.stock.get_item_details import get_item_tax_map
 from erpnext.stock.utils import _get_incoming_rate, get_stock_balance
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestSalesInvoice(ERPNextTestSuite):
@@ -6333,6 +6333,9 @@ def create_sales_invoice(**args):
 			"use_serial_batch_fields": args.use_serial_batch_fields or 0,
 		},
 	)
+
+	if args.return_against:
+		set_return_row_references(si)
 
 	if not args.do_not_save:
 		si.insert()

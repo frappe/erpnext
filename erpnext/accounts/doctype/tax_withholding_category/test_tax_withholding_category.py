@@ -10,7 +10,7 @@ from frappe.utils import add_days, add_months, getdate, today
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.mapper import make_purchase_invoice
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestTaxWithholdingCategory(ERPNextTestSuite):
@@ -1640,6 +1640,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		pi_return = create_purchase_invoice(supplier="Test LDC Supplier", is_return=1, qty=-1, rate=60000)
 		pi_return.return_against = pi.name
+		set_return_row_references(pi_return)
 		pi_return.save()
 		pi_return.submit()
 		self.assertEqual(pi_return.taxes_and_charges_deducted, -2000)
@@ -1679,6 +1680,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		pi_return = create_purchase_invoice(supplier="Test LDC Supplier", is_return=1, qty=-1, rate=1500)
 		pi_return.return_against = pi1.name
+		set_return_row_references(pi_return)
 		pi_return.save()
 		pi_return.submit()
 		self.assertEqual(pi_return.taxes_and_charges_deducted, -30)
@@ -1742,6 +1744,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 			set_posting_time=True,
 		)
 		pi_return.return_against = pi.name
+		set_return_row_references(pi_return)
 		pi_return.save()
 		pi_return.submit()
 		self.assertEqual(pi_return.taxes_and_charges_deducted, -240)
@@ -2743,6 +2746,7 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		pi_return = create_purchase_invoice(supplier="Test TDS Supplier", is_return=1, qty=-1, rate=40000)
 		pi_return.return_against = pi.name
+		set_return_row_references(pi_return)
 		pi_return.save()
 		pi_return.submit()
 
