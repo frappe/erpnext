@@ -1354,7 +1354,11 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 				filterd_serial_batch["serial_nos"] = available_serial_nos
 
 	elif data.batches:
+		unavailable_batch = None
 		for batch_no, batch_qty in data.batches.items():
+			if qty <= 0:
+				break
+
 			if parent_doc.get("is_internal_customer"):
 				batch_qty = batch_qty * -1
 
@@ -1369,6 +1373,7 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 				)
 
 				if batch_qty <= 0:
+<<<<<<< HEAD
 					frappe.throw(
 						_("Batch {0} is not available in warehouse {1}").format(batch_no, warehouse),
 						title=_("Batch Not Available for Return"),
@@ -1376,6 +1381,10 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 
 			if qty <= 0:
 				break
+=======
+					unavailable_batch = batch_no
+					continue
+>>>>>>> dd07d12 (fix(stock): skip batches no longer in the warehouse on a purchase return)
 
 			if batch_qty > qty:
 				filterd_serial_batch["batches"][batch_no] = qty
@@ -1383,6 +1392,14 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 			else:
 				filterd_serial_batch["batches"][batch_no] += batch_qty
 				qty -= batch_qty
+
+		if unavailable_batch and not filterd_serial_batch["batches"]:
+			frappe.throw(
+				_("Batch {0} is not available in warehouse {1}").format(
+					SerialBatchIdentity("Batch").get_label(unavailable_batch), warehouse
+				),
+				title=_("Batch Not Available for Return"),
+			)
 
 	return filterd_serial_batch
 
