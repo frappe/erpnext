@@ -774,6 +774,7 @@ def update_reference_in_payment_entry(
 			if existing_row.reference_doctype in advance_payment_doctypes:
 				new_row.advance_voucher_type = existing_row.reference_doctype
 				new_row.advance_voucher_no = existing_row.reference_name
+				new_row.payment_request = existing_row.payment_request
 
 			row = new_row
 
