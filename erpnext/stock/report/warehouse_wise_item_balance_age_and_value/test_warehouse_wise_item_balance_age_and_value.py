@@ -68,7 +68,7 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 
 		columns, data = self.get_rows_for_restricted_user(item_code, "Finished Goods - _TC")
 
-		self.assertNotIn("Stores - _TC:Int:100", columns)
+		self.assertNotIn("Stores - _TC:Float:100", columns)
 		self.assertEqual([row[4] for row in data if row[0] == item_code], [])
 
 	def test_hidden_descendants_of_a_permitted_group_are_not_shown(self):
@@ -77,7 +77,7 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 
 		columns, data = self.get_rows_for_restricted_user(item_code, group, hide_descendants=1)
 
-		self.assertNotIn("Stores - _TC:Int:100", columns)
+		self.assertNotIn("Stores - _TC:Float:100", columns)
 		self.assertEqual([row[4] for row in data if row[0] == item_code], [])
 
 	def test_permission_for_another_doctype_does_not_limit_warehouses(self):
@@ -88,3 +88,9 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 		)
 
 		self.assertEqual([row[4] for row in data if row[0] == item_code], [700])
+
+	def test_quantity_columns_keep_fractions(self):
+		columns = self.run_report_with_columns(warehouse=["Stores - _TC", "Finished Goods - _TC"])[0]
+
+		self.assertIn("Total Qty:Float:120", columns)
+		self.assertIn("Stores - _TC:Float:100", columns)
