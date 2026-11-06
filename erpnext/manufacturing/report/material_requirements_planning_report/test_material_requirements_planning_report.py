@@ -18,7 +18,8 @@ from erpnext.manufacturing.report.material_requirements_planning_report.material
 	get_item_lead_time,
 	make_order,
 )
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.selling.doctype.sales_order.test_sales_order import create_dn_against_so, make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -683,6 +684,17 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		make_mrp_sales_order(plan.rm_item, 7, add_days(today(), 30))
 		rm_row = get_mrp_rows(mps)[plan.rm_item]
 		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty, rm_row.required_qty), (24, 14, 24))
+
+	def test_bundle_sales_orders_count_only_undelivered_components(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		bundle = make_item(properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 2}]})
+		make_product_bundle(bundle.name, [plan.rm_item])
+		sales_order = make_sales_order(item_code=bundle.name, qty=5, uom="Box", warehouse=WAREHOUSE)
+		create_dn_against_so(sales_order.name, delivered_qty=2)
+
+		rm_row = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))[plan.rm_item]
+
+		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty), (16, 6))
 
 	def test_open_orders_booked_before_from_date_are_demand(self):
 		plan = make_mrp_plan(self)
