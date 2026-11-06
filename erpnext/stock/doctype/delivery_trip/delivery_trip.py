@@ -61,6 +61,7 @@ class DeliveryTrip(Document):
 		if self._action == "submit":
 			self.validate_driver()
 
+		self.validate_delivery_notes_not_on_other_trips()
 		self.validate_stop_addresses()
 
 	def validate_driver(self):
@@ -85,6 +86,33 @@ class DeliveryTrip(Document):
 		for stop in self.delivery_stops:
 			if stop.address and not stop.customer_address:
 				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
+
+	def validate_delivery_notes_not_on_other_trips(self):
+		delivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}
+		if not delivery_notes:
+			return
+
+		delivery_note = frappe.qb.DocType("Delivery Note")
+		notes = (
+			frappe.qb.from_(delivery_note)
+			.select(delivery_note.name, delivery_note.company)
+			.where(delivery_note.name.isin(delivery_notes))
+			.for_update()
+			.run(as_dict=True)
+		)
+		if other_company := [d.name for d in notes if self.company and d.company != self.company]:
+			frappe.throw(
+				_("Delivery Notes {0} do not belong to Company {1}").format(
+					", ".join(other_company), frappe.bold(self.company)
+				)
+			)
+
+		if linked := get_delivery_notes_on_other_trips(delivery_notes, self.name):
+			frappe.throw(
+				_("Delivery Notes are already on another Delivery Trip: {0}").format(
+					", ".join(f"{name} ({trip})" for name, trip in linked)
+				)
+			)
 
 	def update_status(self):
 		status = {0: "Draft", 1: "Scheduled", 2: "Cancelled"}[self.docstatus]
@@ -117,6 +145,11 @@ class DeliveryTrip(Document):
 			"lr_no": self.name,
 			"lr_date": self.departure_time,
 		}
+
+		if delete:
+			delivery_notes = frappe.get_all(
+				"Delivery Note", filters={"name": ("in", delivery_notes), "lr_no": self.name}, pluck="name"
+			)
 
 		for delivery_note in delivery_notes:
 			note_doc = frappe.get_doc("Delivery Note", delivery_note)
@@ -284,6 +317,25 @@ class DeliveryTrip(Document):
 			frappe.throw(_(str(e)))
 
 		return directions[0] if directions else False
+
+
+def get_delivery_notes_on_other_trips(delivery_notes, trip_name):
+	trip = frappe.qb.DocType("Delivery Trip")
+	stop = frappe.qb.DocType("Delivery Stop")
+	return (
+		frappe.qb.from_(stop)
+		.inner_join(trip)
+		.on(trip.name == stop.parent)
+		.select(stop.delivery_note, trip.name)
+		.distinct()
+		.where(
+			(stop.parenttype == "Delivery Trip")
+			& (stop.delivery_note.isin(delivery_notes))
+			& (trip.docstatus < 2)
+			& (trip.name != (trip_name or ""))
+		)
+		.run()
+	)
 
 
 @frappe.whitelist()
