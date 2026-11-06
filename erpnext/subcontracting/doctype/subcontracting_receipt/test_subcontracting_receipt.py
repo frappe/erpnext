@@ -31,6 +31,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
+	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -471,6 +472,53 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			return get_batch_from_bundle(bundle)
 
 		self.assertEqual(get_batch(scr_return), get_batch(receipts[1]))
+
+	def test_serial_return_skips_serial_nos_moved_out_of_the_warehouse(self):
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_sub_contracted_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SCR-RET-MOVED-SN-.####",
+			}
+		).name
+		make_bom(item=fg_item, raw_materials=[make_item(properties={"is_stock_item": 1}).name])
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 2,
+					"rate": 50,
+					"fg_item": fg_item,
+					"fg_item_qty": 2,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+		scr.reload()
+
+		moved, remaining = get_serial_numbers_from_bundle(scr.items[0].serial_and_batch_bundle)
+		make_stock_entry(
+			item_code=fg_item,
+			qty=1,
+			from_warehouse="_Test Warehouse - _TC",
+			to_warehouse="_Test Warehouse 1 - _TC",
+			serial_no=moved,
+			use_serial_batch_fields=1,
+		)
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
+
+		self.assertEqual(
+			get_serial_numbers_from_bundle(scr_return.items[0].serial_and_batch_bundle), [remaining]
+		)
 
 	def test_serial_return_from_rejected_warehouse_takes_the_rejected_serial_nos(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
