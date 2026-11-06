@@ -34,6 +34,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -1599,8 +1600,6 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		args = frappe._dict(
 			{
 				"item_code": item.get("variant_item_code"),
-				"required_qty": item.get("qty"),
-				"qty": item.get("qty"),  # for bom
 				"source_warehouse": item.get("source_warehouse"),
 				"operation": item.get("operation"),
 			}
@@ -1609,6 +1608,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		bom_doc = frappe.get_cached_doc("BOM", bom_no)
 		item_data = get_item_details(args.item_code, skip_bom_info=True)
 		args.update(item_data)
+		args.update(_variant_row_qty(args.item_code, item, item_data.stock_uom))
 
 		args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 
@@ -1618,15 +1618,32 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 			).default_warehouse
 
 		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
-		args["uom"] = item_data.stock_uom
 
-		existing_row = (
-			get_template_rm_item(wo_doc, item.get("item_code")) if table_name == "required_items" else None
-		)
+		if table_name != "required_items":
+			# bom rows are costed per row uom, work order rows per stock uom
+			args["rate"] = flt(args.rate) * flt(args.conversion_factor)
+			wo_doc.append(table_name, args)
+			continue
+
+		existing_row = get_template_rm_item(wo_doc, item.get("item_code"))
 		if existing_row:
 			existing_row.update(args)
 		else:
 			wo_doc.append(table_name, args)
+
+
+def _variant_row_qty(item_code, item, stock_uom):
+	"""The dialog qty is in the template row's uom; the work order needs the stock qty."""
+	uom = item.get("uom") or stock_uom
+	conversion_factor = flt(get_conversion_factor(item_code, uom)["conversion_factor"])
+	stock_qty = flt(item.get("qty")) * conversion_factor
+	return {
+		"qty": flt(item.get("qty")),  # for bom
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"stock_qty": stock_qty,
+		"required_qty": stock_qty,
+	}
 
 
 def get_raw_material_rate(args, wo_doc, bom_doc):
