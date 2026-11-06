@@ -23,16 +23,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-<<<<<<< HEAD
-from erpnext.stock.utils import _get_incoming_rate
-=======
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.utils import (
-	_get_incoming_rate,
-	get_valuation_method,
-	is_serial_no_wise_valuation_disabled,
-)
->>>>>>> 5b01686 (fix(subcontracting): value a Subcontracting Receipt return at the returned receipt's rate)
+from erpnext.stock.utils import _get_incoming_rate, is_serial_no_wise_valuation_disabled
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
 
 
