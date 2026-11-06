@@ -90,7 +90,9 @@ const makes = computed(() => {
 	const qty = preview.value?.output_qty ?? (output.expected_qty || output.planned_qty);
 	return { name: output.item_name || output.item_code, qty: `${fmt(round(qty, 3))} ${output.uom || ""}` };
 });
-const inputErrors = computed(() => (props.stage.phase === "ready" && preview.value?.errors) || []);
+const inputErrors = computed(() =>
+	props.stage.phase === "ready" ? [...(preview.value?.errors || []), ...run.pickErrors(props.stage)] : []
+);
 const canConsume = computed(
 	() => preview.value && !run.isPreviewing(props.stage) && !inputErrors.value.length && !run.paused.value
 );

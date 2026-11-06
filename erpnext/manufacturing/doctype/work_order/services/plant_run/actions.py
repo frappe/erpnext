@@ -7,6 +7,10 @@ from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as ma
 from erpnext.manufacturing.doctype.work_order.mapper import create_job_card
 from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import PlantFlow
 from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
+from erpnext.manufacturing.doctype.work_order.services.plant_run.picks import (
+	PickedSerialBatch,
+	get_pick_options,
+)
 from erpnext.manufacturing.page.shop_floor.shop_floor import submit_quality_inspection
 
 
@@ -137,7 +141,7 @@ class PlantRun:
 	def preview(self, job_card, quantities):
 		return Lot(self.get_flow(), self.get_job_card(job_card), quantities).get_preview()
 
-	def consume(self, job_card, quantities):
+	def consume(self, job_card, quantities, picks=None):
 		job_card = self.get_job_card(job_card)
 		if job_card.is_paused:
 			frappe.throw(_("Resume the Work Order before you consume materials"))
@@ -153,9 +157,16 @@ class PlantRun:
 		job_card.save()
 
 		entry = make_transfer_entry(job_card.name)
+		PickedSerialBatch(entry, picks).apply()
 		entry.insert()
 		entry.submit()
 		return entry.name
+
+	def get_pick_options(self, job_card, row_name):
+		row = next((row for row in self.get_job_card(job_card).items if row.name == row_name), None)
+		if not row:
+			frappe.throw(_("This stage does not consume that material"))
+		return get_pick_options(row.item_code, row.source_warehouse)
 
 	def produce(self, job_card, output_qty, rejected_qty=0, readings=None):
 		job_card = self.get_job_card(job_card)
