@@ -184,6 +184,11 @@ class Issue(Document):
 		replicated_issue.first_response_time = 0
 		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
+		replicated_issue.status = "Open"
+		replicated_issue.opening_date = getdate()
+		replicated_issue.resolution_time = None
+		replicated_issue.user_resolution_time = None
+		replicated_issue.sla_resolution_date = None
 
 		# Reset SLA
 		if replicated_issue.service_level_agreement:
@@ -192,7 +197,6 @@ class Issue(Document):
 			replicated_issue.agreement_status = "First Response Due"
 			replicated_issue.response_by = None
 			replicated_issue.resolution_by = None
-			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -233,10 +237,6 @@ class Issue(Document):
 		).insert(ignore_permissions=True)
 
 		return replicated_issue.name
-
-	def reset_issue_metrics(self):
-		self.db_set("resolution_time", None)
-		self.db_set("user_resolution_time", None)
 
 
 def get_list_context(context=None):
