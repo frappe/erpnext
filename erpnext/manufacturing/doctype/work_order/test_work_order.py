@@ -32,6 +32,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_job_card,
 	make_stock_entry,
 	make_stock_return_entry,
+	make_work_order,
 	stop_unstop,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -4660,6 +4661,23 @@ class TestWorkOrder(FrappeTestCase):
 		wo.required_items[0].item_code = changed_item
 		wo.insert()
 		self.assertEqual((wo.required_items[0].rate, wo.required_items[0].amount), (250, 1250))
+
+	def test_variant_work_order_requires_the_template_row_in_stock_uom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import make_template_bom_with_box_row
+
+		data = make_template_bom_with_box_row()
+		variant_items = [
+			{"item_code": data.template_rm, "variant_item_code": data.rm_variant, "qty": 4, "uom": "Box"}
+		]
+		wo = make_work_order(
+			data.bom, data.variant, 2, "_Test Company", variant_items=variant_items, use_multi_level_bom=0
+		)
+		wo.wip_warehouse = wo.fg_warehouse = "_Test Warehouse - _TC"
+		wo.insert()
+
+		row = wo.required_items[0]
+		self.assertEqual((row.item_code, row.required_qty, row.stock_uom), (data.rm_variant, 40, "Nos"))
+		self.assertEqual((row.rate, row.amount), (5, 200))
 
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
