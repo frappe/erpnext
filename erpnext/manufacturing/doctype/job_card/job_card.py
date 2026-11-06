@@ -2223,7 +2223,7 @@ def make_subcontracting_po(source_name, target_doc=None):
 		"Job Card",
 		source_name,
 		{
-			"Job Card": {"doctype": "Purchase Order", "field_no_map": ["naming_series"]},
+			"Job Card": {"doctype": "Purchase Order"},
 		},
 		target_doc,
 		set_missing_values,
