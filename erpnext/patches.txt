@@ -567,6 +567,7 @@ erpnext.patches.v16_0.encrypt_currency_exchange_access_key
 erpnext.patches.v16_0.remove_all_role_from_import_supplier_invoice
 erpnext.patches.v16_0.encrypt_bank_plaid_access_token
 erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
+erpnext.patches.v16_0.restore_auto_reconciliation_job
 execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
 erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
 erpnext.patches.v16_0.share_assigned_appointments_with_agents

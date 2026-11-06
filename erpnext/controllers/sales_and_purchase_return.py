@@ -1055,7 +1055,9 @@ def get_filters(
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
 	warehouses = []
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and (item_row or warehouse):
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"] and (
+		item_row or warehouse
+	):
 		if reference_voucher_detail_no:
 			warehouses = get_warehouses_for_return(voucher_type, reference_voucher_detail_no)
 
