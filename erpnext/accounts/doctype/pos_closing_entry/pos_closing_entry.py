@@ -122,6 +122,29 @@ class POSClosingEntry(StatusUpdater):
 			{"data": self, "currency": currency},
 		)
 
+	def before_submit(self):
+		self.validate_session_invoices_are_included()
+
+	def validate_session_invoices_are_included(self):
+		included_invoices = {d.pos_invoice for d in self.pos_transactions}
+		session_invoices = get_session_invoices(
+			self.period_start_date, frappe.utils.now_datetime(), self.pos_profile, self.user
+		)
+		missing_invoices = [d.name for d in session_invoices if d.name not in included_invoices]
+		if not missing_invoices:
+			return
+
+		invoice_list = ", ".join(frappe.bold(name) for name in missing_invoices[:10])
+		if len(missing_invoices) > 10:
+			invoice_list += " " + _("and {0} more").format(len(missing_invoices) - 10)
+
+		frappe.throw(
+			_(
+				"Invoices {0} of this POS session are not in this POS Closing Entry. Create the POS Closing Entry again to include them."
+			).format(invoice_list),
+			title=_("Missing Invoices"),
+		)
+
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)
 		frappe.publish_realtime(
@@ -135,6 +158,7 @@ class POSClosingEntry(StatusUpdater):
 
 	@frappe.whitelist()
 	def retry(self):
+		self.validate_session_invoices_are_included()
 		consolidate_pos_invoices(closing_entry=self)
 
 	def update_opening_entry(self, for_cancel=False):
@@ -163,6 +187,14 @@ def get_pos_invoices(start, end, pos_profile, user):
 	frappe.has_permission("POS Profile", doc=pos_profile, throw=True)
 	frappe.has_permission("POS Invoice", throw=True)
 
+	# need to get taxes and payments so can't avoid get_doc
+	return [
+		frappe.get_doc("POS Invoice", d.name).as_dict()
+		for d in get_session_invoices(start, end, pos_profile, user)
+	]
+
+
+def get_session_invoices(start, end, pos_profile, user):
 	data = frappe.db.sql(
 		"""
 	select
@@ -178,11 +210,7 @@ def get_pos_invoices(start, end, pos_profile, user):
 		as_dict=1,
 	)
 
-	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
-	# need to get taxes and payments so can't avoid get_doc
-	data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
-
-	return data
+	return list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
 
 
 def make_closing_entry_from_opening(opening_entry):
