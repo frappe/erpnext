@@ -8717,6 +8717,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
 
+	def test_moving_average_return_keeps_its_value_on_repost(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_purchase_receipt(item_code=item, qty=5, rate=130)
+		receipt = make_purchase_receipt(item_code=item, qty=5, rate=330)
+
+		pr_return = make_return_doc("Purchase Receipt", receipt.name)
+		pr_return.items[0].qty = pr_return.items[0].received_qty = -2
+		pr_return.submit()
+		self.assertEqual(get_sl_entries(pr_return.doctype, pr_return.name)[0].stock_value_difference, -460)
+
+		pr_return.repost_future_sle_and_gle(force=True)
+		self.assertEqual(get_sl_entries(pr_return.doctype, pr_return.name)[0].stock_value_difference, -460)
+
 	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
 		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_receipt as make_receipt_from_order,
