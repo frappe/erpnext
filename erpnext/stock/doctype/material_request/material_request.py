@@ -12,6 +12,7 @@ import frappe.defaults
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
@@ -335,7 +336,13 @@ class MaterialRequest(BuyingController):
 			qty_field = doctype.transfer_qty
 		elif self.material_request_type == "Manufacture":
 			doctype = frappe.qb.DocType("Work Order")
-			qty_field = doctype.qty
+			qty_field = (
+				Case()
+				.when(
+					(doctype.status == "Closed") & (doctype.produced_qty < doctype.qty), doctype.produced_qty
+				)
+				.else_(doctype.qty)
+			)
 
 		if doctype and qty_field:
 			query = (
@@ -348,9 +355,6 @@ class MaterialRequest(BuyingController):
 				)
 				.groupby(doctype.material_request_item)
 			)
-
-			if self.material_request_type == "Manufacture":
-				query = query.where(doctype.status != "Closed")
 
 			mr_items_ordered_qty = frappe._dict(query.run())
 
