@@ -292,7 +292,7 @@ class TestTaxesAndTotals(FrappeTestCase):
 		self.assertEqual(so.base_rounded_total, 1510718.42)
 
 	def test_base_rounded_total_with_transaction_rounding(self):
-		"""JPY rounds to whole units: the base rounded total is the base total plus the base adjustment."""
+		"""JPY rounds to whole units; retain its converted balance for settlement."""
 		so = make_sales_order(do_not_save=True)
 		so.currency = "JPY"
 		so.conversion_rate = 0.567
@@ -306,9 +306,9 @@ class TestTaxesAndTotals(FrappeTestCase):
 		self.assertEqual(so.rounded_total, 1701)
 		self.assertEqual(so.rounding_adjustment, -0.4)
 		self.assertEqual(so.base_grand_total, 964.69)
-		self.assertEqual(so.base_rounding_adjustment, -0.23)
-		# 1701 * 0.567 rounds to 964.47, which would not match the base totals
-		self.assertEqual(so.base_rounded_total, 964.46)
+		self.assertEqual(so.base_rounding_adjustment, -0.22)
+		self.assertEqual(so.base_rounded_total, 964.47)
+		self.assertEqual(so.base_grand_total + so.base_rounding_adjustment, so.base_rounded_total)
 
 	def test_disabling_rounded_total_resets_base_fields(self):
 		"""Disabling rounded total should also clear base rounded values."""
