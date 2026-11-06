@@ -2379,3 +2379,62 @@ class TestPickList(FrappeTestCase):
 			distinct=True,
 		)
 		self.assertEqual(len(delivery_notes), 2)
+
+	def test_row_stock_qty_is_derived_on_the_server(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=24, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 2,
+						"uom": "Box",
+						"conversion_factor": 1,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		).insert()
+		pick_list.submit()
+
+		row = pick_list.locations[0]
+		self.assertEqual((row.conversion_factor, row.stock_qty, row.picked_qty), (12, 24, 24))
+
+	def test_submit_derives_stock_qty_from_unsaved_changes(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=36, basic_rate=100)
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{"item_code": item, "qty": 1, "uom": "Box", "warehouse": "_Test Warehouse - _TC"}
+				],
+			}
+		).insert()
+		pick_list.locations[0].qty = 2
+		pick_list.submit()
+
+		row = pick_list.locations[0]
+		self.assertEqual((row.stock_qty, row.picked_qty), (24, 24))
