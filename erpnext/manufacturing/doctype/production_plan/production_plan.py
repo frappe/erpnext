@@ -29,6 +29,7 @@ from frappe.utils import (
 from frappe.utils.csvutils import build_csv_response
 from pypika.terms import ExistsCriterion
 
+import erpnext
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -1516,7 +1517,7 @@ def download_raw_materials(doc, warehouses=None):
 
 		if not doc.get("for_warehouse"):
 			row = {"item_code": d.get("item_code")}
-			for bin_dict in get_bin_details(row, doc.company, all_warehouse=True):
+			for bin_dict in _get_bin_details(row, doc.company, all_warehouse=True):
 				if d.get("warehouse") == bin_dict.get("warehouse"):
 					continue
 
@@ -2026,13 +2027,20 @@ def _adjust_required_qty_for_uom(row, required_qty):
 
 @frappe.whitelist()
 def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
+	frappe.has_permission("Production Plan", "read", throw=True)
+	return _get_bin_details(row, company, for_warehouse, all_warehouse, ignore_permissions=False)
+
+
+def _get_bin_details(row, company, for_warehouse=None, all_warehouse=False, ignore_permissions=True):
 	if isinstance(row, str):
 		row = frappe._dict(json.loads(row))
 
 	bin = frappe.qb.DocType("Bin")
 	wh = frappe.qb.DocType("Warehouse")
 
-	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
+	subquery = frappe.qb.get_query("Warehouse", fields=["name"], ignore_permissions=ignore_permissions).where(
+		wh.company == company
+	)
 
 	warehouse = ""
 	if not all_warehouse:
@@ -2061,13 +2069,21 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 @frappe.whitelist()
 def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
-	return _aggregate_bin_details(get_bin_details(row, company, for_warehouse))
+	frappe.has_permission("Production Plan", "read", throw=True)
+	return _aggregate_bin_details(_get_bin_details(row, company, for_warehouse, ignore_permissions=False))
 
 
 @frappe.whitelist()
 def get_so_details(sales_order):
+	# planners pick orders without a Sales Order role, as in sales_order_query
+	frappe.has_permission("Production Plan", throw=True)
+	erpnext.require_user_permission("Sales Order", sales_order)
+
 	return frappe.db.get_value(
-		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
+		"Sales Order",
+		{"name": sales_order, "docstatus": 1},
+		["transaction_date", "customer", "grand_total"],
+		as_dict=1,
 	)
 
 
@@ -2299,9 +2315,9 @@ def get_items_for_material_requests(
 			fallback = details.get("source_warehouse") or details.get("default_warehouse")
 			row_scope_warehouse = scope_warehouse or fallback
 			row_target_warehouse = target_warehouse or fallback
-			# get_bin_details scopes to the warehouse's descendants, returning one row per
+			# _get_bin_details scopes to the warehouse's descendants, returning one row per
 			# child warehouse; sum them so a group warehouse reflects combined child stock.
-			bins = get_bin_details(details, doc.company, row_scope_warehouse)
+			bins = _get_bin_details(details, doc.company, row_scope_warehouse)
 			bin_dict = _aggregate_bin_details(bins)
 			shortage_warehouse, shortage_bin = row_scope_warehouse, bin_dict
 			if is_transfer and row_scope_warehouse != row_target_warehouse:
@@ -2497,7 +2513,7 @@ def get_sub_assembly_items(
 			required_qty = stock_qty
 
 			if warehouse and d.item_code not in bin_details:
-				bins = get_bin_details(d, company, for_warehouse=warehouse)
+				bins = _get_bin_details(d, company, for_warehouse=warehouse)
 				bin_details[d.item_code] = frappe._dict(_aggregate_bin_details(bins))
 
 			if skip_available_sub_assembly_item:
