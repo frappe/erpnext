@@ -1325,6 +1325,94 @@ class TestMaterialRequest(FrappeTestCase):
 		):
 			self.assertRaises(frappe.InvalidStatusError, mapper, stopped_mr.name)
 
+	def test_reorder_mail_goes_to_the_company_and_shows_stock_qty(self):
+		from erpnext.stock.reorder_item import get_email_list
+
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-other-company@example.com",
+				"first_name": "Reorder",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 1,
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertNotIn(user.email, get_email_list("_Test Company 1"))
+
+		scoped_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-request-scoped@example.com",
+				"first_name": "Reorder Scoped",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": scoped_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Material Request",
+			}
+		).insert(ignore_permissions=True)
+		self.assertNotIn(scoped_user.email, get_email_list("_Test Company 1"))
+		self.assertIn(scoped_user.email, get_email_list("_Test Company"))
+
+		from unittest.mock import patch
+
+		hidden_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "reorder-parent-only@example.com",
+				"first_name": "Reorder Parent Only",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock Manager"}],
+			}
+		).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": hidden_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Material Request",
+				"hide_descendants": 1,
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Company", "_Test Company 1", "parent_company", "_Test Company")
+
+		with patch("erpnext.stock.reorder_item.get_ancestors_of", return_value=["_Test Company"]):
+			recipients = get_email_list("_Test Company 1")
+			self.assertIn(user.email, recipients)
+			self.assertNotIn(hidden_user.email, recipients)
+
+		message = frappe.render_template(
+			"templates/emails/reorder_item.html",
+			{
+				"mr_list": [
+					frappe._dict(
+						name="MR-1",
+						items=[frappe._dict(item_code="X", qty=2, uom="Box", stock_qty=24, projected_qty=6)],
+					)
+				]
+			},
+		)
+		self.assertIn(">30.0<", message)
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
