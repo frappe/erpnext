@@ -922,7 +922,7 @@ class BOM(WebsiteGenerator):
 		items = []
 		for m in self.get("items"):
 			if m.bom_no:
-				validate_bom_no(m.item_code, m.bom_no)
+				validate_production_bom(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
