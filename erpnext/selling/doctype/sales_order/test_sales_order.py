@@ -405,6 +405,20 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertFalse(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_over_delivery_of_bundle_is_blocked(self):
+		# a bundle parent is non-stock, but its components move real stock, so it must obey the limit
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=50, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=2, warehouse="_Test Warehouse - _TC")
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 5
+		self.assertRaises(frappe.ValidationError, dn.submit)
+
 	def test_over_delivery_keeps_whole_number_uom_qty(self):
 		item = make_item(
 			"_Test Over Delivery Whole Item",
@@ -1378,7 +1392,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			)
 
 	def test_update_items_allows_existing_unconfigured_uom(self):
-		legacy_item, item = make_item(), make_item()
+		legacy_item = make_item(uoms=[{"uom": "Box", "conversion_factor": 2}])
+		item = make_item()
 		so = make_sales_order(
 			item_list=[
 				{
@@ -1391,6 +1406,9 @@ class TestSalesOrder(ERPNextTestSuite):
 				{"item_code": item.name, "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 			]
 		)
+		legacy_item.reload()
+		legacy_item.uoms = [row for row in legacy_item.uoms if row.uom != "Box"]
+		legacy_item.save()
 		trans_items = json.dumps(
 			[
 				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 100, "uom": row.uom}
@@ -1402,6 +1420,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			update_child_qty_rate("Sales Order", trans_items, so.name)
 
 		so.reload()
+		self.assertEqual(so.items[0].uom, "Box")
+		self.assertEqual(so.items[0].conversion_factor, 2)
 		self.assertEqual(so.items[1].qty, 5)
 
 	def test_update_child_preserves_conversion_factor_precision(self):
@@ -2551,6 +2571,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			}
 		)
 
+		# a closed row is not offered for work orders
+		from erpnext.controllers.item_close import update_closed_status
+
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		self.assertNotIn(so.items[1].name, [i["sales_order_item"] for i in get_work_order_items(so.name)])
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 0)
+
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
@@ -2577,6 +2604,16 @@ class TestSalesOrder(ERPNextTestSuite):
 				.where((wo.sales_order == so.name) & (wo.sales_order_item == item))
 			).run()
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+
+	def test_update_status_endpoint_rejects_invalid_status(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		so = make_sales_order()
+		# only Draft / On Hold / Closed are allowed, and only on a submitted order
+		self.assertRaises(frappe.ValidationError, update_status, "Cancelled", so.name)
+
+		draft = make_sales_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_status, "Closed", draft.name)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_work_order_for_duplicate_product_bundle_rows(self):
@@ -2632,6 +2669,48 @@ class TestSalesOrder(ERPNextTestSuite):
 				getdate(work_order.expected_delivery_date),
 				getdate(expected_delivery_dates[work_order.sales_order_item]),
 			)
+
+	def test_update_child_keeps_paid_payment_term_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+			get_payment_entry,
+		)
+
+		create_payment_terms_template()
+		for invoice_portion in (100, 0):
+			with self.subTest(invoice_portion=invoice_portion):
+				so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+				so.payment_terms_template = "Test Receivable Template"
+				so.set("payment_schedule", [])
+				so.append(
+					"payment_schedule",
+					{
+						"payment_term": "Basic Amount Receivable",
+						"due_date": so.delivery_date,
+						"invoice_portion": invoice_portion,
+						"payment_amount": 1000,
+					},
+				)
+				so.insert()
+				so.submit()
+
+				pe = get_payment_entry("Sales Order", so.name, party_amount=400)
+				pe.reference_no = "1"
+				pe.reference_date = nowdate()
+				pe.references[0].allocated_amount = 400
+				pe.insert()
+				pe.submit()
+
+				item = so.items[0]
+				trans_item = json.dumps(
+					[{"item_code": item.item_code, "qty": 1, "rate": 1000, "docname": item.name}]
+				)
+				update_child_qty_rate("Sales Order", trans_item, so.name)
+
+				term = frappe.get_doc("Sales Order", so.name).payment_schedule[0]
+				self.assertEqual(term.paid_amount, 400)
+				self.assertEqual(term.outstanding, 600)
+				self.assertEqual(term.base_outstanding, 600)
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -2917,12 +2996,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.insert()
@@ -2933,7 +3012,7 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.items[0].rate = so.items[0].price_list_rate = 0
 		so.save()
 		so.submit()
@@ -2941,7 +3020,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.net_total, 0)
 		self.assertEqual(so.billing_status, "Not Billed")
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.price_list = "_Test Price List"
 		si.items[0].rate = 0
 		si.items[0].price_list_rate = 0
@@ -2965,7 +3044,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.save()
 		so.submit()
 
@@ -2976,7 +3055,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn1.taxes.clear()
 		dn1.save().submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.items[0].delivery_note = dn1.name
@@ -3000,7 +3079,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.per_billed, 100)
 		self.assertEqual(so.per_delivered, 50)
 
-		cr_note = create_sales_invoice(is_return=1, qty=-1, do_not_submit=True)
+		cr_note = create_sales_invoice(is_return=1, qty=-1, uom="_Test UOM", do_not_submit=True)
 		cr_note.items[0].qty = -5
 		cr_note.items[0].sales_order = so.name
 		cr_note.items[0].so_detail = so.items[0].name
@@ -3353,7 +3432,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		pr = make_payment_request(
 			dt=so.doctype,
 			dn=so.name,
-			order_type="Shopping Cart",
+			make_sales_invoice=True,
 			submit_doc=True,
 			return_doc=True,
 			mute_email=True,
@@ -3369,11 +3448,9 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		pe.cancel()
 		pr.reload()
-		self.assertEqual(pr.status, "Paid")  # TODO: this might be a bug
+		self.assertEqual(pr.status, "Requested")
 		so.reload()  # reload
-		# regardless, since the references have already "handed-over" to SI,
-		# the SO keeps its historical state at the time of hand over
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
 
 		pr.cancel()
 		self.assertEqual(

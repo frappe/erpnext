@@ -570,7 +570,13 @@ frappe.ui.form.on("Payment Entry", {
 									frm.set_value("party_bank_account", r.message.party_bank_account);
 								}
 								if (r.message.bank_account) {
-									frm.set_value("bank_account", r.message.bank_account);
+									// Auto-filled default bank account should not override Mode of Payment account
+									frm.set_bank_account_based_on_party = true;
+									return frm
+										.set_value("bank_account", r.message.bank_account)
+										.finally(() => {
+											frm.set_bank_account_based_on_party = false;
+										});
 								}
 							},
 							() =>
@@ -1366,18 +1372,33 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	bank_account: function (frm) {
-		if (frm.set_company_bank_account_based_on_coa) return;
+		if (frm.set_company_bank_account_based_on_coa) {
+			frm.set_company_bank_account_based_on_coa = false;
+			return;
+		}
 
-		const field = frm.doc.payment_type == "Pay" ? "paid_from" : "paid_to";
-		if (frm.doc.bank_account && ["Pay", "Receive"].includes(frm.doc.payment_type)) {
+		// Only the current event is an automatic selection; later user edits must take precedence.
+		const auto_filled = frm.set_bank_account_based_on_party;
+		frm.set_bank_account_based_on_party = false;
+		const { bank_account, company, payment_type, mode_of_payment } = frm.doc;
+		const field = payment_type == "Pay" ? "paid_from" : "paid_to";
+		if (bank_account && ["Pay", "Receive"].includes(payment_type)) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.bank_account.bank_account.get_bank_account_details",
 				args: {
-					bank_account: frm.doc.bank_account,
+					bank_account,
 				},
 				callback: function (r) {
+					if (
+						frm.doc.bank_account != bank_account ||
+						frm.doc.company != company ||
+						frm.doc.payment_type != payment_type ||
+						frm.doc.mode_of_payment != mode_of_payment
+					)
+						return;
+
 					if (r.message) {
-						if (!frm.doc.mode_of_payment) {
+						if (!auto_filled || !mode_of_payment) {
 							frm.set_value(field, r.message.account);
 						} else {
 							frappe.call({
@@ -1385,13 +1406,21 @@ frappe.ui.form.on("Payment Entry", {
 								args: {
 									doctype: "Mode of Payment Account",
 									filters: {
-										parent: frm.doc.mode_of_payment,
-										company: frm.doc.company,
+										parent: mode_of_payment,
+										company,
 									},
 									fieldname: "default_account",
 									parent: "Mode of Payment",
 								},
 								callback: function (res) {
+									if (
+										frm.doc.bank_account != bank_account ||
+										frm.doc.company != company ||
+										frm.doc.payment_type != payment_type ||
+										frm.doc.mode_of_payment != mode_of_payment
+									)
+										return;
+
 									if (!res.message.default_account) {
 										frm.set_value(field, r.message.account);
 									}
@@ -1413,23 +1442,35 @@ frappe.ui.form.on("Payment Entry", {
 
 		if (!frm.doc.company || !frm.doc[field]) return;
 
-		frm.set_company_bank_account_based_on_coa = true;
+		const account = frm.doc[field];
+		const { bank_account, company, payment_type } = frm.doc;
 
 		frappe.call({
 			method: "frappe.client.get_value",
 			args: {
 				doctype: "Bank Account",
 				filters: {
-					company: frm.doc.company,
-					account: frm.doc[field],
+					company,
+					account,
 					disabled: 0,
 				},
 				fieldname: ["name"],
 			},
-			callback: async function (r) {
-				if (r.message) await frm.set_value("bank_account", r.message.name);
+			callback: function (r) {
+				if (
+					frm.doc[field] != account ||
+					frm.doc.bank_account != bank_account ||
+					frm.doc.company != company ||
+					frm.doc.payment_type != payment_type
+				)
+					return;
 
-				frm.set_company_bank_account_based_on_coa = false;
+				if (r.message) {
+					frm.set_company_bank_account_based_on_coa = true;
+					return frm.set_value("bank_account", r.message.name).finally(() => {
+						frm.set_company_bank_account_based_on_coa = false;
+					});
+				}
 			},
 		});
 	},
@@ -1806,6 +1847,7 @@ frappe.ui.form.on("Payment Entry Reference", {
 							: frm.doc.paid_to_account_currency,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
+					party_account: frm.doc.payment_type == "Receive" ? frm.doc.paid_from : frm.doc.paid_to,
 				},
 				callback: function (r, rt) {
 					if (r.message) {

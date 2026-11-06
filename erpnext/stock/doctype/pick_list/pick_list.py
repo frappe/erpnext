@@ -17,6 +17,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_reserved_serial_nos_for_sre,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
@@ -376,18 +377,8 @@ class PickList(TransactionBase):
 		if self.purpose != "Delivery":
 			return
 
-		so_list = set(location.sales_order for location in self.locations if location.sales_order)
-
-		if so_list:
-			for so in so_list:
-				so_doc = frappe.get_doc("Sales Order", so)
-				for item in so_doc.items:
-					if item.stock_reserved_qty > 0:
-						frappe.throw(
-							_(
-								"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
-							).format(frappe.bold(so))
-						)
+		for so in {location.sales_order for location in self.locations if location.sales_order}:
+			validate_no_reserved_stock(so)
 
 	def validate_picked_items(self):
 		for item in self.locations:
@@ -731,14 +722,6 @@ class PickList(TransactionBase):
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
 
-		# Serialize concurrent allocations per item on postgres. MariaDB's gap locks on the
-		# picked-items locking read below already make two simultaneous allocations take turns;
-		# postgres locking reads can't see the rows another in-flight allocation is inserting, so
-		# both could claim the same stock. Sorted so overlapping documents can't deadlock.
-		if frappe.db.db_type == "postgres" and hasattr(frappe.db, "transaction_advisory_lock"):
-			for item_code in sorted({d.item_code for d in items}):
-				frappe.db.transaction_advisory_lock(("pick-allocate", item_code))
-
 		picked_items_details = self.get_picked_items_details(items)
 		self.item_location_map = frappe._dict()
 
@@ -792,9 +775,8 @@ class PickList(TransactionBase):
 				priority_warehouses.extend(get_descendants_of("Warehouse", source_warehouse))
 				from_warehouses = list(dict.fromkeys(priority_warehouses + from_warehouses))
 
-			self.item_location_map.setdefault(
-				item_code,
-				get_available_item_locations(
+			if item_code not in self.item_location_map:
+				self.item_location_map[item_code] = get_available_item_locations(
 					item_code,
 					from_warehouses,
 					self.item_count_map.get(item_code),
@@ -808,8 +790,7 @@ class PickList(TransactionBase):
 					),
 					exclude_warehouses=excluded_warehouses,
 					own_vouchers=own_vouchers,
-				),
-			)
+				)
 
 			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
@@ -1080,8 +1061,8 @@ class PickList(TransactionBase):
 			}
 		return product_bundle_qty_map
 
-	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items) -> int:
-		"""Compute how many full bundles can be created from picked items."""
+	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
+		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
 		possible_bundles = {}
 		for item in self.locations:
@@ -1089,8 +1070,9 @@ class PickList(TransactionBase):
 				continue
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
+				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
 				possible_bundles.setdefault(item.product_bundle_item, 0)
-				possible_bundles[item.product_bundle_item] += item.picked_qty / qty_in_bundle
+				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
@@ -1224,6 +1206,20 @@ class PickList(TransactionBase):
 					return True
 
 		return False
+
+
+def validate_no_reserved_stock(sales_order: str) -> None:
+	"""Raise if the Sales Order has reserved stock, on its rows or on bundle components."""
+	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		get_sre_reserved_qty_details_for_voucher,
+	)
+
+	if get_sre_reserved_qty_details_for_voucher("Sales Order", sales_order):
+		frappe.throw(
+			_(
+				"Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
+			).format(frappe.bold(sales_order))
+		)
 
 
 def update_pick_list_status(pick_list):
@@ -1631,6 +1627,10 @@ def get_available_item_locations(
 	if picked_item_details:
 		locations = filter_locations_by_picked_materials(locations, picked_item_details)
 
+	# after picked serials are removed, so a reserved pick is not deducted twice
+	if has_serial_no:
+		locations = remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers)
+
 	if locations and keep_all_locations:
 		locations = prioritize_locations(locations, priority_warehouses)
 	elif locations:
@@ -1917,6 +1917,23 @@ def remove_stock_reserved_for_others(item_code, locations, own_vouchers=None):
 	precision = frappe.get_precision("Pick List Item", "stock_qty")
 	for location in locations:
 		location.qty = flt(flt(location.qty) - reserved_qty[location.warehouse], precision)
+
+	return [location for location in locations if location.qty > 0]
+
+
+def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=None):
+	reserved_serial_nos = {
+		row.serial_no
+		for row in get_reserved_serial_nos_for_sre(frappe._dict(item_code=item_code))
+		if row.voucher_no not in (own_vouchers or ())
+	}
+	if not reserved_serial_nos:
+		return locations
+
+	for location in locations:
+		serial_nos = [sn for sn in location.serial_nos if sn not in reserved_serial_nos]
+		location.qty -= len(location.serial_nos) - len(serial_nos)
+		location.serial_nos = serial_nos
 
 	return [location for location in locations if location.qty > 0]
 

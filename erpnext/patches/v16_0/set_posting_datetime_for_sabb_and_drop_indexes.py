@@ -1,19 +1,42 @@
 import click
 import frappe
 
+BATCH_SIZE = 10000
+
 
 def execute():
-	frappe.db.sql(
-		"""
-		UPDATE `tabSerial and Batch Bundle`
-		JOIN `tabStock Ledger Entry`
-		ON `tabSerial and Batch Bundle`.`name` = `tabStock Ledger Entry`.`serial_and_batch_bundle`
-		SET `tabSerial and Batch Bundle`.`posting_datetime` = `tabStock Ledger Entry`.`posting_datetime`
-		WHERE `tabStock Ledger Entry`.`is_cancelled` = 0
-	"""
-	)
+	last_name = ""
+	while names := get_bundle_names(last_name):
+		set_posting_datetime(names)
+		frappe.db.commit()
+		last_name = names[-1]
 
 	drop_indexes()
+
+
+def get_bundle_names(last_name):
+	sabb = frappe.qb.DocType("Serial and Batch Bundle")
+
+	return (
+		frappe.qb.from_(sabb)
+		.select(sabb.name)
+		.where(sabb.name > last_name)
+		.orderby(sabb.name)
+		.limit(BATCH_SIZE)
+	).run(pluck=True)
+
+
+def set_posting_datetime(names):
+	sabb = frappe.qb.DocType("Serial and Batch Bundle").as_("sabb")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	(
+		frappe.qb.update(sabb)
+		.join(sle)
+		.on(sabb.name == sle.serial_and_batch_bundle)
+		.set(sabb.posting_datetime, sle.posting_datetime)
+		.where((sle.is_cancelled == 0) & sabb.name.isin(names))
+	).run()
 
 
 def drop_indexes():

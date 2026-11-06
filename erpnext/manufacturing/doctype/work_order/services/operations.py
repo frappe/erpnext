@@ -29,6 +29,7 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.work_order.mapper import (
 	create_job_card,
 	get_operation_qty,
+	get_operation_target_qty,
 	split_qty_based_on_batch_size,
 )
 
@@ -149,7 +150,7 @@ class OperationsService:
 		if schedule_blocks:
 			row.db_update()
 		elif enable_capacity_planning and job_card_doc:
-			row.planned_start_time = job_card_doc.scheduled_time_logs[-1].from_time
+			row.planned_start_time = job_card_doc.scheduled_time_logs[0].from_time
 			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
 			self._validate_capacity_window(row, plan_days)
 			row.db_update()
@@ -230,7 +231,13 @@ class OperationsService:
 	def set_work_order_operations(self):
 		"""Fetch operations from BOM and set in 'Work Order'"""
 		self.doc.set("operations", [])
-		if not self.doc.bom_no or not frappe.get_cached_value("BOM", self.doc.bom_no, "with_operations"):
+		if not self.doc.bom_no:
+			return
+
+		# With multi-level BOM, sub-assembly operations apply even when the top-level BOM has none
+		if not self.doc.use_multi_level_bom and not frappe.get_cached_value(
+			"BOM", self.doc.bom_no, "with_operations"
+		):
 			return
 
 		operations = self._collect_bom_operations()
@@ -417,9 +424,10 @@ class OperationsService:
 
 	def _operation_status(self, d):
 		qty = self._operation_qty(d)
-		if not qty:
+		operation_qty = get_operation_target_qty(self.doc, d)
+		if not qty and operation_qty:
 			return "Pending"
-		if qty < flt(get_operation_qty(self.doc, d), d.precision("completed_qty")):
+		if qty < operation_qty:
 			return "Work in Progress"
 		return "Completed"
 

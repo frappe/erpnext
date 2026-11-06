@@ -24,7 +24,7 @@ class Bank(Document):
 
 		bank_name: DF.Data
 		bank_transaction_mapping: DF.Table[BankTransactionMapping]
-		plaid_access_token: DF.Data | None
+		plaid_access_token: DF.Password | None
 		swift_number: DF.Data | None
 		website: DF.Data | None
 	# end: auto-generated types

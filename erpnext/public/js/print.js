@@ -12,22 +12,22 @@ const print_format_styles = ["Bordered", "Classic", "Modern", "Modern with Image
 const allowed_print_formats = doctype_list.flatMap((doctype) =>
 	print_format_styles.map((style) => `${doctype} ${style}`)
 );
-const allowed_letterheads = ["Company Letterhead", "Company Letterhead - Grey"];
+const allowed_letterheads = ["Company Letterhead"];
 
-handle_route_event();
+const preview = frappe.ui.form.PrintView.prototype.preview;
+frappe.ui.form.PrintView.prototype.preview = function () {
+	preview.call(this);
+	check_company_details(this.frm.doctype, this.frm.docname);
+};
 
-function handle_route_event() {
-	const route = frappe.get_route();
-	const current_doctype = route[1];
-	const current_docname = route[2];
+function check_company_details(doctype, docname) {
+	// kept for the session, so the reload after Save does not ask again
+	const key = `company_details_checked:${doctype}:${docname}`;
+	if (!doctype_list.includes(doctype) || sessionStorage.getItem(key)) return;
+	if (!should_fetch_company_details()) return;
 
-	if (!doctype_list.includes(current_doctype)) return;
-
-	setTimeout(() => {
-		if (should_fetch_company_details()) {
-			fetch_company_details(current_doctype, current_docname);
-		}
-	}, 500);
+	sessionStorage.setItem(key, "1");
+	fetch_company_details(doctype, docname);
 }
 
 function should_fetch_company_details() {
@@ -57,6 +57,11 @@ function open_company_details_dialog(data, current_doctype) {
 		primary_action(values) {
 			save_company_details(dialog, data, values, current_doctype);
 		},
+		secondary_action_label: __("Skip"),
+		secondary_action() {
+			skip_company_details(data.company);
+			dialog.hide();
+		},
 	});
 
 	dialog.show();
@@ -64,8 +69,8 @@ function open_company_details_dialog(data, current_doctype) {
 
 function build_dialog_fields(data) {
 	return [
-		make_field(__("Company Logo"), "company_logo", "Attach Image", data.company_logo),
-		make_field(__("Website"), "website", "Data", data.website),
+		make_field(__("Company Logo"), "company_logo", "Attach Image", data.company_logo, false),
+		make_field(__("Website"), "website", "Data", data.website, false),
 		make_field(__("Phone No"), "phone_no", "Data", data.phone_no),
 		{
 			label: __("Email"),
@@ -90,7 +95,7 @@ function build_dialog_fields(data) {
 		make_field(__("Address Line 1"), "address_line1", "Data", data.address_line),
 		make_field(__("Address Line 2"), "address_line2", "Data", data.address_line, false),
 		make_field(__("City"), "city", "Data", data.address_line),
-		make_field(__("State"), "state", "Data", data.address_line, false),
+		make_field(__("State/Province"), "state", "Data", data.address_line, false),
 		{
 			label: __("Country"),
 			fieldname: "country",
@@ -127,6 +132,18 @@ function make_field(label, fieldname, fieldtype, existing_value, required_if_emp
 		reqd: existing_value ? 0 : required_if_empty ? 1 : 0,
 		hidden: existing_value ? 1 : 0,
 	};
+}
+
+function skip_company_details(company) {
+	frappe.model.user_settings.get("Company").then((settings) => {
+		const skipped = settings.skipped_print_details || [];
+		if (skipped.includes(company)) return;
+
+		frappe.xcall("frappe.model.utils.user_settings.save", {
+			doctype: "Company",
+			user_settings: { skipped_print_details: [...skipped, company] },
+		});
+	});
 }
 
 function save_company_details(dialog, data, values, current_doctype) {

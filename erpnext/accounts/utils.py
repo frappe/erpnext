@@ -41,6 +41,7 @@ import erpnext
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
+from erpnext.accounts.doctype.ledger_health.ledger_health import update_ledger_health
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_combine_datetime, get_stock_value_on
 
@@ -396,6 +397,7 @@ def get_count_on(account, fieldname, date):
 		else:
 			cond.append(f"""gle.account = {frappe.db.escape(account)} """)
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- values are escaped
 		entries = frappe.db.sql(
 			"""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
@@ -582,6 +584,7 @@ def reconcile_against_document(
 				entry.account,
 				entry.party_type,
 				entry.party,
+				update_payment_schedule=True,
 			)
 		frappe.flags.ignore_party_validation = False
 
@@ -780,6 +783,7 @@ def update_reference_in_payment_entry(
 			if existing_row.reference_doctype in advance_payment_doctypes:
 				new_row.advance_voucher_type = existing_row.reference_doctype
 				new_row.advance_voucher_no = existing_row.reference_name
+				new_row.payment_request = existing_row.payment_request
 
 			row = new_row
 
@@ -1675,7 +1679,7 @@ def get_coa(doctype: str, parent: str, is_root: bool | None = None, chart: str |
 	chart = chart if chart else frappe.flags.chart
 	frappe.flags.chart = chart
 
-	parent = None if parent == _("All Accounts") else parent
+	parent = None if is_root else parent
 	accounts = build_tree_from_json(chart)  # returns alist of dict in a tree render-able form
 
 	# filter out to show data for the selected node only
@@ -1738,6 +1742,7 @@ def repost_gle_for_stock_vouchers(
 				_delete_accounting_ledger_entries(voucher_type, voucher_no)
 
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		if repost_doc:
@@ -2203,7 +2208,9 @@ def create_payment_ledger_entry(
 			ple.submit()
 
 
-def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
+def update_voucher_outstanding(
+	voucher_type, voucher_no, account, party_type, party, update_payment_schedule=False
+):
 	from erpnext.accounts.doctype.dunning.dunning import update_linked_dunnings
 
 	if not voucher_type or not voucher_no:
@@ -2249,9 +2256,61 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		outstanding_amount,
 	)
 
+	if update_payment_schedule:
+		sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc)
+
 	update_linked_dunnings(ref_doc, previous_outstanding_amount)
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
+
+
+def sync_payment_schedule_outstanding(voucher_type, voucher_no, ref_doc=None):
+	"""Make the Payment Schedule total outstanding match the invoice outstanding.
+
+	Reconciliation, unreconciliation and cancellation change the invoice outstanding through the
+	Payment Ledger only. Syncing to the absolute outstanding (not a delta) is idempotent and does not
+	depend on what else already touched the outstanding. Earliest due terms are cleared first, and
+	terms are restored latest first. ponytail: no per-term choice, add if users need to pick the term.
+	"""
+	ref_doc = ref_doc or frappe.get_doc(voucher_type, voucher_no)
+	if ref_doc.docstatus != 1 or ref_doc.get("is_return") or not ref_doc.get("payment_schedule"):
+		return
+
+	rate = flt(ref_doc.conversion_rate) or 1
+	outstanding = flt(ref_doc.outstanding_amount)
+	if ref_doc.party_account_currency != ref_doc.currency:
+		# outstanding is in company currency, the schedule is in transaction currency
+		outstanding /= rate
+
+	precision = ref_doc.precision("outstanding_amount")
+	amount = flt(sum(flt(term.outstanding) for term in ref_doc.payment_schedule) - outstanding, precision)
+	terms = sorted(ref_doc.payment_schedule, key=lambda t: (getdate(t.due_date), t.idx), reverse=amount < 0)
+	# A reversal takes back paid amounts first. A cash discount stays with its payment, unless the
+	# outstanding still needs more, which means the discounted payment itself was reversed.
+	for field in ("paid_amount", "discounted_amount") if amount < 0 else ("paid_amount",):
+		for term in terms:
+			if not amount:
+				break
+
+			if amount > 0:
+				change = min(amount, flt(term.outstanding))
+			else:
+				change = max(amount, -flt(term.get(field)))
+
+			if not change:
+				continue
+
+			base_change = flt(change * rate, term.precision("base_outstanding"))
+			values = {
+				"outstanding": flt(term.outstanding) - change,
+				field: flt(term.get(field)) + change,
+				"base_outstanding": flt(term.base_outstanding) - base_change,
+			}
+			if field == "paid_amount":
+				values["base_paid_amount"] = flt(term.base_paid_amount) + base_change
+
+			term.db_set(values, update_modified=False)
+			amount = flt(amount - change, precision)
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):
@@ -2688,78 +2747,84 @@ def get_advance_payment_doctypes(payment_type=None):
 
 def run_ledger_health_checks():
 	health_monitor_settings = frappe.get_doc("Ledger Health Monitor")
-	if health_monitor_settings.enable_health_monitor:
-		period_end = getdate()
-		period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
+	if not health_monitor_settings.enable_health_monitor:
+		return
 
-		run_date = get_datetime()
+	period_end = getdate()
+	period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
+	companies = [x.company for x in health_monitor_settings.companies]
+	scan = frappe._dict(companies=companies, from_date=period_start, to_date=period_end)
+	run_date = get_datetime()
 
-		# Debit-Credit mismatch report
-		if health_monitor_settings.debit_credit_mismatch:
-			for x in health_monitor_settings.companies:
-				filters = {"company": x.company, "from_date": period_start, "to_date": period_end}
-				voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
-				res = voucher_wise.execute_script_report(filters=filters)
-				for x in res[1]:
-					doc = frappe.new_doc("Ledger Health")
-					doc.voucher_type = x.voucher_type
-					doc.voucher_no = x.voucher_no
-					doc.debit_credit_mismatch = True
-					doc.checked_on = run_date
-					doc.save()
+	if health_monitor_settings.debit_credit_mismatch:
+		vouchers = get_vouchers_reported_by(
+			"Voucher-wise Balance", companies, {"from_date": period_start, "to_date": period_end}
+		)
+		update_ledger_health("debit_credit_mismatch", vouchers, run_date, scan)
 
-		# General Ledger and Payment Ledger discrepancy
-		if health_monitor_settings.general_and_payment_ledger_mismatch:
-			for x in health_monitor_settings.companies:
-				filters = {
-					"company": x.company,
-					"period_start_date": period_start,
-					"period_end_date": period_end,
-				}
-				gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
-				res = gl_pl_comparison.execute_script_report(filters=filters)
-				for x in res[1]:
-					doc = frappe.new_doc("Ledger Health")
-					doc.voucher_type = x.voucher_type
-					doc.voucher_no = x.voucher_no
-					doc.general_and_payment_ledger_mismatch = True
-					doc.checked_on = run_date
-					doc.save()
+	if health_monitor_settings.general_and_payment_ledger_mismatch:
+		vouchers = get_vouchers_reported_by(
+			"General and Payment Ledger Comparison",
+			companies,
+			{"period_start_date": period_start, "period_end_date": period_end},
+		)
+		update_ledger_health("general_and_payment_ledger_mismatch", vouchers, run_date, scan)
+
+
+def get_vouchers_reported_by(report_name, companies, filters):
+	report = frappe.get_doc("Report", report_name)
+	vouchers = set()
+	for company in companies:
+		data = report.execute_script_report(filters={"company": company, **filters})[1]
+		vouchers.update((row.voucher_type, row.voucher_no) for row in data)
+
+	return vouchers
 
 
 def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
-	auto_reconciliation_job_trigger = auto_reconciliation_job_trigger or frappe.get_single_value(
-		"Accounts Settings", "auto_reconciliation_job_trigger"
+	auto_reconciliation_job_trigger = (
+		auto_reconciliation_job_trigger
+		or frappe.get_single_value("Accounts Settings", "auto_reconciliation_job_trigger")
+		or 15
 	)
 	method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
 
-	sch_event = frappe.get_doc(
-		"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}
-	)
-	if frappe.db.get_value("Scheduled Job Type", {"method": method}):
+	event_filters = {"scheduled_against": "Process Payment Reconciliation", "method": method}
+	# Serialize registration so concurrent settings saves cannot create duplicate records.
+	frappe.db.get_value("DocType", "Scheduler Event", "name", for_update=True)
+	sch_event = frappe.db.get_value("Scheduler Event", event_filters, "name")
+	if not sch_event:
+		sch_event = (
+			frappe.get_doc({"doctype": "Scheduler Event", **event_filters})
+			.insert(ignore_permissions=True)
+			.name
+		)
+	job_name = frappe.db.get_value("Scheduled Job Type", {"method": method}, "name")
+	if job_name:
 		frappe.get_doc(
 			"Scheduled Job Type",
-			{
-				"method": method,
-			},
+			job_name,
 		).update(
 			{
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event,
+				"frequency": "Cron",
+				"create_log": True,
+				"stopped": False,
 			}
-		).save()
+		).save(ignore_permissions=True)
 	else:
 		frappe.get_doc(
 			{
 				"doctype": "Scheduled Job Type",
 				"method": method,
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event,
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
 				"create_log": True,
 				"stopped": False,
 				"frequency": "Cron",
 			}
-		).save()
+		).insert(ignore_permissions=True)
 
 
 def get_link_fields_grouped_by_option(doctype):
@@ -2837,17 +2902,13 @@ def _check_credit_limit_warn(doc):
 	if doc.get("is_return") or not doc.get("customer"):
 		return
 
-	from erpnext.selling.doctype.customer.customer import check_credit_limit
+	from erpnext.selling.doctype.customer.customer import (
+		check_credit_limit,
+		is_sales_order_credit_check_bypassed,
+	)
 
 	try:
-		bypass = cint(
-			frappe.db.get_value(
-				"Customer Credit Limit",
-				filters={"parent": doc.customer, "parenttype": "Customer", "company": doc.company},
-				fieldname="bypass_credit_limit_check",
-			)
-			or 0
-		)
+		bypass = is_sales_order_credit_check_bypassed(doc.customer, doc.company)
 
 		if doc.doctype == "Sales Invoice":
 			validate_against_credit_limit = bypass or any(

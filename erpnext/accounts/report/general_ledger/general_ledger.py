@@ -17,6 +17,7 @@ from erpnext.accounts.report.utils import (
 	convert_to_presentation_currency,
 	get_currency,
 	has_gl_entry_restrictions,
+	validate_date_range,
 )
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 
@@ -62,7 +63,7 @@ def validate_filters(filters, account_details):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
-	if not filters.get("from_date") and not filters.get("to_date"):
+	if not filters.get("from_date") or not filters.get("to_date"):
 		frappe.throw(
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
@@ -86,8 +87,7 @@ def validate_filters(filters, account_details):
 	if filters.get("voucher_no") and filters.get("categorize_by") in ["Categorize by Voucher"]:
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range(filters)
 
 	if filters.get("project"):
 		filters.project = frappe.parse_json(filters.get("project"))
@@ -202,6 +202,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
 		)
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- filters use placeholders; fields come from config
 	gl_entries = frappe.db.sql(
 		f"""
 		select

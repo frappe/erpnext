@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
@@ -217,6 +218,19 @@ class TestContract(ERPNextTestSuite):
 		self.assertFalse(
 			frappe.has_permission("Contract", "read", doc=contracts["other_customer"], user=user.name)
 		)
+
+	def test_no_contracts_when_none_of_the_party_types_exist(self):
+		contract = get_contract()
+		employee = frappe.db.get_value("Employee", {"first_name": "_Test Employee"})
+		contract.update({"party_type": "Employee", "party_name": employee})
+		contract.insert()
+
+		make_property_setter("Contract", "party_type", "options", "Customer\nSupplier", "Text")
+		self.addCleanup(frappe.clear_cache, doctype="Contract")
+		user = create_user("contract-hr-manager@example.com", "HR Manager")
+
+		self.assertEqual(self.get_visible_contracts(user.name, {"employee": contract.name}), set())
+		self.assertFalse(frappe.has_permission("Contract", "read", doc=contract, user=user.name))
 
 	def make_party_contracts(self) -> dict[str, str]:
 		parties = {

@@ -24,6 +24,7 @@ from erpnext.accounts.report.utils import (
 	convert_to_presentation_currency,
 	get_currency,
 	has_gl_entry_restrictions,
+	validate_date_range,
 )
 from erpnext.accounts.utils import get_zero_cutoff
 
@@ -72,8 +73,7 @@ def validate_filters(filters):
 	filters.from_date = getdate(filters.from_date)
 	filters.to_date = getdate(filters.to_date)
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date cannot be greater than To Date"))
+	validate_date_range(filters)
 
 	if (filters.from_date < filters.year_start_date) or (filters.from_date > filters.year_end_date):
 		frappe.msgprint(
@@ -619,6 +619,7 @@ def execute_snapshot_report(filters):
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
+		validate_company_permission(filters.company)
 		validate_filters(filters)
 		columns = get_columns()
 		data = get_data_duckdb(filters, conn)

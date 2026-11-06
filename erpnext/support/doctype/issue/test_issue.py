@@ -493,6 +493,46 @@ class TestIssue(TestSetUp):
 			frappe.db.get_value("Issue", issue.name, ["customer", "status"]), ("_Test Customer", "Open")
 		)
 
+	def test_web_form_ignores_submitted_customer_and_raised_by(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		# a desk user who can pick any Customer in a Link field but cannot create an Issue
+		user = make_fenced_user("test_issue_web_form_user@example.com", ["Stock User"])
+		self.assertTrue(frappe.has_permission("Customer", "select", doc="_Test Customer", user=user))
+		self.assertFalse(frappe.has_permission("Issue", "create", user=user))
+
+		# raised_by is matched to a Contact, which would attribute the issue to its customer
+		victim = "test_issue_web_form_victim@example.com"
+		if not frappe.db.exists("Contact Email", {"email_id": victim}):
+			contact = frappe.get_doc({"doctype": "Contact", "first_name": "Victim"})
+			contact.add_email(victim, is_primary=True)
+			contact.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+			contact.insert(ignore_permissions=True)
+
+		in_web_form = frappe.flags.get("in_web_form", False)
+		frappe.flags.in_web_form = True
+		try:
+			with as_user(user):
+				issue = frappe.get_doc(
+					{
+						"doctype": "Issue",
+						"subject": "Forged customer",
+						"customer": "_Test Customer",
+						"status": "Closed",
+						"raised_by": victim,
+					}
+				).insert(ignore_permissions=True)
+				self.assertEqual((issue.customer, issue.status, issue.raised_by), (None, "Open", user))
+
+				issue = frappe.get_doc("Issue", issue.name)
+				issue.customer = "_Test Customer"
+				issue.status = "Closed"
+				issue.save(ignore_permissions=True)
+		finally:
+			frappe.flags.in_web_form = in_web_form
+
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, ["customer", "status"]), (None, "Open"))
+
 	def test_portal_list_ignores_contact_links(self):
 		from erpnext.support.doctype.issue.issue import get_issue_list
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user

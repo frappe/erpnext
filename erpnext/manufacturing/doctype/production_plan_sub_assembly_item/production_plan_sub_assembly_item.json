@@ -15,6 +15,7 @@
   "type_of_manufacturing",
   "section_break_4rxf",
   "required_qty",
+  "process_loss_percentage",
   "column_break_xfhm",
   "projected_qty",
   "qty",
@@ -227,6 +228,13 @@
    "label": "Required Qty"
   },
   {
+   "description": "Work Orders include this loss",
+   "fieldname": "process_loss_percentage",
+   "fieldtype": "Percent",
+   "label": "% Process Loss",
+   "read_only": 1
+  },
+  {
    "fieldname": "subcontracting_section",
    "fieldtype": "Section Break",
    "label": "Subcontracting"
@@ -278,7 +286,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-25 12:00:00.000000",
+ "modified": "2026-10-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",

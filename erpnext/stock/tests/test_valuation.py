@@ -67,6 +67,24 @@ class TestFIFOValuation(ERPNextTestSuite):
 		self.queue.remove_stock(1, 20)
 		self.assertEqual(self.queue, [[1, 10]])
 
+	def test_removing_rate_at_database_precision(self):
+		for rounding_method in ["Banker's Rounding", "Banker's Rounding (legacy)", "Commercial Rounding"]:
+			with self.subTest(rounding_method=rounding_method):
+				with self.change_settings("System Settings", rounding_method=rounding_method):
+					queue = FIFOValuation([[1, 0.61], [2, 1025 / 1024], [1, 1.000976563]])
+					self.assertEqual(queue.remove_stock(1, 1.000976563), [[1, 1025 / 1024]])
+					self.assertEqual(queue.state, [[1, 0.61], [1, 1025 / 1024], [1, 1.000976563]])
+
+	def test_removing_rate_keeps_ninth_decimal_distinct(self):
+		queue = FIFOValuation([[1, 0.61], [1, 0.763600001]])
+		self.assertEqual(queue.remove_stock(1, 0.7636), [[1, 0.61]])
+		self.assertEqual(queue.state, [[1, 0.763600001]])
+
+	def test_purchase_return_matches_rate_at_database_precision(self):
+		queue = FIFOValuation([[1, 0.61], [1, 286.35 / 375]])
+		self.assertEqual(queue.remove_stock(1, 0.7636, is_return_purchase_entry=True), [[1, 286.35 / 375]])
+		self.assertEqual(queue.state, [[1, 0.61]])
+
 	def test_remove_multiple_bins(self):
 		self.queue.add_stock(1, 10)
 		self.queue.add_stock(2, 20)

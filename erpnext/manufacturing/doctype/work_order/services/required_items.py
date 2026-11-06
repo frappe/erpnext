@@ -15,7 +15,10 @@ from frappe.utils import cint, flt
 from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-from erpnext.manufacturing.doctype.work_order.mapper import check_if_scrap_warehouse_mandatory
+from erpnext.manufacturing.doctype.work_order.mapper import (
+	check_if_scrap_warehouse_mandatory,
+	get_raw_material_rate,
+)
 from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	CONSUMPTION_PURPOSES,
 	WorkOrderStockReservation,
@@ -162,6 +165,27 @@ class RequiredItemsService:
 			"operation_row_id": item.operation_row_id,
 		}
 
+	def set_rate_for_edited_items(self):
+		"""Fetch rate afresh for rows whose item was added or changed by hand."""
+		previous = self.doc.get_doc_before_save()
+		previous_items = {d.name: d.item_code for d in previous.required_items} if previous else {}
+		bom_items = get_bom_items_as_dict(
+			self.doc.bom_no, self.doc.company, fetch_exploded=self.doc.use_multi_level_bom
+		)
+		edited_rows = [
+			d for d in self.doc.get("required_items") if _is_edited_item(d, previous_items, bom_items)
+		]
+		if not edited_rows:
+			return
+
+		bom_doc = frappe.get_cached_doc("BOM", self.doc.bom_no)
+		for d in edited_rows:
+			d.rate = flt(get_raw_material_rate(d, self.doc, bom_doc), d.precision("rate"))
+
+	def set_required_item_amounts(self):
+		for d in self.doc.get("required_items"):
+			d.amount = flt(flt(d.rate) * flt(d.required_qty), d.precision("amount"))
+
 	def update_transferred_qty_for_required_items(self):
 		if self.doc.skip_transfer:
 			return
@@ -247,18 +271,20 @@ class RequiredItemsService:
 		transferred = self._material_transfer_qty_by_item(is_return=0)
 		requested = self._material_request_pending_qty_by_item()
 		picked = self._pick_list_pending_qty_by_item()
+		precision = frappe.get_precision("Work Order Item", "required_qty")
 
 		for item_code, incoming_qty in incoming_qty_by_item.items():
 			if item_code not in required_by_item:
 				continue
 
-			pending = (
-				required_by_item[item_code]
+			pending = flt(
+				get_allowed_transfer_qty(required_by_item[item_code])
 				- flt(transferred.get(item_code))
 				- flt(requested.get(item_code))
-				- flt(picked.get(item_code))
+				- flt(picked.get(item_code)),
+				precision,
 			)
-			if flt(incoming_qty - pending, 6) > 0:
+			if flt(incoming_qty, precision) > pending:
 				frappe.throw(
 					_("Only {0} {1} of {2} is pending in Work Order {3}.").format(
 						max(pending, 0.0), uom_by_item[item_code], item_code, self.doc.name
@@ -283,6 +309,7 @@ class RequiredItemsService:
 			.where(
 				(mr.docstatus == 1)
 				& (mr.work_order == self.doc.name)
+				& (fn.Coalesce(mr.job_card, "") == "")
 				& (mr.material_request_type == "Material Transfer")
 				& (mr.status != "Stopped")
 				& (mr_item.stock_qty > mr_item.ordered_qty)
@@ -546,6 +573,12 @@ class RequiredItemsService:
 		}
 
 
+def _is_edited_item(row, previous_items, bom_items):
+	if row.name in previous_items:
+		return previous_items[row.name] != row.item_code
+	return not row.rate or not _find_bom_item(bom_items, row)
+
+
 def _find_bom_item(item_dict, row):
 	for key in ((row.item_code, row.operation), (row.item_code, row.operation_row_id), row.item_code):
 		if key in item_dict:
@@ -578,6 +611,14 @@ def distribute_transfers_over_rows(rows, qty_by_item_warehouse_and_operation):
 			qty_by_row[name] += share
 
 	return qty_by_row
+
+
+def get_allowed_transfer_qty(required_qty):
+	"""Required qty plus the Transfer Extra Materials Percentage allowance."""
+	extra_pct = flt(
+		frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
+	)
+	return flt(required_qty) + flt(required_qty) * extra_pct / 100
 
 
 def is_row_of_operation(row, operation):

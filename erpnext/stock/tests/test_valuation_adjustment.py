@@ -48,7 +48,11 @@ from erpnext.stock.report.stock_valuation_comparison.stock_valuation_comparison 
 from erpnext.stock.report.stock_valuation_comparison.test_stock_valuation_comparison import (
 	make_batch_without_batch_wise_valuation,
 )
-from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, BackdatedEntryBeforeAdjustmentError
+from erpnext.stock.valuation_adjustment import (
+	ADJUSTMENT_ENTRY,
+	BackdatedEntryBeforeAdjustmentError,
+	ManualAdjustmentEntryError,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -142,6 +146,7 @@ class ValuationFixTestCase(ERPNextTestSuite):
 		self.assertEqual(result["not_adjusted"], [])
 		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
 		self.assertEqual(adjustment.purpose, ADJUSTMENT_ENTRY)
+		self.assertTrue(adjustment.is_made_from_valuation_comparison)
 		adjustment.submit()
 
 		# from its date on the ledger is right
@@ -710,6 +715,42 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
 		adjustment.items[0].valuation_rate = 90
 		self.assertRaises(frappe.ValidationError, adjustment.save)
+
+	def test_rows_are_checked_on_the_posting_date_set_on_save(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+
+		adjustment = frappe.get_doc("Stock Reconciliation", result["adjustment_entry"])
+		adjustment.set_posting_time = 0
+		self.assertRaises(frappe.ValidationError, adjustment.save)
+
+	def test_adjustment_entry_cannot_be_selected_manually(self):
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(item_code=item, target=WAREHOUSE, qty=10, rate=100)
+		reconciliation = frappe.get_doc(
+			{
+				"doctype": "Stock Reconciliation",
+				"company": COMPANY,
+				"purpose": ADJUSTMENT_ENTRY,
+				"items": [{"item_code": item, "warehouse": WAREHOUSE, "qty": 10, "valuation_rate": 100}],
+			}
+		)
+		self.assertRaises(ManualAdjustmentEntryError, reconciliation.insert)
+
+		reconciliation.purpose = "Stock Reconciliation"
+		reconciliation.items[0].qty = 12
+		reconciliation.insert()
+		reconciliation.purpose = ADJUSTMENT_ENTRY
+		self.assertRaises(ManualAdjustmentEntryError, reconciliation.save)
+
+	def test_duplicate_of_adjustment_entry_is_not_allowed(self):
+		item = self.make_fifo_issue_at_wrong_value()
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+
+		copy = frappe.copy_doc(
+			frappe.get_doc("Stock Reconciliation", result["adjustment_entry"]), ignore_no_copy=False
+		)
+		self.assertRaises(ManualAdjustmentEntryError, copy.insert)
 
 	def test_no_backdated_entry_before_an_adjustment_entry(self):
 		item = self.make_fifo_issue_at_wrong_value()

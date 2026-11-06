@@ -25,6 +25,7 @@ from erpnext.manufacturing.doctype.bom.bom import (
 	get_op_cost_from_sub_assemblies,
 	validate_bom_no,
 )
+from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock import stock_ledger
@@ -65,6 +66,9 @@ WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES = (
 	"Manufacture",
 	"Material Consumption for Manufacture",
 )
+
+WORK_ORDER_PURPOSES = (*WORK_ORDER_ALTERNATIVE_ITEM_PURPOSES, "Disassemble", "Repack")
+FROM_BOM_PURPOSES = (*WORK_ORDER_PURPOSES, "Material Issue", "Send to Subcontractor")
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -276,6 +280,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import _apply_putaway_rule
 
+		self.clear_links_hidden_for_purpose()
+
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_validate"):
 			self.purpose_cls(self).before_validate()
 
@@ -305,6 +311,15 @@ class StockEntry(StockController, SubcontractingInwardController):
 					get_brand_defaults(row.item_code, self.company),
 					self.company,
 				)
+
+	def clear_links_hidden_for_purpose(self):
+		if self.purpose not in WORK_ORDER_PURPOSES:
+			self.work_order = None
+			self.job_card = None
+
+		if self.purpose not in FROM_BOM_PURPOSES:
+			self.from_bom = 0
+			self.bom_no = None
 
 	def set_allow_alternative_item(self):
 		"""Raw materials of a work order can be swapped only when both the work order and the item allow it."""
@@ -665,6 +680,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if any(d.s_warehouse for d in self.get("items")):
 			return True
 
+		return self.is_rm_cost_from_consumption_entries()
+
+	def is_rm_cost_from_consumption_entries(self) -> bool:
+		"""Whether the consumption entries replace the raw materials of this entry."""
 		settings = frappe.get_single("Manufacturing Settings")
 		if settings.material_consumption and settings.get_rm_cost_from_consumption_entry and self.work_order:
 			return bool(self.get_consumption_entries())
@@ -732,8 +751,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 				frappe.get_value("BOM Secondary Item", d.bom_secondary_item, "cost_allocation_per")
 			)
 			if flt(d.transfer_qty):
+				secondary_items_qty = sum(
+					flt(item.transfer_qty)
+					for item in self.items
+					if item.bom_secondary_item == d.bom_secondary_item
+					and not item.s_warehouse
+					and not item.set_basic_rate_manually
+					and not is_costed_out_of_finished_item(item)
+				)
 				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
-				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / d.transfer_qty
+				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 				has_derived_rate = True
 
 		# A rate of zero that was derived rather than left unset is a real cost. Falling back to
@@ -1169,7 +1196,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 			return
 
-		stock_ledger.acquire_sle_processing_gates(source_entries + target_entries)
 		stock_ledger.make_sl_entries(
 			source_entries, allow_negative_stock, via_landed_cost_voucher, defer_dimension_checks=True
 		)
@@ -1800,18 +1826,14 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def get_pending_process_loss_qty(self):
 		"""Loss this entry should still book: the job card's unbooked loss when the entry
-		belongs to one, else the largest operation loss on the work order (legacy flow)."""
+		belongs to one, else the cumulative operation loss on the work order."""
 		if self.job_card:
 			job_card = frappe.get_doc("Job Card", self.job_card)
 			return max(flt(job_card.process_loss_qty) - flt(job_card.get_consumed_process_loss()), 0)
 
 		if self.work_order:
-			data = frappe.get_all(
-				"Work Order Operation",
-				filters={"parent": self.work_order},
-				fields=[{"MAX": "process_loss_qty", "as": "process_loss_qty"}],
-			)
-			return flt(data[0].process_loss_qty) if data else 0
+			work_order = self.pro_doc
+			return max(get_upstream_process_loss(work_order) - flt(work_order.process_loss_qty), 0)
 
 		return 0
 
@@ -2020,6 +2042,20 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = get_remaining_qty_in_row_uom(source_doc)
+		map_target_dimensions_to_source(source_doc, target_doc)
+
+	def map_target_dimensions_to_source(source_doc, target_doc):
+		# the stock sits in transit with the outward entry's target dimensions,
+		# so the end transit entry must take it out from there
+		from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+
+		for dimension in get_inventory_dimensions():
+			fieldname = dimension.source_fieldname
+			if fieldname.startswith("to_") or not target_doc.meta.has_field(f"to_{fieldname}"):
+				continue
+
+			target_doc.set(fieldname, source_doc.get(f"to_{fieldname}"))
+			target_doc.set(f"to_{fieldname}", None)
 
 	def get_remaining_qty_in_row_uom(source_doc):
 		remaining_qty = get_remaining_transfer_qty(source_doc)
@@ -2160,9 +2196,9 @@ def get_remaining_operating_cost(work_order=None, bom_no=None):
 
 	# Get operating cost from BOM if not found in work_order.
 	if not remaining_operating_cost and bom_no:
-		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
+		bom = frappe.db.get_value("BOM", bom_no, ["base_operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
-			remaining_operating_cost = flt(bom.operating_cost) / flt(bom.quantity)
+			remaining_operating_cost = flt(bom.base_operating_cost) / flt(bom.quantity)
 
 	return remaining_operating_cost
 

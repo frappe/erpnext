@@ -21,6 +21,7 @@ class JobCardTimeLog(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		process_loss_qty: DF.Float
 		time_in_mins: DF.Float
 		to_time: DF.Datetime | None
 	# end: auto-generated types

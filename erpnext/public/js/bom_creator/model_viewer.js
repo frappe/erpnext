@@ -80,7 +80,7 @@ export class ModelViewer {
 		const renderer = this.get_capture_renderer(size);
 		renderer.render(scene, camera);
 		materials.forEach((material) => material.dispose());
-		return renderer.domElement.toDataURL("image/png");
+		return get_centered_image(renderer.domElement, size);
 	}
 
 	get_capture_renderer(size) {
@@ -173,6 +173,49 @@ function place_camera(camera, box) {
 	camera.far = distance * 100;
 	camera.updateProjectionMatrix();
 	return center;
+}
+
+function get_centered_image(source, size, margin = 0.1) {
+	const canvas = document.createElement("canvas");
+	canvas.width = canvas.height = size;
+	const context = canvas.getContext("2d", { willReadFrequently: true });
+	context.drawImage(source, 0, 0, size, size);
+	const bounds = get_drawn_bounds(context.getImageData(0, 0, size, size));
+	if (!bounds) return canvas.toDataURL("image/png");
+
+	const scale = (size * (1 - 2 * margin)) / Math.max(bounds.width, bounds.height);
+	const [width, height] = [bounds.width * scale, bounds.height * scale];
+	context.fillStyle = "#fff";
+	context.fillRect(0, 0, size, size);
+	context.drawImage(
+		source,
+		bounds.x,
+		bounds.y,
+		bounds.width,
+		bounds.height,
+		(size - width) / 2,
+		(size - height) / 2,
+		width,
+		height
+	);
+	return canvas.toDataURL("image/png");
+}
+
+function get_drawn_bounds({ data, width, height }) {
+	let [left, top, right, bottom] = [width, height, -1, -1];
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const index = (y * width + x) * 4;
+			if (Math.min(data[index], data[index + 1], data[index + 2]) > 245) continue;
+			[left, top, right, bottom] = [
+				Math.min(left, x),
+				Math.min(top, y),
+				Math.max(right, x),
+				Math.max(bottom, y),
+			];
+		}
+	}
+	return right < 0 ? null : { x: left, y: top, width: right - left + 1, height: bottom - top + 1 };
 }
 
 function get_css_color(variable) {

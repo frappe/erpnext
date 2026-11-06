@@ -719,6 +719,74 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 0}
+	)
+	def test_order_invoice_validates_exchange_rate_of_pending_receipts(self):
+		po = create_purchase_order(
+			company="_Test Company with perpetual inventory",
+			supplier="_Test Supplier USD",
+			warehouse="Stores - TCP1",
+			currency="USD",
+			qty=2,
+			rate=100,
+			do_not_save=True,
+		)
+		po.conversion_rate = 70
+		po.insert().submit()
+
+		invoice = make_pi_from_po(po.name)
+		invoice.credit_to = "_Test Payable USD - TCP1"
+		invoice.conversion_rate = 80
+		invoice.insert().submit()
+		invoice.cancel()
+
+		receipts = []
+		for exchange_rate in (70, 90):
+			receipt = create_purchase_receipt_from_order(po.name)
+			receipt.items[0].qty = 1
+			receipt.conversion_rate = exchange_rate
+			receipt.insert().submit()
+			receipts.append(receipt)
+
+		invoice = make_pi_from_po(po.name)
+		invoice.credit_to = "_Test Payable USD - TCP1"
+		invoice.items[0].rate = 40
+		invoice.conversion_rate = 70
+		self.assertRaisesRegex(frappe.ValidationError, receipts[1].name, invoice.insert)
+
+		invoices = []
+		for receipt in receipts:
+			invoice = make_pi_from_po(po.name)
+			invoice.credit_to = "_Test Payable USD - TCP1"
+			invoice.items[0].qty = 1
+			invoice.conversion_rate = 80
+			self.assertFalse(invoice.items[0].purchase_receipt)
+			self.assertRaisesRegex(frappe.ValidationError, receipt.name, invoice.insert)
+			invoice.conversion_rate = receipt.conversion_rate
+			invoice.insert().submit()
+			invoices.append(invoice)
+			self.assertEqual(receipt.reload().per_billed, 100)
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": ("in", [doc.name for doc in receipts + invoices]),
+				"account": "Stock Received But Not Billed - TCP1",
+				"is_cancelled": 0,
+			},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(len(gl_entries), 4)
+		self.assertEqual(sum(row.debit - row.credit for row in gl_entries), 0)
+
+		for invoice in reversed(invoices):
+			invoice.cancel()
+		for receipt in reversed(receipts):
+			self.assertEqual(receipt.reload().per_billed, 0)
+			receipt.cancel()
+		po.reload().cancel()
+
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_invoice as create_purchase_invoice,
@@ -1480,6 +1548,39 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		invoice.reload()
 		self.assertEqual(invoice.status, "Paid")
 		self.assertEqual(invoice.outstanding_amount, 0)
+
+	def test_payment_term_outstanding_without_invoice_portion(self):
+		pi = make_purchase_invoice(qty=1, rate=1000, do_not_save=1)
+		pi.append("payment_schedule", dict(due_date=nowdate(), invoice_portion=0, payment_amount=1000))
+		pi.insert()
+
+		term = pi.payment_schedule[0]
+		self.assertEqual(term.payment_amount, pi.grand_total)
+		self.assertEqual(term.outstanding, term.payment_amount)
+		self.assertEqual(term.base_outstanding, term.base_payment_amount)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"automatically_fetch_payment_terms": 1})
+	def test_payment_term_outstanding_fetched_from_order_without_invoice_portion(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+		)
+
+		create_payment_terms_template()
+		po = create_purchase_order(qty=1, rate=1000, do_not_save=1)
+		po.payment_terms_template = "Test Receivable Template"
+		po.append("payment_schedule", dict(due_date=nowdate(), invoice_portion=0, payment_amount=1000))
+		po.insert()
+		po.submit()
+
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+
+		term = pi.payment_schedule[0]
+		self.assertEqual(term.invoice_portion, 0)
+		self.assertEqual(term.payment_amount, pi.grand_total)
+		self.assertEqual(term.base_payment_amount, pi.base_grand_total)
+		self.assertEqual(term.outstanding, term.payment_amount)
+		self.assertEqual(term.base_outstanding, term.base_payment_amount)
 
 	def test_debit_note(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry

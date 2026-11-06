@@ -83,35 +83,21 @@ def make_payment_entry(source_name: str, target_doc: str | dict | Document | Non
 
 
 def _set_missing_values(source, target):
-	address = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Address",
-		},
-		["parent"],
-		limit=1,
-	)
+	from frappe.contacts.doctype.address.address import get_default_address
+	from frappe.contacts.doctype.contact.contact import get_default_contact
 
-	contact = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Contact",
-		},
-		["parent"],
-		limit=1,
-	)
+	address = source.customer_primary_address
+	if not address or frappe.db.get_value("Address", address, "disabled"):
+		address = get_default_address(source.doctype, source.name)
+	contact = source.customer_primary_contact or get_default_contact(source.doctype, source.name)
 
 	if address:
-		target.customer_address = address[0].parent
+		target.customer_address = address
 
 	if contact:
-		target.contact_person = contact[0].parent
+		target.contact_person = contact
 		target.contact_display, target.contact_email, target.contact_mobile = frappe.get_value(
-			"Contact", contact[0].parent, ["full_name", "email_id", "mobile_no"]
+			"Contact", contact, ["full_name", "email_id", "mobile_no"]
 		)
 
 

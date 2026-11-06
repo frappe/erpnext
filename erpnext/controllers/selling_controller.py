@@ -12,6 +12,7 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
@@ -48,9 +49,12 @@ class SellingController(StockController):
 		if self.docstatus.is_draft() and self.get("company") and not self.get("terms"):
 			if not self.get("tc_name"):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
-			self.set_missing_terms()
+			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
+			if tnc and not tnc.disabled and tnc.get("selling"):
+				self.set_missing_terms()
 
 	def validate(self):
+		validate_terms_and_conditions(self.get("tc_name"), "selling")
 		super().validate()
 		self.ensure_customer_is_not_blocked()
 		self.validate_items()
@@ -189,6 +193,8 @@ class SellingController(StockController):
 			)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
+			if self.get("sales_partner"):
+				party_details.pop("commission_rate", None)
 			self.update_if_missing(party_details)
 
 		elif lead:
@@ -251,6 +257,17 @@ class SellingController(StockController):
 	def calculate_commission(self):
 		if not self.meta.get_field("commission_rate"):
 			return
+
+		if not self.get("sales_partner"):
+			self.commission_rate = 0
+		elif self.commission_rate is None or (
+			self.get_doc_before_save()
+			and self.has_value_changed("sales_partner")
+			and not self.has_value_changed("commission_rate")
+		):
+			self.commission_rate = (
+				frappe.get_cached_value("Sales Partner", self.sales_partner, "commission_rate") or 0
+			)
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
 
@@ -349,7 +366,14 @@ class SellingController(StockController):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						flt(d.rate_with_margin) > 0
+						and flt(d.discount_amount)
+						> flt(flt(d.rate_with_margin) * discount / 100, d.precision("discount_amount"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
@@ -560,7 +584,8 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def ensure_customer_is_not_blocked(self):
-		if self.doctype == "Quotation":
+		# Consolidated POS invoices only merge POS invoices that already passed this check
+		if self.doctype == "Quotation" or self.get("is_consolidated") or self.get("is_return"):
 			return
 
 		if self.customer and is_customer_blocked(self.customer):
@@ -619,10 +644,18 @@ class SellingController(StockController):
 				):
 					d.incoming_rate = 0
 
-		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+		is_standalone = self.get("is_return") and not self.get("return_against")
+
+		if self.doctype not in ("Delivery Note", "Sales Invoice") and not (
+			self.doctype == "POS Invoice" and is_standalone
+		):
 			return
 
-		if self.doctype == "Sales Invoice" and not self.update_stock and not self.is_internal_transfer():
+		if (
+			self.doctype in ("Sales Invoice", "POS Invoice")
+			and not self.update_stock
+			and not self.is_internal_transfer()
+		):
 			return
 
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
@@ -633,8 +666,6 @@ class SellingController(StockController):
 		set_zero_rate_for_expired_batch = frappe.db.get_single_value(
 			"Selling Settings", "set_zero_rate_for_expired_batch"
 		)
-
-		is_standalone = self.is_return and not self.return_against
 
 		old_doc = self.get_doc_before_save()
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -886,8 +917,9 @@ class SellingController(StockController):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(
-					((flt(item.stock_uom_rate) - flt(item.valuation_rate)) * item.stock_qty),
-					self.precision("amount", item),
+					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
+					* item.stock_qty,
+					self.precision("gross_profit", item),
 				)
 
 	def set_customer_address(self):
@@ -1013,34 +1045,22 @@ class SellingController(StockController):
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+
 		# Don't update Delivered Qty on Return.
 		if self.is_return:
 			return
 
 		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
 
-		items = []
-		for item in self.items:
-			packed_items = [
-				packed_item
-				for packed_item in self.packed_items
-				if packed_item.parent_detail_docname == item.name
-			]
-			if not packed_items:
-				items.append(item)
-			else:
-				for d in packed_items:
-					d.set(so_field, item.get(so_field))
-					d.so_detail = frappe.get_value(
-						"Packed Item",
-						{
-							"parent_detail_docname": item.so_detail,
-							"parent_item": item.item_code,
-							"item_code": d.item_code,
-							"warehouse": d.warehouse,
-						},
-					)
-					items.append(d)
+		bundle_rows = {packed_item.parent_detail_docname for packed_item in self.packed_items}
+		items = [item for item in self.items if item.name not in bundle_rows]
+		items_by_name = {item.name: item for item in self.items}
+		# a component reserves against the order's packed row, whatever warehouse it is delivered from
+		for packed_item, so_packed_item in get_order_packed_item_pairs(self):
+			packed_item.set(so_field, items_by_name[packed_item.parent_detail_docname].get(so_field))
+			packed_item.so_detail = so_packed_item.name
+			items.append(packed_item)
 
 		if self._action == "submit":
 			for item in items:

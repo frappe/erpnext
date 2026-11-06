@@ -73,6 +73,7 @@ def make_packing_list(doc):
 	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
+	order_packed_items = get_order_packed_items(doc)
 
 	reset = reset_packing_list(doc)
 
@@ -86,6 +87,7 @@ def make_packing_list(doc):
 			item_row.is_product_bundle = 1 if bundle_name else 0
 
 		if bundle_name:
+			so_packed_items = list(order_packed_items.get(item_row.get("so_detail"), []))
 			for bundle_item in get_product_bundle_items_by_name(bundle_name):
 				pi_row = add_packed_item_row(
 					doc=doc,
@@ -97,13 +99,14 @@ def make_packing_list(doc):
 				pi_row.product_bundle = bundle_name
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
-				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
+				so_packed_item = pop_order_packed_item(
+					so_packed_items, item_row.item_code, bundle_item.item_code
+				)
+				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc, so_packed_item)
 				update_packed_item_price_data(pi_row, item_data, doc)
 
 				if item_row.get("against_pick_list"):
 					update_packed_item_with_pick_list_info(item_row, pi_row)
-
-				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
 				if set_price_from_children:  # create/update bundle item wise price dict
 					update_product_bundle_rate(parent_items_price, pi_row, item_row)
@@ -127,17 +130,34 @@ def get_indexed_packed_items_table(doc):
 	A component repeated on a bundle shares one key, so rows are kept as a list and
 	consumed per occurrence rather than collapsed onto a single row.
 	"""
+	cancelled_row_idx = get_cancelled_row_idx(doc)
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
+		parent_row = packed_item.parent_detail_docname
 		key = (
 			packed_item.parent_item,
 			packed_item.item_code,
-			packed_item.parent_detail_docname,
+			cancelled_row_idx.get(parent_row, parent_row),
 		)
 
 		indexed_table.setdefault(key, []).append(packed_item)
 
 	return indexed_table
+
+
+def get_cancelled_row_idx(doc):
+	"""Row idx by row name of the cancelled document, which an amendment's copied packed rows point to."""
+	if not (doc.is_new() and doc.get("amended_from")):
+		return {}
+
+	return dict(
+		frappe.get_all(
+			doc.meta.get_field("items").options,
+			filters={"parenttype": doc.doctype, "parent": doc.amended_from},
+			fields=["name", "idx"],
+			as_list=True,
+		)
+	)
 
 
 def reset_packing_list(doc):
@@ -244,7 +264,8 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
 
-	if doc.is_new() and doc.get("reserve_stock"):
+	# a component added to a saved order (later save or Update Items) is reserved like a new order's
+	if doc.get("reserve_stock") and (doc.is_new() or not exists):
 		pi_row.reserve_stock = 1
 
 	return pi_row
@@ -293,27 +314,14 @@ def get_component_conversion_factor(packing_item, stock_uom):
 	return flt(get_conversion_factor(packing_item.item_code, uom).get("conversion_factor")) or 1.0
 
 
-def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc):
+def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data, doc, so_packed_item=None):
 	# TODO batch_no, actual_batch_qty, incoming_rate
-	if main_item_row.get("so_detail"):
-		warehouse, reserve_stock = (
-			frappe.get_value(
-				"Packed Item",
-				{
-					"parent_detail_docname": main_item_row.so_detail,
-					"parent_item": main_item_row.item_code,
-					"item_code": packing_item.item_code,
-				},
-				["warehouse", "reserve_stock"],
-			)
-			or None,
-			None,
-		)
+	if so_packed_item and not doc.get("is_return"):
+		# reserved stock must ship from the reserved warehouse; otherwise keep any edit on this row
+		if so_packed_item.reserve_stock or not pi_row.warehouse:
+			pi_row.warehouse = so_packed_item.warehouse
 
-		if reserve_stock:
-			pi_row.warehouse = warehouse
-
-	if not pi_row.warehouse and not doc.amended_from:
+	if not pi_row.warehouse:
 		fetch_warehouse = doc.get("is_pos") or item_data.is_stock_item or not item_data.default_warehouse
 		pi_row.warehouse = (
 			main_item_row.warehouse
@@ -324,10 +332,56 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	if not pi_row.target_warehouse:
 		pi_row.target_warehouse = main_item_row.get("target_warehouse")
 
+	if not item_data.is_stock_item:
+		pi_row.reserve_stock = 0
+
 	bin = get_packed_item_bin_qty(packing_item.item_code, pi_row.warehouse)
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
 	pi_row.use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
+
+
+def get_order_packed_items(doc) -> dict:
+	"""Sales Order packed rows of the order rows this document is made from, by order row in idx order."""
+	so_details = {item.so_detail for item in doc.get("items") if item.get("so_detail")}
+	if not so_details:
+		return {}
+
+	order_packed_items = {}
+	for row in frappe.get_all(
+		"Packed Item",
+		filters={"parenttype": "Sales Order", "parent_detail_docname": ["in", list(so_details)]},
+		fields=["name", "parent_detail_docname", "parent_item", "item_code", "warehouse", "reserve_stock"],
+		order_by="idx",
+	):
+		order_packed_items.setdefault(row.parent_detail_docname, []).append(row)
+
+	return order_packed_items
+
+
+def pop_order_packed_item(so_packed_items, parent_item, item_code):
+	"""Take the order's packed row of a component; a component repeated in the bundle takes the next one."""
+	for idx, row in enumerate(so_packed_items):
+		if row.parent_item == parent_item and row.item_code == item_code:
+			return so_packed_items.pop(idx)
+
+
+def get_order_packed_item_pairs(doc) -> list[tuple]:
+	"""Pair each packed row of a document made from a Sales Order with the order's packed row it delivers."""
+	order_packed_items = get_order_packed_items(doc)
+	pairs = []
+	for item in doc.get("items"):
+		so_packed_items = list(order_packed_items.get(item.get("so_detail"), []))
+		for packed_item in doc.get("packed_items"):
+			if packed_item.parent_detail_docname != (item.name or item.idx):
+				continue
+
+			if so_packed_item := pop_order_packed_item(
+				so_packed_items, packed_item.parent_item, packed_item.item_code
+			):
+				pairs.append((packed_item, so_packed_item))
+
+	return pairs
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row):
@@ -376,21 +430,6 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 	pi_row.rate = rate or item_data.get("valuation_rate") or 0.0
 
 
-def update_packed_item_from_cancelled_doc(main_item_row, packing_item, pi_row, doc):
-	"Update packed item row details from cancelled doc into amended doc."
-	prev_doc_packed_items_map = None
-	if doc.amended_from:
-		prev_doc_packed_items_map = get_cancelled_doc_packed_item_details(doc.packed_items)
-
-	if prev_doc_packed_items_map and prev_doc_packed_items_map.get(
-		(packing_item.item_code, main_item_row.name)
-	):
-		prev_doc_row = prev_doc_packed_items_map.get((packing_item.item_code, main_item_row.name))
-		pi_row.batch_no = prev_doc_row[0].batch_no
-		pi_row.serial_no = prev_doc_row[0].serial_no
-		pi_row.warehouse = prev_doc_row[0].warehouse
-
-
 def get_packed_item_bin_qty(item, warehouse):
 	bin_data = frappe.db.get_values(
 		"Bin",
@@ -400,15 +439,6 @@ def get_packed_item_bin_qty(item, warehouse):
 	)
 
 	return bin_data[0] if bin_data else {}
-
-
-def get_cancelled_doc_packed_item_details(old_packed_items):
-	prev_doc_packed_items_map = {}
-	for items in old_packed_items:
-		prev_doc_packed_items_map.setdefault((items.item_code, items.parent_detail_docname), []).append(
-			items.as_dict()
-		)
-	return prev_doc_packed_items_map
 
 
 def update_product_bundle_rate(parent_items_price, pi_row, item_row):

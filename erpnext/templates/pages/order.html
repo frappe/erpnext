@@ -22,10 +22,13 @@
 			</button>
 			<ul class="dropdown-menu dropdown-menu-right" role="menu">
 				{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
-					<a class="dropdown-item"
-						href="/api/method/erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
-						data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}
-					</a>
+					<form action="/api/method/erpnext.buying.doctype.purchase_order.mapper.make_purchase_invoice_from_portal" method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token | e }}">
+						<input type="hidden" name="purchase_order_name" value="{{ doc.name | e }}">
+						<button type="submit" class="dropdown-item" data-action="make_purchase_invoice">
+							{{ _("Make Purchase Invoice") }}
+						</button>
+					</form>
 				{% endif %}
 				<a class="dropdown-item"
 					href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank"
@@ -37,12 +40,17 @@
 		{% if show_pay_button %}
 			<div class="form-column col-sm-6">
 				<div class="page-header-actions-block" data-html-block="header-actions">
-					<p>
-						<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
+					<form action="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request" method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token | e }}">
+						<input type="hidden" name="dn" value="{{ doc.name | e }}">
+						<input type="hidden" name="dt" value="{{ doc.doctype | e }}">
+						<input type="hidden" name="submit_doc" value="1">
+						<input type="hidden" name="order_type" value="Shopping Cart">
+						<button type="submit"
 							class="btn btn-primary btn-sm" id="pay-for-order">
 							{{ _("Pay", null, "Amount") }} {{ pay_amount }}
-						</a>
-					</p>
+						</button>
+					</form>
 				</div>
 			</div>
 		{% endif %}
