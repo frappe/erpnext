@@ -269,3 +269,13 @@ def welcome_email():
 	site_name = get_default_company() or "ERPNext"
 	title = _("Welcome to {0}").format(site_name)
 	return title
+
+
+def set_root_as_default_parent(doc):
+	"""Default an empty tree parent to the root, unless the doc is the root."""
+	if doc.get(doc.nsm_parent_field):
+		return
+
+	root = get_root_of(doc.doctype)
+	if root != doc.name:
+		doc.set(doc.nsm_parent_field, root)
