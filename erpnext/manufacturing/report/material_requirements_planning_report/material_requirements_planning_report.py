@@ -478,7 +478,11 @@ class MaterialRequirementsPlanningReport:
 		sorted_data = sorted(self.mps_data, key=lambda x: getdate(x["delivery_date"]))
 
 		for row in sorted_data:
-			rm_details = self.item_rm_details.get(row.item_code) or frappe._dict({})
+			rm_details = (
+				self.item_rm_details.get((row.item_code, row.get("bom_no")))
+				or self.item_rm_details.get(row.item_code)
+				or frappe._dict({})
+			)
 
 			row.indent = 0
 			row.bom_no = rm_details.get("bom_no")
@@ -838,6 +842,7 @@ class MaterialRequirementsPlanningReport:
 				doctype.parent_warehouse,
 				child_doctype.name,
 				child_doctype.item_name,
+				child_doctype.bom_no,
 				child_doctype.planned_qty,
 				child_doctype.uom,
 			)
@@ -917,6 +922,17 @@ class MaterialRequirementsPlanningReport:
 
 			if item_data.bom_no:
 				item_data.raw_materials = self.get_raw_materials(item_data.bom_no, indent=0)
+
+		for row in self.mps_data:
+			key = (row.item_code, row.get("bom_no"))
+			if not row.get("bom_no") or key in item_wise_rm_details:
+				continue
+
+			item_data = item_wise_rm_details[row.item_code]
+			if row.bom_no != item_data.bom_no:
+				item_wise_rm_details[key] = frappe._dict(
+					item_data, bom_no=row.bom_no, raw_materials=self.get_raw_materials(row.bom_no)
+				)
 
 		return item_wise_rm_details
 
