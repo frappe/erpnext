@@ -19,6 +19,19 @@ class StockOverReturnError(frappe.ValidationError):
 	pass
 
 
+# return rows of these doctypes refer to the original row through `<doctype>_item`
+ROW_REFERENCE_DOCTYPES = (
+	"Purchase Receipt",
+	"Purchase Invoice",
+	"Sales Invoice",
+	"POS Invoice",
+	"Subcontracting Receipt",
+)
+
+# return rows of these doctypes can take qty back out of the rejected warehouse
+REJECTED_WAREHOUSE_RETURN_DOCTYPES = ("Purchase Receipt", "Subcontracting Receipt")
+
+
 def validate_return(doc):
 	if not doc.meta.get_field("is_return") or not doc.is_return:
 		return
@@ -67,7 +80,7 @@ def validate_return_against(doc):
 				)
 
 			# validate same exchange rate
-			if doc.conversion_rate != ref_doc.conversion_rate:
+			if doc.get("conversion_rate") != ref_doc.get("conversion_rate"):
 				frappe.throw(
 					_("Exchange Rate must be same as {0} {1} ({2})").format(
 						doc.doctype, doc.return_against, ref_doc.conversion_rate
@@ -86,7 +99,14 @@ def validate_return_against(doc):
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
+<<<<<<< HEAD
 	select_fields = "item_code, qty, stock_qty, rate, parenttype, conversion_factor, name"
+=======
+	select_fields = ["item_code", "qty", "stock_qty", "rate", "parenttype", "conversion_factor", "name"]
+	if doc.doctype == "Subcontracting Receipt":
+		select_fields.remove("stock_qty")
+
+>>>>>>> 1155c5b (fix(subcontracting): cap a return by the accepted and rejected qty)
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ",serial_no, batch_no"
 
@@ -98,6 +118,9 @@ def validate_returned_items(doc):
 		doc.return_against,
 		as_dict=1,
 	):
+		if doc.doctype == "Subcontracting Receipt":
+			d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
+
 		valid_items = get_ref_item_dict(valid_items, d)
 		if doc.doctype == "Delivery Note":
 			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
@@ -122,7 +145,7 @@ def validate_returned_items(doc):
 	for d in doc.get("items"):
 		key = d.item_code
 		raise_exception = False
-		if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Sales Invoice", "POS Invoice"]:
+		if doc.doctype in ROW_REFERENCE_DOCTYPES:
 			field = frappe.scrub(doc.doctype) + "_item"
 			if d.get(field):
 				key = (d.item_code, d.get(field))
@@ -278,7 +301,10 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 
 	for column in fields:
 		returned_column = column
-		if args.get("return_qty_from_rejected_warehouse") and doc.doctype == "Purchase Receipt":
+		if (
+			args.get("return_qty_from_rejected_warehouse")
+			and doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES
+		):
 			returned_column = "rejected_qty"
 
 		returned_qty = (
@@ -301,7 +327,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			)
 		else:
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
-			current_stock_qty = args.get(column) * args.get("conversion_factor", 1.0)
+			current_stock_qty = flt(args.get(column)) * args.get("conversion_factor", 1.0)
 
 		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
 		label = column.replace("_", " ").title()
@@ -328,6 +354,28 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
 
+<<<<<<< HEAD
+=======
+
+def add_returned_row(doc, key, row, already_returned_items):
+	"""Count a validated row so that the next rows of the same return see it."""
+	conversion_factor = flt(row.conversion_factor or 1)
+	stock_qty = get_returned_stock_qty(doc, row)
+	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
+		rejected_qty += stock_qty
+		stock_qty = 0
+
+	returned = already_returned_items.setdefault(key, frappe._dict())
+	returned.qty = flt(returned.qty) + abs(flt(row.qty))
+	returned.stock_qty = flt(returned.stock_qty) + stock_qty
+	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
+	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+
+
+def get_returned_stock_qty(doc, row):
+	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
+>>>>>>> 1155c5b (fix(subcontracting): cap a return by the accepted and rejected qty)
 	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
 	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
@@ -382,15 +430,14 @@ def get_already_returned_items(doc):
 	child = DocType(f"{doc.doctype} Item")
 	par = DocType(doc.doctype)
 
-	field = (
-		frappe.scrub(doc.doctype) + "_item"
-		if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Sales Invoice", "POS Invoice"]
-		else "dn_detail"
-	)
+	field = frappe.scrub(doc.doctype) + "_item" if doc.doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
 
 	stock_qty = Abs(child.stock_qty)
+	if doc.doctype == "Subcontracting Receipt":
+		stock_qty = Abs(child.qty) * child.conversion_factor
+
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
-	if doc.doctype == "Purchase Receipt":
+	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
 		from_rejected_warehouse = child.return_qty_from_rejected_warehouse == 1
 		rejected_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
 		stock_qty = Case().when(from_rejected_warehouse, 0).else_(stock_qty)
