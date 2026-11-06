@@ -25,6 +25,9 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
 class TestMaterialRequest(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_material_request_qty(self):
 		mr = frappe.copy_doc(test_records[0])
 		mr.items[0].qty = 0
@@ -1114,6 +1117,24 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.save()
 
 		self.assertIsNone(mr.customer)
+
+	def test_manufacture_request_from_sales_order_updates_requested_qty(self):
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_material_request as make_request_from_so,
+		)
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(qty=5)
+		mr = make_request_from_so(so.name)
+		mr.material_request_type = "Manufacture"
+		mr.items[0].schedule_date = today()
+		mr.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 5)
+		self.assertFalse(make_request_from_so(so.name).items)
+
+		mr.cancel()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "requested_qty"), 0)
 
 
 def get_in_transit_warehouse(company):
