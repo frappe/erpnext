@@ -2433,6 +2433,55 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		scr.submit()
 
+	def test_manual_secondary_item_of_foreign_currency_bom_uses_company_currency_cost(self):
+		set_backflush_based_on("BOM")
+
+		fg_item = "Subcontracted Item SA1"
+		raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		manual_item = make_item(properties={"is_stock_item": 1}).name
+
+		bom = make_bom(item=fg_item, raw_materials=[raw_material], rate=100, do_not_submit=True)
+		bom.conversion_rate = 80
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": manual_item,
+				"secondary_item_type": "By-Product",
+				"stock_qty": 1,
+				"valuation_type": "Manual",
+				"cost": 0.5,
+			},
+		)
+		bom.save()
+		bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.get_secondary_items()
+
+		# 0.5 USD at 80 per unit
+		manual_row = next(item for item in scr.items if item.item_code == manual_item)
+		self.assertEqual(manual_row.rate, 40)
+
 	def test_subcontracting_receipt_cancel_with_batch(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
