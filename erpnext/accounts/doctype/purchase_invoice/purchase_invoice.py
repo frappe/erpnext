@@ -1867,6 +1867,9 @@ class PurchaseInvoice(BuyingController):
 					{
 						"account": round_off_account,
 						"against": self.supplier,
+						"debit_in_transaction_currency": flt(
+							self.rounding_adjustment, self.precision("rounding_adjustment")
+						),
 						"debit_in_account_currency": self.base_rounding_adjustment
 						if round_off_account_currency == self.company_currency
 						else self.rounding_adjustment,
