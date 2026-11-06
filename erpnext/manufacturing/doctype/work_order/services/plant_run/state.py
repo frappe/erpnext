@@ -143,6 +143,8 @@ class PlantRunState:
 			source_stage=source.stage_name if source else None,
 			is_balance_item=not source and row.item_code in self.flow.balance_items,
 			weight_factor=flt(self.plan.weight_factors.get(row.item_code)),
+			has_serial_no=frappe.get_cached_value("Item", row.item_code, "has_serial_no"),
+			has_batch_no=frappe.get_cached_value("Item", row.item_code, "has_batch_no"),
 		)
 
 	def get_output(self, stage, cards, card):

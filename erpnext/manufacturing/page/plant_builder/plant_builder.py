@@ -293,9 +293,17 @@ def preview_lot(work_order: str, job_card: str, quantities: str | dict | None = 
 	return run.preview(job_card, frappe.parse_json(quantities) if quantities else {})
 
 
+@frappe.whitelist()
+def get_serial_batch_options(work_order: str, job_card: str, row: str) -> dict:
+	return get_plant_run(work_order, "read").get_pick_options(job_card, row)
+
+
 @frappe.whitelist(methods=["POST"])
-def consume_materials(work_order: str, job_card: str, quantities: str | dict) -> dict:
-	return run_action(work_order, lambda run: run.consume(job_card, frappe.parse_json(quantities)))
+def consume_materials(
+	work_order: str, job_card: str, quantities: str | dict, picks: str | dict | None = None
+) -> dict:
+	picks = frappe.parse_json(picks) if picks else None
+	return run_action(work_order, lambda run: run.consume(job_card, frappe.parse_json(quantities), picks))
 
 
 @frappe.whitelist(methods=["POST"])

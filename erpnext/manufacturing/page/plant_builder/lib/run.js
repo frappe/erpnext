@@ -22,6 +22,7 @@ export function useRun(workOrder) {
 		preview: {},
 		pending: {},
 		replan: {},
+		picks: {},
 	});
 	const now = ref(Date.now());
 	const capacity = {};
@@ -100,6 +101,7 @@ export function useRun(workOrder) {
 			const key = `${stage.job_card?.name}:${stage.phase}:${waiting}`;
 			if (local.seeded[stage.idx] === key) return;
 			local.seeded[stage.idx] = key;
+			local.picks[stage.idx] = {};
 			if (stage.job_card) {
 				local.actual[stage.idx] = Object.fromEntries(
 					stage.items.map((row) => [row.name, row.is_input ? row.waiting_qty : row.required_qty])
@@ -176,7 +178,11 @@ export function useRun(workOrder) {
 		try {
 			await act(
 				"consume_materials",
-				{ job_card: stage.job_card.name, quantities: local.actual[stage.idx] },
+				{
+					job_card: stage.job_card.name,
+					quantities: local.actual[stage.idx],
+					picks: local.picks[stage.idx],
+				},
 				CHARGE_MS
 			);
 			setTimeout(() => (local.charging = null), CHARGE_MS);
@@ -248,6 +254,37 @@ export function useRun(workOrder) {
 		schedulePreview(stage);
 	}
 
+	const pickOf = (stage, row) => local.picks[stage.idx]?.[row.name];
+	const pickedQty = (pick) =>
+		pick.serial_nos?.length || Object.values(pick.batches || {}).reduce((sum, qty) => sum + num(qty), 0);
+
+	function setPick(stage, row, pick) {
+		if (!pick) return delete local.picks[stage.idx][row.name];
+		local.picks[stage.idx][row.name] = pick;
+		if (!row.is_balance_item) setMaterial(stage, row, round(pickedQty(pick), 3));
+	}
+
+	function pickErrors(stage) {
+		return stage.items
+			.filter((row) => pickOf(stage, row))
+			.filter((row) => round(pickedQty(pickOf(stage, row)), 3) !== round(usedOf(stage, row), 3))
+			.map((row) =>
+				__("Picked {0} {1} of {2}, but this lot uses {3} {1}", [
+					fmt(pickedQty(pickOf(stage, row))),
+					row.uom,
+					row.item_name,
+					fmt(usedOf(stage, row)),
+				])
+			);
+	}
+
+	const getPickOptions = (stage, row) =>
+		call("get_serial_batch_options", {
+			work_order: workOrder,
+			job_card: stage.job_card.name,
+			row: row.name,
+		});
+
 	const previewOf = (stage) => local.preview[stage.idx];
 	const plannedOf = (stage, row) => previewOf(stage)?.items[row.name]?.planned_qty ?? row.required_qty;
 	const usedOf = (stage, row) => previewOf(stage)?.items[row.name]?.qty ?? row.transferred_qty;
@@ -274,6 +311,11 @@ export function useRun(workOrder) {
 		usedOf,
 		isOff,
 		isPreviewing,
+		pickOf,
+		pickedQty,
+		setPick,
+		pickErrors,
+		getPickOptions,
 		setPass,
 		setMaterial,
 		refresh,

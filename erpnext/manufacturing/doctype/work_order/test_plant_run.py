@@ -18,10 +18,15 @@ from erpnext.manufacturing.doctype.bom_creator.test_process_design import (
 )
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import MachineBusyError, PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
+from erpnext.manufacturing.doctype.work_order.services.plant_run.picks import (
+	PickedSerialBatch,
+	get_pick_options,
+)
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.utils import get_stock_balance
 from erpnext.tests.utils import ERPNextTestSuite
@@ -167,6 +172,63 @@ class TestPlantRun(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, set_run_qty, work_order.name, 1000)
 
 		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "qty"), 2000)
+
+	def test_consume_uses_the_picked_batches(self):
+		run, job_card, quantities, sugar = start_with_sugar_batches()
+
+		options = run.get_pick_options(job_card.name, sugar.name)
+		self.assertEqual(
+			[(row["batch_id"], row["qty"]) for row in options["batches"]],
+			[("_TKS-PICK-A", 300), ("_TKS-PICK-B", 300)],
+		)
+
+		first, second = (row["batch_no"] for row in options["batches"])
+		qty = quantities[sugar.name]
+		picks = {sugar.name: {"batches": {first: qty - 100, second: 100}}}
+		entry = frappe.get_doc("Stock Entry", run.consume(job_card.name, quantities, picks))
+
+		row = next(row for row in entry.items if row.item_code == "_Test Ketchup Sugar")
+		bundle = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+		self.assertEqual(
+			sorted((entry.batch_no, entry.qty) for entry in bundle.entries),
+			sorted([(first, -(qty - 100)), (second, -100)]),
+		)
+
+	def test_consume_refuses_picked_batches_off_the_quantity(self):
+		run, job_card, quantities, sugar = start_with_sugar_batches()
+
+		batch_no = frappe.db.get_value("Batch", {"batch_id": "_TKS-PICK-A"})
+		picks = {sugar.name: {"batches": {batch_no: 100}}}
+		self.assertRaisesRegex(frappe.ValidationError, "Pick", run.consume, job_card.name, quantities, picks)
+
+	def test_picked_serial_nos_make_the_outward_bundle(self):
+		item = make_item("_Test Plant Run Serial Part", {"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item,
+			target=STORE,
+			qty=3,
+			basic_rate=10,
+			serial_no="_TPRS-1\n_TPRS-2\n_TPRS-3",
+			use_serial_batch_fields=1,
+		)
+		serial_nos = sorted(row["serial_no"] for row in get_pick_options(item, STORE)["serial_nos"])
+		self.assertEqual(len(serial_nos), 3)
+
+		entry = make_stock_entry(
+			item_code=item,
+			source=STORE,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			purpose="Material Transfer",
+			do_not_save=True,
+		)
+		entry.items[0].job_card_item = "picked-row"
+		PickedSerialBatch(entry, {"picked-row": {"serial_nos": serial_nos[1:]}}).apply()
+		entry.insert()
+		entry.submit()
+
+		bundle = frappe.get_doc("Serial and Batch Bundle", entry.items[0].serial_and_batch_bundle)
+		self.assertEqual(sorted(row.serial_no for row in bundle.entries), serial_nos[1:])
 
 	def test_next_stage_waits_while_its_machine_is_busy(self):
 		stock_ketchup_materials()
@@ -334,6 +396,29 @@ class TestPlantRun(ERPNextTestSuite):
 
 def make_ketchup_work_order(qty=2000):
 	return make_process_work_order(make_ketchup_bom(make_ketchup_design()), qty)
+
+
+def start_with_sugar_batches():
+	stock_ketchup_materials()
+	frappe.db.set_value("Item", "_Test Ketchup Sugar", "has_batch_no", 1)
+	frappe.clear_document_cache("Item", "_Test Ketchup Sugar")
+	for batch_id in ("_TKS-PICK-A", "_TKS-PICK-B"):
+		batch = frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": "_Test Ketchup Sugar"})
+		make_stock_entry(
+			item_code="_Test Ketchup Sugar",
+			target=STORE,
+			qty=300,
+			basic_rate=10,
+			batch_no=batch.insert().name,
+		)
+
+	work_order = make_ketchup_work_order()
+	run = PlantRun(work_order.name)
+	run.start()
+	job_card = run.get_open_job_card(1)
+	quantities = get_quantities(run, job_card, {})
+	sugar = next(row for row in job_card.items if row.item_code == "_Test Ketchup Sugar")
+	return run, job_card, quantities, sugar
 
 
 def minutes_ago(minutes):
