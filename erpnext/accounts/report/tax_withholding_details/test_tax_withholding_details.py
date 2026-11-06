@@ -9,11 +9,14 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_category import (
+	create_purchase_invoice,
+	create_records,
 	create_tax_withholding_category,
 )
 from erpnext.accounts.report.tax_withholding_details.tax_withholding_details import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.tests.permission_test_utils import make_fenced_user
 
 
 class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
@@ -111,6 +114,33 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 			[inv_2.name, "TDS - 3", 20.0, 5000, 5000, 1000, 4000],
 		]
 		self.check_expected_values(result, expected_values)
+
+	def test_rows_limited_to_permitted_parties(self):
+		create_records()
+		create_tax_category("TDS - 1", rate=10, account="TDS - _TC", cumulative_threshold=1)
+		frappe.db.set_value("Supplier", "Test TDS Supplier", "tax_withholding_category", "TDS - 1")
+		frappe.db.set_value("Supplier", "Test TDS Supplier1", "tax_withholding_category", "TDS - 1")
+		create_purchase_invoice(supplier="Test TDS Supplier", rate=5000).submit()
+		create_purchase_invoice(supplier="Test TDS Supplier1", rate=7000).submit()
+		create_tax_category(cumulative_threshold=300)
+		frappe.db.set_value("Customer", "Test TCS Customer", "tax_withholding_category", "TCS")
+		create_sales_invoice(customer="Test TCS Customer", rate=1000).submit()
+
+		user = make_fenced_user(
+			"test_twd_party_permission@example.com", ["Purchase User"], [("Supplier", "Test TDS Supplier")]
+		)
+
+		filters = frappe._dict(
+			company="_Test Company", party_type="Supplier", from_date=today(), to_date=today()
+		)
+		with self.set_user(user):
+			parties = {row["party"] for row in execute(frappe._dict(filters))[1]}
+			restricted = execute(frappe._dict(filters, party="Test TDS Supplier1"))[1]
+			customers = execute(frappe._dict(filters, party_type="Customer"))[1]
+
+		self.assertEqual(parties, {"Test TDS Supplier"})
+		self.assertEqual(restricted, [])
+		self.assertEqual(customers, [])
 
 	def check_expected_values(self, result, expected_values):
 		for i in range(len(result)):
