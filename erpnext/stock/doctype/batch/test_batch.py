@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.exceptions import ValidationError
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
@@ -207,7 +207,6 @@ class TestBatch(FrappeTestCase):
 			create_batch_item_with_batch,
 		)
 
-		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 		item_code = "_Test POS Batch Warehouse Item"
 		batch_no = create_batch_item_with_batch(item_code, "TestBatch-POS-WH 01")
 		for warehouse, qty in (("_Test Warehouse 1 - _TC", 3), ("_Test Warehouse - _TC", 7)):
@@ -239,7 +238,7 @@ class TestBatch(FrappeTestCase):
 			[(d.batch_no, d.warehouse, d.qty) for d in batches], [(batch_no, "_Test Warehouse 1 - _TC", 3)]
 		)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_pos_reserved_bundle_qty_of_other_batch_is_ignored(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
 			init_user_and_profile,
@@ -250,7 +249,6 @@ class TestBatch(FrappeTestCase):
 			create_batch_item_with_batch,
 		)
 
-		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 		item_code = "_Test POS Batch Bundle Item"
 		batch_1 = create_batch_item_with_batch(item_code, "TestBatch-POS-SABB 01")
 		batch_2 = create_batch_item_with_batch(item_code, "TestBatch-POS-SABB 02")
