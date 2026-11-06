@@ -38,6 +38,7 @@ class TestDeliveryTrip(FrappeTestCase):
 		return super().tearDown()
 
 	def test_delivery_trip_notify_customers(self):
+		self.delivery_trip.submit()
 		notify_customers(delivery_trip=self.delivery_trip.name)
 		self.delivery_trip.load_from_db()
 		self.assertEqual(self.delivery_trip.email_notification_sent, 1)
@@ -316,6 +317,20 @@ class TestDeliveryTrip(FrappeTestCase):
 
 		self.assertEqual(sendmail.call_args.kwargs["subject"], f"Trip {self.delivery_trip.name}")
 		self.assertIn("Stop for _Test Customer", sendmail.call_args.kwargs["message"])
+
+	def test_dispatch_mail_only_for_submitted_trips_and_own_contacts(self):
+		self.assertRaises(frappe.ValidationError, notify_customers, self.delivery_trip.name)
+
+		other_contact = frappe.get_doc(
+			{
+				"doctype": "Contact",
+				"first_name": "_Test Other Customer Contact",
+				"email_ids": [{"email_id": "other-customer-contact@example.com", "is_primary": 1}],
+				"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 1"}],
+			}
+		).insert()
+		self.delivery_trip.delivery_stops[0].contact = other_contact.name
+		self.assertRaises(frappe.ValidationError, self.delivery_trip.save)
 
 
 def create_address(driver):
