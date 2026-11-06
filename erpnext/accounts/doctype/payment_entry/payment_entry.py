@@ -596,26 +596,6 @@ class PaymentEntry(AccountsController):
 				doc.delink_advance_entries(self.name)
 
 	def trigger_invoice_update_for_subscriptions(self):
-<<<<<<< HEAD
-		invoice_names = set()
-		for ref in self.references:
-			if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-				invoice_names.add((ref.reference_doctype, ref.reference_name))
-
-		for doctype, name in invoice_names:
-<<<<<<< HEAD
-=======
-			if not frappe.db.get_value(doctype, name, "subscription"):
-				continue
-
-			frappe.db.savepoint("subscription_update")
->>>>>>> 4ac0582 (perf(payment entry): load only invoices linked to a subscription to refresh it)
-			try:
-				doc = frappe.get_doc(doctype, name)
-				doc.refresh_subscription_status()
-			except Exception:
-				frappe.log_error(_("Failed to update subscription status for {0} {1}").format(doctype, name))
-=======
 		for doctype in ("Sales Invoice", "Purchase Invoice"):
 			names = {ref.reference_name for ref in self.references if ref.reference_doctype == doctype}
 			if not names:
@@ -623,16 +603,13 @@ class PaymentEntry(AccountsController):
 
 			filters = {"name": ["in", list(names)], "subscription": ["is", "set"]}
 			for name in frappe.get_all(doctype, filters=filters, pluck="name"):
-				frappe.db.savepoint("subscription_update")
 				try:
 					doc = frappe.get_doc(doctype, name)
 					doc.refresh_subscription_status()
 				except Exception:
-					frappe.db.rollback(save_point="subscription_update")
 					frappe.log_error(
 						_("Failed to update subscription status for {0} {1}").format(doctype, name)
 					)
->>>>>>> 2c0539d (perf(payment entry): find subscription invoices in one query per doctype)
 
 	def set_missing_values(self):
 		if self.payment_type == "Internal Transfer":
@@ -1427,17 +1404,13 @@ class PaymentEntry(AccountsController):
 	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
 	def clear_unallocated_reference_document_rows(self):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
-<<<<<<< HEAD
-		frappe.db.sql(
-			"""delete from `tabPayment Entry Reference`
-			where parent = %s and allocated_amount = 0""",
-			self.name,
-		)
-=======
 		# A new document has no rows yet; the delete would only take gap locks that deadlock concurrent inserts.
 		if not self.is_new():
-			frappe.db.delete("Payment Entry Reference", {"parent": self.name, "allocated_amount": 0})
->>>>>>> 47a15d5 (fix(payment entry): skip deleting reference rows of a new document)
+			frappe.db.sql(
+				"""delete from `tabPayment Entry Reference`
+				where parent = %s and allocated_amount = 0""",
+				self.name,
+			)
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
