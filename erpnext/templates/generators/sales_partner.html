@@ -23,9 +23,11 @@
 				{% endfor %}
 			{% endif %}
 		</div>
+		{% if description %}
 		<div class="col-md-8">
 			<p>{{ description }}</p>
 		</div>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
