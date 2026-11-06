@@ -3717,7 +3717,14 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		gl_entries = frappe.get_all(
 			"GL Entry",
 			filters={"voucher_type": "Purchase Invoice", "voucher_no": pi.name},
-			fields=["account", "debit", "credit", "credit_in_account_currency"],
+			fields=[
+				"account",
+				"debit",
+				"credit",
+				"debit_in_transaction_currency",
+				"credit_in_transaction_currency",
+				"credit_in_account_currency",
+			],
 		)
 		by_account = {gle.account: gle for gle in gl_entries}
 		self.assertEqual([by_account[credit_to].debit, by_account[credit_to].credit], [0.0, 964.46])
@@ -3725,6 +3732,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			[by_account["Round Off - _TC"].credit, by_account["Round Off - _TC"].credit_in_account_currency],
 			[0.23, 0.23],
 		)
+		self.assertEqual(by_account["Round Off - _TC"].debit_in_transaction_currency, -0.4)
 		self.assertEqual(sum(gle.debit for gle in gl_entries), sum(gle.credit for gle in gl_entries))
 
 	def test_ledger_entries_of_opening_invoice_with_rounding_adjustment(self):
