@@ -7,8 +7,11 @@ from frappe import _
 from frappe.query_builder import DocType
 from frappe.utils import cstr, flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 

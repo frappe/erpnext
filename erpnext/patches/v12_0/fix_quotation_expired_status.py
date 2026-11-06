@@ -15,6 +15,7 @@ def execute():
 			and so_item.prevdoc_docname = qo.name
 			and qo.valid_till < so.transaction_date"""  # check if SO was created after quotation expired
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 	frappe.db.sql(
 		f"""UPDATE `tabQuotation` qo SET qo.status = 'Expired' WHERE {cond} and exists({invalid_so_against_quo})"""
 	)
@@ -28,6 +29,7 @@ def execute():
 			and so_item.prevdoc_docname = qo.name
 			and qo.valid_till >= so.transaction_date"""  # check if SO was created before quotation expired
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 	frappe.db.sql(
 		f"""UPDATE `tabQuotation` qo SET qo.status = 'Closed' WHERE {cond} and exists({valid_so_against_quo})"""
 	)

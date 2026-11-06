@@ -6,8 +6,12 @@ from collections import defaultdict
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	columns = get_columns()
 	data = get_data(filters)

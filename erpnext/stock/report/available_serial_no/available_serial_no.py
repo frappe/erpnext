@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_serial_nos_from_sle_list
 from erpnext.stock.report.stock_ledger.stock_ledger import (
 	get_item_details,
@@ -15,6 +16,8 @@ from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	is_reposting_item_valuation_in_progress()
 	columns = get_columns(filters)
 	items = get_items(filters)

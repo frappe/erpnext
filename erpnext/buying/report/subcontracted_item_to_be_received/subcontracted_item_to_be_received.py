@@ -5,8 +5,11 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	if filters.from_date > filters.to_date:
 		frappe.msgprint(_("To Date must be greater than From Date"))
 

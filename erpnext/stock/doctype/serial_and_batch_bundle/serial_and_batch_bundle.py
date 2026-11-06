@@ -897,8 +897,10 @@ class SerialandBatchBundle(Document):
 			if batches and valuation_method in ("FIFO", "LIFO"):
 				stock_queue = parse_json(prev_sle.stock_queue)
 
-		set_valuation_rate_for_rejected_materials = frappe.db.get_single_value(
-			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		# a Subcontracting Receipt books the whole cost on the accepted qty, so its rejected material has none
+		set_valuation_rate_for_rejected_materials = (
+			self.voucher_type != "Subcontracting Receipt"
+			and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
 
 		transfer_rates = self.get_transfer_rates()
@@ -2691,6 +2693,49 @@ def get_available_serial_nos(kwargs):
 		if kwargs.warehouse:
 			filters["warehouse"] = kwargs.warehouse
 
+	if not set_batch_filter(filters, kwargs):
+		return []
+
+	# A row delivering against a Sales Order row takes the serial nos reserved for it first
+	reserved = get_serial_nos_reserved_for_row(filters, fields, order_by, kwargs)
+	if reserved and kwargs.qty:
+		if len(reserved) >= cint(kwargs.qty):
+			return reserved
+
+		kwargs = frappe._dict(kwargs, qty=cint(kwargs.qty) - len(reserved))
+
+	if not set_unreserved_serial_no_filter(filters, kwargs):
+		return reserved
+
+	return reserved + get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def set_batch_filter(filters, kwargs) -> bool:
+	"""Limit the filters to the non-expired batches asked for; returns False when none are."""
+	if not kwargs.get("batches"):
+		return True
+
+	batches = get_non_expired_batches(kwargs.get("batches"))
+	filters["batch_no"] = ("in", batches)
+	return bool(batches)
+
+
+def get_serial_nos_reserved_for_row(filters, fields, order_by, kwargs) -> list:
+	"""Available serial nos reserved for the Sales Order row in `kwargs.sales_order_item`."""
+	if not kwargs.get("sales_order_item"):
+		return []
+
+	ignore = set(kwargs.get("ignore_serial_nos") or [])
+	reserved = get_reserved_serial_nos_for_sre(frappe._dict(kwargs, reserved_for=kwargs.sales_order_item))
+	reserved = [sn for sn in reserved if sn not in ignore]
+	if not reserved:
+		return []
+
+	return get_serial_nos_based_on_filters({**filters, "name": ("in", reserved)}, fields, order_by, kwargs)
+
+
+def set_unreserved_serial_no_filter(filters, kwargs) -> bool:
+	"""Limit the filters to serial nos in stock and not reserved; returns False when none are."""
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos = get_reserved_serial_nos(kwargs)
 
@@ -2703,7 +2748,7 @@ def get_available_serial_nos(kwargs):
 		time_based_serial_nos = get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos)
 
 		if not time_based_serial_nos:
-			return []
+			return False
 
 		filters["name"] = ("in", time_based_serial_nos)
 	elif ignore_serial_nos:
@@ -2711,14 +2756,7 @@ def get_available_serial_nos(kwargs):
 	elif kwargs.get("serial_nos"):
 		filters["name"] = ("in", kwargs.get("serial_nos"))
 
-	if kwargs.get("batches"):
-		batches = get_non_expired_batches(kwargs.get("batches"))
-		if not batches:
-			return []
-
-		filters["batch_no"] = ("in", batches)
-
-	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+	return True
 
 
 def get_serial_nos_based_on_filters(filters, fields, order_by, kwargs):
@@ -2944,6 +2982,9 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
+	if kwargs.reserved_for:
+		query = query.where(sre.voucher_detail_no == kwargs.reserved_for)
+
 	return [row[0] for row in query.run()]
 
 
@@ -3007,7 +3048,15 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	if kwargs.get("ignore_voucher_nos"):
 		pos_invoices = pos_invoices.where(POS_Invoice.name.notin(kwargs.get("ignore_voucher_nos")))
 
+	if kwargs.get("warehouse"):
+		warehouses = kwargs.warehouse if isinstance(kwargs.warehouse, list) else [kwargs.warehouse]
+		pos_invoices = pos_invoices.where(POS_Invoice_Item.warehouse.isin(warehouses))
+
 	pos_invoices = pos_invoices.run(as_dict=True)
+
+	batch_nos = kwargs.get("batch_no") or []
+	if isinstance(batch_nos, str):
+		batch_nos = [batch_nos]
 
 	ids = [
 		pos_invoice.serial_and_batch_bundle
@@ -3017,6 +3066,9 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	if ids:
 		for d in _get_serial_batch_ledgers(kwargs.item_code, docstatus=1, name=ids):
+			if batch_nos and d.batch_no not in batch_nos:
+				continue
+
 			key = (d.batch_no, d.warehouse)
 			if key not in pos_batches:
 				pos_batches[key] = frappe._dict(
@@ -3030,10 +3082,10 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	# POS invoices having batch without bundle (to handle old POS invoices)
 	for row in pos_invoices:
-		if not row.batch_no:
+		if not row.batch_no or row.serial_and_batch_bundle in ids:
 			continue
 
-		if kwargs.get("batch_no") and row.batch_no != kwargs.get("batch_no"):
+		if batch_nos and row.batch_no not in batch_nos:
 			continue
 
 		key = (row.batch_no, row.warehouse)
@@ -3089,6 +3141,10 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
+
+	# A Sales Order row's own reservation is available to it
+	if kwargs.sales_order_item:
+		query = query.where(sre.voucher_detail_no != kwargs.sales_order_item)
 
 	data = query.run(as_dict=True)
 

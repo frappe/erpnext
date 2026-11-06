@@ -205,6 +205,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.validate_returned_serial_batches()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
@@ -241,9 +243,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.create_raw_materials_supplied()
 
 	def validate_closed_subcontracting_order(self):
-		for item in self.items:
-			if item.subcontracting_order:
-				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
+		if reference := self.get_on_hold_or_closed_reference("Subcontracting Order", "subcontracting_order"):
+			check_on_hold_or_closed_status("Subcontracting Order", reference[0])
 
 	def set_service_expense_account(self, default_expense_account):
 		for row in self.get("items"):
@@ -524,9 +525,17 @@ class SubcontractingReceipt(SubcontractingController):
 				else:
 					scrap_cost_map[item.reference_name] = item.amount
 
+		rejected_return_rows = self.get_rejected_return_rows()
+		returned_service_costs = self.get_returned_service_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.is_scrap_item:
+				# rejected qty is received without service cost
+				if item.name in returned_service_costs:
+					item.service_cost_per_qty = (
+						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
+					)
+
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -554,6 +563,25 @@ class SubcontractingReceipt(SubcontractingController):
 		else:
 			self.total_qty = total_qty
 			self.total = total_amount
+
+	def get_returned_service_costs(self) -> dict[str, float]:
+		"""Service cost per qty of the returned receipt row, for each return row."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		service_costs = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
+				fields=["name", "service_cost_per_qty"],
+				as_list=True,
+			)
+		)
+		return {
+			item.name: service_costs[item.subcontracting_receipt_item]
+			for item in self.items
+			if item.subcontracting_receipt_item in service_costs
+		}
 
 	def validate_scrap_items(self):
 		for item in self.items:
