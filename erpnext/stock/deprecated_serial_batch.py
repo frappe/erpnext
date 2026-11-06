@@ -440,7 +440,6 @@ class DeprecatedBatchNoValuation:
 	def set_balance_value_from_bundle(self) -> None:
 		from erpnext.stock.utils import get_combine_datetime
 
-		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
@@ -463,7 +462,7 @@ class DeprecatedBatchNoValuation:
 			# are summed as of two different points in time
 			posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
 
-		timestamp_condition = bundle.posting_datetime < posting_datetime
+		timestamp_condition = bundle_child.posting_datetime < posting_datetime
 
 		if sle_creation:
 			sle_table = frappe.qb.DocType("Stock Ledger Entry")
@@ -471,20 +470,18 @@ class DeprecatedBatchNoValuation:
 			# bundle creation and SLE creation are different timelines (a bundle can be
 			# created much before its SLE), so break the tie on the creation of the
 			# bundle's own SLE, exactly like BatchNoValuation.get_batch_stock_before_date
-			timestamp_condition |= (bundle.posting_datetime == posting_datetime) & ExistsCriterion(
+			timestamp_condition |= (bundle_child.posting_datetime == posting_datetime) & ExistsCriterion(
 				frappe.qb.from_(sle_table)
 				.select(sle_table.name)
 				.where(
-					(sle_table.serial_and_batch_bundle == bundle.name)
+					(sle_table.serial_and_batch_bundle == bundle_child.parent)
 					& (sle_table.is_cancelled == 0)
 					& (sle_table.creation < sle_creation)
 				)
 			)
 
 		query = (
-			frappe.qb.from_(bundle)
-			.inner_join(bundle_child)
-			.on(bundle.name == bundle_child.parent)
+			frappe.qb.from_(bundle_child)
 			.inner_join(batch)
 			.on(bundle_child.batch_no == batch.name)
 			.select(
@@ -493,12 +490,12 @@ class DeprecatedBatchNoValuation:
 				Sum(bundle_child.stock_value_difference).as_("batch_value"),
 			)
 			.where(
-				(bundle.item_code == self.sle.item_code)
-				& (bundle.warehouse == self.sle.warehouse)
+				(bundle_child.item_code == self.sle.item_code)
+				& (bundle_child.warehouse == self.sle.warehouse)
 				& (bundle_child.batch_no.isnotnull())
-				& (bundle.is_cancelled == 0)
-				& (bundle.docstatus == 1)
-				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
+				& (bundle_child.is_cancelled == 0)
+				& (bundle_child.docstatus == 1)
+				& (bundle_child.type_of_transaction.isin(["Inward", "Outward"]))
 				& (bundle_child.batch_no.isin(self.non_batchwise_valuation_batches))
 			)
 			.for_update()
@@ -507,9 +504,9 @@ class DeprecatedBatchNoValuation:
 		)
 
 		if self.sle.serial_and_batch_bundle:
-			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
+			query = query.where(bundle_child.parent != self.sle.serial_and_batch_bundle)
 
-		query = query.where(bundle.voucher_type != "Pick List")
+		query = query.where(bundle_child.voucher_type != "Pick List")
 
 		# Moving Average items with no Use Batch wise Valuation but want to use batch wise valuation
 		moving_avg_item_non_batch_value = self.use_batch_pool_for_moving_average()
