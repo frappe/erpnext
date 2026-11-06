@@ -943,14 +943,13 @@ def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out
 
 
 def _get_item_tax_template_from_item_group(ctx, item_group, out=None):
-	from frappe.utils.nestedset import get_ancestors_of
-
-	ancestors = get_ancestors_of("Item Group", item_group)
-	for group in [item_group, *ancestors]:
-		group_doc = frappe.get_cached_doc("Item Group", group)
+	"""Return the first tax template found walking up from `item_group` to the root."""
+	while item_group:
+		group_doc = frappe.get_cached_doc("Item Group", item_group)
 		item_tax_template = _get_item_tax_template(ctx, group_doc.taxes, out)
 		if item_tax_template:
 			return item_tax_template
+		item_group = group_doc.parent_item_group
 	return None
 
 
@@ -1514,7 +1513,10 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 		if desired_qty := ctx.get("qty"):
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
 	else:
-		general_price_list_rate = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
+		# Without ignore_party this repeats the query above, which found nothing
+		general_price_list_rate = ctx.get("ignore_party") and get_item_price(
+			pctx, item_code, ignore_party=True
+		)
 
 		if not general_price_list_rate and ctx.get("uom") != ctx.get("stock_uom"):
 			pctx.uom = ctx.get("stock_uom")

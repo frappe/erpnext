@@ -105,11 +105,12 @@ class TransactionBase(StatusUpdater):
 			is_child = val.get("is_child_table")
 			ref_doc = {}
 			item_ref_dn = []
+			child_rows = []
 			for d in self.get_all_children(self.doctype + " Item"):
 				ref_dn = d.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:
-						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
+						child_rows.append((ref_dn, d))
 						if ref_dn not in item_ref_dn:
 							item_ref_dn.append(ref_dn)
 						elif not val.get("allow_duplicate_prev_row_id"):
@@ -118,6 +119,12 @@ class TransactionBase(StatusUpdater):
 						ref_doc.setdefault(key, [])
 						if ref_dn not in ref_doc[key]:
 							ref_doc[key].append(ref_dn)
+			if child_rows:
+				prev_doc_detail_map = self.get_prev_doc_reference_details(
+					item_ref_dn, key, val["compare_fields"]
+				)
+				for ref_dn, d in child_rows:
+					self.compare_prev_doc_values(prev_doc_detail_map, key, ref_dn, val["compare_fields"], d)
 			if ref_doc:
 				self.compare_values(ref_doc, val["compare_fields"])
 
@@ -125,13 +132,20 @@ class TransactionBase(StatusUpdater):
 		for reference_doctype, ref_dn_list in ref_doc.items():
 			prev_doc_detail_map = self.get_prev_doc_reference_details(ref_dn_list, reference_doctype, fields)
 			for reference_name in ref_dn_list:
-				prevdoc_values = prev_doc_detail_map.get(reference_name)
-				if not prevdoc_values:
-					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+				self.compare_prev_doc_values(
+					prev_doc_detail_map, reference_doctype, reference_name, fields, doc
+				)
 
-				for field, condition in fields:
-					if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
-						self.validate_value(field, condition, prevdoc_values[field], doc)
+	def compare_prev_doc_values(
+		self, prev_doc_detail_map, reference_doctype, reference_name, fields, doc=None
+	):
+		prevdoc_values = prev_doc_detail_map.get(reference_name)
+		if not prevdoc_values:
+			frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+
+		for field, condition in fields:
+			if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
+				self.validate_value(field, condition, prevdoc_values[field], doc)
 
 	def get_prev_doc_reference_details(self, reference_names, reference_doctype, fields):
 		prev_doc_detail_map = {}
