@@ -3082,7 +3082,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 
 	# POS invoices having batch without bundle (to handle old POS invoices)
 	for row in pos_invoices:
-		if not row.batch_no:
+		if not row.batch_no or row.serial_and_batch_bundle in ids:
 			continue
 
 		if batch_nos and row.batch_no not in batch_nos:
