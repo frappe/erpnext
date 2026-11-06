@@ -62,8 +62,20 @@ class Contract(Document):
 		self.signed_by_company = frappe.session.user
 
 	def before_update_after_submit(self):
+		self.validate_fulfilment_terms_unchanged()
 		self.update_contract_status()
 		self.update_fulfilment_status()
+
+	def validate_fulfilment_terms_unchanged(self):
+		"""Rows can be ticked after submit, not added or removed."""
+		previous = self.get_doc_before_save()
+		if previous and {row.name for row in previous.fulfilment_terms} != {
+			row.name for row in self.fulfilment_terms
+		}:
+			frappe.throw(
+				_("Fulfilment terms cannot be added or removed after submission."),
+				frappe.UpdateAfterSubmitError,
+			)
 
 	def validate_dates(self):
 		if self.end_date and self.end_date < self.start_date:
@@ -113,14 +125,15 @@ def get_status(start_date, end_date):
 	        str: 'Active' if within range, otherwise 'Inactive'
 	"""
 
-	if not end_date:
-		return "Active"
-
-	start_date = getdate(start_date)
-	end_date = getdate(end_date)
 	now_date = getdate(nowdate())
+	if start_date and getdate(start_date) > now_date:
+		return "Inactive"
 
-	return "Active" if start_date <= now_date <= end_date else "Inactive"
+	# a blank end date means the contract is open-ended
+	if end_date and getdate(end_date) < now_date:
+		return "Inactive"
+
+	return "Active"
 
 
 def update_status_for_contracts():
@@ -139,3 +152,20 @@ def update_status_for_contracts():
 		status = get_status(contract.get("start_date"), contract.get("end_date"))
 
 		frappe.db.set_value("Contract", contract.get("name"), "status", status)
+
+	set_lapsed_fulfilment_status()
+
+
+def set_lapsed_fulfilment_status():
+	"""Mark submitted contracts whose fulfilment deadline passed unfulfilled as Lapsed."""
+	frappe.db.set_value(
+		"Contract",
+		{
+			"docstatus": 1,
+			"requires_fulfilment": 1,
+			"fulfilment_deadline": ("<", nowdate()),
+			"fulfilment_status": ("not in", ["Fulfilled", "Lapsed"]),
+		},
+		"fulfilment_status",
+		"Lapsed",
+	)
