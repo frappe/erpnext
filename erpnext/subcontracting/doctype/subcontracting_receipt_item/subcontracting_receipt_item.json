@@ -286,24 +286,20 @@
    "width": "100px"
   },
   {
-<<<<<<< HEAD
    "depends_on": "eval:!doc.__islocal",
-=======
-   "default": "0",
-   "fieldname": "return_qty_from_rejected_warehouse",
-   "fieldtype": "Check",
-   "label": "Return Qty from Rejected Warehouse",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal && !doc.secondary_item_type && !doc.valuation_type",
->>>>>>> 21cd0df (fix(subcontracting): keep the rejected warehouse flag on a return row)
    "fieldname": "quality_inspection",
    "fieldtype": "Link",
    "label": "Quality Inspection",
    "no_copy": 1,
    "options": "Quality Inspection",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "return_qty_from_rejected_warehouse",
+   "fieldtype": "Check",
+   "label": "Return Qty from Rejected Warehouse",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_40",
@@ -609,11 +605,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2025-09-26 12:00:38.877638",
-=======
  "modified": "2026-11-06 06:08:35.073317",
->>>>>>> 21cd0df (fix(subcontracting): keep the rejected warehouse flag on a return row)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

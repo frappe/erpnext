@@ -497,6 +497,7 @@ class StockController(AccountsController):
 			"Purchase Receipt": "purchase_receipt_item",
 			"Purchase Invoice": "purchase_invoice_item",
 			"POS Invoice": "pos_invoice_item",
+			"Subcontracting Receipt": "subcontracting_receipt_item",
 		}.get(self.doctype)
 
 		if not bundle_field:
