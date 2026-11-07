@@ -60,6 +60,8 @@ from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
+NO_EXPIRY_DATE = "9999-12-31"
+
 
 class SalesInvoice(SellingController):
 	# begin: auto-generated types
@@ -2049,7 +2051,9 @@ class SalesInvoice(SellingController):
 					"invoice": self.name,
 					"loyalty_points": points_earned,
 					"purchase_amount": eligible_amount,
-					"expiry_date": add_days(self.posting_date, lp_details.expiry_duration),
+					"expiry_date": add_days(self.posting_date, lp_details.expiry_duration)
+					if lp_details.expiry_duration
+					else NO_EXPIRY_DATE,
 					"posting_date": self.posting_date,
 				}
 			)
