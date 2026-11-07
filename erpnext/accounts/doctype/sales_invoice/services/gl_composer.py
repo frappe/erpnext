@@ -449,7 +449,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						+ " for the Loyalty Program",
 						"credit": doc.loyalty_amount,
 						"credit_in_transaction_currency": doc.loyalty_amount,
-						"against_voucher": doc.return_against if cint(doc.is_return) else doc.name,
+						"against_voucher": self._resolve_against_voucher(),
 						"against_voucher_type": doc.doctype,
 						"cost_center": doc.cost_center,
 					},
@@ -471,17 +471,24 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 			)
 
 	def make_pos_gl_entries(self, gl_entries):
+		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import get_change_payment_row
+
 		doc = self.doc
 		if cint(doc.is_pos):
 			skip_change_gl_entries = not cint(
 				frappe.get_single_value("POS Settings", "post_change_gl_entries")
 			)
+			change_payment_row = None
+			if skip_change_gl_entries:
+				change_payment_row = get_change_payment_row(doc.payments, doc.account_for_change_amount)
 
 			for payment_mode in doc.payments:
-				if skip_change_gl_entries and payment_mode.account == doc.account_for_change_amount:
-					payment_mode.base_amount -= flt(doc.base_change_amount)
+				base_amount, amount = flt(payment_mode.base_amount), flt(payment_mode.amount)
+				if payment_mode is change_payment_row:
+					base_amount -= flt(doc.base_change_amount)
+					amount -= flt(doc.change_amount)
 
-				if payment_mode.base_amount:
+				if base_amount:
 					# POS, make payment entries
 					gl_entries.append(
 						self.get_gl_dict(
@@ -490,11 +497,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 								"party_type": "Customer",
 								"party": doc.customer,
 								"against": payment_mode.account,
-								"credit": payment_mode.base_amount,
+								"credit": base_amount,
 								"credit_in_account_currency": self._get_amount_in_account_currency(
-									doc.party_account_currency, payment_mode.base_amount, payment_mode.amount
+									doc.party_account_currency, base_amount, amount
 								),
-								"credit_in_transaction_currency": payment_mode.amount,
+								"credit_in_transaction_currency": amount,
 								"against_voucher": self._resolve_against_voucher(),
 								"against_voucher_type": doc.doctype,
 								"cost_center": doc.cost_center,
@@ -510,13 +517,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 							{
 								"account": payment_mode.account,
 								"against": doc.customer,
-								"debit": payment_mode.base_amount,
+								"debit": base_amount,
 								"debit_in_account_currency": self._get_amount_in_account_currency(
-									payment_mode_account_currency,
-									payment_mode.base_amount,
-									payment_mode.amount,
+									payment_mode_account_currency, base_amount, amount
 								),
-								"debit_in_transaction_currency": payment_mode.amount,
+								"debit_in_transaction_currency": amount,
 								"cost_center": doc.cost_center,
 							},
 							payment_mode_account_currency,
@@ -547,9 +552,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						doc.party_account_currency, flt(doc.base_change_amount), flt(doc.change_amount)
 					),
 					"debit_in_transaction_currency": flt(doc.change_amount),
-					"against_voucher": doc.return_against
-					if cint(doc.is_return) and doc.return_against
-					else doc.name,
+					"against_voucher": self._resolve_against_voucher(),
 					"against_voucher_type": doc.doctype,
 					"cost_center": doc.cost_center,
 					"project": doc.project,
@@ -596,7 +599,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						"credit_in_transaction_currency": flt(
 							doc.write_off_amount, doc.precision("write_off_amount")
 						),
-						"against_voucher": doc.return_against if cint(doc.is_return) else doc.name,
+						"against_voucher": self._resolve_against_voucher(),
 						"against_voucher_type": doc.doctype,
 						"cost_center": doc.cost_center,
 						"project": doc.project,
