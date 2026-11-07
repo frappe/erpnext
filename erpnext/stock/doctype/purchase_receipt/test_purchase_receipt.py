@@ -32,7 +32,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.tests.assertions import assert_raises_with_savepoint
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestPurchaseReceipt(ERPNextTestSuite):
@@ -8989,6 +8989,9 @@ def make_purchase_receipt(**args):
 	if args.get_taxes_and_charges:
 		for tax in get_taxes():
 			pr.append("taxes", tax)
+
+	if args.return_against:
+		set_return_row_references(pr)
 
 	if not args.do_not_save:
 		pr.insert()

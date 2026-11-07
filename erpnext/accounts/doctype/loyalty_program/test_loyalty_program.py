@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 )
 from erpnext.accounts.party import get_dashboard_info
-from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
 
 
 class TestLoyaltyProgram(ERPNextTestSuite):
@@ -164,6 +164,7 @@ class TestLoyaltyProgram(ERPNextTestSuite):
 		si_return.conversion_rate = flt(1)
 		si_return.is_return = 1
 		si_return.return_against = si_original.name
+		set_return_row_references(si_return)
 		si_return.insert()
 		si_return.submit()
 
