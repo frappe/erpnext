@@ -99,14 +99,10 @@ def validate_return_against(doc):
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
-<<<<<<< HEAD
-	select_fields = "item_code, qty, stock_qty, rate, parenttype, conversion_factor, name"
-=======
-	select_fields = ["item_code", "qty", "stock_qty", "rate", "parenttype", "conversion_factor", "name"]
-	if doc.doctype == "Subcontracting Receipt":
-		select_fields.remove("stock_qty")
+	select_fields = "item_code, qty, rate, parenttype, conversion_factor, name"
+	if doc.doctype != "Subcontracting Receipt":
+		select_fields += ", stock_qty"
 
->>>>>>> 1155c5b (fix(subcontracting): cap a return by the accepted and rejected qty)
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ",serial_no, batch_no"
 
@@ -354,28 +350,6 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 		ref = valid_items[row.item_code]
 		validate_quantity(doc, row.item_code, row, ref, valid_items, already_returned_items)
 
-<<<<<<< HEAD
-=======
-
-def add_returned_row(doc, key, row, already_returned_items):
-	"""Count a validated row so that the next rows of the same return see it."""
-	conversion_factor = flt(row.conversion_factor or 1)
-	stock_qty = get_returned_stock_qty(doc, row)
-	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
-	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
-		rejected_qty += stock_qty
-		stock_qty = 0
-
-	returned = already_returned_items.setdefault(key, frappe._dict())
-	returned.qty = flt(returned.qty) + abs(flt(row.qty))
-	returned.stock_qty = flt(returned.stock_qty) + stock_qty
-	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
-	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
-
-
-def get_returned_stock_qty(doc, row):
-	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
->>>>>>> 1155c5b (fix(subcontracting): cap a return by the accepted and rejected qty)
 	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
 	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
