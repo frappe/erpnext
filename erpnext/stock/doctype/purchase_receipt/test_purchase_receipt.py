@@ -3530,6 +3530,34 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			-1,
 		)
 
+	def test_return_of_a_fully_rejected_batch_receipt(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		item = make_item(
+			"_Test PR Batch Item For Fully Rejected Return",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TFRBR-.#####",
+			},
+		).name
+		pr = make_purchase_receipt(
+			item_code=item, qty=0, rejected_qty=2, received_qty=2, rate=100, do_not_save=True
+		)
+		pr.submit()
+
+		returned = make_purchase_return(pr.name)
+		returned.items[0].update({"rejected_qty": -1, "received_qty": -1})
+		returned.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", returned.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+			-1,
+		)
+
 	def test_return_of_a_transfer_that_rejected_batch_material(self):
 		"""Returning the whole receipt puts the accepted and the rejected material back into the
 		in-transit warehouse, and leaves the batch qty where it started."""
