@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.document import Document
-from frappe.utils import cint, get_datetime, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_datetime, get_link_to_form, getdate
 
 
 class DeliveryTrip(Document):
@@ -61,7 +61,9 @@ class DeliveryTrip(Document):
 		if self._action == "submit":
 			self.validate_driver()
 
+		self.validate_delivery_notes_not_on_other_trips()
 		self.validate_stop_addresses()
+		self.validate_stop_contacts()
 
 	def validate_driver(self):
 		status, expiry_date = frappe.db.get_value("Driver", self.driver, ["status", "expiry_date"])
@@ -86,6 +88,57 @@ class DeliveryTrip(Document):
 			if stop.address and not stop.customer_address:
 				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
 
+	def validate_stop_contacts(self):
+		stops = [stop for stop in self.delivery_stops if stop.contact and stop.customer]
+		if not stops:
+			return
+
+		dynamic_link = frappe.qb.DocType("Dynamic Link")
+		contact_customers = set(
+			frappe.qb.from_(dynamic_link)
+			.select(dynamic_link.parent, dynamic_link.link_name)
+			.where(
+				(dynamic_link.parenttype == "Contact")
+				& (dynamic_link.link_doctype == "Customer")
+				& dynamic_link.parent.isin({stop.contact for stop in stops})
+			)
+			.run()
+		)
+		for stop in stops:
+			if (stop.contact, stop.customer) not in contact_customers:
+				frappe.throw(
+					_("Row #{0}: Contact {1} does not belong to Customer {2}").format(
+						stop.idx, frappe.bold(stop.contact), frappe.bold(stop.customer)
+					)
+				)
+
+	def validate_delivery_notes_not_on_other_trips(self):
+		delivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}
+		if not delivery_notes:
+			return
+
+		delivery_note = frappe.qb.DocType("Delivery Note")
+		notes = (
+			frappe.qb.from_(delivery_note)
+			.select(delivery_note.name, delivery_note.company)
+			.where(delivery_note.name.isin(delivery_notes))
+			.for_update()
+			.run(as_dict=True)
+		)
+		if other_company := [d.name for d in notes if self.company and d.company != self.company]:
+			frappe.throw(
+				_("Delivery Notes {0} do not belong to Company {1}").format(
+					", ".join(other_company), frappe.bold(self.company)
+				)
+			)
+
+		if linked := get_delivery_notes_on_other_trips(delivery_notes, self.name):
+			frappe.throw(
+				_("Delivery Notes are already on another Delivery Trip: {0}").format(
+					", ".join(f"{name} ({trip})" for name, trip in linked)
+				)
+			)
+
 	def update_status(self):
 		status = {0: "Draft", 1: "Scheduled", 2: "Cancelled"}[self.docstatus]
 
@@ -99,37 +152,38 @@ class DeliveryTrip(Document):
 		self.db_set("status", status)
 
 	def update_delivery_notes(self, delete=False):
-		"""
-		Update all connected Delivery Notes with Delivery Trip details
-		(Driver, Vehicle, etc.). If `delete` is `True`, then details
-		are removed.
+		delivery_notes = {stop.delivery_note for stop in self.delivery_stops if stop.delivery_note}
+		if not delivery_notes:
+			return
 
-		Args:
-		        delete (bool, optional): Defaults to `False`. `True` if driver details need to be emptied, else `False`.
-		"""
+		trip_values = self.get_delivery_note_values()
+		notes = frappe.get_all(
+			"Delivery Note", filters={"name": ("in", list(delivery_notes))}, fields=["name", *trip_values]
+		)
+		other_trips = get_other_trips({note.lr_no for note in notes if note.lr_no}, self.name)
 
-		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
+		updated = []
+		for note in notes:
+			if delete:
+				values = {} if note.lr_no in other_trips else release_delivery_note(note, trip_values)
+			else:
+				values = link_delivery_note(note, trip_values)
 
-		update_fields = {
+			if values:
+				frappe.db.set_value("Delivery Note", note.name, values)
+				updated.append(get_link_to_form("Delivery Note", note.name))
+
+		if updated:
+			frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(updated)))
+
+	def get_delivery_note_values(self):
+		return {
 			"driver": self.driver,
 			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
 			"lr_no": self.name,
-			"lr_date": self.departure_time,
+			"lr_date": getdate(self.departure_time) if self.departure_time else None,
 		}
-
-		for delivery_note in delivery_notes:
-			note_doc = frappe.get_doc("Delivery Note", delivery_note)
-
-			for field, value in update_fields.items():
-				value = None if delete else value
-				setattr(note_doc, field, value)
-
-			note_doc.flags.ignore_validate_update_after_submit = True
-			note_doc.save()
-
-		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
 
 	@frappe.whitelist()
 	def process_route(self, optimize):
@@ -144,10 +198,12 @@ class DeliveryTrip(Document):
 
 		departure_datetime = get_datetime(self.departure_time)
 		route_list = self.form_route_list(optimize)
+		ends_at_home = not (optimize and self.delivery_stops and self.delivery_stops[-1].locked)
+		total_distance = None
 
 		# For locks, maintain idx count while looping through route list
 		idx = 0
-		for route in route_list:
+		for route_idx, route in enumerate(route_list):
 			directions = self.get_directions(route, optimize)
 
 			if directions:
@@ -155,7 +211,9 @@ class DeliveryTrip(Document):
 					self.rearrange_stops(directions.get("waypoint_order"), start=idx)
 
 				# Avoid estimating last leg back to the home address
-				legs = directions.get("legs")[:-1] if route == route_list[-1] else directions.get("legs")
+				legs = directions.get("legs")
+				if ends_at_home and route_idx == len(route_list) - 1:
+					legs = legs[:-1]
 
 				# Google Maps returns the legs in the optimized order
 				for leg in legs:
@@ -175,13 +233,15 @@ class DeliveryTrip(Document):
 					idx += 1
 
 				# Include last leg in the final distance calculation
-				self.uom = self.default_distance_uom
-				total_distance = sum(
+				total_distance = flt(total_distance) + sum(
 					leg.get("distance", {}).get("value", 0.0) for leg in directions.get("legs")
 				)  # in meters
-				self.total_distance = total_distance * self.uom_conversion_factor
 			else:
 				idx += len(route) - 1
+
+		if total_distance is not None:
+			self.uom = self.default_distance_uom
+			self.total_distance = total_distance * self.uom_conversion_factor
 
 		self.save()
 
@@ -286,6 +346,47 @@ class DeliveryTrip(Document):
 		return directions[0] if directions else False
 
 
+def get_other_trips(names, trip_name):
+	names = names - {trip_name}
+	if not names:
+		return set()
+
+	return set(frappe.get_all("Delivery Trip", filters={"name": ("in", list(names))}, pluck="name"))
+
+
+def link_delivery_note(note, trip_values):
+	return {field: value for field, value in trip_values.items() if value and not note.get(field)}
+
+
+def release_delivery_note(note, trip_values):
+	return {
+		field: None for field in trip_values if note.get(field) and is_trip_value(note, field, trip_values)
+	}
+
+
+def is_trip_value(note, field, trip_values):
+	return cstr(note.get(field)) == cstr(trip_values[field])
+
+
+def get_delivery_notes_on_other_trips(delivery_notes, trip_name):
+	trip = frappe.qb.DocType("Delivery Trip")
+	stop = frappe.qb.DocType("Delivery Stop")
+	return (
+		frappe.qb.from_(stop)
+		.inner_join(trip)
+		.on(trip.name == stop.parent)
+		.select(stop.delivery_note, trip.name)
+		.distinct()
+		.where(
+			(stop.parenttype == "Delivery Trip")
+			& (stop.delivery_note.isin(delivery_notes))
+			& (trip.docstatus < 2)
+			& (trip.name != (trip_name or ""))
+		)
+		.run()
+	)
+
+
 @frappe.whitelist()
 def get_contact_and_address(name):
 	# `select`, not `read`: three of the four roles that run Delivery Trips hold no Customer read row
@@ -353,7 +454,8 @@ def get_default_address(out, name):
 
 @frappe.whitelist()
 def get_contact_display(contact: str):
-	frappe.has_permission("Contact", "read", doc=contact, throw=True)
+	if not frappe.has_permission("Contact", "read", doc=contact):
+		check_contact_customer_permission(contact)
 
 	contact_info = frappe.db.get_value(
 		"Contact", contact, ["first_name", "last_name", "phone", "mobile_no"], as_dict=1
@@ -367,6 +469,22 @@ def get_contact_display(contact: str):
 	)
 
 	return contact_info.html
+
+
+def check_contact_customer_permission(contact):
+	dynamic_link = frappe.qb.DocType("Dynamic Link")
+	customers = (
+		frappe.qb.from_(dynamic_link)
+		.select(dynamic_link.link_name)
+		.where(
+			(dynamic_link.parenttype == "Contact")
+			& (dynamic_link.parent == contact)
+			& (dynamic_link.link_doctype == "Customer")
+		)
+		.run(pluck=True)
+	)
+	if not any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers):
+		frappe.throw(_("Not permitted to view Contact {0}").format(contact), frappe.PermissionError)
 
 
 def sanitize_address(address):
@@ -389,11 +507,18 @@ def sanitize_address(address):
 	return ", ".join(address[:3])
 
 
-@frappe.whitelist()
-def notify_customers(delivery_trip):
+@frappe.whitelist(methods=["POST"])
+def notify_customers(delivery_trip: str):
 	delivery_trip = frappe.get_doc("Delivery Trip", delivery_trip)
 	delivery_trip.check_permission()
+	if delivery_trip.docstatus != 1:
+		frappe.throw(_("Customers can be notified only for a submitted Delivery Trip"))
 
+	dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
+	if not dispatch_template_name:
+		frappe.throw(_("Missing email template for dispatch. Please set one in Delivery Settings."))
+
+	dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
 	context = delivery_trip.as_dict()
 
 	if delivery_trip.driver:
@@ -417,13 +542,10 @@ def notify_customers(delivery_trip):
 			context.update(stop.as_dict())
 			context.update(contact_info)
 
-			dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
-			dispatch_template = frappe.get_doc("Email Template", dispatch_template_name)
-
 			frappe.sendmail(
 				recipients=contact_info.email_id,
-				subject=dispatch_template.subject,
-				message=frappe.render_template(dispatch_template.response, context, restrict_globals=True),
+				subject=dispatch_template.get_formatted_subject(context),
+				message=dispatch_template.get_formatted_response(context),
 				attachments=get_attachments(stop),
 			)
 
@@ -457,7 +579,7 @@ def get_attachments(delivery_stop):
 
 @frappe.whitelist()
 def get_driver_email(driver: str):
-	frappe.has_permission("Driver", "read", doc=driver, throw=True)
+	frappe.has_permission("Driver", "select", doc=driver, throw=True)
 
 	employee = frappe.db.get_value("Driver", driver, "employee")
 	email = None
