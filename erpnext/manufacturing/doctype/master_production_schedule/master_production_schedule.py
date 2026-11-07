@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_json
 
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
 from erpnext.stock.get_item_details import get_conversion_factor
 
@@ -75,7 +75,7 @@ class MasterProductionSchedule(Document):
 			get_conversion_factor(item_code, uom, throw_if_missing=True)
 
 		for item_code, bom_no in {(row.item_code, row.bom_no) for row in self.items if row.bom_no}:
-			validate_bom_no(item_code, bom_no)
+			validate_production_bom(item_code, bom_no)
 
 	def validate_sales_forecast_not_used(self):
 		if not self.sales_forecast:
