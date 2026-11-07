@@ -905,7 +905,39 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(pln.po_items[0].item_code, "PIV-RED")
 		self.assertEqual(pln.po_items[0].bom_no, parent_bom.name)
 
+<<<<<<< HEAD
 		frappe.db.rollback()
+=======
+	def test_template_item_cannot_be_planned_but_variant_can_use_template_bom(self):
+		template = make_item(
+			"Test PP Template Item",
+			{
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Colour"}],
+			},
+		)
+		bom = make_bom(item=template.name, raw_materials=["Raw Material Item 1"])
+		plan = create_production_plan(
+			item_code=template.name,
+			skip_getting_mr_items=1,
+			do_not_save=1,
+		)
+		plan.po_items[0].bom_no = bom.name
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Item Template"):
+			plan.insert()
+
+		variant = create_variant(template.name, {"Colour": "Red"}).insert()
+		plan = create_production_plan(
+			item_code=variant.name,
+			skip_getting_mr_items=1,
+			do_not_save=1,
+		)
+		plan.po_items[0].bom_no = bom.name
+		plan.insert()
+		plan.submit()
+>>>>>>> 6611556 (fix(manufacturing): reject template items in production plans)
 
 	def test_get_sales_order_items_for_product_bundle(self):
 		"""Testing the Planned Qty for Product Bundle Item"""
