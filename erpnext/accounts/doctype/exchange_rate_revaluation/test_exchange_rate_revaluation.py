@@ -229,8 +229,14 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 
 		row = next(x for x in je.accounts if x.account == self.debtors_usd)
 		self.assertEqual(flt(row.credit_in_account_currency, precision), 5.0)  # in USD
+		# the unrealized gain/loss account is in INR and its INR balance does not change
 		row = next(x for x in je.accounts if x.account != self.debtors_usd)
-		self.assertEqual(flt(row.debit_in_account_currency, precision), 421.05)  # in INR
+		self.assertEqual(flt(row.debit_in_account_currency, precision), 0.0)
+		self.assertEqual(flt(row.credit_in_account_currency, precision), 0.0)
+
+		# the journal is posted once
+		self.assertTrue(err.check_journal_and_reversal().get("journals_posted"))
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
 
 		# total_debit and total_credit will be 0.0, as JV is posting only to account currency fields
 		self.assertEqual(flt(je.total_debit, precision), 0.0)
@@ -385,6 +391,247 @@ class TestExchangeRateRevaluation(ERPNextTestSuite):
 			"Journal Entry", filters={"reversal_of": err_journals.get("revaluation_jv")}, pluck="name"
 		)
 		self.assertIsNotNone(reverse_jv)
+
+	def _usd_invoice(self, posting_date=None, rate=100, conversion_rate=80):
+		si = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debtors_usd,
+			posting_date=posting_date or today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=rate,
+			price_list_rate=rate,
+			do_not_submit=1,
+		)
+		si.currency = "USD"
+		si.conversion_rate = conversion_rate
+		return si.save().submit()
+
+	def _revaluation(self, posting_date=None, new_exchange_rate=85):
+		err = frappe.new_doc("Exchange Rate Revaluation")
+		err.company = self.company
+		err.posting_date = posting_date or today()
+		err.extend("accounts", err.get_accounts_data())
+		for row in err.accounts:
+			if not row.zero_balance:
+				row.new_exchange_rate = new_exchange_rate
+		return err
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_zero_balance_rows_are_revalued_from_the_ledger(self):
+		si = self._usd_invoice()
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.source_exchange_rate = 85
+		pe.received_amount = 8500
+		pe.save().submit()
+		# Cancel the auto created gain/loss JE to leave -500 only in base currency
+		je = frappe.db.get_all("Journal Entry Account", filters={"reference_name": si.name}, pluck="parent")[
+			0
+		]
+		frappe.get_doc("Journal Entry", je).cancel()
+
+		err = frappe.new_doc("Exchange Rate Revaluation")
+		err.company = self.company
+		err.posting_date = today()
+		err.append(
+			"accounts",
+			{
+				"account": self.debtors_usd,
+				"party_type": "Customer",
+				"party": self.customer,
+				"zero_balance": 1,
+				"balance_in_base_currency": -500,
+				"gain_loss": -5000,
+				"new_exchange_rate": 0,
+			},
+		)
+		err.save().submit()
+		self.assertEqual(err.accounts[0].gain_loss, 500)
+
+		je = frappe.get_doc("Journal Entry", err.make_jv_entries().get("zero_balance_jv"))
+		self.assertEqual(je.total_debit, 500)
+		self.assertEqual(je.total_credit, 500)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_journals_are_made_once(self):
+		self._usd_invoice()
+		err = self._revaluation().save()
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
+
+		err.submit()
+		journals = err.make_jv_entries()
+		self.assertFalse(err.check_journal_and_reversal().get("journals_posted"))
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
+
+		frappe.get_doc("Journal Entry", journals.get("revaluation_jv")).submit()
+		self.assertTrue(err.check_journal_and_reversal().get("journals_posted"))
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_cancelled_journal_is_made_again(self):
+		# _Test Customer: 5 USD and 0 INR, revalued by the zero balance journal
+		si = self._usd_invoice(posting_date=add_days(today(), -1))
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.paid_amount = 95
+		pe.source_exchange_rate = 84.2105
+		pe.received_amount = 8000
+		pe.references = []
+		pe.save().submit()
+		# _Test Customer 1: 100 USD at 80, revalued by the revaluation journal
+		create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer="_Test Customer 1",
+			debit_to=self.debtors_usd,
+			posting_date=add_days(today(), -1),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			rate=100,
+			price_list_rate=100,
+			currency="USD",
+			conversion_rate=80,
+		)
+
+		err = self._revaluation().save().submit()
+		journals = err.make_jv_entries()
+		zero_balance_jv = frappe.get_doc("Journal Entry", journals.get("zero_balance_jv")).submit()
+		revaluation_jv = frappe.get_doc("Journal Entry", journals.get("revaluation_jv")).submit()
+		self.assertTrue(err.check_journal_and_reversal().get("journals_posted"))
+
+		# only the cancelled journal is made again
+		zero_balance_jv.cancel()
+		self.assertFalse(err.check_journal_and_reversal().get("journals_posted"))
+		journals = err.make_jv_entries()
+		self.assertTrue(journals.get("zero_balance_jv"))
+		self.assertIsNone(journals.get("revaluation_jv"))
+		frappe.get_doc("Journal Entry", journals.get("zero_balance_jv")).submit()
+		self.assertTrue(err.check_journal_and_reversal().get("journals_posted"))
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
+
+		revaluation_jv.cancel()
+		journals = err.make_jv_entries()
+		self.assertIsNone(journals.get("zero_balance_jv"))
+		self.assertTrue(journals.get("revaluation_jv"))
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_balances_are_read_again_on_submit(self):
+		si = self._usd_invoice()
+		err = self._revaluation().save()
+		self.assertEqual(err.accounts[0].balance_in_account_currency, 100)
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.paid_amount = 40
+		pe.source_exchange_rate = 85
+		pe.received_amount = 3400
+		pe.references[0].allocated_amount = 40
+		pe.save().submit()
+
+		err.submit()
+		self.assertEqual(err.accounts[0].balance_in_account_currency, 60)
+		self.assertEqual(err.accounts[0].balance_in_base_currency, 4800)
+		self.assertEqual(err.accounts[0].gain_loss, 300)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_balance_changed_after_submit_is_not_revalued(self):
+		si = self._usd_invoice(posting_date=add_days(today(), -1))
+		err = self._revaluation().save().submit()
+
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), -1)
+		pe.paid_amount = 40
+		pe.source_exchange_rate = 85
+		pe.received_amount = 3400
+		pe.references[0].allocated_amount = 40
+		pe.save().submit()
+
+		self.assertRaises(frappe.ValidationError, err.make_jv_entries)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_new_exchange_rate_is_required(self):
+		self._usd_invoice()
+		err = self._revaluation(new_exchange_rate=0).save()
+		self.assertRaises(frappe.ValidationError, err.submit)
+
+	def test_get_account_details_needs_revaluation_permission(self):
+		from erpnext.accounts.doctype.exchange_rate_revaluation.exchange_rate_revaluation import (
+			get_account_details,
+		)
+
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "err-sales-user@example.com",
+				"first_name": "ERR Sales User",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Sales User"}],
+			}
+		).insert(ignore_permissions=True)
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user.name)
+		self.assertRaises(
+			frappe.PermissionError,
+			get_account_details,
+			self.company,
+			today(),
+			self.debtors_usd,
+			"Customer",
+			self.customer,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_warns_about_a_later_revaluation(self):
+		self._usd_invoice(posting_date=add_days(today(), -20))
+		later = self._revaluation().save().submit()
+
+		earlier = self._revaluation(posting_date=add_days(today(), -10), new_exchange_rate=82).save()
+		frappe.clear_messages()
+		earlier.submit()
+		self.assertIn(later.name, str(frappe.message_log))
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings",
+		{"allow_multi_currency_invoices_against_single_party_account": 1, "allow_stale": 0},
+	)
+	def test_zero_balance_rate_uses_entries_up_to_the_posting_date(self):
+		si = self._usd_invoice(posting_date=add_days(today(), -10))
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), -5)
+		pe.paid_amount = 95
+		pe.source_exchange_rate = 84.2105
+		pe.received_amount = 8000
+		pe.references = []
+		pe.save().submit()
+		self._usd_invoice(rate=10, conversion_rate=90)
+
+		err = frappe.new_doc("Exchange Rate Revaluation")
+		err.company = self.company
+		err.posting_date = add_days(today(), -5)
+		row = next(d for d in err.get_accounts_data() if d["party"] == self.customer)
+		self.assertTrue(row["zero_balance"])
+		self.assertAlmostEqual(row["current_exchange_rate"], 84.21, places=2)
 
 
 class TestExchangeRateRevaluationValidation(ERPNextTestSuite):
