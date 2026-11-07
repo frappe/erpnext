@@ -763,6 +763,9 @@ class PaymentEntry(AccountsController):
 		if self.party and not frappe.db.exists(self.party_type, self.party):
 			frappe.throw(_("{0} {1} does not exist").format(_(self.party_type), self.party))
 
+		if self.party:
+			validate_party_company(self.party_type, self.party, self.company)
+
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
 		self.set_target_exchange_rate(ref_doc)
