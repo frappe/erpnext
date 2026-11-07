@@ -100,6 +100,8 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		query = query.where(conditions)
 	invoices = query.run(pluck=True)
 
+	frappe.flags.deferred_accounting_error = False
+
 	# For each invoice, book deferred expense
 	for invoice in invoices:
 		doc = frappe.get_doc("Purchase Invoice", invoice)
@@ -137,6 +139,8 @@ def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_da
 	if conditions is not None:
 		query = query.where(conditions)
 	invoices = query.run(pluck=True)
+
+	frappe.flags.deferred_accounting_error = False
 
 	for invoice in invoices:
 		doc = frappe.get_doc("Sales Invoice", invoice)
@@ -239,6 +243,10 @@ def calculate_monthly_amount(
 		)
 
 		actual_months = rounded(total_months * prorate_factor, 1)
+		if not actual_months:
+			return calculate_amount(
+				doc, item, last_gl_entry, total_days, total_booking_days, account_currency
+			)
 
 		already_booked_amount, already_booked_amount_in_account_currency = get_already_booked_amount(
 			doc, item
@@ -426,7 +434,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 				prev_posting_date = end_date
 
 			if via_journal_entry:
-				book_revenue_via_journal_entry(
+				booked = book_revenue_via_journal_entry(
 					doc,
 					credit_account,
 					debit_account,
@@ -441,7 +449,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 					submit_journal_entry,
 				)
 			else:
-				make_gl_entries(
+				booked = make_gl_entries(
 					doc,
 					credit_account,
 					debit_account,
@@ -456,9 +464,9 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 					deferred_process,
 				)
 
-		# Returned in case of any errors because it tries to submit the same record again and again in case of errors
-		if frappe.flags.deferred_accounting_error:
-			return
+			# stop on an error, else it tries to book the same entry again and again
+			if not booked:
+				return
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(
@@ -534,7 +542,7 @@ def make_gl_entries(
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	if amount == 0:
-		return
+		return True
 
 	gl_entries = []
 	gl_entries.append(
@@ -576,19 +584,22 @@ def make_gl_entries(
 	)
 
 	if gl_entries:
+		# undo only this booking on an error, not the whole run
+		save_point = f"deferred_{frappe.generate_hash(length=10)}"
+		frappe.db.savepoint(save_point)
 		try:
 			make_gl_entries(gl_entries, cancel=(doc.docstatus == 2), merge_entries=True)
 			if not frappe.in_test:
 				frappe.db.commit()
 		except Exception as e:
+			frappe.db.rollback(save_point=save_point)
+			doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
 			if frappe.in_test:
-				frappe.db.rollback()
-				doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
 				raise e
-			else:
-				frappe.db.rollback()
-				doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
-				frappe.flags.deferred_accounting_error = True
+			frappe.flags.deferred_accounting_error = True
+			return False
+
+	return True
 
 
 def send_mail(deferred_process):
@@ -616,7 +627,7 @@ def book_revenue_via_journal_entry(
 	submit="No",
 ):
 	if amount == 0:
-		return
+		return True
 
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.posting_date = posting_date
@@ -656,6 +667,9 @@ def book_revenue_via_journal_entry(
 	journal_entry.append("accounts", debit_entry)
 	journal_entry.append("accounts", credit_entry)
 
+	# undo only this booking on an error, not the whole run
+	save_point = f"deferred_{frappe.generate_hash(length=10)}"
+	frappe.db.savepoint(save_point)
 	try:
 		journal_entry.save()
 
@@ -665,9 +679,12 @@ def book_revenue_via_journal_entry(
 		if not frappe.in_test:
 			frappe.db.commit()
 	except Exception:
-		frappe.db.rollback()
+		frappe.db.rollback(save_point=save_point)
 		doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
 		frappe.flags.deferred_accounting_error = True
+		return False
+
+	return True
 
 
 def get_deferred_booking_accounts(doctype, voucher_detail_no, dr_or_cr):

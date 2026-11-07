@@ -45,6 +45,11 @@ class ProcessDeferredAccounting(Document):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ["GL Entry"]
+		# draft journals of this run would still count as booked
+		for journal_entry in frappe.get_all(
+			"Journal Entry", filters={"process_deferred_accounting": self.name, "docstatus": 0}, pluck="name"
+		):
+			frappe.delete_doc("Journal Entry", journal_entry)
 		gl_entries = frappe.get_all(
 			"GL Entry",
 			fields=["*"],
