@@ -373,6 +373,23 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		asset_doc.load_from_db()
 		self.assertEqual(asset_doc.value_after_depreciation, 50000.0)
 
+	def test_adjustment_without_finance_book_is_refused_for_named_finance_books(self):
+		asset = create_asset_for_value_adjustment(finance_book="Test Finance Book 1")
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=100000,
+			date="2023-01-15",
+		)
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset.name, finance_book="Test Finance Book 1", new_asset_value=100000, date="2023-01-15"
+		)
+		adjustment.submit()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000)
+
 	def test_expected_value_after_useful_life(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 

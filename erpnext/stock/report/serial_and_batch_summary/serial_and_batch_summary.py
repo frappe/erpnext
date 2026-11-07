@@ -48,7 +48,11 @@ def get_filter_conditions(filters):
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
-			if field == "voucher_no":
+			if field == "warehouse":
+				filter_conditions.append(
+					["Serial and Batch Bundle", field, "descendants of (inclusive)", filters.get(field)]
+				)
+			elif field == "voucher_no":
 				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
 			else:
 				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
@@ -136,7 +140,7 @@ def get_columns(filters, data):
 			]
 		)
 
-	if not filters.get("warehouse"):
+	if not filters.get("warehouse") or frappe.get_cached_value("Warehouse", filters.warehouse, "is_group"):
 		columns.append(
 			{
 				"label": _("Warehouse"),
@@ -151,15 +155,11 @@ def get_columns(filters, data):
 		columns.append({"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Data", "width": 120})
 
 	if not item_details or item_details.get("has_batch_no"):
-		columns.extend(
-			[
-				{"label": _("Batch No"), "fieldname": "batch_no", "fieldtype": "Data", "width": 120},
-				{"label": _("Batch Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 120},
-			]
-		)
+		columns.append({"label": _("Batch No"), "fieldname": "batch_no", "fieldtype": "Data", "width": 120})
 
 	columns.extend(
 		[
+			{"label": _("Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 120},
 			{"label": _("Incoming Rate"), "fieldname": "incoming_rate", "fieldtype": "Float", "width": 120},
 			{
 				"label": _("Change in Stock Value"),
@@ -193,6 +193,9 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 	if not has_filter_permissions(filters):
+		return []
+
+	if not frappe.has_permission("Serial No", "select"):
 		return []
 
 	query_filters = {}
@@ -229,6 +232,9 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 	if not has_filter_permissions(filters):
+		return []
+
+	if not frappe.has_permission("Batch", "select"):
 		return []
 
 	query_filters = {}
