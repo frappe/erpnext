@@ -2,13 +2,49 @@
 # See license.txt
 
 import unittest
+from unittest.mock import patch
 
 import frappe
 
-from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import get_recipients
+from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
+	execute_repost_item_valuation,
+	get_recipients,
+	in_configured_timeslot,
+)
 
 
 class TestStockRepostingSettings(unittest.TestCase):
+	def test_widened_overnight_timeslot_runs_past_midnight(self):
+		settings = frappe.get_doc("Stock Reposting Settings")
+		settings.update({"limit_reposting_timeslot": 1, "start_time": "22:00:00", "end_time": "06:00:00"})
+		settings.limits_dont_apply_on = None
+		settings.validate()
+
+		self.assertEqual(settings.end_time, "08:00:00")
+		self.assertTrue(in_configured_timeslot(settings, "23:30:00"))
+		self.assertTrue(in_configured_timeslot(settings, "03:00:00"))
+		self.assertTrue(in_configured_timeslot(settings, "07:30:00"))
+		self.assertFalse(in_configured_timeslot(settings, "12:00:00"))
+
+	def test_timeslot_compares_unpadded_end_time(self):
+		settings = frappe._dict(
+			limit_reposting_timeslot=1, start_time="22:00:00", end_time="8:0:0", limits_dont_apply_on=None
+		)
+
+		self.assertTrue(in_configured_timeslot(settings, "03:00:00"))
+
+	def test_manual_start_outside_timeslot_is_not_reported_as_started(self):
+		module = "erpnext.stock.doctype.repost_item_valuation.repost_item_valuation"
+		with (
+			patch(f"{module}.in_configured_timeslot", return_value=False),
+			patch(
+				"frappe.core.doctype.scheduled_job_type.scheduled_job_type.ScheduledJobType.enqueue"
+			) as enqueue,
+		):
+			self.assertFalse(execute_repost_item_valuation())
+
+		enqueue.assert_not_called()
+
 	def test_notify_reposting_error_to_role(self):
 		role = "Notify Reposting Role"
 
