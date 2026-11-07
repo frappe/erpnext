@@ -1712,8 +1712,10 @@ def get_pos_profile(company, pos_profile=None, user=None):
 
 
 @frappe.whitelist()
-def get_conversion_factor(item_code, uom):
-	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+def get_conversion_factor(item_code, uom, throw_if_missing: bool = False):
+	item = frappe.get_cached_value(
+		"Item", item_code, ["variant_of", "stock_uom", "is_stock_item"], as_dict=True
+	)
 	if not item_code or not item or uom == item.stock_uom:
 		return {"conversion_factor": 1.0}
 
@@ -1738,6 +1740,9 @@ def get_conversion_factor(item_code, uom):
 		conversion_factor = get_uom_conv_factor(uom, item.stock_uom)
 	else:
 		conversion_factor = conversion_factor[0]
+
+	if throw_if_missing and not conversion_factor and item.is_stock_item:
+		throw(_("UOM {0} has no conversion factor in Item {1}.").format(uom, item_code))
 
 	return {"conversion_factor": conversion_factor or 1.0}
 
