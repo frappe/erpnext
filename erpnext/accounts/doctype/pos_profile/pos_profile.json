@@ -29,6 +29,7 @@
   "write_off_cost_center",
   "column_break_pkca",
   "write_off_limit",
+  "cash_difference_account",
   "income_and_expense_account",
   "income_account",
   "column_break_byzk",
@@ -403,6 +404,13 @@
    "reqd": 1
   },
   {
+   "description": "If set, differences between the expected and counted amounts are posted to this account when a POS Closing Entry is submitted",
+   "fieldname": "cash_difference_account",
+   "fieldtype": "Link",
+   "label": "Cash Difference Account",
+   "options": "Account"
+  },
+  {
    "default": "0",
    "description": "If enabled, the consolidated invoices will have rounded total disabled",
    "fieldname": "disable_rounded_total",
@@ -592,7 +600,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2026-09-23 12:00:00.000000",
+ "modified": "2026-11-02 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

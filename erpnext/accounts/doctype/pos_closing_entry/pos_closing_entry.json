@@ -34,6 +34,7 @@
   "grand_total",
   "section_break_11",
   "payment_reconciliation",
+  "difference_journal_entry",
   "failure_description_section",
   "error_message",
   "section_break_14",
@@ -118,6 +119,15 @@
    "fieldtype": "Table",
    "label": "Payment Reconciliation",
    "options": "POS Closing Entry Detail"
+  },
+  {
+   "depends_on": "difference_journal_entry",
+   "fieldname": "difference_journal_entry",
+   "fieldtype": "Link",
+   "label": "Difference Journal Entry",
+   "no_copy": 1,
+   "options": "Journal Entry",
+   "read_only": 1
   },
   {
    "collapsible_depends_on": "eval:doc.docstatus==0",
@@ -263,7 +273,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2025-06-14 02:38:14.962291",
+ "modified": "2026-11-02 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

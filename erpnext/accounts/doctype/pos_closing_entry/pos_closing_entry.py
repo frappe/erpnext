@@ -11,10 +11,12 @@ from frappe.query_builder import functions as fn
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 	unconsolidate_pos_invoices,
 )
+from erpnext.accounts.doctype.sales_invoice.services.pos import get_bank_cash_account
 from erpnext.controllers.status_updater import StatusUpdater
 
 
@@ -40,6 +42,7 @@ class POSClosingEntry(StatusUpdater):
 
 		amended_from: DF.Link | None
 		company: DF.Link
+		difference_journal_entry: DF.Link | None
 		error_message: DF.SmallText | None
 		grand_total: DF.Currency
 		net_total: DF.Currency
@@ -64,6 +67,13 @@ class POSClosingEntry(StatusUpdater):
 		self.fetch_invoice_type()
 		self.validate_pos_opening_entry()
 		self.validate_invoice_mode()
+		self.set_payment_differences()
+
+	def set_payment_differences(self):
+		for row in self.payment_reconciliation:
+			row.difference = flt(
+				flt(row.closing_amount) - flt(row.expected_amount), row.precision("difference")
+			)
 
 	def set_posting_date_and_time(self):
 		if self.posting_date:
@@ -234,6 +244,8 @@ class POSClosingEntry(StatusUpdater):
 		)
 
 	def on_submit(self):
+		# consolidation commits, so anything that can fail after it would leave the closing half done
+		self.make_difference_journal_entry()
 		consolidate_pos_invoices(closing_entry=self)
 		# only the cashier's POS page listens for this event
 		frappe.publish_realtime(
@@ -249,6 +261,7 @@ class POSClosingEntry(StatusUpdater):
 			self.check_pce_is_cancellable()
 
 	def on_cancel(self):
+		self.cancel_difference_journal_entry()
 		unconsolidate_pos_invoices(closing_entry=self)
 
 		self.update_sales_invoices_closing_entry(cancel=True)
@@ -267,6 +280,57 @@ class POSClosingEntry(StatusUpdater):
 			self.check_permission("submit")
 			self.validate_session_invoices_are_included()
 			consolidate_pos_invoices(closing_entry=self)
+
+	def make_difference_journal_entry(self):
+		pos_profile = frappe.get_cached_doc("POS Profile", self.pos_profile)
+		if not pos_profile.cash_difference_account:
+			return
+
+		precision = frappe.get_precision("POS Closing Entry Detail", "difference")
+		difference_by_account = {}
+		for row in self.payment_reconciliation:
+			if row.difference:
+				account = get_bank_cash_account(row.mode_of_payment, self.company)["account"]
+				difference_by_account[account] = flt(
+					difference_by_account.get(account, 0) + row.difference, precision
+				)
+
+		# a shortage credits the payment account and debits the difference account, an excess the reverse
+		amount_by_account = {
+			**difference_by_account,
+			pos_profile.cash_difference_account: flt(-sum(difference_by_account.values()), precision),
+		}
+		dimensions = {dimension: pos_profile.get(dimension) for dimension in get_accounting_dimensions()}
+
+		journal_entry = frappe.new_doc("Journal Entry")
+		journal_entry.company = self.company
+		journal_entry.posting_date = self.posting_date
+		journal_entry.user_remark = _("Cash difference of POS Closing Entry {0}").format(self.name)
+		for account, amount in amount_by_account.items():
+			if amount:
+				journal_entry.append(
+					"accounts",
+					{
+						"account": account,
+						"cost_center": pos_profile.write_off_cost_center,
+						"debit_in_account_currency": max(amount, 0),
+						"credit_in_account_currency": max(-amount, 0),
+						**dimensions,
+					},
+				)
+
+		if not journal_entry.accounts:
+			return
+
+		journal_entry.flags.ignore_permissions = True
+		journal_entry.submit()
+		self.db_set("difference_journal_entry", journal_entry.name, update_modified=False)
+
+	def cancel_difference_journal_entry(self):
+		if self.difference_journal_entry:
+			journal_entry = frappe.get_doc("Journal Entry", self.difference_journal_entry)
+			journal_entry.flags.ignore_permissions = True
+			journal_entry.cancel()
 
 	def update_opening_entry(self, for_cancel=False):
 		opening_entry = frappe.get_doc("POS Opening Entry", self.pos_opening_entry)
