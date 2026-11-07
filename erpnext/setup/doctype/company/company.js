@@ -34,7 +34,7 @@ frappe.ui.form.on("Company", {
 		});
 
 		frm.set_query("default_selling_terms", function () {
-			return { filters: { selling: 1 } };
+			return { filters: { selling: 1, disabled: 0 } };
 		});
 
 		frm.set_query("default_sales_contact", function (doc) {
@@ -45,7 +45,7 @@ frappe.ui.form.on("Company", {
 		});
 
 		frm.set_query("default_buying_terms", function () {
-			return { filters: { buying: 1 } };
+			return { filters: { buying: 1, disabled: 0 } };
 		});
 
 		frm.set_query("default_in_transit_warehouse", function () {
