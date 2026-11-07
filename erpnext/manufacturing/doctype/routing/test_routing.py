@@ -136,9 +136,28 @@ class TestRouting(FrappeTestCase):
 		routing = create_routing(routing_name="Disabled Route", operations=operations)
 		routing.db_set("disabled", 1)
 
-		self.assertRaises(
-			frappe.ValidationError, setup_bom, item_code="_Test Disabled Routing Item", routing=routing.name
-		)
+		with self.assertRaisesRegex(frappe.ValidationError, "is disabled"):
+			make_routing_bom("_Test Disabled Routing Item", routing.name)
+
+	def test_bom_saved_after_its_routing_is_disabled(self):
+		frappe.db.savepoint("routing_disabled_later")
+		self.addCleanup(frappe.db.rollback, save_point="routing_disabled_later")
+
+		operations = [
+			{"operation": "Test Operation A", "workstation": "Test Workstation A", "time_in_mins": 30}
+		]
+		setup_operations(operations)
+		routing = create_routing(routing_name="Routing Disabled Later", operations=operations)
+		bom = make_routing_bom("_Test Routing Disabled Later Item", routing.name, do_not_submit=True)
+
+		routing.db_set("disabled", 1)
+		bom.reload()
+		bom.quantity = 2
+		bom.save()
+		bom.submit()
+
+		self.assertEqual(bom.docstatus, 1)
+		self.assertEqual(bom.routing, routing.name)
 
 
 def setup_operations(rows):
@@ -168,6 +187,17 @@ def create_routing(**args):
 			doc.save()
 
 	return doc
+
+
+def make_routing_bom(item_code, routing, **args):
+	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+	make_item(item_code, {"is_stock_item": 1})
+	make_item("Test Extra Item N-1", {"is_stock_item": 1})
+
+	return make_bom(
+		item=item_code, raw_materials=["Test Extra Item N-1"], routing=routing, with_operations=1, **args
+	)
 
 
 def setup_bom(**args):
