@@ -513,6 +513,72 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertRaises(frappe.ValidationError, riv.save)
 
+	def test_recalculate_valuation_rate_not_allowed_for_stock_entry_with_source_warehouse(self):
+		item = self.make_item().name
+		fg = self.make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=item, target=warehouse, qty=10, rate=100)
+
+		issue = make_stock_entry(item_code=item, source=warehouse, qty=1)
+		repack = make_stock_entry(item_code=item, source=warehouse, qty=1, purpose="Repack", do_not_save=True)
+		repack.append("items", {"item_code": fg, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1})
+		repack.submit()
+
+		for entry in (issue, repack):
+			riv = frappe.get_doc(
+				doctype="Repost Item Valuation",
+				based_on="Transaction",
+				voucher_type=entry.doctype,
+				voucher_no=entry.name,
+				recalculate_valuation_rate=1,
+				posting_date=entry.posting_date,
+				posting_time=entry.posting_time,
+			)
+			with self.subTest(purpose=entry.purpose):
+				self.assertRaises(frappe.ValidationError, riv.save)
+
+	def test_recalculate_valuation_rate_skips_later_vouchers(self):
+		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
+		receipt = make_stock_entry(
+			item_code=item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			rate=100,
+			posting_date=add_days(today(), -2),
+		)
+		transfer = make_stock_entry(
+			item_code=item,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=4,
+			posting_date=add_days(today(), -1),
+			do_not_submit=True,
+		)
+		transfer.append(
+			"additional_costs",
+			{"expense_account": "Stock Adjustment - _TC", "description": "freight", "amount": 40},
+		)
+		transfer.submit()
+
+		frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Transaction",
+			voucher_type=receipt.doctype,
+			voucher_no=receipt.name,
+			recalculate_valuation_rate=1,
+			posting_date=receipt.posting_date,
+			posting_time=receipt.posting_time,
+		).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": transfer.name, "actual_qty": ("<", 0), "is_cancelled": 0},
+				["outgoing_rate", "stock_value_difference"],
+			),
+			(0, -400),
+		)
+
 	def test_recalculate_stock_entry_additional_cost_updates_all_incoming_rows(self):
 		from erpnext.stock.stock_ledger import update_entries_after
 
