@@ -1354,33 +1354,11 @@ class SubcontractingController(StockController):
 				scr_qty = flt(item.qty) * flt(item.conversion_factor)
 
 				if scr_qty:
-<<<<<<< HEAD
-					sle = self.get_sl_entries(item, {"actual_qty": flt(scr_qty)})
-					rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
-					incoming_rate = flt(item.rate, rate_db_precision)
-					sle.update(
-						{
-							"incoming_rate": incoming_rate,
-							"recalculate_rate": 1,
-						}
-					)
-					if self.is_return:
-=======
 					sle = self.get_sl_entries(item, {"actual_qty": flt(scr_qty), "recalculate_rate": 1})
-<<<<<<< HEAD
-					if self.is_return:
-						# take the finished good out at the rate the returned receipt brought it in
->>>>>>> 123c573 (fix(subcontracting): return the finished good at the returned receipt's rate)
-=======
 					if not self.is_return:
 						rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
 						sle.incoming_rate = flt(item.rate, rate_db_precision)
-<<<<<<< HEAD
-					elif self.is_returned_at_receipt_rate(item.item_code):
->>>>>>> 86ae937 (fix(subcontracting): keep Moving Average returns at the running rate)
-=======
-					elif not is_serial_no_wise_valuation_disabled(item.item_code):
->>>>>>> 8c5681a (fix(subcontracting): return a Moving Average finished good at the receipt rate on submit, as a Purchase Receipt return does)
+					else:
 						sle.outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, item.item_code, self.return_against, item_row=item
 						)
@@ -1405,21 +1383,7 @@ class SubcontractingController(StockController):
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
-=======
-	def is_returned_at_receipt_rate(self, item_code):
-		"""Same rule a repost uses for a return, so both give the same value."""
-		if is_serial_no_wise_valuation_disabled(item_code):
-			return False
-
-		return get_valuation_method(item_code, self.company) != "Moving Average"
-
-=======
->>>>>>> 8c5681a (fix(subcontracting): return a Moving Average finished good at the receipt rate on submit, as a Purchase Receipt return does)
-	def get_supplied_items_cost(self, item_row_id):
->>>>>>> 86ae937 (fix(subcontracting): keep Moving Average returns at the running rate)
 		supplied_items_cost = 0.0
 		for item in self.get("supplied_items"):
 			if item.reference_name == item_row_id:
