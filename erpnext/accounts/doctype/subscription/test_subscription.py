@@ -251,6 +251,7 @@ class TestSubscription(ERPNextTestSuite):
 					subscription.next_billing_period_end,
 					subscription.next_billing_period_start,
 					cint(subscription.generate_invoice_at == "Prepaid (bill at period start)"),
+					upto=subscription.cancelation_date,
 				),
 				2,
 			),
@@ -388,6 +389,7 @@ class TestSubscription(ERPNextTestSuite):
 		self.assertEqual(invoice.additional_discount_percentage, 10)
 		self.assertEqual(invoice.apply_discount_on, "Grand Total")
 
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"prorate": 0})
 	def test_subscription_invoice_discount_amount(self):
 		subscription = create_subscription(additional_discount_amount=11)
 		subscription.cancel_subscription()
@@ -1118,6 +1120,171 @@ class TestSubscription(ERPNextTestSuite):
 
 		# Without a company the item fallback is skipped.
 		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
+
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"prorate": 1})
+	def test_postpaid_catch_up_bills_full_periods(self):
+		with freeze_time("2026-10-02 12:00:00"):
+			subscription = create_subscription(start_date="2026-07-01", generate_new_invoices_past_due_date=1)
+
+		totals = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name},
+			pluck="grand_total",
+			order_by="from_date asc",
+		)
+		self.assertEqual(totals, [900, 900, 900])
+
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"prorate": 1})
+	def test_force_fetch_bills_the_full_period(self):
+		with freeze_time("2026-09-01 12:00:00"):
+			subscription = create_subscription(start_date="2026-09-01")
+
+		with freeze_time("2026-09-10 12:00:00"):
+			subscription.force_fetch_subscription_updates()
+
+		invoice = subscription.get_current_invoice()
+		self.assertEqual(getdate(invoice.to_date), getdate("2026-09-30"))
+		self.assertEqual(invoice.grand_total, 900)
+
+	def test_trial_subscription_moves_to_the_next_period(self):
+		with freeze_time("2026-06-01 12:00:00"):
+			subscription = create_subscription(
+				start_date="2026-06-01",
+				trial_period_start="2026-06-01",
+				trial_period_end="2026-06-30",
+				generate_new_invoices_past_due_date=1,
+			)
+		self.assertEqual(getdate(subscription.next_billing_period_start), getdate("2026-07-01"))
+
+		for posting_date in ("2026-07-31", "2026-08-31"):
+			with freeze_time(f"{posting_date} 12:00:00"):
+				subscription.process(posting_date=posting_date)
+
+		from_dates = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name},
+			pluck="from_date",
+			order_by="from_date asc",
+		)
+		self.assertEqual(from_dates, [getdate("2026-07-01"), getdate("2026-08-01")])
+		self.assertEqual(getdate(subscription.next_billing_period_start), getdate("2026-09-01"))
+		self.assertEqual(getdate(subscription.next_billing_period_end), getdate("2026-09-30"))
+
+	def test_bill_days_before_does_not_discount_the_first_paid_period(self):
+		with freeze_time("2026-09-01 12:00:00"):
+			subscription = create_subscription(
+				start_date="2026-09-01",
+				trial_period_start="2026-09-01",
+				trial_period_end="2026-09-30",
+				generate_invoice_at="Bill N days before period start",
+				number_of_days=10,
+			)
+
+		with freeze_time("2026-09-25 12:00:00"):
+			subscription.process(posting_date="2026-09-25")
+
+		invoice = subscription.get_current_invoice()
+		self.assertEqual(getdate(invoice.from_date), getdate("2026-10-01"))
+		self.assertEqual(invoice.grand_total, 900)
+
+	def test_status_is_active_after_trial_while_first_invoice_is_not_due(self):
+		with freeze_time("2026-07-01 12:00:00"):
+			subscription = create_subscription(
+				start_date="2026-07-01",
+				trial_period_start="2026-07-01",
+				trial_period_end="2026-07-31",
+				generate_invoice_at="Prepaid (bill at period start)",
+				days_until_due=20,
+			)
+		self.assertEqual(subscription.status, "Trialing")
+
+		with freeze_time("2026-08-01 12:00:00"):
+			subscription.process(posting_date="2026-08-01")
+
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, "Active")
+
+	def test_cancel_at_period_end_bills_the_last_period_once(self):
+		with freeze_time("2026-08-01 12:00:00"):
+			subscription = create_subscription(
+				start_date="2026-08-01",
+				end_date="2026-09-30",
+				cancel_at_period_end=1,
+				generate_new_invoices_past_due_date=1,
+			)
+
+		for posting_date in ("2026-08-31", "2026-09-30"):
+			with freeze_time(f"{posting_date} 12:00:00"):
+				subscription.process(posting_date=posting_date)
+
+		from_dates = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name},
+			pluck="from_date",
+			order_by="from_date asc",
+		)
+		self.assertEqual(from_dates, [getdate("2026-08-01"), getdate("2026-09-01")])
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), getdate("2026-09-30"))
+
+	def test_cancel_at_period_end_without_end_date(self):
+		with freeze_time("2026-07-01 12:00:00"):
+			subscription = create_subscription(start_date="2026-07-01", cancel_at_period_end=1)
+
+		with freeze_time("2026-07-31 12:00:00"):
+			subscription.process(posting_date="2026-07-31")
+
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), getdate("2026-07-31"))
+
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"prorate": 1})
+	def test_discount_amount_is_prorated_on_cancellation(self):
+		with freeze_time("2026-10-01 12:00:00"):
+			subscription = create_subscription(start_date="2026-10-01", additional_discount_amount=500)
+
+		with freeze_time("2026-10-02 12:00:00"):
+			subscription.cancel_subscription()
+
+		invoice = subscription.get_current_invoice()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(invoice.discount_amount, flt(500 * 2 / 31, 2))
+
+	def test_cancellation_invoice_is_posted_on_the_cancellation_date(self):
+		with freeze_time("2026-10-01 12:00:00"):
+			subscription = create_subscription(start_date="2026-10-01")
+
+		with freeze_time("2026-10-15 12:00:00"):
+			subscription.cancel_subscription()
+
+		invoice = subscription.get_current_invoice()
+		self.assertEqual(getdate(invoice.to_date), getdate("2026-10-15"))
+		self.assertEqual(getdate(invoice.posting_date), getdate("2026-10-15"))
+
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"grace_period": 10, "prorate": 1})
+	def test_cancel_in_grace_period_bills_the_days_used(self):
+		with freeze_time("2026-08-01 12:00:00"):
+			subscription = create_subscription(start_date="2026-08-01")
+
+		with freeze_time("2026-08-31 12:00:00"):
+			subscription.process(posting_date="2026-08-31")
+
+		with freeze_time("2026-09-07 12:00:00"):
+			subscription.process(posting_date="2026-09-07")
+			self.assertEqual(subscription.status, "Grace Period")
+			subscription.cancel_subscription()
+
+		invoice = subscription.get_current_invoice()
+		self.assertEqual(len(subscription.invoices), 2)
+		self.assertEqual(getdate(invoice.from_date), getdate("2026-09-01"))
+		self.assertEqual(getdate(invoice.to_date), getdate("2026-09-07"))
+		self.assertEqual(flt(invoice.grand_total, 2), 210)
+
+	def test_plan_dimensions_need_plan_read(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		with as_user(make_fenced_user("plan-dimensions-outsider@example.com", [])):
+			self.assertRaises(frappe.PermissionError, get_plan_dimensions, "_Test Plan Name")
 
 
 def make_full_credit_note(invoice_name):
