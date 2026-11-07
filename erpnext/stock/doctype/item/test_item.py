@@ -843,6 +843,23 @@ class TestItem(FrappeTestCase):
 		)
 		self.assertEqual(price, 10)
 
+	@change_settings("Global Defaults", {"default_company": "Wind Power LLC"})
+	def test_standard_rate_price_uses_the_item_default_company_currency(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 5000,
+				"item_defaults": [{"company": "_Test Company", "default_price_list": "_Test Price List"}],
+			}
+		).name
+		price = frappe.db.get_value(
+			"Item Price",
+			{"item_code": item, "price_list": "_Test Price List"},
+			["currency", "price_list_rate"],
+			as_dict=True,
+		)
+		self.assertEqual(price, {"currency": "INR", "price_list_rate": 5000})
+
 	def test_maintain_stock_cannot_be_turned_on_after_an_invoice(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 

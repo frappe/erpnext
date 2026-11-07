@@ -176,12 +176,13 @@ class Item(Document):
 	def after_insert(self):
 		"""set opening stock and item price"""
 		if self.standard_rate and not self.has_variants:
-			price_lists = {
-				self.get_selling_price_list(default.default_price_list)
-				for default in self.item_defaults or [frappe._dict()]
-			}
-			for price_list in price_lists:
-				self.add_price(price_list)
+			price_lists = {}
+			for default in self.item_defaults or [frappe._dict()]:
+				price_list = self.get_selling_price_list(default.default_price_list)
+				price_lists.setdefault(price_list, default.company)
+
+			for price_list, company in price_lists.items():
+				self.add_price(price_list, company)
 
 		if self.opening_stock:
 			self.set_opening_stock()
@@ -273,17 +274,19 @@ class Item(Document):
 			"Price List", "Standard Selling"
 		)
 
-	def add_price(self, price_list=None):
+	def add_price(self, price_list=None, company=None):
 		"""Add a new price"""
 		price_list = self.get_selling_price_list(price_list)
 		if not price_list:
 			return False
 
-		default_currency = erpnext.get_default_currency()
-		currency = frappe.get_cached_value("Price List", price_list, "currency") or default_currency
+		standard_rate_currency = (
+			erpnext.get_company_currency(company) if company else erpnext.get_default_currency()
+		)
+		currency = frappe.get_cached_value("Price List", price_list, "currency") or standard_rate_currency
 		price_list_rate = flt(self.standard_rate)
-		if default_currency and currency != default_currency:
-			exchange_rate = flt(get_exchange_rate(currency, default_currency, args="for_selling"))
+		if standard_rate_currency and currency != standard_rate_currency:
+			exchange_rate = flt(get_exchange_rate(currency, standard_rate_currency, args="for_selling"))
 			if not exchange_rate:
 				return False
 
