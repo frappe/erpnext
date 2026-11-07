@@ -254,8 +254,7 @@ class POSInvoice(SalesInvoice):
 			LoyaltyService(self).make_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
-			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).recompute_earned_points()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			LoyaltyService(self).apply_loyalty_points()
 		self.check_phone_payments()
@@ -306,8 +305,7 @@ class POSInvoice(SalesInvoice):
 			LoyaltyService(self).delete_loyalty_point_entry()
 		elif self.is_return and self.return_against and self.loyalty_program:
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
-			LoyaltyService(against_psi_doc).delete_loyalty_point_entry()
-			LoyaltyService(against_psi_doc).make_loyalty_point_entry()
+			LoyaltyService(against_psi_doc).recompute_earned_points()
 
 		self.db_set("status", "Cancelled")
 		self.update_status_of_return_against()

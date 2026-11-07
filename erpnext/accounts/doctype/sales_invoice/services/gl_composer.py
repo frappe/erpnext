@@ -448,7 +448,10 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						+ cstr(doc.loyalty_redemption_account)
 						+ " for the Loyalty Program",
 						"credit": doc.loyalty_amount,
-						"credit_in_transaction_currency": doc.loyalty_amount,
+						"credit_in_transaction_currency": flt(
+							flt(doc.loyalty_amount) / flt(doc.conversion_rate or 1),
+							doc.precision("loyalty_amount"),
+						),
 						"against_voucher": doc.return_against if cint(doc.is_return) else doc.name,
 						"against_voucher_type": doc.doctype,
 						"cost_center": doc.cost_center,
@@ -463,7 +466,10 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 						"cost_center": doc.cost_center or doc.loyalty_redemption_cost_center,
 						"against": doc.customer,
 						"debit": doc.loyalty_amount,
-						"debit_in_transaction_currency": doc.loyalty_amount,
+						"debit_in_transaction_currency": flt(
+							flt(doc.loyalty_amount) / flt(doc.conversion_rate or 1),
+							doc.precision("loyalty_amount"),
+						),
 						"remark": "Loyalty Points redeemed by the customer",
 					},
 					item=doc,

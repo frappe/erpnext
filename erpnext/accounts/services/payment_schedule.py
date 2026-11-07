@@ -40,8 +40,9 @@ class PaymentScheduleService:
 				frappe.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
 			)
 			if doc.doctype != "Sales Order":
-				base_grand_total = base_grand_total - flt(doc.base_write_off_amount)
-				grand_total = grand_total - flt(doc.write_off_amount)
+				loyalty_amount, base_loyalty_amount = get_redeemed_loyalty_amount(doc)
+				base_grand_total = base_grand_total - flt(doc.base_write_off_amount) - base_loyalty_amount
+				grand_total = grand_total - flt(doc.write_off_amount) - loyalty_amount
 
 		if doc.get("total_advance"):
 			if party_account_currency == doc.company_currency:
@@ -295,8 +296,9 @@ class PaymentScheduleService:
 			grand_total = flt(doc.get("rounded_total") or doc.grand_total)
 
 			if doc.doctype in ("Sales Invoice", "Purchase Invoice"):
-				base_grand_total = base_grand_total - flt(doc.base_write_off_amount)
-				grand_total = grand_total - flt(doc.write_off_amount)
+				loyalty_amount, base_loyalty_amount = get_redeemed_loyalty_amount(doc)
+				base_grand_total = base_grand_total - flt(doc.base_write_off_amount) - base_loyalty_amount
+				grand_total = grand_total - flt(doc.write_off_amount) - loyalty_amount
 
 			if doc.get("total_advance"):
 				if party_account_currency == doc.company_currency:
@@ -355,6 +357,19 @@ class PaymentScheduleService:
 		self.set_payment_schedule()
 		self.validate_payment_schedule_dates()
 		self.validate_payment_schedule_amount()
+
+
+def get_redeemed_loyalty_amount(doc) -> tuple[float, float]:
+	"""Loyalty amount that pays a non-POS Sales Invoice, as (amount, base amount).
+
+	`loyalty_amount` is in company currency.
+	"""
+	if doc.doctype != "Sales Invoice" or doc.get("is_pos") or not doc.get("redeem_loyalty_points"):
+		return 0.0, 0.0
+
+	base_amount = flt(doc.get("loyalty_amount"))
+	amount = flt(base_amount / flt(doc.get("conversion_rate") or 1), doc.precision("grand_total"))
+	return amount, base_amount
 
 
 def linked_order_has_payment_terms_template(po_or_so, doctype) -> str | None:
