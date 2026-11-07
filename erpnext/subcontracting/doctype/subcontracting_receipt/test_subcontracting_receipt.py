@@ -10,16 +10,8 @@ from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-<<<<<<< HEAD
 from erpnext.accounts.utils import get_company_default
-from erpnext.controllers.sales_and_purchase_return import make_return_doc
-=======
-from erpnext.controllers.ledger_preview import (
-	get_accounting_ledger_preview,
-	get_stock_ledger_preview,
-)
 from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
->>>>>>> c4c636c (test: cap a subcontracting return by the accepted and rejected qty)
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
@@ -559,7 +551,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 	def test_return_is_capped_by_the_accepted_and_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
@@ -592,7 +584,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 	def test_rejected_return_is_capped_by_the_returned_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
