@@ -648,14 +648,15 @@ def get_gl_entries_on_asset_regain(
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
+		gross_asset_value,
 	) = get_asset_details(asset, finance_book, disposal_values)
 
 	gl_entries = [
 		asset.get_gl_dict(
 			{
 				"account": fixed_asset_account,
-				"debit_in_account_currency": asset.gross_purchase_amount,
-				"debit": asset.gross_purchase_amount,
+				"debit_in_account_currency": gross_asset_value,
+				"debit": gross_asset_value,
 				"cost_center": depreciation_cost_center,
 				"posting_date": date,
 			},
@@ -707,14 +708,15 @@ def get_gl_entries_on_asset_disposal(
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
+		gross_asset_value,
 	) = get_asset_details(asset, finance_book, disposal_values)
 
 	gl_entries = [
 		asset.get_gl_dict(
 			{
 				"account": fixed_asset_account,
-				"credit_in_account_currency": asset.gross_purchase_amount,
-				"credit": asset.gross_purchase_amount,
+				"credit_in_account_currency": gross_asset_value,
+				"credit": gross_asset_value,
 				"cost_center": depreciation_cost_center,
 				"posting_date": date,
 			},
@@ -753,7 +755,10 @@ def get_gl_entries_on_asset_disposal(
 def get_asset_details(asset, finance_book=None, disposal_values: dict | None = None):
 	disposal_values = disposal_values or get_asset_disposal_values(asset, finance_book)
 	value_after_depreciation = flt(disposal_values["value_after_depreciation"])
-	accumulated_depr_amount = flt(disposal_values["gross_asset_value"]) - value_after_depreciation
+	gross_asset_value = flt(disposal_values["gross_asset_value"])
+	accumulated_depr_amount = flt(
+		gross_asset_value - value_after_depreciation, asset.precision("gross_purchase_amount")
+	)
 
 	fixed_asset_account, accumulated_depr_account, _ = get_depreciation_accounts(
 		asset.asset_category, asset.company
@@ -769,6 +774,7 @@ def get_asset_details(asset, finance_book=None, disposal_values: dict | None = N
 		accumulated_depr_amount,
 		disposal_account,
 		value_after_depreciation,
+		gross_asset_value,
 	)
 
 
@@ -776,8 +782,28 @@ def get_asset_disposal_values(asset, finance_book: str | None = None) -> dict:
 	"""Current value after depreciation and gross value of the asset, used to post its disposal."""
 	return {
 		"value_after_depreciation": asset.get_value_after_depreciation(finance_book),
-		"gross_asset_value": asset.gross_purchase_amount,
+		"gross_asset_value": get_gross_asset_value(asset, finance_book),
 	}
+
+
+def get_gross_asset_value(asset, finance_book: str | None = None) -> float:
+	"""Value carried in the fixed asset account: cost and revaluations."""
+	return flt(
+		flt(asset.gross_purchase_amount) + get_value_adjustment_amount(asset, finance_book),
+		asset.precision("gross_purchase_amount"),
+	)
+
+
+def get_value_adjustment_amount(asset, finance_book: str | None = None) -> float:
+	"""Net Asset Value Adjustments, kept on the asset so that a split shares them."""
+	if not asset.calculate_depreciation:
+		return flt(asset.value_adjustment_amount)
+
+	row = next(
+		(row for row in asset.get("finance_books") if not finance_book or row.finance_book == finance_book),
+		None,
+	)
+	return flt(row.value_adjustment_amount) if row else 0.0
 
 
 def get_depreciation_accounts(asset_category, company):
