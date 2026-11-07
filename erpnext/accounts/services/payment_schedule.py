@@ -43,6 +43,8 @@ class PaymentScheduleService:
 				base_grand_total = base_grand_total - flt(doc.base_write_off_amount)
 				grand_total = grand_total - flt(doc.write_off_amount)
 
+		total_before_advance, base_total_before_advance = grand_total, base_grand_total
+
 		if doc.get("total_advance"):
 			if party_account_currency == doc.company_currency:
 				base_grand_total -= doc.get("total_advance")
@@ -87,12 +89,12 @@ class PaymentScheduleService:
 			"allocate_payment_based_on_payment_terms",
 		)
 
+		keep_settled = doc.docstatus == 1 and getattr(doc, "_action", None) != "submit"
 		if not (
 			automatically_fetch_payment_terms
 			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
-			keep_settled = doc.docstatus == 1 and getattr(doc, "_action", None) != "submit"
 			for d in doc.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
@@ -111,6 +113,38 @@ class PaymentScheduleService:
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			doc.ignore_default_payment_terms_template = 1
+			keep_settled = False
+
+		if doc.get("total_advance"):
+			self.settle_earliest_terms_with_advance(
+				total_before_advance,
+				base_total_before_advance,
+				total_before_advance - grand_total,
+				base_total_before_advance - base_grand_total,
+				keep_settled,
+			)
+
+	def settle_earliest_terms_with_advance(
+		self, total, base_total, advance, base_advance, keep_settled: bool
+	) -> None:
+		"""Pay off the earliest terms with the advance, instead of re-splitting what is left across all terms.
+
+		Terms with a fixed amount are skipped, as that amount is already net of the advance.
+		"""
+		for d in self.doc.get("payment_schedule"):
+			if not d.invoice_portion:
+				continue
+
+			amount = flt(total * flt(d.invoice_portion) / 100, d.precision("payment_amount"))
+			base_amount = flt(base_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount"))
+			settled, base_settled = min(amount, advance), min(base_amount, base_advance)
+
+			d.payment_amount = flt(amount - settled, d.precision("payment_amount"))
+			d.base_payment_amount = flt(base_amount - base_settled, d.precision("base_payment_amount"))
+			self.set_term_outstanding(d, keep_settled)
+
+			advance -= settled
+			base_advance -= base_settled
 
 	def set_term_outstanding(self, term, keep_settled: bool) -> None:
 		settled = base_settled = 0

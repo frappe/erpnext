@@ -1411,7 +1411,8 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			}
 		)
 		rows = execute(filters)[1]
-		self.assertEqual([row.outstanding for row in rows], [2000.0, 2000.0])
+		# the advance pays off the first term, which then has nothing outstanding
+		self.assertEqual([row.outstanding for row in rows], [4000.0])
 
 	def test_payment_terms_as_of_a_date_before_a_term_payment(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
