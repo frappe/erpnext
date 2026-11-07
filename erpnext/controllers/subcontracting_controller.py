@@ -1492,7 +1492,7 @@ class SubcontractingController(StockController):
 					if not self.is_return:
 						rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
 						sle.incoming_rate = flt(item.rate, rate_db_precision)
-					elif self.is_returned_at_receipt_rate(item.item_code):
+					elif not is_serial_no_wise_valuation_disabled(item.item_code):
 						sle.outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, item.item_code, self.return_against, item_row=item
 						)
@@ -1516,13 +1516,6 @@ class SubcontractingController(StockController):
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
-
-	def is_returned_at_receipt_rate(self, item_code):
-		"""Same rule a repost uses for a return, so both give the same value."""
-		if is_serial_no_wise_valuation_disabled(item_code):
-			return False
-
-		return get_valuation_method(item_code, self.company) != "Moving Average"
 
 	def get_supplied_items_cost(self, item_row_id):
 		supplied_items_cost = 0.0
