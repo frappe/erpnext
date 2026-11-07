@@ -57,6 +57,7 @@
   "lost_detail_section",
   "lost_reasons",
   "order_lost_reason",
+  "lost_on",
   "column_break_56",
   "competitors",
   "contact_info",
@@ -178,6 +179,14 @@
    "fieldname": "order_lost_reason",
    "fieldtype": "Small Text",
    "label": "Detailed Reason",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "lost_on",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Lost On",
    "no_copy": 1,
    "read_only": 1
   },
@@ -625,7 +634,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2025-06-26 11:16:13.665866",
+ "modified": "2026-11-02 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
