@@ -54,7 +54,7 @@ class Prospect(CRMNote):
 				frappe.throw(_("Lead {0} is added more than once").format(frappe.bold(lead)))
 
 			filters = {"lead": lead, "parenttype": self.doctype}
-			if not self.is_new():
+			if self.name:
 				filters["parent"] = ["!=", self.name]
 			if other := frappe.db.get_value("Prospect Lead", filters, "parent"):
 				self.throw_lead_in_other_prospect(lead, other)

@@ -34,12 +34,12 @@ class TestCampaignEfficiency(FrappeTestCase):
 		quotation.party_name = customer.name
 		quotation.save()
 		quotation.submit()
-		make_sales_order_for(quotation.name)
+		sales_order = make_sales_order_for(quotation.name)
 
 		row = campaign_row(campaign)
 		self.assertEqual(row["quot_count"], 1)
 		self.assertEqual(row["order_count"], 1)
-		self.assertEqual(row["order_value"] - value_before, 1000)
+		self.assertEqual(row["order_value"] - value_before, sales_order.base_net_total)
 
 	def test_leads_limited_to_user_permissions(self):
 		campaign = make_campaign("_Test Campaign Eff Permissions")
@@ -90,11 +90,11 @@ class TestCampaignEfficiency(FrappeTestCase):
 
 		cancelled = make_sales_order_for(quotation.name)
 		cancelled.cancel()
-		make_sales_order_for(quotation.name)
+		sales_order = make_sales_order_for(quotation.name)
 
 		row = campaign_row(campaign)
 		self.assertEqual(row["order_count"], 1)
-		self.assertEqual(row["order_value"] - value_before, 1000)
+		self.assertEqual(row["order_value"] - value_before, sales_order.base_net_total)
 
 
 def make_sales_user(email: str) -> str:
