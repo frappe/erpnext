@@ -47,3 +47,24 @@ class TestFifoQueueVsQtyAfterTransactionComparison(FrappeTestCase):
 		)
 
 		self.assertEqual([row for row in data if row], [])
+
+	def test_wrong_fifo_entry_is_reported(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(
+			item_code=item, to_warehouse="Stores - _TC", qty=10, rate=100, posting_date="2026-06-01"
+		)
+		entry = make_stock_entry(
+			item_code=item, to_warehouse="Stores - _TC", qty=5, rate=100, posting_date="2026-06-20"
+		)
+		sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", sle, "qty_after_transaction", 12, update_modified=False)
+
+		for filters in (
+			{"item_code": item},
+			{"item_code": item, "from_date": "2026-06-01", "to_date": "2026-06-30"},
+			{"warehouse": "Stores - _TC", "from_date": "2026-06-20", "to_date": "2026-06-20"},
+		):
+			data = self.run_report({"company": "_Test Company", **filters})
+			self.assertIn(sle, [row.get("name") for row in data if row])
