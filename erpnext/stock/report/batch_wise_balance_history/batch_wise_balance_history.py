@@ -241,7 +241,7 @@ def set_pooled_batch_values(filters, iwb_map):
 		return
 
 	warehouses = {warehouse for item in pooled_items for warehouse in iwb_map[item]}
-	cutoff = get_datetime(f"{filters.get('to_date')} 23:59:59")
+	cutoff = get_datetime(filters.get("to_datetime") or f"{filters.get('to_date')} 23:59:59")
 	rates = get_last_valuation_rates(pooled_items, warehouses, cutoff)
 
 	for item in pooled_items:
