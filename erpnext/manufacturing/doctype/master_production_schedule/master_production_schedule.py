@@ -11,11 +11,7 @@ from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_j
 
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
-<<<<<<< HEAD
-=======
-from erpnext.manufacturing.scheduling.plan_adapter import get_days_needed
 from erpnext.stock.get_item_details import get_conversion_factor
->>>>>>> 7754616 (fix(manufacturing): validate the UOM conversion of Master Production Schedule rows)
 
 
 class MasterProductionSchedule(Document):
