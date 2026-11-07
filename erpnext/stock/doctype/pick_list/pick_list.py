@@ -625,7 +625,9 @@ class PickList(TransactionBase):
 		excluded_warehouses = self.get_excluded_warehouses()
 		for item_doc in items:
 			item_code = item_doc.item_code
-			priority_warehouses = [item_doc.warehouse] if item_doc.warehouse and not self.work_order else []
+			priority_warehouses = (
+				[item_doc.warehouse] if item_doc.warehouse and self.purpose == "Delivery" else []
+			)
 
 			if self.work_order and item_warehouse_dict.get(item_code):
 				source_warehouse = item_warehouse_dict.get(item_code)

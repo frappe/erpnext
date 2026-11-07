@@ -2168,6 +2168,29 @@ class TestPickList(FrappeTestCase):
 			[("_Test Warehouse - _TC", 10), ("_Test Warehouse 1 - _TC", 5)],
 		)
 
+	def test_material_request_pick_does_not_prefer_its_target_warehouse(self):
+		from erpnext.stock.doctype.material_request.material_request import (
+			create_pick_list as create_pick_list_from_material_request,
+		)
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		for warehouse in ("_Test Warehouse 1 - _TC", "_Test Warehouse - _TC"):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		material_request = make_material_request(
+			material_request_type="Material Transfer",
+			item_code=item,
+			qty=4,
+			uom="Nos",
+			warehouse="_Test Warehouse - _TC",
+		)
+		pick_list = create_pick_list_from_material_request(material_request.name)
+
+		self.assertEqual(
+			[(row.warehouse, row.qty) for row in pick_list.locations], [("_Test Warehouse 1 - _TC", 4)]
+		)
+
 	def test_work_order_pick_leaves_out_the_wip_warehouse(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
