@@ -277,6 +277,18 @@ class TestSalesTeam(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			doc.save()
 
+	def test_row_without_sales_person_raises_mandatory_error(self):
+		for team in (
+			[{"allocated_percentage": 100}],
+			[{"allocated_percentage": 50}, {"allocated_percentage": 50}],
+			[{"sales_person": self.person.name, "allocated_percentage": 50}, {"allocated_percentage": 50}],
+		):
+			with self.subTest(team=team):
+				doc = make_sales_order(item_code="_Test Non Stock Item", qty=1, rate=1000, do_not_save=True)
+				doc.set("sales_team", team)
+				with self.assertRaises(frappe.MandatoryError):
+					doc.insert()
+
 	def test_timeline_counts_only_submitted_transactions(self):
 		from erpnext.setup.doctype.sales_person.sales_person import get_timeline_data
 
