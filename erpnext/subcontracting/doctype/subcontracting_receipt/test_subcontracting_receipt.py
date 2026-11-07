@@ -533,6 +533,73 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, second_return.submit)
 
+	def test_moving_average_return_takes_the_finished_good_out_at_the_receipt_rate_on_submit(self):
+		moving_average = {"is_stock_item": 1, "valuation_method": "Moving Average"}
+		rm_item = make_item(properties=moving_average).name
+		fg_item = make_item(properties={**moving_average, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse - _TC", qty=5, basic_rate=500)
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 5,
+					"rate": 30,
+					"fg_item": fg_item,
+					"fg_item_qty": 5,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name).submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
+
+	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate_on_submit(self):
+		fg_item = make_subcontracted_fg_item("LIFO")
+		scr = make_fg_receipt(fg_item, rm_rate=100)
+		make_fg_receipt(fg_item, rm_rate=300)
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
+
+	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_warehouse_rate_on_submit(self):
+		fg_item = make_subcontracted_fg_item("FIFO")
+		make_fg_receipt(fg_item, rm_rate=100)
+		scr = make_fg_receipt(fg_item, rm_rate=300, rejected_qty=1)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.supplier_warehouse = "_Test Warehouse 1 - _TC"
+		scr_return.items[0].qty = -2
+		scr_return.items[0].rejected_qty = 0
+		scr_return.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
+
 	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
@@ -3518,6 +3585,41 @@ def make_return_subcontracting_receipt(**args):
 
 	return_doc.load_from_db()
 	return return_doc
+
+
+def make_subcontracted_fg_item(valuation_method):
+	properties = {"is_stock_item": 1, "valuation_method": valuation_method}
+	rm_item = make_item(properties=properties).name
+	fg_item = make_item(properties={**properties, "is_sub_contracted_item": 1}).name
+	make_bom(item=fg_item, raw_materials=[rm_item])
+	return fg_item
+
+
+def make_fg_receipt(fg_item, rm_rate, rejected_qty=0):
+	"""Receipt of 5 finished goods made from raw materials at `rm_rate`, service rate 30."""
+	sco = get_subcontracting_order(
+		service_items=[
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 30,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+	)
+	rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rm_rate}]
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+	)
+	scr = make_subcontracting_receipt(sco.name)
+	if rejected_qty:
+		scr.rejected_warehouse = "_Test Warehouse 1 - _TC"
+		scr.items[0].qty = 5 - rejected_qty
+		scr.items[0].rejected_qty = rejected_qty
+	return scr.submit()
 
 
 def get_items(**args):
