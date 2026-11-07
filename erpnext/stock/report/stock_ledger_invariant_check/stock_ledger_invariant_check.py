@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, get_link_to_form, parse_json
 
 from erpnext.stock.utils import get_valuation_method
@@ -59,9 +60,7 @@ def add_invariant_check_fields(sles, filters):
 
 	incorrect_idx = None
 	float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
-	currency_precision = (
-		cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
-	)
+	currency_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"))
 	for idx, sle in enumerate(sles):
 		if sle.batch_no:
 			sle.use_batchwise_valuation = frappe.db.get_value(

@@ -118,6 +118,28 @@ class TestStockLedgerInvariantCheck(FrappeTestCase):
 
 		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
 
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": ""})
+	def test_blank_currency_precision_uses_the_ledger_precision(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_method": "Moving Average"}
+		).name
+		make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=33.33, posting_date="2026-06-01"
+		)
+		create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=12.25, rate=37.77, posting_date="2026-06-02"
+		)
+
+		sle = frappe.get_last_doc(
+			"Stock Ledger Entry", {"item_code": item, "warehouse": WAREHOUSE, "is_cancelled": 0}
+		)
+		self.assertEqual(sle.stock_value, 462.68)
+		self.assertEqual(self.run_report(item_code=item, show_incorrect_entries=1), [])
+
 	def test_moving_average_item_skips_fifo_queue_checks(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
