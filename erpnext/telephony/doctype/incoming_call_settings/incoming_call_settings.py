@@ -2,11 +2,12 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
+from datetime import timedelta
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import to_timedelta
 
 
 class IncomingCallSettings(Document):
@@ -78,7 +79,6 @@ class IncomingCallSettings(Document):
 		return True
 
 	@staticmethod
-	def time_to_seconds(time: str) -> int:
-		"""Convert time string of format HH:MM:SS into seconds"""
-		date_time = datetime.strptime(time, "%H:%M:%S")
-		return date_time - datetime(1900, 1, 1)
+	def time_to_seconds(time: str | timedelta) -> timedelta:
+		"""Convert a time string or the timedelta loaded from the database into a timedelta"""
+		return to_timedelta(time)
