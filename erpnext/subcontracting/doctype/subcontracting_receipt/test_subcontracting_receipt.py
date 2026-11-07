@@ -535,6 +535,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	def test_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
 		fifo = {"is_stock_item": 1, "valuation_method": "FIFO"}
@@ -575,6 +576,9 @@ class TestSubcontractingReceipt(FrappeTestCase):
 =======
 >>>>>>> 3adb655 (test: drop the FIFO return test develop already has, name the submit-time tests apart from the repost ones)
 	def test_moving_average_return_takes_the_finished_good_out_at_the_running_rate(self):
+=======
+	def test_moving_average_return_takes_the_finished_good_out_at_the_receipt_rate_on_submit(self):
+>>>>>>> fb3a31d (test: Moving Average return takes the finished good out at the receipt rate on submit)
 		moving_average = {"is_stock_item": 1, "valuation_method": "Moving Average"}
 		rm_item = make_item(properties=moving_average).name
 		fg_item = make_item(properties={**moving_average, "is_sub_contracted_item": 1}).name
@@ -599,9 +603,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
 		)
 		scr = make_subcontracting_receipt(sco.name).submit()
-		running_rate = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": scr.name, "item_code": fg_item}, "valuation_rate"
-		)
 
 		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2)
 
@@ -610,7 +611,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
 			"stock_value_difference",
 		)
-		self.assertEqual(stock_value_difference, flt(-2 * running_rate, 2))
+		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
 
 	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate_on_submit(self):
 		fg_item = make_subcontracted_fg_item("LIFO")
