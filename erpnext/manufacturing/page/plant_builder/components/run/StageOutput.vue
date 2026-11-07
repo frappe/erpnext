@@ -26,6 +26,10 @@ const packingSets = computed(() => {
 		.map((row) => num(row.transferred_qty) / perUnit[row.item_code]);
 	return sets.length ? Math.min(...sets) : Infinity;
 });
+const outputWeight = computed(() => {
+	const factor = num(props.stage.output.weight_factor);
+	return factor ? num(local.output[props.stage.idx]) / factor : null;
+});
 const unit = computed(() => plural(props.stage.output.uom || ""));
 const outputLabel = computed(() =>
 	props.meta.pack
@@ -36,33 +40,17 @@ const outputLabel = computed(() =>
 const errors = computed(() => {
 	const output = num(local.output[props.stage.idx]);
 	if (output <= 0) return [__("Enter the quantity made")];
-	if (props.meta.pack) {
-		const units = output + num(local.rejected[props.stage.idx]);
-		if (units > packingSets.value + 0.001) {
-			return [
-				__("Only {0} sets of packing material were issued to the line", [
-					fmt(round(packingSets.value)),
-				]),
-			];
-		}
-		const needed = units * plan.value.weight_per_unit;
-		if (needed > consumedWeight.value + 0.001) {
-			return [
-				__("{0} units need {1} {2}, but only {3} {2} was issued", [
-					fmt(units),
-					fmt(needed),
-					plan.value.weight_uom,
-					fmt(round(consumedWeight.value)),
-				]),
-			];
-		}
-		return [];
-	}
-	if (consumedWeight.value && output > consumedWeight.value + 0.001) {
+	const units = output + num(local.rejected[props.stage.idx]);
+	if (props.meta.pack && units > packingSets.value + 0.001) {
 		return [
-			__("You cannot make more than the {0} {1} that went in", [
-				fmt(round(consumedWeight.value)),
-				plan.value.weight_uom,
+			__("Only {0} sets of packing material were issued to the line", [fmt(round(packingSets.value))]),
+		];
+	}
+	if (units > num(props.stage.output.planned_qty) + 0.001) {
+		return [
+			__("You cannot make more than {0} {1} from the materials that went in", [
+				fmt(props.stage.output.planned_qty),
+				props.stage.output.uom,
 			]),
 		];
 	}
@@ -99,10 +87,20 @@ const facts = computed(() => {
 			[__("Left in the line"), `${fmt(round(consumedWeight.value - filled))} ${plan.value.weight_uom}`],
 		];
 	}
-	const yieldPercentage = consumedWeight.value ? round((output / consumedWeight.value) * 100, 1) : 0;
+	const wentIn = [__("Went in"), `${fmt(round(consumedWeight.value))} ${plan.value.weight_uom}`];
+	if (outputWeight.value === null) return [wentIn];
+	const yieldPercentage = consumedWeight.value
+		? round((outputWeight.value / consumedWeight.value) * 100, 1)
+		: 0;
 	return [
-		[__("Went in"), `${fmt(round(consumedWeight.value))} ${plan.value.weight_uom}`],
-		[__("Lost in this stage"), `${fmt(round(consumedWeight.value - output))} ${plan.value.weight_uom}`],
+		wentIn,
+		...(props.stage.output.uom !== plan.value.weight_uom
+			? [[__("Made"), `${fmt(round(outputWeight.value))} ${plan.value.weight_uom}`]]
+			: []),
+		[
+			__("Lost in this stage"),
+			`${fmt(round(consumedWeight.value - outputWeight.value))} ${plan.value.weight_uom}`,
+		],
 		[__("Yield"), `${fmt(yieldPercentage)}%`],
 	];
 });

@@ -5,7 +5,7 @@ from frappe.utils import flt, now_datetime
 from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_transfer_entry
 from erpnext.manufacturing.doctype.work_order.mapper import create_job_card
-from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import PlantFlow
+from erpnext.manufacturing.doctype.work_order.services.plant_run.flow import EPSILON, PlantFlow
 from erpnext.manufacturing.doctype.work_order.services.plant_run.lot import Lot
 from erpnext.manufacturing.doctype.work_order.services.plant_run.picks import (
 	PickedSerialBatch,
@@ -181,10 +181,16 @@ class PlantRun:
 			job_card.reload()
 
 		output_qty, rejected_qty = flt(output_qty), flt(rejected_qty)
-		for_quantity = max(flt(job_card.for_quantity), output_qty + rejected_qty)
+		for_quantity = flt(job_card.for_quantity)
+		if output_qty + rejected_qty > for_quantity + EPSILON:
+			frappe.throw(
+				_("You cannot make more than {0} {1} from the materials that went in").format(
+					for_quantity, frappe.get_cached_value("Item", job_card.finished_good, "stock_uom")
+				)
+			)
+
 		job_card.complete_job_card(
 			qty=output_qty,
-			for_quantity=for_quantity if for_quantity > flt(job_card.for_quantity) else 0,
 			process_loss_qty=for_quantity - output_qty,
 			end_time=now_datetime(),
 			auto_submit=1,
