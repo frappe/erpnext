@@ -46,9 +46,9 @@ def get_payment_entry_against_order(
 
 	if not amount:
 		if party_account_currency == ref_doc.company_currency:
-			amount = flt(ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
+			amount = flt(ref_doc.base_rounded_total or ref_doc.base_grand_total) - flt(ref_doc.advance_paid)
 		else:
-			amount = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
+			amount = flt(ref_doc.rounded_total or ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
 	return get_payment_entry(
 		ref_doc,
@@ -208,7 +208,8 @@ def _append_bank_row(je, ref_doc, args: dict, cost_center, exchange_rate: float)
 	if bank_row.account_currency == args.get("party_account_currency"):
 		bank_row.set(args.get("amount_field_bank"), amount)
 	else:
-		bank_row.set(args.get("amount_field_bank"), amount * exchange_rate)
+		# party amount -> company currency -> bank account currency
+		bank_row.set(args.get("amount_field_bank"), amount * exchange_rate / flt(bank_row.exchange_rate or 1))
 
 	return bank_row
 
