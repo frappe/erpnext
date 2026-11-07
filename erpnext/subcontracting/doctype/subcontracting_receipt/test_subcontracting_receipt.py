@@ -994,6 +994,19 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_return_row_sends_back_a_changed_batch_at_its_consumed_rate(self):
+		scr, scr_return = make_draft_return_of_two_batches(-4)
+		consumed_rates = get_batch_rates(scr.name)
+		row = scr_return.supplied_items[0]
+		other_batch = next(batch_no for batch_no in consumed_rates if batch_no != row.batch_no)
+		row.batch_no = other_batch
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual(scr_return.supplied_items[0].rate, consumed_rates[other_batch])
+		self.assertEqual(get_batch_rates(scr_return.name), {other_batch: consumed_rates[other_batch]})
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_return_does_not_rewrite_a_picked_bundle(self):
 		_scr, scr_return = make_draft_return_of_two_batches(-4)
 		row = scr_return.supplied_items[0]
