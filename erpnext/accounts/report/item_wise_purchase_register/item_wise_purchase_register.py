@@ -117,6 +117,13 @@ def _execute(filters=None, additional_table_columns=None):
 	return columns, [row for _item, row in rows], None, None, None, 0
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	if data.bold:
+		value = f"<b>{value}</b>"
+	return value
+
+
 def get_columns(additional_table_columns, filters):
 	columns = []
 

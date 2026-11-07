@@ -50,6 +50,13 @@ def execute(filters=None):
 	return columns, grouped_data
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	if data.bold:
+		value = f"<b>{value}</b>"
+	return value
+
+
 def get_pos_entries(filters, group_by_field):
 	"""POS sales from POS Invoices and from Sales Invoices made directly at the POS."""
 	entries = get_invoice_entries("POS Invoice", filters, group_by_field)
