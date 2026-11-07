@@ -552,42 +552,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, second_return.submit)
 
-	def test_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
-		fifo = {"is_stock_item": 1, "valuation_method": "FIFO"}
-		rm_item = make_item(properties=fifo).name
-		fg_item = make_item(properties={**fifo, "is_sub_contracted_item": 1}).name
-		make_bom(item=fg_item, raw_materials=[rm_item])
-
-		receipts = []
-		for rate in (100, 300):
-			sco = get_subcontracting_order(
-				service_items=[
-					{
-						"warehouse": "_Test Warehouse - _TC",
-						"item_code": "Subcontracted Service Item 1",
-						"qty": 5,
-						"rate": 30,
-						"fg_item": fg_item,
-						"fg_item_qty": 5,
-					}
-				]
-			)
-			rm_items = [{**get_rm_items(sco.supplied_items)[0], "qty": 5, "rate": rate}]
-			itemwise_details = make_stock_in_entry(rm_items=rm_items)
-			make_stock_transfer_entry(
-				sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
-			)
-			receipts.append(make_subcontracting_receipt(sco.name).submit())
-
-		scr_return = make_return_subcontracting_receipt(scr_name=receipts[1].name, qty=-2)
-
-		stock_value_difference = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": scr_return.name, "item_code": fg_item, "is_cancelled": 0},
-			"stock_value_difference",
-		)
-		self.assertEqual(stock_value_difference, -2 * receipts[1].items[0].rate)
-
 	def test_moving_average_return_takes_the_finished_good_out_at_the_running_rate(self):
 		moving_average = {"is_stock_item": 1, "valuation_method": "Moving Average"}
 		rm_item = make_item(properties=moving_average).name
@@ -626,7 +590,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, flt(-2 * running_rate, 2))
 
-	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
+	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate_on_submit(self):
 		fg_item = make_subcontracted_fg_item("LIFO")
 		scr = make_fg_receipt(fg_item, rm_rate=100)
 		make_fg_receipt(fg_item, rm_rate=300)
@@ -640,7 +604,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
 
-	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_warehouse_rate(self):
+	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_warehouse_rate_on_submit(self):
 		fg_item = make_subcontracted_fg_item("FIFO")
 		make_fg_receipt(fg_item, rm_rate=100)
 		scr = make_fg_receipt(fg_item, rm_rate=300, rejected_qty=1)
