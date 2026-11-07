@@ -1058,47 +1058,44 @@ class SerialandBatchBundle(Document):
 		if self.has_batch_no and not self.has_serial_no and not batches:
 			return
 
-		parent = frappe.qb.DocType("Serial and Batch Bundle")
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
-		timestamp_condition = parent.posting_datetime > self.posting_datetime
+		timestamp_condition = child.posting_datetime > self.posting_datetime
 
 		future_entries = (
-			frappe.qb.from_(parent)
-			.inner_join(child)
-			.on(parent.name == child.parent)
+			frappe.qb.from_(child)
 			.select(
 				child.serial_no,
 				child.batch_no,
-				parent.voucher_type,
-				parent.voucher_no,
+				child.voucher_type,
+				child.voucher_no,
 			)
 			.distinct()
 			.where(
 				(child.parent != self.name)
-				& (parent.item_code == self.item_code)
-				& (parent.docstatus == 1)
-				& (parent.is_cancelled == 0)
-				& (parent.type_of_transaction.isin(["Inward", "Outward"]))
+				& (child.item_code == self.item_code)
+				& (child.docstatus == 1)
+				& (child.is_cancelled == 0)
+				& (child.type_of_transaction.isin(["Inward", "Outward"]))
 			)
 			.where(timestamp_condition)
 		)
 
 		if self.has_batch_no and not self.has_serial_no:
-			future_entries = future_entries.where(parent.voucher_type == "Stock Reconciliation")
+			future_entries = future_entries.where(child.voucher_type == "Stock Reconciliation")
 
 		if serial_nos:
 			future_entries = future_entries.where(
 				(child.serial_no.isin(serial_nos))
-				| ((parent.warehouse == self.warehouse) & (parent.voucher_type == "Stock Reconciliation"))
+				| ((child.warehouse == self.warehouse) & (child.voucher_type == "Stock Reconciliation"))
 			)
 		elif self.has_serial_no:
 			future_entries = future_entries.where(
-				(parent.warehouse == self.warehouse) & (parent.voucher_type == "Stock Reconciliation")
+				(child.warehouse == self.warehouse) & (child.voucher_type == "Stock Reconciliation")
 			)
 		elif batches:
 			future_entries = future_entries.where(
-				(child.batch_no.isin(batches)) & (parent.warehouse == self.warehouse)
+				(child.batch_no.isin(batches)) & (child.warehouse == self.warehouse)
 			)
 
 		future_entries = future_entries.run(as_dict=True)
@@ -3571,43 +3568,40 @@ def get_voucher_wise_serial_batch_from_bundle(**kwargs) -> dict[str, dict]:
 def get_picked_batches(kwargs) -> dict[str, dict]:
 	picked_batches = frappe._dict()
 
-	table = frappe.qb.DocType("Serial and Batch Bundle")
 	child_table = frappe.qb.DocType("Serial and Batch Entry")
 	pick_list_table = frappe.qb.DocType("Pick List")
 
 	query = (
-		frappe.qb.from_(table)
-		.inner_join(child_table)
-		.on(table.name == child_table.parent)
+		frappe.qb.from_(child_table)
 		.inner_join(pick_list_table)
-		.on(table.voucher_no == pick_list_table.name)
+		.on(child_table.voucher_no == pick_list_table.name)
 		.select(
 			child_table.batch_no,
 			child_table.warehouse,
 			Sum(child_table.qty).as_("qty"),
 		)
 		.where(
-			(table.docstatus != 2)
+			(child_table.docstatus != 2)
 			& (pick_list_table.status != "Completed")
-			& (table.type_of_transaction == "Outward")
-			& (table.is_cancelled == 0)
-			& (table.voucher_type == "Pick List")
-			& (table.voucher_no.isnotnull())
+			& (child_table.type_of_transaction == "Outward")
+			& (child_table.is_cancelled == 0)
+			& (child_table.voucher_type == "Pick List")
+			& (child_table.voucher_no.isnotnull())
 		)
 		.groupby(child_table.batch_no, child_table.warehouse)
 	)
 
 	if kwargs.get("company"):
-		query = query.where(table.company == kwargs.get("company"))
+		query = query.where(pick_list_table.company == kwargs.get("company"))
 
 	if kwargs.get("item_code"):
-		query = query.where(table.item_code == kwargs.get("item_code"))
+		query = query.where(child_table.item_code == kwargs.get("item_code"))
 
 	if kwargs.get("warehouse"):
 		if isinstance(kwargs.warehouse, list):
-			query = query.where(table.warehouse.isin(kwargs.warehouse))
+			query = query.where(child_table.warehouse.isin(kwargs.warehouse))
 		else:
-			query = query.where(table.warehouse == kwargs.get("warehouse"))
+			query = query.where(child_table.warehouse == kwargs.get("warehouse"))
 
 	data = query.run(as_dict=True)
 	for row in data:
@@ -3629,37 +3623,34 @@ def get_picked_batches(kwargs) -> dict[str, dict]:
 
 
 def get_picked_serial_nos(item_code, warehouse=None) -> list[str]:
-	table = frappe.qb.DocType("Serial and Batch Bundle")
 	child_table = frappe.qb.DocType("Serial and Batch Entry")
 	pick_list_table = frappe.qb.DocType("Pick List")
 
 	query = (
-		frappe.qb.from_(table)
-		.inner_join(child_table)
-		.on(table.name == child_table.parent)
+		frappe.qb.from_(child_table)
 		.inner_join(pick_list_table)
-		.on(table.voucher_no == pick_list_table.name)
+		.on(child_table.voucher_no == pick_list_table.name)
 		.select(
 			child_table.serial_no,
 		)
 		.where(
-			(table.docstatus != 2)
+			(child_table.docstatus != 2)
 			& (pick_list_table.status != "Completed")
-			& (table.type_of_transaction == "Outward")
-			& (table.is_cancelled == 0)
-			& (table.voucher_type == "Pick List")
-			& (table.voucher_no.isnotnull())
+			& (child_table.type_of_transaction == "Outward")
+			& (child_table.is_cancelled == 0)
+			& (child_table.voucher_type == "Pick List")
+			& (child_table.voucher_no.isnotnull())
 		)
 	)
 
 	if item_code:
-		query = query.where(table.item_code == item_code)
+		query = query.where(child_table.item_code == item_code)
 
 	if warehouse:
 		if isinstance(warehouse, list):
-			query = query.where(table.warehouse.isin(warehouse))
+			query = query.where(child_table.warehouse.isin(warehouse))
 		else:
-			query = query.where(table.warehouse == warehouse)
+			query = query.where(child_table.warehouse == warehouse)
 
 	data = query.run(as_dict=True)
 	if not data:
@@ -3930,3 +3921,7 @@ def get_stock_reco_details(voucher_detail_no):
 		],
 		as_dict=True,
 	)
+
+
+def on_doctype_update():
+	frappe.db.add_index("Serial and Batch Bundle", ["voucher_no", "voucher_type"])
