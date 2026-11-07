@@ -163,8 +163,8 @@ class POSInvoiceMergeLog(Document):
 		credit_notes = self.get_consolidated_credit_notes()
 
 		self.update_pos_invoices(pos_invoice_docs)
-		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.cancel_linked_invoices(credit_notes)
+		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.delink_serial_and_batch_bundle()
 
 	def process_merging_into_sales_invoice(self, data):
