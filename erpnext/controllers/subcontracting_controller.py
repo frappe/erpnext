@@ -1375,8 +1375,12 @@ class SubcontractingController(StockController):
 					if not self.is_return:
 						rate_db_precision = 6 if cint(self.precision("rate", item)) <= 6 else 9
 						sle.incoming_rate = flt(item.rate, rate_db_precision)
+<<<<<<< HEAD
 					elif self.is_returned_at_receipt_rate(item.item_code):
 >>>>>>> 86ae937 (fix(subcontracting): keep Moving Average returns at the running rate)
+=======
+					elif not is_serial_no_wise_valuation_disabled(item.item_code):
+>>>>>>> 8c5681a (fix(subcontracting): return a Moving Average finished good at the receipt rate on submit, as a Purchase Receipt return does)
 						sle.outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, item.item_code, self.return_against, item_row=item
 						)
@@ -1402,6 +1406,7 @@ class SubcontractingController(StockController):
 		)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
 =======
 	def is_returned_at_receipt_rate(self, item_code):
@@ -1411,6 +1416,8 @@ class SubcontractingController(StockController):
 
 		return get_valuation_method(item_code, self.company) != "Moving Average"
 
+=======
+>>>>>>> 8c5681a (fix(subcontracting): return a Moving Average finished good at the receipt rate on submit, as a Purchase Receipt return does)
 	def get_supplied_items_cost(self, item_row_id):
 >>>>>>> 86ae937 (fix(subcontracting): keep Moving Average returns at the running rate)
 		supplied_items_cost = 0.0
