@@ -49,6 +49,10 @@ class TestAssetRepair(unittest.TestCase):
 		create_item("_Test Stock Item")
 		frappe.db.sql("delete from `tabTax Rule`")
 
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
+
 	def test_asset_status(self):
 		date = nowdate()
 		purchase_date = add_months(get_first_day(date), -2)
