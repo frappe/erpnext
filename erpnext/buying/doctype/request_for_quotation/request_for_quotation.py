@@ -443,8 +443,13 @@ class RequestforQuotation(BuyingController):
 @frappe.whitelist(methods=["POST"])
 def send_supplier_emails(rfq_name):
 	check_portal_enabled("Request for Quotation")
+<<<<<<< HEAD
 	rfq = frappe.get_doc("Request for Quotation", rfq_name)
 	rfq.check_permission("write")
+=======
+	rfq = frappe.get_doc("Request for Quotation", rfq_name, check_permission="write")
+	rfq.check_permission("email")
+>>>>>>> d8a6e9e (fix: require email permission to send payment and quotation requests)
 	if rfq.docstatus == 1:
 		rfq.send_to_supplier()
 
