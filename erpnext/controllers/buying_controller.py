@@ -244,14 +244,15 @@ class BuyingController(SubcontractingController):
 			return
 
 		purchase_doc_field = "purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
-		not_cancelled_asset = []
-		if self.return_against:
-			not_cancelled_asset = [
-				d.name
-				for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
-			]
+		detail_field = purchase_doc_field + "_item"
+		asset_filters = {purchase_doc_field: self.return_against, "docstatus": 1}
+		if (self.doctype == "Purchase Receipt" or self.get("update_stock")) and all(
+			row.get(detail_field) for row in self.items if row.is_fixed_asset
+		):
+			# Linked assets are checked against the quantity retained in each purchase row below.
+			asset_filters[detail_field] = ("is", "not set")
 
-		if self.is_return and len(not_cancelled_asset):
+		if self.return_against and frappe.db.exists("Asset", asset_filters):
 			frappe.throw(
 				_(
 					"{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
@@ -259,6 +260,75 @@ class BuyingController(SubcontractingController):
 				title=_("Not Allowed"),
 			)
 
+<<<<<<< HEAD
+=======
+		self.validate_assets_left_after_return()
+
+	def validate_assets_left_after_return(self):
+		if self.doctype == "Purchase Invoice" and not self.get("update_stock"):
+			return
+
+		detail_field = (
+			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
+		)
+		returned_qty, rows = self.get_returned_asset_qty(detail_field)
+		if not returned_qty:
+			return
+
+		kept_qty = self.get_qty_kept_after_return(detail_field, returned_qty)
+		for detail, asset_qty in get_linked_asset_qty(detail_field, list(returned_qty)).items():
+			if flt(asset_qty) > kept_qty[detail]:
+				frappe.throw(
+					_(
+						"Row #{0}: {1} assets of {2} are linked to {3}, which keeps only {4} after this return. Cancel the extra submitted assets or delete the extra draft assets first."
+					).format(
+						rows[detail].idx,
+						flt(asset_qty),
+						frappe.bold(rows[detail].item_code),
+						get_link_to_form(self.doctype, self.return_against),
+						kept_qty[detail],
+					),
+					title=_("Not Allowed"),
+				)
+
+	def get_returned_asset_qty(self, detail_field):
+		returned_qty, rows = {}, {}
+		for d in self.items:
+			if d.is_fixed_asset and d.get(detail_field):
+				returned_qty[d.get(detail_field)] = returned_qty.get(d.get(detail_field), 0) + abs(flt(d.qty))
+				rows.setdefault(d.get(detail_field), d)
+
+		return returned_qty, rows
+
+	def get_qty_kept_after_return(self, detail_field, returned_qty):
+		item_doctype = f"{self.doctype} Item"
+		kept_qty = dict(
+			frappe.get_all(
+				item_doctype, filters={"name": ("in", list(returned_qty))}, fields=["name", "qty"], as_list=1
+			)
+		)
+
+		parent, child = frappe.qb.DocType(self.doctype), frappe.qb.DocType(item_doctype)
+		earlier_returns = (
+			frappe.qb.from_(child)
+			.join(parent)
+			.on(parent.name == child.parent)
+			.select(child[detail_field], Sum(Abs(child.qty)))
+			.where(
+				(child[detail_field].isin(list(returned_qty)))
+				& (parent.docstatus == 1)
+				& (parent.is_return == 1)
+				& (parent.name != self.name)
+			)
+			.groupby(child[detail_field])
+		).run()
+
+		for detail, qty in earlier_returns:
+			kept_qty[detail] = flt(kept_qty.get(detail)) - flt(qty)
+
+		return {detail: flt(kept_qty.get(detail)) - qty for detail, qty in returned_qty.items()}
+
+>>>>>>> bb1ef48 (fix(stock): allow partial returns of asset purchases)
 	def get_asset_items(self):
 		if self.doctype not in ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]:
 			return []
