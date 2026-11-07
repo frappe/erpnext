@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from itertools import groupby
 
 import frappe
 from dateutil.relativedelta import relativedelta
@@ -34,6 +35,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -145,6 +147,10 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+		self.set_onload(
+			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
+		)
+		self.set_onload("upstream_process_loss", get_upstream_process_loss(self))
 
 	def validate(self):
 		self.validate_production_item()
@@ -1082,9 +1088,10 @@ class WorkOrder(Document):
 		for d in self.get("operations"):
 			precision = d.precision("completed_qty")
 			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
-			if not qty:
+			operation_target_qty = get_operation_target_qty(self, d)
+			if not qty and operation_target_qty:
 				d.status = "Pending"
-			elif qty < flt(self.qty, precision):
+			elif qty < operation_target_qty:
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
@@ -1599,8 +1606,6 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		args = frappe._dict(
 			{
 				"item_code": item.get("variant_item_code"),
-				"required_qty": item.get("qty"),
-				"qty": item.get("qty"),  # for bom
 				"source_warehouse": item.get("source_warehouse"),
 				"operation": item.get("operation"),
 			}
@@ -1609,6 +1614,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		bom_doc = frappe.get_cached_doc("BOM", bom_no)
 		item_data = get_item_details(args.item_code, skip_bom_info=True)
 		args.update(item_data)
+		args.update(_variant_row_qty(args.item_code, item, item_data.stock_uom))
 
 		args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 
@@ -1618,15 +1624,34 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 			).default_warehouse
 
 		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
-		args["uom"] = item_data.stock_uom
 
-		existing_row = (
-			get_template_rm_item(wo_doc, item.get("item_code")) if table_name == "required_items" else None
-		)
+		if table_name != "required_items":
+			# bom rows are costed per row uom, work order rows per stock uom
+			args["rate"] = flt(args.rate * args.conversion_factor, frappe.get_precision("BOM Item", "rate"))
+			wo_doc.append(table_name, args)
+			continue
+
+		existing_row = get_template_rm_item(wo_doc, item.get("item_code"))
 		if existing_row:
 			existing_row.update(args)
 		else:
 			wo_doc.append(table_name, args)
+
+
+def _variant_row_qty(item_code, item, stock_uom):
+	"""The dialog qty is in the template row's uom; the work order needs the stock qty."""
+	uom = item.get("uom") or stock_uom
+	conversion_factor = flt(get_conversion_factor(item_code, uom)["conversion_factor"])
+	stock_qty = flt(
+		flt(item.get("qty")) * conversion_factor, frappe.get_precision("Work Order Item", "required_qty")
+	)
+	return {
+		"qty": flt(item.get("qty")),  # for bom
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"stock_qty": stock_qty,
+		"required_qty": stock_qty,
+	}
 
 
 def get_raw_material_rate(args, wo_doc, bom_doc):
@@ -1852,6 +1877,43 @@ def close_work_order(work_order, status):
 	frappe.msgprint(_("Work Order has been {0}").format(status))
 	work_order.notify_update()
 	return work_order.status
+
+
+def get_upstream_process_loss(work_order, operation=None):
+	"""Loss before an operation, or before finished goods when no operation is supplied."""
+	if work_order.get("track_semi_finished_goods"):
+		return 0
+
+	process_loss_qty = 0
+	available_qty = None
+	for sequence_id, rows in groupby(
+		sorted(work_order.get("operations") or [], key=lambda row: cint(row.sequence_id)),
+		key=lambda row: cint(row.sequence_id),
+	):
+		if operation is not None and sequence_id >= cint(operation.get("sequence_id")):
+			break
+
+		rows = list(rows)
+		# Cap new loss at the previous output; legacy cards can repeat upstream loss.
+		process_loss_qty += max(
+			(
+				flt(row.process_loss_qty)
+				if available_qty is None
+				else min(flt(row.process_loss_qty), max(available_qty - flt(row.completed_qty), 0))
+			)
+			for row in rows
+		)
+		available_qty = min(flt(row.completed_qty) for row in rows)
+
+	return flt(process_loss_qty)
+
+
+def get_operation_target_qty(work_order, operation):
+	"""Operation qty less the process loss booked before it."""
+	return flt(
+		flt(work_order.get("qty")) - get_upstream_process_loss(work_order, operation),
+		operation.precision("completed_qty"),
+	)
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):

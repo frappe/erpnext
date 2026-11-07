@@ -29,9 +29,11 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
 	close_work_order,
+	get_upstream_process_loss,
 	make_job_card,
 	make_stock_entry,
 	make_stock_return_entry,
+	make_work_order,
 	stop_unstop,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -649,6 +651,56 @@ class TestWorkOrder(FrappeTestCase):
 		)
 
 		self.assertEqual(work_order.get_status(), "Completed")
+
+	@change_settings("Manufacturing Settings", {"overproduction_percentage_for_work_order": 5})
+	def test_operation_targets_include_upstream_process_loss(self):
+		for operations, upstream_losses, total_loss in (
+			([(1, 95, 5), (2, 92, 3), (3, 90, 2)], [0, 5, 8], 10),
+			([(1, 95, 5), (1, 97, 3), (2, 93, 2)], [0, 0, 5], 7),
+			([(1, 95, 5), (2, 90, 10), (3, 90, 10)], [0, 5, 10], 10),
+			([(1, 100, 5), (2, 100, 0)], [0, 5], 5),
+			([(0, 95, 5), (0, 95, 5)], [0, 0], 5),
+			([(1, 0, 100), (2, 0, 0)], [0, 100], 100),
+		):
+			with self.subTest(operations=operations):
+				work_order = frappe.get_doc(
+					{
+						"doctype": "Work Order",
+						"qty": 100,
+						"operations": [
+							{
+								"sequence_id": sequence_id,
+								"completed_qty": completed_qty,
+								"process_loss_qty": process_loss_qty,
+							}
+							for sequence_id, completed_qty, process_loss_qty in operations
+						],
+					}
+				)
+				self.assertEqual(
+					[get_upstream_process_loss(work_order, row) for row in work_order.operations],
+					upstream_losses,
+				)
+				self.assertEqual(get_upstream_process_loss(work_order), total_loss)
+				work_order.update_operation_status()
+				self.assertTrue(all(row.status == "Completed" for row in work_order.operations))
+				work_order.track_semi_finished_goods = 1
+				self.assertEqual(get_upstream_process_loss(work_order), 0)
+
+	def test_operation_target_rounds_upstream_process_loss(self):
+		work_order = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"qty": 0.3,
+				"operations": [
+					{"sequence_id": 1, "completed_qty": 0.2, "process_loss_qty": 0.1},
+					{"sequence_id": 2, "completed_qty": 0, "process_loss_qty": 0.2},
+					{"sequence_id": 3},
+				],
+			}
+		)
+		work_order.update_operation_status()
+		self.assertEqual(work_order.operations[2].status, "Completed")
 
 	def test_work_order_material_transferred_qty_with_process_loss(self):
 		stock_entries = []
@@ -4660,6 +4712,23 @@ class TestWorkOrder(FrappeTestCase):
 		wo.required_items[0].item_code = changed_item
 		wo.insert()
 		self.assertEqual((wo.required_items[0].rate, wo.required_items[0].amount), (250, 1250))
+
+	def test_variant_work_order_requires_the_template_row_in_stock_uom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import make_template_bom_with_box_row
+
+		data = make_template_bom_with_box_row()
+		variant_items = [
+			{"item_code": data.template_rm, "variant_item_code": data.rm_variant, "qty": 4, "uom": "Box"}
+		]
+		wo = make_work_order(
+			data.bom, data.variant, 2, "_Test Company", variant_items=variant_items, use_multi_level_bom=0
+		)
+		wo.wip_warehouse = wo.fg_warehouse = "_Test Warehouse - _TC"
+		wo.insert()
+
+		row = wo.required_items[0]
+		self.assertEqual((row.item_code, row.required_qty, row.stock_uom), (data.rm_variant, 40, "Nos"))
+		self.assertEqual((row.rate, row.amount), (5, 200))
 
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
