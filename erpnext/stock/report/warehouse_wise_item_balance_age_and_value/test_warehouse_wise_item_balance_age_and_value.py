@@ -39,7 +39,7 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 		filters.update(extra)
 		return execute(filters)
 
-	def get_rows_for_restricted_user(self, item_code, warehouse, **permission):
+	def get_rows_for_restricted_user(self, item_code, warehouse, other_warehouses=(), **permission):
 		from frappe.permissions import add_user_permission
 
 		user = "warehouse-age-value-user@example.com"
@@ -49,6 +49,8 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 			).insert(ignore_permissions=True)
 		frappe.get_doc("User", user).add_roles("Stock User")
 		add_user_permission("Warehouse", warehouse, user, **permission)
+		for other_warehouse in other_warehouses:
+			add_user_permission("Warehouse", other_warehouse, user)
 
 		frappe.set_user(user)
 		try:
@@ -87,6 +89,18 @@ class TestWarehouseWiseItemBalanceAgeAndValue(FrappeTestCase):
 			item_code, "Finished Goods - _TC", applicable_for="Purchase Order"
 		)
 
+		self.assertEqual([row[4] for row in data if row[0] == item_code], [700])
+
+	def test_permitted_warehouses_of_another_company_get_no_column(self):
+		item_code = self.make_stock_in_stores()
+
+		columns, data = self.get_rows_for_restricted_user(
+			item_code, "Stores - _TC", other_warehouses=["_Test Warehouse 2 - _TC1"]
+		)
+		column_names = [column.split(":")[0] for column in columns]
+
+		self.assertNotIn("_Test Warehouse 2 - _TC1", column_names)
+		self.assertIn("Stores - _TC", column_names)
 		self.assertEqual([row[4] for row in data if row[0] == item_code], [700])
 
 	def test_quantity_columns_keep_fractions(self):

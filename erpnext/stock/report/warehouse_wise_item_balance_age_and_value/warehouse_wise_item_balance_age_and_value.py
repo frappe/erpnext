@@ -105,7 +105,11 @@ def apply_permitted_warehouses(filters):
 	if not permitted:
 		return True
 
-	permitted = frappe.get_all("Warehouse", filters={"name": ("in", permitted), "is_group": 0}, pluck="name")
+	permitted = frappe.get_all(
+		"Warehouse",
+		filters={"name": ("in", permitted), "company": filters.get("company"), "is_group": 0},
+		pluck="name",
+	)
 	if filters.get("warehouse"):
 		selected = {warehouse.name for warehouse in get_warehouse_list(filters)}
 		permitted = [warehouse for warehouse in permitted if warehouse in selected]
