@@ -11,11 +11,18 @@ from erpnext.stock.report.batch_item_expiry_status.batch_item_expiry_status impo
 
 
 class TestBatchItemExpiryStatus(FrappeTestCase):
+	def setUp(self):
+		frappe.db.savepoint("batch_item_expiry_status")
+
+	def tearDown(self):
+		frappe.db.rollback(save_point="batch_item_expiry_status")
+		frappe.cache.hdel("user_permissions", "batch-expiry-warehouse@example.com")
+
 	def run_report(self, **extra):
 		filters = frappe._dict(
 			{
-				"from_date": "2026-01-01",
-				"to_date": "2026-12-31",
+				"from_date": frappe.utils.add_years(frappe.utils.today(), -1),
+				"to_date": frappe.utils.add_days(frappe.utils.today(), 60),
 				"company": "_Test Company",
 			}
 		)
