@@ -517,3 +517,15 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		with self.set_user(self.make_report_user()):
 			self.assertEqual(self.run_report("stock", "batch_split_tree", {"batch": batch}), [])
+
+	def test_incoming_rate_keeps_to_permitted_companies(self):
+		from erpnext.stock.utils import get_incoming_rate
+
+		args = {
+			"item_code": "_Test Item",
+			"warehouse": "Stores - _TC",
+			"qty": 1,
+			"company": "_Test Company 1",
+		}
+		with self.set_user(self.make_report_user()):
+			self.assertRaises(frappe.PermissionError, get_incoming_rate, args)
