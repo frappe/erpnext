@@ -4,14 +4,18 @@
 
 import copy
 import functools
-import math
 import re
 
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Max, Min, Sum
+<<<<<<< HEAD
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
 from pypika.terms import ExistsCriterion
+=======
+from frappe.utils import add_days, add_months, cstr, flt, formatdate, get_first_day, getdate
+from pypika.terms import Bracket, ExistsCriterion, LiteralValue
+>>>>>>> ff6929d (fix(accounts): retain fiscal year boundaries in accumulated reports)
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -26,6 +30,184 @@ from erpnext.accounts.report.utils import (
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
 
+<<<<<<< HEAD
+=======
+def get_dimension_values(filters: frappe._dict) -> tuple[str | None, list]:
+	"""
+	Return (fieldname, [dimension_values]) for the chosen grouping dimension.
+
+	NOTE: Disabled dimensions values are not filtered out!
+	"""
+	if not filters.group_by_dimension:
+		return None, []
+
+	dim_doctype = filters.group_by_dimension
+	fieldname = get_dimension_fieldname(dim_doctype)
+
+	meta = frappe.get_meta(dim_doctype)
+	is_tree = bool(meta.is_tree)
+
+	dim = frappe.qb.DocType(dim_doctype)
+	query = frappe.qb.from_(dim).select(dim.name)
+
+	if is_tree and meta.has_field("is_group"):
+		query = query.where(dim.is_group == 0)
+
+	if meta.has_field("company"):
+		query = query.where(dim.company == filters.company)
+
+	# Self-filter: narrow to values the user picked for this same dimension.
+	if selected := filters.get(fieldname):
+		if isinstance(selected, str):
+			selected = frappe.parse_json(selected)
+		if is_tree:
+			selected = get_dimension_with_children(dim_doctype, selected)
+		query = query.where(dim.name.isin(selected))
+
+	from frappe.desk.reportview import build_match_conditions
+
+	if match_conditions := build_match_conditions(dim_doctype):
+		query = query.where(Bracket(LiteralValue(match_conditions)))
+
+	# order by name
+	query = query.orderby(dim.name)
+
+	return fieldname, query.run(pluck=True)
+
+
+def get_dimension_period_list(filters: frappe._dict, split_on_fiscal_year=False) -> list[dict]:
+	"""
+	Return a period_list-shaped axis = cross-product of (dimension_value * time period).
+
+	Each cell is a `get_period_list` bucket plus dimension keys, e.g.:
+
+	```
+	{
+	        "dimension_field": "cost_center",
+	        "dimension_value": "Main - ATD",
+	        "key": "main___atd_mar_2027",
+	        "label": "Main - ATD - 2026-2027",
+	        "period": "mar_2027",
+	        ...
+	}
+
+	```
+	"""
+	fieldname, dimensions = get_dimension_values(filters)
+	if not fieldname or not dimensions:
+		return []
+
+	period_buckets = get_period_list(
+		filters.from_fiscal_year,
+		filters.to_fiscal_year,
+		filters.period_start_date,
+		filters.period_end_date,
+		filters.filter_based_on,
+		filters.periodicity,
+		accumulated_values=filters.accumulated_values,
+		company=filters.company,
+		split_on_fiscal_year=split_on_fiscal_year,
+	)
+
+	if not period_buckets:
+		return []
+
+	period_list = []
+
+	# Guard against rare collisions where two distinct dimension values
+	# `frappe.scrub()` to the same key (e.g. "CC-A" and "CC A") and would
+	# otherwise overwrite each other's column.
+	used_keys = set()
+
+	for dimension in dimensions:
+		dim_key_base = frappe.scrub(dimension)
+		for period in period_buckets:
+			key = f"{dim_key_base}_{period.key}"
+
+			if key in used_keys:
+				key = f"{key}_{len(used_keys)}"
+			used_keys.add(key)
+
+			cell = frappe._dict(period)
+			cell.update(
+				{
+					"key": key,
+					"label": f"{dimension} - {period.label}",
+					"dimension_field": fieldname,
+					"dimension_value": dimension,
+					"period": period.key,
+				}
+			)
+			period_list.append(cell)
+
+	return period_list
+
+
+def build_period_list(filters: frappe._dict, split_on_fiscal_year=False) -> list[dict]:
+	"""
+	Build the report `period_list` from filters.
+
+	- If `group_by_dimension` is set, returns a dimension * period cross-product via `get_dimension_period_list`.
+	- Otherwise, returns plain time buckets via `get_period_list`.
+	"""
+	if filters.group_by_dimension and not filters.report_template:
+		return get_dimension_period_list(filters, split_on_fiscal_year=split_on_fiscal_year)
+
+	return get_period_list(
+		filters.from_fiscal_year,
+		filters.to_fiscal_year,
+		filters.period_start_date,
+		filters.period_end_date,
+		filters.filter_based_on,
+		filters.periodicity,
+		company=filters.company,
+		split_on_fiscal_year=split_on_fiscal_year,
+	)
+
+
+def is_dimension_grouped(period_list: list[dict]) -> bool:
+	"""
+	Return True if period_list contains dimension-grouped periods.
+	"""
+	if not period_list or not isinstance(period_list, list):
+		return False
+
+	return bool(period_list[0].get("dimension_field"))
+
+
+def get_period_keys_for_total(
+	period_list: list[dict],
+	accumulated_values: bool,
+	consolidated: bool = False,
+) -> list[str]:
+	"""
+	Return the period keys whose values should be summed for the row-level
+	`Total` column / report-summary cards.
+
+	- Group by Dimension + accumulated: each dimension's last period
+	- Accumulated:  only the last period
+	- Not accumulated: all periods (sum of independent period activity)
+	- Consolidated: list of period keys is the same as the period_list
+	        - In case of consolidated reports
+	"""
+	if not period_list:
+		return []
+
+	if consolidated:
+		return list(period_list)
+
+	if is_dimension_grouped(period_list) and accumulated_values:
+		return list({period.dimension_value: period.key for period in period_list}.values())
+
+	# when 'accumulated_values' is enabled, periods have running balance.
+	# so, last period will have the net amount.
+	if accumulated_values:
+		return [period_list[-1].key]
+
+	return [period.key for period in period_list]
+
+
+>>>>>>> ff6929d (fix(accounts): retain fiscal year boundaries in accumulated reports)
 def get_period_list(
 	from_fiscal_year,
 	to_fiscal_year,
@@ -37,6 +219,7 @@ def get_period_list(
 	company=None,
 	reset_period_on_fy_change=True,
 	ignore_fiscal_year=False,
+	split_on_fiscal_year=False,
 ):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 	Periodicity can be (Yearly, Quarterly, Monthly)"""
@@ -56,17 +239,14 @@ def get_period_list(
 	period_list = []
 
 	start_date = year_start_date
-	months = get_months(year_start_date, year_end_date)
 
-	for i in range(cint(math.ceil(months / months_to_add))):
+	while start_date <= year_end_date:
 		period = frappe._dict({"from_date": start_date})
 
-		if i == 0 and filter_based_on == "Date Range":
+		if start_date == year_start_date and filter_based_on == "Date Range" and periodicity == "Monthly":
 			to_date = add_months(get_first_day(start_date), months_to_add)
 		else:
 			to_date = add_months(start_date, months_to_add)
-
-		start_date = to_date
 
 		# Subtract one day from to_date, as it may be first day in next fiscal year or month
 		to_date = add_days(to_date, -1)
@@ -79,17 +259,24 @@ def get_period_list(
 			period.to_date = year_end_date
 
 		if not ignore_fiscal_year:
+			fiscal_year = get_fiscal_year(period.from_date, company=company)
+			if split_on_fiscal_year:
+				# Reports that reset accumulated values must retain each fiscal year's final balance.
+				period.to_date = min(period.to_date, getdate(fiscal_year[2]))
 			period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
-			period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
+			period.from_date_fiscal_year_start_date = fiscal_year[1]
 
 		period_list.append(period)
-
-		if period.to_date == year_end_date:
-			break
+		start_date = add_days(period.to_date, 1)
 
 	# common processing
+	used_keys = set()
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
+		if key in used_keys:
+			key = f"{key}_{opts['to_date'].day}"
+		used_keys.add(key)
+
 		if periodicity == "Monthly" and not accumulated_values:
 			label = formatdate(opts["to_date"], "MMM YYYY")
 		else:
