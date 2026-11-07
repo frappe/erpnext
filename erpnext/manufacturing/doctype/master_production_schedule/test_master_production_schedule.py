@@ -169,6 +169,43 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual(mps.items[0].cumulative_lead_time, 24)
 
+	def test_row_uom_needs_a_conversion_factor(self):
+		self.assertRaises(frappe.ValidationError, make_mps, items=[make_mps_row(uom="Box")])
+		make_mps(items=[make_mps_row(uom="_Test UOM 1")])
+
+	def test_row_bom_must_belong_to_the_item(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		item, other_item, raw_material = (
+			make_item(f"_Test MPS BOM {name}", {"is_stock_item": 1}).name for name in ("FG", "Other", "RM")
+		)
+		other_bom = make_bom(item=other_item, raw_materials=[raw_material]).name
+		self.assertRaises(
+			frappe.ValidationError, make_mps, items=[make_mps_row(item_code=item, bom_no=other_bom)]
+		)
+
+		bom = make_bom(item=item, raw_materials=[raw_material]).name
+		make_mps(items=[make_mps_row(item_code=item, bom_no=bom)])
+
+	def test_to_date_covers_every_row(self):
+		mps = make_mps(items=[make_mps_row(delivery_date=add_days(today(), 30))])
+		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 30)))
+
+		mps.append("items", make_mps_row(delivery_date=add_days(today(), 40)))
+		mps.save()
+		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 40)))
+
+
+def make_mps_row(item_code="_Test Item", **values):
+	return {
+		"item_code": item_code,
+		"warehouse": "_Test Warehouse - _TC",
+		"delivery_date": add_days(today(), 10),
+		"planned_qty": 1,
+		"uom": frappe.get_cached_value("Item", item_code, "stock_uom"),
+		**values,
+	}
+
 
 def make_lead_time(item_code, **values):
 	frappe.db.delete("Item Lead Time", {"item_code": item_code})
@@ -188,6 +225,7 @@ def make_mps(**args):
 			"select_items": [{"item_code": item} for item in args.select_items or []],
 			"sales_orders": [{"sales_order": name} for name in args.sales_orders or []],
 			"material_requests": [{"material_request": name} for name in args.material_requests or []],
+			"items": args.get("items") or [],
 		}
 	)
 	mps.insert()
