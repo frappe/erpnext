@@ -87,6 +87,8 @@ class LowerDeductionCertificate(Document):
 				"tax_withholding_category": self.tax_withholding_category,
 				"name": ("!=", self.name),
 				"company": self.company,
+				"valid_from": ("<=", self.valid_upto),
+				"valid_upto": (">=", self.valid_from),
 			},
 			["name", "valid_from", "valid_upto"],
 			as_dict=True,
