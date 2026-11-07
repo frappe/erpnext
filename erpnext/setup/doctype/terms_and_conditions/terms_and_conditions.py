@@ -8,8 +8,12 @@ from frappe.model import get_permitted_fields
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.jinja import safe_render_flags, set_filters, validate_template
-from jinja2 import DebugUndefined
+from jinja2 import DebugUndefined, TemplateError
 from jinja2.sandbox import SandboxedEnvironment
+
+
+class TermsTemplateError(frappe.ValidationError):
+	pass
 
 
 class TermsandConditions(Document):
@@ -53,7 +57,16 @@ def get_terms_and_conditions(template_name: str, doc: str | dict):
 		throw(_("Illegal template"))
 
 	with safe_render_flags():
-		return get_terms_environment(tnc.modified_by).from_string(tnc.terms).render(doc)
+		try:
+			return get_terms_environment(tnc.modified_by).from_string(tnc.terms).render(doc)
+		except TemplateError as e:
+			throw(
+				_("Terms and Conditions {0} could not be rendered: {1}").format(
+					frappe.bold(template_name), frappe.utils.escape_html(str(e))
+				),
+				TermsTemplateError,
+				title=_("Invalid Terms and Conditions Template"),
+			)
 
 
 def get_terms_environment(author):
