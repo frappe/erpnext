@@ -9,7 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Concat_ws, Sum
+from frappe.query_builder.functions import Concat_ws, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -126,27 +126,69 @@ class StockLedgerEntry(Document):
 		if diff < 0 and abs(diff) > 0.0001:
 			self.throw_validation_error(diff, dimensions)
 
-	def get_available_qty_after_prev_transaction(self, dimensions):
+		if not self.flags.defer_future_dimension_check:
+			self.validate_future_inventory_dimension_balance(diff, dimensions, flt_precision)
+
+	def validate_future_dimension_balance_after_voucher(self):
+		if self.is_cancelled or self.actual_qty >= 0:
+			return
+
+		dimensions = self._get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		balance = flt(
+			self.get_available_qty_after_prev_transaction(dimensions, include_same_time=True), flt_precision
+		)
+		self.validate_future_inventory_dimension_balance(balance, dimensions, flt_precision)
+
+	def validate_future_inventory_dimension_balance(self, balance, dimensions, precision):
+		for actual_qty in self.get_future_dimension_qty(dimensions):
+			balance = flt(balance + flt(actual_qty), precision)
+			if balance < 0 and abs(balance) > 0.0001:
+				self.throw_validation_error(balance, dimensions)
+
+	def get_available_qty_after_prev_transaction(self, dimensions, include_same_time=False):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		available_qty_query = (
-			frappe.qb.from_(sle)
+		posting_condition = (
+			sle.posting_datetime <= self.posting_datetime
+			if include_same_time
+			else sle.posting_datetime < self.posting_datetime
+		)
+		available_qty = (
+			self.get_dimension_sle_query(sle, dimensions)
 			.select(Sum(sle.actual_qty))
-			.where(
-				(sle.item_code == self.item_code)
-				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
-				& (sle.company == self.company)
-				& (sle.is_cancelled == 0)
-			)
+			.where(posting_condition)
+			.run()
+		)
+
+		return available_qty[0][0] or 0
+
+	def get_future_dimension_qty(self, dimensions):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return (
+			self.get_dimension_sle_query(sle, dimensions)
+			.select(Sum(sle.actual_qty))
+			.where(sle.posting_datetime > self.posting_datetime)
+			.groupby(sle.posting_datetime, sle.voucher_type, sle.voucher_no)
+			.orderby(sle.posting_datetime)
+			.orderby(Min(sle.creation))
+			.run(pluck=True)
+		)
+
+	def get_dimension_sle_query(self, sle, dimensions):
+		query = frappe.qb.from_(sle).where(
+			(sle.item_code == self.item_code)
+			& (sle.warehouse == self.warehouse)
+			& (sle.company == self.company)
+			& (sle.is_cancelled == 0)
 		)
 
 		for dimension, values in dimensions.items():
-			dimension_value = values.get("value")
-			available_qty_query = available_qty_query.where(sle[dimension] == dimension_value)
+			query = query.where(sle[dimension] == values.get("value"))
 
-		available_qty = available_qty_query.run()
-
-		return available_qty[0][0] or 0
+		return query
 
 	def throw_validation_error(self, diff, dimensions):
 		msg = _(
