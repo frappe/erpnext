@@ -153,6 +153,7 @@ class PlantRunState:
 			item_code=stage.output_item,
 			item_name=frappe.get_cached_value("Item", stage.output_item, "item_name"),
 			uom=frappe.get_cached_value("Item", stage.output_item, "stock_uom"),
+			weight_factor=flt(self.plan.weight_factors.get(stage.output_item)),
 			planned_qty=flt(card.for_quantity) if card and card.docstatus == 0 else stage.output_qty,
 			expected_qty=self.get_expected_qty(stage, card),
 			done_qty=self.flow.get_done_qty(stage.idx),

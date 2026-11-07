@@ -91,6 +91,7 @@ class TestPlantRun(ERPNextTestSuite):
 		state = PlantRunState(PlantRun(work_order.name)).as_dict()
 		self.assertEqual([stage.phase for stage in state.stages], ["done", "done", "done"])
 		self.assertEqual(state.stages[1].output.process_loss_qty, 10)
+		self.assertEqual(state.stages[1].output.weight_factor, 1)
 		self.assertEqual(len(state.entries), 6)
 		cooked = next(
 			entry
@@ -141,6 +142,23 @@ class TestPlantRun(ERPNextTestSuite):
 			self.assertRaisesRegex(
 				frappe.ValidationError, "4.0% off the formula", run.consume, job_card.name, quantities
 			)
+
+	def test_produce_refuses_more_than_the_lot_quantity(self):
+		stock_ketchup_materials()
+		work_order = make_ketchup_work_order()
+		with minutes_ago(60):
+			run = PlantRun(work_order.name)
+			run.start()
+			job_card = run.get_open_job_card(1)
+			run.consume(job_card.name, get_quantities(run, job_card, {}))
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"You cannot make more than 1250",
+			PlantRun(work_order.name).produce,
+			job_card.name,
+			1251,
+		)
 
 	def test_plant_builder_reads_the_run_from_the_work_order(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import get_run
