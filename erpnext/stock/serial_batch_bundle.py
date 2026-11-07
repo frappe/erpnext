@@ -485,7 +485,10 @@ class SerialBatchBundle:
 		if (
 			self.sle.voucher_type == "Sales Invoice"
 			and self.sle.serial_and_batch_bundle
-			and voucher_type == "POS Invoice"
+			and (
+				voucher_type == "POS Invoice"
+				or frappe.get_cached_value("Sales Invoice", self.sle.voucher_no, "is_consolidated")
+			)
 		):
 			return True
 
