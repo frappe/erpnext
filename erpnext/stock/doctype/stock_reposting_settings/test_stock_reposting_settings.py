@@ -65,6 +65,16 @@ class TestStockRepostingSettings(unittest.TestCase):
 				}
 			).insert(ignore_permissions=True)
 
+		previous_role = frappe.db.get_single_value(
+			"Stock Reposting Settings", "notify_reposting_error_to_role"
+		)
+		self.addCleanup(
+			frappe.db.set_single_value,
+			"Stock Reposting Settings",
+			"notify_reposting_error_to_role",
+			previous_role,
+		)
+
 		frappe.db.set_single_value("Stock Reposting Settings", "notify_reposting_error_to_role", "")
 
 		users = get_recipients()
