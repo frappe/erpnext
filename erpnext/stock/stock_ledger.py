@@ -11,8 +11,8 @@ from itertools import count
 import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
-from frappe.query_builder import Order
-from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.query_builder import Case, Order
+from frappe.query_builder.functions import CombineDatetime, Concat, Sum
 from frappe.utils import (
 	cint,
 	cstr,
@@ -1567,6 +1567,8 @@ class update_entries_after:
 		if sle.voucher_type == "Stock Entry":
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
 			rate = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "valuation_rate")
+		elif self.is_returned_supplied_item(sle):
+			rate = self.get_returned_supplied_item_rate(sle)
 		# Sales and Purchase Return
 		elif sle.voucher_type in (
 			"Purchase Receipt",
@@ -1654,6 +1656,21 @@ class update_entries_after:
 
 		return rate
 
+	@staticmethod
+	def is_returned_supplied_item(sle):
+		"""Raw material a Subcontracting Receipt return brings back to the supplier warehouse."""
+		return (
+			sle.voucher_type == "Subcontracting Receipt"
+			and flt(sle.actual_qty) > 0
+			and bool(frappe.db.exists("Subcontracting Receipt Supplied Item", sle.voucher_detail_no))
+		)
+
+	@staticmethod
+	def get_returned_supplied_item_rate(sle):
+		scr = frappe.get_doc("Subcontracting Receipt", sle.voucher_no)
+		row = scr.getone("supplied_items", {"name": sle.voucher_detail_no})
+		return scr.get_supplied_item_rates([row])[0]
+
 	def is_unvalued_rejected_material(self, sle):
 		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""
 		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
@@ -1710,7 +1727,9 @@ class update_entries_after:
 				self.update_rate_on_delivery_and_sales_return(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
-			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Subcontracting Receipt":
+			elif sle.voucher_type == "Subcontracting Receipt" and (
+				flt(sle.actual_qty) < 0 or self.is_returned_supplied_item(sle)
+			):
 				self.update_rate_on_subcontracting_receipt(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Asset Capitalization":
 				frappe.get_doc(sle.voucher_type, sle.voucher_no).update_stock_item_rate(
@@ -1794,10 +1813,15 @@ class update_entries_after:
 		if frappe.db.exists("Subcontracting Receipt Item", sle.voucher_detail_no):
 			frappe.db.set_value("Subcontracting Receipt Item", sle.voucher_detail_no, "rate", outgoing_rate)
 		else:
+			# consumed qty is the negated ledger qty, so a return's amount stays negative
+			amount = flt(
+				-flt(sle.actual_qty) * outgoing_rate,
+				frappe.get_precision("Subcontracting Receipt Supplied Item", "amount"),
+			)
 			frappe.db.set_value(
 				"Subcontracting Receipt Supplied Item",
 				sle.voucher_detail_no,
-				{"rate": outgoing_rate, "amount": abs(sle.actual_qty) * outgoing_rate},
+				{"rate": outgoing_rate, "amount": amount},
 			)
 
 		scr = frappe.get_doc("Subcontracting Receipt", sle.voucher_no, for_update=True)
@@ -2537,15 +2561,11 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			(sle.posting_datetime == posting_datetime) & (sle.creation > args.get("creation"))
 		)
 
-	query = (
-		frappe.qb.update(sle)
-		.set(sle.qty_after_transaction, sle.qty_after_transaction + qty_shift)
-		.where(
-			(sle.item_code == args.get("item_code"))
-			& (sle.warehouse == args.get("warehouse"))
-			& (sle.is_cancelled == 0)
-			& future_condition
-		)
+	query = frappe.qb.update(sle).where(
+		(sle.item_code == args.get("item_code"))
+		& (sle.warehouse == args.get("warehouse"))
+		& (sle.is_cancelled == 0)
+		& future_condition
 	)
 
 	# find the next nearest stock reco so that we only recalculate SLEs till that point
@@ -2553,9 +2573,61 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	if next_stock_reco_detail:
 		query = query.where(get_datetime_limit_condition(sle, next_stock_reco_detail[0]))
 
+	new_qty = sle.qty_after_transaction + qty_shift
+	valuation_method = get_valuation_method(args.get("item_code"))
+	query = set_value_shift_in_future_sle(query, sle, args, new_qty, valuation_method)
+	query = query.set(sle.qty_after_transaction, new_qty)
 	query.run()
 
 	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
+
+def set_value_shift_in_future_sle(query, sle, args, new_qty, valuation_method):
+	value_shift = get_value_shift_for_future_sle(args)
+	if not value_shift:
+		return query
+
+	new_value = sle.stock_value + value_shift
+	new_rate = Case().when(new_qty != 0, new_value / new_qty).else_(sle.valuation_rate)
+
+	if valuation_method in ("FIFO", "LIFO") and not (args.has_serial_no or args.has_batch_no):
+		query = query.set(sle.stock_queue, Concat("[[", new_qty, ", ", new_rate, "]]"))
+
+	return query.set(sle.valuation_rate, new_rate).set(sle.stock_value, new_value)
+
+
+def get_value_shift_for_future_sle(args):
+	from erpnext.controllers.stock_controller import future_sle_exists
+
+	if not future_sle_exists(args):
+		return 0.0
+
+	if not args.get("is_cancelled"):
+		return flt(frappe.db.get_value("Stock Ledger Entry", args.name, "stock_value_difference"))
+
+	return -get_stock_value_difference_of_cancelled_entry(args)
+
+
+def get_stock_value_difference_of_cancelled_entry(args):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	entry = (
+		frappe.qb.from_(sle)
+		.select(sle.stock_value_difference)
+		.where(
+			(sle.voucher_type == args.voucher_type)
+			& (sle.voucher_no == args.voucher_no)
+			& (sle.voucher_detail_no == args.voucher_detail_no)
+			& (sle.item_code == args.item_code)
+			& (sle.warehouse == args.warehouse)
+			& (sle.is_cancelled == 1)
+			& (sle.name != args.name)
+			& (sle.actual_qty * flt(args.actual_qty) <= 0)
+		)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+	).run()
+
+	return flt(entry[0][0]) if entry else 0.0
 
 
 def get_stock_reco_qty_shift(args):
