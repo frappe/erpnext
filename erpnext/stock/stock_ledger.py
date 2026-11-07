@@ -1037,6 +1037,7 @@ class update_entries_after:
 
 			if sle.dependant_sle_voucher_detail_no:
 				self.include_dependant_sle_in_reposting(sle)
+				self.include_returned_supplied_items_in_reposting(sle)
 				self.update_item_wh_wise_last_posted_sle(sle)
 
 			if i % 2000 == 0:
@@ -1045,7 +1046,7 @@ class update_entries_after:
 	def start_pending_item_wh(self):
 		"""Queue each pending item-warehouse once the repost reaches its posting datetime.
 
-		One that an earlier entry already queued as a dependant is covered from that earlier point.
+		One that an earlier entry already queued is covered from that earlier point.
 		"""
 		started = False
 		while self.pending_item_wh and (
@@ -1053,16 +1054,8 @@ class update_entries_after:
 			or get_datetime(self.pending_item_wh[0].posting_datetime)
 			<= get_datetime(self._sles.first().posting_datetime)
 		):
-			pending = self.pending_item_wh.popleft()
-			item_wh_key = (pending.item_code, pending.warehouse)
-			if item_wh_key in self.distinct_dependant_item_wh:
-				continue
-
-			self.distinct_dependant_item_wh.add(item_wh_key)
-			self._sles.extend(self.get_future_entries_to_repost(pending))
-			# resume from here if a checkpoint is saved before its first entry is reposted
-			self.item_wh_wise_last_posted_sle[item_wh_key] = pending
-			started = True
+			if self.queue_item_wh_from(self.pending_item_wh.popleft()):
+				started = True
 
 		if started:
 			# the queue order changed, the prefetched window is no longer the next batch
@@ -1114,19 +1107,46 @@ class update_entries_after:
 			dependant_sles = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no)
 
 		for depend_sle in dependant_sles:
-			item_wh_key = (depend_sle.item_code, depend_sle.warehouse)
-			if item_wh_key in self.distinct_dependant_item_wh:
+			if not self.queue_item_wh_from(depend_sle):
 				continue
-
-			self.distinct_dependant_item_wh.add(item_wh_key)
-			self._sles.extend(self.get_future_entries_to_repost(depend_sle))
 
 			if produced_by_manufacture:
 				self.reposted_dependant_item_wh.setdefault(
-					item_wh_key,
+					(depend_sle.item_code, depend_sle.warehouse),
 					depend_sle.posting_datetime
 					or get_combine_datetime(depend_sle.posting_date, depend_sle.posting_time),
 				)
+
+	def include_returned_supplied_items_in_reposting(self, sle):
+		"""A receipt's return can bring the raw material back to another supplier warehouse."""
+		if sle.voucher_type == "Subcontracting Receipt" and flt(sle.actual_qty) < 0:
+			for return_sle in get_returned_supplied_item_sles(sle):
+				self.queue_item_wh_from(return_sle)
+
+	def queue_item_wh_from(self, sle):
+		"""Queue the item-warehouse's entries from `sle` on; False if they are already queued from there or earlier.
+
+		A return is queued ahead of the entry being reposted, so the queued position is saved for a resumed
+		repost, and an earlier entry queues the gap before it.
+		"""
+		item_wh_key = (sle.item_code, sle.warehouse)
+		queued_until = None
+		if item_wh_key in self.distinct_dependant_item_wh:
+			queued_from = self.item_wh_wise_last_posted_sle.get(item_wh_key)
+			posting_datetime = sle.posting_datetime or get_combine_datetime(
+				sle.posting_date, sle.posting_time
+			)
+			if not queued_from or get_datetime(queued_from.posting_datetime) <= get_datetime(
+				posting_datetime
+			):
+				return False
+
+			queued_until = queued_from.posting_datetime
+
+		self.distinct_dependant_item_wh.add(item_wh_key)
+		self._sles.extend(self.get_future_entries_to_repost(sle, queued_until))
+		self.update_item_wh_wise_last_posted_sle(sle)
+		return True
 
 	def repost_stock_ledger_entry(self, sle):
 		if isinstance(sle, dict):
@@ -1199,12 +1219,17 @@ class update_entries_after:
 			docname=self.repost_doc.name,
 		)
 
-	def get_future_entries_to_repost(self, kwargs):
+	def get_future_entries_to_repost(self, kwargs, until=None):
 		# The queue holds only the identity and sort keys, and is not locked. Rows are
 		# locked REPOST_SLE_BATCH_SIZE at a time in `get_sle_to_repost`, so a repost
 		# spanning millions of entries does not hold a lock on all of them.
+		extra_cond = None
+		if until:
+			kwargs = {**kwargs, "until": until}
+			extra_cond = " and posting_datetime < %(until)s"
+
 		return get_stock_ledger_entries(
-			kwargs, ">=", "asc", check_serial_no=False, fields=REPOST_SLE_QUEUE_FIELDS
+			kwargs, ">=", "asc", check_serial_no=False, fields=REPOST_SLE_QUEUE_FIELDS, extra_cond=extra_cond
 		)
 
 	def get_incoming_sles_of_entry(self, sle):
@@ -2691,6 +2716,33 @@ def get_sle_by_voucher_detail_no(voucher_detail_no):
 		},
 		fields=["item_code", "warehouse", "posting_date", "posting_time", "posting_datetime", "creation"],
 	)
+
+
+def get_returned_supplied_item_sles(sle):
+	"""Entries that bring back the raw material of `sle` in the returns of its Subcontracting Receipt."""
+	ledger = frappe.qb.DocType("Stock Ledger Entry")
+	receipt = frappe.qb.DocType("Subcontracting Receipt")
+
+	return (
+		frappe.qb.from_(ledger)
+		.join(receipt)
+		.on(receipt.name == ledger.voucher_no)
+		.select(
+			ledger.item_code,
+			ledger.warehouse,
+			ledger.posting_date,
+			ledger.posting_time,
+			ledger.posting_datetime,
+			ledger.creation,
+		)
+		.where(
+			(ledger.voucher_type == "Subcontracting Receipt")
+			& (ledger.item_code == sle.item_code)
+			& (ledger.actual_qty > 0)
+			& (ledger.is_cancelled == 0)
+			& (receipt.return_against == sle.voucher_no)
+		)
+	).run(as_dict=True)
 
 
 def get_prior_ledger_condition(table, posting_datetime, creation):
