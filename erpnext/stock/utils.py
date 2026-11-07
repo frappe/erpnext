@@ -389,12 +389,15 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		args = frappe._dict(args)
 
 	valuation_method = get_valuation_method(args.get("item_code"), args.get("company"))
-	skip_batch_valuation = valuation_method == "Standard Cost" or (
-		frappe.get_single_value("Stock Settings", "do_not_use_batchwise_valuation")
-		and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
-	)
+	skip_batch_valuation = frappe.get_single_value(
+		"Stock Settings", "do_not_use_batchwise_valuation"
+	) and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
 
-	if (
+	if valuation_method == "Standard Cost":
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		in_rate = get_item_standard_rate(args.get("item_code"), args.get("company"), args.get("posting_date"))
+	elif (
 		item_details
 		and item_details.has_serial_no
 		and args.get("serial_and_batch_bundle")
@@ -467,12 +470,6 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 				)
 		elif valuation_method == "Moving Average":
 			in_rate = previous_sle.get("valuation_rate")
-		elif valuation_method == "Standard Cost":
-			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
-
-			in_rate = get_item_standard_rate(
-				args.get("item_code"), args.get("company"), args.get("posting_date")
-			)
 
 	if in_rate is None:
 		voucher_no = args.get("voucher_no") or args.get("name")
