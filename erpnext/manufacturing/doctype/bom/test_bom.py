@@ -860,6 +860,22 @@ class TestBOM(FrappeTestCase):
 		for row in bom.items:
 			self.assertEqual(row.stock_uom, "Kg")
 
+	def test_sub_bom_that_only_consumes_the_row_item_is_rejected(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		sub_bom = make_bom(item=sub_assembly, raw_materials=[raw_material])
+
+		bom = make_bom(
+			item=make_item(properties={"is_stock_item": 1}).name,
+			raw_materials=[raw_material],
+			do_not_save=True,
+		)
+		bom.items[0].bom_no = sub_bom.name
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			bom.insert()
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
