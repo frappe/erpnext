@@ -52,6 +52,18 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		self.assertRaises(CanNotBeDefaultDimension, inv_dim1.insert)
 
+	def test_incompatible_existing_field_is_not_reused_as_dimension(self):
+		dimension = create_inventory_dimension(
+			reference_document="Vehicle",
+			dimension_name="Purpose",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry",
+			do_not_save=True,
+		)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Stock Entry.purpose.*Select"):
+			dimension.insert()
+
 	def test_delete_inventory_dimension(self):
 		inv_dim1 = create_inventory_dimension(
 			reference_document="Shelf",

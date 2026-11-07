@@ -65,6 +65,7 @@ class InventoryDimension(Document):
 		self.do_not_update_document()
 		self.reset_value()
 		self.set_source_and_target_fieldname()
+		self.validate_fieldname_conflicts()
 		self.set_type_of_transaction()
 
 	def set_type_of_transaction(self):
@@ -156,6 +157,40 @@ class InventoryDimension(Document):
 
 		if not self.target_fieldname:
 			self.target_fieldname = scrub(self.dimension_name)
+
+	def validate_fieldname_conflicts(self):
+		fields_by_doctype = {
+			"Stock Ledger Entry": [self.target_fieldname],
+			"Stock Closing Balance": [self.target_fieldname],
+		}
+
+		for doctype in self.get_dimension_doctypes():
+			fieldnames = fields_by_doctype.setdefault(doctype, [])
+			fieldnames.append(self.source_fieldname)
+
+			if doctype in ("Sales Invoice Item", "Delivery Note Item", "Stock Entry Detail"):
+				fieldnames.append(f"to_{self.source_fieldname}")
+			elif doctype in ("Purchase Invoice Item", "Purchase Receipt Item"):
+				fieldnames.extend((f"from_{self.source_fieldname}", f"rejected_{self.source_fieldname}"))
+
+		incompatible_fields = []
+		for doctype, fieldnames in fields_by_doctype.items():
+			meta = frappe.get_meta(doctype, cached=False)
+			for fieldname in fieldnames:
+				field = meta.get_field(fieldname)
+				if not field:
+					continue
+				if field.fieldtype != "Link" or field.options != self.reference_document:
+					incompatible_fields.append(f"{doctype}.{fieldname} ({field.fieldtype})")
+
+		if incompatible_fields:
+			frappe.throw(
+				_(
+					"Cannot create inventory dimension fields because incompatible fields already "
+					"exist: {0}. Choose a different dimension name."
+				).format(", ".join(incompatible_fields)),
+				title=_("Fieldname Conflict"),
+			)
 
 	def on_update(self):
 		self.add_custom_fields()

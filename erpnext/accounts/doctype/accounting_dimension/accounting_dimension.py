@@ -85,13 +85,29 @@ class AccountingDimension(Document):
 			frappe.throw(message)
 
 	def validate_fieldname_conflict(self):
-		conflicting_doctypes = []
+		compatible_doctypes = []
+		incompatible_fields = []
 		for doctype in get_doctypes_with_dimensions():
 			meta = frappe.get_meta(doctype, cached=False)
-			if any(f.fieldname == self.fieldname for f in meta.get("fields")):
-				conflicting_doctypes.append(doctype)
+			field = meta.get_field(self.fieldname)
+			if not field:
+				continue
 
-		if conflicting_doctypes:
+			if field.fieldtype == "Link" and field.options == self.document_type:
+				compatible_doctypes.append(doctype)
+			else:
+				incompatible_fields.append(f"{doctype} ({field.fieldtype})")
+
+		if incompatible_fields:
+			frappe.throw(
+				_(
+					"Cannot create accounting dimension field {0}. It conflicts with incompatible "
+					"fields in: {1}. Choose a different fieldname."
+				).format(frappe.bold(self.fieldname), ", ".join(incompatible_fields)),
+				title=_("Fieldname Conflict"),
+			)
+
+		if compatible_doctypes:
 			frappe.msgprint(
 				_(
 					"Fieldname {0} already exists in the following doctypes: {1}. "
@@ -99,7 +115,7 @@ class AccountingDimension(Document):
 					"GL Entries will use the value of the existing field as the dimension value."
 				).format(
 					frappe.bold(self.fieldname),
-					", ".join(frappe.bold(d) for d in conflicting_doctypes),
+					", ".join(frappe.bold(d) for d in compatible_doctypes),
 				),
 				title=_("Fieldname Conflict"),
 				indicator="orange",

@@ -73,6 +73,19 @@ class TestAccountingDimension(ERPNextTestSuite):
 		frappe.get_doc("Accounting Dimension", "Location").save()
 		self.assertFalse([m for m in frappe.message_log if m.get("title") == "Fieldname Conflict"])
 
+	def test_incompatible_existing_field_is_not_reused_as_dimension(self):
+		dimension = frappe.get_doc(
+			{
+				"doctype": "Accounting Dimension",
+				"document_type": "Vehicle",
+				"label": "Purpose",
+				"fieldname": "purpose",
+			}
+		)
+
+		with self.assertRaisesRegex(frappe.ValidationError, "Stock Entry.*Select"):
+			dimension.insert()
+
 	def test_mandatory(self):
 		location = frappe.get_doc("Accounting Dimension", "Location")
 		location.dimension_defaults[0].mandatory_for_bs = True
