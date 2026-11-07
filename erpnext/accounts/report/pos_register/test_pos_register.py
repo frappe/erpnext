@@ -79,6 +79,20 @@ class TestPOSRegister(FrappeTestCase):
 			frappe.set_user("Administrator")
 		self.assertEqual([row.get("grand_total") for row in rows if row], [1000, 1000])
 
+	def test_report_runs_for_user_without_system_manager(self):
+		from frappe.desk.query_report import generate_report_result
+
+		invoice = self.make_pos_sales_invoice({"Cash": 1000})
+		user = make_user_restricted_to_customer("_Test Customer")
+		filters = {"company": "_Test Company", "from_date": today(), "to_date": today(), "group_by": ""}
+
+		frappe.set_user(user)
+		try:
+			result = generate_report_result(frappe.get_doc("Report", "POS Register"), filters)["result"]
+		finally:
+			frappe.set_user("Administrator")
+		self.assertIn(invoice.name, [row.get("pos_invoice") for row in result])
+
 	def test_if_owner_role_lists_only_own_invoices(self):
 		self.make_pos_sales_invoice({"Cash": 1000})
 		own_invoice = self.make_pos_sales_invoice({"Cash": 3000}, rate=3000)
