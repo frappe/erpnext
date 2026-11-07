@@ -6108,14 +6108,19 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.savepoint("before_closed_period_pcv")
 		self.addCleanup(frappe.db.rollback, save_point="before_closed_period_pcv")
 
-		closed_date = add_days(get_fiscal_year(today(), company="_Test Company")[1], -1)
-		make_period_closing_voucher(
-			company="_Test Company", cost_center="Main - _TC", posting_date=closed_date
-		)
+		company = create_company_without_ledger_entries()
+		closed_date = add_days(get_fiscal_year(today(), company=company)[1], -1)
+		make_period_closing_voucher(company=company, cost_center="Main - _TCPC", posting_date=closed_date)
 		item = make_item("_Test Non Stock Closed Period Item", {"is_stock_item": 0}).name
 
 		with change_settings("Stock Reposting Settings", {"item_based_reposting": 0}):
-			receipt = make_purchase_receipt(item_code=item, posting_date=closed_date)
+			receipt = make_purchase_receipt(
+				item_code=item,
+				posting_date=closed_date,
+				company=company,
+				warehouse="Stores - _TCPC",
+				supplier_warehouse="Stores - _TCPC",
+			)
 			receipt.cancel()
 
 		self.assertEqual(receipt.docstatus, 2)
@@ -6179,6 +6184,24 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(return_entry.items[0].qty, -2)
 		self.assertEqual(return_entry.items[0].rejected_qty, 0)  # 3-3=0
+
+
+def create_company_without_ledger_entries():
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "_Test Closed Period Company",
+				"abbr": "_TCPC",
+				"country": "India",
+				"default_currency": "INR",
+				"create_chart_of_accounts_based_on": "Standard Template",
+				"chart_of_accounts": "Standard",
+			}
+		)
+		.insert(ignore_if_duplicate=True)
+		.name
+	)
 
 
 def prepare_data_for_internal_transfer():
