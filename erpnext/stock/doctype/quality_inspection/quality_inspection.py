@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from decimal import Decimal
 from math import isfinite
 from typing import Any
 
@@ -81,7 +82,7 @@ class QualityInspection(Document):
 			self.set_acceptance_criteria_from_template()
 
 		if self.readings:
-			self.validate_reading_number_format()
+			self.set_readings_in_stored_format()
 			self.inspect_and_set_status()
 
 		self.validate_inspection_required()
@@ -356,23 +357,22 @@ class QualityInspection(Document):
 					)
 					break
 
-	def validate_reading_number_format(self):
-		"""Reject newly entered readings that are not numbers in the user's format.
+	def set_readings_in_stored_format(self):
+		"""Parse new readings in the user's number format and store them in one fixed format.
 
-		They would otherwise be misread rather than refused, silently rejecting an
-		inspection whose readings are in fact within the acceptance range. Readings
-		already stored are left alone, so a document entered by a user in one locale
-		stays saveable and submittable by a user in another."""
+		Stored readings are in that format, so any user reads them the same. Old ones the
+		migration could not convert are parsed again. A reading that means another number
+		in the stored format is refused, as it may be a stored reading the user edited."""
 		number_format = get_reading_number_format()
 		decimal_str, comma_str = get_reading_separators(number_format)
 		before_save = self.get_doc_before_save()
 
 		for reading in self.readings:
-			if not cint(reading.numeric) or cint(reading.manual_inspection):
+			if not is_number_checked(reading):
 				continue
 
 			stored = before_save and before_save.get("readings", {"name": reading.name})
-			stored = stored[0] if stored else None
+			stored = stored[0] if stored and is_number_checked(stored[0]) else None
 
 			for i in range(1, 11):
 				field = "reading_" + str(i)
@@ -380,10 +380,12 @@ class QualityInspection(Document):
 				if value is None or not value.strip():
 					continue
 
-				if stored and stored.get(field) == value:
+				stored_number = parse_reading(value, ".", "")
+				if stored and stored.get(field) == value and stored_number is not None:
 					continue
 
-				if parse_reading(value, decimal_str, comma_str) is None:
+				number = parse_reading(value, decimal_str, comma_str)
+				if number is None:
 					frappe.throw(
 						_(
 							"Row #{0}: Reading {1} {2} is not a valid number in the {3} number format. Use {4} as the decimal separator."
@@ -396,6 +398,16 @@ class QualityInspection(Document):
 						),
 						title=_("Invalid Reading"),
 					)
+
+				if stored_number not in (None, number):
+					frappe.throw(
+						_(
+							"Row #{0}: Reading {1} {2} can be read in more than one way. Enter it without thousands separators."
+						).format(reading.idx, i, frappe.bold(value)),
+						title=_("Invalid Reading"),
+					)
+
+				reading.set(field, format_reading(number))
 
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
@@ -629,12 +641,12 @@ def make_quality_inspection(source_name: str, target_doc: str | dict | Document 
 	return doc
 
 
-def get_reading_number_format() -> NumberFormat:
+def get_reading_number_format(user: str | None = None) -> NumberFormat:
 	"""Number format the user enters readings in.
 
 	User defaults fall back to the global default, so this is the same format the
 	user's desk formats numbers with."""
-	number_format = frappe.defaults.get_user_default("number_format")
+	number_format = frappe.defaults.get_user_default("number_format", user)
 	if number_format not in NUMBER_FORMAT_MAP:
 		number_format = "#,###.##"
 
@@ -679,11 +691,16 @@ def parse_reading(value: str, decimal_str: str, comma_str: str) -> float | None:
 	return number if isfinite(number) else None
 
 
+def format_reading(number: float) -> str:
+	"""Reading in the stored format: "." decimal, no grouping, no trailing zeros."""
+	return format(Decimal(str(number)).normalize(), "f")
+
+
 def parse_float(num: str) -> float:
-	"""Since reading_# fields are `Data` field they might contain number which
-	is representation in user's prefered number format instead of machine
-	readable format. This function converts them to machine readable format."""
+	"""Stored reading as a float."""
+	return flt(parse_reading(num, ".", ""))
 
-	decimal_str, comma_str = get_reading_separators(get_reading_number_format())
 
-	return flt(parse_reading(num, decimal_str, comma_str))
+def is_number_checked(reading) -> bool:
+	"""Numeric reading whose status is set from its values."""
+	return bool(cint(reading.numeric) and not cint(reading.manual_inspection))
