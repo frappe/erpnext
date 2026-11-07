@@ -62,7 +62,7 @@ def get_incorrect_data(data, precision, reconciled_qty):
 	balance_qty = 0.0
 	for row in data:
 		balance_qty += row.actual_qty
-		if row.voucher_type == "Stock Reconciliation" and not row.batch_no:
+		if row.voucher_type == "Stock Reconciliation" and not row.batch_no and not row.is_adjustment_entry:
 			balance_qty = flt(row.qty_after_transaction)
 			if not row.actual_qty and row.voucher_detail_no in reconciled_qty:
 				balance_qty = flt(reconciled_qty[row.voucher_detail_no])
@@ -88,6 +88,7 @@ def get_stock_ledger_entries(report_filters):
 		"warehouse",
 		"qty_after_transaction",
 		"batch_no",
+		"is_adjustment_entry",
 		"voucher_detail_no",
 	]
 

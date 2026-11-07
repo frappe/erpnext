@@ -68,3 +68,34 @@ class TestIncorrectBalanceQtyAfterTransaction(FrappeTestCase):
 		flagged = [row for row in self.run_report(item_code=item) if row.get("name") == sle_name]
 
 		self.assertEqual([(row["expected_balance_qty"], row["differnce"]) for row in flagged], [(7, 2)])
+
+	def test_adjustment_entry_after_a_backdated_receipt_is_not_flagged(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		receipt = make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=10, rate=100, posting_date="2026-06-01"
+		)
+		make_stock_entry(item_code=item, from_warehouse=WAREHOUSE, qty=10, posting_date="2026-06-02")
+		receipt_sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": receipt.name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", receipt_sle, "stock_value_difference", 1100)
+
+		reconciliation = create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=0, rate=0, posting_date="2026-06-05", do_not_save=1
+		)
+		reconciliation.items[0].allow_zero_valuation_rate = 1
+		reconciliation.submit()
+		make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=4, rate=50, posting_date="2026-06-03")
+
+		adjustment_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": reconciliation.name, "is_cancelled": 0},
+			["is_adjustment_entry", "qty_after_transaction"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			(adjustment_entry.is_adjustment_entry, adjustment_entry.qty_after_transaction), (1, 4)
+		)
+		self.assertEqual(self.run_report(item_code=item), [])
