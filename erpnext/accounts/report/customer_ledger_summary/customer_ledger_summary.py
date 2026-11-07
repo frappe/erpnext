@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_with_children,
 )
 from erpnext.accounts.report.trial_balance.trial_balance import validate_company_permission
+from erpnext.accounts.report.utils import validate_date_range
 
 TREE_DOCTYPES = frozenset(
 	["Customer Group", "Territory", "Supplier Group", "Sales Partner", "Sales Person", "Cost Center"]
@@ -52,8 +53,7 @@ class PartyLedgerSummaryReport:
 
 		validate_company_permission(self.filters.company)
 
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
+		validate_date_range(self.filters)
 
 		self.update_hierarchical_filters()
 
@@ -394,12 +394,13 @@ class PartyLedgerSummaryReport:
 			{
 				"is_return": 1,
 				"docstatus": 1,
-				"posting_date": ["between", [self.filters.from_date, self.filters.to_date]],
+				# refunds in the period can be against returns posted before it
+				"posting_date": ["<=", self.filters.to_date],
 				f"{scrub(self.filters.party_type)}": ["in", self.parties],
 			},
 		)
 
-		self.return_invoices = frappe.get_all(doctype, filters=filters, pluck="name")
+		self.return_invoices = set(frappe.get_all(doctype, filters=filters, pluck="name"))
 
 	def get_party_adjustment_amounts(self):
 		account_type = "Expense Account" if self.filters.party_type == "Customer" else "Income Account"
@@ -488,7 +489,7 @@ def get_children(doctype, value):
 	all_children = []
 
 	for d in value:
-		all_children += get_descendants_of(doctype, value)
+		all_children += get_descendants_of(doctype, d)
 		all_children.append(d)
 
 	return list(set(all_children))

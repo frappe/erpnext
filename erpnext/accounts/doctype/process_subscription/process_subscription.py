@@ -39,6 +39,7 @@ class ProcessSubscription(Document):
 				queue="long",
 				subscription=subscription,
 				posting_date=self.posting_date,
+				enqueue_after_commit=True,
 			)
 
 

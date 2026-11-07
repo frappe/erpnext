@@ -6,7 +6,7 @@ import unittest
 
 import frappe
 from frappe import _
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, nowdate
 
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
@@ -61,6 +61,37 @@ class TestPOSInvoice(unittest.TestCase):
 		if frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			frappe.db.set_single_value("Selling Settings", "validate_selling_price", 0)
 
+	def test_partner_change_preserves_explicit_commission_rate(self):
+		partners = [
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test POS Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": rate,
+				}
+			).insert()
+			for rate in (5, 8)
+		]
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		for rate in (6, 0):
+			with self.subTest(rate=rate):
+				doc = create_pos_invoice(qty=10, rate=100, do_not_save=True)
+				doc.sales_partner = partners[0].name
+				self.assertIsNone(doc.commission_rate)
+				doc.save()
+				self.assertEqual(doc.commission_rate, 5)
+				self.assertEqual(doc.total_commission, 50)
+
+				doc.commission_rate = 7
+				doc.save()
+				doc.sales_partner = partners[1].name
+				doc.commission_rate = rate
+				doc.save()
+				doc.reload()
+				self.assertEqual(doc.commission_rate, rate)
+				self.assertEqual(doc.total_commission, 1000 * rate / 100)
+
 	def test_timestamp_change(self):
 		w = create_pos_invoice(do_not_save=1)
 		w.docstatus = 0
@@ -84,6 +115,8 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.CannotChangeConstantError, inv.save)
 
+	@change_settings("Accounts Settings", {"round_row_wise_tax": 0})
+	@change_settings("System Settings", {"currency_precision": 2})
 	def test_discount_and_inclusive_tax(self):
 		inv = create_pos_invoice(qty=100, rate=50, do_not_save=1)
 		inv.append(
@@ -121,7 +154,9 @@ class TestPOSInvoice(unittest.TestCase):
 
 		inv.save()
 
-		self.assertEqual(inv.net_total, 4298.24)
+		self.assertEqual(inv.net_total, 4298.25)
+		self.assertEqual(inv.taxes[0].tax_amount_after_discount_amount, 601.75)
+		self.assertEqual(inv.taxes[0].total, 4900)
 		self.assertEqual(inv.grand_total, 4900.00)
 
 	def test_tax_calculation_with_multiple_items(self):

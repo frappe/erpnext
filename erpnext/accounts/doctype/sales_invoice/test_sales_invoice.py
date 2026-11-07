@@ -67,6 +67,134 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 		frappe.db.set_single_value("Accounts Settings", "acc_frozen_upto", None)
 
+	@change_settings("Accounts Settings", {"round_row_wise_tax": 0})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings(
+		"System Settings",
+		{"number_format": "#,###.##", "currency_precision": 2, "rounding_method": "Commercial Rounding"},
+	)
+	def test_opening_invoice_with_tax_group_rounding(self):
+		template = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Opening Inclusive Tax",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": "_Test Account Service Tax - _TC", "tax_rate": 21}],
+			}
+		).insert()
+		frappe.db.set_value("Company", "_Test Company", "round_off_for_opening", None)
+
+		for round_off_configured in (False, True):
+			with self.subTest(round_off_configured=round_off_configured):
+				si = self._create_opening_invoice_with_inclusive_tax()
+				si.items[1].item_tax_template = template.name
+				si.save()
+				self.assertEqual(si.net_total, 131.16)
+				self.assertEqual(si.taxes[0].tax_amount, 13.83)
+				self.assertEqual(si.taxes[0].total, 144.99)
+				self.assertEqual(si.grand_total, 145)
+				self.assertEqual(si.rounding_adjustment, 0)
+
+				if not round_off_configured:
+					with self.assertRaisesRegex(frappe.ValidationError, "Please set.*Round Off for Opening"):
+						si.submit()
+					self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": si.name}))
+					continue
+
+				self._create_opening_roundoff_account(si.company)
+				si.submit()
+				self.assertCountEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"voucher_no": si.name, "is_cancelled": False},
+						fields=["account", "debit", "credit", "is_opening"],
+						as_list=True,
+					),
+					[
+						("Debtors - _TC", 145, 0, "Yes"),
+						("Temporary Opening - _TC", 0, 131.16, "Yes"),
+						("_Test Account Service Tax - _TC", 0, 13.83, "Yes"),
+						("Round Off for Opening - _TC", 0, 0.01, "Yes"),
+					],
+				)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings(
+		"System Settings",
+		{"number_format": "#,###.##", "currency_precision": 2, "rounding_method": "Commercial Rounding"},
+	)
+	def test_inclusive_tax_net_amount_rounding(self):
+		for item_values, tax_rate, round_row_wise_tax, discount, net_total, tax_amount in (
+			([(1, 379)] * 2, 21, 0, 0, 626.45, 131.55),
+			([(1, 379)] * 20, 21, 0, 0, 6264.46, 1315.54),
+			([(1, 379)] * 2, 21, 1, 0, 626.44, 131.56),
+			([(1, 379)] * 2, 21, 0, 10, 563.80, 118.40),
+			([(1, 379)] * 20, 21, 0, 10, 5638.02, 1183.98),
+			([(1, 379)] * 2, 21, 1, 10, 563.80, 118.40),
+			([(100, 50)], 14, 0, 2, 4298.25, 601.75),
+			([(20, 800), (10, 1000)], 7, 0, 0, 24299.07, 1700.93),
+			([(20, 800), (10, 1000)], 7, 1, 0, 24299.06, 1700.94),
+		):
+			with (
+				self.subTest(
+					items=item_values,
+					tax_rate=tax_rate,
+					round_row_wise_tax=round_row_wise_tax,
+					discount=discount,
+				),
+				change_settings("Accounts Settings", round_row_wise_tax=round_row_wise_tax),
+			):
+				si = create_sales_invoice(qty=item_values[0][0], rate=item_values[0][1], do_not_save=True)
+				si.disable_rounded_total = 1
+				si.apply_discount_on = "Grand Total"
+				si.additional_discount_percentage = discount
+				for idx, (qty, rate) in enumerate(item_values[1:], start=2):
+					si.append("items", {**si.items[0].as_dict(), "idx": idx, "qty": qty, "rate": rate})
+				si.append(
+					"taxes",
+					{
+						"charge_type": "On Net Total",
+						"account_head": "_Test Account Service Tax - _TC",
+						"description": f"Tax {tax_rate}%",
+						"rate": tax_rate,
+						"included_in_print_rate": 1,
+					},
+				)
+				si.insert()
+				si.submit()
+				si.reload()
+
+				self.assertEqual(si.net_total, net_total)
+				self.assertEqual(flt(sum(item.net_amount for item in si.items), 2), net_total)
+				grand_total = flt(sum(qty * rate for qty, rate in item_values) * (1 - discount / 100), 2)
+				self.assertEqual(si.taxes[0].tax_amount_after_discount_amount, tax_amount)
+				self.assertEqual(si.total_taxes_and_charges, tax_amount)
+				self.assertEqual(flt(si.net_total + si.total_taxes_and_charges, 2), grand_total)
+				self.assertEqual(si.taxes[0].total, grand_total)
+				self.assertEqual(si.grand_total, grand_total)
+				self.assertEqual(si.outstanding_amount, si.grand_total)
+				self.assertEqual(si.rounding_adjustment, 0)
+				if discount and not round_row_wise_tax:
+					self.assertEqual(
+						flt(sum(item.distributed_discount_amount for item in si.items), 2),
+						flt(
+							sum(qty * rate for qty, rate in item_values) / (1 + tax_rate / 100) - net_total, 2
+						),
+					)
+				self.assertCountEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"voucher_type": si.doctype, "voucher_no": si.name},
+						fields=["account", "debit", "credit"],
+						as_list=True,
+					),
+					[
+						("Debtors - _TC", grand_total, 0),
+						("Sales - _TC", 0, net_total),
+						("_Test Account Service Tax - _TC", 0, tax_amount),
+					],
+				)
+
 	@change_settings(
 		"Accounts Settings",
 		{"maintain_same_internal_transaction_rate": 1, "maintain_same_rate_action": "Stop"},
@@ -2191,17 +2319,21 @@ class TestSalesInvoice(FrappeTestCase):
 		si.insert()
 		return si
 
+	@change_settings("Selling Settings", {"sales_update_frequency": "Each Transaction"})
 	def test_company_monthly_sales(self):
-		existing_current_month_sales = frappe.get_cached_value(
-			"Company", "_Test Company", "total_monthly_sales"
-		)
+		from erpnext.setup.doctype.company.company import update_company_current_month_sales
+
+		company = "_Test Company"
+
+		update_company_current_month_sales(company)
+		existing_current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 
 		si = create_sales_invoice()
-		current_month_sales = frappe.get_cached_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales + si.base_grand_total)
 
 		si.cancel()
-		current_month_sales = frappe.get_cached_value("Company", "_Test Company", "total_monthly_sales")
+		current_month_sales = frappe.db.get_value("Company", company, "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
 	def test_rounding_adjustment(self):
@@ -2347,7 +2479,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.save()
 		si.submit()
 		self.assertEqual(si.net_total, si.base_net_total)
-		self.assertEqual(si.net_total, 4007.15)
+		self.assertEqual(si.net_total, 4007.16)
 		self.assertEqual(si.grand_total, 4488.02)
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
 		self.assertEqual(si.rounding_adjustment, -0.02)
@@ -2359,8 +2491,8 @@ class TestSalesInvoice(FrappeTestCase):
 				[si.debit_to, 4488.0, 0.0],
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
-				["Sales - _TC", 0.0, 4007.15],
-				[round_off_account, 0.01, 0.0],
+				["Sales - _TC", 0.0, 4007.16],
+				[round_off_account, 0.02, 0.0],
 			]
 		)
 
@@ -3861,6 +3993,18 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_sales_commission(self):
 		si = frappe.copy_doc(test_records[2])
+		si.sales_partner = (
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test Invoice Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": 0,
+				}
+			)
+			.insert()
+			.name
+		)
 
 		frappe.db.set_value("Item", si.get("items")[0].item_code, "grant_commission", 1)
 		frappe.db.set_value("Item", si.get("items")[1].item_code, "grant_commission", 0)
@@ -4179,6 +4323,38 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 		si.reload()
 		self.assertTrue(get_serial_nos_from_bundle(si.items[0].serial_and_batch_bundle))
+
+	def test_credit_note_returns_packed_serial_and_batch_items(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "_Test Warehouse - _TC"
+		batch_item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SI-PKD-B-.#####"}
+		).name
+		serial_item = make_item(properties={"has_serial_no": 1, "serial_no_series": "SI-PKD-S-.#####"}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [batch_item, serial_item], qty=2)
+		for item_code in (batch_item, serial_item):
+			make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+
+		si = create_sales_invoice(item_code=bundle_item, warehouse=warehouse, update_stock=1, qty=1)
+		credit_note = make_return_doc("Sales Invoice", si.name)
+		credit_note.submit()
+		si.reload()
+		credit_note.reload()
+
+		for row, returned_row in zip(si.packed_items, credit_note.packed_items, strict=True):
+			if row.item_code == batch_item:
+				self.assertEqual(
+					get_batch_from_bundle(returned_row.serial_and_batch_bundle),
+					get_batch_from_bundle(row.serial_and_batch_bundle),
+				)
+			else:
+				self.assertEqual(
+					sorted(get_serial_nos_from_bundle(returned_row.serial_and_batch_bundle)),
+					sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)),
+				)
 
 	def test_sales_invoice_with_disabled_account(self):
 		try:
@@ -4827,16 +5003,33 @@ class TestSalesInvoice(FrappeTestCase):
 				"included_in_print_rate": True,
 			},
 		)
-		# there will be 0.01 precision loss between Dr and Cr
-		# caused by 'included_in_print_tax' option
 		si.save()
 		return si
 
-	def test_rounding_validation_for_opening_with_inclusive_tax(self):
+	@change_settings("Accounts Settings", {"round_row_wise_tax": 0})
+	def test_opening_invoice_with_inclusive_tax_without_round_off_account(self):
+		frappe.db.set_value("Company", "_Test Company", "round_off_for_opening", None)
 		si = self._create_opening_invoice_with_inclusive_tax()
-		# 'Round Off for Opening' not set in Company master
-		# Ledger level validation must be thrown
-		self.assertRaises(frappe.ValidationError, si.submit)
+		si.submit()
+		self.assertEqual(si.net_total, 138.10)
+		self.assertEqual(si.total_taxes_and_charges, 6.90)
+		self.assertEqual(si.taxes[0].total, 145)
+		self.assertEqual(si.grand_total, 145)
+		self.assertEqual(si.rounding_adjustment, 0)
+		self.assertEqual(si.outstanding_amount, 145)
+		self.assertCountEqual(
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_no": si.name, "is_cancelled": False},
+				fields=["account", "debit", "credit", "is_opening"],
+				as_list=True,
+			),
+			[
+				("Debtors - _TC", 145, 0, "Yes"),
+				("Temporary Opening - _TC", 0, 138.10, "Yes"),
+				("_Test Account Service Tax - _TC", 0, 6.90, "Yes"),
+			],
+		)
 
 	def test_ledger_entries_on_opening_invoice_with_rounding_loss_by_inclusive_tax(self):
 		si = self._create_opening_invoice_with_inclusive_tax()
@@ -4853,10 +5046,9 @@ class TestSalesInvoice(FrappeTestCase):
 		expected = [
 			{"account": "_Test Account Service Tax - _TC", "debit": 0.0, "credit": 6.9, "is_opening": "Yes"},
 			{"account": "Debtors - _TC", "debit": 145.0, "credit": 0.0, "is_opening": "Yes"},
-			{"account": "Round Off for Opening - _TC", "debit": 0.0, "credit": 0.01, "is_opening": "Yes"},
-			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.09, "is_opening": "Yes"},
+			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.10, "is_opening": "Yes"},
 		]
-		self.assertEqual(len(actual), 4)
+		self.assertEqual(len(actual), 3)
 		self.assertEqual(expected, actual)
 
 	@change_settings("Accounts Settings", {"enable_common_party_accounting": True})
@@ -4941,6 +5133,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertTrue(jv)
 		self.assertEqual(jv[0], si.grand_total)
 
+	@change_settings("Selling Settings", {"sales_update_frequency": "Each Transaction"})
 	def test_total_billed_amount(self):
 		si = create_sales_invoice(do_not_submit=True)
 
@@ -4956,6 +5149,7 @@ class TestSalesInvoice(FrappeTestCase):
 		doc = frappe.get_doc("Project", project.name)
 		self.assertEqual(doc.total_billed_amount, si.grand_total)
 
+	@change_settings("Selling Settings", {"sales_update_frequency": "Each Transaction"})
 	def test_total_billed_amount_with_different_projects(self):
 		# This test case is for checking the scenario where project is set at document level and for **some** child items only, not all
 		from copy import copy
@@ -5464,6 +5658,30 @@ class TestSalesInvoice(FrappeTestCase):
 
 		frappe.get_doc("Purchase Invoice", purchase_invoices[0]).cancel()
 		self.assertFalse(si.get_db_value("inter_company_invoice_reference"))
+
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "Row #2: Asset .* is already added in another row"
+		):
+			si.insert()
 
 
 def make_item_for_si(item_code, properties=None):

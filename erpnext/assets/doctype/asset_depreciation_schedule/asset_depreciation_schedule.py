@@ -289,7 +289,6 @@ class AssetDepreciationSchedule(Document):
 		return getdate(asset_doc.available_for_use_date)
 
 	def clear_depr_schedule(self):
-		start = 0
 		num_of_depreciations_completed = 0
 		depr_schedule = []
 
@@ -300,12 +299,11 @@ class AssetDepreciationSchedule(Document):
 				num_of_depreciations_completed += 1
 				depr_schedule.append(schedule)
 			else:
-				start = num_of_depreciations_completed
 				break
 
 		self.depreciation_schedule = depr_schedule
 
-		return start
+		return num_of_depreciations_completed
 
 	def _make_depr_schedule(
 		self,
@@ -537,7 +535,7 @@ class AssetDepreciationSchedule(Document):
 			shift = (
 				self.schedules_before_clearing[schedule_idx].shift
 				if self.schedules_before_clearing and len(self.schedules_before_clearing) > schedule_idx
-				else frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
+				else get_default_shift_name()
 			)
 		else:
 			shift = None
@@ -879,6 +877,13 @@ def get_shift_depr_amount(asset_depr_schedule, asset, row, schedule_idx):
 
 def get_asset_shift_factors_map():
 	return dict(frappe.db.get_all("Asset Shift Factor", ["shift_name", "shift_factor"], as_list=True))
+
+
+def get_default_shift_name() -> str:
+	shift_name = frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
+	if not shift_name:
+		frappe.throw(_("Please set a default Asset Shift Factor to use shift based depreciation."))
+	return shift_name
 
 
 @erpnext.allow_regional

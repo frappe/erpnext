@@ -5,8 +5,13 @@ import unittest
 
 import frappe
 
+from erpnext.assets.doctype.asset.test_asset import create_asset, create_fixed_asset_item
+
 
 class TestAssetCategory(unittest.TestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_mandatory_fields(self):
 		asset_category = frappe.new_doc("Asset Category")
 		asset_category.asset_category_name = "Computers"
@@ -51,3 +56,31 @@ class TestAssetCategory(unittest.TestCase):
 		)
 
 		self.assertRaises(frappe.ValidationError, asset_category.insert)
+
+	def test_accounts_cannot_change_while_active_assets_exist(self):
+		# a category and item of their own, so assets left by other tests do not block the last change
+		asset_category = frappe.copy_doc(frappe.get_doc("Asset Category", "Computers"))
+		asset_category.asset_category_name = "Account Change Checks"
+		asset_category.insert()
+		item = create_fixed_asset_item("_Test Account Change Checks Item")
+		item.db_set("asset_category", asset_category.name)
+		asset = create_asset(
+			asset_category=asset_category.name, item_code=item.name, company="_Test Company", submit=1
+		)
+		self.assertEqual(asset.asset_category, asset_category.name)
+		row = next(row for row in asset_category.accounts if row.company_name == asset.company)
+		row.fixed_asset_account = "Furnitures and Fixtures - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "Fixed Asset Account", asset_category.save)
+
+		asset_category.reload()
+		asset_category.accounts = [
+			row for row in asset_category.accounts if row.company_name != asset.company
+		]
+		self.assertRaises(frappe.ValidationError, asset_category.save)
+
+		asset.cancel()
+		asset_category.reload()
+		next(
+			row for row in asset_category.accounts if row.company_name == asset.company
+		).fixed_asset_account = "Furnitures and Fixtures - _TC"
+		asset_category.save()

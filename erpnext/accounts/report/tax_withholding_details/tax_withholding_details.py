@@ -139,10 +139,23 @@ def get_result(filters, tds_accounts, tax_category_map, net_total_map):
 					entries[key]["tax_amount"] += tax_amount
 				else:
 					entries[key] = row
-	out = list(entries.values())
+	out = remove_rows_of_restricted_parties(list(entries.values()), filters.get("party_type"))
 	out.sort(key=lambda x: (x["tax_withholding_category"], x["transaction_date"], x["ref_no"]))
 
 	return out
+
+
+def remove_rows_of_restricted_parties(rows: list[dict], party_type: str | None) -> list[dict]:
+	"""Keep only rows whose Customer or Supplier the user can read."""
+	permitted = get_permitted_parties(party_type, {row["party"] for row in rows if row["party"]})
+	return [row for row in rows if not row["party"] or row["party"] in permitted]
+
+
+def get_permitted_parties(party_type: str | None, parties: set[str]) -> set[str]:
+	if not parties or not party_type or not frappe.has_permission(party_type, "read"):
+		return set()
+
+	return set(frappe.get_list(party_type, filters={"name": ["in", list(parties)]}, pluck="name"))
 
 
 def get_party_pan_map(party_type, party_names):

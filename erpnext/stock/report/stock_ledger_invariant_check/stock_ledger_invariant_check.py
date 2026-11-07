@@ -5,6 +5,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, get_link_to_form, parse_json
 
 from erpnext.stock.utils import get_valuation_method
@@ -59,9 +60,7 @@ def add_invariant_check_fields(sles, filters):
 
 	incorrect_idx = None
 	float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
-	currency_precision = (
-		cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
-	)
+	currency_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"))
 	for idx, sle in enumerate(sles):
 		if sle.batch_no:
 			sle.use_batchwise_valuation = frappe.db.get_value(
@@ -95,7 +94,7 @@ def add_invariant_check_fields(sles, filters):
 		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
 		if maintains_fifo_queue(sle, valuation_method):
-			add_fifo_fields(sle, sles[idx - 1] if idx else None)
+			add_fifo_fields(sle, sles[idx - 1] if idx else None, currency_precision)
 
 		if incorrect_idx is None and not is_sle_has_correct_data(sle, float_precision, currency_precision):
 			incorrect_idx = idx
@@ -117,14 +116,14 @@ def maintains_fifo_queue(sle, valuation_method):
 	)
 
 
-def add_fifo_fields(sle, prev_sle):
+def add_fifo_fields(sle, prev_sle, currency_precision=None):
 	queue = json.loads(sle.stock_queue) if sle.stock_queue else []
 
 	fifo_qty = 0.0
 	fifo_value = 0.0
 	for qty, rate in queue:
 		fifo_qty += qty
-		fifo_value += qty * rate
+		fifo_value += qty * flt(rate)
 
 	sle.fifo_queue_qty = fifo_qty
 	sle.fifo_stock_value = fifo_value
@@ -136,7 +135,9 @@ def add_fifo_fields(sle, prev_sle):
 	)
 	# prev row may not maintain a queue; H and H - F stay blank across the gap
 	if prev_sle and prev_sle.fifo_stock_value is not None:
-		sle.fifo_stock_diff = sle.fifo_stock_value - prev_sle.fifo_stock_value
+		sle.fifo_stock_diff = flt(sle.fifo_stock_value, currency_precision) - flt(
+			prev_sle.fifo_stock_value, currency_precision
+		)
 		sle.fifo_difference_diff = sle.fifo_stock_diff - sle.stock_value_difference
 
 
@@ -146,6 +147,8 @@ def is_sle_has_correct_data(sle, float_precision, currency_precision):
 		and flt(sle.diff_value_diff, currency_precision) == 0.0
 		and flt(sle.fifo_qty_diff, float_precision) == 0.0
 		and flt(sle.fifo_value_diff, currency_precision) == 0.0
+		and flt(sle.fifo_difference_diff, currency_precision) == 0.0
+		and abs(flt(sle.valuation_diff) * flt(sle.qty_after_transaction)) < 1 / (10**currency_precision)
 	)
 
 

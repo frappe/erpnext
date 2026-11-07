@@ -823,20 +823,6 @@ class Item(Document):
 					{"company": defaults.get("company"), "default_warehouse": defaults.default_warehouse},
 				)
 
-		item_group = frappe.get_cached_doc("Item Group", self.item_group)
-		if not self.taxes and item_group.taxes:
-			for tax in item_group.taxes:
-				self.append(
-					"taxes",
-					{
-						"item_tax_template": tax.item_tax_template,
-						"tax_category": tax.tax_category,
-						"valid_from": tax.valid_from,
-						"minimum_net_rate": tax.minimum_net_rate,
-						"maximum_net_rate": tax.maximum_net_rate,
-					},
-				)
-
 	def update_variants(self):
 		if self.flags.dont_update_variants or frappe.db.get_single_value(
 			"Item Variant Settings", "do_not_update_variants"
@@ -1501,7 +1487,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	shared_source_match = (
 		frappe.qb.from_(first)
 		.join(second)
-		.on(first.from_uom == second.from_uom)
+		.on((first.from_uom == second.from_uom) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
 		.where((first.to_uom == to_uom) & (second.to_uom == from_uom) & (second.value != 0))
 		.orderby(first.name, second.name)
@@ -1515,7 +1501,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	shared_target_match = (
 		frappe.qb.from_(first)
 		.join(second)
-		.on(first.to_uom == second.to_uom)
+		.on((first.to_uom == second.to_uom) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
 		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
 		.orderby(first.name, second.name)

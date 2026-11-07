@@ -5,9 +5,14 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Concat_ws, Date
+from frappe.utils.nestedset import get_descendants_of
+
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 
@@ -106,7 +111,8 @@ def get_data(filters):
 	)
 
 	if filters.get("territory"):
-		query = query.where(lead.territory == filters.get("territory"))
+		territories = [filters.territory, *get_descendants_of("Territory", filters.territory)]
+		query = query.where(lead.territory.isin(territories))
 
 	if filters.get("status"):
 		query = query.where(lead.status == filters.get("status"))

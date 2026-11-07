@@ -152,6 +152,7 @@ class Batch(Document):
 	def validate(self):
 		self.item_has_batch_enabled()
 		self.set_batchwise_valuation()
+		self.validate_from_to_dates("manufacturing_date", "expiry_date")
 
 	def item_has_batch_enabled(self):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
@@ -299,7 +300,18 @@ def get_batch_qty(
 def get_batches_by_oldest(item_code, warehouse):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
 	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
-	batches_dates = [[batch, frappe.get_value("Batch", batch.batch_no, "expiry_date")] for batch in batches]
+	if not batches:
+		return []
+
+	expiry_dates = dict(
+		frappe.get_all(
+			"Batch",
+			filters={"name": ["in", {batch.batch_no for batch in batches}]},
+			fields=["name", "expiry_date"],
+			as_list=True,
+		)
+	)
+	batches_dates = [[batch, expiry_dates.get(batch.batch_no)] for batch in batches]
 	batches_dates.sort(key=lambda tup: (tup[1] is None, tup[1]))
 	return batches_dates
 

@@ -11,7 +11,10 @@ from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -53,8 +56,11 @@ from erpnext.setup.doctype.company.company import update_company_current_month_s
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.utils import get_bin_qty_map
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
+
+NO_EXPIRY_DATE = "9999-12-31"
 
 
 class SalesInvoice(SellingController):
@@ -389,8 +395,15 @@ class SalesInvoice(SellingController):
 		if self.doctype != "Sales Invoice":
 			return
 
+		seen_assets = set()
 		for d in self.get("items"):
 			if d.is_fixed_asset:
+				if d.asset and not self.is_return:
+					if d.asset in seen_assets:
+						frappe.throw(
+							_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset)
+						)
+					seen_assets.add(d.asset)
 				if d.asset:
 					if not self.is_return:
 						asset_status = frappe.db.get_value("Asset", d.asset, "status")
@@ -471,10 +484,9 @@ class SalesInvoice(SellingController):
 	def on_submit(self):
 		self.validate_pos_paid_amount()
 
-		if not self.auto_repeat:
-			frappe.get_doc("Authorization Control").validate_approving_authority(
-				self.doctype, self.company, self.base_grand_total, self
-			)
+		frappe.get_doc("Authorization Control").validate_approving_authority(
+			self.doctype, self.company, self.base_grand_total, self
+		)
 
 		self.check_prev_docstatus()
 
@@ -804,8 +816,8 @@ class SalesInvoice(SellingController):
 			"items": ("income_account", "expense_account", "discount_account"),
 			"taxes": ("account_head",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -1158,23 +1170,17 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def update_current_stock(self):
+		bin_qty_map = get_bin_qty_map(self.get("items") + self.get("packed_items"))
+
 		for d in self.get("items"):
 			if d.item_code and d.warehouse:
-				bin = frappe.db.sql(
-					"select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
-					(d.item_code, d.warehouse),
-					as_dict=1,
-				)
-				d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
+				bin_data = bin_qty_map.get((d.item_code, d.warehouse))
+				d.actual_qty = flt(bin_data.actual_qty) if bin_data else 0
 
 		for d in self.get("packed_items"):
-			bin = frappe.db.sql(
-				"select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s",
-				(d.item_code, d.warehouse),
-				as_dict=1,
-			)
-			d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
-			d.projected_qty = bin and flt(bin[0]["projected_qty"]) or 0
+			bin_data = bin_qty_map.get((d.item_code, d.warehouse))
+			d.actual_qty = flt(bin_data.actual_qty) if bin_data else 0
+			d.projected_qty = flt(bin_data.projected_qty) if bin_data else 0
 
 	def update_packing_list(self):
 		if self.doctype == "POS Invoice" or (
@@ -2045,7 +2051,9 @@ class SalesInvoice(SellingController):
 					"invoice": self.name,
 					"loyalty_points": points_earned,
 					"purchase_amount": eligible_amount,
-					"expiry_date": add_days(self.posting_date, lp_details.expiry_duration),
+					"expiry_date": add_days(self.posting_date, lp_details.expiry_duration)
+					if lp_details.expiry_duration
+					else NO_EXPIRY_DATE,
 					"posting_date": self.posting_date,
 				}
 			)
@@ -3072,6 +3080,22 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))

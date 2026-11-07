@@ -22,8 +22,12 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_job_card
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	make_stock_entry as make_stock_entry_for_work_order,
+)
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.stock_entry.stock_entry import OperationsNotCompleteError
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
@@ -967,6 +971,144 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(wo_doc.produced_qty, 8)
 		self.assertEqual(wo_doc.process_loss_qty, 2)
 		self.assertEqual(wo_doc.status, "Completed")
+
+	def make_two_operation_work_order(self, qty=10):
+		from erpnext.manufacturing.doctype.routing.test_routing import (
+			create_routing,
+			setup_bom,
+			setup_operations,
+		)
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		operations = [
+			{"operation": "Test Operation A1", "workstation": "Test Workstation A", "time_in_mins": 30},
+			{"operation": "Test Operation B1", "workstation": "Test Workstation A", "time_in_mins": 20},
+		]
+
+		warehouse = create_warehouse("Test Warehouse 123 for Job Card")
+		setup_operations(operations)
+
+		item_code = "Test Job Card Process Qty Item"
+		for item in [item_code, item_code + "RM 1", item_code + "RM 2"]:
+			if not frappe.db.exists("Item", item):
+				make_item(item, {"item_name": item, "stock_uom": "Nos", "is_stock_item": 1})
+
+		routing_doc = create_routing(routing_name="Testing Route", operations=operations)
+		bom_doc = setup_bom(
+			item_code=item_code,
+			routing=routing_doc.name,
+			raw_materials=[item_code + "RM 1", item_code + "RM 2"],
+			source_warehouse=warehouse,
+		)
+
+		for row in bom_doc.items:
+			make_stock_entry(item_code=row.item_code, target=row.source_warehouse, qty=qty, basic_rate=100)
+
+		return make_wo_order_test_record(
+			production_item=item_code,
+			bom_no=bom_doc.name,
+			qty=qty,
+			skip_transfer=1,
+			wip_warehouse=warehouse,
+			source_warehouse=warehouse,
+		)
+
+	def test_upstream_process_loss_in_manufacturing(self):
+		for upstream_qty, upstream_output, downstream_qty, downstream_output, manufacture_entries in (
+			(100, 95, 95, 95, [(100, 5, 95)]),
+			(100, 95, 95, 90, [(50, 10, 40), (50, 0, 50)]),
+			(50, 45, 50, 45, [(50, 5, 45)]),
+			(50, 45, 45, 45, [(50, 5, 45)]),
+		):
+			with self.subTest(
+				upstream_qty=upstream_qty, downstream_qty=downstream_qty, output=downstream_output
+			):
+				work_order = self.make_two_operation_work_order(qty=100)
+				job_cards = frappe.get_all(
+					"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+				)
+				for index, (for_quantity, completed_qty) in enumerate(
+					((upstream_qty, upstream_output), (downstream_qty, downstream_output))
+				):
+					job_card = frappe.get_doc("Job Card", job_cards[index])
+					job_card.for_quantity = for_quantity
+					job_card.append(
+						"time_logs",
+						{
+							"from_time": add_to_date("2024-03-01 08:00:00", hours=index),
+							"to_time": add_to_date("2024-03-01 08:00:00", hours=index, minutes=30),
+							"completed_qty": completed_qty,
+						},
+					)
+					job_card.save()
+					job_card.submit()
+
+				work_order.reload()
+				self.assertEqual(
+					[row.status for row in work_order.operations],
+					["Completed" if upstream_qty == 100 else "Work in Progress"] * 2,
+				)
+				if upstream_qty == 100:
+					# Simulate the stored operation status of an existing work order after upgrading.
+					work_order.operations[1].db_set("status", "Work in Progress")
+					work_order = frappe.get_doc("Work Order", work_order.name)
+					work_order.run_method("onload")
+					work_order.expected_delivery_date = add_to_date(today(), days=1)
+					work_order.save()
+					self.assertEqual(
+						str(work_order.reload().expected_delivery_date), add_to_date(today(), days=1)
+					)
+					self.assertEqual(work_order.operations[1].status, "Work in Progress")
+
+				frappe.get_doc("BOM", work_order.bom_no).db_set("process_loss_percentage", 10)
+				entries = []
+				for qty, loss, finished_qty in manufacture_entries:
+					stock_entry = frappe.get_doc(
+						make_stock_entry_for_work_order(work_order.name, "Manufacture", qty)
+					)
+					stock_entry.submit()
+					self.assertEqual(stock_entry.process_loss_qty, loss)
+					self.assertEqual(
+						sum(row.qty for row in stock_entry.items if row.is_finished_item), finished_qty
+					)
+					ledger = frappe.db.get_value(
+						"Stock Ledger Entry",
+						{
+							"voucher_no": stock_entry.name,
+							"item_code": work_order.production_item,
+							"is_cancelled": 0,
+						},
+						["actual_qty", "stock_value_difference"],
+						as_dict=True,
+					)
+					self.assertEqual(ledger.actual_qty, finished_qty)
+					self.assertEqual(ledger.stock_value_difference, qty * 200)
+					entries.append(stock_entry)
+
+				if upstream_qty < 100:
+					# v16 checks the operations while it fetches the items
+					with self.assertRaises(OperationsNotCompleteError):
+						frappe.get_doc(
+							make_stock_entry_for_work_order(work_order.name, "Manufacture", 5)
+						).submit()
+				else:
+					self.assertEqual(work_order.reload().status, "Completed")
+
+				work_order.reload()
+				self.assertEqual(work_order.produced_qty, downstream_output)
+				self.assertEqual(work_order.process_loss_qty, sum(row[1] for row in manufacture_entries))
+				self.assertEqual(
+					frappe.db.count("Stock Entry", {"work_order": work_order.name, "docstatus": 1}),
+					len(entries),
+				)
+				for entry in reversed(entries):
+					entry.cancel()
+				self.assertEqual(work_order.reload().produced_qty, 0)
+				self.assertEqual(work_order.process_loss_qty, 0)
+				for name in reversed(job_cards):
+					frappe.get_doc("Job Card", name).cancel()
+				self.assertTrue(all(row.status == "Pending" for row in work_order.reload().operations))
 
 	def test_op_cost_calculation(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (

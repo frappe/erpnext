@@ -8,19 +8,24 @@ from frappe.utils import add_years, cint, flt, getdate
 
 import erpnext
 from erpnext.accounts.report.financial_statements import get_period_list
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return ForecastingReport(filters).execute_report()
 
 
 class ExponentialSmoothingForecast:
 	def forecast_future_data(self):
+		from_date = getdate(self.filters.from_date)
 		for _key, value in self.period_wise_data.items():
 			forecast_data = []
 			for period in self.period_list:
 				forecast_key = "forecast_" + period.key
+				is_future = getdate(period.from_date) >= from_date
 
 				if value.get(period.key) and not forecast_data:
 					value[forecast_key] = flt(value.get("avg", 0)) or flt(value.get(period.key))
@@ -32,8 +37,8 @@ class ExponentialSmoothingForecast:
 					)
 
 				if value.get(forecast_key):
-					# will be use to forecaset next period
-					forecast_data.append([value.get(period.key), value.get(forecast_key)])
+					actual = value.get(forecast_key) if is_future else value.get(period.key)
+					forecast_data.append([actual, value.get(forecast_key)])
 
 
 class ForecastingReport(ExponentialSmoothingForecast):
@@ -96,40 +101,38 @@ class ForecastingReport(ExponentialSmoothingForecast):
 					value["avg"] = flt(sum(list_of_period_value)) / flt(sum(total_qty))
 
 	def get_data_for_forecast(self):
-		parent = frappe.qb.DocType(self.doctype)
-		child = frappe.qb.DocType(self.child_doctype)
+		frappe.has_permission(self.doctype, "read", throw=True)
+		child = f"`tab{self.child_doctype}`"
 
 		date_field = (
 			"posting_date" if self.doctype in ("Delivery Note", "Sales Invoice") else "transaction_date"
 		)
 
-		query = (
-			frappe.qb.from_(parent)
-			.from_(child)
-			.select(
-				parent[date_field].as_("posting_date"),
-				child.item_code,
-				child.warehouse,
-				child.item_name,
-				child.stock_qty.as_("qty"),
-				child.base_amount.as_("amount"),
-			)
-			.where(
-				(parent.docstatus == 1)
-				& (parent.name == child.parent)
-				& (parent[date_field] < self.filters.from_date)
-				& (parent.company == self.filters.company)
-			)
-		)
+		filters = [
+			[self.doctype, "docstatus", "=", 1],
+			[self.doctype, date_field, "<", self.filters.from_date],
+			[self.doctype, "company", "=", self.filters.company],
+		]
 
 		if self.filters.item_code:
-			query = query.where(child.item_code == self.filters.item_code)
+			filters.append([self.child_doctype, "item_code", "=", self.filters.item_code])
 
 		if self.filters.warehouse:
 			warehouses = get_child_warehouses(self.filters.warehouse) or []
-			query = query.where(child.warehouse.isin(warehouses))
+			filters.append([self.child_doctype, "warehouse", "in", warehouses])
 
-		return query.run(as_dict=True)
+		return frappe.get_list(
+			self.doctype,
+			fields=[
+				f"`tab{self.doctype}`.{date_field} as posting_date",
+				f"{child}.item_code",
+				f"{child}.warehouse",
+				f"{child}.item_name",
+				f"{child}.stock_qty as qty",
+				f"{child}.base_amount as amount",
+			],
+			filters=filters,
+		)
 
 	def prepare_final_data(self):
 		self.data = []

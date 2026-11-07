@@ -27,6 +27,7 @@ from frappe.utils import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
 
@@ -661,8 +662,6 @@ class JobCard(Document):
 						"item_name": d.item_name,
 						"description": d.description,
 						"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
-						"rate": d.rate,
-						"amount": d.amount,
 					},
 				)
 
@@ -821,9 +820,7 @@ class JobCard(Document):
 				"Kindly cancel the Manufacturing Entries first against the work order {0}."
 			).format(frappe.bold(get_link_to_form("Work Order", self.work_order)))
 
-			frappe.throw(
-				_("{0} {1}").format(first_part_msg, second_part_msg), JobCardCancelError, title=_("Error")
-			)
+			frappe.throw(first_part_msg + " " + second_part_msg, JobCardCancelError, title=_("Error"))
 
 	def update_work_order_data(self, for_quantity, process_loss_qty, time_in_mins, wo):
 		workstation_hour_rate = frappe.get_value("Workstation", self.workstation, "hour_rate")
@@ -968,7 +965,9 @@ class JobCard(Document):
 			if doc.transfer_material_against == "Job Card" and not doc.skip_transfer:
 				min_qty = []
 				for d in doc.operations:
-					completed_qty = flt(d.completed_qty) + flt(d.process_loss_qty)
+					completed_qty = (
+						flt(d.completed_qty) + flt(d.process_loss_qty) + get_upstream_process_loss(doc, d)
+					)
 					if completed_qty:
 						min_qty.append(completed_qty)
 					else:
