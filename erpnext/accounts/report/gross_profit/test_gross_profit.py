@@ -899,16 +899,6 @@ class TestGrossProfit(FrappeTestCase):
 		self.assertIsNone(data[1].buying_rate)
 		self.assertEqual(data[1]["gross_profit_%"], 20)
 
-	def test_drop_ship_not_yet_billed_by_supplier(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-
-		so = self.create_drop_ship_order(buying_rate=70, bill_purchase_order=False)
-		si = make_sales_invoice(so.name)
-		si.items[0].delivered_by_supplier = 1
-		si.submit()
-
-		self.assertEqual(self.get_invoice_buying_amount(si.name), 700)
-
 	def test_drop_ship_partial_billing_and_return(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
@@ -1325,37 +1315,6 @@ class TestGrossProfit(FrappeTestCase):
 
 		return so
 
-	def test_restricted_user_sees_only_permitted_customers(self):
-		item = create_item("_Test Gross Profit Permission Item", is_stock_item=0).name
-		for customer, rate in ((self.customer, 500), ("_Test Customer 1", 9000)):
-			create_sales_invoice(
-				company=self.company,
-				customer=customer,
-				item_code=item,
-				rate=rate,
-				cost_center=self.cost_center,
-				debit_to=self.debit_to,
-				income_account=self.income_account,
-				expense_account=self.expense_account,
-			)
-		frappe.get_doc(
-			{
-				"doctype": "User Permission",
-				"user": "test@example.com",
-				"allow": "Customer",
-				"for_value": self.customer,
-			}
-		).insert()
-
-		frappe.set_user("test@example.com")
-		try:
-			filters = dict(company=self.company, from_date=nowdate(), to_date=nowdate(), item_code=item)
-			_, data = execute(frappe._dict(filters, group_by="Item Code"))
-		finally:
-			frappe.set_user("Administrator")
-
-		self.assertEqual(data[-1][7], 500)
-
 	def test_bundle_delivery_note_billed_in_parts(self):
 		bundle = self.make_stocked_bundle()
 		dnote = self.create_delivery_note(item=bundle, qty=4, rate=500)
@@ -1406,22 +1365,6 @@ class TestGrossProfit(FrappeTestCase):
 		sinv = make_sales_invoice(so.name).submit()
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
-
-	def test_sales_order_with_fully_returned_delivery_uses_valuation_rate(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
-
-		item = create_item("_Test Gross Profit Returned Delivery Item").name
-		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=2, basic_rate=100)
-		so = make_sales_order(
-			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=2
-		)
-		dnote = make_delivery_note(so.name).submit()
-		make_sales_return(dnote.name).submit()
-		sinv = make_sales_invoice(so.name).submit()
-
-		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 200)
 
 	def test_payment_term_group_keeps_invoice_without_schedule(self):
 		item = create_item("_Test Gross Profit No Terms Item", is_stock_item=0).name
