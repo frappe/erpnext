@@ -467,6 +467,12 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 				)
 		elif valuation_method == "Moving Average":
 			in_rate = previous_sle.get("valuation_rate")
+		elif valuation_method == "Standard Cost":
+			from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+			in_rate = get_item_standard_rate(
+				args.get("item_code"), args.get("company"), args.get("posting_date")
+			)
 
 	if in_rate is None:
 		voucher_no = args.get("voucher_no") or args.get("name")
