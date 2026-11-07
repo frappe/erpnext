@@ -30,7 +30,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
-	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -504,7 +503,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.submit()
 		scr.reload()
 
-		moved, remaining = get_serial_numbers_from_bundle(scr.items[0].serial_and_batch_bundle)
+		moved, remaining = get_serial_nos_from_bundle(scr.items[0].serial_and_batch_bundle)
 		make_stock_entry(
 			item_code=fg_item,
 			qty=1,
@@ -516,9 +515,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
 
-		self.assertEqual(
-			get_serial_numbers_from_bundle(scr_return.items[0].serial_and_batch_bundle), [remaining]
-		)
+		self.assertEqual(get_serial_nos_from_bundle(scr_return.items[0].serial_and_batch_bundle), [remaining])
 
 	def test_batch_return_skips_a_batch_moved_out_of_the_warehouse(self):
 		fg_item = make_item(
@@ -576,7 +573,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 	def test_serial_return_from_rejected_warehouse_takes_the_rejected_serial_nos(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
