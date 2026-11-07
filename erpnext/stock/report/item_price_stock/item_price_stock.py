@@ -3,9 +3,12 @@
 
 import frappe
 from frappe import _
+from frappe.utils import today
 
 
 def execute(filters=None):
+	frappe.has_permission("Item Price", "read", throw=True)
+
 	columns, data = [], []
 	columns = get_columns()
 	data = get_data(filters, columns)
@@ -35,6 +38,13 @@ def get_columns():
 			"fieldname": "stock_available",
 			"fieldtype": "Float",
 			"width": 120,
+		},
+		{
+			"label": _("Stock UOM"),
+			"fieldname": "stock_uom",
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 80,
 		},
 		{
 			"label": _("Buying Price List"),
@@ -71,6 +81,21 @@ def get_columns():
 			"options": "Currency",
 			"hidden": 1,
 		},
+		{"label": _("Price UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 80},
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 120,
+		},
+		{
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"fieldtype": "Link",
+			"options": "Supplier",
+			"width": 120,
+		},
 	]
 
 
@@ -83,9 +108,12 @@ def get_data(filters, columns):
 def get_item_price_qty_data(filters):
 	item_price = frappe.qb.DocType("Item Price")
 	bin = frappe.qb.DocType("Bin")
+	item = frappe.qb.DocType("Item")
 
 	query = (
 		frappe.qb.from_(item_price)
+		.inner_join(item)
+		.on(item.name == item_price.item_code)
 		.left_join(bin)
 		.on(item_price.item_code == bin.item_code)
 		.select(
@@ -94,8 +122,16 @@ def get_item_price_qty_data(filters):
 			item_price.name.as_("price_list_name"),
 			item_price.brand.as_("brand"),
 			item_price.currency,
+			item_price.uom,
+			item.stock_uom,
+			item_price.customer,
+			item_price.supplier,
 			bin.warehouse.as_("warehouse"),
 			bin.actual_qty.as_("actual_qty"),
+		)
+		.where(
+			(item_price.valid_from.isnull() | (item_price.valid_from <= today()))
+			& (item_price.valid_upto.isnull() | (item_price.valid_upto >= today()))
 		)
 	)
 
@@ -118,11 +154,15 @@ def get_item_price_qty_data(filters):
 				"brand": item_dict.brand,
 				"warehouse": item_dict.warehouse,
 				"stock_available": item_dict.actual_qty or 0,
+				"stock_uom": item_dict.stock_uom,
 				"buying_price_list": "",
 				"buying_rate": 0.0,
 				"selling_price_list": "",
 				"selling_rate": 0.0,
 				"currency": item_dict.currency,
+				"uom": item_dict.uom,
+				"customer": item_dict.customer,
+				"supplier": item_dict.supplier,
 			}
 
 			price_list = item_dict["price_list_name"]
