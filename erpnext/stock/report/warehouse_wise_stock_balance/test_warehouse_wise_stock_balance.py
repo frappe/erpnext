@@ -10,6 +10,9 @@ from erpnext.stock.report.warehouse_wise_stock_balance.warehouse_wise_stock_bala
 
 
 class TestWarehouseWiseStockBalance(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def run_report(self, **extra):
 		filters = frappe._dict({"company": "_Test Company", **extra})
 		return execute(filters)[1]
@@ -29,3 +32,37 @@ class TestWarehouseWiseStockBalance(FrappeTestCase):
 			self.assertEqual(self.row(data, warehouse)["stock_balance"], 1000)
 		self.assertEqual(self.row(data, middle)["indent"], self.row(data, top)["indent"] + 1)
 		self.assertEqual(self.row(data, leaf)["indent"], self.row(data, middle)["indent"] + 1)
+
+	def test_disabled_warehouses_with_stock_stay_in_the_totals(self):
+		group = create_warehouse("_Test WWSB Disabled Group", properties={"is_group": 1})
+		child = create_warehouse("_Test WWSB Disabled Child", properties={"parent_warehouse": group})
+		make_stock_entry(item_code="_Test Item", to_warehouse=child, qty=5, rate=100)
+		frappe.db.set_value("Warehouse", group, "disabled", 1)
+		root = frappe.db.get_value("Warehouse", group, "parent_warehouse")
+
+		data = self.run_report()
+		with_disabled = self.run_report(show_disabled_warehouses=1)
+
+		self.assertEqual(
+			self.row(data, root)["stock_balance"], self.row(with_disabled, root)["stock_balance"]
+		)
+		self.assertEqual(self.row(data, child)["indent"], self.row(with_disabled, child)["indent"])
+
+	def test_empty_disabled_warehouse_shows_only_when_asked(self):
+		empty = create_warehouse("_Test WWSB Empty Disabled")
+		frappe.db.set_value("Warehouse", empty, "disabled", 1)
+
+		self.assertNotIn(empty, [row["name"] for row in self.run_report()])
+		self.assertIn(empty, [row["name"] for row in self.run_report(show_disabled_warehouses=1)])
+
+	def test_empty_disabled_group_stays_above_its_enabled_children(self):
+		group = create_warehouse("_Test WWSB Empty Disabled Group", properties={"is_group": 1})
+		child = create_warehouse("_Test WWSB Enabled Child", properties={"parent_warehouse": group})
+		frappe.db.set_value("Warehouse", group, "disabled", 1)
+
+		data = self.run_report()
+		names = [row["name"] for row in data]
+
+		self.assertIn(group, names)
+		self.assertEqual(names.index(child), names.index(group) + 1)
+		self.assertEqual(self.row(data, child)["indent"], self.row(data, group)["indent"] + 1)
