@@ -60,6 +60,17 @@ def execute_snapshot_report(filters: StockBalanceFilter | None = None):
 	return execute_from_snapshot(filters)
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+
+	if column.fieldname == "out_qty" and data.out_qty > 0:
+		value = f"<span style='color:red'>{value}</span>"
+	elif column.fieldname == "in_qty" and data.in_qty > 0:
+		value = f"<span style='color:green'>{value}</span>"
+
+	return value
+
+
 class StockBalanceReport:
 	def __init__(self, filters: StockBalanceFilter | None) -> None:
 		self.filters = filters
