@@ -3744,3 +3744,4 @@ def get_stock_reco_details(voucher_detail_no):
 
 def on_doctype_update():
 	frappe.db.add_index("Serial and Batch Bundle", ["item_code", "warehouse", "posting_datetime", "creation"])
+	frappe.db.add_index("Serial and Batch Bundle", ["voucher_no", "voucher_type"])

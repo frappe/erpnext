@@ -27,6 +27,12 @@ from erpnext.tests.permission_test_utils import as_user, assert_refused, insert_
 
 
 class TestSerialandBatchBundle(FrappeTestCase):
+	def test_voucher_no_and_voucher_type_are_indexed(self):
+		self.assertTrue(frappe.db.has_index("tabSerial and Batch Bundle", "voucher_no_voucher_type_index"))
+		self.assertFalse(
+			frappe.db.get_column_index("tabSerial and Batch Bundle", "voucher_type", unique=False)
+		)
+
 	def test_serial_availability_at_posting_cutoff(self):
 		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 
