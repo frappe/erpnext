@@ -26,7 +26,7 @@ from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_items_as_dict,
-	validate_bom_no,
+	validate_production_bom,
 )
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
@@ -155,7 +155,7 @@ class WorkOrder(Document):
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
-			validate_bom_no(self.production_item, self.bom_no)
+			validate_production_bom(self.production_item, self.bom_no)
 
 		self.validate_sales_order()
 		self.set_default_warehouse()
