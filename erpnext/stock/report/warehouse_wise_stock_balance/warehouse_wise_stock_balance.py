@@ -64,7 +64,16 @@ def get_data(filters: StockBalanceFilter):
 	if filters.get("show_disabled_warehouses"):
 		return warehouses
 
-	return [warehouse for warehouse in warehouses if not warehouse.disabled or warehouse.stock_balance]
+	return remove_empty_disabled_warehouses(warehouses)
+
+
+def remove_empty_disabled_warehouses(warehouses):
+	shown = set()
+	for warehouse in reversed(warehouses):
+		if not warehouse.disabled or warehouse.stock_balance or warehouse.name in shown:
+			shown.update((warehouse.name, warehouse.parent_warehouse))
+
+	return [warehouse for warehouse in warehouses if warehouse.name in shown]
 
 
 def update_indent(warehouses):

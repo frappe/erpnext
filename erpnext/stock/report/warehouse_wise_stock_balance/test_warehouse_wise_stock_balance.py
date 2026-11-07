@@ -54,3 +54,15 @@ class TestWarehouseWiseStockBalance(FrappeTestCase):
 
 		self.assertNotIn(empty, [row["name"] for row in self.run_report()])
 		self.assertIn(empty, [row["name"] for row in self.run_report(show_disabled_warehouses=1)])
+
+	def test_empty_disabled_group_stays_above_its_enabled_children(self):
+		group = create_warehouse("_Test WWSB Empty Disabled Group", properties={"is_group": 1})
+		child = create_warehouse("_Test WWSB Enabled Child", properties={"parent_warehouse": group})
+		frappe.db.set_value("Warehouse", group, "disabled", 1)
+
+		data = self.run_report()
+		names = [row["name"] for row in data]
+
+		self.assertIn(group, names)
+		self.assertEqual(names.index(child), names.index(group) + 1)
+		self.assertEqual(self.row(data, child)["indent"], self.row(data, group)["indent"] + 1)
