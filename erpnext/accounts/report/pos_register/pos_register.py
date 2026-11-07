@@ -217,8 +217,7 @@ def get_columns(filters):
 		{
 			"label": _("Invoice Type"),
 			"fieldname": "invoice_type",
-			"fieldtype": "Link",
-			"options": "DocType",
+			"fieldtype": "Data",
 			"width": 120,
 		},
 		{
