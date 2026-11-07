@@ -14,6 +14,7 @@ from frappe.utils import cint, create_batch, cstr, flt, getdate
 from erpnext import (
 	_is_permitted,
 	_refuse,
+	get_company_currency,
 	get_default_cost_center,
 	require_party_permission,
 )
@@ -192,9 +193,15 @@ def create_journal_entry_bts(
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
-		fieldname=["name", "deposit", "withdrawal", "bank_account", "currency"],
+		fieldname=["name", "deposit", "withdrawal", "unallocated_amount", "bank_account", "currency"],
 		as_dict=True,
 	)[0]
+	# book only what is left of the transaction after earlier matches
+	if bank_transaction.deposit > 0.0:
+		bank_transaction.deposit = bank_transaction.unallocated_amount
+	else:
+		bank_transaction.withdrawal = bank_transaction.unallocated_amount
+
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	account_type = frappe.db.get_value("Account", second_account, "account_type")
 	if account_type in ["Receivable", "Payable"]:
@@ -1117,7 +1124,8 @@ def auto_reconcile_vouchers(
 	if not bank_account or not frappe.has_permission("Bank Account", "read", doc=bank_account):
 		_refuse()
 	validate_date_range(from_date, to_date, filter_by_reference_date, from_reference_date, to_reference_date)
-	bank_transactions = get_bank_transactions(bank_account)
+	# only the transactions of the statement period, as the tool lists them
+	bank_transactions = get_bank_transactions(bank_account, from_date, to_date)
 	writable_transactions = []
 	for transaction in bank_transactions:
 		if _is_permitted("Bank Transaction", transaction.name, "write"):
@@ -1252,6 +1260,14 @@ def _reconcile_vouchers(bank_transaction_name: str | int, vouchers: str | list, 
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = frappe.parse_json(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
+	# allocation clears the vouchers at once, which a draft transaction could not undo
+	if transaction.docstatus != 1:
+		frappe.throw(
+			_("Submit Bank Transaction {0} before reconciling vouchers against it.").format(
+				frappe.bold(transaction.name)
+			),
+			title=_("Bank Transaction Not Submitted"),
+		)
 	transaction.add_payment_entries(vouchers, is_new_voucher)
 	transaction.validate_duplicate_references()
 	transaction.allocate_payment_entries()
@@ -1468,6 +1484,7 @@ def get_matching_queries(
 ):
 	queries = []
 	currency = get_account_currency(bank_account)
+	company_currency = get_company_currency(company)
 
 	if "payment_entry" in document_types:
 		query = get_pe_matching_query(
@@ -1497,12 +1514,12 @@ def get_matching_queries(
 		queries.append(query)
 
 	if transaction.deposit > 0.0 and "sales_invoice" in document_types:
-		query = get_si_matching_query(exact_match, currency, common_filters, transaction)
+		query = get_si_matching_query(exact_match, currency, common_filters, transaction, company_currency)
 		queries.append(query)
 
 	if transaction.withdrawal > 0.0:
 		if "purchase_invoice" in document_types:
-			query = get_pi_matching_query(exact_match, currency, common_filters)
+			query = get_pi_matching_query(exact_match, currency, common_filters, company_currency)
 			queries.append(query)
 
 	if "bank_transaction" in document_types:
@@ -1689,17 +1706,21 @@ def get_je_matching_query(
 	return query
 
 
-def get_si_matching_query(exact_match, currency, common_filters, transaction):
+def get_si_matching_query(exact_match, currency, common_filters, transaction, company_currency=None):
 	# get matching sales invoice query
 	si = frappe.qb.DocType("Sales Invoice")
 	sip = frappe.qb.DocType("Sales Invoice Payment")
 
+	# a bank account in the company currency is posted the payment's base amount, whatever the invoice currency
+	in_company_currency = currency == company_currency
+	amount_field = sip.base_amount if in_company_currency else sip.amount
+
 	ref_condition = sip.reference_no == transaction.reference_number
 	ref_rank = frappe.qb.terms.Case().when(ref_condition, 1).else_(0)
 
-	amount_equality = sip.amount == common_filters.amount
+	amount_equality = amount_field == common_filters.amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
-	amount_condition = amount_equality if exact_match else sip.amount > 0.0
+	amount_condition = amount_equality if exact_match else amount_field > 0.0
 
 	party_condition = si.customer == common_filters.party
 	party_rank = frappe.qb.terms.Case().when(party_condition, 1).else_(0)
@@ -1712,20 +1733,23 @@ def get_si_matching_query(exact_match, currency, common_filters, transaction):
 			(ref_rank + party_rank + amount_rank + 1).as_("rank"),
 			ConstantColumn("Sales Invoice").as_("doctype"),
 			si.name,
-			sip.amount.as_("paid_amount"),
+			amount_field.as_("paid_amount"),
 			sip.reference_no,
 			ConstantColumn("").as_("reference_date"),
 			si.customer.as_("party"),
 			ConstantColumn("Customer").as_("party_type"),
 			si.posting_date,
-			si.currency,
+			# the amount above is in the bank account currency
+			ConstantColumn(currency).as_("currency") if in_company_currency else si.currency,
 		)
 		.where(si.docstatus == 1)
 		.where(sip.clearance_date.isnull())
 		.where(sip.account == common_filters.bank_account)
 		.where(amount_condition)
-		.where(si.currency == currency)
 	)
+
+	if not in_company_currency:
+		query = query.where(si.currency == currency)
 
 	if frappe.flags.auto_reconcile_vouchers is True:
 		query = query.where(ref_condition)
@@ -1733,13 +1757,17 @@ def get_si_matching_query(exact_match, currency, common_filters, transaction):
 	return query
 
 
-def get_pi_matching_query(exact_match, currency, common_filters):
+def get_pi_matching_query(exact_match, currency, common_filters, company_currency=None):
 	# get matching purchase invoice query when they are also used as payment entries (is_paid)
 	purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 
-	amount_equality = purchase_invoice.paid_amount == common_filters.amount
+	# a bank account in the company currency is posted the base paid amount, whatever the invoice currency
+	in_company_currency = currency == company_currency
+	amount_field = purchase_invoice.base_paid_amount if in_company_currency else purchase_invoice.paid_amount
+
+	amount_equality = amount_field == common_filters.amount
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
-	amount_condition = amount_equality if exact_match else purchase_invoice.paid_amount > 0.0
+	amount_condition = amount_equality if exact_match else amount_field > 0.0
 
 	party_condition = purchase_invoice.supplier == common_filters.party
 	party_rank = frappe.qb.terms.Case().when(party_condition, 1).else_(0)
@@ -1750,20 +1778,23 @@ def get_pi_matching_query(exact_match, currency, common_filters):
 			(party_rank + amount_rank + 1).as_("rank"),
 			ConstantColumn("Purchase Invoice").as_("doctype"),
 			purchase_invoice.name,
-			purchase_invoice.paid_amount,
+			amount_field.as_("paid_amount"),
 			ConstantColumn("").as_("reference_no"),
 			ConstantColumn("").as_("reference_date"),
 			purchase_invoice.supplier.as_("party"),
 			ConstantColumn("Supplier").as_("party_type"),
 			purchase_invoice.posting_date,
-			purchase_invoice.currency,
+			# the amount above is in the bank account currency
+			ConstantColumn(currency).as_("currency") if in_company_currency else purchase_invoice.currency,
 		)
 		.where(purchase_invoice.docstatus == 1)
 		.where(purchase_invoice.is_paid == 1)
 		.where(purchase_invoice.clearance_date.isnull())
 		.where(purchase_invoice.cash_bank_account == common_filters.bank_account)
 		.where(amount_condition)
-		.where(purchase_invoice.currency == currency)
 	)
+
+	if not in_company_currency:
+		query = query.where(purchase_invoice.currency == currency)
 
 	return query
