@@ -2,7 +2,7 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 
 class TestStockLedgerVariance(FrappeTestCase):
@@ -36,3 +36,33 @@ class TestStockLedgerVariance(FrappeTestCase):
 		data = self.run_report(item_code=item, difference_in="Qty")
 
 		self.assertEqual([row["name"] for row in data if row.get("item_code") == item], [sle])
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": ""})
+	def test_blank_currency_precision_uses_the_ledger_precision(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_method": "FIFO"}).name
+		make_stock_entry(
+			item_code=item, to_warehouse="Stores - _TC", qty=12.25, rate=37.77, posting_date="2026-06-01"
+		)
+
+		sle = frappe.get_last_doc("Stock Ledger Entry", {"item_code": item, "is_cancelled": 0})
+		self.assertEqual(sle.stock_value, 462.68)
+		self.assertEqual(self.run_report(item_code=item), [])
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": ""})
+	def test_blank_currency_precision_still_reports_a_wrong_stock_value(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_method": "FIFO"}).name
+		make_stock_entry(
+			item_code=item, to_warehouse="Stores - _TC", qty=12.25, rate=37.77, posting_date="2026-06-01"
+		)
+		sle = frappe.get_last_doc("Stock Ledger Entry", {"item_code": item, "is_cancelled": 0})
+		frappe.db.set_value("Stock Ledger Entry", sle.name, "stock_value", 462.69, update_modified=False)
+
+		data = self.run_report(item_code=item, difference_in="Value")
+
+		self.assertEqual([row["name"] for row in data], [sle.name])

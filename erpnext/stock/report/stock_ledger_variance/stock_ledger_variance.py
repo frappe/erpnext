@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt
 
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
@@ -203,8 +204,8 @@ def get_data(filters=None):
 	data = []
 	if item_warehouse_map:
 		float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
-		currency_precision = (
-			cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
+		currency_precision = get_field_precision(
+			frappe.get_meta("Stock Ledger Entry").get_field("stock_value")
 		)
 
 		for item_warehouse in item_warehouse_map:
