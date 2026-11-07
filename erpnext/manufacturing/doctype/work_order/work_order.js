@@ -85,7 +85,7 @@ frappe.ui.form.on("Work Order", {
 
 		// formatter for work order operation
 		frm.set_indicator_formatter("operation", function (doc) {
-			return frm.doc.qty == doc.completed_qty ? "green" : "orange";
+			return doc.status === "Completed" ? "green" : "orange";
 		});
 	},
 
@@ -361,10 +361,14 @@ frappe.ui.form.on("Work Order", {
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach((data) => {
-			if (data.completed_qty + data.process_loss_qty != frm.doc.qty) {
-				pending_qty = frm.doc.qty - flt(data.completed_qty) - flt(data.process_loss_qty);
+			let operation_qty = erpnext.work_order.get_operation_target_qty(frm, data);
+			if (data.completed_qty + data.process_loss_qty != operation_qty) {
+				pending_qty = flt(
+					operation_qty - flt(data.completed_qty) - flt(data.process_loss_qty),
+					precision("completed_qty", data)
+				);
 
-				if (pending_qty) {
+				if (pending_qty > 0) {
 					dialog.fields_dict.operations.df.data.push({
 						__checked: 1,
 						name: data.name,
@@ -506,10 +510,15 @@ frappe.ui.form.on("Work Order", {
 			let total_completed_qty = frm.doc.qty * frm.doc.operations.length;
 
 			frm.doc.operations.forEach((d) => {
+				let operation_qty = erpnext.work_order.get_operation_target_qty(frm, d);
+				let completed_qty = operation_qty
+					? Math.min((flt(d.completed_qty) + flt(d.process_loss_qty)) / operation_qty, 1) *
+					  frm.doc.qty
+					: frm.doc.qty;
 				if (!status_wise_oprtation_data[d.status]) {
-					status_wise_oprtation_data[d.status] = [d.completed_qty, d.operation];
+					status_wise_oprtation_data[d.status] = [completed_qty, d.operation];
 				} else {
-					status_wise_oprtation_data[d.status][0] += d.completed_qty;
+					status_wise_oprtation_data[d.status][0] += completed_qty;
 					status_wise_oprtation_data[d.status][1] += ", " + d.operation;
 				}
 			});
@@ -687,6 +696,10 @@ frappe.ui.form.on("Work Order Operation", {
 });
 
 erpnext.work_order = {
+	get_operation_target_qty(frm, row) {
+		return flt(frm.doc.__onload?.operation_target_qty?.[row.name] ?? frm.doc.qty);
+	},
+
 	set_custom_buttons: function (frm) {
 		var doc = frm.doc;
 
