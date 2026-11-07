@@ -77,8 +77,7 @@ def get_columns():
 		{
 			"label": _("Currency"),
 			"fieldname": "currency",
-			"fieldtype": "Link",
-			"options": "Currency",
+			"fieldtype": "Data",
 			"hidden": 1,
 		},
 		{"label": _("Price UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 80},
