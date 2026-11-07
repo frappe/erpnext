@@ -110,6 +110,7 @@ class TestAsset(AssetSetup):
 
 		item.disabled = 1
 		item.save()
+		self.addCleanup(frappe.db.set_value, "Item", "MacBook Pro", "disabled", 0)
 		self.assertRaises(frappe.ValidationError, asset.save)
 		item.disabled = 0
 
