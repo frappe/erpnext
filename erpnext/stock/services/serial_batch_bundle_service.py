@@ -490,7 +490,9 @@ class SerialBatchBundleService:
 			needs_bundle = (
 				self.needs_rejected_bundle(row)
 				if qty_field == "rejected_qty"
-				else not row.get("return_qty_from_rejected_warehouse") and not row.get(bundle_field)
+				else row.get("qty")
+				and not row.get("return_qty_from_rejected_warehouse")
+				and not row.get(bundle_field)
 			)
 			if row.get(field) and needs_bundle and not row.get("use_serial_batch_fields"):
 				reference_ids.append(row.get(field))
