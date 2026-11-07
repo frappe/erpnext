@@ -303,3 +303,13 @@ def identity(x, *args, **kwargs):
 	Use like this: `from erpnext.setup.utils import identity as _`
 	"""
 	return x
+
+
+def set_root_as_default_parent(doc):
+	"""Default an empty tree parent to the root, unless the doc is the root."""
+	if doc.get(doc.nsm_parent_field):
+		return
+
+	root = get_root_of(doc.doctype)
+	if root != doc.name:
+		doc.set(doc.nsm_parent_field, root)

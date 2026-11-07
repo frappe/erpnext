@@ -25,8 +25,9 @@ from frappe.utils import (
 from frappe.utils.csvutils import build_csv_response
 from pypika.terms import ExistsCriterion
 
+import erpnext
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
@@ -174,7 +175,7 @@ class ProductionPlan(Document):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			elif (d.item_code, d.bom_no) not in validated_boms:
-				validate_bom_no(d.item_code, d.bom_no)
+				validate_production_bom(d.item_code, d.bom_no)
 				validated_boms.add((d.item_code, d.bom_no))
 
 			if not flt(d.planned_qty):
@@ -1198,7 +1199,7 @@ def download_raw_materials(doc, warehouses=None):
 
 		if not doc.get("for_warehouse"):
 			row = {"item_code": d.get("item_code")}
-			for bin_dict in get_bin_details(row, doc.company, all_warehouse=True):
+			for bin_dict in _get_bin_details(row, doc.company, all_warehouse=True):
 				if d.get("warehouse") == bin_dict.get("warehouse"):
 					continue
 
@@ -1521,6 +1522,18 @@ def get_sales_orders(self):
 
 @frappe.whitelist()
 def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
+	frappe.has_permission("Production Plan", "read", throw=True)
+
+	permitted_warehouses = frappe.get_list(
+		"Warehouse", filters={"company": company}, pluck="name", limit_page_length=0
+	)
+	if not permitted_warehouses:
+		return []
+
+	return _get_bin_details(row, company, for_warehouse, all_warehouse, permitted_warehouses)
+
+
+def _get_bin_details(row, company, for_warehouse=None, all_warehouse=False, permitted_warehouses=None):
 	if isinstance(row, str):
 		row = frappe._dict(json.loads(row))
 
@@ -1528,6 +1541,8 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 	wh = frappe.qb.DocType("Warehouse")
 
 	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
+	if permitted_warehouses:
+		subquery = subquery.where(wh.name.isin(permitted_warehouses))
 
 	warehouse = ""
 	if not all_warehouse:
@@ -1556,8 +1571,15 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 @frappe.whitelist()
 def get_so_details(sales_order):
+	# planners pick orders without a Sales Order role, as in sales_order_query
+	frappe.has_permission("Production Plan", throw=True)
+	erpnext.require_user_permission("Sales Order", sales_order)
+
 	return frappe.db.get_value(
-		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
+		"Sales Order",
+		{"name": sales_order, "docstatus": 1},
+		["transaction_date", "customer", "grand_total"],
+		as_dict=1,
 	)
 
 
@@ -1763,7 +1785,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
 			warehouse = warehouse or details.get("source_warehouse") or details.get("default_warehouse")
-			bin_dict = get_bin_details(details, doc.company, warehouse)
+			bin_dict = _get_bin_details(details, doc.company, warehouse)
 			bin_dict = bin_dict[0] if bin_dict else {}
 
 			if details.qty > 0:
@@ -1898,7 +1920,7 @@ def get_sub_assembly_items(
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
 			if skip_available_sub_assembly_item and d.item_code not in sub_assembly_items:
-				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+				bin_details.setdefault(d.item_code, _get_bin_details(d, company, for_warehouse=warehouse))
 
 				for _bin_dict in bin_details[d.item_code]:
 					if _bin_dict.projected_qty > 0:
@@ -1910,7 +1932,7 @@ def get_sub_assembly_items(
 							stock_qty = stock_qty - _bin_dict.projected_qty
 							sub_assembly_items.append(d.item_code)
 			elif warehouse:
-				bin_details.setdefault(d.item_code, get_bin_details(d, company, for_warehouse=warehouse))
+				bin_details.setdefault(d.item_code, _get_bin_details(d, company, for_warehouse=warehouse))
 
 			if stock_qty > 0:
 				bom_data.append(

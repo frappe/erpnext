@@ -850,6 +850,7 @@ def make_new_batch(**args):
 				"batch_id": args.batch_id,
 				"item": args.item_code,
 				"expiry_date": args.expiry_date,
+				"manufacturing_date": args.manufacturing_date,
 			}
 		)
 
