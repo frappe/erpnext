@@ -24,7 +24,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+from erpnext.accounts.doctype.journal_entry.journal_entry import map_reverse_journal_entry
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -122,7 +122,8 @@ def get_depreciable_asset_depr_schedules_data(date):
 		.where(a.calculate_depreciation == 1)
 		.where(a.docstatus == 1)
 		.where(ads.docstatus == 1)
-		.where(a.status.isin(["Submitted", "Partially Depreciated"]))
+		# an asset under maintenance keeps depreciating
+		.where(a.status.isin(["Submitted", "Partially Depreciated", "In Maintenance"]))
 		.where(ds.journal_entry.isnull())
 		.where(ds.schedule_date <= date)
 		.groupby(ads.name)
@@ -199,6 +200,7 @@ def make_depreciation_entry(
 	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 	frappe.has_permission("Asset Depreciation Schedule", "write", asset_depr_schedule_doc, throw=True)
 	frappe.has_permission("Asset", "write", asset_depr_schedule_doc.asset, throw=True)
+	frappe.has_permission("Journal Entry", throw=True)
 
 	return _make_depreciation_entry(
 		asset_depr_schedule_name,
@@ -220,8 +222,6 @@ def _make_depreciation_entry(
 	depreciation_cost_center_and_depreciation_series=None,
 	accounting_dimensions=None,
 ):
-	frappe.has_permission("Journal Entry", throw=True)
-
 	if not date:
 		date = today()
 
@@ -259,8 +259,6 @@ def _make_depreciation_entry(
 				asset,
 				date,
 				d,
-				sch_start_idx,
-				sch_end_idx,
 				depreciation_cost_center,
 				depreciation_series,
 				credit_account,
@@ -284,17 +282,13 @@ def _make_journal_entry_for_depreciation(
 	asset,
 	date,
 	depr_schedule,
-	sch_start_idx,
-	sch_end_idx,
 	depreciation_cost_center,
 	depreciation_series,
 	credit_account,
 	debit_account,
 	accounting_dimensions,
 ):
-	if not (sch_start_idx and sch_end_idx) and not (
-		not depr_schedule.journal_entry and getdate(depr_schedule.schedule_date) <= getdate(date)
-	):
+	if depr_schedule.journal_entry or getdate(depr_schedule.schedule_date) > getdate(date):
 		return
 
 	je = frappe.new_doc("Journal Entry")
@@ -461,6 +455,28 @@ def scrap_asset(asset_name, scrap_date=None):
 	frappe.msgprint(_("Asset scrapped via Journal Entry {0}").format(je.name))
 
 
+def get_last_depreciation_date(asset_name, finance_book: str | None = None):
+	depreciation = frappe.qb.DocType("Asset Depreciation Schedule")
+	depreciation_schedule = frappe.qb.DocType("Depreciation Schedule")
+
+	query = (
+		frappe.qb.from_(depreciation)
+		.join(depreciation_schedule)
+		.on(depreciation.name == depreciation_schedule.parent)
+		.select(depreciation_schedule.schedule_date)
+		.where(depreciation.asset == asset_name)
+		.where(depreciation.docstatus == 1)
+		.where(depreciation_schedule.journal_entry != "")
+		.orderby(depreciation_schedule.schedule_date, order=Order.desc)
+		.limit(1)
+	)
+	if finance_book:
+		query = query.where(depreciation.finance_book == finance_book)
+
+	last_depreciation_date = query.run()
+	return last_depreciation_date[0][0] if last_depreciation_date else None
+
+
 def validate_scrap_date(scrap_date, today_date, purchase_date, calculate_depreciation, asset_name):
 	if scrap_date > today_date:
 		frappe.throw(_("Future date is not allowed"))
@@ -495,6 +511,8 @@ def validate_scrap_date(scrap_date, today_date, purchase_date, calculate_depreci
 def restore_asset(asset_name):
 	frappe.has_permission("Asset", "write", asset_name, throw=True)
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.journal_entry_for_scrap:
+		frappe.throw(_("Asset {0} cannot be restored, as it is not scrapped").format(asset_name))
 
 	reverse_depreciation_entry_made_after_disposal(asset, asset.disposal_date)
 
@@ -521,6 +539,7 @@ def depreciate_asset(asset_doc, date, notes):
 		return
 
 	asset_doc.flags.ignore_validate_update_after_submit = True
+	asset_doc.flags.ignore_permissions = True
 
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(asset_doc, notes, date_of_disposal=date)
 
@@ -543,6 +562,7 @@ def reset_depreciation_schedule(asset_doc, date, notes):
 		return
 
 	asset_doc.flags.ignore_validate_update_after_submit = True
+	asset_doc.flags.ignore_permissions = True
 
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(asset_doc, notes, date_of_return=date)
 
@@ -575,7 +595,9 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 				if not disposal_was_made_on_original_schedule_date(
 					schedule_idx, row, date
 				) or disposal_happens_in_the_future(date):
-					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry = map_reverse_journal_entry(
+						schedule.journal_entry, ignore_permissions=True
+					)
 					reverse_journal_entry.posting_date = nowdate()
 
 					for account in reverse_journal_entry.accounts:
@@ -587,11 +609,14 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 						)
 
 					frappe.flags.is_reverse_depr_entry = True
+					reverse_journal_entry.flags.ignore_permissions = True
 					reverse_journal_entry.submit()
 
 					frappe.flags.is_reverse_depr_entry = False
 					asset_depr_schedule_doc.flags.ignore_validate_update_after_submit = True
+					asset_depr_schedule_doc.flags.ignore_permissions = True
 					asset.flags.ignore_validate_update_after_submit = True
+					asset.flags.ignore_permissions = True
 					schedule.journal_entry = None
 					depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
 					row.value_after_depreciation += depreciation_amount
@@ -891,6 +916,13 @@ def get_disposal_account_and_cost_center(company):
 def get_value_after_depreciation_on_disposal_date(
 	asset: str, disposal_date: DateTimeLikeObject, finance_book: str | None = None
 ):
+	frappe.has_permission("Asset", "read", asset, throw=True)
+	return calculate_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book)
+
+
+def calculate_value_after_depreciation_on_disposal_date(
+	asset: str, disposal_date: DateTimeLikeObject, finance_book: str | None = None
+) -> float:
 	asset_doc = frappe.get_doc("Asset", asset)
 
 	if asset_doc.available_for_use_date > getdate(disposal_date):
