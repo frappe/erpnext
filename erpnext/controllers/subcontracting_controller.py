@@ -9,7 +9,11 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
+<<<<<<< HEAD
 from frappe.utils import cint, flt, get_link_to_form
+=======
+from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form
+>>>>>>> c3ece08 (fix(subcontracting): send a return row back at the consumed rate of its own batch or serial nos)
 
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
@@ -96,7 +100,7 @@ class SubcontractingController(StockController):
 				# rows with the consumed serial nos or batches already carry the rate they were consumed at
 				has_serial_batch = row.serial_and_batch_bundle or row.batch_no or row.serial_no
 				return_rate = (
-					row.rate
+					self.get_serial_batch_return_rate(row, returnable_serial_batches[key])
 					if has_serial_batch and key in returnable_serial_batches
 					else return_rates.get(key)
 				)
@@ -108,6 +112,25 @@ class SubcontractingController(StockController):
 				rates.append(_get_incoming_rate(self.get_supplied_item_rate_args(row)))
 
 		return rates
+
+	def get_serial_batch_return_rate(self, row, identities):
+		"""Rate the returned receipt consumed the row's serial nos or batch at; a picked bundle keeps its rate."""
+		# serial nos match case-insensitively, as in SerialBatchIdentity
+		serial_nos = {serial_no.casefold() for serial_no in get_serial_nos(row.serial_no)}
+		rates = [
+			identity.rate
+			for identity in identities
+			if (
+				cstr(identity.serial_number).casefold() in serial_nos
+				if serial_nos
+				else identity.batch_no == row.batch_no
+			)
+		]
+		if not (row.use_serial_batch_fields and rates):
+			return row.rate
+
+		# a serial no is one unit, so the plain mean is the qty-weighted rate
+		return flt(sum(rates) / len(rates), row.precision("rate"))
 
 	def get_supplied_item_rate_args(self, row):
 		return frappe._dict(
@@ -159,6 +182,7 @@ class SubcontractingController(StockController):
 		item = frappe.qb.DocType("Subcontracting Receipt Item")
 		supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
+		serial = frappe.qb.DocType("Serial No")
 		rows = (
 			frappe.qb.from_(supplied_item)
 			.join(receipt)
@@ -167,10 +191,13 @@ class SubcontractingController(StockController):
 			.on(item.name == supplied_item.reference_name)
 			.join(entry)
 			.on(entry.parent == supplied_item.serial_and_batch_bundle)
+			.left_join(serial)
+			.on(serial.name == entry.serial_no)
 			.select(
 				Coalesce(item.subcontracting_receipt_item, item.name).as_("receipt_item"),
 				supplied_item.rm_item_code,
 				entry.serial_no,
+				serial.serial_no.as_("serial_number"),
 				entry.batch_no,
 				entry.qty,
 				entry.incoming_rate,
@@ -192,7 +219,11 @@ class SubcontractingController(StockController):
 				identity = returnable.setdefault(key, {}).setdefault(
 					(row.serial_no, row.batch_no),
 					frappe._dict(
-						serial_no=row.serial_no, batch_no=row.batch_no, qty=0.0, rate=row.incoming_rate
+						serial_no=row.serial_no,
+						serial_number=row.serial_number,
+						batch_no=row.batch_no,
+						qty=0.0,
+						rate=row.incoming_rate,
 					),
 				)
 			else:
@@ -222,11 +253,8 @@ class SubcontractingController(StockController):
 			group = groups[(identity.batch_no, identity.rate)]
 			group.qty += allocated
 			if identity.serial_no:
-				group.serial_nos.append(identity.serial_no)
+				group.serial_nos.append(identity.serial_number)
 
-		numbers = SerialBatchIdentity("Serial No").get_number_map(
-			[serial_no for group in groups.values() for serial_no in group.serial_nos]
-		)
 		for (batch_no, rate), group in groups.items():
 			row = self.append(self.raw_material_table, rm_obj.as_dict(no_default_fields=True))
 			row.update(
@@ -235,7 +263,7 @@ class SubcontractingController(StockController):
 					"rate": flt(rate, row.precision("rate")),
 					"use_serial_batch_fields": 1,
 					"batch_no": batch_no,
-					"serial_no": "\n".join(numbers[serial_no] for serial_no in group.serial_nos),
+					"serial_no": "\n".join(group.serial_nos),
 				}
 			)
 
