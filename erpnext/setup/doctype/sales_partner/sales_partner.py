@@ -113,6 +113,22 @@ class SalesPartner(WebsiteGenerator):
 		return context
 
 
+def get_list_context(context=None):
+	return {"get_list": get_published_partners}
+
+
+def get_published_partners(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
+	"""Website list rows: only the fields `/partners` already shows, so guests cannot read internal ones."""
+	return frappe.get_all(
+		"Sales Partner",
+		filters={"show_in_website": 1},
+		fields=["name", "partner_name", "partner_type", "territory", "route", "logo", "introduction"],
+		limit_start=limit_start,
+		limit_page_length=limit_page_length,
+		order_by="partner_name asc",
+	)
+
+
 @frappe.whitelist()
 def get_commission_rate(sales_partner: str) -> float:
 	partner = frappe.get_doc("Sales Partner", sales_partner)
