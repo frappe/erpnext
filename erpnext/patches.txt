@@ -467,4 +467,6 @@ execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", 
 execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
 execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
 erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
+erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
+erpnext.patches.v16_0.set_recalculate_rate_on_subcontracting_return_raw_materials
 erpnext.patches.v15_0.set_value_adjustment_amount_on_asset

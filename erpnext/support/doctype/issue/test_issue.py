@@ -393,6 +393,32 @@ class TestIssue(TestSetUp):
 
 		self.assertEqual(frappe.db.get_value("Issue", issue.name, ["customer", "status"]), (None, "Open"))
 
+	def test_split_of_closed_issue_keeps_parent_metrics(self):
+		issue = make_issue(get_datetime("2019-03-04 12:00"), index=1)
+		frappe.flags.current_time = get_datetime("2019-03-04 16:00")
+		issue.status = "Closed"
+		issue.save()
+		communication = frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_type": "Communication",
+				"sent_or_received": "Sent",
+				"subject": "Split",
+				"sender": "test@example.com",
+				"reference_doctype": "Issue",
+				"reference_name": issue.name,
+			}
+		).insert(ignore_permissions=True)
+
+		issue = frappe.get_doc("Issue", issue.name)
+		split = frappe.get_doc("Issue", issue.split_issue("Split issue", communication.name))
+
+		self.assertEqual(frappe.db.get_value("Issue", issue.name, "resolution_time"), 14400)
+		self.assertEqual(split.status, "Open")
+		self.assertEqual(split.opening_date, frappe.utils.getdate())
+		self.assertFalse(split.sla_resolution_date)
+		self.assertFalse(split.resolution_time)
+
 	def test_status_change_times_are_in_system_time_zone(self):
 		user = create_user("test_sla_timezone@example.com")
 		user.time_zone = "Pacific/Kiritimati"

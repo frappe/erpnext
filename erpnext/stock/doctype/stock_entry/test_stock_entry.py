@@ -3127,7 +3127,10 @@ class TestStockEntry(FrappeTestCase):
 		item_doc.save()
 
 		batch = make_new_batch(
-			batch_id=frappe.generate_hash("", 5), item_code=item_doc.name, expiry_date=add_days(today(), -1)
+			batch_id=frappe.generate_hash("", 5),
+			item_code=item_doc.name,
+			manufacturing_date=add_days(today(), -2),
+			expiry_date=add_days(today(), -1),
 		)
 
 		se = make_stock_entry(
