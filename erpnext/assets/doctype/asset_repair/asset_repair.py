@@ -4,7 +4,15 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
-from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
+from frappe.utils import (
+	add_months,
+	cint,
+	flt,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	time_diff_in_hours,
+)
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -37,6 +45,7 @@ class AssetRepair(AccountsController):
 		amended_from: DF.Link | None
 		asset: DF.Link
 		asset_name: DF.ReadOnly | None
+		asset_value_updated: DF.Check
 		capitalize_repair_cost: DF.Check
 		company: DF.Link | None
 		completion_date: DF.Datetime | None
@@ -59,8 +68,6 @@ class AssetRepair(AccountsController):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 		self.validate_asset()
 		self.validate_dates()
-		self.update_status()
-
 		if self.get("stock_items"):
 			self.set_stock_items_cost()
 		self.calculate_total_repair_cost()
@@ -76,6 +83,9 @@ class AssetRepair(AccountsController):
 						get_link_to_form("Purchase Invoice", self.purchase_invoice)
 					)
 				)
+
+	def on_update(self):
+		self.update_status()
 
 	def validate_asset(self):
 		if self.asset_doc.status in ("Sold", "Scrapped", "Capitalized"):
@@ -124,6 +134,11 @@ class AssetRepair(AccountsController):
 		if self.get("stock_consumption") or self.get("capitalize_repair_cost"):
 			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
 
+			if self.get("stock_consumption"):
+				self.check_for_stock_items_and_warehouse()
+				self.decrease_stock_quantity()
+				self.set_consumed_items_cost_from_stock_entry()
+
 			self.increase_asset_value()
 
 			total_repair_cost = self.get_total_value_of_stock_consumed()
@@ -132,9 +147,6 @@ class AssetRepair(AccountsController):
 			self.asset_doc.total_asset_cost += total_repair_cost
 			self.asset_doc.additional_asset_cost += total_repair_cost
 
-			if self.get("stock_consumption"):
-				self.check_for_stock_items_and_warehouse()
-				self.decrease_stock_quantity()
 			if self.get("capitalize_repair_cost"):
 				self.make_gl_entries()
 				if self.asset_doc.calculate_depreciation and self.increase_in_asset_life:
@@ -147,6 +159,7 @@ class AssetRepair(AccountsController):
 					get_link_to_form(self.doctype, self.name),
 				)
 				self.asset_doc.flags.ignore_validate_update_after_submit = True
+				self.asset_doc.flags.ignore_permissions = True
 				make_new_active_asset_depr_schedules_and_cancel_current_ones(
 					self.asset_doc, notes, ignore_booked_entry=True
 				)
@@ -195,6 +208,7 @@ class AssetRepair(AccountsController):
 					get_link_to_form(self.doctype, self.name),
 				)
 				self.asset_doc.flags.ignore_validate_update_after_submit = True
+				self.asset_doc.flags.ignore_permissions = True
 				make_new_active_asset_depr_schedules_and_cancel_current_ones(
 					self.asset_doc, notes, ignore_booked_entry=True
 				)
@@ -207,7 +221,16 @@ class AssetRepair(AccountsController):
 					),
 				)
 
+	def on_cancel(self):
+		self.cancel_stock_entry()
 		self.cancel_sabb()
+
+	def cancel_stock_entry(self):
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
+		if stock_entry:
+			stock_entry = frappe.get_doc("Stock Entry", stock_entry)
+			stock_entry.flags.ignore_permissions = True
+			stock_entry.cancel()
 
 	def after_delete(self):
 		frappe.get_doc("Asset", self.asset).set_status()
@@ -236,6 +259,8 @@ class AssetRepair(AccountsController):
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation += self.repair_cost
+		elif self.capitalize_repair_cost:
+			self.update_value_after_depreciation(total_value_of_stock_consumed + flt(self.repair_cost))
 
 	def decrease_asset_value(self):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
@@ -246,6 +271,17 @@ class AssetRepair(AccountsController):
 
 				if self.capitalize_repair_cost:
 					row.value_after_depreciation -= self.repair_cost
+		elif self.capitalize_repair_cost:
+			self.update_value_after_depreciation(-(total_value_of_stock_consumed + flt(self.repair_cost)))
+
+	def update_value_after_depreciation(self, total_repair_cost: float):
+		# repairs submitted before asset_value_updated existed never raised the value, so don't lower it
+		if self.docstatus == 2 and not self.asset_value_updated:
+			return
+
+		self.asset_doc.value_after_depreciation += flt(total_repair_cost)
+		if self.docstatus == 1:
+			self.asset_value_updated = 1
 
 	def get_total_value_of_stock_consumed(self):
 		total_value_of_stock_consumed = 0
@@ -257,7 +293,14 @@ class AssetRepair(AccountsController):
 
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc(
-			{"doctype": "Stock Entry", "stock_entry_type": "Material Issue", "company": self.company}
+			{
+				"doctype": "Stock Entry",
+				"stock_entry_type": "Material Issue",
+				"company": self.company,
+				"set_posting_time": 1,
+				"posting_date": get_datetime(self.completion_date).date(),
+				"posting_time": get_datetime(self.completion_date).time(),
+			}
 		)
 		stock_entry.asset_repair = self.name
 
@@ -282,8 +325,27 @@ class AssetRepair(AccountsController):
 				},
 			)
 
+		stock_entry.flags.ignore_permissions = True
 		stock_entry.insert()
 		stock_entry.submit()
+
+	def set_consumed_items_cost_from_stock_entry(self):
+		"""Use the stock ledger's outgoing value, which the GL also uses, instead of the entered rate."""
+		if not self.get("stock_items"):
+			return
+
+		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
+		stock_entry_items = frappe.get_all(
+			"Stock Entry Detail",
+			filters={"parent": stock_entry},
+			fields=["valuation_rate", "amount"],
+			order_by="idx",
+		)
+		for stock_item, stock_entry_item in zip(self.stock_items, stock_entry_items, strict=True):
+			stock_item.valuation_rate = stock_entry_item.valuation_rate
+			stock_item.total_value = stock_entry_item.amount
+
+		self.calculate_total_repair_cost()
 
 	def validate_serial_no(self, stock_item):
 		if not stock_item.serial_and_batch_bundle and frappe.get_cached_value(
