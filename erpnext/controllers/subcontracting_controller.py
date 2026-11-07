@@ -1507,21 +1507,7 @@ class SubcontractingController(StockController):
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
-=======
-	def is_returned_at_receipt_rate(self, item_code):
-		"""Same rule a repost uses for a return, so both give the same value."""
-		if is_serial_no_wise_valuation_disabled(item_code):
-			return False
-
-		return get_valuation_method(item_code, self.company) != "Moving Average"
-
-=======
->>>>>>> 8c5681a (fix(subcontracting): return a Moving Average finished good at the receipt rate on submit, as a Purchase Receipt return does)
-	def get_supplied_items_cost(self, item_row_id):
->>>>>>> 86ae937 (fix(subcontracting): keep Moving Average returns at the running rate)
 		supplied_items_cost = 0.0
 		for item in self.get("supplied_items"):
 			if item.reference_name == item_row_id:
