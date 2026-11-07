@@ -71,6 +71,10 @@ frappe.ui.form.on("Bank Guarantee", {
 	},
 
 	set_end_date: function (frm) {
+		if (!frm.doc.start_date || !(frm.doc.validity > 0)) {
+			frm.set_value("end_date", null);
+			return;
+		}
 		let end_date = frappe.datetime.add_days(frm.doc.start_date, frm.doc.validity - 1);
 		frm.set_value("end_date", end_date);
 	},
