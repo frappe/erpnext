@@ -422,7 +422,7 @@ class SerialBatchBundleService:
 		available_dict = available_serial_batch_for_return(field, child_doctype, reference_ids)
 
 		for row in self.doc.get(table_name):
-			if row.get("return_qty_from_rejected_warehouse"):
+			if row.get("return_qty_from_rejected_warehouse") or not row.get("qty"):
 				continue
 
 			value = row.get(field)
