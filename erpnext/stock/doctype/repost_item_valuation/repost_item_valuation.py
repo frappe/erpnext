@@ -7,7 +7,16 @@ from frappe.desk.form.load import get_attachments
 from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
 from frappe.query_builder.functions import Max
-from frappe.utils import add_days, cint, get_link_to_form, get_weekday, getdate, now, nowtime
+from frappe.utils import (
+	add_days,
+	cint,
+	get_link_to_form,
+	get_weekday,
+	getdate,
+	now,
+	nowtime,
+	to_timedelta,
+)
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
@@ -600,10 +609,10 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 	if get_weekday() == repost_settings.limits_dont_apply_on:
 		return True
 
-	start_time = repost_settings.start_time
-	end_time = repost_settings.end_time
+	start_time = to_timedelta(repost_settings.start_time)
+	end_time = to_timedelta(repost_settings.end_time)
 
-	now_time = current_time or nowtime()
+	now_time = to_timedelta(current_time or nowtime())
 
 	if start_time < end_time:
 		return end_time >= now_time >= start_time
@@ -617,4 +626,14 @@ def execute_repost_item_valuation():
 	# Force-enqueues the site-wide reposting job, so it needs write on Repost Item Valuation.
 	frappe.has_permission("Repost Item Valuation", "write", throw=True)
 
+	if not in_configured_timeslot():
+		frappe.msgprint(
+			_("Reposting will start within the timeslot configured in {0}").format(
+				get_link_to_form("Stock Reposting Settings", "Stock Reposting Settings")
+			)
+		)
+		return False
+
 	frappe.get_doc("Scheduled Job Type", "repost_item_valuation.repost_entries").enqueue(force=True)
+
+	return True
