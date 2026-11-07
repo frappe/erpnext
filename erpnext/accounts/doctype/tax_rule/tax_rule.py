@@ -10,7 +10,7 @@ from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import IfNull
-from frappe.utils import cstr
+from frappe.utils import cint, cstr
 from frappe.utils.nestedset import get_root_of
 
 from erpnext import _refuse, require_party_permission, require_permission
@@ -28,6 +28,24 @@ class IncorrectSupplierType(frappe.ValidationError):
 
 class ConflictingTaxRule(frappe.ValidationError):
 	pass
+
+
+# Rule fields that the caller may not send. A missing one is read as empty,
+# so that a rule restricted by it does not match.
+RESTRICTING_KEYS = (
+	"item",
+	"item_group",
+	"billing_city",
+	"billing_county",
+	"billing_state",
+	"billing_zipcode",
+	"billing_country",
+	"shipping_city",
+	"shipping_county",
+	"shipping_state",
+	"shipping_zipcode",
+	"shipping_country",
+)
 
 
 class TaxRule(Document):
@@ -70,6 +88,7 @@ class TaxRule(Document):
 		self.validate_tax_template()
 		self.validate_from_to_dates("from_date", "to_date")
 		self.validate_filters()
+		self.warn_item_filters()
 
 	def validate_tax_template(self):
 		if self.tax_type == "Sales":
@@ -85,6 +104,21 @@ class TaxRule(Document):
 
 		if not (self.sales_tax_template or self.purchase_tax_template):
 			frappe.throw(_("Tax Template is mandatory."))
+
+		self.validate_tax_template_company()
+
+	def validate_tax_template_company(self):
+		if not self.company:
+			return
+
+		tax_template = self.sales_tax_template or self.purchase_tax_template
+		doctype = f"{self.tax_type} Taxes and Charges Template"
+		if frappe.db.get_value(doctype, tax_template, "company") != self.company:
+			frappe.throw(
+				_("Tax Template {0} does not belong to Company {1}").format(
+					frappe.bold(tax_template), frappe.bold(self.company)
+				)
+			)
 
 	def validate_filters(self):
 		TaxRule = DocType("Tax Rule")
@@ -118,26 +152,29 @@ class TaxRule(Document):
 		for field, value in filters.items():
 			query = query.where(IfNull(TaxRule[field], "") == cstr(value))
 
-		if self.from_date and self.to_date:
-			query = query.where(
-				((TaxRule.from_date > self.from_date) & (TaxRule.from_date < self.to_date))
-				| ((TaxRule.to_date > self.from_date) & (TaxRule.to_date < self.to_date))
-				| ((self.from_date > TaxRule.from_date) & (self.from_date < TaxRule.to_date))
-				| ((TaxRule.from_date == self.from_date) & (TaxRule.to_date == self.to_date))
-			)
-
-		elif self.from_date:
-			query = query.where(TaxRule.to_date > self.from_date)
-
-		elif self.to_date:
-			query = query.where(TaxRule.from_date < self.to_date)
+		# the date ranges overlap; an empty date is open-ended
+		query = query.where(
+			(IfNull(TaxRule.to_date, "9999-12-31") >= (self.from_date or "0001-01-01"))
+			& (IfNull(TaxRule.from_date, "0001-01-01") <= (self.to_date or "9999-12-31"))
+		)
 
 		tax_rule = query.run(as_dict=True)
 
-		if tax_rule and tax_rule[0].priority == self.priority:
+		conflict = next((rule for rule in tax_rule if cint(rule.priority) == cint(self.priority)), None)
+		if conflict:
 			frappe.throw(
-				_("Tax Rule Conflicts with {0}").format(tax_rule[0].name),
+				_("Tax Rule Conflicts with {0}").format(conflict.name),
 				ConflictingTaxRule,
+			)
+
+	def warn_item_filters(self):
+		if self.item or self.item_group:
+			frappe.msgprint(
+				_(
+					"Item and Item Group are not checked when taxes are fetched, so this Tax Rule is never applied."
+				),
+				indicator="orange",
+				title=_("Tax Rule Not Applied"),
 			)
 
 
@@ -207,6 +244,8 @@ def get_tax_rule_party_details(party: str | None, party_type: str, args: dict | 
 def get_tax_template(posting_date, args):
 	"""Get matching tax rule"""
 	args = frappe._dict(args)
+	for key in RESTRICTING_KEYS:
+		args.setdefault(key, "")
 
 	TaxRule = DocType("Tax Rule")
 	query = frappe.qb.from_(TaxRule).select("*")
@@ -219,6 +258,7 @@ def get_tax_template(posting_date, args):
 	else:
 		query = query.where(TaxRule.from_date.isnull() & TaxRule.to_date.isnull())
 
+	@functools.cache
 	def get_group_ancestors(doctype, get_parents, value):
 		if not value:
 			value = get_root_of(doctype)
@@ -255,21 +295,41 @@ def get_tax_template(posting_date, args):
 			if rule.get(key):
 				rule.no_of_keys_matched += 1
 
+		# a rule for a nearer group wins a tie with a rule for its parent group
+		rule.group_depth = sum(
+			get_group_ancestors(*group_fields[key], args[key]).index(rule.get(key) or "")
+			for key in group_fields
+			if key in args
+		)
+
 	def cmp(a, b):
 		# refernce: https://docs.python.org/3.0/whatsnew/3.0.html#ordering-comparisons
 		return int(a > b) - int(a < b)
 
-	rule = sorted(
+	tax_rule = sorted(
 		tax_rule,
 		key=functools.cmp_to_key(
-			lambda b, a: cmp(a.no_of_keys_matched, b.no_of_keys_matched) or cmp(a.priority, b.priority)
+			lambda b, a: (
+				cmp(a.no_of_keys_matched, b.no_of_keys_matched)
+				or cmp(a.priority, b.priority)
+				or cmp(a.group_depth, b.group_depth)
+			)
 		),
-	)[0]
+	)
 
-	tax_template = rule.sales_tax_template or rule.purchase_tax_template
-	doctype = f"{rule.tax_type} Taxes and Charges Template"
+	for rule in tax_rule:
+		tax_template = rule.sales_tax_template or rule.purchase_tax_template
+		doctype = f"{rule.tax_type} Taxes and Charges Template"
+		if is_usable_tax_template(doctype, tax_template, args.get("company")):
+			return tax_template
 
-	if frappe.db.get_value(doctype, tax_template, "disabled") == 1:
-		return None
+	return None
 
-	return tax_template
+
+def is_usable_tax_template(doctype, tax_template, company):
+	"""Return True if the template is enabled and belongs to the company"""
+	template = frappe.db.get_value(doctype, tax_template, ["disabled", "company"], as_dict=True)
+	if not template or template.disabled:
+		return False
+
+	return not company or template.company == company
