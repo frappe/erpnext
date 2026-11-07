@@ -395,7 +395,7 @@ class StockController(AccountsController):
 
 		self.make_bundle_for_non_rejected_qty(table_name)
 
-		if self.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 			self.make_bundle_for_rejected_qty(table_name)
 
 	def make_bundle_for_rejected_qty(self, table_name=None):
@@ -412,6 +412,9 @@ class StockController(AccountsController):
 		)
 
 		for row in self.get(table_name):
+			if not self.needs_rejected_bundle(row):
+				continue
+
 			if data := available_dict.get(row.get(field)):
 				qty_field = "rejected_qty"
 				warehouse_field = "rejected_warehouse"
@@ -461,6 +464,9 @@ class StockController(AccountsController):
 		available_dict = available_serial_batch_for_return(field, child_doctype, reference_ids)
 
 		for row in self.get(table_name):
+			if row.get("return_qty_from_rejected_warehouse"):
+				continue
+
 			value = row.get(field)
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
 				value = self.get_value_for_packed_item(row, reference_field)
@@ -482,6 +488,17 @@ class StockController(AccountsController):
 					row.db_set(
 						"incoming_rate", frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
 					)
+
+	def needs_rejected_bundle(self, row) -> bool:
+		"""Return row takes rejected qty and has no bundle for it yet."""
+		if row.get("return_qty_from_rejected_warehouse"):
+			return not row.get("serial_and_batch_bundle")
+
+		return bool(
+			row.get("rejected_warehouse")
+			and row.get("rejected_qty")
+			and not row.get("rejected_serial_and_batch_bundle")
+		)
 
 	def get_value_for_packed_item(self, row, reference_field):
 		parent_items = self.get("items", {"name": row.parent_detail_docname})
@@ -511,17 +528,12 @@ class StockController(AccountsController):
 			if not self.is_serial_batch_item(row.item_code):
 				continue
 
-			if (
-				row.get(field)
-				and (
-					qty_field == "qty"
-					and not row.get("return_qty_from_rejected_warehouse")
-					or qty_field == "rejected_qty"
-					and (row.get("return_qty_from_rejected_warehouse") or row.get("rejected_warehouse"))
-				)
-				and not row.get("use_serial_batch_fields")
-				and not row.get(bundle_field)
-			):
+			needs_bundle = (
+				self.needs_rejected_bundle(row)
+				if qty_field == "rejected_qty"
+				else not row.get("return_qty_from_rejected_warehouse") and not row.get(bundle_field)
+			)
+			if row.get(field) and needs_bundle and not row.get("use_serial_batch_fields"):
 				reference_ids.append(row.get(field))
 
 			if table_name == "packed_items" and row.get("parent_detail_docname"):
