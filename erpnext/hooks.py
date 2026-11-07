@@ -106,10 +106,13 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 
+before_install = "erpnext.setup.utils.validate_payments_compatibility"
 after_install = "erpnext.setup.install.after_install"
 
 after_app_install = "erpnext.setup.install.after_app_install"
 after_app_uninstall = "erpnext.setup.install.after_app_uninstall"
+
+before_migrate = "erpnext.setup.utils.validate_payments_compatibility"
 
 # patches that must stop the migration when they fail, even with `bench migrate --skip-failing`
 never_skip_patches = [
