@@ -143,6 +143,9 @@ def get_stock_ledger_entries_for_batch_no(filters):
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
 
+	if filters.to_datetime:
+		query = query.where(sle.posting_datetime <= get_datetime(filters.to_datetime))
+
 	return query.run(as_dict=True) or []
 
 
@@ -190,6 +193,9 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 				query = query.where(batch_package[field] == filters.get(field))
 			else:
 				query = query.where(sle[field] == filters.get(field))
+
+	if filters.to_datetime:
+		query = query.where(sle.posting_datetime <= get_datetime(filters.to_datetime))
 
 	return query.run(as_dict=True) or []
 
