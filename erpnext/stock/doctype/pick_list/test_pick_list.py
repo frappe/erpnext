@@ -2427,6 +2427,7 @@ class TestPickList(FrappeTestCase):
 				"doctype": "Batch",
 				"item": item,
 				"batch_id": f"{item}-EXP",
+				"manufacturing_date": frappe.utils.add_days(frappe.utils.nowdate(), -10),
 				"expiry_date": frappe.utils.add_days(frappe.utils.nowdate(), -1),
 			}
 		).insert()
