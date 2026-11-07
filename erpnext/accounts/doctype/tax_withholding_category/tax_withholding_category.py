@@ -149,6 +149,7 @@ class TaxWithholdingDetails:
 				description=doc.category_name,
 				account_head=account_head,
 				# rates
+				tax_withholding_group=row.tax_withholding_group,
 				tax_rate=row.tax_withholding_rate,
 				from_date=row.from_date,
 				to_date=row.to_date,
