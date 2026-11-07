@@ -77,3 +77,33 @@ class TestItemPriceStock(FrappeTestCase):
 
 		self.assertEqual((labels["uom"], labels["stock_uom"]), ("Price UOM", "Stock UOM"))
 		self.assertEqual([(row["uom"], row["stock_uom"]) for row in rows], [("Box", "Nos")])
+
+	def test_price_managers_without_currency_access_can_run_it(self):
+		from frappe.desk.query_report import run
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item,
+				"price_list": "Standard Selling",
+				"price_list_rate": 100,
+			}
+		).insert()
+
+		user = "item-price-stock-master-manager@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "Price Manager", "send_welcome_email": 0}
+			).insert(ignore_permissions=True)
+		frappe.get_doc("User", user).add_roles("Sales Master Manager", "Stock User")
+
+		frappe.set_user(user)
+		try:
+			rows = run("Item Price Stock", filters={"item_code": item})["result"]
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual([row["selling_rate"] for row in rows], [100])
