@@ -2749,6 +2749,37 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		rows = get_items("_Test Warehouse - _TC", posting_date, "12:00:00", "_Test Company", item.name)
 		self.assertEqual([row["qty"] for row in rows], [10])
 
+	def test_get_items_reads_pooled_batch_rate_at_the_posting_time(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		frappe.db.savepoint("pooled_batch_rate")
+		self.addCleanup(frappe.db.rollback, save_point="pooled_batch_rate")
+		frappe.db.set_single_value("Stock Settings", "do_not_use_batchwise_valuation", 1)
+		item = create_item(f"_Test Reco Pooled Batch At Posting Time {frappe.generate_hash(length=8)}")
+		item.update(
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRPBPT-.###",
+				"valuation_method": "Moving Average",
+			}
+		)
+		item.save()
+		posting_date = add_days(nowdate(), -1)
+
+		for posting_time, rate in (("09:00:00", 100), ("17:00:00", 300)):
+			make_stock_entry(
+				item_code=item.name,
+				target="_Test Warehouse - _TC",
+				qty=10,
+				basic_rate=rate,
+				posting_date=posting_date,
+				posting_time=posting_time,
+			)
+
+		rows = get_items("_Test Warehouse - _TC", posting_date, "12:00:00", "_Test Company", item.name)
+		self.assertEqual([(row["qty"], row["valuation_rate"]) for row in rows], [(10, 100)])
+
 	def test_reconcile_all_keeps_the_entered_qty_and_rate(self):
 		item = create_item(f"_Test Reco All Batches Entered Values {frappe.generate_hash(length=8)}")
 		item.update({"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRABEV-.###"})
