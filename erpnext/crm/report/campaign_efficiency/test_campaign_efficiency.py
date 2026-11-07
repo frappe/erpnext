@@ -80,6 +80,22 @@ class TestCampaignEfficiency(FrappeTestCase):
 		self.assertEqual(row["lead_count"], 1)
 		self.assertEqual(row["quot_count"], 0)
 
+	def test_cancelled_orders_left_out(self):
+		campaign = make_campaign("_Test Campaign Eff Orders")
+		lead = make_campaign_lead(campaign)
+		make_lead_customer(lead)
+		value_before = campaign_row(campaign)["order_value"]
+		quotation = make_lead_quotation(lead.name)
+		quotation.submit()
+
+		cancelled = make_sales_order_for(quotation.name)
+		cancelled.cancel()
+		sales_order = make_sales_order_for(quotation.name)
+
+		row = campaign_row(campaign)
+		self.assertEqual(row["order_count"], 1)
+		self.assertEqual(row["order_value"] - value_before, sales_order.base_net_total)
+
 
 def make_sales_user(email: str) -> str:
 	if not frappe.db.exists("User", email):
