@@ -214,14 +214,8 @@ class RequestforQuotation(BuyingController):
 				rfq_supplier.save()
 
 	def get_link(self):
-		# RFQ link for supplier portal
-		route = frappe.db.get_value(
-			"Portal Menu Item", {"reference_doctype": "Request for Quotation"}, ["route"]
-		)
-		if not route:
-			frappe.throw(_("Please add Request for Quotation to the sidebar in Portal Settings."))
-
-		return get_url(f"{route}/{self.name}")
+		# the RFQ in the supplier portal
+		return get_url(f"/supplier-portal/rfqs/{self.name}")
 
 	def update_supplier_part_no(self, supplier):
 		self.vendor = supplier
