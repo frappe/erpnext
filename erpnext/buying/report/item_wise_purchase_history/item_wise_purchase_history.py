@@ -22,6 +22,15 @@ def execute(filters=None):
 	return columns, data, None, chart_data
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	format_fields = ["received_qty", "billed_amt"]
+
+	if column.fieldname in format_fields and data[column.fieldname] > 0:
+		value = f"<span style='color:green;'>{value}</span>"
+	return value
+
+
 def get_columns(filters):
 	return [
 		{
