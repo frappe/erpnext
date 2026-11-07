@@ -1006,6 +1006,42 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(switched.plc_conversion_rate, 80)
 		self.assertEqual(switched.items[0].rate, 10)
 
+	def test_typed_price_list_exchange_rate_is_kept(self):
+		import json
+
+		from frappe.handler import run_doc_method
+
+		price_list = make_usd_buying_price_list(80)
+		rm_item = make_item("_Test BOM USD Typed RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		bom = make_usd_bom(
+			make_item("_Test BOM USD Typed FG", {"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+			plc_conversion_rate=75,
+		)
+		self.assertEqual(bom.plc_conversion_rate, 75)
+		self.assertEqual(bom.items[0].rate, 9.375)
+
+		frappe.local.request = frappe._dict(method="POST")
+		self.addCleanup(delattr, frappe.local, "request")
+		frappe.local.response = frappe._dict(docs=[])
+		run_doc_method(
+			"update_cost",
+			docs=json.dumps(bom.as_dict(), default=str),
+			args=json.dumps({"update_parent": False, "save": False, "from_child_bom": True}),
+		)
+		self.assertEqual(frappe.local.response.docs[0].plc_conversion_rate, 75)
+
+		bom.update_cost()
+		bom.reload()
+		self.assertEqual(bom.plc_conversion_rate, 75)
+		self.assertEqual(bom.items[0].rate, 9.375)
+
 	def test_exploded_items_use_the_current_stock_qty(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
