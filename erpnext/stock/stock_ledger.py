@@ -1737,6 +1737,8 @@ class update_entries_after:
 		if sle.voucher_type == "Stock Entry":
 			self.recalculate_amounts_in_stock_entry(sle.voucher_no, sle.voucher_detail_no)
 			rate = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "valuation_rate")
+		elif self.is_returned_supplied_item(sle):
+			rate = self.get_returned_supplied_item_rate(sle)
 		# Sales and Purchase Return
 		elif sle.voucher_type in (
 			"Purchase Receipt",
@@ -1825,6 +1827,21 @@ class update_entries_after:
 
 		return rate
 
+	@staticmethod
+	def is_returned_supplied_item(sle):
+		"""Raw material a Subcontracting Receipt return brings back to the supplier warehouse."""
+		return (
+			sle.voucher_type == "Subcontracting Receipt"
+			and flt(sle.actual_qty) > 0
+			and bool(frappe.db.exists("Subcontracting Receipt Supplied Item", sle.voucher_detail_no))
+		)
+
+	@staticmethod
+	def get_returned_supplied_item_rate(sle):
+		scr = frappe.get_doc("Subcontracting Receipt", sle.voucher_no)
+		row = scr.getone("supplied_items", {"name": sle.voucher_detail_no})
+		return scr.get_supplied_item_rates([row])[0]
+
 	def is_unvalued_rejected_material(self, sle):
 		"""A receipt's rejected-warehouse entry carries no value unless Buying Settings values it."""
 		if sle.voucher_type not in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
@@ -1881,7 +1898,9 @@ class update_entries_after:
 				self.update_rate_on_delivery_and_sales_return(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
-			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Subcontracting Receipt":
+			elif sle.voucher_type == "Subcontracting Receipt" and (
+				flt(sle.actual_qty) < 0 or self.is_returned_supplied_item(sle)
+			):
 				self.update_rate_on_subcontracting_receipt(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Asset Capitalization":
 				frappe.get_doc(sle.voucher_type, sle.voucher_no).update_stock_item_rate(
@@ -1965,10 +1984,15 @@ class update_entries_after:
 		if frappe.db.exists("Subcontracting Receipt Item", sle.voucher_detail_no):
 			frappe.db.set_value("Subcontracting Receipt Item", sle.voucher_detail_no, "rate", outgoing_rate)
 		else:
+			# consumed qty is the negated ledger qty, so a return's amount stays negative
+			amount = flt(
+				-flt(sle.actual_qty) * outgoing_rate,
+				frappe.get_precision("Subcontracting Receipt Supplied Item", "amount"),
+			)
 			frappe.db.set_value(
 				"Subcontracting Receipt Supplied Item",
 				sle.voucher_detail_no,
-				{"rate": outgoing_rate, "amount": abs(sle.actual_qty) * outgoing_rate},
+				{"rate": outgoing_rate, "amount": amount},
 			)
 
 		scr = frappe.get_lazy_doc("Subcontracting Receipt", sle.voucher_no, for_update=True)
