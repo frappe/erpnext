@@ -38,13 +38,20 @@ UNSUPPORTED_NODES = (ast.NamedExpr, ast.Lambda)
 
 
 def get_valid_api_method(api_path: str):
-	"""Resolve `api_path`, ensuring it is whitelisted and permits GET (i.e. read-only)."""
+	"""Resolve `api_path`, ensuring it is whitelisted for GET only (i.e. read-only).
+
+	The method runs as whoever opens the report, so a method that also accepts POST, PUT or
+	DELETE (the default of `@frappe.whitelist()`) is refused.
+	"""
 	method = frappe.get_attr(api_path)
 	is_whitelisted(method)
 
-	if "GET" not in frappe.allowed_http_methods_for_whitelisted_func.get(method, ()):
+	allowed_methods = set(frappe.allowed_http_methods_for_whitelisted_func.get(method, ()))
+	if "GET" not in allowed_methods or allowed_methods - {"GET", "QUERY"}:
 		frappe.throw(
-			_("Method {0} must permit GET requests").format(frappe.bold(api_path)),
+			_("Method {0} must be whitelisted for GET requests only: {1}").format(
+				frappe.bold(api_path), frappe.bold('@frappe.whitelist(methods=["GET"])')
+			),
 			frappe.PermissionError,
 			title=_("Method Not Allowed"),
 		)
@@ -527,14 +534,17 @@ class AccountFilterValidator(Validator):
 			if normalized_operator in ["in", "not in"] and not isinstance(value, list):
 				return _("Operator '{0}' requires a list value.").format(operator)
 
+			if value is None:
+				return _("Value of '{0}' cannot be null.").format(field)
+
 		# logical condition: {"and": [condition1, condition2]}
 		elif isinstance(filter_config, dict):
 			if len(filter_config) != 1:
 				return _("Logical condition must have exactly one operator.")
 
-			op = next(iter(filter_config.keys())).lower()
+			op = next(iter(filter_config.keys()))
 			if op not in ["and", "or"]:
-				return _("Logical operators must be 'and' or 'or'.")
+				return _("Logical operators must be 'and' or 'or' (in lower case).")
 
 			conditions = filter_config[next(iter(filter_config.keys()))]
 			if not isinstance(conditions, list) or len(conditions) < 1:

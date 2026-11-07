@@ -101,8 +101,11 @@ class AccountData:
 		return len(self.period_values) > 0
 
 	def accumulate_values(self) -> None:
+		# accumulate from the start of the report, not from the start of the books
+		first_period = next(iter(self.period_values.values()), None)
+		report_opening = first_period.opening if first_period else 0.0
 		for period_value in self.period_values.values():
-			period_value.movement += period_value.opening
+			period_value.movement = period_value.closing - report_opening
 			# closing is accumulated by default
 
 	def unaccumulate_values(self) -> None:
@@ -856,7 +859,7 @@ class FilterExpressionParser:
 			return None
 
 		try:
-			parsed = ast.literal_eval(filter_formula)
+			parsed = parse_filter_formula(filter_formula)
 			return self._build_from_parsed(parsed, table)
 		except (ValueError, SyntaxError) as e:
 			frappe.log_error(f"Invalid filter formula syntax: {filter_formula} - {e}")
@@ -921,6 +924,15 @@ class FilterExpressionParser:
 			return reduce(lambda a, b: a | b, built_conditions)
 
 
+def parse_filter_formula(formula: str):
+	"""Parse an account filter. Filters are validated as JSON (with true, false and null);
+	a filter written as a Python literal is still read."""
+	try:
+		return json.loads(formula)
+	except json.JSONDecodeError:
+		return ast.literal_eval(formula)
+
+
 class FormulaFieldExtractor:
 	"""Extract field values from filter formulas without SQL execution"""
 
@@ -943,7 +955,7 @@ class FormulaFieldExtractor:
 				continue
 
 			try:
-				parsed = ast.literal_eval(row.calculation_formula)
+				parsed = parse_filter_formula(row.calculation_formula)
 				self._extract_recursive(parsed, values)
 			except (ValueError, SyntaxError):
 				continue  # Skip rows with invalid formulas
@@ -996,7 +1008,7 @@ class FormulaFieldUpdater:
 				continue
 
 			try:
-				parsed = ast.literal_eval(formula)
+				parsed = parse_filter_formula(formula)
 				updated = self._update_recursive(parsed)
 
 				if updated != parsed:
@@ -1199,6 +1211,11 @@ class RowProcessor:
 		try:
 			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval
 			values = frappe.call(method, filters=self.context.filters, periods=self.period_list, row=row)
+			if not isinstance(values, list | tuple) or len(values) != len(self.period_list):
+				raise ValueError(
+					f"expected a list of {len(self.period_list)} values, one for each period, got {values!r}"
+				)
+			values = [flt(v) for v in values]
 
 			if row.reverse_sign:
 				values = [-1 * v for v in values]
