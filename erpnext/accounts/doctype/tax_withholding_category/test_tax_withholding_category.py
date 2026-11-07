@@ -479,6 +479,70 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		self.assertGreater(len(pi1.taxes), 0)
 		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
 
+		# More exemption than the threshold, as migrated history can hold, leaves none to use
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier3", rate=5000)
+		pi2.apply_tds = 1
+		pi2.save()
+		pi2.override_tax_withholding_entries = 1
+		pi2.tax_withholding_entries[0].withholding_amount = 0
+		pi2.tax_withholding_entries[0].under_withheld_reason = "Threshold Exemption"
+		pi2.save()
+		pi2.submit()
+		invoices.append(pi2)
+
+		pi3 = create_purchase_invoice(supplier="Test TDS Supplier3", rate=10000)
+		pi3.apply_tds = 1
+		pi3.save()
+		pi3.submit()
+		invoices.append(pi3)
+
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier3",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi3.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi3.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi3.name, expected_entries)
+		self.assertEqual(pi3.taxes[0].tax_amount, 1000)
+
+		# Ignoring the threshold taxes the whole invoice, without an exemption
+		self.setup_party_with_category("Supplier", "Test TDS Supplier7", "New TDS Category")
+		pi4 = create_purchase_invoice(supplier="Test TDS Supplier7", rate=10000, do_not_save=True)
+		pi4.apply_tds = 1
+		pi4.ignore_tax_withholding_threshold = 1
+		pi4.save()
+		pi4.submit()
+		invoices.append(pi4)
+
+		expected_entries = [
+			self.get_tax_withholding_entry(
+				tax_withholding_category="New TDS Category",
+				party_type="Supplier",
+				party="Test TDS Supplier7",
+				tax_rate=10.0,
+				taxable_amount=10000.0,
+				withholding_amount=1000.0,
+				status="Settled",
+				taxable_doctype="Purchase Invoice",
+				taxable_name=pi4.name,
+				withholding_doctype="Purchase Invoice",
+				withholding_name=pi4.name,
+				under_withheld_reason=None,
+			),
+		]
+		self.validate_tax_withholding_entries("Purchase Invoice", pi4.name, expected_entries)
+		self.assertEqual(pi4.taxes[0].tax_amount, 1000)
+
 		self.cleanup_invoices(invoices)
 
 	def test_cumulative_threshold_tcs_on_gross_amount(self):
@@ -2871,6 +2935,8 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		self.validate_tax_withholding_entries("Purchase Invoice", pi1.name, expected_entries)
 
+		# Stands in for rows written by the v16 migration patch
+		frappe.db.set_value("Tax Withholding Entry", {"parent": pi2.name}, "created_by_migration", 1)
 		pi1.reload()
 		pi1.cancel()
 
@@ -2919,6 +2985,14 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		]
 
 		self.validate_tax_withholding_entries("Purchase Invoice", pi2.name, expected_entries)
+		self.assertEqual(
+			frappe.get_all(
+				"Tax Withholding Entry",
+				filters={"parent": pi2.name, "created_by_migration": 0},
+				pluck="status",
+			),
+			["Under Withheld"],
+		)
 
 		# Test future invoice adjustment against the under withheld credit
 		pi3 = create_purchase_invoice(supplier="Test TDS Supplier8", rate=5000, do_not_save=True)
@@ -3046,6 +3120,8 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		pe.apply_tds = 1
 		pe.tax_withholding_category = "Test Multi Invoice Category"
 		pe.save().submit()
+		# Stands in for a row written by the v16 migration patch
+		frappe.db.set_value("Tax Withholding Entry", {"parent": pe.name}, "created_by_migration", 1)
 
 		# Step 2: Create Purchase Invoice with partial adjustment and manual rate change
 		pi = create_purchase_invoice(supplier="Test TDS Supplier8", rate=80000, do_not_save=True)
@@ -3155,6 +3231,14 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 		]
 
 		self.validate_tax_withholding_entries("Payment Entry", pe.name, expected_entries)
+		self.assertEqual(
+			frappe.get_all(
+				"Tax Withholding Entry",
+				filters={"parent": pe.name, "created_by_migration": 0},
+				pluck="status",
+			),
+			["Duplicate"],
+		)
 
 	def test_manual_tax_adjustment_with_rate_change(self):
 		"""Test manual tax adjustment where tax rate is changed during adjustment between payment and invoice"""
