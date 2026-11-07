@@ -16,6 +16,7 @@
   "section_break_4",
   "get_entries",
   "accounts",
+  "covered_vouchers",
   "section_break_6",
   "gain_loss_unbooked",
   "gain_loss_booked",
@@ -60,6 +61,15 @@
    "no_copy": 1,
    "options": "Exchange Rate Revaluation Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "covered_vouchers",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Covered Vouchers",
+   "no_copy": 1,
+   "options": "Exchange Rate Revaluation Voucher",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_6",
@@ -112,7 +122,7 @@
  "icon": "arrow-right-left",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:09:42.951164",
+ "modified": "2026-11-02 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Exchange Rate Revaluation",
