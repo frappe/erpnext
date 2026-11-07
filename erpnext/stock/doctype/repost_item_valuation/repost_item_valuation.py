@@ -1,6 +1,8 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _
 from frappe.desk.form.load import get_attachments
@@ -24,6 +26,8 @@ from erpnext.stock.stock_ledger import (
 from erpnext.utilities import clear_logs_with_references
 
 RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
+
+MERGED_REPOST_LIMIT = 500
 
 
 class RepostItemValuation(Document):
@@ -318,6 +322,7 @@ class RepostItemValuation(Document):
 			"posting_time": self.posting_time,
 		}
 
+<<<<<<< HEAD
 		frappe.db.sql(
 			"""
 			update `tabRepost Item Valuation`
@@ -332,6 +337,76 @@ class RepostItemValuation(Document):
 				""",
 			filters,
 		)
+=======
+	def get_repost_started_at(self):
+		return self.flags.repost_started_at or now()
+
+	def get_saved_repost_started_at(self):
+		if self.reposting_data_file:
+			return get_reposting_data(self.reposting_data_file).get("repost_started_at")
+
+	def merge_queued_item_reposts(self):
+		"""Carry later queued Item and Warehouse reposts of the company in this repost's walk.
+
+		Reposts that start from different items often walk the same dependants, so one pass
+		reposts each shared entry once instead of once per repost.
+		"""
+		if not self.can_merge_queued_item_reposts():
+			return
+
+		merged = get_mergeable_item_reposts(self)
+		if not merged:
+			return
+
+		items = [get_repost_item(row) for row in [self, *merged]]
+		self.db_set("items_to_be_repost", frappe.as_json(items))
+
+	def can_merge_queued_item_reposts(self):
+		return (
+			self.based_on == "Item and Warehouse"
+			and not self.items_to_be_repost
+			and not self.reposting_data_file
+			and not self.via_landed_cost_voucher
+			and not self.repost_only_accounting_ledgers
+			and not frappe.db.get_single_value("Stock Reposting Settings", "enable_parallel_reposting")
+			and not has_failed_merged_repost(self.company)
+		)
+
+	def get_item_reposts(self):
+		"""This repost's item-warehouse, followed by those of the reposts merged into it."""
+		items = json.loads(self.items_to_be_repost or "[]")
+		if len(items) > 1:
+			return [frappe._dict(row) for row in items]
+
+		return [get_repost_item(self)]
+
+	def skip_merged_reposts(self):
+		merged = [row.repost_item_valuation for row in self.get_item_reposts()[1:]]
+		if self.based_on != "Item and Warehouse" or not merged:
+			return
+
+		riv = frappe.qb.DocType("Repost Item Valuation")
+		(
+			frappe.qb.update(riv)
+			.set(riv.status, "Skipped")
+			.where(riv.name.isin(merged) & (riv.status == "Queued"))
+		).run()
+
+	def skip_reposts_covered_by_dependents(self):
+		if self.repost_only_accounting_ledgers:
+			return
+
+		coverage = get_item_wh_first_reposted_from_reposting_data(self)
+		if not coverage:
+			return
+
+		source_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		mark_covered_item_reposts(self.name, coverage, source_datetime, self.get_repost_started_at())
+
+		affected = get_affected_transactions(self)
+		if affected:
+			mark_covered_transaction_reposts(self, coverage, affected, self.get_repost_started_at())
+>>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 
 	def _recalculate_valuation_rate(self):
 		doc = frappe.get_doc(self.voucher_type, self.voucher_no)
@@ -353,6 +428,206 @@ class RepostItemValuation(Document):
 			doc.update_stock_ledger(allow_negative_stock=True)
 
 
+<<<<<<< HEAD
+=======
+@frappe.whitelist(methods=["POST"])
+def bulk_restart_reposting(names: str | list):
+	# restart_reposting() below checks write per document and lets the error propagate, so the
+	# authorisation is already correct — but it only fires after each document has been loaded and
+	# its status read. Gate first; this denies exactly who the per-document check would.
+	frappe.has_permission("Repost Item Valuation", "write", throw=True)
+
+	names = frappe.parse_json(names)
+	for name in names:
+		doc = frappe.get_doc("Repost Item Valuation", name)
+		if doc.status != "Failed":
+			continue
+
+		doc.restart_reposting()
+
+	frappe.msgprint(_("Repost Item Valuation restarted for selected failed records."))
+
+
+def repost_coverage_cache_key(name):
+	return f"riv_dependent_coverage::{name}"
+
+
+def has_failed_merged_repost(company):
+	failed = frappe.get_all(
+		"Repost Item Valuation",
+		filters={
+			"company": company,
+			"based_on": "Item and Warehouse",
+			"status": "Failed",
+			"docstatus": 1,
+			"items_to_be_repost": ("is", "set"),
+		},
+		pluck="items_to_be_repost",
+	)
+	return any(len(json.loads(items)) > 1 for items in failed)
+
+
+def get_mergeable_item_reposts(doc):
+	riv = frappe.qb.DocType("Repost Item Valuation")
+	return (
+		frappe.qb.from_(riv)
+		.select(riv.name, riv.item_code, riv.warehouse, riv.posting_date, riv.posting_time)
+		.where(
+			(riv.name != doc.name)
+			# the walk starts this item-warehouse at doc's date, so an earlier repost of it would be lost
+			& ((riv.item_code != doc.item_code) | (riv.warehouse != doc.warehouse))
+			& (riv.based_on == "Item and Warehouse")
+			& (riv.status == "Queued")
+			& (riv.docstatus == 1)
+			& (riv.company == doc.company)
+			& (riv.creation <= doc.get_repost_started_at())
+			& (riv.allow_negative_stock == doc.allow_negative_stock)
+			& (riv.allow_zero_rate == doc.allow_zero_rate)
+			& (riv.via_landed_cost_voucher == 0)
+			& (riv.recalculate_valuation_rate == 0)
+			& (riv.recreate_stock_ledgers == 0)
+			& (riv.repost_only_accounting_ledgers == 0)
+		)
+		.orderby(CombineDatetime(riv.posting_date, riv.posting_time))
+		.orderby(riv.creation)
+		.limit(MERGED_REPOST_LIMIT)
+	).run(as_dict=True)
+
+
+def get_repost_item(row):
+	return frappe._dict(
+		item_code=row.item_code,
+		warehouse=row.warehouse,
+		posting_date=row.posting_date,
+		posting_time=row.posting_time,
+		posting_datetime=get_combine_datetime(row.posting_date, row.posting_time),
+		repost_item_valuation=row.name,
+	)
+
+
+def get_queued_item_reposts(source_name, item_codes, started_at=None):
+	return frappe.get_all(
+		"Repost Item Valuation",
+		filters={
+			"creation": ("<=", started_at or now()),
+			"name": ("!=", source_name),
+			"based_on": "Item and Warehouse",
+			"status": "Queued",
+			"docstatus": 1,
+			"recalculate_valuation_rate": 0,
+			"recreate_stock_ledgers": 0,
+			"via_landed_cost_voucher": 0,
+			"item_code": ("in", item_codes),
+		},
+		fields=["name", "item_code", "warehouse", "posting_date", "posting_time"],
+	)
+
+
+def mark_covered_item_reposts(source_name, coverage, source_datetime, started_at=None):
+	item_codes = {item_code for item_code, _ in coverage}
+
+	for row in get_queued_item_reposts(source_name, list(item_codes), started_at):
+		from_datetime = coverage.get((row.item_code, row.warehouse))
+		if not from_datetime:
+			continue
+
+		row_datetime = get_combine_datetime(row.posting_date, row.posting_time)
+		if get_datetime(row_datetime) < get_datetime(source_datetime):
+			continue
+
+		if get_datetime(from_datetime) <= get_datetime(row_datetime):
+			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
+
+
+def get_queued_transaction_reposts(source_name, voucher_nos, started_at=None):
+	return frappe.get_all(
+		"Repost Item Valuation",
+		filters={
+			"creation": ("<=", started_at or now()),
+			"name": ("!=", source_name),
+			"based_on": "Transaction",
+			"status": "Queued",
+			"docstatus": 1,
+			"repost_only_accounting_ledgers": 0,
+			"recalculate_valuation_rate": 0,
+			"recreate_stock_ledgers": 0,
+			"via_landed_cost_voucher": 0,
+			"voucher_no": ("in", list(voucher_nos)),
+		},
+		fields=["name", "voucher_type", "voucher_no", "posting_date", "posting_time"],
+	)
+
+
+def accumulate_repost_coverage(row_name, coverage, row_datetime):
+	cache_key = repost_coverage_cache_key(row_name)
+	acc = frappe.cache().get_value(cache_key) or {}
+
+	for key, from_datetime in coverage.items():
+		if get_datetime(from_datetime) > get_datetime(row_datetime):
+			continue
+
+		existing = acc.get(key)
+		if not existing or get_datetime(from_datetime) < get_datetime(existing):
+			acc[key] = from_datetime
+
+	frappe.cache().set_value(cache_key, acc, expires_in_sec=86400)
+	return acc
+
+
+def get_repost_items_by_voucher(rows):
+	voucher_nos = {row.voucher_no for row in rows}
+	if not voucher_nos:
+		return {}
+
+	items_by_voucher = {}
+	for sle in frappe.get_all(
+		"Stock Ledger Entry",
+		filters={"voucher_no": ("in", list(voucher_nos))},
+		fields=["voucher_type", "voucher_no", "item_code", "warehouse"],
+		distinct=True,
+	):
+		items_by_voucher.setdefault((sle.voucher_type, sle.voucher_no), set()).add(
+			(sle.item_code, sle.warehouse)
+		)
+
+	return items_by_voucher
+
+
+def is_transaction_repost_covered(items, acc, row_datetime):
+	if not items:
+		return False
+
+	for key in items:
+		covered = acc.get(key)
+		if not covered or get_datetime(covered) > get_datetime(row_datetime):
+			return False
+
+	return True
+
+
+def mark_covered_transaction_reposts(source, coverage, affected, started_at=None):
+	source_datetime = get_combine_datetime(source.posting_date, source.posting_time)
+	voucher_nos = {voucher_no for _, voucher_no in affected}
+
+	rows = get_queued_transaction_reposts(source.name, voucher_nos, started_at)
+	items_by_voucher = get_repost_items_by_voucher(rows)
+
+	for row in rows:
+		if (row.voucher_type, row.voucher_no) not in affected:
+			continue
+
+		row_datetime = get_combine_datetime(row.posting_date, row.posting_time)
+		if get_datetime(row_datetime) < get_datetime(source_datetime):
+			continue
+
+		acc = accumulate_repost_coverage(row.name, coverage, row_datetime)
+		items = items_by_voucher.get((row.voucher_type, row.voucher_no))
+		if is_transaction_repost_covered(items, acc, row_datetime):
+			frappe.db.set_value("Repost Item Valuation", row.name, "status", "Skipped")
+			frappe.cache().delete_value(repost_coverage_cache_key(row.name))
+
+
+>>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 def on_doctype_update():
 	frappe.db.add_index("Repost Item Valuation", ["warehouse", "item_code"], "item_warehouse")
 
@@ -367,7 +642,13 @@ def repost(doc):
 		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
 
 		doc.set_status("In Progress")
+<<<<<<< HEAD
 		if not frappe.flags.in_test:
+=======
+		doc.merge_queued_item_reposts()
+		mark_closing_entries_outdated(doc.company, doc.posting_date)
+		if not frappe.in_test:
+>>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
@@ -380,10 +661,23 @@ def repost(doc):
 		if doc.recreate_stock_ledgers:
 			doc.recreate_stock_ledger_entries()
 
+<<<<<<< HEAD
 		repost_sl_entries(doc)
 		vouchers = get_reposted_vouchers(doc)
 		repost_gl_entries(doc, vouchers)
 		update_consumed_material_cost_for_vouchers(vouchers)
+=======
+		if doc.repost_only_accounting_ledgers:
+			repost_gl_entries(doc)
+		else:
+			repost_sl_entries(doc)
+			vouchers = get_reposted_vouchers(doc)
+			repost_gl_entries(doc, vouchers)
+			update_consumed_material_cost_for_vouchers(vouchers)
+
+		doc.skip_merged_reposts()
+		doc.skip_reposts_covered_by_dependents()
+>>>>>>> 68ae6f02fe (Merge pull request #63639 from mihir-kandoi/perf/merge-queued-reposts)
 
 		doc.set_status("Completed")
 		doc.db_set("reposting_data_file", None)
@@ -463,16 +757,7 @@ def repost_sl_entries(doc):
 		)
 	else:
 		repost_future_sle(
-			items_to_be_repost=[
-				frappe._dict(
-					{
-						"item_code": doc.item_code,
-						"warehouse": doc.warehouse,
-						"posting_date": doc.posting_date,
-						"posting_time": doc.posting_time,
-					}
-				)
-			],
+			items_to_be_repost=doc.get_item_reposts(),
 			allow_negative_stock=doc.allow_negative_stock,
 			via_landed_cost_voucher=doc.via_landed_cost_voucher,
 			doc=doc,
@@ -514,8 +799,9 @@ def _get_directly_dependent_vouchers(doc):
 		items.update(sle_items)
 		warehouses.update(sle_warehouses)
 	else:
-		items.add(doc.item_code)
-		warehouses.add(doc.warehouse)
+		for row in doc.get_item_reposts():
+			items.add(row.item_code)
+			warehouses.add(row.warehouse)
 
 	affected_vouchers = get_future_stock_vouchers(
 		posting_date=doc.posting_date,
