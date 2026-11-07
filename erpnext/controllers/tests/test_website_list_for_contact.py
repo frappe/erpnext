@@ -86,3 +86,44 @@ class TestWebsiteListForContact(ERPNextTestSuite):
 		self.assertNotIn("party_name", row)
 		self.assertEqual(row["grand_total"], quotation.grand_total)
 		self.assertTrue(any(quotation.name in html for html in rendered["result"]))
+
+	def test_web_form_list_returns_list_columns(self):
+		from frappe.www.list import get_list_data
+
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		quotation = make_quotation(party_name="_Test Customer")
+		user = make_fenced_user("_test_portal_customer@example.com", ["Customer"])
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": user})
+		customer.save()
+
+		web_form = frappe.get_doc(
+			{
+				"doctype": "Web Form",
+				"title": "Test Quotation List",
+				"route": "test-quotation-list",
+				"doc_type": "Quotation",
+				"module": "Selling",
+				"published": 1,
+				"login_required": 1,
+				"show_list": 1,
+				"web_form_fields": [{"fieldname": "party_name", "fieldtype": "Link", "label": "Party"}],
+				"list_columns": [
+					{"fieldname": "transaction_date", "fieldtype": "Date", "label": "Date"},
+					{"fieldname": "total_qty", "fieldtype": "Float", "label": "Total Quantity"},
+					{"fieldname": "items", "fieldtype": "Table", "label": "Items"},
+				],
+			}
+		).insert()
+
+		with as_user(user):
+			frappe.form_dict.web_form_name = web_form.name
+			rows = json.loads(frappe.as_json(get_list_data(doctype="Quotation", web_form_name=web_form.name)))
+
+		row = next(row for row in rows if row["name"] == quotation.name)
+		self.assertEqual(row["transaction_date"], str(quotation.transaction_date))
+		self.assertEqual(row["total_qty"], quotation.total_qty)
+		self.assertFalse(row.get("items"))
+		self.assertNotIn("party_name", row)
