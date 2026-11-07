@@ -23,6 +23,18 @@ frappe.ui.form.on("Project", {
 			frm.events.add_project_budget(frm, event.originalEvent.detail)
 		);
 		$(frm.wrapper).on("costing-set-estimate", () => frm.events.set_estimate(frm));
+		// and the Overview tab for these: a list filtered by task names can outgrow a URL
+		$(frm.wrapper).on("overview-open-list", (event) => {
+			const { doctype, filters } = event.originalEvent.detail;
+			frappe.route_options = filters;
+			frappe.set_route("List", doctype);
+		});
+		$(frm.wrapper).on("overview-open-tab", (event) =>
+			frm.layout.tabs
+				.find((tab) => tab.df.fieldname === event.originalEvent.detail.fieldname)
+				?.set_active()
+		);
+		$(frm.wrapper).on("overview-new-task", () => frm.events.create_task(frm));
 	},
 	onload: function (frm) {
 		const so = frm.get_docfield("sales_order");
@@ -97,8 +109,14 @@ frappe.ui.form.on("Project", {
 		}
 		frm.trigger("set_custom_buttons");
 
-		// the Tasks tab holds only this field, so hiding it hides the tab, as for the Gantt and Kanban views
-		frm.toggle_display("tasks_html", frappe.model.can_read("Task"));
+		// the Tasks and Overview tabs each hold only one of these, so hiding it hides the tab, as for the
+		// Gantt and Kanban views; every panel of the Overview is built from Tasks
+		frm.toggle_display(["tasks_html", "overview_dashboard"], frappe.model.can_read("Task"));
+		// the Overview's figures come from tasks, timesheets and invoices that change without the Project,
+		// so it reads them again on every refresh, as Update Costing and Billing ends with one
+		frm.wrapper.dispatchEvent(
+			new CustomEvent("project-overview-refresh", { bubbles: true, detail: { project: frm.doc.name } })
+		);
 		// Budget records are an Accounts Manager's; without them the Budgets tab hides
 		frm.toggle_display("budgets_html", frappe.model.can_read("Budget"));
 		frm.trigger("render_budgets");
@@ -350,7 +368,6 @@ frappe.ui.form.on("Project", {
 				frm.refresh_fields(fields);
 				frm.refresh_header();
 			}
-			frm.project_overview?.refresh();
 		});
 	},
 

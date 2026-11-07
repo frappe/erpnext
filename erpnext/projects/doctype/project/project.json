@@ -11,7 +11,7 @@
  "engine": "InnoDB",
  "field_order": [
   "overview_tab",
-  "overview_html",
+  "overview_dashboard",
   "details_tab",
   "naming_series",
   "project_name",
@@ -89,10 +89,11 @@
    "label": "Overview"
   },
   {
-   "depends_on": "eval: !doc.__islocal",
-   "fieldname": "overview_html",
-   "fieldtype": "HTML",
-   "label": "Overview HTML"
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "overview_dashboard",
+   "fieldtype": "Vue Component",
+   "label": "Overview Dashboard",
+   "options": "erpnext.project_overview"
   },
   {
    "fieldname": "details_tab",
@@ -565,7 +566,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-11-03 12:00:00.000000",
+ "modified": "2026-11-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
