@@ -96,8 +96,8 @@ class AccountingPeriod(Document):
 				self.append(
 					"closed_documents",
 					{
-						"document_type": doctype_for_closing.document_type,
-						"closed": doctype_for_closing.closed,
+						"document_type": doctype_for_closing["document_type"],
+						"closed": doctype_for_closing["closed"],
 					},
 				)
 
@@ -141,9 +141,12 @@ def validate_accounting_period_on_doc_save(doc, method=None):
 			and accounting_period[0].get("exempted_role") in frappe.get_roles()
 		):
 			return
+		if method == "before_cancel":
+			message = _("You cannot cancel a {0} within the closed Accounting Period {1}")
+		else:
+			message = _("You cannot create a {0} within the closed Accounting Period {1}")
+
 		frappe.throw(
-			_("You cannot create a {0} within the closed Accounting Period {1}").format(
-				doc.doctype, frappe.bold(accounting_period[0]["name"])
-			),
+			message.format(doc.doctype, frappe.bold(accounting_period[0]["name"])),
 			ClosedAccountingPeriod,
 		)
