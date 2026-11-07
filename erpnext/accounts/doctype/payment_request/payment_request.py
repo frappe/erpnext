@@ -631,17 +631,17 @@ class PaymentRequest(Document):
 			or get_account_currency(party_account)
 		)
 
-		party_amount = bank_amount = self.outstanding_amount
-
+		bank_amount = None
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			exchange_rate = ref_doc.get("conversion_rate")
+			# Keep the request-currency amount based on the rate used for the reference document.
 			bank_amount = flt(self.outstanding_amount / exchange_rate, self.precision("grand_total"))
 
-		# outstanding amount is already in Part's account currency
+		# The Payment Request outstanding amount is in the party account currency.
 		payment_entry = get_payment_entry(
 			self.reference_doctype,
 			self.reference_name,
-			party_amount=party_amount,
+			party_amount=self.outstanding_amount,
 			bank_account=self.payment_account,
 			bank_amount=bank_amount,
 			created_from_payment_request=True,
