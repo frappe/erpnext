@@ -8489,6 +8489,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual((row.item_code, row.required_qty, row.stock_uom), (data.rm_variant, 40, "Nos"))
 		self.assertEqual((row.rate, row.amount), (5, 200))
 
+	def test_bom_that_only_consumes_the_item_is_rejected(self):
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		finished_good = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material])
+
+		wo = make_wo_order_test_record(production_item=raw_material, bom_no=bom.name, do_not_save=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			wo.insert()
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")

@@ -32,7 +32,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_items_as_dict,
-	validate_bom_no,
+	validate_production_bom,
 )
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_capacity_planning_days,
@@ -297,7 +297,7 @@ class WorkOrder(Document):
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
-			validate_bom_no(self.production_item, self.bom_no)
+			validate_production_bom(self.production_item, self.bom_no)
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()

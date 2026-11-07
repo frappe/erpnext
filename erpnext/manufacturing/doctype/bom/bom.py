@@ -897,7 +897,7 @@ class BOM(WebsiteGenerator):
 		items = []
 		for m in self.get("items"):
 			if m.bom_no:
-				validate_bom_no(m.item_code, m.bom_no)
+				validate_production_bom(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
@@ -1800,12 +1800,7 @@ def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 
 def validate_bom_no(item, bom_no):
 	"""Validate BOM No of sub-contracted items"""
-	bom = frappe.get_doc("BOM", bom_no)
-	if not bom.is_active:
-		frappe.throw(_("BOM {0} must be active").format(bom_no))
-	if bom.docstatus != 1:
-		if not frappe.in_test:
-			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	bom = get_usable_bom(bom_no)
 	if item:
 		rm_item_exists = False
 		for d in bom.items:
@@ -1814,13 +1809,34 @@ def validate_bom_no(item, bom_no):
 		for d in bom.secondary_items:
 			if d.item_code.lower() == item.lower():
 				rm_item_exists = True
-		if (
-			bom.item.lower() == item.lower()
-			or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
-		):
+		if _bom_produces_item(bom, item):
 			rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def validate_production_bom(item, bom_no):
+	"""Validate that the BOM manufactures the item or its template."""
+	bom = get_usable_bom(bom_no)
+	if not _bom_produces_item(bom, item):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def get_usable_bom(bom_no):
+	bom = frappe.get_doc("BOM", bom_no)
+	if not bom.is_active:
+		frappe.throw(_("BOM {0} must be active").format(bom_no))
+	if bom.docstatus != 1:
+		if not frappe.in_test:
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	return bom
+
+
+def _bom_produces_item(bom, item):
+	return (
+		bom.item.lower() == item.lower()
+		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
+	)
 
 
 @frappe.whitelist()
