@@ -112,12 +112,12 @@ class Workstation(Document):
 			if not data:
 				return
 
+			overwrite = not self.is_new() and self.has_value_changed("workstation_type")
 			for field in fields:
-				if self.get(field):
+				if self.get(field) and (field == "description" or not overwrite):
 					continue
 
-				if value := data.get(field):
-					self.set(field, value)
+				self.set(field, data.get(field))
 
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
