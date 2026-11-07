@@ -1,0 +1,25 @@
+all_scopes: false
+checking_base_sha: c40297ce28be577c492310a1e57b3d16f9c3254e
+previous_check_retries: []
+previous_failed_batches:
+  - batch_pr_head_sha: 6bd899621ecdbff5cd33a5b9b1e5b81a7534cf9d
+    batch_pr_number: 64833
+    checked_pull_requests:
+      - 64258
+      - 64412
+      - 64419
+      - 64545
+      - 64539
+    draft_pr_head_sha: 6bd899621ecdbff5cd33a5b9b1e5b81a7534cf9d
+    draft_pr_number: 64833
+  - batch_pr_head_sha: 33e01b322de1c8cb91402bbe3740bbcf519dfea7
+    batch_pr_number: 64835
+    checked_pull_requests:
+      - 64419
+      - 64545
+    draft_pr_head_sha: 33e01b322de1c8cb91402bbe3740bbcf519dfea7
+    draft_pr_number: 64835
+pull_requests:
+  - number: 64419
+    scopes: []
+scopes: []
