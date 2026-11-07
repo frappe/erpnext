@@ -127,6 +127,57 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 		self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="INV-12345 payment")))
 		self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="invoice abc")))
 
+	def test_evaluate_rule_description_regex_keeps_pattern_case(self):
+		doc = self._rule("rx_case", [{"check": "Regex", "value": r"UPI/\S+/"}])
+		self.assertTrue(doc.evaluate_rule(self._make_transaction(deposit=1, description="UPI/AB12CD/Rent")))
+		self.assertFalse(doc.evaluate_rule(self._make_transaction(deposit=1, description="UPI/ /Rent")))
+
+		doc = self._rule("rx_group", [{"check": "Regex", "value": r"INV-(?P<number>\d+)"}])
+		self.assertTrue(
+			doc.evaluate_rule(self._make_transaction(deposit=1, description="NEFT inv-1001 Sharma"))
+		)
+
+	def test_regex_with_angle_brackets_is_saved_as_written(self):
+		pattern = r"INV-(?P<number>\d+)"
+		doc = self._rule("rx_saved", [{"check": "Regex", "value": pattern}]).insert()
+		doc.reload()
+		self.assertEqual(doc.description_rules[0].value, pattern)
+		self.assertTrue(
+			doc.evaluate_rule(self._make_transaction(deposit=1, description="NEFT INV-1001 Sharma"))
+		)
+
+	def test_rule_run_skips_rule_with_invalid_saved_pattern(self):
+		from erpnext.accounts.doctype.bank_transaction_rule.bank_transaction_rule import (
+			_run_rule_evaluation,
+		)
+
+		broken = self._rule("rx_broken", [{"check": "Regex", "value": "INV-(?P<number>\\d+)"}]).insert()
+		# a value stored before patterns were validated
+		frappe.db.set_value(
+			"Bank Transaction Rule Description Conditions",
+			broken.description_rules[0].name,
+			"value",
+			"INV-(?P\\d+)",
+		)
+		valid = self._rule("rx_valid", [{"check": "Regex", "value": r"INV-\d+"}]).insert()
+
+		transaction = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"date": "2026-01-15",
+				"bank_account": self.bank_account,
+				"deposit": 100,
+				"description": "NEFT INV-1001 Sharma",
+			}
+		).insert()
+		transaction.submit()
+
+		_run_rule_evaluation(force_evaluate=True)
+
+		self.assertEqual(
+			frappe.db.get_value("Bank Transaction", transaction.name, "matched_transaction_rule"), valid.name
+		)
+
 	def test_evaluate_rule_composite_fails_on_description(self):
 		doc = self._rule(
 			"cmp",
