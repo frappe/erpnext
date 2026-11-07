@@ -14,6 +14,7 @@ from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
 from erpnext import _refuse, require_party_permission, require_permission
+from erpnext.accounts.doctype.tax_category.tax_category import get_enabled_tax_category
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 from erpnext.setup.doctype.supplier_group.supplier_group import get_parent_supplier_groups
 
@@ -229,7 +230,8 @@ def get_tax_template(posting_date, args):
 		"supplier_group": ("Supplier Group", get_parent_supplier_groups),
 	}
 
-	args.setdefault("tax_category", "")
+	# a disabled Tax Category matches only the rules without a category
+	args.tax_category = get_enabled_tax_category(args.get("tax_category")) or ""
 
 	for key, value in args.items():
 		if key == "use_for_shopping_cart":
