@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import cint, comma_and
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -135,6 +135,7 @@ class AccountsSettings(Document):
 			clear_cache = True
 
 		self.validate_stale_days()
+		self.validate_repost_allowed_types(old_doc)
 
 		if old_doc.show_payment_schedule_in_print != self.show_payment_schedule_in_print:
 			self.enable_payment_schedule_in_print()
@@ -169,6 +170,21 @@ class AccountsSettings(Document):
 		if not self.allow_stale and cint(self.stale_days) <= 0:
 			frappe.msgprint(
 				_("Stale Days should start from 1."), title="Error", indicator="red", raise_exception=1
+			)
+
+	def validate_repost_allowed_types(self, old_doc):
+		"""Only the types in the `repost_allowed_doctypes` hook can be reposted. Rows saved before
+		this check are kept, so that the settings can still be saved; reposting them fails."""
+		supported_types = frappe.get_hooks("repost_allowed_doctypes")
+		saved_types = {x.document_type for x in old_doc.repost_allowed_types}
+
+		if unsupported_types := [
+			x.document_type
+			for x in self.repost_allowed_types
+			if x.document_type not in supported_types and x.document_type not in saved_types
+		]:
+			frappe.throw(
+				_("Reposting {0} is not supported.").format(frappe.bold(comma_and(unsupported_types)))
 			)
 
 	def enable_payment_schedule_in_print(self):
