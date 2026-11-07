@@ -21,9 +21,11 @@
 				{% if email -%}<p itemprop="email"><span class="fa fa-envelope"></span> {{ email | e }}</p>{%- endif %}
 			</address>
 		</div>
+		{% if description %}
 		<div class="col-md-8">
 			<p>{{ description }}</p>
 		</div>
+		{% endif %}
 	</div>
 </div>
 {% endblock %}

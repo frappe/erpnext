@@ -27,6 +27,7 @@ from frappe.utils import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
 from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
 
@@ -964,7 +965,9 @@ class JobCard(Document):
 			if doc.transfer_material_against == "Job Card" and not doc.skip_transfer:
 				min_qty = []
 				for d in doc.operations:
-					completed_qty = flt(d.completed_qty) + flt(d.process_loss_qty)
+					completed_qty = (
+						flt(d.completed_qty) + flt(d.process_loss_qty) + get_upstream_process_loss(doc, d)
+					)
 					if completed_qty:
 						min_qty.append(completed_qty)
 					else:

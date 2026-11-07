@@ -1215,15 +1215,22 @@ class StockEntry(StockController):
 
 	def check_if_operations_completed(self):
 		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
 		prod_order = frappe.get_doc("Work Order", self.work_order)
 		allowance_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 
 		for d in prod_order.get("operations"):
-			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
+			total_completed_qty = (
+				flt(self.fg_completed_qty) + flt(prod_order.produced_qty) + flt(prod_order.process_loss_qty)
+			)
 			completed_qty = (
-				d.completed_qty + d.process_loss_qty + (allowance_percentage / 100 * d.completed_qty)
+				d.completed_qty
+				+ d.process_loss_qty
+				+ get_upstream_process_loss(prod_order, d)
+				+ (allowance_percentage / 100 * d.completed_qty)
 			)
 			if flt(total_completed_qty, self.precision("fg_completed_qty")) > flt(
 				completed_qty, self.precision("fg_completed_qty")
@@ -2946,19 +2953,19 @@ class StockEntry(StockController):
 			self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
 	def set_process_loss_qty(self):
+		from erpnext.manufacturing.doctype.work_order.work_order import get_upstream_process_loss
+
 		if self.purpose not in ("Manufacture", "Repack"):
 			return
 
 		precision = self.precision("process_loss_qty")
+		upstream_process_loss = 0
 		if self.work_order:
-			data = frappe.get_all(
-				"Work Order Operation",
-				filters={"parent": self.work_order},
-				fields=["max(process_loss_qty) as process_loss_qty"],
-			)
+			work_order = frappe.get_doc("Work Order", self.work_order)
+			upstream_process_loss = get_upstream_process_loss(work_order)
 
-			if data and data[0].process_loss_qty is not None:
-				process_loss_qty = data[0].process_loss_qty
+			if work_order.operations:
+				process_loss_qty = max(upstream_process_loss - flt(work_order.process_loss_qty), 0)
 				if flt(self.process_loss_qty, precision) != flt(process_loss_qty, precision):
 					self.process_loss_qty = flt(process_loss_qty, precision)
 
@@ -2966,7 +2973,7 @@ class StockEntry(StockController):
 						_("The Process Loss Qty has reset as per job cards Process Loss Qty"), alert=True
 					)
 
-		if not self.process_loss_percentage and not self.process_loss_qty:
+		if not self.process_loss_percentage and not self.process_loss_qty and not upstream_process_loss:
 			self.process_loss_percentage = frappe.get_cached_value(
 				"BOM", self.bom_no, "process_loss_percentage"
 			)
