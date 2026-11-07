@@ -1506,7 +1506,10 @@ def update_existing_asset(asset, remaining_qty, new_asset):
 	)
 
 	for row in asset.get("finance_books"):
-		value_after_depreciation = flt((row.value_after_depreciation * remaining_qty) / asset.asset_quantity)
+		value_after_depreciation = flt(
+			(row.value_after_depreciation * remaining_qty) / asset.asset_quantity,
+			row.precision("value_after_depreciation"),
+		)
 		expected_value_after_useful_life = flt(
 			(row.expected_value_after_useful_life * remaining_qty) / asset.asset_quantity
 		)
@@ -1562,6 +1565,7 @@ def create_new_asset_after_split(asset, split_qty):
 		(asset.additional_asset_cost * split_qty) / asset.asset_quantity,
 		asset.precision("additional_asset_cost"),
 	)
+	new_asset.total_asset_cost = new_gross_purchase_amount + new_asset.additional_asset_cost
 	if asset.purchase_amount:
 		new_asset.purchase_amount = new_gross_purchase_amount
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
@@ -1573,7 +1577,10 @@ def create_new_asset_after_split(asset, split_qty):
 	)
 
 	for row in new_asset.get("finance_books"):
-		row.value_after_depreciation = flt((row.value_after_depreciation * split_qty) / asset.asset_quantity)
+		row.value_after_depreciation = flt(
+			(row.value_after_depreciation * split_qty) / asset.asset_quantity,
+			row.precision("value_after_depreciation"),
+		)
 		row.expected_value_after_useful_life = flt(
 			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
