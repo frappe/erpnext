@@ -356,6 +356,57 @@ class TestEmployee(ERPNextTestSuite):
 			)
 		)
 
+	def test_unticking_user_permission_keeps_company_permission_made_by_hand(self):
+		from frappe.permissions import add_user_permission
+
+		user = "employee-manual-company-permission@example.com"
+		make_user(user)
+		add_user_permission("Company", "_Test Company", user)
+		employee = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		employee_doc = frappe.get_doc("Employee", employee)
+		employee_doc.create_user_permission = 0
+		employee_doc.save()
+
+		self.assertFalse(
+			frappe.db.exists("User Permission", {"allow": "Employee", "for_value": employee, "user": user})
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": "_Test Company", "user": user}
+			)
+		)
+
+	def test_deleting_employee_removes_user_permissions_and_role(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		user = "employee-deleted@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		with as_user(hr_user):
+			frappe.delete_doc("Employee", employee)
+
+		self.assertFalse(frappe.db.exists("Employee", employee))
+		self.assertFalse(frappe.db.exists("User Permission", {"user": user}))
+		self.assertNotIn("Employee", frappe.get_roles(user))
+
+	def test_hr_user_cannot_delete_employee_of_admin_user(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-deleted-manager@example.com", ["System Manager"])
+		frappe.db.delete("Employee", {"user_id": manager})
+		employee = make_employee(manager, company="_Test Company", create_user_permission=1)
+
+		with as_user(hr_user):
+			self.assertRaises(frappe.PermissionError, frappe.delete_doc, "Employee", employee)
+
+		self.assertTrue(frappe.db.exists("Employee", employee))
+		self.assertTrue(
+			frappe.db.exists("User Permission", {"allow": "Employee", "for_value": employee, "user": manager})
+		)
+
 	def test_hr_user_cannot_move_admin_user_restrictions_to_another_company(self):
 		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
@@ -541,7 +592,7 @@ def new_employee(user_id: str):
 	)
 
 
-def make_employee(user, company=None, **kwargs):
+def make_user(user):
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc(
 			{
@@ -553,6 +604,10 @@ def make_employee(user, company=None, **kwargs):
 				"roles": [{"doctype": "Has Role", "role": "Employee"}],
 			}
 		).insert()
+
+
+def make_employee(user, company=None, **kwargs):
+	make_user(user)
 
 	if not frappe.db.get_value("Employee", {"user_id": user}):
 		employee = frappe.get_doc(
