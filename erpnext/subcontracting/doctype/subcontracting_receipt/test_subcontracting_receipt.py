@@ -534,6 +534,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, second_return.submit)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	def test_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
 		fifo = {"is_stock_item": 1, "valuation_method": "FIFO"}
@@ -571,6 +572,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, -2 * receipts[1].items[0].rate)
 
+=======
+>>>>>>> 3adb655 (test: drop the FIFO return test develop already has, name the submit-time tests apart from the repost ones)
 	def test_moving_average_return_takes_the_finished_good_out_at_the_running_rate(self):
 		moving_average = {"is_stock_item": 1, "valuation_method": "Moving Average"}
 		rm_item = make_item(properties=moving_average).name
@@ -609,7 +612,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, flt(-2 * running_rate, 2))
 
-	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate(self):
+	def test_lifo_return_takes_the_finished_good_out_at_the_returned_receipt_rate_on_submit(self):
 		fg_item = make_subcontracted_fg_item("LIFO")
 		scr = make_fg_receipt(fg_item, rm_rate=100)
 		make_fg_receipt(fg_item, rm_rate=300)
@@ -623,7 +626,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, -2 * scr.items[0].rate)
 
-	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_warehouse_rate(self):
+	def test_return_of_a_row_with_rejected_qty_takes_the_accepted_warehouse_rate_on_submit(self):
 		fg_item = make_subcontracted_fg_item("FIFO")
 		make_fg_receipt(fg_item, rm_rate=100)
 		scr = make_fg_receipt(fg_item, rm_rate=300, rejected_qty=1)
