@@ -230,3 +230,16 @@ class TestSalesPartner(IntegrationTestCase):
 				with self.subTest(partner=partner.name):
 					set_request(method="GET", path=partner.route)
 					self.assertEqual(get_response().status_code, status_code)
+
+	def test_website_list_hides_internal_fields(self):
+		from frappe.www.list import get_list_data
+
+		published = self.make_partner(show_in_website=1)
+		hidden = self.make_partner()
+		with self.set_user("Guest"):
+			rows = get_list_data("Sales Partner")
+
+		names = [row.name for row in rows]
+		self.assertIn(published.name, names)
+		self.assertNotIn(hidden.name, names)
+		self.assertFalse(any("commission_rate" in row for row in rows))
