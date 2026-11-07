@@ -32,7 +32,7 @@ from pypika.terms import ExistsCriterion
 import erpnext
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
@@ -246,7 +246,7 @@ class ProductionPlan(Document):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			elif (d.item_code, d.bom_no) not in validated_boms:
-				validate_bom_no(d.item_code, d.bom_no)
+				validate_production_bom(d.item_code, d.bom_no)
 				validated_boms.add((d.item_code, d.bom_no))
 
 			if not flt(d.planned_qty):

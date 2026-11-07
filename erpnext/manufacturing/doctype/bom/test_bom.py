@@ -1839,6 +1839,17 @@ class TestBOM(ERPNextTestSuite):
 		sub_bom.is_active = 0
 		self.assertRaisesRegex(frappe.ValidationError, "linked with other BOMs", sub_bom.save)
 
+	def test_sub_bom_that_only_consumes_the_row_item_is_rejected(self):
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1}).name
+		sub_bom = make_usd_bom(sub_assembly, [{"item_code": raw_material, "qty": 1}])
+
+		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
+			make_usd_bom(
+				make_item(properties={"is_stock_item": 1}).name,
+				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
+			)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
