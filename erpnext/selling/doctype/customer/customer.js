@@ -28,7 +28,7 @@ frappe.ui.form.on("Customer", {
 					root_type: "Asset",
 					company: d.company,
 					is_group: 0,
-					...erpnext.utils.get_party_account_currency_filter(doc, d.company),
+					account_currency: erpnext.utils.get_party_account_currency(doc, d.company),
 				},
 			};
 		});
