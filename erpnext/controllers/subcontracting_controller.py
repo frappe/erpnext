@@ -299,19 +299,7 @@ class SubcontractingController(StockController):
 		if not self.is_return:
 			return set()
 
-		rejected_warehouses = dict(
-			frappe.get_all(
-				"Subcontracting Receipt Item",
-				filters={"parent": self.return_against},
-				fields=["name", "rejected_warehouse"],
-				as_list=True,
-			)
-		)
-		return {
-			row.name
-			for row in self.items
-			if row.warehouse and row.warehouse == rejected_warehouses.get(row.subcontracting_receipt_item)
-		}
+		return {row.name for row in self.items if row.return_qty_from_rejected_warehouse}
 
 	def validate_rejected_warehouse(self):
 		for item in self.get("items"):
