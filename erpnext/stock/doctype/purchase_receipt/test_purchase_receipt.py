@@ -609,8 +609,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.load_from_db()
 		pr.cancel()
 
-<<<<<<< HEAD
-=======
 	def test_return_cannot_return_rejected_qty_when_none_was_rejected(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
@@ -624,10 +622,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertRaises(StockOverReturnError, return_pr.save)
 
-	@ERPNextTestSuite.change_settings(
-		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 1}
-	)
->>>>>>> ed481ac (test: return rejected qty from a row with none rejected)
 	def test_per_billed_for_fully_rejected_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
 
