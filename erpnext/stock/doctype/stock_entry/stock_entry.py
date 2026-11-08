@@ -258,6 +258,7 @@ class StockEntry(StockController):
 		self.validate_work_order()
 		self.validate_returned_qty_within_work_order()
 		self.validate_alternative_items()
+		self.validate_work_order_status_for_return()
 		self.validate_source_stock_entry()
 		self.validate_bom()
 		self.set_process_loss_qty()
@@ -1151,6 +1152,20 @@ class StockEntry(StockController):
 		).run()
 
 		return {tuple(pair) for pair in pairs}
+
+	def validate_work_order_status_for_return(self):
+		if not (self.is_return and self.work_order and self.purpose == "Material Transfer for Manufacture"):
+			return
+
+		if frappe.db.get_value("Work Order", self.work_order, "status") in ("Completed", "Closed"):
+			return
+
+		frappe.throw(
+			_("Components can be returned only after Work Order {0} is Completed or Closed").format(
+				get_link_to_form("Work Order", self.work_order)
+			),
+			title=_("Work Order Not Finished"),
+		)
 
 	def validate_source_stock_entry(self):
 		if not self.get("source_stock_entry"):
