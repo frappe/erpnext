@@ -1095,6 +1095,15 @@ def get_filters(
 	return filters
 
 
+def is_rejected_subcontracting_return(return_row, original_rejected_warehouse) -> bool:
+	"""A Subcontracting Receipt return row sends back rejected qty while it is flagged and in the rejected warehouse."""
+	return bool(
+		return_row.return_qty_from_rejected_warehouse
+		and return_row.warehouse
+		and return_row.warehouse == original_rejected_warehouse
+	)
+
+
 def get_warehouses_for_return(voucher_type, name):
 	warehouses = []
 	warehouse_details = frappe.get_all(
