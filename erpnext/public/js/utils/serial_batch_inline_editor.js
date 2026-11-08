@@ -963,7 +963,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	sync_row_qty() {
 		if (this.frm.doc.docstatus !== 0 || !this.has_pending()) return;
 
-		let expected = this.get_effective_qty();
+		let expected = erpnext.stock.get_sbie_signed_qty(this.frm.doc, this.get_effective_qty());
 		if (flt(this.row[this.qty_field]) !== expected) {
 			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, expected);
 		}
@@ -972,12 +972,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	reconcile_row_qty() {
 		if (this.frm.doc.docstatus !== 0 || this.has_pending() || !this.server_total_count) return;
 
-		if (flt(this.row[this.qty_field]) !== this.server_total_qty) {
-			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, this.server_total_qty);
+		let qty = erpnext.stock.get_sbie_signed_qty(this.frm.doc, this.server_total_qty);
+		if (flt(this.row[this.qty_field]) !== qty) {
+			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, qty);
 			frappe.show_alert({
 				message: __(
 					"Qty updated to {0} to match the Serial and Batch Bundle. Please save the document.",
-					[this.server_total_qty]
+					[qty]
 				),
 				indicator: "orange",
 			});
@@ -1279,6 +1280,11 @@ erpnext.stock.get_sbie_row = function (frm, cdn) {
 	return {};
 };
 
+// Bundle totals are positive; return rows store negative qty.
+erpnext.stock.get_sbie_signed_qty = function (doc, qty) {
+	return doc.is_return && qty ? -Math.abs(qty) : qty;
+};
+
 erpnext.stock.get_sbie_pending_map = function (frm) {
 	let store = (frm._sbie_pending = frm._sbie_pending || {});
 	return (store[frm.doc.name] = store[frm.doc.name] || {});
@@ -1346,7 +1352,8 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		);
 
 		row[bundle_field] = summary.bundle;
-		row[cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty"] = summary.total_qty;
+		let qty_field = cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty";
+		row[qty_field] = erpnext.stock.get_sbie_signed_qty(frm.doc, summary.total_qty);
 		if (row.received_qty != null) {
 			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
 		}
