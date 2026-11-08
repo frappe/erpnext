@@ -278,7 +278,7 @@ class SubcontractingController(StockController):
 
 	def get_rejected_return_rows(self):
 		"""Return rows that send back rejected qty; their raw material cost is already in the accepted qty."""
-		if not self.is_return:
+		if not (self.doctype == "Subcontracting Receipt" and self.is_return):
 			return set()
 
 		rejected_warehouses = dict(
@@ -1067,7 +1067,12 @@ class SubcontractingController(StockController):
 		self.bom_items = {}
 
 		has_supplied_items = True if self.get(self.raw_material_table) else False
+		# a receipt consumes no raw materials for its rejected qty, so their return brings none back
+		rejected_return_rows = self.get_rejected_return_rows()
 		for row in self.items:
+			if row.name in rejected_return_rows:
+				continue
+
 			if self.doctype != self.subcontract_data.order_doctype and (
 				(self.__changed_name and row.name not in self.__changed_name)
 				or (has_supplied_items and not self.__changed_name)
