@@ -1916,6 +1916,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		pln = frappe.new_doc("Production Plan")
 		pln.company = "_Test Company"
+		pln.sub_assembly_warehouse = "_Test Warehouse - _TC"
 		pln.append("po_items", {"item_code": "PP SA BOM FG", "bom_no": fg_bom.name, "planned_qty": 1})
 		pln.get_sub_assembly_items("In House")
 		pln.sub_assembly_items[0].bom_no = other_bom.name
