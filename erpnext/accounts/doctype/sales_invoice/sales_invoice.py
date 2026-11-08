@@ -45,6 +45,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
+	get_last_depreciation_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
@@ -406,10 +407,13 @@ class SalesInvoice(SellingController):
 					seen_assets.add(d.asset)
 				if d.asset:
 					if not self.is_return:
-						asset_status = frappe.db.get_value("Asset", d.asset, "status")
+						asset_status, asset_docstatus = frappe.db.get_value(
+							"Asset", d.asset, ["status", "docstatus"]
+						)
 						if self.update_stock:
 							frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
-
+						elif asset_docstatus == 0:
+							frappe.throw(_("Row #{0}: Asset {1} must be submitted").format(d.idx, d.asset))
 						elif asset_status in ("Scrapped", "Cancelled", "Capitalized"):
 							frappe.throw(
 								_("Row #{0}: Asset {1} cannot be sold, it is already {2}").format(
@@ -418,6 +422,8 @@ class SalesInvoice(SellingController):
 							)
 						elif asset_status == "Sold" and not self.is_return:
 							frappe.throw(_("Row #{0}: Asset {1} is already sold").format(d.idx, d.asset))
+
+						self.validate_asset_sale_date(d)
 					elif not self.return_against:
 						frappe.throw(
 							_("Row #{0}: Return Against is required for returning asset").format(d.idx)
@@ -427,6 +433,15 @@ class SalesInvoice(SellingController):
 						_("Row #{0}: You must select an Asset for Item {1}.").format(d.idx, d.item_code),
 						title=_("Missing Asset"),
 					)
+
+	def validate_asset_sale_date(self, item) -> None:
+		last_depreciation_date = get_last_depreciation_date(item.asset)
+		if last_depreciation_date and getdate(self.posting_date) < last_depreciation_date:
+			frappe.throw(
+				_("Row #{0}: Asset {1} cannot be sold before its last depreciation entry dated {2}").format(
+					item.idx, item.asset, frappe.format(last_depreciation_date, "Date")
+				)
+			)
 
 	def validate_item_cost_centers(self):
 		for item in self.items:
@@ -515,11 +530,17 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 			self.validate_produced_serial_nos_against_reservation()
 
-		self.process_asset_depreciation()
+		if not self.is_return:
+			self.process_asset_depreciation()
+
 		self.set_asset_disposal_values()
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+
+		if self.is_return:
+			# the regain entries need the asset value before the disposal depreciation is reversed
+			self.process_asset_depreciation()
 
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
@@ -575,18 +596,35 @@ class SalesInvoice(SellingController):
 	def check_if_consolidated_invoice(self):
 		# since POS Invoice extends Sales Invoice, we explicitly check if doctype is Sales Invoice
 		if self.doctype == "Sales Invoice" and self.is_consolidated:
-			invoice_or_credit_note = "consolidated_credit_note" if self.is_return else "consolidated_invoice"
-			pos_closing_entry = frappe.get_all(
-				"POS Invoice Merge Log",
-				filters={invoice_or_credit_note: self.name},
-				pluck="pos_closing_entry",
-			)
-			if pos_closing_entry and pos_closing_entry[0]:
+			pos_closing_entry = self.get_pos_closing_entry_of_consolidated_invoice()
+			if pos_closing_entry:
 				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
 					frappe.bold(_("Consolidated Sales Invoice")),
-					get_link_to_form("POS Closing Entry", pos_closing_entry[0]),
+					get_link_to_form("POS Closing Entry", pos_closing_entry),
 				)
 				frappe.throw(msg, title=_("Not Allowed"))
+
+	def get_pos_closing_entry_of_consolidated_invoice(self):
+		merge_log = frappe.qb.DocType("POS Invoice Merge Log")
+		query = frappe.qb.from_(merge_log).select(merge_log.pos_closing_entry).limit(1)
+
+		if self.is_return:
+			merge_log_item = frappe.qb.DocType("POS Invoice Reference")
+			pos_invoice = frappe.qb.DocType("POS Invoice")
+			query = (
+				query.join(merge_log_item)
+				.on(merge_log_item.parent == merge_log.name)
+				.join(pos_invoice)
+				.on(pos_invoice.name == merge_log_item.pos_invoice)
+				.where(pos_invoice.consolidated_invoice == self.name)
+			)
+		else:
+			query = query.where(merge_log.consolidated_invoice == self.name)
+
+		result = query.where(
+			merge_log.pos_closing_entry.isnotnull() & (merge_log.pos_closing_entry != "")
+		).run()
+		return result[0][0] if result else None
 
 	def before_cancel(self):
 		self.check_if_consolidated_invoice()
@@ -1438,7 +1476,7 @@ class SalesInvoice(SellingController):
 		"""
 
 		def _update_asset(asset, disposal_date, note, asset_status=None):
-			frappe.db.set_value("Asset", d.asset, "disposal_date", disposal_date)
+			asset.db_set("disposal_date", disposal_date)
 			add_asset_activity(asset.name, note)
 			asset.set_status(asset_status)
 

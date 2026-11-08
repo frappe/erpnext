@@ -6,7 +6,7 @@ import frappe
 
 test_records = frappe.get_test_records("Item Attribute")
 
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 
 from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
 
@@ -16,6 +16,9 @@ class TestItemAttribute(FrappeTestCase):
 		super().setUp()
 		if frappe.db.exists("Item Attribute", "_Test_Length"):
 			frappe.delete_doc("Item Attribute", "_Test_Length")
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_numeric_item_attribute(self):
 		item_attribute = frappe.get_doc(
@@ -33,3 +36,100 @@ class TestItemAttribute(FrappeTestCase):
 
 		item_attribute.increment = 0.5
 		item_attribute.save()
+
+	def test_validate_existing_items_finds_variants(self):
+		from erpnext.controllers.item_variant import InvalidItemAttributeValueError, create_variant
+
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L", force=1)
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		attribute = frappe.get_doc("Item Attribute", "Test Size")
+		attribute.item_attribute_values = []
+		frappe.flags.attribute_values = None
+
+		self.assertRaises(InvalidItemAttributeValueError, attribute.save)
+
+	def make_colour_template(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		if not frappe.db.exists("Item Attribute", "_Test Abbr Colour"):
+			frappe.get_doc(
+				{
+					"doctype": "Item Attribute",
+					"attribute_name": "_Test Abbr Colour",
+					"item_attribute_values": [
+						{"attribute_value": "Red", "abbr": "R"},
+						{"attribute_value": "Blue", "abbr": "B"},
+					],
+				}
+			).insert()
+
+		return make_item(
+			"_Test Abbr Template",
+			{"has_variants": 1, "attributes": [{"attribute": "_Test Abbr Colour"}]},
+		)
+
+	def test_abbr_change_keeps_custom_variant_code(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+		custom = create_variant(template.name, {"_Test Abbr Colour": "Blue"})
+		custom.item_code = "_Test Custom Blue SKU"
+		custom.insert()
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		for row in attribute.item_attribute_values:
+			row.abbr = {"Red": "RD", "Blue": "BL"}[row.attribute_value]
+		attribute.save()
+
+		self.assertTrue(frappe.db.exists("Item", f"{template.name}-RD"))
+		self.assertTrue(frappe.db.exists("Item", "_Test Custom Blue SKU"))
+		self.assertFalse(frappe.db.exists("Item", f"{template.name}-BL"))
+
+	def test_numeric_values_cannot_change_while_used_by_variants(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		attribute.update({"numeric_values": 1, "from_range": 0, "to_range": 100, "increment": 1})
+		self.assertRaises(frappe.ValidationError, attribute.save)
+
+	@change_settings("Item Variant Settings", {"allow_rename_attribute_value": 1})
+	def test_custom_variant_value_does_not_block_attribute_edits(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		variant = create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+		frappe.db.set_value("Item Variant Attribute", variant.attributes[0].name, "attribute_value", "Teal")
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		attribute.append("item_attribute_values", {"attribute_value": "Amber", "abbr": "AMB"})
+		attribute.save()
+
+		self.assertIn("Amber", [d.attribute_value for d in attribute.item_attribute_values])
+
+	@change_settings("Item Variant Settings", {"allow_rename_attribute_value": 1})
+	def test_used_value_cannot_be_removed_when_rename_allowed(self):
+		from erpnext.controllers.item_variant import create_variant
+
+		template = self.make_colour_template()
+		create_variant(template.name, {"_Test Abbr Colour": "Red"}).insert()
+
+		attribute = frappe.get_doc("Item Attribute", "_Test Abbr Colour")
+		attribute.set(
+			"item_attribute_values",
+			[d for d in attribute.item_attribute_values if d.attribute_value != "Red"],
+		)
+		frappe.db.savepoint("remove_used_attribute_value")
+		self.assertRaises(frappe.ValidationError, attribute.save)
+		frappe.db.rollback(save_point="remove_used_attribute_value")
+
+		attribute.reload()
+		for row in attribute.item_attribute_values:
+			if row.attribute_value == "Red":
+				row.attribute_value = "Crimson"
+		attribute.save()

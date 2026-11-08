@@ -276,6 +276,7 @@ class StockEntry(StockController):
 			self.validate_disassembly_quantities()
 
 		self.validate_batch()
+		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
 		self.validate_finished_good_qty_against_fg_completed_qty()
@@ -612,6 +613,7 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("Completed")
 
 	def on_cancel(self):
+		self.validate_asset_repair_is_cancelled()
 		self.delink_asset_repair_sabb()
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
@@ -715,6 +717,14 @@ class StockEntry(StockController):
 				},
 			):
 				frappe.delete_doc("Stock Entry", d.name)
+
+	def validate_asset_repair_is_cancelled(self):
+		if self.asset_repair and frappe.db.get_value("Asset Repair", self.asset_repair, "docstatus") == 1:
+			frappe.throw(
+				_("Cancel Asset Repair {0} instead, it cancels this Stock Entry").format(
+					get_link_to_form("Asset Repair", self.asset_repair)
+				)
+			)
 
 	def delink_asset_repair_sabb(self):
 		if not self.asset_repair:
@@ -3739,6 +3749,43 @@ class StockEntry(StockController):
 					)
 				elif self.purpose == "Material Transfer" and self.add_to_transit:
 					continue
+
+	def validate_against_pick_list(self):
+		pick_list_items = {d.pick_list_item for d in self.items if d.pick_list_item}
+		if not pick_list_items or self.is_return:
+			return
+
+		picked_rows = {
+			row.name: row
+			for row in frappe.get_all(
+				"Pick List Item",
+				filters={"name": ("in", list(pick_list_items))},
+				fields=["name", "warehouse", "picked_qty", "transferred_qty"],
+			)
+		}
+		transfer_qty = defaultdict(float)
+		for d in self.items:
+			picked_row = picked_rows.get(d.pick_list_item)
+			if not picked_row:
+				continue
+
+			if d.s_warehouse and d.s_warehouse != picked_row.warehouse:
+				frappe.throw(
+					_("Row #{0}: Item {1} was picked from {2}, not {3}.").format(
+						d.idx,
+						frappe.bold(d.item_code),
+						frappe.bold(picked_row.warehouse),
+						frappe.bold(d.s_warehouse),
+					)
+				)
+
+			transfer_qty[d.pick_list_item] += flt(d.qty) * flt(d.conversion_factor or 1)
+			if flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item] > flt(picked_row.picked_qty):
+				frappe.throw(
+					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
+						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
+					)
+				)
 
 	def validate_batch(self):
 		if self.purpose in [

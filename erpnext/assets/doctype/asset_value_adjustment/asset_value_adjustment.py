@@ -11,7 +11,10 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
-from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
+from erpnext.assets.doctype.asset.depreciation import (
+	get_depreciation_accounts,
+	get_last_depreciation_date,
+)
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
@@ -42,9 +45,55 @@ class AssetValueAdjustment(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_asset_not_disposed()
 		self.validate_date()
+		self.validate_new_asset_value()
 		self.set_current_asset_value()
 		self.set_difference_amount()
+		self.validate_finance_book()
+
+	def before_cancel(self):
+		self.validate_asset_not_disposed()
+		self.validate_asset_not_split()
+
+	def validate_asset_not_split(self):
+		# self.modified is already the cancel time here; the stored value is the submission time
+		submitted_on = frappe.db.get_value(self.doctype, self.name, "modified")
+		split_asset = frappe.db.get_value(
+			"Asset", {"split_from": self.asset, "creation": (">", submitted_on)}, "name"
+		)
+		if split_asset:
+			frappe.throw(
+				_(
+					"Asset {0} was split into Asset {1} after this adjustment, so it cannot be cancelled. Adjust the value of each asset instead."
+				).format(get_link_to_form("Asset", self.asset), get_link_to_form("Asset", split_asset)),
+				title=_("Asset Split"),
+			)
+
+	def validate_finance_book(self):
+		if self.finance_book or not frappe.db.get_value("Asset", self.asset, "calculate_depreciation"):
+			return
+
+		# The adjustment updates only the matching book row, but its GL entries without a book apply to all books
+		if frappe.db.exists(
+			"Asset Finance Book",
+			{"parent": self.asset, "parenttype": "Asset", "finance_book": ["is", "set"]},
+		):
+			frappe.throw(
+				_("Select a Finance Book, as Asset {0} has named finance books").format(
+					get_link_to_form("Asset", self.asset)
+				),
+				title=_("Missing Finance Book"),
+			)
+
+	def validate_asset_not_disposed(self):
+		status, disposal_date = frappe.db.get_value("Asset", self.asset, ["status", "disposal_date"])
+		if disposal_date or status in ("Sold", "Scrapped", "Capitalized"):
+			frappe.throw(
+				_("Asset {0} is disposed, its value cannot be adjusted").format(
+					get_link_to_form("Asset", self.asset)
+				)
+			)
 
 	def on_submit(self):
 		self.make_depreciation_entry()
@@ -76,11 +125,24 @@ class AssetValueAdjustment(Document):
 				title=_("Incorrect Date"),
 			)
 
+		last_depreciation_date = get_last_depreciation_date(self.asset, self.finance_book)
+		if last_depreciation_date and getdate(self.date) < last_depreciation_date:
+			frappe.throw(
+				_(
+					"Asset Value Adjustment cannot be posted before the last depreciation entry dated {0}"
+				).format(formatdate(last_depreciation_date)),
+				title=_("Incorrect Date"),
+			)
+
+	def validate_new_asset_value(self):
+		if flt(self.new_asset_value) < 0:
+			frappe.throw(_("New Asset Value cannot be negative"))
+
 	def set_difference_amount(self):
 		self.difference_amount = flt(self.new_asset_value - self.current_asset_value)
 
 	def set_current_asset_value(self):
-		if not self.current_asset_value and self.asset:
+		if self.asset:
 			self.current_asset_value = _get_asset_value_after_depreciation(self.asset, self.finance_book)
 
 	def make_depreciation_entry(self):
@@ -202,20 +264,20 @@ class AssetValueAdjustment(Document):
 		if asset.calculate_depreciation:
 			for row in asset.finance_books:
 				if cstr(row.finance_book) == cstr(self.finance_book):
-					salvage_value_adjustment = (
-						self.get_adjusted_salvage_value_amount(row, difference_amount) or 0
-					)
+					salvage_value_adjustment = self.get_adjusted_salvage_value_amount(row, difference_amount)
 					row.expected_value_after_useful_life += salvage_value_adjustment
 					row.value_after_depreciation = row.value_after_depreciation + flt(difference_amount)
+					row.value_adjustment_amount = flt(row.value_adjustment_amount) + flt(difference_amount)
 					row.db_update()
+		else:
+			asset.value_adjustment_amount = flt(asset.value_adjustment_amount) + flt(difference_amount)
 
 		asset.value_after_depreciation += flt(difference_amount)
 		asset.db_update()
 		return asset
 
 	def get_adjusted_salvage_value_amount(self, row, difference_amount):
-		if row.expected_value_after_useful_life:
-			return flt((difference_amount * row.salvage_value_percentage) / 100)
+		return flt((difference_amount * row.salvage_value_percentage) / 100)
 
 
 @frappe.whitelist()

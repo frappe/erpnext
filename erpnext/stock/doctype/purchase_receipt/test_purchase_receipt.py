@@ -609,6 +609,19 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.load_from_db()
 		pr.cancel()
 
+	def test_return_cannot_return_rejected_qty_when_none_was_rejected(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr = make_purchase_receipt(qty=5)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items[0].qty = -3
+		return_pr.items[0].rejected_qty = -2
+		return_pr.items[0].received_qty = -5
+		return_pr.items[0].rejected_warehouse = "_Test Warehouse 1 - _TC"
+
+		self.assertRaises(StockOverReturnError, return_pr.save)
+
 	def test_per_billed_for_fully_rejected_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
 
@@ -1376,6 +1389,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		prepare_data_for_internal_transfer()
 
+		frappe.db.set_value("Account", "_Test Account Stock In Hand - TCP1", "account_type", "Stock")
 		create_warehouse(
 			"_Test Warehouse for Valuation",
 			company="_Test Company with perpetual inventory",
@@ -6108,14 +6122,19 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.savepoint("before_closed_period_pcv")
 		self.addCleanup(frappe.db.rollback, save_point="before_closed_period_pcv")
 
-		closed_date = add_days(get_fiscal_year(today(), company="_Test Company")[1], -1)
-		make_period_closing_voucher(
-			company="_Test Company", cost_center="Main - _TC", posting_date=closed_date
-		)
+		company = create_company_without_ledger_entries()
+		closed_date = add_days(get_fiscal_year(today(), company=company)[1], -1)
+		make_period_closing_voucher(company=company, cost_center="Main - _TCPC", posting_date=closed_date)
 		item = make_item("_Test Non Stock Closed Period Item", {"is_stock_item": 0}).name
 
 		with change_settings("Stock Reposting Settings", {"item_based_reposting": 0}):
-			receipt = make_purchase_receipt(item_code=item, posting_date=closed_date)
+			receipt = make_purchase_receipt(
+				item_code=item,
+				posting_date=closed_date,
+				company=company,
+				warehouse="Stores - _TCPC",
+				supplier_warehouse="Stores - _TCPC",
+			)
 			receipt.cancel()
 
 		self.assertEqual(receipt.docstatus, 2)
@@ -6127,6 +6146,76 @@ class TestPurchaseReceipt(FrappeTestCase):
 			receipt.cancel()
 
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
+	def test_purchase_return_with_and_without_return_against_rejected_qty(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return as _make_purchase_return,
+		)
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		item_code = create_item("Test Item for PR against Rejected Qty").name
+		warehouse = "_Test Warehouse - _TC"
+
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		rejected_wh = create_warehouse("_Test Rejected Warehouse", company=company)
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=10,
+			rejected_qty=5,
+			rate=100,
+			warehouse=warehouse,
+			rejected_warehouse=rejected_wh,
+		)
+
+		# Purchase Return against rejected qty partially
+		return_entry = make_purchase_return_against_rejected_warehouse(pr.name)
+		return_entry.items[0].qty = -2
+		return_entry.items[0].received_qty = -2
+		return_entry.save()
+		return_entry.submit()
+		pr.reload()
+
+		# Purchase Return against rejected qty partially
+		return_entry = _make_purchase_return(pr.name)
+
+		self.assertEqual(return_entry.items[0].qty, -10)
+		self.assertEqual(return_entry.items[0].rejected_qty, -3)  # 5-2=3
+
+		return_entry.items[0].qty = -8
+		return_entry.items[0].stock_qty = -8
+		return_entry.items[0].received_qty = -11
+
+		return_entry.save()
+		return_entry.submit()
+
+		pr.reload()
+
+		# Purchase Return against rejected qty partially
+		return_entry = _make_purchase_return(pr.name)
+
+		self.assertEqual(return_entry.items[0].qty, -2)
+		self.assertEqual(return_entry.items[0].rejected_qty, 0)  # 3-3=0
+
+
+def create_company_without_ledger_entries():
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "_Test Closed Period Company",
+				"abbr": "_TCPC",
+				"country": "India",
+				"default_currency": "INR",
+				"create_chart_of_accounts_based_on": "Standard Template",
+				"chart_of_accounts": "Standard",
+			}
+		)
+		.insert(ignore_if_duplicate=True)
+		.name
+	)
 
 
 def prepare_data_for_internal_transfer():

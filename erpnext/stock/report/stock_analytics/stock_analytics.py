@@ -1,9 +1,12 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
+from bisect import bisect_right
 
 import frappe
 from frappe import _, scrub
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start, getdate
 from frappe.utils import get_first_day as get_first_day_of_month
@@ -79,7 +82,7 @@ def get_period_date_ranges(filters):
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(filters.range, 1)
 
 	periodic_daterange = []
-	for _dummy in range(1, 53, increment):
+	while True:
 		if filters.range == "Weekly":
 			period_end_date = from_date + relativedelta(days=6)
 		else:
@@ -124,7 +127,8 @@ def get_period(posting_date, filters):
 	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 	if filters.range == "Weekly":
-		period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
+		iso_date = (get_first_day_of_week(posting_date) + datetime.timedelta(days=6)).isocalendar()
+		period = _("Week {0} {1}").format(str(iso_date.week), str(iso_date.year))
 	elif filters.range == "Monthly":
 		period = _(str(months[posting_date.month - 1])) + " " + str(posting_date.year)
 	elif filters.range == "Quarterly":
@@ -134,6 +138,15 @@ def get_period(posting_date, filters):
 		period = str(year[2])
 
 	return period
+
+
+def get_period_of_date(posting_date, ranges, periods, filters):
+	posting_date = getdate(posting_date)
+	index = bisect_right(ranges, posting_date, key=lambda date_range: getdate(date_range[0])) - 1
+	if index >= 0 and posting_date <= getdate(ranges[index][1]):
+		return periods[index]
+
+	return get_period(posting_date, filters)
 
 
 def get_periodic_data(entry, filters):
@@ -169,7 +182,7 @@ def get_periodic_data(entry, filters):
 
 	periodic_data = {}
 	for d in entry:
-		period = get_period(d.posting_date, filters)
+		period = get_period_of_date(d.posting_date, expected_ranges, expected_periods, filters)
 		bal_qty = 0
 
 		fill_intermediate_periods(periodic_data, d.item_code, period, expected_periods)
@@ -339,6 +352,9 @@ def apply_conditions(query, filters):
 
 	if company := filters.get("company"):
 		query = query.where(sle.company == company)
+
+	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Stock Entry"):
+		query = query.where(sle.warehouse.isin(warehouses))
 
 	if filters.get("warehouse"):
 		query = apply_warehouse_filter(query, sle, filters)
