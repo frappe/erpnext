@@ -7,6 +7,10 @@ frappe.ui.form.on("Bin", {
 	},
 
 	recalculate_bin_quantity(frm) {
+		if (!frappe.model.can_write("Repost Item Valuation")) {
+			return;
+		}
+
 		frm.add_custom_button(__("Recalculate Bin Qty"), () => {
 			frappe.call({
 				method: "recalculate_qty",
