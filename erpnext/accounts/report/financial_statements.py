@@ -139,7 +139,9 @@ def get_dimension_period_list(filters: frappe._dict, split_on_fiscal_year=False)
 	return period_list
 
 
-def build_period_list(filters: frappe._dict, split_on_fiscal_year=False) -> list[dict]:
+def build_period_list(
+	filters: frappe._dict, split_on_fiscal_year=False, accumulated_values=False
+) -> list[dict]:
 	"""
 	Build the report `period_list` from filters.
 
@@ -156,6 +158,7 @@ def build_period_list(filters: frappe._dict, split_on_fiscal_year=False) -> list
 		filters.period_end_date,
 		filters.filter_based_on,
 		filters.periodicity,
+		accumulated_values=accumulated_values,
 		company=filters.company,
 		split_on_fiscal_year=split_on_fiscal_year,
 	)
@@ -280,7 +283,9 @@ def get_period_list(
 				label = get_label(periodicity, opts["from_date"], opts["to_date"])
 			else:
 				if reset_period_on_fy_change:
-					label = get_label(periodicity, opts.from_date_fiscal_year_start_date, opts["to_date"])
+					# a date range can start after its fiscal year does
+					label_start_date = max(opts.from_date_fiscal_year_start_date, year_start_date)
+					label = get_label(periodicity, label_start_date, opts["to_date"])
 				else:
 					label = get_label(periodicity, period_list[0].from_date, opts["to_date"])
 
