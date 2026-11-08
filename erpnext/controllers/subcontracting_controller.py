@@ -102,15 +102,15 @@ class SubcontractingController(StockController):
 		rejected_return_rows = self.get_rejected_return_rows()
 		return_rates = self.get_consumed_rates_for_return()
 		original_rows = {item.name: item.subcontracting_receipt_item for item in self.items}
-
-		# set while validating; a repost loads the receipt without it
-		returnable_serial_batches = self.get("returnable_serial_batches") or {}
+		consumed_serial_batches = self.get_consumed_serial_batches()
+		bundle_entries = self.get_bundle_entries(rows) if consumed_serial_batches else {}
 
 		rates = []
 		for row in rows:
 			return_rate = None
 			if self.is_return:
 				key = (original_rows.get(row.reference_name), row.rm_item_code)
+<<<<<<< HEAD
 				# rows with the consumed serial nos or batches already carry the rate they were consumed at
 				return_rate = (
 					row.rate
@@ -118,6 +118,14 @@ class SubcontractingController(StockController):
 					else return_rates.get(key)
 				)
 			if row.reference_name in rejected_return_rows:
+=======
+				return_rate = self.get_serial_batch_return_rate(
+					row, consumed_serial_batches.get(key, {}), bundle_entries
+				)
+				if return_rate is None:
+					return_rate = return_rates.get(key)
+			if row.reference_name in rejected_return_rows and not is_standard_cost:
+>>>>>>> eb0ee73 (fix(subcontracting): return a supplied item at the consumed rate of the batches and serial nos in its bundle)
 				rates.append(0.0)
 			elif return_rate is not None:
 				rates.append(return_rate)
@@ -126,6 +134,36 @@ class SubcontractingController(StockController):
 
 		return rates
 
+<<<<<<< HEAD
+=======
+	def get_serial_batch_return_rate(self, row, identities, bundle_entries):
+		"""Qty-weighted rate the returned receipt consumed the row's serial nos or batches at."""
+		if row.serial_and_batch_bundle:
+			returned = [
+				(identities.get((entry.serial_no, entry.batch_no)), abs(flt(entry.qty)))
+				for entry in bundle_entries.get(row.serial_and_batch_bundle, [])
+			]
+		else:
+			# serial nos match case-insensitively, as in SerialBatchIdentity
+			serial_nos = {serial_no.casefold() for serial_no in get_serial_nos(row.serial_no)}
+			returned = [
+				(identity, 1)
+				for identity in identities.values()
+				if (
+					cstr(identity.serial_number).casefold() in serial_nos
+					if serial_nos
+					else row.batch_no and identity.batch_no == row.batch_no
+				)
+			]
+
+		returned = [(identity.rate, qty) for identity, qty in returned if identity]
+		total_qty = sum(qty for _rate, qty in returned)
+		if not total_qty:
+			return None
+
+		return flt(sum(rate * qty for rate, qty in returned) / total_qty, row.precision("rate"))
+
+>>>>>>> eb0ee73 (fix(subcontracting): return a supplied item at the consumed rate of the batches and serial nos in its bundle)
 	def get_supplied_item_rate_args(self, row):
 		return frappe._dict(
 			{
@@ -169,6 +207,15 @@ class SubcontractingController(StockController):
 	def get_returnable_serial_batches(self):
 		"""Serial nos and batches the returned receipt consumed that no return has brought back yet,
 		keyed by (receipt item row, raw material)."""
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
+		return {
+			key: [identity for identity in identities.values() if flt(identity.qty, precision) > 0]
+			for key, identities in self.get_consumed_serial_batches().items()
+		}
+
+	def get_consumed_serial_batches(self):
+		"""Serial nos and batches the returned receipt consumed, with their rate and the qty no other
+		return has brought back, keyed by (receipt item row, raw material), then (serial no, batch)."""
 		if not (self.doctype == "Subcontracting Receipt" and self.is_return and self.return_against):
 			return {}
 
@@ -218,11 +265,7 @@ class SubcontractingController(StockController):
 			if identity:
 				identity.qty -= row.qty
 
-		precision = frappe.get_precision("Serial and Batch Entry", "qty")
-		return {
-			key: [identity for identity in identities.values() if flt(identity.qty, precision) > 0]
-			for key, identities in returnable.items()
-		}
+		return returnable
 
 	def set_serial_batch_for_return(self, rm_obj, identities):
 		"""Send back the serial nos and batches the returned receipt consumed, one row per batch and rate."""
@@ -1343,7 +1386,7 @@ class SubcontractingController(StockController):
 		):
 			return
 
-		bundle_entries = self.__get_bundle_entries()
+		bundle_entries = self.get_bundle_entries(self.get(self.raw_material_table))
 		for row in self.get(self.raw_material_table):
 			key = (row.rm_item_code, row.main_item_code, row.get(self.subcontract_data.order_field))
 			if not self.__transferred_items.get(key):
@@ -1353,19 +1396,15 @@ class SubcontractingController(StockController):
 			self.__validate_batch_no(row, key, entries)
 			self.__validate_serial_no(row, key, entries)
 
-	def __get_bundle_entries(self):
-		bundles = [
-			row.get("serial_and_batch_bundle")
-			for row in self.get(self.raw_material_table)
-			if row.get("serial_and_batch_bundle")
-		]
+	def get_bundle_entries(self, rows):
+		bundles = [row.get("serial_and_batch_bundle") for row in rows if row.get("serial_and_batch_bundle")]
 		if not bundles:
 			return {}
 
 		bundle_entries = defaultdict(list)
 		for entry in frappe.get_all(
 			"Serial and Batch Entry",
-			fields=["parent", "serial_no", "batch_no"],
+			fields=["parent", "serial_no", "batch_no", "qty"],
 			filters={"parent": ("in", bundles)},
 		):
 			bundle_entries[entry.parent].append(entry)
