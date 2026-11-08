@@ -53,6 +53,7 @@ class AssetValueAdjustment(Document):
 		self.validate_finance_book()
 
 	def before_cancel(self):
+		self.validate_asset_not_disposed()
 		self.validate_asset_not_split()
 
 	def validate_asset_not_split(self):
@@ -84,9 +85,6 @@ class AssetValueAdjustment(Document):
 				),
 				title=_("Missing Finance Book"),
 			)
-
-	def before_cancel(self):
-		self.validate_asset_not_disposed()
 
 	def validate_asset_not_disposed(self):
 		status, disposal_date = frappe.db.get_value("Asset", self.asset, ["status", "disposal_date"])
