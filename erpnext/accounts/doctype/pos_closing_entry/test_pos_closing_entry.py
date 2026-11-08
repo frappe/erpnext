@@ -2,8 +2,11 @@
 # See license.txt
 
 import unittest
+from contextlib import contextmanager
+from unittest.mock import patch
 
 import frappe
+from frappe.handler import run_doc_method
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -359,6 +362,221 @@ class TestPOSClosingEntry(unittest.TestCase):
 		expected = {row.mode_of_payment: row.expected_amount for row in closing_entry.payment_reconciliation}
 		self.assertEqual(expected, {"Cash": 90, self.card_mode: 0})
 
+	def test_closing_refuses_session_invoices_left_out(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+		self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		self.assertTrue(frappe.db.get_value("POS Invoice", late_sale.name, "consolidated_invoice"))
+
+	def test_cancel_with_ten_merge_logs_unconsolidates_after_commit(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		customers = make_customers(10)
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		for customer in customers:
+			make_paid_pos_invoice([("Cash", 90)], customer=customer)
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		self.assertTrue(enqueue.call_args.kwargs["enqueue_after_commit"])
+		self.assertEqual(closing_entry.ignore_linked_doctypes, ("POS Invoice Merge Log", "Sales Invoice"))
+		merge_logs = enqueue.call_args.kwargs["merge_logs"]
+		self.assertEqual(len(merge_logs), 10)
+		enqueue.call_args.args[0](
+			merge_logs=merge_logs, closing_entry=enqueue.call_args.kwargs["closing_entry"]
+		)
+
+		for merge_log in merge_logs:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_retry_runs_only_on_failed_closing_entry(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate) as consolidate_pos_invoices:
+			self.assertRaises(frappe.ValidationError, closing_entry.retry)
+			consolidate_pos_invoices.assert_not_called()
+
+			closing_entry.db_set("status", "Failed")
+			closing_entry.status = "Submitted"
+			closing_entry.retry()
+			consolidate_pos_invoices.assert_called_once()
+
+	def test_retry_refuses_session_invoices_sold_after_failed_consolidation(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+
+		consolidate = "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.consolidate_pos_invoices"
+		with patch(consolidate):
+			closing_entry.submit()
+		closing_entry.db_set("status", "Failed")
+		late_sale = make_paid_pos_invoice([("Cash", 90)])
+
+		with patch(consolidate) as consolidate_pos_invoices:
+			with self.assertRaises(frappe.ValidationError) as context:
+				closing_entry.retry()
+			consolidate_pos_invoices.assert_not_called()
+
+		self.assertIn(late_sale.name, str(context.exception))
+
+	def test_failed_cancel_keeps_closing_entry_submitted(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.cancel)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(1, "Submitted"),
+		)
+
+	def test_failed_submit_keeps_closing_entry_draft(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry).insert()
+
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.submit", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(frappe.ValidationError, closing_entry.submit)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(0, "Draft"),
+		)
+
+	def test_failed_background_cancel_is_marked_failed_and_can_be_retried(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		customers = make_customers(10)
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		for customer in customers:
+			make_paid_pos_invoice([("Cash", 90)], customer=customer)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.cancel()
+
+		job, job_arguments = enqueue.call_args.args[0], enqueue.call_args.kwargs
+		with failures_handled_outside_tests(), patch(
+			f"{MERGE_LOG_CLASS}.cancel", side_effect=frappe.ValidationError
+		):
+			self.assertRaises(
+				frappe.ValidationError,
+				job,
+				merge_logs=job_arguments["merge_logs"],
+				closing_entry=job_arguments["closing_entry"],
+			)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Failed"),
+		)
+
+		with patch("erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.enqueue") as enqueue:
+			closing_entry.retry()
+		enqueue.call_args.args[0](
+			merge_logs=enqueue.call_args.kwargs["merge_logs"],
+			closing_entry=enqueue.call_args.kwargs["closing_entry"],
+		)
+
+		for merge_log in job_arguments["merge_logs"]:
+			self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Cancelled"),
+		)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_retry_from_form_reruns_failed_cancel(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		merge_log = frappe.db.get_value("POS Invoice Merge Log", {"pos_closing_entry": closing_entry.name})
+		frappe.db.set_value("POS Closing Entry", closing_entry.name, {"docstatus": 2, "status": "Failed"})
+
+		with (
+			patch("frappe.handler.is_valid_http_method"),
+			patch.object(frappe.local, "response", frappe._dict(docs=[])),
+		):
+			run_doc_method("retry", dt="POS Closing Entry", dn=closing_entry.name)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Cancelled"),
+		)
+		self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_cancel_without_queue_keeps_back_link_check(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+
+		closing_entry.cancel()
+		self.assertFalse(closing_entry.get("ignore_linked_doctypes"))
+
+	def test_missing_invoices_message_lists_first_ten(self):
+		make_stock_entry(target="_Test Warehouse - _TC", qty=11, basic_rate=100)
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		late_sales = [make_paid_pos_invoice([("Cash", 90)]).name for _ in range(11)]
+
+		with self.assertRaises(frappe.ValidationError) as context:
+			closing_entry.submit()
+
+		message = str(context.exception)
+		self.assertIn("and 1 more", message)
+		self.assertEqual(sum(name in message for name in late_sales), 10)
+
+
+MERGE_LOG_CLASS = "erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log.POSInvoiceMergeLog"
+
+
+@contextmanager
+def failures_handled_outside_tests():
+	frappe.db.savepoint("before_failure")
+	rollback = frappe.db.rollback
+	with (
+		patch.object(frappe.db, "rollback", lambda **kwargs: rollback(save_point="before_failure")),
+		patch.object(frappe.db, "commit"),
+	):
+		yield
+
 
 def init_user_and_profile(**args):
 	user = "test@example.com"
@@ -393,3 +611,32 @@ def get_test_item_qty(pos_profile):
 		"actual_qty"
 	)
 	return test_item_qty
+
+
+def make_paid_pos_invoice(payments, **args):
+	pos_invoice = create_pos_invoice(rate=90, do_not_submit=1, **args)
+	for mode_of_payment, amount in payments:
+		pos_invoice.append("payments", {"mode_of_payment": mode_of_payment, "amount": amount})
+	pos_invoice.save()
+	pos_invoice.submit()
+	return pos_invoice
+
+
+def make_customers(count):
+	customers = []
+	for index in range(count):
+		customer_name = f"_Test POS Closing Customer {index + 1}"
+		customer = frappe.db.get_value("Customer", {"customer_name": customer_name}) or (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": customer_name,
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+				}
+			)
+			.insert()
+			.name
+		)
+		customers.append(customer)
+	return customers
