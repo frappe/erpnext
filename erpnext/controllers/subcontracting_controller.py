@@ -975,7 +975,10 @@ class SubcontractingController(StockController):
 
 		rm_obj.reference_name = item_row.name
 
-		use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
+		# like other returns, a return's serial nos and batches go in the fields and get a bundle on submit
+		use_serial_batch_fields = self.get("is_return") or frappe.get_single_value(
+			"Stock Settings", "use_serial_batch_fields"
+		)
 
 		if self.doctype == self.subcontract_data.order_doctype:
 			rm_obj.required_qty = flt(qty, rm_obj.precision("required_qty"))
