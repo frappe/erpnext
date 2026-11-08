@@ -1833,7 +1833,7 @@ class update_entries_after:
 		return (
 			sle.voucher_type == "Subcontracting Receipt"
 			and flt(sle.actual_qty) > 0
-			and bool(frappe.db.exists("Subcontracting Receipt Supplied Item", sle.voucher_detail_no))
+			and bool(sle.dependant_sle_voucher_detail_no)
 		)
 
 	@staticmethod
