@@ -342,7 +342,10 @@ class Item(Document):
 			if not exchange_rate:
 				return False
 
-			price_list_rate = price_list_rate / exchange_rate
+			price_list_rate = flt(
+				price_list_rate / exchange_rate,
+				frappe.get_precision("Item Price", "price_list_rate", currency),
+			)
 
 		frappe.get_doc(
 			{
