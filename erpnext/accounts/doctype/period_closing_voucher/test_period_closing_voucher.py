@@ -463,6 +463,22 @@ class TestPeriodClosingVoucher(FrappeTestCase):
 		):
 			self.make_period_closing_voucher(posting_date="2022-12-31")
 
+	def test_previous_closing_without_processing_status_allows_next_closing(self):
+		self.make_income_entry("2021-03-15", 1000)
+		previous_pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		previous_pcv.db_set("gle_processing_status", None)
+
+		pcv = self.make_period_closing_voucher(posting_date="2022-12-31")
+		self.assertEqual(pcv.docstatus, 1)
+
+	def test_failed_previous_closing_blocks_next_closing(self):
+		self.make_income_entry("2021-03-15", 1000)
+		failed_pcv = self.make_period_closing_voucher(posting_date="2021-12-31")
+		failed_pcv.db_set("gle_processing_status", "Failed")
+
+		with self.assertRaisesRegex(frappe.ValidationError, f"{failed_pcv.name}.*GL Entry Processing Status"):
+			self.make_period_closing_voucher(posting_date="2022-12-31")
+
 	def test_closing_error_fails_submit_in_legacy_controller(self):
 		self.make_income_entry("2021-03-15", 1000, income_account="Service - TPC")
 		frappe.db.set_value("Account", "Service - TPC", "disabled", 1)
