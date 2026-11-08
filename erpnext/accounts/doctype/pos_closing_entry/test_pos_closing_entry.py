@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
+from frappe.handler import run_doc_method
 
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
@@ -513,6 +514,28 @@ class TestPOSClosingEntry(unittest.TestCase):
 			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
 			(2, "Cancelled"),
 		)
+		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
+
+	def test_retry_from_form_reruns_failed_cancel(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+		make_paid_pos_invoice([("Cash", 90)])
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		merge_log = frappe.db.get_value("POS Invoice Merge Log", {"pos_closing_entry": closing_entry.name})
+		frappe.db.set_value("POS Closing Entry", closing_entry.name, {"docstatus": 2, "status": "Failed"})
+
+		with (
+			patch("frappe.handler.is_valid_http_method"),
+			patch.object(frappe.local, "response", frappe._dict(docs=[])),
+		):
+			run_doc_method("retry", dt="POS Closing Entry", dn=closing_entry.name)
+
+		self.assertEqual(
+			frappe.db.get_value("POS Closing Entry", closing_entry.name, ["docstatus", "status"]),
+			(2, "Cancelled"),
+		)
+		self.assertEqual(frappe.db.get_value("POS Invoice Merge Log", merge_log, "docstatus"), 2)
 		self.assertEqual(frappe.db.get_value("POS Opening Entry", opening_entry.name, "status"), "Open")
 
 	def test_cancel_without_queue_keeps_back_link_check(self):

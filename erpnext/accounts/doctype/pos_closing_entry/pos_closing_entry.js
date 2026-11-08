@@ -64,8 +64,11 @@ frappe.ui.form.on("POS Closing Entry", {
 			});
 
 			frm.add_custom_button(__("Retry"), function () {
-				frm.call("retry", {}, () => {
-					frm.reload_doc();
+				frappe.call({
+					method: "run_doc_method",
+					args: { dt: frm.doc.doctype, dn: frm.doc.name, method: "retry" },
+					freeze: true,
+					callback: () => frm.reload_doc(),
 				});
 			});
 		}
