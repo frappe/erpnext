@@ -902,12 +902,12 @@ class SerialandBatchBundle(Document):
 			and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
 
-		transfer_rates = self.get_transfer_rates()
+		entry_rates = self.get_transfer_rates() or self.get_subcontracting_return_rates()
 		precision = frappe.get_precision("Serial and Batch Entry", "incoming_rate")
 		for d in self.entries:
 			is_queue_valued = valuation_method in ("FIFO", "LIFO") and d.batch_no in batches
 
-			entry_rate = transfer_rates.get((d.serial_no, d.batch_no), rate)
+			entry_rate = entry_rates.get((d.serial_no, d.batch_no), rate)
 
 			if self.is_rejected and not set_valuation_rate_for_rejected_materials:
 				entry_rate = 0.0
@@ -1230,6 +1230,48 @@ class SerialandBatchBundle(Document):
 			)
 		}
 
+<<<<<<< HEAD
+=======
+	def get_subcontracting_return_rates(self) -> dict:
+		"""Rate the returned Subcontracting Receipt consumed each serial/batch of a supplied item at."""
+		from erpnext.stock.utils import get_valuation_method
+
+		if self.voucher_type != "Subcontracting Receipt" or not self.voucher_detail_no:
+			return {}
+
+		row = frappe.db.get_value(
+			"Subcontracting Receipt Supplied Item",
+			self.voucher_detail_no,
+			["parent", "reference_name", "rm_item_code"],
+			as_dict=True,
+		)
+		if not row:
+			return {}
+
+		receipt = frappe.get_doc("Subcontracting Receipt", row.parent)
+		# rejected returns and Standard Cost items keep the row rate
+		if (
+			not receipt.is_return
+			or row.reference_name in receipt.get_rejected_return_rows()
+			or get_valuation_method(self.item_code, self.company) == "Standard Cost"
+		):
+			return {}
+
+		receipt_item = receipt.get("items", {"name": row.reference_name})[0].subcontracting_receipt_item
+		consumed = receipt.get_consumed_serial_batches().get((receipt_item, row.rm_item_code), {})
+		return {key: identity.rate for key, identity in consumed.items()}
+
+	def get_transit_rate(self, row) -> float:
+		"""What the material was worth on its way into the in-transit warehouse."""
+		if row and row.get("sales_incoming_rate"):
+			return flt(row.get("sales_incoming_rate"))
+
+		if not (self.voucher_detail_no and self.voucher_no):
+			return 0.0
+
+		return flt(frappe.db.get_value(self.child_table, self.voucher_detail_no, "sales_incoming_rate"))
+
+>>>>>>> 5d5edb8 (fix(subcontracting): return each batch and serial no of a supplied item at its consumed rate)
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:
 			qty_field = "qty"
