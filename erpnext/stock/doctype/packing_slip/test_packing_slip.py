@@ -9,6 +9,7 @@ from erpnext.selling.doctype.product_bundle.test_product_bundle import make_prod
 from erpnext.stock.doctype.delivery_note.delivery_note import make_packing_slip
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestPackingSlip(FrappeTestCase):
@@ -117,3 +118,92 @@ def create_items():
 		items.append(make_item(properties=properties).name)
 
 	return items
+
+
+class TestPackingSlipReferences(FrappeTestCase):
+	def make_draft_delivery_note(self, qty=5, **kwargs):
+		item_code = make_item(properties={"is_stock_item": 1, **kwargs}).name
+		if frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
+		return create_delivery_note(item_code=item_code, qty=qty, do_not_submit=True)
+
+	def test_row_must_belong_to_slip_delivery_note_and_item(self):
+		dn_a = self.make_draft_delivery_note()
+		dn_b = self.make_draft_delivery_note()
+
+		slip = make_packing_slip(dn_a.name)
+		slip.items[0].dn_detail = dn_b.items[0].name
+		self.assertRaises(frappe.ValidationError, slip.insert)
+
+		slip = make_packing_slip(dn_a.name)
+		slip.items[0].item_code = dn_b.items[0].item_code
+		self.assertRaises(frappe.ValidationError, slip.insert)
+
+	def test_rows_for_same_reference_are_checked_together(self):
+		delivery_note = self.make_draft_delivery_note(qty=5)
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.items[0].qty = 4
+		slip.append("items", slip.items[0].as_dict().copy().update({"name": None, "idx": 2}))
+		self.assertRaises(frappe.ValidationError, slip.insert)
+
+	def test_fractional_qty_can_be_packed_to_the_last_unit(self):
+		delivery_note = self.make_draft_delivery_note(qty=0.3, stock_uom="Kg")
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.items[0].qty = 0.1
+		slip.append("items", slip.items[0].as_dict().copy().update({"name": None, "idx": 2}))
+		slip.submit()
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.items[0].qty = 0.1
+		slip.submit()
+
+		delivery_note.reload()
+		self.assertEqual(delivery_note.items[0].packed_qty, 0.3)
+
+	def test_net_weight_uses_uom_conversion(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"weight_per_unit": 1,
+				"weight_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		delivery_note = create_delivery_note(item_code=item_code, qty=2, do_not_save=True)
+		delivery_note.items[0].update({"uom": "Box", "conversion_factor": 12})
+		delivery_note.save()
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.insert()
+
+		self.assertEqual(slip.net_weight_pkg, 24)
+
+	def test_packed_item_names_survive_delivery_note_edit(self):
+		items = create_items()
+		make_product_bundle(items[0], items[1:], 2)
+		delivery_note = create_delivery_note(item_code=items[0], qty=2, do_not_submit=True)
+		packed_item_names = [row.name for row in delivery_note.packed_items]
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.submit()
+
+		delivery_note.reload()
+		delivery_note.append("items", {"item_code": items[1], "warehouse": "_Test Warehouse - _TC", "qty": 1})
+		delivery_note.save()
+
+		self.assertEqual([row.name for row in delivery_note.packed_items], packed_item_names)
+
+	def test_slip_cannot_be_cancelled_after_delivery_note_submit(self):
+		delivery_note = self.make_draft_delivery_note(qty=5)
+		slip = make_packing_slip(delivery_note.name)
+		slip.submit()
+		delivery_note.reload()
+		delivery_note.submit()
+
+		slip.reload()
+		self.assertRaises(frappe.ValidationError, slip.cancel)
+
+		delivery_note.cancel()
+		self.assertEqual(frappe.db.get_value("Packing Slip", slip.name, "docstatus"), 2)
