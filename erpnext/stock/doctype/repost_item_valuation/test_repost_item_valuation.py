@@ -206,15 +206,19 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			StockFreezeError, self.make_queued_item_repost, "_Test Item", add_days(today(), -20)
 		)
 
-	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
-	def test_backdated_entry_refused_when_later_voucher_in_closed_period(self):
-		warehouse = "Stores - TCP1"
+	def make_item_with_later_issue_and_closed_period(self, document_type):
+		frappe.db.savepoint("closed_period_test")
+		self.addCleanup(frappe.db.rollback, save_point="closed_period_test")
 		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
 		make_stock_entry(
-			item_code=item_code, to_warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -20)
+			item_code=item_code,
+			to_warehouse="Stores - TCP1",
+			qty=10,
+			rate=99.99,
+			posting_date=add_days(today(), -20),
 		)
-		make_stock_entry(
-			item_code=item_code, from_warehouse=warehouse, qty=4, posting_date=add_days(today(), -5)
+		issue = make_stock_entry(
+			item_code=item_code, from_warehouse="Stores - TCP1", qty=3, posting_date=add_days(today(), -5)
 		)
 		period = create_accounting_period(
 			company="_Test Company with perpetual inventory",
@@ -223,18 +227,41 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			period_name=frappe.generate_hash(length=10),
 		)
 		period.closed_documents = []
-		period.append("closed_documents", {"document_type": "Stock Entry", "closed": 1})
+		period.append("closed_documents", {"document_type": document_type, "closed": 1})
 		period.insert()
+		return item_code, issue
+
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_backdated_entry_refused_when_later_voucher_in_closed_period(self):
+		item_code, _issue = self.make_item_with_later_issue_and_closed_period("Stock Entry")
 
 		self.assertRaises(
 			ClosedAccountingPeriod,
 			make_stock_entry,
 			item_code=item_code,
-			to_warehouse=warehouse,
-			qty=10,
-			rate=50,
+			to_warehouse="Stores - TCP1",
+			qty=7,
+			rate=33.33,
 			posting_date=add_days(today(), -15),
 		)
+
+	def test_backdated_entry_reposted_when_closed_period_is_for_other_document_type(self):
+		item_code, issue = self.make_item_with_later_issue_and_closed_period("Sales Invoice")
+
+		make_stock_entry(
+			item_code=item_code,
+			to_warehouse="Stores - TCP1",
+			qty=7,
+			rate=33.33,
+			posting_date=add_days(today(), -15),
+		)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": issue.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(flt(stock_value_difference, 2), -217.63)
 
 	def test_clear_old_logs(self):
 		# create 10 logs
