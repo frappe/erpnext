@@ -550,3 +550,21 @@ class TestCompanyRestriction(ERPNextTestSuite):
 				get_asset_capitalization_warehouse_details,
 			):
 				self.assertRaises(frappe.PermissionError, get_warehouse_details, dict(args))
+
+	def test_stock_balance_for_keeps_to_permitted_companies(self):
+		from frappe.utils import nowtime, today
+
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
+
+		user = self.make_user_with_roles("test_company_restriction_stock_reco@example.com", ["Stock Manager"])
+		self.allow_company(user, "_Test Company")
+		with self.set_user(user):
+			self.assertRaises(
+				frappe.PermissionError,
+				get_stock_balance_for,
+				"_Test Item",
+				"Stores - _TC",
+				today(),
+				nowtime(),
+				company="_Test Company 1",
+			)

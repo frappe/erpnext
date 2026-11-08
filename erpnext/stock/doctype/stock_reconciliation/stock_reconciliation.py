@@ -29,6 +29,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
 	_get_stock_balance,
+	check_company,
 	check_warehouse_company,
 	get_valuation_method,
 )
@@ -1847,6 +1848,7 @@ def get_stock_balance_for(
 	_require_reconciliation_permission("Item", item_code)
 	_require_reconciliation_permission("Warehouse", warehouse)
 	check_warehouse_company(warehouse)
+	check_company(company)
 
 	return _get_stock_balance_for(
 		item_code,
