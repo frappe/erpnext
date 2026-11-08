@@ -2608,3 +2608,61 @@ class TestPickList(FrappeTestCase):
 		stock_entry.items[0].qty = 13
 		stock_entry.insert()
 		self.assertEqual(stock_entry.items[0].transfer_qty, 0.013)
+
+	def test_stock_entry_splits_picked_qty_over_rows_with_fractional_conversion_factor(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Gram", "conversion_factor": 0.001}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"warehouse": "_Test Warehouse - _TC",
+						"qty": 13,
+						"uom": "Gram",
+						"conversion_factor": 0.001,
+					}
+				],
+			}
+		).insert()
+		pick_list.submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].t_warehouse = "_Test Warehouse 2 - _TC"
+		stock_entry.items[0].qty = 7
+		first_row = stock_entry.items[0]
+		second_row = stock_entry.append(
+			"items",
+			{
+				field: first_row.get(field)
+				for field in (
+					"item_code",
+					"s_warehouse",
+					"t_warehouse",
+					"uom",
+					"stock_uom",
+					"conversion_factor",
+					"pick_list_item",
+				)
+			},
+		)
+		second_row.qty = 7
+		self.assertRaises(frappe.ValidationError, stock_entry.insert)
+
+		second_row.qty = 6
+		stock_entry.insert()
+		stock_entry.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].transferred_qty, 0.013)
+		self.assertEqual(pick_list.status, "Completed")
