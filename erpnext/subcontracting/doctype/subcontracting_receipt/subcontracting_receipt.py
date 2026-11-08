@@ -722,8 +722,8 @@ class SubcontractingReceipt(SubcontractingController):
 
 		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
 
-		received_qty_ratios = self.get_received_qty_ratios_for_return()
 		rejected_return_rows = self.get_rejected_return_rows()
+		received_qty_ratios = self.get_received_qty_ratios_for_return(rejected_return_rows)
 		returned_service_costs = self.get_returned_service_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
@@ -803,7 +803,7 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.subcontracting_receipt_item in service_costs
 		}
 
-	def get_received_qty_ratios_for_return(self) -> dict[str, float]:
+	def get_received_qty_ratios_for_return(self, rejected_return_rows: set[str]) -> dict[str, float]:
 		"""Received qty per accepted qty of the original row, for each return row of accepted qty."""
 		if not (self.is_return and self.return_against):
 			return {}
@@ -813,14 +813,14 @@ class SubcontractingReceipt(SubcontractingController):
 			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
-				fields=["name", "qty", "received_qty", "rejected_warehouse"],
+				fields=["name", "qty", "received_qty"],
 			)
 		}
 
 		ratios = {}
 		for item in self.items:
 			original_row = original_rows.get(item.subcontracting_receipt_item)
-			if original_row and flt(original_row.qty) and item.warehouse != original_row.rejected_warehouse:
+			if original_row and flt(original_row.qty) and item.name not in rejected_return_rows:
 				ratios[item.name] = flt(original_row.received_qty) / flt(original_row.qty)
 
 		return ratios

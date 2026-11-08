@@ -3444,6 +3444,85 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertTrue(returned_values)
 		self.assertEqual(sum(returned_values), 0)
 
+	def test_accepted_return_from_the_rejected_warehouse_brings_back_raw_materials_at_their_rate(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.submit()
+
+		make_stock_entry(
+			item_code=scr.items[0].item_code,
+			from_warehouse="Stores - TCP1",
+			to_warehouse="Finished Goods - TCP1",
+			qty=2,
+			company=scr.company,
+		)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.items[0].rejected_qty = 0
+		scr_return.items[0].warehouse = "Finished Goods - TCP1"
+		scr_return.save()
+
+		consumed_rates = {row.rm_item_code: row.rate for row in scr.supplied_items}
+		for row in scr_return.supplied_items:
+			self.assertTrue(row.rate)
+			self.assertEqual(row.rate, consumed_rates[row.rm_item_code])
+
+	def test_accepted_return_from_the_rejected_warehouse_sends_finished_goods_back_at_their_rate(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].rejected_qty = 2
+		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
+		scr.submit()
+
+		make_stock_entry(
+			item_code=scr.items[0].item_code,
+			from_warehouse="Stores - TCP1",
+			to_warehouse="Finished Goods - TCP1",
+			qty=2,
+			company=scr.company,
+		)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.items[0].rejected_qty = 0
+		scr_return.items[0].warehouse = "Finished Goods - TCP1"
+		scr_return.items[0].rejected_warehouse = ""
+		scr_return.submit()
+
+		finished_good_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": scr.items[0].item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(scr_return.items[0].amount, -2 * scr.items[0].rate)
+		self.assertEqual(finished_good_value, -2 * scr.items[0].rate)
+
 	def test_recalculate_valuation_rate_keeps_rejected_material_unvalued(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
