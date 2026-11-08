@@ -1069,6 +1069,40 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(row.rate, consumed_rate)
 		self.assertEqual(stock_value_difference, qty * consumed_rate)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_return_sends_back_each_batch_of_a_mixed_rate_bundle_at_its_consumed_rate(self):
+		scr, scr_return = make_draft_return_of_two_batches(-4)
+		consumed_rates = get_batch_rates(scr.name)
+		cheaper, dearer = sorted(consumed_rates, key=consumed_rates.get)
+		row = scr_return.supplied_items[0]
+		# as the serial and batch selector does: the bundle has no rate
+		bundle = make_serial_batch_bundle(
+			{
+				"item_code": row.rm_item_code,
+				"warehouse": scr_return.supplier_warehouse,
+				"qty": 4,
+				"batches": frappe._dict({cheaper: 1, dearer: 3}),
+				"voucher_type": "Subcontracting Receipt",
+				"do_not_submit": True,
+			}
+		).name
+		row.update(
+			{
+				"consumed_qty": -4,
+				"use_serial_batch_fields": 0,
+				"batch_no": None,
+				"serial_and_batch_bundle": bundle,
+			}
+		)
+		scr_return.supplied_items = [row]
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual(
+			get_batch_rates(scr_return.name),
+			{cheaper: consumed_rates[cheaper], dearer: consumed_rates[dearer]},
+		)
+
 	def test_repost_keeps_the_consumed_batch_rate_on_each_return_entry(self):
 		scr, scr_return = make_draft_return_of_two_batches(-10)
 		scr_return.submit()
