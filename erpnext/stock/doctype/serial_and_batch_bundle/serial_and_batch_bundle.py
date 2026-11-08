@@ -3315,13 +3315,15 @@ def get_auto_batch_nos(kwargs):
 	if kwargs.get("is_pick_list"):
 		picked_batches = get_picked_batches(kwargs)
 
+	update_available_batches(available_batches, stock_ledgers_batches)
+	# a reservation of a batch that is not available (e.g. expired) has nothing to reduce
 	update_available_batches(
 		available_batches,
-		stock_ledgers_batches,
 		pos_invoice_batches,
 		sre_reserved_batches,
 		picked_batches,
 		kwargs.get("already_picked_batches"),
+		add_missing=False,
 	)
 
 	if kwargs.based_on == "Expiry":
@@ -3443,7 +3445,8 @@ def get_qty_based_available_batches(available_batches, qty):
 	return batches
 
 
-def update_available_batches(available_batches, *reserved_batches) -> None:
+def update_available_batches(available_batches, *reserved_batches, add_missing=True) -> None:
+	"""Add each batch's qty to its available row; with add_missing, a batch with no row is appended."""
 	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
 	for batches in reserved_batches:
 		if batches:
@@ -3455,7 +3458,7 @@ def update_available_batches(available_batches, *reserved_batches) -> None:
 						batch.qty = flt(batch.qty + data.qty, precision)
 						batch_not_exists = False
 
-				if batch_not_exists:
+				if batch_not_exists and add_missing:
 					available_batches.append(data)
 
 
