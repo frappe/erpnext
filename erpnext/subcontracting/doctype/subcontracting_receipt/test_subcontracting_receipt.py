@@ -1300,7 +1300,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 				flt(return_row.additional_cost_per_qty, 2), flt(original_row.additional_cost_per_qty, 2)
 			)
 
-	def test_rejected_return_brings_back_raw_materials_at_zero_value(self):
+	def test_rejected_return_brings_back_no_raw_materials(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
@@ -1334,13 +1334,13 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr_return.reload()
 		scr_return.submit()
 
-		returned_values = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
-			pluck="stock_value_difference",
+		self.assertFalse(scr_return.supplied_items)
+		self.assertFalse(
+			frappe.db.exists(
+				"Stock Ledger Entry",
+				{"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
+			)
 		)
-		self.assertTrue(returned_values)
-		self.assertEqual(sum(returned_values), 0)
 
 	def test_bom_required_qty_validation_over_all_rows(self):
 		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
