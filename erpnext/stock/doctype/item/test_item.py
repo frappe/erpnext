@@ -843,7 +843,6 @@ class TestItem(FrappeTestCase):
 		)
 		self.assertEqual(price, 10)
 
-<<<<<<< HEAD
 	@change_settings("Global Defaults", {"default_company": "Wind Power LLC"})
 	def test_standard_rate_price_uses_the_item_default_company_currency(self):
 		item = make_item(
@@ -860,9 +859,9 @@ class TestItem(FrappeTestCase):
 			as_dict=True,
 		)
 		self.assertEqual(price, {"currency": "INR", "price_list_rate": 5000})
-=======
-	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
+
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@change_settings("Accounts Settings", {"allow_stale": 1})
 	def test_standard_rate_price_in_another_currency_is_rounded(self):
 		from frappe.utils import add_days, today
 
@@ -899,13 +898,10 @@ class TestItem(FrappeTestCase):
 			"Item Price", {"item_code": item, "price_list": price_list.name}, "price_list_rate"
 		)
 		self.assertEqual(price, 90.91)
->>>>>>> 0957add (test: round the Item Price made from a Standard Selling Rate in another currency)
 
-	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
-	@ERPNextTestSuite.change_settings(
-		"System Settings", {"currency_precision": "", "use_number_format_from_currency": 1}
-	)
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@change_settings("Accounts Settings", {"allow_stale": 1})
+	@change_settings("System Settings", {"currency_precision": "", "use_number_format_from_currency": 1})
 	def test_standard_rate_price_is_rounded_to_its_currency_precision(self):
 		if not frappe.db.exists("Currency", "TPT"):
 			frappe.get_doc(
