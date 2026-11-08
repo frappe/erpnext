@@ -55,6 +55,7 @@ class TestAssetDepreciationsAndBalancesReport(AssetSetup):
 					"doctype": "User",
 					"email": user,
 					"first_name": "Asset Balances",
+					"send_welcome_email": 0,
 					"roles": [{"role": "Accounts User"}],
 				}
 			).insert()

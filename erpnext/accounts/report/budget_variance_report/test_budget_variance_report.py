@@ -55,6 +55,7 @@ def make_user_restricted_to_cost_center(cost_center):
 				"doctype": "User",
 				"email": user,
 				"first_name": "Budget Variance",
+				"send_welcome_email": 0,
 				"roles": [{"role": "Accounts User"}],
 			}
 		).insert()
