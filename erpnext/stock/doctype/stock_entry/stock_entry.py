@@ -3779,8 +3779,10 @@ class StockEntry(StockController):
 					)
 				)
 
-			transfer_qty[d.pick_list_item] += flt(d.qty) * flt(d.conversion_factor or 1)
-			if flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item] > flt(picked_row.picked_qty):
+			precision = self.precision("transfer_qty", d)
+			transfer_qty[d.pick_list_item] += flt(d.transfer_qty)
+			total_transferred = flt(picked_row.transferred_qty) + transfer_qty[d.pick_list_item]
+			if flt(total_transferred, precision) > flt(picked_row.picked_qty, precision):
 				frappe.throw(
 					_("Row #{0}: Item {1} is transferred more than the {2} picked in {3}.").format(
 						d.idx, frappe.bold(d.item_code), flt(picked_row.picked_qty), self.pick_list
