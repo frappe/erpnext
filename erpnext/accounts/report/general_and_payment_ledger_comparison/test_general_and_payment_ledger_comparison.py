@@ -119,8 +119,15 @@ class TestGeneralAndPaymentLedger(FrappeTestCase, AccountsTestMixin):
 
 		user = "test_gl_pl_comparison@example.com"
 		if not frappe.db.exists("User", user):
+			# a welcome email is sent at once in tests, and sending it commits the invoices above
 			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "GLPL", "roles": [{"role": "Accounts User"}]}
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "GLPL",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Accounts User"}],
+				}
 			).insert()
 		frappe.permissions.add_user_permission("Customer", "_Test Customer", user)
 
