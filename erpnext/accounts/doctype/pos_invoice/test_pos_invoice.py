@@ -1261,6 +1261,7 @@ class TestPOSInvoice(unittest.TestCase):
 			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
 			self.assertEqual({d.batch_no for d in entries}, {batch_no})
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_stock_check_adds_up_rows_of_same_item(self):
 		item_code = make_stock_item_with_qty(20)
 		pos = create_pos_invoice(item=item_code, qty=15, rate=100, do_not_save=1)
@@ -1275,6 +1276,7 @@ class TestPOSInvoice(unittest.TestCase):
 		pos.submit()
 		self.assertEqual(pos.docstatus, 1)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_stock_check_excludes_reserved_stock(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 
@@ -1288,6 +1290,7 @@ class TestPOSInvoice(unittest.TestCase):
 		pos.insert()
 		self.assertRaisesRegex(frappe.ValidationError, "Available <strong>5.0</strong>", pos.submit)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_reserved_stock_is_checked_for_item_allowing_negative_stock(self):
 		warehouse = "_Test Warehouse - _TC"
 		item_code = make_stock_item_with_qty(20)
@@ -1299,6 +1302,7 @@ class TestPOSInvoice(unittest.TestCase):
 		pos.insert()
 		self.assertRaisesRegex(frappe.ValidationError, "Available <strong>5.0</strong>", pos.submit)
 
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_pos_screen_checks_reserved_stock_for_item_allowing_negative_stock(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 
@@ -1326,6 +1330,8 @@ class TestPOSInvoice(unittest.TestCase):
 	def test_loyalty_amount_is_recomputed_and_negative_points_refused(self):
 		from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
 
+		frappe.db.savepoint("loyalty_redemption_test")
+		self.addCleanup(frappe.db.rollback, save_point="loyalty_redemption_test")
 		create_records()
 		customer = "Test Loyalty Customer"
 		frappe.db.set_value("Customer", customer, "loyalty_program", "Test Single Loyalty")
@@ -1348,6 +1354,8 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertRaisesRegex(frappe.ValidationError, "must be greater than 0", pos.save)
 
 	def test_consolidation_does_not_count_coupon_again(self):
+		frappe.db.savepoint("coupon_consolidation_test")
+		self.addCleanup(frappe.db.rollback, save_point="coupon_consolidation_test")
 		rule = frappe.get_doc(
 			{
 				"doctype": "Pricing Rule",
