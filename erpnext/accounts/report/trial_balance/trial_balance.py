@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
@@ -47,7 +48,18 @@ def execute(filters=None):
 
 
 def validate_company_permission(company: str | None) -> None:
-	if company and not frappe.has_permission("Company", "select", company):
+	"""Check role access to Company and the user's User Permissions on Company.
+
+	A document check would also match the Company's default accounts against the user's
+	Account restrictions, and refuse a user who is restricted to some accounts.
+	"""
+	if not company:
+		return
+
+	allowed_companies = get_permitted_documents("Company")
+	if not frappe.has_permission("Company", "select") or (
+		allowed_companies and company not in allowed_companies
+	):
 		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
