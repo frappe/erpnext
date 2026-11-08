@@ -187,6 +187,17 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		bom = make_bom(item=item, raw_materials=[raw_material]).name
 		make_mps(items=[make_mps_row(item_code=item, bom_no=bom)])
 
+	def test_row_bom_must_make_the_item(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		item, other_item = (
+			make_item(f"_Test MPS Made BOM {name}", {"is_stock_item": 1}).name for name in ("FG", "Other")
+		)
+		bom_using_item = make_bom(item=other_item, raw_materials=[item]).name
+		self.assertRaises(
+			frappe.ValidationError, make_mps, items=[make_mps_row(item_code=item, bom_no=bom_using_item)]
+		)
+
 	def test_to_date_covers_every_row(self):
 		mps = make_mps(items=[make_mps_row(delivery_date=add_days(today(), 30))])
 		self.assertEqual(getdate(mps.to_date), getdate(add_days(today(), 30)))
