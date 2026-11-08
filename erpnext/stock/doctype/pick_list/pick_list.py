@@ -92,7 +92,10 @@ class PickList(TransactionBase):
 			company = self.company
 
 			for item in self.get("locations"):
-				item.update(get_item_details(item.item_code, item.uom, item.warehouse, company))
+				details = get_item_details(item.item_code, item.uom, item.warehouse, company)
+				# validate sets it, from the ordered row when there is one
+				details.pop("conversion_factor", None)
+				item.update(details)
 
 	def validate(self):
 		self.set_stock_qty()
