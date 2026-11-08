@@ -1284,6 +1284,23 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.cancel()
 		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 0)
 
+	def test_rebuild_patch_corrects_plan_rows_requested_twice_in_their_own_uom(self):
+		from erpnext.patches.v16_0.rebuild_production_plan_requested_qty import execute
+
+		plan = make_plan_with_raw_material_in_boxes()
+		plan_item = plan.mr_items[0].name
+		for _request in range(2):
+			plan.make_material_request()
+			for name in get_draft_plan_requests(plan):
+				frappe.get_doc("Material Request", name).submit()
+
+		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 48)
+
+		frappe.db.set_value("Material Request Plan Item", plan_item, "requested_qty", 24)
+		execute()
+		execute()
+		self.assertEqual(frappe.db.get_value("Material Request Plan Item", plan_item, "requested_qty"), 48)
+
 	def test_pick_list_maps_only_the_qty_left_to_transfer(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry as make_se
 
@@ -1473,6 +1490,23 @@ test_records = frappe.get_test_records("Material Request")
 
 
 def make_plan_request_in_boxes():
+	plan = make_plan_with_raw_material_in_boxes()
+	plan.make_material_request()
+	mr = frappe.get_doc("Material Request", get_draft_plan_requests(plan)[0])
+	mr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2})
+	mr.submit()
+	return plan, mr
+
+
+def get_draft_plan_requests(plan):
+	return frappe.get_all(
+		"Material Request Item",
+		filters={"material_request_plan_item": plan.mr_items[0].name, "docstatus": 0},
+		pluck="parent",
+	)
+
+
+def make_plan_with_raw_material_in_boxes():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 	from erpnext.stock.doctype.item.test_item import make_item
 
@@ -1506,14 +1540,4 @@ def make_plan_request_in_boxes():
 			],
 		}
 	).submit()
-	plan.make_material_request()
-
-	mr = frappe.get_doc(
-		"Material Request",
-		frappe.db.get_value(
-			"Material Request Item", {"material_request_plan_item": plan.mr_items[0].name}, "parent"
-		),
-	)
-	mr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2})
-	mr.submit()
-	return plan, mr
+	return plan

@@ -12,7 +12,7 @@ def execute():
 		.on(plan_item.name == mr_item.material_request_plan_item)
 		.select(plan_item.name)
 		.distinct()
-		.where((mr_item.docstatus == 1) & (mr_item.uom != plan_item.uom))
+		.where(mr_item.docstatus == 1)
 	).run(pluck=True)
 
 	for start in range(0, len(plan_item_names), 500):
