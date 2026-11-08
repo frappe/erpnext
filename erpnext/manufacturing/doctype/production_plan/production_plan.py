@@ -241,15 +241,6 @@ class ProductionPlan(Document):
 			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
-<<<<<<< HEAD
-		validated_boms = set()
-=======
-		templates = frappe.get_all(
-			"Item",
-			filters={"name": ("in", [d.item_code for d in self.po_items]), "has_variants": 1},
-			pluck="name",
-		)
->>>>>>> d08131b (fix(manufacturing): validate the BOM of Production Plan sub-assembly rows)
 		for d in self.get("po_items"):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
