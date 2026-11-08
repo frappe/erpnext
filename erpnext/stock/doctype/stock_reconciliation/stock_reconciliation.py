@@ -16,11 +16,12 @@ import erpnext
 from erpnext import _refuse
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_available_serial_nos,
+	get_batch_qty_for_stock,
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -570,10 +571,10 @@ class StockReconciliation(StockController):
 
 				current_qty = entry.qty
 			else:
-				current_qty = get_batch_qty(
+				current_qty = get_batch_qty_for_stock(
 					entry.batch_no,
 					row.warehouse,
-					row.item_code,
+					item_code=row.item_code,
 					ignore_voucher_nos=[self.name],
 					posting_date=self.posting_date,
 					posting_time=self.posting_time,
@@ -1918,7 +1919,7 @@ def _get_stock_balance_for(
 
 	if item_dict.get("has_batch_no"):
 		qty = (
-			get_batch_qty(
+			get_batch_qty_for_stock(
 				batch_no,
 				warehouse,
 				posting_date=posting_date,
