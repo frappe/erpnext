@@ -425,16 +425,21 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 		"currency": currency,
 	}
 
-	opening_amount = get_opening_balance(filters.company, period_list, filters) or 0.0
-	running_total = opening_amount
+	opening = closing = get_opening_balance(filters.company, period_list, filters) or 0.0
+	movement_start_date = None
 
-	for i, period in enumerate(period_list):
+	for period in period_list:
 		key = period["key"]
-		change = net_change_in_cash.get(key, 0.0)
 
-		opening_balance[key] = opening_amount if i == 0 else running_total
-		running_total += change
-		closing_balance[key] = running_total
+		# accumulated values already include the earlier periods of their fiscal year
+		start_date = get_start_date(period, filters.accumulated_values, filters.company)
+		if start_date != movement_start_date:
+			opening = closing
+			movement_start_date = start_date
+
+		opening_balance[key] = opening
+		closing = opening + net_change_in_cash.get(key, 0.0)
+		closing_balance[key] = closing
 
 	opening_balance["total"] = opening_balance[period_list[0]["key"]]
 	closing_balance["total"] = closing_balance[period_list[-1]["key"]]
