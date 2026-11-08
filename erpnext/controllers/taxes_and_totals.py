@@ -15,6 +15,7 @@ import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule_margin
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 from erpnext.controllers.accounts_controller import (
 	get_qty_in_stock_uom,
 	validate_conversion_rate,
@@ -258,7 +259,7 @@ class calculate_taxes_and_totals:
 				elif not item.qty and self.doc.get("is_debit_note"):
 					item.amount = flt(item.rate, item.precision("amount"))
 				else:
-					item.amount = flt(item.rate * item.qty, item.precision("amount"))
+					item.amount = flt(item.rate * self.get_billed_qty(item), item.precision("amount"))
 
 				item.net_amount = item.amount
 
@@ -267,6 +268,12 @@ class calculate_taxes_and_totals:
 				)
 
 				item.item_tax_amount = 0.0
+
+	def get_billed_qty(self, item):
+		if not flt(item.get("rejected_qty")) or not bills_rejected_quantity(self.doc):
+			return flt(item.qty)
+
+		return flt(item.qty) + flt(item.rejected_qty)
 
 	@property
 	def has_mapped_discount(self):
@@ -308,7 +315,7 @@ class calculate_taxes_and_totals:
 		item.net_amount = flt(
 			item.net_amount - item.distributed_discount_amount, item.precision("net_amount")
 		)
-		item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+		item.net_rate = flt(item.net_amount / self.get_billed_qty(item), item.precision("net_rate"))
 		item._unrounded_net_amount = None
 		self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
@@ -404,7 +411,7 @@ class calculate_taxes_and_totals:
 					)
 					net_total.rounded += item.net_amount
 
-				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+				item.net_rate = flt(item.net_amount / self.get_billed_qty(item), item.precision("net_rate"))
 				item.discount_percentage = flt(
 					item.discount_percentage, item.precision("discount_percentage")
 				)
@@ -987,8 +994,9 @@ class calculate_taxes_and_totals:
 						)
 						net_total.rounded += rounding_difference
 
+					billed_qty = self.get_billed_qty(item)
 					item.net_rate = (
-						flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0
+						flt(item.net_amount / billed_qty, item.precision("net_rate")) if billed_qty else 0
 					)
 
 					self._set_in_company_currency(item, ["net_rate", "net_amount"])

@@ -75,6 +75,20 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
+def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass"):
+	for uom in (from_uom, to_uom):
+		if not frappe.db.exists("UOM", uom):
+			frappe.get_doc(doctype="UOM", uom_name=uom, category=category).insert()
+
+	return frappe.get_doc(
+		doctype="UOM Conversion Factor",
+		category=category,
+		from_uom=from_uom,
+		to_uom=to_uom,
+		value=value,
+	).insert()
+
+
 class TestItem(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
