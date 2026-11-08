@@ -12,7 +12,10 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import cint, flt, get_link_to_form
 
-from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.sales_and_purchase_return import (
+	get_rate_for_return,
+	is_rejected_subcontracting_return,
+)
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -310,7 +313,9 @@ class SubcontractingController(StockController):
 		return {
 			row.name
 			for row in self.items
-			if row.warehouse and row.warehouse == rejected_warehouses.get(row.subcontracting_receipt_item)
+			if is_rejected_subcontracting_return(
+				row, rejected_warehouses.get(row.subcontracting_receipt_item)
+			)
 		}
 
 	def validate_rejected_warehouse(self):
