@@ -103,6 +103,10 @@ class TestStockSettings(FrappeTestCase):
 			)
 		)
 
+	@change_settings(
+		"Stock Settings",
+		{"over_delivery_receipt_allowance": 0, "role_allowed_to_over_deliver_receive": None},
+	)
 	def test_over_delivery_role_kept_with_zero_allowance(self):
 		settings = frappe.get_doc("Stock Settings")
 		settings.over_delivery_receipt_allowance = 0
@@ -114,10 +118,9 @@ class TestStockSettings(FrappeTestCase):
 			"Stock Manager",
 		)
 
+	@change_settings("Stock Settings", {"show_barcode_field": 1})
 	def test_hiding_barcode_field_keeps_item_barcodes(self):
 		settings = frappe.get_doc("Stock Settings")
-		settings.show_barcode_field = 1
-		settings.save()
 		settings.show_barcode_field = 0
 		settings.save()
 
