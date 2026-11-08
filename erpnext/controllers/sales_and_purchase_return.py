@@ -339,7 +339,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
 		label = column.replace("_", " ").title()
 
-		if reference_qty:
+		if reference_qty or flt(current_stock_qty):
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
 			elif returned_qty >= reference_qty and returns_nothing:
