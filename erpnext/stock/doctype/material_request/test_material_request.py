@@ -10,7 +10,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
 from erpnext.controllers.accounts_controller import InvalidQtyError
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.material_request.material_request import (
 	create_pick_list,
 	make_in_transit_stock_entry,
@@ -455,14 +455,15 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
 	def test_over_transfer_qty_allowance(self):
+		item_code = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		mr = frappe.new_doc("Material Request")
 		mr.company = "_Test Company"
 		mr.scheduled_date = today()
 		mr.append(
 			"items",
 			{
-				"item_code": "_Test FG Item",
-				"item_name": "_Test FG Item",
+				"item_code": item_code,
+				"item_name": item_code,
 				"qty": 10,
 				"schedule_date": today(),
 				"uom": "_Test UOM 1",
@@ -502,7 +503,7 @@ class TestMaterialRequest(FrappeTestCase):
 		sr.append(
 			"items",
 			{
-				"item_code": "_Test FG Item",
+				"item_code": item_code,
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": 20,
 				"valuation_rate": 0.01,
