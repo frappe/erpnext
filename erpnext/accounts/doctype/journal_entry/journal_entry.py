@@ -215,6 +215,7 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		self.update_booked_depreciation()
+		self.update_payment_order_requests()
 
 	def on_update_after_submit(self):
 		# Flag will be set on Reconciliation
@@ -255,6 +256,20 @@ class JournalEntry(AccountsController):
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
 		self.update_booked_depreciation(1)
+		self.update_payment_order_requests(cancel=True)
+
+	def on_trash(self):
+		from erpnext.accounts.doctype.payment_order.payment_order import clear_payment_reference
+
+		super().on_trash()
+		clear_payment_reference(self)
+
+	def update_payment_order_requests(self, cancel=False):
+		from erpnext.accounts.doctype.payment_order.payment_order import (
+			update_payment_requests_from_journal_entry,
+		)
+
+		update_payment_requests_from_journal_entry(self, cancel=cancel)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
