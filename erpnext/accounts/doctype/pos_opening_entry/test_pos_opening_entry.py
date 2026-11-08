@@ -1,15 +1,14 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 
-class TestPOSOpeningEntry(unittest.TestCase):
+class TestPOSOpeningEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
