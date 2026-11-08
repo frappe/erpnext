@@ -110,7 +110,10 @@ class PickList(TransactionBase):
 			company = self.company
 
 			for item in self.get("locations"):
-				item.update(get_item_details(item.item_code, item.uom, item.warehouse, company))
+				details = get_item_details(item.item_code, item.uom, item.warehouse, company)
+				# validate sets it, from the ordered row when there is one
+				details.pop("conversion_factor", None)
+				item.update(details)
 
 	def validate(self):
 		self.set_stock_qty()
@@ -127,18 +130,42 @@ class PickList(TransactionBase):
 		conversion_factors = get_uom_conversion_factors(
 			{row.item_code for row in self.locations if row.item_code}
 		)
+		ordered_conversion_factors = self.get_ordered_conversion_factors()
 		for row in self.locations:
 			if not row.item_code:
 				continue
 
 			stock_uom = frappe.get_cached_value("Item", row.item_code, "stock_uom")
 			row.uom = row.uom or stock_uom
+			ordered_row = not row.product_bundle_item and (row.sales_order_item or row.material_request_item)
 			if row.uom == stock_uom:
 				row.conversion_factor = 1
+			elif (ordered_row, row.item_code, row.uom) in ordered_conversion_factors:
+				row.conversion_factor = ordered_conversion_factors[(ordered_row, row.item_code, row.uom)]
 			elif (row.item_code, row.uom) in conversion_factors:
 				row.conversion_factor = conversion_factors[(row.item_code, row.uom)]
 
 			row.stock_qty = flt(flt(row.qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+	def get_ordered_conversion_factors(self) -> dict:
+		"""Conversion factors of the Sales Order and Material Request rows, keyed by row name, item and UOM."""
+		conversion_factors = {}
+		for doctype, field in (
+			("Sales Order Item", "sales_order_item"),
+			("Material Request Item", "material_request_item"),
+		):
+			names = {row.get(field) for row in self.locations if row.get(field)}
+			if not names:
+				continue
+
+			for row in frappe.get_all(
+				doctype,
+				filters={"name": ("in", list(names))},
+				fields=["name", "item_code", "uom", "conversion_factor"],
+			):
+				conversion_factors[(row.name, row.item_code, row.uom)] = flt(row.conversion_factor)
+
+		return conversion_factors
 
 	def before_save(self):
 		self.update_status()
