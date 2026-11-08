@@ -9,10 +9,7 @@ from frappe.utils import ceil, cint, flt, get_link_to_form
 
 from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
 from erpnext.manufacturing.doctype.work_order.mapper import get_upstream_process_loss
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-	get_auto_batch_nos,
-	get_batch_qty_for_stock,
-)
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
@@ -1818,16 +1815,15 @@ def _append_sample_entry(stock_entry, sabb, item, warehouse, retention_warehouse
 def validate_sample_quantity(
 	item_code: str, sample_quantity: int, qty: float, company: str, batch_no: str | None = None
 ):
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
 	if cint(qty) < cint(sample_quantity):
 		frappe.throw(
 			_("Sample quantity {0} cannot be more than received quantity {1}").format(sample_quantity, qty)
 		)
 
-	if batch_no:
-		frappe.has_permission("Batch", "select", throw=True)
-
 	retention_warehouse = get_sample_retention_warehouse(company)
-	return _adjust_sample_quantity(item_code, sample_quantity, batch_no, retention_warehouse)
+	return _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty, retention_warehouse)
 
 
 def get_sample_retention_warehouse(company: str) -> str:
@@ -1845,10 +1841,8 @@ def get_sample_retention_warehouse(company: str) -> str:
 	return warehouse
 
 
-def _adjust_sample_quantity(item_code, sample_quantity, batch_no, retention_warehouse):
-	retainted_qty = (
-		get_batch_qty_for_stock(batch_no, retention_warehouse, item_code=item_code) if batch_no else 0
-	)
+def _adjust_sample_quantity(item_code, sample_quantity, batch_no, get_batch_qty, retention_warehouse):
+	retainted_qty = get_batch_qty(batch_no, retention_warehouse, item_code) if batch_no else 0
 	max_retain_qty = frappe.get_value("Item", item_code, "sample_quantity")
 	if retainted_qty >= max_retain_qty:
 		_warn_max_retained(retainted_qty, batch_no, item_code)
