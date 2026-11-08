@@ -5,6 +5,7 @@ import random
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils import flt
 
 from erpnext.stock.doctype.item.test_item import make_item
 
@@ -582,6 +583,39 @@ class TestBOMCreator(FrappeTestCase):
 		doc.reload()
 		row = doc.items[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.amount), (12, 36, 360))
+
+	def test_sub_assembly_in_another_uom_costs_like_its_bom(self):
+		uoms = {"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}]}
+		make_item("Cruiser Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})
+		make_item(
+			"_Test BOM Creator Box Assembly", {"item_group": "Raw Material", "stock_uom": "Nos", **uoms}
+		)
+		make_item("_Test BOM Creator Box Part", {"item_group": "Raw Material", "valuation_rate": 7.33})
+		frappe.db.set_value("Item", "_Test BOM Creator Box Part", "valuation_rate", 7.33)
+		doc = make_bom_creator(
+			name="Cruiser Bike BOM Box Assembly",
+			company="_Test Company",
+			item_code="Cruiser Bike",
+			qty=1,
+			currency="INR",
+		)
+		assembly = add_test_sub_assembly(
+			doc, "Cruiser Bike", doc.name, "_Test BOM Creator Box Assembly", ["_Test BOM Creator Box Part"]
+		)
+		row = next(row for row in doc.items if row.name == assembly)
+		row.uom = "Box"
+		row.conversion_factor = 0
+		doc.save()
+		doc.reload()
+
+		self.assertEqual(flt(doc.raw_material_cost, 2), flt(7.33 * 12, 2))
+
+		doc.submit()
+		doc.create_boms()
+		top_bom_cost = frappe.db.get_value(
+			"BOM", {"bom_creator": doc.name, "item": "Cruiser Bike", "docstatus": 1}, "raw_material_cost"
+		)
+		self.assertEqual(flt(top_bom_cost, 2), flt(doc.raw_material_cost, 2))
 
 	def test_tree_is_validated_on_insert(self):
 		make_item("City Bike", {"item_group": "Raw Material", "stock_uom": "Nos"})

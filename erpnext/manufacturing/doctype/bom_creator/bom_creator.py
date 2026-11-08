@@ -232,8 +232,9 @@ class BOMCreator(Document):
 				row.amount = flt(row.rate) * flt(row.qty)
 
 			else:
-				row.amount = self.get_raw_material_cost(row.name, children, visited)
-				row.rate = flt(row.amount) / (flt(row.qty) * flt(row.conversion_factor))
+				cost = self.get_raw_material_cost(row.name, children, visited)
+				row.rate = flt(cost) / flt(row.qty or 1) * flt(row.conversion_factor or 1)
+				row.amount = flt(row.rate) * flt(row.qty)
 
 			amount += flt(row.amount)
 
