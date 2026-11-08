@@ -147,6 +147,21 @@ class TestPackingSlipReferences(FrappeTestCase):
 		slip.append("items", slip.items[0].as_dict().copy().update({"name": None, "idx": 2}))
 		self.assertRaises(frappe.ValidationError, slip.insert)
 
+	def test_fractional_qty_can_be_packed_to_the_last_unit(self):
+		delivery_note = self.make_draft_delivery_note(qty=0.3, stock_uom="Kg")
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.items[0].qty = 0.1
+		slip.append("items", slip.items[0].as_dict().copy().update({"name": None, "idx": 2}))
+		slip.submit()
+
+		slip = make_packing_slip(delivery_note.name)
+		slip.items[0].qty = 0.1
+		slip.submit()
+
+		delivery_note.reload()
+		self.assertEqual(delivery_note.items[0].packed_qty, 0.3)
+
 	def test_net_weight_uses_uom_conversion(self):
 		item_code = make_item(
 			properties={
