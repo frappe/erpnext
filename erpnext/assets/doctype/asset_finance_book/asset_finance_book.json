@@ -18,7 +18,8 @@
   "expected_value_after_useful_life",
   "value_adjustment_amount",
   "value_after_depreciation",
-  "rate_of_depreciation"
+  "rate_of_depreciation",
+  "is_rate_of_depreciation_entered"
  ],
  "fields": [
   {
@@ -100,6 +101,15 @@
    "fieldtype": "Percent",
    "label": "Rate of Depreciation (%)",
    "mandatory_depends_on": "eval:doc.depreciation_method == 'Written Down Value'"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_rate_of_depreciation_entered",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Rate of Depreciation Entered",
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "salvage_value_percentage",
