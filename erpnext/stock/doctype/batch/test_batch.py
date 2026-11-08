@@ -801,7 +801,7 @@ class TestBatch(FrappeTestCase):
 		)
 		self.assertEqual([(d.batch_no, d.qty) for d in batches], [(batch_no, 5)])
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_pos_reservation_of_expired_batch_is_skipped(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
 			init_user_and_profile,
@@ -812,9 +812,9 @@ class TestBatch(FrappeTestCase):
 			create_batch_item_with_batch,
 		)
 
-		frappe.db.set_single_value("POS Settings", "invoice_type", "POS Invoice")
 		item_code = "_Test POS Expired Batch Item"
-		batch_no = create_batch_item_with_batch(item_code, "TestBatch-POS-Expired 01")
+		batch_no = "TestBatch-POS-Expired 01"
+		create_batch_item_with_batch(item_code, batch_no)
 		make_stock_entry(
 			target="_Test Warehouse - _TC",
 			item_code=item_code,
@@ -832,6 +832,7 @@ class TestBatch(FrappeTestCase):
 		)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 600})
 		pos_inv.items[0].batch_no = batch_no
+		pos_inv.save()
 		pos_inv.submit()
 		frappe.set_user(session_user)
 
