@@ -4831,6 +4831,36 @@ class TestWorkOrder(FrappeTestCase):
 			manufacture_entries[0].cancel,
 		)
 
+	def test_disassembly_from_the_warehouse_the_finished_good_was_moved_to(self):
+		rm_item = make_item("_Test Moved Disassembly RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Moved Disassembly FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=2,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=4, basic_rate=100
+		)
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 2))
+		manufacture.submit()
+		test_stock_entry.make_stock_entry(
+			item_code=fg_item, source=work_order.fg_warehouse, target="_Test Warehouse 2 - _TC", qty=2
+		)
+
+		disassembly = frappe.get_doc(make_stock_entry(work_order.name, "Disassemble", 2))
+		disassembly.from_warehouse = "_Test Warehouse 2 - _TC"
+		for row in disassembly.items:
+			if row.is_finished_item:
+				row.s_warehouse = "_Test Warehouse 2 - _TC"
+		disassembly.submit()
+
+		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "disassembled_qty"), 2)
+		self.assertEqual(get_bin(fg_item, "_Test Warehouse 2 - _TC").actual_qty, 0)
+
 	def test_manufacture_without_from_bom_keeps_the_work_order_qty(self):
 		rm_item = make_item("_Test Without From BOM RM", {"is_stock_item": 1}).name
 		fg_item = make_item("_Test Without From BOM FG", {"is_stock_item": 1}).name

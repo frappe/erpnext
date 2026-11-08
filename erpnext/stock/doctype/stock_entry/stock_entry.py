@@ -999,6 +999,9 @@ class StockEntry(StockController):
 		self.validate_stock_in_rows()
 
 	def validate_stock_in_rows(self):
+		if self.purpose != "Material Transfer":
+			return
+
 		rows = [item for item in self.items if item.against_stock_entry and item.ste_detail]
 		if not rows:
 			return
