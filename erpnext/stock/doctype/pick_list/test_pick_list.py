@@ -116,6 +116,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pick_list.locations[0].qty, 5)
 
 	def test_pick_list_splits_row_according_to_warehouse_availability(self):
+		item_code = make_item().name
 		try:
 			frappe.get_doc(
 				{
@@ -125,7 +126,7 @@ class TestPickList(FrappeTestCase):
 					"expense_account": "Temporary Opening - _TC",
 					"items": [
 						{
-							"item_code": "_Test Item Warehouse Group Wise Reorder",
+							"item_code": item_code,
 							"warehouse": "_Test Warehouse Group-C1 - _TC",
 							"valuation_rate": 100,
 							"qty": 5,
@@ -145,7 +146,7 @@ class TestPickList(FrappeTestCase):
 					"expense_account": "Temporary Opening - _TC",
 					"items": [
 						{
-							"item_code": "_Test Item Warehouse Group Wise Reorder",
+							"item_code": item_code,
 							"warehouse": "_Test Warehouse 2 - _TC",
 							"valuation_rate": 400,
 							"qty": 10,
@@ -165,7 +166,7 @@ class TestPickList(FrappeTestCase):
 				"purpose": "Delivery",
 				"locations": [
 					{
-						"item_code": "_Test Item Warehouse Group Wise Reorder",
+						"item_code": item_code,
 						"qty": 1000,
 						"stock_qty": 1000,
 						"conversion_factor": 1,
@@ -178,11 +179,11 @@ class TestPickList(FrappeTestCase):
 
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].item_code, "_Test Item Warehouse Group Wise Reorder")
+		self.assertEqual(pick_list.locations[0].item_code, item_code)
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse Group-C1 - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
 
-		self.assertEqual(pick_list.locations[1].item_code, "_Test Item Warehouse Group Wise Reorder")
+		self.assertEqual(pick_list.locations[1].item_code, item_code)
 		self.assertEqual(pick_list.locations[1].warehouse, "_Test Warehouse 2 - _TC")
 		self.assertEqual(pick_list.locations[1].qty, 10)
 

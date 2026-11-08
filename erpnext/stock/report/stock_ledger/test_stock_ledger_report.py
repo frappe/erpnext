@@ -181,11 +181,12 @@ class TestStockLedgerReport(FrappeTestCase):
 		self.assertEqual(opening_rows[0]["qty_after_transaction"], 30)
 
 	def test_opening_stock_reconciliation_on_from_date_non_midnight_time(self):
+		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
 		)
 
-		item = "_Test Item"
+		item = make_item(properties={"is_stock_item": 1}).name
 		from_date = today()
 
 		sr = create_stock_reconciliation(
