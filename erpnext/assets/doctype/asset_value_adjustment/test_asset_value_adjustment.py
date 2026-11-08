@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import add_days, cstr, get_last_day, getdate, nowdate
 
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
+from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset_data,
 	set_mandatory_dimension_default_for_other_company,
@@ -430,6 +430,96 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		adj_doc.cancel()
 		asset_doc.load_from_db()
 		self.assertEqual(asset_doc.finance_books[0].expected_value_after_useful_life, 5000.0)
+
+	def test_current_asset_value_is_recomputed_on_submit(self):
+		asset = create_asset_for_value_adjustment()
+		adjustment = make_asset_value_adjustment(
+			asset=asset.name, current_asset_value=10000, new_asset_value=100000, date="2023-08-21"
+		)
+		self.assertEqual(adjustment.current_asset_value, 120000)
+
+		post_depreciation_entries(getdate("2023-01-31"))
+		adjustment.submit()
+
+		self.assertEqual(adjustment.current_asset_value, 110000)
+		self.assertEqual(get_asset_value_after_depreciation(asset.name), 100000)
+
+	def test_value_of_a_disposed_asset_cannot_be_adjusted(self):
+		asset = create_asset_for_value_adjustment()
+		adjustment = make_asset_value_adjustment(asset=asset.name, new_asset_value=100000, date="2023-01-15")
+		adjustment.submit()
+		scrap_asset(asset.name, "2023-09-30")
+
+		self.assertRaises(frappe.ValidationError, adjustment.cancel)
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=50000,
+			date="2023-10-15",
+		)
+
+	def test_cancel_restores_the_salvage_value(self):
+		asset = create_asset_for_value_adjustment(
+			expected_value_after_useful_life=12000, salvage_value_percentage=10
+		)
+		adjustment = make_asset_value_adjustment(asset=asset.name, new_asset_value=150000, date="2023-01-15")
+		adjustment.submit()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 15000)
+
+		adjustment.cancel()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 12000)
+
+		adjustment = make_asset_value_adjustment(asset=asset.name, new_asset_value=0, date="2023-01-15")
+		adjustment.submit()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 0)
+
+		adjustment.cancel()
+		asset.reload()
+		self.assertEqual(asset.finance_books[0].expected_value_after_useful_life, 12000)
+
+	def test_adjustment_before_the_last_booked_depreciation_is_refused(self):
+		asset = create_asset_for_value_adjustment()
+		post_depreciation_entries(getdate("2023-03-31"))
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=100000,
+			date="2023-02-15",
+		)
+
+	def test_last_booked_depreciation_of_another_finance_book_is_ignored(self):
+		yearly_book = {
+			"finance_book": "Test Finance Book 2",
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 2,
+			"frequency_of_depreciation": 12,
+			"depreciation_start_date": "2023-01-31",
+		}
+		asset = create_asset_for_value_adjustment(
+			extra_finance_books=[yearly_book], finance_book="Test Finance Book 1"
+		)
+		post_depreciation_entries(getdate("2023-03-31"))
+
+		adjustment = make_asset_value_adjustment(
+			asset=asset.name, finance_book="Test Finance Book 2", new_asset_value=100000, date="2023-02-15"
+		)
+		self.assertEqual(getdate(adjustment.date), getdate("2023-02-15"))
+
+	def test_negative_new_asset_value_is_refused(self):
+		asset = create_asset_for_value_adjustment()
+		self.assertRaises(
+			frappe.ValidationError,
+			make_asset_value_adjustment,
+			asset=asset.name,
+			new_asset_value=-50000,
+			date="2023-01-15",
+		)
 
 
 def make_asset_value_adjustment(**args):
