@@ -2415,13 +2415,14 @@ class StockEntry(StockController):
 			)
 			return
 
-		stock_ledger.make_sl_entries(source_entries, allow_negative_stock)
+		stock_ledger.make_sl_entries(source_entries, allow_negative_stock, defer_dimension_checks=True)
 		if self.recalculate_for_bundles_picked_while_posting():
 			valuation_rates = {d.name: flt(d.valuation_rate) for d in self.items}
 			for sle in target_entries:
 				sle.incoming_rate = valuation_rates[sle.voucher_detail_no]
 
 		self.make_sl_entries(target_entries, allow_negative_stock=allow_negative_stock)
+		stock_ledger.run_pending_dimension_checks(self.doctype, self.name)
 
 	def recalculate_for_bundles_picked_while_posting(self) -> bool:
 		"""Reload first: posting wrote the picked bundles and their outgoing rates to the rows."""
