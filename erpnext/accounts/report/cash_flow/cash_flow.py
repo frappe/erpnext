@@ -360,7 +360,8 @@ def get_start_date(period, accumulated_values, company):
 
 	start_date = period["year_start_date"]
 	if accumulated_values:
-		start_date = get_fiscal_year(period.to_date, company=company)[1]
+		# a date range can start after its fiscal year, and profit is only counted from the range start
+		start_date = max(start_date, get_fiscal_year(period.to_date, company=company)[1])
 
 	return start_date
 
