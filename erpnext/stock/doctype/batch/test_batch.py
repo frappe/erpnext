@@ -25,6 +25,31 @@ from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class TestBatch(FrappeTestCase):
+	def test_stock_user_can_read_create_and_use_batch(self):
+		item_code = self.make_batch_item("_Test Stock User Batch Item").name
+		user = make_stock_user("batch-stock-user@example.com")
+
+		frappe.db.savepoint("stock_user_batch")
+		self.addCleanup(frappe.db.rollback, save_point="stock_user_batch")
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(user)
+
+		for ptype in ("read", "select", "create", "write"):
+			self.assertTrue(frappe.has_permission("Batch", ptype))
+
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "batch_id": "_Test Stock User Batch", "item": item_code}
+		).insert()
+		self.assertEqual(frappe.get_list("Batch", filters={"name": batch.name}, pluck="name"), [batch.name])
+
+		stock_entry = make_stock_entry(
+			item_code=item_code, target="_Test Warehouse - _TC", qty=7, basic_rate=15
+		)
+		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+
+		self.assertTrue(frappe.db.exists("Batch", batch_no))
+		self.assertEqual(get_batch_qty(batch_no, "_Test Warehouse - _TC"), 7)
+
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(
 			ValidationError,
@@ -902,3 +927,15 @@ def make_new_batch(**args):
 		batch.insert()
 
 	return batch
+
+
+def make_stock_user(email):
+	if not frappe.db.exists("User", email):
+		frappe.get_doc({"doctype": "User", "email": email, "first_name": "Batch Stock User"}).insert(
+			ignore_permissions=True
+		)
+
+	user = frappe.get_doc("User", email)
+	user.remove_roles(*[role.role for role in user.roles])
+	user.add_roles("Stock User")
+	return user.name
