@@ -3052,7 +3052,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			{"valid_upto": add_days(nowdate(), 1), "expected_rate": 111.0},
 		]:
 			with self.subTest(scenario=scenario):
-				frappe.get_doc(
+				item_price = frappe.get_doc(
 					{
 						"doctype": "Item Price",
 						"item_code": packed_item,
@@ -3074,6 +3074,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				so.selling_price_list = "_Test Price List"
 				so.append("items", {"item_code": bundle, "qty": 1})
 				so.save()
+				item_price.delete()
 
 				self.assertEqual(len(so.items), 1)
 				self.assertEqual(len(so.packed_items), 1)
