@@ -1019,7 +1019,40 @@ def get_filters(
 		if warehouse and warehouse in warehouses:
 			filters["warehouse"] = warehouse
 
+	if voucher_type == "Subcontracting Receipt" and reference_voucher_detail_no:
+		return_row = item_row or frappe.db.get_value(
+			"Subcontracting Receipt Item",
+			voucher_detail_no,
+			["warehouse", "return_qty_from_rejected_warehouse"],
+			as_dict=True,
+		)
+		# the return row's rejected qty has its own entry in its rejected warehouse
+		if return_row and warehouse == return_row.warehouse:
+			filters["warehouse"] = get_subcontracting_return_warehouse(
+				reference_voucher_detail_no, return_row
+			)
+
 	return filters
+
+
+def get_subcontracting_return_warehouse(original_row_name, return_row):
+	"""Warehouse of the original entry that a return row's accepted qty goes back at."""
+	original = frappe.db.get_value(
+		"Subcontracting Receipt Item", original_row_name, ["warehouse", "rejected_warehouse"], as_dict=True
+	)
+	if is_rejected_subcontracting_return(return_row, original.rejected_warehouse):
+		return original.rejected_warehouse
+
+	return original.warehouse
+
+
+def is_rejected_subcontracting_return(return_row, original_rejected_warehouse) -> bool:
+	"""A Subcontracting Receipt return row sends back rejected qty while it is flagged and in the rejected warehouse."""
+	return bool(
+		return_row.return_qty_from_rejected_warehouse
+		and return_row.warehouse
+		and return_row.warehouse == original_rejected_warehouse
+	)
 
 
 def get_warehouses_for_return(voucher_type, name):
