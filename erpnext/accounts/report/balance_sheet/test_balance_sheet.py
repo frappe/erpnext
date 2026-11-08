@@ -107,7 +107,7 @@ def make_journal_entry(rows, posting_date=None):
 	jv.submit()
 
 
-def create_account(account_name: str, parent_account: str, company: str):
+def create_account(account_name: str, parent_account: str, company: str, account_currency: str | None = None):
 	if frappe.db.exists("Account", {"account_name": account_name, "company": company}):
 		return
 
@@ -115,4 +115,5 @@ def create_account(account_name: str, parent_account: str, company: str):
 	acc.account_name = account_name
 	acc.company = COMPANY
 	acc.parent_account = parent_account
+	acc.account_currency = account_currency
 	acc.insert()
