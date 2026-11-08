@@ -2945,46 +2945,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
-<<<<<<< HEAD
-=======
-	def test_rejected_return_brings_back_raw_materials_at_zero_value(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
-			make_subcontract_return_against_rejected_warehouse,
-		)
-
-		sco = get_subcontracting_order(
-			company="_Test Company with perpetual inventory",
-			warehouse="Stores - TCP1",
-			supplier_warehouse="Work In Progress - TCP1",
-		)
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 8
-		scr.items[0].rejected_qty = 2
-		scr.items[0].rejected_warehouse = "Finished Goods - TCP1"
-		scr.save()
-		scr.submit()
-
-		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
-		scr_return.save()
-		scr_return.reload()
-		scr_return.submit()
-
-		returned_values = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": scr_return.name, "warehouse": scr_return.supplier_warehouse},
-			pluck="stock_value_difference",
-		)
-		self.assertTrue(returned_values)
-		self.assertEqual(sum(returned_values), 0)
-
 	def test_accepted_return_from_the_rejected_warehouse_brings_back_raw_materials_at_their_rate(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
@@ -3024,9 +2984,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			self.assertTrue(row.rate)
 			self.assertEqual(row.rate, consumed_rates[row.rm_item_code])
 
-<<<<<<< HEAD
->>>>>>> 5683c85 (test: accepted return from the rejected warehouse brings back raw materials at their rate)
-=======
 	def test_accepted_return_from_the_rejected_warehouse_sends_finished_goods_back_at_their_rate(self):
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
@@ -3067,7 +3024,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr_return.items[0].amount, -2 * scr.items[0].rate)
 		self.assertEqual(finished_good_value, -2 * scr.items[0].rate)
 
->>>>>>> addb262 (test: accepted return from the rejected warehouse sends finished goods back at their rate)
 	def test_recalculate_valuation_rate_keeps_rejected_material_unvalued(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 

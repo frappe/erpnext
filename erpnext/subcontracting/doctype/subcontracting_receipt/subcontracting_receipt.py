@@ -529,7 +529,6 @@ class SubcontractingReceipt(SubcontractingController):
 					scrap_cost_map[item.reference_name] = item.amount
 
 		rejected_return_rows = self.get_rejected_return_rows()
-		received_qty_ratios = self.get_received_qty_ratios_for_return(rejected_return_rows)
 		returned_service_costs = self.get_returned_service_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
@@ -587,37 +586,9 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.subcontracting_receipt_item in service_costs
 		}
 
-<<<<<<< HEAD
 	def validate_scrap_items(self):
 		for item in self.items:
 			if item.is_scrap_item:
-=======
-	def get_received_qty_ratios_for_return(self, rejected_return_rows: set[str]) -> dict[str, float]:
-		"""Received qty per accepted qty of the original row, for each return row of accepted qty."""
-		if not (self.is_return and self.return_against):
-			return {}
-
-		original_rows = {
-			row.name: row
-			for row in frappe.get_all(
-				"Subcontracting Receipt Item",
-				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
-				fields=["name", "qty", "received_qty"],
-			)
-		}
-
-		ratios = {}
-		for item in self.items:
-			original_row = original_rows.get(item.subcontracting_receipt_item)
-			if original_row and flt(original_row.qty) and item.name not in rejected_return_rows:
-				ratios[item.name] = flt(original_row.received_qty) / flt(original_row.qty)
-
-		return ratios
-
-	def validate_secondary_items(self):
-		for item in self.items:
-			if item.secondary_item_type or item.valuation_type:
->>>>>>> 0146c3b (fix(subcontracting): price a return row by the same rejected rule)
 				if not item.qty:
 					frappe.throw(
 						_("Row #{0}: Scrap Item Qty cannot be zero").format(item.idx),
