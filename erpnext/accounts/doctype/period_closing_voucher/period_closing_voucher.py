@@ -76,7 +76,7 @@ class PeriodClosingVoucher(AccountsController):
 
 	def check_if_previous_period_closed(self):
 		last_closing = self.get_last_closing()
-		if last_closing and last_closing.gle_processing_status != "Completed":
+		if last_closing and last_closing.gle_processing_status in ("In Progress", "Failed"):
 			frappe.throw(
 				_(
 					"Period Closing Voucher {0} has GL Entry Processing Status {1}. Complete or cancel it before closing the next period."
