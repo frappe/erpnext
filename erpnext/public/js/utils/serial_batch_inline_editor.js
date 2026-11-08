@@ -1280,9 +1280,9 @@ erpnext.stock.get_sbie_row = function (frm, cdn) {
 	return {};
 };
 
-// Bundle totals are positive; return rows store negative qty.
+// Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
 erpnext.stock.get_sbie_signed_qty = function (doc, qty) {
-	return doc.is_return && qty ? -Math.abs(qty) : qty;
+	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };
 
 erpnext.stock.get_sbie_pending_map = function (frm) {
