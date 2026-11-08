@@ -15,6 +15,7 @@ frappe.ui.form.on("Supplier", {
 					root_type: "Liability",
 					company: d.company,
 					is_group: 0,
+					...erpnext.utils.get_party_account_currency_filter(doc, d.company),
 				},
 			};
 		});
