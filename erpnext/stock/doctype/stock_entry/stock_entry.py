@@ -2639,17 +2639,28 @@ class StockEntry(StockController):
 
 		return process_gl_map(gl_entries, from_repost=frappe.flags.through_repost_item_valuation)
 
+	def is_new_entry_against_closed_work_order(self, pro_doc):
+		return (
+			pro_doc.status == "Closed"
+			and self.docstatus == 1
+			and not self.is_return
+			and self.purpose in ("Material Transfer for Manufacture", "Manufacture")
+		)
+
 	def update_work_order(self):
 		def _validate_work_order(pro_doc):
-			msg, title = "", ""
+			msg = ""
 			if flt(pro_doc.docstatus) != 1:
-				msg = f"Work Order {self.work_order} must be submitted"
+				msg = _("Work Order {0} must be submitted").format(self.work_order)
 
 			if pro_doc.status == "Stopped":
-				msg = f"Transaction not allowed against stopped Work Order {self.work_order}"
+				msg = _("Transaction not allowed against stopped Work Order {0}").format(self.work_order)
+
+			if self.is_new_entry_against_closed_work_order(pro_doc):
+				msg = _("Transaction not allowed against closed Work Order {0}").format(self.work_order)
 
 			if msg:
-				frappe.throw(_(msg), title=title)
+				frappe.throw(msg)
 
 		if self.job_card:
 			job_doc = frappe.get_doc("Job Card", self.job_card)

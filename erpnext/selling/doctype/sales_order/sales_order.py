@@ -2010,6 +2010,8 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 @frappe.whitelist()
 def get_work_order_items(sales_order, for_raw_material_request=0):
 	"""Returns items with BOM that already do not have a linked work order"""
+	from erpnext.manufacturing.doctype.work_order.work_order import qty_against_sales_order
+
 	if sales_order:
 		so = frappe.get_doc("Sales Order", sales_order)
 		so.check_permission("read")
@@ -2033,13 +2035,12 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						qb.from_(wo)
-						.select(Sum(wo.qty - wo.process_loss_qty))
+						.select(Sum(qty_against_sales_order(wo, wo.qty - wo.process_loss_qty)))
 						.where(
 							(wo.production_item == i.item_code)
 							& (wo.sales_order == so.name)
 							& (wo.sales_order_item == i.name)
 							& (wo.docstatus.lt(2))
-							& (wo.status != "Closed")
 						)
 						.run()[0][0]
 					)
