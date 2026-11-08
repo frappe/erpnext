@@ -2414,6 +2414,22 @@ class TestWorkOrder(FrappeTestCase):
 		for row in return_ste_doc.items:
 			self.assertEqual(row.qty, 2)
 
+	def test_return_needs_completed_or_closed_work_order(self):
+		item_code = make_item("Test FG Item To Test Early Return", {"is_stock_item": 1}).name
+		make_bom(item=item_code, source_warehouse="Stores - _TC", raw_materials=["_Test Item"])
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="Stores - _TC", qty=3, basic_rate=100
+		)
+
+		wo_doc = make_wo_order_test_record(production_item=item_code, qty=3)
+		frappe.get_doc(make_stock_entry(wo_doc.name, "Material Transfer for Manufacture", 3)).submit()
+
+		return_ste_doc = make_stock_return_entry(wo_doc.name)
+		self.assertRaisesRegex(frappe.ValidationError, "Completed or Closed", return_ste_doc.save)
+
+		close_work_order(wo_doc.name, "Closed")
+		make_stock_return_entry(wo_doc.name).save()
+
 	def test_workstation_type_for_work_order(self):
 		prepare_data_for_workstation_type_check()
 
