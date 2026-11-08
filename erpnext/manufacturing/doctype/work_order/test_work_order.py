@@ -3885,6 +3885,7 @@ class TestWorkOrder(FrappeTestCase):
 			item=fg_item,
 			qty=10,
 			source_warehouse=source_warehouse,
+			allow_alternative_item=1,
 		)
 
 		transfer_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
@@ -3926,7 +3927,9 @@ class TestWorkOrder(FrappeTestCase):
 		).insert()
 
 		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[raw_material])
-		wo = make_wo_order_test_record(item=fg_item, qty=10, source_warehouse=source_warehouse)
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=10, source_warehouse=source_warehouse, allow_alternative_item=1
+		)
 
 		# 6 as the base item
 		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 6)).submit()
@@ -5233,6 +5236,21 @@ def allow_overproduction(fieldname, percentage):
 	doc.save()
 
 
+def allow_alternative_item(work_order, item_code, alternative_item_code):
+	work_order.db_set("allow_alternative_item", 1)
+	frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+	if not frappe.db.exists(
+		"Item Alternative", {"item_code": item_code, "alternative_item_code": alternative_item_code}
+	):
+		frappe.get_doc(
+			{
+				"doctype": "Item Alternative",
+				"item_code": item_code,
+				"alternative_item_code": alternative_item_code,
+			}
+		).insert()
+
+
 def make_whole_number_work_order(name, rm_properties=None, rm_row_uom=None):
 	"""Work order that turned 4 of a raw material's stock UOM into 3 Nos of a finished good. rm_row_uom
 	is the (uom, conversion_factor) the manufacture entry consumes the raw material in."""
@@ -5286,6 +5304,7 @@ def make_wo_order_test_record(**args):
 	wo_order.stock_uom = args.stock_uom or "_Test UOM"
 	wo_order.use_multi_level_bom = args.use_multi_level_bom or 0
 	wo_order.skip_transfer = args.skip_transfer or 0
+	wo_order.allow_alternative_item = args.allow_alternative_item or 0
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
 	wo_order.planned_start_date = args.planned_start_date or now()
