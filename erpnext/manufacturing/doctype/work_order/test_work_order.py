@@ -4886,6 +4886,491 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(entry.fg_completed_qty, 5)
 		self.assertEqual(frappe.db.get_value("Work Order", work_order.name, "produced_qty"), 5)
 
+	def test_closed_work_order_keeps_produced_qty_on_sales_order(self):
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+		so = make_sales_order(item_code=fg_item, qty=10, rate=100)
+		wo = make_review_work_order(
+			fg_item, bom.name, 10, skip_transfer=1, sales_order=so.name, sales_order_item=so.items[0].name
+		)
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
+		manufacture.submit()
+		close_work_order(wo.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "work_order_qty"), 4)
+		self.assertEqual(get_work_order_items(so.name)[0]["pending_qty"], 6)
+		self.assertRaises(
+			OverProductionError,
+			make_review_work_order,
+			fg_item,
+			bom.name,
+			10,
+			sales_order=so.name,
+			sales_order_item=so.items[0].name,
+		)
+
+	def test_closed_work_order_refuses_new_transfer_and_manufacture(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 4)).submit()
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4)).submit()
+		close_work_order(wo.name, "Closed")
+
+		for purpose in ("Material Transfer for Manufacture", "Manufacture"):
+			entry = frappe.get_doc(make_stock_entry(wo.name, purpose, 2))
+			entry.insert()
+			self.assertRaisesRegex(frappe.ValidationError, "closed Work Order", entry.submit)
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
+
+	@change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 1, "allow_editing_of_items_and_quantities_in_work_order": 0},
+	)
+	def test_draft_work_order_rows_follow_qty_and_bom_changes(self):
+		first_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		second_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		other_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		_operation, _workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[
+				{"item_code": first_item, "qty": 1, "operation": operation},
+				{"item_code": second_item, "qty": 1},
+			],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		other_bom = make_review_bom(fg_item, [{"item_code": other_item, "qty": 2}])
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False)
+		self.assertEqual([row.time_in_mins for row in wo.operations], [50])
+
+		wo.qty = 20
+		wo.save()
+		self.assertEqual([row.required_qty for row in wo.required_items], [20, 20])
+		self.assertEqual([row.time_in_mins for row in wo.operations], [200])
+
+		wo.qty = 10
+		wo.get_items_and_operations_from_bom()
+		wo.save()
+		self.assertEqual([row.time_in_mins for row in wo.operations], [100])
+
+		wo.operations[0].workstation = _workstation
+		wo.save()
+		wo.qty = 20
+		wo.save()
+		self.assertEqual(
+			[(row.workstation, row.time_in_mins) for row in wo.operations], [(_workstation, 200)]
+		)
+
+		wo.bom_no = other_bom.name
+		wo.save()
+		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
+		self.assertEqual(wo.operations, [])
+
+	def test_draft_qty_change_keeps_fixed_time_of_sub_assembly_operations(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_assembly = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		fixed_operation, workstation = make_review_operation()
+		operation, _workstation = make_review_operation()
+		sub_bom = make_review_bom(
+			sub_assembly,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{
+					"operation": fixed_operation,
+					"workstation": workstation,
+					"time_in_mins": 30,
+					"fixed_time": 1,
+				}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": sub_assembly, "qty": 1, "bom_no": sub_bom.name}],
+			operations=[{"operation": operation, "workstation": _workstation, "time_in_mins": 10}],
+		)
+
+		wo = make_review_work_order(fg_item, bom.name, 5, submit=False, use_multi_level_bom=1)
+		self.assertEqual(
+			sorted((row.operation, row.time_in_mins) for row in wo.operations),
+			sorted([(fixed_operation, 30), (operation, 50)]),
+		)
+
+		wo.qty = 10
+		wo.save()
+		self.assertEqual(
+			sorted((row.operation, row.time_in_mins) for row in wo.operations),
+			sorted([(fixed_operation, 30), (operation, 100)]),
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_qty_change_scales_a_normal_row_of_a_repeated_fixed_operation(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1},
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		before = [row.time_in_mins for row in wo.operations]
+
+		wo.qty = 4
+		wo.save()
+
+		self.assertEqual(before, [30, 20])
+		self.assertEqual([row.time_in_mins for row in wo.operations], [30, 40])
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_qty_change_keeps_every_copy_of_a_shared_child_fixed_operation(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		child_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		child_bom = make_review_bom(
+			child_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 15, "fixed_time": 1}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 10}],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2, submit=False)
+		for _copy in range(2):
+			wo.append(
+				"operations",
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"bom": child_bom.name,
+					"time_in_mins": 15,
+					"sequence_id": len(wo.operations) + 1,
+				},
+			)
+		wo.save()
+
+		wo.qty = 4
+		wo.save()
+
+		self.assertEqual([row.time_in_mins for row in wo.operations], [40, 15, 15])
+
+	def test_status_change_accepts_only_its_own_statuses(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		draft = make_review_work_order(fg_item, bom.name, 10, submit=False)
+
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be set to", stop_unstop, wo.name, "Closed")
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be set to", close_work_order, wo.name, "Not Started"
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Only a submitted", close_work_order, draft.name, "Closed"
+		)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Not Started")
+		self.assertEqual(frappe.db.get_value("Work Order", draft.name, "status"), "Draft")
+
+		wo.cancel()
+		self.assertRaisesRegex(frappe.ValidationError, "Only a submitted", stop_unstop, wo.name, "Stopped")
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "status"), "Cancelled")
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_from_work_order_uses_produced_qty(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 2}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10, skip_transfer=1)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10)).submit()
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(new_bom.quantity, 10)
+		self.assertEqual([(row.item_code, row.qty) for row in new_bom.items], [(rm_item, 20)])
+
+		operation, workstation = make_review_operation()
+		bom_with_operation = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 2}],
+			operations=[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+		)
+		wo = make_review_work_order(fg_item, bom_with_operation.name, 10)
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(
+			[(row.doctype, row.operation, row.time_in_mins) for row in new_bom.operations],
+			[("BOM Operation", operation, 60)],
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_keeps_fixed_and_batch_operation_times(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		fixed_operation, workstation = make_review_operation()
+		batch_operation, _workstation = make_review_operation()
+		frappe.db.set_value("Operation", batch_operation, "create_job_card_based_on_batch_size", 1)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{
+					"operation": fixed_operation,
+					"workstation": workstation,
+					"time_in_mins": 30,
+					"fixed_time": 1,
+				},
+				{
+					"operation": batch_operation,
+					"workstation": _workstation,
+					"time_in_mins": 60,
+					"batch_size": 10,
+				},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 20)
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(
+			[(row.operation, row.time_in_mins, row.fixed_time, row.batch_size) for row in new_bom.operations],
+			[(fixed_operation, 30, 1, 1), (batch_operation, 60, 0, 10)],
+		)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_matches_operations_of_their_own_bom(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		sub_bom = make_review_bom(
+			sub_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10, "fixed_time": 1}
+			],
+		)
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1}
+			],
+		)
+		wo = frappe.get_doc("Work Order", make_review_work_order(fg_item, bom.name, 2).name)
+		wo.append(
+			"operations",
+			{
+				"operation": operation,
+				"bom": sub_bom.name,
+				"workstation": workstation,
+				"time_in_mins": 20,
+				"batch_size": 10,
+			},
+		)
+
+		new_bom = wo.make_bom()
+
+		self.assertEqual(
+			[(cint(row.fixed_time), row.time_in_mins) for row in new_bom.operations], [(1, 30), (0, 20)]
+		)
+		self.assertEqual(new_bom.operations[1].batch_size, 2)
+
+		wo.qty = 2.5
+		self.assertEqual(wo.make_bom().operations[1].batch_size, 2.5)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_create_bom_keeps_each_repeated_operation_row_settings(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "fixed_time": 1},
+				{"operation": operation, "workstation": workstation, "time_in_mins": 10},
+			],
+		)
+		wo = make_review_work_order(fg_item, bom.name, 2)
+
+		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
+		self.assertEqual(
+			[(row.time_in_mins, cint(row.fixed_time)) for row in new_bom.operations], [(30, 1), (20, 0)]
+		)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_sales_order_row_work_order_qty_is_per_row(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		so = make_sales_order(item_code=fg_item, qty=5, rate=100, do_not_submit=True)
+		so.append("items", {**so.items[0].as_dict(), "name": None, "idx": None, "qty": 3})
+		so.submit()
+
+		for row in so.items:
+			make_review_work_order(fg_item, bom.name, row.qty, sales_order=so.name, sales_order_item=row.name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Sales Order Item", row.name, "work_order_qty") for row in so.items], [5, 3]
+		)
+
+	def test_planned_qty_leaves_out_process_loss(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}], process_loss_percentage=20)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10, skip_transfer=1)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 5)).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, ["produced_qty", "process_loss_qty"]), (4, 1)
+		)
+		planned_qty = frappe.db.get_value(
+			"Bin", {"item_code": fg_item, "warehouse": "_Test Warehouse 2 - _TC"}, "planned_qty"
+		)
+		self.assertEqual(planned_qty, 5)
+
+	def test_lead_time_is_saved_from_stock_entries(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -3),
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10)
+		transfer = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer.update(
+			{"set_posting_time": 1, "posting_date": add_days(today(), -1), "posting_time": "10:00:00"}
+		)
+		transfer.submit()
+		manufacture = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		manufacture.update({"set_posting_time": 1, "posting_date": today(), "posting_time": "10:00:00"})
+		manufacture.submit()
+
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "lead_time"), 1440)
+
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_amended_work_order_reuses_serial_and_batch_nos(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.db.set_value(
+			"Item",
+			fg_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": f"{fg_item}.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{fg_item}-B.#####",
+			},
+		)
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 3)
+		wo.cancel()
+
+		amended = frappe.copy_doc(wo)
+		amended.update({"amended_from": wo.name, "docstatus": 0, "status": "Draft"})
+		amended.insert()
+		amended.submit()
+
+		serial_nos = frappe.get_all("Serial No", filters={"item_code": fg_item}, pluck="work_order")
+		batches = frappe.get_all("Batch", filters={"item": fg_item}, pluck="reference_name")
+		self.assertEqual(serial_nos, [amended.name] * 3)
+		self.assertEqual(batches, [amended.name])
+
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	@change_settings("Global Defaults", {"default_company": "_Test Company"})
+	def test_amended_work_order_fills_reused_batches_before_new_ones(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.db.set_value(
+			"Item",
+			fg_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": f"{fg_item}.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{fg_item}-B.#####",
+			},
+		)
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		wo = make_review_work_order(fg_item, bom.name, 2, batch_size=2)
+		wo.cancel()
+
+		amended = frappe.copy_doc(wo)
+		amended.update({"amended_from": wo.name, "docstatus": 0, "status": "Draft", "qty": 4})
+		amended.insert()
+		amended.submit()
+
+		serials_per_batch = {}
+		for batch_no in frappe.get_all("Serial No", filters={"item_code": fg_item}, pluck="batch_no"):
+			serials_per_batch[batch_no] = serials_per_batch.get(batch_no, 0) + 1
+		self.assertEqual(sorted(serials_per_batch.values()), [2, 2])
+
+	def test_negative_batch_size_is_refused(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Batch Size cannot be negative",
+			make_review_work_order,
+			fg_item,
+			bom.name,
+			10,
+			submit=False,
+			batch_size=-1,
+		)
+
+	def test_stock_entry_helpers_follow_work_order_user_permissions(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		allowed = make_review_work_order(fg_item, bom.name, 5)
+		restricted = make_review_work_order(fg_item, bom.name, 7)
+		user = create_user("wo-stock-entry-restricted@example.com", "Manufacturing User", "Stock User")
+		add_user_permission("Work Order", allowed.name, user.name)
+
+		with self.set_user(user.name):
+			self.assertEqual(make_stock_entry(allowed.name, "Manufacture")["fg_completed_qty"], 5)
+			self.assertRaises(frappe.PermissionError, make_stock_entry, restricted.name, "Manufacture")
+			self.assertRaises(frappe.PermissionError, make_stock_return_entry, restricted.name)
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
@@ -5326,6 +5811,76 @@ def make_wo_order_test_record(**args):
 	return wo_order
 
 
+def make_review_bom(fg_item, rows, quantity=1, operations=None, **kwargs):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": fg_item,
+			"company": "_Test Company",
+			"currency": "INR",
+			"quantity": quantity,
+			"rm_cost_as_per": "Valuation Rate",
+			"with_operations": 1 if operations else 0,
+			"items": rows,
+			"operations": operations or [],
+			**kwargs,
+		}
+	)
+	bom.insert()
+	bom.submit()
+	return bom
+
+
+def make_review_operation(hour_rate=600):
+	workstation = make_workstation(
+		workstation=f"_Test WO Review Workstation {frappe.generate_hash(length=6)}", hour_rate=hour_rate
+	)
+	operation = make_operation(
+		operation=f"_Test WO Review Operation {frappe.generate_hash(length=6)}",
+		workstation=workstation.name,
+	)
+	return operation.name, workstation.name
+
+
+def make_review_work_order(fg_item, bom_no, qty, submit=True, **kwargs):
+	wo = frappe.get_doc(
+		{
+			"doctype": "Work Order",
+			"production_item": fg_item,
+			"bom_no": bom_no,
+			"qty": qty,
+			"company": "_Test Company",
+			"source_warehouse": "_Test Warehouse - _TC",
+			"wip_warehouse": "_Test Warehouse 1 - _TC",
+			"fg_warehouse": "_Test Warehouse 2 - _TC",
+			"planned_start_date": now(),
+			**kwargs,
+		}
+	)
+	wo.get_items_and_operations_from_bom()
+	wo.insert()
+	if submit:
+		wo.submit()
+	return wo
+
+
+def complete_review_job_card(work_order, qty, hours_ago=2):
+	job_card = frappe.get_doc("Job Card", {"work_order": work_order})
+	start = add_to_date(now(), hours=-hours_ago)
+	job_card.for_quantity = qty
+	job_card.append(
+		"time_logs",
+		{
+			"from_time": start,
+			"to_time": add_to_date(start, minutes=30),
+			"completed_qty": qty,
+			"time_in_mins": 30,
+		},
+	)
+	job_card.submit()
+	return job_card
+
+
 test_records = frappe.get_test_records("Work Order")
 
 
@@ -5363,45 +5918,3 @@ def make_transfer_based_work_order(components, process_loss_percentage=0):
 	)
 	frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
 	return work_order, raw_materials
-
-
-def make_review_bom(fg_item, rows, quantity=1, operations=None, **kwargs):
-	bom = frappe.get_doc(
-		{
-			"doctype": "BOM",
-			"item": fg_item,
-			"company": "_Test Company",
-			"currency": "INR",
-			"quantity": quantity,
-			"rm_cost_as_per": "Valuation Rate",
-			"with_operations": 1 if operations else 0,
-			"items": rows,
-			"operations": operations or [],
-			**kwargs,
-		}
-	)
-	bom.insert()
-	bom.submit()
-	return bom
-
-
-def make_review_work_order(fg_item, bom_no, qty, submit=True, **kwargs):
-	wo = frappe.get_doc(
-		{
-			"doctype": "Work Order",
-			"production_item": fg_item,
-			"bom_no": bom_no,
-			"qty": qty,
-			"company": "_Test Company",
-			"source_warehouse": "_Test Warehouse - _TC",
-			"wip_warehouse": "_Test Warehouse 1 - _TC",
-			"fg_warehouse": "_Test Warehouse 2 - _TC",
-			"planned_start_date": now(),
-			**kwargs,
-		}
-	)
-	wo.get_items_and_operations_from_bom()
-	wo.insert()
-	if submit:
-		wo.submit()
-	return wo
