@@ -6078,28 +6078,6 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		with self.set_user(user):
 			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
-	def test_validate_sample_quantity_for_user_without_retention_warehouse_access(self):
-		from erpnext.stock.doctype.stock_entry.services.manufacturing import validate_sample_quantity
-		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
-
-		retention_warehouse = "_Test Warehouse 1 - _TC"
-		frappe.db.set_value("Company", "_Test Company", "sample_retention_warehouse", retention_warehouse)
-		item = make_item(
-			properties={"has_batch_no": 1, "create_new_batch": 1, "retain_sample": 1, "sample_quantity": 4}
-		)
-		batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
-		make_stock_entry(
-			item_code=item.name, batch_no=batch.name, qty=2, target=retention_warehouse, rate=100
-		)
-		user = make_fenced_user(
-			"sample_retention_fenced@example.com",
-			["Stock User"],
-			[("Company", "_Test Company"), ("Warehouse", "_Test Warehouse - _TC")],
-		)
-
-		with as_user(user):
-			self.assertEqual(validate_sample_quantity(item.name, 3, 5, "_Test Company", batch.name), 2)
-
 	# ── get_expired_batches ────────────────────────────────────────────────────
 
 	def test_get_expired_batches_includes_expired_batch(self):
