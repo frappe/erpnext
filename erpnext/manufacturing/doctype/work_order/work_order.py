@@ -173,6 +173,7 @@ class WorkOrder(Document):
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
+		self.reset_use_multi_level_bom()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_dates()
@@ -180,7 +181,6 @@ class WorkOrder(Document):
 		self.validate_operations()
 		self.status = self.get_status()
 		self.validate_workstation_type()
-		self.reset_use_multi_level_bom()
 
 		if self.source_warehouse:
 			self.set_warehouses()
@@ -257,7 +257,6 @@ class WorkOrder(Document):
 			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue
 			d.time_in_mins = flt(saved.time_in_mins) * flt(self.qty) / flt(previous.qty)
-		self.calculate_operating_cost()
 
 	def get_fixed_time_flags(self):
 		boms = {d.bom or self.bom_no for d in self.get("operations")}
