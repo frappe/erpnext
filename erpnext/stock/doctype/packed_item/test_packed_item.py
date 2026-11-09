@@ -139,10 +139,8 @@ class TestPackedItem(ERPNextTestSuite):
 		so.save()
 		self.assertEqual(sorted(pi.qty for pi in so.packed_items), [4, 6])
 
-<<<<<<< HEAD
-=======
 	def test_update_items_keeps_ordered_component_qty_after_uom_change(self):
-		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
 
 		component = make_item(
 			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
@@ -151,7 +149,6 @@ class TestPackedItem(ERPNextTestSuite):
 		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
 		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
 		bundle_doc.insert()
-		bundle_doc.submit()
 
 		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse)  # 20 Nos
 		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
@@ -167,7 +164,7 @@ class TestPackedItem(ERPNextTestSuite):
 
 	def test_update_items_packs_exact_component_qty_on_qty_increase(self):
 		"A qty increase packs from the exact conversion, not the ratio of the order's rounded packed qty."
-		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
 
 		component = make_item(
 			properties={"stock_uom": "Kg", "uoms": [{"uom": "Nos", "conversion_factor": 1 / 3}]}
@@ -176,7 +173,6 @@ class TestPackedItem(ERPNextTestSuite):
 		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
 		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Nos"})
 		bundle_doc.insert()
-		bundle_doc.submit()
 
 		so = make_sales_order(item_code=bundle, qty=1, warehouse=self.warehouse)
 		row = so.items[0]
@@ -186,238 +182,6 @@ class TestPackedItem(ERPNextTestSuite):
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 10)
 
-	def test_component_uom_is_converted_to_stock_qty(self):
-		"A component measured in a non-stock UOM packs the converted stock quantity."
-		component = make_item(
-			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
-		).name
-		make_stock_entry(item=component, to_warehouse=self.warehouse, qty=100, rate=100)
-
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})
-		bundle_doc.insert()
-		bundle_doc.submit()
-
-		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=True)
-		# 1 Box (= 12 Nos) x 2 bundles = 24 Nos, packed in the component's stock UOM
-		self.assertEqual(so.packed_items[0].qty, 24)
-		self.assertEqual(so.packed_items[0].uom, "Nos")
-
-	def test_item_and_packed_rows_record_bundle_version(self):
-		"The item row and its packed items record the resolved Product Bundle version."
-		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-		version = get_active_product_bundle(self.bundle)
-		self.assertTrue(version and version.startswith("PB-"))
-
-		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse)
-		self.assertEqual(so.items[0].product_bundle, version)
-		self.assertEqual(so.items[0].is_product_bundle, 1)
-		self.assertEqual(len(so.packed_items), 2)
-		for pi in so.packed_items:
-			self.assertEqual(pi.product_bundle, version)
-
-		# the version carries onto a Delivery Note mapped from the Sales Order
-		dn = make_delivery_note(so.name)
-		self.assertEqual(dn.items[0].product_bundle, version)
-		for pi in dn.packed_items:
-			self.assertEqual(pi.product_bundle, version)
-
-	def test_clearing_version_keeps_bundle_flag_and_redefaults(self):
-		"Clearing the version must not lose the bundle flag (keeps the field visible)."
-		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
-		version = so.items[0].product_bundle
-		self.assertEqual(so.items[0].is_product_bundle, 1)
-
-		# user blanks the version field
-		so.items[0].product_bundle = None
-		so.save()
-
-		# the flag stays set (so depends_on keeps the field visible) and the value
-		# re-defaults to the active version
-		self.assertEqual(so.items[0].is_product_bundle, 1)
-		self.assertEqual(so.items[0].product_bundle, version)
-
-	def test_backfill_patch_stamps_existing_rows(self):
-		"The backfill patch stamps the version on rows that predate the field."
-		from erpnext.patches.v16_0.submit_existing_product_bundles import (
-			stamp_versions_on_transactions as stamp_versions,
-		)
-		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-		version = get_active_product_bundle(self.bundle)
-		so = make_sales_order(item_code=self.bundle, qty=1, do_not_submit=True)
-
-		# simulate pre-migration rows with no version recorded and no bundle flag
-		frappe.db.set_value("Sales Order Item", so.items[0].name, "product_bundle", None)
-		frappe.db.set_value("Sales Order Item", so.items[0].name, "is_product_bundle", 0)
-		for pi in so.packed_items:
-			frappe.db.set_value("Packed Item", pi.name, "product_bundle", None)
-
-		stamp_versions()
-
-		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "product_bundle"), version)
-		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "is_product_bundle"), 1)
-		for pi in so.packed_items:
-			self.assertEqual(frappe.db.get_value("Packed Item", pi.name, "product_bundle"), version)
-
-	def test_choosing_an_older_version_packs_its_components(self):
-		"Default picks the active version; choosing an older version re-packs its components."
-		from erpnext.selling.doctype.product_bundle.product_bundle import (
-			get_active_product_bundle,
-			make_new_version,
-		)
-
-		v1 = get_active_product_bundle(self.bundle)
-
-		# new version with a different component becomes the active one
-		new_component = make_item().name
-		make_stock_entry(item=new_component, to_warehouse=self.warehouse, qty=50, rate=100)
-		v2 = make_new_version(v1)
-		v2.items = []
-		v2.append("items", {"item_code": new_component, "qty": 1})
-		v2.insert()
-		v2.submit()
-		self.assertEqual(get_active_product_bundle(self.bundle), v2.name)
-
-		# default: the active version (v2) and its component
-		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
-		self.assertEqual(so.items[0].product_bundle, v2.name)
-		self.assertEqual([pi.item_code for pi in so.packed_items], [new_component])
-
-		# choose the older version -> its components are packed instead
-		so.items[0].product_bundle = v1
-		so.save()
-		self.assertEqual(so.items[0].product_bundle, v1)
-		self.assertEqual(sorted(pi.item_code for pi in so.packed_items), sorted(self.bundle_items))
-
-	def test_disabled_bundle_blocks_transaction(self):
-		"A row that explicitly references a disabled version cannot be saved."
-		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-		version = get_active_product_bundle(self.bundle)
-		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse, do_not_submit=True)
-		self.assertEqual(so.items[0].product_bundle, version)
-
-		frappe.db.set_value("Product Bundle", version, "disabled", 1)
-		self.assertRaises(frappe.ValidationError, so.save)
-
-	def test_disabled_bundle_is_not_packed(self):
-		"Without an explicit version, a disabled bundle is not treated as a bundle at all."
-		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-		version = get_active_product_bundle(self.bundle2)
-		frappe.db.set_value("Product Bundle", version, "disabled", 1)
-
-		so = make_sales_order(item_code=self.bundle2, qty=1, warehouse=self.warehouse, do_not_submit=True)
-		self.assertEqual(so.items[0].is_product_bundle, 0)
-		self.assertFalse(so.items[0].product_bundle)
-		self.assertFalse(so.get("packed_items"))
-
-	def test_disabled_bundle_can_still_be_returned(self):
-		"Disabling a version must not block returns of documents delivered with it."
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
-
-		so = make_sales_order(item_code=self.bundle, qty=1, warehouse=self.warehouse)
-		version = so.items[0].product_bundle
-
-		dn = make_delivery_note(so.name)
-		dn.save()
-		dn.submit()
-
-		# retire the version the usual way (cancel is link-blocked once delivered)
-		frappe.db.set_value("Product Bundle", version, "disabled", 1)
-
-		dn_ret = make_sales_return(dn.name)
-		dn_ret.save()  # must not raise despite the disabled version
-		dn_ret.submit()
-
-		self.assertTrue(dn_ret.packed_items)
-		self.assertTrue(all(pi.qty < 0 for pi in dn_ret.packed_items))
-
-	def test_get_items_from_product_bundle_endpoint(self):
-		"The buying dialog passes the chosen version by document name (legacy: parent item code)."
-		import json
-
-		from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-		from erpnext.stock.doctype.packed_item.packed_item import get_items_from_product_bundle
-
-		ctx = {
-			"quantity": 2,
-			"doctype": "Purchase Order",
-			"parenttype": "Purchase Order",
-			"company": "_Test Company",
-			"currency": "INR",
-			"conversion_rate": 1,
-			"transaction_date": nowdate(),
-		}
-
-		# by document name, as the buying dialog sends it (bundle names are PB-prefixed
-		# since versioning, so they no longer double as the parent item code)
-		version = get_active_product_bundle(self.bundle)
-		items = get_items_from_product_bundle(json.dumps({"product_bundle": version, **ctx}))
-		self.assertEqual(sorted(i.item_code for i in items), sorted(self.bundle_items))
-		self.assertEqual([i.qty for i in items], [4, 4])
-
-		# legacy contract: the parent item code resolves to its active version
-		items = get_items_from_product_bundle(json.dumps({"item_code": self.bundle, **ctx}))
-		self.assertEqual(sorted(i.item_code for i in items), sorted(self.bundle_items))
-
-		# an unsubmitted version is rejected
-		draft = frappe.get_doc(
-			{
-				"doctype": "Product Bundle",
-				"new_item_code": make_item(properties={"is_stock_item": 0}).name,
-				"items": [{"item_code": self.bundle_items[0], "qty": 1}],
-			}
-		).insert()
-		self.assertRaises(
-			frappe.ValidationError,
-			get_items_from_product_bundle,
-			json.dumps({"product_bundle": draft.name, **ctx}),
-		)
-
-		# a disabled version is rejected
-		frappe.db.set_value("Product Bundle", version, "disabled", 1)
-		self.assertRaises(
-			frappe.ValidationError,
-			get_items_from_product_bundle,
-			json.dumps({"product_bundle": version, **ctx}),
-		)
-
-	def test_get_items_from_product_bundle_converts_component_uom(self):
-		"The buying dialog returns component qty in stock units, like packing."
-		import json
-
-		from erpnext.stock.doctype.packed_item.packed_item import get_items_from_product_bundle
-
-		component = make_item(
-			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
-		).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})
-		bundle_doc.insert()
-		bundle_doc.submit()
-
-		items = get_items_from_product_bundle(
-			json.dumps(
-				{
-					"item_code": bundle,
-					"quantity": 2,
-					"doctype": "Purchase Order",
-					"parenttype": "Purchase Order",
-					"company": "_Test Company",
-					"currency": "INR",
-					"conversion_rate": 1,
-					"transaction_date": nowdate(),
-				}
-			)
-		)
-		self.assertEqual([i.qty for i in items], [24])  # 2 x 1 Box (= 12 Nos)
-
->>>>>>> e0617e7 (test: Update Items keeps a bundle's ordered component qty after a UOM change)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_recurring_bundle_item(self):
 		"Test impact on packed items if same bundle item is added and removed."

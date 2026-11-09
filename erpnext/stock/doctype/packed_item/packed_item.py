@@ -95,24 +95,10 @@ def make_packing_list(doc, order_packed_items=None):
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
-<<<<<<< HEAD
 		if is_product_bundle(item_row.item_code):
-			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
-			for bundle_item in get_product_bundle_items(item_row.item_code):
-=======
-		# Pack from the version chosen on the row (default: the item's active version)
-		# and record it so the document keeps a reference to the exact version used.
-		bundle_name = get_bundle_version_for_row(item_row, doc)
-		if item_row.meta.has_field("product_bundle"):
-			item_row.product_bundle = bundle_name
-		if item_row.meta.has_field("is_product_bundle"):
-			item_row.is_product_bundle = 1 if bundle_name else 0
-
-		if bundle_name:
 			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
 			so_packed_items = list(order_packed_items.get(order_row, []))
-			for bundle_item in get_product_bundle_items_by_name(bundle_name):
->>>>>>> 1af1ab9 (fix(selling): keep product bundle component qty on Update Items)
+			for bundle_item in get_product_bundle_items(item_row.item_code):
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
