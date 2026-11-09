@@ -24,6 +24,7 @@ class LedgerMerge(Document):
 
 		account: DF.Link
 		account_name: DF.Data
+		account_type: DF.Data | None
 		company: DF.Link
 		is_group: DF.Check
 		merge_accounts: DF.Table[LedgerMergeAccounts]
