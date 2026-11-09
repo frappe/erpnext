@@ -7674,6 +7674,28 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([(row.item_code, row.required_qty) for row in wo.required_items], [(other_item, 40)])
 		self.assertEqual(wo.operations, [])
 
+	def test_draft_bom_change_resets_operating_cost(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		operation, workstation = make_review_operation()
+		bom = make_review_bom(
+			fg_item,
+			[{"item_code": rm_item, "qty": 1}],
+			operations=[
+				{"operation": operation, "workstation": workstation, "time_in_mins": 30, "hour_rate": 120}
+			],
+		)
+		other_bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+
+		wo = make_review_work_order(fg_item, bom.name, 1, submit=False, use_multi_level_bom=0)
+		self.assertEqual(wo.planned_operating_cost, 60)
+
+		wo.bom_no = other_bom.name
+		wo.save()
+		self.assertEqual(wo.operations, [])
+		self.assertEqual(wo.planned_operating_cost, 0)
+		self.assertEqual(wo.total_operating_cost, 0)
+
 	def test_draft_qty_change_keeps_fixed_time_of_sub_assembly_operations(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 		sub_assembly = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
