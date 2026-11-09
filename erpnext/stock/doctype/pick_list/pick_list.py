@@ -693,6 +693,7 @@ class PickList(TransactionBase):
 					location.batch_no,
 					location.serial_no,
 					location.sales_order_item or location.material_request_item,
+					location.product_bundle_item,
 				)
 
 				if key not in updated_locations:
@@ -769,7 +770,7 @@ class PickList(TransactionBase):
 
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
-			key = (item_code, item.uom, item.warehouse, item.batch_no, reference)
+			key = (item_code, item.uom, item.warehouse, item.batch_no, reference, item.product_bundle_item)
 
 			item.idx = None
 			item.name = None
@@ -962,11 +963,12 @@ class PickList(TransactionBase):
 		for data in bundles:
 			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": data.item_code, "disabled": 0})
 			# picked_qty is in the component's stock UOM, so convert the bundle qty too
-			product_bundle_qty_map[data.item_code] = {
-				item.item_code: flt(item.qty)
-				* flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor"))
-				for item in bundle.items
-			}
+			qty_map = defaultdict(float)
+			for item in bundle.items:
+				qty_map[item.item_code] += flt(item.qty) * flt(
+					get_conversion_factor(item.item_code, item.uom).get("conversion_factor")
+				)
+			product_bundle_qty_map[data.item_code] = qty_map
 		return product_bundle_qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
@@ -979,8 +981,8 @@ class PickList(TransactionBase):
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
 				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
-				possible_bundles.setdefault(item.product_bundle_item, 0)
-				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
+				possible_bundles.setdefault(item.item_code, 0)
+				possible_bundles[item.item_code] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
