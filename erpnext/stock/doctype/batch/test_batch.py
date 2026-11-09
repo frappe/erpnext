@@ -439,6 +439,27 @@ class TestBatch(FrappeTestCase):
 		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
 		self.assertRaises(frappe.ValidationError, delivery_note.insert)
 
+	def test_disabled_batch_cannot_be_delivered_with_is_consolidated_in_payload(self):
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
+		delivery_note.is_consolidated = 1  # not a Delivery Note field, but kept from the payload
+		# a consolidated document keeps the item amounts it is given
+		delivery_note.items[0].update(
+			{
+				"amount": 20,
+				"net_rate": 10,
+				"net_amount": 20,
+				"base_rate": 10,
+				"base_amount": 20,
+				"base_net_rate": 10,
+				"base_net_amount": 20,
+			}
+		)
+		self.assertRaises(frappe.ValidationError, delivery_note.insert)
+
 	def test_disabled_batch_cannot_be_issued(self):
 		receipt = self.test_purchase_receipt(10)
 		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
