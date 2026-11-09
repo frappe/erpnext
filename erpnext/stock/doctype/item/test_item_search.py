@@ -25,15 +25,13 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		self.assertEqual(build_match_query("RAW_MAT_000123"), '"RAW" AND "MAT" AND "000123"')
 		self.assertEqual(build_match_query("abc%def"), '"abc" AND "def"')
 
-<<<<<<< HEAD
 	def test_skips_terms_with_no_usable_fragment(self):
 		for txt in ("ab%cd", "ab_cd", "a%b%c"):
 			self.assertIsNone(build_match_query(txt), txt)
-=======
+
 	def test_folds_small_kana_to_full_size(self):
 		"""LIKE treats small and full-size kana as equal, so the index must too."""
 		self.assertEqual(build_match_query("フイルター"), build_match_query("ﾌｨﾙﾀｰ"))
->>>>>>> 7c177ef (test: small kana fold to full size in the Item search query)
 
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
@@ -281,7 +279,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 	def test_kana_and_width_variants_match_the_scan(self):
 		"""LIKE treats katakana and hiragana, voiced and unvoiced kana, and full and half width as equal."""
-		frappe.get_doc(
+		item = frappe.get_doc(
 			{
 				"doctype": "Item",
 				"item_code": "ZZ-KANA-6613",
@@ -290,7 +288,7 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
 			}
 		).insert()
-		index_docs_in_queue()
+		update_doc_index(item)
 
 		for txt in ("かたかな", "ﾌｨﾙﾀｰ", "はるふ", "part"):
 			with self.subTest(txt=txt):
