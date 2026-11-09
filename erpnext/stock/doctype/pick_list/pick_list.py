@@ -958,6 +958,7 @@ class PickList(TransactionBase):
 			)
 		return product_bundles
 
+<<<<<<< HEAD
 	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
 		product_bundle_qty_map = {}
 		for data in bundles:
@@ -969,6 +970,14 @@ class PickList(TransactionBase):
 				for item in bundle.items
 			}
 		return product_bundle_qty_map
+=======
+	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
+		"""Component stock qty per bundle, by Sales Order row and packed row, as the order packed it."""
+		return {
+			so_row: {row.name: row.qty_per_unit for row in packed_items if row.qty_per_unit}
+			for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items()
+		}
+>>>>>>> 3750ba8 (fix(stock): count picked bundles per packed row, not per component item)
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
@@ -978,7 +987,7 @@ class PickList(TransactionBase):
 			if item.sales_order_item != bundle_row:
 				continue
 
-			if qty_in_bundle := bundle_items.get(item.item_code):
+			if qty_in_bundle := bundle_items.get(item.product_bundle_item):
 				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
 				possible_bundles.setdefault(item.product_bundle_item, 0)
 				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
