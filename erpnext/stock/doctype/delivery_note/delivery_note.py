@@ -1288,7 +1288,11 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 		"Delivery Note",
 		source_name,
 		{
-			"Delivery Note": {"doctype": "Delivery Trip", "validation": {"docstatus": ["=", 1]}},
+			"Delivery Note": {
+				"doctype": "Delivery Trip",
+				"field_map": {"driver": "driver", "driver_name": "driver_name"},
+				"validation": {"docstatus": ["=", 1]},
+			},
 			"Delivery Note Item": {
 				"doctype": "Delivery Stop",
 				"field_map": {"parent": "delivery_note"},
