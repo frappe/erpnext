@@ -955,15 +955,18 @@ def _raw_materials_header():
 
 
 def _build_download_rows(doc, items, item_list):
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	duplicate_item_wh_list = frappe._dict()
 	for d in items:
 		key = (d.get("item_code"), d.get("warehouse"))
 		if key in duplicate_item_wh_list:
-			duplicate_item_wh_list[key][12] += d.get("quantity")
+			# transfer rows are in stock UOM and purchase rows in purchase UOM, so add in the row's UOM
+			rm_data, conversion_factor = duplicate_item_wh_list[key]
+			rm_data[12] = flt(rm_data[12] + _stock_quantity(d) / conversion_factor, precision)
 			continue
 
 		rm_data = _raw_material_row(d)
-		duplicate_item_wh_list[key] = rm_data
+		duplicate_item_wh_list[key] = (rm_data, flt(d.get("conversion_factor")) or 1)
 		item_list.append(rm_data)
 
 		if not doc.get("for_warehouse"):
