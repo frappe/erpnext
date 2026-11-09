@@ -47,8 +47,9 @@ NOT_APPLICABLE_TAX = "N/A"
 
 # For each transaction, the child-row link field(s) that point to the source
 # document item, mapped to that source item doctype. When "maintain same rate" is
-# on, a mapped row keeps the persisted source pricing (read straight from that row),
-# so an unsaved edit on the target row can never lock in a non-source rate.
+# on, or the user cannot write the rate, a mapped row keeps the persisted source pricing
+# (read straight from that row), so an unsaved edit on the target row can never lock in
+# a non-source rate.
 maintain_same_rate_source_fields = {
 	"Purchase Order": {"supplier_quotation_item": "Supplier Quotation Item"},
 	"Purchase Receipt": {"purchase_order_item": "Purchase Order Item"},
@@ -254,8 +255,12 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
-	source_fields = maintain_same_rate_source_fields.get(ctx.parenttype or ctx.doctype)
-	if not source_fields or not doc or ctx.get("is_return") or not is_rate_locked(ctx):
+	parenttype = ctx.parenttype or ctx.doctype
+	source_fields = maintain_same_rate_source_fields.get(parenttype)
+	if not source_fields or not doc or ctx.get("is_return"):
+		return None
+
+	if not maintain_same_rate_enabled(ctx) and has_rate_write_access(parenttype):
 		return None
 
 	row = (
@@ -279,23 +284,17 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	return None
 
 
-def is_rate_locked(ctx: ItemDetailsCtx) -> bool:
-	"""Mapped rows keep the source rate when maintain same rate is on or the user cannot write the rate."""
-	parenttype = ctx.parenttype or ctx.doctype
-	if parenttype in purchase_doctypes:
+def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
+	if (ctx.parenttype or ctx.doctype) in purchase_doctypes:
 		if ctx.get("is_internal_supplier"):
 			return False
-		maintain_same_rate = frappe.get_cached_value(
-			"Buying Settings", "Buying Settings", "maintain_same_rate"
-		)
-	elif ctx.get("is_internal_customer"):
-		return False
-	else:
-		maintain_same_rate = frappe.get_cached_value(
-			"Selling Settings", "Selling Settings", "maintain_same_sales_rate"
-		)
+		return bool(cint(frappe.get_cached_value("Buying Settings", "Buying Settings", "maintain_same_rate")))
 
-	return bool(cint(maintain_same_rate)) or not has_rate_write_access(parenttype)
+	if ctx.get("is_internal_customer"):
+		return False
+	return bool(
+		cint(frappe.get_cached_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate"))
+	)
 
 
 def has_rate_write_access(parenttype: str) -> bool:
