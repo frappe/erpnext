@@ -131,6 +131,36 @@ class TestGeneralLedger(ERPNextTestSuite):
 		bs_rows = get_rows(bs_account)
 		self.assertEqual(bs_rows["'Opening'"]["debit"] - bs_rows["'Opening'"]["credit"], -1300)
 
+	def test_opening_balance_with_only_cost_center_or_dimension_filter(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		# balance sheet account, so the opening doesn't depend on whether -60 days crosses a fiscal year
+		account = "_Test Cash - _TC"
+		offset = "_Test Bank - _TC"
+
+		for fieldname, value, other_value in [
+			("cost_center", "_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"),
+			("department", "_Test Department - _TC", "_Test Department 1 - _TC"),
+		]:
+			with self.subTest(fieldname=fieldname):
+				self.clear_old_entries()
+				# book the bank leg under another value so the filtered value has a non-zero balance
+				for amount, posting_date in [(1000, add_days(today(), -60)), (200, today())]:
+					jv = make_journal_entry(account, offset, amount, posting_date=posting_date, save=False)
+					jv.accounts[0].set(fieldname, value)
+					jv.accounts[1].set(fieldname, other_value)
+					jv.submit()
+
+				filters = frappe._dict(
+					company=self.company, from_date=add_days(today(), -30), to_date=today()
+				)
+				filters[fieldname] = [value]
+				labelled = {row.get("account"): row for row in execute(filters)[1]}
+
+				self.assertEqual(labelled["'Opening'"]["debit"], 1000)
+				self.assertEqual(labelled["'Total'"]["debit"], 200)
+				self.assertEqual(labelled["'Closing (Opening + Total)'"]["debit"], 1200)
+
 	def test_categorize_by_account_subtotals(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
