@@ -432,11 +432,9 @@ class WorkOrder(Document):
 		d.planned_operating_cost = flt(
 			flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
 		)
-		actual_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
-		if job_card_cost := job_card_costs.get(d.name):
-			actual_cost = (
-				flt(job_card_cost.cost) + flt(d.hour_rate) * flt(job_card_cost.mins_without_rate) / 60.0
-			)
+		actual_cost = job_card_costs.get(d.name)
+		if actual_cost is None:
+			actual_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
 		d.actual_operating_cost = flt(actual_cost, d.precision("actual_operating_cost"))
 
 	def get_job_card_operating_costs(self):
@@ -449,9 +447,6 @@ class WorkOrder(Document):
 			.select(
 				job_card.operation_id,
 				Sum(job_card.total_time_in_mins * job_card.hour_rate / 60.0).as_("cost"),
-				Sum(
-					Case().when(IfNull(job_card.hour_rate, 0) == 0, job_card.total_time_in_mins).else_(0)
-				).as_("mins_without_rate"),
 			)
 			.where(
 				(job_card.work_order == self.name)
@@ -460,7 +455,7 @@ class WorkOrder(Document):
 			)
 			.groupby(job_card.operation_id)
 		).run(as_dict=True)
-		return {row.operation_id: row for row in rows}
+		return {row.operation_id: flt(row.cost) for row in rows}
 
 	def validate_work_order_against_so(self):
 		# already ordered qty
