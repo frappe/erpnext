@@ -744,8 +744,8 @@ class JobCard(Document):
 		self.set_transferred_qty()
 
 	def on_cancel(self):
-		self.validate_later_operations()
 		self.update_work_order()
+		self.validate_later_operations()
 		self.set_transferred_qty()
 
 	def validate_transfer_qty(self):

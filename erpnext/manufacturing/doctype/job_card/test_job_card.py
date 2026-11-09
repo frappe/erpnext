@@ -11,6 +11,7 @@ from frappe.utils import flt, random_string
 from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
+	JobCardCancelError,
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OperationSequenceError,
@@ -1675,6 +1676,34 @@ class TestJobCard(FrappeTestCase):
 		second_card.submit()
 
 		self.assertRaises(OperationSequenceError, first_card.cancel)
+
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_earlier_operation_after_manufacture_asks_to_cancel_the_manufacture_entry(self):
+		workstation = make_jc_review_workstation()
+		cutting = make_jc_review_operation(workstation)
+		welding = make_jc_review_operation(workstation)
+		raw_material = make_jc_review_item()
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1}],
+			[
+				{"operation": cutting, "workstation": workstation, "time_in_mins": 60},
+				{"operation": welding, "workstation": workstation, "time_in_mins": 60},
+			],
+			qty=1,
+			skip_transfer=1,
+		)
+
+		first_card, second_card = get_jc_review_job_cards(wo.name)
+		first_card.append("time_logs", jc_review_log("2031-03-09 08:00:00", 60, 1))
+		first_card.submit()
+		second_card.append("time_logs", jc_review_log("2031-03-09 10:00:00", 60, 1))
+		second_card.submit()
+		frappe.get_doc(make_stock_entry_for_work_order(wo.name, "Manufacture", 1)).submit()
+
+		self.assertRaises(JobCardCancelError, first_card.cancel)
+		self.assertRaises(JobCardCancelError, second_card.cancel)
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_job_card_lookups_follow_work_order_user_permissions(self):
