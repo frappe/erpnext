@@ -46,7 +46,16 @@ class ItemTaxTemplate(Document):
 		check_list = []
 		for d in self.get("taxes"):
 			if d.tax_type:
-				account_type = frappe.get_cached_value("Account", d.tax_type, "account_type")
+				account_type, is_group = frappe.get_cached_value(
+					"Account", d.tax_type, ["account_type", "is_group"]
+				)
+
+				if is_group:
+					frappe.throw(
+						_("Item Tax Row {0}: Account {1} is a group account").format(
+							d.idx, frappe.bold(d.tax_type)
+						)
+					)
 
 				if account_type not in [
 					"Tax",

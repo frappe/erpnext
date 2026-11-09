@@ -1312,6 +1312,7 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		clear_item_tax_template_of_other_company,
 		get_inter_company_details,
 		set_purchase_references,
 		update_address,
@@ -1456,6 +1457,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
 			target.set("use_serial_batch_fields", 1)
+
+		clear_item_tax_template_of_other_company(target, details.get("company"))
 
 	doclist = get_mapped_doc(
 		doctype,
