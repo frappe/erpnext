@@ -14,6 +14,10 @@ BARCODE_COLUMN = "barcodes"
 MINIMUM_SQLITE_VERSION = (3, 34, 0)
 DIACRITICS_SQLITE_VERSION = (3, 45, 0)
 KATAKANA_TO_HIRAGANA = {code: code - 0x60 for code in range(ord("ァ"), ord("ヶ") + 1)}
+SMALL_KANA_TO_FULL_SIZE = str.maketrans(
+	"ぁぃぅぇぉっゃゅょゎゕゖㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿ",
+	"あいうえおつやゆよわかけくしすとぬはひふへほむらりるれろ",
+)
 
 
 def has_trigram_tokenizer() -> bool:
@@ -31,8 +35,10 @@ def get_tokenizer() -> str:
 
 def fold_text(text: str) -> str:
 	"""Fold what MariaDB's utf8mb4_unicode_ci treats as equal: accents, kana voicing marks,
-	character width, and katakana with hiragana."""
-	decomposed = unicodedata.normalize("NFKD", text).translate(KATAKANA_TO_HIRAGANA)
+	character width, small and full-size kana, and katakana with hiragana."""
+	decomposed = (
+		unicodedata.normalize("NFKD", text).translate(KATAKANA_TO_HIRAGANA).translate(SMALL_KANA_TO_FULL_SIZE)
+	)
 	return "".join(char for char in decomposed if not unicodedata.combining(char))
 
 
