@@ -815,10 +815,7 @@ class PickList(TransactionBase):
 					consider_rejected_warehouses=self.consider_rejected_warehouses,
 					priority_warehouses=priority_warehouses,
 					pick_list=self.name,
-					keep_all_locations=bool(
-						frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
-						or has_whole_number_stock_uom(item_code)
-					),
+					keep_all_locations=True,
 					exclude_warehouses=excluded_warehouses,
 					own_vouchers=own_vouchers,
 				)
@@ -1547,8 +1544,8 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 		if uom_must_be_whole_number:
 			qty = floor(qty)
 			stock_qty = qty * item_doc.conversion_factor
-		elif has_whole_number_stock_uom(item_doc.item_code):
-			stock_qty = get_exact_whole_stock_qty(stock_qty, conversion_factor, precision)
+		else:
+			stock_qty = get_exact_stock_qty(item_doc.item_code, stock_qty, conversion_factor, precision)
 			qty = flt(stock_qty / conversion_factor, precision)
 
 		if not stock_qty:
@@ -1597,14 +1594,16 @@ def has_whole_number_stock_uom(item_code: str) -> bool:
 	return bool(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"))
 
 
-def get_exact_whole_stock_qty(stock_qty: float, conversion_factor: float, precision: int) -> int:
-	"""Largest whole stock qty up to stock_qty whose qty in the row UOM, rounded to precision,
-	converts back to it exactly. Multiples of a whole conversion factor always do."""
+def get_exact_stock_qty(item_code: str, stock_qty: float, conversion_factor: float, precision: int) -> float:
+	"""Largest stock qty up to stock_qty, whole if the stock UOM must be, whose qty in the row UOM,
+	rounded to precision, converts back to it exactly."""
 	stock_qty_precision = frappe.get_precision("Pick List Item", "stock_qty")
-	for whole_qty in range(cint(floor(flt(stock_qty, stock_qty_precision))), 0, -1):
-		qty = flt(whole_qty / conversion_factor, precision)
-		if flt(qty * conversion_factor, stock_qty_precision) == whole_qty:
-			return whole_qty
+	step = 1 if has_whole_number_stock_uom(item_code) else 10**-stock_qty_precision
+	for steps in range(cint(floor(flt(stock_qty / step, stock_qty_precision))), 0, -1):
+		exact_stock_qty = flt(steps * step, stock_qty_precision)
+		qty = flt(exact_stock_qty / conversion_factor, precision)
+		if flt(qty * conversion_factor, stock_qty_precision) == exact_stock_qty:
+			return exact_stock_qty
 
 	return 0
 
