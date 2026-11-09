@@ -4,8 +4,16 @@
 
 import frappe
 from frappe import _, bold, json, msgprint
+<<<<<<< HEAD
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
+=======
+from frappe.model.docstatus import DocStatus
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+from frappe.query_builder.functions import Sum
+from frappe.utils import add_to_date, cint, cstr, flt, get_link_to_form, now
+from frappe.utils.data import DateTimeLikeObject
+>>>>>>> 937036f (fix: save stock reconciliation before queueing its submission)
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -1293,6 +1301,10 @@ class StockReconciliation(StockController):
 
 	def submit(self):
 		if len(self.items) > 100:
+			# the background job loads the document from the database, so save the current version
+			self.check_permission("submit")
+			self.docstatus = DocStatus.draft()
+			self.save()
 			msgprint(
 				_(
 					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
