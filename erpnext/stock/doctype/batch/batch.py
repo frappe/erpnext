@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 
@@ -193,7 +193,23 @@ class Batch(Document):
 			self.use_batchwise_valuation = 1
 
 	def before_save(self):
+		self.set_manufacturing_date()
 		self.set_expiry_date()
+
+	def set_manufacturing_date(self):
+		if self.manufacturing_date:
+			return
+
+		if (
+			self.reference_doctype
+			and self.reference_name
+			and frappe.get_meta(self.reference_doctype).has_field("posting_date")
+		):
+			self.manufacturing_date = frappe.db.get_value(
+				self.reference_doctype, self.reference_name, "posting_date"
+			)
+
+		self.manufacturing_date = self.manufacturing_date or today()
 
 	def set_expiry_date(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value(
@@ -201,17 +217,7 @@ class Batch(Document):
 		)
 
 		if not self.expiry_date and has_expiry_date and shelf_life_in_days:
-			if (
-				not self.manufacturing_date
-				and self.reference_doctype in ["Stock Entry", "Purchase Receipt", "Purchase Invoice"]
-				and self.reference_name
-			):
-				self.manufacturing_date = frappe.db.get_value(
-					self.reference_doctype, self.reference_name, "posting_date"
-				)
-
-			if self.manufacturing_date:
-				self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
+			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
 			frappe.throw(
@@ -319,7 +325,7 @@ def get_batches_by_oldest(item_code, warehouse):
 @frappe.whitelist(methods=["POST"])
 def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
-	batch = frappe.get_doc(dict(doctype="Batch", item=item_code, batch_id=new_batch_id)).insert()
+	batch = make_split_batch(batch_no, item_code, new_batch_id)
 	qty = flt(qty)
 
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
@@ -365,6 +371,19 @@ def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_b
 	stock_entry.submit()
 
 	return batch.name
+
+
+def make_split_batch(batch_no, item_code, new_batch_id=None):
+	source_batch = frappe.db.get_value(
+		"Batch",
+		batch_no,
+		["manufacturing_date", "expiry_date", "supplier", "use_batchwise_valuation"],
+		as_dict=True,
+	)
+
+	return frappe.get_doc(
+		doctype="Batch", item=item_code, batch_id=new_batch_id, parent_batch=batch_no, **source_batch
+	).insert()
 
 
 def make_batch_bundle(
