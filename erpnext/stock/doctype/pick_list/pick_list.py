@@ -759,6 +759,7 @@ class PickList(TransactionBase):
 					location.batch_no,
 					location.serial_no,
 					location.sales_order_item or location.material_request_item,
+					location.product_bundle_item,
 				)
 
 				if key not in updated_locations:
@@ -827,7 +828,7 @@ class PickList(TransactionBase):
 				continue
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
-			key = (item_code, item.uom, item.warehouse, item.batch_no, reference)
+			key = (item_code, item.uom, item.warehouse, item.batch_no, reference, item.product_bundle_item)
 
 			item.idx = None
 			item.name = None
@@ -1019,11 +1020,14 @@ class PickList(TransactionBase):
 		return [name for name in so_item_names if name in existing]
 
 	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
-		"""Component stock qty per bundle, by Sales Order row, as the order packed it."""
-		return {
-			so_row: {row.item_code: row.qty_per_unit for row in packed_items if row.qty_per_unit}
-			for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items()
-		}
+		"""Component stock qty per bundle, by Sales Order row and item, as the order packed it."""
+		qty_map = defaultdict(lambda: defaultdict(float))
+		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
+			for row in packed_items:
+				if row.qty_per_unit:
+					qty_map[so_row][row.item_code] += row.qty_per_unit
+
+		return qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
@@ -1035,8 +1039,8 @@ class PickList(TransactionBase):
 
 			if qty_in_bundle := bundle_items.get(item.item_code):
 				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
-				possible_bundles.setdefault(item.product_bundle_item, 0)
-				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
+				possible_bundles.setdefault(item.item_code, 0)
+				possible_bundles[item.item_code] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
 
