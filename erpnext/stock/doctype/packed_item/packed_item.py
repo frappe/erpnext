@@ -103,10 +103,10 @@ def make_packing_list(doc):
 					reset=reset,
 				)
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
 				so_packed_item = pop_order_packed_item(
 					so_packed_items, item_row.item_code, bundle_item.item_code
 				)
+				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc, so_packed_item)
 				update_packed_item_price_data(pi_row, item_data, doc)
 
@@ -258,20 +258,31 @@ def get_packed_item_details(item_code, company):
 	return query.run(as_dict=True)[0]
 
 
-def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data):
+def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data, so_packed_item=None):
 	pi_row.parent_item = main_item_row.item_code
 	pi_row.parent_detail_docname = main_item_row.name or main_item_row.idx
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	# component qty is in the bundle row's UOM; convert to stock qty before scaling by bundle qty
-	component_factor = get_component_conversion_factor(packing_item, item_data.stock_uom)
-	pi_row.qty = flt(packing_item.qty) * component_factor * flt(main_item_row.stock_qty)
+	pi_row.qty = flt(
+		get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
+		* flt(main_item_row.stock_qty),
+		pi_row.precision("qty"),
+	)
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
+
+
+def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=None):
+	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
+	if so_packed_item and so_packed_item.qty_per_unit:
+		return so_packed_item.qty_per_unit
+
+	# component qty is in the bundle row's UOM; convert to stock qty
+	return flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
 
 
 def get_component_conversion_factor(packing_item, stock_uom):
@@ -310,17 +321,43 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 
 def get_order_packed_items(doc) -> dict:
 	"""Sales Order packed rows of the order rows this document is made from, by order row in idx order."""
-	so_details = {item.so_detail for item in doc.get("items") if item.get("so_detail")}
+	return get_packed_items_of_order_rows(
+		{item.so_detail for item in doc.get("items") if item.get("so_detail")}
+	)
+
+
+def get_packed_items_of_order_rows(so_details) -> dict:
+	"""Packed rows of the given Sales Order rows, by order row in idx order."""
 	if not so_details:
 		return {}
 
+	packed_item = frappe.qb.DocType("Packed Item")
+	so_item = frappe.qb.DocType("Sales Order Item")
+	rows = (
+		frappe.qb.from_(packed_item)
+		.join(so_item)
+		.on(so_item.name == packed_item.parent_detail_docname)
+		.select(
+			packed_item.name,
+			packed_item.parent_detail_docname,
+			packed_item.parent_item,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.reserve_stock,
+			packed_item.qty,
+			so_item.stock_qty.as_("order_stock_qty"),
+		)
+		.where(
+			(packed_item.parenttype == "Sales Order")
+			& packed_item.parent_detail_docname.isin(list(so_details))
+		)
+		.orderby(packed_item.idx)
+		.run(as_dict=True)
+	)
+
 	order_packed_items = {}
-	for row in frappe.get_all(
-		"Packed Item",
-		filters={"parenttype": "Sales Order", "parent_detail_docname": ["in", list(so_details)]},
-		fields=["name", "parent_detail_docname", "parent_item", "item_code", "warehouse", "reserve_stock"],
-		order_by="idx",
-	):
+	for row in rows:
+		row.qty_per_unit = flt(row.qty) / flt(row.order_stock_qty) if flt(row.order_stock_qty) else 0
 		order_packed_items.setdefault(row.parent_detail_docname, []).append(row)
 
 	return order_packed_items
