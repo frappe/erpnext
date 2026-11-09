@@ -1185,9 +1185,6 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(delivery_note.items[0].qty, 2)
 		self.assertEqual([row.qty for row in delivery_note.packed_items], [2, 4])
 
-<<<<<<< HEAD
-	def test_pick_list_skips_drop_ship_bundle_rows(self):
-=======
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_with_repeated_serial_component_delivers_serials_per_packed_row(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -1215,10 +1212,7 @@ class TestPickList(ERPNextTestSuite):
 		)
 		delivery_note.submit()
 
-	def test_pick_list_skips_closed_bundle_rows(self):
-		from erpnext.controllers.item_close import update_closed_status
-
->>>>>>> 3b49e1b (test: repeated serial bundle component delivers each pick list row's serials)
+	def test_pick_list_skips_drop_ship_bundle_rows(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse=warehouse, qty=5, basic_rate=100)
