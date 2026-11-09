@@ -1040,6 +1040,62 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			sorted(serial_nos),
 		)
 
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_return_sends_back_a_picked_bundle_at_its_consumed_batch_rate(self):
+		scr, scr_return = make_draft_return_of_two_batches(-10)
+		row = scr_return.supplied_items[0]
+		batch_no, qty = row.batch_no, abs(row.consumed_qty)
+		# as the serial and batch selector does: the bundle has no rate
+		bundle = make_serial_batch_bundle(
+			{
+				"item_code": row.rm_item_code,
+				"warehouse": scr_return.supplier_warehouse,
+				"qty": qty,
+				"batches": frappe._dict({batch_no: qty}),
+				"voucher_type": "Subcontracting Receipt",
+				"do_not_submit": True,
+			}
+		).name
+		row.update({"use_serial_batch_fields": 0, "batch_no": None, "serial_and_batch_bundle": bundle})
+		scr_return.save()
+		scr_return.submit()
+
+		row, consumed_rate = scr_return.supplied_items[0], get_batch_rates(scr.name)[batch_no]
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_detail_no": row.name, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(row.rate, consumed_rate)
+		self.assertEqual(stock_value_difference, qty * consumed_rate)
+
+	def test_repost_keeps_the_consumed_batch_rate_on_each_return_entry(self):
+		scr, scr_return = make_draft_return_of_two_batches(-10)
+		scr_return.submit()
+		frappe.get_doc(
+			doctype="Repost Item Valuation",
+			based_on="Item and Warehouse",
+			item_code=scr_return.supplied_items[0].rm_item_code,
+			warehouse=scr_return.supplier_warehouse,
+			company=scr_return.company,
+			posting_date=scr.posting_date,
+			posting_time=scr.posting_time,
+		).submit()
+
+		incoming_rates = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_detail_no": ("in", [row.name for row in scr_return.supplied_items]),
+					"is_cancelled": 0,
+				},
+				fields=["voucher_detail_no", "incoming_rate"],
+				as_list=True,
+			)
+		)
+		self.assertEqual(sorted(incoming_rates.values()), [100, 300])
+		self.assertEqual(incoming_rates, {row.name: row.rate for row in scr_return.supplied_items})
+
 	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
