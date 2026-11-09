@@ -155,7 +155,7 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(return_note.packed_items[0].qty, -20)
 
 	def test_bundle_return_keeps_delivered_qty_after_component_uom_change(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry

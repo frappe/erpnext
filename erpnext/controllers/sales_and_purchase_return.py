@@ -218,12 +218,8 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 	from erpnext.stock.doctype.packed_item.packed_item import (
 		get_component_stock_qty_per_unit,
 		get_order_packed_items,
-<<<<<<< HEAD
-		get_product_bundle_items,
-=======
 		get_order_row,
-		get_product_bundle_items_by_name,
->>>>>>> 7edd914 (fix(stock): return product bundle components at the qty the returned document packed)
+		get_product_bundle_items,
 		pop_order_packed_item,
 	)
 
@@ -244,20 +240,11 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if row.item_code not in components:
 			components[row.item_code] = get_product_bundle_items(row.item_code)
 
-<<<<<<< HEAD
 		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
 		if frappe.db.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
-		so_packed_items = list(order_packed_items.get(row.get("so_detail"), []))
-		for component in components[row.item_code]:
-=======
-		if bundle not in components:
-			components[bundle] = get_product_bundle_items_by_name(bundle)
-
-		bundle_stock_qty = get_returned_stock_qty(doc, row)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
-		for component in components[bundle]:
->>>>>>> 7edd914 (fix(stock): return product bundle components at the qty the returned document packed)
+		for component in components[row.item_code]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
 			ref = valid_items.get(component.item_code)
 			if not ref:
