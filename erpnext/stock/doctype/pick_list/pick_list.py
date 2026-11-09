@@ -1534,12 +1534,13 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	remaining_stock_qty = item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
 
 	precision = frappe.get_precision("Pick List Item", "qty")
+	conversion_factor = item_doc.conversion_factor or 1
 	while flt(remaining_stock_qty, precision) > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
 
 		stock_qty = remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
-		qty = stock_qty / (item_doc.conversion_factor or 1)
+		qty = stock_qty / conversion_factor
 
 		uom_must_be_whole_number = frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
 		if uom_must_be_whole_number:
@@ -1548,8 +1549,8 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			if not stock_qty:
 				continue
 		elif has_whole_number_stock_uom(item_doc.item_code):
-			stock_qty = get_exact_whole_stock_qty(stock_qty, item_doc.conversion_factor or 1, precision)
-			qty = stock_qty / (item_doc.conversion_factor or 1)
+			stock_qty = get_exact_whole_stock_qty(stock_qty, conversion_factor, precision)
+			qty = flt(stock_qty / conversion_factor, precision)
 			if not stock_qty:
 				continue
 
