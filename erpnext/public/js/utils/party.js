@@ -6,6 +6,11 @@ frappe.provide("erpnext.utils");
 const SALES_DOCTYPES = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"];
 const PURCHASE_DOCTYPES = ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"];
 
+erpnext.utils.get_party_account_currency = function (party, company) {
+	// the server allows only accounts in the billing currency, or in the company currency without one
+	return party.default_currency || erpnext.get_currency(company);
+};
+
 erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	if (!method) {
 		method = "erpnext.accounts.party.get_party_details";
