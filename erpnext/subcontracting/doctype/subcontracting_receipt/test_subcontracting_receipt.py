@@ -862,6 +862,23 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, second_return.submit)
 
+	def test_return_must_use_the_receipt_job_worker_warehouse(self):
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=make_stock_in_entry(rm_items=rm_items)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.submit()
+
+		self.assertRaises(
+			frappe.ValidationError,
+			make_return_subcontracting_receipt,
+			scr_name=scr.name,
+			qty=-5,
+			supplier_warehouse="Finished Goods - _TC",
+		)
+
 	def test_moving_average_return_takes_the_finished_good_out_at_the_receipt_rate_on_submit(self):
 		moving_average = {"is_stock_item": 1, "valuation_method": "Moving Average"}
 		rm_item = make_item(properties=moving_average).name
@@ -4993,7 +5010,8 @@ def get_batch_rates(scr_name):
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
 	return_doc = make_return_doc("Subcontracting Receipt", args.scr_name)
-	return_doc.supplier_warehouse = args.supplier_warehouse or args.warehouse or "_Test Warehouse 1 - _TC"
+	if args.supplier_warehouse:
+		return_doc.supplier_warehouse = args.supplier_warehouse
 
 	if args.qty:
 		for item in return_doc.items:

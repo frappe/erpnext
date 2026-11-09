@@ -162,6 +162,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		validate_return(self)
+		self.validate_return_supplier_warehouse()
 
 		# after set_missing_values, so the secondary rates are computed from the same
 		# calculated per-qty costs the Get Secondary Items button uses
@@ -190,6 +191,21 @@ class SubcontractingReceipt(SubcontractingController):
 	def validate_purchase_orders_share_terms(self):
 		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
 			frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
+
+	def validate_return_supplier_warehouse(self):
+		if not (self.is_return and self.return_against):
+			return
+
+		original = frappe.db.get_value("Subcontracting Receipt", self.return_against, "supplier_warehouse")
+		if self.supplier_warehouse != original:
+			frappe.throw(
+				_("{0} must be {1}, the same as in {2}").format(
+					_(self.meta.get_label("supplier_warehouse")),
+					frappe.bold(original),
+					frappe.bold(self.return_against),
+				),
+				title=_("Warehouse Mismatch"),
+			)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
