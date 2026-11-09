@@ -154,6 +154,31 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_note.submit()
 		self.assertEqual(return_note.packed_items[0].qty, -20)
 
+	def test_bundle_return_keeps_delivered_qty_after_component_uom_change(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		make_stock_entry(item=component.name, to_warehouse=warehouse, qty=100, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		delivery_note = create_delivery_note(item_code=bundle, warehouse=warehouse, qty=2)  # 20 Nos
+		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
+		component.save()
+
+		return_note = make_sales_return(delivery_note.name)
+		return_note.submit()
+		self.assertEqual(return_note.packed_items[0].qty, -20)
+
 	def test_purchase_invoice_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
