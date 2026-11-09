@@ -279,7 +279,6 @@ class OperationsService:
 			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue
 			d.time_in_mins = flt(saved.time_in_mins) * flt(self.doc.qty) / flt(previous.qty)
-		self.calculate_operating_cost()
 
 	def _get_fixed_time_flags(self):
 		boms = {d.bom or self.doc.bom_no for d in self.doc.get("operations")}
