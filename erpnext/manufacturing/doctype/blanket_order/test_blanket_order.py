@@ -1,7 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import frappe
-from frappe.utils import add_months, today
+from frappe.utils import add_months, flt, today
 
 from erpnext import get_company_currency
 from erpnext.stock.doctype.item.test_item import make_item
@@ -31,13 +31,13 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, bo.items[0].rate)
 
 		bo = frappe.get_doc("Blanket Order", bo.name)
-		self.assertEqual(so.items[0].qty, bo.items[0].ordered_qty)
+		self.assertEqual(so.items[0].stock_qty, bo.items[0].ordered_qty)
 
 		# test the quantity
 		frappe.flags.args.doctype = "Sales Order"
 		so1 = make_order(bo.name)
 		so1.currency = get_company_currency(so1.company)
-		self.assertEqual(so1.items[0].qty, (bo.items[0].qty - bo.items[0].ordered_qty))
+		self.assertEqual(so1.items[0].qty, get_remaining_blanket_qty(bo.items[0]))
 
 	def test_purchase_order_creation(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing")
@@ -56,13 +56,13 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(po.items[0].rate, po.items[0].rate)
 
 		bo = frappe.get_doc("Blanket Order", bo.name)
-		self.assertEqual(po.items[0].qty, bo.items[0].ordered_qty)
+		self.assertEqual(po.items[0].stock_qty, bo.items[0].ordered_qty)
 
 		# test the quantity
 		frappe.flags.args.doctype = "Purchase Order"
 		po1 = make_order(bo.name)
 		po1.currency = get_company_currency(po1.company)
-		self.assertEqual(po1.items[0].qty, (bo.items[0].qty - bo.items[0].ordered_qty))
+		self.assertEqual(po1.items[0].qty, get_remaining_blanket_qty(bo.items[0]))
 
 	def test_blanket_order_allowance(self):
 		# Sales Order
@@ -136,6 +136,121 @@ class TestBlanketOrder(ERPNextTestSuite):
 		bo = make_blanket_order(blanket_order_type="Purchasing", supplier=supplier, item_code=item_code)
 		self.assertEqual(bo.items[0].party_item_code, "SUPP-PART-1")
 
+	def test_blanket_order_uom_for_sales_order(self):
+		if not frappe.db.exists("UOM", "Box"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "Box"}).insert(ignore_permissions=True)
+
+		item = make_item("_Test Blanket Order UOM Item", uoms=[{"uom": "Box", "conversion_factor": 2}])
+		item.sales_uom = "Box"
+		item.save()
+
+		bo = make_blanket_order(
+			blanket_order_type="Selling",
+			item_code=item.name,
+			quantity=10,
+			uom="Box",
+		)
+		self.assertEqual(bo.items[0].stock_qty, 20)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		self.assertEqual(so.items[0].uom, "Box")
+		self.assertEqual(so.items[0].qty, 10)
+		self.assertEqual(so.items[0].conversion_factor, 2)
+		so.items[0].qty = 5
+		so.submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 10)
+
+	def test_blanket_order_uom_for_purchase_order(self):
+		if not frappe.db.exists("UOM", "Box"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "Box"}).insert(ignore_permissions=True)
+
+		item = make_item("_Test Blanket Order PO UOM Item", uoms=[{"uom": "Box", "conversion_factor": 2}])
+		item.purchase_uom = "Box"
+		item.save()
+
+		bo = make_blanket_order(
+			blanket_order_type="Purchasing",
+			item_code=item.name,
+			quantity=10,
+			uom="Box",
+		)
+		self.assertEqual(bo.items[0].stock_qty, 20)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.schedule_date = today()
+		self.assertEqual(po.items[0].uom, "Box")
+		self.assertEqual(po.items[0].conversion_factor, 2)
+		po.items[0].qty = 5
+		po.submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 10)
+
+	def test_sales_order_address_from_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Selling", submit=False)
+		address = make_customer_address(bo.customer, bo.company)
+		bo.customer_address = address.name
+		bo.shipping_address_name = address.name
+		bo.submit()
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		self.assertEqual(so.customer_address, bo.customer_address)
+		self.assertEqual(so.shipping_address_name, bo.shipping_address_name)
+
+	def test_purchase_order_address_from_blanket_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", submit=False)
+		address = make_supplier_address(bo.supplier, bo.company)
+		bo.supplier_address = address.name
+		bo.shipping_address_name = address.name
+		bo.submit()
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		self.assertEqual(po.supplier_address, bo.supplier_address)
+		self.assertEqual(po.shipping_address, bo.shipping_address_name)
+
+
+def get_remaining_blanket_qty(item):
+	return (flt(item.stock_qty) - flt(item.ordered_qty)) / flt(item.conversion_factor or 1)
+
+
+def make_customer_address(customer, company):
+	country = frappe.get_cached_value("Company", company, "country")
+	return frappe.get_doc(
+		{
+			"doctype": "Address",
+			"address_title": customer,
+			"address_type": "Billing",
+			"address_line1": "Test Address Line",
+			"city": "Test City",
+			"country": country,
+			"links": [{"link_doctype": "Customer", "link_name": customer}],
+		}
+	).insert(ignore_permissions=True)
+
+
+def make_supplier_address(supplier, company):
+	country = frappe.get_cached_value("Company", company, "country")
+	return frappe.get_doc(
+		{
+			"doctype": "Address",
+			"address_title": supplier,
+			"address_type": "Billing",
+			"address_line1": "Test Supplier Address Line",
+			"city": "Test City",
+			"country": country,
+			"links": [{"link_doctype": "Supplier", "link_name": supplier}],
+		}
+	).insert(ignore_permissions=True)
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
@@ -151,15 +266,17 @@ def make_blanket_order(**args):
 	bo.from_date = today()
 	bo.to_date = add_months(bo.from_date, months=12)
 
-	bo.append(
-		"items",
-		{
-			"item_code": args.item_code or "_Test Item",
-			"qty": args.quantity or 1000,
-			"rate": args.rate or 100,
-		},
-	)
+	item_row = {
+		"item_code": args.item_code or "_Test Item",
+		"qty": args.quantity or 1000,
+		"rate": args.rate or 100,
+	}
+	if args.uom:
+		item_row["uom"] = args.uom
+
+	bo.append("items", item_row)
 
 	bo.insert()
-	bo.submit()
+	if args.submit is not False:
+		bo.submit()
 	return bo

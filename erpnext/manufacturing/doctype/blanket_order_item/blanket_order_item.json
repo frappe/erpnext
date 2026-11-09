@@ -10,8 +10,14 @@
   "party_item_code",
   "column_break_3",
   "qty",
+  "uom",
   "rate",
   "ordered_qty",
+  "stock_uom",
+  "column_break_uom",
+  "conversion_factor",
+  "stock_qty",
+  "stock_uom_rate",
   "section_break_7",
   "terms_and_conditions"
  ],
@@ -32,6 +38,12 @@
    "label": "Item Name"
   },
   {
+   "fieldname": "party_item_code",
+   "fieldtype": "Data",
+   "label": "Party Item Code",
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -39,7 +51,16 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity"
+   "label": "Quantity",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "reqd": 1
   },
   {
    "fieldname": "rate",
@@ -57,6 +78,46 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_uom",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "UOM Conversion Factor",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Qty as per Stock UOM",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "no_copy": 1,
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break"
   },
@@ -64,17 +125,11 @@
    "fieldname": "terms_and_conditions",
    "fieldtype": "Text",
    "label": "Terms and Conditions"
-  },
-  {
-   "fieldname": "party_item_code",
-   "fieldtype": "Data",
-   "label": "Party Item Code",
-   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:40.083042",
+ "modified": "2026-11-09 17:10:51.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order Item",

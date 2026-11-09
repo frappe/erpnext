@@ -14,6 +14,7 @@ class BlanketOrderItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		conversion_factor: DF.Float
 		item_code: DF.Link
 		item_name: DF.Data | None
 		ordered_qty: DF.Float
@@ -23,7 +24,11 @@ class BlanketOrderItem(Document):
 		party_item_code: DF.Data | None
 		qty: DF.Float
 		rate: DF.Currency
+		stock_qty: DF.Float
+		stock_uom: DF.Link | None
+		stock_uom_rate: DF.Currency
 		terms_and_conditions: DF.Text | None
+		uom: DF.Link
 	# end: auto-generated types
 
 	pass
