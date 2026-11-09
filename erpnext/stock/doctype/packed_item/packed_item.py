@@ -74,8 +74,10 @@ class PackedItem(Document):
 		self.projected_qty = _bin.projected_qty if _bin else 0
 
 
-def make_packing_list(doc):
-	"Make/Update packing list for Product Bundle Item."
+def make_packing_list(doc, order_packed_items=None):
+	"""Make/Update packing list for Product Bundle Item.
+
+	order_packed_items: a Sales Order's own packed rows by order row, to keep their qty on Update Items."""
 
 	if doc.get("is_subcontracted"):
 		return
@@ -87,14 +89,30 @@ def make_packing_list(doc):
 	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
-	order_packed_items = get_order_packed_items(doc)
+	if order_packed_items is None:
+		order_packed_items = get_order_packed_items(doc)
 
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
+<<<<<<< HEAD
 		if is_product_bundle(item_row.item_code):
 			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
 			for bundle_item in get_product_bundle_items(item_row.item_code):
+=======
+		# Pack from the version chosen on the row (default: the item's active version)
+		# and record it so the document keeps a reference to the exact version used.
+		bundle_name = get_bundle_version_for_row(item_row, doc)
+		if item_row.meta.has_field("product_bundle"):
+			item_row.product_bundle = bundle_name
+		if item_row.meta.has_field("is_product_bundle"):
+			item_row.is_product_bundle = 1 if bundle_name else 0
+
+		if bundle_name:
+			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
+			so_packed_items = list(order_packed_items.get(order_row, []))
+			for bundle_item in get_product_bundle_items_by_name(bundle_name):
+>>>>>>> 1af1ab9 (fix(selling): keep product bundle component qty on Update Items)
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
