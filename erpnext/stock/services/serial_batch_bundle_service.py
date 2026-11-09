@@ -160,7 +160,7 @@ class SerialBatchBundleService:
 	def is_batch_check_needed(self) -> bool:
 		"""An invoice without Update Stock moves no stock, so its batches were checked when they moved.
 		A consolidated invoice repeats POS Invoices whose batches were checked when sold."""
-		if self.doc.get("is_consolidated"):
+		if self.doc.flags.is_consolidated:
 			return False
 
 		is_invoice = self.doc.doctype in ("Sales Invoice", "Purchase Invoice")
