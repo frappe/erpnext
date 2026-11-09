@@ -14,6 +14,7 @@ QUEUE_PREFIX = "Item:"
 BARCODE_COLUMN = "barcodes"
 MINIMUM_SQLITE_VERSION = (3, 34, 0)
 DIACRITICS_SQLITE_VERSION = (3, 45, 0)
+KATAKANA_TO_HIRAGANA = {code: code - 0x60 for code in range(ord("ァ"), ord("ヶ") + 1)}
 
 
 def has_trigram_tokenizer() -> bool:
@@ -29,12 +30,11 @@ def get_tokenizer() -> str:
 	return "trigram remove_diacritics 1" if has_diacritics_option() else "trigram"
 
 
-def fold_diacritics(text: str) -> str:
-	"""Strip accents in Python where the tokenizer cannot."""
-	if has_diacritics_option():
-		return text
-
-	return "".join(char for char in unicodedata.normalize("NFKD", text) if not unicodedata.combining(char))
+def fold_text(text: str) -> str:
+	"""Fold what MariaDB's utf8mb4_unicode_ci treats as equal: accents, kana voicing marks,
+	character width, and katakana with hiragana."""
+	decomposed = unicodedata.normalize("NFKD", text).translate(KATAKANA_TO_HIRAGANA)
+	return "".join(char for char in decomposed if not unicodedata.combining(char))
 
 
 def validate_sqlite_version():
@@ -145,17 +145,17 @@ class ItemSearch(SQLiteSearch):
 		if document is None:
 			return None
 
-		document[BARCODE_COLUMN] = fold_diacritics(self.get_barcode_text(doc.name))
+		document[BARCODE_COLUMN] = fold_text(self.get_barcode_text(doc.name))
 		return document
 
 	def _process_content(self, content):
-		"""Store values verbatim, except accents folded on SQLite older than 3.45.
+		"""Store values verbatim, except for the folding the search term gets too.
 
 		item_query rechecks every candidate with LIKE against the column in MariaDB, so the
 		indexed text has to be what that column holds. The framework's cleaning collapses
 		whitespace and replaces a URL with "[link]", which would lose those rows.
 		"""
-		return "" if content is None else fold_diacritics(str(content))
+		return "" if content is None else fold_text(str(content))
 
 	def get_barcode_text(self, item_code: str) -> str:
 		"""Always a string: a text column left unset drops the document from the index entirely."""
@@ -229,7 +229,7 @@ def build_match_query(txt: str) -> str | None:
 	if "\\" in txt:
 		return None
 
-	fragments = [fold_diacritics(fragment).strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
+	fragments = [fold_text(fragment).strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
 	usable = [fragment for fragment in fragments if len(fragment) >= MINIMUM_TERM_LENGTH]
 	if not usable:
 		return None
