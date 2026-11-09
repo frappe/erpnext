@@ -764,6 +764,76 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+<<<<<<< HEAD
+=======
+	show_batch_dialog_if_required(item) {
+		let show_batch_dialog = 0;
+		let update_stock = 0;
+		let me = this;
+
+		if (!item.item_code) {
+			return;
+		}
+
+		if (["Sales Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
+			update_stock = cint(me.frm.doc.update_stock);
+			show_batch_dialog = update_stock;
+		} else if (this.frm.doc.doctype === "Purchase Receipt" || this.frm.doc.doctype === "Delivery Note") {
+			show_batch_dialog = 1;
+		}
+
+		if (show_batch_dialog && item.use_serial_batch_fields === 1) {
+			show_batch_dialog = 0;
+		}
+
+		frappe.run_serially([
+			() => {
+				if (show_batch_dialog && !frappe.flags.trigger_from_barcode_scanner)
+					return frappe.db
+						.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+						.then((r) => {
+							if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+								item.has_serial_no = r.message.has_serial_no;
+								item.has_batch_no = r.message.has_batch_no;
+								frappe.flags.hide_serial_batch_dialog = false;
+							} else {
+								show_batch_dialog = false;
+							}
+						});
+			},
+			() => {
+				// check if batch serial selector is disabled or not
+				if (show_batch_dialog && frappe.boot.sysdefaults.disable_serial_no_and_batch_selector) {
+					frappe.flags.hide_serial_batch_dialog = true;
+				}
+			},
+			() => {
+				if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {
+					if (item.has_batch_no && item.has_serial_no) {
+						item.batch_no = undefined;
+					}
+
+					frappe.flags.dialog_set = true;
+					erpnext.show_serial_batch_selector(
+						me.frm,
+						item,
+						(item) => {
+							me.frm.script_manager.trigger("qty", item.doctype, item.name);
+							if (!me.frm.doc.set_warehouse)
+								me.frm.script_manager.trigger("warehouse", item.doctype, item.name);
+							me.apply_price_list(item, true);
+						},
+						undefined,
+						!frappe.flags.hide_serial_batch_dialog
+					);
+				} else {
+					frappe.flags.dialog_set = false;
+				}
+			},
+		]);
+	}
+
+>>>>>>> f2f2d83 (fix(stock): read serial and batch selector setting from boot)
 	price_list_rate(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
