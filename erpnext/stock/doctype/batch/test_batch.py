@@ -410,6 +410,35 @@ class TestBatch(ERPNextTestSuite):
 		delivery_note = self.make_delivery_note_with_bundle(receipt, batch_no, 2)
 		self.assertRaises(frappe.ValidationError, delivery_note.insert)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_invoice_of_delivery_note_with_batch_expired_after_delivery_is_submitted(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+
+		receipt = self.test_purchase_receipt(10)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		delivery_note = frappe.get_doc(
+			doctype="Delivery Note",
+			customer="_Test Customer",
+			company=receipt.company,
+			items=[
+				dict(
+					item_code=receipt.items[0].item_code,
+					qty=3,
+					rate=10,
+					warehouse=receipt.items[0].warehouse,
+					batch_no=batch_no,
+					use_serial_batch_fields=1,
+				)
+			],
+		).insert()
+		delivery_note.submit()
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_to_date(getdate(), days=-1))
+
+		sales_invoice = make_sales_invoice(delivery_note.name)
+		sales_invoice.insert()
+		sales_invoice.submit()
+		self.assertEqual(sales_invoice.items[0].batch_no, batch_no)
+
 	def test_disabled_batch_cannot_be_issued(self):
 		receipt = self.test_purchase_receipt(10)
 		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
