@@ -1979,15 +1979,16 @@ class SerialandBatchBundle(Document):
 		sle_query, sle = self.get_batch_query_from_stock_ledger()
 		sabb_query, child = self.get_batch_query_from_sabb()
 		queries = [
-			sle_query.select(Sum(sle.actual_qty).as_("qty"))
-			.where(sle.posting_datetime < posting_datetime)
-			.groupby(sle.batch_no),
-			sabb_query.select(Sum(child.qty).as_("qty"))
-			.where(child.posting_datetime < posting_datetime)
-			.groupby(child.batch_no),
+			sle_query.select(sle.actual_qty.as_("qty")).where(sle.posting_datetime < posting_datetime),
+			sabb_query.select(child.qty).where(child.posting_datetime < posting_datetime),
 		]
 		for query in queries:
-			for row in query.run(as_dict=True):
+			batch_qty = (
+				frappe.qb.from_(query)
+				.select(query.batch_no, Sum(query.qty).as_("qty"))
+				.groupby(query.batch_no)
+			)
+			for row in batch_qty.run(as_dict=True):
 				available_qty[row.batch_no] = flt(available_qty.get(row.batch_no)) + flt(row.qty)
 
 		return available_qty
