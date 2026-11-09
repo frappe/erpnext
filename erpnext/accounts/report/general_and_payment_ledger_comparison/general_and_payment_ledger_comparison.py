@@ -8,6 +8,8 @@ from frappe.query_builder.functions import Sum
 
 from erpnext.accounts.report.utils import validate_date_range
 
+KEY_LENGTH = 6
+
 
 class General_Payment_Ledger_Comparison:
 	"""
@@ -78,8 +80,14 @@ class General_Payment_Ledger_Comparison:
 
 				if acc_type == "receivable":
 					outstanding = (Sum(gle.debit) - Sum(gle.credit)).as_("outstanding")
+					outstanding_in_account_currency = (
+						Sum(gle.debit_in_account_currency) - Sum(gle.credit_in_account_currency)
+					).as_("outstanding_in_account_currency")
 				else:
 					outstanding = (Sum(gle.credit) - Sum(gle.debit)).as_("outstanding")
+					outstanding_in_account_currency = (
+						Sum(gle.credit_in_account_currency) - Sum(gle.debit_in_account_currency)
+					).as_("outstanding_in_account_currency")
 
 				self.account_types[acc_type].gle = (
 					qb.from_(gle)
@@ -91,6 +99,7 @@ class General_Payment_Ledger_Comparison:
 						gle.party_type,
 						gle.party,
 						outstanding,
+						outstanding_in_account_currency,
 					)
 					.where(
 						(gle.company == self.filters.company)
@@ -135,6 +144,7 @@ class General_Payment_Ledger_Comparison:
 						ple.party_type,
 						ple.party,
 						Sum(ple.amount).as_("outstanding"),
+						Sum(ple.amount_in_account_currency).as_("outstanding_in_account_currency"),
 					)
 					.where(
 						(ple.company == self.filters.company)
@@ -162,12 +172,28 @@ class General_Payment_Ledger_Comparison:
 		self.diff = frappe._dict({})
 
 		for x in self.variation_in_payment_ledger:
-			self.diff[(x[0], x[1], x[2], x[3], x[4], x[5])] = frappe._dict({"gl_balance": x[6]})
+			gl_balance, gl_balance_in_account_currency = x[KEY_LENGTH:]
+			self.diff[x[:KEY_LENGTH]] = frappe._dict(
+				gl_balance=gl_balance, gl_balance_in_account_currency=gl_balance_in_account_currency
+			)
 
 		for x in self.variation_in_general_ledger:
+			pl_balance, pl_balance_in_account_currency = x[KEY_LENGTH:]
 			self.diff.setdefault(
-				(x[0], x[1], x[2], x[3], x[4], x[5]), frappe._dict({"gl_balance": 0.0})
-			).update(frappe._dict({"pl_balance": x[6]}))
+				x[:KEY_LENGTH], frappe._dict({"gl_balance": 0.0, "gl_balance_in_account_currency": 0.0})
+			).update(pl_balance=pl_balance, pl_balance_in_account_currency=pl_balance_in_account_currency)
+
+	def get_account_currencies(self) -> dict[str, str]:
+		accounts = list({key[1] for key in self.diff})
+		if not accounts:
+			return {}
+		account = qb.DocType("Account")
+		return dict(
+			qb.from_(account)
+			.select(account.name, account.account_currency)
+			.where(account.name.isin(accounts))
+			.run()
+		)
 
 	def remove_restricted_parties(self):
 		permitted = self.get_permitted_parties()
@@ -190,6 +216,7 @@ class General_Payment_Ledger_Comparison:
 
 	def generate_data(self):
 		self.data = []
+		account_currencies = self.get_account_currencies()
 		for key, val in self.diff.items():
 			self.data.append(
 				frappe._dict(
@@ -202,6 +229,9 @@ class General_Payment_Ledger_Comparison:
 						"party": key[5],
 						"gl_balance": val.gl_balance,
 						"pl_balance": val.pl_balance,
+						"account_currency": account_currencies[key[1]],
+						"gl_balance_in_account_currency": val.gl_balance_in_account_currency,
+						"pl_balance_in_account_currency": val.pl_balance_in_account_currency,
 					}
 				)
 			)
@@ -283,6 +313,26 @@ class General_Payment_Ledger_Comparison:
 				fieldtype="Currency",
 				options="Company:company:default_currency",
 				width="100",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("GL Balance (Account Currency)"),
+				fieldname="gl_balance_in_account_currency",
+				fieldtype="Currency",
+				options="account_currency",
+				width="200",
+			)
+		)
+
+		self.columns.append(
+			dict(
+				label=_("Payment Ledger Balance (Account Currency)"),
+				fieldname="pl_balance_in_account_currency",
+				fieldtype="Currency",
+				options="account_currency",
+				width="200",
 			)
 		)
 
