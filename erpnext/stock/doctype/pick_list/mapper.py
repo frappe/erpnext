@@ -343,16 +343,16 @@ def add_product_bundles_to_target(
 			for row in pick_list.locations
 			if row.product_bundle_item and row.name in selected_locations
 		}
-		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+		product_bundles = [so_row for so_row in product_bundles if so_row in selected_bundles]
 
-	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
+	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles)
 
-	for so_row, value in product_bundles.items():
+	for so_row in product_bundles:
 		sales_order_item = frappe.get_doc("Sales Order Item", so_row)
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
-		bundle_items = product_bundle_qty_map.get(value.product_bundle)
+		bundle_items = product_bundle_qty_map.get(so_row)
 		if not bundle_items:
 			frappe.throw(
 				_("Row #{0}: cannot resolve the Product Bundle version for Item {1}.").format(
