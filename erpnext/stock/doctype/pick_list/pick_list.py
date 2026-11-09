@@ -1576,7 +1576,7 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			item_location.qty = qty_diff
 			if item_location.serial_nos:
 				# set remaining serial numbers
-				item_location.serial_nos = item_location.serial_nos[-int(qty_diff) :]
+				item_location.serial_nos = item_location.serial_nos[cint(stock_qty) :]
 			available_locations = [item_location, *available_locations]
 
 	# update available locations for the item
