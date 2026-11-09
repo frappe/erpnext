@@ -1498,9 +1498,9 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 
 
 def get_available_batch_qty(parent_doc, batch_no, warehouse):
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 
-	return get_batch_qty(
+	return get_batch_qty_for_stock(
 		batch_no,
 		warehouse,
 		posting_date=parent_doc.posting_date,

@@ -70,3 +70,24 @@ class TestStockQtyVsBatchQty(ERPNextTestSuite):
 		update_batch_qty([row])
 		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
 		self.assertEqual(self.run_report(item=item, batch=batch_no), [])
+
+	def test_warehouse_restricted_user_updates_total_batch_qty(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		item = self.make_batch_item()
+		make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=10, rate=100)
+		batch_no = frappe.db.get_value("Batch", {"item": item}, "name")
+		make_stock_entry(
+			item_code=item, to_warehouse="Finished Goods - _TC", qty=5, rate=100, batch_no=batch_no
+		)
+		frappe.db.set_value("Batch", batch_no, "batch_qty", 7)
+		user = make_fenced_user(
+			"batch_qty_report@example.com", ["Item Manager"], [("Warehouse", "Stores - _TC")]
+		)
+
+		with as_user(user):
+			rows = self.run_report(item=item)
+			self.assertEqual([(row["stock_qty"], row["batch_qty"]) for row in rows], [(15, 7)])
+			update_batch_qty(rows)
+
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 15)

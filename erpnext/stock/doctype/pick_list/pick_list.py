@@ -203,14 +203,16 @@ class PickList(TransactionBase):
 		return flt(row.stock_qty)
 
 	def validate_batch_stock_qty(self, picked_qty):
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_batch_qty_for_stock,
+		)
 
 		if not picked_qty:
 			return
 
 		held_qty = self.get_qty_held_by_other_picks(picked_qty)
 		for (item_code, warehouse, batch_no), (qty, row) in picked_qty.items():
-			batch_qty = flt(get_batch_qty(batch_no, warehouse, item_code)) - flt(
+			batch_qty = flt(get_batch_qty_for_stock(batch_no, warehouse, item_code=item_code)) - flt(
 				held_qty.get((item_code, warehouse, batch_no))
 			)
 			if qty > batch_qty:

@@ -850,10 +850,10 @@ def get_available_qty_to_reserve(
 ) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
+	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 
 	if batch_no:
-		return get_batch_qty(
+		return get_batch_qty_for_stock(
 			item_code=item_code,
 			warehouse=warehouse,
 			batch_no=batch_no,
