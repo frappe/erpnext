@@ -1600,7 +1600,7 @@ def get_exact_whole_stock_qty(stock_qty: float, conversion_factor: float, precis
 	"""Largest whole stock qty up to stock_qty whose qty in the row UOM, rounded to precision,
 	converts back to it exactly. Multiples of a whole conversion factor always do."""
 	stock_qty_precision = frappe.get_precision("Pick List Item", "stock_qty")
-	for whole_qty in range(cint(floor(stock_qty)), 0, -1):
+	for whole_qty in range(cint(floor(flt(stock_qty, stock_qty_precision))), 0, -1):
 		qty = flt(whole_qty / conversion_factor, precision)
 		if flt(qty * conversion_factor, stock_qty_precision) == whole_qty:
 			return whole_qty
