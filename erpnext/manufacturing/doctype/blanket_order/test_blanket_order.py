@@ -235,6 +235,24 @@ class TestBlanketOrder(FrappeTestCase):
 
 		self.assertEqual(get_purchase_blanket_order_details(bo, item).blanket_order, bo.name)
 
+	def test_blanket_order_lookup_keeps_order_without_qty_limit(self):
+		item = make_item("_Test Blanket Order No Limit Lookup Item", {"is_stock_item": 1}).name
+		bo = new_blanket_order(blanket_order_type="Purchasing")
+		bo.supplier = "_Test Supplier"
+		bo.items[0].item_code = item
+		bo.items[0].qty = 0
+		bo.items[0].rate = 90
+		bo.submit()
+
+		po = make_purchase_order_against(bo, qty=25)
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.submit()
+
+		details = get_purchase_blanket_order_details(bo, item)
+		self.assertTrue(details)
+		self.assertEqual(details.blanket_order, bo.name)
+		self.assertEqual(details.blanket_order_rate, 90)
+
 	def test_blanket_order_lookup_skips_order_not_started(self):
 		item = make_item("_Test Blanket Order Not Started Lookup Item", {"is_stock_item": 1}).name
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item)

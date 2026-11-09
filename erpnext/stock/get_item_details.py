@@ -1913,7 +1913,7 @@ def _get_blanket_order_details(args):
 				& (bo_item.item_code == args.item_code)
 				& (bo.docstatus == 1)
 				& (bo.name == bo_item.parent)
-				& (bo_item.ordered_qty < bo_item.qty * (1 + allowance / 100))
+				& ((bo_item.qty == 0) | (bo_item.ordered_qty < bo_item.qty * (1 + allowance / 100)))
 			)
 			.orderby(bo.to_date)
 			.orderby(bo.name)
