@@ -15,6 +15,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 	get_reserved_serial_nos_for_sre,
@@ -947,10 +948,10 @@ class PickList(TransactionBase):
 
 	def update_bundle_picked_qty(self):
 		product_bundles = self._get_product_bundles()
-		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles.values())
+		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
 
-		for so_row, value in product_bundles.items():
-			bundle_items = product_bundle_qty_map.get(value.product_bundle)
+		for so_row in product_bundles:
+			bundle_items = product_bundle_qty_map.get(so_row)
 			if not bundle_items:
 				continue
 			picked_qty = self._compute_picked_qty_for_bundle(so_row, bundle_items)
@@ -1047,46 +1048,25 @@ class PickList(TransactionBase):
 
 		return query.run(as_dict=True)
 
-	def _get_product_bundles(self) -> dict[str, frappe._dict]:
-		so_item_names = {item.sales_order_item for item in self.locations if item.product_bundle_item}
+	def _get_product_bundles(self) -> list[str]:
+		"""Sales Order rows of the bundles picked in this list, in location order."""
+		so_item_names = list(
+			dict.fromkeys(item.sales_order_item for item in self.locations if item.product_bundle_item)
+		)
 		if not so_item_names:
-			return {}
+			return []
 
-		so_items = {
-			row.name: row
-			for row in frappe.get_all(
-				"Sales Order Item",
-				filters={"name": ("in", list(so_item_names))},
-				fields=["name", "item_code", "product_bundle"],
-			)
+		existing = set(
+			frappe.get_all("Sales Order Item", filters={"name": ("in", so_item_names)}, pluck="name")
+		)
+		return [name for name in so_item_names if name in existing]
+
+	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
+		"""Component stock qty per bundle, by Sales Order row, as the order packed it."""
+		return {
+			so_row: {row.item_code: row.qty_per_unit for row in packed_items if row.qty_per_unit}
+			for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items()
 		}
-
-		product_bundles = {}
-		for item in self.locations:
-			so_item = so_items.get(item.sales_order_item) if item.product_bundle_item else None
-			if not so_item:
-				continue
-			# count picked bundles against the version recorded on the order row, not the
-			# item's current active version (which may have changed since the order)
-			product_bundles[item.sales_order_item] = frappe._dict(
-				{"product_bundle": so_item.product_bundle or get_active_product_bundle(so_item.item_code)}
-			)
-		return product_bundles
-
-	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
-		product_bundle_qty_map = {}
-		for data in bundles:
-			bundle_name = data.product_bundle
-			if not bundle_name or bundle_name in product_bundle_qty_map:
-				continue
-			bundle = frappe.get_doc("Product Bundle", bundle_name)
-			# picked_qty is in the component's stock UOM, so convert the bundle qty too
-			product_bundle_qty_map[bundle_name] = {
-				item.item_code: flt(item.qty)
-				* flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor"))
-				for item in bundle.items
-			}
-		return product_bundle_qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
