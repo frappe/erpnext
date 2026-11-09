@@ -181,6 +181,9 @@ class TestItemTaxTemplate(FrappeTestCase):
 		self.assertEqual(self.get_template_for(item_code), template_5)
 		self.assertEqual(si.items[0].item_tax_template, template_5)
 
+	def make_item_without_taxes(self):
+		return make_item(properties={"item_group": self.make_item_group_with_taxes([])}).name
+
 	def test_group_account_throws(self):
 		doc = self.make_template([("Duties and Taxes - _TC", 7, 0)])
 		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
@@ -190,13 +193,14 @@ class TestItemTaxTemplate(FrappeTestCase):
 		template.disabled = 1
 		template.insert()
 
-		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si = create_sales_invoice(item_code=self.make_item_without_taxes(), rate=1000, do_not_save=True)
 		si.items[0].item_tax_template = template.name
 		self.assertRaisesRegex(frappe.ValidationError, "is disabled", si.insert)
 
 	def test_draft_submits_after_its_template_is_disabled(self):
 		template = self.make_tax_template(28)
-		si = create_sales_invoice(rate=1000, do_not_save=True)
+		item_code = self.make_item_without_taxes()
+		si = create_sales_invoice(item_code=item_code, rate=1000, do_not_save=True)
 		si.items[0].item_tax_template = template
 		si.insert()
 
@@ -205,15 +209,13 @@ class TestItemTaxTemplate(FrappeTestCase):
 		si.submit()
 		self.assertEqual(si.docstatus, 1)
 
-		draft = create_sales_invoice(rate=1000, do_not_submit=True)
-		draft.append(
-			"items", {"item_code": "_Test Item", "qty": 1, "rate": 1000, "item_tax_template": template}
-		)
+		draft = create_sales_invoice(item_code=item_code, rate=1000, do_not_submit=True)
+		draft.append("items", {"item_code": item_code, "qty": 1, "rate": 1000, "item_tax_template": template})
 		self.assertRaisesRegex(frappe.ValidationError, "is disabled", draft.save)
 
 	def test_template_of_other_company_on_transaction_throws(self):
 		other_company_template = frappe.db.get_value("Item Tax Template", {"company": "_Test Company 1"})
-		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si = create_sales_invoice(item_code=self.make_item_without_taxes(), rate=1000, do_not_save=True)
 		si.items[0].item_tax_template = other_company_template
 		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company", si.insert)
 
