@@ -18,7 +18,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
 		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
-			effective_item_rate = item.blanket_order_rate;
+			effective_item_rate = flt(item.blanket_order_rate) * (flt(item.conversion_factor) || 1);
 		}
 		if (item.margin_type == "Percentage") {
 			item.rate_with_margin = flt(effective_item_rate)
