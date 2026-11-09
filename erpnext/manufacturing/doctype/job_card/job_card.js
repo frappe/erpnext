@@ -3,6 +3,8 @@
 
 frappe.ui.form.on("Job Card", {
 	setup: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["Quality Inspection"];
+
 		frm.set_query("operation", function () {
 			return {
 				query: "erpnext.manufacturing.doctype.job_card.job_card.get_operations",
