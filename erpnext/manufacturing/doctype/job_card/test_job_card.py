@@ -973,6 +973,44 @@ class TestJobCard(FrappeTestCase):
 		)
 		self.assertRaises(OperationSequenceError, extra.submit)
 
+	def test_upstream_cancel_counts_process_loss_of_later_operation(self):
+		work_order = self.make_two_operation_work_order(qty=10)
+		first, second = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+			)
+		)
+		make_job_card(
+			work_order.name,
+			[
+				{
+					"name": first.operation_id,
+					"operation": first.operation,
+					"sequence_id": first.sequence_id,
+					"qty": 2,
+					"pending_qty": 2,
+				}
+			],
+		)
+		extra = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
+		first.for_quantity = 8
+
+		for index, (job_card, completed_qty) in enumerate(((first, 8), (extra, 2), (second, 8))):
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date("2024-04-10 08:00:00", hours=index),
+					"to_time": add_to_date("2024-04-10 08:00:00", hours=index, minutes=30),
+					"completed_qty": completed_qty,
+				},
+			)
+			job_card.save()
+			job_card.submit()
+
+		self.assertEqual(second.process_loss_qty, 2)
+		self.assertRaises(OperationSequenceError, extra.cancel)
+
 	def test_op_cost_calculation(self):
 		from erpnext.manufacturing.doctype.routing.test_routing import (
 			create_routing,
