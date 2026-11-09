@@ -958,37 +958,18 @@ class PickList(TransactionBase):
 			)
 		return product_bundles
 
-<<<<<<< HEAD
 	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
 		product_bundle_qty_map = {}
 		for data in bundles:
 			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": data.item_code, "disabled": 0})
 			# picked_qty is in the component's stock UOM, so convert the bundle qty too
-			product_bundle_qty_map[data.item_code] = {
-				item.item_code: flt(item.qty)
-				* flt(get_conversion_factor(item.item_code, item.uom).get("conversion_factor"))
-				for item in bundle.items
-			}
+			qty_map = defaultdict(float)
+			for item in bundle.items:
+				qty_map[item.item_code] += flt(item.qty) * flt(
+					get_conversion_factor(item.item_code, item.uom).get("conversion_factor")
+				)
+			product_bundle_qty_map[data.item_code] = qty_map
 		return product_bundle_qty_map
-=======
-	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
-<<<<<<< HEAD
-		"""Component stock qty per bundle, by Sales Order row and packed row, as the order packed it."""
-		return {
-			so_row: {row.name: row.qty_per_unit for row in packed_items if row.qty_per_unit}
-			for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items()
-		}
->>>>>>> 3750ba8 (fix(stock): count picked bundles per packed row, not per component item)
-=======
-		"""Component stock qty per bundle, by Sales Order row and item, as the order packed it."""
-		qty_map = defaultdict(lambda: defaultdict(float))
-		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
-			for row in packed_items:
-				if row.qty_per_unit:
-					qty_map[so_row][row.item_code] += row.qty_per_unit
-
-		return qty_map
->>>>>>> fe42da0 (fix(stock): count picked bundles by component item so a partial delivery leaves the rest pending)
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
