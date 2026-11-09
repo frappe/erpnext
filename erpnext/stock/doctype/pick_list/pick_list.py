@@ -1020,9 +1020,9 @@ class PickList(TransactionBase):
 		return [name for name in so_item_names if name in existing]
 
 	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
-		"""Component stock qty per bundle, by Sales Order row, as the order packed it."""
+		"""Component stock qty per bundle, by Sales Order row and packed row, as the order packed it."""
 		return {
-			so_row: {row.item_code: row.qty_per_unit for row in packed_items if row.qty_per_unit}
+			so_row: {row.name: row.qty_per_unit for row in packed_items if row.qty_per_unit}
 			for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items()
 		}
 
@@ -1034,7 +1034,7 @@ class PickList(TransactionBase):
 			if item.sales_order_item != bundle_row:
 				continue
 
-			if qty_in_bundle := bundle_items.get(item.item_code):
+			if qty_in_bundle := bundle_items.get(item.product_bundle_item):
 				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
 				possible_bundles.setdefault(item.product_bundle_item, 0)
 				possible_bundles[item.product_bundle_item] += qty / qty_in_bundle
