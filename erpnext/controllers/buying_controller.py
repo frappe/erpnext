@@ -929,10 +929,10 @@ class BuyingController(SubcontractingController):
 	def get_chargeable_qty(self, row) -> float:
 		"""Qty a charge spreads over when no row has a net amount. A receipt row that accepts nothing
 		carries it on its rejected qty, when that material is valued."""
-		if flt(row.qty) or self.doctype != "Purchase Receipt":
+		if flt(row.qty) or self.doctype != "Purchase Receipt" or self.is_internal_transfer():
 			return flt(row.qty)
 
-		if not is_rejected_material_valued(self.doctype, row.name):
+		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
 			return 0.0
 
 		return flt(row.rejected_qty)
