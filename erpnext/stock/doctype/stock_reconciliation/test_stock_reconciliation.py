@@ -20,6 +20,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
+	StockReconciliation,
 	get_items,
 	get_stock_balance_for,
 )
@@ -2824,6 +2825,30 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		sr = create_stock_reconciliation(item_code=item.name, rate=120)
 		self.assertEqual((sr.items[0].qty, sr.items[0].valuation_rate), (10, 120))
 		self.assertEqual(get_stock_value_on("_Test Warehouse - _TC", nowdate(), item.name), 1200)
+
+	def test_queued_submit_saves_the_current_version(self):
+		items = [self.make_item(properties={"is_stock_item": 1}).name for _ in range(11)]
+		warehouses = [create_warehouse(f"_Test Queued Reco Warehouse {i}") for i in range(10)]
+		sr = create_stock_reconciliation(item_code=items[0], warehouse=warehouses[0], do_not_save=True)
+		sr.set(
+			"items",
+			[
+				{"item_code": item_code, "warehouse": warehouse, "qty": 10, "valuation_rate": 100}
+				for item_code in items
+				for warehouse in warehouses
+			],
+		)
+		# the desk sets docstatus before it calls submit
+		sr.docstatus = 1
+
+		with patch.object(StockReconciliation, "queue_action") as queue_action:
+			sr.submit()
+			sr.items[0].qty = 20
+			sr.submit()
+
+		self.assertEqual(queue_action.call_count, 2)
+		self.assertEqual(frappe.db.get_value("Stock Reconciliation", sr.name, "docstatus"), 0)
+		self.assertEqual(frappe.db.get_value("Stock Reconciliation Item", sr.items[0].name, "qty"), 20)
 
 
 def create_batch_item_with_batch(item_name, batch_id):
