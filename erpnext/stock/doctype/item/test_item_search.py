@@ -286,6 +286,24 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			with self.subTest(txt=txt):
 				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
 
+	def test_kana_and_width_variants_match_the_scan(self):
+		"""LIKE treats katakana and hiragana, voiced and unvoiced kana, and full and half width as equal."""
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-KANA-6613",
+				"item_name": "カタカナ フィルター バルブ Ｐａｒｔ",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		index_docs_in_queue()
+
+		for txt in ("かたかな", "ﾌｨﾙﾀｰ", "はるふ", "part"):
+			with self.subTest(txt=txt):
+				self.assertIn("ZZ-KANA-6613", self.candidates(txt))
+				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
+
 	def test_an_index_write_failure_saves_the_item_and_drops_the_index(self):
 		"""The save must survive, and the index must stop answering: nothing recorded the Item as
 		stale, so its candidate list would hide a row the scan returns."""
