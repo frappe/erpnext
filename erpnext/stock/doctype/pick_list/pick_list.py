@@ -1030,18 +1030,17 @@ class PickList(TransactionBase):
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
-		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
-		possible_bundles = {}
+		picked_qty = defaultdict(float)
 		for item in self.locations:
-			if item.sales_order_item != bundle_row:
-				continue
+			if item.sales_order_item == bundle_row and bundle_items.get(item.item_code):
+				picked_qty[item.item_code] += flt(item.picked_qty) - (
+					flt(item.delivered_qty) if pending_only else 0
+				)
 
-			if qty_in_bundle := bundle_items.get(item.item_code):
-				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
-				possible_bundles.setdefault(item.item_code, 0)
-				possible_bundles[item.item_code] += qty / qty_in_bundle
-
-		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
+		return min(
+			(get_whole_bundle_count(qty, bundle_items[item_code]) for item_code, qty in picked_qty.items()),
+			default=0,
+		)
 
 	def update_bundle_delivered_qty(self):
 		bundle_locations = defaultdict(list)
@@ -1239,6 +1238,16 @@ def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 def validate_item_locations(pick_list):
 	if not pick_list.locations:
 		frappe.throw(_("Add items in the Item Locations table"))
+
+
+def get_whole_bundle_count(qty: float, qty_per_bundle: float) -> int:
+	"""Whole bundles in ``qty``. The order packs a rounded qty, so its rounded qty makes a bundle."""
+	precision = frappe.get_precision("Packed Item", "qty")
+	bundles = int(qty / qty_per_bundle)
+	if flt((bundles + 1) * qty_per_bundle, precision) <= flt(qty, precision):
+		bundles += 1
+
+	return bundles
 
 
 def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
