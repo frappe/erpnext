@@ -22,6 +22,10 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		self.assertEqual(build_match_query("RAW_MAT_000123"), '"RAW" AND "MAT" AND "000123"')
 		self.assertEqual(build_match_query("abc%def"), '"abc" AND "def"')
 
+	def test_folds_small_kana_to_full_size(self):
+		"""LIKE treats small and full-size kana as equal, so the index must too."""
+		self.assertEqual(build_match_query("フイルター"), build_match_query("ﾌｨﾙﾀｰ"))
+
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
 		self.assertIsNone(build_match_query("ab\\_cd"))
