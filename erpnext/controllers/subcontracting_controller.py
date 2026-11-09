@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import cint, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
@@ -92,22 +92,12 @@ class SubcontractingController(StockController):
 			return_rate = None
 			if self.is_return:
 				key = (original_rows.get(row.reference_name), row.rm_item_code)
-<<<<<<< HEAD
-				# rows with the consumed serial nos or batches already carry the rate they were consumed at
-				return_rate = (
-					row.rate
-					if row.serial_and_batch_bundle and key in returnable_serial_batches
-					else return_rates.get(key)
-				)
-			if row.reference_name in rejected_return_rows:
-=======
 				return_rate = self.get_serial_batch_return_rate(
 					row, consumed_serial_batches.get(key, {}), bundle_entries
 				)
 				if return_rate is None:
 					return_rate = return_rates.get(key)
-			if row.reference_name in rejected_return_rows and not is_standard_cost:
->>>>>>> eb0ee73 (fix(subcontracting): return a supplied item at the consumed rate of the batches and serial nos in its bundle)
+			if row.reference_name in rejected_return_rows:
 				rates.append(0.0)
 			elif return_rate is not None:
 				rates.append(return_rate)
@@ -116,8 +106,6 @@ class SubcontractingController(StockController):
 
 		return rates
 
-<<<<<<< HEAD
-=======
 	def get_serial_batch_return_rate(self, row, identities, bundle_entries):
 		"""Qty-weighted rate the returned receipt consumed the row's serial nos or batches at."""
 		if row.serial_and_batch_bundle:
@@ -145,7 +133,6 @@ class SubcontractingController(StockController):
 
 		return flt(sum(rate * qty for rate, qty in returned) / total_qty, row.precision("rate"))
 
->>>>>>> eb0ee73 (fix(subcontracting): return a supplied item at the consumed rate of the batches and serial nos in its bundle)
 	def get_supplied_item_rate_args(self, row):
 		return frappe._dict(
 			{
@@ -205,6 +192,7 @@ class SubcontractingController(StockController):
 		item = frappe.qb.DocType("Subcontracting Receipt Item")
 		supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
+		serial = frappe.qb.DocType("Serial No")
 		rows = (
 			frappe.qb.from_(supplied_item)
 			.join(receipt)
@@ -213,10 +201,13 @@ class SubcontractingController(StockController):
 			.on(item.name == supplied_item.reference_name)
 			.join(entry)
 			.on(entry.parent == supplied_item.serial_and_batch_bundle)
+			.left_join(serial)
+			.on(serial.name == entry.serial_no)
 			.select(
 				Coalesce(item.subcontracting_receipt_item, item.name).as_("receipt_item"),
 				supplied_item.rm_item_code,
 				entry.serial_no,
+				serial.serial_no.as_("serial_number"),
 				entry.batch_no,
 				entry.qty,
 				entry.incoming_rate,
@@ -238,7 +229,11 @@ class SubcontractingController(StockController):
 				identity = returnable.setdefault(key, {}).setdefault(
 					(row.serial_no, row.batch_no),
 					frappe._dict(
-						serial_no=row.serial_no, batch_no=row.batch_no, qty=0.0, rate=row.incoming_rate
+						serial_no=row.serial_no,
+						serial_number=row.serial_number,
+						batch_no=row.batch_no,
+						qty=0.0,
+						rate=row.incoming_rate,
 					),
 				)
 			else:
@@ -253,7 +248,7 @@ class SubcontractingController(StockController):
 		"""Send back the serial nos and batches the returned receipt consumed, one row per batch and rate."""
 		qty = abs(rm_obj.consumed_qty)
 		precision = rm_obj.precision("consumed_qty")
-		groups = defaultdict(lambda: frappe._dict(qty=0.0, serial_nos=[], batches=defaultdict(float)))
+		groups = defaultdict(lambda: frappe._dict(qty=0.0, serial_nos=[]))
 		for identity in identities:
 			allocated = min(qty, identity.qty)
 			if flt(allocated, precision) <= 0:
@@ -264,15 +259,18 @@ class SubcontractingController(StockController):
 			group = groups[(identity.batch_no, identity.rate)]
 			group.qty += allocated
 			if identity.serial_no:
-				group.serial_nos.append(identity.serial_no)
-			else:
-				group.batches[identity.batch_no] += allocated
+				group.serial_nos.append(identity.serial_number)
 
-		for (_batch_no, rate), group in groups.items():
+		for (batch_no, rate), group in groups.items():
 			row = self.append(self.raw_material_table, rm_obj.as_dict(no_default_fields=True))
-			row.consumed_qty = -flt(group.qty, precision)
-			row.serial_and_batch_bundle = self.make_supplied_item_bundle(
-				row.rm_item_code, row.consumed_qty, group.serial_nos, group.batches, rate
+			row.update(
+				{
+					"consumed_qty": -flt(group.qty, precision),
+					"rate": flt(rate, row.precision("rate")),
+					"use_serial_batch_fields": 1,
+					"batch_no": batch_no,
+					"serial_no": "\n".join(group.serial_nos),
+				}
 			)
 
 		# a return sends back no more than the receipt consumed
@@ -815,19 +813,15 @@ class SubcontractingController(StockController):
 		elif self.available_materials.get(key) and self.available_materials[key]["batch_no"]:
 			batches = self.__get_batch_nos_for_bundle(qty, key)
 
-		return self.make_supplied_item_bundle(rm_obj.rm_item_code, qty, serial_nos, batches)
-
-	def make_supplied_item_bundle(self, rm_item_code, qty, serial_nos, batches, incoming_rate=None):
 		bundle = SerialBatchCreation(
 			frappe._dict(
 				{
 					"company": self.company,
-					"item_code": rm_item_code,
+					"item_code": rm_obj.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"qty": qty,
 					"serial_nos": serial_nos,
 					"batches": batches,
-					"incoming_rate": incoming_rate,
 					"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 					"voucher_type": "Subcontracting Receipt",
 					"do_not_submit": True,
@@ -1003,6 +997,10 @@ class SubcontractingController(StockController):
 				return item
 
 	def set_rate_for_supplied_items(self, rm_obj, item_row):
+		# set_valuation_rate_for_rm rates returns at the rate the receipt consumed at
+		if self.is_return:
+			return
+
 		args = frappe._dict(
 			{
 				"item_code": rm_obj.rm_item_code,
