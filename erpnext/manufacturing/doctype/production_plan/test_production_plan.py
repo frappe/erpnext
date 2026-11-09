@@ -1256,10 +1256,6 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (2, "Box", 10))
 
 	def test_download_raw_materials_shows_uom_of_required_qty(self):
-		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-			download_raw_materials,
-		)
-
 		rm_item = make_item(
 			"_Test PP Download Box RM",
 			{
@@ -1279,16 +1275,11 @@ class TestProductionPlan(ERPNextTestSuite):
 			skip_getting_mr_items=True,
 			do_not_submit=1,
 		)
-		download_raw_materials(plan.as_dict())
-		header, row = list(csv.reader(io.StringIO(frappe.response.result)))[:2]
+		header, row = download_raw_material_rows(plan)[:2]
 
 		self.assertEqual((row[header.index("Required Qty")], row[header.index("UOM")]), ("5", "Box"))
 
 	def test_download_raw_materials_merges_transfer_and_purchase_in_one_uom(self):
-		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
-			download_raw_materials,
-		)
-
 		rm_item = make_item(
 			"_Test PP Download Merge RM",
 			{
@@ -1310,8 +1301,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			do_not_submit=1,
 		)
 		# 20 Nos transferred from Finished Goods and 3 Box purchased
-		download_raw_materials(plan.as_dict(), warehouses=[{"warehouse": "Finished Goods - _TC"}])
-		header, row = list(csv.reader(io.StringIO(frappe.response.result)))[:2]
+		header, row = download_raw_material_rows(plan, warehouses=[{"warehouse": "Finished Goods - _TC"}])[:2]
 
 		self.assertEqual((flt(row[header.index("Required Qty")]), row[header.index("UOM")]), (50, "Nos"))
 
@@ -5686,6 +5676,18 @@ def create_production_plan(**args):
 			pln.submit()
 
 	return pln
+
+
+def download_raw_material_rows(plan, warehouses=None):
+	"""Rows of the Download Required Materials CSV."""
+	from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+		download_raw_materials,
+	)
+
+	download_raw_materials(plan.as_dict(), warehouses=warehouses)
+	# the download sets this flag for its request; clear it so later tests still validate conversion factors
+	frappe.flags.show_qty_in_stock_uom = None
+	return list(csv.reader(io.StringIO(frappe.response.result)))
 
 
 def submit_work_order_from_plan(plan, qty, source_warehouse):
