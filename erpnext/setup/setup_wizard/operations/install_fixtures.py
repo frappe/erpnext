@@ -366,7 +366,7 @@ def update_selling_defaults():
 	selling_settings.so_required = "No"
 	selling_settings.dn_required = "No"
 	selling_settings.allow_multiple_items = 1
-	selling_settings.sales_update_frequency = "Each Transaction"
+	selling_settings.sales_update_frequency = "Daily"
 	selling_settings.save()
 
 
@@ -390,6 +390,7 @@ def update_item_variant_settings():
 def add_uom_data():
 	# add UOMs
 	uoms = json.loads(
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 		open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read()
 	)
 	for d in uoms:
@@ -403,6 +404,7 @@ def add_uom_data():
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 		open(
 			frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")
 		).read()

@@ -24,6 +24,7 @@ from erpnext.accounts.report.utils import (
 	convert_to_presentation_currency,
 	get_currency,
 	has_gl_entry_restrictions,
+	validate_date_range,
 )
 from erpnext.accounts.utils import get_fiscal_year, get_zero_cutoff
 
@@ -318,8 +319,7 @@ def validate_dates(from_date, to_date):
 	if not from_date or not to_date:
 		frappe.throw(_("From Date and To Date are mandatory"))
 
-	if to_date < from_date:
-		frappe.throw(_("To Date cannot be less than From Date"))
+	validate_date_range({"from_date": from_date, "to_date": to_date})
 
 
 def get_months(start_date, end_date):

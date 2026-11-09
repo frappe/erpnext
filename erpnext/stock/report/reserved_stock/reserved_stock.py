@@ -7,6 +7,8 @@ from frappe.query_builder.functions import Date
 from frappe.utils import flt
 from pypika.terms import ValueWrapper
 
+from erpnext.accounts.report.utils import validate_date_range
+
 AVAILABLE_QTY_INDEX = 9
 
 
@@ -29,8 +31,7 @@ def validate_filters(filters):
 		if not filters.get(field):
 			frappe.throw(_("Please set {0}").format(field))
 
-	if filters.get("from_date") > filters.get("to_date"):
-		frappe.throw(_("From Date cannot be greater than To Date"))
+	validate_date_range(filters)
 
 
 def get_data(filters):

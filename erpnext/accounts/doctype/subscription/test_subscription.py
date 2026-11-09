@@ -1045,7 +1045,7 @@ def create_parties():
 	if not frappe.db.exists("Supplier", "_Test Supplier"):
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = "_Test Supplier"
-		supplier.supplier_group = "All Supplier Groups"
+		supplier.supplier_group = "Services"
 		supplier.insert()
 
 	if not frappe.db.exists("Customer", "_Test Subscription Customer"):

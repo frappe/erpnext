@@ -668,6 +668,74 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			frappe.db.exists("GL Entry", {"account": exchange_gain_loss_account, "voucher_no": pi.name})
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 0}
+	)
+	def test_order_invoice_validates_exchange_rate_of_pending_receipts(self):
+		po = create_purchase_order(
+			company="_Test Company with perpetual inventory",
+			supplier="_Test Supplier USD",
+			warehouse="Stores - TCP1",
+			currency="USD",
+			qty=2,
+			rate=100,
+			do_not_save=True,
+		)
+		po.conversion_rate = 70
+		po.insert().submit()
+
+		invoice = make_pi_from_po(po.name)
+		invoice.credit_to = "_Test Payable USD - TCP1"
+		invoice.conversion_rate = 80
+		invoice.insert().submit()
+		invoice.cancel()
+
+		receipts = []
+		for exchange_rate in (70, 90):
+			receipt = create_purchase_receipt_from_order(po.name)
+			receipt.items[0].qty = 1
+			receipt.conversion_rate = exchange_rate
+			receipt.insert().submit()
+			receipts.append(receipt)
+
+		invoice = make_pi_from_po(po.name)
+		invoice.credit_to = "_Test Payable USD - TCP1"
+		invoice.items[0].rate = 40
+		invoice.conversion_rate = 70
+		self.assertRaisesRegex(frappe.ValidationError, receipts[1].name, invoice.insert)
+
+		invoices = []
+		for receipt in receipts:
+			invoice = make_pi_from_po(po.name)
+			invoice.credit_to = "_Test Payable USD - TCP1"
+			invoice.items[0].qty = 1
+			invoice.conversion_rate = 80
+			self.assertFalse(invoice.items[0].purchase_receipt)
+			self.assertRaisesRegex(frappe.ValidationError, receipt.name, invoice.insert)
+			invoice.conversion_rate = receipt.conversion_rate
+			invoice.insert().submit()
+			invoices.append(invoice)
+			self.assertEqual(receipt.reload().per_billed, 100)
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": ("in", [doc.name for doc in receipts + invoices]),
+				"account": "Stock Received But Not Billed - TCP1",
+				"is_cancelled": 0,
+			},
+			fields=["debit", "credit"],
+		)
+		self.assertEqual(len(gl_entries), 4)
+		self.assertEqual(sum(row.debit - row.credit for row in gl_entries), 0)
+
+		for invoice in reversed(invoices):
+			invoice.cancel()
+		for receipt in reversed(receipts):
+			self.assertEqual(receipt.reload().per_billed, 0)
+			receipt.cancel()
+		po.reload().cancel()
+
 	def test_purchase_invoice_with_exchange_rate_difference_for_non_stock_item(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_invoice as create_purchase_invoice,

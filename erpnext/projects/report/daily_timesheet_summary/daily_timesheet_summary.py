@@ -6,8 +6,11 @@ import frappe
 from frappe import _
 from frappe.desk.reportview import build_match_conditions
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	if not filters:
 		filters = {}
 	elif filters.get("from_date") or filters.get("to_date"):

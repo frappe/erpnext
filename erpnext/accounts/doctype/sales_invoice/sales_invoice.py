@@ -16,7 +16,10 @@ from frappe.utils.data import comma_and
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -439,8 +442,15 @@ class SalesInvoice(SellingController):
 		if self.doctype != "Sales Invoice":
 			return
 
+		seen_assets = set()
 		for d in self.get("items"):
 			if d.is_fixed_asset:
+				if d.asset and not self.is_return:
+					if d.asset in seen_assets:
+						frappe.throw(
+							_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset)
+						)
+					seen_assets.add(d.asset)
 				if d.asset:
 					if not self.is_return:
 						asset_status, asset_docstatus = frappe.db.get_value(
@@ -499,10 +509,9 @@ class SalesInvoice(SellingController):
 	def on_submit(self):
 		self.validate_pos_paid_amount()
 
-		if not self.auto_repeat:
-			frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-				self.doctype, self.company, self.base_grand_total, self
-			)
+		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
+			self.doctype, self.company, self.base_grand_total, self
+		)
 
 		self.check_prev_docstatus()
 
@@ -970,8 +979,8 @@ class SalesInvoice(SellingController):
 			"items": ("income_account", "expense_account", "discount_account"),
 			"taxes": ("account_head",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -2603,16 +2612,10 @@ class SalesInvoice(SellingController):
 
 	@frappe.whitelist()
 	def is_subcontracted(self):
-		if not self.has_subcontracted:
+		sales_orders = [item.sales_order for item in self.items if item.sales_order]
+		if not self.has_subcontracted and sales_orders:
 			self.has_subcontracted = bool(
-				frappe.get_cached_value(
-					"Sales Order",
-					{
-						"name": ["in", [item.sales_order for item in self.items if item.sales_order]],
-						"is_subcontracted": 1,
-					},
-					"name",
-				)
+				frappe.db.exists("Sales Order", {"name": ["in", sales_orders], "is_subcontracted": 1})
 			)
 		if self.has_subcontracted:
 			self.update_stock = 0
@@ -3531,6 +3534,22 @@ def create_dunning(source_name, target_doc=None, args=None, ignore_permissions=F
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))

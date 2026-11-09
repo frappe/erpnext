@@ -14,6 +14,7 @@ def setup_taxes_and_charges(company_name: str, country: str):
 		frappe.throw(_("Company {} does not exist yet. Taxes setup aborted.").format(company_name))
 
 	file_path = os.path.join(os.path.dirname(__file__), "..", "data", "country_wise_tax.json")
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 	with open(file_path) as json_file:
 		tax_data = json.load(json_file)
 

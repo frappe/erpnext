@@ -14,6 +14,7 @@ def execute():
 	for doctype in ("Lead", "Opportunity", "Prospect"):
 		frappe.reload_doctype(doctype)
 		for key, value in options.items():
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 			frappe.db.sql(
 				f"""
                 update `tab{doctype}`

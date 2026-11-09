@@ -223,5 +223,23 @@
 		"doctype": "Company",
 		"chart_of_accounts": "Standard",
 		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TUNA",
+		"company_name": "_Test Unrelated A",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
+	},
+	{
+		"abbr": "_TUNB",
+		"company_name": "_Test Unrelated B",
+		"country": "India",
+		"default_currency": "INR",
+		"doctype": "Company",
+		"chart_of_accounts": "Standard",
+		"create_chart_of_accounts_based_on": "Standard Template"
 	}
 ]

@@ -5,7 +5,7 @@ import frappe
 from frappe.search.sqlite_search import get_search_classes, update_doc_index
 
 from erpnext.controllers import queries
-from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
+from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query, get_barcodes_by_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -32,6 +32,12 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
 		self.assertIsNone(build_match_query("ab\\_cd"))
+
+
+class TestBarcodePreload(ERPNextTestSuite):
+	def test_an_item_without_barcodes_is_preloaded(self):
+		"""A batch preload missing it sends the build back to one Item Barcode query per Item."""
+		self.assertEqual(get_barcodes_by_item(["ZZ-NO-BARCODE"]), {"ZZ-NO-BARCODE": ""})
 
 
 class TestItemSearchSetting(ERPNextTestSuite):

@@ -8,11 +8,15 @@ from frappe.query_builder import DocType
 from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
+
 Opportunity = DocType("Opportunity")
 OpportunityLostReasonDetail = DocType("Opportunity Lost Reason Detail")
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 

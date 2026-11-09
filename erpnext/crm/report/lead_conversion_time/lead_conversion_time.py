@@ -7,8 +7,12 @@ from frappe import _, msgprint
 from frappe.query_builder.functions import Count, Date
 from frappe.utils import date_diff, flt, parse_addr, split_emails
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = {}
 

@@ -29,16 +29,20 @@ from frappe.utils import (
 from frappe.utils.csvutils import build_csv_response
 from pypika.terms import ExistsCriterion
 
+import erpnext
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	clear_reserve_stock_if_disabled,
+)
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -150,6 +154,7 @@ class ProductionPlan(Document):
 		self.validate_raw_material_group_warehouse()
 		if self.for_warehouse:
 			validate_warehouse_company(self.for_warehouse, self.company)
+		clear_reserve_stock_if_disabled(self)
 		self.enable_auto_reserve_stock()
 
 	def validate_raw_material_group_warehouse(self):
@@ -236,13 +241,9 @@ class ProductionPlan(Document):
 			self.total_planned_qty += flt(d.planned_qty)
 
 	def validate_data(self):
-		validated_boms = set()
 		for d in self.get("po_items"):
 			if not d.bom_no:
 				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
-			elif (d.item_code, d.bom_no) not in validated_boms:
-				validate_bom_no(d.item_code, d.bom_no)
-				validated_boms.add((d.item_code, d.bom_no))
 
 			if not flt(d.planned_qty):
 				frappe.throw(
@@ -250,6 +251,15 @@ class ProductionPlan(Document):
 						d.idx, frappe.bold(d.item_code)
 					)
 				)
+
+		self.validate_boms()
+
+	def validate_boms(self):
+		"""Each BOM must produce the item of its row."""
+		boms = dict.fromkeys((d.item_code, d.bom_no) for d in self.po_items)
+		boms.update(dict.fromkeys((d.production_item, d.bom_no) for d in self.sub_assembly_items if d.bom_no))
+		for item_code, bom_no in boms:
+			validate_production_bom(item_code, bom_no)
 
 	def _rename_temporary_references(self):
 		"""po_items and sub_assembly_items items are both constructed client side without saving.
@@ -1512,7 +1522,7 @@ def download_raw_materials(doc, warehouses=None):
 
 		if not doc.get("for_warehouse"):
 			row = {"item_code": d.get("item_code")}
-			for bin_dict in get_bin_details(row, doc.company, all_warehouse=True):
+			for bin_dict in _get_bin_details(row, doc.company, all_warehouse=True):
 				if d.get("warehouse") == bin_dict.get("warehouse"):
 					continue
 
@@ -2022,13 +2032,20 @@ def _adjust_required_qty_for_uom(row, required_qty):
 
 @frappe.whitelist()
 def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
+	frappe.has_permission("Production Plan", "read", throw=True)
+	return _get_bin_details(row, company, for_warehouse, all_warehouse, ignore_permissions=False)
+
+
+def _get_bin_details(row, company, for_warehouse=None, all_warehouse=False, ignore_permissions=True):
 	if isinstance(row, str):
 		row = frappe._dict(json.loads(row))
 
 	bin = frappe.qb.DocType("Bin")
 	wh = frappe.qb.DocType("Warehouse")
 
-	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
+	subquery = frappe.qb.get_query("Warehouse", fields=["name"], ignore_permissions=ignore_permissions).where(
+		wh.company == company
+	)
 
 	warehouse = ""
 	if not all_warehouse:
@@ -2057,13 +2074,21 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 @frappe.whitelist()
 def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
-	return _aggregate_bin_details(get_bin_details(row, company, for_warehouse))
+	frappe.has_permission("Production Plan", "read", throw=True)
+	return _aggregate_bin_details(_get_bin_details(row, company, for_warehouse, ignore_permissions=False))
 
 
 @frappe.whitelist()
 def get_so_details(sales_order):
+	# planners pick orders without a Sales Order role, as in sales_order_query
+	frappe.has_permission("Production Plan", throw=True)
+	erpnext.require_user_permission("Sales Order", sales_order)
+
 	return frappe.db.get_value(
-		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
+		"Sales Order",
+		{"name": sales_order, "docstatus": 1},
+		["transaction_date", "customer", "grand_total"],
+		as_dict=1,
 	)
 
 
@@ -2295,9 +2320,9 @@ def get_items_for_material_requests(
 			fallback = details.get("source_warehouse") or details.get("default_warehouse")
 			row_scope_warehouse = scope_warehouse or fallback
 			row_target_warehouse = target_warehouse or fallback
-			# get_bin_details scopes to the warehouse's descendants, returning one row per
+			# _get_bin_details scopes to the warehouse's descendants, returning one row per
 			# child warehouse; sum them so a group warehouse reflects combined child stock.
-			bins = get_bin_details(details, doc.company, row_scope_warehouse)
+			bins = _get_bin_details(details, doc.company, row_scope_warehouse)
 			bin_dict = _aggregate_bin_details(bins)
 			shortage_warehouse, shortage_bin = row_scope_warehouse, bin_dict
 			if is_transfer and row_scope_warehouse != row_target_warehouse:
@@ -2493,7 +2518,7 @@ def get_sub_assembly_items(
 			required_qty = stock_qty
 
 			if warehouse and d.item_code not in bin_details:
-				bins = get_bin_details(d, company, for_warehouse=warehouse)
+				bins = _get_bin_details(d, company, for_warehouse=warehouse)
 				bin_details[d.item_code] = frappe._dict(_aggregate_bin_details(bins))
 
 			if skip_available_sub_assembly_item:

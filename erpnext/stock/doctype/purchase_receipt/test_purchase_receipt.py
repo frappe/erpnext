@@ -605,6 +605,19 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.load_from_db()
 		pr.cancel()
 
+	def test_return_cannot_return_rejected_qty_when_none_was_rejected(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr = make_purchase_receipt(qty=5)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items[0].qty = -3
+		return_pr.items[0].rejected_qty = -2
+		return_pr.items[0].received_qty = -5
+		return_pr.items[0].rejected_warehouse = "_Test Warehouse 1 - _TC"
+
+		self.assertRaises(StockOverReturnError, return_pr.save)
+
 	def test_per_billed_for_fully_rejected_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
 

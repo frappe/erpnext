@@ -924,7 +924,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_purchase_invoice_from_portal(purchase_order_name):
 	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
 	if frappe.session.user not in frappe.get_all(
@@ -934,8 +934,6 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 	for item in [item for item in doc.items if not item.qty]:
 		doc.remove(item)
 	doc.save()
-	if not frappe.in_test:
-		frappe.db.commit()
 	frappe.response["type"] = "redirect"
 	frappe.response.location = "/purchase-invoices/" + doc.name
 

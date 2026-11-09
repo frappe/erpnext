@@ -14,6 +14,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 	validate_fiscal_year,
 )
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.assets.doctype.asset.asset import _get_asset_value_after_depreciation
 
@@ -151,6 +152,7 @@ def get_report_end_date(filters):
 
 
 def get_conditions(filters):
+	validate_date_range(filters)
 	conditions = {"docstatus": 1}
 	status = filters.status
 	date_field = frappe.scrub(filters.date_based_on or "Purchase Date")
@@ -493,7 +495,7 @@ def get_columns(filters):
 	if filters.get("group_by") in ["Asset Category", "Location"]:
 		return [
 			{
-				"label": _("{}").format(filters.get("group_by")),
+				"label": _(filters.get("group_by")),
 				"fieldtype": "Link",
 				"fieldname": frappe.scrub(filters.get("group_by")),
 				"options": filters.get("group_by"),

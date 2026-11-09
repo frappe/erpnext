@@ -1305,6 +1305,52 @@ class TestPickList(ERPNextTestSuite):
 		row = pick_list.locations[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.picked_qty), (12, 24, 24))
 
+	def test_sales_order_pick_list_keeps_the_ordered_conversion_factor(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		)
+		make_stock_entry(item=item.name, to_warehouse="_Test Warehouse - _TC", qty=100, basic_rate=100)
+		sales_order = make_sales_order(
+			item_code=item.name, qty=2, uom="Box", warehouse="_Test Warehouse - _TC"
+		)
+
+		next(row for row in item.uoms if row.uom == "Box").conversion_factor = 12
+		item.save()
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.save()
+		pick_list.submit()
+
+		row = pick_list.locations[0]
+		self.assertEqual((row.conversion_factor, row.stock_qty, row.picked_qty), (10, 20, 20))
+
+	def test_draft_pick_list_loads_with_the_ordered_conversion_factor(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		)
+		make_stock_entry(item=item.name, to_warehouse="_Test Warehouse - _TC", qty=100, basic_rate=100)
+		sales_order = make_sales_order(
+			item_code=item.name, qty=2, uom="Box", warehouse="_Test Warehouse - _TC"
+		)
+
+		next(row for row in item.uoms if row.uom == "Box").conversion_factor = 12
+		item.save()
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.save()
+		pick_list = frappe.get_doc("Pick List", pick_list.name)
+		pick_list.run_method("onload")
+
+		self.assertEqual(pick_list.locations[0].conversion_factor, 10)
+
 	def test_manual_pick_of_an_expired_batch_is_refused_before_picked_qty_is_set(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
 		batch = frappe.get_doc(

@@ -182,6 +182,41 @@ class TestCashFlow(ERPNextTestSuite):
 
 		self.assertEqual(net_change_in_cash() - before, 500)
 
+	def test_accumulated_date_range_counts_only_movements_in_range(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		_fiscal_year, year_start_date, year_end_date = get_fiscal_year(today(), company=self.company)
+		range_start_date = add_days(year_start_date, 90)
+		filters = frappe._dict(
+			company=self.company,
+			period_start_date=range_start_date,
+			period_end_date=year_end_date,
+			filter_based_on="Date Range",
+			periodicity="Quarterly",
+			accumulated_values=1,
+		)
+
+		def net_change_in_cash():
+			columns, rows = execute(filters)[:2]
+			net_change = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
+			return [
+				net_change[column["fieldname"]] for column in columns if column["fieldtype"] == "Currency"
+			]
+
+		before = net_change_in_cash()
+		for amount, posting_date in ((1000, year_start_date), (500, range_start_date)):
+			make_journal_entry(
+				"Cash - _TC", "Capital Stock - _TC", amount, posting_date=posting_date, submit=True
+			)
+
+		self.assertEqual(
+			[
+				round(after - previous, 2)
+				for after, previous in zip(net_change_in_cash(), before, strict=True)
+			],
+			[500] * len(before),
+		)
+
 	def test_opening_balance_is_cash_balance_before_period(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
@@ -286,26 +321,34 @@ class TestCashFlow(ERPNextTestSuite):
 			period_start_date=previous_year_start_date,
 			period_end_date=year_end_date,
 			filter_based_on="Fiscal Year",
-			periodicity="Yearly",
+			periodicity="Quarterly",
 			accumulated_values=1,
+			show_opening_and_closing_balance=1,
 		)
 
-		def investing_card_and_net_change_total():
-			_columns, rows, _message, _chart, summary = execute(filters)
+		def report_values():
+			columns, rows, _message, _chart, summary = execute(filters)
 			card = next(card["value"] for card in summary if card["label"] == "Net Cash from Investing")
 			net_change = next(row for row in rows if row.get("section") == "'Net Change in Cash'")
-			return card, net_change["total"]
+			opening = next(row for row in rows if row.get("section") == "Opening")
+			closing = next(row for row in rows if row.get("section") == "Closing (Opening + Total)")
+			period_keys = [column["fieldname"] for column in columns if column["fieldtype"] == "Currency"]
+			return card, net_change["total"], [row[key] for row in (opening, closing) for key in period_keys]
 
-		before_card, before_total = investing_card_and_net_change_total()
+		before_card, before_total, before_balances = report_values()
 		for posting_date in (previous_year_start_date, year_start_date):
 			make_journal_entry(
 				"Office Equipment - _TC", "Cash - _TC", 500, posting_date=posting_date, submit=True
 			)
 			make_journal_entry("Cash - _TC", "Sales - _TC", 300, posting_date=posting_date, submit=True)
 
-		card, total = investing_card_and_net_change_total()
+		card, total, balances = report_values()
 		self.assertEqual(card - before_card, -1000)
 		self.assertEqual(total - before_total, -400)
+		self.assertEqual(
+			[round(after - before, 2) for after, before in zip(balances, before_balances, strict=True)],
+			[0] * 4 + [-200] * 4 + [-200] * 4 + [-400] * 4,
+		)
 
 	def test_net_change_in_cash_equals_cash_ledger_movement(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

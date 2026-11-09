@@ -127,6 +127,7 @@ def get_chart(chart_template, existing_company=None):
 			for fname in os.listdir(path):
 				fname = frappe.as_unicode(fname)
 				if fname.endswith(".json"):
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 					with open(os.path.join(path, fname)) as f:
 						chart = f.read()
 						if chart and json.loads(chart).get("name") == chart_template:
@@ -159,6 +160,7 @@ def get_charts_for_country(country, with_standard=False):
 			for fname in os.listdir(path):
 				fname = frappe.as_unicode(fname)
 				if (fname.startswith(country_code) or fname.startswith(country)) and fname.endswith(".json"):
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 					with open(os.path.join(path, fname)) as f:
 						_get_chart_name(f.read())
 

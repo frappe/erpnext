@@ -60,6 +60,37 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 
 		self.opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
 
+	def test_partner_change_preserves_explicit_commission_rate(self):
+		partners = [
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test POS Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": rate,
+				}
+			).insert()
+			for rate in (5, 8)
+		]
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		for rate in (6, 0):
+			with self.subTest(rate=rate):
+				doc = create_pos_invoice(qty=10, rate=100, do_not_save=True)
+				doc.sales_partner = partners[0].name
+				self.assertIsNone(doc.commission_rate)
+				doc.save()
+				self.assertEqual(doc.commission_rate, 5)
+				self.assertEqual(doc.total_commission, 50)
+
+				doc.commission_rate = 7
+				doc.save()
+				doc.sales_partner = partners[1].name
+				doc.commission_rate = rate
+				doc.save()
+				doc.reload()
+				self.assertEqual(doc.commission_rate, rate)
+				self.assertEqual(doc.total_commission, 1000 * rate / 100)
+
 	def test_timestamp_change(self):
 		w = create_pos_invoice(do_not_save=1)
 		w.docstatus = 0
@@ -430,6 +461,18 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(pos_inv.status, "Paid")
 
 		set_allow_partial_payment(self.pos_profile, 0)
+
+	def test_collecting_more_than_outstanding_updates_change_amounts(self):
+		set_allow_partial_payment(self.pos_profile, 1)
+		pos_inv = create_pos_invoice(pos_profile=self.pos_profile.name, rate=110, do_not_save=True)
+		pos_inv.append("payments", {"mode_of_payment": "Cash", "amount": 40})
+		pos_inv.insert().submit()
+
+		pos_inv.update_payments(payments=[{"mode_of_payment": "Cash", "amount": 80}])
+		pos_inv.reload()
+
+		self.assertEqual((pos_inv.paid_amount, pos_inv.outstanding_amount), (120, 0))
+		self.assertEqual((pos_inv.change_amount, pos_inv.base_change_amount), (10, 10))
 
 	def test_multi_payment_for_partly_paid_invoices(self):
 		set_allow_partial_payment(self.pos_profile, 1)
