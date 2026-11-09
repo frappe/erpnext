@@ -28,6 +28,9 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.disable_include_dimensions = cint(
 			frappe.get_single_value("Accounts Settings", "disable_include_dimensions")
 		)
+		bootinfo.sysdefaults.disable_serial_no_and_batch_selector = cint(
+			frappe.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector")
+		)
 
 		remove_disabled_price_list_defaults(bootinfo)
 
