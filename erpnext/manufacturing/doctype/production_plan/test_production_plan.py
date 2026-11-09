@@ -5588,7 +5588,7 @@ def create_production_plan(**args):
 
 def download_raw_material_rows(plan, warehouses=None):
 	"""Rows of the Download Required Materials CSV."""
-	from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+	from erpnext.manufacturing.doctype.production_plan.production_plan import (
 		download_raw_materials,
 	)
 
