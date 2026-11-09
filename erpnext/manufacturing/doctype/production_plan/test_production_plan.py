@@ -1284,6 +1284,37 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row[header.index("Required Qty")], row[header.index("UOM")]), ("5", "Box"))
 
+	def test_download_raw_materials_merges_transfer_and_purchase_in_one_uom(self):
+		from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+			download_raw_materials,
+		)
+
+		rm_item = make_item(
+			"_Test PP Download Merge RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		fg_item = make_item("_Test PP Download Merge FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Finished Goods - _TC", qty=20, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=50,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		# 20 Nos transferred from Finished Goods and 3 Box purchased
+		download_raw_materials(plan.as_dict(), warehouses=[{"warehouse": "Finished Goods - _TC"}])
+		header, row = list(csv.reader(io.StringIO(frappe.response.result)))[:2]
+
+		self.assertEqual((flt(row[header.index("Required Qty")]), row[header.index("UOM")]), (50, "Nos"))
+
 	def test_requested_sub_assembly_components_are_not_requested(self):
 		for item in (
 			"_Test PP Bought SA RM",
