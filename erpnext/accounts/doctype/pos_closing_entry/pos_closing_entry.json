@@ -20,6 +20,7 @@
   "column_break_7",
   "pos_profile",
   "user",
+  "currency",
   "section_break_12",
   "pos_invoices",
   "sales_invoices",
@@ -109,6 +110,14 @@
    "reqd": 1
   },
   {
+   "fetch_from": "pos_profile.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
    "label": "Modes of Payment"
@@ -130,6 +139,7 @@
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Grand Total",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -137,6 +147,7 @@
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -251,6 +262,7 @@
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
    "label": "Total Taxes and Charges",
+   "options": "currency",
    "read_only": 1
   }
  ],
@@ -263,7 +275,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2025-06-14 02:38:14.962291",
+ "modified": "2026-10-23 16:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
