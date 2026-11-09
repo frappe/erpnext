@@ -1069,7 +1069,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(row.rate, consumed_rate)
 		self.assertEqual(stock_value_difference, qty * consumed_rate)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_return_sends_back_each_batch_of_a_mixed_rate_bundle_at_its_consumed_rate(self):
 		scr, scr_return = make_draft_return_of_two_batches(-4)
 		consumed_rates = get_batch_rates(scr.name)
