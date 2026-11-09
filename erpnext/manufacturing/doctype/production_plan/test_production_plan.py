@@ -2726,6 +2726,7 @@ class TestProductionPlan(FrappeTestCase):
 			planned_qty=50,
 			for_warehouse="Stores - _TC",
 			skip_getting_mr_items=True,
+			ignore_existing_ordered_qty=1,
 			do_not_submit=1,
 		)
 		# 20 Nos transferred from Finished Goods and 3 Box purchased
@@ -3118,7 +3119,7 @@ def create_production_plan(**args):
 
 def download_raw_material_rows(plan, warehouses=None):
 	"""Rows of the Download Required Materials CSV."""
-	from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+	from erpnext.manufacturing.doctype.production_plan.production_plan import (
 		download_raw_materials,
 	)
 
