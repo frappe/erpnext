@@ -124,6 +124,27 @@ class TestPackedItem(ERPNextTestSuite):
 			so.reload()
 			self.assertEqual(so.packed_items[0].qty, packed_qty)
 
+	def test_update_items_packs_exact_component_qty_on_qty_increase(self):
+		"A qty increase packs from the exact conversion, not the ratio of the order's rounded packed qty."
+		from erpnext.accounts.services.child_item_update import update_child_qty_rate
+
+		component = make_item(
+			properties={"stock_uom": "Kg", "uoms": [{"uom": "Nos", "conversion_factor": 1 / 3}]}
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Nos"})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		so = make_sales_order(item_code=bundle, qty=1, warehouse=self.warehouse)
+		row = so.items[0]
+		trans_item = {"docname": row.name, "item_code": bundle, "qty": 30, "rate": row.rate}
+		trans_item.update({"uom": row.uom, "conversion_factor": row.conversion_factor})
+		update_child_qty_rate("Sales Order", frappe.as_json([trans_item]), so.name)
+		so.reload()
+		self.assertEqual(so.packed_items[0].qty, 10)
+
 	def test_component_uom_is_converted_to_stock_qty(self):
 		"A component measured in a non-stock UOM packs the converted stock quantity."
 		component = make_item(
