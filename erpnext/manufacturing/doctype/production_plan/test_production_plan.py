@@ -1285,6 +1285,33 @@ class TestProductionPlan(ERPNextTestSuite):
 			[("_Test PP Bought SA", 5), ("_Test PP Bought SA RM 2", 5)],
 		)
 
+	def test_requested_sub_assembly_gets_item_default_warehouse(self):
+		make_item("_Test PP Default WH SA RM", {"is_stock_item": 1})
+		make_item(
+			"_Test PP Default WH SA",
+			{
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "Stores - _TC"}],
+			},
+		)
+		make_item("_Test PP Default WH FG", {"is_stock_item": 1})
+		make_bom(item="_Test PP Default WH SA", raw_materials=["_Test PP Default WH SA RM"], currency="INR")
+		make_bom(item="_Test PP Default WH FG", raw_materials=["_Test PP Default WH SA"], currency="INR")
+
+		plan = create_production_plan(
+			item_code="_Test PP Default WH FG", planned_qty=5, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual(
+			[(row.get("item_code"), row.get("warehouse")) for row in items],
+			[("_Test PP Default WH SA", "Stores - _TC")],
+		)
+
 	def test_sub_assembly_bought_for_one_row_is_still_made_for_another(self):
 		for item in (
 			"_Test PP Mixed SA RM",
