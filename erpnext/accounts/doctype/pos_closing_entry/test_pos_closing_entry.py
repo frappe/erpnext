@@ -304,6 +304,38 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
 		self.assertEqual(batch_qty_with_pos, 10.0)
 
+	def test_closing_consolidates_sale_of_batch_disabled_after_sale(self):
+		item_code = make_item(
+			"_Test POS Closing Batch Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-POS-CLOSING-.####",
+				"create_new_batch": 1,
+			},
+		).name
+		se = make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		pos_inv = create_pos_invoice(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			do_not_submit=1,
+		)
+		pos_inv.payments[0].amount = pos_inv.grand_total
+		pos_inv.save()
+		pos_inv.submit()
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		make_closing_entry_from_opening(opening_entry).submit()
+
+		pos_inv.load_from_db()
+		self.assertTrue(pos_inv.consolidated_invoice)
+
 	def test_cancelling_pos_closing_entry_restores_batch_qty(self):
 		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
