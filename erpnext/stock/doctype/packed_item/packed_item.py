@@ -296,11 +296,18 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 
 def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=None):
 	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
-	if so_packed_item and so_packed_item.qty_per_unit:
-		return so_packed_item.qty_per_unit
-
 	# component qty is in the bundle row's UOM; convert to stock qty
-	return flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+	qty_per_unit = flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+
+	# the order's ratio comes from its rounded packed qty, so use it only once the conversion has changed
+	if so_packed_item and so_packed_item.qty_per_unit:
+		ordered_qty = flt(
+			qty_per_unit * flt(so_packed_item.order_stock_qty), frappe.get_precision("Packed Item", "qty")
+		)
+		if ordered_qty != flt(so_packed_item.qty):
+			return so_packed_item.qty_per_unit
+
+	return qty_per_unit
 
 
 def get_component_conversion_factor(packing_item, stock_uom):
