@@ -1897,17 +1897,8 @@ class SerialandBatchBundle(Document):
 			sabb_query = sabb_query.force_index(batch_no_index)
 
 		queries = [
-<<<<<<< HEAD
-			sle_query.select(Sum(sle.actual_qty).as_("qty"))
-			.where(sle.posting_datetime < posting_datetime)
-			.groupby(sle.batch_no),
-			sabb_query.select(Sum(child.qty).as_("qty"))
-			.where(parent.posting_datetime < posting_datetime)
-			.groupby(child.batch_no),
-=======
 			sle_query.select(sle.actual_qty.as_("qty")).where(sle.posting_datetime < posting_datetime),
-			sabb_query.select(child.qty).where(child.posting_datetime < posting_datetime),
->>>>>>> 7ff141f (fix(stock): lock batch entries before summing them on postgres)
+			sabb_query.select(child.qty).where(parent.posting_datetime < posting_datetime),
 		]
 		for query in queries:
 			batch_qty = (
