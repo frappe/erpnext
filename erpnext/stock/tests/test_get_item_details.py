@@ -669,6 +669,27 @@ class TestGetItemDetail(ERPNextTestSuite):
 			frappe.db.set_single_value("Buying Settings", "maintain_same_rate", original)
 			frappe.clear_cache(doctype="Buying Settings")
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 0})
+	def test_mapped_row_keeps_source_rate_the_user_cannot_write(self):
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		for fieldname in ("price_list_rate", "discount_percentage", "discount_amount", "rate"):
+			make_property_setter("Delivery Note Item", fieldname, "permlevel", 1, "Int")
+		self.addCleanup(frappe.clear_cache, doctype="Delivery Note Item")
+
+		first_so = make_sales_order(price_list_rate=2000, discount_percentage=10)
+		second_so = make_sales_order(price_list_rate=2000, discount_percentage=10)
+		user = make_fenced_user("_test_rate_permlevel_user@example.com", ["Stock User", "Sales User"])
+
+		with as_user(user):
+			dn = make_delivery_note(first_so.name).insert()
+			dn = make_delivery_note(second_so.name, target_doc=dn).save()
+
+		self.assertEqual([row.rate for row in dn.items], [1800, 1800])
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
 	def test_delivery_note_to_sales_invoice_keeps_item_rates(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
