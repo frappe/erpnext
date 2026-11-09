@@ -1546,6 +1546,11 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			stock_qty = qty * item_doc.conversion_factor
 			if not stock_qty:
 				continue
+		elif has_whole_number_stock_uom(item_doc.item_code):
+			stock_qty = get_exact_whole_stock_qty(stock_qty, item_doc.conversion_factor or 1, precision)
+			qty = stock_qty / (item_doc.conversion_factor or 1)
+			if not stock_qty:
+				continue
 
 		serial_nos = None
 		if item_location.serial_nos:
@@ -1582,6 +1587,23 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	# update available locations for the item
 	item_location_map[item_doc.item_code] = available_locations
 	return locations
+
+
+def has_whole_number_stock_uom(item_code: str) -> bool:
+	stock_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+	return bool(frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"))
+
+
+def get_exact_whole_stock_qty(stock_qty: float, conversion_factor: float, precision: int) -> int:
+	"""Largest whole stock qty up to stock_qty whose qty in the row UOM, rounded to precision,
+	converts back to it exactly. Multiples of a whole conversion factor always do."""
+	stock_qty_precision = frappe.get_precision("Pick List Item", "stock_qty")
+	for whole_qty in range(cint(floor(stock_qty)), 0, -1):
+		qty = flt(whole_qty / conversion_factor, precision)
+		if flt(qty * conversion_factor, stock_qty_precision) == whole_qty:
+			return whole_qty
+
+	return 0
 
 
 def get_available_item_locations(
