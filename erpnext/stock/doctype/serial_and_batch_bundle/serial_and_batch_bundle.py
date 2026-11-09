@@ -1897,15 +1897,25 @@ class SerialandBatchBundle(Document):
 			sabb_query = sabb_query.force_index(batch_no_index)
 
 		queries = [
+<<<<<<< HEAD
 			sle_query.select(Sum(sle.actual_qty).as_("qty"))
 			.where(sle.posting_datetime < posting_datetime)
 			.groupby(sle.batch_no),
 			sabb_query.select(Sum(child.qty).as_("qty"))
 			.where(parent.posting_datetime < posting_datetime)
 			.groupby(child.batch_no),
+=======
+			sle_query.select(sle.actual_qty.as_("qty")).where(sle.posting_datetime < posting_datetime),
+			sabb_query.select(child.qty).where(child.posting_datetime < posting_datetime),
+>>>>>>> 7ff141f (fix(stock): lock batch entries before summing them on postgres)
 		]
 		for query in queries:
-			for row in query.run(as_dict=True):
+			batch_qty = (
+				frappe.qb.from_(query)
+				.select(query.batch_no, Sum(query.qty).as_("qty"))
+				.groupby(query.batch_no)
+			)
+			for row in batch_qty.run(as_dict=True):
 				available_qty[row.batch_no] = flt(available_qty.get(row.batch_no)) + flt(row.qty)
 
 		return available_qty
