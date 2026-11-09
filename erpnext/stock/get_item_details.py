@@ -255,7 +255,7 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 		doc = json.loads(doc)
 
 	source_fields = maintain_same_rate_source_fields.get(ctx.parenttype or ctx.doctype)
-	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
+	if not source_fields or not doc or ctx.get("is_return") or not is_rate_locked(ctx):
 		return None
 
 	row = (
@@ -279,17 +279,29 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	return None
 
 
-def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
-	if (ctx.parenttype or ctx.doctype) in purchase_doctypes:
+def is_rate_locked(ctx: ItemDetailsCtx) -> bool:
+	"""Mapped rows keep the source rate when maintain same rate is on or the user cannot write the rate."""
+	parenttype = ctx.parenttype or ctx.doctype
+	if parenttype in purchase_doctypes:
 		if ctx.get("is_internal_supplier"):
 			return False
-		return bool(cint(frappe.get_cached_value("Buying Settings", "Buying Settings", "maintain_same_rate")))
-
-	if ctx.get("is_internal_customer"):
+		maintain_same_rate = frappe.get_cached_value(
+			"Buying Settings", "Buying Settings", "maintain_same_rate"
+		)
+	elif ctx.get("is_internal_customer"):
 		return False
-	return bool(
-		cint(frappe.get_cached_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate"))
-	)
+	else:
+		maintain_same_rate = frappe.get_cached_value(
+			"Selling Settings", "Selling Settings", "maintain_same_sales_rate"
+		)
+
+	return bool(cint(maintain_same_rate)) or not has_rate_write_access(parenttype)
+
+
+def has_rate_write_access(parenttype: str) -> bool:
+	"""Frappe resets an item rate the user cannot write when the document is saved."""
+	item_meta = frappe.get_meta(frappe.get_meta(parenttype).get_field("items").options)
+	return item_meta.get_field("rate").permlevel in item_meta.get_permlevel_access("write", parenttype)
 
 
 def lock_source_rate(out: frappe._dict, source_row) -> None:
