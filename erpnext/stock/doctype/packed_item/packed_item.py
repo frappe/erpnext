@@ -293,6 +293,7 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 		.join(order_item)
 		.on(order_item.name == packed_item.parent_detail_docname)
 		.select(
+			packed_item.name,
 			packed_item.parent_detail_docname,
 			packed_item.parent_item,
 			packed_item.item_code,
