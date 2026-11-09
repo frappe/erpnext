@@ -1543,7 +1543,6 @@ class TestJobCard(FrappeTestCase):
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_employee_overlap_hides_a_job_card_the_user_cannot_read(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
 		from frappe.permissions import add_user_permission
 
 		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
@@ -1561,7 +1560,7 @@ class TestJobCard(FrappeTestCase):
 		restricted_card.append("time_logs", jc_review_log("2031-03-16 08:00:00", 60, 0, employee))
 		restricted_card.save()
 
-		user = create_user("jc-overlap-restricted@example.com", "Manufacturing User")
+		user = make_jc_review_user("jc-overlap-restricted@example.com")
 		add_user_permission("Work Order", allowed_card.work_order, user.name)
 		with self.set_user(user.name):
 			card = frappe.get_doc("Job Card", allowed_card.name)
@@ -1707,7 +1706,6 @@ class TestJobCard(FrappeTestCase):
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_job_card_lookups_follow_work_order_user_permissions(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
 		from frappe.permissions import add_user_permission
 
 		from erpnext.manufacturing.doctype.job_card.job_card import get_job_details, get_operation_details
@@ -1723,7 +1721,7 @@ class TestJobCard(FrappeTestCase):
 		restricted_card.append("time_logs", jc_review_log("2031-03-10 08:00:00", 60, 0))
 		restricted_card.save()
 
-		user = create_user("jc-lookup-restricted@example.com", "Manufacturing User")
+		user = make_jc_review_user("jc-lookup-restricted@example.com")
 		add_user_permission("Work Order", allowed.name, user.name)
 
 		with self.set_user(user.name):
@@ -1947,6 +1945,13 @@ def jc_review_log(from_time, minutes, completed_qty=0, employee=None, **values):
 		"employee": employee,
 		**values,
 	}
+
+
+def make_jc_review_user(email):
+	user = frappe.new_doc("User")
+	user.update({"email": email, "first_name": email.split("@")[0], "send_welcome_email": 0})
+	user.append("roles", {"role": "Manufacturing User"})
+	return user.insert()
 
 
 def make_jc_review_employee():
