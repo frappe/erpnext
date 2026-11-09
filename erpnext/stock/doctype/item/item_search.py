@@ -19,6 +19,7 @@ def has_trigram_tokenizer() -> bool:
 	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
 
 
+<<<<<<< HEAD
 def has_diacritics_option() -> bool:
 	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
 	return sqlite3.sqlite_version_info >= DIACRITICS_SQLITE_VERSION
@@ -34,6 +35,20 @@ def fold_diacritics(text: str) -> str:
 		return text
 
 	return "".join(char for char in unicodedata.normalize("NFKD", text) if not unicodedata.combining(char))
+=======
+def fold_text(text: str) -> str:
+	"""Fold what MariaDB's utf8mb4_unicode_ci treats as equal: accents, kana voicing marks,
+	character width, small and full-size kana, katakana with hiragana, and digits of any script."""
+	decomposed = (
+		unicodedata.normalize("NFKD", text).translate(KATAKANA_TO_HIRAGANA).translate(SMALL_KANA_TO_FULL_SIZE)
+	)
+	return "".join(fold_digit(char) for char in decomposed if not unicodedata.combining(char))
+
+
+def fold_digit(char: str) -> str:
+	digit = unicodedata.digit(char, None)
+	return char if digit is None else str(digit)
+>>>>>>> 6ad4805 (fix(stock): fold digits of any script in the Item search index)
 
 
 def validate_sqlite_version():
