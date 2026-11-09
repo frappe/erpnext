@@ -224,10 +224,19 @@ def get_gl_entries(filters, accounting_dimensions):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
-	else:
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
+
+
+def convert_gl_entries_currency(gl_entries, currency_map, filters):
+	if not filters.get("presentation_currency"):
 		return gl_entries
+
+	return convert_to_presentation_currency(
+		gl_entries,
+		currency_map,
+		filters,
+		use_account_currency=not filters.get("convert_at_reporting_date_rate"),
+	)
 
 
 def get_conditions(filters):
@@ -986,9 +995,7 @@ def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters, use_account_currency=True)
-	return gl_entries
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
 
 
 def _build_gl_conditions_duckdb(filters):
