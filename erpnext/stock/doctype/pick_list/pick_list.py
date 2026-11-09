@@ -817,6 +817,7 @@ class PickList(TransactionBase):
 					pick_list=self.name,
 					keep_all_locations=bool(
 						frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
+						or has_whole_number_stock_uom(item_code)
 					),
 					exclude_warehouses=excluded_warehouses,
 					own_vouchers=own_vouchers,
