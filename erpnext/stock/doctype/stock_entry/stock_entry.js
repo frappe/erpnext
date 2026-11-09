@@ -1129,23 +1129,17 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	set_source_warehouse_query() {
-		frappe.db.get_value(
-			"Stock Settings",
-			{ name: "Stock Settings" },
-			"sample_retention_warehouse",
-			(r) => {
-				const source_warehouse_query = () => {
-					const query = erpnext.queries.warehouse(this.frm.doc);
-					if (r?.sample_retention_warehouse) {
-						query.filters.push(["Warehouse", "name", "!=", r.sample_retention_warehouse]);
-					}
-					return query;
-				};
-
-				this.frm.set_query("from_warehouse", source_warehouse_query);
-				this.frm.set_query("s_warehouse", "items", source_warehouse_query);
+		const source_warehouse_query = () => {
+			const query = erpnext.queries.warehouse(this.frm.doc);
+			const sample_retention_warehouse = frappe.boot.sysdefaults.sample_retention_warehouse;
+			if (sample_retention_warehouse) {
+				query.filters.push(["Warehouse", "name", "!=", sample_retention_warehouse]);
 			}
-		);
+			return query;
+		};
+
+		this.frm.set_query("from_warehouse", source_warehouse_query);
+		this.frm.set_query("s_warehouse", "items", source_warehouse_query);
 	}
 
 	setup() {

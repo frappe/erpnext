@@ -30,6 +30,10 @@ def boot_session(bootinfo):
 			frappe.get_single_value("Accounts Settings", "disable_include_dimensions")
 		)
 
+		bootinfo.sysdefaults.sample_retention_warehouse = frappe.db.get_single_value(
+			"Stock Settings", "sample_retention_warehouse"
+		)
+
 		remove_disabled_price_list_defaults(bootinfo)
 
 		bootinfo.sysdefaults.quotation_valid_till = cint(
