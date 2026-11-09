@@ -782,9 +782,10 @@ class JobCard(Document):
 				as_list=True,
 			)
 		)
+		precision = self.precision("transferred_qty", "items")
 		for row in wo_items:
 			expected = flt(row.required_qty) / wo_qty * flt(self.for_quantity)
-			if flt(transferred.get(row.item_code), 6) < flt(expected, 6):
+			if flt(transferred.get(row.item_code), precision) < flt(expected, precision):
 				return True
 		return False
 
