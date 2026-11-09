@@ -13,7 +13,6 @@ LIKE_WILDCARDS = r"[%_]"
 QUEUE_PREFIX = "Item:"
 BARCODE_COLUMN = "barcodes"
 MINIMUM_SQLITE_VERSION = (3, 34, 0)
-DIACRITICS_SQLITE_VERSION = (3, 45, 0)
 KATAKANA_TO_HIRAGANA = {code: code - 0x60 for code in range(ord("ァ"), ord("ヶ") + 1)}
 SMALL_KANA_TO_FULL_SIZE = str.maketrans(
 	"ぁぃぅぇぉっゃゅょゎゕゖㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿ",
@@ -23,15 +22,6 @@ SMALL_KANA_TO_FULL_SIZE = str.maketrans(
 
 def has_trigram_tokenizer() -> bool:
 	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
-
-
-def has_diacritics_option() -> bool:
-	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
-	return sqlite3.sqlite_version_info >= DIACRITICS_SQLITE_VERSION
-
-
-def get_tokenizer() -> str:
-	return "trigram remove_diacritics 1" if has_diacritics_option() else "trigram"
 
 
 def fold_text(text: str) -> str:
@@ -82,7 +72,7 @@ class ItemSearch(SQLiteSearch):
 			}
 		}
 		self.INDEX_SCHEMA = {
-			"tokenizer": get_tokenizer(),
+			"tokenizer": "trigram",
 			"text_fields": [
 				"title",
 				"content",
@@ -99,40 +89,29 @@ class ItemSearch(SQLiteSearch):
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
 
 	def index_exists(self) -> bool:
-		"""A table missing a searched column, or built for another SQLite, cannot answer, so it
-		reports itself absent.
+		"""A table missing a searched column cannot answer, so it reports itself absent.
 
 		The searched fields come from the Item meta, so a site that adds one leaves an older table
-		short. A SQLite upgrade or downgrade changes whether the tokenizer or Python folds accents.
-		Callers fall back and the builder replaces it. One connection: this runs on every save.
+		short. Callers fall back and the builder replaces it.
 		"""
 		if not os.path.exists(self.db_path):
 			return False
 
-		columns, definition = self.get_index_table()
-		return (
-			set(self.schema["text_fields"]) <= columns
-			and ("remove_diacritics" in definition) == has_diacritics_option()
-		)
+		return set(self.schema["text_fields"]) <= self.get_index_columns()
 
-	def get_index_table(self) -> tuple[set[str], str]:
-		"""Columns and CREATE statement of the built table, empty when there is no table."""
+	def get_index_columns(self) -> set[str]:
+		"""Columns of the built table, empty when there is no table."""
 		try:
 			connection = self._get_connection(read_only=True)
 		except SQLiteSearchIndexMissingError:
-			return set(), ""
+			return set()
 
 		try:
-			definition = connection.execute(
-				"SELECT sql FROM sqlite_master WHERE name = 'search_fts'"
-			).fetchone()
-			columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+			return {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
 		except sqlite3.Error:
-			return set(), ""
+			return set()
 		finally:
 			connection.close()
-
-		return columns, definition["sql"] if definition else ""
 
 	def get_documents_paginated(self, doctype, *args, **kwargs):
 		"""Preload the batch's barcodes: reading them per document would be one query each."""
