@@ -30,7 +30,7 @@ from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_childr
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.item.item import get_uom_conv_factor
+from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -1879,7 +1879,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 						planned_qty=planned_qty,
 					)
 		elif data.get("item_code"):
-			item_master = frappe.get_doc("Item", data["item_code"]).as_dict()
+			item_master = get_item_defaults(data["item_code"], doc.get("company"))
 			purchase_uom = item_master.purchase_uom or item_master.stock_uom
 			conversion_factor = (
 				get_uom_conversion_factor(item_master.name, purchase_uom) if item_master.purchase_uom else 1.0
