@@ -950,6 +950,7 @@ def _raw_materials_header():
 		"Reserved Qty for Production",
 		"Safety Stock",
 		"Required Qty",
+		"UOM",
 	]
 
 
@@ -984,6 +985,7 @@ def _raw_material_row(d):
 		d.get("reserved_qty_for_production"),
 		d.get("safety_stock"),
 		d.get("quantity"),
+		d.get("uom"),
 	]
 
 
