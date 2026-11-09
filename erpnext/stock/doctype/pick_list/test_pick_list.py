@@ -959,6 +959,29 @@ class TestPickList(ERPNextTestSuite):
 			[(row.warehouse, row.qty) for row in pick_list.locations], [("_Test Warehouse 1 - _TC", 2)]
 		)
 
+	def test_a_fractional_uom_splits_only_at_whole_stock_qty_it_can_express(self):
+		"""5 Nos is 0.41666 Box, which no Delivery Note qty converts back to whole Nos."""
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse 1 - _TC", qty=36, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, uom="Box")
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name).insert()
+
+		self.assertEqual(
+			[(row.warehouse, row.qty, row.stock_qty) for row in delivery_note.items],
+			[("_Test Warehouse - _TC", 0.25, 3), ("_Test Warehouse 1 - _TC", 1.75, 21)],
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_cancelling_a_pick_list_cancels_its_open_reservations(self):
 		item = make_item(properties={"is_stock_item": 1}).name
