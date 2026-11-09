@@ -19,6 +19,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
+from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 	get_picked_serial_nos,
@@ -815,10 +816,13 @@ class PickList(TransactionBase):
 
 	def update_bundle_picked_qty(self):
 		product_bundles = self._get_product_bundles()
-		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles.values())
+		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
 
-		for so_row, value in product_bundles.items():
-			picked_qty = self._compute_picked_qty_for_bundle(so_row, product_bundle_qty_map[value.item_code])
+		for so_row in product_bundles:
+			bundle_items = product_bundle_qty_map.get(so_row)
+			if not bundle_items:
+				continue
+			picked_qty = self._compute_picked_qty_for_bundle(so_row, bundle_items)
 			item_table = "Sales Order Item"
 			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
 			frappe.db.set_value(
@@ -941,35 +945,28 @@ class PickList(TransactionBase):
 
 		return query.run(as_dict=True)
 
-	def _get_product_bundles(self) -> dict[str, frappe._dict]:
-		product_bundles = {}
-		for item in self.locations:
-			if not item.product_bundle_item:
-				continue
+	def _get_product_bundles(self) -> list[str]:
+		"""Sales Order rows of the bundles picked in this list, in location order."""
+		so_item_names = list(
+			dict.fromkeys(item.sales_order_item for item in self.locations if item.product_bundle_item)
+		)
+		if not so_item_names:
+			return []
 
-			product_bundles[item.sales_order_item] = frappe._dict(
-				{
-					"item_code": frappe.db.get_value(
-						"Sales Order Item",
-						item.sales_order_item,
-						"item_code",
-					),
-				}
-			)
-		return product_bundles
+		existing = set(
+			frappe.get_all("Sales Order Item", filters={"name": ("in", so_item_names)}, pluck="name")
+		)
+		return [name for name in so_item_names if name in existing]
 
-	def _get_product_bundle_qty_map(self, bundles) -> dict[str, dict[str, float]]:
-		product_bundle_qty_map = {}
-		for data in bundles:
-			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": data.item_code, "disabled": 0})
-			# picked_qty is in the component's stock UOM, so convert the bundle qty too
-			qty_map = defaultdict(float)
-			for item in bundle.items:
-				qty_map[item.item_code] += flt(item.qty) * flt(
-					get_conversion_factor(item.item_code, item.uom).get("conversion_factor")
-				)
-			product_bundle_qty_map[data.item_code] = qty_map
-		return product_bundle_qty_map
+	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
+		"""Component stock qty per bundle, by Sales Order row and item, as the order packed it."""
+		qty_map = defaultdict(lambda: defaultdict(float))
+		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
+			for row in packed_items:
+				if row.qty_per_unit:
+					qty_map[so_row][row.item_code] += row.qty_per_unit
+
+		return qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
@@ -1859,17 +1856,17 @@ def add_product_bundles_to_delivery_note(
 			for row in pick_list.locations
 			if row.product_bundle_item and row.name in selected_locations
 		}
-		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+		product_bundles = [so_row for so_row in product_bundles if so_row in selected_bundles]
 
-	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
+	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles)
 
-	for so_row, value in product_bundles.items():
+	for so_row in product_bundles:
 		sales_order_item = frappe.get_doc("Sales Order Item", so_row)
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
 		pending_qty = pick_list._compute_picked_qty_for_bundle(
-			so_row, product_bundle_qty_map[value.item_code], pending_only=True
+			so_row, product_bundle_qty_map.get(so_row, {}), pending_only=True
 		)
 		if not pending_qty:
 			continue
