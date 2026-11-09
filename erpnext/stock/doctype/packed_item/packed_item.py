@@ -298,7 +298,7 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
 	pi_row.qty = flt(
-		get_component_stock_qty_per_unit(packing_item, item_data, so_packed_item)
+		get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
 		* flt(main_item_row.stock_qty),
 		pi_row.precision("qty"),
 	)
@@ -309,13 +309,13 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 		pi_row.description = packing_item.get("description")
 
 
-def get_component_stock_qty_per_unit(packing_item, item_data, so_packed_item=None):
+def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=None):
 	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
 	if so_packed_item and so_packed_item.qty_per_unit:
 		return so_packed_item.qty_per_unit
 
 	# component qty is in the bundle row's UOM; convert to stock qty
-	return flt(packing_item.qty) * get_component_conversion_factor(packing_item, item_data.stock_uom)
+	return flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
 
 
 def get_component_conversion_factor(packing_item, stock_uom):
