@@ -67,11 +67,13 @@ def make_packing_list(doc):
 	set_price_from_children = frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
+	order_packed_items = get_order_packed_items(doc)
 
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
 		if is_product_bundle(item_row.item_code):
+			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
 			for bundle_item in get_product_bundle_items(item_row.item_code):
 				pi_row = add_packed_item_row(
 					doc=doc,
@@ -81,7 +83,10 @@ def make_packing_list(doc):
 					reset=reset,
 				)
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data)
+				so_packed_item = pop_order_packed_item(
+					so_packed_items, item_row.item_code, bundle_item.item_code
+				)
+				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
 				update_packed_item_price_data(pi_row, item_data, doc)
 
@@ -231,20 +236,87 @@ def get_packed_item_details(item_code, company):
 	return query.run(as_dict=True)[0]
 
 
-def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data):
+def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data, so_packed_item=None):
 	pi_row.parent_item = main_item_row.item_code
 	pi_row.parent_detail_docname = main_item_row.name
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	# component qty is in the bundle row's UOM; convert to stock qty before scaling by bundle qty
-	component_factor = get_component_conversion_factor(packing_item, item_data.stock_uom)
-	pi_row.qty = flt(packing_item.qty) * component_factor * flt(main_item_row.stock_qty)
+	pi_row.qty = flt(
+		get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
+		* flt(main_item_row.stock_qty),
+		pi_row.precision("qty"),
+	)
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
+
+
+def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=None):
+	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
+	if so_packed_item and so_packed_item.qty_per_unit:
+		return so_packed_item.qty_per_unit
+
+	# component qty is in the bundle row's UOM; convert to stock qty
+	return flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+
+
+def get_order_packed_items(doc) -> dict:
+	"""Packed rows of the rows this document is made from, by that row in idx order:
+	the returned document's for a return, else the Sales Order's."""
+	return get_packed_items_of_order_rows(
+		{row for item in doc.get("items") if (row := get_order_row(doc, item))},
+		doc.doctype if doc.get("is_return") else "Sales Order",
+	)
+
+
+def get_order_row(doc, item_row):
+	"""Row whose packed rows ``item_row`` keeps the qty of."""
+	if not doc.get("is_return"):
+		return item_row.get("so_detail")
+	return item_row.get(
+		"dn_detail" if doc.doctype == "Delivery Note" else frappe.scrub(doc.doctype) + "_item"
+	)
+
+
+def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
+	"""Packed rows of the given rows of ``doctype``, by row in idx order."""
+	if not order_rows:
+		return {}
+
+	packed_item = frappe.qb.DocType("Packed Item")
+	order_item = frappe.qb.DocType(f"{doctype} Item")
+	rows = (
+		frappe.qb.from_(packed_item)
+		.join(order_item)
+		.on(order_item.name == packed_item.parent_detail_docname)
+		.select(
+			packed_item.parent_detail_docname,
+			packed_item.parent_item,
+			packed_item.item_code,
+			packed_item.qty,
+			order_item.stock_qty.as_("order_stock_qty"),
+		)
+		.where((packed_item.parenttype == doctype) & packed_item.parent_detail_docname.isin(list(order_rows)))
+		.orderby(packed_item.idx)
+		.run(as_dict=True)
+	)
+
+	order_packed_items = {}
+	for row in rows:
+		row.qty_per_unit = flt(row.qty) / flt(row.order_stock_qty) if flt(row.order_stock_qty) else 0
+		order_packed_items.setdefault(row.parent_detail_docname, []).append(row)
+
+	return order_packed_items
+
+
+def pop_order_packed_item(so_packed_items, parent_item, item_code):
+	"""Take the order's packed row of a component; a component repeated in the bundle takes the next one."""
+	for idx, row in enumerate(so_packed_items):
+		if row.parent_item == parent_item and row.item_code == item_code:
+			return so_packed_items.pop(idx)
 
 
 def get_component_conversion_factor(packing_item, stock_uom):
