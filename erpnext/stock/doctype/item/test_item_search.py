@@ -29,6 +29,11 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		for txt in ("ab%cd", "ab_cd", "a%b%c"):
 			self.assertIsNone(build_match_query(txt), txt)
 
+	def test_folds_digits_of_any_script(self):
+		"""LIKE treats every digit as its ASCII digit, so the index must too."""
+		for txt in ("ABC١٢٣", "ABC۱۲۳", "ABC१२३", "ABC❶❷❸"):
+			self.assertEqual(build_match_query(txt), '"ABC123"', txt)
+
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
 		self.assertIsNone(build_match_query("ab\\_cd"))
