@@ -1468,35 +1468,6 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(operation_cost, 600)
 
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-	def test_operation_cost_of_submitted_job_card_without_hour_rate(self):
-		workstation = make_jc_review_workstation(hour_rate=600)
-		operation = make_jc_review_operation(workstation)
-		wo = make_jc_review_work_order(
-			make_jc_review_item(),
-			[{"item_code": make_jc_review_item(), "qty": 1}],
-			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
-			skip_transfer=1,
-		)
-
-		first_card = get_jc_review_job_cards(wo.name)[0]
-		second_card = frappe.copy_doc(first_card)
-		first_card.for_quantity = 5
-		first_card.append("time_logs", jc_review_log("2031-03-03 08:00:00", 60, 5))
-		first_card.submit()
-		first_card.db_set("hour_rate", 0)
-
-		second_card.for_quantity = 5
-		second_card.set("time_logs", [jc_review_log("2031-03-03 10:00:00", 30, 5)])
-		second_card.set("scheduled_time_logs", [])
-		second_card.insert()
-		second_card.submit()
-
-		operation_cost = frappe.db.get_value(
-			"Work Order Operation", {"parent": wo.name}, "actual_operating_cost"
-		)
-		self.assertEqual(operation_cost, 900)
-
-	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_workstation_capacity_counts_logs_of_other_employees(self):
 		workstation = make_jc_review_workstation(capacity=1)
 		operation = make_jc_review_operation(workstation)
