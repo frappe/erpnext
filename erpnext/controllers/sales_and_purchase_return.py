@@ -216,8 +216,10 @@ def validate_returned_items(doc):
 def validate_returned_bundle_components(doc, valid_items, already_returned_items):
 	"""Hold the components of returned bundles to what is left of each delivered component."""
 	from erpnext.stock.doctype.packed_item.packed_item import (
-		get_component_conversion_factor,
+		get_component_stock_qty_per_unit,
+		get_order_packed_items,
 		get_product_bundle_items,
+		pop_order_packed_item,
 	)
 
 	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
@@ -228,6 +230,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 			pluck="new_item_code",
 		)
 	)
+	order_packed_items = get_order_packed_items(doc)
 	components = {}
 	for row in returned_rows:
 		if row.item_code not in bundle_items:
@@ -239,7 +242,9 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
 		if frappe.db.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
+		so_packed_items = list(order_packed_items.get(row.get("so_detail"), []))
 		for component in components[row.item_code]:
+			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
 			ref = valid_items.get(component.item_code)
 			if not ref:
 				continue
@@ -248,8 +253,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 				component.item_code, frappe._dict(qty=0, stock_qty=0)
 			)
 			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
-			# component.qty is in the bundle-row UOM; convert to stock qty, as packing does
-			component_stock_qty = flt(component.qty) * get_component_conversion_factor(component, None)
+			component_stock_qty = get_component_stock_qty_per_unit(component, None, so_packed_item)
 			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * component_stock_qty
 			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
 				ref.stock_qty, row.precision("stock_qty")
