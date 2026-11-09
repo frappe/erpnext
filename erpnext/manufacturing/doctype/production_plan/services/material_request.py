@@ -849,6 +849,7 @@ def _material_request_item_row(
 		"projected_qty": bin_dict.get("projected_qty", 0),
 		"ordered_qty": bin_dict.get("ordered_qty", 0),
 		"reserved_qty_for_production": bin_dict.get("reserved_qty_for_production", 0),
+		"planned_qty": bin_dict.get("planned_qty", 0),
 		"min_order_qty": row["min_order_qty"],
 		"material_request_type": row.get("default_material_request_type"),
 		"sales_order": sales_order,
@@ -1008,11 +1009,13 @@ def _append_other_warehouse_bins(item_list, d, doc):
 				"",
 				"",
 				"",
+				"",
 				bin_dict.get("warehouse"),
 				"",
 				bin_dict.get("projected_qty", 0),
 				bin_dict.get("actual_qty", 0),
 				bin_dict.get("ordered_qty", 0),
+				bin_dict.get("planned_qty", 0),
 				bin_dict.get("reserved_qty_for_production", 0),
 			]
 		)

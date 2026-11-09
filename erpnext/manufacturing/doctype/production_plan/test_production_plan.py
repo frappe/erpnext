@@ -1305,6 +1305,25 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((flt(row[header.index("Required Qty")]), row[header.index("UOM")]), (50, "Nos"))
 
+	def test_download_raw_materials_puts_other_warehouse_qty_under_its_columns(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Finished Goods - _TC", qty=7, rate=100)
+		frappe.db.set_value(
+			"Bin", {"item_code": rm_item, "warehouse": "Finished Goods - _TC"}, "planned_qty", 4
+		)
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=50, skip_getting_mr_items=True, do_not_submit=1
+		)
+		header, item_row, warehouse_row = download_raw_material_rows(plan)[:3]
+
+		self.assertEqual(flt(item_row[header.index("Planned Qty")]), 4)
+		self.assertEqual(warehouse_row[header.index("Warehouse")], "Finished Goods - _TC")
+		self.assertEqual(flt(warehouse_row[header.index("Available Qty In Hand")]), 7)
+		self.assertEqual(flt(warehouse_row[header.index("Planned Qty")]), 4)
+
 	def test_requested_sub_assembly_components_are_not_requested(self):
 		for item in (
 			"_Test PP Bought SA RM",
