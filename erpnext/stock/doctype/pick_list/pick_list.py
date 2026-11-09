@@ -16,12 +16,17 @@ from frappe.utils import ceil, cint, cstr, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
+<<<<<<< HEAD
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_sales_invoice as create_sales_invoice_from_sales_order,
 )
+=======
+from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
+from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
+>>>>>>> 710a59f (fix(stock): deliver product bundle components at the qty the Sales Order packed)
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 	get_reserved_serial_nos_for_sre,
@@ -871,10 +876,18 @@ class PickList(TransactionBase):
 
 	def update_bundle_picked_qty(self):
 		product_bundles = self._get_product_bundles()
-		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles.values())
+		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
 
+<<<<<<< HEAD
 		for so_row, value in product_bundles.items():
 			picked_qty = self._compute_picked_qty_for_bundle(so_row, product_bundle_qty_map[value.item_code])
+=======
+		for so_row in product_bundles:
+			bundle_items = product_bundle_qty_map.get(so_row)
+			if not bundle_items:
+				continue
+			picked_qty = self._compute_picked_qty_for_bundle(so_row, bundle_items)
+>>>>>>> 710a59f (fix(stock): deliver product bundle components at the qty the Sales Order packed)
 			item_table = "Sales Order Item"
 			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
 			frappe.db.set_value(
@@ -1001,6 +1014,7 @@ class PickList(TransactionBase):
 
 		return query.run(as_dict=True)
 
+<<<<<<< HEAD
 	def _get_product_bundles(self) -> dict[str, frappe._dict]:
 		product_bundles = {}
 		for item in self.locations:
@@ -1029,6 +1043,27 @@ class PickList(TransactionBase):
 				for item in bundle.items
 			}
 		return product_bundle_qty_map
+=======
+	def _get_product_bundles(self) -> list[str]:
+		"""Sales Order rows of the bundles picked in this list, in location order."""
+		so_item_names = list(
+			dict.fromkeys(item.sales_order_item for item in self.locations if item.product_bundle_item)
+		)
+		if not so_item_names:
+			return []
+
+		existing = set(
+			frappe.get_all("Sales Order Item", filters={"name": ("in", so_item_names)}, pluck="name")
+		)
+		return [name for name in so_item_names if name in existing]
+
+	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
+		"""Component stock qty per bundle, by Sales Order row, as the order packed it."""
+		return {
+			so_row: {row.item_code: row.qty_per_unit for row in packed_items if row.qty_per_unit}
+			for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items()
+		}
+>>>>>>> 710a59f (fix(stock): deliver product bundle components at the qty the Sales Order packed)
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
