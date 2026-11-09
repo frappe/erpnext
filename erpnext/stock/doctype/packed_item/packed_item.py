@@ -60,8 +60,10 @@ class PackedItem(Document):
 	pass
 
 
-def make_packing_list(doc):
-	"Make/Update packing list for Product Bundle Item."
+def make_packing_list(doc, order_packed_items=None):
+	"""Make/Update packing list for Product Bundle Item.
+
+	order_packed_items: a Sales Order's own packed rows by order row, to keep their qty on Update Items."""
 
 	if doc.get("is_subcontracted"):
 		return
@@ -73,7 +75,8 @@ def make_packing_list(doc):
 	set_price_from_children = frappe.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
-	order_packed_items = get_order_packed_items(doc)
+	if order_packed_items is None:
+		order_packed_items = get_order_packed_items(doc)
 
 	reset = reset_packing_list(doc)
 
@@ -87,7 +90,8 @@ def make_packing_list(doc):
 			item_row.is_product_bundle = 1 if bundle_name else 0
 
 		if bundle_name:
-			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
+			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
+			so_packed_items = list(order_packed_items.get(order_row, []))
 			for bundle_item in get_product_bundle_items_by_name(bundle_name):
 				pi_row = add_packed_item_row(
 					doc=doc,
