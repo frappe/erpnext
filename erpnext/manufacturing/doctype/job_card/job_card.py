@@ -719,6 +719,7 @@ class JobCard(Document):
 					)
 				)
 
+<<<<<<< HEAD
 			if self.get("operation") == d.operation or self.is_corrective_job_card:
 				self.append(
 					"items",
@@ -731,6 +732,28 @@ class JobCard(Document):
 						"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
 					},
 				)
+=======
+		if d.operation_row_id and self.operation_row_id:
+			if self.operation_row_id != d.operation_row_id:
+				return
+		elif self.get("operation") != d.operation:
+			return
+
+		self.append(
+			"items",
+			{
+				"item_code": d.item_code,
+				"source_warehouse": self.source_warehouse or d.source_warehouse,
+				"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+				"item_name": d.item_name,
+				"description": d.description,
+				"required_qty": flt(
+					d.required_qty * flt(self.for_quantity) / flt(operation_qty or doc.qty),
+					frappe.get_precision("Job Card Item", "required_qty"),
+				),
+			},
+		)
+>>>>>>> 98e9ed6 (fix(manufacturing): round the Job Card's required qty to its precision)
 
 	def before_save(self):
 		self.set_expected_and_actual_time()
