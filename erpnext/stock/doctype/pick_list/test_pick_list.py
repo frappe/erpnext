@@ -1238,6 +1238,32 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
 		self.assertEqual(delivery_note.items[0].qty, 3)
 
+	def test_bundle_with_repeated_component_keeps_undelivered_bundles_pending(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=100, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
+		delivery_note.items[0].qty = 1
+		delivery_note.submit()
+
+		pick_list.reload()
+		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
+		self.assertEqual(delivery_note.items[0].qty, 2)
+		self.assertEqual([row.qty for row in delivery_note.packed_items], [2, 4])
+
 	def test_pick_list_skips_closed_bundle_rows(self):
 		from erpnext.controllers.item_close import update_closed_status
 
