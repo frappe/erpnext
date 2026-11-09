@@ -377,7 +377,7 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if not item.bom:
 				frappe.throw(
-					_("Row #{0}: BOM is not specified for subcontracting item {0}").format(
+					_("Row #{0}: BOM is not specified for subcontracting item {1}").format(
 						item.idx, item.item_code
 					)
 				)
