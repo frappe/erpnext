@@ -1425,11 +1425,7 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 				continue
 
 			if parent_doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
-				batch_qty = get_available_batch_qty(
-					parent_doc,
-					batch_no,
-					warehouse,
-				)
+				batch_qty = min(batch_qty, get_available_batch_qty(parent_doc, batch_no, warehouse))
 
 				if batch_qty <= 0:
 					unavailable_batch = batch_no
@@ -1449,6 +1445,17 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 			)
 
 	return filterd_serial_batch
+
+
+def remove_picked_serial_batches(data, picked, parent_doc):
+	"""Drop what a return row picked so later rows against the same row do not pick it again."""
+	for serial_no in picked.serial_nos:
+		data.serial_nos.pop(serial_no, None)
+
+	sign = -1 if parent_doc.get("is_internal_customer") else 1
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	for batch_no, qty in picked.batches.items():
+		data.batches[batch_no] = flt(data.batches[batch_no] - sign * qty, precision)
 
 
 def get_available_batch_qty(parent_doc, batch_no, warehouse):
