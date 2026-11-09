@@ -112,6 +112,105 @@
     style-mod "^4.1.0"
     w3c-keyname "^2.2.4"
 
+"@cropper/element-canvas@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-canvas/-/element-canvas-2.3.1.tgz#133eb0dd148d562d0359a415b477c122c503eba3"
+  integrity sha512-UH3VMyjn58PdwYkPiTHuvRUjGzmyKr6E2pYWxTxN/04wnjgYLA77B5u5c1HhV6vD1ZKSvxJ/i9TkiySR9P1D6A==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-crosshair@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-crosshair/-/element-crosshair-2.3.1.tgz#8940a0c85a1a186ce5b6259cc69a5f8b7483d7d3"
+  integrity sha512-Vz2heRwr2nd2rZ161vKyE4JwYV3eSodGCGGZq39TR0LICGOOeggLq0R664Af/eFB9PU8+tfJ42lWLoUdxQlVJQ==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-grid@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-grid/-/element-grid-2.3.1.tgz#3b755c0802bb45705f280979d654b1b0077526fa"
+  integrity sha512-6LDaUDxH2xdA7biTcqnihPQVHjlT4bXysA403s9rU4jo5f4pPnFHtNbB+FQTYKNz5EKun52WgVtR+6oWbmbxlg==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-handle@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-handle/-/element-handle-2.3.1.tgz#ed49617a3638c876dd686857d441d02d1f041b74"
+  integrity sha512-ygLw89PWu9k8SuKW7rjRBpD6ZfmtVr5ayWux9YKHU7PxX0SeL5kbCD+PpOxQB1ycW4UcyH0tHt77EWnsdSoOHw==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-image@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-image/-/element-image-2.3.1.tgz#093241585ee5b1c8dd9c94a1c3994b83280a0bbd"
+  integrity sha512-rPE7OX/BPTw66+DjpN5aOuPb1xSAjQMgAJZXdRgmeJnn0YcDDhfGQm8VwcL8/PMLxtWFcKEM+aUiezbO01j4fg==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/element-canvas" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-selection@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-selection/-/element-selection-2.3.1.tgz#2dd89e94d438b5c223aed4877cad50b8c6a9f86f"
+  integrity sha512-b8sabaFbHeQYY459uItDIeDY0IisZBO/wF+SYhKvAgI8TExj/f2mNcBZXjPHYCkWel2+1BSUTTNZxy+tR8sDEA==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/element-canvas" "^2.3.1"
+    "@cropper/element-image" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-shade@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-shade/-/element-shade-2.3.1.tgz#ae73e99f7da9858bd8051ec8086d7a9e09712de7"
+  integrity sha512-X5ceZsy7iBxuIRhsL05H9+cPYzxZuvM7/9j5irXIbNsDiNwTedxIHdjhEhPbUYa+FaNn9wsKId24AEyH43JTGw==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/element-canvas" "^2.3.1"
+    "@cropper/element-selection" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element-viewer@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element-viewer/-/element-viewer-2.3.1.tgz#6ce03352ac984450ccb1a792c6966b66e09e14f5"
+  integrity sha512-EdrYDbnkj0IOl/kyWKzzvcDRobr7Tfzho7FkVu8mpSk1ILDHmVf8pfZrYVwou8l4znLqp8ZqwuabAezJPfC2Yg==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/element-canvas" "^2.3.1"
+    "@cropper/element-image" "^2.3.1"
+    "@cropper/element-selection" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/element@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/element/-/element-2.3.1.tgz#3202427fbaf75eeb8387a2ad590c3caca03b9b1b"
+  integrity sha512-CgrLOx0qERWlfJK1Ed6ePq7SXcB6gLHtj3mtDVypyzti70fJdmNxrFm5Ucbq8vpp2Yo3tW2L6uDI0IBDoiT17A==
+  dependencies:
+    "@cropper/utils" "^2.3.1"
+
+"@cropper/elements@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/elements/-/elements-2.3.1.tgz#648e9801ff48549e1310eaaa96be3b5da037f624"
+  integrity sha512-+D5rFlfFlWSL1lp0vPYI59/R6XM2vMnTSX0/B1zKRvmkc0t0N0m9lxVsaDb+9RkHx6PwAkBBNPZSRUeau33jMg==
+  dependencies:
+    "@cropper/element" "^2.3.1"
+    "@cropper/element-canvas" "^2.3.1"
+    "@cropper/element-crosshair" "^2.3.1"
+    "@cropper/element-grid" "^2.3.1"
+    "@cropper/element-handle" "^2.3.1"
+    "@cropper/element-image" "^2.3.1"
+    "@cropper/element-selection" "^2.3.1"
+    "@cropper/element-shade" "^2.3.1"
+    "@cropper/element-viewer" "^2.3.1"
+
+"@cropper/utils@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@cropper/utils/-/utils-2.3.1.tgz#cdd0101864d9feb06ccff74da4b7eb8dc03300a1"
+  integrity sha512-b5qFTwws/osx0asIGLK1V//hdL08frGvfpi6s+p6zj5XH05ofVcz0Xl+Tot7sUx12pbfhhAlsquQTOJ1IsOoFw==
+
 "@emnapi/core@1.11.1":
   version "1.11.1"
   resolved "https://registry.yarnpkg.com/@emnapi/core/-/core-1.11.1.tgz#b9e1064f3a6b1631e241e638eb48d736bfd372a6"
@@ -165,6 +264,7 @@
 
 "@framework/ui@link:../../frappe/ui":
   version "0.0.0"
+  uid ""
 
 "@iconify/types@^2.0.0":
   version "2.0.0"
@@ -679,6 +779,11 @@
   resolved "https://registry.yarnpkg.com/@types/unist/-/unist-3.0.3.tgz#acaab0f919ce69cce629c2d4ed2eb4adc1b6c20c"
   integrity sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==
 
+"@types/web-bluetooth@^0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@types/web-bluetooth/-/web-bluetooth-0.0.20.tgz#f066abfcd1cbe66267cdbbf0de010d8a41b41597"
+  integrity sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==
+
 "@types/web-bluetooth@^0.0.21":
   version "0.0.21"
   resolved "https://registry.yarnpkg.com/@types/web-bluetooth/-/web-bluetooth-0.0.21.tgz#525433c784aed9b457aaa0ee3d92aeb71f346b63"
@@ -690,6 +795,22 @@
   integrity sha512-b80aUQh3n+qEzzZm5oQp3rT2QImeCx58K6eFl/RkJ3d65KW0kTuv5lNsLRVAjbW9YRUpo/wzmvzMgV34bTAItA==
   dependencies:
     "@rolldown/pluginutils" "^1.0.1"
+
+"@vue-flow/background@^1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@vue-flow/background/-/background-1.3.2.tgz#0c90cd05e5d60da017bbaf5a1c3eb6af7ed9b778"
+  integrity sha512-eJPhDcLj1wEo45bBoqTXw1uhl0yK2RaQGnEINqvvBsAFKh/camHJd5NPmOdS1w+M9lggc9igUewxaEd3iCQX2w==
+
+"@vue-flow/core@^1.48.2":
+  version "1.48.2"
+  resolved "https://registry.yarnpkg.com/@vue-flow/core/-/core-1.48.2.tgz#cef8641b17f6220c257d4208bdb2082cee882225"
+  integrity sha512-raxhgKWE+G/mcEvXJjGFUDYW9rAI3GOtiHR3ZkNpwBWuIaCC1EYiBmKGwJOoNzVFgwO7COgErnK7i08i287AFA==
+  dependencies:
+    "@vueuse/core" "^10.5.0"
+    d3-drag "^3.0.0"
+    d3-interpolate "^3.0.1"
+    d3-selection "^3.0.0"
+    d3-zoom "^3.0.0"
 
 "@vue/compiler-core@3.5.44":
   version "3.5.44"
@@ -777,6 +898,16 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.5.44.tgz#eefe91aa2e17c617260c4ae4c21246be5d85642e"
   integrity sha512-H82XLH0DjmSOdbEwO15x3QTo1f5PWEtv237eLpYKc0mqLu+B8hnq16lFWmuBmNurkeiG3wr+oM1FhOll/YVFRg==
 
+"@vueuse/core@^10.5.0":
+  version "10.11.1"
+  resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-10.11.1.tgz#15d2c0b6448d2212235b23a7ba29c27173e0c2c6"
+  integrity sha512-guoy26JQktXPcz+0n3GukWIy/JDNKti9v6VEMu6kV2sYBsWuGiTU8OWdg+ADfUbHg3/3DlqySDe7JmdHrktiww==
+  dependencies:
+    "@types/web-bluetooth" "^0.0.20"
+    "@vueuse/metadata" "10.11.1"
+    "@vueuse/shared" "10.11.1"
+    vue-demi ">=0.14.8"
+
 "@vueuse/core@^14.1.0":
   version "14.4.0"
   resolved "https://registry.yarnpkg.com/@vueuse/core/-/core-14.4.0.tgz#a841da6b3c7d548bdeed5bf611e73f3de62d20fa"
@@ -786,10 +917,22 @@
     "@vueuse/metadata" "14.4.0"
     "@vueuse/shared" "14.4.0"
 
+"@vueuse/metadata@10.11.1":
+  version "10.11.1"
+  resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-10.11.1.tgz#209db7bb5915aa172a87510b6de2ca01cadbd2a7"
+  integrity sha512-IGa5FXd003Ug1qAZmyE8wF3sJ81xGLSqTqtQ6jaVfkeZ4i5kS2mwQF61yhVqojRnenVew5PldLyRgvdl4YYuSw==
+
 "@vueuse/metadata@14.4.0":
   version "14.4.0"
   resolved "https://registry.yarnpkg.com/@vueuse/metadata/-/metadata-14.4.0.tgz#a2508499b803bac14775a9c9b852b8738fc16f98"
   integrity sha512-swx/255R6JyHZFJhx845iz5CRWDZdCfvkZOpACWc5+c5WHcG24mv8gUT1WIdFQaHt6dq79rvILd9QnCWiyVm9g==
+
+"@vueuse/shared@10.11.1":
+  version "10.11.1"
+  resolved "https://registry.yarnpkg.com/@vueuse/shared/-/shared-10.11.1.tgz#62b84e3118ae6e1f3ff38f4fbe71b0c5d0f10938"
+  integrity sha512-LHpC8711VFZlDaYUXEBbFBCQ7GS3dVU9mjOhhMhXP6txTV4EhYQg/KGnQuvt/sPAtoUKq7VVUnL6mVtFoL42sA==
+  dependencies:
+    vue-demi ">=0.14.8"
 
 "@vueuse/shared@14.4.0", "@vueuse/shared@^14.1.0":
   version "14.4.0"
@@ -980,6 +1123,14 @@ crelt@^1.0.5, crelt@^1.0.6:
   resolved "https://registry.yarnpkg.com/crelt/-/crelt-1.0.7.tgz#3b441b2ddfa73161d6a2770aa4cd677f895eaf28"
   integrity sha512-aK6BbWfhf4U/wCcLHKPJl/xa6VkVstRaPywWtMKGwuOLc/wZTyQYuoxgvZnNsBvv7Kg3YTBQYYBCggcviQczuA==
 
+cropperjs@^2.1.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/cropperjs/-/cropperjs-2.3.1.tgz#44e73333152db03a24694c18f64656223f05dd4c"
+  integrity sha512-bgy+iHRFjsBxBCriXkTuFuHRJGSGZISuqDGhDQG7gLK0F7qOzhH06bdXzGf4b0bZSQ+mApakybiW9xvKnS9dbg==
+  dependencies:
+    "@cropper/elements" "^2.3.1"
+    "@cropper/utils" "^2.3.1"
+
 cross-spawn@^7.0.3:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-7.0.6.tgz#8a58fe78f00dcd70c370451759dfbfaf03e8ee9f"
@@ -998,6 +1149,68 @@ csstype@^3.2.3:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.2.3.tgz#ec48c0f3e993e50648c86da559e2610995cf989a"
   integrity sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==
+
+"d3-color@1 - 3":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-3.1.1.tgz#72442183223bc5bfd044745e9df2b2d242de744a"
+  integrity sha512-lfab8x0Bj0UO7SNsY8dZSbNIA6ipbkE3X0NG9nqjCu6CfCHZseuDnOSJY7hidKrjpP++i1M2qT+FlAdPKYRilA==
+
+"d3-dispatch@1 - 3":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/d3-dispatch/-/d3-dispatch-3.0.2.tgz#c92c560ed688a0356caae1a510d41aa96fc188e5"
+  integrity sha512-sAzH4Y4nsLo8eSqw5jKiZt+LU2wZmL/qS+OkxQGjhwazB/D7TY34R/QK1eshfGr7cZEKymKZ/Haem7m+lu98Sg==
+
+"d3-drag@2 - 3", d3-drag@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/d3-drag/-/d3-drag-3.0.1.tgz#b4984fc42a5bbfe4a81df744750898754b1ea329"
+  integrity sha512-OWeoayCq8J69hUIjvL+Mb6Q6Oaj/fyHV5XaXByEUAG+JUjIfTGDnk3qGpcXrD3VmQ3BSV96fcbM6fqq7C0tbPA==
+  dependencies:
+    d3-dispatch "1 - 3"
+    d3-selection "3"
+
+"d3-ease@1 - 3":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/d3-ease/-/d3-ease-3.0.2.tgz#8b5e1e55bc581800425f9abe186d6d200087d22f"
+  integrity sha512-B5znKqRmKROAN4oHWQ50W/qisVjA9GXh2WMsVKdFVp4DxWmcrOsweqgUOUVsv5th96kwaZlokU6SlV4J3gak1w==
+
+"d3-interpolate@1 - 3", d3-interpolate@^3.0.1:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/d3-interpolate/-/d3-interpolate-3.0.2.tgz#09c66b39a3a32a93cfa90883dd38c9a5b22436a4"
+  integrity sha512-IRzGU62DtxhvsnSTWMQIdnoZ6gA+BCWwBon1EJI6SjoN595799b6z/QRBzXfFhE8iupUPp3042yBNo0STPqnzQ==
+  dependencies:
+    d3-color "1 - 3"
+
+"d3-selection@2 - 3", d3-selection@3, d3-selection@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/d3-selection/-/d3-selection-3.0.1.tgz#27190b13a3d0b3e3818b0a853dc8b165f1455605"
+  integrity sha512-ODSf35vqCrlCfp7hrm0eZjvOosSXSYLjqvIlhMBV9q9VOx7EBJG6pc+uXBswEZNJgCGJ+qnKYcWutbZDIxe/Xg==
+
+"d3-timer@1 - 3":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/d3-timer/-/d3-timer-3.0.2.tgz#35decb7421234fb6ec58cafd3d14351f945f2f37"
+  integrity sha512-1Il1aliroVSErrv5aulRBxAY+7+DnaoLIWGd1C6SsBTWDeobWiP/V69vwb8vT6abR1kKwaNe1196pmaQ1fK90A==
+
+"d3-transition@2 - 3":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/d3-transition/-/d3-transition-3.0.2.tgz#ed0bc62277827957d49f0682c5edd50d8d75bdc0"
+  integrity sha512-RcjCsdFgyFoDB+QXLC5m60ZkTN0k9zH+ovoLlTdJnDS1AbfbcuowiM4pCKSTOclNibS4f4J4cbv2m7O7y8NTOQ==
+  dependencies:
+    d3-color "1 - 3"
+    d3-dispatch "1 - 3"
+    d3-ease "1 - 3"
+    d3-interpolate "1 - 3"
+    d3-timer "1 - 3"
+
+d3-zoom@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/d3-zoom/-/d3-zoom-3.0.1.tgz#8e0fb0736c1afe212be8382ad6ddb4d8b643d16e"
+  integrity sha512-kfjD3BDQu/FOatpZ6JdMSyIoDwTxIpI29ySTI2J5ZlDaH1WbuJGQJ2Q9oJkWTEZEW98j6idezoomSD3Cn2zwiw==
+  dependencies:
+    d3-dispatch "1 - 3"
+    d3-drag "2 - 3"
+    d3-interpolate "1 - 3"
+    d3-selection "2 - 3"
+    d3-transition "2 - 3"
 
 dayjs@^1.11.13:
   version "1.11.23"
@@ -1471,6 +1684,21 @@ klaw-sync@^6.0.0:
   integrity sha512-nIeuVSzdCCs6TDPTqI8w1Yre34sSq7AkZ4B3sfOBbI2CgVSB4Du4aLQijFU2+lhAFCwt9+42Hel6lQNIv6AntQ==
   dependencies:
     graceful-fs "^4.1.11"
+
+leaflet-draw@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/leaflet-draw/-/leaflet-draw-1.0.4.tgz#45be92f378ed253e7202fdeda1fcc71885198d46"
+  integrity sha512-rsQ6saQO5ST5Aj6XRFylr5zvarWgzWnrg46zQ1MEOEIHsppdC/8hnN8qMoFvACsPvTioAuysya/TVtog15tyAQ==
+
+leaflet.locatecontrol@^0.89.0:
+  version "0.89.1"
+  resolved "https://registry.yarnpkg.com/leaflet.locatecontrol/-/leaflet.locatecontrol-0.89.1.tgz#738600d190c566d9f6cf83582cd9bd9c20b2c3a6"
+  integrity sha512-okZEUsGa8955vjoaeG/tkqALRxpaiRkpUOiuk+C99g8aK9kKjWMHWXREdepFzFQUR1KAKTZHCS36MferLAKUvA==
+
+leaflet@^1.9.4:
+  version "1.9.4"
+  resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.9.4.tgz#23fae724e282fa25745aff82ca4d394748db7d8d"
+  integrity sha512-nxS1ynzJOmOlHp+iL3FyWqK89GtNL8U8rvlMOsQdTTssxZwCXh8N2NB3GDQOL+YR3XnWyZAxwQixURb+FA74PA==
 
 lightningcss-android-arm64@1.33.0:
   version "1.33.0"
@@ -2108,6 +2336,11 @@ socket.io-parser@~4.2.4:
     "@socket.io/component-emitter" "~3.1.0"
     debug "~4.4.1"
 
+sortablejs@1.14.0:
+  version "1.14.0"
+  resolved "https://registry.yarnpkg.com/sortablejs/-/sortablejs-1.14.0.tgz#6d2e17ccbdb25f464734df621d4f35d4ab35b3d8"
+  integrity sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==
+
 source-map-js@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.2.tgz#79fb88d97535a21cb27162cb05d211b67acea4ab"
@@ -2373,7 +2606,7 @@ vite@8.1.6:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vue-demi@>=0.13.0:
+vue-demi@>=0.13.0, vue-demi@>=0.14.8:
   version "0.14.10"
   resolved "https://registry.yarnpkg.com/vue-demi/-/vue-demi-0.14.10.tgz#afc78de3d6f9e11bf78c55e8510ee12814522f04"
   integrity sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==
@@ -2400,6 +2633,13 @@ vue@^3.5.14:
     "@vue/runtime-dom" "3.5.44"
     "@vue/server-renderer" "3.5.44"
     "@vue/shared" "3.5.44"
+
+vuedraggable@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/vuedraggable/-/vuedraggable-4.1.0.tgz#edece68adb8a4d9e06accff9dfc9040e66852270"
+  integrity sha512-FU5HCWBmsf20GpP3eudURW3WdWTKIbEIQxh9/8GE806hydR9qZqRRxRE3RjqX7PkuLuMQG/A7n3cfj9rCEchww==
+  dependencies:
+    sortablejs "1.14.0"
 
 w3c-keyname@^2.2.0, w3c-keyname@^2.2.4:
   version "2.2.8"
