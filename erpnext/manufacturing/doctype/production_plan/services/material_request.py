@@ -961,12 +961,17 @@ def _build_download_rows(doc, items, item_list):
 		key = (d.get("item_code"), d.get("warehouse"))
 		if key in duplicate_item_wh_list:
 			# transfer rows are in stock UOM and purchase rows in purchase UOM, so add in the row's UOM
-			rm_data, conversion_factor = duplicate_item_wh_list[key]
-			rm_data[12] = flt(rm_data[12] + _stock_quantity(d) / conversion_factor, precision)
+			merged = duplicate_item_wh_list[key]
+			merged.quantity += _stock_quantity(d) / merged.conversion_factor
+			merged.row[12] = flt(merged.quantity, precision)
 			continue
 
 		rm_data = _raw_material_row(d)
-		duplicate_item_wh_list[key] = (rm_data, flt(d.get("conversion_factor")) or 1)
+		duplicate_item_wh_list[key] = frappe._dict(
+			row=rm_data,
+			conversion_factor=flt(d.get("conversion_factor")) or 1,
+			quantity=flt(d.get("quantity")),
+		)
 		item_list.append(rm_data)
 
 		if not doc.get("for_warehouse"):
