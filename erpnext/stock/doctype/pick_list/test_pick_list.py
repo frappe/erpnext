@@ -982,6 +982,43 @@ class TestPickList(ERPNextTestSuite):
 			[("_Test Warehouse - _TC", 0.25, 3), ("_Test Warehouse 1 - _TC", 1.75, 21)],
 		)
 
+	def test_a_location_too_small_for_one_row_uom_stays_for_the_next_row(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse 1 - _TC", qty=12, basic_rate=100)
+		sales_order = make_sales_order(
+			item_list=[
+				{
+					"item_code": item,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 1,
+					"uom": "Box",
+					"rate": 100,
+				},
+				{
+					"item_code": item,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": 2,
+					"uom": "Nos",
+					"rate": 100,
+				},
+			]
+		)
+
+		pick_list = create_pick_list(sales_order.name)
+
+		self.assertEqual(
+			[(row.warehouse, row.uom, row.stock_qty) for row in pick_list.locations],
+			[("_Test Warehouse 1 - _TC", "Box", 12), ("_Test Warehouse - _TC", "Nos", 2)],
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_cancelling_a_pick_list_cancels_its_open_reservations(self):
 		item = make_item(properties={"is_stock_item": 1}).name
