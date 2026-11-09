@@ -1012,10 +1012,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		pr.cancel()
 
-	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	@change_settings(
+		"Buying Settings",
+		{"bill_for_rejected_quantity_in_purchase_invoice": 1, "set_valuation_rate_for_rejected_materials": 1},
+	)
 	def test_rejected_qty_of_fixed_asset_item_with_rejected_materials_valued(self):
-		from erpnext.assets.doctype.asset.test_asset import create_fixed_asset_item
+		from erpnext.assets.doctype.asset.test_asset import create_asset_data, create_fixed_asset_item
 
+		create_asset_data()
 		asset_item = create_fixed_asset_item().name
 		pr = make_purchase_receipt(item_code=asset_item, qty=2, rejected_qty=1, rate=100)
 
