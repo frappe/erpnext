@@ -306,16 +306,23 @@ class WorkOrder(Document):
 		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
+		self.reset_use_multi_level_bom()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
 		self.validate_operations()
 		self.status = self.get_status()
 		self.validate_workstation_type()
+<<<<<<< HEAD
 		self.reset_use_multi_level_bom()
 		self.clear_reserve_stock_if_disabled()
 		self.set_reserve_stock()
 		self.validate_fg_warehouse_for_reservation()
+=======
+		WorkOrderStockReservation(self).clear_reserve_stock_if_disabled()
+		WorkOrderStockReservation(self).set_reserve_stock()
+		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
+>>>>>>> 00a1268 (fix(manufacturing): recalculate operating cost after a draft reloads operations from the BOM)
 		self.validate_dates()
 
 		if self.source_warehouse:
