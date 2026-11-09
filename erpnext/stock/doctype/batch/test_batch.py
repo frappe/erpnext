@@ -412,7 +412,7 @@ class TestBatch(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_invoice_of_delivery_note_with_batch_expired_after_delivery_is_submitted(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 
 		receipt = self.test_purchase_receipt(10)
 		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
