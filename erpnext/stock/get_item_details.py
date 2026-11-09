@@ -298,9 +298,10 @@ def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
 
 
 def has_rate_write_access(parenttype: str) -> bool:
-	"""Frappe resets an item rate the user cannot write when the document is saved."""
+	"""Frappe resets an item rate above permlevel 0 the user cannot write when the document is saved."""
 	item_meta = frappe.get_meta(frappe.get_meta(parenttype).get_field("items").options)
-	return item_meta.get_field("rate").permlevel in item_meta.get_permlevel_access("write", parenttype)
+	permlevel = item_meta.get_field("rate").permlevel
+	return not permlevel or permlevel in item_meta.get_permlevel_access("write", parenttype)
 
 
 def lock_source_rate(out: frappe._dict, source_row) -> None:
