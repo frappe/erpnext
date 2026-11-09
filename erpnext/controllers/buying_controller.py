@@ -490,6 +490,12 @@ class BuyingController(SubcontractingController):
 			if d.category in ["Valuation", "Valuation and Total"]
 		)
 
+		if not stock_and_asset_items_qty and not frappe.db.get_single_value(
+			"Buying Settings", "set_valuation_rate_for_rejected_materials"
+		):
+			# Rejected material that is not valued cannot carry valuation charges.
+			total_valuation_amount = 0
+
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get("items")):
 			if (
