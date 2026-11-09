@@ -1273,7 +1273,10 @@ class StockController(AccountsController):
 		):
 			return
 
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import validate_qi_reference
+
 		for row in self.get("items"):
+			validate_qi_reference(self, row)
 			qi_required = False
 			if inspection_required_fieldname and frappe.db.get_value(
 				"Item", row.item_code, inspection_required_fieldname

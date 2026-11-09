@@ -44,6 +44,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			"Serial and Batch Bundle",
 			"Bank Transaction",
 			"Packing Slip",
+			"Quality Inspection",
 		];
 
 		if (!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {

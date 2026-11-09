@@ -58,6 +58,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			"Unreconcile Payment Entries",
 			"Serial and Batch Bundle",
 			"Bank Transaction",
+			"Quality Inspection",
 		];
 
 		if (!this.frm.doc.__islocal) {

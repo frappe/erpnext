@@ -2646,9 +2646,10 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		# SCR should be submitted successfully as Quality Inspection is set
 		scr1.submit()
-		qa.cancel()
 		scr1.reload()
 		scr1.cancel()
+		qa.reload()
+		qa.cancel()
 
 		scr2 = make_subcontracting_receipt(sco.name)
 		scr2.save()
