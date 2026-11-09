@@ -164,6 +164,14 @@ class TestDeliveryTrip(FrappeTestCase):
 		self.assertEqual(len(trip.delivery_stops), 2)
 		self.assertIsNone(trip.delivery_stops[0].delivery_note)
 
+	def test_trip_made_from_delivery_note_gets_its_driver(self):
+		driver = create_driver()
+		delivery_note = self.make_delivery_note_with_address(driver=driver.name, driver_name=driver.full_name)
+
+		trip = make_delivery_trip(delivery_note.name)
+
+		self.assertEqual((trip.driver, trip.driver_name), (driver.name, driver.full_name))
+
 	def test_stop_without_address_throws_mandatory_error(self):
 		self.delivery_trip.append("delivery_stops", {"customer": "_Test Customer"})
 
