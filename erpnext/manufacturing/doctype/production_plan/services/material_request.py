@@ -543,6 +543,7 @@ def _mr_item_for_details(
 		bin_dict,
 		consumed_qty,
 		shortage_bin,
+		is_transfer,
 	)
 
 
@@ -661,6 +662,7 @@ def get_material_request_items(
 	bin_dict,
 	consumed_qty,
 	shortage_bin,
+	is_transfer=False,
 ):
 	required_qty = _required_qty_for_mr(
 		row, ignore_existing_ordered_qty, warehouse, shortage_bin, consumed_qty, include_safety_stock
@@ -677,6 +679,7 @@ def get_material_request_items(
 		conversion_factor,
 		item_group_defaults,
 		min_order_qty,
+		is_transfer,
 	)
 
 
@@ -826,6 +829,7 @@ def _material_request_item_row(
 	conversion_factor,
 	item_group_defaults,
 	min_order_qty=0,
+	is_transfer=False,
 ):
 	warehouse = (
 		warehouse
@@ -834,12 +838,15 @@ def _material_request_item_row(
 		or item_group_defaults.get("default_warehouse")
 	)
 	uom = _mr_purchase_uom(row) or row.get("stock_uom")
+	quantity = required_qty / conversion_factor
+	if not is_transfer:  # a transfer rounds only what is left to purchase
+		quantity = _round_up_whole_uom(
+			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
+		)
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": _round_up_whole_uom(
-			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
-		),
+		"quantity": quantity,
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
