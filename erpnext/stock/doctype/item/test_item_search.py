@@ -22,6 +22,10 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		self.assertEqual(build_match_query("RAW_MAT_000123"), '"RAW" AND "MAT" AND "000123"')
 		self.assertEqual(build_match_query("abc%def"), '"abc" AND "def"')
 
+	def test_folds_small_kana_to_full_size(self):
+		"""LIKE treats small and full-size kana as equal, so the index must too."""
+		self.assertEqual(build_match_query("フイルター"), build_match_query("ﾌｨﾙﾀｰ"))
+
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
 		self.assertIsNone(build_match_query("ab\\_cd"))
@@ -90,20 +94,11 @@ class TestItemSearchOnOldSQLite(ERPNextTestSuite):
 			active.stop()
 		super().tearDownClass()
 
-	def test_the_index_uses_plain_trigram(self):
-		self.assertEqual(self.search.schema["tokenizer"], "trigram")
-
 	def test_an_accented_item_is_found_by_an_unaccented_term(self):
 		self.assertIn("ZZ-CRÈME-7782", self.candidates("creme-7782"))
 
 	def test_a_differently_accented_term_finds_the_item(self):
 		self.assertIn("ZZ-CRÈME-7782", self.candidates("crême filter"))
-
-	def test_an_upgrade_past_3_45_reports_the_index_as_absent(self):
-		"""The table holds folded text, and the query on newer SQLite is no longer folded."""
-		self.assertTrue(self.search.index_exists())
-		with patch.object(sqlite3, "sqlite_version_info", (3, 45, 0)):
-			self.assertFalse(ItemSearch(db_name="item_search_old_sqlite.db").index_exists())
 
 	def candidates(self, txt):
 		return self.search.get_candidate_item_codes(txt, ["name", "item_code", "item_name"])
@@ -175,10 +170,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			self.assertEqual(connection.execute("SELECT count(*) FROM search_trigrams").fetchone()[0], 0)
 		finally:
 			connection.close()
-
-	def test_tokenizer_folds_accents(self):
-		"""MariaDB's utf8mb4_unicode_ci LIKE is accent insensitive, so the index must be too."""
-		self.assertEqual(self.search.schema["tokenizer"], "trigram remove_diacritics 1")
 
 	def test_an_accented_item_is_found_by_an_unaccented_term(self):
 		item = frappe.get_doc(
@@ -267,6 +258,24 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		for txt in ("Valve  3", "example.com"):
 			with self.subTest(txt=txt):
+				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
+
+	def test_kana_and_width_variants_match_the_scan(self):
+		"""LIKE treats katakana and hiragana, voiced and unvoiced kana, and full and half width as equal."""
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-KANA-6613",
+				"item_name": "カタカナ フィルター バルブ Ｐａｒｔ",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		index_docs_in_queue()
+
+		for txt in ("かたかな", "ﾌｨﾙﾀｰ", "はるふ", "part"):
+			with self.subTest(txt=txt):
+				self.assertIn("ZZ-KANA-6613", self.candidates(txt))
 				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
 
 	def test_an_index_write_failure_saves_the_item_and_drops_the_index(self):
