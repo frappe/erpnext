@@ -693,6 +693,7 @@ class PickList(TransactionBase):
 					location.batch_no,
 					location.serial_no,
 					location.sales_order_item or location.material_request_item,
+					location.product_bundle_item,
 				)
 
 				if key not in updated_locations:
@@ -769,7 +770,7 @@ class PickList(TransactionBase):
 
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
-			key = (item_code, item.uom, item.warehouse, item.batch_no, reference)
+			key = (item_code, item.uom, item.warehouse, item.batch_no, reference, item.product_bundle_item)
 
 			item.idx = None
 			item.name = None
