@@ -256,6 +256,9 @@ class StockController(AccountsController):
 			self.validate_outward_bundle_batches(check_expiry=not is_material_issue)
 
 	def is_batch_check_needed(self):
+		if self.get("is_consolidated"):
+			return False
+
 		return self.doctype not in ("Sales Invoice", "Purchase Invoice") or cint(self.get("update_stock"))
 
 	def validate_batch_is_usable(self, idx, batch_no, expiry_date, disabled):
