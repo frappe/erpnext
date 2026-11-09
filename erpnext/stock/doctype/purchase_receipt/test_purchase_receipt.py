@@ -783,7 +783,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		returned = frappe.get_all(
 			"Serial and Batch Entry",
 			filters={"parent": ["in", [row.serial_and_batch_bundle for row in return_pr.items]]},
-			fields=["batch_no", {"SUM": "qty", "as": "qty"}],
+			fields=["batch_no", "sum(qty) as qty"],
 			group_by="batch_no",
 		)
 		self.assertEqual({row.batch_no: row.qty for row in returned}, {batches[0]: -5, batches[1]: -5})
