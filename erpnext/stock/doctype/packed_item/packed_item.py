@@ -72,9 +72,23 @@ def make_packing_list(doc):
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
+<<<<<<< HEAD
 		if is_product_bundle(item_row.item_code):
 			so_packed_items = list(order_packed_items.get(item_row.get("so_detail"), []))
 			for bundle_item in get_product_bundle_items(item_row.item_code):
+=======
+		# Pack from the version chosen on the row (default: the item's active version)
+		# and record it so the document keeps a reference to the exact version used.
+		bundle_name = get_bundle_version_for_row(item_row, doc)
+		if item_row.meta.has_field("product_bundle"):
+			item_row.product_bundle = bundle_name
+		if item_row.meta.has_field("is_product_bundle"):
+			item_row.is_product_bundle = 1 if bundle_name else 0
+
+		if bundle_name:
+			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
+			for bundle_item in get_product_bundle_items_by_name(bundle_name):
+>>>>>>> 7edd914 (fix(stock): return product bundle components at the qty the returned document packed)
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
@@ -334,7 +348,88 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	bin = get_packed_item_bin_qty(packing_item.item_code, pi_row.warehouse)
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
+<<<<<<< HEAD
 	pi_row.use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
+=======
+	pi_row.use_serial_batch_fields = frappe.get_single_value("Stock Settings", "use_serial_batch_fields")
+
+
+def get_order_packed_items(doc) -> dict:
+	"""Packed rows of the rows this document is made from, by that row in idx order:
+	the returned document's for a return, else the Sales Order's."""
+	return get_packed_items_of_order_rows(
+		{row for item in doc.get("items") if (row := get_order_row(doc, item))},
+		doc.doctype if doc.get("is_return") else "Sales Order",
+	)
+
+
+def get_order_row(doc, item_row):
+	"""Row whose packed rows ``item_row`` keeps the qty of."""
+	if not doc.get("is_return"):
+		return item_row.get("so_detail")
+	return item_row.get(
+		"dn_detail" if doc.doctype == "Delivery Note" else frappe.scrub(doc.doctype) + "_item"
+	)
+
+
+def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
+	"""Packed rows of the given rows of ``doctype``, by row in idx order."""
+	if not order_rows:
+		return {}
+
+	packed_item = frappe.qb.DocType("Packed Item")
+	order_item = frappe.qb.DocType(f"{doctype} Item")
+	rows = (
+		frappe.qb.from_(packed_item)
+		.join(order_item)
+		.on(order_item.name == packed_item.parent_detail_docname)
+		.select(
+			packed_item.name,
+			packed_item.parent_detail_docname,
+			packed_item.parent_item,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.reserve_stock,
+			packed_item.qty,
+			order_item.stock_qty.as_("order_stock_qty"),
+		)
+		.where((packed_item.parenttype == doctype) & packed_item.parent_detail_docname.isin(list(order_rows)))
+		.orderby(packed_item.idx)
+		.run(as_dict=True)
+	)
+
+	order_packed_items = {}
+	for row in rows:
+		row.qty_per_unit = flt(row.qty) / flt(row.order_stock_qty) if flt(row.order_stock_qty) else 0
+		order_packed_items.setdefault(row.parent_detail_docname, []).append(row)
+
+	return order_packed_items
+
+
+def pop_order_packed_item(so_packed_items, parent_item, item_code):
+	"""Take the order's packed row of a component; a component repeated in the bundle takes the next one."""
+	for idx, row in enumerate(so_packed_items):
+		if row.parent_item == parent_item and row.item_code == item_code:
+			return so_packed_items.pop(idx)
+
+
+def get_order_packed_item_pairs(doc) -> list[tuple]:
+	"""Pair each packed row of a document made from a Sales Order with the order's packed row it delivers."""
+	order_packed_items = get_order_packed_items(doc)
+	pairs = []
+	for item in doc.get("items"):
+		so_packed_items = list(order_packed_items.get(get_order_row(doc, item), []))
+		for packed_item in doc.get("packed_items"):
+			if packed_item.parent_detail_docname != (item.name or item.idx):
+				continue
+
+			if so_packed_item := pop_order_packed_item(
+				so_packed_items, packed_item.parent_item, packed_item.item_code
+			):
+				pairs.append((packed_item, so_packed_item))
+
+	return pairs
+>>>>>>> 7edd914 (fix(stock): return product bundle components at the qty the returned document packed)
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row):
