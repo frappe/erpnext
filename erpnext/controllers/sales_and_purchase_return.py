@@ -216,16 +216,10 @@ def validate_returned_items(doc):
 def validate_returned_bundle_components(doc, valid_items, already_returned_items):
 	"""Hold the components of returned bundles to what is left of each delivered component."""
 	from erpnext.stock.doctype.packed_item.packed_item import (
-<<<<<<< HEAD
-		get_component_conversion_factor,
-		get_product_bundle_items,
-=======
-		get_bundle_version_for_row,
 		get_component_stock_qty_per_unit,
 		get_order_packed_items,
-		get_product_bundle_items_by_name,
+		get_product_bundle_items,
 		pop_order_packed_item,
->>>>>>> ea7e451 (fix(stock): check returned bundle components at the qty the Sales Order packed)
 	)
 
 	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
@@ -236,12 +230,8 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 			pluck="new_item_code",
 		)
 	)
-<<<<<<< HEAD
-	components = {}
-=======
 	order_packed_items = get_order_packed_items(doc)
-	bundles, components = {}, {}
->>>>>>> ea7e451 (fix(stock): check returned bundle components at the qty the Sales Order packed)
+	components = {}
 	for row in returned_rows:
 		if row.item_code not in bundle_items:
 			continue
@@ -249,20 +239,12 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if row.item_code not in components:
 			components[row.item_code] = get_product_bundle_items(row.item_code)
 
-<<<<<<< HEAD
 		bundle_stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
 		if frappe.db.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 			bundle_stock_qty = flt(bundle_stock_qty, row.precision("stock_qty"))
-		for component in components[row.item_code]:
-=======
-		if bundle not in components:
-			components[bundle] = get_product_bundle_items_by_name(bundle)
-
-		bundle_stock_qty = get_returned_stock_qty(doc, row)
 		so_packed_items = list(order_packed_items.get(row.get("so_detail"), []))
-		for component in components[bundle]:
+		for component in components[row.item_code]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
->>>>>>> ea7e451 (fix(stock): check returned bundle components at the qty the Sales Order packed)
 			ref = valid_items.get(component.item_code)
 			if not ref:
 				continue

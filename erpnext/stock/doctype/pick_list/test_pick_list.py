@@ -50,6 +50,33 @@ class TestPickList(ERPNextTestSuite):
 		# 12 Nos picked / 12 (1 Box in stock units) = 1 bundle, not 12
 		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
 
+	def test_bundle_delivery_keeps_order_qty_after_component_uom_change(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		make_stock_entry(item=component.name, to_warehouse=warehouse, qty=100, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=2)  # 20 Nos
+		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
+		component.save()
+
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 2)
+
+		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
+		self.assertEqual(delivery_note.items[0].qty, 2)
+		self.assertEqual(delivery_note.packed_items[0].qty, 20)
+
 	def test_delivery_mapping_requires_pick_list_read_permission(self):
 		pick_list = frappe.get_doc(
 			{
@@ -1130,77 +1157,7 @@ class TestPickList(ERPNextTestSuite):
 
 		# a drop-ship bundle row leaves its components off the pick list
 		pick_list = create_pick_list(sales_order.name)
-<<<<<<< HEAD
 		self.assertEqual([row.item_code for row in pick_list.locations], [item])
-=======
-		for row in pick_list.locations:
-			row.picked_qty = row.qty
-		pick_list.submit()
-
-		# 6 picked / 2 (the version the order was placed with) = 3 bundles, not 6/4
-		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 3)
-
-	def test_bundle_picked_qty_converts_component_uom(self):
-		warehouse = "_Test Warehouse - _TC"
-		component = make_item(
-			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 12}]}
-		).name
-		make_stock_entry(item=component, to_warehouse=warehouse, qty=50, rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component, "qty": 1, "uom": "Box"})  # 1 Box = 12 Nos
-		bundle_doc.insert()
-		bundle_doc.submit()
-
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)  # 12 Nos
-		pick_list = create_pick_list(sales_order.name)
-		for row in pick_list.locations:
-			row.picked_qty = row.qty
-		pick_list.submit()
-
-		# 12 Nos picked / 12 (1 Box in stock units) = 1 bundle, not 12
-		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
-
-	def test_bundle_delivery_keeps_order_qty_after_component_uom_change(self):
-		warehouse = "_Test Warehouse - _TC"
-		component = make_item(
-			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
-		)
-		make_stock_entry(item=component.name, to_warehouse=warehouse, qty=100, rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
-		bundle_doc.insert()
-		bundle_doc.submit()
-
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=2)  # 20 Nos
-		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
-		component.save()
-
-		pick_list = create_pick_list(sales_order.name)
-		for row in pick_list.locations:
-			row.picked_qty = row.qty
-		pick_list.submit()
-
-		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 2)
-
-		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
-		self.assertEqual(delivery_note.items[0].qty, 2)
-		self.assertEqual(delivery_note.packed_items[0].qty, 20)
-
-	def test_pick_list_skips_closed_bundle_rows(self):
-		from erpnext.controllers.item_close import update_closed_status
-
-		warehouse = "_Test Warehouse - _TC"
-		bundle, _components = create_product_bundle([2], warehouse=warehouse)
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
-
-		# closing the bundle row drops its components from the pick list too
-		update_closed_status("Sales Order", sales_order.name, [sales_order.items[0].name], 1)
-
-		pick_list = create_pick_list(sales_order.name)
-		self.assertEqual(pick_list.locations, [])
->>>>>>> 339d8d6 (test: deliver product bundle at the order's packed qty after a component UOM change)
 
 	def test_delivery_note_leaves_out_unselected_bundles_and_rows_without_order(self):
 		warehouse = "_Test Warehouse - _TC"

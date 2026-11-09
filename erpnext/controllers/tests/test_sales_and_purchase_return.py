@@ -126,9 +126,9 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_sales_return(dn.name).insert)
 
 	def test_bundle_return_keeps_order_qty_after_component_uom_change(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
