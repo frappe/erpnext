@@ -982,6 +982,30 @@ class TestPickList(ERPNextTestSuite):
 			[("_Test Warehouse - _TC", 0.25, 3), ("_Test Warehouse 1 - _TC", 1.75, 21)],
 		)
 
+	def test_a_fractional_stock_uom_splits_only_at_stock_qty_the_row_uom_can_express(self):
+		"""5 Kg is 0.41666 Box, which the Delivery Note rounds to 0.42 Box (5.04 Kg)."""
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse 1 - _TC", qty=36, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, uom="Box")
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name).insert()
+
+		self.assertEqual(
+			[(row.warehouse, row.qty, row.stock_qty) for row in delivery_note.items],
+			[("_Test Warehouse - _TC", 0.41, 4.92), ("_Test Warehouse 1 - _TC", 1.59, 19.08)],
+		)
+
 	def test_a_location_too_small_for_one_row_uom_stays_for_the_next_row(self):
 		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
 		item = make_item(
