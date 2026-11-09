@@ -1064,7 +1064,15 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 			and not parent.closed
 			and parent.delivered_by_supplier != 1
 			and abs(parent.delivered_qty) < abs(parent.qty)
-			and flt(packed_item.qty) > 0
+			and get_packed_qty_to_pick(packed_item, parent) > 0
+		)
+
+	def get_packed_qty_to_pick(packed_item, parent) -> float:
+		# what is left on this component, as components of one bundle can be picked unevenly
+		delivered_qty = flt(packed_item.qty) * flt(parent.delivered_qty) / flt(parent.qty)
+		return flt(
+			flt(packed_item.qty) - max(flt(packed_item.picked_qty), delivered_qty),
+			packed_item.precision("qty"),
 		)
 
 	def update_item_quantity(source, target, source_parent) -> None:
@@ -1080,13 +1088,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		target.company_total_stock = bin_details.get("company_total_stock")
 
 	def update_packed_item_qty(source, target, source_parent) -> None:
-		qty = flt(source.qty)
-		for item in source_parent.items:
-			if source.parent_detail_docname == item.name:
-				picked_qty = flt(item.picked_qty) / (flt(item.conversion_factor) or 1)
-				pending_percent = (item.qty - max(picked_qty, item.delivered_qty)) / item.qty
-				target.qty = target.stock_qty = qty * pending_percent
-				return
+		target.qty = target.stock_qty = get_packed_qty_to_pick(source, so_items[source.parent_detail_docname])
 
 	def should_pick_order_item(item) -> bool:
 		return (
