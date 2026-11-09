@@ -158,7 +158,11 @@ class SerialBatchBundleService:
 			self.validate_outward_bundle_batches(check_expiry=not is_material_issue)
 
 	def is_batch_check_needed(self) -> bool:
-		"""An invoice without Update Stock moves no stock, so its batches were checked when they moved."""
+		"""An invoice without Update Stock moves no stock, so its batches were checked when they moved.
+		A consolidated invoice repeats POS Invoices whose batches were checked when sold."""
+		if self.doc.get("is_consolidated"):
+			return False
+
 		is_invoice = self.doc.doctype in ("Sales Invoice", "Purchase Invoice")
 		return not is_invoice or bool(self.doc.get("update_stock"))
 
