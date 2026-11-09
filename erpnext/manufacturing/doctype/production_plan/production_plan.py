@@ -1485,6 +1485,7 @@ def download_raw_materials(doc, warehouses=None):
 			"Reserved Qty for Production",
 			"Safety Stock",
 			"Required Qty",
+			"UOM",
 		]
 	]
 
@@ -1492,13 +1493,16 @@ def download_raw_materials(doc, warehouses=None):
 	frappe.flags.show_qty_in_stock_uom = 1
 	items = get_items_for_material_requests(doc, warehouses=warehouses, get_parent_warehouse_data=True)
 
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	duplicate_item_wh_list = frappe._dict()
 
 	for d in items:
 		key = (d.get("item_code"), d.get("warehouse"))
 		if key in duplicate_item_wh_list:
-			rm_data = duplicate_item_wh_list[key]
-			rm_data[12] += d.get("quantity")
+			# transfer rows are in stock UOM and purchase rows in purchase UOM, so add in the row's UOM
+			merged = duplicate_item_wh_list[key]
+			merged.quantity += _stock_quantity(d) / merged.conversion_factor
+			merged.row[12] = flt(merged.quantity, precision)
 			continue
 
 		rm_data = [
@@ -1515,9 +1519,14 @@ def download_raw_materials(doc, warehouses=None):
 			d.get("reserved_qty_for_production"),
 			d.get("safety_stock"),
 			d.get("quantity"),
+			d.get("uom"),
 		]
 
-		duplicate_item_wh_list[key] = rm_data
+		duplicate_item_wh_list[key] = frappe._dict(
+			row=rm_data,
+			conversion_factor=flt(d.get("conversion_factor")) or 1,
+			quantity=flt(d.get("quantity")),
+		)
 		item_list.append(rm_data)
 
 		if not doc.get("for_warehouse"):
