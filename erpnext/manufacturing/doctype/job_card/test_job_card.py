@@ -4316,6 +4316,80 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "Move the raw materials", job_card.submit)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+<<<<<<< HEAD
+=======
+	def test_job_card_with_fractional_material_can_be_submitted_after_full_transfer(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=1,
+			bom_quantity=3,
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		frappe.get_doc(make_stock_entry_from_jc(job_card.name)).submit()
+
+		job_card.reload()
+		job_card.append("time_logs", jc_review_log("2031-03-07 08:00:00", 60, 1))
+		job_card.submit()
+
+		self.assertEqual(job_card.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	def test_full_transfer_of_a_required_qty_with_more_decimals_than_float_precision(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=2,
+			bom_quantity=3,
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		frappe.get_doc(make_stock_entry_from_jc(job_card.name)).submit()  # 2/3 Kg
+
+		job_card.reload()
+		self.assertEqual(job_card.items[0].transferred_qty, 0.667)
+		self.assertEqual(job_card.status, "Material Transferred")
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_split_job_cards_with_fractional_material_can_be_submitted_after_full_transfer(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=1)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=3,
+			bom_quantity=3,
+			transfer_material_against="Job Card",
+		)
+		job_cards = get_jc_review_job_cards(wo.name)
+		self.assertEqual(len(job_cards), 3)
+		for index, job_card in enumerate(job_cards):
+			frappe.get_doc(make_stock_entry_from_jc(job_card.name)).submit()
+			job_card.reload()
+			job_card.append("time_logs", jc_review_log(f"2031-03-07 0{index}:00:00", 60, 1))
+			job_card.submit()
+
+		self.assertEqual([job_card.docstatus for job_card in job_cards], [1, 1, 1])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+>>>>>>> 3577786 (test: Job Card takes a full transfer of a required qty with more decimals than Float Precision)
 	def test_repeated_operation_gets_only_its_own_materials(self):
 		workstation = make_jc_review_workstation()
 		cutting = make_jc_review_operation(workstation)
