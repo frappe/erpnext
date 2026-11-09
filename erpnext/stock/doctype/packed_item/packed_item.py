@@ -73,7 +73,7 @@ def make_packing_list(doc):
 
 	for item_row in doc.get("items"):
 		if is_product_bundle(item_row.item_code):
-			so_packed_items = list(order_packed_items.get(item_row.get("so_detail"), []))
+			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
 			for bundle_item in get_product_bundle_items(item_row.item_code):
 				pi_row = add_packed_item_row(
 					doc=doc,
@@ -264,34 +264,42 @@ def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=Non
 
 
 def get_order_packed_items(doc) -> dict:
-	"""Sales Order packed rows of the order rows this document is made from, by order row in idx order."""
+	"""Packed rows of the rows this document is made from, by that row in idx order:
+	the returned document's for a return, else the Sales Order's."""
 	return get_packed_items_of_order_rows(
-		{item.so_detail for item in doc.get("items") if item.get("so_detail")}
+		{row for item in doc.get("items") if (row := get_order_row(doc, item))},
+		doc.doctype if doc.get("is_return") else "Sales Order",
 	)
 
 
-def get_packed_items_of_order_rows(so_details) -> dict:
-	"""Packed rows of the given Sales Order rows, by order row in idx order."""
-	if not so_details:
+def get_order_row(doc, item_row):
+	"""Row whose packed rows ``item_row`` keeps the qty of."""
+	if not doc.get("is_return"):
+		return item_row.get("so_detail")
+	return item_row.get(
+		"dn_detail" if doc.doctype == "Delivery Note" else frappe.scrub(doc.doctype) + "_item"
+	)
+
+
+def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
+	"""Packed rows of the given rows of ``doctype``, by row in idx order."""
+	if not order_rows:
 		return {}
 
 	packed_item = frappe.qb.DocType("Packed Item")
-	so_item = frappe.qb.DocType("Sales Order Item")
+	order_item = frappe.qb.DocType(f"{doctype} Item")
 	rows = (
 		frappe.qb.from_(packed_item)
-		.join(so_item)
-		.on(so_item.name == packed_item.parent_detail_docname)
+		.join(order_item)
+		.on(order_item.name == packed_item.parent_detail_docname)
 		.select(
 			packed_item.parent_detail_docname,
 			packed_item.parent_item,
 			packed_item.item_code,
 			packed_item.qty,
-			so_item.stock_qty.as_("order_stock_qty"),
+			order_item.stock_qty.as_("order_stock_qty"),
 		)
-		.where(
-			(packed_item.parenttype == "Sales Order")
-			& packed_item.parent_detail_docname.isin(list(so_details))
-		)
+		.where((packed_item.parenttype == doctype) & packed_item.parent_detail_docname.isin(list(order_rows)))
 		.orderby(packed_item.idx)
 		.run(as_dict=True)
 	)
