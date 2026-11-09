@@ -38,7 +38,7 @@ from erpnext.manufacturing.doctype.production_plan.work_order_quantities import 
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.item.item import get_uom_conv_factor
+from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
 	clear_reserve_stock_if_disabled,
@@ -2269,7 +2269,7 @@ def get_items_for_material_requests(
 						planned_qty=planned_qty,
 					)
 		elif data.get("item_code"):
-			item_master = frappe.get_doc("Item", data["item_code"]).as_dict()
+			item_master = get_item_defaults(data["item_code"], doc.get("company"))
 			purchase_uom = item_master.purchase_uom or item_master.stock_uom
 			conversion_factor = (
 				get_uom_conversion_factor(item_master.name, purchase_uom) if item_master.purchase_uom else 1.0
