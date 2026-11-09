@@ -1348,16 +1348,9 @@ class TestPickList(ERPNextTestSuite):
 
 	def test_next_pick_list_picks_what_is_left_on_each_bundle_component(self):
 		warehouse = "_Test Warehouse - _TC"
-		component_a = make_item(properties={"is_stock_item": 1}).name
-		component_b = make_item(properties={"is_stock_item": 1}).name
+		bundle, (component_a, component_b) = create_product_bundle([1, 2])
 		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=100, rate=100)
 		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=3, rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component_a, "qty": 1})
-		bundle_doc.append("items", {"item_code": component_b, "qty": 2})
-		bundle_doc.insert()
-		bundle_doc.submit()
 
 		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
 		pick_list = create_pick_list(sales_order.name)
