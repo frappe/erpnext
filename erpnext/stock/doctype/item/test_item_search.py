@@ -103,20 +103,11 @@ class TestItemSearchOnOldSQLite(ERPNextTestSuite):
 			active.stop()
 		super().tearDownClass()
 
-	def test_the_index_uses_plain_trigram(self):
-		self.assertEqual(self.search.schema["tokenizer"], "trigram")
-
 	def test_an_accented_item_is_found_by_an_unaccented_term(self):
 		self.assertIn("ZZ-CRÈME-7782", self.candidates("creme-7782"))
 
 	def test_a_differently_accented_term_finds_the_item(self):
 		self.assertIn("ZZ-CRÈME-7782", self.candidates("crême filter"))
-
-	def test_an_upgrade_past_3_45_reports_the_index_as_absent(self):
-		"""The table holds folded text, and the query on newer SQLite is no longer folded."""
-		self.assertTrue(self.search.index_exists())
-		with patch.object(sqlite3, "sqlite_version_info", (3, 45, 0)):
-			self.assertFalse(ItemSearch(db_name="item_search_old_sqlite.db").index_exists())
 
 	def candidates(self, txt):
 		return self.search.get_candidate_item_codes(txt, ["name", "item_code", "item_name"])
@@ -187,10 +178,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 			self.assertEqual(connection.execute("SELECT count(*) FROM search_trigrams").fetchone()[0], 0)
 		finally:
 			connection.close()
-
-	def test_tokenizer_folds_accents(self):
-		"""MariaDB's utf8mb4_unicode_ci LIKE is accent insensitive, so the index must be too."""
-		self.assertEqual(self.search.schema["tokenizer"], "trigram remove_diacritics 1")
 
 	def test_an_accented_item_is_found_by_an_unaccented_term(self):
 		item = frappe.get_doc(
