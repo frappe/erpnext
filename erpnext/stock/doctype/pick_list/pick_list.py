@@ -138,6 +138,7 @@ class PickList(TransactionBase):
 				continue
 
 			stock_uom = frappe.get_cached_value("Item", row.item_code, "stock_uom")
+			row.stock_uom = stock_uom
 			row.uom = row.uom or stock_uom
 			ordered_row = not row.product_bundle_item and (row.sales_order_item or row.material_request_item)
 			if row.uom == stock_uom:
