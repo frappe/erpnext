@@ -111,7 +111,7 @@ def make_packing_list(doc):
 				update_packed_item_price_data(pi_row, item_data, doc)
 
 				if item_row.get("against_pick_list"):
-					update_packed_item_with_pick_list_info(item_row, pi_row)
+					update_packed_item_with_pick_list_info(item_row, pi_row, so_packed_item)
 
 				if set_price_from_children:  # create/update bundle item wise price dict
 					update_product_bundle_rate(parent_items_price, pi_row, item_row)
@@ -396,15 +396,20 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 	return pairs
 
 
-def update_packed_item_with_pick_list_info(main_item_row, pi_row):
+def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
+	filters = {
+		"item_code": pi_row.item_code,
+		"sales_order": main_item_row.get("against_sales_order"),
+		"sales_order_item": main_item_row.get("so_detail"),
+		"parent": main_item_row.against_pick_list,
+	}
+	# a component repeated on the bundle has a pick list row per packed row
+	if so_packed_item:
+		filters["product_bundle_item"] = so_packed_item.name
+
 	pl_row = frappe.db.get_value(
 		"Pick List Item",
-		{
-			"item_code": pi_row.item_code,
-			"sales_order": main_item_row.get("against_sales_order"),
-			"sales_order_item": main_item_row.get("so_detail"),
-			"parent": main_item_row.against_pick_list,
-		},
+		filters,
 		["warehouse", "batch_no", "serial_no"],
 		as_dict=True,
 		order_by="qty desc",
