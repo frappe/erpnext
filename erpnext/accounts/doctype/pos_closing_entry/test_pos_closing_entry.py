@@ -331,6 +331,67 @@ class TestPOSClosingEntry(unittest.TestCase):
 		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
 		self.assertEqual(batch_qty_with_pos, 10.0)
 
+	def test_closing_consolidates_sale_of_batch_disabled_after_sale(self):
+		opening_entry, pos_invoice, batch_no = self.make_session_with_batch_sale()
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		make_closing_entry_from_opening(opening_entry).submit()
+
+		pos_invoice.load_from_db()
+		self.assertTrue(pos_invoice.consolidated_invoice)
+
+	def test_closing_consolidates_sale_of_batch_expired_after_sale(self):
+		opening_entry, pos_invoice, batch_no = self.make_session_with_batch_sale()
+		frappe.db.set_value(
+			"Batch", batch_no, "expiry_date", frappe.utils.add_days(pos_invoice.posting_date, -1)
+		)
+
+		make_closing_entry_from_opening(opening_entry).submit()
+
+		pos_invoice.load_from_db()
+		self.assertTrue(pos_invoice.consolidated_invoice)
+
+	def test_disabled_batch_cannot_be_sold_in_pos(self):
+		item_code, batch_no = self.make_batch_item_with_stock()
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+		test_user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, test_user.name)
+
+		pos_invoice = create_pos_invoice(
+			item_code=item_code, qty=2, rate=300, batch_no=batch_no, do_not_save=1
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", pos_invoice.insert)
+
+	def make_session_with_batch_sale(self):
+		item_code, batch_no = self.make_batch_item_with_stock()
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+
+		pos_invoice = create_pos_invoice(
+			item_code=item_code, qty=2, rate=300, batch_no=batch_no, do_not_submit=1
+		)
+		pos_invoice.payments[0].amount = pos_invoice.grand_total
+		pos_invoice.save()
+		pos_invoice.submit()
+
+		return opening_entry, pos_invoice, batch_no
+
+	def make_batch_item_with_stock(self):
+		item_code = make_item(
+			"_Test POS Closing Batch Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-POS-CLOSING-.####",
+				"create_new_batch": 1,
+			},
+		).name
+		stock_entry = make_stock_entry(
+			target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100
+		)
+
+		return item_code, get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+
 	def test_change_is_taken_once_with_zero_value_card_payment(self):
 		test_user, pos_profile = init_user_and_profile()
 		frappe.set_user("Administrator")

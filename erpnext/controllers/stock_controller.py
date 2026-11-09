@@ -221,6 +221,7 @@ class StockController(AccountsController):
 		if self.doctype == "Stock Entry" and self.purpose in ["Material Issue", "Material Transfer"]:
 			is_material_issue = True
 
+		check_batches = self.is_batch_check_needed()
 		for d in self.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
 				serial_nos = frappe.get_all(
@@ -237,7 +238,13 @@ class StockController(AccountsController):
 							)
 						)
 
-			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
+			if (
+				check_batches
+				and flt(d.qty) > 0.0
+				and d.get("batch_no")
+				and self.get("posting_date")
+				and self.docstatus < 2
+			):
 				expiry_date, disabled = frappe.get_cached_value(
 					"Batch", d.get("batch_no"), ["expiry_date", "disabled"]
 				)
@@ -245,7 +252,14 @@ class StockController(AccountsController):
 					d.idx, d.batch_no, None if is_material_issue else expiry_date, disabled
 				)
 
-		self.validate_outward_bundle_batches(check_expiry=not is_material_issue)
+		if check_batches:
+			self.validate_outward_bundle_batches(check_expiry=not is_material_issue)
+
+	def is_batch_check_needed(self):
+		if self.get("is_consolidated"):
+			return False
+
+		return self.doctype not in ("Sales Invoice", "Purchase Invoice") or cint(self.get("update_stock"))
 
 	def validate_batch_is_usable(self, idx, batch_no, expiry_date, disabled):
 		if disabled:

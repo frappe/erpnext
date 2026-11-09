@@ -454,6 +454,69 @@ class TestBatch(FrappeTestCase):
 			purpose="Material Issue",
 		)
 
+	def test_invoice_of_delivery_note_with_disabled_batch_is_submitted(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		receipt = self.test_purchase_receipt(10)
+		row = receipt.items[0]
+		batch_no = get_batch_from_bundle(row.serial_and_batch_bundle)
+		delivery_note = create_delivery_note(
+			item_code=row.item_code,
+			warehouse=row.warehouse,
+			qty=3,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		invoice = make_sales_invoice(delivery_note.name)
+		invoice.submit()
+
+		self.assertEqual(invoice.items[0].batch_no, batch_no)
+		self.assertEqual(invoice.docstatus, 1)
+
+	def test_invoice_of_purchase_receipt_with_disabled_batch_is_submitted(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_invoice_from_receipt,
+		)
+
+		first_receipt = self.test_purchase_receipt(10)
+		row = first_receipt.items[0]
+		batch_no = get_batch_from_bundle(row.serial_and_batch_bundle)
+		receipt = make_purchase_receipt(
+			item_code=row.item_code,
+			warehouse=row.warehouse,
+			qty=5,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		invoice = make_invoice_from_receipt(receipt.name)
+		invoice.submit()
+
+		self.assertEqual(invoice.items[0].batch_no, batch_no)
+		self.assertEqual(invoice.docstatus, 1)
+
+	def test_disabled_batch_cannot_be_sold_by_invoice_with_update_stock(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		receipt = self.test_purchase_receipt(10)
+		row = receipt.items[0]
+		batch_no = get_batch_from_bundle(row.serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		invoice = create_sales_invoice(
+			item_code=row.item_code,
+			warehouse=row.warehouse,
+			qty=3,
+			update_stock=1,
+			batch_no=batch_no,
+			do_not_save=1,
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", invoice.insert)
+
 	def test_expired_packed_item_batch_cannot_be_delivered(self):
 		from erpnext.controllers.stock_controller import BatchExpiredError
 
