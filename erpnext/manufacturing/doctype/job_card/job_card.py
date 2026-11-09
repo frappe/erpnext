@@ -1022,7 +1022,7 @@ class JobCard(Document):
 				"description": d.description,
 				"required_qty": flt(
 					d.required_qty * flt(self.for_quantity) / flt(operation_qty or doc.qty),
-					frappe.get_precision("Job Card Item", "required_qty"),
+					self.precision("required_qty", "items"),
 				),
 			},
 		)
