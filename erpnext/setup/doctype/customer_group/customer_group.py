@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils.nestedset import NestedSet
 
 from erpnext.setup.utils import set_root_as_default_parent
+from erpnext.stock.doctype.price_list.price_list import validate_default_price_list_side
 
 
 class CustomerGroup(NestedSet):
@@ -40,6 +41,7 @@ class CustomerGroup(NestedSet):
 	def validate(self):
 		set_root_as_default_parent(self)
 		self.validate_currency_for_receivable_and_advance_account()
+		validate_default_price_list_side(self.default_price_list, "selling")
 
 	def validate_currency_for_receivable_and_advance_account(self):
 		for x in self.accounts:
