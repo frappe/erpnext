@@ -12,7 +12,7 @@ const print_format_styles = ["Bordered", "Classic", "Modern", "Modern with Image
 const allowed_print_formats = doctype_list.flatMap((doctype) =>
 	print_format_styles.map((style) => `${doctype} ${style}`)
 );
-const allowed_letterheads = ["Company Letterhead"];
+const allowed_letterheads = ["Company Letterhead", "Company Letterhead - Grey"];
 
 const preview = frappe.ui.form.PrintView.prototype.preview;
 frappe.ui.form.PrintView.prototype.preview = function () {
