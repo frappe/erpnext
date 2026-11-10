@@ -2775,7 +2775,6 @@ class TestProductionPlan(FrappeTestCase):
 			item_code=fg_item,
 			planned_qty=5,
 			for_warehouse="Stores - _TC",
-			ignore_existing_ordered_qty=1,
 			skip_getting_mr_items=True,
 			do_not_submit=1,
 		)
