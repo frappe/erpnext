@@ -9,7 +9,7 @@ from frappe.utils import cint, flt, get_link_to_form, nowtime
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
-from erpnext.controllers.stock_controller import StockController
+from erpnext.controllers.stock_controller import StockController, add_picked_batches
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
@@ -409,13 +409,8 @@ class SellingController(StockController):
 		il = []
 		picked_serial_nos = picked_batches = None
 		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-<<<<<<< HEAD
 			picked_serial_nos = self.get_serial_nos_used_in_rows()
-=======
-			service = SerialBatchBundleService(self)
-			picked_serial_nos = service.get_serial_nos_used_in_rows()
-			picked_batches = service.get_batches_used_in_rows()
->>>>>>> 679fc27 (fix(stock): also skip batch qty held by bundles already on the rows)
+			picked_batches = self.get_batches_used_in_rows()
 
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
@@ -1230,7 +1225,6 @@ def get_serial_and_batch_bundle(
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-	from erpnext.stock.services.serial_batch_bundle_service import add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
@@ -1275,78 +1269,6 @@ def get_serial_and_batch_bundle(
 	return doc.name
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-def add_picked_batches(picked_batches, bundle):
-	for entry in bundle.get("entries") or []:
-		if entry.batch_no:
-			picked = picked_batches.setdefault(
-				(entry.batch_no, bundle.warehouse),
-				frappe._dict(batch_no=entry.batch_no, warehouse=bundle.warehouse, qty=0),
-			)
-			picked.qty += entry.qty
-
-
-=======
->>>>>>> 679fc27 (fix(stock): also skip batch qty held by bundles already on the rows)
-def get_delivered_serial_batch_for_reservation(item):
-	"""Serial nos and per-batch qty delivered by a stock row.
-
-	The detail may be stored in a Serial and Batch Bundle or directly in the row's
-	``serial_no``/``batch_no`` fields (``use_serial_batch_fields``). Reading from whichever is
-	present keeps the Stock Reservation Entry delivered-qty update independent of a bundle being
-	created -- delivering reserved serial/batch stock used to crash when the row had no bundle.
-	"""
-	serial_nos, batch_qty = [], {}
-
-	if item.get("serial_and_batch_bundle"):
-		bundle = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
-		for row in bundle.entries:
-			if row.serial_no:
-				serial_nos.append(row.serial_no)
-			if row.batch_no:
-				batch_qty[row.batch_no] = batch_qty.get(row.batch_no, 0) + abs(flt(row.qty))
-	else:
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-		from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-
-		if item.get("serial_no"):
-			serial_nos = SerialBatchIdentity("Serial No").resolve(
-				item.item_code, get_serial_nos(item.serial_no), ignore_permissions=True
-			)
-		if item.get("batch_no"):
-			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
-
-	return serial_nos, batch_qty
-
-
-def get_reserved_warehouses_by_order_row(so_details: list) -> dict:
-	if not so_details:
-		return {}
-
-	sre = frappe.qb.DocType("Stock Reservation Entry")
-	rows = (
-		frappe.qb.from_(sre)
-		.select(sre.voucher_detail_no, sre.warehouse)
-		.where(
-			(sre.docstatus == 1)
-			& (sre.voucher_type == "Sales Order")
-			& (sre.voucher_detail_no.isin(so_details))
-			& (sre.delivered_qty < sre.reserved_qty)
-		)
-		.groupby(sre.voucher_detail_no, sre.warehouse)
-		.orderby(Min(sre.creation))
-	).run(as_dict=True)
-
-	reserved_warehouses = {}
-	for row in rows:
-		reserved_warehouses.setdefault(row.voucher_detail_no, []).append(row.warehouse)
-
-	return reserved_warehouses
-
-
->>>>>>> 66d5ff0 (fix(stock): skip batch qty earlier packed rows took when picking a bundle component)
 def get_ledger_qty(qty) -> float:
 	"""Stock qty as the stock ledger keeps balances, rounded to its precision."""
 	return flt(qty, frappe.get_precision("Stock Ledger Entry", "actual_qty"))

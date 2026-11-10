@@ -1707,7 +1707,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual([len(numbers) for numbers in serial_nos], [1, 2])
 		self.assertFalse(set(serial_nos[0]) & set(serial_nos[1]))
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1740,11 +1740,11 @@ class TestDeliveryNote(FrappeTestCase):
 				picked[entry.batch_no] += abs(entry.qty)
 		self.assertEqual(sorted(picked.values()), [1, 2])
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_bundle_row_added_later_skips_batch_qty_of_saved_packed_rows(self):
 		component = make_item(
 			properties={
@@ -1778,7 +1778,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.docstatus, 1)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1819,7 +1819,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.docstatus, 1)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
