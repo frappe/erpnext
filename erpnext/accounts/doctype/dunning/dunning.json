@@ -408,7 +408,7 @@
  "is_submittable": 1,
  "link_display_mode": "Search",
  "links": [],
- "modified": "2026-11-11 04:52:58.630239",
+ "modified": "2026-11-11 04:54:15.740643",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
@@ -431,6 +431,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
