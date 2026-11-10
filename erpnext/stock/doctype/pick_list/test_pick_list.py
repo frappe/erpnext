@@ -991,7 +991,6 @@ class TestPickList(FrappeTestCase):
 
 		self.assertEqual(stock_entry.items[0].serial_no, pick_list.locations[0].serial_no)
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_delivery_from_pick_list_gets_only_undelivered_serial_nos(self):
 		item = make_item(
@@ -1013,6 +1012,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_delivery.items[0].serial_no), picked_serial_nos[2:])
 		second_delivery.submit()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 >>>>>>> 4de8f8a (test: next delivery from a pick list gets only undelivered serial nos)
 	def test_rows_of_the_same_serialized_item_get_the_oldest_serial_nos_in_a_fractional_uom(self):
