@@ -725,26 +725,23 @@ class JobCard(Document):
 		for d in doc.required_items:
 			self.append_required_item(doc, d, operation_qty, other_job_cards_qty)
 
-	def get_other_job_cards_qty(self) -> frappe._dict:
-		"""For Quantity and Required Qty per item on the other job cards of this operation."""
+	def get_other_job_cards_qty(self) -> float:
+		"""Total For Quantity of the other job cards of this operation."""
 		job_card = frappe.qb.DocType("Job Card")
-		job_card_item = frappe.qb.DocType("Job Card Item")
-		other_job_cards = (job_card.work_order == self.work_order) & (job_card.docstatus < 2)
-		other_job_cards &= (job_card.operation_id == self.operation_id) & (job_card.name != (self.name or ""))
-		other_job_cards &= IfNull(job_card.is_corrective_job_card, 0) == 0
-
-		for_quantity = frappe.qb.from_(job_card).select(Sum(job_card.for_quantity)).where(other_job_cards)
-		required_qty = (
-			frappe.qb.from_(job_card_item)
-			.join(job_card)
-			.on(job_card_item.parent == job_card.name)
-			.select(job_card_item.item_code, Sum(job_card_item.required_qty))
-			.where(other_job_cards)
-			.groupby(job_card_item.item_code)
+		query = (
+			frappe.qb.from_(job_card)
+			.select(Sum(job_card.for_quantity))
+			.where(
+				(job_card.work_order == self.work_order)
+				& (job_card.operation_id == self.operation_id)
+				& (job_card.name != (self.name or ""))
+				& (job_card.docstatus < 2)
+				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
+			)
 		)
-		return frappe._dict(for_quantity=flt(for_quantity.run()[0][0]), required_qty=dict(required_qty.run()))
+		return flt(query.run()[0][0])
 
-	def append_required_item(self, doc, d, operation_qty=None, other_job_cards_qty=None):
+	def append_required_item(self, doc, d, operation_qty=None, other_job_cards_qty=0):
 		if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
 			frappe.throw(
 				_("Row {0} : Operation is required against the raw material item {1}").format(
@@ -788,18 +785,14 @@ class JobCard(Document):
 		)
 >>>>>>> 8c3ee0d (fix(manufacturing): let the last Job Card of an operation take the rounding remainder)
 
-	def get_required_qty(self, d, operation_qty, other_job_cards_qty=None) -> float:
-		"""This job card's share of the work order item, rounded as it is transferred.
-		The job card that completes the operation qty takes what the other ones leave."""
+	def get_required_qty(self, d, operation_qty, other_job_cards_qty=0) -> float:
+		"""This job card's share of the work order item. Shares are rounded on the running
+		For Quantity of the operation's job cards, so they add up to the item's required qty."""
 		precision = self.precision("required_qty", "items")
-		qty = flt(d.required_qty) * flt(self.for_quantity) / flt(operation_qty)
-		if other_job_cards_qty and other_job_cards_qty.for_quantity:
-			total_for_quantity = other_job_cards_qty.for_quantity + flt(self.for_quantity)
-			precision_for_quantity = self.precision("for_quantity")
-			if flt(total_for_quantity, precision_for_quantity) >= flt(operation_qty, precision_for_quantity):
-				qty = flt(d.required_qty) - flt(other_job_cards_qty.required_qty.get(d.item_code))
-
-		return flt(qty, precision)
+		total_for_quantity = other_job_cards_qty + flt(self.for_quantity)
+		allocated_qty = flt(flt(d.required_qty) * other_job_cards_qty / flt(operation_qty), precision)
+		total_qty = flt(flt(d.required_qty) * total_for_quantity / flt(operation_qty), precision)
+		return flt(total_qty - allocated_qty, precision)
 
 	def before_save(self):
 		self.set_expected_and_actual_time()
