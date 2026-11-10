@@ -1463,6 +1463,23 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
 
+	def test_bundle_picked_qty_counts_components_picked_across_pick_lists(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle(quantities=[1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=3, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		def pick():
+			pick_list = create_pick_list(sales_order.name)
+			for row in pick_list.locations:
+				row.picked_qty = row.qty
+			pick_list.submit()
+			return frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty")
+
+		self.assertEqual(pick(), 0)  # no B picked yet
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
+		self.assertEqual(pick(), 3)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
 	def test_bundle_picked_qty_counts_component_qty_a_delivery_packs(self):
 		cases = (
