@@ -298,6 +298,10 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 			packed_item.parent_item,
 			packed_item.item_code,
 			packed_item.qty,
+<<<<<<< HEAD
+=======
+			packed_item.product_bundle,
+>>>>>>> 2539f8c (fix(stock): count picked product bundles from all picked components)
 			packed_item.picked_qty,
 			order_item.stock_qty.as_("order_stock_qty"),
 		)

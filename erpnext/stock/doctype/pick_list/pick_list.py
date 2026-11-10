@@ -846,6 +846,7 @@ class PickList(TransactionBase):
 
 	def update_bundle_picked_qty(self):
 		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its components."""
+<<<<<<< HEAD
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction") or 6
 		for so_row, packed_items in get_packed_items_of_order_rows(self._get_product_bundles()).items():
 			picked_qty = min(
@@ -861,6 +862,23 @@ class PickList(TransactionBase):
 	def get_own_vouchers(self):
 		"""Vouchers whose stock reservations this pick list may pick."""
 		return {row.sales_order for row in self.locations if row.sales_order}
+=======
+		product_bundles = self._get_product_bundles()
+		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
+		for so_row, packed_items in get_packed_items_of_order_rows(product_bundles).items():
+			picked_qty = defaultdict(float)
+			for row in packed_items:
+				picked_qty[row.item_code] += flt(row.picked_qty)
+
+			bundle_qty = min(
+				(
+					get_whole_bundle_count(picked_qty[item_code], qty_per_bundle)
+					for item_code, qty_per_bundle in product_bundle_qty_map[so_row].items()
+				),
+				default=0,
+			)
+			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", bundle_qty)
+>>>>>>> 2539f8c (fix(stock): count picked product bundles from all picked components)
 
 	def get_picked_items_details(self, items):
 		picked_items = frappe._dict()
