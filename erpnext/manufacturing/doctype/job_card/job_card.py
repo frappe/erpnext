@@ -968,7 +968,10 @@ class JobCard(Document):
 						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 						"item_name": d.item_name,
 						"description": d.description,
-						"required_qty": (d.required_qty * flt(self.for_quantity)) / operation_qty,
+						"required_qty": flt(
+							d.required_qty * flt(self.for_quantity) / operation_qty,
+							self.precision("required_qty", "items"),
+						),
 					},
 				)
 
