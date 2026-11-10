@@ -1334,6 +1334,33 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_with_repeated_serial_component_delivers_serials_per_packed_row(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRPT-.#####"}
+		).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=10, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
+		self.assertEqual(
+			[row.serial_no for row in delivery_note.packed_items],
+			[row.serial_no for row in pick_list.locations],
+		)
+		delivery_note.submit()
+
 	def test_pick_list_skips_drop_ship_bundle_rows(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1}).name
