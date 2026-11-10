@@ -306,7 +306,7 @@ class PickList(TransactionBase):
 	def before_submit(self):
 		self.validate_sales_order()
 		self.validate_picked_items()
-		self.validate_picked_serial_nos()
+		self.validate_picked_serial_and_batch()
 		self.validate_pending_qty_in_work_order()
 
 	def validate_pending_qty_in_work_order(self):
@@ -368,22 +368,20 @@ class PickList(TransactionBase):
 				# if the user has not entered any picked qty, set it to stock_qty, before submit
 				item.picked_qty = item.stock_qty
 
-	def validate_picked_serial_nos(self):
-		bundle_qty = self.get_serial_bundle_qty()
+	def validate_picked_serial_and_batch(self):
+		bundle_qty = self.get_bundle_qty()
 		for row in self.locations:
-			serial_qty = len(get_serial_nos(row.serial_no)) if row.serial_no else None
-			if row.serial_and_batch_bundle in bundle_qty:
-				serial_qty = bundle_qty[row.serial_and_batch_bundle]
-
-			if serial_qty is not None and serial_qty != flt(row.picked_qty):
+			selected_qty = bundle_qty.get(row.serial_and_batch_bundle) or len(get_serial_nos(row.serial_no))
+			precision = row.precision("picked_qty")
+			if selected_qty and flt(selected_qty, precision) != flt(row.picked_qty, precision):
 				frappe.throw(
 					_(
-						"Row #{0}: {1} serial nos are set but the picked qty is {2}. Set only the picked serial nos."
-					).format(row.idx, serial_qty, row.picked_qty),
-					title=_("Serial Nos Do Not Match Picked Qty"),
+						"Row #{0}: the selected serial / batch qty is {1} but the picked qty is {2}. Select only what was picked."
+					).format(row.idx, selected_qty, row.picked_qty),
+					title=_("Selected Qty Does Not Match Picked Qty"),
 				)
 
-	def get_serial_bundle_qty(self):
+	def get_bundle_qty(self):
 		bundles = [row.serial_and_batch_bundle for row in self.locations if row.serial_and_batch_bundle]
 		if not bundles:
 			return {}
@@ -392,7 +390,7 @@ class PickList(TransactionBase):
 			bundle.name: abs(bundle.total_qty)
 			for bundle in frappe.get_all(
 				"Serial and Batch Bundle",
-				filters={"name": ("in", bundles), "has_serial_no": 1},
+				filters={"name": ("in", bundles)},
 				fields=["name", "total_qty"],
 			)
 		}
