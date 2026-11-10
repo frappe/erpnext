@@ -41,7 +41,7 @@ frappe.ui.form.on("Asset", {
 	},
 
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Journal Entry"];
+		frm.ignore_doctypes_on_cancel_all = ["Journal Entry", "Asset Capitalization"];
 
 		frm.make_methods = {
 			"Asset Movement": () => {
@@ -803,6 +803,7 @@ frappe.ui.form.on("Asset", {
 				purchase_doc_name: frm.doc.purchase_receipt || frm.doc.purchase_invoice,
 				item_code: frm.doc.item_code,
 				doctype: doctype,
+				asset: frm.is_new() ? null : frm.doc.name,
 			},
 			callback: (r) => {
 				if (r.message) {

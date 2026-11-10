@@ -16,6 +16,14 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	assert_refused_without,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -493,19 +501,25 @@ class TestAssetCapitalization(ERPNextTestSuite):
 		self.assertEqual(target_asset.db_get("net_purchase_amount"), 800)
 		self.assertEqual(asset_capitalization.db_get("total_value"), 800)
 
-	def test_cancel_is_refused_after_the_target_asset_is_submitted(self):
-		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
-		asset_capitalization = create_asset_capitalization(
-			target_asset=target_asset.name,
-			service_rate=500,
-			service_expense_account="Expenses Included In Asset Valuation - _TC",
-			submit=1,
-		)
-		target_asset.reload()
-		target_asset.submit()
+	def test_capitalization_and_submitted_target_asset_are_cancelled_together(self):
+		for cancel_target_first in (False, True):
+			with self.subTest(cancel_target_first=cancel_target_first):
+				consumed_asset = create_asset(submit=1, warehouse="Stores - _TC")
+				target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+				asset_capitalization = create_asset_capitalization(
+					target_asset=target_asset.name, consumed_asset=consumed_asset.name, submit=1
+				)
+				target_asset.reload()
+				target_asset.submit()
 
-		self.assertRaises(frappe.ValidationError, asset_capitalization.cancel)
-		self.assertEqual(target_asset.db_get("net_purchase_amount"), 500)
+				if cancel_target_first:
+					target_asset.cancel()
+				else:
+					asset_capitalization.cancel()
+
+				self.assertEqual(asset_capitalization.db_get("docstatus"), 2)
+				self.assertEqual(target_asset.db_get("docstatus"), 2)
+				self.assertNotEqual(consumed_asset.db_get("status"), "Capitalized")
 
 	def test_consumed_asset_cannot_be_added_twice(self):
 		consumed_asset = create_asset(submit=1, warehouse="Stores - _TC")
@@ -528,6 +542,84 @@ class TestAssetCapitalization(ERPNextTestSuite):
 			consumed_asset=consumed_asset.name,
 			posting_date="2020-06-30",
 		)
+
+	def test_capitalization_roles_consume_stock_and_depreciating_assets(self):
+		make_stock_entry(
+			item_code="Capitalization Source Stock Item",
+			target="_Test Warehouse - _TC",
+			qty=3,
+			basic_rate=1000,
+		)
+		capitalizations = {}
+		for role in ("Manufacturing Manager", "Quality Manager", "Accounts User"):
+			with self.subTest(role=role):
+				consumed_asset = create_depreciation_asset(submit=1, total_number_of_depreciations=10)
+				target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+				user = make_fenced_user(f"capitalization-{frappe.scrub(role)}@example.com", [role])
+				with as_user(user):
+					asset_capitalization = create_asset_capitalization(
+						target_asset=target_asset.name, consumed_asset=consumed_asset.name, stock_rate=1000
+					)
+					asset_capitalization.submit()
+
+				self.assertTrue(asset_capitalization.stock_items[0].valuation_rate)
+				self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
+				capitalizations[role] = (user, asset_capitalization)
+
+		user, asset_capitalization = capitalizations["Manufacturing Manager"]
+		with as_user(user):
+			asset_capitalization.cancel()
+		consumed_asset = asset_capitalization.asset_items[0].asset
+		self.assertNotEqual(frappe.db.get_value("Asset", consumed_asset, "status"), "Capitalized")
+
+	def test_stock_lookups_still_need_stock_ledger_access(self):
+		from erpnext.assets.doctype.asset_capitalization.asset_capitalization import (
+			get_consumed_stock_item_details,
+			get_warehouse_details,
+		)
+
+		ctx = {
+			"item_code": "Capitalization Source Stock Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"company": "_Test Company",
+		}
+		with as_user(make_fenced_user("capitalization-sales-user@example.com", ["Sales User"])):
+			self.assertRaises(frappe.PermissionError, get_consumed_stock_item_details, ctx)
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, ctx)
+
+	def test_items_tagged_to_wip_composite_asset(self):
+		from erpnext.assets.doctype.asset_capitalization.asset_capitalization import (
+			get_items_tagged_to_wip_composite_asset,
+		)
+
+		target_asset = create_asset(asset_type="Composite Asset", warehouse="Stores - _TC")
+		pr = make_purchase_receipt(do_not_save=1)
+		pr.items[0].wip_composite_asset = target_asset.name
+		pr.insert()
+		pr.submit()
+
+		def build_kwargs(name):
+			return {"params": {"target_asset": name}}
+
+		with as_user(
+			make_company_fenced_user(
+				"capitalization-other-company@example.com", ["Accounts User"], "_Test Company 1"
+			)
+		):
+			assert_refused_for_names(
+				self, get_items_tagged_to_wip_composite_asset, build_kwargs, [target_asset.name]
+			)
+
+		with as_user(make_fenced_user("capitalization-quality_manager@example.com", ["Quality Manager"])):
+			assert_refused_without(
+				self, [pr.name], get_items_tagged_to_wip_composite_asset, **build_kwargs(target_asset.name)
+			)
+
+		with as_user(make_fenced_user("capitalization-accounts_user@example.com", ["Accounts User"])):
+			stock_items, _asset_items = get_items_tagged_to_wip_composite_asset(
+				**build_kwargs(target_asset.name)
+			)
+		self.assertEqual(stock_items[0].purchase_receipt, pr.name)
 
 
 def create_asset_capitalization_data():

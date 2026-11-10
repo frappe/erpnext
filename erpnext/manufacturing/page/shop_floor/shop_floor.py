@@ -1,10 +1,13 @@
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Count, Date
-from frappe.utils import cint, flt, get_datetime, getdate, now_datetime, time_diff_in_seconds
+from frappe.utils import cint, flt, get_datetime, getdate, now_datetime
 from pypika.terms import ExistsCriterion
 
+from erpnext.manufacturing.doctype.job_card.job_card import get_workstation_minutes
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	get_status_color,
 	get_time_logs,
@@ -129,7 +132,8 @@ def save_and_continue(
 	frappe.has_permission("Job Card", "write", throw=True)
 	doc = _record_session(job_card, qty, for_quantity, pending_qty, process_loss_qty, end_time)
 	if doc.docstatus == 0:
-		doc.db_set("is_paused", 1)
+		doc.is_paused = 1
+		doc.save()
 	return {"name": doc.name}
 
 
@@ -355,16 +359,23 @@ def _has_job_cards_criterion(wo, docstatus):
 
 
 def _bucket_criterion(wo, status_group):
-	"""The floor is done with a Work Order once every job card is submitted, even though the
-	Work Order stays "In Process" until the finished goods are received. Such operationally
-	complete orders belong on the Completed tab — not stranded under Pending / In Progress."""
+	"""Submitted cards can leave quantity for another card. Require completed operations
+	before moving an open Work Order to Completed, even before finished goods are received."""
 	open_statuses = WORK_ORDER_STATUS_GROUPS["open"]
-	all_job_cards_done = _has_job_cards_criterion(wo, 1) & _has_job_cards_criterion(wo, 0).negate()
-	if status_group == "completed":
-		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_job_cards_done)
-	return wo.status.isin(open_statuses) & (
-		_has_job_cards_criterion(wo, 1).negate() | _has_job_cards_criterion(wo, 0)
+	operation = frappe.qb.DocType("Work Order Operation")
+	incomplete_operations = ExistsCriterion(
+		frappe.qb.from_(operation)
+		.select(operation.name)
+		.where((operation.parent == wo.name) & (operation.status != "Completed"))
 	)
+	all_operations_done = (
+		_has_job_cards_criterion(wo, 1)
+		& _has_job_cards_criterion(wo, 0).negate()
+		& incomplete_operations.negate()
+	)
+	if status_group == "completed":
+		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_operations_done)
+	return wo.status.isin(open_statuses) & all_operations_done.negate()
 
 
 def _apply_work_order_filters(query, wo, status_group, search, with_job_cards_only):
@@ -788,19 +799,18 @@ def _get_run_and_ideal_minutes(workstation, today) -> tuple[float, float, set]:
 	today_start = get_datetime(f"{today} 00:00:00")
 	today_end = get_datetime(f"{today} 23:59:59")
 	now = now_datetime()
-	actual_run_min = 0.0
 	ideal_min = 0.0
-	worked_job_cards = set()
+	run_intervals = defaultdict(list)
 	for log in _get_oee_time_logs(workstation, today_start, today_end):
 		# Clip the log's interval to today's window for fair attribution.
 		start = max(get_datetime(log.from_time), today_start)
 		end = min(get_datetime(log.to_time) if log.to_time else now, today_end)
 		if end > start:
-			actual_run_min += time_diff_in_seconds(end, start) / 60
-			worked_job_cards.add(log.job_card)
+			run_intervals[log.job_card].append(frappe._dict(from_time=start, to_time=end))
 		if log.completed_qty and log.for_quantity and log.time_required:
 			ideal_min += (flt(log.time_required) / flt(log.for_quantity)) * flt(log.completed_qty)
-	return actual_run_min, ideal_min, worked_job_cards
+	actual_run_min = sum(get_workstation_minutes(intervals) for intervals in run_intervals.values())
+	return actual_run_min, ideal_min, set(run_intervals)
 
 
 def _get_oee_time_logs(workstation, today_start, today_end) -> list[dict]:

@@ -1,6 +1,7 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import ast
 import json
 import keyword
 import math
@@ -13,6 +14,7 @@ import frappe
 from frappe import _, is_whitelisted
 from frappe.database.operator_map import OPERATOR_MAP
 from frappe.utils import escape_html
+from frappe.utils.safe_exec import WHITELISTED_SAFE_EVAL_GLOBALS
 
 FORMULA_FUNCTIONS = {
 	"abs": abs,
@@ -25,6 +27,14 @@ FORMULA_FUNCTIONS = {
 	"ceil": math.ceil,
 	"floor": math.floor,
 }
+
+# Some inbuilt functions that are allowed in formulas.
+ALLOWED_FUNCTIONS = frozenset(FORMULA_FUNCTIONS) | frozenset(
+	name for name in WHITELISTED_SAFE_EVAL_GLOBALS if not name.startswith("_")
+)
+
+# These nodes are not supported by Frappe's safe_eval, so they are not allowed in formulas.
+UNSUPPORTED_NODES = (ast.NamedExpr, ast.Lambda)
 
 
 def get_valid_api_method(api_path: str):
@@ -65,7 +75,9 @@ class ValidationIssue:
 
 	def __str__(self) -> str:
 		if self.row_idx:
-			return _("Row {0}: {1}", context="Financial Report Template").format(self.row_idx, self.message)
+			return _("Template row {0}: {1}", context="Financial Report Template").format(
+				self.row_idx, self.message
+			)
 		return self.message
 
 
@@ -170,7 +182,7 @@ class TemplateStructureValidator(Validator):
 				result.add_error(
 					ValidationIssue(
 						message=_(
-							"Invalid line reference format: '{0}'. Must start with a letter and contain only letters, numbers and underscores"
+							"Invalid line reference format: '{0}'. Must start with a letter and contain only letters, numbers and underscores."
 						).format(ref_code),
 						row_idx=row.idx,
 					)
@@ -178,7 +190,7 @@ class TemplateStructureValidator(Validator):
 			elif keyword.iskeyword(ref_code) or ref_code in FORMULA_FUNCTIONS:
 				result.add_error(
 					ValidationIssue(
-						message=_("'{0}' is a reserved name and cannot be used as a line reference").format(
+						message=_("'{0}' is a reserved name and cannot be used as a line reference.").format(
 							ref_code
 						),
 						row_idx=row.idx,
@@ -189,7 +201,7 @@ class TemplateStructureValidator(Validator):
 			if ref_code in used_codes:
 				result.add_error(
 					ValidationIssue(
-						message=_("Duplicate line reference: '{0}'").format(ref_code),
+						message=_("Duplicate line reference: '{0}'.").format(ref_code),
 						row_idx=row.idx,
 					)
 				)
@@ -205,7 +217,7 @@ class TemplateStructureValidator(Validator):
 			if row.data_source == "Account Data" and not row.balance_type:
 				result.add_error(
 					ValidationIssue(
-						message=_("Balance Type is required for Account Data"),
+						message=_("Balance Type is required for Account Data."),
 						row_idx=row.idx,
 					)
 				)
@@ -215,7 +227,7 @@ class TemplateStructureValidator(Validator):
 				if not row.calculation_formula:
 					result.add_error(
 						ValidationIssue(
-							message=_("{0} is required when {1} is {2}").format(
+							message=_("{0} is required when {1} is {2}.").format(
 								get_formula_field_label(row.data_source),
 								row.meta.get_translated_label("data_source"),
 								_(row.data_source),
@@ -244,9 +256,7 @@ class DependencyValidator(Validator):
 				# skip self-reference, `CalculationFormulaValidator` already reports it
 				deps = [
 					code
-					for code in extract_reference_codes_from_formula(
-						row.calculation_formula, list(available_codes)
-					)
+					for code in extract_reference_codes_from_formula(row.calculation_formula, available_codes)
 					if code != row.reference_code
 				]
 				if deps:
@@ -278,7 +288,7 @@ class DependencyValidator(Validator):
 				cycle = [*path[cycle_start:], node]
 				result.add_error(
 					ValidationIssue(
-						message=_("Circular dependency detected: {0}").format(" → ".join(cycle)),
+						message=_("Circular dependency detected: {0}.").format(" → ".join(cycle)),
 					)
 				)
 				return
@@ -305,6 +315,10 @@ class CalculationFormulaValidator(Validator):
 	"""Validates calculation formulas used in Calculated Amount rows"""
 
 	def __init__(self, reference_codes: set[str]):
+		"""
+		Args:
+		                reference_codes: line references the formula may use.
+		"""
 		self.reference_codes = reference_codes
 
 	def validate(self, row) -> ValidationResult:
@@ -314,66 +328,123 @@ class CalculationFormulaValidator(Validator):
 		if row.data_source != "Calculated Amount":
 			return result
 
-		formula = self._preprocess_formula(row.calculation_formula)
+		formula = (row.calculation_formula or "").strip()
 
-		# Check parentheses
-		if not self._are_parentheses_balanced(formula):
+		if not formula:
+			return result
+
+		try:
+			tree = ast.parse(formula, mode="eval")
+		except SyntaxError as e:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula has unbalanced parentheses"),
+					# e.msg, not str(e): str would add "(<unknown>, line 1)"
+					message=_("Formula has invalid syntax: {0}.").format(e.msg),
+					row_idx=row.idx,
+				)
+			)
+			return result
+		except RecursionError:
+			result.add_error(
+				ValidationIssue(message=_("Formula exceeds maximum recursion depth."), row_idx=row.idx)
+			)
+			return result
+
+		if unsupported := self._unsupported_reason(tree, formula):
+			result.add_error(
+				ValidationIssue(
+					message=_("Formula is not allowed: {0}.").format(unsupported),
 					row_idx=row.idx,
 				)
 			)
 			return result
 
-		# Check self-reference
-		available_codes = list(self.reference_codes)
-		refs = extract_reference_codes_from_formula(formula, available_codes)
-		if row.reference_code and row.reference_code in refs:
+		result.merge(self._validate_formula_names(tree, row))
+
+		return result
+
+	def _unsupported_reason(self, tree: ast.Expression, formula: str) -> str | None:
+		from frappe.utils.safe_exec import FrappeTransformer
+		from RestrictedPython import compile_restricted
+
+		# replicating the check in `safe_eval`
+		if any(isinstance(node, UNSUPPORTED_NODES) for node in ast.walk(tree)):
+			return _("assignment expressions and lambdas are not supported")
+
+		try:
+			# check if this formula can be compiled under frappe's restricted rules
+			compile_restricted(formula, filename="<formula>", policy=FrappeTransformer, mode="eval")
+		except SyntaxError as e:
+			# compile_restricted puts a list of reasons in args[0], so str(e) would show
+			# the brackets and quotes of a tuple.
+			reasons = e.args[0] if e.args else None
+			if isinstance(reasons, list | tuple):
+				return "; ".join(str(r) for r in reasons)
+			return str(reasons or e)
+		except RecursionError:
+			return _("it exceeds the maximum recursion depth")
+		except Exception as e:
+			return str(e)
+
+	def _validate_formula_names(self, tree: ast.Expression, row) -> ValidationResult:
+		"""
+		Validate the names a formula uses against the known codes and functions.
+
+		- A name that is neither a known code nor a known function is an error.
+		- So is a self-reference: it evaluates without failing and produces a misleading value.
+		"""
+		result = ValidationResult()
+		unknown_functions, unknown_codes, used_codes = self._resolve_names(tree)
+
+		if unknown_functions:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula references itself ('{0}')").format(row.reference_code),
+					message=_("Formula uses unknown functions: {0}.").format(
+						", ".join(sorted(unknown_functions))
+					),
 					row_idx=row.idx,
 				)
 			)
 
-		# Try to evaluate with dummy values
-		eval_error = self._test_formula_evaluation(formula, available_codes)
-		if eval_error:
+		if unknown_codes:
 			result.add_error(
 				ValidationIssue(
-					message=_("Formula evaluation error: {0}").format(eval_error),
+					message=_("Formula references undefined codes: {0}.").format(
+						", ".join(sorted(unknown_codes))
+					),
+					row_idx=row.idx,
+				)
+			)
+
+		if row.reference_code and row.reference_code in used_codes:
+			result.add_error(
+				ValidationIssue(
+					message=_("Formula references itself ('{0}').").format(row.reference_code),
 					row_idx=row.idx,
 				)
 			)
 
 		return result
 
-	def _preprocess_formula(self, formula: str) -> str:
-		if not formula or not isinstance(formula, str):
-			return ""
+	def _resolve_names(self, tree: ast.Expression) -> tuple[set, set, set]:
+		"""
+		Look up every name a formula uses against the known codes and functions.
 
-		return formula.strip()
+		Returns:
+		                Unknown functions, unknown codes, and known codes the formula reads.
+		"""
+		called, created, read = collect_names(tree)
 
-	@staticmethod
-	def _are_parentheses_balanced(formula: str) -> bool:
-		return formula.count("(") == formula.count(")")
+		# skip names the formula made itself, like REV in [REV for REV in ...]
+		names = read - created
+		functions = names & called
+		codes = names - called
 
-	def _test_formula_evaluation(self, formula: str, available_codes: list[str]) -> str | None:
-		try:
-			context = {code: 1.0 for code in available_codes}
-			context.update(FORMULA_FUNCTIONS)
+		unknown_functions = functions - ALLOWED_FUNCTIONS
+		unknown_codes = codes - self.reference_codes - ALLOWED_FUNCTIONS
+		used_codes = codes & self.reference_codes
 
-			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
-
-			if not isinstance(result, (int | float)):
-				return _("Formula must return a numeric value, got {0}").format(type(result).__name__)
-
-			return None
-		except ZeroDivisionError:
-			return None
-		except Exception as e:
-			return str(e)
+		return unknown_functions, unknown_codes, used_codes
 
 
 class AccountFilterValidator(Validator):
@@ -421,7 +492,7 @@ class AccountFilterValidator(Validator):
 				ValidationIssue(
 					message=_("[{0}] {1}", context="Financial Report Template").format(
 						get_formula_field_label("Account Data"),
-						_("Invalid JSON format: {0}").format(str(e)),
+						_("Invalid JSON format: {0}.").format(str(e)),
 					),
 					row_idx=row.idx,
 				)
@@ -438,36 +509,36 @@ class AccountFilterValidator(Validator):
 		# simple condition: [field, operator, value]
 		if isinstance(filter_config, list):
 			if len(filter_config) != 3:
-				return _("Filter must be [field, operator, value]")
+				return _("Filter must be [field, operator, value].")
 
 			field, operator, value = filter_config
 
 			if not isinstance(field, str) or not isinstance(operator, str):
-				return _("Field and operator must be strings")
+				return _("Field and operator must be strings.")
 
 			if field not in account_fields:
-				return _("Field '{0}' is not a valid Account field").format(field)
+				return _("Field '{0}' is not a valid Account field.").format(field)
 
 			normalized_operator = operator.casefold()
 
 			if normalized_operator not in OPERATOR_MAP:
-				return _("Invalid operator '{0}'").format(operator)
+				return _("Invalid operator '{0}'.").format(operator)
 
 			if normalized_operator in ["in", "not in"] and not isinstance(value, list):
-				return _("Operator '{0}' requires a list value").format(operator)
+				return _("Operator '{0}' requires a list value.").format(operator)
 
 		# logical condition: {"and": [condition1, condition2]}
 		elif isinstance(filter_config, dict):
 			if len(filter_config) != 1:
-				return _("Logical condition must have exactly one operator")
+				return _("Logical condition must have exactly one operator.")
 
 			op = next(iter(filter_config.keys())).lower()
 			if op not in ["and", "or"]:
-				return _("Logical operators must be 'and' or 'or'")
+				return _("Logical operators must be 'and' or 'or'.")
 
 			conditions = filter_config[next(iter(filter_config.keys()))]
 			if not isinstance(conditions, list) or len(conditions) < 1:
-				return _("Logical conditions need at least 1 sub-condition")
+				return _("Logical conditions need at least 1 sub-condition.")
 
 			# recursive
 			for condition in conditions:
@@ -475,7 +546,7 @@ class AccountFilterValidator(Validator):
 				if error:
 					return error
 		else:
-			return _("Filter must be a list or dict")
+			return _("Filter must be a list or dict.")
 
 		return None
 
@@ -511,7 +582,7 @@ class FormulaValidator(Validator):
 		if "." not in api_path:
 			result.add_error(
 				ValidationIssue(
-					message=_("{0} should be in format: app.module.method").format(
+					message=_("{0} should be in format: app.module.method.").format(
 						get_formula_field_label(row.data_source)
 					),
 					row_idx=row.idx,
@@ -529,10 +600,10 @@ class FormulaValidator(Validator):
 			if isinstance(e, frappe.PermissionError):
 				message = _("[{0}] {1}", context="Financial Report Template").format(
 					get_formula_field_label(row.data_source),
-					_("Method '{0}' must be whitelisted and permit GET requests").format(api_path),
+					_("Method '{0}' must be whitelisted and permit GET requests.").format(api_path),
 				)
 			else:
-				message = _("Could not validate {0}: {1}").format(
+				message = _("Could not validate {0}: {1}.").format(
 					get_formula_field_label(row.data_source), str(e)
 				)
 
@@ -541,11 +612,40 @@ class FormulaValidator(Validator):
 		return result
 
 
-def extract_reference_codes_from_formula(formula: str, available_codes: list[str]) -> list[str]:
-	found_codes = []
-	for code in available_codes:
-		# Match complete words only to avoid partial matches
-		pattern = r"\b" + re.escape(code) + r"\b"
-		if re.search(pattern, formula):
-			found_codes.append(code)
-	return found_codes
+def collect_names(tree: ast.Expression) -> tuple[set, set, set]:
+	"""
+	Read every name in a formula in one pass.
+
+	Returns three sets:
+	                - called: used as a function, like `sum` in `sum([A])`
+	                - created: made by the formula, like `x` in `[x for x in ...]`
+	                - read: everything read by name
+	"""
+	called, created, read = set(), set(), set()
+
+	for node in ast.walk(tree):
+		if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+			called.add(node.func.id)
+		elif isinstance(node, ast.Name):
+			target = created if isinstance(node.ctx, ast.Store) else read
+			target.add(node.id)
+
+	return called, created, read
+
+
+def extract_reference_codes_from_formula(formula: str, available_codes: set[str]) -> list[str]:
+	"""Return the reference codes a formula depends on, sorted so the result is stable."""
+	if not formula:
+		return []
+
+	try:
+		tree = ast.parse(formula, mode="eval")
+	except SyntaxError:
+		# `CalculationFormulaValidator` reports the syntax error
+		return []
+
+	called, created, read = collect_names(tree)
+	found = (read - called - created) & available_codes
+
+	# sorted so the order is the same in every process
+	return sorted(found)

@@ -14,14 +14,14 @@ from frappe.database.operator_map import OPERATOR_MAP
 from frappe.model import numeric_fieldtypes
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Cast_, Sum
-from frappe.utils import cstr, date_diff, flt, getdate
+from frappe.utils import cstr, date_diff, escape_html, flt, getdate
 from frappe.utils.xlsxutils import XLSXMetadata, XLSXStyleBuilder
 from pypika.terms import Bracket, LiteralValue
 
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.financial_report_row.financial_report_row import FinancialReportRow
 from erpnext.accounts.doctype.financial_report_template.financial_report_template import (
@@ -36,7 +36,6 @@ from erpnext.accounts.doctype.financial_report_template.financial_report_validat
 )
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
-	get_cost_centers_with_children,
 	get_period_list,
 )
 from erpnext.accounts.utils import get_children, get_currency_precision
@@ -747,14 +746,14 @@ class FinancialQueryBuilder:
 		query = query.where(~is_pcv | table.account.isin(closing_heads))
 
 		if self.filters.get("project"):
-			projects = self.filters.get("project")
-			if isinstance(projects, str):
-				projects = [projects]
-			query = query.where(table.project.isin(projects))
+			query = query.where(
+				get_dimension_filter_condition(table.project, self.filters.project, "Project")
+			)
 
 		if self.filters.get("cost_center"):
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
-			query = query.where(table.cost_center.isin(self.filters.cost_center))
+			query = query.where(
+				get_dimension_filter_condition(table.cost_center, self.filters.cost_center, "Cost Center")
+			)
 
 		finance_book = self.filters.get("finance_book")
 		if self.filters.get("include_default_book_entries"):
@@ -777,12 +776,13 @@ class FinancialQueryBuilder:
 		dimensions = get_accounting_dimensions(as_list=False)
 		for dimension in dimensions:
 			if self.filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					self.filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, self.filters.get(dimension.fieldname)
+				query = query.where(
+					get_dimension_filter_condition(
+						table[dimension.fieldname],
+						self.filters[dimension.fieldname],
+						dimension.document_type,
 					)
-
-				query = query.where(table[dimension.fieldname].isin(self.filters.get(dimension.fieldname)))
+				)
 
 		return query
 
@@ -821,29 +821,27 @@ class FilterExpressionParser:
 
 	def build_condition(self, report_row, table, raise_on_invalid=False):
 		"""
-		Build SQL condition directly from filter formula.
+		Build an SQL condition from a filter formula.
 
-		Supports:
-		1. Simple condition: ["field", "operator", "value"]
-		   Example: ["account_type", "=", "Income"]
+		- A single condition is `["field", "operator", "value"]`:
 
-		2. Complex logical conditions:
-		   {"and": [condition1, condition2, ...]}  # All conditions must be true
-		   {"or": [condition1, condition2, ...]}   # Any condition can be true
+		```
+		["account_type", "=", "Income"]
+		```
 
-		   Example:
-		   {
-		         "and": [
-		           ["account_type", "=", "Income"],
-		           {"or": [
-		                 ["category", "=", "Direct Income"],
-		                 ["category", "=", "Indirect Income"]
-		           ]}
-		         ]
-		   }
+		- `and` and `or` nest them. `and` needs every condition to hold, `or` needs one:
 
-		Returns:
-		        SQL condition object or None if invalid
+		```
+		{
+		    "and": [
+		        ["account_type", "=", "Income"],
+		        {"or": [["category", "=", "Direct Income"], ["category", "=", "Indirect Income"]]},
+		    ]
+		}
+		```
+
+		---
+		Returns the condition, or None when the row has no filter or the filter is invalid.
 		"""
 		filter_formula = report_row.calculation_formula
 		if not filter_formula:
@@ -1334,31 +1332,56 @@ class FormulaCalculator:
 		negation_factor = -1 if report_row.reverse_sign else 1
 
 		if validation_result.issues:
-			# TODO: Throw?
-			messages = "<br><br>".join(str(issue) for issue in validation_result.issues)
-			frappe.log_error(f"Formula validation errors found:\n{messages}")
-			return [0.0] * len(self.period_list)
+			frappe.throw(
+				"<br>".join(str(issue) for issue in validation_result.issues),
+				title=_("Formula Error"),
+			)
 
 		results = []
 		for i in range(len(self.period_list)):
-			result = self._evaluate_for_period(formula, i, negation_factor)
+			result = self._evaluate_for_period(report_row, formula, i, negation_factor)
 			results.append(result)
 
 		return results
 
-	def _evaluate_for_period(self, formula: str, period_index: int, negation_factor: int) -> float:
-		# TODO: consistent error handling
+	@staticmethod
+	def _row_label(report_row: dict[str, Any]) -> str:
+		"""Name the template row the reader has to go and fix."""
+		return _("Template row {0} ({1})").format(
+			report_row.idx, report_row.display_name or report_row.reference_code
+		)
+
+	def _evaluate_for_period(
+		self, report_row: dict[str, Any], formula: str, period_index: int, negation_factor: int
+	) -> float:
 		try:
 			context = self._build_context(period_index)
 			result = frappe.safe_eval(formula, eval_globals=None, eval_locals=context)
-			return flt(result * negation_factor, self.precision)
 
 		except ZeroDivisionError:
-			frappe.log_error(f"Division by zero in formula: {formula}")
-			return 0.0
+			frappe.throw(
+				_("{0}: formula {1} divides by zero. Check the divisor first, for example {2}.").format(
+					self._row_label(report_row), f'"{escape_html(formula)}"', '"A / B if B else 0"'
+				),
+				title=_("Formula Error"),
+			)
 		except Exception as e:
-			frappe.log_error(f"Formula evaluation error: {formula} - {e!s}")
-			return 0.0
+			frappe.throw(
+				_("{0}: formula {1} couldn't be calculated: {2}.").format(
+					self._row_label(report_row), f'"{escape_html(formula)}"', escape_html(str(e))
+				),
+				title=_("Formula Error"),
+			)
+
+		if type(result) not in (int, float):
+			frappe.throw(
+				_("{0}: formula {1} must return a number, got {2}.").format(
+					self._row_label(report_row), f'"{escape_html(formula)}"', type(result).__name__
+				),
+				title=_("Formula Error"),
+			)
+
+		return flt(result * negation_factor, self.precision)
 
 	def _build_context(self, period_index: int) -> dict[str, Any]:
 		context = {}

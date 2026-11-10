@@ -222,6 +222,7 @@
      {
       "aggregation": "sum",
       "column_name": "value_to_receive",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Amount to Receive"
@@ -265,6 +266,7 @@
      {
       "aggregation": "max",
       "column_name": "overdue",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Overdue to Receive",
@@ -316,6 +318,7 @@
      {
       "aggregation": "sum",
       "column_name": "base_net_amount",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Purchases, Fiscal Year to Date",
@@ -369,6 +372,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "base_net_amount",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Purchase Amount"
@@ -421,6 +425,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "purchases",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Purchase Amount"
@@ -431,6 +436,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "purchases_last_year",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Same Month Last Year"
@@ -483,6 +489,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "base_net_amount",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Purchase Amount"
@@ -566,6 +573,7 @@
      {
       "aggregation": "max",
       "column_name": "to_receive",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "To Receive",
@@ -835,7 +843,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:09:41.603404",
+ "modified": "2026-10-24 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "buying",
@@ -1914,7 +1922,13 @@
      "type": "source"
     },
     {
-     "dimensions": [],
+     "dimensions": [
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
+      }
+     ],
      "measures": [
       {
        "data_type": "Decimal",

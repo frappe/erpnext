@@ -215,17 +215,18 @@
    "fieldname": "finished_good",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "FG / Semi FG Item",
+   "label": "Output Item",
    "mandatory_depends_on": "eval:parent.track_semi_finished_goods === 1",
    "options": "Item"
   },
   {
    "columns": 2,
    "depends_on": "eval:parent.track_semi_finished_goods === 1",
+   "description": "Pick a BOM to copy its raw materials into this step. Leave it empty to add the raw materials yourself with Add Raw Materials.",
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "BOM No",
+   "label": "Output Item BOM",
    "options": "BOM"
   },
   {
@@ -235,14 +236,14 @@
    "fieldname": "finished_good_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty to produce"
+   "label": "Output Qty"
   },
   {
    "default": "0",
-   "description": "In a multi-operation BOM, marks the operation that produces this BOM's final item, the others produce intermediate semi-finished goods. Its FG item is set to the BOM's item automatically and must match it.",
+   "description": "Tick this on the step that makes this BOM's own item. The other steps make in-between items.",
    "fieldname": "is_final_finished_good",
    "fieldtype": "Check",
-   "label": "Is final Finished Good",
+   "label": "Last Step",
    "show_description_on_click": 1
   },
   {
@@ -330,10 +331,9 @@
   {
    "fieldname": "semi_finished_goods_section",
    "fieldtype": "Section Break",
-   "label": "Semi finished goods"
+   "label": "Output of This Step"
   },
   {
-   "description": "Each operation produces its own semi-finished output. Supply its raw materials either by linking that output's BOM in BOM No, or by adding them manually.",
    "fieldname": "column_break_fnun",
    "fieldtype": "Column Break"
   }
@@ -342,7 +342,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-09-22 12:27:49.512253",
+ "modified": "2026-10-19 13:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

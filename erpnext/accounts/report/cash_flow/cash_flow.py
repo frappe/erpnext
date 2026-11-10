@@ -4,14 +4,14 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cstr, flt
 from pypika.terms import Bracket, LiteralValue
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
@@ -21,7 +21,6 @@ from erpnext.accounts.report.financial_statements import (
 	build_period_list,
 	get_appropriate_currency,
 	get_columns,
-	get_cost_centers_with_children,
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_keys_for_total,
@@ -33,12 +32,14 @@ from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement
 from erpnext.accounts.report.utils import convert, get_currency
 from erpnext.accounts.utils import get_fiscal_year
 
+OTHER_BALANCE_SHEET_ACCOUNTS = "Other Balance Sheet Accounts"
+
 
 def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	period_list = build_period_list(filters)
+	period_list = build_period_list(filters, split_on_fiscal_year=bool(filters.accumulated_values))
 
 	if not period_list:
 		return
@@ -111,15 +112,7 @@ def execute(filters=None):
 			row_data = get_account_type_based_data(
 				filters.company, row["account_type"], period_list, filters.accumulated_values, filters
 			)
-			accounts = frappe.get_all(
-				"Account",
-				filters={
-					"account_type": row["account_type"],
-					"is_group": 0,
-					"company": filters.company,
-				},
-				pluck="name",
-			)
+			accounts = get_row_accounts(filters.company, row["account_type"])
 			row_data.update(
 				{
 					"section_name": row["label"],
@@ -190,6 +183,10 @@ def get_cash_flow_accounts():
 			{"account_type": "Receivable", "label": _("Net Change in Accounts Receivable")},
 			{"account_type": "Payable", "label": _("Net Change in Accounts Payable")},
 			{"account_type": "Stock", "label": _("Net Change in Inventory")},
+			{
+				"account_type": OTHER_BALANCE_SHEET_ACCOUNTS,
+				"label": _("Net Change in Other Balance Sheet Accounts"),
+			},
 		],
 	}
 
@@ -209,6 +206,44 @@ def get_cash_flow_accounts():
 
 	# combine all cash flow accounts for iteration
 	return [operation_accounts, investing_accounts, financing_accounts]
+
+
+def get_row_accounts(company: str, account_type: str) -> list[str]:
+	account = frappe.qb.DocType("Account")
+	return get_row_accounts_query(account, company, account_type).run(pluck=True)
+
+
+def get_row_accounts_query(account, company: str, account_type: str):
+	return (
+		frappe.qb.from_(account)
+		.select(account.name)
+		.where(account.is_group == 0)
+		.where(account.company == company)
+		.where(get_row_account_condition(account, account_type))
+	)
+
+
+def get_row_account_condition(account, account_type: str):
+	if account_type != OTHER_BALANCE_SHEET_ACCOUNTS:
+		return account.account_type == account_type
+
+	# Balance sheet accounts not reported on another row, so that Net Change in Cash equals the movement
+	# on Cash and Bank. Depreciation accounts offset the charge credited to accumulated depreciation,
+	# since the Depreciation row already adds it back.
+	excluded_types = [*get_mapped_account_types(), "Cash", "Bank"]
+	other_balance_sheet_accounts = account.root_type.isin(["Asset", "Liability", "Equity"]) & IfNull(
+		account.account_type, ""
+	).notin(excluded_types)
+	return other_balance_sheet_accounts | (account.account_type == "Depreciation")
+
+
+def get_mapped_account_types() -> list[str]:
+	return [
+		row["account_type"]
+		for section in get_cash_flow_accounts()
+		for row in section["account_types"]
+		if row["account_type"] != OTHER_BALANCE_SHEET_ACCOUNTS
+	]
 
 
 def get_account_type_based_data(company, account_type, period_list, accumulated_values, filters):
@@ -262,15 +297,7 @@ def get_account_type_based_gl_data(company, filters=None):
 		.where(gl.posting_date >= filters.start_date)
 		.where(gl.posting_date <= filters.end_date)
 		.where(gl.voucher_type != "Period Closing Voucher")
-		.where(
-			gl.account.isin(
-				frappe.qb.from_(acc)
-				.select(acc.name)
-				.where(acc.is_group == 0)
-				.where(acc.company == company)
-				.where(acc.account_type == filters.account_type)
-			)
-		)
+		.where(gl.account.isin(get_row_accounts_query(acc, company, filters.account_type)))
 	)
 
 	if not frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting"):
@@ -305,27 +332,28 @@ def apply_gl_filters(query, gl, company, filters):
 
 	# cost center (with children)
 	if filters.get("cost_center"):
-		cost_centers = get_cost_centers_with_children(filters.cost_center)
-		query = query.where(gl.cost_center.isin(cost_centers))
+		query = query.where(
+			get_dimension_filter_condition(gl.cost_center, filters.cost_center, "Cost Center")
+		)
 
 	# project
 	if filters.get("project"):
-		projects = filters.project
-		if not isinstance(projects, list):
-			projects = frappe.parse_json(projects)
-		query = query.where(gl.project.isin(projects))
+		query = query.where(get_dimension_filter_condition(gl.project, filters.project, "Project"))
 
 	# per-period group-by-dimension filter (always a single exact value)
 	if filters.get("dimension_field") and filters.get("dimension_value"):
-		query = query.where(gl[filters.dimension_field] == filters.dimension_value)
+		query = query.where(
+			get_dimension_filter_condition(gl[filters.dimension_field], [filters.dimension_value])
+		)
 
 	# accounting dimension filters selected in the filter bar
 	for dimension in get_accounting_dimensions(as_list=False):
 		if filters.get(dimension.fieldname):
-			values = filters[dimension.fieldname]
-			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-				values = get_dimension_with_children(dimension.document_type, values)
-			query = query.where(gl[dimension.fieldname].isin(values))
+			query = query.where(
+				get_dimension_filter_condition(
+					gl[dimension.fieldname], filters[dimension.fieldname], dimension.document_type
+				)
+			)
 
 	# apply permission filters
 	from frappe.desk.reportview import build_match_conditions
@@ -342,7 +370,8 @@ def get_start_date(period, accumulated_values, company):
 
 	start_date = period["year_start_date"]
 	if accumulated_values:
-		start_date = get_fiscal_year(period.to_date, company=company)[1]
+		# a date range can start after its fiscal year, and profit is only counted from the range start
+		start_date = max(start_date, get_fiscal_year(period.to_date, company=company)[1])
 
 	return start_date
 
@@ -407,16 +436,21 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 		"currency": currency,
 	}
 
-	opening_amount = get_opening_balance(filters.company, period_list, filters) or 0.0
-	running_total = opening_amount
+	opening = closing = get_opening_balance(filters.company, period_list, filters) or 0.0
+	movement_start_date = None
 
-	for i, period in enumerate(period_list):
+	for period in period_list:
 		key = period["key"]
-		change = net_change_in_cash.get(key, 0.0)
 
-		opening_balance[key] = opening_amount if i == 0 else running_total
-		running_total += change
-		closing_balance[key] = running_total
+		# accumulated values already include the earlier periods of their fiscal year
+		start_date = get_start_date(period, filters.accumulated_values, filters.company)
+		if start_date != movement_start_date:
+			opening = closing
+			movement_start_date = start_date
+
+		opening_balance[key] = opening
+		closing = opening + net_change_in_cash.get(key, 0.0)
+		closing_balance[key] = closing
 
 	opening_balance["total"] = opening_balance[period_list[0]["key"]]
 	closing_balance["total"] = closing_balance[period_list[-1]["key"]]

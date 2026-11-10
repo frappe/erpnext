@@ -133,7 +133,4 @@ class ItemPrice(Document):
 			)
 
 	def before_save(self):
-		if self.selling:
-			self.reference = self.customer
-		if self.buying:
-			self.reference = self.supplier
+		self.reference = self.customer or self.supplier

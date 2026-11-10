@@ -343,18 +343,31 @@ def add_product_bundles_to_target(
 			for row in pick_list.locations
 			if row.product_bundle_item and row.name in selected_locations
 		}
-		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+		product_bundles = [so_row for so_row in product_bundles if so_row in selected_bundles]
 
-	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
+	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles)
 
-	for so_row, value in product_bundles.items():
+	for so_row in product_bundles:
 		sales_order_item = frappe.get_doc("Sales Order Item", so_row)
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
+		bundle_items = product_bundle_qty_map.get(so_row)
+		if not bundle_items:
+			frappe.throw(
+				_("Row #{0}: cannot resolve the Product Bundle version for Item {1}.").format(
+					sales_order_item.idx, frappe.bold(sales_order_item.item_code)
+				)
+			)
+
+		pending_qty = pick_list._compute_picked_qty_for_bundle(so_row, bundle_items, pending_only=True)
+		if not pending_qty:
+			continue
+
 		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
-		target_bundle_item.qty = pick_list._compute_picked_qty_for_bundle(
-			so_row, product_bundle_qty_map[value.item_code]
+		target_bundle_item.qty = flt(
+			pending_qty / (flt(target_bundle_item.conversion_factor) or 1),
+			target_bundle_item.precision("qty"),
 		)
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
@@ -570,5 +583,6 @@ def update_common_item_properties(item, location):
 	item.material_request = location.material_request
 	item.serial_no = location.serial_no
 	item.batch_no = location.batch_no
+	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name

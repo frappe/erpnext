@@ -34,7 +34,6 @@
   "sec_break1",
   "invoice_name",
   "invoices",
-  "column_break_15",
   "payment_name",
   "payments",
   "totals_section",
@@ -164,10 +163,6 @@
    "options": "Payment Reconciliation Invoice"
   },
   {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "allocation",
    "fieldtype": "Table",
    "label": "Allocation",
@@ -291,7 +286,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-04-23 12:38:29.557315",
+ "modified": "2026-10-30 18:18:07.872317",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",

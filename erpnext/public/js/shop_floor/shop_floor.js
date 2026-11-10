@@ -44,13 +44,15 @@ class ShopFloor {
 		this.view = "operator"; // overwritten once context loads
 		this.active_bucket = "open";
 		this.with_job_cards_only = true; // board default: hide WOs that have no job cards
-		this.buckets = {}; // key -> { rows, total, start, loaded }
+		this.buckets = {}; // key -> { rows, total, page_length }
+		this.board_request = 0;
 		this.selected_wo = null;
 		this.focus_index = -1;
 		this.op_state = { workstation: null, work_order: null };
+		// Job Card updates arrive for the whole site, so cap reloads on a busy floor.
+		this.throttled_reload = frappe.utils.throttle(() => this.reload_operations(), 2000);
 
 		this.make();
-		this.bind_realtime();
 		this.bind_lifecycle();
 		this.init();
 	}
@@ -287,27 +289,29 @@ class ShopFloor {
 		this.load_bucket(this.active_bucket);
 	}
 
-	load_bucket(bucket, append = false) {
-		const state = this.buckets[bucket] || { rows: [], total: 0, start: 0, loaded: false };
-		const start = append ? state.start : 0;
+	load_bucket(bucket, more = false) {
+		const state = this.buckets[bucket];
+		// Every request fetches all pages asked for, so a reload can't undo "Load more".
+		if (state && more) state.page_length += PAGE_LENGTH;
+		const page_length = state?.page_length || PAGE_LENGTH;
+		// Only the latest request applies, so an older reply can't replace newer rows.
+		const request = ++this.board_request;
 
 		frappe.call({
 			method: "erpnext.manufacturing.page.shop_floor.shop_floor.get_work_orders",
 			args: {
 				status_group: bucket,
-				start: start,
-				page_length: PAGE_LENGTH,
+				page_length: page_length,
 				search: this.search_term || null,
 				with_job_cards_only: this.with_job_cards_only ? 1 : 0,
 			},
 			callback: (r) => {
+				if (request !== this.board_request) return;
 				const data = r.message || {};
-				const rows = data.work_orders || [];
 				this.buckets[bucket] = {
-					rows: append ? state.rows.concat(rows) : rows,
+					rows: data.work_orders || [],
 					total: cint(data.total),
-					start: start + rows.length,
-					loaded: true,
+					page_length: page_length,
 				};
 				this.update_tab_count(bucket);
 				if (bucket === this.active_bucket) this.render_board();
@@ -323,7 +327,9 @@ class ShopFloor {
 
 	render_board() {
 		const state = this.buckets[this.active_bucket] || { rows: [], total: 0 };
-		this.focus_index = -1;
+		// Realtime reloads re-render the board, so keep keyboard focus on the same work order.
+		const focused = this.focused_el()?.attr("data-name");
+		this.focus_index = state.rows.findIndex((wo) => wo.name === focused);
 
 		if (!state.rows.length) {
 			this.board_container.html(`<div class="sf-empty">${__("No work orders here.")}</div>`);
@@ -341,6 +347,7 @@ class ShopFloor {
 		this.board_container.html(
 			`<div class="sf-wo-grid">${cards}</div><div class="sf-board-more">${more}</div>`
 		);
+		this.focused_el()?.addClass("sf-focused");
 
 		this.board_container.find(".sf-wo-card").on("click", (e) => {
 			this.open_wo($(e.currentTarget).attr("data-name"));
@@ -502,6 +509,17 @@ class ShopFloor {
 		} else {
 			this.load_operator();
 		}
+	}
+
+	reload_operations() {
+		if (this.view !== "manager") {
+			this.load_operator();
+			return;
+		}
+		if (this.selected_wo) {
+			this.load_operator_data(this.op_container_target, { work_order: this.selected_wo });
+		}
+		this.load_bucket(this.active_bucket);
 	}
 
 	refresh() {
@@ -1249,11 +1267,21 @@ class ShopFloor {
 
 	// ── Realtime + lifecycle ───────────────────────────────────────────────────
 	bind_realtime() {
-		frappe.realtime.on("update_workstation_status", (data) => {
-			if (data && data.name === this.op_state.workstation) {
-				this.reload();
+		frappe.realtime.doctype_subscribe("Workstation");
+		frappe.realtime.doctype_subscribe("Job Card");
+		if (this.status_handler) {
+			frappe.realtime.off("list_update", this.status_handler);
+		}
+		this.status_handler = (data) => {
+			if (
+				this.initialized &&
+				frappe.get_route()[0] === "shop-floor" &&
+				["Workstation", "Job Card"].includes(data.doctype)
+			) {
+				this.throttled_reload();
 			}
-		});
+		};
+		frappe.realtime.on("list_update", this.status_handler);
 	}
 
 	bind_lifecycle() {
@@ -1274,11 +1302,18 @@ class ShopFloor {
 	}
 
 	on_show() {
+		this.bind_realtime();
 		$(document.body).addClass("shop-floor-active");
 		this.bind_keys();
 		// Cached re-navigation (e.g. the Work Order "Shop Floor" button) lands here with fresh
 		// route_options; init() handles the very first load before we're initialized.
-		if (this.initialized) this.apply_route_options();
+		if (this.initialized) {
+			if (frappe.route_options?.work_order || frappe.route_options?.workstation) {
+				this.apply_route_options();
+			} else {
+				this.refresh();
+			}
+		}
 	}
 
 	// ── Keyboard ────────────────────────────────────────────────────────────────

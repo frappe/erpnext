@@ -6,8 +6,8 @@ import frappe
 from frappe import _
 from frappe.permissions import get_user_permissions
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Count, CurDate, DateDiff, Max, Sum
-from frappe.utils import cint
+from frappe.query_builder.functions import Count, DateDiff, Max, Sum
+from frappe.utils import cint, nowdate
 from pypika import Order
 from pypika.analytics import RowNumber
 
@@ -65,7 +65,9 @@ def get_sales_details(doctype):
 		num_of_order = Count(Case().when(not_return, sales.name)).distinct()
 		last_order_date = Max(Case().when(not_return, date_col))
 
-	days_since_last_order = DateDiff(CurDate(), last_order_date)
+	# Use the application's today (nowdate, System Settings timezone) rather than the database
+	# server's CURRENT_DATE, which may differ when the DB session timezone does not match.
+	days_since_last_order = DateDiff(nowdate(), last_order_date)
 
 	query = (
 		frappe.qb.from_(customer)

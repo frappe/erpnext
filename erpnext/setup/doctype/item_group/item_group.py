@@ -68,9 +68,9 @@ class ItemGroup(NestedSet):
 		frappe.cache().hdel("child_item_groups", self.name)
 
 	def validate_item_group_defaults(self):
-		from erpnext.stock.doctype.item.item import validate_item_default_company_links
+		from erpnext.stock.doctype.item.item import validate_item_defaults
 
-		validate_item_default_company_links(self.item_group_defaults)
+		validate_item_defaults(self.item_group_defaults)
 
 
 def get_child_item_groups(item_group_name):

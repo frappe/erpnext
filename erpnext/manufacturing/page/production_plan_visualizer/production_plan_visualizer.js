@@ -514,7 +514,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	rail_row(fg) {
-		const completion = fg.qty ? (fg.produced_qty / fg.qty) * 100 : 0;
+		const completion = fg.qty ? ((fg.qty - fg.pending_qty) / fg.qty) * 100 : 0;
 		const risk = this.risk_of(fg);
 		const row = $(`
 			<div class="ppv-rail-row" data-focus="${this.esc(fg.row_name)}" data-risk="${risk.level}"
@@ -543,7 +543,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 		if (short.length) {
 			return { level: "short", label: __("{0} materials short", [short.length]) };
 		}
-		if (fg.qty && fg.produced_qty >= fg.qty) return { level: "done", label: __("Completed") };
+		if (fg.qty && fg.pending_qty <= 0) return { level: "done", label: __("Completed") };
 		const rows = [fg, ...(this.index.subs_by_parent[fg.row_name] || [])];
 		if (rows.every((d) => !(d.documents || []).length)) {
 			return { level: "idle", label: __("Not started") };
@@ -680,7 +680,7 @@ erpnext.ProductionPlanVisualizer = class ProductionPlanVisualizer {
 	}
 
 	manufacture_row(row, kind) {
-		const completion = row.qty ? (row.produced_qty / row.qty) * 100 : 0;
+		const completion = row.qty ? ((row.qty - row.pending_qty) / row.qty) * 100 : 0;
 		const uom = row.stock_uom || row.uom || "";
 		const tr = $(`
 			<tr data-kind="${kind}" data-search="${this.esc(

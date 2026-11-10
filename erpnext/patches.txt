@@ -262,6 +262,7 @@ erpnext.patches.v15_0.rename_subcontracting_fields
 erpnext.patches.v15_0.unset_incorrect_additional_discount_percentage
 erpnext.patches.v16_0.convert_commission_rate_to_percent
 erpnext.patches.v16_0.convert_hide_currency_symbol_to_check
+erpnext.patches.v16_0.deduplicate_bank_account_balances
 
 [post_model_sync]
 erpnext.patches.v15_0.rename_gross_purchase_amount_to_net_purchase_amount
@@ -550,3 +551,28 @@ execute:frappe.db.set_value("Report", "Negative Batch Report", "prepared_report"
 erpnext.patches.v16_0.scope_voice_call_settings_to_desk_users
 erpnext.patches.v16_0.set_default_mins_between_operations
 erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+erpnext.patches.v16_0.set_value_adjustment_amount_on_asset
+erpnext.patches.v16_0.set_subcontracted_qty_in_work_orders
+erpnext.patches.v16_0.credit_job_card_transfers_to_their_operation
+erpnext.patches.v16_0.set_lost_on_in_opportunity
+erpnext.patches.v16_0.restore_in_words_print_defaults
+erpnext.patches.v16_0.apply_selling_settings_section_toggles
+erpnext.patches.v16_0.set_output_qty_in_work_order_operations
+execute:frappe.db.set_value("Dunning", {"docstatus": 0}, "status", "Draft", update_modified=False)
+execute:frappe.db.set_value("Dunning", {"docstatus": 2}, "status", "Cancelled", update_modified=False)
+execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_print_template.update_existing_cheque_print_formats")()
+erpnext.patches.v16_0.move_bom_creator_items_to_part_tree
+erpnext.patches.v16_0.set_fg_qty_on_job_card_material_request_transfers
+erpnext.patches.v16_0.encrypt_currency_exchange_access_key
+erpnext.patches.v16_0.remove_all_role_from_import_supplier_invoice
+erpnext.patches.v16_0.encrypt_bank_plaid_access_token
+erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
+erpnext.patches.v16_0.restore_auto_reconciliation_job
+execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
+erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
+erpnext.patches.v16_0.share_assigned_appointments_with_agents
+erpnext.patches.v16_0.link_receipt_reservations_to_production_plan_rows
+erpnext.patches.v16_0.merge_grey_letter_head_into_company_letter_head
+erpnext.patches.v16_0.drop_item_code_warehouse_posting_datetime_index_from_sabb
+erpnext.patches.v16_0.drop_unfolded_item_search_index #2026-11-09
+erpnext.patches.v16_0.round_open_job_card_required_qty

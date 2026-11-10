@@ -194,6 +194,7 @@ class StockSettings(Document):
 						.where(item.valuation_method.isnull() | (item.valuation_method == ""))
 					)
 				)
+				.where(sle_dt.is_cancelled == 0)
 				.limit(1)
 				.run()
 			)

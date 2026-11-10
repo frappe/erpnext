@@ -28,6 +28,7 @@
      {
       "aggregation": "sum",
       "column_name": "base_net_total",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Booked, Year to Date",
@@ -81,6 +82,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "base_net_amount",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Sales Order Value (This FY)"
@@ -131,6 +133,7 @@
      "series": [
       {
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(transaction_date >= date_sub(month_start(today()), 12, 'month'), base_net_total)",
@@ -143,6 +146,7 @@
       },
       {
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(transaction_date < date_sub(month_start(today()), 12, 'month'), base_net_total)",
@@ -234,6 +238,7 @@
      {
       "aggregation": "sum",
       "column_name": "value_to_deliver",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Amount to Deliver"
@@ -269,6 +274,7 @@
      {
       "aggregation": "sum",
       "column_name": "base_net_total",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Open Quotations",
@@ -357,6 +363,7 @@
      {
       "aggregation": "sum",
       "column_name": "base_net_total",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Amount"
@@ -398,12 +405,14 @@
      {
       "aggregation": "sum",
       "column_name": "value_to_deliver",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "To Deliver",
       "measure_name": "Sales Orders to Deliver"
      },
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(days_late > 0, value_to_deliver)",
@@ -456,6 +465,7 @@
      "series": [
       {
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(transaction_date.between(fiscal_year_start(today()), today()), base_net_total)",
@@ -468,6 +478,7 @@
       },
       {
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(transaction_date.between(date_sub(fiscal_year_start(today()), 1, 'year'), date_sub(today(), 1, 'year')), base_net_total)",
@@ -797,7 +808,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:09:41.525572",
+ "modified": "2026-10-24 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "selling",

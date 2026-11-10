@@ -18,6 +18,7 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -259,9 +260,16 @@ def make_delivery_trip(
 def make_installation_note(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
+	# returned_qty_map is keyed by DN Item row and already in the row's stock-to-sales UOM
+	returned_qty_map = get_returned_qty_map(source_name)
+
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.installed_qty)
+		target.qty = flt(obj.qty) - flt(returned_qty_map.get(obj.name, 0)) - flt(obj.installed_qty)
+
 		serial_ids = get_serial_batch_list_from_item(obj)[0]
+		if serial_ids:
+			returned = set(get_returned_serial_nos(obj, source_parent))
+			serial_ids = [s for s in serial_ids if s not in returned]
 		target.serial_no = "\n".join(SerialBatchIdentity("Serial No").get_numbers(obj.item_code, serial_ids))
 		target.serial_and_batch_bundle = None
 
@@ -278,7 +286,9 @@ def make_installation_note(
 					"parenttype": "prevdoc_doctype",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.installed_qty < doc.qty and not doc.closed,
+				"condition": lambda doc: doc.installed_qty
+				< flt(doc.qty) - flt(returned_qty_map.get(doc.name, 0))
+				and not doc.closed,
 			},
 		},
 		target_doc,
@@ -445,6 +455,7 @@ def has_pending_inter_company_qty(item, doctype: str, accepted_returns: dict | N
 
 def make_inter_company_transaction(doctype: str, source_name: str, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.mapper import (
+		clear_item_tax_template_of_other_company,
 		get_inter_company_details,
 		set_purchase_references,
 		update_address,
@@ -596,6 +607,8 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 
 		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
 			target.set("use_serial_batch_fields", 1)
+
+		clear_item_tax_template_of_other_company(target, details.get("company"))
 
 	bundle_rows = {d.parent_detail_docname: d for d in source_doc.get("packed_items") or []}
 	bundle_rows = {d.name: d for d in source_doc.items if d.name in bundle_rows}

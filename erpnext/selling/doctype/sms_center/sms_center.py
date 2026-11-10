@@ -76,14 +76,18 @@ class SMSCenter(Document):
 		DynamicLink = frappe.qb.DocType("Dynamic Link")
 		query = (
 			frappe.qb.from_(Contact)
-			.join(DynamicLink)
-			.on(DynamicLink.parent == Contact.name)
 			.select(
 				fn.Concat(fn.IfNull(Contact.first_name, ""), " ", fn.IfNull(Contact.last_name, "")),
 				Contact.mobile_no,
 			)
 			.where((fn.IfNull(Contact.mobile_no, "") != "") & (Contact.docstatus != 2))
 		)
+
+		# "All Contact" needs no link; the party options join Dynamic Link and dedupe multi-link contacts
+		if self.send_to == "All Contact":
+			return query
+
+		query = query.join(DynamicLink).on(DynamicLink.parent == Contact.name).distinct()
 
 		if self.send_to == "All Customer Contact":
 			query = query.where(DynamicLink.link_doctype == "Customer")
@@ -114,7 +118,7 @@ class SMSCenter(Document):
 		Lead = frappe.qb.DocType("Lead")
 		query = (
 			frappe.qb.from_(Lead)
-			.select(Lead.lead_name, Lead.mobile)
+			.select(Lead.lead_name, Lead.mobile_no)
 			.where((fn.IfNull(Lead.mobile_no, "") != "") & (Lead.docstatus != 2) & (Lead.status == "Open"))
 		)
 		return query
@@ -148,7 +152,11 @@ class SMSCenter(Document):
 			.left_join(Employee)
 			.on(SalesPerson.employee == Employee.name)
 			.select(SalesPerson.sales_person_name, Employee.cell_number)
-			.where(fn.IfNull(Employee.cell_number, "") != "")
+			.where(
+				(SalesPerson.enabled == 1)
+				& (Employee.status == "Active")
+				& (fn.IfNull(Employee.cell_number, "") != "")
+			)
 		)
 
 		return query
@@ -157,9 +165,8 @@ class SMSCenter(Document):
 		receiver_nos = []
 		if self.receiver_list:
 			for d in self.receiver_list.split("\n"):
-				receiver_no = d
-				if "-" in d:
-					receiver_no = receiver_no.split("-")[1]
+				# lines are "name - number"; split on the last " - " so hyphens in names/numbers survive
+				receiver_no = d.rsplit(" - ", 1)[-1]
 				if receiver_no.strip():
 					receiver_nos.append(cstr(receiver_no).strip())
 		else:

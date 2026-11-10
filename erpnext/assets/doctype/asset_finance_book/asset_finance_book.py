@@ -23,6 +23,7 @@ class AssetFinanceBook(Document):
 		finance_book: DF.Link | None
 		frequency_of_depreciation: DF.Int
 		increase_in_asset_life: DF.Int
+		is_rate_of_depreciation_entered: DF.Check
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -31,6 +32,7 @@ class AssetFinanceBook(Document):
 		shift_based: DF.Check
 		total_number_of_booked_depreciations: DF.Int
 		total_number_of_depreciations: DF.Int
+		value_adjustment_amount: DF.Currency
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
 

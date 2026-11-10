@@ -181,6 +181,7 @@ class InventoryDimension(Document):
 			label_start_with = "Source"
 
 		label = self.dimension_name
+		# nosemgrep: python.lang.correctness.useless-comparison.no-strings-as-booleans -- label_start_with is a variable
 		if label_start_with:
 			label = f"{label_start_with} {self.dimension_name}"
 

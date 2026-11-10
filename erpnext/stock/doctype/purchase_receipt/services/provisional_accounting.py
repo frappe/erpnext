@@ -89,15 +89,153 @@ def get_order_billing_provisional_reversals(invoice) -> dict:
 		return {}
 
 	unreversed_qty = get_unreversed_receipt_qty(receipt_rows, invoice)
+	posted = get_posted_provision(receipt_rows, invoice)
+	factors = get_posted_to_replayed_factors(receipt_rows, unreversed_qty, posted)
 	reversals = {}
 	for item in items:
-		rows = receipt_rows.get(item.po_detail, [])
+		rows = receipt_rows.get(item.po_detail)
+		if not rows:
+			continue
+
 		if flt(item.qty) < 0:
-			reversals[item.name] = release_receipt_rows(rows, unreversed_qty, -flt(item.qty))
+			allocations = release_receipt_rows(rows, unreversed_qty, -flt(item.qty))
+			factor = get_restore_factor(item, allocations, posted, factors[item.po_detail])
 		else:
-			reversals[item.name] = allocate_receipt_rows(rows, unreversed_qty, flt(item.qty))
+			allocations = allocate_receipt_rows(rows, unreversed_qty, flt(item.qty))
+			factor = factors[item.po_detail].open
+
+		reversals[item.name] = [(row, qty * factor) for row, qty in allocations if flt(qty * factor, 9)]
 
 	return reversals
+
+
+def get_posted_to_replayed_factors(receipt_rows, unreversed_qty, posted) -> dict:
+	factors = {}
+	for po_detail, rows in receipt_rows.items():
+		replayed_open = sum(max(unreversed_qty[row.name], 0) * get_unit_amount(row) for row in rows)
+		replayed_reversal = sum(
+			(flt(row.kept_qty) - unreversed_qty[row.name]) * get_unit_amount(row) for row in rows
+		)
+		reversed_amount = flt(posted.reversed.get(po_detail))
+		factors[po_detail] = frappe._dict(
+			open=get_ratio(flt(posted.booked.get(po_detail)) - reversed_amount, replayed_open),
+			reversed=get_ratio(reversed_amount, replayed_reversal),
+		)
+
+	return factors
+
+
+def get_restore_factor(item, allocations, posted, factors) -> float:
+	original = posted.invoice_rows.get(item.purchase_invoice_item)
+	if not original or not flt(original.qty):
+		return factors.reversed
+
+	returned_share = min(1, -flt(item.qty) / flt(original.qty))
+	return get_ratio(original.reversed * returned_share, -get_reversal_amount(allocations))
+
+
+def get_ratio(posted_amount, replayed_amount) -> float:
+	if flt(posted_amount, 9) <= 0 or flt(replayed_amount, 9) <= 0:
+		return 0.0
+
+	return flt(posted_amount / replayed_amount, 9)
+
+
+def get_unit_amount(row) -> float:
+	return flt(row.rate) * flt(row.conversion_rate)
+
+
+def get_reversal_amount(allocations) -> float:
+	return sum(flt(qty) * get_unit_amount(row) for row, qty in allocations)
+
+
+def get_posted_provision(receipt_rows, invoice) -> frappe._dict:
+	booking_rows = {row.name: po_detail for po_detail, rows in receipt_rows.items() for row in rows}
+	booking_rows.update(get_receipt_return_rows(booking_rows))
+	other_rows = get_other_invoice_rows(booking_rows, invoice)
+	booking_rows.update({name: row.po_detail for name, row in other_rows.items() if row.pr_detail})
+	invoice_rows = {name: row for name, row in other_rows.items() if not row.pr_detail}
+
+	accounts = {row.provisional_expense_account for rows in receipt_rows.values() for row in rows}
+	balances = get_provisional_balances([*booking_rows, *invoice_rows], accounts, invoice)
+	posted = frappe._dict(booked={}, reversed={}, invoice_rows=invoice_rows)
+	for name, po_detail in booking_rows.items():
+		posted.booked[po_detail] = flt(posted.booked.get(po_detail)) + flt(balances.get(name))
+
+	for po_detail, amount in get_own_receipt_row_reversals(invoice, receipt_rows).items():
+		posted.booked[po_detail] = flt(posted.booked.get(po_detail)) - amount
+
+	for name, row in invoice_rows.items():
+		row.reversed = -flt(balances.get(name))
+		posted.reversed[row.po_detail] = flt(posted.reversed.get(row.po_detail)) + row.reversed
+
+	return posted
+
+
+def get_own_receipt_row_reversals(invoice, receipt_rows) -> dict:
+	if cint(invoice.docstatus) != 1:
+		return {}
+
+	rows = {row.name: (po_detail, row) for po_detail, po_rows in receipt_rows.items() for row in po_rows}
+	reversals = {}
+	for item in invoice.items:
+		if item.pr_detail not in rows:
+			continue
+
+		po_detail, row = rows[item.pr_detail]
+		amount = min(flt(item.qty), flt(row.qty)) * get_unit_amount(row)
+		reversals[po_detail] = flt(reversals.get(po_detail)) + amount
+
+	return reversals
+
+
+def get_receipt_return_rows(booking_rows) -> dict:
+	return_rows = frappe.get_all(
+		"Purchase Receipt Item",
+		filters={"purchase_receipt_item": ("in", list(booking_rows)), "docstatus": 1},
+		fields=["name", "purchase_receipt_item"],
+	)
+	return {row.name: booking_rows[row.purchase_receipt_item] for row in return_rows}
+
+
+def get_other_invoice_rows(booking_rows, invoice) -> dict:
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	rows = (
+		frappe.qb.from_(pi_item)
+		.join(pi)
+		.on(pi.name == pi_item.parent)
+		.select(pi_item.name, pi_item.qty, pi_item.pr_detail, pi_item.po_detail)
+		.where(
+			(pi.docstatus == 1)
+			& (pi.name != invoice.name)
+			& (
+				(pi_item.pr_detail.isin(list(booking_rows)))
+				| (pi_item.po_detail.isin(set(booking_rows.values())))
+			)
+		)
+	).run(as_dict=True)
+
+	for row in rows:
+		row.po_detail = booking_rows.get(row.pr_detail) or row.po_detail
+
+	return {row.name: row for row in rows}
+
+
+def get_provisional_balances(names, accounts, invoice) -> dict:
+	gle = frappe.qb.DocType("GL Entry")
+	return frappe._dict(
+		frappe.qb.from_(gle)
+		.select(gle.voucher_detail_no, Sum(gle.credit - gle.debit))
+		.where(
+			(gle.voucher_detail_no.isin(names))
+			& (gle.account.isin(accounts))
+			& (gle.is_cancelled == 0)
+			& (gle.voucher_no != invoice.name)
+		)
+		.groupby(gle.voucher_detail_no)
+		.run()
+	)
 
 
 def get_provisional_receipt_rows(company, po_details) -> dict:

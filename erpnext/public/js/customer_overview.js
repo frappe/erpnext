@@ -119,18 +119,18 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 		const t = this.overview?.data?.trend;
 		const notes = [];
 		if (t?.average) notes.push(__("Avg {0}", [this.money0(t.average)]));
-		if (t?.has_mtd) notes.push(__("{0} is month to date", [t.points[t.points.length - 1].label]));
+		if (t?.has_mtd) notes.push(__("{0} is month to date", [moment(t.points.at(-1).month).format("MMM")]));
 		return {
 			title: __("Monthly Sales Trend"),
 			subtitle: __("Monthly, net of returns"),
 			right: this.report_link(__("Sales Analytics"), () => this.open_analytics()),
-			type: "line",
-			colors: ["--blue-600"],
 			notes,
-			data: t?.points.some((p) => flt(p.value)) && {
-				labels: t.points.map((p) => p.label),
-				titles: t.points.map((p) => p.title),
-				datasets: [{ name: __("Net Sales"), values: t.points.map((p) => flt(p.value)) }],
+			chart: t?.points.some((p) => flt(p.value)) && {
+				type: "area",
+				data: t.points,
+				x: "month",
+				y: "value",
+				seriesConfig: { value: { label: __("Net Sales") } },
 			},
 		};
 	}
@@ -185,23 +185,24 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 	credit_donut($panel, data, limit, used) {
 		const receivable = Math.min(Math.max(flt(data.outstanding.value), 0), used);
 		const overdue = Math.min(Math.max(flt(data.overdue.value), 0), receivable);
-		const $chart = this.draw_donut($panel, {
-			segments: [
-				{ label: __("Overdue"), value: overdue, color: "var(--blue-600)" },
-				{ label: __("Not due"), value: receivable - overdue, color: "var(--blue-400)" },
-				{ label: __("Unbilled orders"), value: used - receivable, color: "var(--green-400)" },
-				{ label: __("Available"), value: Math.max(limit - used, 0), color: "var(--green-600)" },
+		this.draw_donut(
+			$panel,
+			[
+				{ label: __("Overdue"), value: overdue, color: "var(--chart-categorical-1)" },
+				{ label: __("Not due"), value: receivable - overdue, color: "var(--chart-categorical-2)" },
+				{
+					label: __("Unbilled orders"),
+					value: used - receivable,
+					color: "var(--chart-categorical-4)",
+				},
+				{ label: __("Available"), value: limit - used, color: "var(--chart-categorical-3)" },
 			].filter((s) => s.value > 0),
-			center: {
-				value: flt((used / limit) * 100, 1) + "%",
-				label: __("used"),
-			},
-			format: (v) => this.short_money(v),
-		});
+			{ centerLabel: used > limit ? __("used") : __("credit limit"), ...this.currency_format() }
+		);
 		if (used > limit) {
-			$('<div class="text-ink-red-7">')
+			$('<div class="co-note co-error">')
 				.text(__("Over credit limit by {0}", [this.money0(used - limit)]))
-				.appendTo($chart);
+				.appendTo($panel);
 		}
 	}
 

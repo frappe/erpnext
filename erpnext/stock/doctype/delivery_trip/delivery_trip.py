@@ -64,6 +64,7 @@ class DeliveryTrip(Document):
 			frappe.throw(_("A driver must be set to submit."))
 
 		if self._action == "submit":
+			self.validate_driver()
 			self.validate_delivery_note_not_draft()
 		self.validate_delivery_notes_not_on_other_trips()
 		self.validate_stop_addresses()
@@ -114,6 +115,13 @@ class DeliveryTrip(Document):
 						stop.idx, frappe.bold(stop.contact), frappe.bold(stop.customer)
 					)
 				)
+
+	def validate_driver(self):
+		status, expiry_date = frappe.db.get_value("Driver", self.driver, ["status", "expiry_date"])
+		if status != "Active":
+			frappe.throw(_("The driver must be active to submit a Delivery Trip."))
+		if expiry_date and getdate(expiry_date) < getdate(self.departure_time):
+			frappe.throw(_("The driver's licence must be valid on the departure date."))
 
 	def validate_delivery_note_not_draft(self):
 		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
@@ -591,6 +599,15 @@ def get_attachments(delivery_stop):
 def get_driver_email(driver: str):
 	frappe.has_permission("Driver", "select", doc=driver, throw=True)
 
-	employee = frappe.db.get_value("Driver", driver, "employee")
-	email = frappe.db.get_value("Employee", employee, "prefered_email")
+	driver_data = frappe.db.get_value("Driver", driver, ["user", "employee"], as_dict=True)
+	email = driver_data.user
+	if (
+		not email
+		and driver_data.employee
+		and frappe.has_permission("Employee", "read", doc=driver_data.employee)
+	):
+		employee = frappe.db.get_value(
+			"Employee", driver_data.employee, ["company_email", "prefered_email"], as_dict=True
+		)
+		email = employee.company_email or employee.prefered_email
 	return {"email": email}

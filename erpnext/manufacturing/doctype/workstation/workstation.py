@@ -145,28 +145,6 @@ class Workstation(Document):
 		self.validate_overlap_for_operation_timings()
 		self.update_bom_operation()
 
-		if self.plant_floor:
-			self.publish_workstation_status()
-
-	def publish_workstation_status(self):
-		if not self._doc_before_save:
-			return
-
-		if self._doc_before_save.get("status") == self.status:
-			return
-
-		data = get_workstations(plant_floor=self.plant_floor, workstation_name=self.name)[0]
-
-		color_map = get_color_map()
-		data["old_color"] = color_map.get(self._doc_before_save.get("status"), "red")
-
-		frappe.publish_realtime(
-			"update_workstation_status",
-			data,
-			doctype="Plant Floor",
-			docname=self.plant_floor,
-		)
-
 	def validate_overlap_for_operation_timings(self):
 		"""Check if there is no overlap in setting Workstation Operating Hours"""
 		for d in self.get("working_hours"):

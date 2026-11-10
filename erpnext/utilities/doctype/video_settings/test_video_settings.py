@@ -15,6 +15,13 @@ class TestVideoSettings(ERPNextTestSuite):
 			with patch("erpnext.utilities.doctype.video_settings.video_settings.Api"):
 				self.assertRaises(frappe.ValidationError, settings.save)
 
+	def test_removed_frequency_is_saved_as_hourly(self):
+		frappe.db.set_single_value("Video Settings", "frequency", "30 mins")
+		settings = frappe.get_doc("Video Settings")
+		settings.enable_youtube_tracking = 0
+		settings.save()
+		self.assertEqual(frappe.db.get_single_value("Video Settings", "frequency"), "1 hr")
+
 	def test_video_saves_when_the_youtube_client_fails(self):
 		frappe.db.set_single_value("Video Settings", {"enable_youtube_tracking": 1, "api_key": None})
 		video = frappe.get_doc(

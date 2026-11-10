@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
+from frappe.model.docstatus import DocStatus
 from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_link_to_form, now
@@ -16,11 +17,12 @@ import erpnext
 from erpnext import _refuse
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_available_serial_nos,
+	get_batch_qty_for_stock,
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -29,6 +31,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import (
 	_get_incoming_rate,
 	_get_stock_balance,
+	check_company,
 	check_warehouse_company,
 	get_valuation_method,
 )
@@ -61,6 +64,7 @@ class StockReconciliation(StockController):
 		cost_center: DF.Link | None
 		difference_amount: DF.Currency
 		expense_account: DF.Link | None
+		is_made_from_valuation_comparison: DF.Check
 		items: DF.Table[StockReconciliationItem]
 		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
 		posting_date: DF.Date
@@ -117,6 +121,8 @@ class StockReconciliation(StockController):
 	def validate_adjustment_entry(self):
 		"""An Adjustment Entry resets each item-warehouse to its rows (erpnext.stock.valuation_adjustment),
 		so none of the counting a reconciliation does applies to it."""
+		AdjustmentEntry(self).validate_made_from_report()
+
 		if not self.expense_account:
 			self.expense_account = frappe.get_cached_value(
 				"Company", self.company, "stock_adjustment_account"
@@ -566,10 +572,10 @@ class StockReconciliation(StockController):
 
 				current_qty = entry.qty
 			else:
-				current_qty = get_batch_qty(
+				current_qty = get_batch_qty_for_stock(
 					entry.batch_no,
 					row.warehouse,
-					row.item_code,
+					item_code=row.item_code,
 					ignore_voucher_nos=[self.name],
 					posting_date=self.posting_date,
 					posting_time=self.posting_time,
@@ -1294,7 +1300,9 @@ class StockReconciliation(StockController):
 					frappe.bold(self.expense_account)
 				)
 			)
-		elif self.purpose == "Opening Stock" or not frappe.db.get_all("Stock Ledger Entry", limit=1):
+		elif self.purpose == "Opening Stock" or not frappe.db.get_all(
+			"Stock Ledger Entry", filters={"company": self.company, "is_cancelled": 0}, limit=1
+		):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(
 					_(
@@ -1370,7 +1378,7 @@ class StockReconciliation(StockController):
 			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
 			d.amount_difference = flt(d.amount) - flt(d.current_amount)
 
-	def recalculate_difference_amount_from_ledger(self):
+	def recalculate_difference_amount_from_ledger(self, voucher_detail_no: str | None = None):
 		"""Sync the displayed current qty/rate and difference amount with the (reposted) ledger.
 
 		Submitted reconciliations freeze ``difference_amount`` and the per-row current values at
@@ -1378,49 +1386,49 @@ class StockReconciliation(StockController):
 		Entries and rebuild the GL from them. Without this sync the document keeps showing stale figures
 		that no longer match the GL entries. Anchoring ``amount_difference`` to the row's summed
 		``stock_value_difference`` keeps the document and the GL consistent by construction.
+
+		With ``voucher_detail_no``, only that row is refreshed and the total is summed from all rows.
 		"""
 		if self.purpose == ADJUSTMENT_ENTRY:
 			AdjustmentEntry(self).set_difference_amount_from_ledger()
 			return
 
-		difference_amount = 0.0
-
 		for row in self.items:
-			stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
-			amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+			if voucher_detail_no in (None, row.name):
+				self.set_row_values_from_ledger(row)
 
-			if self.is_adjustment_row(row):
-				self.set_adjustment_row_values(row, amount_difference)
-				difference_amount += amount_difference
-				continue
-
-			amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
-			current_amount = flt(amount - amount_difference, row.precision("current_amount"))
-
-			current_qty = self.get_current_qty_from_ledger(row)
-			current_valuation_rate = (
-				flt(current_amount / current_qty, row.precision("current_valuation_rate"))
-				if current_qty
-				else 0.0
-			)
-
-			row.db_set(
-				{
-					"amount": amount,
-					"current_qty": current_qty,
-					"current_valuation_rate": current_valuation_rate,
-					"current_amount": current_amount,
-					"quantity_difference": flt(row.qty) - current_qty,
-					"amount_difference": amount_difference,
-				},
-				update_modified=False,
-			)
-
-			difference_amount += amount_difference
-
+		difference_amount = sum(flt(row.amount_difference) for row in self.items)
 		self.db_set(
 			"difference_amount",
 			flt(difference_amount, self.precision("difference_amount")),
+			update_modified=False,
+		)
+
+	def set_row_values_from_ledger(self, row: StockReconciliationItem):
+		stock_value_difference = flt(get_row_stock_value_difference(self.doctype, self.name, row.name))
+		amount_difference = flt(stock_value_difference, row.precision("amount_difference"))
+
+		if self.is_adjustment_row(row):
+			self.set_adjustment_row_values(row, amount_difference)
+			return
+
+		amount = flt(flt(row.qty) * flt(row.valuation_rate), row.precision("amount"))
+		current_amount = flt(amount - amount_difference, row.precision("current_amount"))
+
+		current_qty = self.get_current_qty_from_ledger(row)
+		current_valuation_rate = (
+			flt(current_amount / current_qty, row.precision("current_valuation_rate")) if current_qty else 0.0
+		)
+
+		row.db_set(
+			{
+				"amount": amount,
+				"current_qty": current_qty,
+				"current_valuation_rate": current_valuation_rate,
+				"current_amount": current_amount,
+				"quantity_difference": flt(row.qty) - current_qty,
+				"amount_difference": amount_difference,
+			},
 			update_modified=False,
 		)
 
@@ -1529,6 +1537,10 @@ class StockReconciliation(StockController):
 
 	def submit(self):
 		if len(self.items) > 100:
+			# the background job loads the document from the database, so save the current version
+			self.check_permission("submit")
+			self.docstatus = DocStatus.draft()
+			self.save()
 			msgprint(
 				_(
 					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
@@ -1842,6 +1854,7 @@ def get_stock_balance_for(
 	_require_reconciliation_permission("Item", item_code)
 	_require_reconciliation_permission("Warehouse", warehouse)
 	check_warehouse_company(warehouse)
+	check_company(company)
 
 	return _get_stock_balance_for(
 		item_code,
@@ -1911,7 +1924,7 @@ def _get_stock_balance_for(
 
 	if item_dict.get("has_batch_no"):
 		qty = (
-			get_batch_qty(
+			get_batch_qty_for_stock(
 				batch_no,
 				warehouse,
 				posting_date=posting_date,

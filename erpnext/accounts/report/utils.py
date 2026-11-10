@@ -3,14 +3,15 @@ from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
+from frappe.utils import flt, formatdate, get_datetime, get_datetime_str, get_link_to_form, get_table_name
+from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_descendants_of
 from pypika import Order
 
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
 from erpnext.accounts.party import get_party_account
@@ -28,7 +29,17 @@ def validate_mandatory_date_range(filters, from_field="from_date", to_field="to_
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
 
-	if from_date > to_date:
+	validate_date_range(filters, from_field, to_field)
+
+
+def validate_date_range(filters, from_field="from_date", to_field="to_date"):
+	if not filters:
+		return
+
+	from_date = filters.get(from_field)
+	to_date = filters.get(to_field)
+
+	if from_date and to_date and get_datetime(from_date) > get_datetime(to_date):
 		frappe.throw(_("From Date must be before To Date"))
 
 
@@ -78,7 +89,7 @@ def convert(value, from_, to, date):
 	:return: Result of converting `value`
 	"""
 	rate = get_rate_as_at(date, from_, to)
-	converted_value = flt(value) / (rate or 1)
+	converted_value = flt(value) / rate
 	return converted_value
 
 
@@ -93,21 +104,43 @@ def get_rate_as_at(date, from_currency, to_currency):
 	:param to_currency: Quote currency
 	:return: Retrieved exchange rate
 	"""
+	if from_currency == to_currency:
+		return 1
 
 	rate = __exchange_rates.get(f"{from_currency}-{to_currency}@{date}")
 	if not rate:
-		rate = get_exchange_rate(from_currency, to_currency, date) or 1
+		rate = get_exchange_rate(from_currency, to_currency, date)
+		if not rate:
+			throw_missing_exchange_rate(date, from_currency, to_currency)
 		__exchange_rates[f"{from_currency}-{to_currency}@{date}"] = rate
 
 	return rate
 
 
-def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
+def throw_missing_exchange_rate(date: DateTimeLikeObject, from_currency: str, to_currency: str) -> None:
+	frappe.throw(
+		_(
+			"Exchange rate from {0} to {1} on {2} not found. Create a {3} record and run the report again."
+		).format(
+			frappe.bold(from_currency),
+			frappe.bold(to_currency),
+			frappe.bold(formatdate(date)),
+			get_link_to_form("Currency Exchange", None, _("Currency Exchange")),
+		),
+		title=_("Exchange Rate Missing"),
+	)
+
+
+def convert_to_presentation_currency(
+	gl_entries, currency_info, filters=None, use_account_currency: bool = False
+):
 	"""
 	Take a list of GL Entries and change the 'debit' and 'credit' values to currencies
 	in `currency_info`.
 	:param gl_entries:
 	:param currency_info:
+	:param use_account_currency: Use the account-currency amounts as is when every entry is on an
+	        account in the presentation currency. Only the General Ledger sets it.
 	:return:
 	"""
 	converted_gl_list = []
@@ -131,10 +164,12 @@ def convert_to_presentation_currency(gl_entries, currency_info, filters=None):
 		account_currency = entry["account_currency"]
 
 		if (
-			len(account_currencies) == 1
+			use_account_currency
+			and len(account_currencies) == 1
 			and account_currency == presentation_currency
 			and not exchange_gain_or_loss
-		) and not (filters and filters.get("show_amount_in_company_currency")):
+			and not (filters and filters.get("show_amount_in_company_currency"))
+		):
 			entry["debit"] = debit_in_account_currency
 			entry["credit"] = credit_in_account_currency
 		else:
@@ -386,32 +421,32 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	if payments:
 		if doctype == "Journal Entry" and filters.get("cost_center"):
 			query = query.where(
-				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+				get_dimension_filter_condition(child_doc.cost_center, filters.cost_center, "Cost Center")
 			)
 		elif filters.get("cost_center"):
 			query = query.where(
-				parent_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+				get_dimension_filter_condition(parent_doc.cost_center, filters.cost_center, "Cost Center")
 			)
 	else:
 		if filters.get("cost_center"):
 			query = query.where(
-				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+				get_dimension_filter_condition(child_doc.cost_center, filters.cost_center, "Cost Center")
 			)
 			join_required = True
 		if filters.get("warehouse"):
 			query = query.where(
-				child_doc.warehouse.isin(get_with_descendants("Warehouse", filters.warehouse))
+				get_dimension_filter_condition(child_doc.warehouse, filters.warehouse, "Warehouse")
 			)
 			join_required = True
 		if filters.get("item_group"):
 			query = query.where(
-				child_doc.item_group.isin(get_with_descendants("Item Group", filters.item_group))
+				get_dimension_filter_condition(child_doc.item_group, filters.item_group, "Item Group")
 			)
 			join_required = True
 
 	if not payments:
 		if filters.get("brand"):
-			query = query.where(child_doc.brand == filters.brand)
+			query = query.where(get_dimension_filter_condition(child_doc.brand, filters.brand, "Brand"))
 			join_required = True
 
 	if join_required:
@@ -425,9 +460,36 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	return query
 
 
-def get_with_descendants(doctype: str, name: str) -> list[str]:
-	"""The tree node and all nodes under it."""
-	return [name, *get_descendants_of(doctype, name, ignore_permissions=True)]
+def get_filter_values(value) -> list:
+	"""A report filter value as a list. MultiSelectList filters can arrive as a JSON string."""
+	if not value:
+		return []
+
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return list(value)
+
+	return [value]
+
+
+def get_qb_filter_condition(field, value):
+	"""`field = value` for one value, `field IN (...)` for many, None when nothing is selected."""
+	values = get_filter_values(value)
+	if not values:
+		return None
+
+	return field == values[0] if len(values) == 1 else field.isin(values)
+
+
+def get_with_descendants(doctype: str, names: str | list[str] | tuple[str, ...]) -> list[str]:
+	"""The selected tree nodes and all nodes under them."""
+	values = []
+	for name in get_filter_values(names):
+		values.extend([name, *get_descendants_of(doctype, name, ignore_permissions=True)])
+
+	return list(dict.fromkeys(values))
 
 
 def get_advance_taxes_and_charges(invoice_list):
@@ -457,12 +519,12 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
-					)
 				fieldname = dimension.fieldname
-				query = query.where(parent_doc[fieldname].isin(filters[fieldname]))
+				query = query.where(
+					get_dimension_filter_condition(
+						parent_doc[fieldname], filters[fieldname], dimension.document_type
+					)
+				)
 	return query
 
 
@@ -485,3 +547,10 @@ def get_opening_row(party_type, party, from_date, company):
 			& (gle.is_cancelled == 0)
 		)
 	).run(as_dict=True)
+
+
+def has_gl_entry_restrictions() -> bool:
+	"""Snapshot reports read a DuckDB copy that cannot apply the user's GL Entry permission conditions."""
+	from frappe.desk.reportview import build_match_conditions
+
+	return bool(build_match_conditions("GL Entry"))

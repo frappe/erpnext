@@ -27,6 +27,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_keys_for_total,
 	prepare_data,
 )
+from erpnext.accounts.report.utils import has_gl_entry_restrictions
 
 
 def execute(filters=None):
@@ -222,6 +223,9 @@ def get_chart_data(filters, chart_columns, income, expense, net_profit_loss, cur
 
 
 def execute_snapshot_report(filters):
+	if filters.report_template or has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if not (conn := get_latest_sync("GL Entry")):
@@ -235,7 +239,12 @@ def execute_snapshot_report(filters):
 	expense = _get_data_duckdb(conn, filters, "Expense", "Debit", period_list)
 
 	net_profit_loss = get_net_profit_loss(
-		income, expense, period_list, filters.company, filters.presentation_currency
+		income,
+		expense,
+		period_list,
+		filters.company,
+		filters.presentation_currency,
+		accumulated_values=bool(filters.accumulated_values),
 	)
 
 	data = []
@@ -244,7 +253,13 @@ def execute_snapshot_report(filters):
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
+	columns = get_columns(
+		filters.periodicity,
+		period_list,
+		filters.accumulated_values,
+		filters.company,
+		selected_view=filters.get("selected_view"),
+	)
 
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"

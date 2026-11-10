@@ -267,7 +267,10 @@ frappe.ui.form.on("Sales Order", {
 					onchange: () => {
 						if (dialog.get_value("set_warehouse")) {
 							dialog.fields_dict.items.df.data.forEach((row) => {
-								row.warehouse = dialog.get_value("set_warehouse");
+								// a bundle component reserves in its packed row's warehouse
+								if (!row.is_packed_item) {
+									row.warehouse = dialog.get_value("set_warehouse");
+								}
 							});
 							dialog.fields_dict.items.grid.refresh();
 						}
@@ -1892,7 +1895,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				qty_field: "delivered_qty",
 				qty_label: __("Delivered Qty"),
 				help: __(
-					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note or Sales Invoice."
+					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note, Sales Invoice or Work Order."
 				),
 			})
 		);

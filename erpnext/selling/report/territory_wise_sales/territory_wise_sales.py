@@ -4,19 +4,25 @@
 
 import frappe
 from frappe import _
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 
 from erpnext import get_default_currency
 
 
 def execute(filters=None):
 	filters = frappe._dict(filters)
-	columns = get_columns()
+	columns = get_columns(filters)
 	data = get_data(filters)
 	return columns, data
 
 
-def get_columns():
+def get_columns(filters=None):
+	filters = filters or frappe._dict()
+	# amounts are stored in each document's company currency; show the selected
+	# company's currency, falling back to the default company's
 	currency = get_default_currency()
+	if filters.get("company"):
+		currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency") or currency
 	return [
 		{
 			"label": _("Territory"),
@@ -59,10 +65,25 @@ def get_columns():
 def get_data(filters=None):
 	data = []
 
-	opportunities = get_opportunities(filters)
-	quotations = get_quotations(opportunities)
-	sales_orders = get_sales_orders(quotations)
-	sales_invoices = get_sales_invoice(sales_orders)
+	# The report walks Opportunity -> Quotation -> Sales Order -> Sales Invoice, and its
+	# roles cannot read Sales Invoice, so permissions can't be enforced via get_list.
+	# Apply the selected company filter and the user's Customer/Company permissions at
+	# every stage, reading each permission against the stage's own doctype (user
+	# permissions can be scoped to a specific doctype).
+	user_permissions = get_user_permissions(frappe.session.user)
+
+	opportunities = restrict(
+		get_opportunities(filters), "Opportunity", filters, user_permissions, "party_name", "opportunity_from"
+	)
+	quotations = restrict(
+		get_quotations(opportunities), "Quotation", filters, user_permissions, "party_name", "quotation_to"
+	)
+	sales_orders = restrict(
+		get_sales_orders(quotations), "Sales Order", filters, user_permissions, "customer"
+	)
+	sales_invoices = restrict(
+		get_sales_invoice(sales_orders), "Sales Invoice", filters, user_permissions, "customer"
+	)
 
 	for territory in frappe.get_all("Territory"):
 		territory_opportunities = []
@@ -93,7 +114,7 @@ def get_data(filters=None):
 
 		territory_data = {
 			"territory": territory.name,
-			"opportunity_amount": _get_total(territory_opportunities, "opportunity_amount"),
+			"opportunity_amount": _get_total(territory_opportunities, "base_opportunity_amount"),
 			"quotation_amount": _get_total(territory_quotations),
 			"order_amount": _get_total(territory_orders),
 			"billing_amount": _get_total(territory_invoices),
@@ -101,6 +122,29 @@ def get_data(filters=None):
 		data.append(territory_data)
 
 	return data
+
+
+def restrict(rows, doctype, filters, user_permissions, party_field, party_type_field=None):
+	# Drop rows the selected company filter or the user's permissions (scoped to this
+	# doctype) forbid. Customer permissions only apply when the party is a Customer, so
+	# lead/prospect rows stay visible.
+	customers = get_allowed_docs_for_doctype(user_permissions.get("Customer", []), doctype)
+	companies = get_allowed_docs_for_doctype(user_permissions.get("Company", []), doctype)
+	requested_company = filters.get("company")
+
+	permitted = []
+	for row in rows:
+		company = row.get("company")
+		if requested_company and company != requested_company:
+			continue
+		if companies and company not in companies:
+			continue
+		if customers and (party_type_field is None or row.get(party_type_field) == "Customer"):
+			if row.get(party_field) not in customers:
+				continue
+		permitted.append(row)
+
+	return permitted
 
 
 def get_opportunities(filters):
@@ -112,11 +156,10 @@ def get_opportunities(filters):
 			[filters["transaction_date"][0], filters["transaction_date"][1]],
 		]
 
-	if filters.get("company"):
-		orm_filters["company"] = filters["company"]
-
 	return frappe.get_all(
-		"Opportunity", fields=["name", "territory", "opportunity_amount"], filters=orm_filters
+		"Opportunity",
+		fields=["name", "territory", "base_opportunity_amount", "company", "opportunity_from", "party_name"],
+		filters=orm_filters,
 	)
 
 
@@ -128,7 +171,7 @@ def get_quotations(opportunities):
 
 	return frappe.get_all(
 		"Quotation",
-		fields=["name", "base_grand_total", "opportunity"],
+		fields=["name", "base_grand_total", "opportunity", "company", "quotation_to", "party_name"],
 		filters={"docstatus": 1, "opportunity": ["in", opportunity_names]},
 	)
 
@@ -146,7 +189,13 @@ def get_sales_orders(quotations):
 		frappe.qb.from_(SalesOrder)
 		.join(SalesOrderItem)
 		.on(SalesOrder.name == SalesOrderItem.parent)
-		.select(SalesOrder.name, SalesOrder.base_grand_total, SalesOrderItem.prevdoc_docname.as_("quotation"))
+		.select(
+			SalesOrder.name,
+			SalesOrder.base_grand_total,
+			SalesOrder.company,
+			SalesOrder.customer,
+			SalesOrderItem.prevdoc_docname.as_("quotation"),
+		)
 		.where(SalesOrder.docstatus == 1)
 		.where(SalesOrderItem.prevdoc_docname.isin(quotation_names))
 	)
@@ -167,7 +216,13 @@ def get_sales_invoice(sales_orders):
 		frappe.qb.from_(SalesInvoice)
 		.join(SalesInvoiceItem)
 		.on(SalesInvoice.name == SalesInvoiceItem.parent)
-		.select(SalesInvoice.name, SalesInvoice.base_grand_total, SalesInvoiceItem.sales_order)
+		.select(
+			SalesInvoice.name,
+			SalesInvoice.base_grand_total,
+			SalesInvoice.company,
+			SalesInvoice.customer,
+			SalesInvoiceItem.sales_order,
+		)
 		.where(SalesInvoice.docstatus == 1)
 		.where(SalesInvoiceItem.sales_order.isin(so_names))
 	)
@@ -179,8 +234,13 @@ def _get_total(doclist, amount_field="base_grand_total"):
 	if not doclist:
 		return 0
 
+	# a document fans out into one row per item/source, so total each one only once
+	seen = set()
 	total = 0
 	for doc in doclist:
+		if doc.get("name") in seen:
+			continue
+		seen.add(doc.get("name"))
 		total += doc.get(amount_field, 0)
 
 	return total

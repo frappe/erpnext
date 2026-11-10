@@ -50,18 +50,14 @@ frappe.ui.form.on("Customer", {
 		frm.set_query("default_price_list", () => ({ filters: { selling: 1 } }));
 		frm.set_query("account", "accounts", function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
-			let filters = {
-				account_type: "Receivable",
-				root_type: "Asset",
-				company: d.company,
-				is_group: 0,
-			};
-
-			if (doc.party_account_currency) {
-				$.extend(filters, { account_currency: doc.party_account_currency });
-			}
 			return {
-				filters: filters,
+				filters: {
+					account_type: "Receivable",
+					root_type: "Asset",
+					company: d.company,
+					is_group: 0,
+					account_currency: erpnext.utils.get_party_account_currency(doc, d.company),
+				},
 			};
 		});
 
@@ -225,6 +221,8 @@ frappe.ui.form.on("Customer", {
 						: __("Loyalty Points: {0}", [info.loyalty_points]);
 				frm.dashboard.add_indicator(label, "blue");
 			});
+
+			frm.trigger("render_items_tab");
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
@@ -254,6 +252,32 @@ frappe.ui.form.on("Customer", {
 	validate: function (frm) {
 		if (frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 	},
+
+	render_items_tab(frm) {
+		frm.party_items ??= new erpnext.PartyItems(frm, {
+			party_type: "Customer",
+			order_doctype: "Sales Order",
+			labels: {
+				frequent_description: __("The items this customer orders most often."),
+				frequent_empty: __("No sales orders from this customer yet."),
+				orders_title: __("Submitted sales orders that include this item"),
+				section_title: __("Customer Specific Items"),
+				add_title: __("Add Customer Specific Item"),
+				allowed_description: __("When selling to this customer, only these items can be selected."),
+				allowed_empty: __("No limits set. Every item can be sold to this customer."),
+				first_rule_note: __(
+					"After this, only items in Customer Specific Items can be sold to this customer."
+				),
+				item_hint: __("Items this customer orders most often are listed first."),
+			},
+		});
+		frm.party_items.refresh();
+	},
+
+	on_tab_change(frm) {
+		frm.party_items?.show();
+	},
+
 	get_customer_group_details: function (frm) {
 		frappe.call({
 			method: "get_customer_group_details",

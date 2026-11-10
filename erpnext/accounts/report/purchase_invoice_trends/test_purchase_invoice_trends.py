@@ -12,14 +12,20 @@ FISCAL_YEAR = "_Test Fiscal Year 2026"
 COMPANY = "_Test Company"
 SUPPLIER = "_Test Supplier"
 ITEM = "_Test Item"
+OTHER_ITEM = "_Test Item 2"
 POSTING_DATE = "2026-06-01"
 
 
-def make_dated_purchase_invoice(qty, rate, bill_date=None):
+def make_dated_purchase_invoice(qty, rate, bill_date=None, item_code=ITEM):
 	# make_purchase_invoice ignores posting_date unless posting time is explicitly set, so build the
 	# invoice unsubmitted, pin the posting date, then submit to land it in the intended period bucket.
 	pi = make_purchase_invoice(
-		supplier=SUPPLIER, item_code=ITEM, qty=qty, rate=rate, posting_date=POSTING_DATE, do_not_submit=1
+		supplier=SUPPLIER,
+		item_code=item_code,
+		qty=qty,
+		rate=rate,
+		posting_date=POSTING_DATE,
+		do_not_submit=1,
 	)
 	pi.set_posting_time = 1
 	pi.posting_date = POSTING_DATE
@@ -187,3 +193,13 @@ class TestPurchaseInvoiceTrends(ERPNextTestSuite):
 		row = self._find_row(data, ITEM)
 		self.assertEqual(self._cell(labels, row, "Jul (Qty)") - before_july, 7)
 		self.assertEqual(self._cell(labels, row, "Jun (Qty)") - before_june, 5)
+
+	def test_item_filter_restricts_rows(self):
+		# the Item filter is applied in the query, so the excluded item never reaches the rows
+		make_dated_purchase_invoice(4, 250)
+		make_dated_purchase_invoice(2, 250, item_code=OTHER_ITEM)
+
+		labels, data = self.run_report(item_code=[ITEM])
+		items = {row[labels.index("Item")] for row in data}
+		self.assertIn(ITEM, items)
+		self.assertNotIn(OTHER_ITEM, items)

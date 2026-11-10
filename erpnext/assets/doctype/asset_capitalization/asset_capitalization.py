@@ -7,7 +7,7 @@ import frappe
 
 # import erpnext
 from frappe import _
-from frappe.utils import cint, flt, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
@@ -31,7 +31,7 @@ from erpnext.stock.get_item_details import (
 	get_item_warehouse_,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import _get_incoming_rate, check_warehouse_company
+from erpnext.stock.utils import _get_incoming_rate, check_company, check_warehouse_company
 
 force_fields = [
 	"target_item_name",
@@ -119,12 +119,16 @@ class AssetCapitalization(StockController):
 		self.update_target_asset()
 
 	def before_cancel(self):
-		if frappe.db.get_value("Asset", self.target_asset, "docstatus") == 1:
-			frappe.throw(
-				_("Cancel the submitted Target Asset {0} before cancelling this Asset Capitalization").format(
-					get_link_to_form("Asset", self.target_asset)
-				)
-			)
+		self.cancel_target_asset()
+
+	def cancel_target_asset(self):
+		"""A submitted target asset carries the capitalised value, so it is cancelled together with this."""
+		target_asset = frappe.get_doc("Asset", self.target_asset)
+		if target_asset.docstatus != 1:
+			return
+
+		target_asset.flags.cancelled_by_asset_capitalization = self.name
+		target_asset.cancel()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -160,7 +164,7 @@ class AssetCapitalization(StockController):
 			args.update(d.as_dict())
 			args.doctype = self.doctype
 			args.name = self.name
-			consumed_stock_item_details = get_consumed_stock_item_details(args)
+			consumed_stock_item_details = _get_consumed_stock_item_details(args)
 			for k, v in consumed_stock_item_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_fields):
 					d.set(k, v)
@@ -357,7 +361,7 @@ class AssetCapitalization(StockController):
 		for d in self.get("stock_items"):
 			if d.item_code and d.warehouse:
 				args = self.get_args_for_incoming_rate(d)
-				warehouse_details = get_warehouse_details(args)
+				warehouse_details = _get_warehouse_details(args)
 				d.update(warehouse_details)
 
 		self.split_valuation_rate_for_grouped_stock_items()
@@ -624,9 +628,9 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 	# Get Asset Details
 	asset_details = frappe._dict()
 	if asset:
-		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code"], as_dict=1)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(asset))
+		erpnext.require_permission("Asset", asset, "select")
+		asset_details = frappe.db.get_value("Asset", asset, ["asset_name", "item_code", "company"], as_dict=1)
+		check_capitalization_access(asset_details.company)
 
 		# Re-set item code from Asset
 		out.target_item_code = asset_details.item_code
@@ -648,12 +652,24 @@ def get_target_asset_details(asset: str | None = None, company: str | None = Non
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	frappe.has_permission("Stock Ledger Entry", throw=True)
+	if ctx.item_code:
+		frappe.get_cached_doc("Item", ctx.item_code).check_permission()
+
+	out = _get_consumed_stock_item_details(ctx)
+	if out.warehouse:
+		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
+
+	return out
+
+
+@erpnext.normalize_ctx_input(ItemDetailsCtx)
+def _get_consumed_stock_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
+	"""Row defaults for a consumed stock item; the capitalization's own permission covers them."""
 	out = frappe._dict()
 
 	item = frappe._dict()
 	if ctx.item_code:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
-		item.check_permission()
 
 	out.item_name = item.item_name
 	out.batch_no = None
@@ -663,8 +679,6 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 	out.stock_uom = item.stock_uom
 
 	out.warehouse = get_item_warehouse_(ctx, item, overwrite_warehouse=True) if item else None
-	if out.warehouse:
-		frappe.has_permission("Warehouse", doc=out.warehouse, throw=True)
 
 	# Cost Center
 	item_defaults = get_item_defaults(item.name, ctx.company)
@@ -688,7 +702,7 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 				"serial_and_batch_bundle": ctx.serial_and_batch_bundle,
 			}
 		)
-		out.update(get_warehouse_details(incoming_rate_args))
+		out.update(_get_warehouse_details(incoming_rate_args))
 	else:
 		out.valuation_rate = 0
 		out.actual_qty = 0
@@ -699,20 +713,27 @@ def get_consumed_stock_item_details(ctx: ItemDetailsCtx):
 @frappe.whitelist()
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
 def get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
-	out = frappe._dict()
 	if ctx.warehouse and ctx.item_code:
 		frappe.has_permission("Item", doc=ctx.item_code, throw=True)
 		frappe.has_permission("Warehouse", doc=ctx.warehouse, throw=True)
 		frappe.has_permission("Stock Ledger Entry", throw=True)
-		# inherited from get_incoming_rate before the split; _get_incoming_rate does not scope
-		check_warehouse_company(ctx.warehouse)
-		out = frappe._dict(
-			{
-				"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
-				"valuation_rate": _get_incoming_rate(ctx, raise_error_if_no_rate=False),
-			}
-		)
-	return out
+
+	return _get_warehouse_details(ctx)
+
+
+def _get_warehouse_details(ctx: ItemDetailsCtx) -> frappe._dict:
+	if not (ctx.warehouse and ctx.item_code):
+		return frappe._dict()
+
+	# inherited from get_incoming_rate before the split; _get_incoming_rate does not scope
+	check_warehouse_company(ctx.warehouse)
+	check_company(ctx.company)
+	return frappe._dict(
+		{
+			"actual_qty": get_previous_sle(ctx).get("qty_after_transaction") or 0,
+			"valuation_rate": _get_incoming_rate(ctx, raise_error_if_no_rate=False),
+		}
+	)
 
 
 @frappe.whitelist()
@@ -724,11 +745,11 @@ def get_consumed_asset_details(ctx: ItemDetailsCtx) -> frappe._dict:
 
 	asset_details = frappe._dict()
 	if ctx.asset:
+		erpnext.require_permission("Asset", ctx.asset, "select")
 		asset_details = frappe.db.get_value(
-			"Asset", ctx.asset, ["asset_name", "item_code", "item_name"], as_dict=1
+			"Asset", ctx.asset, ["asset_name", "item_code", "item_name", "company"], as_dict=1
 		)
-		if not asset_details:
-			frappe.throw(_("Asset {0} does not exist").format(ctx.asset))
+		check_capitalization_access(asset_details.company)
 
 	out.item_code = asset_details.item_code
 	out.asset_name = asset_details.asset_name
@@ -792,7 +813,9 @@ def get_service_item_details(ctx: ItemDetailsCtx) -> frappe._dict:
 def get_items_tagged_to_wip_composite_asset(params: dict | str):
 	params = frappe.parse_json(params)
 
-	check_capitalization_access(params.get("company") if isinstance(params, dict | frappe._dict) else None)
+	target_asset = cstr(params.get("target_asset"))
+	erpnext.require_permission("Asset", target_asset, "select")
+	check_capitalization_access(frappe.db.get_value("Asset", target_asset, "company"))
 
 	fields = [
 		"item_code",
@@ -813,9 +836,12 @@ def get_items_tagged_to_wip_composite_asset(params: dict | str):
 
 	pr_items = frappe.get_all(
 		"Purchase Receipt Item",
-		filters={"wip_composite_asset": params.get("target_asset"), "docstatus": 1},
+		filters={"wip_composite_asset": target_asset, "docstatus": 1},
 		fields=fields,
 	)
+
+	for purchase_receipt in {d.purchase_receipt for d in pr_items}:
+		erpnext.require_permission("Purchase Receipt", purchase_receipt)
 
 	stock_items = []
 	asset_items = []

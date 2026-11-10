@@ -133,8 +133,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					frm.doc.bank_statement_from_date &&
 					frm.doc.bank_statement_to_date
 				) {
-					frm.trigger("render_chart");
-					frm.trigger("render");
+					frm.trigger("render_chart").then(() => frm.trigger("render"));
 					frappe.utils.scroll_to(frm.get_field("reconciliation_tool_cards").$wrapper, true, 30);
 				}
 			});
@@ -144,11 +143,10 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 	get_account_opening_balance(frm) {
 		if (frm.doc.company && frm.doc.bank_account && frm.doc.bank_statement_from_date) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_account_balance",
+				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_account_opening_balance",
 				args: {
 					bank_account: frm.doc.bank_account,
 					till_date: frappe.datetime.add_days(frm.doc.bank_statement_from_date, -1),
-					company: frm.doc.company,
 				},
 				callback: (response) => {
 					frm.set_value("account_opening_balance", response.message);
@@ -174,11 +172,14 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 	},
 
 	render_chart(frm) {
-		frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager({
-			$reconciliation_tool_cards: frm.get_field("reconciliation_tool_cards").$wrapper,
-			bank_statement_closing_balance: frm.doc.bank_statement_closing_balance,
-			cleared_balance: frm.cleared_balance,
-			currency: frm.doc.account_currency,
+		// the bank account trigger can fire before refresh has loaded the bundle
+		return frappe.require("bank-reconciliation-tool.bundle.js", () => {
+			frm.cards_manager = new erpnext.accounts.bank_reconciliation.NumberCardManager({
+				$reconciliation_tool_cards: frm.get_field("reconciliation_tool_cards").$wrapper,
+				bank_statement_closing_balance: frm.doc.bank_statement_closing_balance,
+				cleared_balance: frm.cleared_balance,
+				currency: frm.doc.account_currency,
+			});
 		});
 	},
 

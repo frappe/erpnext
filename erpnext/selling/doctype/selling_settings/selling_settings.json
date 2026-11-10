@@ -128,7 +128,7 @@
   },
   {
    "default": "Daily",
-   "description": "The frequency at which project progress and company transaction details will be updated. Set it to daily or monthly if you post a lot of transactions.",
+   "description": "The frequency at which project progress and company transaction details will be updated. Set it to daily or monthly if you post a lot of transactions. Daily refreshes nightly; Monthly refreshes on the 1st of each month.",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "How often should sales data be updated in Company/Project?",

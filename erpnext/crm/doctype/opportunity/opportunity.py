@@ -10,7 +10,7 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.model.document import Document
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
-from frappe.utils import comma_or, flt, get_fullname
+from frappe.utils import comma_or, flt, get_fullname, today
 from pypika.terms import Criterion
 
 from erpnext.accounts.party import validate_party_frozen_disabled
@@ -68,6 +68,7 @@ class Opportunity(TransactionBase, CRMNote):
 		items: DF.Table[OpportunityItem]
 		job_title: DF.Data | None
 		language: DF.Link | None
+		lost_on: DF.Date | None
 		lost_reasons: DF.TableMultiSelect[OpportunityLostReasonDetail]
 		market_segment: DF.Link | None
 		naming_series: DF.Literal["CRM-OPP-.YYYY.-"]
@@ -137,11 +138,13 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.validate_party()
+		self.validate_party_specific_items()
 		self.validate_party_contact_and_address()
 		self.refresh_party_fields()
 		self.map_fields()
 		self.validate_qty()
 		self.validate_status()
+		self.set_lost_on()
 		self.set_exchange_rate()
 
 		if not self.title:
@@ -164,6 +167,11 @@ class Opportunity(TransactionBase, CRMNote):
 	def on_trash(self):
 		frappe.db.delete("Prospect Opportunity", {"opportunity": self.name})
 
+	def validate_party_specific_items(self):
+		from erpnext.accounts.services.party_validation import PartyValidator
+
+		PartyValidator(self).validate_party_specific_items()
+
 	def validate_opportunity_from(self):
 		if self.opportunity_from not in PARTY_DOCTYPES:
 			frappe.throw(
@@ -180,32 +188,47 @@ class Opportunity(TransactionBase, CRMNote):
 				)
 
 	def validate_status(self):
-		"""Quotation and Converted come from the linked quotations and can't be set or left by hand."""
+		"""Refuse a status set by hand only where it contradicts the linked quotations."""
 		if self.is_new() or not self.has_value_changed("status"):
 			return
 
-		quotation_status = self.get_quotation_status()
-		if self.status != quotation_status and (
-			quotation_status or self.status in ("Quotation", "Converted")
-		):
-			if self.status == "Lost":
-				frappe.throw(_("Cannot declare as Lost because an active Quotation exists."))
-			frappe.throw(
-				_("Status {0} is set from the Opportunity's Quotations").format(
-					frappe.bold(_(quotation_status or self.status))
-				)
-			)
-
+		self.validate_status_against_quotations(self.get_quotation_status())
 		previous = self.get_doc_before_save()
 		if previous and previous.status == "Lost":
 			self.lost_reasons = []
 			self.order_lost_reason = None
+
+	def validate_status_against_quotations(self, quotation_status: str | None) -> None:
+		if self.status == "Lost" and quotation_status:
+			frappe.throw(_("Cannot declare as Lost because an active Quotation exists."))
+
+		if self.status in ("Quotation", "Converted") and self.status != quotation_status:
+			frappe.throw(
+				_("Status {0} is set from the Opportunity's Quotations").format(frappe.bold(_(self.status)))
+			)
+
+		if quotation_status == "Converted" and self.status != "Converted":
+			frappe.throw(_("Status cannot be changed because an ordered Quotation exists."))
 
 	def get_quotation_status(self) -> str | None:
 		if self.has_ordered_quotation():
 			return "Converted"
 		if self.has_active_quotation():
 			return "Quotation"
+
+	def set_lost_on(self) -> None:
+		if self.has_value_changed("status"):
+			self.lost_on = self.get_lost_on()
+
+	def get_lost_on(self) -> str | None:
+		return today() if self.status == "Lost" else None
+
+	def set_status(self, update: bool = False, status: str | None = None, update_modified: bool = True):
+		"""Also keep Lost On in step when the status is changed from a linked Quotation."""
+		previous_status = self.status
+		super().set_status(update=update, status=status, update_modified=update_modified)
+		if update and self.status != previous_status:
+			self.db_set("lost_on", self.get_lost_on(), update_modified=update_modified)
 
 	def map_fields(self):
 		for field in self.meta.get_valid_columns():
@@ -227,7 +250,9 @@ class Opportunity(TransactionBase, CRMNote):
 			return
 
 		if not self.conversion_rate or self.conversion_rate == 1.0 or self.is_currency_changed_alone():
-			self.conversion_rate = get_exchange_rate(self.currency, company_currency, self.transaction_date)
+			self.conversion_rate = get_exchange_rate(
+				self.currency, company_currency, self.transaction_date, "for_selling"
+			)
 
 	def is_currency_changed_alone(self) -> bool:
 		return (

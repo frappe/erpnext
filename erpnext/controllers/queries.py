@@ -20,12 +20,12 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import nowdate, today, unique
+from frappe.utils import nowdate, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item import get_allowed_uoms
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
@@ -292,13 +292,13 @@ def item_query(
 
 	filters = frappe.parse_json(filters)
 	company = filters.pop("company", None) if isinstance(filters, dict) else None
-	restricted_items_condition = None
+	allowed_items_condition = None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
-			restricted_items_condition = get_restricted_items_condition(party_type, party)
+			allowed_items_condition = get_allowed_items_condition(party_type, party)
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -417,8 +417,8 @@ def item_query(
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))
 
-	if restricted_items_condition is not None:
-		query = query.where(~restricted_items_condition)
+	if allowed_items_condition is not None:
+		query = query.where(allowed_items_condition)
 
 	return query.run(as_dict=as_dict)
 
@@ -670,7 +670,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
-	expiry_date = filters.get("posting_date") or today()
+	expiry_date = filters.get("posting_date") or nowdate()
 
 	query = (
 		frappe.qb.from_(stock_ledger_entry)
@@ -734,7 +734,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
-	expiry_date = filters.get("posting_date") or today()
+	expiry_date = filters.get("posting_date") or nowdate()
 
 	bundle_query = (
 		frappe.qb.from_(bundle)
@@ -1063,7 +1063,7 @@ def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page
 	batch = frappe.qb.DocType("Batch")
 	query = frappe.qb.get_query("Batch", fields=["name", "batch_id", "item"], ignore_permissions=False).where(
 		(batch.disabled == 0)
-		& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
+		& (batch.expiry_date.isnull() | (batch.expiry_date >= nowdate()))
 		& (batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
 	)
 
