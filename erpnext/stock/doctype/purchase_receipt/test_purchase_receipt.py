@@ -820,6 +820,32 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
 
+	def test_stock_manager_makes_receipt_from_order_with_company_address(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_pr_from_po
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "_Test Company Stock Address",
+				"address_line1": "1 Road",
+				"city": "Mumbai",
+				"country": "India",
+				"is_your_company_address": 1,
+				"links": [{"link_doctype": "Company", "link_name": "_Test Company"}],
+			}
+		).insert()
+		po = create_purchase_order()
+		self.assertTrue(po.shipping_address)
+
+		user = create_user_with_roles("test_pr_stock_manager@example.com", "Stock User", "Stock Manager")
+		with self.set_user(user.name):
+			pr = make_pr_from_po(po.name)
+			pr.insert()
+
+		self.assertEqual(pr.shipping_address, po.shipping_address)
+
 	def test_purchase_return_against_closed_purchase_order(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt as make_pr_from_po
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
