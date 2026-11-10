@@ -1203,6 +1203,66 @@ class SellingController(StockController):
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
+<<<<<<< HEAD
+=======
+	def set_serial_and_batch_bundle_from_pick_list(self):
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		for item in self.items:
+			if item.use_serial_batch_fields or not item.against_pick_list or not self.get("update_stock", 1):
+				continue
+
+			if item.pick_list_item and not item.serial_and_batch_bundle:
+				filters = {
+					"item_code": item.item_code,
+					"voucher_type": "Pick List",
+					"voucher_no": item.against_pick_list,
+					"voucher_detail_no": item.pick_list_item,
+				}
+
+				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
+
+				if bundle_id:
+					package = SerialBatchCreation(
+						{
+							"type_of_transaction": "Outward",
+							"serial_and_batch_bundle": bundle_id,
+							"item_code": item.get("item_code"),
+							"warehouse": item.get("warehouse"),
+							"do_not_save": True,
+						}
+					).duplicate_package()
+
+					remove_delivered_serial_nos(package)
+					package.save()
+
+					item.serial_and_batch_bundle = package.name
+
+	def update_pick_list_status(self):
+		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
+
+		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
+		for pick_list in pick_lists:
+			update_pick_list_status(pick_list)
+
+>>>>>>> 1907db4 (fix(stock): copy only undelivered serial nos of a pick list bundle to the next delivery)
+
+def remove_delivered_serial_nos(package):
+	"""Drop the serial nos an earlier delivery of a partly delivered pick list row took."""
+	serial_nos = [row.serial_no for row in package.entries if row.serial_no]
+	if not serial_nos:
+		return
+
+	in_stock = set(
+		frappe.get_all(
+			"Serial No",
+			filters={"name": ("in", serial_nos), "warehouse": package.warehouse},
+			pluck="name",
+		)
+	)
+	for row in [row for row in package.entries if row.serial_no and row.serial_no not in in_stock]:
+		package.remove(row)
+
 
 def set_default_income_account_for_item(obj):
 	"""Set income account as default for items in the transaction.
