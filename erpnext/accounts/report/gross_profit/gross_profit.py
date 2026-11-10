@@ -595,6 +595,10 @@ class GrossProfitGenerator:
 				row.buying_amount = flt(
 					self.get_buying_amount_from_delivered_bundles(row), self.currency_precision
 				)
+			elif row.so_detail and row.so_detail in self.so_bundle_deliveries:
+				row.buying_amount = flt(
+					self.get_buying_amount_from_so_delivered_bundles(row), self.currency_precision
+				)
 			else:
 				row.buying_amount = flt(self.get_buying_amount(row, row.item_code), self.currency_precision)
 
@@ -845,9 +849,10 @@ class GrossProfitGenerator:
 
 		return not row.get(scrub(group_by))
 
-	def get_buying_amount_from_product_bundle(self, row, product_bundle):
+	def get_buying_amount_from_product_bundle(self, row, product_bundle, billed_share=None):
 		buying_amount = 0.0
-		billed_share = self.get_billed_share_of_bundle(row)
+		if billed_share is None:
+			billed_share = self.get_billed_share_of_bundle(row)
 		for packed_item in product_bundle:
 			if packed_item.get("parent_detail_docname") == row.item_row:
 				packed_item_row = row.copy()
@@ -872,9 +877,46 @@ class GrossProfitGenerator:
 					"qty": delivered_row.stock_qty,
 				}
 			)
-			buying_amount += self.get_buying_amount_from_product_bundle(delivery, packed_items)
+			buying_amount += self.get_buying_amount_from_product_bundle(
+				delivery, packed_items, billed_share=1
+			)
 
 		return buying_amount
+
+	def get_buying_amount_from_so_delivered_bundles(self, row):
+		"""Buying amount of a bundle row delivered by Delivery Notes linked through the Sales Order."""
+		if row.so_detail not in self.so_bundle_rates:
+			deliveries = self.so_bundle_deliveries[row.so_detail]
+			delivered_qty = sum(flt(delivered_row.stock_qty) for delivered_row, _ in deliveries)
+			if not delivered_qty:
+				deliveries = [
+					(delivered_row, packed_items)
+					for delivered_row, packed_items in deliveries
+					if flt(delivered_row.stock_qty) > 0
+				]
+				delivered_qty = sum(flt(delivered_row.stock_qty) for delivered_row, _ in deliveries)
+
+			total_delivered_cost = 0.0
+			for delivered_row, packed_items in deliveries:
+				delivery = row.copy()
+				delivery.update(
+					{
+						"is_return": 0,
+						"dn_detail": delivered_row.name,
+						"delivery_note": delivered_row.parent,
+						"item_row": delivered_row.name,
+						"qty": delivered_row.stock_qty,
+					}
+				)
+				total_delivered_cost += self.get_buying_amount_from_product_bundle(
+					delivery, packed_items, billed_share=1
+				)
+
+			self.so_bundle_rates[row.so_detail] = (
+				total_delivered_cost / delivered_qty if delivered_qty else 0.0
+			)
+
+		return flt(flt(row.qty) * self.so_bundle_rates[row.so_detail], self.currency_precision)
 
 	def get_billed_share_of_bundle(self, row):
 		"""Share of the delivered bundle qty billed by this invoice row; packed item qty is the delivered qty."""
@@ -1462,6 +1504,8 @@ class GrossProfitGenerator:
 	def load_bundle_deliveries(self):
 		"""Bundle rows of Delivery Notes made from the invoices, keyed by the invoice row."""
 		self.bundle_deliveries = {}
+		self.so_bundle_deliveries = {}
+		self.so_bundle_rates = {}
 		invoices = {row.parent for row in self.si_list}
 		if not invoices:
 			return
@@ -1484,6 +1528,28 @@ class GrossProfitGenerator:
 				self.bundle_deliveries.setdefault(delivered_row.si_detail, []).append(
 					(delivered_row, packed_items)
 				)
+
+		# Also find bundle deliveries linked through Sales Orders (SO -> SI and SO -> DN)
+		so_details = {row.so_detail for row in self.si_list if row.so_detail}
+		if so_details:
+			so_delivered_rows = (
+				qb.from_(dni)
+				.select(dni.name, dni.parent, dni.item_code, dni.stock_qty, dni.so_detail)
+				.where(
+					(dni.docstatus == 1)
+					& dni.so_detail.isin(so_details)
+					& (Coalesce(dni.against_sales_invoice, "") == "")
+				)
+				.run(as_dict=True)
+			)
+
+			for delivered_row in so_delivered_rows:
+				if packed_items := delivery_note_bundles.get(delivered_row.parent, {}).get(
+					delivered_row.item_code
+				):
+					self.so_bundle_deliveries.setdefault(delivered_row.so_detail, []).append(
+						(delivered_row, packed_items)
+					)
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")
