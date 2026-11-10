@@ -1048,6 +1048,7 @@ class PickList(TransactionBase):
 		return qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
+<<<<<<< HEAD
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
 		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
 		possible_bundles = {}
@@ -1061,6 +1062,20 @@ class PickList(TransactionBase):
 				possible_bundles[item.item_code] += qty / qty_in_bundle
 
 		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
+=======
+		"""Whole bundles this Pick List's own rows picked (or left undelivered) of every stock component."""
+		picked_qty = defaultdict(float)
+		for item in self.locations:
+			if item.sales_order_item == bundle_row:
+				picked_qty[item.item_code] += flt(item.picked_qty) - (
+					flt(item.delivered_qty) if pending_only else 0
+				)
+
+		return min(
+			(get_whole_bundle_count(picked_qty[item_code], qty) for item_code, qty in bundle_items.items()),
+			default=0,
+		)
+>>>>>>> 747d993 (fix(stock): deliver from a Pick List only the bundles its own rows complete)
 
 	def update_bundle_delivered_qty(self):
 		bundle_locations = defaultdict(list)
