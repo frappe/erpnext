@@ -321,8 +321,8 @@ class PickList(TransactionBase):
 		self.validate_serial_and_batch_bundle()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_status()
-		self.update_bundle_picked_qty()
 		self.update_reference_qty()
+		self.update_bundle_picked_qty()
 		self.update_sales_order_picking_status()
 
 	def validate_expired_batches(self):
@@ -397,8 +397,8 @@ class PickList(TransactionBase):
 		]
 
 		self.update_status()
-		self.update_bundle_picked_qty()
 		self.update_reference_qty()
+		self.update_bundle_picked_qty()
 		self.update_sales_order_picking_status()
 		self.delink_serial_and_batch_bundle()
 
@@ -815,22 +815,18 @@ class PickList(TransactionBase):
 			item.idx = idx
 
 	def update_bundle_picked_qty(self):
-		product_bundles = self._get_product_bundles()
-		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
-
-		for so_row in product_bundles:
-			bundle_items = product_bundle_qty_map.get(so_row)
-			if not bundle_items:
-				continue
-			picked_qty = self._compute_picked_qty_for_bundle(so_row, bundle_items)
-			item_table = "Sales Order Item"
-			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
-			frappe.db.set_value(
-				item_table,
-				so_row,
-				"picked_qty",
-				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
+		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its components."""
+		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction") or 6
+		for so_row, packed_items in get_packed_items_of_order_rows(self._get_product_bundles()).items():
+			picked_qty = min(
+				(
+					int(flt(flt(row.picked_qty) / row.qty_per_unit, precision))
+					for row in packed_items
+					if row.qty_per_unit
+				),
+				default=0,
 			)
+			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", picked_qty)
 
 	def get_own_vouchers(self):
 		"""Vouchers whose stock reservations this pick list may pick."""
