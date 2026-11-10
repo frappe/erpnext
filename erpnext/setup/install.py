@@ -34,7 +34,6 @@ def after_install():
 	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
-	grant_address_read_to_accounts_manager()
 	add_app_name()
 	hide_workspaces()
 	update_roles()
@@ -164,6 +163,8 @@ def create_address_and_contact_custom_fields():
 def setup_company_address_permissions():
 	"""Only Accounts Manager and System Manager may mark an address as the company's own (permlevel 1)."""
 	from frappe.permissions import add_permission, update_permission_property
+
+	grant_address_read_to_accounts_manager()
 
 	for role in ("System Manager", "Accounts Manager"):
 		add_permission("Address", role, 1)
