@@ -28,6 +28,7 @@ from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_or
 from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.packed_item.packed_item import (
 	get_component_stock_qty_per_unit,
+	get_ordered_qty_per_unit,
 	get_packed_items_of_order_rows,
 	get_product_bundle_items_by_name,
 	pop_order_packed_item,
@@ -1035,12 +1036,15 @@ class PickList(TransactionBase):
 		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
 			bundle, parent_item = packed_items[0].product_bundle, packed_items[0].parent_item
 			if bundle not in components:
-				components[bundle] = get_product_bundle_items_by_name(bundle)
+				components[bundle] = [
+					(component, get_component_stock_qty_per_unit(component, None))
+					for component in get_product_bundle_items_by_name(bundle)
+				]
 
-			for component in components[bundle]:
+			for component, qty_per_unit in components[bundle]:
 				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
 					qty_map[so_row][component.item_code].append(
-						get_component_stock_qty_per_unit(component, None, packed_item)
+						get_ordered_qty_per_unit(qty_per_unit, packed_item)
 					)
 
 		return qty_map

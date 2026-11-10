@@ -284,7 +284,11 @@ def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=Non
 	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
 	# component qty is in the bundle row's UOM; convert to stock qty
 	qty_per_unit = flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+	return get_ordered_qty_per_unit(qty_per_unit, so_packed_item)
 
+
+def get_ordered_qty_per_unit(qty_per_unit, so_packed_item=None):
+	"""``qty_per_unit``, or the order's own ratio if the conversion changed after the order was packed."""
 	# the order's ratio comes from its rounded packed qty, so use it only once the conversion has changed
 	if so_packed_item and so_packed_item.qty_per_unit:
 		ordered_qty = flt(
