@@ -1280,6 +1280,27 @@ class TestPickList(ERPNextTestSuite):
 		# 12 Nos picked / 12 (1 Box in stock units) = 1 bundle, not 12
 		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
 
+	def test_bundle_sold_in_non_stock_uom_picks_component_stock_qty(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, rate=100)
+		bundle = make_item(
+			properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 2}]}
+		).name
+		make_product_bundle(bundle, [component])
+
+		sales_order = make_sales_order(
+			item_code=bundle, warehouse=warehouse, qty=3, uom="Box", do_not_save=True
+		)
+		sales_order.items[0].conversion_factor = 2
+		sales_order.submit()  # 6 Nos of the component
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.save()
+
+		self.assertEqual(pick_list.locations[0].qty, 6)
+		self.assertEqual(pick_list.locations[0].stock_qty, 6)
+
 	def test_bundle_delivery_keeps_order_qty_after_component_uom_change(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
