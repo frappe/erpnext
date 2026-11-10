@@ -69,6 +69,24 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.reload()
 		qa.cancel()
 
+	def test_amended_delivery_note_keeps_quality_inspection_of_the_original(self):
+		make_stock_entry(
+			item_code="_Test Item with QA", target="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name)
+		dn.reload()
+		dn.submit()
+		dn.cancel()
+
+		amended_dn = frappe.copy_doc(dn)
+		amended_dn.amended_from = dn.name
+		amended_dn.docstatus = 0
+		amended_dn.insert()
+		amended_dn.submit()
+
+		self.assertEqual(amended_dn.items[0].quality_inspection, qa.name)
+
 	def test_qa_not_submit(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		qa = create_quality_inspection(
