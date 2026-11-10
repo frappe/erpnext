@@ -1971,6 +1971,39 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.docstatus, 1)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_packed_row_of_removed_bundle_row_does_not_hold_serial_nos(self):
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TRSR-.#####"}
+		).name
+		removed_bundle = make_item(properties={"is_stock_item": 0}).name
+		kept_bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(removed_bundle, [component])
+		make_product_bundle(kept_bundle, [component])
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+
+		dn = create_delivery_note(item_code=removed_bundle, qty=2, do_not_submit=True)
+		dn.save()
+		dn.append(
+			"items",
+			{
+				"item_code": kept_bundle,
+				"qty": 2,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"cost_center": dn.items[0].cost_center,
+				"expense_account": dn.items[0].expense_account,
+			},
+		)
+		dn.save()
+		dn.remove(dn.items[0])
+		dn.save()
+
+		self.assertEqual(len(get_serial_nos_from_bundle(dn.packed_items[0].serial_and_batch_bundle)), 2)
+
 	def test_delivery_note_bundle_with_batched_item(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
