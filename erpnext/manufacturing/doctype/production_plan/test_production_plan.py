@@ -1718,6 +1718,30 @@ class TestProductionPlan(ERPNextTestSuite):
 			[("Material Transfer", 7, "Nos"), ("Purchase", 4, "Box")],
 		)
 
+	def test_transfer_rounds_up_to_a_whole_stock_uom(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1, quantity=3, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Finished Goods - _TC", qty=10, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=5,
+			for_warehouse="Stores - _TC",
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "Finished Goods - _TC"}]
+		)
+
+		# 5 / 3 = 1.667 Nos short, rounded up to 2
+		self.assertEqual(
+			[(d["material_request_type"], d["quantity"], d["uom"]) for d in items],
+			[("Material Transfer", 2, "Nos")],
+		)
+
 	def test_download_raw_materials_puts_other_warehouse_qty_under_its_columns(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
