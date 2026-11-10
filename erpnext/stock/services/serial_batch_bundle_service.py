@@ -319,6 +319,25 @@ class SerialBatchBundleService:
 		self.add_serial_nos_in_bundles(picked_serial_nos, bundle_items)
 		return picked_serial_nos
 
+	def get_batches_used_in_rows(self):
+		"""Batch qty held by the bundles on the rows, by (batch_no, warehouse)."""
+		bundles = [
+			row.serial_and_batch_bundle
+			for table_name in ("items", "packed_items")
+			for row in self.doc.get(table_name) or []
+			if row.get("serial_and_batch_bundle")
+		]
+		picked_batches = frappe._dict()
+		if bundles:
+			entries = frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": ("in", bundles), "batch_no": ("is", "set")},
+				fields=["batch_no", "warehouse", "qty"],
+			)
+			add_picked_batches(picked_batches, entries)
+
+		return picked_batches
+
 	def add_serial_nos_in_bundles(self, picked_serial_nos, bundle_items):
 		if not bundle_items:
 			return
@@ -867,3 +886,13 @@ def unusable_batch_condition(batch, posting_date):
 		return batch.disabled == 1
 
 	return (batch.expiry_date < getdate(posting_date)) | (batch.disabled == 1)
+
+
+def add_picked_batches(picked_batches, entries):
+	for entry in entries:
+		if entry.batch_no:
+			picked = picked_batches.setdefault(
+				(entry.batch_no, entry.warehouse),
+				frappe._dict(batch_no=entry.batch_no, warehouse=entry.warehouse, qty=0),
+			)
+			picked.qty += entry.qty
