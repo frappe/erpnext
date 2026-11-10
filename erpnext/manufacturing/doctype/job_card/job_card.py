@@ -968,7 +968,10 @@ class JobCard(Document):
 						"uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
 						"item_name": d.item_name,
 						"description": d.description,
-						"required_qty": (d.required_qty * flt(self.for_quantity)) / operation_qty,
+						"required_qty": flt(
+							d.required_qty * flt(self.for_quantity) / operation_qty,
+							self.precision("required_qty", "items"),
+						),
 					},
 				)
 
@@ -1467,11 +1470,12 @@ class JobCard(Document):
 				as_list=True,
 			)
 		)
+		precision = self.precision("transferred_qty", "items")
 		for row in wo_items:
 			if not self.is_own_material(row):
 				continue
 			expected = flt(row.required_qty) / wo_qty * flt(self.for_quantity)
-			if flt(transferred.get(row.item_code), 6) < flt(expected, 6):
+			if flt(transferred.get(row.item_code), precision) < flt(expected, precision):
 				return True
 		return False
 
