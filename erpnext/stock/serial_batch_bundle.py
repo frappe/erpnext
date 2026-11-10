@@ -233,6 +233,7 @@ class SerialBatchBundle:
 					| bundle.name.isin(self.get_bundles_on_voucher_rows("Packed Item"))
 				)
 				& (bundle.item_code == self.item_code)
+				& (bundle.type_of_transaction == "Outward")
 				& (bundle.docstatus == 0)
 			)
 		).run(as_dict=True)
