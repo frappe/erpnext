@@ -284,7 +284,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
-	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations)
+	serial_nos_in_stock = get_serial_nos_in_stock(
+		[location for location in pick_list.locations if location.sales_order == sales_order]
+	)
 
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
