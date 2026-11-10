@@ -4745,6 +4745,26 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(manufacture.docstatus, 1)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_split_job_card_raised_above_operation_qty_gets_its_full_share(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=5)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=10,
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[1]
+		job_card.for_quantity = 6
+		job_card.items = []
+		job_card.get_required_items()
+
+		self.assertEqual(job_card.items[0].required_qty, 6)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_repeated_operation_gets_only_its_own_materials(self):
 		workstation = make_jc_review_workstation()
 		cutting = make_jc_review_operation(workstation)
