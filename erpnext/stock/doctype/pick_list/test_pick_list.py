@@ -1403,6 +1403,25 @@ class TestPickList(ERPNextTestSuite):
 		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
 		self.assertEqual(pick(), 3)
 
+	def test_delivery_from_a_pick_list_skips_bundles_it_does_not_complete(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle(quantities=[1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=3, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		def pick():
+			pick_list = create_pick_list(sales_order.name)
+			for row in pick_list.locations:
+				row.picked_qty = row.qty
+			pick_list.submit()
+			return pick_list
+
+		pick()  # picks only A
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
+		pick_list = pick()  # picks only B
+
+		self.assertFalse(create_delivery_note(pick_list.name).items)
+
 	def test_bundle_picked_qty_skips_non_stock_and_pools_repeated_components(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(properties={"is_stock_item": 1}).name
