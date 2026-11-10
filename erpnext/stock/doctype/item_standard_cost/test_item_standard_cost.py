@@ -6,6 +6,10 @@ from frappe.utils import add_days, flt, nowtime, today
 
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -933,6 +937,123 @@ class TestItemStandardCost(ERPNextTestSuite):
 				"Bin", {"item_code": item.name, "warehouse": warehouse}, "stock_value"
 			)
 			self.assertEqual(flt(stock_value), qty * 150)
+			# the revaluation moves no serial: each one stays active where it was
+			self.assertEqual(
+				frappe.db.count(
+					"Serial No", {"item_code": item.name, "warehouse": warehouse, "status": "Active"}
+				),
+				qty,
+			)
+
+		# and the revalued serials can still be issued, at the new standard rate
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=PI_FG,
+			company=PI_COMPANY,
+			qty=2,
+			use_serial_batch_fields=1,
+		)
+		self.assertEqual(flt(issue.items[0].basic_rate), 150)
+
+	def test_serialized_item_counted_down_keeps_the_entered_serials(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item(has_serial_no=1, serial_no_series="SC-CNT-.####")
+		create_item_standard_cost(item.name, rate=100, company=PI_COMPANY)
+		make_stock_entry(
+			item_code=item.name,
+			to_warehouse=PI_STORES,
+			company=PI_COMPANY,
+			qty=3,
+			basic_rate=100,
+			use_serial_batch_fields=1,
+		)
+		serial_nos = frappe.get_all(
+			"Serial No", {"item_code": item.name}, pluck="serial_no", order_by="serial_no"
+		)
+
+		# count 2 of the 3: the row names which serials are still there
+		reco = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=PI_STORES,
+			qty=2,
+			rate=100,
+			company=PI_COMPANY,
+			use_serial_batch_fields=1,
+			reconcile_all_serial_batch=0,
+			serial_no="\n".join(serial_nos[:2]),
+		)
+
+		status = {
+			row.serial_no: row.status
+			for row in frappe.get_all("Serial No", {"item_code": item.name}, ["serial_no", "status"])
+		}
+		self.assertEqual([status[serial_no] for serial_no in serial_nos], ["Active", "Active", "Delivered"])
+		bin_data = frappe.db.get_value(
+			"Bin",
+			{"item_code": item.name, "warehouse": PI_STORES},
+			["actual_qty", "stock_value"],
+			as_dict=True,
+		)
+		self.assertEqual((flt(bin_data.actual_qty), flt(bin_data.stock_value)), (2, 200))
+		self.assertEqual(flt(reco.difference_amount), -100)
+
+		# the two counted serials remain issuable
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=PI_STORES,
+			company=PI_COMPANY,
+			qty=2,
+			use_serial_batch_fields=1,
+		)
+		issued = frappe.get_all(
+			"Serial No",
+			{"name": ("in", get_serial_nos_from_bundle(issue.items[0].serial_and_batch_bundle))},
+			pluck="serial_no",
+		)
+		self.assertEqual(sorted(issued), serial_nos[:2])
+
+	def test_batched_item_counted_up_follows_the_batch(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = create_standard_cost_item(
+			has_batch_no=1, create_new_batch=1, batch_number_series="SC-BAT-.####"
+		)
+		create_item_standard_cost(item.name, rate=100, company=PI_COMPANY)
+		receipt = make_stock_entry(
+			item_code=item.name, to_warehouse=PI_STORES, company=PI_COMPANY, qty=3, basic_rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		reco = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=PI_STORES,
+			qty=5,
+			rate=100,
+			company=PI_COMPANY,
+			use_serial_batch_fields=1,
+			reconcile_all_serial_batch=0,
+			batch_no=batch_no,
+		)
+
+		self.assertEqual(flt(get_batch_qty(batch_no, PI_STORES, item.name)), 5)
+		self.assertEqual(flt(reco.difference_amount), 200)
+
+		# all five can be issued from the batch
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=PI_STORES,
+			company=PI_COMPANY,
+			qty=5,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+		)
+		self.assertEqual(flt(issue.items[0].basic_rate), 100)
 
 	def test_standard_rate_cache_invalidated_after_submit(self):
 		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
