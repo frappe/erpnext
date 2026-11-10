@@ -320,22 +320,27 @@ class SerialBatchBundleService:
 		return picked_serial_nos
 
 	def get_batches_used_in_rows(self):
-		"""Batch qty held by the bundles on the rows, by (batch_no, warehouse)."""
-		bundles = [
-			row.serial_and_batch_bundle
-			for table_name in ("items", "packed_items")
-			for row in self.doc.get(table_name) or []
-			if row.get("serial_and_batch_bundle")
-		]
-		picked_batches = frappe._dict()
+		"""Batch qty the rows already take, by (batch_no, warehouse)."""
+		entries, bundles = [], []
+		for table_name in ("items", "packed_items"):
+			for row in self.doc.get(table_name) or []:
+				if row.get("serial_and_batch_bundle"):
+					bundles.append(row.serial_and_batch_bundle)
+				elif row.get("batch_no"):
+					qty = row.stock_qty if table_name == "items" else row.qty
+					entries.append(
+						frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty))
+					)
+
 		if bundles:
-			entries = frappe.get_all(
+			entries += frappe.get_all(
 				"Serial and Batch Entry",
 				filters={"parent": ("in", bundles), "batch_no": ("is", "set")},
 				fields=["batch_no", "warehouse", "qty"],
 			)
-			add_picked_batches(picked_batches, entries)
 
+		picked_batches = frappe._dict()
+		add_picked_batches(picked_batches, entries)
 		return picked_batches
 
 	def add_serial_nos_in_bundles(self, picked_serial_nos, bundle_items):
