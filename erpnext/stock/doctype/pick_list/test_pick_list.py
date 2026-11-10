@@ -1089,6 +1089,46 @@ class TestPickList(FrappeTestCase):
 		pl1.cancel()
 		pl.cancel()
 
+	def pick_all_pending(self, sales_order):
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+		return pick_list
+
+	def test_bundle_picked_qty_counts_components_picked_across_pick_lists(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle([1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=100, rate=100)
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=3, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+		sales_order_item = sales_order.items[0].name
+
+		self.pick_all_pending(sales_order)  # 3 A and 3 B
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), 1)
+
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=10, rate=100)
+		second_pick_list = self.pick_all_pending(sales_order)  # the other 3 B
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), 3)
+		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
+
+		second_pick_list.cancel()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), 1)
+
+	def test_bundle_is_not_picked_until_all_its_components_are_picked(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle([1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=100, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+		sales_order_item = sales_order.items[0].name
+
+		self.pick_all_pending(sales_order)  # 3 A, no B in stock
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), 0)
+
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
+		self.pick_all_pending(sales_order)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), 3)
+
 	def test_picklist_deducts_quantities_from_multiple_bundle_batches(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1})
