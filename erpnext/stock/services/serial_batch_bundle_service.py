@@ -326,7 +326,7 @@ class SerialBatchBundleService:
 			for row in self.doc.get(table_name) or []:
 				if row.get("serial_and_batch_bundle"):
 					bundles.append(row.serial_and_batch_bundle)
-				elif row.get("batch_no"):
+				elif row.get("use_serial_batch_fields") and row.get("batch_no"):
 					qty = row.stock_qty if table_name == "items" else row.qty
 					entries.append(
 						frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty))
