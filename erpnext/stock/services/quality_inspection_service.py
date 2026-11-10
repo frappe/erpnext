@@ -178,7 +178,7 @@ def validate_qi_reference(doc, row, item_code=None):
 	if not qi:
 		return
 
-	if qi.reference_type != doc.doctype or qi.reference_name != doc.name:
+	if qi.reference_type != doc.doctype or qi.reference_name not in get_amendment_chain(doc):
 		frappe.throw(
 			_(
 				"Row #{0}: Please select a valid Quality Inspection with Reference Type {1} and Reference Name {2}."
@@ -191,3 +191,14 @@ def validate_qi_reference(doc, row, item_code=None):
 				row.idx, frappe.bold(item_code or row.item_code)
 			)
 		)
+
+
+def get_amendment_chain(doc) -> list[str]:
+	"""The document's name and the names of the documents it amends."""
+	names = [doc.name]
+	amended_from = doc.get("amended_from")
+	while amended_from:
+		names.append(amended_from)
+		amended_from = frappe.db.get_value(doc.doctype, amended_from, "amended_from", cache=True)
+
+	return names
