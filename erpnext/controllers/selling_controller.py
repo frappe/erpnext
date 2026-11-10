@@ -1306,7 +1306,9 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None, picked_
 	doc = sn_doc.make_serial_and_batch_bundle()
 	child.db_set("serial_and_batch_bundle", doc.name)
 	if picked_serial_nos is not None:
-		picked_serial_nos[child.item_code].extend(d.serial_no for d in doc.entries if d.serial_no)
+		picked_serial_nos[child.item_code].extend(
+			d.serial_no for d in doc.get("entries") or [] if d.serial_no
+		)
 
 	return doc.name
 
