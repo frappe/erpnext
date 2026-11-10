@@ -1725,10 +1725,7 @@ class TestJobCard(FrappeTestCase):
 
 		self.assertEqual([job_card.docstatus for job_card in job_cards], [1, 1, 1])
 
-<<<<<<< HEAD
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-=======
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_last_split_job_card_transfers_the_rounding_remainder(self):
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=1)
@@ -1755,7 +1752,7 @@ class TestJobCard(FrappeTestCase):
 		manufacture.submit()
 		self.assertEqual(manufacture.docstatus, 1)
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_split_job_card_raised_above_operation_qty_gets_its_full_share(self):
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=5)
@@ -1775,7 +1772,7 @@ class TestJobCard(FrappeTestCase):
 
 		self.assertEqual(job_card.items[0].required_qty, 6)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 1, "overproduction_percentage_for_work_order": 100},
 	)
@@ -1810,36 +1807,7 @@ class TestJobCard(FrappeTestCase):
 
 		self.assertEqual([job_card.docstatus for job_card in job_cards], [1, 1, 1])
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-	def test_repeated_operation_gets_only_its_own_materials(self):
-		workstation = make_jc_review_workstation()
-		cutting = make_jc_review_operation(workstation)
-		welding = make_jc_review_operation(workstation)
-		first_item, second_item = make_jc_review_item(), make_jc_review_item()
-		wo = make_jc_review_work_order(
-			make_jc_review_item(),
-			[
-				{"item_code": first_item, "qty": 1, "operation": cutting, "operation_row_id": 1},
-				{"item_code": second_item, "qty": 2, "operation": cutting, "operation_row_id": 3},
-			],
-			[
-				{"operation": cutting, "workstation": workstation, "time_in_mins": 60},
-				{"operation": welding, "workstation": workstation, "time_in_mins": 60},
-				{"operation": cutting, "workstation": workstation, "time_in_mins": 60},
-			],
-			qty=5,
-			transfer_material_against="Job Card",
-		)
-
-		items_by_row = {
-			job_card.operation_row_id: [(row.item_code, row.required_qty) for row in job_card.items]
-			for job_card in get_jc_review_job_cards(wo.name)
-		}
-		self.assertEqual(items_by_row[1], [(first_item, 5)])
-		self.assertEqual(items_by_row[3], [(second_item, 10)])
-
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
->>>>>>> f8b06cd (test: let the last split Job Card transfer the rounding remainder)
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_earlier_operation_cannot_be_undone_after_the_next_one(self):
 		workstation = make_jc_review_workstation()
 		cutting = make_jc_review_operation(workstation)
