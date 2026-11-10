@@ -1678,10 +1678,7 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(job_card.docstatus, 1)
 		self.assertEqual(job_card.items[0].transferred_qty, 0.333)
 
-<<<<<<< HEAD
-	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-=======
-	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	@change_settings("System Settings", {"float_precision": 3})
 	def test_full_transfer_of_a_required_qty_with_more_decimals_than_float_precision(self):
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation)
@@ -1703,8 +1700,7 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(job_card.items[0].transferred_qty, 0.667)
 		self.assertEqual(job_card.status, "Material Transferred")
 
-	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
->>>>>>> 3577786 (test: Job Card takes a full transfer of a required qty with more decimals than Float Precision)
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_split_job_cards_with_fractional_material_can_be_submitted_after_full_transfer(self):
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=1)
