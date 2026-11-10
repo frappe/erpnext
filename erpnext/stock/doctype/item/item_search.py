@@ -25,11 +25,16 @@ def has_trigram_tokenizer() -> bool:
 
 def fold_text(text: str) -> str:
 	"""Fold what MariaDB's utf8mb4_unicode_ci treats as equal: accents, kana voicing marks,
-	character width, small and full-size kana, and katakana with hiragana."""
+	character width, small and full-size kana, katakana with hiragana, and digits of any script."""
 	decomposed = (
 		unicodedata.normalize("NFKD", text).translate(KATAKANA_TO_HIRAGANA).translate(SMALL_KANA_TO_FULL_SIZE)
 	)
-	return "".join(char for char in decomposed if not unicodedata.combining(char))
+	return "".join(fold_digit(char) for char in decomposed if not unicodedata.combining(char))
+
+
+def fold_digit(char: str) -> str:
+	digit = unicodedata.digit(char, None)
+	return char if digit is None else str(digit)
 
 
 def validate_sqlite_version():
