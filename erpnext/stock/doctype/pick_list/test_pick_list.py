@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
@@ -886,6 +887,64 @@ class TestPickList(FrappeTestCase):
 					self.assertEqual(dn_item.qty, 1)
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_rows_of_the_same_serialized_item_get_different_serial_nos(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRDS-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		sales_order = make_sales_order(
+			item_list=[
+				{"item_code": item, "warehouse": "_Test Warehouse - _TC", "qty": qty, "rate": 100}
+				for qty in (1, 2)
+			]
+		)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		serial_nos = [serial_no for row in pick_list.locations for serial_no in get_serial_nos(row.serial_no)]
+		self.assertEqual(len(serial_nos), 3)
+		self.assertEqual(len(set(serial_nos)), 3)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_rows_of_the_same_serialized_item_get_the_oldest_serial_nos_in_a_fractional_uom(self):
+		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "PLFIFO-.#####",
+				"stock_uom": "Kg",
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		sales_order = make_sales_order(
+			item_list=[
+				{
+					"item_code": item,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": qty,
+					"rate": 100,
+					"uom": "Kg",
+				}
+				for qty in (1, 2)
+			]
+		)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		oldest_serial_nos = frappe.get_all(
+			"Serial No", filters={"item_code": item}, order_by="name", limit=3, pluck="name"
+		)
+		self.assertEqual(
+			[get_serial_nos(row.serial_no) for row in pick_list.locations],
+			[oldest_serial_nos[:1], oldest_serial_nos[1:]],
+		)
 
 	def test_bundle_with_repeated_component_is_picked_per_packed_row(self):
 		warehouse = "_Test Warehouse - _TC"
