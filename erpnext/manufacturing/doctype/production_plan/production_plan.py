@@ -1519,6 +1519,7 @@ def get_material_request_items(
 	warehouse,
 	bin_dict,
 	consumed_qty,
+	is_transfer=False,
 ):
 	required_qty = 0
 	item_code = row.get("item_code")
@@ -1561,12 +1562,15 @@ def get_material_request_items(
 		conversion_factor = get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
 
 	uom = purchase_uom or row.get("stock_uom")
+	quantity = required_qty / conversion_factor
+	if not is_transfer:  # a transfer rounds only what is left to purchase
+		quantity = round_up_whole_uom(quantity, uom)
 
 	if flt(row.get("qty")) > 0:
 		return {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": round_up_whole_uom(required_qty / conversion_factor, uom),
+			"quantity": quantity,
 			"conversion_factor": conversion_factor,
 			"required_bom_qty": row.get("qty"),
 			"stock_uom": row.get("stock_uom"),
@@ -1933,6 +1937,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 	mr_items = []
 	consumed_qty = defaultdict(float)
+	is_transfer = bool((not ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses)
 
 	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
@@ -1952,11 +1957,12 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 					row_warehouse,
 					bin_dict,
 					consumed_qty,
+					is_transfer,
 				)
 				if items:
 					mr_items.append(items)
 
-	if (not ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses:
+	if is_transfer:
 		new_mr_items = []
 		for item in mr_items:
 			get_materials_from_other_locations(
