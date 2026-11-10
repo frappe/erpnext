@@ -1083,6 +1083,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
 
+<<<<<<< HEAD
 	def test_bundle_sold_in_non_stock_uom_is_delivered_in_order_uom(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(properties={"is_stock_item": 1}).name
@@ -1091,6 +1092,40 @@ class TestPickList(FrappeTestCase):
 			properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 2}]}
 		).name
 		make_product_bundle(bundle, [component])
+=======
+	def test_bundle_picked_qty_counts_components_picked_across_pick_lists(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle(quantities=[1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=3, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		def pick():
+			pick_list = create_pick_list(sales_order.name)
+			for row in pick_list.locations:
+				row.picked_qty = row.qty
+			pick_list.submit()
+			return frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty")
+
+		self.assertEqual(pick(), 0)  # no B picked yet
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
+		self.assertEqual(pick(), 3)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	def test_bundle_picked_qty_counts_component_qty_a_delivery_packs(self):
+		cases = (
+			(62.5, 3, [0.125], 2),
+			(62.8, 3, [0.125], 1),
+			(62.2, 3, [0.124], 2),
+			(0.1, 14, [0.001], 14),
+			(0.8, 2, [0.002, 0.002, 0.001], 1),
+		)
+		for grams, order_qty, picked_qty, bundles in cases:
+			with self.subTest(grams=grams, picked_qty=picked_qty):
+				sales_order_item = self.pick_rounded_bundle_component(grams, order_qty, picked_qty)
+				self.assertEqual(
+					frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), bundles
+				)
+>>>>>>> 528a32b (test: count picked product bundles from components picked across Pick Lists)
 
 		sales_order = make_sales_order(
 			item_code=bundle, warehouse=warehouse, qty=3, uom="Box", do_not_save=True
