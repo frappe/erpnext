@@ -1187,7 +1187,7 @@ def get_requested_sub_assemblies(doc):
 
 def round_up_whole_uom(quantity, uom):
 	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
-		return ceil(quantity)
+		return ceil(flt(quantity, frappe.get_precision("Material Request Plan Item", "quantity")))
 	return quantity
 
 
@@ -1562,9 +1562,10 @@ def get_material_request_items(
 		conversion_factor = get_conversion_factor(row.item_code, purchase_uom).get("conversion_factor") or 1.0
 
 	uom = purchase_uom or row.get("stock_uom")
-	quantity = required_qty / conversion_factor
-	if not is_transfer:  # a transfer rounds only what is left to purchase
-		quantity = round_up_whole_uom(quantity, uom)
+	if is_transfer:  # whole stock UOM; what is left to purchase rounds later
+		quantity = round_up_whole_uom(required_qty, row.get("stock_uom")) / conversion_factor
+	else:
+		quantity = round_up_whole_uom(required_qty / conversion_factor, uom)
 
 	if flt(row.get("qty")) > 0:
 		return {
