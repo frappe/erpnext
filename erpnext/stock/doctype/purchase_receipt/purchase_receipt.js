@@ -264,6 +264,52 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 					},
 					__("Get Items From")
 				);
+
+				this.frm.add_custom_button(
+					__("Delivery Note"),
+					function () {
+						if (me.frm.doc.supplier && !me.frm.doc.is_internal_supplier) {
+							frappe.throw({
+								title: __("Invalid Action"),
+								message: __("Delivery Notes can only be fetched for internal suppliers."),
+							});
+						}
+
+						erpnext.utils.map_current_doc({
+							method: "erpnext.stock.doctype.delivery_note.mapper.make_inter_company_purchase_receipt",
+							source_doctype: "Delivery Note",
+							target: me.frm,
+							setters: [
+								{
+									fieldtype: "Link",
+									label: __("Supplier"),
+									options: "Supplier",
+									fieldname: "supplier",
+									default: me.frm.doc.supplier,
+									get_query: () => {
+										return {
+											filters: {
+												is_internal_supplier: 1,
+											},
+										};
+									},
+								},
+							],
+							get_query_filters: {
+								docstatus: 1,
+								is_return: 0,
+								is_internal_customer: 1,
+								status: ["not in", ["Closed", "Stopped"]],
+								represents_company: me.frm.doc.company,
+								supplier: me.frm.doc.supplier || undefined,
+								delivery_note: me.frm.doc.inter_company_reference || undefined,
+							},
+							get_query_method: "erpnext.controllers.queries.get_delivery_notes_to_be_received",
+							columns: ["name", "customer", "posting_date"],
+						});
+					},
+					__("Get Items From")
+				);
 			}
 
 			if (this.frm.doc.docstatus == 1 && this.frm.doc.status != "Closed") {
