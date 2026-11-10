@@ -91,7 +91,7 @@ def make_packing_list(doc):
 				update_packed_item_price_data(pi_row, item_data, doc)
 
 				if item_row.get("against_pick_list"):
-					update_packed_item_with_pick_list_info(item_row, pi_row)
+					update_packed_item_with_pick_list_info(item_row, pi_row, so_packed_item)
 
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
@@ -293,6 +293,7 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 		.join(order_item)
 		.on(order_item.name == packed_item.parent_detail_docname)
 		.select(
+			packed_item.name,
 			packed_item.parent_detail_docname,
 			packed_item.parent_item,
 			packed_item.item_code,
@@ -346,15 +347,20 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 
-def update_packed_item_with_pick_list_info(main_item_row, pi_row):
+def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
+	filters = {
+		"item_code": pi_row.item_code,
+		"sales_order": main_item_row.get("against_sales_order"),
+		"sales_order_item": main_item_row.get("so_detail"),
+		"parent": main_item_row.against_pick_list,
+	}
+	# a component repeated on the bundle has a pick list row per packed row
+	if so_packed_item:
+		filters["product_bundle_item"] = so_packed_item.name
+
 	pl_row = frappe.db.get_value(
 		"Pick List Item",
-		{
-			"item_code": pi_row.item_code,
-			"sales_order": main_item_row.get("against_sales_order"),
-			"sales_order_item": main_item_row.get("so_detail"),
-			"parent": main_item_row.against_pick_list,
-		},
+		filters,
 		["warehouse", "batch_no", "serial_no"],
 		as_dict=True,
 		order_by="qty desc",
