@@ -10,7 +10,7 @@ from frappe.utils import cint, flt, get_link_to_form, nowtime
 from erpnext.accounts.party import render_address
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
-from erpnext.controllers.stock_controller import StockController
+from erpnext.controllers.stock_controller import StockController, add_picked_batches
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
@@ -444,13 +444,8 @@ class SellingController(StockController):
 		il = []
 		picked_serial_nos = picked_batches = None
 		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-<<<<<<< HEAD
 			picked_serial_nos = self.get_serial_nos_used_in_rows()
-=======
-			service = SerialBatchBundleService(self)
-			picked_serial_nos = service.get_serial_nos_used_in_rows()
-			picked_batches = service.get_batches_used_in_rows()
->>>>>>> 679fc27 (fix(stock): also skip batch qty held by bundles already on the rows)
+			picked_batches = self.get_batches_used_in_rows()
 
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
@@ -1331,7 +1326,6 @@ def get_serial_and_batch_bundle(
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-	from erpnext.stock.services.serial_batch_bundle_service import add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
