@@ -961,11 +961,9 @@ class SerialandBatchBundle(Document):
 				)
 
 	def set_serial_and_batch_values(self, parent, row, qty_field=None):
-		values_to_set = {}
+		values_to_set = {"is_cancelled": 0}
 		if not self.voucher_no or self.voucher_no != row.parent:
 			values_to_set["voucher_no"] = row.parent
-
-		self.db_set("is_cancelled", 0)
 
 		if self.voucher_type != parent.doctype:
 			values_to_set["voucher_type"] = parent.doctype
@@ -994,8 +992,11 @@ class SerialandBatchBundle(Document):
 			if row.get(return_ref_field):
 				values_to_set["returned_against"] = row.get(return_ref_field)
 
-		if values_to_set:
-			self.db_set(values_to_set)
+		self.db_set(values_to_set)
+		values_to_set.pop("returned_against", None)
+		frappe.db.set_value(
+			"Serial and Batch Entry", {"parent": self.name}, values_to_set, update_modified=False
+		)
 
 		self.calculate_total_qty(save=True)
 
