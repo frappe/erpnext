@@ -5621,7 +5621,7 @@ def get_transferred_qty_map(ste_details):
 def get_expired_batches():
 	data = frappe.get_list(
 		"Batch",
-		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"]],
+		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"], ["disabled", "=", 0]],
 		fields=["item", "name as batch_no", "stock_uom"],
 		limit_page_length=0,
 	)
