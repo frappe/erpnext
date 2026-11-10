@@ -1169,6 +1169,40 @@ class TestPickList(FrappeTestCase):
 		)
 		self.assertEqual(abs(bundle_qty), 2)
 
+	def test_short_picked_batch_bundle_row_needs_only_the_picked_qty(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PLBB-.#####",
+			}
+		).name
+		make_stock_entry(item_code=item, target=warehouse, qty=5, basic_rate=100)
+		so = make_sales_order(item_code=item, warehouse=warehouse, qty=2)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		row = pl.locations[0]
+		row.serial_and_batch_bundle = make_serial_batch_bundle(
+			{
+				"item_code": item,
+				"warehouse": warehouse,
+				"voucher_type": "Pick List",
+				"voucher_no": pl.name,
+				"qty": -2,
+				"batches": {row.batch_no: 2},
+				"type_of_transaction": "Outward",
+				"do_not_submit": True,
+			}
+		).name
+		row.use_serial_batch_fields = 0
+		row.batch_no = None
+		row.picked_qty = 1
+		pl.save()
+		self.assertRaises(frappe.ValidationError, pl.submit)
+
 	def test_picklist_with_multi_uom(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(properties={"uoms": [dict(uom="Box", conversion_factor=24)]}).name
