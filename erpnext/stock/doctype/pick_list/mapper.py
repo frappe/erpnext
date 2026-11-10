@@ -331,12 +331,12 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 
 
 def get_serial_nos_in_stock(locations):
-	"""Return (item_code, serial_no, warehouse) of the partly delivered rows' serial nos."""
+	"""Return (item_code, lower-cased serial_no, warehouse) of the partly delivered rows' serial nos."""
 	numbers = [number for row in locations if row.delivered_qty for number in get_serial_nos(row.serial_no)]
 	records = SerialBatchIdentity("Serial No").get_records(
 		None, numbers, ["item_code", "serial_no", "warehouse"]
 	)
-	return {(record.item_code, record.serial_no, record.warehouse) for record in records}
+	return {(record.item_code, record.serial_no.lower(), record.warehouse) for record in records}
 
 
 def get_pending_serial_nos(location, serial_nos_in_stock):
@@ -347,7 +347,7 @@ def get_pending_serial_nos(location, serial_nos_in_stock):
 	return "\n".join(
 		number
 		for number in get_serial_nos(location.serial_no)
-		if (location.item_code, number, location.warehouse) in serial_nos_in_stock
+		if (location.item_code, number.lower(), location.warehouse) in serial_nos_in_stock
 	)
 
 
