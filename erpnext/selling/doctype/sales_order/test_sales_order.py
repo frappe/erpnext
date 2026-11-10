@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from unittest.mock import patch
 
 import frappe
 import frappe.permissions
@@ -9,6 +10,7 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
@@ -3082,6 +3084,41 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				self.assertEqual(so.packed_items[0].item_code, packed_item)
 				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
 				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
+
+	@patch(
+		# this also shadows one (1) call to _get_payment_gateway_controller
+		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		return_value=None,
+	)
+	def test_payment_request_survives_advance_allocation(self, mocked_get_payment_url):
+		# Flow progressing to SI with payment entries "moved" from SO to SI
+		so = make_sales_order(qty=1, rate=100, do_not_submit=True)
+		# no-op; for optical consistency with how a webshop SO would look like
+		so.order_type = "Shopping Cart"
+		so.submit()
+
+		pr = make_payment_request(
+			dt=so.doctype,
+			dn=so.name,
+			make_sales_invoice=True,
+			submit_doc=True,
+			return_doc=True,
+			mute_email=True,
+		)
+
+		pe = pr.set_as_paid()
+		pr.reload()  # status updated
+		pe.reload()  # references moved to Sales Invoice
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pe.references[0].reference_doctype, "Sales Invoice")
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		pe.cancel()
+		pr.reload()
+		self.assertEqual(pr.status, "Requested")
+		so.reload()  # reload
+
+		pr.cancel()
 
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
