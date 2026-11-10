@@ -1847,6 +1847,17 @@ class TestDeliveryNote(ERPNextTestSuite):
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	def test_bundle_rows_of_a_repeated_batched_component_do_not_overdraw_a_batch(self):
+		self.assertEqual(sorted(self.deliver_bundle_of_a_repeated_batched_component().values()), [1, 2])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_bundle_rows_of_a_repeated_batched_component_do_not_overdraw_a_batch_with_batch_fields(self):
+		self.assertEqual(sorted(self.deliver_bundle_of_a_repeated_batched_component().values()), [1, 2])
+
+	def deliver_bundle_of_a_repeated_batched_component(self):
+		"""Return the qty picked from each batch by a bundle of 1 and 2 of the same batched component."""
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		component = make_item(
 			properties={
@@ -1873,7 +1884,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 				fields=["batch_no", "qty"],
 			):
 				picked[entry.batch_no] += abs(entry.qty)
-		self.assertEqual(sorted(picked.values()), [1, 2])
+		return picked
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
