@@ -16,24 +16,19 @@ from frappe.utils import ceil, cint, cstr, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
-<<<<<<< HEAD
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_sales_invoice as create_sales_invoice_from_sales_order,
 )
-from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
-=======
-from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.packed_item.packed_item import (
 	get_component_stock_qty_per_unit,
 	get_ordered_qty_per_unit,
 	get_packed_items_of_order_rows,
-	get_product_bundle_items_by_name,
+	get_product_bundle_items,
 	pop_order_packed_item,
 )
->>>>>>> 2256c18 (fix(stock): count a picked product bundle at the qty a delivery packs for it)
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 	get_batch_qty_for_stock,
@@ -1034,14 +1029,14 @@ class PickList(TransactionBase):
 		components = {}
 		qty_map = defaultdict(lambda: defaultdict(list))
 		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
-			bundle, parent_item = packed_items[0].product_bundle, packed_items[0].parent_item
-			if bundle not in components:
-				components[bundle] = [
+			parent_item = packed_items[0].parent_item
+			if parent_item not in components:
+				components[parent_item] = [
 					(component, get_component_stock_qty_per_unit(component, None))
-					for component in get_product_bundle_items_by_name(bundle)
+					for component in get_product_bundle_items(parent_item)
 				]
 
-			for component, qty_per_unit in components[bundle]:
+			for component, qty_per_unit in components[parent_item]:
 				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
 					qty_map[so_row][component.item_code].append(
 						get_ordered_qty_per_unit(qty_per_unit, packed_item)
