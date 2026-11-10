@@ -1031,10 +1031,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
 
-<<<<<<< HEAD
-	def test_bundle_sold_in_non_stock_uom_is_delivered_in_order_uom(self):
-=======
-	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
+	@change_settings("System Settings", {"float_precision": 3})
 	def test_bundle_picked_qty_counts_component_qty_a_delivery_packs(self):
 		cases = (
 			(62.5, 3, [0.125], 2),
@@ -1070,10 +1067,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 		return sales_order.items[0].name
 
-	def test_pick_list_skips_closed_bundle_rows(self):
-		from erpnext.controllers.item_close import update_closed_status
-
->>>>>>> 61edcfe (test: count a picked product bundle at the component qty its order rounded)
+	def test_bundle_sold_in_non_stock_uom_is_delivered_in_order_uom(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, rate=100)

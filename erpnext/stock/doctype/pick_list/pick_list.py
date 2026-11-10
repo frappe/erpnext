@@ -16,21 +16,16 @@ from frappe.utils import ceil, cint, cstr, floor, flt, get_link_to_form
 from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
-<<<<<<< HEAD
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
-from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
-=======
-from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
 from erpnext.stock.doctype.packed_item.packed_item import (
 	get_component_stock_qty_per_unit,
 	get_ordered_qty_per_unit,
 	get_packed_items_of_order_rows,
-	get_product_bundle_items_by_name,
+	get_product_bundle_items,
 	pop_order_packed_item,
 )
->>>>>>> 2256c18 (fix(stock): count a picked product bundle at the qty a delivery packs for it)
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
 	get_batch_qty_for_stock,
@@ -826,17 +821,26 @@ class PickList(TransactionBase):
 
 	def update_bundle_picked_qty(self):
 		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its components."""
-		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction") or 6
-		for so_row, packed_items in get_packed_items_of_order_rows(self._get_product_bundles()).items():
-			picked_qty = min(
+		so_rows = self._get_product_bundles()
+		product_bundle_qty_map = self._get_product_bundle_qty_map(so_rows)
+		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
+			bundle_items = product_bundle_qty_map.get(so_row)
+			if not bundle_items:
+				continue
+
+			picked_qty = defaultdict(float)
+			for row in packed_items:
+				if bundle_items.get(row.item_code):
+					picked_qty[row.item_code] += flt(row.picked_qty)
+
+			bundles = min(
 				(
-					int(flt(flt(row.picked_qty) / row.qty_per_unit, precision))
-					for row in packed_items
-					if row.qty_per_unit
+					get_whole_bundle_count(qty, bundle_items[item_code])
+					for item_code, qty in picked_qty.items()
 				),
 				default=0,
 			)
-			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", picked_qty)
+			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", bundles)
 
 	def get_own_vouchers(self):
 		"""Vouchers whose stock reservations this pick list may pick."""
@@ -969,14 +973,14 @@ class PickList(TransactionBase):
 		components = {}
 		qty_map = defaultdict(lambda: defaultdict(list))
 		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
-			bundle, parent_item = packed_items[0].product_bundle, packed_items[0].parent_item
-			if bundle not in components:
-				components[bundle] = [
+			parent_item = packed_items[0].parent_item
+			if parent_item not in components:
+				components[parent_item] = [
 					(component, get_component_stock_qty_per_unit(component, None))
-					for component in get_product_bundle_items_by_name(bundle)
+					for component in get_product_bundle_items(parent_item)
 				]
 
-			for component, qty_per_unit in components[bundle]:
+			for component, qty_per_unit in components[parent_item]:
 				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
 					qty_map[so_row][component.item_code].append(
 						get_ordered_qty_per_unit(qty_per_unit, packed_item)
