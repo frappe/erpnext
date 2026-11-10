@@ -1183,11 +1183,21 @@ def validate_item_locations(pick_list):
 
 
 def get_whole_bundle_count(qty: float, qty_per_bundle: list[float]) -> int:
-	"""Whole bundles in ``qty``, with each packed row's qty rounded the way a delivery packs it."""
+	"""Most whole bundles that fit in ``qty``, with each packed row's qty rounded the way a delivery packs it."""
 	precision = frappe.get_precision("Packed Item", "qty")
+	qty = flt(qty, precision)
 	bundles = int(qty / sum(qty_per_bundle))
-	next_bundle_qty = sum(flt((bundles + 1) * qty_per_unit, precision) for qty_per_unit in qty_per_bundle)
-	return bundles + 1 if next_bundle_qty <= flt(qty, precision) else bundles
+	while get_packed_bundle_qty(bundles + 1, qty_per_bundle, precision) <= qty:
+		bundles += 1
+
+	while bundles and get_packed_bundle_qty(bundles, qty_per_bundle, precision) > qty:
+		bundles -= 1
+
+	return bundles
+
+
+def get_packed_bundle_qty(bundles: int, qty_per_bundle: list[float], precision: int) -> float:
+	return sum(flt(bundles * qty_per_unit, precision) for qty_per_unit in qty_per_bundle)
 
 
 def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
