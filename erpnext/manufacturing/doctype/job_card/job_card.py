@@ -999,23 +999,29 @@ class JobCard(Document):
 		for d in doc.required_items:
 			self.append_required_item(doc, d, operation_qty, other_job_cards_qty)
 
-	def get_other_job_cards_qty(self) -> float:
-		"""Total For Quantity of the other job cards of this operation."""
+	def get_other_job_cards_qty(self) -> frappe._dict:
+		"""For Quantity and Required Qty per item of the other job cards of this operation."""
 		job_card = frappe.qb.DocType("Job Card")
-		query = (
-			frappe.qb.from_(job_card)
-			.select(Sum(job_card.for_quantity))
-			.where(
-				(job_card.work_order == self.work_order)
-				& (job_card.operation_id == self.operation_id)
-				& (job_card.name != (self.name or ""))
-				& (job_card.docstatus < 2)
-				& (IfNull(job_card.is_corrective_job_card, 0) == 0)
-			)
+		job_card_item = frappe.qb.DocType("Job Card Item")
+		other_job_cards = (
+			(job_card.work_order == self.work_order)
+			& (job_card.operation_id == self.operation_id)
+			& (job_card.name != (self.name or ""))
+			& (job_card.docstatus < 2)
+			& (IfNull(job_card.is_corrective_job_card, 0) == 0)
 		)
-		return flt(query.run()[0][0])
+		for_quantity = frappe.qb.from_(job_card).select(Sum(job_card.for_quantity)).where(other_job_cards)
+		required_qty = (
+			frappe.qb.from_(job_card_item)
+			.join(job_card)
+			.on(job_card_item.parent == job_card.name)
+			.select(job_card_item.item_code, Sum(job_card_item.required_qty))
+			.where(other_job_cards)
+			.groupby(job_card_item.item_code)
+		)
+		return frappe._dict(for_quantity=flt(for_quantity.run()[0][0]), required_qty=dict(required_qty.run()))
 
-	def append_required_item(self, doc, d, operation_qty=None, other_job_cards_qty=0):
+	def append_required_item(self, doc, d, operation_qty, other_job_cards_qty):
 		if not doc.track_semi_finished_goods and not d.operation and not d.operation_row_id:
 			frappe.throw(
 				_("Row {0} : Operation is required against the raw material item {1}").format(
@@ -1041,14 +1047,13 @@ class JobCard(Document):
 			},
 		)
 
-	def get_required_qty(self, d, operation_qty, other_job_cards_qty=0) -> float:
-		"""This job card's share of the work order item. Shares are rounded on the running
-		For Quantity of the operation's job cards, so they add up to the item's required qty."""
+	def get_required_qty(self, d, operation_qty, other_job_cards_qty) -> float:
+		"""This job card's share of the work order item: the rounded qty up to the operation's
+		running For Quantity, less what the other job cards of the operation hold."""
 		precision = self.precision("required_qty", "items")
-		total_for_quantity = other_job_cards_qty + flt(self.for_quantity)
-		allocated_qty = flt(flt(d.required_qty) * other_job_cards_qty / flt(operation_qty), precision)
+		total_for_quantity = other_job_cards_qty.for_quantity + flt(self.for_quantity)
 		total_qty = flt(flt(d.required_qty) * total_for_quantity / flt(operation_qty), precision)
-		return flt(total_qty - allocated_qty, precision)
+		return flt(total_qty - flt(other_job_cards_qty.required_qty.get(d.item_code)), precision)
 
 	def before_save(self):
 		self.set_expected_and_actual_time()
@@ -1530,29 +1535,26 @@ class JobCard(Document):
 		if not (self.work_order and flt(self.for_quantity)):
 			return False
 
-		wo_qty = self.get_work_order_qty_details().operation_qty
-		if not wo_qty:
-			return False
-
 		wo_items = frappe.get_all(
 			"Work Order Item",
 			filters={"parent": self.work_order, "parenttype": "Work Order"},
 			fields=["item_code", "required_qty", "operation", "operation_row_id"],
 		)
-		transferred = dict(
-			frappe.get_all(
+		items = {
+			item.item_code: item
+			for item in frappe.get_all(
 				"Job Card Item",
 				filters={"parent": self.name, "parenttype": "Job Card"},
-				fields=["item_code", "transferred_qty"],
-				as_list=True,
+				fields=["item_code", "required_qty", "transferred_qty"],
 			)
-		)
+		}
 		precision = self.precision("transferred_qty", "items")
 		for row in wo_items:
 			if not self.is_own_material(row):
 				continue
-			expected = flt(row.required_qty) / wo_qty * flt(self.for_quantity)
-			if flt(transferred.get(row.item_code), precision) < flt(expected, precision):
+			# a material missing from the job card is short by all of it
+			item = items.get(row.item_code) or frappe._dict(required_qty=row.required_qty)
+			if flt(item.transferred_qty, precision) < flt(item.required_qty, precision):
 				return True
 		return False
 
