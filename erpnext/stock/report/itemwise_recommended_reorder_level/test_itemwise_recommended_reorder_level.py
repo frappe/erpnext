@@ -60,6 +60,50 @@ class TestItemwiseRecommendedReorderLevel(FrappeTestCase):
 
 		self.assertEqual(flt(row[7]), 0)
 
+	def test_stock_reconciliation_is_not_consumption(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		batch_item = make_item(properties={"has_batch_no": 1}).name
+		batch_no = frappe.get_doc(doctype="Batch", item=batch_item, batch_id=f"{batch_item}-01").insert().name
+		plain_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=batch_item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			rate=10,
+			batch_no=batch_no,
+			posting_date="2026-06-02",
+		)
+		make_stock_entry(
+			item_code=plain_item, to_warehouse=WAREHOUSE, qty=10, rate=10, posting_date="2026-06-02"
+		)
+
+		# a batch row is posted as an outgoing leg for the old qty followed by the new qty
+		reco = create_stock_reconciliation(
+			item_code=batch_item,
+			warehouse=WAREHOUSE,
+			qty=12,
+			rate=10,
+			batch_no=batch_no,
+			posting_date="2026-06-05",
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Stock Ledger Entry", {"voucher_no": reco.name, "actual_qty": -10, "is_cancelled": 0}
+			)
+		)
+		create_stock_reconciliation(
+			item_code=plain_item, warehouse=WAREHOUSE, qty=7, rate=10, posting_date="2026-06-05"
+		)
+
+		data = self.run_report()
+		for item in (batch_item, plain_item):
+			row = self.find_row(data, item)
+			self.assertEqual((flt(row[7]), flt(row[9])), (0, 0))  # consumed, total outgoing
+
 	def consumed_today(self, item_code):
 		from frappe.utils import today
 
