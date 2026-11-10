@@ -1072,27 +1072,17 @@ class PickList(TransactionBase):
 
 	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, list[float]]]:
 		"""Component stock qty per bundle of each packed row, by Sales Order row and item, as a delivery packs it."""
-		order_packed_items = get_packed_items_of_order_rows(so_rows)
-		so_items = frappe.get_all(
-			"Sales Order Item",
-			filters={"name": ("in", so_rows)},
-			fields=["name", "item_code", "product_bundle"],
-		)
 		components = {}
 		qty_map = defaultdict(lambda: defaultdict(list))
-		for so_item in so_items:
-			bundle = so_item.product_bundle or get_active_product_bundle(so_item.item_code)
+		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
+			bundle, parent_item = packed_items[0].product_bundle, packed_items[0].parent_item
 			if bundle not in components:
 				components[bundle] = get_product_bundle_items_by_name(bundle)
 
-			so_packed_items = list(order_packed_items.get(so_item.name, []))
 			for component in components[bundle]:
-				so_packed_item = pop_order_packed_item(
-					so_packed_items, so_item.item_code, component.item_code
-				)
-				if so_packed_item:
-					qty_map[so_item.name][component.item_code].append(
-						get_component_stock_qty_per_unit(component, None, so_packed_item)
+				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
+					qty_map[so_row][component.item_code].append(
+						get_component_stock_qty_per_unit(component, None, packed_item)
 					)
 
 		return qty_map
@@ -1550,19 +1540,9 @@ def get_availability_row(key, bin_qty_map, holders, reservations):
 def get_whole_bundle_count(qty: float, qty_per_bundle: list[float]) -> int:
 	"""Whole bundles in ``qty``, with each packed row's qty rounded the way a delivery packs it."""
 	precision = frappe.get_precision("Packed Item", "qty")
-	qty = flt(qty, precision)
 	bundles = int(qty / sum(qty_per_bundle))
-	if get_packed_bundle_qty(bundles + 1, qty_per_bundle, precision) <= qty:
-		return bundles + 1
-
-	if get_packed_bundle_qty(bundles, qty_per_bundle, precision) > qty:
-		return bundles - 1
-
-	return bundles
-
-
-def get_packed_bundle_qty(bundles: int, qty_per_bundle: list[float], precision: int) -> float:
-	return sum(flt(bundles * qty, precision) for qty in qty_per_bundle)
+	next_bundle_qty = sum(flt((bundles + 1) * qty_per_unit, precision) for qty_per_unit in qty_per_bundle)
+	return bundles + 1 if next_bundle_qty <= flt(qty, precision) else bundles
 
 
 def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
