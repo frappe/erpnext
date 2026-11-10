@@ -7,11 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
-<<<<<<< HEAD
-=======
 from frappe.model.docstatus import DocStatus
-from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
->>>>>>> 937036f (fix: save stock reconciliation before queueing its submission)
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 from frappe.utils.data import DateTimeLikeObject
