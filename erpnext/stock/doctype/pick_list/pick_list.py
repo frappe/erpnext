@@ -1099,16 +1099,16 @@ class PickList(TransactionBase):
 		return qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
-		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
+		"""Whole bundles this Pick List's own rows picked (or left undelivered) of every stock component."""
 		picked_qty = defaultdict(float)
 		for item in self.locations:
-			if item.sales_order_item == bundle_row and bundle_items.get(item.item_code):
+			if item.sales_order_item == bundle_row:
 				picked_qty[item.item_code] += flt(item.picked_qty) - (
 					flt(item.delivered_qty) if pending_only else 0
 				)
 
 		return min(
-			(get_whole_bundle_count(qty, bundle_items[item_code]) for item_code, qty in picked_qty.items()),
+			(get_whole_bundle_count(picked_qty[item_code], qty) for item_code, qty in bundle_items.items()),
 			default=0,
 		)
 
