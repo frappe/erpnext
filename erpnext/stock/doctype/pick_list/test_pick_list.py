@@ -1294,6 +1294,62 @@ class TestPickList(FrappeTestCase):
 			{batches[0]: 20, batches[1]: 15},
 		)
 
+	def test_next_delivery_from_pick_list_copies_only_undelivered_serial_nos_of_its_bundle(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUNB-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.pick_manually = 1
+		pick_list.save()
+		picked_serial_nos = sorted(
+			frappe.get_all(
+				"Serial No", filters={"item_code": item}, pluck="name", order_by="creation", limit=3
+			)
+		)
+		pick_list.locations[0].update(
+			{
+				"use_serial_batch_fields": 0,
+				"serial_no": None,
+				"serial_and_batch_bundle": make_serial_batch_bundle(
+					{
+						"item_code": item,
+						"warehouse": warehouse,
+						"voucher_type": "Pick List",
+						"qty": -3,
+						"serial_nos": picked_serial_nos,
+						"do_not_submit": True,
+					}
+				).name,
+			}
+		)
+		pick_list.submit()
+
+		first_delivery = create_delivery_note(pick_list.name)
+		first_delivery.items[0].qty = 2
+		first_delivery.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
+			{
+				"item_code": item,
+				"warehouse": warehouse,
+				"voucher_type": "Delivery Note",
+				"qty": -2,
+				"serial_nos": picked_serial_nos[:2],
+				"do_not_submit": True,
+			}
+		).name
+		first_delivery.submit()
+
+		second_delivery = create_delivery_note(pick_list.name)
+		second_delivery.save()
+		self.assertEqual(second_delivery.items[0].qty, 1)
+		self.assertEqual(
+			get_serial_nos_from_bundle(second_delivery.items[0].serial_and_batch_bundle),
+			picked_serial_nos[2:],
+		)
+		second_delivery.submit()
+
 	def test_picklist_for_serial_item(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
