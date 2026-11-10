@@ -1686,7 +1686,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(si2.items[0].qty, 2)
 		self.assertEqual(si2.items[1].qty, 1)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)

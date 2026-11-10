@@ -406,12 +406,10 @@ class SellingController(StockController):
 				)
 
 	def get_item_list(self):
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
 		il = []
 		picked_serial_nos = None
 		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-			picked_serial_nos = SerialBatchBundleService(self).get_serial_nos_used_in_rows()
+			picked_serial_nos = self.get_serial_nos_used_in_rows()
 
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
