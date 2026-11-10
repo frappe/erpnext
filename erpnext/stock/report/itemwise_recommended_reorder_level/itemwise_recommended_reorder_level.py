@@ -114,9 +114,17 @@ def get_consumed_items(filters):
 		.where(
 			(sle.actual_qty < 0)
 			& (sle.is_cancelled == 0)
+			# a Stock Reconciliation counts stock, it does not consume it: the outgoing leg a serial
+			# or batch row posts before its new balance is a recount, as is an Adjustment Entry
 			& (
 				sle.voucher_type.notin(
-					["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"]
+					[
+						"Delivery Note",
+						"Sales Invoice",
+						"Purchase Receipt",
+						"Purchase Invoice",
+						"Stock Reconciliation",
+					]
 				)
 			)
 			& ((se.purpose.isnull()) | (se.purpose.notin(purpose_to_exclude)))
