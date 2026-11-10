@@ -1337,8 +1337,7 @@ def get_serial_and_batch_bundle(
 	child, parent, delivery_note_child=None, picked_serial_nos=None, picked_batches=None
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-	from erpnext.stock.services.serial_batch_bundle_service import add_picked_batches
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return

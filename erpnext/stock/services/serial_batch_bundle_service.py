@@ -26,6 +26,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_batch_qty_for_stock,
 	get_type_of_transaction,
 )
+from erpnext.stock.serial_batch_bundle import add_picked_batches
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -906,13 +907,3 @@ def unusable_batch_condition(batch, posting_date):
 		return batch.disabled == 1
 
 	return (batch.expiry_date < getdate(posting_date)) | (batch.disabled == 1)
-
-
-def add_picked_batches(picked_batches, entries):
-	for entry in entries:
-		if entry.batch_no:
-			picked = picked_batches.setdefault(
-				(entry.batch_no, entry.warehouse),
-				frappe._dict(batch_no=entry.batch_no, warehouse=entry.warehouse, qty=0),
-			)
-			picked.qty += entry.qty
