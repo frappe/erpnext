@@ -55,7 +55,11 @@ def after_install():
 
 
 def grant_address_read_to_accounts_manager():
-	if not frappe.db.exists("Role", "Accounts Manager"):
+	grant_address_read("Accounts Manager")
+
+
+def grant_address_read(role):
+	if not frappe.db.exists("Role", role):
 		return
 	has_disabled_column = frappe.db.has_column("Custom DocPerm", "is_app_disabled")
 	if (
@@ -63,20 +67,20 @@ def grant_address_read_to_accounts_manager():
 		and "Address" in get_doctypes_with_custom_docperms()
 		and not frappe.db.exists("Custom DocPerm", {"parent": "Address", "is_app_disabled": 0})
 	):
-		print("Address / Accounts Manager: skipped, the site's Address rules are disabled with their app")
+		print(f"Address / {role}: skipped, the site's Address rules are disabled with their app")
 		return
 	has_disabled_rule = False
 	has_rule = False
-	for rule in get_role_rules("Address", "Accounts Manager"):
+	for rule in get_role_rules("Address", role):
 		if not cint(rule.get("is_app_disabled")):
 			has_rule = True
 		elif not cint(rule.permlevel):
 			has_disabled_rule = True
 	if has_disabled_rule:
-		print("Address / Accounts Manager: kept, the role's rule is disabled with its app")
+		print(f"Address / {role}: kept, the role's rule is disabled with its app")
 		return
 	if has_rule:
-		print("Address / Accounts Manager: kept, the role already has a rule")
+		print(f"Address / {role}: kept, the role already has a rule")
 		return
 	logs = frappe.get_all(
 		"Permission Log",
@@ -100,13 +104,13 @@ def grant_address_read_to_accounts_manager():
 		except (TypeError, ValueError):
 			continue
 		changed_roles.update(((logged.get("from") or {}).get("role"), (logged.get("to") or {}).get("role")))
-	if "Accounts Manager" in changed_roles:
-		print("Address / Accounts Manager: skipped, this site changed the rule")
+	if role in changed_roles:
+		print(f"Address / {role}: skipped, this site changed the rule")
 		return
-	add_permission("Address", "Accounts Manager", 0, "read")
-	update_permission_property("Address", "Accounts Manager", 0, "export", 0)
+	add_permission("Address", role, 0, "read")
+	update_permission_property("Address", role, 0, "export", 0)
 	frappe.clear_cache(doctype="Address")
-	print("Address / Accounts Manager: granted read")
+	print(f"Address / {role}: granted read")
 
 
 def get_role_rules(doctype: str, role: str) -> list:
@@ -255,7 +259,8 @@ def create_address_and_contact_custom_fields():
 
 def setup_company_address_permissions():
 	"""Only Accounts Manager and System Manager may mark an address as the company's own (permlevel 1)."""
-	grant_address_read_to_accounts_manager()
+	for role in ("Accounts Manager", "Stock User", "Stock Manager"):
+		grant_address_read(role)
 
 	for role in ("System Manager", "Accounts Manager"):
 		add_permission("Address", role, 1)
