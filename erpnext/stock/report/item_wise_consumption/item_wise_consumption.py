@@ -97,12 +97,13 @@ def get_consumed_details(filters):
 			sle.voucher_type,
 			sle.voucher_detail_no,
 		)
-		# the stock an Adjustment Entry counts out comes back in, it is not consumed
+		# a Stock Reconciliation counts stock, it does not consume it: the outgoing leg a serial
+		# or batch row posts before its new balance is a recount, as is an Adjustment Entry
 		.where(
 			(sle.is_cancelled == 0)
 			& (sle.item_code == item.name)
 			& ((sle.actual_qty < 0) | (sle.voucher_type.isin(SALES_VOUCHER_TYPES)))
-			& (sle.is_adjustment_entry == 0)
+			& (sle.voucher_type != "Stock Reconciliation")
 		)
 	)
 
