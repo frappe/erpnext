@@ -694,7 +694,7 @@ class BuyingController(SubcontractingController):
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Capitalize the full amount onto stock/asset items only (e.g. Freight)
 				stock_item_charges.append(amount)
-			else:
+			elif d.charge_type != "On Item Quantity":
 				all_item_charges.append(amount)
 
 		return tax_accounts, total_valuation_amount, all_item_charges, stock_item_charges
@@ -736,7 +736,28 @@ class BuyingController(SubcontractingController):
 			self._spread_charge_over_items(charge_per_item, charge, all_items)
 		for charge in stock_item_charges:
 			self._spread_charge_over_items(charge_per_item, charge, stock_items)
+		for tax in self.get("taxes"):
+			if tax.charge_type == "On Item Quantity" and tax.category in ("Valuation", "Valuation and Total"):
+				for item_idx, amount in self.get_quantity_based_tax_amounts(tax).items():
+					charge_per_item[item_idx] = charge_per_item.get(item_idx, 0.0) + amount
 		return charge_per_item
+
+	def get_quantity_based_tax_amounts(self, tax):
+		# Reuse the signed, rounded base amounts calculated for each item.
+		if self.get("_item_wise_tax_details"):
+			return {
+				row.item.idx: flt(row.amount)
+				for row in self.get("_item_wise_tax_details")
+				if row.tax.idx == tax.idx
+			}
+
+		# Revaluation and GL reposting can run on a saved document without recalculating taxes.
+		item_indices = {item.name: item.idx for item in self.get("items")}
+		return {
+			item_indices[row.item_row]: flt(row.amount)
+			for row in self.get("item_wise_tax_details") or []
+			if row.tax_row == tax.name
+		}
 
 	def _spread_charge_over_items(self, charge_per_item, total_charge, items):
 		"""Add each item's proportional share of `total_charge` into `charge_per_item`.
@@ -780,7 +801,13 @@ class BuyingController(SubcontractingController):
 			if not amount:
 				continue
 
-			if tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
+			if tax.charge_type == "On Item Quantity":
+				amount = sum(
+					charge
+					for item_idx, charge in self.get_quantity_based_tax_amounts(tax).items()
+					if item_idx in stock_item_idx
+				)
+			elif tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
 				# Spread across all items; only the stock/asset items' share is capitalized.
 				charge_per_item = {}
 				self._spread_charge_over_items(charge_per_item, amount, all_items)
