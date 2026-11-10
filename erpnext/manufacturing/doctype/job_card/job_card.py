@@ -189,6 +189,7 @@ class JobCard(Document):
 		self.validate_time_logs()
 		self.set_status()
 		self.set_operation_id()
+		self.reset_required_items()
 		self.set_hour_rate()
 		self.validate_sequence_id()
 		self.set_sub_operations()
@@ -980,10 +981,23 @@ class JobCard(Document):
 			},
 		)
 
+	def reset_required_items(self):
+		"""Rebuild the items for a changed For Quantity until material moves against them."""
+		if self.is_new() or not self.items or not self.has_value_changed("for_quantity"):
+			return
+
+		if any(flt(row.transferred_qty) or flt(row.consumed_qty) for row in self.items):
+			return
+
+		self.items = []
+		self.set_required_items()
+
 	@frappe.whitelist()
 	def get_required_items(self):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
+		self.set_required_items()
 
+	def set_required_items(self):
 		if self.is_corrective_job_card or not self.get("work_order"):
 			return
 
