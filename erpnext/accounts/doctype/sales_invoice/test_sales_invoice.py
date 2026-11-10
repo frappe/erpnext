@@ -1420,9 +1420,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		pos.is_pos = 1
 		pos.pos_profile = pos_profile.name
+		pos.account_for_change_amount = "Cash - _TC"
 
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 500})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 500})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 512.07})
 		pos.insert()
 		pos.submit()
 

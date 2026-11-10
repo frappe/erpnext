@@ -443,14 +443,17 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 
 		pos.set("payments", [])
-		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 50})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 60, "default": 1})
+		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 108})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 2, "default": 1})
 
 		pos.insert()
 		pos.submit()
 
 		self.assertEqual(pos.grand_total, 105.0)
 		self.assertEqual(pos.change_amount, 5.0)
+
+		pos_return = make_sales_return(pos.name).insert()
+		self.assertEqual([row.amount for row in pos_return.payments], [-105, 0])
 
 	def test_without_payment(self):
 		inv = create_pos_invoice(do_not_save=1)
