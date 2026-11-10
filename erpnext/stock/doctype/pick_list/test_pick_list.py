@@ -1346,6 +1346,22 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(delivery_note.items[0].qty, 3)
 		self.assertEqual(delivery_note.packed_items[0].qty, 6)
 
+	def test_no_delivery_note_when_less_than_one_bundle_is_picked(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.locations[0].picked_qty = 1
+		pick_list.submit()
+
+		delivery_notes = frappe.db.count("Delivery Note")
+		self.assertRaises(frappe.ValidationError, create_delivery_note, pick_list.name)
+		self.assertEqual(frappe.db.count("Delivery Note"), delivery_notes)
+
 	def test_bundle_delivery_keeps_order_qty_after_component_uom_change(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
