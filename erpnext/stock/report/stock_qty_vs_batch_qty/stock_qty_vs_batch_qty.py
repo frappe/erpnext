@@ -6,7 +6,7 @@ import json
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 
 
 def execute(filters=None):
@@ -45,7 +45,7 @@ def get_data(filters=None):
 	batch_no = filters.get("batch")
 
 	batch_sle_data = (
-		get_batch_qty(
+		get_batch_qty_for_stock(
 			item_code=item,
 			batch_no=batch_no,
 			for_stock_levels=True,
@@ -109,7 +109,7 @@ def update_batch_qty(selected_batches=None):
 	for row in selected_batches:
 		batch_name = row.get("batch")
 
-		batches = get_batch_qty(
+		batches = get_batch_qty_for_stock(
 			batch_no=batch_name,
 			item_code=row.get("item_code"),
 			for_stock_levels=True,

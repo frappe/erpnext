@@ -22,6 +22,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_batch_qty_for_stock,
 	get_picked_serial_nos,
 	get_reserved_serial_nos_for_sre,
 )
@@ -160,15 +161,13 @@ class PickList(TransactionBase):
 			self.validate_warehouses()
 
 	def validate_stock_qty(self):
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
-
 		for row in self.get("locations"):
 			row_qty = self.get_qty_to_pick(row)
 			if not row_qty:
 				continue
 
 			if row.batch_no:
-				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
+				batch_qty = get_batch_qty_for_stock(row.batch_no, row.warehouse, item_code=row.item_code)
 
 				if row_qty > batch_qty:
 					frappe.throw(
