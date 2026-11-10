@@ -908,7 +908,7 @@ class PickList(TransactionBase):
 			item.idx = idx
 
 	def update_bundle_picked_qty(self):
-		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its components."""
+		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its stock components."""
 		product_bundles = self._get_product_bundles()
 		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
 		for so_row, packed_items in get_packed_items_of_order_rows(product_bundles).items():
@@ -1056,19 +1056,42 @@ class PickList(TransactionBase):
 		return [name for name in so_item_names if name in existing]
 
 	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, list[float]]]:
-		"""Component stock qty per bundle of each packed row, by Sales Order row and item, as a delivery packs it."""
+		"""Stock component qty per bundle of each packed row, by Sales Order row and item, as a delivery packs it."""
+		bundles = get_packed_items_of_order_rows(so_rows)
+		if not bundles:
+			return {}
+
+		item_codes = {row.item_code for packed_items in bundles.values() for row in packed_items}
+		stock_items = set(
+			frappe.get_all(
+				"Item", filters={"name": ("in", list(item_codes)), "is_stock_item": 1}, pluck="name"
+			)
+		)
 		components = {}
 		qty_map = defaultdict(lambda: defaultdict(list))
+<<<<<<< HEAD
 		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
 			parent_item = packed_items[0].parent_item
 			if parent_item not in components:
 				components[parent_item] = [
+=======
+		for so_row, packed_items in bundles.items():
+			bundle, parent_item = packed_items[0].product_bundle, packed_items[0].parent_item
+			if bundle not in components:
+				components[bundle] = [
+>>>>>>> 25b6c28 (fix(stock): count a picked bundle from its stock components, pooling repeated ones)
 					(component, get_component_stock_qty_per_unit(component, None))
 					for component in get_product_bundle_items(parent_item)
 				]
 
+<<<<<<< HEAD
 			for component, qty_per_unit in components[parent_item]:
 				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
+=======
+			for component, qty_per_unit in components[bundle]:
+				packed_item = pop_order_packed_item(packed_items, parent_item, component.item_code)
+				if packed_item and component.item_code in stock_items:
+>>>>>>> 25b6c28 (fix(stock): count a picked bundle from its stock components, pooling repeated ones)
 					qty_map[so_row][component.item_code].append(
 						get_ordered_qty_per_unit(qty_per_unit, packed_item)
 					)
