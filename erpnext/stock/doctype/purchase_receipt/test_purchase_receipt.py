@@ -4889,7 +4889,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		batch_return.submit()
 
 	def test_return_of_a_disabled_batch(self):
-		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
 		item = make_item(
 			"_Test PR Disabled Batch Return Item",
