@@ -322,15 +322,12 @@ class SerialBatchBundleService:
 	def get_batches_used_in_rows(self):
 		"""Batch qty the rows already take, by (batch_no, warehouse)."""
 		entries, bundles = [], []
-		for table_name in ("items", "packed_items"):
-			for row in self.doc.get(table_name) or []:
-				if row.get("serial_and_batch_bundle"):
-					bundles.append(row.serial_and_batch_bundle)
-				elif row.get("use_serial_batch_fields") and row.get("batch_no"):
-					qty = row.stock_qty if table_name == "items" else row.qty
-					entries.append(
-						frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty))
-					)
+		for row in self.doc.get("items") + self.get_current_packed_rows():
+			if row.get("serial_and_batch_bundle"):
+				bundles.append(row.serial_and_batch_bundle)
+			elif row.get("use_serial_batch_fields") and row.get("batch_no"):
+				qty = row.qty if row.doctype == "Packed Item" else row.stock_qty
+				entries.append(frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty)))
 
 		if bundles:
 			entries += frappe.get_all(
@@ -342,6 +339,15 @@ class SerialBatchBundleService:
 		picked_batches = frappe._dict()
 		add_picked_batches(picked_batches, entries)
 		return picked_batches
+
+	def get_current_packed_rows(self):
+		"""Packed rows of the current item rows; rows of removed items stay until the packing list is rebuilt."""
+		item_rows = {(row.name, row.item_code) for row in self.doc.get("items")}
+		return [
+			row
+			for row in self.doc.get("packed_items") or []
+			if (row.parent_detail_docname, row.parent_item) in item_rows
+		]
 
 	def add_serial_nos_in_bundles(self, picked_serial_nos, bundle_items):
 		if not bundle_items:
