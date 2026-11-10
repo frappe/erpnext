@@ -1031,6 +1031,29 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
 
+	def test_bundle_sold_in_non_stock_uom_is_delivered_in_order_uom(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, rate=100)
+		bundle = make_item(
+			properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 2}]}
+		).name
+		make_product_bundle(bundle, [component])
+
+		sales_order = make_sales_order(
+			item_code=bundle, warehouse=warehouse, qty=3, uom="Box", do_not_save=True
+		)
+		sales_order.items[0].conversion_factor = 2
+		sales_order.submit()
+
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.locations[0].picked_qty = 6
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+
+		self.assertEqual(delivery_note.items[0].qty, 3)
+		self.assertEqual(delivery_note.packed_items[0].qty, 6)
+
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_with_repeated_serial_component_delivers_serials_per_packed_row(self):
 		warehouse = "_Test Warehouse - _TC"
