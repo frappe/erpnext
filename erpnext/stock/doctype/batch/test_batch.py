@@ -20,7 +20,9 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import ItemDetailsCtx, get_item_details
+from erpnext.stock.report.stock_qty_vs_batch_qty.stock_qty_vs_batch_qty import execute, update_batch_qty
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -496,6 +498,49 @@ class TestBatch(ERPNextTestSuite):
 			get_batch_qty(**kwargs)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_batch_qty_respects_warehouse_user_permissions(self):
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1})
+		batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
+		make_stock_entry(item_code=item.name, batch_no=batch.name, qty=3, target="Stores - _TC", rate=100)
+		make_stock_entry(
+			item_code=item.name, batch_no=batch.name, qty=7, target="Finished Goods - _TC", rate=100
+		)
+		user = make_fenced_user(
+			f"batch-warehouse-{frappe.generate_hash(length=8)}@example.com",
+			["Stock User", "Item Manager"],
+			[("Warehouse", "Stores - _TC")],
+		)
+
+		with as_user(user):
+			with self.assertRaises(frappe.PermissionError):
+				get_batch_qty(batch_no=batch.name, warehouse="Finished Goods - _TC")
+			self.assertEqual(get_batch_qty(batch_no=batch.name, warehouse="Stores - _TC"), 3)
+			self.assertEqual(
+				[(row.batch_no, row.warehouse, row.qty) for row in get_batch_qty(item_code=item.name)],
+				[(batch.name, "Stores - _TC", 3)],
+			)
+			batch.recalculate_batch_qty()
+			self.assertEqual(batch.reload().batch_qty, 10)
+
+	def test_warehouse_restricted_user_updates_total_batch_qty(self):
+		item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1})
+		batch = frappe.get_doc(doctype="Batch", item=item.name).insert()
+		make_stock_entry(item_code=item.name, batch_no=batch.name, qty=10, target="Stores - _TC", rate=100)
+		make_stock_entry(
+			item_code=item.name, batch_no=batch.name, qty=5, target="Finished Goods - _TC", rate=100
+		)
+		frappe.db.set_value("Batch", batch.name, "batch_qty", 7)
+		user = make_fenced_user(
+			f"batch-report-{frappe.generate_hash(length=8)}@example.com",
+			["Item Manager"],
+			[("Warehouse", "Stores - _TC")],
+		)
+		with as_user(user):
+			rows = execute(frappe._dict(company="_Test Company", item=item.name))[1]
+			self.assertEqual([(row["stock_qty"], row["batch_qty"]) for row in rows], [(15, 7)])
+			update_batch_qty(frappe.as_json(rows))
+		self.assertEqual(batch.reload().batch_qty, 15)
 
 	def test_batch_negative_stock_error(self):
 		"""Test automatic batch selection for outgoing items"""

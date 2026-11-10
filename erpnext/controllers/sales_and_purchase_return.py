@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method, getdate
 
@@ -1459,9 +1460,7 @@ def remove_picked_serial_batches(data, picked, parent_doc):
 
 
 def get_available_batch_qty(parent_doc, batch_no, warehouse):
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
-
-	return get_batch_qty(
+	return get_batch_qty_for_stock(
 		batch_no,
 		warehouse,
 		posting_date=parent_doc.posting_date,
