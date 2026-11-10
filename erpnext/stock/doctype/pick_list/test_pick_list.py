@@ -953,6 +953,25 @@ class TestPickList(FrappeTestCase):
 
 		self.assertEqual([(row.item_code, row.qty) for row in pick_list.locations], [(component_b, 3)])
 
+	def test_pick_list_picks_bundle_components_for_order_in_other_uom(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component,) = create_product_bundle([1])
+		bundle_item = frappe.get_doc("Item", bundle)
+		bundle_item.append("uoms", {"uom": "_Test UOM 1", "conversion_factor": 2})
+		bundle_item.save()
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=20, rate=100)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, uom="_Test UOM 1")
+		self.assertEqual(sales_order.packed_items[0].qty, 6)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.save()
+
+		self.assertEqual(
+			[(row.qty, row.stock_qty, row.conversion_factor) for row in pick_list.locations], [(6, 6, 1)]
+		)
+		pick_list.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
+
 	def test_picklist_reserved_qty_validation(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
