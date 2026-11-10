@@ -99,18 +99,20 @@ def get_stock_value_on(
 
 
 def check_warehouse_company(warehouse: str | None) -> None:
+	"""Run `check_company` for the warehouse's company."""
+	if isinstance(warehouse, str) and warehouse:
+		check_company(frappe.get_cached_value("Warehouse", warehouse, "company"))
+
+
+def check_company(company: str | None) -> None:
 	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
-	if not isinstance(warehouse, str) or not warehouse:
+	if not company:
 		return
 
 	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
 
 	allowed_companies = get_allowed_companies(frappe.session.user, "Item")
-	if not allowed_companies:
-		return
-
-	company = frappe.db.get_value("Warehouse", warehouse, "company")
-	if company and company not in allowed_companies:
+	if allowed_companies and company not in allowed_companies:
 		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
 
 
@@ -303,7 +305,7 @@ def get_bin_qty_map(rows) -> dict[tuple[str, str], frappe._dict]:
 	bins = frappe.get_all(
 		"Bin",
 		filters={"item_code": ["in", item_codes], "warehouse": ["in", warehouses]},
-		fields=["item_code", "warehouse", "actual_qty", "projected_qty"],
+		fields=["item_code", "warehouse", "actual_qty", "projected_qty", "reserved_stock"],
 	)
 
 	return {(bin.item_code, bin.warehouse): bin for bin in bins}
@@ -356,7 +358,9 @@ def get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fal
 	# to — Delivery Note submit, Stock Entry transfer, Subcontracting Receipt and the Product Bundle
 	# set_valuation_rate loop all raised "Not permitted for ..." for an entitled Company-restricted
 	# identity while this guard sat on the shared function
-	check_warehouse_company(args.get("warehouse") if isinstance(args, dict | frappe._dict) else None)
+	if isinstance(args, dict | frappe._dict):
+		check_warehouse_company(args.get("warehouse"))
+		check_company(args.get("company"))
 
 	return _get_incoming_rate(args, raise_error_if_no_rate, fallbacks)
 
@@ -394,7 +398,11 @@ def _get_incoming_rate(args: dict | str, raise_error_if_no_rate: bool = True, fa
 		and not has_batchwise_valued_batch(args.get("batch_no"), args.get("serial_and_batch_bundle"))
 	)
 
-	if (
+	if valuation_method == "Standard Cost":
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
+
+		in_rate = get_item_standard_rate(args.get("item_code"), args.get("company"), args.get("posting_date"))
+	elif (
 		item_details
 		and item_details.has_serial_no
 		and args.get("serial_and_batch_bundle")

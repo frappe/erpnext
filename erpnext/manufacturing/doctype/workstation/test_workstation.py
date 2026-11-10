@@ -2,6 +2,7 @@
 # See license.txt
 import frappe
 from frappe import _
+from frappe.utils import get_datetime
 
 from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -323,6 +324,24 @@ class TestWorkstation(ERPNextTestSuite):
 			frappe.db.get_value("Workstation", "_Test WS Disabled Shift", "total_working_hours"), 4
 		)
 
+	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
+	def test_operation_planned_times_span_all_scheduled_slots(self):
+		job_card = make_scheduled_job_card(
+			"_Test WS Multi Day", [("08:00:00", "12:00:00")], 360, "2031-03-03 08:00:00"
+		)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Operation",
+				job_card.operation_id,
+				["planned_start_time", "planned_end_time"],
+				as_dict=True,
+			),
+			{
+				"planned_start_time": get_datetime("2031-03-03 08:00:00"),
+				"planned_end_time": get_datetime("2031-03-04 10:00:00"),
+			},
+		)
+
 	@change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 0, "allow_overtime": 0, "allow_production_on_holidays": 0},
@@ -420,6 +439,32 @@ class TestWorkstation(ERPNextTestSuite):
 			card.save()
 
 			self.assertEqual(get_workstation_oee("_Test WS OEE Days")["performance"], 50)
+
+	def test_oee_counts_run_time_once_for_a_crew(self):
+		from frappe.tests.classes.context_managers import freeze_time
+		from frappe.utils import add_to_date, now_datetime, nowdate
+
+		from erpnext.manufacturing.page.shop_floor.shop_floor import get_workstation_oee
+		from erpnext.setup.doctype.employee.test_employee import make_employee
+
+		first = make_employee("oee-operator-1@example.com", company="_Test Company")
+		second = make_employee("oee-operator-2@example.com", company="_Test Company")
+		with freeze_time(f"{nowdate()} 12:00:00", tick=True):
+			shifts = [("08:00:00", "16:00:00")]
+			start = add_to_date(now_datetime(), minutes=-90)
+			card = make_scheduled_job_card(
+				"_Test WS OEE Crew", shifts, 6, start.strftime("%Y-%m-%d %H:%M:%S"), qty=10
+			)
+			end = add_to_date(start, minutes=60)
+			card.append("time_logs", {"employee": first, "from_time": start, "to_time": end})
+			card.append(
+				"time_logs", {"employee": second, "from_time": start, "to_time": end, "completed_qty": 10}
+			)
+			card.save()
+
+			oee = get_workstation_oee("_Test WS OEE Crew")
+			self.assertEqual(oee["availability"], 12.5)
+			self.assertEqual(oee["performance"], 100)
 
 
 def make_workstation(*args, **kwargs):

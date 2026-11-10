@@ -31,6 +31,7 @@ class WorkOrderOperation(Document):
 		hour_rate: DF.Float
 		is_subcontracted: DF.Check
 		operation: DF.Link
+		output_qty: DF.Float
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

@@ -198,3 +198,8 @@
 		color: var(--ink-gray-6);
 	}
 }
+
+// The budget dialog's periods are a fixed list to fill in, so the grid's row selection has no use.
+.budget-periods .row-check {
+	display: none;
+}

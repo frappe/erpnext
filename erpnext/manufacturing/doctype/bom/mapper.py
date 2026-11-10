@@ -35,7 +35,7 @@ _VARIANT_BOM_MAPPING = {
 
 
 @frappe.whitelist()
-def get_children(parent: str | None = None, is_root: bool = False, **filters):
+def get_children(doctype: str | None = None, parent: str | None = None, is_root: bool = False, **filters):
 	frappe.has_permission("BOM", "read", throw=True)
 
 	if not parent or parent == "BOM":
@@ -223,3 +223,4 @@ def _postprocess_variant_bom(source, doc, item, variant_items, source_name):
 	add_variant_item(variant_items, doc, source_name)
 	for row in doc.items[mapped_rows:]:
 		row.qty = flt(row.qty) * (flt(source.quantity) or 1)
+		row.stock_qty = flt(row.qty * row.conversion_factor, row.precision("stock_qty"))

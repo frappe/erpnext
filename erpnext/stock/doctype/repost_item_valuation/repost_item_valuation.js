@@ -129,7 +129,7 @@ frappe.ui.form.on("Repost Item Valuation", {
 		let progress = 0.0;
 		let total_count = frm.doc.items_to_be_repost ? JSON.parse(frm.doc.items_to_be_repost).length : 0;
 
-		if (total_count > 1) {
+		if (total_count > 1 && frm.doc.based_on !== "Item and Warehouse") {
 			progress = flt((cint(frm.doc.current_index) / total_count) * 100, 2) || 0.5;
 			title = __("Reposting for Item-Wh Completed {0}%", [progress]);
 

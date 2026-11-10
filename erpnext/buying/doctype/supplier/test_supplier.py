@@ -150,6 +150,30 @@ class TestSupplier(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, create_supplier, party_account="Debtors - _TC")
 		create_supplier(party_account="Creditors - _TC")
 
+	def test_supplier_group_must_be_a_leaf_on_insert(self):
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Cannot select a Group type Supplier Group",
+			create_supplier,
+			supplier_group="All Supplier Groups",
+		)
+
+	def test_supplier_group_must_be_a_leaf_on_update(self):
+		supplier = create_supplier(supplier_group="Services")
+		supplier.supplier_group = "All Supplier Groups"
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Cannot select a Group type Supplier Group", supplier.save
+		)
+
+	def test_supplier_group_remains_optional(self):
+		supplier = create_supplier(without_supplier_group=True)
+		self.assertFalse(supplier.supplier_group)
+		supplier.supplier_group = "Services"
+		supplier.save()
+		supplier.supplier_group = None
+		supplier.save()
+		self.assertFalse(supplier.reload().supplier_group)
+
 	def test_hold_all_blocks_receipts_and_quotations(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

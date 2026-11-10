@@ -12,6 +12,7 @@
   "bom_no",
   "column_break_6",
   "planned_qty",
+  "process_loss_percentage",
   "stock_uom",
   "warehouse",
   "planned_start_date",
@@ -78,6 +79,13 @@
    "print_width": "100px",
    "reqd": 1,
    "width": "100px"
+  },
+  {
+   "description": "Work Orders include this loss",
+   "fieldname": "process_loss_percentage",
+   "fieldtype": "Percent",
+   "label": "% Process Loss",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_6",
@@ -233,7 +241,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-20 14:00:00.000000",
+ "modified": "2026-10-27 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Item",

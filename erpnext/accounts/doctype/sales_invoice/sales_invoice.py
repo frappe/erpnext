@@ -12,7 +12,10 @@ from frappe.utils import cint, flt, formatdate, get_link_to_form
 from frappe.utils.data import comma_and
 
 import erpnext
-from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.deferred_revenue import (
+	validate_deferred_revenue_return_cancellation,
+	validate_service_stop_date,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
@@ -282,6 +285,7 @@ class SalesInvoice(SellingController):
 				"status_field": "billing_status",
 				"keyword": "Billed",
 				"overflow_type": "billing",
+				"billing_flag": "update_billed_amount_in_sales_order",
 				"extra_cond": """ and exists(select name from `tabSales Invoice`
 				where name=`tabSales Invoice Item`.parent and (is_return=0 or update_billed_amount_in_sales_order=1))""",
 			}
@@ -332,8 +336,8 @@ class SalesInvoice(SellingController):
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
 
-		if self.coupon_code:
-			validate_coupon_code(self.coupon_code)
+		if self.coupon_code and self.counts_coupon_use():
+			validate_coupon_code(self.coupon_code, self.customer)
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -436,6 +440,8 @@ class SalesInvoice(SellingController):
 
 	def before_submit(self):
 		self.add_remarks()
+		if cint(self.is_created_using_pos):
+			POSService(self).validate_mandatory_pos_fields()
 
 	def on_submit(self):
 		POSService(self).validate_pos_paid_amount()
@@ -505,7 +511,7 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "used")
 
 		if (
@@ -526,9 +532,12 @@ class SalesInvoice(SellingController):
 		self.update_billed_qty_in_scio()
 
 		if self.is_return:
+			if self.return_against:
+				frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
 			self.refresh_subscription_status()
 
 	def before_cancel(self):
+		validate_deferred_revenue_return_cancellation(self)
 		POSService(self).check_if_created_using_pos_and_pos_closing_entry_generated()
 		POSService(self).check_if_consolidated_invoice()
 
@@ -572,7 +581,7 @@ class SalesInvoice(SellingController):
 
 		self.db_set("status", "Cancelled")
 
-		if self.coupon_code:
+		if self.coupon_code and self.counts_coupon_use():
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
@@ -617,6 +626,9 @@ class SalesInvoice(SellingController):
 			POSService(self).cancel_pos_invoice_credit_note_generated_during_sales_invoice_mode()
 
 		self.update_billed_qty_in_scio()
+		if self.is_return and self.return_against:
+			frappe.get_doc(self.doctype, self.return_against).set_status(update=True)
+
 		self.refresh_subscription_status()
 
 	def update_status_updater_args(self):
@@ -688,13 +700,14 @@ class SalesInvoice(SellingController):
 		)
 
 	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		from erpnext.selling.doctype.customer.customer import (
+			check_credit_limit,
+			is_sales_order_credit_check_bypassed,
+		)
 
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = frappe.db.get_value(
-			"Customer Credit Limit",
-			filters={"parent": self.customer, "parenttype": "Customer", "company": self.company},
-			fieldname=["bypass_credit_limit_check"],
+		bypass_credit_limit_check_at_sales_order = is_sales_order_credit_check_bypassed(
+			self.customer, self.company
 		)
 
 		if bypass_credit_limit_check_at_sales_order:
@@ -1268,26 +1281,49 @@ class SalesInvoice(SellingController):
 			"taxes": ("account_head",),
 			"payments": ("account",),
 		}
-		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
+
+	def counts_coupon_use(self):
+		# Returns and POS consolidation do not redeem the coupon again.
+		if self.is_return or self.get("is_consolidated"):
+			return False
+
+		if not self.items or any(
+			not item.get("sales_order") or not item.get("so_detail") for item in self.items
+		):
+			return True
+
+		# Match each detail to the order that already consumed this coupon.
+		order = frappe.qb.DocType("Sales Order")
+		order_item = frappe.qb.DocType("Sales Order Item")
+		coupon_order_items = dict(
+			frappe.qb.from_(order_item)
+			.join(order)
+			.on(order.name == order_item.parent)
+			.select(order_item.name, order_item.parent)
+			.where(
+				(order_item.name.isin([item.so_detail for item in self.items]))
+				& (order.coupon_code == self.coupon_code)
+				& (order.customer == self.customer)
+				& (order.company == self.company)
+				& (order.docstatus == 1)
+			)
+			.run()
+		)
+		return any(coupon_order_items.get(item.so_detail) != item.sales_order for item in self.items)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		StatusService(self).set_status(update, status, update_modified)
 
 	@frappe.whitelist()
 	def is_subcontracted(self):
-		if not self.has_subcontracted:
+		sales_orders = [item.sales_order for item in self.items if item.sales_order]
+		if not self.has_subcontracted and sales_orders:
 			self.has_subcontracted = bool(
-				frappe.get_cached_value(
-					"Sales Order",
-					{
-						"name": ["in", [item.sales_order for item in self.items if item.sales_order]],
-						"is_subcontracted": 1,
-					},
-					"name",
-				)
+				frappe.db.exists("Sales Order", {"name": ["in", sales_orders], "is_subcontracted": 1})
 			)
 		if self.has_subcontracted:
 			self.update_stock = 0
@@ -1324,7 +1360,8 @@ def get_bank_cash_account(mode_of_payment: str, company: str) -> dict:
 def get_loyalty_programs(customer: str) -> list:
 	from .services.loyalty import get_loyalty_programs as _get
 
-	return _get(customer)
+	frappe.has_permission("Customer", "read", customer, throw=True)
+	return _get(customer, set_single_program=frappe.has_permission("Customer", "write", customer))
 
 
 def check_if_return_invoice_linked_with_payment_entry(self):

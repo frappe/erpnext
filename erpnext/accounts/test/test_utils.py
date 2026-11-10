@@ -8,6 +8,7 @@ from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
 	get_account_balances_coa,
 	get_balance_on,
+	get_coa,
 	get_currency_precision,
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
@@ -211,6 +212,12 @@ class TestUtils(ERPNextTestSuite):
 		self.assertEqual(len(doc_name), 3)
 		self.assertSequenceEqual(doc_name[0:2], ("SUP", fiscal_year))
 		frappe.db.set_default("supp_master_name", "Supplier Name")
+
+	def test_get_coa_root_with_translated_label(self):
+		# setup wizard sends the root label in the wizard language, not the server language
+		accounts = get_coa("Account", "所有科目", is_root=True, chart="Standard")
+		self.assertTrue(accounts)
+		self.assertTrue(all(d["parent_account"] is None for d in accounts))
 
 	def test_get_zero_cutoff(self):
 		self.assertEqual(get_zero_cutoff(None), 0.005)

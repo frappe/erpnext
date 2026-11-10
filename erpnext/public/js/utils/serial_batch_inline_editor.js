@@ -23,6 +23,15 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		return locals[this.cdt][this.cdn];
 	}
 
+	get item_code() {
+		return this.row[this.config.item_field || "item_code"];
+	}
+
+	get warehouse() {
+		let field = this.config.parent_warehouse_field;
+		return field ? this.frm.doc[field] : this.row.warehouse || this.row.s_warehouse;
+	}
+
 	get bundle() {
 		return this.row[this.bundle_field];
 	}
@@ -55,13 +64,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 
 	async make() {
-		if (!this.row.item_code) {
+		if (!this.item_code) {
 			this.wrapper.empty();
 			this.toggle_section(false);
 			return;
 		}
 
-		this.item = await frappe.db.get_value("Item", this.row.item_code, ["has_serial_no", "has_batch_no"]);
+		this.item = await frappe.db.get_value("Item", this.item_code, ["has_serial_no", "has_batch_no"]);
 		this.item = this.item.message || {};
 
 		if (!cint(this.item.has_serial_no) && !cint(this.item.has_batch_no)) {
@@ -368,7 +377,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			fieldname: "sbie_new_serial",
 			label: __("Serial No"),
 			placeholder: __("Scan / select Serial No"),
-			get_query: () => ({ filters: { item_code: this.row.item_code } }),
+			get_query: () => ({ filters: { item_code: this.item_code } }),
 			onchange: () => this.on_new_serial_change($tr),
 		});
 
@@ -377,7 +386,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			fieldname: "sbie_new_batch",
 			label: __("Batch No"),
 			placeholder: __("Select Batch No"),
-			get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
+			get_query: () => ({ filters: { item: this.item_code, disabled: 0 } }),
 			onchange: () => this.on_new_batch_change($tr),
 		});
 
@@ -455,7 +464,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			field: "batch_no",
 			label: __("Batch No"),
 			placeholder: __("Select Batch No"),
-			get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
+			get_query: () => ({ filters: { item: this.item_code, disabled: 0 } }),
 		});
 	}
 
@@ -465,7 +474,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			field: "serial_no",
 			label: __("Serial No"),
 			placeholder: __("Select Serial No"),
-			get_query: () => ({ filters: { item_code: this.row.item_code } }),
+			get_query: () => ({ filters: { item_code: this.item_code } }),
 		});
 	}
 
@@ -578,7 +587,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	}
 
 	async open_auto_fetch_dialog() {
-		let warehouse = this.row.warehouse || this.row.s_warehouse;
+		let warehouse = this.warehouse;
 		if (!warehouse) {
 			frappe.msgprint(__("Please set Warehouse first"));
 			return;
@@ -620,7 +629,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		let data = await this.call(
 			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_auto_data",
 			{
-				item_code: this.row.item_code,
+				item_code: this.item_code,
 				warehouse: warehouse,
 				has_serial_no: this.item.has_serial_no,
 				has_batch_no: this.item.has_batch_no,
@@ -634,7 +643,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 		if (!data || !data.length) {
 			frappe.msgprint(
 				__("No stock available for Item {0} in Warehouse {1}", [
-					this.esc(this.row.item_code),
+					this.esc(this.item_code),
 					this.esc(warehouse),
 				])
 			);
@@ -850,7 +859,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 				fieldname: "batch_no",
 				options: "Batch",
 				label: __("Batch No"),
-				get_query: () => ({ filters: { item: this.row.item_code, disabled: 0 } }),
+				get_query: () => ({ filters: { item: this.item_code, disabled: 0 } }),
 			},
 		];
 	}
@@ -925,7 +934,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 			...this.last_entries.map((row) => ({ ...row, ...this.pending.updates[row.name] })),
 			...this.pending.new_entries.slice(pending_offset, pending_offset + this.page_length),
 		];
-		await erpnext.utils.load_serial_batch_titles(this.row.item_code, rows);
+		await erpnext.utils.load_serial_batch_titles(this.item_code, rows);
 	}
 
 	get_effective_count() {
@@ -963,7 +972,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	sync_row_qty() {
 		if (this.frm.doc.docstatus !== 0 || !this.has_pending()) return;
 
-		let expected = this.get_effective_qty();
+		let expected = erpnext.stock.get_sbie_signed_qty(this.frm.doc, this.get_effective_qty());
 		if (flt(this.row[this.qty_field]) !== expected) {
 			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, expected);
 		}
@@ -972,12 +981,13 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	reconcile_row_qty() {
 		if (this.frm.doc.docstatus !== 0 || this.has_pending() || !this.server_total_count) return;
 
-		if (flt(this.row[this.qty_field]) !== this.server_total_qty) {
-			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, this.server_total_qty);
+		let qty = erpnext.stock.get_sbie_signed_qty(this.frm.doc, this.server_total_qty);
+		if (flt(this.row[this.qty_field]) !== qty) {
+			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, qty);
 			frappe.show_alert({
 				message: __(
 					"Qty updated to {0} to match the Serial and Batch Bundle. Please save the document.",
-					[this.server_total_qty]
+					[qty]
 				),
 				indicator: "orange",
 			});
@@ -1248,6 +1258,8 @@ erpnext.stock.SBIE_DOCTYPES = [
 		child: "Subcontracting Receipt Supplied Item",
 		table: "supplied_items",
 		qty_field: "consumed_qty",
+		item_field: "rm_item_code",
+		parent_warehouse_field: "supplier_warehouse",
 	},
 	{ parent: "Pick List", child: "Pick List Item", table: "locations" },
 	{
@@ -1277,6 +1289,11 @@ erpnext.stock.get_sbie_row = function (frm, cdn) {
 	}
 
 	return {};
+};
+
+// Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
+erpnext.stock.get_sbie_signed_qty = function (doc, qty) {
+	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };
 
 erpnext.stock.get_sbie_pending_map = function (frm) {
@@ -1346,7 +1363,8 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 		);
 
 		row[bundle_field] = summary.bundle;
-		row[cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty"] = summary.total_qty;
+		let qty_field = cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty";
+		row[qty_field] = erpnext.stock.get_sbie_signed_qty(frm.doc, summary.total_qty);
 		if (row.received_qty != null) {
 			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
 		}

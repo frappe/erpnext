@@ -7,11 +7,13 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext import get_default_company
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
-	if filters.from_date and filters.to_date and filters.from_date > filters.to_date:
-		frappe.throw(_("From Date cannot be greater than To Date"))
+	validate_date_range(filters)
 
 	columns = get_columns(filters)
 	data = get_data(filters)
@@ -131,8 +133,12 @@ def get_columns(filters):
 def get_data(filters):
 	data = []
 
-	company_list = get_descendants_of("Company", filters.get("company"))
-	company_list.append(filters.get("company"))
+	company = filters.get("company") or get_default_company()
+	if not company:
+		return data
+
+	company_list = get_descendants_of("Company", company)
+	company_list.append(company)
 
 	customer_details = get_customer_details()
 	item_details = get_item_details()

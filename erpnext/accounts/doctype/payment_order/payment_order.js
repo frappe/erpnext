@@ -59,16 +59,12 @@ frappe.ui.form.on("Payment Order", {
 	},
 
 	remove_button: function (frm) {
-		// remove custom button of order type that is not imported
-
-		let label = ["Payment Request", "Payment Entry"];
-
 		if (frm.doc.references.length > 0 && frm.doc.payment_order_type) {
-			label = label.reduce((x) => {
-				x != frm.doc.payment_order_type;
-				return x;
-			});
-			frm.remove_custom_button(label, "Get from");
+			for (const label of ["Payment Request", "Payment Entry"]) {
+				if (label !== frm.doc.payment_order_type) {
+					frm.remove_custom_button(__(label), __("Get Payments from"));
+				}
+			}
 		}
 	},
 

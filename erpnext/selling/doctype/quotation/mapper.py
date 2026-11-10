@@ -12,21 +12,50 @@ from frappe.utils import cint, flt, getdate, nowdate
 from erpnext.controllers.mapper import get_qty_already_mapped
 
 
+def validate_target_header(source_name, target_doc, customer):
+	"""A document carries one header, so block merging a quotation into a target that
+	already has rows when its party, currency or company differs (Get Items From)."""
+	target = frappe.parse_json(target_doc) if isinstance(target_doc, str) else target_doc
+	if not (target and target.get("items")):
+		return
+
+	source = frappe.db.get_value("Quotation", source_name, ["currency", "company"], as_dict=1)
+	checks = [
+		(_("Company"), target.get("company"), source.company),
+		(_("Currency"), target.get("currency"), source.currency),
+	]
+	if customer:
+		checks.append((_("Customer"), target.get("customer"), customer.name))
+
+	for label, target_value, source_value in checks:
+		if target_value and source_value and target_value != source_value:
+			frappe.throw(
+				_(
+					"Cannot add Quotation {0}: its {1} {2} does not match {3} already in this document."
+				).format(
+					frappe.bold(source_name), label, frappe.bold(source_value), frappe.bold(target_value)
+				)
+			)
+
+
+def validate_quotation_expiry(source_name):
+	if frappe.db.get_singles_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation"):
+		return
+
+	quotation = frappe.db.get_value("Quotation", source_name, ["transaction_date", "valid_till"], as_dict=1)
+	if (
+		quotation
+		and quotation.valid_till
+		and (quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate()))
+	):
+		frappe.throw(_("Validity period of this quotation has ended."))
+
+
 @frappe.whitelist()
 def make_sales_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
-	if not frappe.db.get_singles_value(
-		"Selling Settings", "allow_sales_order_creation_for_expired_quotation"
-	):
-		quotation = frappe.db.get_value(
-			"Quotation", source_name, ["transaction_date", "valid_till"], as_dict=1
-		)
-		if quotation.valid_till and (
-			quotation.valid_till < quotation.transaction_date or quotation.valid_till < getdate(nowdate())
-		):
-			frappe.throw(_("Validity period of this quotation has ended."))
-
+	validate_quotation_expiry(source_name)
 	return _make_sales_order(source_name, target_doc, args=args)
 
 
@@ -36,6 +65,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 	args = frappe.parse_json(args)
 
 	customer = _make_customer(source_name, ignore_permissions)
+	validate_target_header(source_name, target_doc, customer)
 	ordered_items = get_ordered_items(source_name)
 	mapped_items = get_qty_already_mapped(target_doc, "quotation_item", "stock_qty")
 	for name, stock_qty in mapped_items.items():
@@ -152,6 +182,10 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False, ar
 def make_sales_invoice(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
+	if frappe.db.get_value("Quotation", source_name, "status") == "Lost":
+		frappe.throw(_("Cannot create a Sales Invoice against Lost Quotation {0}.").format(source_name))
+
+	validate_quotation_expiry(source_name)
 	return _make_sales_invoice(source_name, target_doc, args=args)
 
 
@@ -161,6 +195,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, 
 	args = frappe.parse_json(args)
 
 	customer = _make_customer(source_name, ignore_permissions)
+	validate_target_header(source_name, target_doc, customer)
 
 	def set_missing_values(source, target):
 		if customer:
@@ -238,20 +273,7 @@ def _make_customer(source_name, ignore_permissions=False):
 		as_dict=1,
 	)
 
-	if quotation.quotation_to == "Customer":
-		return frappe.get_doc("Customer", quotation.party_name)
-	elif quotation.quotation_to == "CRM Deal":
-		customer_name = frappe.get_value("Customer", {"crm_deal": quotation.party_name})
-		if customer_name:
-			return frappe.get_doc("Customer", customer_name)
-
-	# Check if a Customer already exists for the Lead or Prospect.
-	existing_customer = None
-	if quotation.quotation_to == "Lead":
-		existing_customer = frappe.db.get_value("Customer", {"lead_name": quotation.party_name})
-	elif quotation.quotation_to == "Prospect":
-		existing_customer = frappe.db.get_value("Customer", {"prospect_name": quotation.party_name})
-
+	existing_customer = get_existing_customer_name(quotation.quotation_to, quotation.party_name)
 	if existing_customer:
 		return frappe.get_doc("Customer", existing_customer)
 
@@ -262,6 +284,20 @@ def _make_customer(source_name, ignore_permissions=False):
 		return create_customer_from_prospect(quotation.party_name, ignore_permissions=ignore_permissions)
 
 	return None
+
+
+def get_existing_customer_name(quotation_to, party_name):
+	if not party_name:
+		return
+
+	if quotation_to == "Customer":
+		return party_name
+
+	customer_field = {"Lead": "lead_name", "Prospect": "prospect_name", "CRM Deal": "crm_deal"}.get(
+		quotation_to
+	)
+	if customer_field:
+		return frappe.db.get_value("Customer", {customer_field: party_name})
 
 
 def create_customer_from_lead(lead_name, ignore_permissions=False):

@@ -43,6 +43,12 @@ class AssetMaintenanceTeam(Document):
 			members.add(row.team_member)
 
 	def validate_manager_is_member(self):
+		# older teams saved with an outside manager still save until the manager or membership changes
+		if not (
+			self.is_new() or self.has_value_changed("maintenance_manager") or self.manager_left_members()
+		):
+			return
+
 		if self.maintenance_manager and self.maintenance_manager not in self.get_members():
 			frappe.throw(
 				_("Maintenance Manager {0} must be a member of the team.").format(
@@ -73,6 +79,14 @@ class AssetMaintenanceTeam(Document):
 					", ".join(frappe.bold(assignee) for assignee in assignees)
 				)
 			)
+
+	def manager_left_members(self) -> bool:
+		previous = self.get_doc_before_save()
+		return bool(
+			previous
+			and self.maintenance_manager in previous.get_members()
+			and self.maintenance_manager not in self.get_members()
+		)
 
 	def get_members(self) -> set[str]:
 		return {row.team_member for row in self.maintenance_team_members}

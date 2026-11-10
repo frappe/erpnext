@@ -4,6 +4,7 @@ from frappe.utils import today
 from erpnext.stock.get_item_details import (
 	get_batch_qty,
 	get_bin_details,
+	get_conversion_factor,
 	get_item_details,
 	get_price_list_currency_and_exchange_rate,
 	get_projected_qty,
@@ -15,6 +16,63 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGetItemDetail(ERPNextTestSuite):
+	def test_missing_uom_conversion_is_not_assumed(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		uom = "_Test Missing UOM Conversion"
+		if not frappe.db.exists("UOM", uom):
+			frappe.get_doc({"doctype": "UOM", "uom_name": uom}).insert()
+
+		item = make_item(properties={"stock_uom": "Nos"})
+		self.assertEqual(get_conversion_factor(item.name, uom)["conversion_factor"], 1.0)
+
+		with self.assertRaises(frappe.ValidationError):
+			get_item_details(
+				frappe._dict(
+					item_code=item.name,
+					uom=uom,
+					qty=5,
+					company="_Test Company",
+					doctype="Sales Order",
+					customer="_Test Customer",
+					currency="INR",
+					conversion_rate=1,
+					price_list="Standard Selling",
+					price_list_currency="INR",
+					plc_conversion_rate=1,
+					ignore_pricing_rule=1,
+				)
+			)
+
+	def test_missing_uom_conversion_is_assumed_for_non_stock_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		uom = "_Test Missing UOM Conversion"
+		if not frappe.db.exists("UOM", uom):
+			frappe.get_doc({"doctype": "UOM", "uom_name": uom}).insert()
+
+		item = make_item(properties={"is_stock_item": 0, "stock_uom": "Nos"})
+		self.assertEqual(get_conversion_factor(item.name, uom)["conversion_factor"], 1.0)
+
+		details = get_item_details(
+			frappe._dict(
+				item_code=item.name,
+				uom=uom,
+				qty=5,
+				company="_Test Company",
+				doctype="Sales Order",
+				customer="_Test Customer",
+				currency="INR",
+				conversion_rate=1,
+				price_list="Standard Selling",
+				price_list_currency="INR",
+				plc_conversion_rate=1,
+				ignore_pricing_rule=1,
+			)
+		)
+
+		self.assertEqual(details.conversion_factor, 1.0)
+
 	def test_get_item_detail_purchase_order(self):
 		args = frappe._dict(
 			{
@@ -1015,4 +1073,47 @@ class TestGetItemDetail(ERPNextTestSuite):
 				"ignore_pricing_rule": 1,
 				"qty": 1,
 			}
+		)
+
+	def test_apply_price_list_keeps_normalised_transaction_type_for_rows(self):
+		"""A row in `items` must not replace the context's transaction type, which the
+		Pricing Rule query uses as a column name."""
+		from unittest.mock import patch
+
+		from erpnext.accounts.doctype.pricing_rule import utils as pricing_rule_utils
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+		from erpnext.stock.get_item_details import apply_price_list
+
+		pricing_rule = make_pricing_rule(
+			title="_Test Row Transaction Type Rule", selling=1, discount_percentage=10
+		)
+		self.addCleanup(frappe.delete_doc_if_exists, "Pricing Rule", pricing_rule.name)
+
+		ctx = frappe._dict(
+			doctype="Sales Order",
+			company="_Test Company",
+			customer="_Test Customer",
+			currency="INR",
+			conversion_rate=1.0,
+			price_list="_Test Price List",
+			plc_conversion_rate=1.0,
+			transaction_date=today(),
+			items=[
+				frappe._dict(
+					doctype="Sales Order Item",
+					item_code="_Test Item",
+					qty=1,
+					uom="_Test UOM",
+					conversion_factor=1.0,
+					transaction_type="not_a_column",
+				)
+			],
+		)
+		with patch.object(
+			pricing_rule_utils, "_get_pricing_rules", wraps=pricing_rule_utils._get_pricing_rules
+		) as get_pricing_rules:
+			apply_price_list(ctx)
+
+		self.assertEqual(
+			{call.args[1].transaction_type for call in get_pricing_rules.call_args_list}, {"selling"}
 		)

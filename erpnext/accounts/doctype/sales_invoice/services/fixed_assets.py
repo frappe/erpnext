@@ -27,8 +27,17 @@ class FixedAssetService:
 		if doc.doctype != "Sales Invoice":
 			return
 
+		seen_assets = set()
 		for item in doc.get("items"):
 			if item.is_fixed_asset:
+				if not doc.is_return and item.asset:
+					if item.asset in seen_assets:
+						frappe.throw(
+							_("Row #{0}: Asset {1} is already added in another row").format(
+								item.idx, item.asset
+							)
+						)
+					seen_assets.add(item.asset)
 				self._validate_fixed_asset_item(item)
 
 	def _validate_fixed_asset_item(self, item) -> None:

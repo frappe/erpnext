@@ -16,6 +16,7 @@ from pypika import Order
 from pypika.analytics import RowNumber
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.stock_closing_entry.stock_closing_entry import StockClosing
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -46,11 +47,15 @@ SLEntry = dict[str, Any]
 
 
 def execute(filters: StockBalanceFilter | None = None):
+	validate_date_range(filters)
+
 	return StockBalanceReport(filters).run()
 
 
 def execute_snapshot_report(filters: StockBalanceFilter | None = None):
 	from erpnext.stock.report.stock_balance.stock_balance_snapshot import execute as execute_from_snapshot
+
+	validate_date_range(filters)
 
 	return execute_from_snapshot(filters)
 

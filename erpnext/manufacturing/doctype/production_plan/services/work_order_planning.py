@@ -126,7 +126,12 @@ class WorkOrderCreationService:
 		bom_warehouse_map = self.get_bom_source_warehouse_map(self.doc.sub_assembly_items)
 		for row in self.doc.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
-				subcontracted_po.setdefault(row.supplier, []).append(row)
+				order_qty = ProductionPlanWorkOrderQuantities.get_order_qty(
+					row, "production_plan_sub_assembly_item"
+				)
+				subcontracted_po.setdefault(row.supplier, []).append(
+					frappe._dict(row.as_dict(), qty=order_qty)
+				)
 				continue
 			if row.type_of_manufacturing == "Material Request":
 				continue

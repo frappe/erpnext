@@ -27,7 +27,8 @@ def get_context(context):
 
 def get_portal_doc(rfq) -> dict:
 	"""The RFQ fields the supplier's quotation form needs."""
-	items = [{"name": item.name, "idx": item.idx, "qty": item.qty} for item in rfq.items]
+	# the form shows every rate as 0.00 until the supplier edits it
+	items = [{"name": item.name, "idx": item.idx, "qty": item.qty, "rate": 0} for item in rfq.items]
 	return {"name": rfq.name, "items": items}
 
 

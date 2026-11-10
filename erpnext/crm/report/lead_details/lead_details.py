@@ -8,8 +8,12 @@ from frappe.query_builder import Order
 from frappe.query_builder.functions import Concat_ws, Date, IfNull, NullIf
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
 

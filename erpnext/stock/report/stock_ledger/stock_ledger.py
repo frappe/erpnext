@@ -13,6 +13,7 @@ from frappe.utils import cint, flt, get_datetime
 from pypika import Order
 from pypika.analytics import RowNumber
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.utils import prepare_serial_batch_report
@@ -23,6 +24,7 @@ from erpnext.stock.utils import (
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -148,6 +150,16 @@ def execute(filters=None):
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no",))
+
+
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	if column.fieldname == "out_qty" and data.out_qty < 0:
+		value = f"<span style='color:red'>{value}</span>"
+	elif column.fieldname == "in_qty" and data.in_qty > 0:
+		value = f"<span style='color:green'>{value}</span>"
+
+	return value
 
 
 def set_bundle_qty_and_value(sle, bundle_info):

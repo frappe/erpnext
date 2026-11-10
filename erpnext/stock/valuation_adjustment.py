@@ -51,6 +51,10 @@ class BackdatedEntryBeforeAdjustmentError(frappe.ValidationError):
 	pass
 
 
+class ManualAdjustmentEntryError(frappe.ValidationError):
+	pass
+
+
 @dataclass
 class AdjustmentRow:
 	"""One row of an Adjustment Entry: stock counted in at a rate, as a batch, serial nos, or
@@ -247,25 +251,22 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 	"""The qty of every serial no and batch in the warehouse, and the value of every batch, as the
 	ledger holds them at `posting_datetime`, in the order they were first received: from the bundles,
 	and from the serial and batch nos of entries made before bundles."""
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	entry = frappe.qb.DocType("Serial and Batch Entry")
 	ledger = frappe.qb.DocType("Stock Ledger Entry")
 	cutoff = get_datetime(posting_datetime)
 
 	bundle_entries = (
-		frappe.qb.from_(bundle)
-		.inner_join(entry)
-		.on(entry.parent == bundle.name)
+		frappe.qb.from_(entry)
 		.select(entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
 		.where(
-			(bundle.item_code == item_code)
-			& (bundle.warehouse == warehouse)
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-			& (bundle.posting_datetime <= cutoff)
+			(entry.item_code == item_code)
+			& (entry.warehouse == warehouse)
+			& (entry.docstatus == 1)
+			& (entry.is_cancelled == 0)
+			& (entry.posting_datetime <= cutoff)
 		)
-		.orderby(bundle.posting_datetime)
-		.orderby(bundle.creation)
+		.orderby(entry.posting_datetime)
+		.orderby(entry.creation)
 	)
 	legacy_entries = (
 		frappe.qb.from_(ledger)
@@ -280,7 +281,7 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 		)
 	)
 	if exclude_voucher_no:
-		bundle_entries = bundle_entries.where(bundle.voucher_no != exclude_voucher_no)
+		bundle_entries = bundle_entries.where(entry.voucher_no != exclude_voucher_no)
 		legacy_entries = legacy_entries.where(ledger.voucher_no != exclude_voucher_no)
 
 	lots = LedgerLots()
@@ -317,6 +318,7 @@ def make_adjustment_entry(
 	doc.update(
 		{
 			"purpose": ADJUSTMENT_ENTRY,
+			"is_made_from_valuation_comparison": 1,
 			"company": company,
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -427,6 +429,18 @@ class AdjustmentEntry:
 
 		self.doc.difference_amount = flt(
 			sum(flt(row.amount_difference) for row in self.doc.items), self.doc.precision("difference_amount")
+		)
+
+	def validate_made_from_report(self) -> None:
+		if self.doc.is_made_from_valuation_comparison:
+			return
+
+		frappe.throw(
+			_(
+				"Adjustment Entry can only be used by the system from the Stock Valuation Comparison report. Users can only select the purpose Opening Stock to add opening stock, or Stock Reconciliation to update stock quantity or valuation rate."
+			),
+			title=_("Not Allowed Purpose"),
+			exc=ManualAdjustmentEntryError,
 		)
 
 	def set_row_amounts(self, plan: AdjustmentPlan, rows) -> None:

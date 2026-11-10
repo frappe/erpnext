@@ -5,12 +5,16 @@ from typing import Any
 
 import frappe
 from frappe import _
+from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.stock.report.utils import prepare_serial_batch_report
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	data = get_data(filters)
 	columns = get_columns(filters, data)
 
@@ -44,25 +48,33 @@ def get_data(filters):
 
 def get_filter_conditions(filters):
 	filter_conditions = [
-		["Serial and Batch Bundle", "docstatus", "=", 1],
-		["Serial and Batch Bundle", "is_cancelled", "=", 0],
+		["Serial and Batch Entry", "docstatus", "=", 1],
+		["Serial and Batch Entry", "is_cancelled", "=", 0],
 	]
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
 			if field == "warehouse":
 				filter_conditions.append(
-					["Serial and Batch Bundle", field, "descendants of (inclusive)", filters.get(field)]
+					[
+						"Serial and Batch Entry",
+						field,
+						"in",
+						get_warehouses_with_descendants(filters.get(field)),
+					]
 				)
 			elif field == "voucher_no":
-				filter_conditions.append(["Serial and Batch Bundle", field, "in", filters.get(field)])
+				filter_conditions.append(
+					["Serial and Batch Bundle", field, "in", get_filter_values(filters.get(field))]
+				)
 			else:
-				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
+				doctype = "Serial and Batch Entry" if field == "item_code" else "Serial and Batch Bundle"
+				filter_conditions.append([doctype, field, "=", filters.get(field)])
 
 	if filters.get("from_date") and filters.get("to_date"):
 		filter_conditions.append(
 			[
-				"Serial and Batch Bundle",
+				"Serial and Batch Entry",
 				"posting_datetime",
 				"between",
 				[filters.get("from_date"), filters.get("to_date")],
@@ -74,6 +86,22 @@ def get_filter_conditions(filters):
 			filter_conditions.append(["Serial and Batch Entry", field, "=", filters.get(field)])
 
 	return filter_conditions
+
+
+def get_warehouses_with_descendants(value):
+	warehouses = set()
+	for warehouse in get_filter_values(value):
+		warehouses.update([*get_descendants_of("Warehouse", warehouse), warehouse])
+
+	return list(warehouses)
+
+
+def show_warehouse_column(filters):
+	warehouses = get_filter_values(filters.get("warehouse"))
+	if not warehouses:
+		return True
+
+	return len(warehouses) != 1 or bool(frappe.get_cached_value("Warehouse", warehouses[0], "is_group"))
 
 
 def get_columns(filters, data):
@@ -143,7 +171,7 @@ def get_columns(filters, data):
 			]
 		)
 
-	if not filters.get("warehouse") or frappe.get_cached_value("Warehouse", filters.warehouse, "is_group"):
+	if show_warehouse_column(filters):
 		columns.append(
 			{
 				"label": _("Warehouse"),

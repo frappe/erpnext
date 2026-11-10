@@ -53,6 +53,22 @@ class TestCompanyRestriction(ERPNextTestSuite):
 		self.restrict_to_companies("Supplier", supplier.name, ["_Test Company"])
 		create_purchase_order(supplier=supplier.name, do_not_submit=1)
 
+	def test_communication_ignores_company_restriction(self):
+		customer = make_customer("_Test Company Restricted Communication Customer")
+		self.restrict_to_companies("Customer", customer, ["_Test Company 1"])
+
+		frappe.get_doc(
+			{
+				"doctype": "Communication",
+				"communication_medium": "Email",
+				"sent_or_received": "Sent",
+				"subject": "Restricted customer email",
+				"reference_doctype": "Customer",
+				"reference_name": customer,
+				"company": "_Test Company",
+			}
+		).insert()
+
 	def test_party_query_filters_customer_and_supplier_by_transaction_company(self):
 		customer = make_customer("_Test Company Query Restricted Customer")
 		supplier = create_supplier(supplier_name="_Test Company Query Restricted Supplier")
@@ -501,3 +517,54 @@ class TestCompanyRestriction(ERPNextTestSuite):
 
 		with self.set_user(self.make_report_user()):
 			self.assertEqual(self.run_report("stock", "batch_split_tree", {"batch": batch}), [])
+
+	def test_incoming_rate_keeps_to_permitted_companies(self):
+		from erpnext.stock.utils import get_incoming_rate
+
+		args = {
+			"item_code": "_Test Item",
+			"warehouse": "Stores - _TC",
+			"qty": 1,
+			"company": "_Test Company 1",
+		}
+		with self.set_user(self.make_report_user()):
+			self.assertRaises(frappe.PermissionError, get_incoming_rate, args)
+
+	def test_warehouse_details_keep_to_permitted_companies(self):
+		from erpnext.assets.doctype.asset_capitalization.asset_capitalization import (
+			get_warehouse_details as get_asset_capitalization_warehouse_details,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry import (
+			get_warehouse_details as get_stock_entry_warehouse_details,
+		)
+
+		args = {
+			"item_code": "_Test Item",
+			"warehouse": "Stores - _TC",
+			"qty": 1,
+			"company": "_Test Company 1",
+		}
+		with self.set_user(self.make_report_user()):
+			for get_warehouse_details in (
+				get_stock_entry_warehouse_details,
+				get_asset_capitalization_warehouse_details,
+			):
+				self.assertRaises(frappe.PermissionError, get_warehouse_details, dict(args))
+
+	def test_stock_balance_for_keeps_to_permitted_companies(self):
+		from frappe.utils import nowtime, today
+
+		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
+
+		user = self.make_user_with_roles("test_company_restriction_stock_reco@example.com", ["Stock Manager"])
+		self.allow_company(user, "_Test Company")
+		with self.set_user(user):
+			self.assertRaises(
+				frappe.PermissionError,
+				get_stock_balance_for,
+				"_Test Item",
+				"Stores - _TC",
+				today(),
+				nowtime(),
+				company="_Test Company 1",
+			)

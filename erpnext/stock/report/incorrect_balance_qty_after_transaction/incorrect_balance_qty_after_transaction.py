@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.report.utils import get_filter_values
+
 
 def execute(filters=None):
 	columns, data = [], []
@@ -94,8 +96,8 @@ def get_stock_ledger_entries(report_filters):
 	]
 
 	for field in ["warehouse", "item_code", "company"]:
-		if report_filters.get(field):
-			filters[field] = report_filters.get(field)
+		if values := get_filter_values(report_filters.get(field)):
+			filters[field] = ["in", values]
 
 	return frappe.get_all(
 		"Stock Ledger Entry",

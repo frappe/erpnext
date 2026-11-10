@@ -7,8 +7,12 @@ from frappe import _
 from frappe.permissions import get_user_permissions
 from frappe.utils import cint, cstr, formatdate, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	common_columns = [
 		{
 			"label": _("New Customers"),

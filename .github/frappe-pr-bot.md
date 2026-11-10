@@ -28,7 +28,7 @@ Text after a command is passed to the review as an extra instruction.
 
 ## Question a finding
 
-If you are the PR author or a maintainer, reply in any of the bot's review threads, no mention needed. For example: "how can I reproduce this?" or "I think this is already handled in validate". The bot runs it on the bench, on develop and on your branch, and replies with the steps and what it saw. If the finding turns out to be wrong, it says so and resolves the thread.
+If you are the PR author or a maintainer, reply in any of the bot's review threads, no mention needed. For example: "how can I reproduce this?" or "I think this is already handled in validate". The bot runs it on the bench, on develop and on your branch, and replies with the steps and what it saw. If the finding turns out to be wrong, it says so and resolves the thread. In any other thread, such as a Greptile one, mention `@frappe-pr-bot`; it does not answer other bots.
 
 ## What to expect
 

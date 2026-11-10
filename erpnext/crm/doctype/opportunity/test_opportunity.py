@@ -144,8 +144,9 @@ class TestOpportunity(ERPNextTestSuite):
 		with patch(
 			"erpnext.crm.doctype.opportunity.opportunity.get_exchange_rate",
 			side_effect=lambda from_currency, *args, **kwargs: rates[from_currency],
-		):
+		) as get_rate:
 			opp = make_opportunity(with_items=0, currency="USD", opportunity_amount=1000)
+			self.assertEqual(get_rate.call_args.args[3], "for_selling")
 			self.assertEqual((opp.conversion_rate, opp.base_opportunity_amount), (83.0, 83000.0))
 
 			opp.currency = "EUR"
@@ -293,7 +294,36 @@ class TestOpportunity(ERPNextTestSuite):
 		quoted = make_opportunity(with_items=0)
 		submit_quotation(quoted)
 		self.assertRaises(frappe.ValidationError, set_multiple_status, [quoted.name], "Lost")
+		quoted.reload()
+		quoted.status = "Lost"
+		self.assertRaises(frappe.ValidationError, quoted.save)
 		self.assertEqual(frappe.db.get_value("Opportunity", quoted.name, "status"), "Quotation")
+
+	def test_status_can_be_changed_by_hand_while_a_quotation_is_open(self):
+		opportunity = make_opportunity(with_items=0)
+		submit_quotation(opportunity)
+
+		for status in ("Replied", "Open", "Closed"):
+			set_multiple_status([opportunity.name], status)
+			self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), status)
+
+		self.assertRaises(frappe.ValidationError, set_multiple_status, [opportunity.name], "Converted")
+		set_multiple_status([opportunity.name], "Quotation")
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Quotation")
+
+	def test_converted_opportunity_keeps_its_status_while_ordered(self):
+		from erpnext.selling.doctype.quotation.mapper import make_sales_order
+
+		opportunity = make_opportunity(with_items=0)
+		quotation = submit_quotation(opportunity)
+		sales_order = make_sales_order(quotation.name)
+		sales_order.delivery_date = today()
+		sales_order.submit()
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
+
+		for status in ("Open", "Closed", "Quotation", "Lost"):
+			self.assertRaises(frappe.ValidationError, set_multiple_status, [opportunity.name], status)
+		self.assertEqual(frappe.db.get_value("Opportunity", opportunity.name, "status"), "Converted")
 
 	def test_lost_on_follows_the_lost_status(self):
 		lost_reason = _ensure_master("Opportunity Lost Reason", "lost_reason", "_Test Lost - Too Expensive")

@@ -2,7 +2,17 @@
 # yarn lockfile v1
 
 
+occt-import-js@^0.0.23:
+  version "0.0.23"
+  resolved "https://registry.yarnpkg.com/occt-import-js/-/occt-import-js-0.0.23.tgz#1916aacd5b228e92da5de631ae048ca152281778"
+  integrity sha512-RFfYQXYFX5C1mB1Aywm0ShcUKzXOr/VzTnlzhBSDJOR6YCAPt1HYCzeXWg1vwwjn/cUxwqRNhhtf1dlewoZYCQ==
+
 onscan.js@^1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/onscan.js/-/onscan.js-1.5.2.tgz#14ed636e5f4c3f0a78bacbf9a505dad3140ee341"
   integrity sha512-9oGYy2gXYRjvXO9GYqqVca0VuCTAmWhbmX3egBSBP13rXiMNb+dKPJzKFEeECGqPBpf0m40Zoo+GUQ7eCackdw==
+
+three@^0.186.1:
+  version "0.186.1"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.186.1.tgz#6d50f70c2c437f844179bbb56d6f5b774e1ca38a"
+  integrity sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA==

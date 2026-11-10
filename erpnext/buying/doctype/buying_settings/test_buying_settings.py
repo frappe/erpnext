@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import frappe
 
+from erpnext.buying.doctype.buying_settings.buying_settings import is_rejected_material_valued
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -28,3 +29,7 @@ class TestBuyingSettings(ERPNextTestSuite):
 			settings.save()
 
 		set_by_naming_series.assert_called_once()
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	def test_rejected_material_of_subcontracting_receipt_is_not_valued(self):
+		self.assertFalse(is_rejected_material_valued("Subcontracting Receipt"))

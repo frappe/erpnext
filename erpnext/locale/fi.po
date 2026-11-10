@@ -1067,7 +1067,7 @@ msgstr "Yli 90"
 
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.py:60
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
-msgstr "<b>Alkaen Aika</b> ei voi olla myöhemmin kuin <b>To To</b> {{}"
+msgstr "<b>Alkaen Aika</b> ei voi olla myöhemmin kuin <b>To To</b> {0}"
 
 #. Content of the 'Help Text' (HTML) field in DocType 'Process Statement Of
 #. Accounts'

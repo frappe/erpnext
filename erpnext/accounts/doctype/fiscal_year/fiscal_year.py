@@ -34,10 +34,16 @@ class FiscalYear(Document):
 		self.validate_overlap()
 
 	def on_update(self):
-		frappe.cache().delete_key("fiscal_years")
+		self.clear_fiscal_year_cache()
 
 	def on_trash(self):
-		frappe.cache().delete_key("fiscal_years")
+		self.clear_fiscal_year_cache()
+
+	def clear_fiscal_year_cache(self):
+		cache_keys = ["fiscal_years", "bootinfo"]
+		frappe.cache.delete_value(cache_keys)
+		# Requests before commit can cache the old Fiscal Year again.
+		frappe.db.after_commit.add(lambda: frappe.cache.delete_value(cache_keys))
 
 	def validate_dates(self):
 		self.validate_from_to_dates("year_start_date", "year_end_date")

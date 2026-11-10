@@ -20,7 +20,7 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import nowdate, today, unique
+from frappe.utils import nowdate, unique
 from pypika import Order
 
 import erpnext
@@ -670,7 +670,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
-	expiry_date = filters.get("posting_date") or today()
+	expiry_date = filters.get("posting_date") or nowdate()
 
 	query = (
 		frappe.qb.from_(stock_ledger_entry)
@@ -734,7 +734,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
-	expiry_date = filters.get("posting_date") or today()
+	expiry_date = filters.get("posting_date") or nowdate()
 
 	bundle_query = (
 		frappe.qb.from_(bundle)
@@ -1063,7 +1063,7 @@ def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page
 	batch = frappe.qb.DocType("Batch")
 	query = frappe.qb.get_query("Batch", fields=["name", "batch_id", "item"], ignore_permissions=False).where(
 		(batch.disabled == 0)
-		& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
+		& (batch.expiry_date.isnull() | (batch.expiry_date >= nowdate()))
 		& (batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
 	)
 

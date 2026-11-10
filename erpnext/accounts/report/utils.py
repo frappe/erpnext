@@ -3,7 +3,7 @@ from frappe import _
 from frappe.query_builder import Case
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt, formatdate, get_datetime_str, get_link_to_form, get_table_name
+from frappe.utils import flt, formatdate, get_datetime, get_datetime_str, get_link_to_form, get_table_name
 from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_descendants_of
 from pypika import Order
@@ -11,7 +11,7 @@ from pypika import Order
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
 from erpnext.accounts.party import get_party_account
@@ -29,7 +29,17 @@ def validate_mandatory_date_range(filters, from_field="from_date", to_field="to_
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
 
-	if from_date > to_date:
+	validate_date_range(filters, from_field, to_field)
+
+
+def validate_date_range(filters, from_field="from_date", to_field="to_date"):
+	if not filters:
+		return
+
+	from_date = filters.get(from_field)
+	to_date = filters.get(to_field)
+
+	if from_date and to_date and get_datetime(from_date) > get_datetime(to_date):
 		frappe.throw(_("From Date must be before To Date"))
 
 
@@ -411,32 +421,32 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	if payments:
 		if doctype == "Journal Entry" and filters.get("cost_center"):
 			query = query.where(
-				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+				get_dimension_filter_condition(child_doc.cost_center, filters.cost_center, "Cost Center")
 			)
 		elif filters.get("cost_center"):
 			query = query.where(
-				parent_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+				get_dimension_filter_condition(parent_doc.cost_center, filters.cost_center, "Cost Center")
 			)
 	else:
 		if filters.get("cost_center"):
 			query = query.where(
-				child_doc.cost_center.isin(get_with_descendants("Cost Center", filters.cost_center))
+				get_dimension_filter_condition(child_doc.cost_center, filters.cost_center, "Cost Center")
 			)
 			join_required = True
 		if filters.get("warehouse"):
 			query = query.where(
-				child_doc.warehouse.isin(get_with_descendants("Warehouse", filters.warehouse))
+				get_dimension_filter_condition(child_doc.warehouse, filters.warehouse, "Warehouse")
 			)
 			join_required = True
 		if filters.get("item_group"):
 			query = query.where(
-				child_doc.item_group.isin(get_with_descendants("Item Group", filters.item_group))
+				get_dimension_filter_condition(child_doc.item_group, filters.item_group, "Item Group")
 			)
 			join_required = True
 
 	if not payments:
 		if filters.get("brand"):
-			query = query.where(child_doc.brand == filters.brand)
+			query = query.where(get_dimension_filter_condition(child_doc.brand, filters.brand, "Brand"))
 			join_required = True
 
 	if join_required:
@@ -450,9 +460,36 @@ def apply_common_conditions(filters, query, doctype, child_doctype=None, payment
 	return query
 
 
-def get_with_descendants(doctype: str, name: str) -> list[str]:
-	"""The tree node and all nodes under it."""
-	return [name, *get_descendants_of(doctype, name, ignore_permissions=True)]
+def get_filter_values(value) -> list:
+	"""A report filter value as a list. MultiSelectList filters can arrive as a JSON string."""
+	if not value:
+		return []
+
+	if isinstance(value, str) and value.startswith("["):
+		value = frappe.parse_json(value)
+
+	if isinstance(value, list | tuple):
+		return list(value)
+
+	return [value]
+
+
+def get_qb_filter_condition(field, value):
+	"""`field = value` for one value, `field IN (...)` for many, None when nothing is selected."""
+	values = get_filter_values(value)
+	if not values:
+		return None
+
+	return field == values[0] if len(values) == 1 else field.isin(values)
+
+
+def get_with_descendants(doctype: str, names: str | list[str] | tuple[str, ...]) -> list[str]:
+	"""The selected tree nodes and all nodes under them."""
+	values = []
+	for name in get_filter_values(names):
+		values.extend([name, *get_descendants_of(doctype, name, ignore_permissions=True)])
+
+	return list(dict.fromkeys(values))
 
 
 def get_advance_taxes_and_charges(invoice_list):
@@ -482,12 +519,12 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
-					)
 				fieldname = dimension.fieldname
-				query = query.where(parent_doc[fieldname].isin(filters[fieldname]))
+				query = query.where(
+					get_dimension_filter_condition(
+						parent_doc[fieldname], filters[fieldname], dimension.document_type
+					)
+				)
 	return query
 
 

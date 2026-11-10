@@ -13,6 +13,9 @@ import frappe
 from frappe import _
 from frappe.utils import cint, formatdate, getdate
 
+from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+	get_dimension_label,
+)
 from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
@@ -147,15 +150,17 @@ def validate_against_pcv(is_opening, posting_date, company):
 
 
 def validate_allowed_dimensions(gl_entry, dimension_filter_map):
+	meta = frappe.get_meta("GL Entry")
 	for key, value in dimension_filter_map.items():
 		dimension = key[0]
 		account = key[1]
 
 		if gl_entry.account == account:
+			dimension_label = get_dimension_label(meta, dimension)
 			if value["is_mandatory"] and not gl_entry.get(dimension):
 				frappe.throw(
 					_("{0} is mandatory for account {1}").format(
-						frappe.bold(frappe.unscrub(dimension)), frappe.bold(gl_entry.account)
+						frappe.bold(dimension_label), frappe.bold(gl_entry.account)
 					),
 					MandatoryAccountDimensionError,
 				)
@@ -165,7 +170,7 @@ def validate_allowed_dimensions(gl_entry, dimension_filter_map):
 					frappe.throw(
 						_("Invalid value {0} for {1} against account {2}").format(
 							frappe.bold(gl_entry.get(dimension)),
-							frappe.bold(frappe.unscrub(dimension)),
+							frappe.bold(dimension_label),
 							frappe.bold(gl_entry.account),
 						),
 						InvalidAccountDimensionError,
@@ -175,7 +180,7 @@ def validate_allowed_dimensions(gl_entry, dimension_filter_map):
 					frappe.throw(
 						_("Invalid value {0} for {1} against account {2}").format(
 							frappe.bold(gl_entry.get(dimension)),
-							frappe.bold(frappe.unscrub(dimension)),
+							frappe.bold(dimension_label),
 							frappe.bold(gl_entry.account),
 						),
 						InvalidAccountDimensionError,

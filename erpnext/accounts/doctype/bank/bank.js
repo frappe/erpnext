@@ -16,7 +16,7 @@ frappe.ui.form.on("Bank", {
 		}
 		if (frm.doc.plaid_access_token) {
 			frm.add_custom_button(__("Refresh Plaid Link"), () => {
-				new erpnext.integrations.refreshPlaidLink(frm.doc.plaid_access_token);
+				new erpnext.integrations.refreshPlaidLink(frm.doc.name);
 			});
 		}
 	},
@@ -42,8 +42,8 @@ let add_fields_to_mapping_table = function (frm) {
 };
 
 erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
-	constructor(access_token) {
-		this.access_token = access_token;
+	constructor(bank) {
+		this.bank = bank;
 		this.plaidUrl = "https://cdn.plaid.com/link/v2/stable/link-initialize.js";
 		this.init_config();
 	}
@@ -57,7 +57,7 @@ erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
 	async get_link_token_for_update() {
 		const token = frappe.xcall(
 			"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.get_link_token_for_update",
-			{ access_token: this.access_token }
+			{ bank: this.bank }
 		);
 		if (!token) {
 			frappe.throw(__("Cannot retrieve link token for update. Check Error Log for more information"));

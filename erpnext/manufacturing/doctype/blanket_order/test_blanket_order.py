@@ -436,6 +436,28 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 100)
 		self.assertFalse(frappe.db.exists("Purchase Order Item", po.items[1].name))
 
+	def test_update_items_refreshes_blanket_order_of_removed_row(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		second_item = make_item("_Test Blanket Order Second Item", {"is_stock_item": 1}).name
+		po.append(
+			"items",
+			{
+				"item_code": second_item,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": today(),
+			},
+		)
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 10)
+
+		# Keep only the row without a blanket order
+		update_purchase_order_row_qty(po, po.items[1], 5)
+
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 0)
+
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
 	)

@@ -259,6 +259,12 @@ class TestCustomer(ERPNextTestSuite):
 		customer.mobile_no = "8989889890"
 		customer.save()
 		self.assertTrue(customer.customer_primary_contact)
+
+		# another customer's contact cannot be made primary
+		other_customer = frappe.get_doc("Customer", "_Test Customer")
+		other_customer.customer_primary_contact = customer.customer_primary_contact
+		self.assertRaises(frappe.ValidationError, other_customer.save)
+
 		frappe.delete_doc("Customer", customer.name)
 
 	def test_disabled_customer(self):
@@ -280,7 +286,7 @@ class TestCustomer(ERPNextTestSuite):
 
 		customer = frappe.get_doc("Customer", "_Test Customer")
 		customer.on_hold = 1
-		customer.release_date = nowdate()
+		customer.release_date = add_days(nowdate(), 1)
 		customer.save()
 
 		make_quotation(do_not_save=True).save()
@@ -291,6 +297,21 @@ class TestCustomer(ERPNextTestSuite):
 		customer.release_date = add_days(nowdate(), -1)
 		customer.save()
 		sales_order.save()
+
+	def test_customer_hold_ends_on_release_date(self):
+		from erpnext.selling.doctype.customer.customer import is_customer_blocked
+
+		frappe.db.set_value("Customer", "_Test Customer", {"on_hold": 1, "release_date": nowdate()})
+		self.assertFalse(is_customer_blocked("_Test Customer"))
+
+	def test_blocked_customer_can_make_returns(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		sales_invoice = create_sales_invoice()
+		frappe.db.set_value("Customer", sales_invoice.customer, "on_hold", 1)
+
+		make_sales_return(sales_invoice.name).submit()
 
 	def test_duplicate_customer(self):
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
@@ -382,6 +403,14 @@ class TestCustomer(ERPNextTestSuite):
 		)
 
 	def test_customer_credit_limit_on_change(self):
+		new_customer = frappe.new_doc("Customer")
+		new_customer.customer_name = "_Test Duplicate Credit Limit"
+		new_customer.customer_group = "_Test Customer Group"
+		new_customer.territory = "_Test Territory"
+		new_customer.append("credit_limits", {"credit_limit": 100, "company": "_Test Company"})
+		new_customer.append("credit_limits", {"credit_limit": 1000000, "company": "_Test Company"})
+		self.assertRaises(frappe.ValidationError, new_customer.insert)
+
 		outstanding_amt = self.get_customer_outstanding_amount()
 		customer = frappe.get_doc("Customer", "_Test Customer")
 		customer.append(

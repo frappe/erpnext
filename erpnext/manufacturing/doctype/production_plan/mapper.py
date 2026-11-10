@@ -6,13 +6,20 @@
 
 import frappe
 
+import erpnext
+
 
 @frappe.whitelist()
 def get_so_details(sales_order: str):
-	frappe.has_permission("Sales Order", "read", throw=True)
+	# same gate as sales_order_query: planners pick orders without a Sales Order role
+	frappe.has_permission("Production Plan", throw=True)
+	erpnext.require_user_permission("Sales Order", sales_order)
 
 	return frappe.db.get_value(
-		"Sales Order", sales_order, ["transaction_date", "customer", "grand_total"], as_dict=1
+		"Sales Order",
+		{"name": sales_order, "docstatus": 1},
+		["transaction_date", "customer", "grand_total"],
+		as_dict=1,
 	)
 
 

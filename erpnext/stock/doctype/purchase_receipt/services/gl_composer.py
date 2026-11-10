@@ -53,6 +53,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(doc)
 		stock_items = doc.get_stock_items()
+		perpetual_inventory = erpnext.is_perpetual_inventory_enabled(doc.company)
 		warehouse_with_no_account = []
 		landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 
@@ -109,6 +110,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 
 			if (
 				item.get("rejected_qty")
+				and item.item_code in stock_items
 				and not doc.is_internal_transfer()
 				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
@@ -290,6 +292,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			remarks = doc.get("remarks") or _("Accounting Entry for {0}").format(
 				"Asset" if d.is_fixed_asset else "Stock"
 			)
+			stock_value_diff = 0
+			if perpetual_inventory and d.item_code in stock_items and flt(d.qty):
+				stock_value_diff = get_stock_value_difference(doc.name, d.name, d.warehouse)
 
 			if (
 				provisional_accounting_for_non_stock_items
@@ -301,9 +306,9 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				doc.add_provisional_gl_entry(
 					d, gl_entries, doc.posting_date, d.get("provisional_expense_account")
 				)
-			elif flt(d.qty) and (flt(d.valuation_rate) or doc.is_return):
+			elif flt(d.qty) and (flt(d.valuation_rate) or flt(stock_value_diff) or doc.is_return):
 				if not (
-					(erpnext.is_perpetual_inventory_enabled(doc.company) and d.item_code in stock_items)
+					(perpetual_inventory and d.item_code in stock_items)
 					or (d.is_fixed_asset and not d.purchase_invoice)
 				):
 					continue
@@ -319,7 +324,6 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
 				elif inventory_account := doc.get_inventory_account_dict(d, inventory_account_map):
-					stock_value_diff = get_stock_value_difference(doc.name, d.name, d.warehouse)
 					stock_asset_account_name = inventory_account["account"]
 
 					supplier_warehouse_account = None
@@ -341,14 +345,13 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 					):
 						continue
 
-				if (flt(d.valuation_rate) or doc.is_return or d.is_fixed_asset) and flt(d.qty):
-					make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
-					outgoing_amount = make_stock_received_but_not_billed_entry(d)
-					make_landed_cost_gl_entries(d)
-					make_expenses_added_to_stock_entries(d)
-					make_amount_difference_entry(d)
-					make_sub_contracting_gl_entries(d)
-					make_divisional_loss_gl_entry(d, outgoing_amount)
+				make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
+				outgoing_amount = make_stock_received_but_not_billed_entry(d)
+				make_landed_cost_gl_entries(d)
+				make_expenses_added_to_stock_entries(d)
+				make_amount_difference_entry(d)
+				make_sub_contracting_gl_entries(d)
+				make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
 				not self.is_rejected_material_valued()
 				and d.rejected_warehouse
@@ -359,7 +362,8 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				doc.update_assets(d, d.valuation_rate)
 
-			if d.rejected_qty and self.is_rejected_material_valued():
+			# a non-stock item puts no rejected qty in stock
+			if d.rejected_qty and d.item_code in stock_items and self.is_rejected_material_valued():
 				stock_asset_rbnb = (
 					doc.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset

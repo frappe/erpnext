@@ -374,10 +374,16 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if not wo:
 			return
 
+		from erpnext.manufacturing.doctype.work_order.services.required_items import (
+			get_allowed_transfer_qty,
+		)
+
 		pending_by_item = {}
 		for r in wo.required_items:
 			pending_by_item[r.item_code] = (
-				pending_by_item.get(r.item_code, 0.0) + flt(r.required_qty) - flt(r.transferred_qty)
+				pending_by_item.get(r.item_code, 0.0)
+				+ get_allowed_transfer_qty(r.required_qty)
+				- flt(r.transferred_qty)
 			)
 
 		transfer_by_item = {}
@@ -484,13 +490,10 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			else None
 		)
 		wip_warehouse = self._resolve_wip_warehouse(work_order)
-		extra_pct = flt(
-			frappe.db.get_single_value("Manufacturing Settings", "transfer_extra_materials_percentage")
-		)
 		item_dict = frappe._dict()
 		for d in work_order.get("required_items"):
 			self._add_required_item(
-				item_dict, d, consider_job_card, job_card_items, wip_warehouse, extra_pct, work_order
+				item_dict, d, consider_job_card, job_card_items, wip_warehouse, work_order
 			)
 		return item_dict
 
@@ -505,19 +508,16 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 			return work_order.wip_warehouse
 		return None
 
-	def _add_required_item(
-		self, item_dict, d, consider_job_card, job_card_items, wip_warehouse, extra_pct, work_order
-	):
+	def _add_required_item(self, item_dict, d, consider_job_card, job_card_items, wip_warehouse, work_order):
+		from erpnext.manufacturing.doctype.work_order.services.required_items import (
+			get_allowed_transfer_qty,
+		)
+
 		if consider_job_card and d.item_code not in job_card_items:
 			return
 		if consider_job_card and not self._is_row_of_job_card_operation(d):
 			return
-		additional_qty = extra_pct * flt(d.required_qty) / 100 if extra_pct else 0.0
-		transfer_pending = (
-			(flt(d.required_qty) + additional_qty) > flt(d.transferred_qty)
-			if additional_qty
-			else flt(d.required_qty) > flt(d.transferred_qty)
-		)
+		transfer_pending = get_allowed_transfer_qty(d.required_qty) > flt(d.transferred_qty)
 		can_transfer = transfer_pending or self.backflush_based_on == "Material Transferred for Manufacture"
 		if not can_transfer or not d.include_item_in_manufacturing:
 			return

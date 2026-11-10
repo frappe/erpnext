@@ -27,7 +27,7 @@ class TestFormLoads(ERPNextTestSuite):
 
 	def assertFormLoad(self, doctype, docname):
 		# reset previous response
-		frappe.response = frappe._dict({"docs": []})
+		frappe.local.response = frappe._dict({"docs": []})
 		frappe.response.docinfo = None
 
 		try:
