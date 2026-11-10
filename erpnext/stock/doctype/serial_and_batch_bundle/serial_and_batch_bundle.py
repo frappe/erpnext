@@ -3304,6 +3304,24 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	return reserved_batches_details
 
 
+def get_batch_qty_for_stock(batch_no=None, warehouse=None, posting_date=None, posting_time=None, **kwargs):
+	"""Internal stock calculations must include quantities in all relevant warehouses."""
+	kwargs = frappe._dict(kwargs)
+	kwargs.update(
+		batch_no=batch_no,
+		warehouse=warehouse,
+		based_on=frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
+	)
+	if not kwargs.posting_datetime and posting_date:
+		kwargs.posting_datetime = combine_datetime(posting_date, posting_time)
+
+	batches = get_auto_batch_nos(kwargs)
+	if batch_no and warehouse:
+		return sum(row.qty for row in batches if row.batch_no == batch_no)
+
+	return batches
+
+
 def get_auto_batch_nos(kwargs):
 	if kwargs.against_sales_order and (
 		only_consider_batches := get_batches_to_be_considered(kwargs.against_sales_order)

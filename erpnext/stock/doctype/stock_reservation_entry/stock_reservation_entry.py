@@ -11,6 +11,7 @@ from frappe.query_builder import Case, Order
 from frappe.query_builder.functions import Sum
 from frappe.utils import ceil, cint, floor, flt, nowdate, nowtime, parse_json
 
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 from erpnext.stock.utils import _get_stock_balance, get_or_make_bin
 
 
@@ -838,10 +839,8 @@ def get_available_qty_to_reserve(
 ) -> float:
 	"""Returns `Available Qty to Reserve (Actual Qty - Reserved Qty)` for Item, Warehouse and Batch combination."""
 
-	from erpnext.stock.doctype.batch.batch import get_batch_qty
-
 	if batch_no:
-		return get_batch_qty(
+		return get_batch_qty_for_stock(
 			item_code=item_code,
 			warehouse=warehouse,
 			batch_no=batch_no,
