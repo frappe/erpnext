@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
+from frappe.model.docstatus import DocStatus
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 from frappe.utils.data import DateTimeLikeObject
@@ -1374,6 +1375,10 @@ class StockReconciliation(StockController):
 
 	def submit(self):
 		if len(self.items) > 100:
+			# the background job loads the document from the database, so save the current version
+			self.check_permission("submit")
+			self.docstatus = DocStatus.draft()
+			self.save()
 			msgprint(
 				_(
 					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
