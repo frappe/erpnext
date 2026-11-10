@@ -1089,6 +1089,7 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 
 	def update_packed_item_qty(source, target, source_parent) -> None:
 		target.qty = target.stock_qty = get_packed_qty_to_pick(source, so_items[source.parent_detail_docname])
+		target.conversion_factor = 1
 
 	def should_pick_order_item(item) -> bool:
 		return (
