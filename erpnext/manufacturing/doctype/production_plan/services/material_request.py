@@ -838,8 +838,11 @@ def _material_request_item_row(
 		or item_group_defaults.get("default_warehouse")
 	)
 	uom = _mr_purchase_uom(row) or row.get("stock_uom")
-	quantity = required_qty / conversion_factor
-	if not is_transfer:  # a transfer rounds only what is left to purchase
+	if is_transfer:  # whole stock UOM; what is left to purchase rounds later
+		precision = frappe.get_precision("Material Request Plan Item", "quantity")
+		stock_qty = _round_up_whole_uom(flt(required_qty, precision), row.get("stock_uom"))
+		quantity = stock_qty / conversion_factor
+	else:
 		quantity = _round_up_whole_uom(
 			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
 		)
