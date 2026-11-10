@@ -1006,24 +1006,10 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 	pr_items_billed_amount = get_billed_amount_against_pr(pr_items)
 	set_amount_net_of_returns(pr_details)
 
+	allocated_amounts = get_billed_amounts(pr_details, po_billed_amt_details, pr_items_billed_amount)
 	updated_pr = []
 	for pr_item in pr_details:
-		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
-
-		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
-
-		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_agianst_pr < pr_item.net_amount:
-			pending_to_bill = flt(pr_item.net_amount) - billed_amt_agianst_pr
-			if pending_to_bill <= billed_against_po:
-				billed_amt_agianst_pr += pending_to_bill
-				billed_against_po -= pending_to_bill
-			else:
-				billed_amt_agianst_pr += billed_against_po
-				billed_against_po = 0
-
-		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
+		billed_amt_agianst_pr = allocated_amounts[pr_item.name]
 
 		if pr_item.billed_amt != billed_amt_agianst_pr:
 			# update existing doc if possible
@@ -1043,6 +1029,31 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 			updated_pr.append(pr_item.parent)
 
 	return updated_pr
+
+
+def get_billed_amounts(pr_details, po_billed_amt_details, pr_items_billed_amount):
+	billed_amounts = {}
+	for pr_item in pr_details:
+		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
+
+		# Get billed amount directly against Purchase Receipt
+		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
+
+		# Distribute billed amount directly against PO between PRs based on FIFO
+		if billed_against_po and billed_amt_agianst_pr < pr_item.net_amount:
+			pending_to_bill = flt(pr_item.net_amount) - billed_amt_agianst_pr
+			if pending_to_bill <= billed_against_po:
+				billed_amt_agianst_pr += pending_to_bill
+				billed_against_po -= pending_to_bill
+			else:
+				billed_amt_agianst_pr += billed_against_po
+				billed_against_po = 0
+
+		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
+
+		billed_amounts[pr_item.name] = billed_amt_agianst_pr
+
+	return billed_amounts
 
 
 def set_amount_net_of_returns(pr_details):
