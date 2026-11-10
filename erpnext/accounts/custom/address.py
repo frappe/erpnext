@@ -5,6 +5,9 @@ from frappe.contacts.doctype.address.address import (
 	get_address_display,
 	get_address_templates,
 )
+from frappe.desk.search import get_std_fields_list
+from frappe.model import get_permitted_fields
+from frappe.utils import cint
 
 
 class ERPNextAddress(Address):
@@ -75,6 +78,50 @@ class ERPNextAddress(Address):
 			frappe.db.set_value(
 				"Customer", customer, "primary_address", address_display, update_modified=False
 			)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def address_query(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict | str | None = None
+):
+	if doctype != "Address":
+		return []
+
+	filters = frappe._dict(frappe.parse_json(filters) or {})
+	company_address = filters.pop("is_your_company_address", None)
+	if company_address not in (None, 0, 1, "0", "1"):
+		frappe.throw(_("Invalid company address filter"))
+
+	link_filters = {"parenttype": "Address"}
+	for fieldname in ("link_doctype", "link_name"):
+		if value := filters.pop(fieldname, None):
+			link_filters[fieldname] = value
+
+	permitted_fields = get_permitted_fields("Address")
+	fields = [
+		fieldname
+		for fieldname in get_std_fields_list(frappe.get_meta("Address"), searchfield)
+		if fieldname in permitted_fields
+	]
+	address = frappe.qb.DocType("Address")
+	query = frappe.qb.get_query(
+		"Address",
+		fields=fields,
+		filters=filters,
+		or_filters=[[fieldname, "like", f"%{txt}%"] for fieldname in fields] if txt else None,
+		order_by="idx desc, creation desc, name",
+		limit=page_len,
+		offset=start,
+		ignore_permissions=False,
+	).where(address.disabled == 0)
+	if len(link_filters) > 1:
+		linked_addresses = frappe.qb.get_query("Dynamic Link", fields=["parent"], filters=link_filters)
+		query = query.where(address.name.isin(linked_addresses))
+	if company_address is not None:
+		# Users may select company addresses without being able to read or edit the protected flag.
+		query = query.where(address.is_your_company_address == cint(company_address))
+	return query.run()
 
 
 @frappe.whitelist()
