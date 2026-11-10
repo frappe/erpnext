@@ -2886,7 +2886,8 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		# shifts future balances — no full repost is needed. Update qty and value in place:
 		# stock_value = qty_after_transaction * standard rate, which is constant across this range
 		# (a rate change posts a reconciliation that bounds it). stock_value_difference is unchanged
-		# because every future balance shifts by the same amount.
+		# because every future balance shifts by the same amount; the bounding reconciliation is
+		# not shifted and gets its difference recomputed by the repost queued for it.
 		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import get_item_standard_rate
 
 		standard_rate = flt(
