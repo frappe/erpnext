@@ -249,6 +249,8 @@ class ItemStandardCost(Document):
 					"warehouse": row.warehouse,
 					"qty": row.actual_qty,
 					"valuation_rate": self.standard_rate,
+					# a serial or batch row is revalued over everything the warehouse holds
+					"reconcile_all_serial_batch": 1,
 				},
 			)
 
