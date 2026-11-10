@@ -367,6 +367,7 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 			packed_item.warehouse,
 			packed_item.reserve_stock,
 			packed_item.qty,
+			packed_item.product_bundle,
 			order_item.stock_qty.as_("order_stock_qty"),
 		)
 		.where((packed_item.parenttype == doctype) & packed_item.parent_detail_docname.isin(list(order_rows)))
