@@ -1297,8 +1297,7 @@ class update_entries_after:
 				).format(bold(sle.item_code), bold(self.company), bold(sle.posting_date))
 			)
 
-		# an adjustment entry moves stock rather than setting a balance, as does each leg of a
-		# serial or batch row (an outward entry for the counted-out bundle, an inward one for the new)
+		# an adjustment entry or a bundle leg moves stock rather than setting a balance
 		if (
 			sle.voucher_type == "Stock Reconciliation"
 			and sle.get("qty_after_transaction") is not None
