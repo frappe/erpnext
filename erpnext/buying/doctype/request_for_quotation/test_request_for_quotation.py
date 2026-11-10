@@ -183,6 +183,46 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_accounting_dimensions_flow_from_material_request_to_supplier_quotation(self):
+		from erpnext.stock.doctype.material_request.material_request import (
+			make_request_for_quotation as make_rfq_from_mr,
+		)
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		mr = make_material_request(cost_center="_Test Cost Center - _TC", do_not_submit=True)
+		mr.items[0].location = "Block 1"
+		mr.save()
+		mr.submit()
+
+		rfq = make_rfq_from_mr(mr.name)
+		self.assertEqual(rfq.items[0].cost_center, "_Test Cost Center - _TC")
+		self.assertEqual(rfq.items[0].location, "Block 1")
+		rfq.append("suppliers", {"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"})
+		rfq.insert()
+		rfq.submit()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+		self.assertEqual(sq.items[0].location, "Block 1")
+
+	def test_portal_uses_stored_rfq_accounting_dimensions(self):
+		from erpnext.templates.pages.rfq import get_portal_doc
+
+		rfq = make_request_for_quotation(do_not_submit=True)
+		rfq.items[0].cost_center = "_Test Cost Center - _TC"
+		rfq.items[0].location = "Block 1"
+		rfq.save()
+		rfq.submit()
+
+		portal_doc = get_portal_doc(rfq)
+		portal_doc["supplier"] = rfq.suppliers[0].supplier
+		portal_doc["items"][0]["cost_center"] = "Untrusted Cost Center"
+		portal_doc["items"][0]["location"] = "Untrusted Location"
+
+		sq = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
+		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+		self.assertEqual(sq.items[0].location, "Block 1")
+
 	def test_rate_quoted_from_portal_is_kept(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 
