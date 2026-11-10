@@ -510,6 +510,59 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 9)
 		self.assertEqual(get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code), 9)
 
+	def test_closing_again_after_cancel_keeps_bundle_entries_in_sync(self):
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_data
+
+		item_code = make_item(
+			"_Test Item With Batch For POS Closing Again",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-POS-CLOSING-AGAIN-.####",
+				"create_new_batch": 1,
+			},
+		).name
+		se = make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		pos_inv = create_pos_invoice(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			do_not_submit=True,
+		)
+		pos_inv.payments[0].amount = pos_inv.grand_total
+		pos_inv.submit()
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+		closing_entry.cancel()
+		make_closing_entry_from_opening(opening_entry).submit()
+
+		pos_inv.reload()
+		fields = ["voucher_type", "voucher_no", "voucher_detail_no", "posting_datetime", "is_cancelled"]
+		bundle = frappe.db.get_value(
+			"Serial and Batch Bundle", pos_inv.items[0].serial_and_batch_bundle, fields, as_dict=True
+		)
+		entry = frappe.db.get_value(
+			"Serial and Batch Entry",
+			{"parent": pos_inv.items[0].serial_and_batch_bundle},
+			fields,
+			as_dict=True,
+		)
+		self.assertEqual(bundle.voucher_no, pos_inv.consolidated_invoice)
+		self.assertEqual(entry, bundle)
+
+		rows = get_data(frappe._dict(item_code=item_code))
+		self.assertEqual(
+			sorted((row.voucher_no, row.qty) for row in rows),
+			sorted([(se.name, 10), (pos_inv.consolidated_invoice, -2)]),
+		)
+
 	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "Sales Invoice"})
 	def test_closing_entries_with_sales_invoice(self):
 		test_user, pos_profile = init_user_and_profile()
