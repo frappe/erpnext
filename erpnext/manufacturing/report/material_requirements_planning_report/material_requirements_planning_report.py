@@ -852,13 +852,15 @@ class MaterialRequirementsPlanningReport:
 				child_doctype.planned_qty,
 				child_doctype.uom,
 			)
-			.where(
-				(doctype.from_date >= self.filters.from_date)
-				& (doctype.to_date <= self.filters.to_date)
-				& (child_doctype.parentfield == "items")
-			)
+			.where(child_doctype.parentfield == "items")
 			.orderby(child_doctype.delivery_date)
 		)
+
+		if self.filters.get("from_date"):
+			query = query.where(child_doctype.delivery_date >= self.filters.from_date)
+
+		if self.filters.get("to_date"):
+			query = query.where(child_doctype.delivery_date <= self.filters.to_date)
 
 		fields = {
 			"parent_warehouse": self.filters.get("warehouse"),
