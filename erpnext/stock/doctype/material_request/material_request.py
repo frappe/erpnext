@@ -994,6 +994,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 					["name", "material_request_item"],
 					["parent", "material_request"],
 					["project", "project_name"],
+					["cost_center", "cost_center"],
 				],
 				"postprocess": update_item,
 				"condition": select_item,

@@ -616,6 +616,7 @@ accounting_dimension_doctypes = [
 	"Journal Entry Account",
 	"Journal Entry Template Account",
 	"Material Request Item",
+	"Request for Quotation Item",
 	"Delivery Note Item",
 	"Purchase Receipt Item",
 	"Stock Entry Detail",
