@@ -800,7 +800,7 @@ def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 
 def _round_up_whole_uom(quantity, uom):
 	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
-		return ceil(quantity)
+		return ceil(flt(quantity, frappe.get_precision("Material Request Plan Item", "quantity")))
 	return quantity
 
 
@@ -839,9 +839,7 @@ def _material_request_item_row(
 	)
 	uom = _mr_purchase_uom(row) or row.get("stock_uom")
 	if is_transfer:  # whole stock UOM; what is left to purchase rounds later
-		precision = frappe.get_precision("Material Request Plan Item", "quantity")
-		stock_qty = _round_up_whole_uom(flt(required_qty, precision), row.get("stock_uom"))
-		quantity = stock_qty / conversion_factor
+		quantity = _round_up_whole_uom(required_qty, row.get("stock_uom")) / conversion_factor
 	else:
 		quantity = _round_up_whole_uom(
 			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
