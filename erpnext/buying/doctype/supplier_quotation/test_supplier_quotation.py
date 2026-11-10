@@ -469,6 +469,24 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		po.insert()
 
+	def test_purchase_order_mapping_replaces_existing_taxes(self):
+		tax = {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Excise Duty - _TC",
+			"description": "Excise Duty",
+			"rate": 10,
+			"cost_center": "_Test Cost Center - _TC",
+		}
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq.set("taxes", [tax])
+		sq.submit()
+		target = frappe.new_doc("Purchase Order", supplier=sq.supplier, company=sq.company)
+		target.append("taxes", tax)
+
+		po = make_purchase_order(sq.name, target.as_dict())
+
+		self.assertEqual(len(po.taxes), 1)
+
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_zero_qty_in_supplier_quotation": 1})
 	def test_map_purchase_order_from_zero_qty_supplier_quotation(self):
 		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
