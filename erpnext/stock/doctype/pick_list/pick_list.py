@@ -282,6 +282,49 @@ class PickList(TransactionBase):
 	def before_submit(self):
 		self.validate_sales_order()
 		self.validate_picked_items()
+<<<<<<< HEAD
+=======
+		self.validate_picked_serial_nos()
+		self.validate_pending_qty_in_work_order()
+
+	def validate_pending_qty_in_work_order(self):
+		"""Rows covered by a live material request must stay within that request;
+		every other row must fit the work order's pending requirement."""
+		if not self.work_order:
+			return
+
+		from erpnext.manufacturing.doctype.work_order.services.required_items import RequiredItemsService
+
+		work_order = frappe.get_doc("Work Order", self.work_order, for_update=True)
+		live_requests = {}
+		request_pending = {}
+		incoming = {}
+
+		for row in self.locations:
+			if row.material_request not in live_requests:
+				live_requests[row.material_request] = is_live_material_request(row.material_request)
+
+			if not (row.material_request_item and live_requests[row.material_request]):
+				incoming[row.item_code] = incoming.get(row.item_code, 0.0) + flt(row.picked_qty)
+				continue
+
+			if row.material_request_item not in request_pending:
+				stock_qty, ordered_qty = frappe.db.get_value(
+					"Material Request Item", row.material_request_item, ["stock_qty", "ordered_qty"]
+				)
+				request_pending[row.material_request_item] = flt(stock_qty) - flt(ordered_qty)
+
+			if flt(row.picked_qty - request_pending[row.material_request_item], 6) > 0:
+				frappe.throw(
+					_("Row #{0}: picked qty {1} {2} exceeds the pending qty in Material Request {3}.").format(
+						row.idx, row.picked_qty, row.stock_uom, row.material_request
+					),
+					title=_("Exceeds Requested Qty"),
+				)
+			request_pending[row.material_request_item] -= flt(row.picked_qty)
+
+		RequiredItemsService(work_order).validate_incoming_material_demand(incoming)
+>>>>>>> bb178d6 (fix(stock): require a pick list row's serial nos to match its picked qty)
 
 	def validate_sales_order(self):
 		"""Raises an exception if the `Sales Order` has reserved stock."""
@@ -315,6 +358,35 @@ class PickList(TransactionBase):
 			if not self.scan_mode and not item.picked_qty:
 				# if the user has not entered any picked qty, set it to stock_qty, before submit
 				item.picked_qty = item.stock_qty
+
+	def validate_picked_serial_nos(self):
+		bundle_qty = self.get_serial_bundle_qty()
+		for row in self.locations:
+			serial_qty = len(get_serial_nos(row.serial_no)) if row.serial_no else None
+			if row.serial_and_batch_bundle in bundle_qty:
+				serial_qty = bundle_qty[row.serial_and_batch_bundle]
+
+			if serial_qty is not None and serial_qty != flt(row.picked_qty):
+				frappe.throw(
+					_(
+						"Row #{0}: {1} serial nos are set but the picked qty is {2}. Set only the picked serial nos."
+					).format(row.idx, serial_qty, row.picked_qty),
+					title=_("Serial Nos Do Not Match Picked Qty"),
+				)
+
+	def get_serial_bundle_qty(self):
+		bundles = [row.serial_and_batch_bundle for row in self.locations if row.serial_and_batch_bundle]
+		if not bundles:
+			return {}
+
+		return {
+			bundle.name: abs(bundle.total_qty)
+			for bundle in frappe.get_all(
+				"Serial and Batch Bundle",
+				filters={"name": ("in", bundles), "has_serial_no": 1},
+				fields=["name", "total_qty"],
+			)
+		}
 
 	def on_submit(self):
 		self.validate_serial_and_batch_bundle()
