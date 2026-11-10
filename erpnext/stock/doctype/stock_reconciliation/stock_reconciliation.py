@@ -465,6 +465,7 @@ class StockReconciliation(StockController):
 							"warehouse": item.warehouse,
 							"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 							"ignore_warehouse": 1,
+							"ignore_reserved_stock": True,
 						}
 					)
 				)
@@ -489,6 +490,7 @@ class StockReconciliation(StockController):
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
 							"for_stock_levels": True,
+							"ignore_reserved_stock": True,
 							"ignore_voucher_nos": [self.name],
 						}
 					)
