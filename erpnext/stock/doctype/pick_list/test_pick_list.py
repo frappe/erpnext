@@ -2606,6 +2606,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(len(next_se.items), 1)
 		self.assertEqual(next_se.items[0].qty, 6)
 
+<<<<<<< HEAD
 	def test_create_second_delivery_note_with_fully_delivered_location(self):
 		# When one pick list item is fully delivered by the first Delivery Note
 		# and another item is still pending, creating a second Delivery Note from
@@ -2644,6 +2645,41 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(len(dn2.items), 1)
 		self.assertEqual(dn2.items[0].item_code, item_b)
 		self.assertEqual(dn2.items[0].qty, 5)
+=======
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_next_stock_entry_from_pick_list_gets_only_untransferred_serial_nos(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as pick_list_for_wo
+		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUNT-.#####"}
+		).name
+		bom = make_bom(item=fg_item, rate=100, raw_materials=[rm_item])
+		make_stock_entry(item=rm_item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		wo = make_work_order(item=fg_item, qty=3, bom_no=bom.name, company="_Test Company")
+		wo.required_items[0].source_warehouse = "_Test Warehouse - _TC"
+		wo.wip_warehouse = "Work In Progress - _TC"
+		wo.fg_warehouse = "Finished Goods - _TC"
+		wo.submit()
+
+		pick_list = pick_list_for_wo(wo.name, for_qty=wo.qty)
+		pick_list.save().submit()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+
+		first_transfer = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		first_transfer.items[0].qty = 2
+		first_transfer.items[0].serial_no = "\n".join(picked_serial_nos[:2])
+		first_transfer.save().submit()
+
+		pick_list.reload()
+		second_transfer = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		self.assertEqual(second_transfer.items[0].qty, 1)
+		self.assertEqual(get_serial_nos(second_transfer.items[0].serial_no), picked_serial_nos[2:])
+		second_transfer.save().submit()
+>>>>>>> 50f5b9f (test: next stock entry from a pick list gets only untransferred serial nos)
 
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
