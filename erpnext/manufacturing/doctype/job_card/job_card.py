@@ -1535,26 +1535,30 @@ class JobCard(Document):
 		if not (self.work_order and flt(self.for_quantity)):
 			return False
 
+		wo_qty = self.get_work_order_qty_details().operation_qty
+		if not wo_qty:
+			return False
+
 		wo_items = frappe.get_all(
 			"Work Order Item",
 			filters={"parent": self.work_order, "parenttype": "Work Order"},
 			fields=["item_code", "required_qty", "operation", "operation_row_id"],
 		)
-		items = {
-			item.item_code: item
-			for item in frappe.get_all(
+		transferred = dict(
+			frappe.get_all(
 				"Job Card Item",
 				filters={"parent": self.name, "parenttype": "Job Card"},
-				fields=["item_code", "required_qty", "transferred_qty"],
+				fields=["item_code", "transferred_qty"],
+				as_list=True,
 			)
-		}
+		)
+		other_job_cards_qty = self.get_other_job_cards_qty()
 		precision = self.precision("transferred_qty", "items")
 		for row in wo_items:
 			if not self.is_own_material(row):
 				continue
-			# a material missing from the job card is short by all of it
-			item = items.get(row.item_code) or frappe._dict(required_qty=row.required_qty)
-			if flt(item.transferred_qty, precision) < flt(item.required_qty, precision):
+			expected = self.get_required_qty(row, wo_qty, other_job_cards_qty)
+			if flt(transferred.get(row.item_code), precision) < flt(expected, precision):
 				return True
 		return False
 
