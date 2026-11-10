@@ -213,9 +213,9 @@ class POSInvoice(SalesInvoice):
 
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
+		self.validate_auto_set_posting_time()
 		self.validate_pos_opening_entry()
 		self.validate_is_pos_using_sales_invoice()
-		self.validate_auto_set_posting_time()
 		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")

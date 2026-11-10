@@ -11,7 +11,18 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
-from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate, strip_html
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	strip_html,
+)
 from frappe.utils.data import comma_and
 
 import erpnext
@@ -1397,6 +1408,7 @@ class SalesInvoice(SellingController):
 			)
 
 	def validate_pos_opening_entry(self):
+		"""Require an open session matching the invoice's posting date."""
 		opening_entries = frappe.get_all(
 			"POS Opening Entry",
 			fields=["name", "period_start_date"],
@@ -1417,7 +1429,21 @@ class SalesInvoice(SellingController):
 					"POS Profile - {0} has multiple open POS Opening Entries. Please close or cancel the existing entries before proceeding."
 				).format(self.pos_profile),
 			)
-		if frappe.utils.get_date_str(opening_entries[0].get("period_start_date")) != frappe.utils.today():
+		opening_entry = opening_entries[0]
+		if self.set_posting_time:
+			posting_datetime = get_datetime(f"{self.posting_date} {self.posting_time or '00:00:00'}")
+			if getdate(posting_datetime) != getdate(opening_entry.period_start_date) or (
+				posting_datetime < get_datetime(opening_entry.period_start_date)
+			):
+				frappe.throw(
+					_(
+						"Posting date and time must be on the same day as, and at or after, the start of POS Opening Entry {0}: {1}."
+					).format(opening_entry.name, opening_entry.period_start_date)
+				)
+			if getdate(posting_datetime) < getdate():
+				return
+
+		if getdate(opening_entry.period_start_date) != getdate():
 			frappe.throw(
 				title=_("Outdated POS Opening Entry"),
 				msg=_(
