@@ -407,10 +407,15 @@ class SellingController(StockController):
 
 	def get_item_list(self):
 		il = []
-		picked_serial_nos = None
-		picked_batches = frappe._dict()
+		picked_serial_nos = picked_batches = None
 		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
+<<<<<<< HEAD
 			picked_serial_nos = self.get_serial_nos_used_in_rows()
+=======
+			service = SerialBatchBundleService(self)
+			picked_serial_nos = service.get_serial_nos_used_in_rows()
+			picked_batches = service.get_batches_used_in_rows()
+>>>>>>> 679fc27 (fix(stock): also skip batch qty held by bundles already on the rows)
 
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
@@ -1225,6 +1230,7 @@ def get_serial_and_batch_bundle(
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+	from erpnext.stock.services.serial_batch_bundle_service import add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
@@ -1264,11 +1270,12 @@ def get_serial_and_batch_bundle(
 			d.serial_no for d in doc.get("entries") or [] if d.serial_no
 		)
 	if picked_batches is not None:
-		add_picked_batches(picked_batches, doc)
+		add_picked_batches(picked_batches, doc.get("entries") or [])
 
 	return doc.name
 
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 def add_picked_batches(picked_batches, bundle):
@@ -1281,6 +1288,8 @@ def add_picked_batches(picked_batches, bundle):
 			picked.qty += entry.qty
 
 
+=======
+>>>>>>> 679fc27 (fix(stock): also skip batch qty held by bundles already on the rows)
 def get_delivered_serial_batch_for_reservation(item):
 	"""Serial nos and per-batch qty delivered by a stock row.
 
