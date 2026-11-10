@@ -67,7 +67,12 @@ class TestCompany(unittest.TestCase):
 				try:
 					company = frappe.new_doc("Company")
 					company.company_name = template
-					company.abbr = random_string(3)
+					# a short random abbr collides with existing test companies often enough
+					# to flake, so pick one that is verified unique
+					abbr = random_string(3)
+					while frappe.db.exists("Company", {"abbr": abbr}):
+						abbr = random_string(3)
+					company.abbr = abbr
 					company.default_currency = "USD"
 					company.create_chart_of_accounts_based_on = "Standard Template"
 					company.chart_of_accounts = template
