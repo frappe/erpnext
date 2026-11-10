@@ -1870,7 +1870,9 @@ def add_product_bundles_to_delivery_note(
 			continue
 
 		dn_bundle_item = map_child_doc(sales_order_item, delivery_note, item_mapper)
-		dn_bundle_item.qty = pending_qty
+		dn_bundle_item.qty = flt(
+			pending_qty / (flt(dn_bundle_item.conversion_factor) or 1), dn_bundle_item.precision("qty")
+		)
 		dn_bundle_item.against_pick_list = pick_list.name
 		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
 
