@@ -6,6 +6,10 @@ from frappe.core.doctype.user_permission.user_permission import add_user_permiss
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from erpnext.controllers import queries
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -29,6 +33,27 @@ class TestQueries(ERPNextTestSuite):
 		self.assertGreaterEqual(len(query(txt="_Test Lead")), 4)
 		self.assertEqual(len(query(txt="_Test Lead 4")), 1)
 
+	def test_lead_query_ranking_is_case_insensitive(self):
+		"""A match at the start must rank first whatever its case.
+
+		The filter uses .like(), which frappe renders as ILIKE on PostgreSQL, so both leads match.
+		Ranking used a bare Locate(), which becomes case-sensitive strpos() there: the upper-cased
+		lead scores no match, falls back to 99999 and sorts last, while MariaDB's case-insensitive
+		LOCATE ranks it first. Same query, different order -- and a different page when page_len is
+		small enough to cut between them.
+		"""
+		early, late = "ZZABCD Ranking Lead", "Ranking Lead zzabcd"
+		for lead_name in (early, late):
+			if not frappe.db.exists("Lead", {"lead_name": lead_name}):
+				frappe.get_doc({"doctype": "Lead", "lead_name": lead_name}).insert()
+
+		query = add_default_params(queries.lead_query, "Lead")
+		names = [row[1] for row in query(txt="zzabcd")]
+
+		self.assertIn(early, names)
+		self.assertIn(late, names)
+		self.assertLess(names.index(early), names.index(late))
+
 	def test_item_query(self):
 		query = add_default_params(queries.item_query, "Item")
 
@@ -47,6 +72,18 @@ class TestQueries(ERPNextTestSuite):
 		query(txt="", filters={"customer": ""})
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
+
+	def test_subcontracted_item_query(self):
+		variant, _ = make_subcontracted_variant()
+		item_without_bom = make_item(
+			"Subcontracted Item Without BOM", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		)
+		query = add_default_params(queries.subcontracted_item_query, "Item")
+
+		items = query(txt="Subcontracted", page_len=100)
+
+		self.assert_nested_in(variant.name, items)
+		self.assertNotIn(item_without_bom.name, [row[0] for row in items])
 
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")
@@ -92,6 +129,26 @@ class TestQueries(ERPNextTestSuite):
 	def test_get_purchase_invoices_query(self):
 		query = add_default_params(queries.get_purchase_invoices, "Purchase Invoice")
 		self.assertIsInstance(query(txt="", filters={}), list | tuple)
+
+	def test_get_delivery_notes_to_be_billed_skips_fully_returned(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		returned_dn = create_delivery_note(qty=2)
+		dn_return = make_sales_return(returned_dn.name)
+		dn_return.submit()
+		# a new doc misses the is_return part of status_updater, so update the original DN explicitly
+		frappe.get_doc("Delivery Note", dn_return.name).update_prevdoc_status()
+		returned_dn.reload()
+		self.assertEqual(returned_dn.status, "Return Issued")
+
+		open_dn = create_delivery_note(qty=2)
+
+		query = add_default_params(queries.get_delivery_notes_to_be_billed, "Delivery Note")
+		result = query(filters={"name": ["in", [returned_dn.name, open_dn.name]]})
+
+		self.assert_nested_in(open_dn.name, result)
+		self.assertNotIn(returned_dn.name, [row[0] for row in result])
 
 	def test_get_filtered_child_rows_query(self):
 		# idx is an integer column. Searching child rows by it must run on Postgres

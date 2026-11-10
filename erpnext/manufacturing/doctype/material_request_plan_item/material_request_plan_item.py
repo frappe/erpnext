@@ -46,6 +46,7 @@ class MaterialRequestPlanItem(Document):
 		schedule_date: DF.Date | None
 		stock_reserved_qty: DF.Float
 		sub_assembly_item_reference: DF.Data | None
+		supplier: DF.Link | None
 		uom: DF.Link | None
 		warehouse: DF.Link
 	# end: auto-generated types

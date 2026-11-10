@@ -1,7 +1,9 @@
 {
  "actions": [],
  "creation": "2018-02-26 17:39:11.249778",
+ "description": "An item you can use in place of another.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item-alternative",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -18,14 +20,16 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item Code",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "alternative_item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Alternative Item Code",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -50,8 +54,9 @@
    "label": "Alternative Item Name"
   }
  ],
+ "icon": "replace",
  "links": [],
- "modified": "2024-03-27 13:09:53.809482",
+ "modified": "2026-10-07 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Alternative",

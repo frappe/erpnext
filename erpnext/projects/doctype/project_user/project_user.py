@@ -20,7 +20,7 @@ class ProjectUser(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		project_status: DF.Text | None
+		project_status: DF.TextEditor | None
 		user: DF.Link
 		view_attachments: DF.Check
 		welcome_email_sent: DF.Check

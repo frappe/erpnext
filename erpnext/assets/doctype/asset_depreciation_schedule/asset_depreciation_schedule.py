@@ -40,7 +40,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		frequency_of_depreciation: DF.Int
 		naming_series: DF.Literal["ACC-ADS-.YYYY.-"]
 		net_purchase_amount: DF.Currency
-		notes: DF.SmallText | None
+		notes: DF.TextEditor | None
 		opening_accumulated_depreciation: DF.Currency
 		opening_number_of_booked_depreciations: DF.Int
 		rate_of_depreciation: DF.Percent
@@ -55,6 +55,7 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 		if not self.finance_book_id:
 			self.create_depreciation_schedule()
 		self.update_shift_depr_schedule()
+		self.validate_manual_schedule()
 
 	def validate_another_asset_depr_schedule_does_not_exist(self):
 		finance_book_filter = ["finance_book", "is", "not set"]
@@ -84,6 +85,43 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 					)
 				)
 
+	def validate_manual_schedule(self):
+		if self.depreciation_method != "Manual" or self.flags.is_rescheduled:
+			return
+
+		available_for_use_date = frappe.db.get_value("Asset", self.asset, "available_for_use_date")
+		for row in self.get("depreciation_schedule"):
+			self.validate_manual_row(row, available_for_use_date)
+
+		self.validate_manual_total()
+		self.set_accumulated_depreciation()
+
+	def validate_manual_row(self, row, available_for_use_date):
+		if flt(row.depreciation_amount) <= 0:
+			frappe.throw(_("Row #{0}: Depreciation Amount must be greater than zero").format(row.idx))
+
+		if getdate(row.schedule_date) < getdate(available_for_use_date):
+			frappe.throw(
+				_("Row #{0}: Schedule Date cannot be before the Available-for-use Date {1}").format(
+					row.idx, frappe.format(available_for_use_date, "Date")
+				)
+			)
+
+	def validate_manual_total(self):
+		precision = self.precision("value_after_depreciation")
+		pending_amount = sum(
+			flt(row.depreciation_amount) for row in self.depreciation_schedule if not row.journal_entry
+		)
+		depreciable_amount = flt(self.value_after_depreciation) - flt(self.expected_value_after_useful_life)
+
+		if flt(pending_amount, precision) != flt(depreciable_amount, precision):
+			frappe.throw(
+				_("Total Depreciation Amount {0} must be equal to the depreciable value {1}").format(
+					frappe.bold(frappe.format(pending_amount, "Currency")),
+					frappe.bold(frappe.format(depreciable_amount, "Currency")),
+				)
+			)
+
 	def on_submit(self):
 		self.validate_asset()
 		self.db_set("status", "Active")
@@ -101,6 +139,17 @@ class AssetDepreciationSchedule(DepreciationScheduleController):
 				_("Asset {0} is not submitted. Please submit the asset before proceeding.").format(
 					get_link_to_form("Asset", self.asset)
 				)
+			)
+
+	def before_cancel(self):
+		if self.flags.should_not_cancel_depreciation_entries:
+			return
+
+		if frappe.db.get_value("Asset", self.asset, "docstatus") == 1:
+			frappe.throw(
+				_(
+					"Cannot cancel the depreciation schedule of submitted Asset {0}. Cancel the Asset instead."
+				).format(get_link_to_form("Asset", self.asset))
 			)
 
 	def on_cancel(self):
@@ -210,11 +259,14 @@ def reschedule_depreciation(asset_doc, notes, disposal_date=None):
 
 		new_schedule.create_depreciation_schedule(row, disposal_date)
 		new_schedule.notes = notes
+		new_schedule.flags.is_rescheduled = True
 
 		if current_schedule and current_schedule.docstatus == 1:
 			current_schedule.flags.should_not_cancel_depreciation_entries = True
+			current_schedule.flags.ignore_permissions = True
 			current_schedule.cancel()
 
+		new_schedule.flags.ignore_permissions = True
 		new_schedule.submit()
 
 
@@ -222,13 +274,39 @@ def set_modified_depreciation_rate(asset_doc, row, new_schedule):
 	if row.depreciation_method in (
 		"Written Down Value",
 		"Double Declining Balance",
-	):
+	) and not is_depreciation_rate_entered(asset_doc, row):
 		new_rate_of_depreciation = flt(
 			asset_doc.get_depreciation_rate(row), row.precision("rate_of_depreciation")
 		)
 
 		row.db_set("rate_of_depreciation", new_rate_of_depreciation)
 		new_schedule.rate_of_depreciation = new_rate_of_depreciation
+
+
+def is_depreciation_rate_entered(asset_doc, row) -> bool:
+	"""Finance books saved before the flag existed are judged by their first schedule."""
+	if row.is_rate_of_depreciation_entered:
+		return True
+
+	first_schedule = get_first_depreciation_schedule(asset_doc.name, row.finance_book)
+	return bool(first_schedule) and asset_doc.is_entered_depreciation_rate(first_schedule)
+
+
+def get_first_depreciation_schedule(asset: str, finance_book: str | None) -> dict | None:
+	schedules = frappe.get_all(
+		"Asset Depreciation Schedule",
+		filters={"asset": asset, "finance_book": finance_book or ["is", "not set"]},
+		fields=[
+			"depreciation_method",
+			"rate_of_depreciation",
+			"expected_value_after_useful_life",
+			"total_number_of_depreciations",
+			"frequency_of_depreciation",
+		],
+		order_by="creation asc",
+		limit=1,
+	)
+	return schedules[0] if schedules else None
 
 
 def get_temp_depr_schedule_doc(asset_doc, fb_row, disposal_date=None, updated_depr_schedule=None):
@@ -274,6 +352,13 @@ def get_asset_shift_factors_map():
 
 
 @frappe.whitelist()
+def get_asset_depreciation_schedule(
+	asset_name: str, status: str | None = None, finance_book: str | None = None
+):
+	frappe.has_permission("Asset", "read", asset_name, throw=True)
+	return get_asset_depr_schedule_doc(asset_name, status, finance_book)
+
+
 def get_depr_schedule(asset_name: str, status: str, finance_book: str | None = None):
 	asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_name, status, finance_book)
 
@@ -283,7 +368,6 @@ def get_depr_schedule(asset_name: str, status: str, finance_book: str | None = N
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
 
-@frappe.whitelist()
 def get_asset_depr_schedule_doc(asset_name: str, status: str | None = None, finance_book: str | None = None):
 	asset_depr_schedule = get_asset_depr_schedule_name(asset_name, status, finance_book)
 

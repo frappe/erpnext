@@ -19,11 +19,11 @@ frappe.listview_settings["Delivery Note"] = {
 		} else if (doc.status === "Return Issued") {
 			return [__("Return Issued"), "grey", "status,=,Return Issued"];
 		} else if (flt(doc.per_billed) == 0) {
-			return [__("To Bill"), "orange", "per_billed,=,0|docstatus,=,1"];
+			return [__("To Bill"), "orange", "status,=,To Bill"];
 		} else if (flt(doc.per_billed, 2) > 0 && flt(doc.per_billed, 2) < 100) {
-			return [__("Partially Billed"), "yellow", "per_billed,<,100|docstatus,=,1"];
+			return [__("Partially Billed"), "yellow", "status,=,Partially Billed"];
 		} else if (flt(doc.per_billed, 2) === 100) {
-			return [__("Completed"), "green", "per_billed,=,100|docstatus,=,1"];
+			return [__("Completed"), "green", "status,=,Completed"];
 		}
 	},
 	onload: function (doclist) {
@@ -32,29 +32,20 @@ frappe.listview_settings["Delivery Note"] = {
 			const docnames = doclist.get_checked_items(true);
 
 			if (selected_docs.length > 0) {
-				frappe.new_doc("Delivery Trip").then(() => {
-					// Empty out the child table before inserting new ones
-					cur_frm.set_value("delivery_stops", []);
-
-					// We don't want to use `map_current_doc` since it brings up
-					// the dialog to select more items. We just want the mapper
-					// function to be called.
-					frappe.call({
-						type: "POST",
-						method: "frappe.model.mapper.map_docs",
-						args: {
-							method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
-							source_names: docnames,
-							target_doc: cur_frm.doc,
-						},
-						callback: function (r) {
-							if (!r.exc) {
-								frappe.model.sync(r.message);
-								cur_frm.dirty();
-								cur_frm.refresh();
-							}
-						},
-					});
+				frappe.call({
+					type: "POST",
+					method: "frappe.model.mapper.map_docs",
+					args: {
+						method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
+						source_names: docnames,
+						target_doc: frappe.model.get_new_doc("Delivery Trip"),
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
+						}
+					},
 				});
 			}
 		};

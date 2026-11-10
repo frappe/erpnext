@@ -13,8 +13,12 @@ frappe.query_reports["Procurement Tracker"] = {
 		{
 			fieldname: "cost_center",
 			label: __("Cost Center"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Cost Center",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return erpnext.utils.get_link_options("Cost Center", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "project",
@@ -33,6 +37,11 @@ frappe.query_reports["Procurement Tracker"] = {
 			label: __("To Date"),
 			fieldtype: "Date",
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+		},
+		{
+			fieldname: "show_completed_orders",
+			label: __("Show Completed Orders"),
+			fieldtype: "Check",
 		},
 	],
 };

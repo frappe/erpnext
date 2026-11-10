@@ -13,6 +13,7 @@ from frappe.utils import (
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
@@ -46,7 +47,6 @@ class StockEntryDetail(Document):
 		has_item_scanned: DF.Check
 		image: DF.Attach | None
 		is_finished_item: DF.Check
-		is_legacy_scrap_item: DF.Check
 		item_code: DF.Link
 		item_group: DF.Data | None
 		item_name: DF.Data | None
@@ -58,6 +58,7 @@ class StockEntryDetail(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		pick_list_item: DF.Link | None
 		po_detail: DF.Data | None
 		project: DF.Link | None
 		putaway_rule: DF.Link | None
@@ -80,6 +81,7 @@ class StockEntryDetail(Document):
 		transferred_qty: DF.Float
 		secondary_item_type: DF.Literal["", "Co-Product", "By-Product", "Scrap", "Additional Finished Good"]
 		uom: DF.Link
+		valuation_type: DF.Literal["", "Valuation Rate", "% of Component Cost", "Manual"]
 		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 	# end: auto-generated types
@@ -90,17 +92,25 @@ class StockEntryDetail(Document):
 
 		disabled = frappe.db.get_value("Batch", self.batch_no, "disabled")
 		if disabled:
-			frappe.throw(_("Batch {0} of Item {1} is disabled.").format(self.batch_no, self.item_code))
+			frappe.throw(
+				_("Batch {0} of Item {1} is disabled.").format(
+					SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+				)
+			)
 			return
 
 		expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
 		if expiry_date and getdate(self.parent_doc.posting_date) > getdate(expiry_date):
-			frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
+			frappe.throw(
+				_("Batch {0} of Item {1} has expired.").format(
+					SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
+				)
+			)
 
 	def validate_and_update_item_details(self, item_details, company, purpose):
 		if flt(self.qty) and flt(self.qty) < 0:
 			frappe.throw(
-				_("Row {0}: The item {1}, quantity must be positive number").format(
+				_("Row {0}: The item {1}, quantity must be a positive number").format(
 					self.idx, bold(self.item_code)
 				)
 			)
@@ -131,7 +141,7 @@ class StockEntryDetail(Document):
 				flt(self.qty) * flt(self.conversion_factor), self.precision("transfer_qty")
 			)
 
-		if purpose == "Subcontracting Delivery":
+		if purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
 			self.expense_account = frappe.get_value("Company", company, "default_expense_account")
 
 	def validate_expense_account(self, is_opening, purpose):
@@ -153,7 +163,7 @@ class StockEntryDetail(Document):
 		if is_opening == "Yes" and acc_details.report_type == "Profit and Loss":
 			frappe.throw(
 				_(
-					"Difference Account must be a Asset/Liability type account "
+					"Difference Account must be an Asset/Liability type account "
 					"(Temporary Opening), since this Stock Entry is an Opening Entry"
 				),
 				OpeningEntryAccountError,
@@ -168,7 +178,7 @@ class StockEntryDetail(Document):
 			)
 
 		if (
-			purpose not in ["Material Issue", "Subcontracting Delivery"]
+			purpose not in ["Material Issue", "Subcontracting Delivery", "Subcontracting Return"]
 			and acc_details.account_type == "Cost of Goods Sold"
 		):
 			frappe.msgprint(

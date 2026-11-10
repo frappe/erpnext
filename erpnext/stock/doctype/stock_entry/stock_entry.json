@@ -3,14 +3,17 @@
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
+ "description": "Moves, receives, issues or manufactures stock.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/stock-entry",
  "engine": "InnoDB",
  "field_order": [
   "stock_entry_details_tab",
   "company",
   "naming_series",
   "stock_entry_type",
+  "weight_per_piece",
   "purpose",
   "col2",
   "set_posting_time",
@@ -22,6 +25,7 @@
   "inspection_required",
   "column_break_jabv",
   "work_order",
+  "is_fg_conversion",
   "subcontracting_order",
   "outgoing_stock_entry",
   "source_stock_entry",
@@ -32,10 +36,8 @@
   "cb1",
   "fg_completed_qty",
   "get_items",
-  "section_break_7qsm",
-  "process_loss_percentage",
-  "column_break_e92r",
   "process_loss_qty",
+  "process_loss_percentage",
   "section_break_jwgn",
   "from_warehouse",
   "source_warehouse_address",
@@ -67,7 +69,7 @@
   "address_display",
   "accounting_dimensions_section",
   "project",
-  "column_break_wgvc",
+  "dimension_col_break",
   "cost_center",
   "other_info_tab",
   "printing_settings",
@@ -120,6 +122,16 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.purpose == 'Repack'",
+   "description": "Splits the produced quantity into one batch per this many units",
+   "fieldname": "weight_per_piece",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Weight Per Piece",
+   "no_copy": 1,
+   "non_negative": 1
+  },
+  {
    "depends_on": "eval:doc.purpose == 'Material Transfer'",
    "fieldname": "outgoing_stock_entry",
    "fieldtype": "Link",
@@ -162,7 +174,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:in_list([\"Material Transfer for Manufacture\", \"Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose)",
+   "depends_on": "eval:in_list([\"Material Transfer for Manufacture\", \"Manufacture\", \"Material Consumption for Manufacture\", \"Disassemble\"], doc.purpose) || doc.is_fg_conversion",
    "fieldname": "work_order",
    "fieldtype": "Link",
    "label": "Work Order",
@@ -171,6 +183,16 @@
    "options": "Work Order",
    "print_hide": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_fg_conversion",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Finished Good Conversion",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "eval: erpnext.stock.is_subcontracting_or_return_transfer(doc)",
@@ -234,6 +256,7 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_import_template": 1,
    "label": "Posting Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
@@ -255,6 +278,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Edit Posting Date and Time",
    "print_hide": 1
   },
@@ -314,6 +338,7 @@
    "description": "Sets 'Source Warehouse' in each row of the items table.",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Source Warehouse",
@@ -344,6 +369,7 @@
    "description": "Sets 'Target Warehouse' in each row of the items table.",
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Default Target Warehouse",
@@ -672,27 +698,18 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "collapsible": 1,
-   "depends_on": "eval: doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
-   "fieldname": "section_break_7qsm",
-   "fieldtype": "Section Break",
-   "label": "Process Loss"
-  },
-  {
    "depends_on": "eval: doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
    "fieldname": "process_loss_qty",
    "fieldtype": "Float",
-   "label": "Process Loss Qty"
+   "label": "Process Loss Qty",
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_e92r",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.from_bom && doc.fg_completed_qty",
+   "depends_on": "eval:doc.from_bom && doc.fg_completed_qty > 0 && in_list([\"Manufacture\", \"Repack\"], doc.purpose)",
    "fieldname": "process_loss_percentage",
    "fieldtype": "Percent",
-   "label": "% Process Loss"
+   "label": "% Process Loss",
+   "read_only": 1
   },
   {
    "fieldname": "items_section",
@@ -753,7 +770,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_wgvc",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
@@ -768,12 +785,12 @@
   }
  ],
  "grid_page_length": 50,
- "icon": "fa fa-file-text",
+ "icon": "arrow-left-right",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-06-11 18:23:12.340065",
+ "modified": "2026-09-30 13:11:01.498358",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

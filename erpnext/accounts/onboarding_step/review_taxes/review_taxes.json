@@ -1,0 +1,22 @@
+{
+ "action": "Go to Page",
+ "action_label": "Open Sales Taxes and Charges Template",
+ "creation": "2026-10-04 01:44:23.578444",
+ "description": "The taxes that fill in on every invoice. We added your country's where we had them; check the rates match what you charge. Purchase taxes live in [Purchase Taxes and Charges Template](/desk/purchase-taxes-and-charges-template). See [Setting Up Taxes](https://docs.frappe.io/erpnext/user/manual/en/setting-up-taxes).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "intro_video_url": "https://www.youtube.com/watch?v=DWKb9Z3KbBU",
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:44:23.578444",
+ "modified_by": "Administrator",
+ "name": "Review Taxes",
+ "owner": "Administrator",
+ "path": "List/Sales Taxes and Charges Template",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "Review your taxes",
+ "validate_action": 1
+}

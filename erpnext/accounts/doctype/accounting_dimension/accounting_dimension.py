@@ -16,6 +16,9 @@ from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger 
 	get_allowed_types_from_settings,
 )
 
+# Document names cannot contain ">", so this cannot collide with a dimension value.
+BLANK_ACCOUNTING_DIMENSION = "__blank__>"
+
 
 class AccountingDimension(Document):
 	# begin: auto-generated types
@@ -43,7 +46,8 @@ class AccountingDimension(Document):
 	def validate(self):
 		self.validate_doctype()
 		validate_column_name(self.fieldname)
-		self.validate_fieldname_conflict()
+		if self.has_value_changed("fieldname"):
+			self.validate_fieldname_conflict()
 		self.validate_dimension_defaults()
 
 	def validate_doctype(self):
@@ -59,6 +63,14 @@ class AccountingDimension(Document):
 		):
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
+
+		meta = frappe.get_meta(self.document_type)
+		if meta.istable or meta.issingle:
+			frappe.throw(
+				_(
+					"{0} cannot be used as an accounting dimension as it is not a standalone document type."
+				).format(frappe.bold(self.document_type))
+			)
 
 		exists = frappe.db.get_value("Accounting Dimension", {"document_type": self.document_type}, ["name"])
 
@@ -215,8 +227,11 @@ def delete_accounting_dimension(doc):
 		frappe.clear_cache(doctype=doctype)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def disable_dimension(doc: str):
+	# toggle_disabling rewrites a Custom Field site-wide, so demand the write that configures dimensions
+	frappe.has_permission("Accounting Dimension", "write", throw=True)
+
 	if frappe.in_test:
 		toggle_disabling(doc=doc)
 	else:
@@ -224,7 +239,7 @@ def disable_dimension(doc: str):
 
 
 def toggle_disabling(doc):
-	doc = json.loads(doc)
+	doc = frappe.parse_json(doc)
 
 	if doc.get("disabled"):
 		df = {"read_only": 1}
@@ -297,6 +312,54 @@ def get_dimension_with_children(doctype, dimensions):
 	return all_dimensions
 
 
+def get_dimension_filter_values(values, dimension_doctype=None):
+	if isinstance(values, str):
+		try:
+			parsed_values = json.loads(values)
+		except json.JSONDecodeError:
+			pass
+		else:
+			if isinstance(parsed_values, list):
+				values = parsed_values
+
+	if values is None:
+		values = []
+	elif not isinstance(values, list | tuple):
+		values = [values]
+
+	include_blank = BLANK_ACCOUNTING_DIMENSION in values
+	values = [value for value in values if value != BLANK_ACCOUNTING_DIMENSION]
+
+	if values and dimension_doctype and frappe.get_cached_value("DocType", dimension_doctype, "is_tree"):
+		values = get_dimension_with_children(dimension_doctype, values)
+
+	return values, include_blank
+
+
+def get_dimension_filter_condition(field, values, dimension_doctype=None):
+	values, include_blank = get_dimension_filter_values(values, dimension_doctype)
+	condition = field.isin(values) if values else None
+
+	if include_blank:
+		blank_condition = field.isnull() | (field == "")
+		condition = condition | blank_condition if condition else blank_condition
+
+	return condition
+
+
+def get_dimension_filter_sql_condition(fieldname, values, dimension_doctype=None):
+	values, include_blank = get_dimension_filter_values(values, dimension_doctype)
+	parts = []
+
+	if values:
+		parts.append(f"{fieldname} IN ({', '.join(['?'] * len(values))})")
+
+	if include_blank:
+		parts.append(f"({fieldname} IS NULL OR {fieldname} = '')")
+
+	return f"({' OR '.join(parts)})" if parts else None, values
+
+
 @frappe.whitelist()
 def get_dimensions(with_cost_center_and_project: str | bool = False):
 	c = frappe.qb.DocType("Accounting Dimension Detail")
@@ -359,3 +422,13 @@ def create_accounting_dimensions_for_doctype(doctype):
 		create_custom_field(doctype, df, ignore_validate=True)
 
 	frappe.clear_cache(doctype=doctype)
+
+
+def get_dimension_fieldname(dim_doctype: str) -> str:
+	"""
+	Return the `GL Entry` fieldname for a given dimension.
+	"""
+	if dim_doctype in ("Cost Center", "Project"):
+		return frappe.scrub(dim_doctype)
+
+	return frappe.db.get_value("Accounting Dimension", {"document_type": dim_doctype}, "fieldname")

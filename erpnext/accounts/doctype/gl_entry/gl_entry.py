@@ -134,7 +134,7 @@ class GLEntry(Document):
 		mandatory = ["account", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
+				frappe.throw(_("{0} is required").format(self.meta.get_translated_label(k)))
 
 		if not self.is_cancelled and not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
@@ -303,6 +303,9 @@ class GLEntry(Document):
 		default_currency, reporting_currency = frappe.get_cached_value(
 			"Company", self.company, ["default_currency", "reporting_currency"]
 		)
+		if not reporting_currency:
+			return
+
 		transaction_date = self.transaction_date or self.posting_date
 		self.reporting_currency_exchange_rate = get_exchange_rate(
 			default_currency, reporting_currency, transaction_date
@@ -471,6 +474,25 @@ def on_doctype_update():
 	frappe.db.add_index("GL Entry", ["posting_date", "company"])
 	frappe.db.add_index("GL Entry", ["party_type", "party"])
 
+	if frappe.db.db_type == "postgres":
+		# Postgres-only partial/covering indexes for the financial reports (General Ledger, Trial
+		# Balance, Balance Sheet, P&L), which always filter `is_cancelled = 0` and scope by company.
+		# `where`/`include` are no-ops on MariaDB and its optimizer ignores these anyway, so they are
+		# added only on postgres to avoid dead write overhead on this insert-hot table.
+		frappe.db.add_index(
+			"GL Entry",
+			["company", "posting_date", "account"],
+			index_name="gle_active_detail",
+			where="is_cancelled = 0",
+		)
+		frappe.db.add_index(
+			"GL Entry",
+			["company", "account", "posting_date"],
+			index_name="gle_active_cover",
+			where="is_cancelled = 0",
+			include=["debit", "credit"],
+		)
+
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:
@@ -498,7 +520,9 @@ def rename_temporarily_named_docs(doctype):
 
 			for hook_type in ("on_gle_rename", "on_sle_rename"):
 				for hook in frappe.get_hooks(hook_type):
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- hook paths come from hooks.py
 					frappe.call(hook, newname=newname, oldname=oldname)
 
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()

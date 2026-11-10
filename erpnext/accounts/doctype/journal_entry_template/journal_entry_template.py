@@ -45,6 +45,20 @@ class JournalEntryTemplate(Document):
 
 	def validate(self):
 		self.validate_party()
+		self.validate_account_company()
+
+	def validate_account_company(self):
+		"""Each row's account must belong to the template's company."""
+		for account in self.accounts:
+			if (
+				account.account
+				and frappe.get_cached_value("Account", account.account, "company") != self.company
+			):
+				frappe.throw(
+					_("Row {0}: Account {1} does not belong to company {2}").format(
+						account.idx, account.account, self.company
+					)
+				)
 
 	def validate_party(self):
 		"""

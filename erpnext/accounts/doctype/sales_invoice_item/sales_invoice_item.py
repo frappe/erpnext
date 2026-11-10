@@ -25,6 +25,8 @@ class SalesInvoiceItem(Document):
 		amount: DF.Currency
 		apply_tds: DF.Check
 		asset: DF.Link | None
+		asset_gross_value: DF.Currency
+		asset_value_after_depreciation: DF.Currency
 		barcode: DF.Data | None
 		base_amount: DF.Currency
 		base_net_amount: DF.Currency
@@ -63,6 +65,7 @@ class SalesInvoiceItem(Document):
 		item_name: DF.Data
 		item_tax_rate: DF.SmallText | None
 		item_tax_template: DF.Link | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		net_amount: DF.Currency
@@ -112,15 +115,6 @@ class SalesInvoiceItem(Document):
 				_("Row #{0}: Cost Center {1} does not belong to company {2}").format(
 					frappe.bold(self.idx), frappe.bold(self.cost_center), frappe.bold(company)
 				)
-			)
-
-	def set_actual_qty(self):
-		if self.item_code and self.warehouse:
-			self.actual_qty = (
-				frappe.db.get_value(
-					"Bin", {"item_code": self.item_code, "warehouse": self.warehouse}, "actual_qty"
-				)
-				or 0
 			)
 
 	def set_income_account_for_fixed_asset(self, company: str):

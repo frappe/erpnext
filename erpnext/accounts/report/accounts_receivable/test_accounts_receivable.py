@@ -1,16 +1,64 @@
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, getdate, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport, execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_payment_terms_filters(self):
+		invoice = self.create_sales_invoice()
+		filters = frappe._dict(
+			company=invoice.company,
+			party=[self.customer],
+			report_date=today(),
+			range="30, 60, 90, 120",
+			ageing_based_on="Posting Date",
+		)
+		for party_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+			frappe.db.set_value("Customer", self.customer, "payment_terms", party_terms)
+			for invoice_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+				frappe.db.set_value(invoice.doctype, invoice.name, "payment_terms_template", invoice_terms)
+				for selected, matching_terms in (
+					([], (None, "", "_Test Payment Term Template", "_Test Other Payment Terms")),
+					([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+					(["_Test Payment Term Template"], ("_Test Payment Term Template",)),
+					(
+						["_Test Payment Term Template", "_Test Other Payment Terms"],
+						("_Test Payment Term Template", "_Test Other Payment Terms"),
+					),
+					(
+						[BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"],
+						(None, "", "_Test Payment Term Template"),
+					),
+					("_Test Payment Term Template", ("_Test Payment Term Template",)),
+					(
+						frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"]),
+						(None, "", "_Test Payment Term Template"),
+					),
+				):
+					with self.subTest(
+						party_terms=party_terms, invoice_terms=invoice_terms, selected=selected
+					):
+						filters.payment_terms_template = selected
+						rows = execute(filters)[1]
+						vouchers = {row.get("voucher_no") for row in rows}
+						self.assertEqual(
+							invoice.name in vouchers,
+							party_terms in matching_terms or invoice_terms in matching_terms,
+						)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.company_abbr = "_TC"
@@ -79,6 +127,33 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		)
 
 		return credit_note
+
+	def test_blank_customer_group_filter(self):
+		invoice = self.create_sales_invoice()
+		group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		parent_group = frappe.db.get_value("Customer Group", group, "parent_customer_group")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.customer],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+		for party_group in (None, "", group):
+			frappe.db.set_value("Customer", self.customer, "customer_group", party_group)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not party_group)),
+				([parent_group], int(bool(party_group))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_group], 1),
+			):
+				with self.subTest(party_group=party_group, groups=groups):
+					filters.customer_group = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, invoice.grand_total)
+
+		filters.customer_group = [BLANK_ACCOUNTING_DIMENSION, "_Test Missing Customer Group"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_pos_receivable(self):
 		filters = {
@@ -155,7 +230,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		report = execute(filters)
 
-		expected_data_after_credit_note = [0, 0, 100, 0, -100, self.debit_to]
+		expected_data_after_credit_note = [0, 0, 0, 100, -100, self.debit_to]
 
 		row = report[1][-1]
 		self.assertEqual(
@@ -385,7 +460,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 
 		expected_data_after_credit_note = [
 			[100.0, 100.0, 40.0, 0.0, 60.0, si.name],
-			[0, 0, 100.0, 0.0, -100.0, cr_note.name],
+			[0, 0, 0.0, 100.0, -100.0, cr_note.name],
 		]
 		self.assertEqual(len(report[1]), 2)
 		si_row = next(
@@ -568,6 +643,119 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		report = execute(filters)
 		self.assertEqual(report[1], [])
 
+	def pay_invoice_via_journal_entry(self, si, amount):
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.cash,
+				"debit": amount,
+				"debit_in_account_currency": amount,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"credit": amount,
+				"credit_in_account_currency": amount,
+				"reference_type": "Sales Invoice",
+				"reference_name": si.name,
+				"cost_center": self.cost_center,
+			},
+		)
+		return je.save().submit()
+
+	def ar_rows(self):
+		filters = {"company": self.company, "report_date": today(), "range": "30, 60, 90, 120"}
+		return execute(filters)[1]
+
+	def test_invoice_partially_paid_via_journal_entry(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)  # outstanding 100
+		self.pay_invoice_via_journal_entry(si, 40)
+
+		row = next(row for row in self.ar_rows() if row.voucher_no == si.name)
+		self.assertEqual(row.paid, 40)
+		self.assertEqual(row.outstanding, 60)
+
+	def test_invoice_fully_paid_via_journal_entry(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)  # outstanding 100
+		self.pay_invoice_via_journal_entry(si, 100)
+
+		# a fully settled invoice drops out of the receivable report
+		self.assertEqual([row for row in self.ar_rows() if row.voucher_no == si.name], [])
+
+	def test_credit_note_via_journal_entry_shows_negative_outstanding(self):
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.voucher_type = "Credit Note"
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": self.income_account,
+				"debit": 100,
+				"debit_in_account_currency": 100,
+				"cost_center": self.cost_center,
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": self.debit_to,
+				"party_type": "Customer",
+				"party": self.customer,
+				"credit": 100,
+				"credit_in_account_currency": 100,
+				"cost_center": self.cost_center,
+			},
+		)
+		je = je.save().submit()
+
+		row = next(row for row in self.ar_rows() if row.voucher_no == je.name)
+		self.assertEqual(row.outstanding, -100)
+
+	def test_show_remarks_includes_invoice_remark(self):
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.remarks = "AR test remark"
+		si.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_remarks": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertIn("AR test remark", row.remarks or "")
+
+	def test_show_delivery_notes_links_delivery_note(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code=self.item, qty=5, to_warehouse=self.warehouse, basic_rate=100)
+		dn = create_delivery_note(
+			customer=self.customer, item=self.item, warehouse=self.warehouse, cost_center=self.cost_center
+		)
+		si = make_sales_invoice(dn.name)
+		si.insert()
+		si.submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_delivery_notes": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertIn(dn.name, row.delivery_notes or "")
+
 	def test_group_by_party(self):
 		si1 = self.create_sales_invoice(do_not_submit=True)
 		si1.posting_date = add_days(today(), -1)
@@ -624,6 +812,26 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			],
 		)
 
+	def test_group_by_party_totals_all_ageing_buckets(self):
+		self.create_sales_invoice()
+		overdue = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		overdue.posting_date = overdue.due_date = add_days(today(), -170)
+		overdue.set_posting_time = 1
+		overdue.payment_schedule = []
+		overdue.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120, 150",
+			"ageing_based_on": "Due Date",
+			"group_by_party": True,
+			"party_type": "Customer",
+			"party": [self.customer],
+		}
+		party_total = next(row for row in execute(filters)[1] if row.get("bold") and row.get("party"))
+		self.assertEqual([party_total["range0"], party_total["range6"]], [100.0, 100.0])
+
 	def test_future_payments(self):
 		sr = self.create_sales_invoice(do_not_submit=True)
 		sr.is_return = 1
@@ -665,7 +873,7 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		for row in rows:
 			self.assertEqual(
 				expected_data[row.voucher_no],
-				[row.invoiced or row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+				[row.invoiced or row.credit_note, row.outstanding, row.remaining_balance, row.future_amount],
 			)
 
 		pe.cancel()
@@ -691,13 +899,79 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		pe.paid_amount = 110
 		pe.save().submit()
 		report = execute(filters)[1]
-		self.assertEqual(len(report), 2)
-		expected_data = [[100.0, 0.0, 100.0, 0.0, 100.0], [0.0, 10.0, -10.0, -10.0, 0.0]]
-		for idx, row in enumerate(report):
-			self.assertEqual(
-				expected_data[idx],
-				[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
-			)
+		self.assertEqual(len(report), 1)
+		row = report[0]
+		self.assertEqual(
+			[100.0, 0.0, 100.0, 0.0, 100.0],
+			[row.invoiced, row.paid, row.outstanding, row.remaining_balance, row.future_amount],
+		)
+
+	def test_future_payments_do_not_change_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		self.create_sales_invoice(no_payment_schedule=True)
+		post_dated_invoice = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		post_dated_invoice.set_posting_time = 1
+		post_dated_invoice.posting_date = add_days(today(), 8)
+		post_dated_invoice.due_date = add_days(today(), 8)
+		post_dated_invoice.payment_schedule = []
+		post_dated_invoice.save().submit()
+
+		receipt = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.cash,
+			paid_amount=70,
+		)
+		receipt.posting_date = add_days(today(), 7)
+		receipt.save().submit()
+
+		filters = {"company": self.company, "report_date": today(), "range": "30, 60, 90, 120"}
+		without_option = execute(filters)[1]
+		with_option = execute({**filters, "show_future_payments": True})[1]
+
+		self.assertEqual(sum(row.outstanding for row in without_option), 100.0)
+		self.assertEqual(sum(row.outstanding for row in with_option), 100.0)
+
+	def test_draft_future_payments_are_ignored(self):
+		si = self.create_sales_invoice(no_payment_schedule=True)
+		for days, amount, submit in ((5, 40, True), (6, 30, False)):
+			pe = get_payment_entry(si.doctype, si.name, party_amount=amount, bank_account=self.cash)
+			pe.posting_date = add_days(today(), days)
+			pe.insert()
+			if submit:
+				pe.submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_future_payments": True,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == si.name)
+		self.assertEqual([row.future_amount, row.remaining_balance], [40.0, 60.0])
+
+	def test_future_payments_spread_over_payment_terms(self):
+		si = self.create_sales_invoice()
+		for days, amount in ((5, 20), (6, 15)):
+			pe = get_payment_entry(si.doctype, si.name, party_amount=amount, bank_account=self.cash)
+			pe.posting_date = add_days(today(), days)
+			pe.save().submit()
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_future_payments": True,
+			"based_on_payment_terms": True,
+		}
+		rows = [row for row in execute(filters)[1] if row.voucher_no == si.name]
+		self.assertEqual(
+			[(row.future_amount, row.remaining_balance) for row in rows], [(30, 0), (5, 45), (0, 20)]
+		)
 
 	def test_future_payments_from_journal_entry(self):
 		# A single future-dated Journal Entry paying two different invoices must surface as one
@@ -754,10 +1028,51 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(rows_a[0].future_amount, 50.0)
 		self.assertEqual(rows_b[0].future_amount, 50.0)
 
+	def test_blank_sales_person_filter(self):
+		frappe.db.delete("Sales Team", {"parent": self.customer, "parenttype": "Customer"})
+		invoice = self.create_sales_invoice()
+		frappe.db.delete("Sales Team", {"parent": invoice.name, "parenttype": "Sales Invoice"})
+		report = ReceivablePayableReport(
+			frappe._dict(company=self.company, report_date=today(), range="30, 60, 90, 120")
+		)
+		report.account_type = "Receivable"
+		for sales_person in (None, "_Test Sales Person"):
+			if sales_person:
+				frappe.get_doc(
+					{
+						"doctype": "Sales Team",
+						"parent": invoice.name,
+						"parenttype": "Sales Invoice",
+						"parentfield": "sales_team",
+						"sales_person": sales_person,
+						"allocated_percentage": 100,
+					}
+				).db_insert()
+			for selected, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], not sales_person),
+				(["_Test Sales Person"], bool(sales_person)),
+				([BLANK_ACCOUNTING_DIMENSION, "_Test Sales Person"], True),
+			):
+				with self.subTest(sales_person=sales_person, selected=selected):
+					report.filters.sales_person = selected
+					report.get_sales_invoices_or_customers_based_on_sales_person()
+					self.assertEqual(
+						invoice.name in report.sales_person_records.get("Sales Invoice", set()), expected
+					)
+					rows = execute(report.filters.copy())[1]
+					self.assertEqual({row.voucher_no for row in rows}, {invoice.name} if expected else set())
+					self.assertEqual(
+						sum(row.outstanding for row in rows), invoice.grand_total if expected else 0
+					)
+
+		frappe.db.delete("Sales Team", {"parent": invoice.name, "parenttype": "Sales Invoice"})
+		report.filters.sales_person = [BLANK_ACCOUNTING_DIMENSION]
+		with patch.object(report, "get_permitted_sales_persons", return_value=["_Test Sales Person"]):
+			report.get_sales_invoices_or_customers_based_on_sales_person()
+		self.assertNotIn(invoice.name, report.sales_person_records.get("Sales Invoice", set()))
+
 	def test_sales_person(self):
-		sales_person = frappe.get_doc(
-			{"doctype": "Sales Person", "sales_person_name": "John Clark", "enabled": True}
-		).insert()
+		sales_person = frappe.get_doc("Sales Person", "_Test Sales Person")
 		si = self.create_sales_invoice(do_not_submit=True)
 		si.append("sales_team", {"sales_person": sales_person.name, "allocated_percentage": 100})
 		si.save().submit()
@@ -830,6 +1145,66 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		for row in report:
 			# Assert that the customer group of each row is in the list of customer groups
 			self.assertIn(row.customer_group, cus_groups_list)
+
+	def test_blank_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+		parent_territory = frappe.db.get_value("Territory", territory, "parent_territory")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.customer],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+
+		for customer_territory in (None, "", territory):
+			frappe.db.set_value("Customer", self.customer, "territory", customer_territory)
+			for territories, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not customer_territory)),
+				([parent_territory], int(bool(customer_territory))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_territory], 1),
+			):
+				with self.subTest(customer_territory=customer_territory, territories=territories):
+					filters.territory = territories
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, 100)
+
+		filters.territory = [BLANK_ACCOUNTING_DIMENSION, "_Test Territory Mars"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
+	def test_territory_filter(self):
+		self.create_sales_invoice()
+		territory = frappe.db.get_value("Customer", self.customer, "territory")
+
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"territory": territory,
+		}
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		self.assertEqual(
+			[100.0, 100.0, territory], [report[0].invoiced, report[0].outstanding, report[0].territory]
+		)
+
+		filters.update({"territory": ["_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 0)
+
+		filters.update({"territory": [territory, "_Test Territory United States"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		frappe.db.set_value("Customer", self.customer, "territory", "_Test Territory Maharashtra")
+		filters.update({"territory": ["_Test Territory India"]})
+		self.assertEqual(len(execute(filters)[1]), 1)
+
+		filters.update({"territory": ["_Test Territory Mars"]})
+		self.assertRaises(frappe.ValidationError, execute, filters)
+
+		filters.update({"territory": "  "})
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_party_account_filter(self):
 		si1 = self.create_sales_invoice()
@@ -1133,6 +1508,169 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
 		)
 
+	def test_payment_terms_with_advance_on_foreign_currency(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		customer = frappe.get_doc(
+			{"doctype": "Customer", "customer_name": "Advance USD Customer", "default_currency": "USD"}
+		).insert()
+		self.customer = customer.name
+		advance = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debtors_usd,
+			paid_to=self.cash,
+			paid_amount=50,
+		)
+		advance.source_exchange_rate = 80
+		advance.received_amount = 4000
+		advance.save().submit()
+
+		si = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debtors_usd,
+			currency="USD",
+			conversion_rate=80,
+			rate=100,
+			do_not_save=1,
+		)
+		for due_in_days in (0, 30):
+			si.append(
+				"payment_schedule",
+				dict(due_date=add_days(today(), due_in_days), invoice_portion=50.00, payment_amount=50),
+			)
+		si.allocate_advances_automatically = 1
+		si.save().submit()
+
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"report_date": today(),
+				"range": "30, 60, 90, 120",
+				"based_on_payment_terms": 1,
+				"party_type": "Customer",
+				"party": [self.customer],
+			}
+		)
+		rows = execute(filters)[1]
+		self.assertEqual([row.outstanding for row in rows], [2000.0, 2000.0])
+
+	def test_payment_terms_as_of_a_date_before_a_term_payment(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+		from erpnext.controllers.accounts_controller import get_payment_terms
+
+		si = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			posting_date=add_days(today(), -40),
+			rate=1000,
+			do_not_save=1,
+		)
+		create_payment_terms_template()
+		si.payment_terms_template = "Test Receivable Template"
+		for term in get_payment_terms(si.payment_terms_template, si.posting_date, 1000, 1000):
+			si.append("payment_schedule", term)
+		si.insert().submit()
+		pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash)
+		pe.posting_date = add_days(today(), -5)
+		pe.references = pe.references[:1]
+		pe.paid_amount = pe.received_amount = pe.references[0].allocated_amount
+		pe.save().submit()
+
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"report_date": add_days(today(), -20),
+				"range": "30, 60, 90, 120",
+				"based_on_payment_terms": 1,
+				"party_type": "Customer",
+				"party": [self.customer],
+			}
+		)
+		rows = [row for row in execute(filters)[1] if row.voucher_no == si.name]
+		expected = [schedule.payment_amount for schedule in si.payment_schedule]
+		self.assertEqual([row.outstanding for row in rows], expected)
+
+	def test_payment_terms_as_of_a_date_allocate_earlier_payments_by_due_date(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
+
+		create_payment_terms_template()
+		terms = ("Basic Amount Receivable", "Tax Receivable")
+		si = self.create_backdated_invoice_with_terms(
+			dict(
+				payment_term=terms[0], due_date=add_days(today(), -30), invoice_portion=50, payment_amount=50
+			),
+			dict(
+				payment_term=terms[1], due_date=add_days(today(), -10), invoice_portion=50, payment_amount=50
+			),
+		)
+		for days, term, amount in ((-25, terms[0], 20), (-5, terms[1], 50)):
+			pe = get_payment_entry(si.doctype, si.name, bank_account=self.cash, party_amount=amount)
+			pe.posting_date = add_days(today(), days)
+			pe.references[0].payment_term = term
+			pe.references[0].allocated_amount = amount
+			pe.save().submit()
+		self.assertEqual(
+			frappe.get_all("Payment Schedule", {"parent": si.name}, pluck="paid_amount", order_by="idx"),
+			[20, 50],
+		)
+
+		self.assertEqual(self.get_term_outstandings(si, add_days(today(), -20)), [30.0, 50.0])
+
+	def test_payment_terms_as_of_a_date_ignore_later_discounts(self):
+		term = frappe.get_doc(
+			{
+				"doctype": "Payment Term",
+				"payment_term_name": frappe.generate_hash(length=10),
+				"discount_type": "Amount",
+				"discount": 10,
+			}
+		).insert()
+		frappe.db.set_value("Company", self.company, "default_discount_account", "Write Off - _TC")
+		si = self.create_backdated_invoice_with_terms(
+			dict(
+				payment_term=term.name,
+				due_date=add_days(today(), -3),
+				invoice_portion=100,
+				payment_amount=100,
+				discount_date=add_days(today(), -4),
+			)
+		)
+		pe = get_payment_entry(
+			si.doctype, si.name, bank_account=self.cash, reference_date=add_days(today(), -5)
+		)
+		pe.posting_date = add_days(today(), -5)
+		pe.references[0].payment_term = term.name
+		pe.save().submit()
+		self.assertEqual(
+			frappe.db.get_value("Payment Schedule", {"parent": si.name}, "discounted_amount"), 10
+		)
+
+		self.assertEqual(self.get_term_outstandings(si, add_days(today(), -20)), [100.0])
+
+	def create_backdated_invoice_with_terms(self, *terms):
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.posting_date = add_days(today(), -40)
+		si.set_posting_time = 1
+		si.payment_schedule = []
+		for term in terms:
+			si.append("payment_schedule", term)
+		return si.save().submit()
+
+	def get_term_outstandings(self, si, report_date):
+		filters = {
+			"company": self.company,
+			"report_date": report_date,
+			"range": "30, 60, 90, 120",
+			"based_on_payment_terms": 1,
+			"party_type": "Customer",
+			"party": [self.customer],
+		}
+		return [row.outstanding for row in execute(filters)[1] if row.voucher_no == si.name]
+
 	def test_accounts_receivable_output_for_minor_outstanding(self):
 		"""
 		AR/AP should report miniscule outstanding of 0.01. Or else there will be slight difference with General Ledger/Trial Balance
@@ -1192,6 +1730,28 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])
+
+	def test_cost_center_on_payment_before_invoice(self):
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": [self.customer],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.posting_date = add_days(today(), 1)
+		si.due_date = si.posting_date
+		si.payment_schedule[0].due_date = si.posting_date
+		si.save().submit()
+
+		pe = self.create_payment_entry(si.name, do_not_submit=True)
+		pe.cost_center = self.cost_center
+		pe.save().submit()
+
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pe.name)
+		self.assertEqual(row.cost_center, pe.cost_center)
 
 	def test_payment_terms_template_filters(self):
 		from erpnext.controllers.accounts_controller import get_payment_terms
@@ -1256,6 +1816,19 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 2)
 		self.assertEqual([si.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])
 
+		group = frappe.db.get_value("Customer", self.customer, "customer_group")
+		for group_value in (None, "", group):
+			frappe.db.set_value("Customer", self.customer, "customer_group", group_value)
+			frappe.db.set_value("Sales Invoice", si.name, "customer_group", group_value)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], 2 if not group_value else 0),
+				([BLANK_ACCOUNTING_DIMENSION, group], 2),
+			):
+				with self.subTest(group_value=group_value, groups=groups):
+					filters["customer_group"] = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+
 	def test_project_filter(self):
 		project = frappe.get_doc(
 			{"doctype": "Project", "project_name": "_Test AR Project", "company": self.company}
@@ -1309,10 +1882,10 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		# Party is a dynamic link on Payment Ledger Entry, so user permissions on Customer
 		# must be applied explicitly. The report should only show permitted customers.
 		original_customer = self.customer
-		second_customer = "_Test AR Perm Customer"
+		second_customer = "_Test Customer 1"
 
 		# create_customer overrides self.customer, so build the restricted invoice first
-		self.create_customer(customer_name=second_customer)
+		self.customer = second_customer
 		self.create_sales_invoice(no_payment_schedule=True)
 
 		self.customer = original_customer
@@ -1345,3 +1918,66 @@ class TestAccountsReceivable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertIn(original_customer, parties)
 		self.assertNotIn(second_customer, parties)
 		self.assertEqual(allowed_invoice.customer, original_customer)
+
+	def test_receivable_filtered_by_sales_partner(self):
+		frappe.set_user("Administrator")
+		partner_a = "_Test Sales Partner India - 1"
+		partner_b = "_Test Sales Partner India - 2"
+
+		def _si(sales_partner):
+			si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True, qty=2)
+			si.sales_partner = sales_partner
+			return si.save().submit()
+
+		partner_a_si = _si(partner_a)
+		partner_b_si = _si(partner_b)
+		no_partner_si = _si(None)
+
+		# a return is folded onto the invoice it settles, so it nets against that
+		# invoice's partner even when the return's own partner is cleared
+		no_partner_return = make_return_doc("Sales Invoice", partner_a_si.name)
+		no_partner_return.sales_partner = None
+		no_partner_return.items[0].qty = -1
+		no_partner_return.update_outstanding_for_self = 0
+		no_partner_return.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+
+		def rows_for(partner):
+			return {
+				r.voucher_no: r
+				for r in execute({**filters, "sales_partner": partner})[1]
+				if r.get("voucher_no")
+			}
+
+		rows_a = rows_for(partner_a)
+		self.assertIn(partner_a_si.name, rows_a)
+		self.assertEqual(rows_a[partner_a_si.name].sales_partner, partner_a)
+		self.assertNotIn(partner_b_si.name, rows_a)
+		self.assertNotIn(no_partner_si.name, rows_a)
+		self.assertNotIn(no_partner_return.name, rows_a)
+		self.assertEqual(rows_a[partner_a_si.name].credit_note, 100)
+		self.assertEqual(rows_a[partner_a_si.name].outstanding, 100)
+
+		rows_b = rows_for(partner_b)
+		self.assertIn(partner_b_si.name, rows_b)
+		self.assertNotIn(partner_a_si.name, rows_b)
+
+		for blank_value in (None, ""):
+			frappe.db.set_value("Sales Invoice", no_partner_si.name, "sales_partner", blank_value)
+			for partners, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], {no_partner_si.name}),
+				([partner_a, partner_b], {partner_a_si.name, partner_b_si.name}),
+				([BLANK_ACCOUNTING_DIMENSION, partner_a], {no_partner_si.name, partner_a_si.name}),
+			):
+				with self.subTest(blank_value=blank_value, partners=partners):
+					rows = rows_for(partners)
+					self.assertEqual(set(rows), expected)
+					if partner_a_si.name in rows:
+						self.assertEqual(rows[partner_a_si.name].credit_note, 100)
+						self.assertEqual(rows[partner_a_si.name].outstanding, 100)

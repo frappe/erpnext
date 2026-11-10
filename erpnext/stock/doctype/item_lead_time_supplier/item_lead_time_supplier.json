@@ -1,0 +1,58 @@
+{
+ "actions": [],
+ "creation": "2026-08-22 11:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier",
+  "purchase_time",
+  "buffer_time",
+  "is_default"
+ ],
+ "fields": [
+  {
+   "columns": 4,
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "purchase_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Purchase Time (Days)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "buffer_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Buffer Time (Days)"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-08-22 11:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item Lead Time Supplier",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

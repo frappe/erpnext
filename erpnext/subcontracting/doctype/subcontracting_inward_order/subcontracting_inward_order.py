@@ -5,10 +5,15 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import comma_and, flt, get_link_to_form
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	cancel_stock_reservation_entries,
+)
+from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_finished_good_bom
 
 
 class SubcontractingInwardOrder(SubcontractingController):
@@ -63,6 +68,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def validate(self):
 		super().validate()
+		check_on_hold_or_closed_status("Sales Order", self.sales_order)
 		self.set_is_customer_provided_item()
 		self.validate_customer_provided_items()
 		self.validate_customer_warehouse()
@@ -76,6 +82,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def on_cancel(self):
 		self.update_status()
 		self.update_subcontracted_quantity_in_so()
+		cancel_stock_reservation_entries(voucher_type=self.doctype, voucher_no=self.name, notify=False)
 
 	def update_status(self, status=None, update_modified=True):
 		if self.status == "Closed" and self.status != status:
@@ -182,15 +189,6 @@ class SubcontractingInwardOrder(SubcontractingController):
 				)
 				si.amount = available_qty * si.rate
 
-				bom = (
-					frappe.db.get_value(
-						"Subcontracting BOM",
-						{"finished_good": item.name, "is_active": 1},
-						"finished_good_bom",
-					)
-					or item.default_bom
-				)
-
 				items.append(
 					{
 						"item_code": item.name,
@@ -202,7 +200,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 						"qty": si.fg_item_qty,
 						"subcontracting_conversion_factor": conversion_factor,
 						"stock_uom": item.stock_uom,
-						"bom": bom,
+						"bom": get_finished_good_bom(item),
 						"sales_order_item": si.sales_order_item,
 					}
 				)
@@ -224,7 +222,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if not any([rm.is_customer_provided_item for rm in raw_materials]):
 				frappe.throw(
 					_(
-						"Atleast one raw material for Finished Good Item {0} should be customer provided."
+						"At least one raw material for Finished Good Item {0} should be customer provided."
 					).format(frappe.bold(item.item_code))
 				)
 
@@ -253,6 +251,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	def get_production_items(self):
 		item_list = []
+		pending_qty = self.get_pending_work_order_qty()
 
 		for d in self.items:
 			if d.produced_qty >= d.qty:
@@ -285,13 +284,31 @@ class SubcontractingInwardOrder(SubcontractingController):
 			)
 			qty = min(
 				int(qty) if frappe.get_cached_value("UOM", d.stock_uom, "must_be_whole_number") else qty,
-				d.qty - d.produced_qty,
+				d.qty - d.produced_qty - flt(pending_qty.get(d.name)),
 			)
 
 			item_details.update({"qty": qty, "max_producible_qty": qty})
 			item_list.append(item_details)
 
 		return item_list
+
+	def get_pending_work_order_qty(self):
+		"""Qty still to be produced by open Work Orders, per inward order item."""
+		wo = frappe.qb.DocType("Work Order")
+		query = (
+			frappe.qb.from_(wo)
+			.select(
+				wo.subcontracting_inward_order_item,
+				Sum(wo.qty - wo.produced_qty - wo.process_loss_qty),
+			)
+			.where(
+				(wo.subcontracting_inward_order == self.name)
+				& (wo.docstatus == 1)
+				& (wo.status.notin(["Completed", "Closed"]))
+			)
+			.groupby(wo.subcontracting_inward_order_item)
+		)
+		return frappe._dict(query.run())
 
 	def create_work_order(self, item):
 		from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
@@ -331,19 +348,39 @@ class SubcontractingInwardOrder(SubcontractingController):
 				["process_loss_qty", "include_exploded_items"],
 				as_dict=True,
 			)
-			stock_qty = frappe.get_value(
+			qty_consumed_per_unit = frappe.get_value(
 				"BOM Explosion Item" if data.include_exploded_items else "BOM Item",
 				{"name": rm_item.bom_detail_no},
-				"stock_qty",
+				"qty_consumed_per_unit",
 			)
 			qty = flt(
-				stock_qty * data.process_loss_qty,
+				qty_consumed_per_unit * data.process_loss_qty,
 				frappe.get_precision("Subcontracting Inward Order Received Item", "required_qty"),
 			)
 			return rm_item.required_qty - rm_item.received_qty + rm_item.returned_qty + qty
 
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
+
+		def postprocess(source, target):
+			target.purpose = "Receive from Customer"
+			target.subcontracting_inward_order = source.name
+			target.set_stock_entry_type()
+
+			for rm_item in source.received_items:
+				if not rm_item.required_qty or not rm_item.is_customer_provided_item:
+					continue
+
+				target.append(
+					"items",
+					{
+						"scio_detail": rm_item.get("name"),
+						"item_code": rm_item.get("rm_item_code"),
+						"qty": calculate_qty_as_per_bom(rm_item),
+						"t_warehouse": rm_item.get("warehouse"),
+						"stock_uom": rm_item.get("stock_uom"),
+					},
+				)
 
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
@@ -357,29 +394,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Receive from Customer"
-		stock_entry.subcontracting_inward_order = self.name
-
-		stock_entry.set_stock_entry_type()
-
-		for rm_item in self.received_items:
-			if not rm_item.required_qty or not rm_item.is_customer_provided_item:
-				continue
-
-			items_dict = {
-				rm_item.get("rm_item_code"): {
-					"scio_detail": rm_item.get("name"),
-					"item_code": rm_item.get("rm_item_code"),
-					"qty": calculate_qty_as_per_bom(rm_item),
-					"t_warehouse": rm_item.get("warehouse"),
-					"stock_uom": rm_item.get("stock_uom"),
-				}
-			}
-
-			stock_entry.append("items", items_dict[rm_item.get("rm_item_code")])
 
 		if target_doc:
 			return stock_entry
@@ -391,6 +408,27 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
+		def postprocess(source, target):
+			target.purpose = "Return Raw Material to Customer"
+			target.subcontracting_inward_order = source.name
+			target.set_stock_entry_type()
+
+			for rm_item in source.received_items:
+				qty = rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty
+				if not rm_item.is_customer_provided_item or qty <= 0:
+					continue
+
+				target.append(
+					"items",
+					{
+						"scio_detail": rm_item.get("name"),
+						"item_code": rm_item.get("rm_item_code"),
+						"qty": qty,
+						"s_warehouse": rm_item.get("warehouse"),
+						"stock_uom": rm_item.get("stock_uom"),
+					},
+				)
+
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
 			self.name,
@@ -403,27 +441,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Return Raw Material to Customer"
-		stock_entry.set_stock_entry_type()
-		stock_entry.subcontracting_inward_order = self.name
-
-		for rm_item in self.received_items:
-			items_dict = {
-				rm_item.get("rm_item_code"): {
-					"scio_detail": rm_item.get("name"),
-					"item_code": rm_item.get("rm_item_code"),
-					"qty": rm_item.received_qty - rm_item.work_order_qty - rm_item.returned_qty,
-					"s_warehouse": rm_item.get("warehouse"),
-					"stock_uom": rm_item.get("stock_uom"),
-				}
-			}
-
-			ste_item = items_dict[rm_item.get("rm_item_code")]
-			if ste_item.get("qty"):
-				stock_entry.append("items", ste_item)
 
 		if target_doc:
 			return stock_entry
@@ -435,6 +455,57 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
 
+		def postprocess(source, target):
+			target.purpose = "Subcontracting Delivery"
+			target.subcontracting_inward_order = source.name
+			target.set_stock_entry_type()
+
+			scio_details = []
+			allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
+			for fg_item in source.items:
+				qty = (
+					fg_item.produced_qty if allow_over else min(fg_item.qty, fg_item.produced_qty)
+				) - fg_item.delivered_qty
+				if qty < 0:
+					continue
+
+				scio_details.append(fg_item.name)
+				if qty > 0:
+					target.append(
+						"items",
+						{
+							"qty": qty,
+							"item_code": fg_item.item_code,
+							"s_warehouse": fg_item.delivery_warehouse,
+							"stock_uom": fg_item.stock_uom,
+							"scio_detail": fg_item.name,
+							"is_finished_item": 1,
+						},
+					)
+
+			if (
+				frappe.get_single_value("Selling Settings", "deliver_secondary_items")
+				and source.secondary_items
+				and scio_details
+			):
+				for secondary_item in source.secondary_items:
+					if secondary_item.reference_name not in scio_details:
+						continue
+
+					qty = secondary_item.produced_qty - secondary_item.delivered_qty
+					if qty > 0:
+						target.append(
+							"items",
+							{
+								"qty": qty,
+								"item_code": secondary_item.item_code,
+								"s_warehouse": secondary_item.warehouse,
+								"stock_uom": secondary_item.stock_uom,
+								"scio_detail": secondary_item.name,
+								"secondary_item_type": secondary_item.secondary_item_type,
+							},
+						)
+
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
 			self.name,
@@ -447,63 +518,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Subcontracting Delivery"
-		stock_entry.set_stock_entry_type()
-		stock_entry.subcontracting_inward_order = self.name
-		scio_details = []
-
-		allow_over = frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty")
-		for fg_item in self.items:
-			qty = (
-				fg_item.produced_qty
-				if allow_over
-				else min(fg_item.qty, fg_item.produced_qty) - fg_item.delivered_qty
-			)
-			if qty < 0:
-				continue
-
-			scio_details.append(fg_item.name)
-			items_dict = {
-				fg_item.item_code: {
-					"qty": qty,
-					"item_code": fg_item.item_code,
-					"s_warehouse": fg_item.delivery_warehouse,
-					"stock_uom": fg_item.stock_uom,
-					"scio_detail": fg_item.name,
-					"is_finished_item": 1,
-				}
-			}
-
-			stock_entry.append("items", items_dict[fg_item.item_code])
-
-		if (
-			frappe.get_single_value("Selling Settings", "deliver_secondary_items")
-			and self.secondary_items
-			and scio_details
-		):
-			secondary_items = [
-				secondary_item
-				for secondary_item in self.secondary_items
-				if secondary_item.reference_name in scio_details
-			]
-			for secondary_item in secondary_items:
-				qty = secondary_item.produced_qty - secondary_item.delivered_qty
-				if qty > 0:
-					items_dict = {
-						secondary_item.item_code: {
-							"qty": secondary_item.produced_qty - secondary_item.delivered_qty,
-							"item_code": secondary_item.item_code,
-							"s_warehouse": secondary_item.warehouse,
-							"stock_uom": secondary_item.stock_uom,
-							"scio_detail": secondary_item.name,
-							"secondary_item_type": secondary_item.secondary_item_type,
-						}
-					}
-
-					stock_entry.append("items", items_dict[secondary_item.item_code])
 
 		if target_doc:
 			return stock_entry
@@ -514,6 +531,26 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def make_subcontracting_return(self, target_doc: Document | str | None = None):
 		if target_doc and target_doc.get("items"):
 			target_doc.items = []
+
+		def postprocess(source, target):
+			target.purpose = "Subcontracting Return"
+			target.set_stock_entry_type()
+
+			for fg_item in source.items:
+				qty = fg_item.delivered_qty - fg_item.returned_qty
+				if qty <= 0:
+					continue
+
+				target.append(
+					"items",
+					{
+						"qty": qty,
+						"item_code": fg_item.item_code,
+						"stock_uom": fg_item.stock_uom,
+						"scio_detail": fg_item.name,
+						"is_finished_item": 1,
+					},
+				)
 
 		stock_entry = get_mapped_doc(
 			"Subcontracting Inward Order",
@@ -528,28 +565,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				},
 			},
 			target_doc,
+			postprocess=postprocess,
 			ignore_child_tables=True,
 		)
-
-		stock_entry.purpose = "Subcontracting Return"
-		stock_entry.set_stock_entry_type()
-
-		for fg_item in self.items:
-			qty = fg_item.delivered_qty - fg_item.returned_qty
-			if qty < 0:
-				continue
-
-			items_dict = {
-				fg_item.item_code: {
-					"qty": qty,
-					"item_code": fg_item.item_code,
-					"stock_uom": fg_item.stock_uom,
-					"scio_detail": fg_item.name,
-					"is_finished_item": 1,
-				}
-			}
-
-			stock_entry.append("items", items_dict[fg_item.item_code])
 
 		if target_doc:
 			return stock_entry
@@ -571,4 +589,9 @@ def update_subcontracting_inward_order_status(scio: str | Document, status: str 
 		scio = frappe.get_doc("Subcontracting Inward Order", scio)
 
 	scio.check_permission("write")
+	if scio.docstatus != 1:
+		frappe.throw(_("Only a submitted Subcontracting Inward Order can be closed or re-opened."))
+	if status and status != "Closed":
+		frappe.throw(_("Status {0} cannot be set manually.").format(frappe.bold(status)))
+
 	set_subcontracting_inward_order_status(scio, status)

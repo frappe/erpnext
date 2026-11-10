@@ -4,6 +4,7 @@
 import frappe
 
 from erpnext.projects.doctype.activity_cost.activity_cost import DuplicationError
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -27,3 +28,59 @@ class TestActivityCost(ERPNextTestSuite):
 		activity_cost1.insert()
 		activity_cost2 = frappe.copy_doc(activity_cost1)
 		self.assertRaises(DuplicationError, activity_cost2.insert)
+
+	def test_default_activity_cost_title_and_duplication(self):
+		activity_type = "_Test Activity Type"
+
+		default_cost = frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"activity_type": activity_type,
+				"billing_rate": 80,
+				"costing_rate": 40,
+			}
+		).insert()
+		# without an employee, the title is just the activity type
+		self.assertEqual(default_cost.title, activity_type)
+
+		duplicate = frappe.copy_doc(default_cost)
+		self.assertRaises(DuplicationError, duplicate.insert)
+
+	def test_employee_name_and_title_are_set(self):
+		activity_type = "_Test Activity Type"
+		employee = frappe.db.get_all("Employee", filters={"first_name": "_Test Employee"})[0].name
+		employee_name = frappe.db.get_value("Employee", employee, "employee_name")
+
+		# employee_name is left blank so set_title has to fetch it
+		cost = frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"employee": employee,
+				"activity_type": activity_type,
+				"billing_rate": 60,
+				"costing_rate": 30,
+			}
+		).insert()
+		self.assertEqual(cost.employee_name, employee_name)
+		self.assertEqual(cost.title, f"{employee_name} for {activity_type}")
+
+	def test_duplication_is_checked_per_employee(self):
+		first = make_employee("_test_namesake_1@example.com", "_Test Company", first_name="_Test Namesake")
+		second = make_employee("_test_namesake_2@example.com", "_Test Company", first_name="_Test Namesake")
+		make_activity_cost(first)
+		cost = make_activity_cost(second)
+
+		cost.employee = first
+		self.assertRaises(DuplicationError, cost.save)
+
+
+def make_activity_cost(employee):
+	return frappe.get_doc(
+		{
+			"doctype": "Activity Cost",
+			"employee": employee,
+			"activity_type": "_Test Activity Type",
+			"billing_rate": 100,
+			"costing_rate": 50,
+		}
+	).insert()

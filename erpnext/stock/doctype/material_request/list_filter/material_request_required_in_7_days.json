@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"material_request_type\", \"label\": \"Purpose\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"schedule_date\", \"label\": \"Required By\"}, {\"fieldname\": \"set_warehouse\", \"label\": \"Set Target Warehouse\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 22:32:20.724650",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Required in 7 Days",
+ "filters": "[[\"Material Request\", \"docstatus\", \"=\", 1], [\"Material Request\", \"status\", \"in\", [\"Pending\", \"Partially Ordered\", \"Partially Received\"]], [\"Material Request\", \"schedule_date\", \"Timespan\", \"next 7 days\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 4,
+ "modified": "2026-09-30 22:32:20.724650",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Material Request-Required in 7 Days",
+ "owner": "Administrator",
+ "reference_doctype": "Material Request",
+ "route_signature": "docstatus=1&schedule_date=[\"Timespan\",\"next 7 days\"]&status=[\"in\",[\"Pending\",\"Partially Ordered\",\"Partially Received\"]]",
+ "sort_field": "schedule_date",
+ "sort_order": "asc"
+}

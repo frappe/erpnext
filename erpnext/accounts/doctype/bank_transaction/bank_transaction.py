@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Abs, Max, Sum
 from frappe.utils import flt, getdate
 
 
+# nosemgrep: frappe-semgrep-rules.rules.frappe-modifying-but-not-comitting-other-method -- set_status uses db_set once submitted or cancelled
 class BankTransaction(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
@@ -58,6 +59,7 @@ class BankTransaction(Document):
 		self.db_set("status", "Cancelled")
 
 	def validate(self):
+		self.set_status()
 		self.validate_included_fee()
 		self.validate_duplicate_references()
 		self.validate_currency()
@@ -82,13 +84,14 @@ class BankTransaction(Document):
 					)
 
 	def set_status(self):
-		if self.docstatus == 2:
+		if self.docstatus.is_draft():
+			self.status = "Pending"
+		elif self.docstatus.is_cancelled():
 			self.db_set("status", "Cancelled")
-		elif self.docstatus == 1:
-			if self.unallocated_amount > 0:
-				self.db_set("status", "Unreconciled")
-			elif self.unallocated_amount <= 0:
-				self.db_set("status", "Reconciled")
+		elif self.unallocated_amount > 0:
+			self.db_set("status", "Unreconciled")
+		else:
+			self.db_set("status", "Reconciled")
 
 	def validate_duplicate_references(self):
 		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""
@@ -397,7 +400,7 @@ def unreconcile_transaction(transaction_name: str | int):
 		frappe.get_doc(voucher["doctype"], voucher["name"]).cancel()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def unreconcile_transaction_entry(bank_transaction_id: str | int, voucher_type: str, voucher_id: str | int):
 	"""
 	Removes a single payment entry from a bank transaction - for example only undoing one voucher instead of undoing the entire transaction
@@ -440,7 +443,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 		if bt_bank_account != gl_bank_account:
 			frappe.throw(
-				_("Bank Account {} in Bank Transaction {} is not matching with Bank Account {}").format(
+				_("Bank Account {0} in Bank Transaction {1} is not matching with Bank Account {2}").format(
 					bt_bank_account, payment_entry.payment_entry, gl_bank_account
 				)
 			)
@@ -449,7 +452,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 
 	if gl_bank_account not in gl_entries:
 		frappe.throw(
-			_("{} {} is not affecting bank account {}").format(
+			_("{0} {1} is not affecting bank account {2}").format(
 				payment_entry.payment_document, payment_entry.payment_entry, gl_bank_account
 			)
 		)
@@ -457,7 +460,7 @@ def get_clearance_details(transaction, payment_entry, bt_allocations, gl_entries
 	allocable_amount = gl_entries.pop(gl_bank_account) or 0
 	if allocable_amount <= 0.0:
 		frappe.throw(
-			_("Invalid amount in accounting entries of {} {} for Account {}: {}").format(
+			_("Invalid amount in accounting entries of {0} {1} for Account {2}: {3}").format(
 				payment_entry.payment_document, payment_entry.payment_entry, gl_bank_account, allocable_amount
 			)
 		)

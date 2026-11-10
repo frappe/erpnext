@@ -15,15 +15,113 @@ frappe.setup.on("before_load", function () {
 		return;
 	}
 
-	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
+	let slides = erpnext.setup.slides_settings;
+	// HR trials get the HRMS persona step instead
+	if (frappe.boot.hr_only_setup) {
+		slides = slides.filter((slide) => slide.name !== "persona");
+	}
+	slides.map(frappe.setup.add_slide);
 });
 
 erpnext.setup.slides_settings = [
 	{
+		// Persona — help us tailor the setup
+		name: "persona",
+		title: __("A little about you"),
+		// subtitle shown under the title
+		help: __("A few quick questions so we can set things up the way you work."),
+		fields: [
+			{
+				fieldname: "persona_industry",
+				label: __("What kind of work do you do?"),
+				fieldtype: "Select",
+				options: [
+					"",
+					"Manufacturing",
+					"Retail",
+					"Wholesale / Distribution",
+					"E-commerce",
+					"Services / Consulting",
+					"Construction / Real Estate",
+					"Technology / Software",
+					"Healthcare",
+					"Education",
+					"Agriculture",
+					"Food & Beverage",
+					"Non Profit",
+					"Other",
+				].join("\n"),
+				reqd: 1,
+			},
+			{
+				fieldname: "persona_implementing_for",
+				label: __("Who are you setting this up for?"),
+				fieldtype: "Select",
+				options: ["", "My own business", "A company I work for", "A client I'm consulting for"].join(
+					"\n"
+				),
+			},
+			{
+				fieldname: "persona_company_size",
+				label: __("How big is the team?"),
+				fieldtype: "Select",
+				options: ["", "1–10", "11–50", "51–200", "201–1,000", "1,000+"].join("\n"),
+			},
+			{
+				fieldname: "persona_current_system",
+				label: __("What do you use today?"),
+				fieldtype: "Select",
+				options: [
+					"",
+					"Tally",
+					"QuickBooks",
+					"Zoho",
+					"Sage",
+					"SAP",
+					"Microsoft Dynamics",
+					"Oracle NetSuite",
+					"Odoo",
+					"Xero",
+					"Excel / Spreadsheets",
+					"Nothing yet - starting fresh",
+					"Other",
+				].join("\n"),
+			},
+			{
+				fieldtype: "Section Break",
+				description: __("Select the modules that you plan to implement"),
+			},
+			{ fieldname: "module_accounting", label: __("Accounting"), fieldtype: "Check" },
+			{ fieldname: "module_stock", label: __("Stock"), fieldtype: "Check" },
+			{ fieldtype: "Column Break" },
+			{ fieldname: "module_manufacturing", label: __("Manufacturing"), fieldtype: "Check" },
+			{ fieldname: "module_projects", label: __("Project Management"), fieldtype: "Check" },
+		],
+
+		onload: function (slide) {
+			this.bind_industry_modules(slide);
+		},
+
+		bind_industry_modules: function (slide) {
+			let me = this;
+			slide.get_input("persona_industry").on("change", function () {
+				me.apply_industry_modules(slide);
+			});
+		},
+
+		apply_industry_modules: function (slide) {
+			let industry = slide.get_field("persona_industry").get_value();
+			let modules = erpnext.setup.industry_modules[industry] || ["accounting"];
+			["accounting", "stock", "manufacturing", "projects"].forEach(function (module) {
+				slide.get_field("module_" + module).set_value(modules.includes(module) ? 1 : 0);
+			});
+		},
+	},
+	{
 		// Organization
 		name: "organization",
-		title: __("Setup your organization"),
-		icon: "fa fa-building",
+		title: __("Set up your company"),
+		help: __("We'll use these to create your company and its accounts."),
 		fields: [
 			{
 				fieldname: "company_name",
@@ -36,6 +134,7 @@ erpnext.setup.slides_settings = [
 				label: __("Company Abbreviation"),
 				fieldtype: "Data",
 				reqd: 1,
+				description: __("A short code added to account names, like Cash - AC."),
 			},
 			{ fieldtype: "Section Break" },
 			{
@@ -43,20 +142,12 @@ erpnext.setup.slides_settings = [
 				label: __("Chart of Accounts"),
 				options: "",
 				fieldtype: "Select",
+				description: __("The standard chart for your country works for most businesses."),
 			},
 			{ fieldname: "view_coa", label: __("View Chart of Accounts"), fieldtype: "Button" },
 			{ fieldname: "fy_start_date", label: __("Financial Year Begins On"), fieldtype: "Date", reqd: 1 },
 			// end date should be hidden (auto calculated)
 			{ fieldname: "fy_end_date", label: __("End Date"), fieldtype: "Date", reqd: 1, hidden: 1 },
-			{ fieldtype: "Section Break" },
-			{
-				fieldname: "setup_demo",
-				label: __("Generate Demo Data for Exploration"),
-				fieldtype: "Check",
-				description: __(
-					"If checked, we will create demo data for you to explore the system. This demo data can be erased later."
-				),
-			},
 		],
 
 		onload: function (slide) {
@@ -74,7 +165,7 @@ erpnext.setup.slides_settings = [
 			}
 
 			if ((this.values.company_name || "").toLowerCase() == "company") {
-				frappe.msgprint(__("Company Name cannot be Company"));
+				frappe.msgprint(__("Please pick a company name other than Company."));
 				return false;
 			}
 			if (!this.values.company_abbr) {
@@ -94,7 +185,7 @@ erpnext.setup.slides_settings = [
 			const start_greater_than_end = this.values.fy_start_date > this.values.fy_end_date;
 
 			if (invalid || start_greater_than_end) {
-				frappe.msgprint(__("Please enter valid Financial Year Start and End Dates"));
+				frappe.msgprint(__("Please enter a valid date for when your financial year begins."));
 				return false;
 			}
 
@@ -171,7 +262,9 @@ erpnext.setup.slides_settings = [
 				.on("change", function () {
 					let abbr = slide.get_input("company_abbr").val();
 					if (abbr.length > 10) {
-						frappe.msgprint(__("Company Abbreviation cannot have more than 5 characters"));
+						frappe.msgprint(
+							__("Company Abbreviation cannot have more than {0} characters", [10])
+						);
 						abbr = abbr.slice(0, 10);
 					}
 					slide.get_field("company_abbr").set_value(abbr);
@@ -218,6 +311,8 @@ erpnext.setup.slides_settings = [
 				parent: $(dialog.body),
 				label: parent,
 				expandable: true,
+				// read-only preview: row-mode visuals without actions
+				row_style: true,
 				method: "erpnext.accounts.utils.get_coa",
 				args: {
 					chart: chart_template,
@@ -242,6 +337,24 @@ erpnext.setup.slides_settings = [
 		},
 	},
 ];
+
+// Modules pre-selected on the persona slide based on the chosen industry.
+// Keys must match the persona_industry option values. Accounting is always on.
+erpnext.setup.industry_modules = {
+	Manufacturing: ["accounting", "stock", "manufacturing"],
+	Retail: ["accounting", "stock"],
+	"Wholesale / Distribution": ["accounting", "stock"],
+	"E-commerce": ["accounting", "stock"],
+	"Services / Consulting": ["accounting", "projects"],
+	"Construction / Real Estate": ["accounting", "stock", "projects"],
+	"Technology / Software": ["accounting", "projects"],
+	Healthcare: ["accounting", "stock"],
+	Education: ["accounting", "projects"],
+	Agriculture: ["accounting", "stock"],
+	"Food & Beverage": ["accounting", "stock", "manufacturing"],
+	"Non Profit": ["accounting", "projects"],
+	Other: ["accounting"],
+};
 
 // Source: https://en.wikipedia.org/wiki/Fiscal_year
 // default 1st Jan - 31st Dec

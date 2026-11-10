@@ -9,6 +9,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika.terms import Bracket, LiteralValue, Order
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimension_filter_condition
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.report.utils import (
 	apply_common_conditions,
@@ -20,10 +21,13 @@ from erpnext.accounts.report.utils import (
 	get_query_columns,
 	get_taxes_query,
 	get_values_for_columns,
+	validate_date_range,
 )
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return _execute(filters)
 
 
@@ -141,19 +145,34 @@ def _execute(filters, additional_table_columns=None):
 
 		# total tax, grand total, outstanding amount & rounded total
 
+		outstanding_precision = (
+			get_field_precision(
+				frappe.get_meta("Sales Invoice").get_field("outstanding_amount"),
+				currency=company_currency,
+			)
+			or 2
+		)
 		row.update(
 			{
 				"tax_total": total_tax,
 				"grand_total": inv.base_grand_total,
 				"rounded_total": inv.base_rounded_total,
-				"outstanding_amount": inv.outstanding_amount,
 			}
 		)
 
 		if inv.doctype == "Sales Invoice":
-			row.update({"debit": inv.base_grand_total, "credit": 0.0})
+			row.update(
+				{
+					"debit": get_receivable_debit(inv),
+					# credits the invoice itself posts to the receivable (mirrors its GL)
+					"credit": get_in_invoice_receivable_credit(inv),
+					"outstanding_amount": flt(
+						get_outstanding_in_company_currency(inv, company_currency), outstanding_precision
+					),
+				}
+			)
 		else:
-			row.update({"debit": 0.0, "credit": inv.base_grand_total})
+			row.update({"debit": inv.debit, "credit": inv.credit})
 		data.append(row)
 
 	res += sorted(data, key=lambda x: x["posting_date"])
@@ -167,12 +186,38 @@ def _execute(filters, additional_table_columns=None):
 	return columns, res, None, None, None, include_payments
 
 
+def get_receivable_debit(inv):
+	"""Amount the invoice debits to its receivable, rounded like its GL entry."""
+	if inv.base_rounding_adjustment and inv.base_rounded_total:
+		return inv.base_rounded_total
+
+	return inv.base_grand_total
+
+
+def get_outstanding_in_company_currency(inv, company_currency):
+	"""Outstanding is in the party account currency."""
+	if inv.party_account_currency == company_currency:
+		return flt(inv.outstanding_amount)
+
+	return flt(inv.outstanding_amount) * (inv.conversion_rate or 1)
+
+
+def get_in_invoice_receivable_credit(inv):
+	# amount the invoice settles against its own receivable, matching the invoice's GL entries
+	credit = flt(inv.loyalty_amount)  # loyalty redemption, POS or not
+	if inv.is_pos:  # POS payments and write-off credit the receivable only on POS invoices
+		credit += flt(inv.base_paid_amount) - flt(inv.base_change_amount) + flt(inv.base_write_off_amount)
+	return credit
+
+
 def get_columns(invoice_list, additional_table_columns, include_payments=False):
 	"""return columns based on filters"""
 	columns = [
 		{
 			"label": _("Voucher Type"),
 			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 120,
 		},
 		{
@@ -444,10 +489,18 @@ def get_invoices(filters, additional_query_columns):
 			si.base_net_total,
 			si.base_grand_total,
 			si.base_rounded_total,
+			si.base_rounding_adjustment,
+			si.is_pos,
+			si.base_paid_amount,
+			si.base_change_amount,
+			si.base_write_off_amount,
+			si.loyalty_amount,
 			si.outstanding_amount,
 			si.is_internal_customer,
 			si.represents_company,
 			si.company,
+			si.conversion_rate,
+			si.party_account_currency,
 		)
 		.where(si.docstatus == 1)
 	)
@@ -457,10 +510,12 @@ def get_invoices(filters, additional_query_columns):
 			query = query.select(col)
 
 	if filters.get("customer"):
-		query = query.where(si.customer == filters.customer)
+		query = query.where(get_dimension_filter_condition(si.customer, filters.customer))
 
 	if filters.get("customer_group"):
-		query = query.where(si.customer_group == filters.customer_group)
+		query = query.where(
+			get_dimension_filter_condition(si.customer_group, filters.customer_group, "Customer Group")
+		)
 
 	query = get_conditions(filters, query, "Sales Invoice")
 	query = apply_common_conditions(
@@ -485,8 +540,12 @@ def get_conditions(filters, query, doctype):
 
 	if filters.get("mode_of_payment"):
 		payment_doc = frappe.qb.DocType("Sales Invoice Payment")
-		query = query.inner_join(payment_doc).on(parent_doc.name == payment_doc.parent)
-		query = query.where(payment_doc.mode_of_payment == filters.mode_of_payment).distinct()
+		query = query.left_join(payment_doc).on(
+			(parent_doc.name == payment_doc.parent) & (payment_doc.parenttype == doctype)
+		)
+		query = query.where(
+			get_dimension_filter_condition(payment_doc.mode_of_payment, filters.mode_of_payment)
+		).distinct()
 
 	return query
 
@@ -494,7 +553,6 @@ def get_conditions(filters, query, doctype):
 def get_payments(filters):
 	args = frappe._dict(
 		account="debit_to",
-		account_fieldname="paid_from",
 		party="customer",
 		party_name="customer_name",
 		party_account=get_party_account("Customer", filters.customer, filters.company, include_advance=True),
@@ -638,6 +696,7 @@ def get_mode_of_payments(invoice_list):
 		)
 
 		for d in inv_mop:
-			mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
+			if d.mode_of_payment:
+				mode_of_payments.setdefault(d.parent, []).append(d.mode_of_payment)
 
 	return mode_of_payments

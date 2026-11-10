@@ -1,9 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from math import isfinite
+from urllib.parse import quote
+
 import frappe
 from frappe import _
-from frappe.utils import add_days, flt, get_datetime_str, nowdate
+from frappe.permissions import is_system_user
+from frappe.utils import add_days, flt, getdate
 from frappe.utils.data import DateTimeLikeObject
 from frappe.utils.nestedset import get_root_of
 
@@ -58,47 +62,80 @@ def get_pegged_rate(pegged_map, from_currency, to_currency, transaction_date=Non
 	return None
 
 
+def get_stored_exchange_rate(from_currency, to_currency, transaction_date, args=None, checkpoint_date=None):
+	"""Return the latest rate from Currency Exchange records, or None if there is none.
+
+	On the same date, a record meant only for the requested side (buying or selling)
+	wins over a record meant for both.
+	"""
+	filters = [
+		["date", "<=", getdate(transaction_date)],
+		["from_currency", "=", from_currency],
+		["to_currency", "=", to_currency],
+	]
+	order_by = "date desc"
+
+	if args == "for_buying":
+		filters.append(["for_buying", "=", 1])
+		order_by += ", for_selling asc"
+	elif args == "for_selling":
+		filters.append(["for_selling", "=", 1])
+		order_by += ", for_buying asc"
+
+	if checkpoint_date:
+		filters.append(["date", ">", getdate(checkpoint_date)])
+
+	entries = frappe.get_all(
+		"Currency Exchange",
+		fields=["exchange_rate"],
+		filters=filters,
+		order_by=order_by + ", name desc",
+		limit=1,
+	)
+	if entries:
+		return flt(entries[0].exchange_rate)
+
+
 @frappe.whitelist()
 def get_exchange_rate(
-	from_currency: str,
-	to_currency: str,
+	from_currency: str | None = None,
+	to_currency: str | None = None,
 	transaction_date: DateTimeLikeObject | None = None,
 	args: str | None = None,
 ):
 	if not (from_currency and to_currency):
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
+	for currency in (from_currency, to_currency):
+		if not isinstance(currency, str) or not frappe.db.exists("Currency", currency):
+			frappe.throw(_("Invalid currency: {0}").format(currency))
+
 	if from_currency == to_currency:
 		return 1
 
+	transaction_date = getdate(transaction_date)
 	if not transaction_date:
-		transaction_date = nowdate()
+		frappe.throw(_("Invalid transaction date"))
+	transaction_date = transaction_date.isoformat()
 
 	currency_settings = frappe.get_cached_doc("Accounts Settings")
 	allow_stale_rates = currency_settings.get("allow_stale")
 
-	filters = [
-		["date", "<=", get_datetime_str(transaction_date)],
-		["from_currency", "=", from_currency],
-		["to_currency", "=", to_currency],
-	]
-
-	if args == "for_buying":
-		filters.append(["for_buying", "=", "1"])
-	elif args == "for_selling":
-		filters.append(["for_selling", "=", "1"])
-
+	checkpoint_date = None
 	if not allow_stale_rates:
-		stale_days = currency_settings.get("stale_days")
-		checkpoint_date = add_days(transaction_date, -stale_days)
-		filters.append(["date", ">", get_datetime_str(checkpoint_date)])
+		checkpoint_date = add_days(transaction_date, -currency_settings.get("stale_days"))
 
-	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
-	entries = frappe.get_all(
-		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc", limit=1
+	rate = get_stored_exchange_rate(from_currency, to_currency, transaction_date, args, checkpoint_date)
+	if rate is not None:
+		return rate
+
+	# no direct record: use the inverse of a record for the opposite direction
+	reverse_args = {"for_buying": "for_selling", "for_selling": "for_buying"}.get(args, args)
+	reverse_rate = get_stored_exchange_rate(
+		to_currency, from_currency, transaction_date, reverse_args, checkpoint_date
 	)
-	if entries:
-		return flt(entries[0].exchange_rate)
+	if reverse_rate:
+		return 1 / reverse_rate
 
 	if frappe.get_single_value("Currency Exchange Settings", "disabled"):
 		return 0.00
@@ -113,10 +150,20 @@ def get_exchange_rate(
 	try:
 		cache = frappe.cache()
 		key = f"currency_exchange_rate_{transaction_date}:{from_currency}:{to_currency}"
-		value = cache.get(key)
+		value = cache.get_value(key)
 
 		if not value:
+			if not is_system_user():
+				frappe.throw(
+					_("Only system users can fetch exchange rates from an external provider."),
+					frappe.PermissionError,
+				)
+
 			import requests
+
+			from erpnext.accounts.doctype.currency_exchange_settings.currency_exchange_settings import (
+				get_auth_params,
+			)
 
 			settings = frappe.get_cached_doc("Currency Exchange Settings")
 			req_params = {
@@ -131,16 +178,30 @@ def get_exchange_rate(
 			params = {}
 			for row in settings.req_params:
 				params[row.key] = format_ces_api(row.value, req_params)
-			response = requests.get(format_ces_api(settings.api_endpoint, req_params), params=params)
+			params.update(get_auth_params(settings))
+			response = requests.get(
+				format_ces_api(
+					settings.api_endpoint, {key: quote(value, safe="") for key, value in req_params.items()}
+				),
+				params=params,
+				timeout=frappe.conf.get("currency_exchange_request_timeout") or 10,
+			)
 			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()
 			for res_key in settings.result_key:
 				value = value[format_ces_api(str(res_key.key), req_params)]
-			cache.setex(name=key, time=21600, value=flt(value))
+			if isinstance(value, bool):
+				raise ValueError("Invalid exchange rate")
+			value = float(value)
+			if not isfinite(value) or value <= 0:
+				raise ValueError("Exchange rate must be a positive finite number")
+			cache.set_value(key, value, expires_in_sec=21600)
 
 		# Support multiple pegged currencies
-		value = flt(value)
+		value = float(value)
+		if not isfinite(value) or value <= 0:
+			raise ValueError("Exchange rate must be a positive finite number")
 
 		if currency_settings.allow_pegged_currencies_exchange_rates and to_currency in pegged_currencies:
 			value *= flt(pegged_currencies[to_currency]["ratio"])
@@ -148,6 +209,8 @@ def get_exchange_rate(
 			value /= flt(pegged_currencies[from_currency]["ratio"])
 
 		return flt(value)
+	except frappe.PermissionError:
+		raise
 	except Exception:
 		frappe.log_error("Unable to fetch exchange rate")
 		frappe.msgprint(
@@ -208,13 +271,11 @@ def welcome_email():
 	return title
 
 
-def identity(x, *args, **kwargs):
-	"""Used for redefining the translation function to return the string as is.
+def set_root_as_default_parent(doc):
+	"""Default an empty tree parent to the root, unless the doc is the root."""
+	if doc.get(doc.nsm_parent_field):
+		return
 
-	We want to create english records but still mark the strings as translatable.
-	E.g. when the respective DocTypes have 'Translate Link Fields' enabled or
-	we're creating custom fields.
-
-	Use like this: `from erpnext.setup.utils import identity as _`
-	"""
-	return x
+	root = get_root_of(doc.doctype)
+	if root != doc.name:
+		doc.set(doc.nsm_parent_field, root)

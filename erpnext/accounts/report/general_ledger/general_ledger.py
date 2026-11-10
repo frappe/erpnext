@@ -10,11 +10,16 @@ from frappe.utils import cstr, getdate
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_sql_condition,
+	get_dimension_filter_values,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+	validate_date_range,
+)
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 
 DEBIT_CREDIT_DICT = {
 	"debit": 0.0,
@@ -58,7 +63,7 @@ def validate_filters(filters, account_details):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
-	if not filters.get("from_date") and not filters.get("to_date"):
+	if not filters.get("from_date") or not filters.get("to_date"):
 		frappe.throw(
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
@@ -82,8 +87,7 @@ def validate_filters(filters, account_details):
 	if filters.get("voucher_no") and filters.get("categorize_by") in ["Categorize by Voucher"]:
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range(filters)
 
 	if filters.get("project"):
 		filters.project = frappe.parse_json(filters.get("project"))
@@ -137,7 +141,11 @@ def set_account_currency(filters):
 				)
 
 		filters["account_currency"] = account_currency or filters.company_currency
-		if filters.account_currency != filters.company_currency and not filters.presentation_currency:
+		if (
+			filters.account_currency != filters.company_currency
+			and not filters.presentation_currency
+			and not filters.get("show_amount_in_company_currency")
+		):
 			filters.presentation_currency = filters.account_currency
 
 	return filters
@@ -194,6 +202,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
 		)
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- filters use placeholders; fields come from config
 	gl_entries = frappe.db.sql(
 		f"""
 		select
@@ -216,10 +225,19 @@ def get_gl_entries(filters, accounting_dimensions):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
-	else:
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
+
+
+def convert_gl_entries_currency(gl_entries, currency_map, filters):
+	if not filters.get("presentation_currency"):
 		return gl_entries
+
+	return convert_to_presentation_currency(
+		gl_entries,
+		currency_map,
+		filters,
+		use_account_currency=not filters.get("convert_at_reporting_date_rate"),
+	)
 
 
 def get_conditions(filters):
@@ -233,8 +251,7 @@ def get_conditions(filters):
 			conditions.append("account in %(account)s")
 
 	if filters.get("cost_center"):
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		conditions.append("cost_center in %(cost_center)s")
+		append_named_dimension_condition(conditions, filters, "cost_center", "Cost Center")
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
@@ -308,7 +325,7 @@ def get_conditions(filters):
 		conditions.append("posting_date <=%(to_date)s")
 
 	if filters.get("project"):
-		conditions.append("project in %(project)s")
+		append_named_dimension_condition(conditions, filters, "project", "Project")
 
 	if filters.get("include_default_book_entries"):
 		if filters.get("finance_book"):
@@ -343,15 +360,27 @@ def get_conditions(filters):
 			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
 			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, filters.get(dimension.fieldname)
-						)
-						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
-					else:
-						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
+					append_named_dimension_condition(
+						conditions, filters, dimension.fieldname, dimension.document_type
+					)
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def append_named_dimension_condition(conditions, filters, fieldname, dimension_doctype):
+	values, include_blank = get_dimension_filter_values(filters[fieldname], dimension_doctype)
+	parts = []
+
+	if values:
+		parameter = f"_selected_{fieldname}"
+		filters[parameter] = values
+		parts.append(f"{fieldname} in %({parameter})s")
+
+	if include_blank:
+		parts.append(f"({fieldname} is null or {fieldname} = '')")
+
+	if parts:
+		conditions.append(f"({' or '.join(parts)})")
 
 
 def get_party_name_map():
@@ -478,21 +507,25 @@ def get_totals_dict():
 	)
 
 
-def get_group_by_field(group_by):
+def get_group_by_fields(group_by: str | None) -> tuple[str, ...]:
 	if group_by == "Categorize by Party":
-		return "party"
+		return ("party_type", "party")
 	elif group_by in ["Categorize by Voucher (Consolidated)", "Categorize by Account"]:
-		return "account"
+		return ("account",)
 	else:
-		return "voucher_no"
+		return ("voucher_type", "voucher_no")
+
+
+def get_group_by_value(gle: dict, group_by_fields: tuple[str, ...]) -> tuple:
+	return tuple(gle.get(field) for field in group_by_fields)
 
 
 def initialize_gle_map(gl_entries, filters):
 	gle_map = {}
-	group_by = get_group_by_field(filters.get("categorize_by"))
+	group_by = get_group_by_fields(filters.get("categorize_by"))
 
 	for gle in gl_entries:
-		group_by_value = gle.get(group_by)
+		group_by_value = get_group_by_value(gle, group_by)
 		if group_by_value not in gle_map:
 			gle_map[group_by_value] = _dict(
 				totals=get_totals_dict(),
@@ -504,7 +537,7 @@ def initialize_gle_map(gl_entries, filters):
 def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	entries = []
 	consolidated_gle = {}
-	group_by = get_group_by_field(filters.get("categorize_by"))
+	group_by = get_group_by_fields(filters.get("categorize_by"))
 	group_by_voucher_consolidated = filters.get("categorize_by") == "Categorize by Voucher (Consolidated)"
 
 	if filters.get("show_net_values_in_party_account"):
@@ -554,11 +587,23 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	show_opening_entries = filters.get("show_opening_entries")
 
+	# P&L accounts reset every fiscal year, so their entries before the year start don't count in opening
+	pl_accounts, year_start_date = set(), None
+	if fiscal_year := get_fiscal_year(from_date, company=filters.company, raise_on_missing=False):
+		year_start_date = getdate(fiscal_year[1])
+		pl_accounts = set(
+			frappe.get_all(
+				"Account", {"company": filters.company, "report_type": "Profit and Loss"}, pluck="name"
+			)
+		)
+
 	totals = get_totals_dict()
 	for gle in gl_entries:
-		group_by_value = gle.get(group_by)
+		if year_start_date and gle.posting_date < year_start_date and gle.account in pl_accounts:
+			continue
+
+		group_by_value = get_group_by_value(gle, group_by)
 		gle.voucher_subtype = _(gle.voucher_subtype)
-		gle.against_voucher_type = _(gle.against_voucher_type)
 		gle.remarks = _(gle.remarks)
 		gle.party_type = _(gle.party_type)
 
@@ -679,8 +724,9 @@ def get_columns(filters):
 		and filters["presentation_currency"] != company_currency
 	):
 		frappe.throw(
-			_(
-				f'Presentation Currency cannot be {frappe.bold(filters["presentation_currency"])} , When {frappe.bold("Show Credit / Debit in Company Currency")} is enabled.'
+			_("Presentation Currency cannot be {0}, when {1} is enabled.").format(
+				frappe.bold(filters["presentation_currency"]),
+				frappe.bold(_("Show Credit / Debit in Company Currency")),
 			)
 		)
 
@@ -756,7 +802,13 @@ def get_columns(filters):
 		]
 
 	columns += [
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"fieldtype": "Link",
+			"options": "DocType",
+			"width": 120,
+		},
 		{
 			"label": _("Voucher Subtype"),
 			"fieldname": "voucher_subtype",
@@ -801,7 +853,13 @@ def get_columns(filters):
 
 	columns.extend(
 		[
-			{"label": _("Against Voucher Type"), "fieldname": "against_voucher_type", "width": 100},
+			{
+				"label": _("Against Voucher Type"),
+				"fieldname": "against_voucher_type",
+				"fieldtype": "Link",
+				"options": "DocType",
+				"width": 100,
+			},
 			{
 				"label": _("Against Voucher"),
 				"fieldname": "against_voucher",
@@ -817,3 +875,291 @@ def get_columns(filters):
 		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
 
 	return columns
+
+
+def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
+	from frappe.database.duckdb.database import get_latest_sync
+
+	if conn := get_latest_sync("GL Entry"):
+		return _execute_with_duckdb_conn(filters, conn)
+
+	frappe.throw(_("General Ledger requires {0} to be synced to DuckDB").format(frappe.bold("GL Entry")))
+
+
+def _execute_with_duckdb_conn(filters, conn):
+	if not filters:
+		return [], []
+
+	account_details = {}
+
+	if filters.get("print_in_account_currency") and not filters.get("account"):
+		frappe.throw(_("Select an account to print in account currency"))
+
+	for acc in frappe.get_all("Account", fields=["name", "is_group"]):
+		account_details.setdefault(acc.name, acc)
+
+	if filters.get("party"):
+		filters.party = frappe.parse_json(filters.get("party"))
+
+	validate_filters(filters, account_details)
+	validate_party(filters)
+	filters = set_account_currency(filters)
+	columns = get_columns(filters)
+	res = get_result_duckdb(filters, account_details, conn)
+	return columns, res
+
+
+def get_result_duckdb(filters, account_details, conn):
+	accounting_dimensions = []
+	if filters.get("include_dimensions"):
+		accounting_dimensions = get_accounting_dimensions()
+
+	gl_entries = get_gl_entries_duckdb(filters, accounting_dimensions, conn)
+	data = get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries)
+	return get_result_as_list(data, filters)
+
+
+def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
+	currency_map = get_currency(filters)
+
+	col_names = [
+		"gl_entry",
+		"posting_date",
+		"account",
+		"party_type",
+		"party",
+		"voucher_type",
+		"voucher_subtype",
+		"voucher_no",
+		"cost_center",
+		"project",
+		"against_voucher_type",
+		"against_voucher",
+		"account_currency",
+		"against",
+		"is_opening",
+		"creation",
+		"debit",
+		"credit",
+		"debit_in_account_currency",
+		"credit_in_account_currency",
+	]
+	select_exprs = [
+		"name",
+		"posting_date",
+		"account",
+		"party_type",
+		"party",
+		"voucher_type",
+		"voucher_subtype",
+		"voucher_no",
+		"cost_center",
+		"project",
+		"against_voucher_type",
+		"against_voucher",
+		"account_currency",
+		"against",
+		"is_opening",
+		"creation",
+		"debit",
+		"credit",
+		"debit_in_account_currency",
+		"credit_in_account_currency",
+	]
+
+	if filters.get("show_remarks"):
+		remarks_length = frappe.get_single_value("Accounts Settings", "general_ledger_remarks_length")
+		if remarks_length:
+			select_exprs.append(f"substr(remarks, 1, {int(remarks_length)})")
+		else:
+			select_exprs.append("remarks")
+		col_names.append("remarks")
+
+	if filters.get("add_values_in_transaction_currency"):
+		select_exprs += [
+			"debit_in_transaction_currency",
+			"credit_in_transaction_currency",
+			"transaction_currency",
+		]
+		col_names += [
+			"debit_in_transaction_currency",
+			"credit_in_transaction_currency",
+			"transaction_currency",
+		]
+
+	if accounting_dimensions:
+		select_exprs += accounting_dimensions
+		col_names += accounting_dimensions
+
+	order_by = "posting_date, account, creation"
+	if filters.get("include_dimensions"):
+		order_by = "posting_date, creation"
+	if filters.get("categorize_by") == "Categorize by Voucher":
+		order_by = "posting_date, voucher_type, voucher_no"
+	if filters.get("categorize_by") == "Categorize by Account":
+		order_by = "account, posting_date, creation"
+
+	if filters.get("include_default_book_entries"):
+		filters["company_fb"] = frappe.get_cached_value(
+			"Company", filters.get("company"), "default_finance_book"
+		)
+
+	conditions, params = _build_gl_conditions_duckdb(filters)
+	select_clause = ", ".join(select_exprs)
+	sql = f'SELECT {select_clause} FROM "tabGL Entry" WHERE {" AND ".join(conditions)} ORDER BY {order_by}'
+
+	rows = conn.execute(sql, params).fetchall()
+	gl_entries = [frappe._dict(zip(col_names, row, strict=False)) for row in rows]
+
+	party_name_map = get_party_name_map()
+	for gl_entry in gl_entries:
+		if gl_entry.party_type and gl_entry.party:
+			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
+
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
+
+
+def _build_gl_conditions_duckdb(filters):
+	ignore_is_opening = frappe.get_single_value("Accounts Settings", "ignore_is_opening_check_for_reporting")
+
+	conditions = ["company = ?"]
+	params = [filters.company]
+
+	if filters.get("account"):
+		filters.account = get_accounts_with_children(filters.account)
+		if filters.account:
+			conditions.append(f"account IN ({', '.join(['?'] * len(filters.account))})")
+			params.extend(filters.account)
+
+	if filters.get("cost_center"):
+		append_positional_dimension_condition(
+			conditions, params, "cost_center", filters.cost_center, "Cost Center"
+		)
+
+	if filters.get("voucher_no"):
+		conditions.append("voucher_no = ?")
+		params.append(filters.voucher_no)
+
+	if filters.get("against_voucher_no"):
+		conditions.append("against_voucher = ?")
+		params.append(filters.against_voucher_no)
+
+	if filters.get("ignore_err"):
+		err_journals = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"company": filters.get("company"),
+				"docstatus": 1,
+				"voucher_type": ("in", ["Exchange Rate Revaluation", "Exchange Gain Or Loss"]),
+			},
+			pluck="name",
+		)
+		if err_journals:
+			filters.update({"voucher_no_not_in": err_journals})
+
+	if filters.get("ignore_cr_dr_notes"):
+		system_generated = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"company": filters.get("company"),
+				"docstatus": 1,
+				"voucher_type": ("in", ["Credit Note", "Debit Note"]),
+				"is_system_generated": 1,
+			},
+			pluck="name",
+		)
+		if system_generated:
+			vouchers_to_ignore = (filters.get("voucher_no_not_in") or []) + system_generated
+			filters.update({"voucher_no_not_in": vouchers_to_ignore})
+
+	if filters.get("voucher_no_not_in"):
+		vouchers = filters.voucher_no_not_in
+		conditions.append(f"voucher_no NOT IN ({', '.join(['?'] * len(vouchers))})")
+		params.extend(vouchers)
+
+	if filters.get("categorize_by") == "Categorize by Party" and not filters.get("party_type"):
+		conditions.append("party_type IN ('Customer', 'Supplier')")
+
+	if filters.get("party_type"):
+		conditions.append("party_type = ?")
+		params.append(filters.party_type)
+
+	if filters.get("party"):
+		conditions.append(f"party IN ({', '.join(['?'] * len(filters.party))})")
+		params.extend(filters.party)
+
+	# from_date: skip when filtering by account/party to allow opening balance calc in Python
+	if filters.get("disable_opening_balance_calculation"):
+		if not ignore_is_opening:
+			conditions.append("(posting_date >= ? OR is_opening = 'Yes')")
+		else:
+			conditions.append("posting_date >= ?")
+		params.append(filters.from_date)
+	elif not (
+		filters.get("account")
+		or filters.get("party")
+		or filters.get("categorize_by") in ["Categorize by Account", "Categorize by Party"]
+	):
+		if not ignore_is_opening:
+			conditions.append("(posting_date >= ? OR is_opening = 'Yes')")
+		else:
+			conditions.append("posting_date >= ?")
+		params.append(filters.from_date)
+
+	if not ignore_is_opening:
+		conditions.append("(posting_date <= ? OR is_opening = 'Yes')")
+	else:
+		conditions.append("posting_date <= ?")
+	params.append(filters.to_date)
+
+	if filters.get("project"):
+		append_positional_dimension_condition(conditions, params, "project", filters.project, "Project")
+
+	company_fb = filters.get("company_fb") or frappe.get_cached_value(
+		"Company", filters.company, "default_finance_book"
+	)
+	if filters.get("include_default_book_entries"):
+		if filters.get("finance_book"):
+			if company_fb and cstr(filters.finance_book) != cstr(company_fb):
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default FB Entries'")
+				)
+			fb_vals = [cstr(filters.finance_book), ""]
+		else:
+			fb_vals = [cstr(company_fb), ""]
+		conditions.append(f"(finance_book IN ({', '.join(['?'] * len(fb_vals))}) OR finance_book IS NULL)")
+		params.extend(fb_vals)
+	else:
+		if filters.get("finance_book"):
+			conditions.append("(finance_book IN (?, '') OR finance_book IS NULL)")
+			params.append(cstr(filters.finance_book))
+		else:
+			conditions.append("(finance_book IN ('') OR finance_book IS NULL)")
+
+	if not filters.get("show_cancelled_entries"):
+		conditions.append("is_cancelled = 0")
+
+	accounting_dimensions_list = get_accounting_dimensions(as_list=False)
+	if accounting_dimensions_list:
+		for dimension in accounting_dimensions_list:
+			if not dimension.disabled and dimension.document_type != "Finance Book":
+				if filters.get(dimension.fieldname):
+					append_positional_dimension_condition(
+						conditions,
+						params,
+						dimension.fieldname,
+						filters[dimension.fieldname],
+						dimension.document_type,
+					)
+
+	return conditions, params
+
+
+def append_positional_dimension_condition(conditions, params, fieldname, selected_values, dimension_doctype):
+	condition, values = get_dimension_filter_sql_condition(fieldname, selected_values, dimension_doctype)
+	if condition:
+		conditions.append(condition)
+		params.extend(values)

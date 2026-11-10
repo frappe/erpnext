@@ -5,7 +5,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, now_datetime
 from pypika.terms import ExistsCriterion
 
@@ -68,6 +68,7 @@ class SalesOrderSourcingService:
 				& (mr.status != "Stopped")
 				& (mr.company == self.doc.company)
 				& (mr_item.qty > IfNull(mr_item.ordered_qty, 0))
+				& (mr_item.stock_qty > IfNull(_mr_item_planned_qty_query(mr_item), 0))
 				& bom_exists
 			)
 		)
@@ -211,7 +212,12 @@ class SalesOrderSourcingService:
 		)
 		if self.doc.item_code:
 			query = query.where(mr_item.item_code == self.doc.item_code)
-		return query.run(as_dict=True)
+
+		items = query.run(as_dict=True)
+		for item in items:
+			item.pending_qty = max(min(flt(item.pending_qty), flt(item.stock_qty) - flt(item.planned_qty)), 0)
+
+		return items
 
 	def add_items(self, items):
 		refs = {}
@@ -220,8 +226,8 @@ class SalesOrderSourcingService:
 				continue
 
 			item_details = get_item_details(data.item_code, throw=False)
-			if self.doc.combine_items:
-				self._add_combine_ref(refs, data, item_details)
+			if self.doc.combine_items and self._add_combine_ref(refs, data, item_details):
+				continue
 
 			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
 			if not bom_no:
@@ -238,9 +244,10 @@ class SalesOrderSourcingService:
 		if bom_no in refs:
 			refs[bom_no]["so_details"].append(detail)
 			refs[bom_no]["qty"] += data.pending_qty
-			return
+			return True
 
 		refs[bom_no] = {"qty": data.pending_qty, "po_item_ref": data.name, "so_details": [detail]}
+		return False
 
 	def _append_po_item(self, data, item_details, bom_no):
 		pi = self.doc.append("po_items", self._po_item_values(data, item_details, bom_no))
@@ -297,6 +304,8 @@ def _so_item_columns(so_item):
 		so_item.warehouse,
 		(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
 		so_item.work_order_qty,
+		so_item.stock_qty,
+		so_item.production_plan_qty,
 		so_item.delivered_qty,
 		so_item.conversion_factor,
 		so_item.description,
@@ -310,14 +319,16 @@ def _so_items_filter(so_item, so_list):
 		(so_item.parent.isin(so_list))
 		& (so_item.docstatus == 1)
 		& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
+		& (so_item.stock_qty > so_item.production_plan_qty)
 	)
 
 
 def _set_so_item_pending_qty(items):
 	for item in items:
-		item.pending_qty = flt(item.qty) - max(
+		pending_qty = flt(item.qty) - max(
 			item.work_order_qty, flt(item.delivered_qty) * item.conversion_factor, 0
 		)
+		item.pending_qty = min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty))
 
 
 def _so_packed_columns(so_item, pi):
@@ -366,7 +377,18 @@ def _mr_item_columns(mr_item):
 		mr_item.description,
 		mr_item.bom_no,
 		((mr_item.qty - mr_item.ordered_qty) * mr_item.conversion_factor).as_("pending_qty"),
+		mr_item.stock_qty,
+		IfNull(_mr_item_planned_qty_query(mr_item), 0).as_("planned_qty"),
 	]
+
+
+def _mr_item_planned_qty_query(mr_item):
+	plan_item = frappe.qb.DocType("Production Plan Item")
+	return (
+		frappe.qb.from_(plan_item)
+		.select(Sum(plan_item.planned_qty))
+		.where((plan_item.material_request_item == mr_item.name) & (plan_item.docstatus == 1))
+	)
 
 
 def _mr_items_filter(bom, mr_item, mr_list):

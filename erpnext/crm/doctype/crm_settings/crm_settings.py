@@ -3,8 +3,10 @@
 
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields, delete_custom_fields
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.model.document import Document
+
+from erpnext.crm.frappe_crm_api import is_crm_installed
 
 
 class CRMSettings(Document):
@@ -32,8 +34,13 @@ class CRMSettings(Document):
 
 	def validate(self):
 		frappe.db.set_default("campaign_naming_by", self.get("campaign_naming_by", ""))
+		self.validate_default_valid_till()
 		self.validate_enable_opportunity_creation_from_contact_us()
 		self.validate_allowed_users()
+
+	def validate_default_valid_till(self):
+		if self.default_valid_till and not str(self.default_valid_till).strip().isdigit():
+			frappe.throw(_("Default Quotation Validity Days must be a whole number of days, 0 or more."))
 
 	def validate_enable_opportunity_creation_from_contact_us(self):
 		contact_disabled = frappe.get_single_value("Contact Us Settings", "is_disabled")
@@ -46,12 +53,15 @@ class CRMSettings(Document):
 			)
 
 	def validate_allowed_users(self):
-		if self.enable_frappe_crm_data_synchronization and not self.allowed_users:
+		if self.enable_frappe_crm_data_synchronization and not (is_crm_installed() or self.allowed_users):
 			frappe.throw(
 				_(
-					"Please add atleast one user on Allowed Users to allow Data Synchronization from Frappe CRM site."
+					"Please add at least one user on Allowed Users to allow Data Synchronization from Frappe CRM site."
 				)
 			)
+
+		if self.enable_frappe_crm_data_synchronization and is_crm_installed() and self.allowed_users:
+			frappe.throw(_("Allowed Users is not required as Frappe CRM is already installed on the site."))
 
 	def before_save(self):
 		self.clear_allowed_users()
@@ -64,6 +74,13 @@ class CRMSettings(Document):
 			self.allowed_users = []
 
 	def custom_fields_for_frappe_crm_data_sync(self):
+		custom_fields = self.get_frappe_crm_custom_fields()
+
+		if self.enable_frappe_crm_data_synchronization:
+			create_custom_fields(custom_fields, ignore_validate=True)
+
+	@staticmethod
+	def get_frappe_crm_custom_fields():
 		custom_fields = {
 			"Quotation": [
 				{
@@ -83,4 +100,4 @@ class CRMSettings(Document):
 			],
 		}
 
-		create_custom_fields(custom_fields, ignore_validate=True)
+		return custom_fields

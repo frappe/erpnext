@@ -42,7 +42,6 @@ def add_permissions():
 	"""Add Permissions for South Africa VAT Settings and South Africa VAT Account
 	and VAT Audit Report"""
 	for doctype in ("South Africa VAT Settings", "South Africa VAT Account"):
-		add_permission(doctype, "All", 0)
 		for role in ("Accounts Manager", "Accounts User", "System Manager"):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, "write", 1)

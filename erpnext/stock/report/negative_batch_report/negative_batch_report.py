@@ -5,7 +5,9 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, flt, today
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 from erpnext.stock.report.stock_ledger.stock_ledger import execute as stock_ledger_execute
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters: dict | None = None):
@@ -18,7 +20,7 @@ def execute(filters: dict | None = None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_columns() -> list[dict]:
@@ -71,7 +73,8 @@ def get_columns() -> list[dict]:
 		{
 			"label": _("Document Type"),
 			"fieldname": "voucher_type",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType",
 			"width": 130,
 		},
 		{
@@ -144,7 +147,11 @@ def get_warehouses(filters):
 	if filters.get("warehouse"):
 		warehouse_filters["name"] = filters["warehouse"]
 
-	return frappe.get_all("Warehouse", fields=["name", "company"], filters=warehouse_filters)
+	filter_list = [warehouse_filters]
+	if condition := get_allowed_companies_condition(frappe.qb.DocType("Warehouse").company, "Warehouse"):
+		filter_list.append(condition)
+
+	return frappe.get_all("Warehouse", fields=["name", "company"], filters=filter_list)
 
 
 def get_batches(filters):

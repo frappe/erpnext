@@ -25,6 +25,7 @@ class Operation(Document):
 		quality_inspection_template: DF.Link | None
 		sub_operations: DF.Table[SubOperation]
 		total_operation_time: DF.Float
+		work_instruction: DF.TextEditor | None
 		workstation: DF.Link | None
 	# end: auto-generated types
 
@@ -40,12 +41,12 @@ class Operation(Document):
 		for row in self.sub_operations:
 			if row.operation in operation_list:
 				frappe.throw(
-					_("The operation {0} can not add multiple times").format(frappe.bold(row.operation))
+					_("The operation {0} cannot be added multiple times").format(frappe.bold(row.operation))
 				)
 
 			if self.name == row.operation:
 				frappe.throw(
-					_("The operation {0} can not be the sub operation").format(frappe.bold(row.operation))
+					_("The operation {0} cannot be its own sub-operation").format(frappe.bold(row.operation))
 				)
 
 			operation_list.append(row.operation)

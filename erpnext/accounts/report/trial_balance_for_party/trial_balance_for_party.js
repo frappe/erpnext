@@ -71,10 +71,22 @@ frappe.query_reports["Trial Balance for Party"] = {
 			fieldtype: "MultiSelectList",
 			options: "Account",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Account", txt, {
+				return erpnext.utils.get_link_options("Account", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
+		},
+		{
+			fieldname: "finance_book",
+			label: __("Finance Book"),
+			fieldtype: "Link",
+			options: "Finance Book",
+		},
+		{
+			fieldname: "include_default_book_entries",
+			label: __("Include Default FB Entries"),
+			fieldtype: "Check",
+			default: 1,
 		},
 		{
 			fieldname: "show_zero_values",

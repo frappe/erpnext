@@ -3,8 +3,10 @@
  "allow_import": 1,
  "autoname": "TASK-.YYYY.-.#####",
  "creation": "2013-01-29 19:25:50",
+ "description": "A piece of work to be done, often part of a project.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tasks",
  "engine": "InnoDB",
  "field_order": [
   "subject",
@@ -76,6 +78,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Project",
@@ -115,6 +118,7 @@
    "bold": 1,
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
@@ -124,8 +128,10 @@
    "options": "Open\nWorking\nPending Review\nOverdue\nTemplate\nCompleted\nCancelled"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "priority",
    "fieldtype": "Select",
+   "in_import_template": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Priority",
@@ -156,9 +162,11 @@
    "label": "Timeline"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Datetime",
+   "in_import_template": 1,
    "label": "Expected Start Date",
    "oldfieldname": "exp_start_date",
    "oldfieldtype": "Date"
@@ -167,24 +175,27 @@
    "default": "0",
    "fieldname": "expected_time",
    "fieldtype": "Float",
+   "in_import_template": 1,
    "label": "Expected Time (in hours)",
    "oldfieldname": "exp_total_hrs",
    "oldfieldtype": "Data"
   },
   {
-   "fetch_from": "type.weight",
    "fieldname": "task_weight",
    "fieldtype": "Float",
-   "label": "Weight"
+   "label": "Weight",
+   "non_negative": 1
   },
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "exp_end_date",
    "fieldtype": "Datetime",
+   "in_import_template": 1,
    "label": "Expected End Date",
    "oldfieldname": "exp_end_date",
    "oldfieldtype": "Date",
@@ -210,8 +221,10 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
+   "in_import_template": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
@@ -368,7 +381,6 @@
    "options": "User"
   },
   {
-   "allow_in_quick_entry": 1,
    "default": "0",
    "fieldname": "is_template",
    "fieldtype": "Check",
@@ -418,12 +430,13 @@
    "fieldtype": "Column Break"
   }
  ],
- "icon": "fa fa-check",
+ "icon": "list-checks",
  "idx": 1,
  "is_tree": 1,
+ "link_display_mode": "Search",
  "links": [],
  "max_attachments": 5,
- "modified": "2026-04-09 19:12:27.153143",
+ "modified": "2026-11-02 16:48:25.316976",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -455,6 +468,18 @@
    "role": "HR Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
+  },
+  {
+   "role": "Employee",
+   "select": 1
+  },
+  {
+   "role": "Manufacturing User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

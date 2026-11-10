@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:tariff_number",
  "creation": "2017-03-24 15:30:36.314639",
+ "description": "The tariff code an item is declared under at customs.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -26,6 +27,7 @@
    "label": "Description"
   }
  ],
+ "icon": "hash",
  "links": [],
  "modified": "2024-03-27 13:06:48.957880",
  "modified_by": "Administrator",

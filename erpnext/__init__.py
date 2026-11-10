@@ -3,8 +3,7 @@ import inspect
 from typing import TypeVar
 
 import frappe
-from frappe.model.document import Document
-from frappe.utils.user import is_website_user
+from frappe.utils import cstr
 
 __version__ = "17.0.0-dev"
 
@@ -155,6 +154,8 @@ def allow_regional(fn):
 
 
 def check_app_permission():
+	from frappe.utils.user import is_website_user
+
 	if frappe.session.user == "Administrator":
 		return True
 
@@ -175,9 +176,16 @@ def normalize_ctx_input(T: type) -> callable:
 	- Casting the result to the specified type T
 	"""
 
+	from frappe.model.document import Document
+
 	def decorator(func: callable):
 		# conserve annotations for frappe.utils.typing_validations
-		@functools.wraps(func, assigned=(a for a in functools.WRAPPER_ASSIGNMENTS if a != "__annotations__"))
+		@functools.wraps(
+			func,
+			assigned=(
+				a for a in functools.WRAPPER_ASSIGNMENTS if a not in ("__annotations__", "__annotate__")
+			),
+		)
 		def wrapper(ctx: T | Document | dict | str, *args, **kwargs):
 			if isinstance(ctx, Document):
 				ctx = T(**ctx.as_dict())
@@ -193,3 +201,61 @@ def normalize_ctx_input(T: type) -> callable:
 		return wrapper
 
 	return decorator
+
+
+def require_user_permission(doctype: str, name) -> None:
+	if not _is_within_user_permissions(doctype, name):
+		_refuse()
+
+
+def _is_within_user_permissions(doctype: str, name) -> bool:
+	from frappe.permissions import has_user_permission
+
+	name = cstr(name)
+	if not name:
+		return False
+	saved_messages = frappe.get_message_log()
+	frappe.clear_messages()
+	try:
+		return has_user_permission(frappe.get_doc(doctype, name), frappe.session.user)
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = saved_messages
+
+
+def require_permission(doctype: str, name, ptype: str = "read") -> None:
+	if not _is_permitted(doctype, name, ptype):
+		_refuse()
+
+
+def require_party_permission(party_type: str | None, party) -> str | None:
+	party_name = cstr(party)
+	if not party_name:
+		return party
+	party_type = cstr(party_type)
+	if not frappe.db.exists("Party Type", party_type):
+		_refuse()
+	ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+	if not frappe.has_permission(party_type, ptype, doc=party_name):
+		_refuse()
+	return party_name
+
+
+def _is_permitted(doctype: str, name, ptype: str) -> bool:
+	name = cstr(name)
+	if not name:
+		return False
+	saved_messages = frappe.get_message_log()
+	frappe.clear_messages()
+	try:
+		return frappe.has_permission(doctype, ptype, doc=name)
+	except frappe.DoesNotExistError:
+		return False
+	finally:
+		frappe.local.message_log = saved_messages
+
+
+def _refuse() -> None:
+	frappe.flags.disable_traceback = True
+	frappe.throw_permission_error()

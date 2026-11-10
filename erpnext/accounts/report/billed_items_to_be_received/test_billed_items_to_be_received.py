@@ -1,0 +1,238 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+
+import frappe
+from frappe.utils import add_days, today
+
+from erpnext.accounts.doctype.purchase_invoice.mapper import make_debit_note, make_purchase_receipt
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.report.billed_items_to_be_received.billed_items_to_be_received import execute
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_invoice as make_invoice_from_receipt
+from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt as make_receipt
+from erpnext.tests.utils import ERPNextTestSuite
+
+
+class TestBilledItemsToBeReceived(ERPNextTestSuite):
+	def run_report(self, **extra):
+		filters = frappe._dict(
+			{
+				"company": "_Test Company",
+				"posting_date": today(),
+			}
+		)
+		filters.update(extra)
+		return execute(filters)[1]
+
+	def get_rows_for(self, data, pi_name):
+		return [row for row in data if row.get("name") == pi_name]
+
+	def test_billed_but_not_received_item_appears(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier",
+			item_code="_Test Item",
+			qty=5,
+			rate=200,
+			update_stock=0,
+		)
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+		self.assertEqual(len(rows), 1)
+
+		row = rows[0]
+		self.assertEqual(row.get("supplier"), "_Test Supplier")
+		self.assertEqual(row.get("company"), "_Test Company")
+		self.assertEqual(row.get("item_code"), "_Test Item")
+		self.assertEqual(row.get("qty"), 5)
+		self.assertEqual(row.get("received_qty"), 0)
+		self.assertEqual(row.get("rate"), 200)
+		self.assertEqual(row.get("amount"), 1000)
+
+	def test_stock_updating_invoice_is_excluded(self):
+		"""update_stock=1 means the item is already received; it must not appear."""
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier",
+			item_code="_Test Item",
+			qty=5,
+			rate=200,
+			update_stock=1,
+		)
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+		self.assertEqual(len(rows), 0)
+
+	def test_fully_received_invoice_drops_off(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier",
+			item_code="_Test Item",
+			qty=5,
+			rate=200,
+			update_stock=0,
+		)
+
+		# Present while nothing has been received.
+		self.assertEqual(len(self.get_rows_for(self.run_report(), pi.name)), 1)
+
+		self.receive(pi.name, today())
+
+		# Absent once fully received.
+		self.assertEqual(len(self.get_rows_for(self.run_report(), pi.name)), 0)
+
+	def test_receipt_after_as_on_date_is_pending(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier",
+			item_code="_Test Item",
+			qty=5,
+			rate=200,
+			update_stock=0,
+			posting_date=add_days(today(), -30),
+			do_not_save=True,
+		)
+		pi.set_posting_time = 1
+		pi.insert()
+		pi.submit()
+		self.receive(pi.name, today())
+
+		rows = self.get_rows_for(self.run_report(posting_date=add_days(today(), -10)), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty) for row in rows], [(5, 0)])
+
+	def test_debit_note_settles_pending_qty(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
+		)
+		self.receive(pi.name, today(), qty=4)
+		debit_note = make_debit_note(pi.name)
+		debit_note.items[0].qty = -6
+		debit_note.insert()
+		debit_note.submit()
+
+		names = {row.name for row in self.run_report()}
+
+		self.assertNotIn(pi.name, names)
+		self.assertNotIn(debit_note.name, names)
+
+	def test_service_rows_are_not_listed(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Non Stock Item", qty=1, rate=300, update_stock=0
+		)
+
+		self.assertEqual(self.get_rows_for(self.run_report(), pi.name), [])
+
+	def test_invoice_made_from_receipt_is_received(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
+		pi = make_invoice_from_receipt(receipt.name)
+		pi.insert()
+		pi.submit()
+
+		self.assertEqual(self.get_rows_for(self.run_report(), pi.name), [])
+
+	def test_stock_returned_by_debit_note_is_pending_again(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
+		)
+		self.receive(pi.name, today(), qty=6)
+		debit_note = make_debit_note(pi.name)
+		debit_note.update_stock = 1
+		debit_note.items[0].qty = debit_note.items[0].received_qty = -6
+		debit_note.insert()
+		debit_note.submit()
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(10, 0, 6)])
+
+	def test_receipt_return_reopens_invoice_made_from_receipt(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
+		pi = make_invoice_from_receipt(receipt.name)
+		pi.insert()
+		pi.submit()
+		self.return_to_supplier(receipt.name, qty=2)
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
+
+	def test_receipt_return_counted_once_across_invoices_of_one_receipt_row(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=200)
+		first_invoice, second_invoice = (self.bill_receipt(receipt.name, qty=5) for _ in range(2))
+		self.return_to_supplier(receipt.name, qty=2)
+
+		data = self.run_report()
+
+		self.assertEqual(self.get_rows_for(data, first_invoice), [])
+		rows = self.get_rows_for(data, second_invoice)
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(5, 3, 0)])
+
+	def test_rebilled_receipt_row_is_received_by_replacement_invoice(self):
+		receipt = make_receipt(supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200)
+		cancelled_invoice = self.bill_receipt(receipt.name, qty=5)
+		debit_note = make_debit_note(cancelled_invoice)
+		debit_note.insert()
+		debit_note.submit()
+		replacement_invoice = self.bill_receipt(receipt.name, qty=5)
+
+		names = {row.name for row in self.run_report()}
+
+		self.assertNotIn(cancelled_invoice, names)
+		self.assertNotIn(replacement_invoice, names)
+
+	def test_receipt_return_reopens_invoice_received_later(self):
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=10, rate=100, update_stock=0
+		)
+		receipt = self.receive(pi.name, today())
+		self.return_to_supplier(receipt, qty=4)
+
+		rows = self.get_rows_for(self.run_report(), pi.name)
+
+		self.assertEqual([(row.qty, row.received_qty, row.returned_qty) for row in rows], [(10, 6, 0)])
+
+	def receive(self, invoice: str, posting_date: str, qty: float | None = None) -> str:
+		receipt = make_purchase_receipt(invoice)
+		if qty:
+			receipt.items[0].qty = receipt.items[0].received_qty = qty
+		receipt.set_posting_time = 1
+		receipt.posting_date = posting_date
+		receipt.insert()
+		receipt.submit()
+		return receipt.name
+
+	def bill_receipt(self, receipt: str, qty: float) -> str:
+		invoice = make_invoice_from_receipt(receipt)
+		invoice.items[0].qty = qty
+		invoice.insert()
+		invoice.submit()
+		return invoice.name
+
+	def return_to_supplier(self, receipt: str, qty: float) -> None:
+		receipt_return = make_purchase_return(receipt)
+		receipt_return.items[0].qty = receipt_return.items[0].received_qty = -qty
+		receipt_return.insert()
+		receipt_return.submit()
+
+	def test_posting_date_upper_bound_filter(self):
+		"""A PI posted after the filter's posting_date must be excluded."""
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier",
+			item_code="_Test Item",
+			qty=5,
+			rate=200,
+			update_stock=0,
+		)
+
+		rows = self.get_rows_for(self.run_report(posting_date="2000-01-01"), pi.name)
+		self.assertEqual(len(rows), 0)
+
+	def test_purchase_invoice_filter_scopes_to_that_invoice(self):
+		"""The optional purchase_invoice filter must narrow to that invoice only."""
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=5, rate=200, update_stock=0
+		)
+		other = make_purchase_invoice(
+			supplier="_Test Supplier", item_code="_Test Item", qty=3, rate=200, update_stock=0
+		)
+
+		names = {row.get("name") for row in self.run_report(purchase_invoice=pi.name)}
+		self.assertEqual(names, {pi.name})
+		self.assertNotIn(other.name, names)

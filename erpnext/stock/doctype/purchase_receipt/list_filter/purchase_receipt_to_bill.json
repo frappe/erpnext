@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"posting_date\", \"label\": \"Date\"}, {\"fieldname\": \"per_billed\", \"label\": \"% Amount Billed\"}, {\"fieldname\": \"grand_total\", \"label\": \"Grand Total\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.837980",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Bill",
+ "filters": "[[\"Purchase Receipt\", \"status\", \"in\", [\"To Bill\", \"Partly Billed\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.837980",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Purchase Receipt-To Bill",
+ "owner": "Administrator",
+ "reference_doctype": "Purchase Receipt",
+ "route_signature": "status=[\"in\",[\"To Bill\",\"Partly Billed\"]]",
+ "sort_field": "posting_date",
+ "sort_order": "asc"
+}

@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"operation\", \"label\": \"Operation\"}, {\"fieldname\": \"work_order\", \"label\": \"Work Order\"}, {\"fieldname\": \"workstation\", \"label\": \"Workstation\"}, {\"fieldname\": \"for_quantity\", \"label\": \"Qty to Manufacture\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:57.022408",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "On Hold",
+ "filters": "[[\"Job Card\", \"status\", \"=\", \"On Hold\"]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:57.022408",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Job Card-On Hold",
+ "owner": "Administrator",
+ "reference_doctype": "Job Card",
+ "route_signature": "status=On Hold",
+ "sort_field": "creation",
+ "sort_order": "desc"
+}

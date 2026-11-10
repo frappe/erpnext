@@ -4,8 +4,10 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cstr, getdate
+from frappe.utils import cstr, escape_html, getdate
 
+from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -66,10 +68,52 @@ class InstallationNote(TransactionBase):
 	def validate(self):
 		self.validate_installation_date()
 		self.check_item_table()
+		self.validate_with_previous_doc()
 
 		from erpnext.controllers.selling_controller import set_default_income_account_for_item
 
 		set_default_income_account_for_item(self)
+
+	def validate_with_previous_doc(self):
+		self.validate_prevdoc_references()
+		super().validate_with_previous_doc(
+			{
+				"Delivery Note": {
+					"ref_dn_field": "prevdoc_docname",
+					"compare_fields": [["customer", "="], ["company", "="]],
+				},
+				"Delivery Note Item": {
+					"ref_dn_field": "prevdoc_detail_docname",
+					"compare_fields": [["item_code", "="]],
+					"is_child_table": True,
+					"allow_duplicate_prev_row_id": True,
+				},
+			}
+		)
+
+	def validate_prevdoc_references(self):
+		for d in self.get("items"):
+			if not d.prevdoc_detail_docname:
+				continue
+
+			dn_item = frappe.db.get_value(
+				"Delivery Note Item", d.prevdoc_detail_docname, ["parent", "docstatus"], as_dict=True
+			)
+			if not dn_item or dn_item.docstatus != 1:
+				frappe.throw(
+					_("Row #{0}: Installation can only be recorded against a submitted Delivery Note").format(
+						d.idx
+					)
+				)
+
+			# the referenced row must belong to the named Delivery Note, else a submit could
+			# update an unrelated customer's Delivery Note row
+			if dn_item.parent != d.prevdoc_docname:
+				frappe.throw(
+					_("Row #{0}: Delivery Note Item does not belong to Delivery Note {1}").format(
+						d.idx, escape_html(cstr(d.prevdoc_docname))
+					)
+				)
 
 	def is_serial_no_added(self, item_code, serial_no):
 		has_serial_no = frappe.db.get_value("Item", item_code, "has_serial_no")
@@ -78,33 +122,47 @@ class InstallationNote(TransactionBase):
 		elif has_serial_no != 1 and cstr(serial_no).strip():
 			frappe.throw(_("Item {0} is not a serialized Item").format(item_code))
 
-	def is_serial_no_exist(self, item_code, serial_no):
-		for x in serial_no:
-			if not frappe.db.exists("Serial No", x):
-				frappe.throw(_("Serial No {0} does not exist").format(x))
-
 	def get_prevdoc_serial_no(self, prevdoc_detail_docname):
-		serial_nos = frappe.db.get_value("Delivery Note Item", prevdoc_detail_docname, "serial_no")
-		return get_valid_serial_nos(serial_nos)
+		row = frappe.db.get_value(
+			"Delivery Note Item",
+			prevdoc_detail_docname,
+			["item_code", "serial_no", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		return get_serial_batch_list_from_item(row)[0] if row else []
 
 	def is_serial_no_match(self, cur_s_no, prevdoc_s_no, prevdoc_docname):
 		for sr in cur_s_no:
 			if sr not in prevdoc_s_no:
+				number = frappe.get_cached_value("Serial No", sr, "serial_no")
 				frappe.throw(
-					_("Serial No {0} does not belong to Delivery Note {1}").format(sr, prevdoc_docname)
+					_("Serial No {0} does not belong to Delivery Note {1}").format(
+						escape_html(number), escape_html(prevdoc_docname)
+					)
 				)
 
 	def validate_serial_no(self):
-		prevdoc_s_no, sr_list = [], []
 		for d in self.get("items"):
-			self.is_serial_no_added(d.item_code, d.serial_no)
-			if d.serial_no:
-				sr_list = get_valid_serial_nos(d.serial_no, d.qty, d.item_code)
-				self.is_serial_no_exist(d.item_code, sr_list)
-
-				prevdoc_s_no = self.get_prevdoc_serial_no(d.prevdoc_detail_docname)
-				if prevdoc_s_no:
-					self.is_serial_no_match(sr_list, prevdoc_s_no, d.prevdoc_docname)
+			if (
+				d.serial_and_batch_bundle
+				and frappe.get_cached_value("Serial and Batch Bundle", d.serial_and_batch_bundle, "item_code")
+				!= d.item_code
+			):
+				frappe.throw(
+					_("Row #{0}: Serial and Batch Bundle does not belong to Item {1}").format(
+						d.idx, escape_html(d.item_code)
+					)
+				)
+			serial_ids = get_serial_batch_list_from_item(d)[0]
+			numbers = SerialBatchIdentity("Serial No").get_numbers(d.item_code, serial_ids)
+			serial_text = "\n".join(numbers)
+			self.is_serial_no_added(d.item_code, serial_text)
+			if serial_ids:
+				get_valid_serial_nos(serial_text, d.qty, d.item_code)
+				if d.prevdoc_detail_docname:
+					self.is_serial_no_match(
+						serial_ids, self.get_prevdoc_serial_no(d.prevdoc_detail_docname), d.prevdoc_docname
+					)
 
 	def validate_installation_date(self):
 		for d in self.get("items"):

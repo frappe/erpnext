@@ -2,7 +2,6 @@ import { useAtomValue } from "jotai"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
-import { Paragraph } from "@/components/ui/typography"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo } from "react"
 import { useFrappeGetCall, useFrappePostCall } from "frappe-react-sdk"
@@ -18,6 +17,7 @@ import { PartyPopper } from "lucide-react"
 import ErrorBanner from "@/components/ui/error-banner"
 import _ from "@/lib/translate"
 import { Empty, EmptyTitle, EmptyDescription, EmptyMedia, EmptyHeader } from "@/components/ui/empty"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const IncorrectlyClearedEntries = () => {
     const companyID = useCurrentCompany()
@@ -177,34 +177,36 @@ const IncorrectlyClearedEntriesView = () => {
         [accountCurrency, onClearClick],
     )
 
-    return <div className="space-y-4 py-2">
+    const content = _("This report shows all entries in the system where the <strong>clearance date is before the posting date</strong> which is incorrect.")
 
-        <div>
-            <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("This report shows all entries in the system where the <strong>clearance date is before the posting date</strong> which is incorrect.")
-                }} />
+    const entriesContent = _("Entries below have a posting date after {0} but the clearance date is before {1}.", [`<strong>${formattedToDate}</strong>`, `<strong>${formattedToDate}</strong>`])
+
+    return <div className="flex min-h-0 flex-1 flex-col space-y-4 py-2">
+
+        <div className="shrink-0">
+            <span className="text-p-sm">
+                <MarkdownRenderer content={content} />
                 <br />
                 {data && data.message.result.length > 0 && <span>
-                    <span dangerouslySetInnerHTML={{
-                        __html: _("Entries below have a posting date after {0} but the clearance date is before {1}.", [`<strong>${formattedToDate}</strong>`, `<strong>${formattedToDate}</strong>`])
-                    }} />
+                    <MarkdownRenderer content={entriesContent} />
                     <br />
                     {_("You can reset the clearing dates of these entries here.")}
                 </span>}
-            </Paragraph>
+            </span>
         </div>
 
         {error && <ErrorBanner error={error} />}
 
         {data && data.message.result.length > 0 && (
-            <div className="space-y-2">
-                <p className="text-ink-gray-5 text-sm">{_("Incorrectly cleared entries as per the report.")}</p>
+            <div className="flex min-h-0 flex-1 flex-col space-y-2">
+                <p className="shrink-0 text-ink-gray-5 text-sm">{_("Incorrectly cleared entries as per the report.")}</p>
                 <ListView
                     data={data.message.result}
                     columns={incorrectlyClearedColumns}
                     getRowId={(row) => `${row.payment_entry}-${row.posting_date}`}
-                    maxHeight="min(70vh, 640px)"
+                    className="min-h-0 flex-1"
+                    maxHeight="none"
+                    scrollAreaClassName="flex-1"
                     emptyState={_("No rows to display.")}
                 />
             </div>

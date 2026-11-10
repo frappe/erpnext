@@ -7,6 +7,7 @@ from math import ceil
 import frappe
 from frappe import _
 from frappe.utils import add_days, cint, escape_html, flt, nowdate
+from frappe.utils.nestedset import get_ancestors_of
 
 import erpnext
 
@@ -56,9 +57,8 @@ def _reorder_item():
 
 		original_reorder_qty = reorder_qty
 		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
-			deficiency = reorder_level - projected_qty
-			if deficiency > reorder_qty:
-				reorder_qty = deficiency
+			if projected_qty + reorder_qty <= reorder_level:
+				reorder_qty += reorder_level - projected_qty
 
 			company = warehouse_company.get(kwargs.warehouse) or default_company
 
@@ -182,6 +182,10 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	item_warehouse_projected_qty = {}
 	items_to_consider = list(items_to_consider.keys())
 
+	warehouse_parent_map = frappe._dict(
+		frappe.get_all("Warehouse", fields=["name", "parent_warehouse"], as_list=True)
+	)
+
 	for item_code, warehouse, projected_qty in frappe.get_all(
 		"Bin",
 		filters={"item_code": ["in", items_to_consider], "warehouse": ["is", "set"]},
@@ -194,16 +198,14 @@ def get_item_warehouse_projected_qty(items_to_consider):
 		if warehouse not in item_warehouse_projected_qty.get(item_code):
 			item_warehouse_projected_qty[item_code][warehouse] = flt(projected_qty)
 
-		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		parent_warehouse = warehouse_parent_map.get(warehouse)
 
-		while warehouse_doc.parent_warehouse:
-			if not item_warehouse_projected_qty.get(item_code, {}).get(warehouse_doc.parent_warehouse):
-				item_warehouse_projected_qty.setdefault(item_code, {})[warehouse_doc.parent_warehouse] = flt(
-					projected_qty
-				)
+		while parent_warehouse:
+			if not item_warehouse_projected_qty.get(item_code, {}).get(parent_warehouse):
+				item_warehouse_projected_qty.setdefault(item_code, {})[parent_warehouse] = flt(projected_qty)
 			else:
-				item_warehouse_projected_qty[item_code][warehouse_doc.parent_warehouse] += flt(projected_qty)
-			warehouse_doc = frappe.get_doc("Warehouse", warehouse_doc.parent_warehouse)
+				item_warehouse_projected_qty[item_code][parent_warehouse] += flt(projected_qty)
+			parent_warehouse = warehouse_parent_map.get(parent_warehouse)
 
 	return item_warehouse_projected_qty
 
@@ -216,6 +218,7 @@ def create_material_request(material_requests):
 	company_wise_mr = frappe._dict({})
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
+			frappe.db.savepoint("reorder_mr")
 			try:
 				items = material_requests[request_type][company]
 				if not items:
@@ -287,8 +290,9 @@ def create_material_request(material_requests):
 				company_wise_mr.setdefault(company, []).append(mr)
 
 			except Exception as exception:
+				frappe.db.rollback(save_point="reorder_mr")
 				exceptions_list.append(exception)
-				mr.log_error("Unable to create material request")
+				frappe.log_error(title="Unable to create material request")
 
 	if company_wise_mr:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
@@ -339,6 +343,8 @@ def get_email_list(company):
 
 	if users:
 		query = query.where(user_table.name.isin(users))
+	elif restricted_users := get_company_restricted_users(company):
+		query = query.where(user_table.name.notin(restricted_users))
 
 	emails = query.run(as_dict=True)
 
@@ -346,18 +352,36 @@ def get_email_list(company):
 
 
 def get_comapny_wise_users(company):
-	companies = [company]
+	# single company: no explicit permission needed, everyone has access
+	if frappe.db.count("Company") == 1:
+		return []
 
-	if parent_company := frappe.db.get_value("Company", company, "parent_company"):
-		companies.append(parent_company)
-
-	users = frappe.get_all(
+	permissions = frappe.get_all(
 		"User Permission",
-		filters={"allow": "Company", "for_value": ("in", companies), "apply_to_all_doctypes": 1},
-		fields=["user"],
+		filters={"allow": "Company", "for_value": ("in", [company, *get_ancestors_of("Company", company)])},
+		or_filters={"apply_to_all_doctypes": 1, "applicable_for": "Material Request"},
+		fields=["user", "for_value", "hide_descendants"],
 	)
+	return list({d.user for d in permissions if d.for_value == company or not d.hide_descendants})
 
-	return [user.user for user in users]
+
+def get_company_restricted_users(company):
+	if frappe.db.count("Company") == 1:
+		return []
+
+	permissions = frappe.get_all(
+		"User Permission",
+		filters={"allow": "Company"},
+		or_filters={"apply_to_all_doctypes": 1, "applicable_for": "Material Request"},
+		fields=["user", "for_value", "hide_descendants"],
+	)
+	ancestors = set(get_ancestors_of("Company", company))
+	allowed_users = {
+		d.user
+		for d in permissions
+		if d.for_value == company or (d.for_value in ancestors and not d.hide_descendants)
+	}
+	return list({d.user for d in permissions} - allowed_users)
 
 
 def notify_errors(exceptions_list):
@@ -376,7 +400,7 @@ def notify_errors(exceptions_list):
 			error_message = f"<div class='small text-muted'>{escape_html(str(exception))}</div><br>"
 			content += error_message
 		except Exception:
-			pass
+			frappe.log_error(title="Failed to format auto reorder exception", message=frappe.get_traceback())
 
 	content += _("Regards,") + "<br>" + _("Administrator")
 

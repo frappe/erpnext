@@ -59,8 +59,8 @@ const SelectedTransactionDetails = ({ transaction, showAccount = false, account 
                         </div>
                     </div>
                     <div className='flex flex-col gap-1'>
-                        <span className='text-sm'>{transaction.description}</span>
-                        {transaction.reference_number ? <span className='text-sm text-ink-gray-5'>{_("Ref")}: {transaction.reference_number}</span> : null}
+                        <span className='text-p-sm'>{transaction.description}</span>
+                        {transaction.reference_number ? <span className='text-p-sm text-ink-gray-5'>{_("Ref")}: {transaction.reference_number}</span> : null}
                         {showAccount && account ? <span className='text-sm text-ink-gray-5'>{_("GL Account")}: {account}</span> : null}
                     </div>
 

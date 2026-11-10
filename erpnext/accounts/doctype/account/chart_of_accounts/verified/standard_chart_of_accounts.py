@@ -138,6 +138,7 @@ def get():
 				_("Gain/Loss on Asset Disposal"): {"account_category": "Other Operating Income"},
 				_("Impairment"): {"account_category": "Operating Expenses"},
 				_("Tax Expense"): {"account_category": "Tax Expense"},
+				_("Exchange Loss"): {"account_category": "Operating Expenses"},
 			},
 			"root_type": "Expense",
 		},
@@ -149,6 +150,7 @@ def get():
 			_("Indirect Income"): {
 				_("Interest Income"): {"account_category": "Investment Income"},
 				_("Interest on Fixed Deposits"): {"account_category": "Investment Income"},
+				_("Exchange Gain"): {"account_category": "Other Operating Income"},
 				"is_group": 1,
 			},
 			"root_type": "Income",

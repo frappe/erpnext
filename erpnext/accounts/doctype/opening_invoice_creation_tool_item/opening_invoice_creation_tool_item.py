@@ -15,6 +15,7 @@ class OpeningInvoiceCreationToolItem(Document):
 		from frappe.types import DF
 
 		cost_center: DF.Link | None
+		currency: DF.Link | None
 		due_date: DF.Date | None
 		invoice_number: DF.Data | None
 		item_name: DF.Data | None
@@ -26,6 +27,7 @@ class OpeningInvoiceCreationToolItem(Document):
 		party_name: DF.Data | None
 		party_type: DF.Link | None
 		posting_date: DF.Date | None
+		project: DF.Link | None
 		qty: DF.Data | None
 		supplier_invoice_date: DF.Date | None
 		temporary_opening_account: DF.Link | None

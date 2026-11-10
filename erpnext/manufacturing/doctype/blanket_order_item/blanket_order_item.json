@@ -11,13 +11,16 @@
   "column_break_3",
   "qty",
   "uom",
-  "rate",
-  "ordered_qty",
   "stock_uom",
-  "column_break_uom",
   "conversion_factor",
   "stock_qty",
+  "price_list_rate",
+  "base_price_list_rate",
+  "rate",
+  "base_rate",
   "stock_uom_rate",
+  "ordered_qty",
+  "closed",
   "section_break_7",
   "terms_and_conditions"
  ],
@@ -36,12 +39,6 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name"
-  },
-  {
-   "fieldname": "party_item_code",
-   "fieldtype": "Data",
-   "label": "Party Item Code",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -63,31 +60,13 @@
    "reqd": 1
   },
   {
-   "fieldname": "rate",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Rate",
-   "reqd": 1
-  },
-  {
-   "fieldname": "ordered_qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Ordered Quantity",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.uom != doc.stock_uom",
+   "columns": 1,
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
    "options": "UOM",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_uom",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:doc.uom != doc.stock_uom",
@@ -108,12 +87,63 @@
    "read_only": 1
   },
   {
+   "fieldname": "price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Price List Rate",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Price List Rate (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "options": "currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "label": "Rate (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
    "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom_rate",
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
    "no_copy": 1,
    "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "description": "In Stock UOM",
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Ordered Quantity",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "closed",
+   "fieldtype": "Check",
+   "label": "Closed",
+   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -125,11 +155,17 @@
    "fieldname": "terms_and_conditions",
    "fieldtype": "Text",
    "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "party_item_code",
+   "fieldtype": "Data",
+   "label": "Party Item Code",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-11-09 17:10:51.000000",
+ "modified": "2026-11-10 10:08:08.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order Item",

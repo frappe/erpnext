@@ -12,24 +12,36 @@
  "doctype": "Module Onboarding",
  "idx": 0,
  "is_complete": 0,
- "modified": "2026-02-25 16:59:59.005097",
+ "modified": "2026-10-04 01:51:25.823299",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Onboarding",
  "owner": "Administrator",
  "steps": [
   {
+   "is_optional": 0,
    "step": "Create Project"
   },
   {
+   "is_optional": 0,
    "step": "Create Tasks"
   },
   {
+   "is_optional": 0,
    "step": "Create Timesheet"
   },
   {
+   "is_optional": 1,
+   "step": "Create Project Template"
+  },
+  {
+   "is_optional": 1,
    "step": "View Project Summary"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Delayed Tasks"
   }
  ],
- "title": "Projects Setup"
+ "title": "Plan and deliver projects"
 }

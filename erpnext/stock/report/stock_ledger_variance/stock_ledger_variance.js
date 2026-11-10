@@ -12,6 +12,7 @@ const DIFFERENCE_FIELD_NAMES = [
 ];
 
 frappe.query_reports["Stock Ledger Variance"] = {
+	export_hidden_cols: true,
 	filters: [
 		{
 			fieldname: "company",
@@ -34,13 +35,16 @@ frappe.query_reports["Stock Ledger Variance"] = {
 		},
 		{
 			fieldname: "warehouse",
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			label: __("Warehouse"),
 			options: "Warehouse",
-			get_query: function () {
-				return {
-					filters: { is_group: 0, disabled: 0 },
-				};
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				let filters = { is_group: 0, disabled: 0 };
+				if (company) {
+					filters.company = company;
+				}
+				return erpnext.utils.get_link_options("Warehouse", txt, filters);
 			},
 		},
 		{
@@ -73,7 +77,7 @@ frappe.query_reports["Stock Ledger Variance"] = {
 	],
 
 	formatter(value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 
 		if (DIFFERENCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = "<span style='color:red'>" + value + "</span>";
@@ -93,12 +97,11 @@ frappe.query_reports["Stock Ledger Variance"] = {
 			let message = `
 				<div>
 					<p>
-						Reposting Entries will change the value of
-						accounts Stock In Hand, and Stock Expenses
-						in the Trial Balance report and will also change
-						the Balance Value in the Stock Balance report.
+						${__(
+							"Reposting Entries will change the value of accounts Stock In Hand, and Stock Expenses in the Trial Balance report and will also change the Balance Value in the Stock Balance report."
+						)}
 					</p>
-					<p>Are you sure you want to create Reposting Entries?</p>
+					<p>${__("Are you sure you want to create Reposting Entries?")}</p>
 				</div>`;
 			let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
 			let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
@@ -107,7 +110,7 @@ frappe.query_reports["Stock Ledger Variance"] = {
 				frappe.throw(__("Please select rows to create Reposting Entries"));
 			}
 
-			frappe.confirm(__(message), () => {
+			frappe.confirm(message, () => {
 				frappe.call({
 					method: "erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check.create_reposting_entries",
 					args: {

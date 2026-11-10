@@ -1,5 +1,7 @@
 <!--
 
+Note: Your PR will be automatically closed if you're not in list of [vouched users](https://github.com/frappe/erpnext/blob/develop/.github/VOUCHED.td).
+
 Some key notes before you open a PR:
 
  1. Select which branch should this PR be merged in?
@@ -17,6 +19,8 @@ Also, if you're new here
 - Contribution Guide => https://github.com/frappe/erpnext/blob/develop/.github/CONTRIBUTING.md
 
 - Pull Request Checklist => https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist
+
+- frappe-pr-bot review => comment `@frappe-pr-bot review`. All commands: https://github.com/frappe/erpnext/blob/develop/.github/frappe-pr-bot.md
 
 -->
 

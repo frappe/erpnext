@@ -1,8 +1,17 @@
 # Copyright (c) 2025, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import ceil, cint, flt
+
+MANUFACTURING_INPUT_FIELDS = (
+	"shift_time_in_hours",
+	"no_of_workstations",
+	"no_of_shift",
+	"manufacturing_time_in_mins",
+)
 
 
 class ItemLeadTime(Document):
@@ -13,6 +22,10 @@ class ItemLeadTime(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
+
+		from erpnext.stock.doctype.item_lead_time_supplier.item_lead_time_supplier import (
+			ItemLeadTimeSupplier,
+		)
 
 		buffer_time: DF.Int
 		capacity_per_day: DF.Int
@@ -26,7 +39,45 @@ class ItemLeadTime(Document):
 		purchase_time: DF.Int
 		shift_time_in_hours: DF.Int
 		stock_uom: DF.Link | None
+		supplier_lead_times: DF.Table[ItemLeadTimeSupplier]
 		total_workstation_time: DF.Int
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		self.set_capacity_per_day()
+		self.validate_supplier_lead_times()
+
+	def set_capacity_per_day(self):
+		self.total_workstation_time = (
+			cint(self.shift_time_in_hours) * cint(self.no_of_workstations) * cint(self.no_of_shift)
+		)
+		if self.total_workstation_time and cint(self.manufacturing_time_in_mins):
+			units_produced = flt(self.total_workstation_time) / cint(self.manufacturing_time_in_mins) * 60
+		elif self.has_manufacturing_inputs_changed():
+			units_produced = 0
+		else:
+			return
+
+		self.no_of_units_produced = cint(units_produced)
+		self.capacity_per_day = ceil(flt(self.daily_yield) * units_produced / 100)
+
+	def has_manufacturing_inputs_changed(self):
+		return not self.is_new() and any(
+			self.has_value_changed(fieldname) for fieldname in MANUFACTURING_INPUT_FIELDS
+		)
+
+	def validate_supplier_lead_times(self):
+		suppliers = set()
+		default_rows = 0
+		for row in self.supplier_lead_times:
+			if row.supplier in suppliers:
+				frappe.throw(
+					_("Row #{0}: Supplier {1} is already added in the Supplier Lead Times table").format(
+						row.idx, frappe.bold(row.supplier)
+					)
+				)
+			suppliers.add(row.supplier)
+			default_rows += cint(row.is_default)
+
+		if default_rows > 1:
+			frappe.throw(_("Only one supplier can be marked as default in the Supplier Lead Times table"))

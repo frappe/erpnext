@@ -72,8 +72,10 @@ class AssetService:
 				if asset.calculate_depreciation:
 					self.update_journal_entry_link_on_depr_schedule(asset, d)
 					self.update_value_after_depreciation(asset, d.debit)
+					asset.sync_value_after_depreciation()
+				else:
+					asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 
-				asset.db_set("value_after_depreciation", asset.value_after_depreciation - d.debit)
 				asset.set_status()
 				asset.set_total_booked_depreciations()
 
@@ -94,11 +96,12 @@ class AssetService:
 	def update_journal_entry_link_on_depr_schedule(self, asset, je_row) -> None:
 		"""Stamp this entry onto the matching (date + amount) depreciation schedule row."""
 		depr_schedule = get_depr_schedule(asset.name, "Active", self.doc.finance_book)
+		precision = je_row.precision("debit")
 		for d in depr_schedule or []:
 			if (
 				d.schedule_date == self.doc.posting_date
 				and not d.journal_entry
-				and d.depreciation_amount == flt(je_row.debit)
+				and flt(d.depreciation_amount, precision) == flt(je_row.debit, precision)
 			):
 				frappe.db.set_value("Depreciation Schedule", d.name, "journal_entry", self.doc.name)
 
@@ -147,10 +150,13 @@ class AssetService:
 		"""Add the depreciation amount back to the asset and unlink its schedule row."""
 		asset = frappe.get_doc("Asset", d.reference_name)
 
-		if asset.calculate_depreciation and not self._restore_scheduled_depreciation(asset, d.debit):
-			self._restore_finance_book_value(asset, d.debit)
+		if asset.calculate_depreciation:
+			if not self._restore_scheduled_depreciation(asset, d.debit):
+				self._restore_finance_book_value(asset, d.debit)
+			asset.sync_value_after_depreciation()
+		else:
+			asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 
-		asset.db_set("value_after_depreciation", asset.value_after_depreciation + d.debit)
 		asset.set_status()
 		asset.set_total_booked_depreciations()
 

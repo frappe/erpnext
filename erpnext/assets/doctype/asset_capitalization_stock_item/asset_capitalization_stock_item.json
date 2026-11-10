@@ -21,6 +21,8 @@
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
   "column_break_13",
+  "serial_batch_entries_section",
+  "serial_batch_entries_html",
   "section_break_bfqc",
   "serial_no",
   "column_break_mbuv",
@@ -166,6 +168,15 @@
    "label": "Use Serial No / Batch Fields"
   },
   {
+   "fieldname": "serial_batch_entries_section",
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch Entries"
+  },
+  {
+   "fieldname": "serial_batch_entries_html",
+   "fieldtype": "HTML"
+  },
+  {
    "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "section_break_bfqc",
    "fieldtype": "Section Break"
@@ -185,7 +196,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-03-05 12:46:01.074742",
+ "modified": "2026-07-18 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Stock Item",

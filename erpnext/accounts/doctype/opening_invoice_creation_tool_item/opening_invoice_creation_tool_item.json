@@ -16,12 +16,14 @@
   "supplier_invoice_date",
   "section_break_5",
   "item_name",
+  "currency",
   "outstanding_amount",
   "column_break_4",
   "qty",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break"
+  "dimension_col_break",
+  "project"
  ],
  "fields": [
   {
@@ -76,11 +78,20 @@
    "label": "Item Name"
   },
   {
+   "description": "Currency of the outstanding amount. Defaults to the Company currency.",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
    "default": "0",
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding Amount",
+   "options": "currency",
    "reqd": 1
   },
   {
@@ -89,6 +100,7 @@
   },
   {
    "default": "1",
+   "description": "Must be positive. If the unit rate would change the opening amount through rounding, the invoice uses quantity 1 and records this quantity in the description.",
    "fieldname": "qty",
    "fieldtype": "Data",
    "label": "Quantity"
@@ -125,11 +137,17 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Party Name"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2026-03-20 02:11:42.023575",
+ "modified": "2026-10-09 11:35:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",

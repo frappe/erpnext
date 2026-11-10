@@ -5,7 +5,7 @@ import copy
 from datetime import timedelta
 
 import frappe
-from frappe import qb
+from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder.functions import Count, Max, Min, Sum
 from frappe.utils import flt, get_datetime
@@ -42,8 +42,40 @@ class ProcessPeriodClosingVoucher(Document):
 		self.db_set("status", "Cancelled")
 
 	def validate(self):
+		self.validate_parent_pcv()
+		if frappe.db.get_value(
+			self.doctype,
+			{"parent_pcv": self.parent_pcv, "docstatus": ["!=", 2], "name": ["!=", self.name]},
+			for_update=True,
+		):
+			frappe.throw(_("A Process Period Closing Voucher already exists for {0}").format(self.parent_pcv))
+
 		self.status = "Queued"
 		self.populate_processing_tables()
+
+	def validate_processing(self, statuses):
+		if self.docstatus != 1:
+			frappe.throw(_("Process Period Closing Voucher must be submitted before processing"))
+
+		if self.status not in statuses:
+			return False
+
+		self.validate_parent_pcv()
+		return True
+
+	def validate_parent_pcv(self):
+		pcv = frappe.get_doc("Period Closing Voucher", self.parent_pcv)
+		if pcv.docstatus != 1:
+			frappe.throw(_("Period Closing Voucher {0} must be submitted before processing").format(pcv.name))
+
+		if (
+			pcv.gle_processing_status == "Completed"
+			or frappe.db.exists(
+				"GL Entry", {"voucher_type": pcv.doctype, "voucher_no": pcv.name, "is_cancelled": 0}
+			)
+			or frappe.db.exists("Account Closing Balance", {"period_closing_voucher": pcv.name})
+		):
+			frappe.throw(_("Period Closing Voucher {0} has already been processed").format(pcv.name))
 
 	def populate_processing_tables(self):
 		self.generate_pcv_dates()
@@ -89,52 +121,68 @@ class ProcessPeriodClosingVoucher(Document):
 		cancel_pcv_processing(self.name)
 
 
-@frappe.whitelist()
+def initialize_parallel_threads(docname: str):
+	threads = 4
+	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
+	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+
+	frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
+
+	if normal_balances := (
+		qb.from_(ppcvd)
+		.select(ppcvd.name, ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
+		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
+		.limit(threads)
+		.for_update(skip_locked=True)
+		.run(as_dict=True)
+	):
+		if not is_scheduler_inactive():
+			for x in normal_balances:
+				frappe.db.set_value(
+					"Process Period Closing Voucher Detail",
+					x.name,
+					"status",
+					"Running",
+				)
+				frappe.enqueue(
+					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
+					queue="long",
+					timeout=timeout,
+					is_async=True,
+					enqueue_after_commit=True,
+					docname=docname,
+					row_name=x.name,
+					date=x.processing_date,
+					report_type=x.report_type,
+					parentfield=x.parentfield,
+				)
+			# keep transaction on PPCV and PPCVD short
+			# prevents concurrency errors - REPEATABLE READ
+			if not frappe.in_test:
+				frappe.db.commit()  # nosemgrep
+	else:
+		schedule_next_date(docname)
+
+
+@frappe.whitelist(methods=["POST"])
 def start_pcv_processing(docname: str):
-	if frappe.db.get_value("Process Period Closing Voucher", docname, "status") in ["Queued", "Running"]:
-		frappe.has_permission("Process Payment Reconciliation", "write", doc=docname, throw=True)
-		frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Running")
+	# checked before the status is read, not inside the branch: otherwise an unentitled caller
+	# learns the document's status from whether this returns or throws
+	frappe.has_permission("Process Period Closing Voucher", "write", doc=docname, throw=True)
 
-		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
-		if normal_balances := (
-			qb.from_(ppcvd)
-			.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
-			.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
-			.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
-			.limit(4)
-			.for_update(skip_locked=True)
-			.run(as_dict=True)
-		):
-			if not is_scheduler_inactive():
-				for x in normal_balances:
-					frappe.db.set_value(
-						"Process Period Closing Voucher Detail",
-						{
-							"processing_date": x.processing_date,
-							"parent": docname,
-							"report_type": x.report_type,
-							"parentfield": x.parentfield,
-						},
-						"status",
-						"Running",
-					)
-					frappe.enqueue(
-						method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
-						queue="long",
-						timeout="3600",
-						is_async=True,
-						enqueue_after_commit=True,
-						docname=docname,
-						date=x.processing_date,
-						report_type=x.report_type,
-						parentfield=x.parentfield,
-					)
-		else:
-			frappe.db.set_value("Process Period Closing Voucher", docname, "status", "Completed")
+	if frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(
+		["Queued", "Running"]
+	):
+		initialize_parallel_threads(docname)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def pause_pcv_processing(docname: str):
+	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+		return
+
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Paused").where(ppcv.name.eq(docname)).run()
 
@@ -148,22 +196,32 @@ def pause_pcv_processing(docname: str):
 		qb.update(ppcvd).set(ppcvd.status, "Paused").where(ppcvd.name.isin(queued_dates)).run()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def cancel_pcv_processing(docname: str):
+	frappe.has_permission("Process Period Closing Voucher", ptype="cancel", doc=docname, throw=True)
+	if frappe.db.get_value("Process Period Closing Voucher", docname, "docstatus") != 2:
+		frappe.throw(_("Cancel the Process Period Closing Voucher document to stop processing"))
+
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Cancelled").where(ppcv.name.eq(docname)).run()
 
 	if queued_dates := frappe.db.get_all(
 		"Process Period Closing Voucher Detail",
-		filters={"parent": docname, "status": "Queued"},
+		filters={"parent": docname, "status": ["in", ["Queued", "Running", "Paused"]]},
 		pluck="name",
 	):
 		ppcvd = qb.DocType("Process Period Closing Voucher Detail")
 		qb.update(ppcvd).set(ppcvd.status, "Cancelled").where(ppcvd.name.isin(queued_dates)).run()
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def resume_pcv_processing(docname: str):
+	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(
+		["Paused", "Running"]
+	):
+		return
+
 	ppcv = qb.DocType("Process Period Closing Voucher")
 	qb.update(ppcv).set(ppcv.status, "Running").where(ppcv.name.eq(docname)).run()
 
@@ -245,12 +303,19 @@ def get_gle_for_closing_account(pcv, dimension_balance, dimensions):
 	return gl_entry
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def schedule_next_date(docname: str):
+	# marks a row Running and enqueues a long job, so it needs the same write check as the sibling controls
+	frappe.has_permission("Process Period Closing Voucher", ptype="write", doc=docname, throw=True)
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+		return
+
+	timeout = frappe.db.get_single_value("Accounts Settings", "pcv_job_timeout") or 3600
 	ppcvd = qb.DocType("Process Period Closing Voucher Detail")
+
 	if to_process := (
 		qb.from_(ppcvd)
-		.select(ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
+		.select(ppcvd.name, ppcvd.processing_date, ppcvd.report_type, ppcvd.parentfield)
 		.where(ppcvd.parent.eq(docname) & ppcvd.status.eq("Queued"))
 		.orderby(ppcvd.parentfield, ppcvd.idx, ppcvd.processing_date)
 		.limit(1)
@@ -260,22 +325,23 @@ def schedule_next_date(docname: str):
 		if not is_scheduler_inactive():
 			frappe.db.set_value(
 				"Process Period Closing Voucher Detail",
-				{
-					"processing_date": to_process[0].processing_date,
-					"parent": docname,
-					"report_type": to_process[0].report_type,
-					"parentfield": to_process[0].parentfield,
-				},
+				to_process[0].name,
 				"status",
 				"Running",
 			)
+			# keep transaction on PPCV and PPCVD short
+			# prevents concurrency errors - REPEATABLE READ
+			if not frappe.in_test:
+				frappe.db.commit()  # nosemgrep
+
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.process_individual_date",
 				queue="long",
-				timeout="3600",
+				timeout=timeout,
 				is_async=True,
 				enqueue_after_commit=True,
 				docname=docname,
+				row_name=to_process[0].name,
 				date=to_process[0].processing_date,
 				report_type=to_process[0].report_type,
 				parentfield=to_process[0].parentfield,
@@ -302,7 +368,7 @@ def schedule_next_date(docname: str):
 				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_period_closing_voucher.process_period_closing_voucher.summarize_and_post_ledger_entries",
 					queue="long",
-					timeout="3600",
+					timeout=timeout,
 					is_async=True,
 					job_name=job_name,
 					enqueue_after_commit=True,
@@ -419,6 +485,12 @@ def get_closing_account_closing_entry(closing_account_gle, pcv):
 
 
 def summarize_and_post_ledger_entries(docname):
+	# Serialize summary jobs so a queued retry sees the completed status before posting.
+	ppcv = frappe.get_doc("Process Period Closing Voucher", docname, for_update=True)
+	if not ppcv.validate_processing(["Running"]):
+		return
+	pcv = frappe.get_doc("Period Closing Voucher", ppcv.parent_pcv)
+
 	# P&L accounts
 	pl_accounts_reverse_gle, closing_account_gle = get_gl_entries(docname)
 	gl_entries = pl_accounts_reverse_gle + closing_account_gle
@@ -426,9 +498,6 @@ def summarize_and_post_ledger_entries(docname):
 
 	if gl_entries:
 		make_gl_entries(gl_entries, merge_entries=False)
-
-	pcv_name = frappe.db.get_value("Process Period Closing Voucher", docname, "parent_pcv")
-	pcv = frappe.get_doc("Period Closing Voucher", pcv_name)
 
 	# Balance sheet accounts
 	bs_dimension_wise_acc_balance = calculate_balance_sheet_balance(docname)
@@ -525,10 +594,13 @@ def build_dimension_wise_balance_dict(gl_entries):
 	return dimension_balances
 
 
-def process_individual_date(docname: str, date, report_type, parentfield):
+def process_individual_date(docname: str, row_name, date, report_type, parentfield):
+	if not frappe.get_lazy_doc("Process Period Closing Voucher", docname).validate_processing(["Running"]):
+		return
+
 	current_date_status = frappe.db.get_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"status",
 	)
 	if current_date_status != "Running":
@@ -558,6 +630,7 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 	).where(
 		(gle.company.eq(company))
 		& (gle.is_cancelled.eq(0))
+		& (gle.voucher_type != "Period Closing Voucher")
 		& (gle.posting_date.eq(date))
 		& (gle.account.isin(accounts))
 	)
@@ -576,17 +649,20 @@ def process_individual_date(docname: str, date, report_type, parentfield):
 	# save results
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"closing_balance",
 		frappe.json.dumps(res),
 	)
 
 	frappe.db.set_value(
 		"Process Period Closing Voucher Detail",
-		{"processing_date": date, "parent": docname, "report_type": report_type, "parentfield": parentfield},
+		row_name,
 		"status",
 		"Completed",
 	)
+	# commit heavy computation before touching PPCV or PPCVD
+	if not frappe.in_test:
+		frappe.db.commit()  # nosemgrep
 
 	# chain call
 	schedule_next_date(docname)

@@ -6,10 +6,13 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.utils import get_combine_datetime
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters = filters or {}
 
 	columns = get_column()
@@ -63,9 +66,7 @@ def get_data(filters):
 		query = query.where(tsd.from_time >= get_combine_datetime(filters.get("from_date"), "00:00:00"))
 
 	if filters.get("to_date"):
-		# upper bound is the end of to_date, i.e. midnight of the next day
-		# (matches the original `timestamp(to_date, '24:00:00')`)
 		end_of_to_date = get_combine_datetime(add_days(getdate(filters.get("to_date")), 1), "00:00:00")
-		query = query.where(tsd.to_time <= end_of_to_date)
+		query = query.where(tsd.from_time < end_of_to_date)
 
 	return query.orderby(ts.name).run(as_list=True)

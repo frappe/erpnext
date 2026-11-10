@@ -57,5 +57,6 @@ class PackingService:
 		if res:
 			for r in res:
 				ps = frappe.get_doc("Packing Slip", r)
+				ps.flags.cancelled_by_delivery_note = True
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))

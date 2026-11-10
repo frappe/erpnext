@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"supplier_name\", \"label\": \"Supplier Name\"}, {\"fieldname\": \"supplier_group\", \"label\": \"Supplier Group\"}, {\"fieldname\": \"supplier_type\", \"label\": \"Supplier Type\"}, {\"fieldname\": \"country\", \"label\": \"Country\"}, {\"fieldname\": \"mobile_no\", \"label\": \"Mobile No\"}, {\"fieldname\": \"email_id\", \"label\": \"Email ID\"}]",
+ "creation": "2026-09-30 21:12:56.791308",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Active",
+ "filters": "[[\"Supplier\", \"disabled\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.791308",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Supplier-Active",
+ "owner": "Administrator",
+ "reference_doctype": "Supplier",
+ "route_signature": "disabled=0",
+ "sort_field": "supplier_name",
+ "sort_order": "asc"
+}

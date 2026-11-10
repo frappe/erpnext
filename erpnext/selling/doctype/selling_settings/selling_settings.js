@@ -50,6 +50,7 @@ function get_transactions(frm) {
 		{ label: __("Sales Order"), doctype: "Sales Order" },
 		{ label: __("Sales Invoice"), doctype: "Sales Invoice" },
 		{ label: __("Delivery Note"), doctype: "Delivery Note" },
+		{ label: __("Proforma Invoice"), doctype: "Proforma Invoice" },
 	];
 
 	if (frm.doc.cust_master_name !== "Naming Series") {

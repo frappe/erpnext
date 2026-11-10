@@ -1,15 +1,15 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import json
-
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.accounts.report.utils import get_filter_values
 from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
 	get_data as stock_ledger_invariant_check,
 )
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters=None):
@@ -19,7 +19,7 @@ def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_columns():
@@ -205,7 +205,10 @@ def get_data(filters=None):
 
 	data = []
 	if item_warehouse_map:
-		precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
+		float_precision = cint(frappe.db.get_single_value("System Settings", "float_precision")) or 3
+		currency_precision = (
+			cint(frappe.db.get_single_value("System Settings", "currency_precision")) or float_precision
+		)
 
 		for item_warehouse in item_warehouse_map:
 			report_data = stock_ledger_invariant_check(item_warehouse)
@@ -215,7 +218,11 @@ def get_data(filters=None):
 
 			for row in report_data:
 				if has_difference(
-					row, precision, filters.difference_in, item_warehouse.valuation_method or valuation_method
+					row,
+					float_precision,
+					currency_precision,
+					filters.difference_in,
+					item_warehouse.valuation_method or valuation_method,
 				):
 					row.update(
 						{
@@ -253,31 +260,31 @@ def get_item_warehouse_combinations(filters: dict | None = None) -> dict:
 
 	if filters.item_code:
 		query = query.where(item.name == filters.item_code)
-	if filters.warehouse:
-		query = query.where(warehouse.name == filters.warehouse)
+	if warehouses := get_filter_values(filters.warehouse):
+		query = query.where(warehouse.name.isin(warehouses))
 	if not filters.include_disabled:
 		query = query.where((item.disabled == 0) & (warehouse.disabled == 0))
 
 	return query.run(as_dict=1)
 
 
-def has_difference(row, precision, difference_in, valuation_method):
+def has_difference(row, float_precision, currency_precision, difference_in, valuation_method):
 	if valuation_method == "Moving Average":
-		qty_diff = flt(row.difference_in_qty, precision)
-		value_diff = flt(row.diff_value_diff, precision)
-		valuation_diff = flt(row.valuation_diff, precision)
+		qty_diff = flt(row.difference_in_qty, float_precision)
+		value_diff = flt(row.diff_value_diff, currency_precision)
+		valuation_diff = flt(row.valuation_diff, currency_precision)
 	else:
-		qty_diff = flt(row.difference_in_qty, precision)
-		value_diff = flt(row.diff_value_diff, precision)
+		qty_diff = flt(row.difference_in_qty, float_precision)
+		value_diff = flt(row.diff_value_diff, currency_precision)
 
-		if row.stock_queue and json.loads(row.stock_queue):
-			value_diff = value_diff or (
-				flt(row.fifo_value_diff, precision) or flt(row.fifo_difference_diff, precision)
-			)
+		value_diff = value_diff or (
+			flt(row.fifo_value_diff, currency_precision) or flt(row.fifo_difference_diff, currency_precision)
+		)
+		qty_diff = qty_diff or flt(row.fifo_qty_diff, float_precision)
 
-			qty_diff = qty_diff or flt(row.fifo_qty_diff, precision)
-
-		valuation_diff = flt(row.valuation_diff, precision) or flt(row.fifo_valuation_diff, precision)
+		valuation_diff = flt(row.valuation_diff, currency_precision) or flt(
+			row.fifo_valuation_diff, currency_precision
+		)
 
 	if difference_in == "Qty" and qty_diff:
 		return True
@@ -287,3 +294,5 @@ def has_difference(row, precision, difference_in, valuation_method):
 		return True
 	elif difference_in not in ["Qty", "Value", "Valuation"] and (qty_diff or value_diff or valuation_diff):
 		return True
+
+	return False

@@ -64,7 +64,8 @@ frappe.ui.form.on("Delivery Trip", {
 						},
 						get_query_filters: {
 							company: frm.doc.company,
-							status: ["Not In", ["Completed", "Cancelled"]],
+							docstatus: 1,
+							status: ["!=", "Closed"],
 						},
 					});
 				},
@@ -89,10 +90,10 @@ frappe.ui.form.on("Delivery Trip", {
 
 	calculate_arrival_time: function (frm) {
 		if (!frm.doc.driver_address) {
-			frappe.throw(__("Cannot Calculate Arrival Time as Driver Address is Missing."));
+			frappe.throw(__("Cannot calculate arrival time as the driver address is missing."));
 		}
 		frappe.show_alert({
-			message: "Calculating Arrival Times",
+			message: __("Calculating arrival times"),
 			indicator: "orange",
 		});
 		frm.call(
@@ -122,10 +123,10 @@ frappe.ui.form.on("Delivery Trip", {
 
 	optimize_route: function (frm) {
 		if (!frm.doc.driver_address) {
-			frappe.throw(__("Cannot Optimize Route as Driver Address is Missing."));
+			frappe.throw(__("Cannot optimize route as the driver address is missing."));
 		}
 		frappe.show_alert({
-			message: "Optimizing Route",
+			message: __("Optimizing route"),
 			indicator: "orange",
 		});
 		frm.call(
@@ -143,7 +144,7 @@ frappe.ui.form.on("Delivery Trip", {
 		$.each(frm.doc.delivery_stops || [], function (i, delivery_stop) {
 			if (!delivery_stop.delivery_note) {
 				frappe.msgprint({
-					message: __("No Delivery Note selected for Customer {}", [delivery_stop.customer]),
+					message: __("No Delivery Note selected for Customer {0}", [delivery_stop.customer]),
 					title: __("Warning"),
 					indicator: "orange",
 					alert: 1,
@@ -151,25 +152,19 @@ frappe.ui.form.on("Delivery Trip", {
 			}
 		});
 
-		frappe.db.get_value("Delivery Settings", { name: "Delivery Settings" }, "dispatch_template", (r) => {
-			if (!r.dispatch_template) {
-				frappe.throw(__("Missing email template for dispatch. Please set one in Delivery Settings."));
-			} else {
-				frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
-					frappe.call({
-						method: "erpnext.stock.doctype.delivery_trip.delivery_trip.notify_customers",
-						args: {
-							delivery_trip: frm.doc.name,
-						},
-						callback: function (r) {
-							if (!r.exc) {
-								frm.doc.email_notification_sent = true;
-								frm.refresh_field("email_notification_sent");
-							}
-						},
-					});
-				});
-			}
+		frappe.confirm(__("Do you want to notify all the customers by email?"), function () {
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.notify_customers",
+				args: {
+					delivery_trip: frm.doc.name,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						frm.doc.email_notification_sent = true;
+						frm.refresh_field("email_notification_sent");
+					}
+				},
+			});
 		});
 	},
 });
@@ -210,12 +205,7 @@ frappe.ui.form.on("Delivery Stop", {
 				args: { address_dict: row.address },
 				callback: function (r) {
 					if (r.message) {
-						frappe.model.set_value(
-							cdt,
-							cdn,
-							"customer_address",
-							frappe.utils.html2text(r.message)
-						);
+						frappe.model.set_value(cdt, cdn, "customer_address", r.message);
 					}
 				},
 			});

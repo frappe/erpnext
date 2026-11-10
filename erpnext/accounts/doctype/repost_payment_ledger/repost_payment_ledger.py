@@ -27,6 +27,7 @@ def start_payment_ledger_repost(docname: str | None = None):
 	"""
 	if docname:
 		repost_doc = frappe.get_doc("Repost Payment Ledger", docname)
+		repost_doc.check_permission("submit")
 		if repost_doc.docstatus.is_submitted() and repost_doc.repost_status in ["Queued", "Failed"]:
 			try:
 				for entry in repost_doc.repost_vouchers:
@@ -118,9 +119,11 @@ class RepostPaymentLedger(Document):
 		frappe.msgprint(_("Repost started in the background"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def execute_repost_payment_ledger(docname: str):
 	"""Repost Payment Ledger Entries by background job."""
+
+	frappe.has_permission("Repost Payment Ledger", ptype="submit", doc=docname, throw=True)
 
 	job_name = "payment_ledger_repost_" + docname
 

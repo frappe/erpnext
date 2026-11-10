@@ -3,10 +3,11 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
- "creation": "2026-02-02 14:41:23.105228",
- "description": "A Product or a Service that is bought, sold or kept in stock.",
+ "creation": "2026-07-13 23:00:47.512490",
+ "description": "A product or service you buy, sell or keep in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/item",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -40,6 +41,9 @@
   "over_delivery_receipt_allowance",
   "column_break_wugd",
   "over_billing_allowance",
+  "company_restrictions_section",
+  "restrict_to_companies",
+  "allowed_companies",
   "section_break_11",
   "brand",
   "description",
@@ -95,6 +99,7 @@
   "column_break_37",
   "has_serial_no",
   "serial_no_series",
+  "use_serial_no_wise_valuation",
   "variants_section",
   "variant_of",
   "variant_based_on",
@@ -126,7 +131,6 @@
   "is_sub_contracted_item",
   "default_bom",
   "column_break_74",
-  "production_capacity",
   "total_projected_qty",
   "section_break_xili",
   "default_manufacturer_part_no",
@@ -170,6 +174,7 @@
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Variant Of",
+   "link_filters": "[[\"Item\",\"has_variants\",\"=\",1]]",
    "options": "Item",
    "read_only": 1,
    "search_index": 1,
@@ -181,6 +186,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_import_template": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
@@ -193,7 +199,6 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
-   "link_filters": "[[\"Item Group\",\"is_group\",\"=\",0]]",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
@@ -239,7 +244,7 @@
    "description": "ERPNext will make a stock ledger entry for each transaction of this item. Keep unchecked for non-stock or service items.",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
-   "in_list_view": 0,
+   "in_import_template": 1,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select",
@@ -251,6 +256,7 @@
    "description": "Enable for raw material items used in BOM. Uncheck for additional services like 'washing' used in manufacturing.",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Include Item In Manufacturing"
   },
   {
@@ -264,7 +270,9 @@
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
-   "label": "Valuation Rate"
+   "in_import_template": 1,
+   "label": "Valuation Rate",
+   "non_negative": 1
   },
   {
    "bold": 1,
@@ -272,6 +280,7 @@
    "description": "Creates an Item Price automatically when the item is saved",
    "fieldname": "standard_rate",
    "fieldtype": "Currency",
+   "in_import_template": 1,
    "label": "Standard Selling Rate"
   },
   {
@@ -280,15 +289,17 @@
    "description": "Enable if this item is a company asset like machinery or furniture.",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
+   "in_import_template": 1,
+   "in_list_view": 1,
    "label": "Is Fixed Asset",
-   "read_only_depends_on": "eval:doc.is_stock_item",
-   "in_list_view": 1
+   "read_only_depends_on": "eval:doc.is_stock_item"
   },
   {
    "allow_in_quick_entry": 1,
    "depends_on": "is_fixed_asset",
    "fieldname": "asset_category",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Asset Category",
    "mandatory_depends_on": "is_fixed_asset",
    "options": "Asset Category"
@@ -317,6 +328,7 @@
   {
    "fieldname": "brand",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "label": "Brand",
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
@@ -326,6 +338,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
+   "in_import_template": 1,
    "in_preview": 1,
    "label": "Description",
    "oldfieldname": "description",
@@ -384,7 +397,8 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Valuation Method",
-   "options": "\nFIFO\nMoving Average\nLIFO"
+   "description": "Serialized items are valued at Moving Average once stock transactions exist and Serial No Wise Valuation is disabled.",
+   "options": "\nFIFO\nMoving Average\nLIFO\nStandard Cost"
   },
   {
    "depends_on": "is_stock_item",
@@ -456,6 +470,7 @@
    "description": "Track this item in batches. Cannot be changed after a stock transaction exists.",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Has Batch No",
    "oldfieldname": "has_batch_no",
    "oldfieldtype": "Select",
@@ -513,6 +528,7 @@
    "description": "Track each unit with a unique serial number for warranty and return tracking. Cannot be changed after a stock transaction exists.",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Has Serial No",
    "oldfieldname": "has_serial_no",
    "oldfieldtype": "Select",
@@ -524,6 +540,15 @@
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
    "label": "Serial Number Series",
+   "show_description_on_click": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:doc.is_stock_item && doc.has_serial_no",
+   "description": "Value every outward movement at each Serial No's own incoming rate. If unchecked, the item is valued at Moving Average once stock transactions exist. Cannot be enabled once Serial Nos exist for this item.",
+   "fieldname": "use_serial_no_wise_valuation",
+   "fieldtype": "Check",
+   "label": "Use Serial No Wise Valuation",
    "show_description_on_click": 1
   },
   {
@@ -572,6 +597,7 @@
    "description": "Allow this item to be used in purchase transactions.",
    "fieldname": "is_purchase_item",
    "fieldtype": "Check",
+   "in_import_template": 1,
    "label": "Allow Purchase",
    "read_only_depends_on": "eval: doc.is_customer_provided_item",
    "show_description_on_click": 1
@@ -595,7 +621,7 @@
    "oldfieldtype": "Currency"
   },
   {
-   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption × Lead Time).",
+   "description": "Minimum stock level to maintain as a buffer. Used to calculate recommended reorder level: Reorder Level = Safety Stock + (Average Daily Consumption \u00d7 Lead Time).",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock",
@@ -698,9 +724,10 @@
    "description": "Allow this item to be used in sales transactions.",
    "fieldname": "is_sales_item",
    "fieldtype": "Check",
+   "in_import_template": 1,
+   "in_list_view": 1,
    "label": "Allow Sales",
-   "show_description_on_click": 1,
-   "in_list_view": 1
+   "show_description_on_click": 1
   },
   {
    "fieldname": "column_break3",
@@ -718,7 +745,7 @@
   },
   {
    "default": "0",
-   "description": "Expense for this item will be recognized over a period of months. Eg: prepaid insurance or annual software license",
+   "description": "Income from this item will be recognized over a period of months instead of all at once. Eg: annual subscription paid upfront.",
    "fieldname": "enable_deferred_revenue",
    "fieldtype": "Check",
    "label": "Enable Deferred Revenue"
@@ -727,11 +754,12 @@
    "depends_on": "enable_deferred_revenue",
    "fieldname": "no_of_months",
    "fieldtype": "Int",
-   "label": "No of Months (Revenue)"
+   "label": "No of Months (Revenue)",
+   "non_negative": 1
   },
   {
    "default": "0",
-   "description": "Income from this item will be recognized over a period of months instead of all at once. Eg: annual subscription paid upfront.",
+   "description": "Expense for this item will be recognized over a period of months. Eg: prepaid insurance or annual software license",
    "fieldname": "enable_deferred_expense",
    "fieldtype": "Check",
    "label": "Enable Deferred Expense"
@@ -740,7 +768,8 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "no_of_months_exp",
    "fieldtype": "Int",
-   "label": "No of Months (Expense)"
+   "label": "No of Months (Expense)",
+   "non_negative": 1
   },
   {
    "depends_on": "eval:!doc.is_fixed_asset",
@@ -852,6 +881,7 @@
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)",
+   "non_negative": 1,
    "oldfieldname": "tolerance",
    "oldfieldtype": "Currency"
   },
@@ -860,7 +890,8 @@
    "description": "Percentage by which over-billing is allowed against a Sales/Purchase Order for this item. If not set, value from Accounts Settings will be used.",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Float",
-   "label": "Over Billing Allowance (%)"
+   "label": "Over Billing Allowance (%)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -949,11 +980,6 @@
    "fieldname": "deferred_accounting_section",
    "fieldtype": "Section Break",
    "label": "Deferred Accounting"
-  },
-  {
-   "fieldname": "production_capacity",
-   "fieldtype": "Int",
-   "label": "Production Capacity"
   },
   {
    "fieldname": "section_break_znra",
@@ -1083,14 +1109,37 @@
    "fieldname": "item_prices_column",
    "fieldtype": "Column Break",
    "label": "Item Prices"
+  },
+  {
+   "fieldname": "company_restrictions_section",
+   "fieldtype": "Section Break",
+   "label": "Company Restrictions",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "description": "If checked, this Item is only available for transactions in the companies listed below.",
+   "fieldname": "restrict_to_companies",
+   "fieldtype": "Check",
+   "label": "Restrict to Companies",
+   "permlevel": 1
+  },
+  {
+   "depends_on": "eval:doc.restrict_to_companies",
+   "fieldname": "allowed_companies",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Companies",
+   "mandatory_depends_on": "eval:doc.restrict_to_companies",
+   "options": "Company Restriction",
+   "permlevel": 1
   }
  ],
- "icon": "fa fa-tag",
+ "icon": "package",
  "idx": 2,
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-05-27 10:18:46.862670",
+ "modified": "2026-11-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1152,6 +1201,12 @@
    "role": "Desk User",
    "select": 1,
    "share": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Item Manager",
+   "write": 1
   }
  ],
  "quick_entry": 1,

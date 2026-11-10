@@ -4,11 +4,17 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Max
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
+
+from erpnext.accounts.report.utils import get_qb_filter_condition, validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns = get_columns(filters)
 	data = get_data(filters)
 	return columns, data
@@ -132,10 +138,12 @@ def apply_filters_on_query(filters, parent, child, query):
 	if filters.get("company"):
 		query = query.where(parent.company == filters.get("company"))
 
-	if filters.get("cost_center") or filters.get("project"):
-		query = query.where(
-			(child.cost_center == filters.get("cost_center")) | (child.project == filters.get("project"))
-		)
+	cost_center_condition = get_qb_filter_condition(child.cost_center, filters.get("cost_center"))
+	if cost_center_condition is not None:
+		query = query.where(cost_center_condition)
+
+	if filters.get("project"):
+		query = query.where(child.project == filters.get("project"))
 
 	if filters.get("from_date"):
 		query = query.where(parent.transaction_date >= filters.get("from_date"))
@@ -148,9 +156,11 @@ def apply_filters_on_query(filters, parent, child, query):
 
 def get_data(filters):
 	purchase_order_entry = get_po_entries(filters)
-	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters)
+	request_items = {po.material_request_item for po in purchase_order_entry if po.material_request_item}
+	mr_records, procurement_record_against_mr = get_mapped_mr_details(filters, request_items)
 	pr_records = get_mapped_pr_records()
-	pi_records = get_mapped_pi_records()
+	pi_records = get_mapped_pi_records(filters)
+	ordered_qty_by_request_item = get_ordered_qty_by_request_item(request_items)
 
 	procurement_record = []
 	if procurement_record_against_mr:
@@ -170,13 +180,13 @@ def get_data(filters):
 				"material_request_no": po.material_request,
 				"item_code": po.item_code,
 				"quantity": flt(po.qty),
-				"unit_of_measurement": po.stock_uom,
+				"unit_of_measurement": po.uom,
 				"status": po.status,
 				"purchase_order_date": po.transaction_date,
 				"purchase_order": po.parent,
 				"supplier": po.supplier,
-				"estimated_cost": flt(mr_record.get("amount")),
-				"actual_cost": flt(pi_records.get(po.name)) or flt(po.amount),
+				"estimated_cost": get_estimated_cost(po, mr_record, ordered_qty_by_request_item),
+				"actual_cost": get_actual_cost(po, pi_records),
 				"purchase_order_amt": flt(po.amount),
 				"purchase_order_amt_in_company_currency": flt(po.base_amount),
 				"expected_delivery_date": po.schedule_date,
@@ -187,8 +197,44 @@ def get_data(filters):
 	return procurement_record
 
 
-def get_mapped_mr_details(filters):
-	mr_records = {}
+def get_ordered_qty_by_request_item(request_items):
+	if not request_items:
+		return {}
+
+	parent = frappe.qb.DocType("Purchase Order")
+	child = frappe.qb.DocType("Purchase Order Item")
+	return dict(
+		frappe.qb.from_(child)
+		.inner_join(parent)
+		.on(child.parent == parent.name)
+		.select(child.material_request_item, Sum(get_request_qty_column(parent, child)))
+		.where((child.docstatus == 1) & (child.material_request_item.isin(list(request_items))))
+		.groupby(child.material_request_item)
+		.run()
+	)
+
+
+def get_request_qty_column(parent, child):
+	"""Order line quantity in its request's unit: finished goods for subcontracting."""
+	return Case().when(parent.is_subcontracted == 1, child.fg_item_qty).else_(child.stock_qty)
+
+
+def get_actual_cost(po, pi_records):
+	"""Invoiced amount, or the line amount while the order can still be billed."""
+	if po.name in pi_records:
+		return flt(pi_records[po.name])
+	return 0.0 if po.status == "Closed" else flt(po.base_amount)
+
+
+def get_estimated_cost(po, mr_record, ordered_qty_by_request_item):
+	"""Request item amount shared across all its submitted Purchase Order lines by ordered qty."""
+	ordered_qty = flt(ordered_qty_by_request_item.get(po.material_request_item))
+	if not ordered_qty:
+		return flt(mr_record.get("amount"))
+	return flt(mr_record.get("amount")) * (flt(po.request_qty) / ordered_qty)
+
+
+def get_mapped_mr_details(filters, request_items):
 	parent = frappe.qb.DocType("Material Request")
 	child = frappe.qb.DocType("Material Request Item")
 
@@ -197,61 +243,75 @@ def get_mapped_mr_details(filters):
 		.from_(child)
 		.select(
 			parent.transaction_date,
-			parent.per_ordered,
 			parent.owner,
 			child.name,
 			child.parent,
 			child.amount,
 			child.qty,
+			child.ordered_qty,
 			child.item_code,
 			child.uom,
 			parent.status,
 			child.project,
 			child.cost_center,
 		)
-		.where((parent.per_ordered >= 0) & (parent.name == child.parent) & (parent.docstatus == 1))
+		.where(
+			(parent.per_ordered >= 0)
+			& (parent.name == child.parent)
+			& (parent.docstatus == 1)
+			& (parent.material_request_type.isin(("Purchase", "Subcontracting")))
+		)
 	)
-	query = apply_filters_on_query(filters, parent, child, query)
+	if condition := get_allowed_companies_condition(parent.company, "Material Request"):
+		query = query.where(condition)
 
-	mr_details = query.run(as_dict=True)
+	mr_records = {}
+	if request_items:
+		for record in query.where(child.name.isin(list(request_items))).run(as_dict=True):
+			mr_records.setdefault(record.name, []).append(record)
 
+	unordered_query = apply_filters_on_query(filters, parent, child, query).where(child.ordered_qty == 0)
 	procurement_record_against_mr = []
-	for record in mr_details:
-		if record.per_ordered:
-			mr_records.setdefault(record.name, []).append(frappe._dict(record))
-		else:
-			procurement_record_details = dict(
-				material_request_date=record.transaction_date,
-				material_request_no=record.parent,
-				requestor=record.owner,
-				item_code=record.item_code,
-				estimated_cost=flt(record.amount),
-				quantity=flt(record.qty),
-				unit_of_measurement=record.uom,
-				status=record.status,
-				actual_cost=0,
-				purchase_order_amt=0,
-				purchase_order_amt_in_company_currency=0,
-				project=record.project,
-				cost_center=record.cost_center,
-			)
-			procurement_record_against_mr.append(procurement_record_details)
+	for record in unordered_query.run(as_dict=True):
+		procurement_record_details = dict(
+			material_request_date=record.transaction_date,
+			material_request_no=record.parent,
+			requestor=record.owner,
+			item_code=record.item_code,
+			estimated_cost=flt(record.amount),
+			quantity=flt(record.qty),
+			unit_of_measurement=record.uom,
+			status=record.status,
+			actual_cost=0,
+			purchase_order_amt=0,
+			purchase_order_amt_in_company_currency=0,
+			project=record.project,
+			cost_center=record.cost_center,
+		)
+		procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
 
 
-def get_mapped_pi_records():
+def get_hidden_order_statuses(filters):
+	if filters.get("show_completed_orders"):
+		return ("Cancelled",)
+	return ("Closed", "Completed", "Cancelled")
+
+
+def get_mapped_pi_records(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 	pi_records = (
 		frappe.qb.from_(pi_item)
 		.inner_join(po)
 		.on(pi_item.purchase_order == po.name)
-		.select(pi_item.po_detail, pi_item.base_amount)
+		.select(pi_item.po_detail, Sum(pi_item.base_amount))
 		.where(
 			(pi_item.docstatus == 1)
-			& (po.status.notin(("Closed", "Completed", "Cancelled")))
+			& (po.status.notin(get_hidden_order_statuses(filters)))
 			& (pi_item.po_detail.isnotnull())
 		)
+		.groupby(pi_item.po_detail)
 	).run()
 
 	return frappe._dict(pi_records)
@@ -263,13 +323,14 @@ def get_mapped_pr_records():
 	pr_records = (
 		frappe.qb.from_(pr)
 		.from_(pr_item)
-		.select(pr_item.purchase_order_item, pr.posting_date)
+		.select(pr_item.purchase_order_item, Max(pr.posting_date))
 		.where(
 			(pr.docstatus == 1)
+			& (pr.is_return == 0)
 			& (pr.name == pr_item.parent)
 			& (pr_item.purchase_order_item.isnotnull())
-			& (pr.status.notin(("Closed", "Completed", "Cancelled")))
 		)
+		.groupby(pr_item.purchase_order_item)
 	).run()
 
 	return frappe._dict(pr_records)
@@ -283,35 +344,33 @@ def get_po_entries(filters):
 		frappe.qb.from_(parent)
 		.from_(child)
 		.select(
-			Max(child.name).as_("name"),
-			Max(child.parent).as_("parent"),
-			Max(child.cost_center).as_("cost_center"),
-			Max(child.project).as_("project"),
-			Max(child.warehouse).as_("warehouse"),
-			Max(child.material_request).as_("material_request"),
+			child.name,
+			child.parent,
+			child.cost_center,
+			child.project,
+			child.warehouse,
+			child.material_request,
 			child.material_request_item,
-			Max(child.item_code).as_("item_code"),
-			Max(child.stock_uom).as_("stock_uom"),
-			Max(child.qty).as_("qty"),
-			Max(child.amount).as_("amount"),
-			Max(child.base_amount).as_("base_amount"),
-			Max(child.schedule_date).as_("schedule_date"),
-			Max(parent.transaction_date).as_("transaction_date"),
-			Max(parent.supplier).as_("supplier"),
-			Max(parent.status).as_("status"),
-			Max(parent.owner).as_("owner"),
+			child.item_code,
+			child.uom,
+			child.qty,
+			child.amount,
+			child.base_amount,
+			get_request_qty_column(parent, child).as_("request_qty"),
+			child.schedule_date,
+			parent.transaction_date,
+			parent.supplier,
+			parent.status,
+			parent.owner,
 		)
 		.where(
 			(parent.docstatus == 1)
 			& (parent.name == child.parent)
-			& (parent.status.notin(("Closed", "Completed", "Cancelled")))
+			& (parent.status.notin(get_hidden_order_statuses(filters)))
 		)
-		# Group only by the PO and material_request_item (the pre-effort key) and aggregate the rest
-		# with Max(): postgres requires every non-grouped column to be aggregated, and this keeps one
-		# row per (PO, material_request_item) — matching the prior MariaDB row count. Adding the PO
-		# Item PK to the GROUP BY would split a multi-line PO into one row per line.
-		.groupby(parent.name, child.material_request_item)
 	)
 	query = apply_filters_on_query(filters, parent, child, query)
+	if condition := get_allowed_companies_condition(parent.company, "Purchase Order"):
+		query = query.where(condition)
 
 	return query.run(as_dict=True)

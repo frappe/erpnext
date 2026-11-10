@@ -19,21 +19,24 @@ class ItemAlternative(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		alternative_item_code: DF.Link | None
+		alternative_item_code: DF.Link
 		alternative_item_name: DF.ReadOnly | None
-		item_code: DF.Link | None
+		item_code: DF.Link
 		item_name: DF.ReadOnly | None
 		two_way: DF.Check
 	# end: auto-generated types
 
 	def validate(self):
+		if not (self.item_code and self.alternative_item_code):
+			return
+
 		self.has_alternative_item()
 		self.validate_alternative_item()
 		self.validate_duplicate()
 
 	def has_alternative_item(self):
 		if self.item_code and not frappe.db.get_value("Item", self.item_code, "allow_alternative_item"):
-			frappe.throw(_("Not allow to set alternative item for the item {0}").format(self.item_code))
+			frappe.throw(_("Cannot set alternative item for the item {0}").format(self.item_code))
 
 	def validate_alternative_item(self):
 		if self.item_code == self.alternative_item_code:
@@ -56,7 +59,7 @@ class ItemAlternative(Document):
 
 				frappe.msgprint(
 					_("The value of {0} differs between Items {1} and {2}").format(
-						frappe.bold(item_meta.get_label(field)),
+						frappe.bold(item_meta.get_translated_label(field)),
 						frappe.bold(self.alternative_item_code),
 						frappe.bold(self.item_code),
 					),
@@ -65,7 +68,7 @@ class ItemAlternative(Document):
 					indicator="Orange",
 				)
 
-		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {}")
+		alternate_item_check_msg = _("Allow Alternative Item must be checked on Item {0}")
 
 		if not item_data.allow_alternative_item:
 			frappe.throw(alternate_item_check_msg.format(self.item_code))
@@ -81,7 +84,30 @@ class ItemAlternative(Document):
 				"name": ("!=", self.name),
 			},
 		):
-			frappe.throw(_("Already record exists for the item {0}").format(self.item_code))
+			frappe.throw(_("Record already exists for the item {0}").format(self.item_code))
+
+
+def get_alternative_item_pairs(item_codes) -> set:
+	if not item_codes:
+		return set()
+
+	item_alternative = frappe.qb.DocType("Item Alternative")
+	rows = (
+		frappe.qb.from_(item_alternative)
+		.select(item_alternative.item_code, item_alternative.alternative_item_code, item_alternative.two_way)
+		.where(
+			(item_alternative.item_code.isin(item_codes))
+			| ((item_alternative.alternative_item_code.isin(item_codes)) & (item_alternative.two_way == 1))
+		)
+	).run(as_dict=True)
+
+	pairs = set()
+	for row in rows:
+		pairs.add((row.item_code, row.alternative_item_code))
+		if row.two_way:
+			pairs.add((row.alternative_item_code, row.item_code))
+
+	return pairs
 
 
 @frappe.whitelist()

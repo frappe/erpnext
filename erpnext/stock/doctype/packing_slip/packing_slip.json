@@ -3,9 +3,10 @@
  "allow_import": 1,
  "autoname": "MAT-PAC-.YYYY.-.#####",
  "creation": "2013-04-11 15:32:24",
- "description": "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",
+ "description": "The contents and weight of each package in a delivery.",
  "doctype": "DocType",
  "document_type": "Document",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/packing-slip",
  "engine": "InnoDB",
  "field_order": [
   "packing_slip_details",
@@ -172,7 +173,7 @@
    "read_only": 1
   }
  ],
- "icon": "fa fa-suitcase",
+ "icon": "package",
  "idx": 1,
  "is_submittable": 1,
  "links": [],

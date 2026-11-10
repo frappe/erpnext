@@ -37,20 +37,16 @@ class SupplierScorecardCriteria(Document):
 		_get_variables(self)
 
 	def validate_formula(self):
-		# evaluate the formula with 0's to make sure it is valid
-		test_formula = self.formula.replace("\r", "").replace("\n", "")
-
-		regex = r"\{(.*?)\}"
-
-		mylist = re.finditer(regex, test_formula, re.MULTILINE | re.DOTALL)
-		for _dummy1, match in enumerate(mylist):
-			for _dummy2 in range(0, len(match.groups())):
-				test_formula = test_formula.replace("{" + match.group(1) + "}", "1")
-
-		try:
-			frappe.safe_eval(test_formula, None, {"max": max, "min": min})
-		except Exception:
-			frappe.throw(_("Error evaluating the criteria formula"))
+		formula = self.formula.replace("\r", "").replace("\n", "")
+		for value in ("0.0", "1.00"):
+			try:
+				frappe.safe_eval(re.sub(r"\{(.*?)\}", value, formula), None, {"max": max, "min": min})
+			except Exception:
+				frappe.throw(
+					_(
+						"The criteria formula fails when every variable is {0}. Check its syntax and guard divisions by a variable, for example: {1}"
+					).format(value, "{a} / {b} if {b} else 0")
+				)
 
 
 @frappe.whitelist()

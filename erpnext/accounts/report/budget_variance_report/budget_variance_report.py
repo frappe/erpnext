@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.custom import MonthName
-from frappe.utils import add_months, flt, formatdate
+from frappe.utils import add_months, cstr, flt, formatdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.utils import get_fiscal_year
@@ -24,6 +24,7 @@ def execute(filters=None):
 			dimensions = get_cost_center_with_children(dimensions)
 	else:
 		dimensions = get_budget_dimensions(filters)
+	dimensions = get_permitted_dimensions(filters.get("budget_against"), dimensions)
 	if not dimensions:
 		return columns, [], None, None
 
@@ -140,6 +141,7 @@ def get_actual_transactions(dimension_name, filters):
 			& (gle.fiscal_year >= filters.from_fiscal_year)
 			& (gle.fiscal_year <= filters.to_fiscal_year)
 			& (gle.is_cancelled == 0)
+			& (gle.voucher_type != "Period Closing Voucher")
 			& (budget[budget_against] == dimension_name)
 		)
 		# budget[budget_against] is selected from the Budget table, which is not functionally
@@ -148,6 +150,9 @@ def get_actual_transactions(dimension_name, filters):
 		.groupby(gle.name, budget[budget_against])
 		.orderby(gle.fiscal_year)
 	)
+
+	company_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+	query = query.where(gle.finance_book.isin(["", cstr(company_finance_book)]) | gle.finance_book.isnull())
 
 	if filters.get("budget_against") == "Cost Center" and dimension_name:
 		cost_centers = get_cost_center_with_children([dimension_name])
@@ -399,6 +404,14 @@ def get_budget_dimensions(filters):
 		return frappe.qb.from_(dimension).select(dimension.name).run(pluck="name")
 
 
+def get_permitted_dimensions(budget_against: str, dimensions: list) -> list:
+	"""Keep only the dimensions the user may read, in their original order."""
+	if not dimensions:
+		return []
+	permitted = set(frappe.get_list(budget_against, filters={"name": ["in", dimensions]}, pluck="name"))
+	return [dimension for dimension in dimensions if dimension in permitted]
+
+
 def validate_budget_dimensions(filters):
 	dimensions = [d.get("document_type") for d in get_dimensions(with_cost_center_and_project=True)[0]]
 	if filters.get("budget_against") and filters.get("budget_against") not in dimensions:
@@ -422,6 +435,11 @@ def build_comparison_chart_data(filters, columns, data):
 		if not fieldname:
 			continue
 
+		# skip the dimension column ("budget_against"), it only matches the
+		# "budget_" prefix by coincidence and would shift the actual values by one
+		if fieldname == "budget_against":
+			continue
+
 		if fieldname.startswith("budget_"):
 			budget_fields.append(fieldname)
 		elif fieldname.startswith("actual_"):
@@ -433,7 +451,7 @@ def build_comparison_chart_data(filters, columns, data):
 	labels = [
 		col["label"].replace("Budget", "").strip()
 		for col in columns
-		if col.get("fieldname", "").startswith("budget_")
+		if col.get("fieldname", "").startswith("budget_") and col.get("fieldname") != "budget_against"
 	]
 
 	budget_values = [0] * len(budget_fields)

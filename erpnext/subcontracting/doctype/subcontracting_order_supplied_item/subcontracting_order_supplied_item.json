@@ -63,6 +63,7 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Conversion Factor",
+   "precision": "9",
    "read_only": 1
   },
   {
@@ -176,7 +177,7 @@
  "hide_toolbar": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-30 16:00:43.379828",
+ "modified": "2026-08-07 17:31:31.732720",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Supplied Item",

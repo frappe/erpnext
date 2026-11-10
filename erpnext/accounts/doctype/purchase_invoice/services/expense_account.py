@@ -148,7 +148,7 @@ class ExpenseAccountService:
 					if not account:
 						form_link = get_link_to_form("Asset Category", item.asset_category)
 						throw(
-							_("Please set Fixed Asset Account in {} against {}.").format(
+							_("Please set Fixed Asset Account in {0} against {1}.").format(
 								form_link, doc.company
 							),
 							title=_("Missing Account"),

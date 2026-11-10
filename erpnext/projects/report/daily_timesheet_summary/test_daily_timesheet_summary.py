@@ -14,27 +14,27 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestDailyTimesheetSummary(ERPNextTestSuite):
 	def test_submitted_timesheet_in_summary(self):
-		frappe.set_user("Administrator")
+		timesheet = self.make_timesheet_logged_at(hour=9, hours=2)
 
+		self.assertIn(timesheet.name, self.get_timesheets_of_today())
+
+	def test_overnight_log_in_summary_of_its_start_day(self):
+		timesheet = self.make_timesheet_logged_at(hour=22, hours=4)
+
+		self.assertIn(timesheet.name, self.get_timesheets_of_today())
+
+	def make_timesheet_logged_at(self, hour, hours):
 		employee = make_employee("test_employee_6@salary.com", company="_Test Company")
 		timesheet = make_timesheet(employee, simulate=True)
-
-		# make_timesheet logs at now_datetime(); run late in the day (under the site timezone)
-		# the 2h log crosses midnight and falls outside the report's `to_time <= end-of-day`
-		# bound. Pin the log to a fixed mid-day window on today so the assertion is
-		# time-of-day independent.
-		start = get_datetime(today()) + timedelta(hours=9)
+		start = get_datetime(today()) + timedelta(hours=hour)
 		frappe.db.set_value(
 			"Timesheet Detail",
 			timesheet.time_logs[0].name,
-			{"from_time": start, "to_time": start + timedelta(hours=2)},
+			{"from_time": start, "to_time": start + timedelta(hours=hours)},
 			update_modified=False,
 		)
+		return timesheet
 
+	def get_timesheets_of_today(self):
 		_columns, data = execute({"from_date": today(), "to_date": today()})
-
-		# Row column order: [Timesheet.name, employee, employee_name, from_time, to_time,
-		# hours, activity_type, task, project, status]. The converted join must surface the
-		# submitted timesheet for today; row[0] holds the Timesheet name.
-		names = [row[0] for row in data]
-		self.assertIn(timesheet.name, names)
+		return [row[0] for row in data]

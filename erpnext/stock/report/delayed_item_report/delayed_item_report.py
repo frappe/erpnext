@@ -5,9 +5,14 @@
 import frappe
 from frappe import _
 from frappe.utils import date_diff
+from frappe.utils.nestedset import get_descendants_of
+
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None, consolidated=False):
+	validate_date_range(filters)
+
 	data, columns = DelayedItemReport(filters).run()
 
 	return data, columns
@@ -49,6 +54,7 @@ class DelayedItemReport:
 			.where(
 				(child.parent == parent.name)
 				& (parent.docstatus == 1)
+				& (parent.is_return == 0)
 				& (parent.posting_date.between(self.filters.get("from_date"), self.filters.get("to_date")))
 				& (child[sales_order_field].notnull())
 				& (child[sales_order_field] != "")
@@ -58,13 +64,18 @@ class DelayedItemReport:
 		if doctype == "Sales Invoice":
 			query = query.where((parent.update_stock == 1) & (parent.is_pos == 0))
 
-		if self.filters.get("item_group"):
-			query = query.where(child.item_group == self.filters.get("item_group"))
+		if item_group := self.filters.get("item_group"):
+			query = query.where(child.item_group.isin(get_group_and_descendants("Item Group", item_group)))
+
+		if customer_group := self.filters.get("customer_group"):
+			query = query.where(
+				parent.customer_group.isin(get_group_and_descendants("Customer Group", customer_group))
+			)
 
 		if self.filters.get("sales_order"):
 			query = query.where(child[sales_order_field] == self.filters.get("sales_order"))
 
-		for field in ("customer", "customer_group", "company"):
+		for field in ("customer", "company"):
 			if self.filters.get(field):
 				query = query.where(parent[field] == self.filters.get(field))
 
@@ -72,6 +83,7 @@ class DelayedItemReport:
 
 		if self.transactions:
 			self.filter_transactions_data(consolidated)
+			self.transactions = [row for row in self.transactions if row.delayed_days > 0]
 
 			return self.transactions
 
@@ -164,3 +176,7 @@ class DelayedItemReport:
 			},
 			{"label": _("Customer PO"), "fieldname": "po_no", "fieldtype": "Data", "width": 100},
 		]
+
+
+def get_group_and_descendants(doctype, group):
+	return [group, *get_descendants_of(doctype, group)]

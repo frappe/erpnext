@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, get_link_to_form
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -39,27 +39,44 @@ class POSOpeningEntry(StatusUpdater):
 		self.validate_pos_profile_and_cashier()
 		self.check_open_pos_exists()
 		self.check_user_already_assigned()
+		self.validate_balance_details()
 		self.validate_payment_method_account()
 		self.set_status()
 
 	def validate_pos_profile_and_cashier(self):
 		if not frappe.db.exists("POS Profile", self.pos_profile):
-			frappe.throw(_("POS Profile {} does not exist.").format(self.pos_profile))
+			frappe.throw(_("POS Profile {0} does not exist.").format(self.pos_profile))
 
 		pos_profile_company, pos_profile_disabled = frappe.db.get_value(
 			"POS Profile", self.pos_profile, ["company", "disabled"]
 		)
 
 		if pos_profile_disabled:
-			frappe.throw(_("POS Profile {} is disabled.").format(frappe.bold(self.pos_profile)))
+			frappe.throw(_("POS Profile {0} is disabled.").format(frappe.bold(self.pos_profile)))
 
 		if self.company != pos_profile_company:
 			frappe.throw(
-				_("POS Profile {} does not belong to company {}").format(self.pos_profile, self.company)
+				_("POS Profile {0} does not belong to company {1}").format(self.pos_profile, self.company)
 			)
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
-			frappe.throw(_("User {} is disabled. Please select valid user/cashier").format(self.user))
+			frappe.throw(_("User {0} is disabled. Please select valid user/cashier").format(self.user))
+
+		self.validate_cashier_of_pos_profile()
+
+	def validate_cashier_of_pos_profile(self):
+		cashiers = frappe.get_all(
+			"POS Profile User",
+			filters={"parent": self.pos_profile, "parenttype": "POS Profile"},
+			pluck="user",
+		)
+		if cashiers and all(cashiers) and self.user not in cashiers:
+			frappe.throw(
+				_("User {0} is not in Applicable for Users of POS Profile {1}").format(
+					frappe.bold(self.user), frappe.bold(self.pos_profile)
+				),
+				title=_("Invalid Cashier"),
+			)
 
 	def check_open_pos_exists(self):
 		if frappe.db.exists("POS Opening Entry", {"pos_profile": self.pos_profile, "status": "Open"}):
@@ -77,6 +94,23 @@ class POSOpeningEntry(StatusUpdater):
 				msg=_("Cashier is currently assigned to another POS."),
 			)
 
+	def validate_balance_details(self):
+		modes_of_payment = set()
+		for d in self.balance_details:
+			if flt(d.opening_amount) < 0:
+				frappe.throw(
+					_("Row #{0}: Opening Amount for {1} cannot be negative").format(
+						d.idx, frappe.bold(d.mode_of_payment)
+					)
+				)
+			if d.mode_of_payment in modes_of_payment:
+				frappe.throw(
+					_("Row #{0}: Mode of Payment {1} is added more than once").format(
+						d.idx, frappe.bold(d.mode_of_payment)
+					)
+				)
+			modes_of_payment.add(d.mode_of_payment)
+
 	def validate_payment_method_account(self):
 		invalid_modes = []
 		for d in self.balance_details:
@@ -91,9 +125,9 @@ class POSOpeningEntry(StatusUpdater):
 
 		if invalid_modes:
 			if invalid_modes == 1:
-				msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+				msg = _("Please set default Cash or Bank account in Mode of Payment {0}")
 			else:
-				msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+				msg = _("Please set default Cash or Bank account in Mode of Payments {0}")
 			frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 	def on_submit(self):

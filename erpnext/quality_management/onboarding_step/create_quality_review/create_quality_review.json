@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Quality Review",
+ "creation": "2026-10-04 01:54:23.342902",
+ "description": "Compare the results against the goal, and decide what to change. See [Quality Management](https://docs.frappe.io/erpnext/user/manual/en/quality-management).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:54:23.342902",
+ "modified_by": "Administrator",
+ "name": "Create Quality Review",
+ "owner": "Administrator",
+ "reference_document": "Quality Review",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Review how a goal is going",
+ "validate_action": 1
+}

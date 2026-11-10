@@ -2,7 +2,6 @@ import { useAtomValue } from "jotai"
 import { MissingFiltersBanner } from "./MissingFiltersBanner"
 import { bankRecDateAtom, SelectedBank, selectedBankAccountAtom } from "./bankRecAtoms"
 import { useCurrentCompany } from "@/hooks/useCurrentCompany"
-import { Paragraph } from "@/components/ui/typography"
 import type { ColumnDef } from "@tanstack/react-table"
 import { useCallback, useMemo, useState } from "react"
 import { useFrappeGetCall, useFrappePostCall, useSWRConfig } from "frappe-react-sdk"
@@ -26,6 +25,7 @@ import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { DateField } from "@/components/ui/form-elements"
 import { Empty, EmptyMedia, EmptyHeader, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import MarkdownRenderer from "@/components/ui/markdown"
 
 const BankClearanceSummary = () => {
     const bankAccount = useAtomValue(selectedBankAccountAtom)
@@ -203,14 +203,14 @@ const BankClearanceSummaryView = () => {
         [accountCurrency, bankAccount, companyID, mutate, onCopy],
     )
 
-    return <div className="space-y-4 py-2">
+    const content = _("Below is a list of all accounting entries posted against the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
 
-        <div>
-            <Paragraph className="text-sm">
-                <span dangerouslySetInnerHTML={{
-                    __html: _("Below is a list of all accounting entries posted against the bank account {0} between {1} and {2}.", [`<strong>${bankAccount?.account}</strong>`, `<strong>${formattedFromDate}</strong>`, `<strong>${formattedToDate}</strong>`])
-                }} />
-            </Paragraph>
+    return <div className="flex min-h-0 flex-1 flex-col space-y-4 py-2">
+
+        <div className="shrink-0">
+            <span className="text-p-sm">
+                <MarkdownRenderer content={content} />
+            </span>
         </div>
 
         {error && <ErrorBanner error={error} />}
@@ -220,8 +220,9 @@ const BankClearanceSummaryView = () => {
                 data={data.message.result}
                 columns={clearanceColumns}
                 getRowId={(row) => `${row.payment_entry}-${row.posting_date}`}
-                maxHeight="calc(100vh - 200px)"
-                scrollAreaClassName="min-h-[calc(100vh-200px)]"
+                className="min-h-0 flex-1"
+                maxHeight="none"
+                scrollAreaClassName="flex-1"
                 emptyState={_("No rows to display.")}
             />
         ) : null}

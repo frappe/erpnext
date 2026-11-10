@@ -4,18 +4,61 @@
 """Small query helpers shared by Production Plan material planning."""
 
 import json
+import math
 
 import frappe
 from frappe.query_builder.functions import IfNull, Sum
+from frappe.utils import flt
 from pypika.terms import ExistsCriterion
 
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.stock.doctype.item.item import get_uom_conv_factor
+
+
+def get_planned_process_loss_percentage(bom_no):
+	"""BOM process loss % to add to the quantity, 0 when the BOM loses everything."""
+	return get_planned_loss_percentage(frappe.get_cached_value("BOM", bom_no, "process_loss_percentage"))
+
+
+def get_plan_process_loss_percentage(plan, bom_no):
+	"""BOM process loss % a Production Plan orders for, 0 unless it considers process loss."""
+	if not plan.get("consider_process_loss"):
+		return 0
+	return get_planned_process_loss_percentage(bom_no)
+
+
+def get_planned_loss_percentage(loss_percentage):
+	"""Process loss % to plan for, 0 when everything is lost."""
+	loss_percentage = flt(loss_percentage)
+	return loss_percentage if loss_percentage < 100 else 0
+
+
+def get_qty_before_process_loss(qty, loss_percentage, uom):
+	"""Quantity to make so that `qty` is left after `loss_percentage` process loss."""
+	loss_percentage = get_planned_loss_percentage(loss_percentage)
+	if not loss_percentage:
+		return flt(qty)
+	return round_up_to_whole_unit(flt(qty) / (1 - loss_percentage / 100), uom)
+
+
+def round_up_to_whole_unit(qty, uom):
+	"""A fraction of a whole number UOM cannot be made, so make the next whole unit."""
+	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
+		return math.ceil(flt(qty, frappe.get_precision("Work Order", "qty")))
+	return qty
 
 
 def get_uom_conversion_factor(item_code, uom):
-	return frappe.db.get_value(
+	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+	conversion_factor = frappe.db.get_value(
 		"UOM Conversion Detail", {"parent": item_code, "uom": uom}, "conversion_factor"
 	)
+	if not conversion_factor and item.variant_of:
+		conversion_factor = frappe.db.get_value(
+			"UOM Conversion Detail", {"parent": item.variant_of, "uom": uom}, "conversion_factor"
+		)
+
+	return conversion_factor or get_uom_conv_factor(uom, item.stock_uom)
 
 
 @frappe.whitelist()
@@ -23,12 +66,21 @@ def get_bin_details(
 	row: str | dict, company: str, for_warehouse: str | None = None, all_warehouse: bool = False
 ):
 	frappe.has_permission("Production Plan", "read", throw=True)
+	row = frappe.parse_json(row)
+	return _get_bin_details(row, company, for_warehouse, all_warehouse, ignore_permissions=False)
 
-	if isinstance(row, str):
-		row = frappe._dict(json.loads(row))
 
+@frappe.whitelist()
+def get_pooled_bin_details(row: str | dict, company: str, for_warehouse: str):
+	frappe.has_permission("Production Plan", "read", throw=True)
+	row = frappe.parse_json(row)
+	return aggregate_bin_details(_get_bin_details(row, company, for_warehouse, ignore_permissions=False))
+
+
+def _get_bin_details(row, company, for_warehouse=None, all_warehouse=False, ignore_permissions=True):
+	row = frappe._dict(row)
 	bin = frappe.qb.DocType("Bin")
-	subquery = _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse)
+	subquery = _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse, ignore_permissions)
 	query = (
 		frappe.qb.from_(bin)
 		.select(bin.warehouse, *_bin_qty_columns(bin))
@@ -38,9 +90,11 @@ def get_bin_details(
 	return query.run(as_dict=True)
 
 
-def _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse):
+def _bin_warehouse_subquery(bin, company, row, for_warehouse, all_warehouse, ignore_permissions):
 	wh = frappe.qb.DocType("Warehouse")
-	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
+	subquery = frappe.qb.get_query("Warehouse", fields=["name"], ignore_permissions=ignore_permissions).where(
+		wh.company == company
+	)
 
 	warehouse = ""
 	if not all_warehouse:
@@ -62,11 +116,25 @@ def _bin_qty_columns(bin):
 	]
 
 
+def aggregate_bin_details(bin_list):
+	qty_fields = (
+		"projected_qty",
+		"actual_qty",
+		"ordered_qty",
+		"reserved_qty_for_production",
+		"planned_qty",
+	)
+	aggregated = {field: 0 for field in qty_fields}
+	for row in bin_list or []:
+		for field in qty_fields:
+			aggregated[field] += flt(row.get(field))
+	return aggregated
+
+
 def get_warehouse_list(warehouses):
 	warehouse_list = []
 
-	if isinstance(warehouses, str):
-		warehouses = json.loads(warehouses)
+	warehouses = frappe.parse_json(warehouses)
 
 	for row in warehouses:
 		child_warehouses = frappe.db.get_descendants("Warehouse", row.get("warehouse"))
@@ -126,7 +194,7 @@ def _open_so_base_query(plan, so, so_item):
 			& (so.docstatus == 1)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == plan.company)
-			& (so_item.qty > so_item.production_plan_qty)
+			& (so_item.stock_qty > so_item.production_plan_qty)
 		)
 	)
 

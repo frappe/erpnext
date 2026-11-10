@@ -29,60 +29,53 @@ class ItemManufacturer(Document):
 		self.manage_default_item_manufacturer()
 
 	def on_trash(self):
-		self.manage_default_item_manufacturer(delete=True)
+		if self.is_default:
+			self.clear_item_default(self)
 
 	def validate_duplicate_entry(self):
-		if self.is_new():
-			filters = {
-				"item_code": self.item_code,
-				"manufacturer": self.manufacturer,
-				"manufacturer_part_no": self.manufacturer_part_no,
-			}
+		filters = {
+			"item_code": self.item_code,
+			"manufacturer": self.manufacturer,
+			"manufacturer_part_no": self.manufacturer_part_no,
+			"name": ("!=", self.name),
+		}
 
-			if frappe.db.exists("Item Manufacturer", filters):
-				frappe.throw(
-					_("Duplicate entry against the item code {0} and manufacturer {1}").format(
-						self.item_code, self.manufacturer
-					)
+		if frappe.db.exists("Item Manufacturer", filters):
+			frappe.throw(
+				_("Duplicate entry against the item code {0} and manufacturer {1}").format(
+					self.item_code, self.manufacturer
 				)
+			)
 
-	def manage_default_item_manufacturer(self, delete=False):
+	def manage_default_item_manufacturer(self):
 		from frappe.model.utils import set_default
 
-		item = frappe.get_doc("Item", self.item_code)
-		default_manufacturer = item.default_item_manufacturer
-		default_part_no = item.default_manufacturer_part_no
+		previous = self.get_doc_before_save()
+		if previous and previous.is_default and self.has_default_changed(previous):
+			self.clear_item_default(previous)
 
-		if not self.is_default:
-			# if unchecked and default in Item master, clear it.
-			if default_manufacturer == self.manufacturer and default_part_no == self.manufacturer_part_no:
-				frappe.db.set_value(
-					"Item",
-					item.name,
-					{"default_item_manufacturer": None, "default_manufacturer_part_no": None},
-				)
-
-		elif self.is_default:
+		if self.is_default:
 			set_default(self, "item_code")
-			manufacturer, manufacturer_part_no = default_manufacturer, default_part_no
+			self.set_item_default(self.item_code, self.manufacturer, self.manufacturer_part_no)
 
-			if delete:
-				manufacturer, manufacturer_part_no = None, None
+	def has_default_changed(self, previous):
+		fieldnames = ("is_default", "item_code", "manufacturer", "manufacturer_part_no")
+		return any(previous.get(fieldname) != self.get(fieldname) for fieldname in fieldnames)
 
-			elif (default_manufacturer != self.manufacturer) or (
-				default_manufacturer == self.manufacturer and default_part_no != self.manufacturer_part_no
-			):
-				manufacturer = self.manufacturer
-				manufacturer_part_no = self.manufacturer_part_no
+	def clear_item_default(self, row):
+		item_default = frappe.db.get_value(
+			"Item", row.item_code, ["default_item_manufacturer", "default_manufacturer_part_no"]
+		)
+		if tuple(item_default or ()) == (row.manufacturer, row.manufacturer_part_no):
+			self.set_item_default(row.item_code, None, None)
 
-			frappe.db.set_value(
-				"Item",
-				item.name,
-				{
-					"default_item_manufacturer": manufacturer,
-					"default_manufacturer_part_no": manufacturer_part_no,
-				},
-			)
+	def set_item_default(self, item_code, manufacturer, manufacturer_part_no):
+		frappe.has_permission("Item", "write", doc=item_code, throw=True)
+		frappe.db.set_value(
+			"Item",
+			item_code,
+			{"default_item_manufacturer": manufacturer, "default_manufacturer_part_no": manufacturer_part_no},
+		)
 
 
 @frappe.whitelist()

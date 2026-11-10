@@ -3,6 +3,7 @@
  "allow_copy": 1,
  "creation": "2019-09-06 12:01:33.933063",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/quick-stock-balance",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -97,6 +98,7 @@
   }
  ],
  "hide_toolbar": 1,
+ "icon": "scale",
  "issingle": 1,
  "links": [],
  "modified": "2024-03-27 13:10:30.449554",

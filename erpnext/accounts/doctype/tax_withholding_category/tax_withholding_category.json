@@ -4,7 +4,9 @@
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2018-04-13 18:42:06.431683",
+ "description": "Rates and thresholds for tax withheld on payments, like TDS.",
  "doctype": "DocType",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/tax-withholding-category",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
@@ -98,9 +100,10 @@
    "label": "Disable Transaction Threshold"
   }
  ],
+ "icon": "badge-percent",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-30 07:13:51.785735",
+ "modified": "2026-08-21 23:11:50.979676",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Withholding Category",
@@ -142,6 +145,26 @@
    "role": "Accounts User",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Item Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Manager",
+   "select": 1
+  },
+  {
+   "role": "Purchase Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
   }
  ],
  "row_format": "Dynamic",

@@ -6,7 +6,9 @@ import json
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
+from erpnext.stock.report.utils import prepare_serial_batch_report
 
 
 def execute(filters=None):
@@ -16,7 +18,7 @@ def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
 
-	return columns, data
+	return prepare_serial_batch_report(columns, data)
 
 
 def get_columns() -> list[dict]:
@@ -45,7 +47,7 @@ def get_data(filters=None):
 	batch_no = filters.get("batch")
 
 	batch_sle_data = (
-		get_batch_qty(
+		get_batch_qty_for_stock(
 			item_code=item,
 			batch_no=batch_no,
 			for_stock_levels=True,
@@ -75,7 +77,10 @@ def get_data(filters=None):
 	if batch_no:
 		query = query.where(batch.name == batch_no)
 
-	batch_records = query.run(as_dict=True) or []
+	if condition := get_allowed_masters_condition(batch.item, "Item"):
+		query = query.where(condition)
+
+	batch_records = query.orderby(batch.batch_id).orderby(batch.item).run(as_dict=True) or []
 
 	result = []
 	for row in batch_records:
@@ -100,16 +105,16 @@ def get_data(filters=None):
 
 
 @frappe.whitelist()
-def update_batch_qty(selected_batches: str | None = None):
+def update_batch_qty(selected_batches: str | list | None = None):
 	frappe.has_permission("Batch", "write", throw=True, ignore_share_permissions=True)
 	if not selected_batches:
 		return
 
-	selected_batches = json.loads(selected_batches)
+	selected_batches = frappe.parse_json(selected_batches)
 	for row in selected_batches:
 		batch_name = row.get("batch")
 
-		batches = get_batch_qty(
+		batches = get_batch_qty_for_stock(
 			batch_no=batch_name,
 			item_code=row.get("item_code"),
 			for_stock_levels=True,

@@ -1,6 +1,7 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from unittest.mock import patch
 
 import frappe
 from frappe.utils.data import (
@@ -16,9 +17,15 @@ from frappe.utils.data import (
 	getdate,
 	nowdate,
 )
+from freezegun import freeze_time
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.subscription.subscription import Subscription, get_prorata_factor, process_all
+from erpnext.accounts.doctype.subscription.subscription import (
+	Subscription,
+	get_plan_dimensions,
+	get_prorata_factor,
+	process_all,
+)
 from erpnext.accounts.utils import update_subscription_on_invoice_update
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -127,6 +134,45 @@ class TestSubscription(ERPNextTestSuite):
 		subscription.process(posting_date=subscription.next_billing_period_end)  # generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Active")
+
+	def test_subscription_grace_period_boundaries(self):
+		for grace_period in (0, 3):
+			for cancel_after_grace in (0, 1):
+				with self.subTest(grace_period=grace_period, cancel_after_grace=cancel_after_grace):
+					settings = frappe.get_single("Subscription Settings")
+					settings.grace_period = grace_period
+					settings.cancel_after_grace = cancel_after_grace
+					settings.save()
+
+					with freeze_time("2026-09-10 12:00:00.123456"):
+						subscription = create_subscription(
+							start_date=nowdate(),
+							generate_invoice_at="Prepaid (bill at period start)",
+							submit_invoice=1,
+						)
+						invoice = subscription.get_current_invoice()
+						self.assertEqual(getdate(invoice.due_date), getdate("2026-09-10"))
+						self.assertGreater(invoice.outstanding_amount, 0)
+						self.assertTrue(
+							subscription.is_past_grace_period(add_days(invoice.due_date, grace_period + 1))
+						)
+
+					for days_overdue in range(grace_period + 2):
+						posting_date = add_days(invoice.due_date, days_overdue)
+						with self.subTest(posting_date=posting_date), freeze_time(
+							f"{posting_date} 12:00:00.123456"
+						):
+							self.assertEqual(subscription.current_invoice_is_past_due(), days_overdue > 0)
+							self.assertEqual(subscription.is_past_grace_period(), days_overdue > grace_period)
+							subscription.process(posting_date=posting_date)
+							if days_overdue == 0:
+								self.assertEqual(subscription.status, "Active")
+							elif days_overdue <= grace_period:
+								self.assertEqual(subscription.status, "Grace Period")
+							else:
+								self.assertEqual(
+									subscription.status, "Cancelled" if cancel_after_grace else "Unpaid"
+								)
 
 	def test_subscription_is_past_due_doesnt_change_within_grace_period(self):
 		settings = frappe.get_single("Subscription Settings")
@@ -530,6 +576,63 @@ class TestSubscription(ERPNextTestSuite):
 
 		self.assertEqual(len(subscription.invoices), 2)
 
+	def test_subscription_days_before_with_end_date_does_not_rebill(self):
+		# first of next month keeps periods clear of month-end clamping
+		start_date = get_first_day(add_months(nowdate(), 1))
+		end_date = add_to_date(start_date, months=2, days=-1)
+		subscription = create_subscription(
+			start_date=start_date,
+			end_date=end_date,
+			generate_invoice_at="Bill N days before period start",
+			number_of_days=10,
+			generate_new_invoices_past_due_date=1,
+		)
+
+		period_1_end = add_to_date(start_date, months=1, days=-1)
+		period_2_start = add_days(period_1_end, 1)
+
+		trigger_1 = add_days(start_date, -10)
+		trigger_2 = add_days(period_2_start, -10)
+		end_date_plus_1 = add_days(end_date, 1)
+		end_date_plus_cycle = add_to_date(end_date, months=1)
+
+		# Only process on the critical dates: each trigger date, End Date, End Date + 1,
+		# and End Date + one billing cycle.
+		for posting_date in [trigger_1, trigger_2, end_date, end_date_plus_1, end_date_plus_cycle]:
+			subscription.process(posting_date=posting_date)
+
+		# Exactly 2 invoices generated (no rebilling past end date)
+		self.assertEqual(len(subscription.invoices), 2)
+
+		invoices = frappe.get_all(
+			"Sales Invoice",
+			filters={"subscription": subscription.name, "docstatus": ("<", 2)},
+			fields=["name", "from_date", "to_date"],
+			order_by="from_date asc",
+		)
+		self.assertEqual(len(invoices), 2)
+		for inv in invoices:
+			self.assertLessEqual(getdate(inv.from_date), getdate(inv.to_date))
+
+		self.assertEqual(getdate(invoices[0].from_date), getdate(start_date))
+		self.assertEqual(getdate(invoices[0].to_date), getdate(period_1_end))
+		self.assertEqual(getdate(invoices[1].from_date), getdate(period_2_start))
+		self.assertEqual(getdate(invoices[1].to_date), getdate(end_date))
+
+		# Prevent reversed period after End Date ("To Date cannot be before From Date")
+		self.assertLessEqual(
+			getdate(subscription.next_billing_period_start), getdate(subscription.next_billing_period_end)
+		)
+		self.assertEqual(getdate(subscription.next_billing_period_start), getdate(period_2_start))
+		self.assertEqual(getdate(subscription.next_billing_period_end), getdate(end_date))
+
+		# Final status should be Completed once both invoices are paid
+		for inv in invoices:
+			get_payment_entry("Sales Invoice", inv.name).submit()
+		subscription.reload()
+		subscription.process(posting_date=end_date_plus_cycle)
+		self.assertEqual(subscription.status, "Completed")
+
 	def test_future_subscription(self):
 		"""Force-Fetch should not process future subscriptions"""
 		subscription = create_subscription(
@@ -653,23 +756,15 @@ class TestSubscription(ERPNextTestSuite):
 		sub2 = create_subscription(start_date="2018-01-02")
 
 		processed = []
-		original_process = Subscription.process
-		original_rollback = frappe.db.rollback
 
 		def patched(self, posting_date=None):
 			processed.append(self.name)
 			if self.name == sub1.name:
 				raise frappe.ValidationError("forced failure")
 
-		Subscription.process = patched
-		# process_all calls frappe.db.rollback() on error which would otherwise wipe
-		# the test transaction; stub it so we can observe the iteration in isolation.
-		frappe.db.rollback = lambda *a, **kw: None
-		try:
+		# Stub transaction recovery so the test can observe the complete iteration in isolation.
+		with patch.object(Subscription, "process", patched), patch.object(frappe.db, "rollback"):
 			process_all([sub1.name, sub2.name])
-		finally:
-			Subscription.process = original_process
-			frappe.db.rollback = original_rollback
 
 		self.assertEqual(processed, [sub1.name, sub2.name])
 
@@ -718,7 +813,7 @@ class TestSubscription(ERPNextTestSuite):
 
 	def test_status_updates_immediately_when_invoice_paid(self):
 		subscription = create_subscription(
-			start_date=nowdate(),
+			start_date=add_days(nowdate(), -1),
 			generate_invoice_at="Prepaid (bill at period start)",
 			submit_invoice=1,
 		)
@@ -734,7 +829,7 @@ class TestSubscription(ERPNextTestSuite):
 
 	def test_invoice_update_hook_refreshes_subscription_status(self):
 		subscription = create_subscription(
-			start_date=nowdate(),
+			start_date=add_days(nowdate(), -1),
 			generate_invoice_at="Prepaid (bill at period start)",
 			submit_invoice=1,
 		)
@@ -753,7 +848,7 @@ class TestSubscription(ERPNextTestSuite):
 	def test_payment_entry_triggers_subscription_status_update(self):
 		# Test that payment entry → invoice → subscription status update chain works
 		subscription = create_subscription(
-			start_date=nowdate(),
+			start_date=add_days(nowdate(), -1),
 			generate_invoice_at="Prepaid (bill at period start)",
 			submit_invoice=1,
 		)
@@ -773,6 +868,38 @@ class TestSubscription(ERPNextTestSuite):
 		# Subscription status should now be Active (via on_update_after_submit hook)
 		subscription.reload()
 		self.assertEqual(subscription.status, "Active")
+
+	def test_cancelled_subscription_stays_cancelled_after_payment_and_reprocess(self):
+		# https://github.com/frappe/erpnext/issues/57761
+		subscription = create_subscription(
+			start_date=nowdate(),
+			generate_invoice_at="Prepaid (bill at period start)",
+			submit_invoice=1,
+			cancel_at_period_end=1,
+		)
+		subscription.process(posting_date=nowdate())
+		invoice = subscription.get_current_invoice()
+		self.assertGreater(invoice.outstanding_amount, 0)
+
+		subscription.cancel_subscription()
+		self.assertEqual(subscription.status, "Cancelled")
+		cancelation_date = getdate(subscription.cancelation_date)
+		self.assertIsNotNone(cancelation_date)
+
+		payment_entry = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Bank - _TC")
+		payment_entry.reference_no = "12345"
+		payment_entry.reference_date = nowdate()
+		payment_entry.submit()
+
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(getdate(subscription.cancelation_date), cancelation_date)
+
+		invoice_count = len(subscription.invoices)
+		subscription.process()
+		subscription.reload()
+		self.assertEqual(subscription.status, "Cancelled")
+		self.assertEqual(len(subscription.invoices), invoice_count)
 
 	def test_first_invoice_generated_on_create_for_prepaid(self):
 		subscription = create_subscription(
@@ -849,7 +976,7 @@ class TestSubscription(ERPNextTestSuite):
 
 	def test_status_becomes_refunded_when_only_invoice_credited(self):
 		subscription = create_subscription(
-			start_date=nowdate(),
+			start_date=add_days(nowdate(), -1),
 			generate_invoice_at="Prepaid (bill at period start)",
 			submit_invoice=1,
 		)
@@ -951,6 +1078,47 @@ class TestSubscription(ERPNextTestSuite):
 		cells = {cell["date"]: cell for cell in subscription.get_billing_heatmap()}
 		self.assertEqual(cells[str(getdate(invoice.from_date))]["status"], "refunded")
 
+	def test_plan_dimensions_resolve_from_plan_then_item(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# Plan-level cost center takes precedence.
+		create_plan(plan_name="_Test Sub Plan CC", cost=100, currency="INR")
+		frappe.db.set_value(
+			"Subscription Plan", "_Test Sub Plan CC", "cost_center", "_Test Cost Center - _TC"
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+
+		# No plan cost center: fall back to the item's company default (selling vs buying by party type).
+		item = make_item(
+			"_Test Sub Dimension Item",
+			{
+				"is_stock_item": 0,
+				"item_defaults": [
+					{
+						"company": "_Test Company",
+						"selling_cost_center": "_Test Cost Center - _TC",
+						"buying_cost_center": "_Test Cost Center 2 - _TC",
+					}
+				],
+			},
+		)
+		create_plan(plan_name="_Test Sub Plan No CC", cost=100, currency="INR", item=item.name)
+
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Customer").get("cost_center"),
+			"_Test Cost Center - _TC",
+		)
+		self.assertEqual(
+			get_plan_dimensions("_Test Sub Plan No CC", "_Test Company", "Supplier").get("cost_center"),
+			"_Test Cost Center 2 - _TC",
+		)
+
+		# Without a company the item fallback is skipped.
+		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
+
 
 def make_full_credit_note(invoice_name):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
@@ -995,12 +1163,6 @@ def create_plan(**kwargs):
 
 
 def create_parties():
-	if not frappe.db.exists("Supplier", "_Test Supplier"):
-		supplier = frappe.new_doc("Supplier")
-		supplier.supplier_name = "_Test Supplier"
-		supplier.supplier_group = "All Supplier Groups"
-		supplier.insert()
-
 	if not frappe.db.exists("Customer", "_Test Subscription Customer"):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "_Test Subscription Customer"

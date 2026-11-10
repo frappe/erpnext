@@ -62,7 +62,7 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 						frm.events.add_serial_batch(frm, data);
 					},
 					__("Add {0}", [label]),
-					__("Make {0}", [label])
+					__("Add and Save")
 				);
 			});
 		}
@@ -118,7 +118,12 @@ frappe.ui.form.on("Serial and Batch Bundle", {
 				data: prompt_data,
 			},
 			callback(r) {
-				refresh_field("entries");
+				if (!r.message) return;
+				if (r.message === frm.doc.name) {
+					frm.reload_doc();
+				} else {
+					frappe.set_route("Form", frm.doctype, r.message);
+				}
 			},
 		});
 	},

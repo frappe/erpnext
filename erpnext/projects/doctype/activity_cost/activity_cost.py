@@ -35,8 +35,6 @@ class ActivityCost(Document):
 
 	def set_title(self):
 		if self.employee:
-			if not self.employee_name:
-				self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 			self.title = _("{0} for {1}").format(self.employee_name, self.activity_type)
 		else:
 			self.title = self.activity_type
@@ -46,7 +44,7 @@ class ActivityCost(Document):
 			if frappe.db.exists(
 				"Activity Cost",
 				{
-					"employee_name": self.employee_name,
+					"employee": self.employee,
 					"activity_type": self.activity_type,
 					"name": ["!=", self.name],
 				},

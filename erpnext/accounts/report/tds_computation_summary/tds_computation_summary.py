@@ -8,7 +8,8 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
-	GROUP_BY_FIELDS = ("party_type", "party", "tax_withholding_category")
+	# a lower deduction certificate or a mid-year rate change must not merge into the normal rate
+	GROUP_BY_FIELDS = ("party_type", "party", "tax_withholding_category", "rate")
 	CARRY_OVER_FIELDS = (
 		"tax_id",
 		"party",
@@ -21,8 +22,7 @@ class TDSComputationSummaryReport(TaxWithholdingDetailsReport):
 	AGGREGATE_FIELDS = ("total_amount", "tax_amount")
 
 	def validate_filters(self):
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date must be before To Date"))
+		super().validate_filters()
 
 		from_year = get_fiscal_year(self.filters.from_date)[0]
 		to_year = get_fiscal_year(self.filters.to_date)[0]

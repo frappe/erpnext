@@ -29,4 +29,5 @@ class QualityAction(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		self.status = "Open" if any([d.status == "Open" for d in self.resolutions]) else "Completed"
+		is_completed = self.resolutions and all(d.status == "Completed" for d in self.resolutions)
+		self.status = "Completed" if is_completed else "Open"

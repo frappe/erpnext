@@ -12,7 +12,7 @@
         </div>
     {% else %}
         <div class="alert alert-danger">
-            {{ _("Verification failed please check the link") }}
+            {{ message or _("Verification failed please check the link") }}
         </div>
     {% endif %}
 {% endblock%}

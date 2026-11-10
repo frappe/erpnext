@@ -18,7 +18,7 @@ class ProductionPlanSubAssemblyItem(Document):
 		actual_qty: DF.Float
 		bom_level: DF.Int
 		bom_no: DF.Link | None
-		description: DF.SmallText | None
+		description: DF.TextEditor | None
 		fg_warehouse: DF.Link | None
 		indent: DF.Int
 		item_name: DF.Data | None
@@ -27,6 +27,7 @@ class ProductionPlanSubAssemblyItem(Document):
 		parent_item_code: DF.Link | None
 		parentfield: DF.Data
 		parenttype: DF.Data
+		process_loss_percentage: DF.Percent
 		production_item: DF.Link | None
 		production_plan_item: DF.Data | None
 		projected_qty: DF.Float

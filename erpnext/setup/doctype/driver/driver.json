@@ -128,9 +128,9 @@
    "read_only_depends_on": "employee"
   }
  ],
- "icon": "fa fa-user",
+ "icon": "car",
  "links": [],
- "modified": "2026-06-16 16:04:12.762960",
+ "modified": "2026-08-21 23:11:41.847540",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Driver",
@@ -138,13 +138,16 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Fleet Manager",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "print": 1,
@@ -173,6 +176,22 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Fulfillment User",
+   "select": 1
+  },
+  {
+   "role": "Sales User",
+   "select": 1
+  },
+  {
+   "role": "Stock Manager",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
   }
  ],
  "quick_entry": 1,

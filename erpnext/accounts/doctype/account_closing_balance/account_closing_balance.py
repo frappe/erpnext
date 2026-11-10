@@ -3,8 +3,9 @@
 
 import frappe
 from frappe import _
+from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr, flt, now
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -50,21 +51,49 @@ def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 	combined_entries = closing_entries + previous_closing_entries
 
 	merged_entries = aggregate_with_last_account_closing_balance(combined_entries, accounting_dimensions)
+	if not merged_entries:
+		return
 
-	for _key, value in merged_entries.items():
-		cle = frappe.new_doc("Account Closing Balance")
-		cle.update(value)
-		cle.update(value["dimensions"])
-		cle.update(
-			{
-				"period_closing_voucher": voucher_name,
-				"closing_date": closing_date,
-			}
-		)
-		set_amount_in_reporting_currency(cle, company, closing_date)
-		cle.flags.ignore_permissions = True
-		cle.flags.ignore_links = True
-		cle.submit()
+	# one row per dimension combination can run into lakhs; inserting them one
+	# by one exceeds the write limit of a single transaction
+	exchange_rate = get_reporting_currency_exchange_rate(company, closing_date)
+	timestamp = now()
+	rows = [
+		get_closing_balance_row(value, voucher_name, closing_date, exchange_rate, timestamp)
+		for value in merged_entries.values()
+	]
+	frappe.db.bulk_insert(
+		"Account Closing Balance",
+		fields=list(rows[0]),
+		values=[tuple(row.values()) for row in rows],
+		chunk_size=10_000,
+	)
+
+
+def get_closing_balance_row(value, voucher_name, closing_date, exchange_rate, timestamp):
+	"""Return the row that `Document.submit` would have written.
+
+	The validate hooks still run, so app hooks and Server Scripts see each row; only the write is batched.
+	"""
+	cle = frappe.new_doc("Account Closing Balance")
+	cle.update(value)
+	cle.update(value["dimensions"])
+	cle.update(
+		{
+			"period_closing_voucher": voucher_name,
+			"closing_date": closing_date,
+			"docstatus": DocStatus.SUBMITTED,
+			"owner": frappe.session.user,
+			"modified_by": frappe.session.user,
+			"creation": timestamp,
+			"modified": timestamp,
+		}
+	)
+	if exchange_rate:
+		set_amount_with_exchange_rate(cle, exchange_rate)
+	cle.run_method("validate")
+	cle.set_new_name()
+	return cle.get_valid_dict(convert_dates_to_str=True, ignore_virtual=True)
 
 
 def aggregate_with_last_account_closing_balance(entries, accounting_dimensions):
@@ -154,9 +183,17 @@ def get_previous_closing_entries(company, closing_date, accounting_dimensions):
 
 
 def set_amount_in_reporting_currency(cle, company, closing_date):
+	if exchange_rate := get_reporting_currency_exchange_rate(company, closing_date):
+		set_amount_with_exchange_rate(cle, exchange_rate)
+
+
+def get_reporting_currency_exchange_rate(company, closing_date):
 	default_currency, reporting_currency = frappe.get_cached_value(
 		"Company", company, ["default_currency", "reporting_currency"]
 	)
+
+	if not reporting_currency:
+		return
 
 	reporting_currency_exchange_rate = get_exchange_rate(default_currency, reporting_currency, closing_date)
 	if not reporting_currency_exchange_rate:
@@ -167,6 +204,11 @@ def set_amount_in_reporting_currency(cle, company, closing_date):
 			).format(default_currency, reporting_currency, closing_date),
 			exc=ReportingCurrencyExchangeNotFoundError,
 		)
+
+	return reporting_currency_exchange_rate
+
+
+def set_amount_with_exchange_rate(cle, reporting_currency_exchange_rate):
 	debit_in_reporting_currency = flt(cle.get("debit", 0) * reporting_currency_exchange_rate)
 	credit_in_reporting_currency = flt(cle.get("credit", 0) * reporting_currency_exchange_rate)
 

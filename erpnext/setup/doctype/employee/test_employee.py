@@ -1,13 +1,15 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from unittest.mock import MagicMock, patch
+
 import frappe
 import frappe.utils
 from frappe.query_builder import Criterion
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
+from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError, is_holiday
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -32,6 +34,154 @@ class TestEmployee(ERPNextTestSuite):
 		employee_doc.user_id = ""
 		employee_doc.save()
 		self.assertNotIn("Employee", frappe.get_roles(user))
+
+	def test_hr_user_cannot_unlink_or_reenable_admin_users(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-linked-manager@example.com", ["System Manager", "Employee"])
+		frappe.db.set_value("User", manager, "enabled", 1)
+		frappe.db.delete("Employee", {"user_id": manager})
+		employee = make_employee(manager, company="_Test Company")
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.user_id = ""
+			self.assertRaises(frappe.PermissionError, linked.save)
+		self.assertEqual(frappe.db.get_value("Employee", employee, "user_id"), manager)
+		self.assertIn("Employee", frappe.get_roles(manager))
+
+		frappe.db.set_value("User", manager, "enabled", 0)
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.cell_number = "9999999999"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", manager, "enabled"), 0)
+
+	def test_hr_user_cannot_reenable_user_through_employee_status(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-disabled-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+		frappe.db.set_value("User", staff, "enabled", 0)
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.status = "Inactive"
+			linked.save()
+			linked.status = "Active"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
+		linked = frappe.get_doc("Employee", employee)
+		linked.status = "Inactive"
+		linked.save()
+		linked.status = "Active"
+		linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 1)
+
+		with as_user(hr_user):
+			linked = frappe.get_doc("Employee", employee)
+			linked.status = "Inactive"
+			linked.save()
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
+	def test_hr_user_reenables_only_users_disabled_through_employee_status(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-returning-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+
+		def set_status_as_hr(status):
+			with as_user(hr_user):
+				linked = frappe.get_doc("Employee", employee)
+				linked.status = status
+				linked.save()
+
+		set_status_as_hr("Inactive")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+		set_status_as_hr("Active")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 1)
+
+		user = frappe.get_doc("User", staff)
+		user.enabled = 0
+		user.save(ignore_version=False)
+		set_status_as_hr("Inactive")
+		set_status_as_hr("Active")
+		self.assertEqual(frappe.db.get_value("User", staff, "enabled"), 0)
+
+	def test_hr_roles_link_any_user_except_admins(self):
+		from frappe.permissions import add_permission, reset_perms
+
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user_admin_role = "_Test User Administrator"
+		if not frappe.db.exists("Role", user_admin_role):
+			frappe.get_doc({"doctype": "Role", "role_name": user_admin_role}).insert()
+		if not frappe.db.exists("Custom DocPerm", {"parent": "User"}):
+			self.addCleanup(reset_perms, "User")
+		add_permission("User", user_admin_role, ptype="write")
+		self.addCleanup(frappe.clear_cache, doctype="User")
+
+		admins = [
+			make_fenced_user("employee-manager@example.com", ["System Manager"]),
+			make_fenced_user("employee-user-admin@example.com", [user_admin_role]),
+		]
+		sales_user = make_fenced_user("employee-sales@example.com", ["Sales User"])
+		for hr_role in ("HR User", "HR Manager"):
+			frappe.db.delete("Employee", {"user_id": ("in", [*admins, sales_user])})
+			hr_user = make_fenced_user(f"employee-{frappe.scrub(hr_role)}@example.com", [hr_role])
+			with as_user(hr_user):
+				for admin in admins:
+					self.assertRaises(frappe.PermissionError, new_employee(admin).insert)
+				new_employee(sales_user).insert()
+
+	def test_hr_user_toggles_user_permission_only_for_non_admin_users(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-manager@example.com", ["System Manager"])
+		staff = make_fenced_user("employee-staff@example.com", ["Employee"])
+		employees = {}
+		for user in (manager, staff):
+			frappe.db.set_value("User", user, "enabled", 1)
+			frappe.db.delete("Employee", {"user_id": user})
+			employees[user] = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		with as_user(hr_user):
+			manager_employee = frappe.get_doc("Employee", employees[manager])
+			manager_employee.create_user_permission = 0
+			self.assertRaises(frappe.PermissionError, manager_employee.save)
+
+			staff_employee = frappe.get_doc("Employee", employees[staff])
+			staff_employee.create_user_permission = 0
+			staff_employee.save()
+
+		for user, expected in ((manager, True), (staff, False)):
+			has_permission = frappe.db.exists(
+				"User Permission", {"allow": "Employee", "for_value": employees[user], "user": user}
+			)
+			self.assertEqual(bool(has_permission), expected)
+
+	def test_hr_user_sets_image_of_employee_linked_to_user(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		staff = make_fenced_user("employee-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": staff})
+		employee = make_employee(staff, company="_Test Company")
+		image = frappe.get_doc(doctype="File", file_name="employee-image.png", content=b"image").insert()
+
+		with as_user(hr_user):
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.image = image.file_url
+			employee_doc.save()
+
+		self.assertEqual(frappe.db.get_value("User", staff, "user_image"), image.file_url)
 
 	def test_employee_user_permission(self):
 		employee1 = make_employee(
@@ -62,6 +212,271 @@ class TestEmployee(ERPNextTestSuite):
 
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
+
+	def test_employee_role_reads_only_linked_employee(self):
+		from frappe.www.printview import validate_print_permission
+
+		from erpnext.tests.permission_test_utils import as_user
+
+		user = "employee-read-own@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=0)
+		other_employee = make_employee(
+			"employee-read-other@example.com", company="_Test Company", create_user_permission=0
+		)
+
+		reportee = make_employee(
+			"employee-read-reportee@example.com",
+			company="_Test Company",
+			create_user_permission=0,
+			reports_to=employee,
+		)
+
+		with as_user(user):
+			self.assertTrue(frappe.has_permission("Employee", "read", employee))
+			self.assertTrue(frappe.has_permission("Employee", "read", reportee))
+			for ptype in ("read", "print", "email"):
+				self.assertFalse(frappe.has_permission("Employee", ptype, other_employee))
+			# Print view accepts read or print access.
+			self.assertRaises(
+				frappe.PermissionError, validate_print_permission, frappe.get_doc("Employee", other_employee)
+			)
+			# A document sent from the client has no tree position.
+			self.assertFalse(frappe.has_permission("Employee", "read", frappe.new_doc("Employee")))
+			self.assertEqual(sorted(frappe.get_list("Employee", pluck="name")), sorted([employee, reportee]))
+
+	def test_other_employee_roles_keep_employee_access(self):
+		from erpnext.tests.permission_test_utils import as_user
+
+		other_employee = make_employee("employee-lookup-other@example.com", company="_Test Company")
+		for role in ("Accounts User", "HR User"):
+			user = f"employee-lookup-{frappe.scrub(role)}@example.com"
+			make_employee(user, company="_Test Company", create_user_permission=0)
+			frappe.get_doc("User", user).add_roles(role)
+
+			with as_user(user):
+				# Select-only roles pick other employees in link fields, e.g. on a Journal Entry.
+				self.assertTrue(frappe.has_permission("Employee", "select", other_employee))
+				self.assertIn(other_employee, frappe.get_list("Employee", pluck="name"))
+
+	def test_changing_or_clearing_user_removes_previous_user_access(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for case, new_user in (("changed", "employee-replacement-user@example.com"), ("cleared", "")):
+			old_user = f"employee-previous-user-{case}@example.com"
+			employee = make_employee(old_user, company="_Test Company", create_user_permission=1)
+			if new_user:
+				make_fenced_user(new_user, ["Employee"])
+
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.user_id = new_user
+			employee_doc.save()
+
+			for allow, for_value in (("Employee", employee), ("Company", "_Test Company")):
+				self.assertFalse(
+					frappe.db.exists(
+						"User Permission", {"allow": allow, "for_value": for_value, "user": old_user}
+					)
+				)
+			self.assertNotIn("Employee", frappe.get_roles(old_user))
+			with as_user(old_user):
+				self.assertFalse(frappe.has_permission("Employee", "read", employee))
+
+	def test_hr_user_cannot_replace_admin_user(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-replaced-manager@example.com", ["System Manager"])
+		staff = make_fenced_user("employee-replacing-staff@example.com", ["Employee"])
+		frappe.db.delete("Employee", {"user_id": ("in", [manager, staff])})
+		employee = make_employee(manager, company="_Test Company")
+
+		with as_user(hr_user):
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.user_id = staff
+			self.assertRaises(frappe.PermissionError, employee_doc.save)
+
+	def test_removing_one_employee_keeps_company_permission_of_another(self):
+		user = "employee-shared-company@example.com"
+		former_employee = make_employee(user, company="_Test Company", create_user_permission=1)
+		former_employee_doc = frappe.get_doc("Employee", former_employee)
+		former_employee_doc.status = "Left"
+		former_employee_doc.relieving_date = "2024-01-01"
+		former_employee_doc.save()
+		rehire = new_employee(user)
+		rehire.create_user_permission = 1
+		rehire.insert()
+
+		former_employee_doc.reload()
+		former_employee_doc.user_id = ""
+		former_employee_doc.save()
+
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": "_Test Company", "user": user}
+			)
+		)
+		self.assertTrue(
+			frappe.db.exists("User Permission", {"allow": "Employee", "for_value": rehire.name, "user": user})
+		)
+
+	def test_unlinking_left_employee_keeps_role_of_rehire(self):
+		user = "employee-rehire-role@example.com"
+		former_employee = make_employee(user, company="_Test Company")
+		former_employee_doc = frappe.get_doc("Employee", former_employee)
+		former_employee_doc.status = "Left"
+		former_employee_doc.relieving_date = "2024-01-01"
+		former_employee_doc.save()
+		new_employee(user).insert()
+
+		former_employee_doc.reload()
+		former_employee_doc.user_id = ""
+		former_employee_doc.save()
+
+		self.assertIn("Employee", frappe.get_roles(user))
+
+	def test_changing_company_replaces_company_user_permission(self):
+		user = "employee-company-change@example.com"
+		employee = make_employee(user, company="_Test Company", create_user_permission=1)
+
+		employee_doc = frappe.get_doc("Employee", employee)
+		employee_doc.company = "_Test Company 1"
+		employee_doc.department = None
+		employee_doc.save()
+
+		def has_company_permission(company):
+			return frappe.db.exists(
+				"User Permission", {"allow": "Company", "for_value": company, "user": user}
+			)
+
+		self.assertFalse(has_company_permission("_Test Company"))
+		self.assertTrue(has_company_permission("_Test Company 1"))
+		# The Employee restriction also limits HR documents of other doctypes to this employee.
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission",
+				{"allow": "Employee", "for_value": employee, "user": user, "apply_to_all_doctypes": 1},
+			)
+		)
+
+	def test_hr_user_cannot_move_admin_user_restrictions_to_another_company(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		hr_user = make_fenced_user("employee-hr@example.com", ["HR User"])
+		manager = make_fenced_user("employee-moved-manager@example.com", ["System Manager"])
+		frappe.db.delete("Employee", {"user_id": manager})
+		employee = make_employee(manager, company="_Test Company", create_user_permission=1)
+
+		with as_user(hr_user):
+			employee_doc = frappe.get_doc("Employee", employee)
+			employee_doc.company = "_Test Company 1"
+			employee_doc.department = None
+			self.assertRaises(frappe.PermissionError, employee_doc.save)
+
+	def test_create_user_for_left_employee_is_disabled(self):
+		from erpnext.setup.doctype.employee.employee import create_user
+
+		employee = new_employee("")
+		employee.update({"first_name": "Former Employee", "status": "Left", "relieving_date": "2024-01-01"})
+		employee.insert()
+
+		user = create_user(employee.name, "employee-left-created@example.com", create_user_permission=1)
+
+		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 0)
+		self.assertIn("Employee", frappe.get_roles(user))
+		self.assertTrue(
+			frappe.db.exists(
+				"User Permission", {"allow": "Employee", "for_value": employee.name, "user": user}
+			)
+		)
+
+	def test_hr_roles_create_employee_users(self):
+		from erpnext.setup.doctype.employee.employee import create_user
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for role in ("HR User", "HR Manager"):
+			hr_user = make_fenced_user(f"employee-create-{frappe.scrub(role)}@example.com", [role])
+			employee = new_employee("")
+			employee.first_name = role
+			employee.insert()
+
+			with as_user(hr_user):
+				user = create_user(
+					employee.name,
+					f"employee-created-by-{frappe.scrub(role)}@example.com",
+					create_user_permission=1,
+				)
+
+				automatic = new_employee("")
+				automatic.update(
+					{
+						"first_name": f"Auto {role}",
+						"personal_email": f"employee-auto-created-by-{frappe.scrub(role)}@example.com",
+						"create_user_automatically": 1,
+						"create_user_permission": 1,
+					}
+				)
+				automatic.insert()
+
+			for created_user in (user, automatic.reload().user_id):
+				self.assertIn("Employee", frappe.get_roles(created_user))
+
+	def test_disabled_department_cannot_be_assigned(self):
+		department = frappe.get_doc(
+			{
+				"doctype": "Department",
+				"department_name": "Employee Disabled Department",
+				"company": "_Test Company",
+			}
+		).insert()
+		employee = frappe.get_doc(
+			"Employee",
+			make_employee(
+				"test_disabled_department@company.com",
+				company="_Test Company",
+				department=department.name,
+			),
+		)
+		other_doc = frappe.get_doc(
+			"Employee",
+			make_employee(
+				"test_other_department@company.com", company="_Test Company", department=department.name
+			),
+		)
+		department.disabled = 1
+		department.save()
+
+		# Existing assignments remain valid until the department link changes.
+		employee.save()
+		other_doc.department = None
+		other_doc.save()
+		other_doc.department = department.name
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled Department"):
+			other_doc.save()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled Department"):
+			frappe.get_doc(
+				{
+					"doctype": "Employee",
+					"first_name": "Disabled Department Test",
+					"company": "_Test Company",
+					"department": department.name,
+					"gender": "Female",
+					"date_of_birth": "1990-05-08",
+					"date_of_joining": "2013-01-01",
+				}
+			).insert()
+
+	def test_salary_currency_set_from_company(self):
+		employee = make_employee("test_emp_salary_currency@company.com", company="_Test Company 1")
+		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "USD")
+
+	def test_salary_currency_not_overridden_if_set(self):
+		employee = make_employee(
+			"test_emp_salary_currency_set@company.com",
+			company="_Test Company 1",
+			salary_currency="EUR",
+		)
+		self.assertEqual(frappe.db.get_value("Employee", employee, "salary_currency"), "EUR")
 
 	def test_create_user_automatically(self):
 		def get_new_employee(email: str, create_user_permission: int):
@@ -114,6 +529,28 @@ class TestEmployee(ERPNextTestSuite):
 				"User Permission", {"allow": "Company", "for_value": employee2.company, "user": user2}
 			)
 		)
+
+	def test_is_holiday_passes_date_to_holiday_list_override(self):
+		override = MagicMock(return_value=None)
+		with (
+			patch("frappe.get_hooks", return_value=["holiday_list.override"]),
+			patch("frappe.get_attr", return_value=override),
+		):
+			is_holiday("_T-Employee-00001", date="2026-01-01")
+
+		override.assert_called_once_with("_T-Employee-00001", True, "2026-01-01")
+
+
+def new_employee(user_id: str):
+	return frappe.get_doc(
+		doctype="Employee",
+		first_name=user_id,
+		company="_Test Company",
+		user_id=user_id,
+		date_of_birth="1990-05-08",
+		date_of_joining="2013-01-01",
+		gender="Female",
+	)
 
 
 def make_employee(user, company=None, **kwargs):

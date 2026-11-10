@@ -40,6 +40,7 @@
   "discount_percentage",
   "discount_amount",
   "distributed_discount_amount",
+  "mapped_additional_discount_amount",
   "base_rate_with_margin",
   "sec_break2",
   "rate",
@@ -75,6 +76,10 @@
   "quality_inspection",
   "rejected_warehouse",
   "rejected_serial_and_batch_bundle",
+  "serial_batch_entries_section",
+  "serial_batch_entries_html",
+  "rejected_serial_batch_entries_section",
+  "rejected_serial_batch_entries_html",
   "section_break_rqbe",
   "serial_no",
   "rejected_serial_no",
@@ -129,6 +134,7 @@
    "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_import_template": 1,
    "in_list_view": 1,
    "label": "Item",
    "oldfieldname": "item_code",
@@ -146,7 +152,6 @@
    "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_global_search": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
@@ -237,6 +242,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -942,6 +948,24 @@
    "print_hide": 1
   },
   {
+   "fieldname": "serial_batch_entries_section",
+   "fieldtype": "Section Break",
+   "label": "Serial / Batch Entries"
+  },
+  {
+   "fieldname": "serial_batch_entries_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "rejected_serial_batch_entries_section",
+   "fieldtype": "Section Break",
+   "label": "Rejected Serial / Batch Entries"
+  },
+  {
+   "fieldname": "rejected_serial_batch_entries_html",
+   "fieldtype": "HTML"
+  },
+  {
    "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "section_break_rqbe",
    "fieldtype": "Section Break"
@@ -990,6 +1014,17 @@
    "print_hide": 1
   },
   {
+   "default": "0",
+   "description": "Tax-exclusive additional discount carried from a source document, per stock unit.",
+   "fieldname": "mapped_additional_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Additional Discount per Stock Unit",
+   "options": "currency",
+   "precision": "9",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -1010,7 +1045,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-08 21:00:00.000000",
+ "modified": "2026-10-15 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

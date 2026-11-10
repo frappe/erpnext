@@ -1,11 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from functools import cached_property
+
 import frappe
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
 import erpnext
+from erpnext.accounts.deferred_revenue import get_already_booked_amounts
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
@@ -33,9 +36,11 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 		self.make_item_gl_entries(gl_entries)
 
-		disable_sdbnb_in_sr = frappe.get_cached_value("Company", doc.company, "disable_sdbnb_in_sr")
+		disable_sdbnb_in_sr, is_sdbnb_enabled = frappe.get_cached_value(
+			"Company", doc.company, ["disable_sdbnb_in_sr", "enable_stock_delivered_but_not_billed"]
+		)
 
-		if not (doc.is_return and disable_sdbnb_in_sr):
+		if is_sdbnb_enabled and not (doc.is_return and disable_sdbnb_in_sr):
 			self.stock_delivered_but_not_billed_gl_entries(gl_entries)
 
 		self.make_precision_loss_gl_entry(gl_entries)
@@ -115,11 +120,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 	def _append_item_discount_gl_entries(self, item, gl_entries) -> None:
 		doc = self.doc
 		discount_amount = item.discount_amount * item.qty
-		income_account = (
-			item.income_account
-			if (not item.enable_deferred_revenue or doc.is_return)
-			else item.deferred_revenue_account
-		)
+		income_account = self.get_item_income_account(item)
 
 		account_currency = get_account_currency(item.discount_account)
 		gl_entries.append(
@@ -145,6 +146,9 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 			doc.get_gl_dict(
 				{
 					"account": income_account,
+					"voucher_detail_no": item.name
+					if doc.is_return and item.enable_deferred_revenue
+					else None,
 					"against": doc.customer,
 					"credit": flt(
 						discount_amount * doc.get("conversion_rate"),
@@ -374,11 +378,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 	def _append_item_income_gl_entry(self, item, gl_entries, tax_service, enable_discount_accounting) -> None:
 		doc = self.doc
-		income_account = (
-			item.income_account
-			if (not item.enable_deferred_revenue or doc.is_return)
-			else item.deferred_revenue_account
-		)
+		income_account = self.get_item_income_account(item)
 
 		amount, base_amount = tax_service.get_amount_and_base_amount(item, enable_discount_accounting)
 
@@ -387,6 +387,9 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 			self.get_gl_dict(
 				{
 					"account": income_account,
+					"voucher_detail_no": item.name
+					if doc.is_return and item.enable_deferred_revenue
+					else None,
 					"against": doc.customer,
 					"credit": flt(base_amount, item.precision("base_net_amount")),
 					"credit_in_account_currency": self._get_amount_in_account_currency(
@@ -403,9 +406,62 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 			)
 		)
 
+	def get_item_income_account(self, item):
+		if not item.enable_deferred_revenue:
+			return item.income_account
+		if not self.doc.is_return:
+			return item.deferred_revenue_account
+		if not self.doc.return_against or not item.sales_invoice_item:
+			return item.income_account
+
+		if item.name in self.deferred_return_items:
+			return item.deferred_revenue_account
+		return item.income_account
+
+	@cached_property
+	def deferred_return_items(self):
+		items = [item for item in self.doc.items if item.enable_deferred_revenue and item.sales_invoice_item]
+		frappe.db.get_value("Sales Invoice", self.doc.return_against, "name", for_update=True)
+		# Stock reposting composes entries before replacing the existing ledger.
+		entries = {
+			(entry.voucher_detail_no, entry.account)
+			for entry in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": "Sales Invoice", "voucher_no": self.doc.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "account"],
+			)
+		}
+		deferred_items = {
+			item.name for item in items if (item.name, item.deferred_revenue_account) in entries
+		}
+		items = [item for item in items if item.name not in deferred_items]
+		if not items:
+			return deferred_items
+
+		invoice = frappe.get_cached_doc("Sales Invoice", self.doc.return_against)
+		original_names = {item.sales_invoice_item for item in items}
+		original_items = {
+			item.name: item
+			for item in invoice.items
+			if item.name in original_names and item.enable_deferred_revenue
+		}
+		booked_amounts = get_already_booked_amounts(invoice, list(original_items.values()))
+		# Keep the existing treatment once recognition has started, including draft journals.
+		for item in items:
+			original_item = original_items.get(item.sales_invoice_item)
+			if (
+				original_item
+				and original_item.deferred_revenue_account == item.deferred_revenue_account
+				and not any(booked_amounts[original_item.name])
+			):
+				deferred_items.add(item.name)
+
+		return deferred_items
+
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		doc = self.doc
 		asset = frappe.get_cached_doc("Asset", item.asset)
+		disposal_values = get_stored_asset_disposal_values(item)
 
 		if doc.is_return:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
@@ -415,6 +471,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				doc.get("doctype"),
 				doc.get("name"),
 				doc.get("posting_date"),
+				disposal_values,
 			)
 		else:
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -424,6 +481,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 				doc.get("doctype"),
 				doc.get("name"),
 				doc.get("posting_date"),
+				disposal_values,
 			)
 
 		for gle in fixed_asset_gl_entries:
@@ -432,7 +490,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		doc = self.doc
-		if cint(doc.redeem_loyalty_points and doc.loyalty_points and not doc.is_consolidated):
+		if cint(doc.redeem_loyalty_points and doc.loyalty_points):
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -474,7 +532,7 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 
 			for payment_mode in doc.payments:
 				if skip_change_gl_entries and payment_mode.account == doc.account_for_change_amount:
-					payment_mode.base_amount -= flt(doc.change_amount)
+					payment_mode.base_amount -= flt(doc.base_change_amount)
 
 				if payment_mode.base_amount:
 					# POS, make payment entries
@@ -683,3 +741,14 @@ class SalesInvoiceGLComposer(BaseGLComposer):
 		if doc.is_return and doc.return_against and not doc.update_outstanding_for_self:
 			return doc.return_against
 		return doc.name
+
+
+def get_stored_asset_disposal_values(item) -> dict | None:
+	"""Asset values stored on the row at submit, so a repost does not pick up later changes to the asset."""
+	if not flt(item.asset_gross_value):
+		return None
+
+	return {
+		"value_after_depreciation": item.asset_value_after_depreciation,
+		"gross_asset_value": item.asset_gross_value,
+	}

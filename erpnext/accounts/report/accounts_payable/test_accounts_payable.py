@@ -1,6 +1,9 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.accounts_payable.accounts_payable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -8,11 +11,80 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_payment_terms_filters(self):
+		invoice = self.create_purchase_invoice()
+		filters = frappe._dict(
+			company=invoice.company,
+			party=[self.supplier],
+			report_date=today(),
+			range="30, 60, 90, 120",
+			ageing_based_on="Posting Date",
+		)
+		for party_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+			frappe.db.set_value("Supplier", self.supplier, "payment_terms", party_terms)
+			for invoice_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+				frappe.db.set_value(invoice.doctype, invoice.name, "payment_terms_template", invoice_terms)
+				for selected, matching_terms in (
+					([], (None, "", "_Test Payment Term Template", "_Test Other Payment Terms")),
+					([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+					(["_Test Payment Term Template"], ("_Test Payment Term Template",)),
+					(
+						["_Test Payment Term Template", "_Test Other Payment Terms"],
+						("_Test Payment Term Template", "_Test Other Payment Terms"),
+					),
+					(
+						[BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"],
+						(None, "", "_Test Payment Term Template"),
+					),
+					("_Test Payment Term Template", ("_Test Payment Term Template",)),
+					(
+						frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"]),
+						(None, "", "_Test Payment Term Template"),
+					),
+				):
+					with self.subTest(
+						party_terms=party_terms, invoice_terms=invoice_terms, selected=selected
+					):
+						filters.payment_terms_template = selected
+						rows = execute(filters)[1]
+						vouchers = {row.get("voucher_no") for row in rows}
+						self.assertEqual(
+							invoice.name in vouchers,
+							party_terms in matching_terms or invoice_terms in matching_terms,
+						)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.item = "_Test Item"
 		self.supplier = "_Test Supplier 2"
 		self.creditors_usd = "_Test Payable USD - _TC"
+
+	def test_blank_supplier_group_filter(self):
+		invoice = self.create_purchase_invoice()
+		group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
+		parent_group = frappe.db.get_value("Supplier Group", group, "parent_supplier_group")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.supplier],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+		for party_group in (None, "", group):
+			frappe.db.set_value("Supplier", self.supplier, "supplier_group", party_group)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not party_group)),
+				([parent_group], int(bool(party_group))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_group], 1),
+			):
+				with self.subTest(party_group=party_group, groups=groups):
+					filters.supplier_group = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, invoice.grand_total)
+
+		filters.supplier_group = [BLANK_ACCOUNTING_DIMENSION, "_Test Missing Supplier Group"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_accounts_payable_for_foreign_currency_supplier(self):
 		pi = self.create_purchase_invoice(do_not_submit=True)
@@ -54,41 +126,90 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 			pi = pi.submit()
 		return pi
 
+	def test_invoice_partially_paid_via_journal_entry(self):
+		pi = self.create_purchase_invoice()  # outstanding 300
+
+		je = frappe.new_doc("Journal Entry")
+		je.company = self.company
+		je.posting_date = today()
+		je.append(
+			"accounts",
+			{
+				"account": "Creditors - _TC",
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"debit": 120,
+				"debit_in_account_currency": 120,
+				"reference_type": "Purchase Invoice",
+				"reference_name": pi.name,
+				"cost_center": "Main - _TC",
+			},
+		)
+		je.append(
+			"accounts",
+			{
+				"account": "Cash - _TC",
+				"credit": 120,
+				"credit_in_account_currency": 120,
+				"cost_center": "Main - _TC",
+			},
+		)
+		je.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+		self.assertEqual(row.paid, 120)
+		self.assertEqual(row.outstanding, 180)
+
+	def test_show_remarks_includes_invoice_remark(self):
+		pi = self.create_purchase_invoice(do_not_submit=True)
+		pi.remarks = "AP test remark"
+		pi.save().submit()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"show_remarks": 1,
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+		self.assertIn("AP test remark", row.remarks or "")
+
+	def test_group_by_supplier_totals(self):
+		self.create_purchase_invoice()  # outstanding 300
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"group_by_party": True,
+		}
+		report = execute(filters)[1]
+
+		# a per-supplier subtotal row plus a grand total row
+		party_subtotal = next(
+			row for row in report if row.get("party") == self.supplier and not row.get("voucher_no")
+		)
+		grand_total = next(row for row in report if row.get("party") == "Total")
+		self.assertEqual(party_subtotal.get("invoiced"), 300)
+		self.assertEqual(grand_total.get("outstanding"), 300)
+
 	def test_payment_terms_template_filters(self):
 		from erpnext.controllers.accounts_controller import get_payment_terms
 
-		payment_term1 = frappe.get_doc(
-			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 15 Days"}
-		).insert()
-		payment_term2 = frappe.get_doc(
-			{"doctype": "Payment Term", "payment_term_name": "_Test 50% on 30 Days"}
-		).insert()
-
-		template = frappe.get_doc(
-			{
-				"doctype": "Payment Terms Template",
-				"template_name": "_Test 50-50",
-				"terms": [
-					{
-						"doctype": "Payment Terms Template Detail",
-						"due_date_based_on": "Day(s) after invoice date",
-						"payment_term": payment_term1.name,
-						"description": "_Test 50-50",
-						"invoice_portion": 50,
-						"credit_days": 15,
-					},
-					{
-						"doctype": "Payment Terms Template Detail",
-						"due_date_based_on": "Day(s) after invoice date",
-						"payment_term": payment_term2.name,
-						"description": "_Test 50-50",
-						"invoice_portion": 50,
-						"credit_days": 30,
-					},
-				],
-			}
-		)
-		template.insert()
+		template = frappe.get_doc("Payment Terms Template", "_Test Payment Term Template")
+		first_term = frappe.get_doc("Payment Term", template.terms[0].payment_term)
+		expected_payment_term = first_term.description or first_term.name
 
 		filters = {
 			"company": self.company,
@@ -115,12 +236,40 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		row = report[1][0]
 
 		self.assertEqual(len(report[1]), 2)
-		self.assertEqual([pi.name, payment_term1.payment_term_name], [row.voucher_no, row.payment_term])
+		self.assertEqual([pi.name, expected_payment_term], [row.voucher_no, row.payment_term])
+
+	def test_supplier_group_filter(self):
+		pi = self.create_purchase_invoice()
+		supplier_group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
+		other_group = frappe.get_doc(
+			doctype="Supplier Group",
+			supplier_group_name="_Test Supplier Group AP",
+			parent_supplier_group="All Supplier Groups",
+		).insert()
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"supplier_group": supplier_group,
+		}
+		self.assertIn(pi.name, [row.voucher_no for row in execute(filters)[1]])
+
+		filters.update({"supplier_group": [other_group.name]})
+		self.assertEqual(len(execute(filters)[1]), 0)
+
+		filters.update({"supplier_group": [supplier_group, other_group.name]})
+		self.assertIn(pi.name, [row.voucher_no for row in execute(filters)[1]])
+
+		filters.update({"supplier_group": ["All Supplier Groups"]})
+		self.assertIn(pi.name, [row.voucher_no for row in execute(filters)[1]])
+
+		filters.update({"supplier_group": ["_Test Supplier Group Mars"]})
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_project_filter(self):
-		project = frappe.get_doc(
-			{"doctype": "Project", "project_name": "_Test AP Project", "company": self.company}
-		).insert()
+		project = frappe.get_doc("Project", {"project_name": "_Test Project"})
 
 		pi = self.create_purchase_invoice(do_not_submit=True)
 		pi.project = project.name
@@ -149,9 +298,7 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 			"range": "30, 60, 90, 120",
 		}
 
-		project = frappe.get_doc(
-			{"doctype": "Project", "project_name": "_Test AP Project Output", "company": self.company}
-		).insert()
+		project = frappe.get_doc("Project", {"project_name": "_Test Project"})
 
 		pi = self.create_purchase_invoice(do_not_submit=True)
 		pi.project = project.name
@@ -162,3 +309,43 @@ class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(report[1]), 1)
 		row = report[1][0]
 		self.assertEqual([pi.name, project.name, 300], [row.voucher_no, row.project, row.outstanding])
+
+	def test_supplier_invoice_date_ageing_without_bill_date(self):
+		pi = self.create_purchase_invoice()
+		self.assertFalse(pi.bill_date)
+
+		filters = {
+			"company": self.company,
+			"party_type": "Supplier",
+			"party": [self.supplier],
+			"report_date": today(),
+			"range": "30, 60, 90, 120",
+			"ageing_based_on": "Supplier Invoice Date",
+		}
+		row = next(row for row in execute(filters)[1] if row.voucher_no == pi.name)
+
+		self.assertEqual(row.range1, 300)
+		self.assertEqual(row.total_due, 300)
+
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
+	def test_bulk_payment_outstanding_in_company_currency(self):
+		from erpnext.accounts.bulk_payment import get_payable_invoices
+
+		invoices = {}
+		for supplier, credit_to in (
+			(self.supplier, self.creditors_usd),
+			("_Test Supplier", "Creditors - _TC"),
+		):
+			pi = make_purchase_invoice(
+				supplier=supplier, currency="USD", conversion_rate=80, qty=1, rate=300, do_not_save=1
+			)
+			pi.credit_to = credit_to
+			invoices[pi.save().submit().name] = credit_to
+
+		payable = get_payable_invoices([{"voucher_no": name} for name in invoices])["payable"]
+
+		self.assertEqual(
+			{row["voucher_no"]: row["outstanding"] for row in payable}, dict.fromkeys(invoices, 24000)
+		)

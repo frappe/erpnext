@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Create Quality Inspection",
+ "creation": "2026-10-04 01:54:23.339721",
+ "description": "Record the results against a receipt or a delivery, and accept or reject the goods. See [Quality Inspection](https://docs.frappe.io/erpnext/user/manual/en/quality-inspection).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2026-10-04 01:54:23.339721",
+ "modified_by": "Administrator",
+ "name": "Create Quality Inspection",
+ "owner": "Administrator",
+ "reference_document": "Quality Inspection",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Inspect goods coming in or going out",
+ "validate_action": 1
+}

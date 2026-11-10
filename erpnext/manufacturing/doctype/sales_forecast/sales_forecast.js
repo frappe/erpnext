@@ -1,5 +1,6 @@
 frappe.ui.form.on("Sales Forecast", {
 	refresh(frm) {
+		frm.fields_dict.items.grid.update_docfield_property("demand_qty", "reqd", 1);
 		frm.trigger("set_query_filters");
 		frm.trigger("set_custom_buttons");
 		frm.set_df_property("items", "cannot_add_rows", true);

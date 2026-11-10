@@ -4,7 +4,15 @@
 const DIFFERNCE_FIELD_NAMES = ["fifo_qty_diff", "fifo_value_diff"];
 
 frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
+	export_hidden_cols: true,
 	filters: [
+		{
+			fieldname: "company",
+			fieldtype: "Link",
+			label: __("Company"),
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+		},
 		{
 			fieldname: "item_code",
 			fieldtype: "Link",
@@ -24,9 +32,13 @@ frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
 		},
 		{
 			fieldname: "warehouse",
-			fieldtype: "Link",
-			label: "Warehouse",
+			fieldtype: "MultiSelectList",
+			label: __("Warehouse"),
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return erpnext.utils.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "from_date",
@@ -36,11 +48,11 @@ frappe.query_reports["FIFO Queue vs Qty After Transaction Comparison"] = {
 		{
 			fieldname: "to_date",
 			fieldtype: "Date",
-			label: "From Posting Date",
+			label: "To Posting Date",
 		},
 	],
 	formatter(value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+		value = erpnext.utils.format_serial_batch_number(value, row, column, data, default_formatter);
 		if (DIFFERNCE_FIELD_NAMES.includes(column.fieldname) && Math.abs(data[column.fieldname]) > 0.001) {
 			value = "<span style='color:red'>" + value + "</span>";
 		}

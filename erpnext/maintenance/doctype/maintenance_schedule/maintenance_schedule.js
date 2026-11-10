@@ -134,7 +134,7 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 										},
 									},
 								],
-								primary_action_label: "Create Visit",
+								primary_action_label: __("Create Visit"),
 								primary_action(values) {
 									frappe.call({
 										method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
@@ -163,4 +163,4 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({ frm: cur_frm }));
+frappe.ui.form.set_controller("Maintenance Schedule", erpnext.maintenance.MaintenanceSchedule);

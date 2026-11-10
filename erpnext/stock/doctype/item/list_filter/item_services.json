@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"item_group\", \"label\": \"Item Group\"}, {\"fieldname\": \"stock_uom\", \"label\": \"Default Unit of Measure\"}, {\"fieldname\": \"standard_rate\", \"label\": \"Standard Selling Rate\"}, {\"fieldname\": \"item_code\", \"label\": \"Item Code\"}]",
+ "creation": "2026-09-30 21:12:56.845014",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Services",
+ "filters": "[[\"Item\", \"disabled\", \"=\", 0], [\"Item\", \"is_stock_item\", \"=\", 0], [\"Item\", \"is_fixed_asset\", \"=\", 0]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 2,
+ "modified": "2026-09-30 21:12:56.845014",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Item-Services",
+ "owner": "Administrator",
+ "reference_doctype": "Item",
+ "route_signature": "disabled=0&is_fixed_asset=0&is_stock_item=0",
+ "sort_field": "item_name",
+ "sort_order": "asc"
+}

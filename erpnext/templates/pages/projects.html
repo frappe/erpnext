@@ -1,7 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block title %}
-  {{ doc.project_name }}
+  {{ doc.project_name | e }}
 {% endblock %}
 
 {% block head_include %}
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block header %}
-  <h3 class="my-account-header">{{ doc.project_name }}</h3>
+  <h3 class="my-account-header">{{ doc.project_name | e }}</h3>
 {% endblock %}
 
 {% block style %}
@@ -34,7 +34,7 @@
   <div class="row align-items-center">
     <div class="col-sm-6 my-account-header"> <h4>{{ _("Tasks") }}</h4></div>
     <div class="col-sm-6 text-right">
-      <a class="btn btn-secondary btn-light btn-sm" href='/tasks/new?project={{ doc.project_name }}'>{{ _("New task") }}</a>
+      <a class="btn btn-secondary btn-light btn-sm" href='/tasks/new?project={{ doc.project_name | urlencode }}'>{{ _("New task") }}</a>
     </div>
   </div>
   {% if doc.tasks %}

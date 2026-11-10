@@ -1,11 +1,32 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
-
 frappe.ui.form.on("Quality Inspection", {
+	before_load(frm) {
+		return frm.trigger("set_serial_no_from_number");
+	},
+
 	onload(frm) {
 		frm.trigger("set_default_company");
+	},
+
+	set_serial_no_from_number(frm) {
+		const { item_code, item_serial_no: number } = frm.doc;
+		if (!frm.is_new() || !item_code || !number) return;
+
+		return frappe
+			.xcall(
+				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_scan",
+				{
+					item_code,
+					number,
+					doctype: "Serial No",
+				}
+			)
+			.then((record) => {
+				frm.doc.item_serial_no = record?.name || number;
+			})
+			.catch(() => {});
 	},
 
 	set_default_company(frm) {

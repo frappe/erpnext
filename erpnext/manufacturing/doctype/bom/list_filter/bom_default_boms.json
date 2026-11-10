@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"name\", \"label\": \"ID\"}, {\"fieldname\": \"item\", \"label\": \"Item to Manufacture\"}, {\"fieldname\": \"item_name\", \"label\": \"Item Name\"}, {\"fieldname\": \"quantity\", \"label\": \"Quantity (Output Qty)\"}, {\"fieldname\": \"total_cost\", \"label\": \"Total Cost\"}, {\"fieldname\": \"with_operations\", \"label\": \"With Operations\"}]",
+ "creation": "2026-09-30 21:12:56.879304",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "Default BOMs",
+ "filters": "[[\"BOM\", \"docstatus\", \"=\", 1], [\"BOM\", \"is_active\", \"=\", 1], [\"BOM\", \"is_default\", \"=\", 1]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 1,
+ "modified": "2026-09-30 21:12:56.879304",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM-Default BOMs",
+ "owner": "Administrator",
+ "reference_doctype": "BOM",
+ "route_signature": "docstatus=1&is_active=1&is_default=1",
+ "sort_field": "item",
+ "sort_order": "asc"
+}

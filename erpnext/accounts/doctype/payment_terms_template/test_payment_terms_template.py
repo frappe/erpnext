@@ -5,6 +5,11 @@ import frappe
 from frappe.utils import add_days, getdate
 
 from erpnext.controllers.accounts_controller import get_payment_term_details
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused_for_names,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -126,3 +131,59 @@ class TestPaymentTermsTemplate(ERPNextTestSuite):
 		)
 
 		self.assertRaises(frappe.ValidationError, template.insert)
+
+	def test_get_payment_terms_fences_the_template(self):
+		from erpnext.accounts.services.payment_schedule import get_payment_terms
+
+		template = "_Test Payment Term Template"
+		other = frappe.db.get_value("Payment Terms Template", {"name": ["!=", template]})
+
+		def payment_terms_kwargs(name):
+			return {"terms_template": name, "grand_total": 100}
+
+		outside = make_fenced_user(
+			"ptt-fenced@example.com", ["Accounts User"], [("Payment Terms Template", other)]
+		)
+		with as_user(outside):
+			assert_refused_for_names(
+				self,
+				get_payment_terms,
+				payment_terms_kwargs,
+				[template],
+				type_gated=True,
+				caller_supplied=True,
+			)
+		inside = make_fenced_user(
+			"ptt-fenced@example.com", ["Accounts User"], [("Payment Terms Template", template)]
+		)
+		with as_user(inside):
+			schedule = get_payment_terms(template, grand_total=100)
+		total = 0
+		for row in schedule:
+			total += row.payment_amount
+		self.assertEqual(total, 100)
+
+	def test_get_payment_term_details_fences_the_term(self):
+		from erpnext.accounts.services.payment_schedule import get_payment_term_details
+
+		def term_kwargs(name):
+			return {"term": name, "grand_total": 100}
+
+		outside = make_fenced_user(
+			"pt-fenced@example.com", ["Accounts User"], [("Payment Term", "_Test COD")]
+		)
+		with as_user(outside):
+			assert_refused_for_names(
+				self,
+				get_payment_term_details,
+				term_kwargs,
+				["_Test N30"],
+				type_gated=True,
+				caller_supplied=True,
+			)
+		inside = make_fenced_user("pt-fenced@example.com", ["Accounts User"], [("Payment Term", "_Test N30")])
+		with as_user(inside):
+			details = get_payment_term_details("_Test N30", grand_total=100)
+		self.assertEqual(
+			details.payment_amount, frappe.db.get_value("Payment Term", "_Test N30", "invoice_portion")
+		)

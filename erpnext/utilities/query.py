@@ -62,8 +62,7 @@ def get_filter_conditions_qb(doctype, filters, ignore_permissions=None):
 	if isinstance(filters, Criterion):
 		return [filters]
 
-	if isinstance(filters, str):
-		filters = json.loads(filters)
+	filters = frappe.parse_json(filters)
 
 	if isinstance(filters, dict):
 		# Mirror get_filters_cond's dict normalization: a string value prefixed with "!" means

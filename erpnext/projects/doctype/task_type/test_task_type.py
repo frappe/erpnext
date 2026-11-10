@@ -1,8 +1,54 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import frappe
+
+from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestTaskType(ERPNextTestSuite):
-	pass
+	def test_task_weight_set_on_the_task_is_kept(self):
+		task_type = frappe.get_doc({"doctype": "Task Type", "name": "_Test Task Type", "weight": 1}).insert()
+		task = create_task("_Test Weighted Task", save=False)
+		task.type = task_type.name
+		task.insert()
+		self.assertEqual(task.task_weight, 1)
+
+		task.task_weight = 5
+		task.save()
+		self.assertEqual(task.task_weight, 5)
+
+		task.task_weight = 0
+		task.save()
+		self.assertEqual(task.task_weight, 0)
+
+	def test_zero_task_weight_is_kept(self):
+		task_type = frappe.get_doc(
+			{"doctype": "Task Type", "name": "_Test Zero Weight Type", "weight": 1}
+		).insert()
+		task = create_task("_Test Zero Weight Task", save=False)
+		task.type = task_type.name
+		task.task_weight = 0
+		task.insert()
+		self.assertEqual(task.task_weight, 0)
+
+	def test_type_change_fetches_weight_unless_weight_changes(self):
+		light = frappe.get_doc(
+			{"doctype": "Task Type", "name": "_Test Light Task Type", "weight": 1}
+		).insert()
+		heavy = frappe.get_doc(
+			{"doctype": "Task Type", "name": "_Test Heavy Task Type", "weight": 3}
+		).insert()
+		task = create_task("_Test Retyped Task", save=False)
+		task.type = light.name
+		task.insert()
+
+		task.type = heavy.name
+		task.save()
+		self.assertEqual(task.task_weight, 3)
+
+		task.type = light.name
+		task.task_weight = 0
+		task.save()
+		self.assertEqual(task.task_weight, 0)

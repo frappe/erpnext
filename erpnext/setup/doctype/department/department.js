@@ -8,6 +8,7 @@ frappe.ui.form.on("Department", {
 		});
 	},
 	refresh: function (frm) {
+		frm.set_df_property("company", "read_only", !frm.is_new());
 		// read-only for root department
 		if (!frm.doc.parent_department && !frm.is_new()) {
 			frm.set_read_only();
@@ -16,7 +17,7 @@ frappe.ui.form.on("Department", {
 	},
 	validate: function (frm) {
 		if (frm.doc.name == "All Departments") {
-			frappe.throw(__("You cannot edit root node."));
+			frappe.throw(__("You cannot edit the root node."));
 		}
 	},
 });

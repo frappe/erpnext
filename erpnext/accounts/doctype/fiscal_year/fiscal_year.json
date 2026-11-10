@@ -3,9 +3,10 @@
  "allow_import": 1,
  "autoname": "field:year",
  "creation": "2013-01-22 16:50:25",
- "description": "Represents a Financial Year. All accounting entries and other major transactions are tracked against the Fiscal Year.",
+ "description": "The year your books are kept and closed for.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/fiscal-year",
  "engine": "InnoDB",
  "field_order": [
   "year",
@@ -79,10 +80,10 @@
    "set_only_once": 1
   }
  ],
- "icon": "fa fa-calendar",
+ "icon": "calendar",
  "idx": 1,
  "links": [],
- "modified": "2024-05-27 17:29:55.560840",
+ "modified": "2026-08-21 23:11:42.509102",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
@@ -131,8 +132,13 @@
   {
    "read": 1,
    "role": "Auditor"
+  },
+  {
+   "role": "Sales Master Manager",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_name_in_global_search": 1,
  "sort_field": "name",
  "sort_order": "DESC",

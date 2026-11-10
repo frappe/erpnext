@@ -231,3 +231,45 @@ class TestBankTransactionRule(ERPNextTestSuite, AccountsTestMixin):
 		doc = self._rule("bad_rx", [{"check": "Regex", "value": "["}])
 		with self.assertRaises(ValidationError):
 			doc.insert()
+
+	def _multiple_accounts_rule(self, prefix: str, accounts, **fields):
+		return self._rule(
+			prefix,
+			[{"check": "Contains", "value": "x"}],
+			classify_as="Bank Entry",
+			bank_entry_type="Multiple Accounts",
+			accounts=accounts,
+			**fields,
+		)
+
+	def test_validate_bank_entry_multiple_valid_amount_formulas(self):
+		doc = self._multiple_accounts_rule(
+			"be_formula",
+			accounts=[
+				{"account": self.bank, "debit": "200", "credit": ""},
+				{"account": self.cash, "debit": "", "credit": "transaction_amount * 0.25"},
+				{"account": self.cash, "debit": "", "credit": ""},
+			],
+		)
+		doc.insert()
+		self.assertTrue(doc.name)
+
+	def test_validate_bank_entry_multiple_invalid_amount_formulas(self):
+		malicious_formulas = [
+			"__import__('os')",
+			"eval('1+1')",
+			"open('/etc/passwd')",
+			"transaction_amount ** 2",
+			"transaction_amount // 2",
+		]
+		for formula in malicious_formulas:
+			with self.subTest(formula=formula):
+				doc = self._multiple_accounts_rule(
+					"be_bad_formula",
+					accounts=[
+						{"account": self.bank, "debit": formula, "credit": ""},
+						{"account": self.cash, "debit": "", "credit": ""},
+					],
+				)
+				with self.assertRaises(ValidationError):
+					doc.insert()

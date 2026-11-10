@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "autoname": "field:call_type",
  "creation": "2022-02-25 16:13:37.321312",
+ "description": "A grouping of calls, like sales or support.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -29,10 +30,11 @@
    "read_only": 1
   }
  ],
+ "icon": "tag",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:52.942655",
+ "modified": "2026-10-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Telephony Call Type",
@@ -40,6 +42,7 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -49,7 +52,13 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Employee",
+   "select": 1
   }
  ],
  "sort_field": "creation",

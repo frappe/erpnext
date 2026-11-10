@@ -37,7 +37,7 @@ class PartyLink(Document):
 		)
 		if existing_party_link:
 			frappe.throw(
-				_("{} {} is already linked with {} {}").format(
+				_("{0} {1} is already linked with {2} {3}").format(
 					self.primary_role,
 					bold(self.primary_party),
 					self.secondary_role,
@@ -50,7 +50,7 @@ class PartyLink(Document):
 		)
 		if existing_party_link:
 			frappe.throw(
-				_("{} {} is already linked with another {}").format(
+				_("{0} {1} is already linked with another {2}").format(
 					self.secondary_role, self.secondary_party, existing_party_link[0]
 				)
 			)
@@ -60,7 +60,7 @@ class PartyLink(Document):
 		)
 		if existing_party_link:
 			frappe.throw(
-				_("{} {} is already linked with another {}").format(
+				_("{0} {1} is already linked with another {2}").format(
 					self.primary_role, self.primary_party, existing_party_link[0]
 				)
 			)

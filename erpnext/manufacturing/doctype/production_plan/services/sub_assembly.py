@@ -7,6 +7,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_plan_process_loss_percentage,
+	get_qty_before_process_loss,
+)
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
 	get_sub_assembly_items,
 )
@@ -48,14 +52,16 @@ class SubAssemblyService:
 
 		bom_data = []
 		get_sub_assembly_items(
-			[item.production_item for item in sub_assembly_items_store],
 			bin_details,
 			row.bom_no,
 			bom_data,
-			row.planned_qty,
+			get_qty_before_process_loss(
+				row.planned_qty, get_plan_process_loss_percentage(self.doc, row.bom_no), row.stock_uom
+			),
 			self.doc.company,
 			warehouse=self.doc.sub_assembly_warehouse,
 			skip_available_sub_assembly_item=self.doc.skip_available_sub_assembly_item,
+			consider_process_loss=self.doc.consider_process_loss,
 		)
 		self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 		sub_assembly_items_store.extend(bom_data)
@@ -68,7 +74,7 @@ class SubAssemblyService:
 
 		frappe.msgprint(
 			_(
-				"Row #{0}: Since 'Track Semi Finished Goods' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
+				"Row #{0}: Since 'Produce Item per Operation' is enabled, the BOM {1} cannot be used for Sub Assembly Items"
 			).format(row.idx, row.bom_no)
 		)
 		return True
@@ -82,7 +88,7 @@ class SubAssemblyService:
 			frappe.throw(_("Row #{0}: Please select the BOM No in Assembly Items").format(row.idx))
 
 	def _warn_sufficient_sub_assembly(self):
-		label = self.meta.get_field("skip_available_sub_assembly_item").label
+		label = self.doc.meta.get_field("skip_available_sub_assembly_item").label
 		message = (
 			_(
 				"As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
@@ -159,6 +165,7 @@ class SubAssemblyService:
 	def _merge_subassembly_row(existing_row, row):
 		existing_row.qty += flt(row.qty)
 		existing_row.stock_qty += flt(row.stock_qty)
+		existing_row.required_qty += flt(row.required_qty)
 		existing_row.bom_level = max(existing_row.bom_level, row.bom_level)
 
 	def all_items_completed(self):

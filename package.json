@@ -12,12 +12,15 @@
     "url": "https://github.com/frappe/erpnext/issues"
   },
   "scripts": {
-    "postinstall": "cd banking && yarn install",
+    "postinstall": "cd banking && yarn install && cd ../islands && yarn install",
     "dev": "cd banking && yarn dev",
-    "build": "cd banking && yarn build"
+    "build": "cd banking && yarn build && cd ../islands && yarn build",
+    "test:js": "node --test \"erpnext/tests/js/**/*.test.mjs\""
   },
   "devDependencies": {},
   "dependencies": {
-    "onscan.js": "^1.5.2"
+    "occt-import-js": "^0.0.23",
+    "onscan.js": "^1.5.2",
+    "three": "^0.186.1"
   }
 }

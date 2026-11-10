@@ -8,22 +8,15 @@ from frappe.model.mapper import get_mapped_doc
 
 
 @frappe.whitelist()
-def make_quotation(source_name: str, target_doc: str | Document | None = None):
-	def set_missing_values(source, target):
-		_set_missing_values(source, target)
-
+def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	target_doc = get_mapped_doc(
 		"Customer",
 		source_name,
 		{"Customer": {"doctype": "Quotation", "field_map": {"name": "party_name"}}},
 		target_doc,
-		set_missing_values,
 	)
 
 	target_doc.quotation_to = "Customer"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
-	target_doc.run_method("calculate_taxes_and_totals")
 
 	price_list, currency = frappe.db.get_value(
 		"Customer", {"name": source_name}, ["default_price_list", "default_currency"]
@@ -33,11 +26,15 @@ def make_quotation(source_name: str, target_doc: str | Document | None = None):
 	if currency:
 		target_doc.currency = currency
 
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("set_other_charges")
+	target_doc.run_method("calculate_taxes_and_totals")
+
 	return target_doc
 
 
 @frappe.whitelist()
-def make_opportunity(source_name: str, target_doc: str | Document | None = None):
+def make_opportunity(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -61,7 +58,7 @@ def make_opportunity(source_name: str, target_doc: str | Document | None = None)
 
 
 @frappe.whitelist()
-def make_payment_entry(source_name: str, target_doc: str | Document | None = None):
+def make_payment_entry(source_name: str, target_doc: str | dict | Document | None = None):
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -86,35 +83,21 @@ def make_payment_entry(source_name: str, target_doc: str | Document | None = Non
 
 
 def _set_missing_values(source, target):
-	address = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Address",
-		},
-		["parent"],
-		limit=1,
-	)
+	from frappe.contacts.doctype.address.address import get_default_address
+	from frappe.contacts.doctype.contact.contact import get_default_contact
 
-	contact = frappe.get_all(
-		"Dynamic Link",
-		{
-			"link_doctype": source.doctype,
-			"link_name": source.name,
-			"parenttype": "Contact",
-		},
-		["parent"],
-		limit=1,
-	)
+	address = source.customer_primary_address
+	if not address or frappe.db.get_value("Address", address, "disabled"):
+		address = get_default_address(source.doctype, source.name)
+	contact = source.customer_primary_contact or get_default_contact(source.doctype, source.name)
 
 	if address:
-		target.customer_address = address[0].parent
+		target.customer_address = address
 
 	if contact:
-		target.contact_person = contact[0].parent
+		target.contact_person = contact
 		target.contact_display, target.contact_email, target.contact_mobile = frappe.get_value(
-			"Contact", contact[0].parent, ["full_name", "email_id", "mobile_no"]
+			"Contact", contact, ["full_name", "email_id", "mobile_no"]
 		)
 
 
@@ -172,7 +155,7 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 	if reqd_fields:
 		msg = _("Following fields are mandatory to create address:")
 		frappe.throw(
-			"{} <br><br> <ul>{}</ul>".format(msg, "\n".join(reqd_fields)),
+			msg + " <br><br> <ul>{}</ul>".format("\n".join(reqd_fields)),
 			title=_("Missing Values Required"),
 		)
 

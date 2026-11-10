@@ -18,6 +18,7 @@ class CustomerCreditLimit(Document):
 		bypass_credit_limit_check: DF.Check
 		company: DF.Link | None
 		credit_limit: DF.Currency
+		overdue_billing_threshold: DF.Currency
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

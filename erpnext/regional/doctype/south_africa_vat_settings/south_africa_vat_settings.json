@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "field:company",
  "creation": "2021-07-08 22:34:33.668015",
+ "description": "The VAT accounts to report in the South Africa VAT audit report.",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -27,6 +28,7 @@
    "reqd": 1
   }
  ],
+ "icon": "percent",
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2024-03-27 13:10:43.257718",

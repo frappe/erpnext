@@ -2,18 +2,6 @@
  "allow_roles": [
   {
    "role": "System Manager"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Manufacturing Manager"
-  },
-  {
-   "role": "Stock Manager"
   }
  ],
  "creation": "2026-02-24 18:03:53.158438",
@@ -21,27 +9,48 @@
  "doctype": "Module Onboarding",
  "idx": 0,
  "is_complete": 0,
- "modified": "2026-02-24 18:07:36.808560",
+ "modified": "2026-10-04 03:16:15.381887",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Organization Onboarding",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Setup Company"
-  },
-  {
+   "is_optional": 0,
    "step": "Invite Users"
   },
   {
-   "step": "Setup Email Account"
+   "is_optional": 0,
+   "step": "Complete Accounting Onboarding"
   },
   {
-   "step": "Setup Role Permissions"
+   "is_optional": 0,
+   "step": "Complete Selling Onboarding"
   },
   {
-   "step": "Review System Settings"
+   "is_optional": 0,
+   "step": "Complete Buying Onboarding"
+  },
+  {
+   "is_optional": 0,
+   "step": "Complete Stock Onboarding"
+  },
+  {
+   "is_optional": 0,
+   "step": "Complete Manufacturing Onboarding"
+  },
+  {
+   "is_optional": 0,
+   "step": "Complete Projects Onboarding"
+  },
+  {
+   "is_optional": 0,
+   "step": "Complete Asset Onboarding"
+  },
+  {
+   "is_optional": 0,
+   "step": "Complete Quality Onboarding"
   }
  ],
- "title": "Setup Organization"
+ "title": "Get to know ERPNext"
 }

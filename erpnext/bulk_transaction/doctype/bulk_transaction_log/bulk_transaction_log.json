@@ -3,6 +3,7 @@
  "allow_copy": 1,
  "creation": "2023-11-09 20:14:45.139593",
  "default_view": "List",
+ "description": "The result of creating or submitting many documents at once.",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [

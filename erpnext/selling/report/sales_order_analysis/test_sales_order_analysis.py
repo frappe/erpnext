@@ -1,20 +1,29 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import add_days
 
+from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+from erpnext.controllers.item_close import update_closed_status
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.selling.report.sales_order_analysis.sales_order_analysis import execute
+from erpnext.selling.report.sales_order_analysis.sales_order_analysis import (
+	AGGREGATED_FIELDS,
+	execute,
+	group_by_item,
+)
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSalesOrderAnalysis(ERPNextTestSuite):
-	def create_sales_order(self, transaction_date, do_not_save=False, do_not_submit=False):
+	def create_sales_order(self, transaction_date, do_not_save=False, do_not_submit=False, qty=10, uom=None):
 		item = create_item(item_code="_Test Excavator", is_stock_item=0)
 		so = make_sales_order(
 			transaction_date=transaction_date,
 			item=item.item_code,
-			qty=10,
+			qty=qty,
+			uom=uom,
 			rate=100000,
 			do_not_save=True,
 		)
@@ -27,6 +36,17 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 			if not do_not_submit:
 				so.submit()
 		return item, so
+
+	def make_item_row(self, company, qty):
+		row = frappe._dict(dict.fromkeys(AGGREGATED_FIELDS, 0))
+		row.update({"company": company, "item_code": "_Test Excavator", "uom": "Nos", "qty": qty})
+		return row
+
+	def add_uom(self, item_code, uom, conversion_factor):
+		item = frappe.get_doc("Item", item_code)
+		if not any(row.uom == uom for row in item.uoms):
+			item.append("uoms", {"uom": uom, "conversion_factor": conversion_factor})
+			item.save()
 
 	def create_sales_invoice(self, so, do_not_save=False, do_not_submit=False):
 		sinv = make_sales_invoice(so.name)
@@ -255,3 +275,291 @@ class TestSalesOrderAnalysis(ERPNextTestSuite):
 		for key, val in expected_value.items():
 			with self.subTest(key=key, val=val):
 				self.assertEqual(data[0][key], val)
+
+	def test_08_group_by_item_across_sales_orders(self):
+		transaction_date = "2021-06-01"
+		item, so1 = self.create_sales_order(transaction_date)
+		self.create_sales_order(transaction_date, qty=4)
+
+		dn = self.create_delivery_note(so1, do_not_save=True)
+		dn.items[0].qty = 3
+		dn.save().submit()
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"group_by_item": 1,
+			}
+		)
+		expected_value = {
+			"item_code": item.item_code,
+			"uom": "Nos",
+			"qty": 14,
+			"delivered_qty": 3,
+			"pending_qty": 11,
+		}
+		self.assertEqual(len(data), 1)
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
+
+		fieldnames = [column["fieldname"] for column in columns]
+		self.assertIn("uom", fieldnames)
+		self.assertNotIn("sales_order", fieldnames)
+
+	def test_09_group_by_item_keeps_each_uom_apart(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+		self.add_uom(item.item_code, "Box", 10)
+		self.create_sales_order(transaction_date, qty=2, uom="Box")
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"group_by_item": 1,
+			}
+		)
+		self.assertEqual(len(data), 2)
+		self.assertEqual([(row["uom"], row["qty"]) for row in data], [("Box", 2), ("Nos", 10)])
+
+	def test_billed_qty_after_credit_note_in_another_uom(self):
+		transaction_date = "2021-06-01"
+		item = create_item(item_code="_Test Excavator", is_stock_item=0)
+		self.add_uom(item.item_code, "Box", 10)
+		_, so = self.create_sales_order(transaction_date, qty=2, uom="Box")
+		sinv = self.create_sales_invoice(so)
+
+		credit_note = make_sales_return(sinv.name)
+		credit_note.update_billed_amount_in_sales_order = 1
+		credit_note.items[0].update({"uom": "Nos", "conversion_factor": 1, "qty": -2})
+		credit_note.submit()
+
+		columns, data, message, chart = execute(
+			{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+		)
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0]["billed_qty"], 1.8)
+		self.assertAlmostEqual(data[0]["qty_to_bill"], 0.2)
+
+	def test_10_group_by_filters_cannot_be_combined(self):
+		self.assertRaises(
+			frappe.ValidationError,
+			execute,
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"group_by_so": 1,
+				"group_by_item": 1,
+			},
+		)
+
+	def test_11_group_by_item_keeps_each_company_apart(self):
+		rows = [
+			self.make_item_row("_Test Company", 10),
+			self.make_item_row("_Test Company 1", 4),
+			self.make_item_row("_Test Company", 6),
+		]
+
+		grouped = group_by_item(rows)
+
+		self.assertEqual(
+			[(row["company"], row["qty"]) for row in grouped],
+			[("_Test Company", 16), ("_Test Company 1", 4)],
+		)
+
+	def test_14_user_permission_restricts_rows_and_chart(self):
+		transaction_date = "2021-06-01"
+		item = create_item("_Test SOA Perm Item", is_stock_item=0).item_code
+		visible = make_sales_order(
+			customer="_Test Customer 1", item=item, qty=2, rate=100, transaction_date=transaction_date
+		)
+		hidden = make_sales_order(
+			customer="_Test Customer 2", item=item, qty=3, rate=100, transaction_date=transaction_date
+		)
+
+		user = "_test_soa_perm@example.com"
+		if not frappe.db.exists("User", user):
+			u = frappe.new_doc("User")
+			u.email = user
+			u.first_name = "SOA Perm"
+			u.append("roles", {"role": "Sales User"})
+			u.insert()
+		frappe.permissions.add_user_permission("Customer", "_Test Customer 1", user)
+
+		frappe.set_user(user)
+		try:
+			columns, data, message, chart = execute(
+				{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		orders = {row["sales_order"] for row in data}
+		self.assertIn(visible.name, orders)
+		self.assertNotIn(hidden.name, orders)
+
+		labels = chart["data"]["labels"]
+		values = chart["data"]["datasets"][0]["values"]
+		self.assertEqual(values[labels.index("Amount to Bill")], 200)
+
+	def test_15_closed_order_reports_nothing_pending(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date, qty=5)
+		dn = self.create_delivery_note(so, do_not_save=True)
+		dn.items[0].qty = 3
+		dn.save().submit()
+		so.reload()
+		so.update_status("Closed")
+
+		columns, data, message, chart = execute(
+			{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+		)
+		self.assertEqual(len(data), 1)
+		expected_value = {
+			"status": "Closed",
+			"pending_qty": 0,
+			"qty_to_bill": 0,
+			"pending_amount": 0,
+			"delay": 0,
+		}
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
+
+	def test_18_individually_closed_row_has_nothing_pending(self):
+		transaction_date = "2021-06-01"
+		closed_item = create_item("_Test SOA Closed Row", is_stock_item=0).item_code
+		open_item = create_item("_Test SOA Open Row", is_stock_item=0).item_code
+		delivery_date = add_days(transaction_date, 15)
+		so = make_sales_order(
+			transaction_date=transaction_date,
+			item_list=[
+				{"item_code": closed_item, "qty": 5, "rate": 100, "delivery_date": delivery_date},
+				{"item_code": open_item, "qty": 3, "rate": 100, "delivery_date": delivery_date},
+			],
+		)
+		update_closed_status("Sales Order", so.name, [so.items[0].name], 1)
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"sales_order": [so.name],
+			}
+		)
+		rows = {row["item_code"]: row for row in data}
+		self.assertEqual((rows[closed_item]["pending_qty"], rows[closed_item]["qty_to_bill"]), (0, 0))
+		self.assertEqual((rows[closed_item]["pending_amount"], rows[closed_item]["delay"]), (0, 0))
+		self.assertEqual((rows[open_item]["pending_qty"], rows[open_item]["qty_to_bill"]), (3, 3))
+
+	def test_19_group_by_so_delay_ignores_closed_rows(self):
+		transaction_date = "2021-06-01"
+		early = create_item("_Test SOA Delay A", is_stock_item=0).item_code
+		late = create_item("_Test SOA Delay Z", is_stock_item=0).item_code
+		delivery_date = add_days(transaction_date, 15)
+		expected_delay = frappe.utils.date_diff(frappe.utils.nowdate(), delivery_date)
+
+		def grouped_delay(closed_item):
+			so = make_sales_order(
+				transaction_date=transaction_date,
+				item_list=[
+					{"item_code": early, "qty": 2, "rate": 100, "delivery_date": delivery_date},
+					{"item_code": late, "qty": 2, "rate": 100, "delivery_date": delivery_date},
+				],
+			)
+			idx = 0 if closed_item == early else 1
+			update_closed_status("Sales Order", so.name, [so.items[idx].name], 1)
+			columns, data, message, chart = execute(
+				{
+					"company": "_Test Company",
+					"from_date": "2021-06-01",
+					"to_date": "2021-06-30",
+					"sales_order": [so.name],
+					"group_by_so": 1,
+				}
+			)
+			return data[0]["delay"]
+
+		# whichever row is closed (it sorts first or second), the open row's delay must survive
+		self.assertEqual(grouped_delay(early), expected_delay)
+		self.assertEqual(grouped_delay(late), expected_delay)
+
+	def test_16_credit_note_keeps_billed_qty_consistent_with_amount(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+
+		sinv = self.create_sales_invoice(so, do_not_save=True)
+		sinv.items[0].qty = 6
+		sinv.save().submit()
+
+		credit_note = make_sales_return(sinv.name)
+		credit_note.posting_date = transaction_date
+		credit_note.items[0].qty = -2
+		credit_note.save().submit()
+
+		columns, data, message, chart = execute(
+			{"company": "_Test Company", "from_date": "2021-06-01", "to_date": "2021-06-30"}
+		)
+		self.assertEqual(len(data), 1)
+		expected_value = {
+			"billed_qty": 6,
+			"qty_to_bill": 4,
+			"billed_amount": 600000,
+			"pending_amount": 400000,
+		}
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
+
+	def test_17_warehouse_filter_includes_child_warehouses(self):
+		transaction_date = "2021-06-01"
+		group = "_Test Warehouse Group - _TC"
+		child = "_Test Warehouse Group-C1 - _TC"
+		sibling = "_Test Warehouse Group-C2 - _TC"
+		item = create_item("_Test SOA WH Item", is_stock_item=1).item_code
+		so = make_sales_order(transaction_date=transaction_date, item=item, qty=5, rate=100, warehouse=child)
+
+		def orders_for(warehouse):
+			columns, data, message, chart = execute(
+				{
+					"company": "_Test Company",
+					"from_date": "2021-06-01",
+					"to_date": "2021-06-30",
+					"warehouse": warehouse,
+				}
+			)
+			return [row["sales_order"] for row in data]
+
+		# the parent group resolves to its children, a sibling child does not
+		self.assertIn(so.name, orders_for(group))
+		self.assertNotIn(so.name, orders_for(sibling))
+
+	def test_12_company_falls_back_to_the_default(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+		filters = {"from_date": "2021-06-01", "to_date": "2021-06-30"}
+
+		with patch("erpnext.get_default_company", return_value="_Test Company"):
+			columns, data, message, chart = execute(filters)
+
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data[0]["sales_order"], so.name)
+
+		with patch("erpnext.get_default_company", return_value="_Test Company 1"):
+			columns, data, message, chart = execute(filters)
+
+		self.assertNotIn(so.name, [row["sales_order"] for row in data])
+
+	def test_13_company_is_mandatory_without_a_default(self):
+		with patch("erpnext.get_default_company", return_value=None):
+			self.assertRaises(
+				frappe.ValidationError,
+				execute,
+				{"from_date": "2021-06-01", "to_date": "2021-06-30"},
+			)

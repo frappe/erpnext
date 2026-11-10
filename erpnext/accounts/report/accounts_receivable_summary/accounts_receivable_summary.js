@@ -12,7 +12,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 		},
 		{
 			fieldname: "report_date",
-			label: __("Posting Date"),
+			label: __("Report Date"),
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
 		},
@@ -24,10 +24,10 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			default: "Due Date",
 		},
 		{
-			fieldname: "calculate_ageing_with",
-			label: __("Calculate Ageing With"),
+			fieldname: "age_as_on",
+			label: __("Age as on"),
 			fieldtype: "Select",
-			options: "Report Date\nToday Date",
+			options: "Report Date\nToday",
 			default: "Report Date",
 		},
 		{
@@ -47,7 +47,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			label: __("Cost Center"),
 			fieldtype: "MultiSelectList",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
+				return erpnext.utils.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -59,7 +59,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Project",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Project", txt, {
+				return erpnext.utils.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -88,7 +88,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 				let party_type = frappe.query_report.get_filter_value("party_type");
 				if (!party_type) return;
 
-				return frappe.db.get_link_options(party_type, txt);
+				return erpnext.utils.get_link_options(party_type, txt);
 			},
 		},
 		{
@@ -106,8 +106,11 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 		{
 			fieldname: "territory",
 			label: __("Territory"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Territory",
+			get_data: function (txt) {
+				return erpnext.utils.get_link_options("Territory", txt);
+			},
 		},
 		{
 			fieldname: "sales_partner",
@@ -138,7 +141,7 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 		},
 		{
 			fieldname: "for_revaluation_journals",
-			label: __("Revaluation Journals"),
+			label: __("Include Revaluation Journals"),
 			fieldtype: "Check",
 		},
 	],

@@ -61,10 +61,10 @@ frappe.query_reports["Sales Partner Transaction Summary"] = {
 			options: "Territory",
 		},
 		{
-			fieldname: "show_return_entries",
-			label: __("Show Return Entries"),
+			fieldname: "account_for_return_entries",
+			label: __("Account for Return Entries"),
 			fieldtype: "Check",
-			default: 0,
+			default: 1,
 		},
 	],
 };

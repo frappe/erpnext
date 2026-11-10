@@ -1,12 +1,91 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from dataclasses import dataclass
+
 import frappe
 from frappe import _
 from frappe.utils import add_days, flt
 
 from erpnext.accounts.report.financial_statements import get_data, get_period_list
 from erpnext.accounts.utils import get_balance_on, get_fiscal_year
+
+
+@dataclass(frozen=True)
+class GroupLedgers:
+	"""Finds the ledgers of a ratio group when no group account is typed with it, as in the shipped charts."""
+
+	categories: tuple[str, ...]
+	account_types: tuple[str, ...] = ()
+	whole_root_if_none: bool = False
+
+	def get_accounts(self, accounts: dict) -> set[str]:
+		categories = get_account_categories(accounts)
+		ledgers = {
+			name
+			for name, row in accounts.items()
+			if not row.get("is_group") and self.matches(row, categories.get(name))
+		}
+		if not self.whole_root_if_none or self.has_category_accounts(accounts):
+			return ledgers
+		return {
+			name for name, row in accounts.items() if row.get("is_group") and not row.get("parent_account")
+		}
+
+	def has_category_accounts(self, accounts: dict) -> bool:
+		if not accounts:
+			return False
+
+		company = frappe.get_cached_value("Account", next(iter(accounts)), "company")
+		return bool(
+			frappe.db.exists("Account", {"company": company, "account_category": ("in", self.categories)})
+		)
+
+	def matches(self, row: dict, category: str | None) -> bool:
+		if category:
+			return category in self.categories
+		return row.get("account_type") in self.account_types
+
+
+GROUP_LEDGERS = {
+	"Current Asset": GroupLedgers(
+		categories=(
+			"Cash and Cash Equivalents",
+			"Trade Receivables",
+			"Other Receivables",
+			"Stock Assets",
+			"Short-term Investments",
+			"Other Current Assets",
+		),
+		account_types=("Bank", "Cash", "Receivable", "Stock", "Stock Delivered But Not Billed", "Tax"),
+	),
+	"Fixed Asset": GroupLedgers(
+		categories=("Tangible Assets", "Intangible Assets"),
+		account_types=("Fixed Asset", "Accumulated Depreciation", "Capital Work in Progress"),
+	),
+	"Current Liability": GroupLedgers(
+		categories=(
+			"Trade Payables",
+			"Other Payables",
+			"Short-term Borrowings",
+			"Current Tax Liabilities",
+			"Short-term Provisions",
+			"Other Current Liabilities",
+		),
+		account_types=(
+			"Payable",
+			"Tax",
+			"Stock Received But Not Billed",
+			"Asset Received But Not Billed",
+			"Service Received But Not Billed",
+		),
+	),
+	"Direct Expense": GroupLedgers(
+		categories=("Cost of Goods Sold", "Other Direct Costs"),
+		account_types=("Cost of Goods Sold", "Expenses Included In Valuation", "Stock Adjustment"),
+	),
+	"Direct Income": GroupLedgers(categories=("Revenue from Operations",), whole_root_if_none=True),
+}
 
 
 def execute(filters=None):
@@ -106,7 +185,7 @@ def get_ratios_data(filters, period_list, years):
 				0,
 			],
 			[cogs, total_expense, "Cost of Goods Sold", year, expense, "Expense", {}, total_cogs],
-			[direct_expense, direct_expense, "Direct Expense", year, expense, "Expense", {}, 0],
+			[direct_expense, {}, "Direct Expense", year, expense, "Expense", {}, 0],
 			[net_sales, total_income, "Direct Income", year, income, "Income", {}, total_net_sales],
 		]:
 			update_balances(d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7])
@@ -122,19 +201,26 @@ def get_ratios_data(filters, period_list, years):
 def get_gl_data(filters, period_list, years):
 	data = {}
 
-	for d in [
-		["Asset", "Debit"],
-		["Liability", "Credit"],
-		["Income", "Credit"],
-		["Expense", "Debit"],
-	]:
-		data[frappe.scrub(d[0])] = get_data(
+	for root_type, balance_must_be in [["Asset", "Debit"], ["Liability", "Credit"]]:
+		data[frappe.scrub(root_type)] = get_data(
 			filters.company,
-			d[0],
-			d[1],
+			root_type,
+			balance_must_be,
 			period_list,
 			only_current_fiscal_year=False,
 			filters=filters,
+		)
+
+	# income and expense of each period only, as in the Profit and Loss Statement
+	for root_type, balance_must_be in [["Income", "Credit"], ["Expense", "Debit"]]:
+		data[frappe.scrub(root_type)] = get_data(
+			filters.company,
+			root_type,
+			balance_must_be,
+			period_list,
+			filters=filters,
+			accumulated_values=0,
+			ignore_closing_entries=True,
 		)
 
 	assets, liabilities, income, expense = (
@@ -203,11 +289,9 @@ def add_turnover_ratios(data, years, period_list, filters, fixed_asset, net_sale
 	for d in ["Receivable", "Payable", "Stock"]:
 		avg_data[frappe.scrub(d)] = avg_ratio_balance(d, period_list, precision, filters)
 
-	avg_debtors, avg_creditors, avg_stock = (
-		avg_data.get("receivable"),
-		avg_data.get("payable"),
-		avg_data.get("stock"),
-	)
+	avg_debtors, avg_stock = avg_data.get("receivable"), avg_data.get("stock")
+	# payables are credit balances
+	avg_creditors = {key: -flt(balance) for key, balance in avg_data.get("payable").items()}
 
 	ratio_data = [
 		[_("Fixed Asset Turnover Ratio"), net_sales, fixed_asset],
@@ -235,30 +319,71 @@ def update_balances(
 	net_dict=None,
 	total_net=0,
 ):
+	group_accounts = get_group_accounts(account_type, root_type_data)
+
 	for entry in root_type_data:
 		if not entry.get("parent_account") and entry.get("is_group"):
 			total_dict[year] = entry[year]
-			if account_type == "Direct Expense":
-				total_dict[year] = entry[year] * -1
+
+		if root_type == "Expense" and account_type == "Cost of Goods Sold":
+			if entry.get("account_type") == account_type:
+				total_net += entry.get(year)
+				ratio_dict[year] = total_net
+		elif entry.get("account") in group_accounts:
+			ratio_dict[year] = flt(ratio_dict.get(year)) + flt(entry.get(year))
 
 		if root_type in ("Asset", "Liability"):
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				ratio_dict[year] = entry.get(year)
 			if entry.get("account_type") in ["Bank", "Cash", "Receivable"] and not entry.get("is_group"):
 				total_net += entry.get(year)
 				net_dict[year] = total_net
 
-		elif root_type == "Income":
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				total_net += entry.get(year)
-				ratio_dict[year] = total_net
-		elif root_type == "Expense" and account_type == "Cost of Goods Sold":
-			if entry.get("account_type") == account_type:
-				total_net += entry.get(year)
-				ratio_dict[year] = total_net
-		else:
-			if entry.get("account_type") == account_type and entry.get("is_group"):
-				ratio_dict[year] = entry.get(year)
+
+def get_group_accounts(account_type: str, root_type_data: list[dict]) -> set[str]:
+	"""Accounts that make up a ratio group: the outermost groups typed with it, else its ledgers."""
+	accounts = {entry.get("account"): entry for entry in root_type_data if entry.get("account")}
+	typed_groups = {
+		name for name, entry in accounts.items() if is_outermost_group_of_type(entry, account_type, accounts)
+	}
+	if typed_groups or account_type not in GROUP_LEDGERS:
+		return typed_groups
+
+	return GROUP_LEDGERS[account_type].get_accounts(accounts)
+
+
+def is_outermost_group_of_type(entry, account_type, accounts):
+	if not (entry.get("is_group") and entry.get("account_type") == account_type):
+		return False
+
+	parent = accounts.get(entry.get("parent_account"))
+	while parent:
+		if parent.get("is_group") and parent.get("account_type") == account_type:
+			return False
+		parent = accounts.get(parent.get("parent_account"))
+
+	return True
+
+
+def get_account_categories(accounts: dict) -> dict[str, str]:
+	"""Category of each account, taken from its nearest parent group when the account has none."""
+	if not accounts:
+		return {}
+
+	own_categories = dict(
+		frappe.get_all(
+			"Account",
+			filters={"name": ("in", list(accounts)), "account_category": ("is", "set")},
+			fields=["name", "account_category"],
+			as_list=True,
+		)
+	)
+	return {name: get_inherited_category(name, own_categories, accounts) for name in accounts}
+
+
+def get_inherited_category(account: str, categories: dict, accounts: dict) -> str | None:
+	while account and not categories.get(account):
+		account = accounts.get(account, {}).get("parent_account")
+
+	return categories.get(account)
 
 
 def avg_ratio_balance(account_type, period_list, precision, filters):
@@ -271,11 +396,13 @@ def avg_ratio_balance(account_type, period_list, precision, filters):
 			date=closing_date,
 			company=filters.company,
 			account_type=account_type,
+			in_account_currency=False,
 		)
 		opening_balance = get_balance_on(
 			date=opening_date,
 			company=filters.company,
 			account_type=account_type,
+			in_account_currency=False,
 		)
 		avg_ratio[period["key"]] = flt((flt(closing_balance) + flt(opening_balance)) / 2, precision=precision)
 

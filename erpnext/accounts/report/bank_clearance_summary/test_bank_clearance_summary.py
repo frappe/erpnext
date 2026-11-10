@@ -1,0 +1,148 @@
+# Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
+# See license.txt
+
+import frappe
+
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.bank_clearance_summary.bank_clearance_summary import execute
+from erpnext.tests.utils import ERPNextTestSuite
+
+BANK_ACCOUNT = "_Test Bank - _TC"
+POSTING_DATE = "2026-06-15"
+
+
+class TestBankClearanceSummary(ERPNextTestSuite):
+	def run_report(self, **extra):
+		filters = frappe._dict(
+			{
+				"account": BANK_ACCOUNT,
+				"company": "_Test Company",
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+			}
+		)
+		filters.update(extra)
+		return execute(filters)[1]
+
+	def find_row(self, data, payment_entry):
+		for row in data:
+			if row[1] == payment_entry:
+				return row
+		return None
+
+	def test_uncleared_then_cleared_journal_entry(self):
+		je = make_journal_entry(BANK_ACCOUNT, "Sales - _TC", 5000, submit=True, posting_date="2026-06-01")
+
+		# Uncleared: the bank row appears with the debit amount and no clearance date
+		row = self.find_row(self.run_report(), je.name)
+		self.assertIsNotNone(row, "Journal Entry not listed in Bank Clearance Summary")
+		self.assertEqual(row[0], "Journal Entry")
+		self.assertEqual(frappe.utils.getdate(row[2]), frappe.utils.getdate("2026-06-01"))
+		self.assertIsNone(row[4])  # clearance_date empty -> uncleared
+		self.assertEqual(row[5], "Sales - _TC")  # against account
+		self.assertEqual(row[6], 5000)  # debit - credit on the bank account
+
+		# Cleared: set the clearance date on the Journal Entry and re-run
+		frappe.db.set_value("Journal Entry", je.name, "clearance_date", "2026-06-05")
+
+		row = self.find_row(self.run_report(), je.name)
+		self.assertIsNotNone(row)
+		self.assertEqual(frappe.utils.getdate(row[4]), frappe.utils.getdate("2026-06-05"))
+		self.assertEqual(row[6], 5000)
+
+	def test_date_filter_excludes_out_of_range_entries(self):
+		je = make_journal_entry(BANK_ACCOUNT, "Sales - _TC", 3000, submit=True, posting_date="2026-06-10")
+
+		# Within range: present
+		self.assertIsNotNone(self.find_row(self.run_report(), je.name))
+
+		# Window entirely after the posting date (from_date lower bound): excluded
+		after = self.run_report(from_date="2026-07-01", to_date="2026-12-31")
+		self.assertIsNone(self.find_row(after, je.name))
+
+		# Window ending before the posting date (to_date upper bound): excluded
+		before = self.run_report(from_date="2026-01-01", to_date="2026-06-09")
+		self.assertIsNone(self.find_row(before, je.name))
+
+	def test_payment_entry_amount_after_taxes(self):
+		receipt = self.make_taxed_payment_entry(
+			"Receive",
+			1000,
+			{"rate": 10, "add_deduct_tax": "Deduct"},
+			party_type="Customer",
+			party="_Test Customer",
+			paid_from="Debtors - _TC",
+		)
+		payment = self.make_taxed_payment_entry("Pay", 1180, {"rate": 18, "included_in_paid_amount": 1})
+
+		data = self.run_report()
+		self.assertEqual(self.find_row(data, receipt.name)[6], 900)
+		self.assertEqual(self.find_row(data, payment.name)[6], -1180)
+
+	def test_pos_invoice_payment_into_bank(self):
+		invoice = create_sales_invoice(rate=300, posting_date=POSTING_DATE, do_not_save=True)
+		invoice.is_pos = 1
+		invoice.append(
+			"payments",
+			{"mode_of_payment": self.make_mode_of_payment(), "amount": 300, "reference_no": "UTR-300"},
+		)
+		invoice.insert()
+		invoice.submit()
+
+		row = self.find_row(self.run_report(), invoice.name)
+		self.assertIsNotNone(row, "POS invoice payment not listed in Bank Clearance Summary")
+		self.assertEqual(row[0], "Sales Invoice")
+		self.assertEqual(row[3], "UTR-300")
+		self.assertEqual(row[6], 300)
+
+	def test_foreign_currency_paid_invoice_in_bank_currency(self):
+		invoice = make_purchase_invoice(
+			rate=100,
+			qty=1,
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=80,
+			is_paid=1,
+			cash_bank_account=BANK_ACCOUNT,
+			posting_date=POSTING_DATE,
+			do_not_save=True,
+		)
+		invoice.set_posting_time = 1
+		invoice.insert()
+		invoice.paid_amount = invoice.grand_total
+		invoice.submit()
+
+		self.assertEqual(self.find_row(self.run_report(), invoice.name)[6], -8000)
+
+	def make_taxed_payment_entry(self, payment_type: str, amount: float, tax: dict, **party):
+		bank_field = "paid_to" if payment_type == "Receive" else "paid_from"
+		party[bank_field] = BANK_ACCOUNT
+		payment_entry = create_payment_entry(payment_type=payment_type, paid_amount=amount, **party)
+		payment_entry.posting_date = payment_entry.reference_date = POSTING_DATE
+		tax.setdefault("add_deduct_tax", "Add")
+		payment_entry.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Service Tax - _TC",
+				"charge_type": "On Paid Amount",
+				"description": "Service Tax",
+				**tax,
+			},
+		)
+		payment_entry.save()
+		payment_entry.submit()
+		return payment_entry
+
+	def make_mode_of_payment(self) -> str:
+		mode_of_payment = frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "_Test Bank Clearance Transfer",
+				"type": "Bank",
+				"accounts": [{"company": "_Test Company", "default_account": BANK_ACCOUNT}],
+			}
+		)
+		return mode_of_payment.insert(ignore_if_duplicate=True).name

@@ -36,26 +36,38 @@ class ShippingRule(Document):
 		from erpnext.accounts.doctype.shipping_rule_condition.shipping_rule_condition import (
 			ShippingRuleCondition,
 		)
-		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import (
-			ShippingRuleCountry,
-		)
+		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import ShippingRuleCountry
 
 		account: DF.Link
 		calculate_based_on: DF.Literal["Fixed", "Net Total", "Net Weight"]
 		company: DF.Link
 		conditions: DF.Table[ShippingRuleCondition]
-		cost_center: DF.Link
+		cost_center: DF.Link | None
 		countries: DF.Table[ShippingRuleCountry]
 		disabled: DF.Check
 		label: DF.Data
+		project: DF.Link | None
 		shipping_amount: DF.Currency
 		shipping_rule_type: DF.Literal["Selling", "Buying"]
 	# end: auto-generated types
 
 	def validate(self):
+		self.validate_account_company()
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
+
+	def validate_account_company(self):
+		if not self.company or not self.account:
+			return
+
+		if frappe.get_cached_value("Account", self.account, "company") != self.company:
+			throw(
+				_("Shipping Account {0} does not belong to Company {1}").format(
+					frappe.bold(self.account), frappe.bold(self.company)
+				),
+				title=_("Invalid Shipping Account"),
+			)
 
 	def validate_from_to_values(self):
 		if self.calculate_based_on == "Fixed":
@@ -98,7 +110,7 @@ class ShippingRule(Document):
 			self.validate_countries(doc)
 
 		if self.calculate_based_on == "Net Total":
-			value = doc.base_net_total
+			value = self.get_net_total(doc)
 			by_value = True
 
 		elif self.calculate_based_on == "Net Weight":
@@ -117,6 +129,26 @@ class ShippingRule(Document):
 			shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
 
 		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
+
+	def get_net_total(self, doc):
+		"""Net total before a Grand Total discount, which depends on the shipping charge itself."""
+		if (
+			doc.apply_discount_on != "Grand Total"
+			or not doc.discount_amount
+			or doc.get("is_cash_or_non_trade_discount")
+		):
+			return doc.base_net_total
+
+		# rounded per item, as base_net_amount was, so the total does not drift with the discount
+		base_net_total = sum(
+			flt(
+				(item.net_amount + flt(item.distributed_discount_amount)) * doc.conversion_rate,
+				item.precision("base_net_amount"),
+			)
+			for item in doc.items
+			if not item.get("is_alternative")
+		)
+		return flt(base_net_total, doc.precision("base_net_total"))
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
@@ -162,7 +194,14 @@ class ShippingRule(Document):
 			)
 			shipping_charge["add_deduct_tax"] = "Add"
 
-		existing_shipping_charge = doc.get("taxes", filters=shipping_charge)
+		shipping_charge_filters = shipping_charge.copy()
+		if not self.cost_center:
+			shipping_charge_filters["cost_center"] = (
+				"in",
+				(None, "", erpnext.get_default_cost_center(doc.company)),
+			)
+
+		existing_shipping_charge = doc.get("taxes", filters=shipping_charge_filters)
 		if existing_shipping_charge:
 			# take the last record found
 			existing_shipping_charge[-1].tax_amount = shipping_amount

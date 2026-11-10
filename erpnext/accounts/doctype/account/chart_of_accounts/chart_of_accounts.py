@@ -102,6 +102,8 @@ def identify_is_group(child):
 def get_chart(chart_template: str | None, existing_company: str | None = None):
 	chart = {}
 	if existing_company:
+		frappe.has_permission("Company", doc=existing_company, throw=True)
+
 		return get_account_tree_from_existing_company(existing_company)
 
 	elif chart_template == "Standard":
@@ -125,6 +127,7 @@ def get_chart(chart_template: str | None, existing_company: str | None = None):
 			for fname in os.listdir(path):
 				fname = frappe.as_unicode(fname)
 				if fname.endswith(".json"):
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 					with open(os.path.join(path, fname)) as f:
 						chart = f.read()
 						if chart and json.loads(chart).get("name") == chart_template:
@@ -137,7 +140,7 @@ def get_charts_for_country(country: str, with_standard: bool = False):
 
 	def _get_chart_name(content):
 		if content:
-			content = json.loads(content)
+			content = frappe.parse_json(content)
 			if (
 				content and content.get("disabled", "No") == "No"
 			) or frappe.local.flags.allow_unverified_charts:
@@ -157,6 +160,7 @@ def get_charts_for_country(country: str, with_standard: bool = False):
 			for fname in os.listdir(path):
 				fname = frappe.as_unicode(fname)
 				if (fname.startswith(country_code) or fname.startswith(country)) and fname.endswith(".json"):
+					# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 					with open(os.path.join(path, fname)) as f:
 						_get_chart_name(f.read())
 

@@ -1,0 +1,32 @@
+{
+ "content": null,
+ "creation": "2026-05-30 10:00:00",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-06-05 00:24:12.148085",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "shop-floor",
+ "owner": "Administrator",
+ "page_name": "shop-floor",
+ "roles": [
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Shop Floor Manager"
+  },
+  {
+   "role": "Shop Floor User"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Shop Floor"
+}

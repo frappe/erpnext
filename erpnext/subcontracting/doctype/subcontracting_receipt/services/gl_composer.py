@@ -34,6 +34,7 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 		doc = self.doc
 		warehouse_with_no_account = []
 
+		remarks = doc.get("remarks") or _("Accounting Entry for Stock")
 		supplied_items_details = frappe._dict()
 		for item in doc.supplied_items:
 			supplied_items_details.setdefault(item.reference_name, []).append(
@@ -64,8 +65,6 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 						"stock_value_difference",
 					)
 
-					remarks = doc.get("remarks") or _("Accounting Entry for Stock")
-
 					self.add_gl_entry(
 						gl_entries=gl_entries,
 						account=_inv_dict["account"],
@@ -80,8 +79,8 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 					)
 
 					service_cost = flt(
-						item.service_cost_per_qty, item.precision("service_cost_per_qty")
-					) * flt(item.qty, item.precision("qty"))
+						flt(item.service_cost_per_qty) * flt(item.qty), item.precision("amount")
+					)
 
 					self.add_gl_entry(
 						gl_entries=gl_entries,
@@ -109,49 +108,6 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 						project=item.project,
 						item=item,
 					)
-
-					if flt(item.rm_supp_cost):
-						for rm_item in supplied_items_details.get(item.name):
-							_inv_dict = doc.get_inventory_account_dict(
-								rm_item, inventory_account_map, "supplier_warehouse"
-							)
-
-							self.add_gl_entry(
-								gl_entries=gl_entries,
-								account=_inv_dict.get("account"),
-								cost_center=rm_item.cost_center or item.cost_center,
-								debit=0.0,
-								credit=flt(rm_item.amount),
-								remarks=remarks,
-								against_account=rm_item.expense_account or item.expense_account,
-								account_currency=_inv_dict.get("account_currency"),
-								project=item.project,
-								item=item,
-							)
-							self.add_gl_entry(
-								gl_entries=gl_entries,
-								account=rm_item.expense_account or item.expense_account,
-								cost_center=rm_item.cost_center or item.cost_center,
-								debit=flt(rm_item.amount),
-								credit=0.0,
-								remarks=remarks,
-								against_account=_inv_dict.get("account"),
-								account_currency=get_account_currency(item.expense_account),
-								project=item.project,
-								item=item,
-							)
-
-					if item.additional_cost_per_qty:
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=item.expense_account,
-							cost_center=doc.cost_center or doc.get_company_default("cost_center"),
-							debit=item.qty * item.additional_cost_per_qty,
-							credit=0.0,
-							remarks=remarks,
-							against_account=None,
-							account_currency=get_account_currency(item.expense_account),
-						)
 
 					if divisional_loss := flt(item.amount - stock_value_diff, item.precision("amount")):
 						loss_account = doc.get_company_default(
@@ -188,6 +144,22 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 				):
 					warehouse_with_no_account.append(item.warehouse)
 
+			self._make_supplied_items_gl_entries(
+				gl_entries, item, supplied_items_details.get(item.name, []), inventory_account_map, remarks
+			)
+
+			if item.additional_cost_per_qty:
+				self.add_gl_entry(
+					gl_entries=gl_entries,
+					account=item.expense_account,
+					cost_center=doc.cost_center or doc.get_company_default("cost_center"),
+					debit=flt(item.received_qty) * item.additional_cost_per_qty,
+					credit=0.0,
+					remarks=remarks,
+					against_account=None,
+					account_currency=get_account_currency(item.expense_account),
+				)
+
 		for row in doc.additional_costs:
 			credit_amount = (
 				flt(row.base_amount)
@@ -213,7 +185,49 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 				+ "\n".join(warehouse_with_no_account)
 			)
 
+	def _make_supplied_items_gl_entries(
+		self, gl_entries: list, item, supplied_items: list, inventory_account_map: dict | None, remarks: str
+	) -> None:
+		"""Credit the supplier warehouse for consumed raw materials, also when the row has no accepted qty."""
+		for rm_item in supplied_items:
+			if not flt(rm_item.amount):
+				continue
+
+			_inv_dict = self.doc.get_inventory_account_dict(
+				rm_item, inventory_account_map, "supplier_warehouse"
+			)
+			expense_account = rm_item.expense_account or item.expense_account
+
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=_inv_dict.get("account"),
+				cost_center=rm_item.cost_center or item.cost_center,
+				debit=0.0,
+				credit=flt(rm_item.amount),
+				remarks=remarks,
+				against_account=expense_account,
+				account_currency=_inv_dict.get("account_currency"),
+				project=item.project,
+				item=item,
+			)
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=expense_account,
+				cost_center=rm_item.cost_center or item.cost_center,
+				debit=flt(rm_item.amount),
+				credit=0.0,
+				remarks=remarks,
+				against_account=_inv_dict.get("account"),
+				account_currency=get_account_currency(item.expense_account),
+				project=item.project,
+				item=item,
+			)
+
 	def _make_item_gl_entries_for_lcv(self, gl_entries: list, inventory_account_map: dict | None) -> None:
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import (
+			get_custom_dimension_overrides,
+		)
+
 		doc = self.doc
 		landed_cost_entries = doc.get_item_account_wise_lcv_entries()
 
@@ -221,45 +235,52 @@ class SubcontractingReceiptGLComposer(BaseStockGLComposer):
 			return
 
 		for item in doc.items:
-			if item.landed_cost_voucher_amount and landed_cost_entries:
+			item_entries = landed_cost_entries.get((item.item_code, item.name), [])
+
+			if item.landed_cost_voucher_amount and item_entries:
 				remarks = _("Accounting Entry for Landed Cost Voucher for SCR {0}").format(doc.name)
-				if (item.item_code, item.name) in landed_cost_entries:
-					_inv_dict = doc.get_inventory_account_dict(item, inventory_account_map)
+				_inv_dict = doc.get_inventory_account_dict(item, inventory_account_map)
 
-					for account, amount in landed_cost_entries[(item.item_code, item.name)].items():
-						account_currency = get_account_currency(account)
-						credit_amount = (
-							flt(amount["base_amount"])
-							if (amount["base_amount"] or account_currency != doc.company_currency)
-							else flt(amount["amount"])
-						)
+				for entry in item_entries:
+					if not (entry.amount or entry.base_amount):
+						continue
 
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount,
-							remarks=remarks,
-							against_account=_inv_dict["account"],
-							credit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+					account_currency = get_account_currency(entry.expense_account)
+					credit_amount = (
+						flt(entry.base_amount)
+						if (entry.base_amount or account_currency != doc.company_currency)
+						else flt(entry.amount)
+					)
 
-						account_currency = get_account_currency(item.expense_account)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=entry.expense_account,
+						cost_center=entry.dimensions.cost_center or item.cost_center,
+						debit=0.0,
+						credit=credit_amount,
+						remarks=remarks,
+						against_account=_inv_dict["account"],
+						credit_in_account_currency=flt(entry.amount),
+						account_currency=account_currency,
+						project=entry.dimensions.project or item.project,
+						item=item,
+						dimensions=get_custom_dimension_overrides(entry),
+					)
 
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=item.expense_account,
-							cost_center=item.cost_center,
-							debit=0.0,
-							credit=credit_amount * -1,
-							remarks=remarks,
-							against_account=_inv_dict["account"],
-							debit_in_account_currency=flt(amount["amount"]),
-							account_currency=account_currency,
-							project=item.project,
-							item=item,
-						)
+					# Reclass leg: keeps the item's dimensions so it nets against the base item
+					# entry posted to the same expense account.
+					account_currency = get_account_currency(item.expense_account)
+
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=item.expense_account,
+						cost_center=item.cost_center,
+						debit=0.0,
+						credit=credit_amount * -1,
+						remarks=remarks,
+						against_account=_inv_dict["account"],
+						debit_in_account_currency=flt(entry.amount),
+						account_currency=account_currency,
+						project=item.project,
+						item=item,
+					)

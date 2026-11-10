@@ -69,7 +69,6 @@ frappe.ui.form.on("Issue", {
 					"erpnext.support.doctype.service_level_agreement.service_level_agreement.reset_service_level_agreement",
 					{
 						reason: values.reason,
-						user: frappe.session.user_email,
 						doctype: frm.doc.doctype,
 						docname: frm.doc.name,
 					},
@@ -89,7 +88,7 @@ frappe.ui.form.on("Issue", {
 		if (!frm.timeline.wrapper.find(".btn-split-issue").length) {
 			let split_issue_btn = $(`
 				<a class="action-btn btn-split-issue" title="${__("Split Issue")}">
-					${frappe.utils.icon("branch", "sm")}
+					${frappe.utils.icon("git-branch", "sm")}
 				</a>
 			`);
 
@@ -123,7 +122,9 @@ frappe.ui.form.on("Issue", {
 								},
 								(r) => {
 									frappe.msgprint(
-										`New issue created: <a href="/app/issue/${r.message}">${r.message}</a>`
+										__("New issue created: {0}", [
+											`<a href="/app/issue/${r.message}">${r.message}</a>`,
+										])
 									);
 									frm.reload_doc();
 									dialog.hide();
@@ -144,7 +145,7 @@ frappe.ui.form.on("Issue", {
 
 		// 	let help_article = $(`
 		// 		<a class="action-btn btn-add-to-kb" title="${__('Help Article')}">
-		// 			${frappe.utils.icon('solid-info', 'sm')}
+		// 			${frappe.utils.icon('info', 'sm')}
 		// 		</a>
 		// 	`);
 

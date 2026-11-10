@@ -49,6 +49,7 @@ erpnext.sales_common = {
 				);
 
 				me.frm.set_query("contact_person", erpnext.queries.contact_query);
+				me.frm.set_query("shipping_contact_person", erpnext.queries.contact_query);
 				me.frm.set_query("company_contact_person", erpnext.queries.company_contact_query);
 				me.frm.set_query("customer_address", erpnext.queries.address_query);
 				me.frm.set_query("shipping_address_name", erpnext.queries.address_query);
@@ -59,13 +60,13 @@ erpnext.sales_common = {
 
 				if (this.frm.fields_dict.selling_price_list) {
 					this.frm.set_query("selling_price_list", function () {
-						return { filters: { selling: 1 } };
+						return { filters: { selling: 1, enabled: 1 } };
 					});
 				}
 
 				if (this.frm.fields_dict.tc_name) {
 					this.frm.set_query("tc_name", function () {
-						return { filters: { selling: 1 } };
+						return { filters: { selling: 1, disabled: 0 } };
 					});
 				}
 
@@ -81,7 +82,12 @@ erpnext.sales_common = {
 						}
 						return {
 							query: "erpnext.controllers.queries.item_query",
-							filters: { is_sales_item: 1, customer: customer, has_variants: 0 },
+							filters: {
+								is_sales_item: 1,
+								customer: customer,
+								has_variants: 0,
+								company: me.frm.doc.company,
+							},
 						};
 					});
 				}
@@ -196,8 +202,23 @@ erpnext.sales_common = {
 				erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
 			}
 
-			sales_partner() {
+			async sales_partner() {
 				this.apply_pricing_rule();
+				if (!this.frm.fields_dict.commission_rate) return;
+
+				const partner = this.frm.doc.sales_partner;
+				const rate = partner
+					? await frappe.xcall(
+							"erpnext.setup.doctype.sales_partner.sales_partner.get_commission_rate",
+							{
+								sales_partner: partner,
+							}
+					  )
+					: 0;
+				if (partner === this.frm.doc.sales_partner) {
+					await this.frm.set_value("commission_rate", rate);
+					this.calculate_commission();
+				}
 			}
 
 			campaign() {
@@ -268,8 +289,17 @@ erpnext.sales_common = {
 				}
 			}
 
-			sales_person(doc, cdt, cdn) {
-				var row = frappe.get_doc(cdt, cdn);
+			async sales_person(doc, cdt, cdn) {
+				const row = frappe.get_doc(cdt, cdn);
+				const sales_person = row.sales_person;
+				const commission_rate = sales_person
+					? await frappe.xcall(
+							"erpnext.setup.doctype.sales_person.sales_person.get_commission_rate",
+							{ sales_person }
+					  )
+					: 0;
+				if (row.sales_person !== sales_person) return;
+				await frappe.model.set_value(cdt, cdn, "commission_rate", flt(commission_rate));
 				this.calculate_incentive(row);
 				refresh_field("incentives", row.name, row.parentfield);
 			}
@@ -280,23 +310,39 @@ erpnext.sales_common = {
 				}
 
 				this.set_actual_qty(doc, cdt, cdn);
+
+				if (cdt !== "Packed Item" && doc.packed_items) {
+					doc.packed_items
+						.filter(
+							(item) =>
+								item.parent_detail_docname === cdn ||
+								(/^\d+$/.test(String(item.parent_detail_docname)) &&
+									Number(item.parent_detail_docname) === locals[cdt][cdn].idx)
+						)
+						.forEach((item) => {
+							frappe.model.set_value(
+								item.doctype,
+								item.name,
+								"warehouse",
+								locals[cdt][cdn].warehouse
+							);
+						});
+				}
 			}
 
 			set_actual_qty(doc, cdt, cdn) {
 				let row = locals[cdt][cdn];
-				let sales_doctypes = ["Sales Invoice", "Delivery Note", "Sales Order"];
+				let sales_doctypes = ["Sales Invoice", "Delivery Note", "Sales Order", "Quotation"];
 
 				if (row.item_code && row.warehouse && sales_doctypes.includes(doc.doctype)) {
-					frappe.call({
+					return this.frm.call({
 						method: "erpnext.stock.get_item_details.get_bin_details",
+						child: row,
 						args: {
 							item_code: row.item_code,
 							warehouse: row.warehouse,
-						},
-						callback(r) {
-							if (r.message) {
-								frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
-							}
+							company: doc.company,
+							include_child_warehouses: true,
 						},
 					});
 				}
@@ -331,9 +377,13 @@ erpnext.sales_common = {
 				if (this.frm.doc.commission_rate > 100) {
 					this.frm.set_value("commission_rate", 100);
 					frappe.throw(
-						`${__(
-							frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)
-						)} ${__("cannot be greater than 100")}`
+						__("{0} cannot be greater than 100", [
+							frappe.meta.get_translated_label(
+								this.frm.doc.doctype,
+								"commission_rate",
+								this.frm.doc.name
+							),
+						])
 					);
 				}
 
@@ -365,12 +415,10 @@ erpnext.sales_common = {
 			}
 
 			calculate_incentive(row) {
-				if (row.allocated_amount) {
-					row.incentives = flt(
-						(row.allocated_amount * row.commission_rate) / 100.0,
-						precision("incentives", row)
-					);
-				}
+				row.incentives = flt(
+					(flt(row.allocated_amount) * flt(row.commission_rate)) / 100.0,
+					precision("incentives", row)
+				);
 			}
 
 			set_dynamic_labels() {
@@ -585,37 +633,40 @@ erpnext.sales_common = {
 };
 
 erpnext.pre_sales = {
+	// also used by the Opportunity Kanban board
+	lost_reason_fields: function (doctype) {
+		return [
+			{
+				fieldtype: "Table MultiSelect",
+				label: __("Lost Reasons"),
+				fieldname: "lost_reason",
+				options:
+					doctype === "Opportunity"
+						? "Opportunity Lost Reason Detail"
+						: "Quotation Lost Reason Detail",
+				reqd: 1,
+			},
+			{
+				fieldtype: "Table MultiSelect",
+				label: __("Competitors"),
+				fieldname: "competitors",
+				options: "Competitor Detail",
+			},
+			{
+				fieldtype: "Small Text",
+				label: __("Detailed Reason"),
+				fieldname: "detailed_reason",
+			},
+		];
+	},
+
 	set_as_lost: function (doctype) {
 		frappe.ui.form.on(doctype, {
 			set_as_lost_dialog: function (frm) {
 				var dialog = new frappe.ui.Dialog({
 					title: __("Set as Lost"),
-					fields: [
-						{
-							fieldtype: "Table MultiSelect",
-							label: __("Lost Reasons"),
-							fieldname: "lost_reason",
-							options:
-								frm.doctype === "Opportunity"
-									? "Opportunity Lost Reason Detail"
-									: "Quotation Lost Reason Detail",
-							reqd: 1,
-						},
-						{
-							fieldtype: "Table MultiSelect",
-							label: __("Competitors"),
-							fieldname: "competitors",
-							options: "Competitor Detail",
-						},
-						{
-							fieldtype: "Small Text",
-							label: __("Detailed Reason"),
-							fieldname: "detailed_reason",
-						},
-					],
-					primary_action: function () {
-						let values = dialog.get_values();
-
+					fields: erpnext.pre_sales.lost_reason_fields(frm.doctype),
+					primary_action: function (values) {
 						frm.call({
 							doc: frm.doc,
 							method: "declare_enquiry_lost",

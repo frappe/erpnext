@@ -39,9 +39,12 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "MultiSelectList",
 			options: "Account",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Account", txt, {
+				return erpnext.utils.get_link_options("Account", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
+			},
+			on_change: function () {
+				toggle_reporting_date_rate_filter().then(() => frappe.query_report.refresh());
 			},
 		},
 		{
@@ -81,7 +84,7 @@ frappe.query_reports["General Ledger"] = {
 				let party_type = frappe.query_report.get_filter_value("party_type");
 				if (!party_type) return;
 
-				return frappe.db.get_link_options(party_type, txt);
+				return erpnext.utils.get_link_options(party_type, txt);
 			},
 			on_change: function () {
 				var party_type = frappe.query_report.get_filter_value("party_type");
@@ -155,7 +158,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "MultiSelectList",
 			options: "Cost Center",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Cost Center", txt, {
+				return erpnext.utils.get_link_options("Cost Center", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -166,7 +169,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "MultiSelectList",
 			options: "Project",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Project", txt, {
+				return erpnext.utils.get_link_options("Project", txt, {
 					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
@@ -175,7 +178,7 @@ frappe.query_reports["General Ledger"] = {
 			fieldname: "include_dimensions",
 			label: __("Consider Accounting Dimensions"),
 			fieldtype: "Check",
-			default: 1,
+			default: frappe.boot.sysdefaults.disable_include_dimensions ? 0 : 1,
 		},
 		{
 			fieldname: "disable_opening_balance_calculation",
@@ -210,6 +213,15 @@ frappe.query_reports["General Ledger"] = {
 			fieldtype: "Check",
 		},
 		{
+			fieldname: "convert_at_reporting_date_rate",
+			label: __("Convert at Reporting Date Exchange Rate"),
+			fieldtype: "Check",
+			hidden: 1,
+			description: __(
+				"Convert company currency amounts to account currency at the exchange rate on To Date"
+			),
+		},
+		{
 			fieldname: "add_values_in_transaction_currency",
 			label: __("Add Columns in Transaction Currency"),
 			fieldtype: "Check",
@@ -232,6 +244,31 @@ frappe.query_reports["General Ledger"] = {
 	],
 	collapsible_filters: true,
 	separate_check_filters: true,
+	onload: function () {
+		toggle_reporting_date_rate_filter();
+	},
 };
+
+async function toggle_reporting_date_rate_filter() {
+	const filter = frappe.query_report.get_filter("convert_at_reporting_date_rate");
+	const accounts = frappe.query_report.get_filter_value("account");
+	const company_currency = erpnext.get_currency(frappe.query_report.get_filter_value("company"));
+
+	let in_account_currency = false;
+	if (accounts?.length) {
+		const currencies = await frappe.db.get_list("Account", {
+			filters: { name: ["in", accounts] },
+			fields: ["account_currency"],
+			group_by: "account_currency",
+		});
+		in_account_currency = currencies.length === 1 && currencies[0].account_currency !== company_currency;
+	}
+
+	filter.df.hidden = !in_account_currency;
+	filter.refresh();
+	if (!in_account_currency && filter.get_value()) {
+		filter.set_value(0);
+	}
+}
 
 erpnext.utils.add_dimensions("General Ledger", 15);

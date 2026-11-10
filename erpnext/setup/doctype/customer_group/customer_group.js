@@ -7,7 +7,7 @@ frappe.ui.form.on("Customer Group", {
 			return {
 				filters: {
 					is_group: 1,
-					name: ["!=", cur_frm.doc.customer_group_name],
+					name: ["!=", doc.customer_group_name],
 				},
 			};
 		});

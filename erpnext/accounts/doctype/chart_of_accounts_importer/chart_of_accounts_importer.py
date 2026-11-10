@@ -8,6 +8,7 @@ from functools import reduce
 
 import frappe
 from frappe import _
+from frappe.core.doctype.file.utils import find_file_by_url
 from frappe.desk.form.linked_with import get_linked_fields
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
@@ -45,9 +46,7 @@ def validate_columns(data):
 	if not data:
 		frappe.throw(_("No data found. Seems like you uploaded a blank file"))
 
-	no_of_columns = max([len(d) for d in data])
-
-	if no_of_columns != 8:
+	if any(len(row) != 8 for row in data):
 		frappe.throw(
 			_(
 				"Columns are not according to template. Please compare the uploaded file with standard template"
@@ -58,19 +57,27 @@ def validate_columns(data):
 
 @frappe.whitelist()
 def validate_company(company: str):
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	parent_company, allow_account_creation_against_child_company = frappe.get_cached_value(
 		"Company", company, ["parent_company", "allow_account_creation_against_child_company"]
 	)
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		msg = _("{} is a child company.").format(frappe.bold(company)) + " "
-		msg += _("Please import accounts against parent company or enable {} in company master.").format(
+		msg = _("{0} is a child company.").format(frappe.bold(company)) + " "
+		msg += _("Please import accounts against parent company or enable {0} in company master.").format(
 			frappe.bold(_("Allow Account Creation Against Child Company"))
 		)
 		frappe.throw(msg, title=_("Wrong Company"))
 
 	if frappe.db.get_all("GL Entry", {"company": company}, "name", limit=1):
-		return False
+		frappe.throw(
+			_(
+				"Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
+			)
+		)
+
+	validate_user_perms(company)
 
 
 @frappe.whitelist()
@@ -79,18 +86,24 @@ def import_coa(file_name: str, company: str):
 
 	# delete existing data for accounts
 	frappe.has_permission("Company", "write", company, throw=True)
-	unset_existing_data(company)
 
 	# create accounts
 	file_doc, extension = get_file(file_name)
+	validate_accounts(file_doc, extension)
 
 	if extension == "csv":
 		data = generate_data_from_csv(file_doc)
 	else:
 		data = generate_data_from_excel(file_doc, extension)
 
-	frappe.local.flags.ignore_root_company_validation = True
+	validate_columns(data)
 	forest = build_forest(data)
+
+	validate_company(company)
+
+	unset_existing_data(company)
+
+	frappe.local.flags.ignore_root_company_validation = True
 	create_charts(company, custom_chart=forest, from_coa_importer=True)
 
 	# trigger on_update for company to reset default accounts
@@ -98,7 +111,10 @@ def import_coa(file_name: str, company: str):
 
 
 def get_file(file_name):
-	file_doc = frappe.get_doc("File", {"file_url": file_name})
+	file_doc = find_file_by_url(file_name)
+	if not file_doc:
+		raise frappe.PermissionError
+
 	parts = file_doc.get_extension()
 	extension = parts[1]
 	extension = extension.lstrip(".")
@@ -116,25 +132,9 @@ def get_file(file_name):
 def generate_data_from_csv(file_doc, as_dict=False):
 	"""read csv file and return the generated nested tree"""
 
-	file_path = file_doc.get_full_path()
-
-	data = []
-	with open(file_path) as in_file:
-		csv_reader = list(csv.reader(in_file))
-		headers = csv_reader[0]
-		del csv_reader[0]  # delete top row and headers row
-
-		for row in csv_reader:
-			if as_dict:
-				data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
-			else:
-				if not row[1] and len(row) > 1:
-					row[1] = row[0]
-					row[3] = row[2]
-				data.append(row)
-
-	# convert csv data
-	return data
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
+	with open(file_doc.get_full_path()) as in_file:
+		return generate_data_from_rows(list(csv.reader(in_file)), as_dict)
 
 
 def generate_data_from_excel(file_doc, extension, as_dict=False):
@@ -145,13 +145,19 @@ def generate_data_from_excel(file_doc, extension, as_dict=False):
 	elif extension == "xls":
 		rows = read_xls_file_from_attached_file(content)
 
-	data = []
-	headers = rows[0]
-	del rows[0]
+	return generate_data_from_rows(rows, as_dict)
 
-	for row in rows:
+
+def generate_data_from_rows(rows, as_dict=False):
+	rows = [row for row in rows if any(cstr(value).strip() for value in row)]
+	validate_columns(rows[1:])
+	validate_columns(rows[:1])
+
+	headers = rows[0]
+	data = []
+	for row in rows[1:]:
 		if as_dict:
-			data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
+			data.append({frappe.scrub(cstr(header)): row[index] for index, header in enumerate(headers)})
 		else:
 			if not row[1]:
 				row[1] = row[0]
@@ -167,6 +173,8 @@ def get_coa(
 ):
 	"""called by tree view (to fetch node's children)"""
 
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	file_doc, extension = get_file(file_name)
 	parent = None if parent == _("All Accounts") else parent
 
@@ -177,9 +185,9 @@ def get_coa(
 
 	validate_columns(data)
 	validate_accounts(file_doc, extension)
+	forest = build_forest(data)
 
 	if not for_validate:
-		forest = build_forest(data)
 		accounts = build_tree_from_json(
 			"", chart_data=forest, from_coa_importer=True
 		)  # returns a list of dict in a tree render-able form
@@ -207,6 +215,7 @@ def build_forest(data):
 	        }
 	}
 	"""
+	validate_columns(data)
 
 	# set the value of nested dictionary
 	def set_nested(d, path, value):
@@ -214,30 +223,25 @@ def build_forest(data):
 		return d
 
 	# returns the path of any node in list format
-	def return_parent(data, child):
-		from frappe import _
-
-		for row in data:
-			account_name, parent_account, account_number, parent_account_number = row[0:4]
-			if account_number:
-				account_name = f"{account_number} - {account_name}"
-			if parent_account_number:
-				parent_account_number = cstr(parent_account_number).strip()
-				parent_account = f"{parent_account_number} - {parent_account}"
-
-			if parent_account == account_name == child:
-				return [parent_account]
-			elif account_name == child:
-				parent_account_list = return_parent(data, parent_account)
-				if not parent_account_list and parent_account:
-					frappe.throw(
-						_("The parent account {0} does not exists in the uploaded template").format(
-							frappe.bold(parent_account)
-						)
+	def return_parent(parent_accounts, child):
+		path = []
+		while child:
+			if child in path:
+				frappe.throw(_("Circular reference found for account {0}").format(frappe.bold(child)))
+			path.append(child)
+			parent_account = parent_accounts[child]
+			if parent_account == child:
+				break
+			if parent_account and parent_account not in parent_accounts:
+				frappe.throw(
+					_("The parent account {0} does not exist in the uploaded template").format(
+						frappe.bold(parent_account)
 					)
-				return [child, *parent_account_list]
+				)
+			child = parent_account
+		return path
 
-	charts_map, paths = {}, []
+	charts_map, parent_accounts = {}, {}
 
 	line_no = 2
 	error_messages = []
@@ -255,12 +259,22 @@ def build_forest(data):
 		) = i
 
 		if not account_name:
-			error_messages.append(f"Row {line_no}: Please enter Account Name")
+			error_messages.append(_("Row {0}: Please enter Account Name").format(line_no))
 
 		name = account_name
 		if account_number:
 			account_number = cstr(account_number).strip()
 			account_name = f"{account_number} - {account_name}"
+		if parent_account_number:
+			parent_account = f"{cstr(parent_account_number).strip()} - {parent_account}"
+		parent_accounts[account_name] = parent_account
+
+		if account_name in charts_map:
+			error_messages.append(
+				_("Row {0}: Account {1} is duplicated. Use a different name or account number").format(
+					line_no, frappe.bold(account_name)
+				)
+			)
 
 		charts_map[account_name] = {}
 		charts_map[account_name]["account_name"] = name
@@ -274,15 +288,14 @@ def build_forest(data):
 			charts_map[account_name]["root_type"] = root_type
 		if account_currency:
 			charts_map[account_name]["account_currency"] = account_currency
-		path = return_parent(data, account_name)[::-1]
-		paths.append(path)  # List of path is created
 		line_no += 1
 
 	if error_messages:
 		frappe.throw("<br>".join(error_messages))
 
 	out = {}
-	for path in paths:
+	for account_name in charts_map:
+		path = return_parent(parent_accounts, account_name)[::-1]
 		for n, account_name in enumerate(path):
 			set_nested(
 				out, path[: n + 1], charts_map[account_name]
@@ -293,8 +306,10 @@ def build_forest(data):
 
 def build_response_as_excel(writer):
 	filename = frappe.generate_hash("", 10)
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- temporary file with a generated name
 	with open(filename, "wb") as f:
 		f.write(cstr(writer.getvalue()).encode("utf-8"))
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- temporary file with a generated name
 	f = open(filename)
 	reader = csv.reader(f)
 
@@ -313,6 +328,8 @@ def build_response_as_excel(writer):
 
 @frappe.whitelist()
 def download_template(file_type: str, template_type: str, company: str):
+	frappe.has_permission("Chart of Accounts Importer", throw=True)
+
 	writer = get_template(template_type, company)
 
 	if file_type == "CSV":
@@ -340,14 +357,14 @@ def get_template(template_type, company):
 
 	if template_type == "Blank Template":
 		for root_type in get_root_types():
-			writer.writerow(["", "", "", "", 1, "", root_type])
+			writer.writerow(["", "", "", "", 1, "", root_type, ""])
 
 		for account in get_mandatory_group_accounts():
-			writer.writerow(["", "", "", "", 1, account, "Asset"])
+			writer.writerow(["", "", "", "", 1, account, "Asset", ""])
 
 		for account_type in get_mandatory_account_types():
 			writer.writerow(
-				["", "", "", "", 0, account_type.get("account_type"), account_type.get("root_type")]
+				["", "", "", "", 0, account_type.get("account_type"), account_type.get("root_type"), ""]
 			)
 	else:
 		writer = get_sample_template(writer, company)
@@ -357,6 +374,7 @@ def get_template(template_type, company):
 
 def get_sample_template(writer, company):
 	currency = frappe.db.get_value("Company", company, "default_currency")
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 	with open(os.path.join(os.path.dirname(__file__), "coa_sample_template.csv")) as f:
 		for row in f:
 			row = [*row.strip().split(","), currency]
@@ -365,7 +383,6 @@ def get_sample_template(writer, company):
 	return writer
 
 
-@frappe.whitelist()
 def validate_accounts(file_doc: Document, extension: str):
 	if extension == "csv":
 		accounts = generate_data_from_csv(file_doc, as_dict=True)
@@ -374,6 +391,8 @@ def validate_accounts(file_doc: Document, extension: str):
 
 	accounts_dict = {}
 	for account in accounts:
+		if not account.get("account_name"):
+			frappe.throw(_("Please enter Account Name for every row in the uploaded template"))
 		accounts_dict.setdefault(account["account_name"], account)
 		if "parent_account" not in account:
 			msg = _(
@@ -386,6 +405,18 @@ def validate_accounts(file_doc: Document, extension: str):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
 	validate_root(accounts_dict)
+
+	account_types = {account.get("account_type") for account in accounts}
+	missing = [
+		_(account["account_type"])
+		for account in get_mandatory_account_types()
+		if account["account_type"] not in account_types
+	]
+	if missing:
+		frappe.throw(
+			_("Please add accounts for the following Account Types: {0}").format(", ".join(missing)),
+			title=_("Missing Account Types"),
+		)
 
 	return [True, len(accounts)]
 
@@ -452,23 +483,37 @@ def get_mandatory_account_types():
 
 def unset_existing_data(company):
 	# remove accounts data from company
-
 	fieldnames = get_linked_fields("Account").get("Company", {}).get("fieldname", [])
-	linked = [{"fieldname": name} for name in fieldnames]
-	update_values = {d.get("fieldname"): "" for d in linked}
+	frappe.db.set_value("Company", company, dict.fromkeys(fieldnames, ""))
 
-	frappe.db.set_value("Company", company, update_values, update_values)
+	# import_coa authorizes company replacement; Accounts Manager cannot delete purchase templates.
+	for doctype in ("Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"):
+		for name in frappe.get_all(doctype, filters={"company": company}, pluck="name"):
+			frappe.delete_doc(doctype, name, ignore_permissions=True)
 
-	# remove accounts data from various doctypes
-	for doctype in [
-		"Account",
-		"Party Account",
-		"Mode of Payment Account",
-		"Tax Withholding Account",
-		"Sales Taxes and Charges Template",
-		"Purchase Taxes and Charges Template",
-	]:
-		frappe.get_query(doctype, delete=True, filters={"company": company}, ignore_permissions=False).run()
+	for doctype in ("Party Account", "Mode of Payment Account", "Tax Withholding Account"):
+		frappe.db.delete(doctype, {"company": company})
+
+	# Delete children before their parents, preserving link checks and account validation.
+	for name in frappe.get_all("Account", filters={"company": company}, order_by="lft desc", pluck="name"):
+		frappe.delete_doc("Account", name)
+
+
+def validate_user_perms(company):
+	# User Permission Check for Account Deletion
+	company_accounts_count = frappe.get_query(
+		"Account", fields=[{"COUNT": "name"}], filters={"company": company}
+	).run()[0][0]
+	company_accounts_user_has_access_to = frappe.get_query(
+		"Account", fields=[{"COUNT": "name"}], filters={"company": company}, ignore_permissions=False
+	).run()[0][0]
+
+	if company_accounts_count != company_accounts_user_has_access_to:
+		frappe.throw(
+			_("Accounts cannot be removed, as user doesn't have access to all the accounts of {0}").format(
+				frappe.bold(company)
+			)
+		)
 
 
 def set_default_accounts(company):
@@ -478,10 +523,22 @@ def set_default_accounts(company):
 	company.update(
 		{
 			"default_receivable_account": frappe.db.get_value(
-				"Account", {"company": company.name, "account_type": "Receivable", "is_group": 0}
+				"Account",
+				{
+					"company": company.name,
+					"account_type": "Receivable",
+					"is_group": 0,
+					"account_currency": company.default_currency,
+				},
 			),
 			"default_payable_account": frappe.db.get_value(
-				"Account", {"company": company.name, "account_type": "Payable", "is_group": 0}
+				"Account",
+				{
+					"company": company.name,
+					"account_type": "Payable",
+					"is_group": 0,
+					"account_currency": company.default_currency,
+				},
 			),
 			"default_provisional_account": frappe.db.get_value(
 				"Account",
@@ -491,5 +548,9 @@ def set_default_accounts(company):
 	)
 
 	company.save()
+	company.update_default_account = True
+	company.set_default_accounts()
+	if company.default_cash_account:
+		company.set_mode_of_payment_account()
 	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()

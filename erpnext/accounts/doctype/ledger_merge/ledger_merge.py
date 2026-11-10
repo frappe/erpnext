@@ -24,6 +24,7 @@ class LedgerMerge(Document):
 
 		account: DF.Link
 		account_name: DF.Data
+		account_type: DF.Data | None
 		company: DF.Link
 		is_group: DF.Check
 		merge_accounts: DF.Table[LedgerMergeAccounts]
@@ -40,6 +41,7 @@ class LedgerMerge(Document):
 
 		job_id = f"ledger_merge::{self.name}"
 		if not is_job_enqueued(job_id):
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-enqueue-without-after-commit -- user action, nothing written before the enqueue
 			enqueue(
 				start_merge,
 				queue="default",
@@ -54,9 +56,11 @@ class LedgerMerge(Document):
 		return False
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def form_start_merge(docname: str):
-	return frappe.get_doc("Ledger Merge", docname).start_merge()
+	lm_doc = frappe.get_doc("Ledger Merge", docname)
+	lm_doc.check_permission("write")
+	return lm_doc.start_merge()
 
 
 def start_merge(docname):
@@ -65,6 +69,7 @@ def start_merge(docname):
 	total = len(ledger_merge.merge_accounts)
 	for row in ledger_merge.merge_accounts:
 		if not row.merged:
+			frappe.db.savepoint("ledger_merge_row")
 			try:
 				merge_account(
 					row.account,
@@ -72,15 +77,17 @@ def start_merge(docname):
 				)
 				row.db_set("merged", 1)
 				if not frappe.in_test:
+					# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 					frappe.db.commit()
 				successful_merges += 1
 				frappe.publish_realtime(
 					"ledger_merge_progress",
 					{"ledger_merge": ledger_merge.name, "current": successful_merges, "total": total},
+					doctype=ledger_merge.doctype,
+					docname=ledger_merge.name,
 				)
 			except Exception:
-				if not frappe.in_test:
-					frappe.db.rollback()
+				frappe.db.rollback(save_point="ledger_merge_row")
 				ledger_merge.log_error("Ledger merge failed")
 			finally:
 				if successful_merges == total:
@@ -90,4 +97,9 @@ def start_merge(docname):
 				else:
 					ledger_merge.db_set("status", "Error")
 
-	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})
+	frappe.publish_realtime(
+		"ledger_merge_refresh",
+		{"ledger_merge": ledger_merge.name},
+		doctype=ledger_merge.doctype,
+		docname=ledger_merge.name,
+	)

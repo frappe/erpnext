@@ -1,3 +1,4 @@
+import frappe
 from frappe import qb
 
 
@@ -13,5 +14,8 @@ def execute():
 		"Payment Reconciliation Allocation",
 	]
 	for x in doctypes:
+		# child tables may not exist yet on sites where this pre-model-sync patch runs first
+		if not frappe.db.table_exists(x):
+			continue
 		dt = qb.DocType(x)
 		qb.from_(dt).delete().run()

@@ -57,7 +57,7 @@
   },
   {
    "fieldname": "description",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Description",
    "read_only": 1
   },
@@ -116,7 +116,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-06-23 16:52:37.669110",
+ "modified": "2026-09-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Item",

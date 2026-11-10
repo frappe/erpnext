@@ -4,9 +4,10 @@
  "allow_rename": 1,
  "autoname": "field:short_name",
  "creation": "2016-01-17 11:04:52.761731",
- "description": "Manufacturers used in Items",
+ "description": "A company that makes the items you buy or sell.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "documentation": "https://docs.frappe.io/erpnext/user/manual/en/manufacturer",
  "engine": "InnoDB",
  "field_order": [
   "short_name",
@@ -85,9 +86,9 @@
    "fieldtype": "Section Break"
   }
  ],
- "icon": "fa fa-certificate",
+ "icon": "factory",
  "links": [],
- "modified": "2024-03-27 13:10:04.558108",
+ "modified": "2026-08-21 23:11:44.296381",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Manufacturer",
@@ -113,8 +114,17 @@
    "report": 1,
    "role": "Stock User",
    "share": 1
+  },
+  {
+   "role": "Accounts Manager",
+   "select": 1
+  },
+  {
+   "role": "Accounts User",
+   "select": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "short_name, full_name",
  "show_name_in_global_search": 1,
  "sort_field": "creation",

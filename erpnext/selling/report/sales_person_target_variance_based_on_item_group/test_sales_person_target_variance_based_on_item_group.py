@@ -65,6 +65,72 @@ class TestSalesPersonTargetVarianceBasedOnItemGroup(ERPNextTestSuite):
 			[50, 10, -40],
 		)
 
+	def test_sales_team_scoped_to_report_doctype(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		distribution = create_target_distribution(self.fiscal_year)
+		person_on_order = create_sales_target_doc(
+			"Sales Person",
+			"sales_person_name",
+			"_Test Target Person Order",
+			self.fiscal_year,
+			distribution.name,
+		)
+		person_on_invoice = create_sales_target_doc(
+			"Sales Person",
+			"sales_person_name",
+			"_Test Target Person Invoice",
+			self.fiscal_year,
+			distribution.name,
+		)
+
+		so = make_sales_order(rate=1000, qty=20, do_not_submit=True)
+		so.set("sales_team", [{"sales_person": person_on_order.name, "allocated_percentage": 100}])
+		so.submit()
+
+		# a Sales Invoice sharing the order's name must not add its sales person to the order
+		si = create_sales_invoice(rate=1000, qty=5, do_not_save=True)
+		si.set("sales_team", [{"sales_person": person_on_invoice.name, "allocated_percentage": 100}])
+		si.insert()
+		frappe.rename_doc("Sales Invoice", si.name, so.name, force=True)
+
+		rows = {
+			r.get("sales_person"): frappe._dict(r)
+			for r in execute(
+				frappe._dict(
+					{
+						"fiscal_year": self.fiscal_year,
+						"doctype": "Sales Order",
+						"period": "Yearly",
+						"target_on": "Quantity",
+					}
+				)
+			)[1]
+		}
+		self.assertEqual(flt(rows[person_on_order.name].total_achieved, 2), 20)
+		self.assertEqual(flt(rows[person_on_invoice.name].total_achieved, 2), 0)
+
+	def test_company_filter_excludes_other_company_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_company_filter,
+		)
+
+		check_company_filter(self, "Sales Person", "sales_person_name", execute)
+
+	def test_duplicate_target_inputs_count_actuals_once(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_duplicate_targets,
+		)
+
+		check_duplicate_targets(self, "Sales Person", "sales_person_name", execute)
+
+	def test_group_target_includes_descendant_sales(self):
+		from erpnext.selling.report.territory_target_variance_based_on_item_group.test_territory_target_variance_based_on_item_group import (
+			check_group_target,
+		)
+
+		check_group_target(self, "Sales Person", "sales_person_name", execute)
+
 
 def create_target_distribution(fiscal_year):
 	distribution = frappe.new_doc("Monthly Distribution")

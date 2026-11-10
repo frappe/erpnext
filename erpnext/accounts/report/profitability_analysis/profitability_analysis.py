@@ -4,15 +4,20 @@
 
 import frappe
 from frappe import _, qb
+from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Criterion
 from frappe.utils import cstr, flt
+from pypika.terms import Bracket, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
 )
-from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from erpnext.accounts.report.trial_balance.trial_balance import (
+	validate_company_permission,
+	validate_filters,
+)
 from erpnext.accounts.utils import get_zero_cutoff
 
 value_fields = ("income", "expense", "gross_profit_loss")
@@ -34,23 +39,28 @@ def execute(filters=None):
 
 def get_accounts_data(based_on, company):
 	if based_on == "Cost Center":
-		cc = qb.DocType("Cost Center")
-		return (
-			qb.from_(cc)
-			.select(
-				cc.name,
-				cc.parent_cost_center.as_("parent_account"),
-				cc.cost_center_name.as_("account_name"),
-				cc.lft,
-				cc.rgt,
-			)
-			.where(cc.company.eq(company))
-			.orderby(cc.name)
-			.run(as_dict=True)
+		cost_centers = frappe.get_list(
+			"Cost Center",
+			fields=[
+				"name",
+				"parent_cost_center as parent_account",
+				"cost_center_name as account_name",
+				"lft",
+				"rgt",
+			],
+			filters={"company": company},
+			order_by="name",
 		)
+		# show a cost center as a root when the user cannot read its parent
+		names = {cc.name for cc in cost_centers}
+		for cc in cost_centers:
+			if cc.parent_account not in names:
+				cc.parent_account = None
+		return cost_centers
 	elif based_on == "Project":
-		return frappe.get_all("Project", fields=["name"], filters={"company": company}, order_by="name")
+		return frappe.get_list("Project", fields=["name"], filters={"company": company}, order_by="name")
 	else:
+		validate_company_permission(company)
 		filters = {}
 		doctype = frappe.unscrub(based_on)
 		has_company = frappe.db.has_column(doctype, "company")
@@ -58,7 +68,7 @@ def get_accounts_data(based_on, company):
 		if has_company:
 			filters.update({"company": company})
 
-		return frappe.get_all(doctype, fields=["name"], filters=filters, order_by="name")
+		return frappe.get_list(doctype, fields=["name"], filters=filters, order_by="name")
 
 
 def get_data(accounts, filters, based_on):
@@ -82,6 +92,7 @@ def get_data(accounts, filters, based_on):
 		fieldname,
 		gl_entries_by_account,
 		ignore_closing_entries=not flt(filters.get("with_period_closing_entry")),
+		finance_books=get_finance_books(filters),
 	)
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
@@ -212,7 +223,13 @@ def get_columns(filters):
 
 
 def set_gl_entries_by_account(
-	company, from_date, to_date, based_on, gl_entries_by_account, ignore_closing_entries=False
+	company,
+	from_date,
+	to_date,
+	based_on,
+	gl_entries_by_account,
+	ignore_closing_entries=False,
+	finance_books=None,
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	gl = qb.DocType("GL Entry")
@@ -232,6 +249,11 @@ def set_gl_entries_by_account(
 
 	if ignore_closing_entries:
 		conditions.append(gl.voucher_type.ne("Period Closing Voucher"))
+
+	conditions.append(gl.finance_book.isin(["", *(finance_books or [])]) | gl.finance_book.isnull())
+
+	if match_conditions := build_match_conditions("GL Entry"):
+		conditions.append(Bracket(LiteralValue(match_conditions)))
 
 	root_subquery = qb.from_(acc).select(acc.root_type).where(acc.name.eq(gl.account))
 	gl_entries = (
@@ -253,3 +275,18 @@ def set_gl_entries_by_account(
 		gl_entries_by_account.setdefault(entry.based_on, []).append(entry)
 
 	return gl_entries_by_account
+
+
+def get_finance_books(filters) -> list[str]:
+	"""Finance books whose entries are included besides those without a book."""
+	finance_books = [cstr(filters.get("finance_book"))]
+	if filters.get("include_default_book_entries"):
+		company_finance_book = frappe.get_cached_value("Company", filters.company, "default_finance_book")
+		if (
+			filters.get("finance_book")
+			and company_finance_book
+			and filters.finance_book != company_finance_book
+		):
+			frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+		finance_books.append(cstr(company_finance_book))
+	return finance_books

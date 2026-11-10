@@ -1,0 +1,21 @@
+{
+ "columns": "[{\"fieldname\": \"title\", \"label\": \"Title\"}, {\"fieldname\": \"status_field\", \"label\": \"Status\"}, {\"fieldname\": \"schedule_date\", \"label\": \"Required By\"}, {\"fieldname\": \"set_from_warehouse\", \"label\": \"Set Source Warehouse\"}, {\"fieldname\": \"set_warehouse\", \"label\": \"Set Target Warehouse\"}, {\"fieldname\": \"name\", \"label\": \"ID\"}]",
+ "creation": "2026-09-30 21:12:56.826883",
+ "docstatus": 0,
+ "doctype": "List Filter",
+ "filter_name": "To Transfer",
+ "filters": "[[\"Material Request\", \"material_request_type\", \"=\", \"Material Transfer\"], [\"Material Request\", \"status\", \"in\", [\"Pending\", \"Partially Received\"]]]",
+ "for_user": "",
+ "idx": 0,
+ "is_standard": 1,
+ "layout_order": 3,
+ "modified": "2026-09-30 21:12:56.826883",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Material Request-To Transfer",
+ "owner": "Administrator",
+ "reference_doctype": "Material Request",
+ "route_signature": "material_request_type=Material Transfer&status=[\"in\",[\"Pending\",\"Partially Received\"]]",
+ "sort_field": "schedule_date",
+ "sort_order": "asc"
+}

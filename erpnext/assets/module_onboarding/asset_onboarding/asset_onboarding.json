@@ -5,9 +5,6 @@
   },
   {
    "role": "Accounts User"
-  },
-  {
-   "role": "Quality Manager"
   }
  ],
  "creation": "2026-02-23 20:56:50.917521",
@@ -15,30 +12,40 @@
  "doctype": "Module Onboarding",
  "idx": 0,
  "is_complete": 0,
- "modified": "2026-02-26 10:45:47.970714",
+ "modified": "2026-10-04 01:52:52.546249",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Onboarding",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Learn Asset"
-  },
-  {
+   "is_optional": 0,
    "step": "Create Asset Category"
   },
   {
+   "is_optional": 0,
    "step": "Create Asset Item"
   },
   {
-   "step": "Create Asset Location"
-  },
-  {
+   "is_optional": 0,
    "step": "Create Existing Asset"
   },
   {
-   "step": "View Balance Sheet"
+   "is_optional": 1,
+   "step": "View Asset Depreciation"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Asset Movement"
+  },
+  {
+   "is_optional": 1,
+   "step": "Create Asset Maintenance"
+  },
+  {
+   "is_optional": 1,
+   "step": "View Fixed Asset Register"
   }
  ],
- "title": "Assets Setup"
+ "title": "Track what your business owns"
 }

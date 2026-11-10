@@ -4,9 +4,8 @@
 
 import frappe
 from frappe import _
+from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
-
-from erpnext.accounts.utils import validate_field_number
 
 
 class CostCenter(NestedSet):
@@ -37,8 +36,23 @@ class CostCenter(NestedSet):
 		self.name = get_autoname_with_number(self.cost_center_number, self.cost_center_name, self.company)
 
 	def validate(self):
+		self.validate_changes()
 		self.validate_mandatory()
 		self.validate_parent_cost_center()
+
+	def validate_changes(self):
+		previous = self.get_doc_before_save()
+		if not previous:
+			return
+
+		if self.company != previous.company:
+			frappe.throw(_("Company cannot be changed for an existing Cost Center"))
+
+		if cint(self.is_group) != cint(previous.is_group):
+			if cint(self.is_group):
+				self.validate_ledger_to_group()
+			else:
+				self.validate_group_to_ledger()
 
 	def validate_mandatory(self):
 		if self.cost_center_name != self.company and not self.parent_cost_center:
@@ -48,26 +62,37 @@ class CostCenter(NestedSet):
 
 	def validate_parent_cost_center(self):
 		if self.parent_cost_center:
-			if not frappe.db.get_value("Cost Center", self.parent_cost_center, "is_group"):
+			parent = frappe.db.get_value(
+				"Cost Center", self.parent_cost_center, ["is_group", "company"], as_dict=True
+			)
+			if not parent or not parent.is_group:
 				frappe.throw(
 					_("{0} is not a group node. Please select a group node as parent cost center").format(
 						frappe.bold(self.parent_cost_center)
 					)
 				)
+			if parent.company != self.company:
+				frappe.throw(_("Parent Cost Center must belong to the same Company"))
 
 	@frappe.whitelist()
 	def convert_group_to_ledger(self):
+		self.is_group = 0
+		self.save()
+		return 1
+
+	@frappe.whitelist()
+	def convert_ledger_to_group(self):
+		self.is_group = 1
+		self.save()
+		return 1
+
+	def validate_group_to_ledger(self):
 		if self.check_if_child_exists():
 			frappe.throw(_("Cannot convert Cost Center to ledger as it has child nodes"))
 		elif self.check_gle_exists():
 			frappe.throw(_("Cost Center with existing transactions can not be converted to ledger"))
-		else:
-			self.is_group = 0
-			self.save()
-			return 1
 
-	@frappe.whitelist()
-	def convert_ledger_to_group(self):
+	def validate_ledger_to_group(self):
 		if self.if_allocation_exists_against_cost_center():
 			frappe.throw(_("Cost Center with Allocation records can not be converted to a group"))
 		if self.check_if_part_of_cost_center_allocation():
@@ -76,9 +101,6 @@ class CostCenter(NestedSet):
 			)
 		if self.check_gle_exists():
 			frappe.throw(_("Cost Center with existing transactions can not be converted to group"))
-		self.is_group = 1
-		self.save()
-		return 1
 
 	def check_gle_exists(self):
 		return frappe.db.get_value("GL Entry", {"cost_center": self.name})
@@ -121,22 +143,9 @@ class CostCenter(NestedSet):
 				"Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1
 			)
 
-			# exclude company abbr
-			new_parts = newdn.split(" - ")[:-1]
-			# update cost center number and remove from parts
-			if new_parts[0][0].isdigit():
-				if len(new_parts) == 1:
-					new_parts = newdn.split(" ")
-				if new_cost_center.cost_center_number != new_parts[0]:
-					validate_field_number(
-						"Cost Center", self.name, new_parts[0], self.company, "cost_center_number"
-					)
-					self.cost_center_number = new_parts[0]
-					self.db_set("cost_center_number", new_parts[0])
-				new_parts = new_parts[1:]
-
-			# update cost center name
-			cost_center_name = " - ".join(new_parts)
+			cost_center_name = newdn.rsplit(" - ", 1)[0]
+			if new_cost_center.cost_center_number:
+				cost_center_name = cost_center_name.removeprefix(f"{new_cost_center.cost_center_number} - ")
 			if new_cost_center.cost_center_name != cost_center_name:
 				self.cost_center_name = cost_center_name
 				self.db_set("cost_center_name", cost_center_name)
@@ -147,6 +156,6 @@ def on_doctype_update():
 
 
 def get_name_with_number(new_account, account_number):
-	if account_number and not new_account[0].isdigit():
+	if account_number and not new_account.startswith(f"{account_number} - "):
 		new_account = account_number + " - " + new_account
 	return new_account

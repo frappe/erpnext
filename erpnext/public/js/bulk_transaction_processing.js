@@ -25,10 +25,9 @@ $.extend(erpnext.bulk_transaction_processing, {
 					})
 					.then(() => {});
 				if (count_of_rows > 10) {
-					frappe.show_alert("Starting a background job to create {0} {1}", [
-						count_of_rows,
-						__(to_doctype),
-					]);
+					frappe.show_alert(
+						__("Starting a background job to create {0} {1}", [count_of_rows, __(to_doctype)])
+					);
 				}
 			} else {
 				frappe.msgprint(__("Selected document must be in submitted state"));

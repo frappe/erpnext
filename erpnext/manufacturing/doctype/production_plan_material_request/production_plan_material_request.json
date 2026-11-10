@@ -28,6 +28,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "material_request.transaction_date",
    "fieldname": "material_request_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -41,12 +42,14 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:20.526011",
+ "modified": "2026-07-17 22:06:35.428875",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Material Request",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": []

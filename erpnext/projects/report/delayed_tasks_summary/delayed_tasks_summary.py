@@ -6,8 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, nowdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	data = get_data(filters)
 	columns = get_columns()
@@ -17,7 +21,7 @@ def execute(filters=None):
 
 def get_data(filters):
 	conditions = get_conditions(filters)
-	tasks = frappe.get_all(
+	tasks = frappe.get_list(
 		"Task",
 		filters=conditions,
 		fields=[
@@ -56,7 +60,7 @@ def get_data(filters):
 
 
 def get_conditions(filters):
-	conditions = frappe._dict()
+	conditions = frappe._dict(is_template=0, status=["!=", "Cancelled"])
 	keys = ["priority", "status", "project"]
 	for key in keys:
 		if filters.get(key):

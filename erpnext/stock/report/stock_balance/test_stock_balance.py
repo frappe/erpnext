@@ -18,12 +18,17 @@ def stock_balance(filters):
 class TestStockBalance(ERPNextTestSuite):
 	# ----------- utils
 
+	# `_Test Item` is a committed bootstrap item that starts at zero stock in `Stores - _TC`,
+	# so transacting here keeps exact qty/value assertions deterministic.
+	test_warehouse = "Stores - _TC"
+
 	def setUp(self):
-		self.item = make_item()
+		self.item = frappe.get_doc("Item", "_Test Item")
 		self.filters = _dict(
 			{
 				"company": "_Test Company",
 				"item_code": [self.item.name],
+				"warehouse": self.test_warehouse,
 				"from_date": "2020-01-01",
 				"to_date": str(today()),
 			}
@@ -36,7 +41,7 @@ class TestStockBalance(ERPNextTestSuite):
 	def generate_stock_ledger(self, item_code: str, movements):
 		for movement in map(_dict, movements):
 			if "to_warehouse" not in movement:
-				movement.to_warehouse = "_Test Warehouse - _TC"
+				movement.to_warehouse = self.test_warehouse
 			make_stock_entry(item_code=item_code, **movement)
 
 	def assertInvariants(self, rows):
@@ -94,6 +99,138 @@ class TestStockBalance(ERPNextTestSuite):
 		)
 		self.assertInvariants(rows)
 
+	def test_dimension_wise_stock_of_an_opening_reconciliation(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		sr = frappe.new_doc("Stock Reconciliation")
+		sr.update({"purpose": "Opening Stock", "company": "_Test Company"})
+		for plant, qty in ((plant_a, 5), (plant_b, 3)):
+			sr.append(
+				"items",
+				{
+					"item_code": self.item.name,
+					"warehouse": self.test_warehouse,
+					"qty": qty,
+					"valuation_rate": 100,
+					"id_plant": plant,
+				},
+			)
+		sr.insert()
+		sr.submit()
+
+		rows = stock_balance(_dict(self.filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (5, 500), plant_b: (3, 300)},
+		)
+
+	def test_reconciliation_without_dimension_in_dimension_wise_stock(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+			make_plant_dimension,
+		)
+
+		plant_a, _plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+
+		def receive_into_plant_a(qty):
+			receipt = make_stock_entry(
+				item_code=item, to_warehouse=self.test_warehouse, qty=qty, rate=100, do_not_save=True
+			)
+			receipt.items[0].to_id_plant = plant_a
+			receipt.insert().submit()
+
+		receive_into_plant_a(10)
+		make_stock_entry(item_code=item, to_warehouse=self.test_warehouse, qty=5, rate=100)
+		create_stock_reconciliation(item_code=item, warehouse=self.test_warehouse, qty=20, rate=100)
+		receive_into_plant_a(5)
+
+		rows = stock_balance(_dict(self.filters, item_code=[item], show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_a: (15, 1500), None: (10, 1000)},
+		)
+
+	def test_dimension_rows_use_the_pool_rate(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		for field, plant, movement in (
+			("to_id_plant", plant_a, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 100}),
+			("to_id_plant", plant_b, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 200}),
+			("id_plant", plant_a, {"from_warehouse": self.test_warehouse, "qty": 5}),
+		):
+			entry = make_stock_entry(item_code=item, do_not_save=True, **movement)
+			entry.items[0].set(field, plant)
+			entry.insert().submit()
+
+		filters = _dict(self.filters, item_code=[item])
+		rows = stock_balance(_dict(filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val, row.val_rate) for row in rows},
+			{plant_a: (5, 750, 150), plant_b: (10, 1500, 150)},
+		)
+
+		rows = stock_balance(_dict(filters, id_plant=[plant_a]))
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in rows], [(5, 750)])
+
+	def test_dimension_wise_stock_keeps_stranded_pool_value(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import make_plant_dimension
+
+		plant_a, plant_b = make_plant_dimension()
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		entries = []
+		for field, plant, movement in (
+			("to_id_plant", plant_a, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 100}),
+			("id_plant", plant_a, {"from_warehouse": self.test_warehouse, "qty": 10}),
+			("to_id_plant", plant_b, {"to_warehouse": self.test_warehouse, "qty": 10, "rate": 100}),
+		):
+			entry = make_stock_entry(item_code=item, do_not_save=True, **movement)
+			entry.items[0].set(field, plant)
+			entry.insert().submit()
+			entries.append(entry)
+
+		receipt_sle = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entries[0].name}, "name")
+		frappe.db.set_value("Stock Ledger Entry", receipt_sle, "stock_value_difference", 1500)
+
+		filters = _dict(self.filters, item_code=[item])
+		self.assertEqual([(row.bal_qty, row.bal_val) for row in stock_balance(filters)], [(10, 1500)])
+
+		rows = stock_balance(_dict(filters, show_dimension_wise_stock=1))
+		self.assertEqual(
+			{row.id_plant: (row.bal_qty, row.bal_val) for row in rows},
+			{plant_b: (10, 1000), None: (0, 500)},
+		)
+
+	def test_include_zero_stock_items(self):
+		"""Items whose balance nets to zero are hidden by default and shown only when the filter is on."""
+		self.generate_stock_ledger(
+			self.item.name,
+			[
+				_dict(qty=5, rate=10),
+				_dict(qty=5, from_warehouse=self.test_warehouse, to_warehouse=None),
+			],
+		)
+
+		self.assertEqual(stock_balance(self.filters), [])
+
+		rows = stock_balance(self.filters.update({"include_zero_stock_items": 1}))
+		self.assertEqual(rows[0].item_code, self.item.name)
+		self.assertEqual(rows[0].bal_qty, 0)
+		self.assertEqual(rows[0].bal_val, 0)
+
+	def test_show_stock_ageing_data_adds_ageing_columns(self):
+		"""The ageing columns appear only when 'show stock ageing data' is on."""
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10, posting_date="2021-01-01")])
+
+		self.assertNotIn("average_age", stock_balance(self.filters)[0])
+
+		rows = stock_balance(self.filters.update({"show_stock_ageing_data": 1}))
+		self.assertIn("average_age", rows[0])
+		self.assertGreater(rows[0].average_age, 0)  # stock has been held since 2021
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 3})
 	def test_opening_balance(self):
 		self.generate_stock_ledger(
@@ -126,8 +263,11 @@ class TestStockBalance(ERPNextTestSuite):
 		self.assertInvariants(rows)
 
 	def test_item_group(self):
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+
 		self.filters.pop("item_code", None)
 		rows = stock_balance(self.filters.update({"item_group": self.item.item_group}))
+		self.assertTrue(rows)
 		self.assertTrue(all(r.item_group == self.item.item_group for r in rows))
 
 	def test_child_warehouse_balances(self):
@@ -142,15 +282,27 @@ class TestStockBalance(ERPNextTestSuite):
 			msg=f"Expected child warehouse balances \n{rows}",
 		)
 
+	def test_warehouse_type_applies_with_a_warehouse(self):
+		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10, to_warehouse="Stores - _TC")])
+		warehouse_type = (
+			frappe.get_doc(
+				doctype="Warehouse Type", name=f"_Test Unused Type {frappe.generate_hash(length=6)}"
+			)
+			.insert()
+			.name
+		)
+
+		rows = stock_balance(
+			self.filters.update({"warehouse": "All Warehouses - _TC", "warehouse_type": warehouse_type})
+		)
+
+		self.assertFalse([row for row in rows if row.item_code == self.item.name])
+
 	def test_show_item_attr(self):
 		from erpnext.controllers.item_variant import create_variant
 
-		self.item.has_variants = True
-		self.item.append("attributes", {"attribute": "Test Size"})
-		self.item.save()
-
 		attributes = {"Test Size": "Large"}
-		variant = create_variant(self.item.name, attributes)
+		variant = create_variant("_Test Variant Item", attributes)
 		variant.save()
 
 		self.generate_stock_ledger(variant.name, [_dict(qty=5, rate=10)])
@@ -158,21 +310,17 @@ class TestStockBalance(ERPNextTestSuite):
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)
 
-	def test_alt_uom_balance_single_uom(self):
-		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
-		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
-		self.item.save()
-
-		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
-
-		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
-		self.assertEqual(len(rows), 1)
-		self.assertEqual(rows[0].get("alt_uom"), "Box")
-		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 2.0)  # 24 / 12
+	def make_alt_uom_item(self, uoms=None):
+		"""Fresh item with a controlled UOM table; `_Test Item` already carries an alternate
+		UOM, which would shadow the "first alternate" assertions in these tests."""
+		item = make_item(uoms=uoms)
+		self.filters.update({"item_code": [item.name]})
+		return item
 
 	def test_alt_uom_balance_no_alternate_uom(self):
 		"""Alt UOM columns are not added when no items in the report have alt UOMs."""
-		self.generate_stock_ledger(self.item.name, [_dict(qty=5, rate=10)])
+		item = self.make_alt_uom_item()
+		self.generate_stock_ledger(item.name, [_dict(qty=5, rate=10)])
 
 		columns, _ = execute(self.filters.update({"show_alt_uom_balance": 1}))
 		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
@@ -181,24 +329,36 @@ class TestStockBalance(ERPNextTestSuite):
 
 	def test_alt_uom_balance_filter_disabled(self):
 		"""No alt UOM columns are injected when show_alt_uom_balance is not set."""
-		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
-		self.item.save()
+		item = self.make_alt_uom_item(uoms=[{"conversion_factor": 12, "uom": "Box"}])
 
-		self.generate_stock_ledger(self.item.name, [_dict(qty=24, rate=10)])
+		self.generate_stock_ledger(item.name, [_dict(qty=24, rate=10)])
 
 		columns, _ = execute(self.filters)
 		col_fieldnames = [c.get("fieldname") for c in columns if isinstance(c, dict)]
 		self.assertNotIn("alt_uom", col_fieldnames)
 		self.assertNotIn("alt_uom_bal_qty", col_fieldnames)
 
+	def test_alt_uom_balance_single_uom(self):
+		"""Alt UOM columns show correct name and converted qty for an item with one alternate UOM."""
+		item = self.make_alt_uom_item(uoms=[{"conversion_factor": 12, "uom": "Box"}])
+
+		self.generate_stock_ledger(item.name, [_dict(qty=24, rate=10)])
+
+		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0].get("alt_uom"), "Box")
+		self.assertAlmostEqual(rows[0].get("alt_uom_bal_qty"), 2.0)  # 24 / 12
+
 	def test_alt_uom_balance_uses_first_alternate_uom(self):
 		"""When an item has multiple alt UOMs, only the first (lowest idx) is shown."""
-		frappe.get_doc({"doctype": "UOM", "uom_name": "Carton"}).insert(ignore_if_duplicate=True)
-		self.item.append("uoms", {"conversion_factor": 12, "uom": "Box"})
-		self.item.append("uoms", {"conversion_factor": 144, "uom": "Carton"})
-		self.item.save()
+		item = self.make_alt_uom_item(
+			uoms=[
+				{"conversion_factor": 12, "uom": "Box"},
+				{"conversion_factor": 144, "uom": "_Test UOM 1"},
+			]
+		)
 
-		self.generate_stock_ledger(self.item.name, [_dict(qty=144, rate=10)])
+		self.generate_stock_ledger(item.name, [_dict(qty=144, rate=10)])
 
 		rows = stock_balance(self.filters.update({"show_alt_uom_balance": 1}))
 		self.assertEqual(len(rows), 1)

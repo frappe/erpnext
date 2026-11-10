@@ -6,8 +6,10 @@ import copy
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Coalesce, Max, Sum
-from frappe.utils import cint, date_diff, flt, getdate
+from frappe.query_builder.functions import Coalesce, Max, Min, Sum
+from frappe.utils import cint, flt, getdate
+
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
@@ -30,8 +32,8 @@ def validate_filters(filters):
 
 	if not from_date and to_date:
 		frappe.throw(_("From and To Dates are required."))
-	elif date_diff(to_date, from_date) < 0:
-		frappe.throw(_("To Date cannot be before From Date."))
+
+	validate_date_range({"from_date": getdate(from_date), "to_date": getdate(to_date)})
 
 
 def get_data(filters):
@@ -47,12 +49,10 @@ def get_data(filters):
 			# non-grouped columns are constant per grouped mr.name / item_code -> Max() keeps the
 			# GROUP BY valid on postgres while returning the same value MySQL picked.
 			Max(mr.transaction_date).as_("date"),
-			Max(mr_item.schedule_date).as_("required_date"),
+			Min(mr_item.schedule_date).as_("required_date"),
 			mr_item.item_code.as_("item_code"),
 			Sum(Coalesce(mr_item.qty, 0)).as_("qty"),
 			Sum(Coalesce(mr_item.stock_qty, 0)).as_("stock_qty"),
-			Max(Coalesce(mr_item.uom, "")).as_("uom"),
-			Max(Coalesce(mr_item.stock_uom, "")).as_("stock_uom"),
 			Sum(Coalesce(mr_item.ordered_qty, 0)).as_("ordered_qty"),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
 			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.received_qty, 0))).as_(
@@ -60,8 +60,6 @@ def get_data(filters):
 			),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
 			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
-			Max(mr_item.item_name).as_("item_name"),
-			Max(mr_item.description).as_("description"),
 			Max(mr.company).as_("company"),
 		)
 		.where(
@@ -75,8 +73,30 @@ def get_data(filters):
 	query = get_conditions(filters, query, mr, mr_item)  # add conditional conditions
 
 	query = query.groupby(mr.name, mr_item.item_code).orderby(Max(mr.transaction_date), Max(mr.schedule_date))
-	data = query.run(as_dict=True)
-	return data
+	rows = query.run(as_dict=True)
+	apply_representative_lines(rows)
+	return rows
+
+
+def apply_representative_lines(rows):
+	"""Fill the line-level columns from one real Material Request Item line: the first by idx."""
+	material_requests = list({row.material_request for row in rows})
+	representative = {}
+	if material_requests:
+		for line in frappe.get_all(
+			"Material Request Item",
+			filters={"parent": ("in", material_requests), "docstatus": 1},
+			fields=["parent", "item_code", "item_name", "description", "uom", "stock_uom"],
+			order_by="idx",
+		):
+			representative.setdefault((line.parent, line.item_code), line)
+
+	for row in rows:
+		line = representative.get((row.material_request, row.item_code))
+		row.item_name = line.item_name if line else None
+		row.description = line.description if line else None
+		row.uom = line.uom if line else ""
+		row.stock_uom = line.stock_uom if line else ""
 
 
 def get_conditions(filters, query, mr, mr_item):
@@ -217,18 +237,19 @@ def get_columns(filters):
 					"fieldtype": "Data",
 					"width": 100,
 				},
+				{
+					"label": _("Qty"),
+					"fieldname": "qty",
+					"fieldtype": "Float",
+					"width": 140,
+					"convertible": "qty",
+					"disable_total": True,
+				},
 			]
 		)
 
 	columns.extend(
 		[
-			{
-				"label": _("Qty"),
-				"fieldname": "qty",
-				"fieldtype": "Float",
-				"width": 140,
-				"convertible": "qty",
-			},
 			{
 				"label": _("Qty in Stock UOM"),
 				"fieldname": "stock_qty",

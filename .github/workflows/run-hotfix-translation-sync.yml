@@ -44,9 +44,18 @@ jobs:
         with:
           node-version: 24
 
+      - name: Get Frappe Release Bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FRAPPE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FRAPPE_BOT_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Run sync script
         run: |
           bash "${GITHUB_WORKSPACE}/.github/helper/sync_hotfix_translations.sh"
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_REVIEWER: diptanilsaha

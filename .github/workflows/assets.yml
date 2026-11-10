@@ -1,0 +1,32 @@
+name: Pre-build assets
+on:
+  push:
+    branches: [develop, version-15, version-16]
+
+concurrency:
+  group: assets-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  assets:
+    name: Pre-build assets
+    if: github.repository == 'frappe/erpnext'
+    uses: frappe/pilot/.github/workflows/app-assets.yml@develop
+    permissions:
+      contents: write
+
+  marketplace:
+    name: Open the marketplace release PR
+    needs: assets
+    if: github.ref_name == 'develop' || startsWith(github.event.head_commit.message, 'chore(release):')
+    uses: frappe/marketplace/.github/workflows/publish-release.yml@main
+    with:
+      app: erpnext
+      branch: ${{ github.ref_name }}
+      commit: ${{ github.sha }}
+      channel: ${{ github.ref_name == 'develop' && 'nightly' || 'stable' }}
+    secrets:
+      registry_token: ${{ secrets.MARKETPLACE_PR_TOKEN }}
