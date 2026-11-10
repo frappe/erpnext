@@ -468,6 +468,7 @@ execute:frappe.get_attr("erpnext.accounts.doctype.cheque_print_template.cheque_p
 execute:frappe.get_attr("erpnext.accounts.doctype.dunning.dunning.update_superseded_dunnings")()
 erpnext.patches.v16_0.set_outstanding_for_zero_portion_payment_terms
 erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
+<<<<<<< HEAD
 erpnext.patches.v15_0.share_assigned_appointments_with_agents
 erpnext.patches.v15_0.set_lost_on_in_opportunity
 erpnext.patches.v15_0.set_value_adjustment_amount_on_asset
@@ -476,3 +477,11 @@ erpnext.patches.v16_0.disable_add_to_transit_on_standard_stock_entry_types
 erpnext.patches.v16_0.unhide_item_barcode_fields
 erpnext.patches.v16_0.set_default_mins_between_operations
 erpnext.patches.v16_0.rebuild_production_plan_requested_qty
+=======
+erpnext.patches.v16_0.share_assigned_appointments_with_agents
+erpnext.patches.v16_0.link_receipt_reservations_to_production_plan_rows
+erpnext.patches.v16_0.merge_grey_letter_head_into_company_letter_head
+erpnext.patches.v16_0.drop_item_code_warehouse_posting_datetime_index_from_sabb
+erpnext.patches.v16_0.drop_unfolded_item_search_index #2026-11-09
+erpnext.patches.v16_0.round_open_job_card_required_qty
+>>>>>>> b59d33d (fix(manufacturing): round the Required Qty of open Job Cards made before the fix)
