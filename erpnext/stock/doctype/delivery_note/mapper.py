@@ -439,18 +439,22 @@ def make_sales_return(source_name: str, target_doc: str | dict | Document | None
 
 
 @frappe.whitelist()
-def make_inter_company_purchase_receipt(source_name: str, target_doc: str | dict | Document | None = None):
+def make_inter_company_purchase_receipt(
+	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
+):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 
-def has_pending_inter_company_qty(item, doctype: str, accepted_returns: dict | None = None) -> bool:
+def has_pending_inter_company_qty(
+	item, doctype: str, accepted_returns: dict | None = None, mapped_stock_qty: float = 0.0
+) -> bool:
 	if item.closed:
 		return False
 
 	if doctype == "Purchase Receipt":
 		return flt(item.qty) - flt((accepted_returns or {}).get(item.name)) > 0
 
-	return get_pending_receipt_qty(item) > 0
+	return get_pending_receipt_qty(item, mapped_stock_qty) > 0
 
 
 def make_inter_company_transaction(doctype: str, source_name: str, target_doc=None):
@@ -463,16 +467,30 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		validate_inter_company_transaction,
 	)
 
+	mapped_qty_by_item = mapped_qty_by_packed_item = {}
+	if doctype == "Delivery Note" and target_doc:
+		target_doc_obj = frappe.parse_json(target_doc) if isinstance(target_doc, str) else target_doc
+		if target_doc_obj.get("inter_company_reference") not in (None, "", source_name):
+			frappe.throw(
+				_("Cannot map items from multiple Delivery Notes into a single internal Purchase Receipt.")
+			)
+
+		mapped_qty_by_item = get_received_stock_qty_already_mapped(target_doc, "delivery_note_item")
+		mapped_qty_by_packed_item = get_received_stock_qty_already_mapped(
+			target_doc, "delivery_note_packed_item"
+		)
+
 	if doctype == "Delivery Note":
-		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Purchase Receipt"
 		source_document_warehouse_field = "target_warehouse"
 		target_document_warehouse_field = "from_warehouse"
 	else:
-		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Delivery Note"
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
+
+	frappe.has_permission(target_doctype, "create", throw=True)
+	source_doc = frappe.get_doc(doctype, source_name)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -597,7 +615,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 
 	def update_item(source, target, source_parent):
 		if source_parent.doctype == "Delivery Note":
-			target.qty = get_pending_receipt_qty(source)
+			target.qty = get_pending_receipt_qty(source, mapped_qty_by_item.get(source.name, 0.0))
 
 		if source_parent.doctype == "Purchase Receipt":
 			target.qty = flt(source.qty) - flt(accepted_returns.get(source.name))
@@ -630,17 +648,47 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 				"Material_request_item": "material_request_item",
 			},
 			"field_no_map": ["warehouse"],
-			"condition": lambda item: has_pending_inter_company_qty(item, doctype, accepted_returns)
+			"condition": lambda item: has_pending_inter_company_qty(
+				item, doctype, accepted_returns, mapped_qty_by_item.get(item.name, 0.0)
+			)
 			and item.name not in bundle_rows,
 			"postprocess": update_item,
 		},
 	}
 	if doctype == "Delivery Note" and bundle_rows:
-		table_maps["Packed Item"] = get_component_receipt_map(bundle_rows)
+		table_maps["Packed Item"] = get_component_receipt_map(bundle_rows, mapped_qty_by_packed_item)
 
-	doclist = get_mapped_doc(doctype, source_name, table_maps, target_doc, set_missing_values)
+	# the receiving user may not see the sender's DN; then the mapped PR itself must be permitted
+	can_read_source = True
+	if doctype == "Delivery Note":
+		can_read_source = frappe.has_permission(doctype, "read", source_doc)
+	doclist = get_mapped_doc(
+		doctype,
+		source_name,
+		table_maps,
+		target_doc,
+		set_missing_values,
+		ignore_permissions=not can_read_source,
+	)
+	if not can_read_source:
+		doclist.check_permission("create")
+		validate_receiving_warehouses(doclist)
 
 	return doclist
+
+
+def get_received_stock_qty_already_mapped(target_doc, ref_field: str) -> dict:
+	# rejected qty is received too; received_qty and stock_qty are only computed on validate
+	if isinstance(target_doc, str):
+		target_doc = frappe.parse_json(target_doc)
+
+	qty_map = {}
+	for row in (target_doc and target_doc.get("items")) or []:
+		if ref := row.get(ref_field):
+			received_qty = flt(row.get("qty")) + flt(row.get("rejected_qty"))
+			qty_map[ref] = qty_map.get(ref, 0) + received_qty * (flt(row.get("conversion_factor")) or 1)
+
+	return qty_map
 
 
 def get_accepted_returned_qty(receipt) -> dict:
@@ -649,16 +697,45 @@ def get_accepted_returned_qty(receipt) -> dict:
 	return get_item_wise_returned_qty([d.name for d in receipt.items])
 
 
-def get_pending_receipt_qty(item) -> float:
-	returned_qty = flt(item.get("returned_qty")) / (flt(item.get("conversion_factor")) or 1)
-	return flt(item.qty) - returned_qty - flt(item.get("received_qty"))
+def get_allowed_on_purchase_receipt(link_doctype: str) -> list[str]:
+	"""Values of `link_doctype` the user is restricted to on Purchase Receipt; empty means unrestricted."""
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+	from frappe.permissions import get_allowed_docs_for_doctype
+
+	return get_allowed_docs_for_doctype(get_user_permissions().get(link_doctype, []), "Purchase Receipt")
 
 
-def get_component_receipt_map(bundle_rows: dict) -> dict:
+def validate_receiving_warehouses(purchase_receipt: Document):
+	# from_warehouse ignores user permissions, so check the transit warehouse explicitly
+	allowed = get_allowed_on_purchase_receipt("Warehouse")
+	if not allowed:
+		return
+
+	for row in purchase_receipt.items:
+		if row.from_warehouse and row.from_warehouse not in allowed:
+			frappe.throw(
+				_("Row #{0}: You are not permitted to receive into Warehouse {1}").format(
+					row.idx, frappe.bold(row.from_warehouse)
+				),
+				frappe.PermissionError,
+			)
+
+
+def get_pending_receipt_qty(item, mapped_stock_qty: float = 0.0) -> float:
+	conversion_factor = flt(item.get("conversion_factor")) or 1
+	returned_qty = flt(item.get("returned_qty")) / conversion_factor
+	mapped_qty = flt(mapped_stock_qty) / conversion_factor
+	return flt(item.qty) - returned_qty - flt(item.get("received_qty")) - mapped_qty
+
+
+def get_component_receipt_map(bundle_rows: dict, mapped_qty_map: dict | None = None) -> dict:
 	"""Receive the components of a product bundle row, which is what the delivery moved into transit."""
+	mapped_qty_map = mapped_qty_map or {}
 
 	def update_component(source, target, source_parent):
-		target.qty = get_pending_component_qty(source, bundle_rows[source.parent_detail_docname])
+		target.qty = get_pending_component_qty(
+			source, bundle_rows[source.parent_detail_docname], mapped_qty_map.get(source.name, 0.0)
+		)
 		target.rate = flt(source.incoming_rate)
 		if source.get("use_serial_batch_fields") or source.get("serial_no") or source.get("batch_no"):
 			target.set("use_serial_batch_fields", 1)
@@ -669,15 +746,18 @@ def get_component_receipt_map(bundle_rows: dict) -> dict:
 		"field_no_map": ["warehouse"],
 		"condition": lambda packed: packed.parent_detail_docname in bundle_rows
 		and not bundle_rows[packed.parent_detail_docname].closed
-		and get_pending_component_qty(packed, bundle_rows[packed.parent_detail_docname]) > 0,
+		and get_pending_component_qty(
+			packed, bundle_rows[packed.parent_detail_docname], mapped_qty_map.get(packed.name, 0.0)
+		)
+		> 0,
 		"postprocess": update_component,
 	}
 
 
-def get_pending_component_qty(packed_item, bundle_row) -> float:
+def get_pending_component_qty(packed_item, bundle_row, mapped_stock_qty: float = 0.0) -> float:
 	bundle_qty = flt(bundle_row.stock_qty or bundle_row.qty)
 	if not bundle_qty:
 		return 0.0
 
 	kept_share = 1 - flt(bundle_row.returned_qty) / bundle_qty
-	return flt(packed_item.qty) * kept_share - flt(packed_item.get("received_qty"))
+	return flt(packed_item.qty) * kept_share - flt(packed_item.get("received_qty")) - flt(mapped_stock_qty)
