@@ -1049,6 +1049,43 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(stock_entry.items[0].serial_no, pick_list.locations[0].serial_no)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_rows_of_the_same_serialized_item_get_the_oldest_serial_nos_in_a_fractional_uom(self):
+		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "PLFIFO-.#####",
+				"stock_uom": "Kg",
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		sales_order = make_sales_order(
+			item_list=[
+				{
+					"item_code": item,
+					"warehouse": "_Test Warehouse - _TC",
+					"qty": qty,
+					"rate": 100,
+					"uom": "Kg",
+				}
+				for qty in (1, 2)
+			]
+		)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.save()
+
+		oldest_serial_nos = frappe.get_all(
+			"Serial No", filters={"item_code": item}, order_by="serial_no", limit=3, pluck="serial_no"
+		)
+		self.assertEqual(
+			[get_serial_nos(row.serial_no) for row in pick_list.locations],
+			[oldest_serial_nos[:1], oldest_serial_nos[1:]],
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_pick_leaves_stock_reserved_for_other_orders(self):
 		item = make_item(properties={"is_stock_item": 1}).name
