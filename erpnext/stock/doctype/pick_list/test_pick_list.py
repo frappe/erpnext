@@ -1035,7 +1035,15 @@ class TestPickList(FrappeTestCase):
 	def test_bundle_sold_in_non_stock_uom_is_delivered_in_order_uom(self):
 =======
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
-	def test_bundle_picked_qty_counts_component_qty_rounded_on_the_order(self):
+	def test_bundle_picked_qty_counts_component_qty_a_delivery_packs(self):
+		for grams, picked_qty, bundles in ((62.5, 0.125, 2), (62.8, 0.125, 1), (62.2, 0.124, 2)):
+			with self.subTest(grams=grams):
+				sales_order_item = self.pick_rounded_bundle_component(grams, picked_qty)
+				self.assertEqual(
+					frappe.db.get_value("Sales Order Item", sales_order_item, "picked_qty"), bundles
+				)
+
+	def pick_rounded_bundle_component(self, grams, picked_qty):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
 			properties={"stock_uom": "Kg", "uoms": [{"uom": "Gram", "conversion_factor": 0.001}]}
@@ -1043,17 +1051,16 @@ class TestPickList(FrappeTestCase):
 		make_stock_entry(item=component, to_warehouse=warehouse, qty=10, rate=100)
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component, "qty": 62.5, "uom": "Gram"})
+		bundle_doc.append("items", {"item_code": component, "qty": grams, "uom": "Gram"})
 		bundle_doc.insert()
 		bundle_doc.submit()
 
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)  # packs 0.188 Kg
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
 		pick_list = create_pick_list(sales_order.name)
-		pick_list.locations[0].stock_uom = "Kg"  # see #65113
-		pick_list.locations[0].picked_qty = 0.125
+		pick_list.locations[0].stock_uom = "Kg"
+		pick_list.locations[0].picked_qty = picked_qty
 		pick_list.submit()
-
-		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 2)
+		return sales_order.items[0].name
 
 	def test_pick_list_skips_closed_bundle_rows(self):
 		from erpnext.controllers.item_close import update_closed_status
