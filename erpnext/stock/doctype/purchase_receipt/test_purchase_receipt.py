@@ -6580,7 +6580,10 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 		receipt.submit()
 		return receipt
 
-	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	@change_settings(
+		"Buying Settings",
+		{"bill_for_rejected_quantity_in_purchase_invoice": 1, "set_valuation_rate_for_rejected_materials": 1},
+	)
 	def test_rejected_material_is_valued_without_the_valuation_charges(self):
 		company = "_Test Company with perpetual inventory"
 		receipt = make_purchase_receipt(
