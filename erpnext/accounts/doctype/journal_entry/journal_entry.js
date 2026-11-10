@@ -525,6 +525,20 @@ $.extend(erpnext.journal_entry, {
 	set_debit_credit_in_company_currency: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 
+<<<<<<< HEAD
+=======
+		frm.doc.total_debit = flt(total_debit, precision("total_debit"));
+		frm.doc.total_credit = flt(total_credit, precision("total_credit"));
+		frm.doc.difference = flt(total_debit - total_credit, precision("difference"));
+		["total_debit", "total_credit", "difference"].forEach((field) => frm.refresh_field(field));
+	},
+
+	set_debit_credit_in_company_currency(frm, cdt, cdn) {
+		// Exchange gain/loss journals adjust base and account currency amounts independently.
+		if (frm.doc.voucher_type === "Exchange Gain Or Loss" && frm.doc.multi_currency) return;
+
+		const row = frappe.get_doc(cdt, cdn);
+>>>>>>> eb610ea (fix(accounts): preserve exchange gain and loss amounts)
 		frappe.model.set_value(
 			cdt,
 			cdn,
