@@ -369,6 +369,8 @@ class PickList(TransactionBase):
 				item.picked_qty = item.stock_qty
 
 	def validate_picked_serial_and_batch(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		bundle_qty = self.get_bundle_qty()
 		for row in self.locations:
 			selected_qty = bundle_qty.get(row.serial_and_batch_bundle) or len(get_serial_nos(row.serial_no))
@@ -453,15 +455,8 @@ class PickList(TransactionBase):
 						"qty": row.picked_qty,
 						"type_of_transaction": "Outward",
 						"company": self.company,
-<<<<<<< HEAD
 						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
-						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
-=======
-						"serial_nos": SerialBatchIdentity("Serial No").resolve(
-							row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True
-						),
 						"batches": frappe._dict({row.batch_no: row.picked_qty}) if row.batch_no else None,
->>>>>>> 6f216d1 (fix(stock): build a pick list row's serial and batch bundle for its picked qty)
 						"batch_no": row.batch_no,
 					}
 				).make_serial_and_batch_bundle()
