@@ -1638,7 +1638,7 @@ class StockController(AccountsController):
 		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
 
-		if self.doctype not in ["Delivery Note", "Sales Invoice", "Stock Entry"]:
+		if self.doctype not in ["Delivery Note", "Sales Invoice", "Stock Entry", "Stock Reconciliation"]:
 			return
 
 		batches = frappe.get_all(
@@ -1660,7 +1660,7 @@ class StockController(AccountsController):
 			"Sales Invoice": ["sales_order"],
 			"Delivery Note": ["against_sales_order"],
 			"Stock Entry": ["work_order", "subcontracting_inward_order"],
-		}.get(self.doctype)
+		}.get(self.doctype, [])
 
 		items = self.items
 		if self.doctype == "Stock Entry":

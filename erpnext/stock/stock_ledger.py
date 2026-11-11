@@ -1548,6 +1548,18 @@ class update_entries_after:
 			if key in sle:
 				del sle[key]
 
+	def get_reserved_stock_to_keep(self, sle):
+		"""Reserved qty this entry must leave in the warehouse.
+
+		A serial / batch reconciliation takes out its current qty and puts the counted qty back,
+		so only the reserved qty beyond the counted qty must stay."""
+		reserved_stock = flt(self.get_reserved_stock(sle.item_code, sle.warehouse))
+		if not reserved_stock or sle.voucher_type != "Stock Reconciliation" or flt(sle.actual_qty) >= 0:
+			return reserved_stock
+
+		counted_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
+		return max(reserved_stock - flt(counted_qty), 0)
+
 	def get_outgoing_rate_for_batched_item(self, sle):
 		if self.wh_data.qty_after_transaction == 0:
 			return 0
@@ -1559,11 +1571,7 @@ class update_entries_after:
 		validate negative stock for entries current datetime onwards
 		will not consider cancelled entries
 		"""
-		diff = (
-			self.wh_data.qty_after_transaction
-			+ flt(sle.actual_qty)
-			- flt(self.get_reserved_stock(sle.item_code, sle.warehouse))
-		)
+		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty) - self.get_reserved_stock_to_keep(sle)
 		diff = flt(diff, self.flt_precision)  # respect system precision
 
 		diff_threshold = 0.0001
@@ -2886,17 +2894,17 @@ def get_datetime_limit_condition(sle, detail):
 
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
-	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
-		if not allow_negative_stock and is_reserved_stock_drawn(args):
-			validate_reserved_stock(args)
-		return
-
 	if (
 		args.voucher_type == "Stock Reconciliation"
 		and args.actual_qty < 0
 		and args.get("serial_and_batch_bundle")
-		and frappe.db.get_value("Stock Reconciliation Item", args.voucher_detail_no, "qty") > 0
+		and flt(frappe.db.get_value("Stock Reconciliation Item", args.voucher_detail_no, "qty")) > 0
 	):
+		return
+
+	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
+		if not allow_negative_stock and is_reserved_stock_drawn(args):
+			validate_reserved_stock(args)
 		return
 
 	if args.actual_qty >= 0 and args.voucher_type != "Stock Reconciliation":
