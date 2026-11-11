@@ -783,7 +783,7 @@ class SerialBatchBundleService:
 		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			return
 
-		if self.doc.doctype not in ["Delivery Note", "Sales Invoice", "Stock Entry"]:
+		if self.doc.doctype not in ["Delivery Note", "Sales Invoice", "Stock Entry", "Stock Reconciliation"]:
 			return
 
 		batches = frappe.get_all(
@@ -805,7 +805,7 @@ class SerialBatchBundleService:
 			"Sales Invoice": ["sales_order"],
 			"Delivery Note": ["against_sales_order"],
 			"Stock Entry": ["work_order", "subcontracting_inward_order"],
-		}.get(self.doc.doctype)
+		}.get(self.doc.doctype, [])
 
 		items = self.doc.items
 		if self.doc.doctype == "Stock Entry":
