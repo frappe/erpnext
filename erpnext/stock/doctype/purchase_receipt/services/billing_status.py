@@ -287,7 +287,9 @@ def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -
 			):
 				frappe.throw(
 					_("Over Billing Allowance exceeded for Purchase Receipt Item {0} ({1}) by {2}%").format(
-						item.name, frappe.bold(item.item_code), per_over_billed - over_billing_allowance
+						item.name,
+						frappe.bold(item.item_code),
+						flt(per_over_billed - over_billing_allowance, 2),
 					)
 				)
 
