@@ -3662,6 +3662,34 @@ class TestPickList(ERPNextTestSuite):
 		sales_order.cancel()
 		stock_entry.cancel()
 
+	def test_delivery_from_pick_list_whose_rows_without_so_are_delivered(self):
+		warehouse = "_Test Warehouse - _TC"
+		item_with_so = make_item().name
+		item_without_so = make_item().name
+		make_stock_entry(item=item_with_so, to_warehouse=warehouse, qty=5, basic_rate=100)
+		make_stock_entry(item=item_without_so, to_warehouse=warehouse, qty=5, basic_rate=100)
+
+		sales_order = make_sales_order(item_code=item_with_so, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.append(
+			"locations",
+			{"item_code": item_without_so, "qty": 2, "stock_qty": 2, "picked_qty": 2, "warehouse": warehouse},
+		)
+		pick_list.submit()
+
+		create_delivery_note(pick_list.name)
+		for name in frappe.get_all(
+			"Delivery Note Item", {"against_pick_list": pick_list.name}, pluck="parent"
+		):
+			delivery_note = frappe.get_doc("Delivery Note", name)
+			if delivery_note.items[0].item_code == item_without_so:
+				delivery_note.submit()
+			else:
+				delivery_note.delete()
+
+		delivery_note = create_delivery_note(pick_list.name)
+		self.assertEqual([(row.item_code, row.qty) for row in delivery_note.items], [(item_with_so, 3)])
+
 	def test_creating_dn_from_so_with_different_addresses(self):
 		warehouse = "_Test Warehouse - _TC"
 		item1 = make_item().name
