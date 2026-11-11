@@ -413,11 +413,32 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 
 def filter_batches(batches, doc):
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for row in doc.get("items"):
-		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= row.get("qty")
-			if batches[row.get("batch_no")] <= 0:
-				del batches[row.get("batch_no")]
+		batch_no = row.get("batch_no")
+		if batch_no in batches:
+			batches[batch_no] = flt(batches[batch_no] - get_row_stock_qty(row), precision)
+			if batches[batch_no] <= 0:
+				del batches[batch_no]
+
+
+def get_row_stock_qty(row):
+	"""Rows of a sales document inserted through the API may not have stock_qty or uom yet."""
+	if row.get("stock_qty"):
+		return flt(row.get("stock_qty"))
+
+	conversion_factor = row.get("conversion_factor")
+	# a row without uom gets the Default Sales UOM in get_basic_details
+	uom = row.get("uom") or frappe.get_cached_value("Item", row.get("item_code"), "sales_uom")
+	if not conversion_factor and uom:
+		conversion_factor = get_uom_conversion_factor(row.get("item_code"), uom)
+
+	return flt(row.get("qty")) * flt(conversion_factor or 1)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom)["conversion_factor"]
 
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
