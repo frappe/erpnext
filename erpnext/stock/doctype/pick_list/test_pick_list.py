@@ -1403,6 +1403,32 @@ class TestPickList(ERPNextTestSuite):
 			get_batches_from_bundle(delivery_note.packed_items[0].serial_and_batch_bundle), {batch_no: -4}
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_bundle_delivery_from_pick_list_keeps_the_picked_serial_nos(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBS-.#####"}
+		).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=5, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.submit()
+
+		delivered_serial_nos = SerialBatchIdentity("Serial No").get_numbers(
+			component, get_serial_nos_from_bundle(delivery_note.packed_items[0].serial_and_batch_bundle)
+		)
+		self.assertEqual(
+			sorted(delivered_serial_nos), sorted(get_serial_nos(pick_list.locations[0].serial_no))
+		)
+
 	def test_bundle_with_repeated_component_is_picked_per_packed_row(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(properties={"is_stock_item": 1}).name
