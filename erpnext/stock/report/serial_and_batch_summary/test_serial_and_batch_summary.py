@@ -204,8 +204,8 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		lots = get_ledger_lots(item, "_Test Warehouse - _TC", frappe.utils.add_days(frappe.utils.now(), 1))
 		self.assertEqual(sum(lots.batch_qty.values()), 10)
 
-	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
-	def test_unconsolidated_pos_invoice_bundle_moves_no_stock(self):
+	def make_open_pos_invoice(self):
+		"""A POS Invoice for 3 of a batch of 10, in a POS that is still open."""
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
@@ -214,10 +214,9 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 			get_batch_from_bundle,
 		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-		from erpnext.stock.valuation_adjustment import get_ledger_lots
 
 		user, pos_profile = init_user_and_profile()
-		create_opening_entry(pos_profile, user.name)
+		opening_entry = create_opening_entry(pos_profile, user.name)
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -239,8 +238,40 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		)
 		pos_invoice.append("payments", {"mode_of_payment": "Cash", "amount": 300, "default": 1})
 		pos_invoice.submit()
+		return opening_entry, pos_invoice
+
+	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
+	def test_unconsolidated_pos_invoice_bundle_moves_no_stock(self):
+		from erpnext.stock.valuation_adjustment import get_ledger_lots
+
+		_, pos_invoice = self.make_open_pos_invoice()
+		item = pos_invoice.items[0].item_code
 
 		self.assertEqual({row.voucher_type for row in self.run_report(item_code=item)}, {"Stock Entry"})
 
 		lots = get_ledger_lots(item, "_Test Warehouse - _TC", frappe.utils.add_days(frappe.utils.now(), 1))
 		self.assertEqual(sum(lots.batch_qty.values()), 10)
+
+	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
+	def test_consolidated_pos_invoice_bundle_with_old_entries_moves_stock(self):
+		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+			make_closing_entry_from_opening,
+		)
+		from erpnext.stock.valuation_adjustment import get_ledger_lots
+
+		opening_entry, pos_invoice = self.make_open_pos_invoice()
+		make_closing_entry_from_opening(opening_entry).submit()
+		# older consolidations left the entries on the POS Invoice
+		frappe.db.set_value(
+			"Serial and Batch Entry",
+			{"parent": pos_invoice.items[0].serial_and_batch_bundle},
+			"voucher_type",
+			"POS Invoice",
+		)
+
+		lots = get_ledger_lots(
+			pos_invoice.items[0].item_code,
+			"_Test Warehouse - _TC",
+			frappe.utils.add_days(frappe.utils.now(), 1),
+		)
+		self.assertEqual(sum(lots.batch_qty.values()), 7)
