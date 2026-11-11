@@ -1472,28 +1472,9 @@ erpnext.stock.setup_inline_serial_batch_editor = function () {
 erpnext.stock.setup_inline_serial_batch_editor();
 
 erpnext.stock.is_inline_serial_batch_editor_enabled = async function () {
-	if (erpnext.stock._inline_editor_enabled === undefined) {
-		let { message } = await frappe.db.get_value(
-			"Stock Settings",
-			"Stock Settings",
-			"use_inline_serial_batch_editor"
-		);
-		erpnext.stock._inline_editor_enabled = cint(message && message.use_inline_serial_batch_editor);
-	}
-
-	return erpnext.stock._inline_editor_enabled;
+	return cint(frappe.boot.sysdefaults.use_inline_serial_batch_editor);
 };
 
 erpnext.stock.get_pick_serial_batch_based_on = async function () {
-	if (erpnext.stock._pick_serial_batch_based_on === undefined) {
-		let { message } = await frappe.db.get_value(
-			"Stock Settings",
-			"Stock Settings",
-			"pick_serial_and_batch_based_on"
-		);
-		erpnext.stock._pick_serial_batch_based_on =
-			(message && message.pick_serial_and_batch_based_on) || "FIFO";
-	}
-
-	return erpnext.stock._pick_serial_batch_based_on;
+	return frappe.boot.sysdefaults.pick_serial_and_batch_based_on || "FIFO";
 };
