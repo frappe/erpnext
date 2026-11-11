@@ -69,7 +69,10 @@ from erpnext.exceptions import InvalidCurrency
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_packed_items_of_order_rows,
+	make_packing_list,
+)
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_bin_details,
@@ -4654,6 +4657,10 @@ def update_child_qty_rate(
 	validate_parent_status(parent)
 	validate_blanket_order_changes(parent, data)
 
+	packed_items_before_update = {}
+	if parent_doctype == "Sales Order":
+		packed_items_before_update = get_packed_items_of_order_rows({row.name for row in parent.items})
+
 	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, ordered_items)
@@ -4833,7 +4840,7 @@ def update_child_qty_rate(
 	parent.set_total_in_words()
 	parent.validate_party_specific_items()
 	if parent_doctype == "Sales Order":
-		make_packing_list(parent)
+		make_packing_list(parent, packed_items_before_update)
 		parent.set_gross_profit()
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)
