@@ -37,7 +37,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_billed_by_qty
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
-from erpnext.stock.stock_ledger import get_items_to_be_repost
+from erpnext.stock.stock_ledger import get_items_to_be_repost, get_next_stock_reco
 
 
 class StockController(AccountsController):
@@ -949,7 +949,7 @@ def create_item_wise_repost_entries(
 	from erpnext.stock.utils import get_valuation_method
 
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
-	company = frappe.db.get_value(voucher_type, voucher_no, "company")
+	company, docstatus = frappe.db.get_value(voucher_type, voucher_no, ["company", "docstatus"])
 
 	distinct_item_warehouses = set()
 	repost_entries = []
@@ -962,7 +962,11 @@ def create_item_wise_repost_entries(
 
 		# Standard Cost items don't need a full repost: a backdated entry only shifts future balances
 		# (qty and value at the standard rate), which is done in place by update_qty_in_future_sle.
-		if get_valuation_method(sle.item_code, company) == "Standard Cost":
+		# A later Stock Reconciliation keeps its counted balance, so its stock value difference and
+		# GL depend on the shifted balance before it; only the repost recomputes those.
+		if get_valuation_method(sle.item_code, company) == "Standard Cost" and not get_next_stock_reco(
+			frappe._dict(sle, voucher_no=voucher_no, is_cancelled=docstatus == 2)
+		):
 			continue
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
