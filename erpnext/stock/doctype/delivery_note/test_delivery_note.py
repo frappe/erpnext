@@ -1984,7 +1984,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
 		dn.save()
-		self.assertTrue(dn.packed_items[0].serial_and_batch_bundle)
+		self.assertFalse(dn.packed_items[0].serial_and_batch_bundle)
 
 		dn.append(
 			"items",
@@ -2000,6 +2000,36 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.submit()
 
 		self.assertEqual(dn.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_packed_row_bundle_follows_bundle_qty_changed_on_a_saved_draft(self):
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRBQ-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		dn.save()
+		dn.items[0].qty = 2
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", dn.packed_items[0].serial_and_batch_bundle, "total_qty"
+			),
+			-2,
+		)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
