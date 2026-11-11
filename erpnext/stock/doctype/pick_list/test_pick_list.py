@@ -959,8 +959,37 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_delivery.items[0].serial_no), picked_serial_nos[2:])
 		second_delivery.submit()
 
+<<<<<<< HEAD
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+=======
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_next_delivery_from_pick_list_after_an_unpicked_serial_no_gets_its_pending_qty(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUNP-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+		unpicked_serial_no = frappe.get_all(
+			"Serial No", {"item_code": item, "serial_no": ("not in", picked_serial_nos)}, pluck="serial_no"
+		)[0]
+
+		first_delivery = create_delivery_note(pick_list.name)
+		first_delivery.items[0].qty = 1
+		first_delivery.items[0].serial_no = unpicked_serial_no
+		first_delivery.submit()
+
+		second_delivery = create_delivery_note(pick_list.name)
+		self.assertEqual(second_delivery.items[0].qty, 2)
+		self.assertEqual(get_serial_nos(second_delivery.items[0].serial_no), picked_serial_nos[:2])
+		second_delivery.submit()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+>>>>>>> 86c2b1b (test: map no more serial nos than the pending qty from a pick list row)
 	def test_rows_of_the_same_serialized_item_get_the_oldest_serial_nos_in_a_fractional_uom(self):
 		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
 		item = make_item(
