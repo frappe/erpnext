@@ -11,12 +11,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		this.init();
 	}
 
-	async init() {
-		try {
-			this.based_on = await erpnext.stock.get_pick_serial_batch_based_on();
-		} catch (e) {
-			this.based_on = "FIFO";
-		}
+	init() {
+		this.based_on = frappe.boot.sysdefaults.pick_serial_and_batch_based_on || "FIFO";
 
 		this.make();
 		this.render_data();
