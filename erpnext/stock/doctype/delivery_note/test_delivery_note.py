@@ -43,6 +43,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	set_valuation_method,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1755,6 +1756,34 @@ class TestDeliveryNote(ERPNextTestSuite):
 			):
 				picked[entry.batch_no] += abs(entry.qty)
 		return picked
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_picked_row_skips_batch_qty_of_a_row_with_batch_no_without_batch_fields(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRBF-.#####",
+			}
+		).name
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		first_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		# e.g. through the REST API: a batch_no without use_serial_batch_fields
+		dn = create_delivery_note(item_code=item, qty=8, do_not_save=True)
+		dn.items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 0})
+		dn.append("items", {**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "batch_no": None})
+		dn.items[1].use_serial_batch_fields = 1
+		dn.insert()
+		dn.submit()
+
+		self.assertEqual(get_batches_from_bundle(dn.items[1].serial_and_batch_bundle)[first_batch], -2)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
