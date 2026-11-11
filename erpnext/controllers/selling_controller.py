@@ -317,6 +317,8 @@ class SellingController(StockController):
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
+		# Rows without a Sales Person are left to the mandatory check, which runs after validate.
+		sales_team = [row for row in sales_team if row.sales_person]
 		sales_persons = [d.sales_person for d in sales_team]
 
 		if not sales_persons:
