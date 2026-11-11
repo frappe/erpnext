@@ -220,6 +220,10 @@ class SerialBatchBundle:
 		if self.sle.actual_qty > 0:
 			return {}
 
+		item_doctype = self.child_doctype
+		if item_doctype == "Packed Item":
+			item_doctype = self.sle.voucher_type + " Item"
+
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		entries = (
@@ -229,7 +233,7 @@ class SerialBatchBundle:
 			.select(entry.serial_no, entry.batch_no, entry.qty, bundle.warehouse)
 			.where(
 				(
-					bundle.name.isin(self.get_bundles_on_voucher_rows(self.child_doctype))
+					bundle.name.isin(self.get_bundles_on_voucher_rows(item_doctype))
 					| bundle.name.isin(self.get_bundles_on_voucher_rows("Packed Item"))
 				)
 				& (bundle.item_code == self.item_code)
