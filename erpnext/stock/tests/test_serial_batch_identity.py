@@ -508,6 +508,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					"serial_no": "pick-001",
 					"batch_no": batch.name,
 					"stock_qty": 1,
+					"picked_qty": 1,
 					"use_serial_batch_fields": 1,
 					"warehouse": "_Test Warehouse - _TC",
 				}
