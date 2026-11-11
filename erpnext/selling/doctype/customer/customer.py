@@ -199,17 +199,18 @@ class Customer(TransactionBase):
 		self.credit_limits = []
 		self.payment_terms = self.default_price_list = ""
 
-		tables = [["accounts", "account"], ["credit_limits", "credit_limit"]]
+		tables = [
+			["accounts", ["account", "advance_account"]],
+			["credit_limits", ["credit_limit", "bypass_credit_limit_check"]],
+		]
 		fields = ["payment_terms", "default_price_list"]
 
-		for row in tables:
-			table, field = row[0], row[1]
-			if not doc.get(table):
-				continue
-
-			for entry in doc.get(table):
+		for table, table_fields in tables:
+			for entry in doc.get(table) or []:
 				child = self.append(table)
-				child.update({"company": entry.company, field: entry.get(field)})
+				child.update(
+					{"company": entry.company, **{field: entry.get(field) for field in table_fields}}
+				)
 
 		for field in fields:
 			if not doc.get(field):
