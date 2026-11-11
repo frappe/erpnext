@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from collections import defaultdict
-
 import frappe
 from frappe import _, bold, throw
 from frappe.utils import cint, flt, get_link_to_form, nowtime
@@ -1205,99 +1203,6 @@ class SellingController(StockController):
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
-<<<<<<< HEAD
-=======
-	def set_serial_and_batch_bundle_from_pick_list(self):
-		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-
-		for item in self.items:
-			if item.use_serial_batch_fields or not item.against_pick_list or not self.get("update_stock", 1):
-				continue
-
-			if item.pick_list_item and not item.serial_and_batch_bundle:
-				filters = {
-					"item_code": item.item_code,
-					"voucher_type": "Pick List",
-					"voucher_no": item.against_pick_list,
-					"voucher_detail_no": item.pick_list_item,
-				}
-
-				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
-
-				if bundle_id:
-					package = SerialBatchCreation(
-						{
-							"type_of_transaction": "Outward",
-							"serial_and_batch_bundle": bundle_id,
-							"item_code": item.get("item_code"),
-							"warehouse": item.get("warehouse"),
-							"do_not_save": True,
-						}
-					).duplicate_package()
-
-					remove_delivered_entries(package, item.pick_list_item)
-					package.save()
-
-					item.serial_and_batch_bundle = package.name
-
-	def update_pick_list_status(self):
-		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
-
-		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
-		for pick_list in pick_lists:
-			update_pick_list_status(pick_list)
-
-
-def remove_delivered_entries(package, pick_list_item):
-	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
-	delivered = get_delivered_entries(pick_list_item)
-	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
-	delivered_batch_qty = defaultdict(float)
-	for row in delivered:
-		if row.batch_no and not row.serial_no:
-			delivered_batch_qty[row.batch_no] += abs(row.qty)
-
-	for row in list(package.entries):
-		if row.serial_no:
-			if row.serial_no in delivered_serial_nos:
-				package.remove(row)
-			continue
-
-		taken = min(delivered_batch_qty[row.batch_no], abs(row.qty))
-		delivered_batch_qty[row.batch_no] -= taken
-		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
-		if not row.qty:
-			package.remove(row)
-
-
-def get_delivered_entries(pick_list_item):
-	"""Return the serial and batch entries that submitted deliveries of a pick list row took."""
-	voucher_detail_nos = [
-		name
-		for doctype in ("Delivery Note Item", "Sales Invoice Item")
-		for name in frappe.get_all(
-			doctype, filters={"pick_list_item": pick_list_item, "docstatus": 1}, pluck="name"
-		)
-	]
-	if not voucher_detail_nos:
-		return []
-
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	return (
-		frappe.qb.from_(entry)
-		.join(bundle)
-		.on(entry.parent == bundle.name)
-		.select(entry.serial_no, entry.batch_no, entry.qty)
-		.where(
-			bundle.voucher_detail_no.isin(voucher_detail_nos)
-			& (bundle.type_of_transaction == "Outward")
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-		)
-	).run(as_dict=True)
-
->>>>>>> 65d3469 (fix(stock): copy only the undelivered part of a pick list bundle to the next delivery)
 
 def set_default_income_account_for_item(obj):
 	"""Set income account as default for items in the transaction.
