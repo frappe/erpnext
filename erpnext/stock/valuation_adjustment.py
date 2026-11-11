@@ -41,6 +41,7 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.expected_valuation import ADJUSTMENT_ENTRY, QueuePool, iterate_expected_stock_at
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
 from erpnext.stock.stock_ledger import make_sl_entries
 from erpnext.stock.utils import get_combine_datetime
 
@@ -263,8 +264,7 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 			& (entry.warehouse == warehouse)
 			& (entry.docstatus == 1)
 			& (entry.is_cancelled == 0)
-			# a Pick List only reserves; its bundles move no stock
-			& (entry.voucher_type != "Pick List")
+			& (entry.voucher_type.notin(RESERVING_VOUCHER_TYPES))
 			& (entry.posting_datetime <= cutoff)
 		)
 		.orderby(entry.posting_datetime)
