@@ -100,22 +100,13 @@
    "fieldtype": "Column Break"
   }
  ],
-<<<<<<< HEAD
-=======
- "icon": "bell",
- "link_display_mode": "Search",
->>>>>>> 6da5aca (fix(Dunning): let Accounts User submit dunnings and read Dunning Type)
  "links": [
   {
    "link_doctype": "Dunning",
    "link_fieldname": "dunning_type"
   }
  ],
-<<<<<<< HEAD
- "modified": "2026-05-30 20:40:09.952533",
-=======
  "modified": "2026-11-11 04:33:03.999443",
->>>>>>> 6da5aca (fix(Dunning): let Accounts User submit dunnings and read Dunning Type)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
