@@ -1156,7 +1156,11 @@ class SerialandBatchBundle(Document):
 			return list(serial_nos.intersection(current_serial_nos)), []
 
 		elif data.batch_no and data.current_qty == data.qty:
-			return [], [data.batch_no]
+			if self.has_serial_no and data.current_serial_and_batch_bundle and data.serial_and_batch_bundle:
+				current_serial_nos = set(get_serial_nos_from_bundle(data.current_serial_and_batch_bundle))
+				serial_nos = set(get_serial_nos_from_bundle(data.serial_and_batch_bundle))
+
+			return list(serial_nos.intersection(current_serial_nos)), [data.batch_no]
 
 		elif data.current_serial_and_batch_bundle:
 			if self.has_serial_no:
