@@ -3056,17 +3056,17 @@ def get_datetime_limit_condition(sle, detail):
 
 
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
-	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
-		if not allow_negative_stock and is_reserved_stock_drawn(args):
-			validate_reserved_stock(args)
-		return
-
 	if (
 		args.voucher_type == "Stock Reconciliation"
 		and args.actual_qty < 0
 		and args.get("serial_and_batch_bundle")
 		and frappe.db.get_value("Stock Reconciliation Item", args.voucher_detail_no, "qty") > 0
 	):
+		return
+
+	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
+		if not allow_negative_stock and is_reserved_stock_drawn(args):
+			validate_reserved_stock(args)
 		return
 
 	if args.actual_qty >= 0 and args.voucher_type != "Stock Reconciliation":
