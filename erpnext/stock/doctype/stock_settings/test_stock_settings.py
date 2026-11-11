@@ -165,6 +165,16 @@ class TestStockSettings(ERPNextTestSuite):
 			"Stock Manager",
 		)
 
+	def test_boot_cache_cleared_when_boot_setting_changes(self):
+		frappe.cache.hset("bootinfo", frappe.session.user, {"cached": 1})
+		settings = frappe.get_doc("Stock Settings")
+		settings.disable_serial_no_and_batch_selector = (
+			0 if settings.disable_serial_no_and_batch_selector else 1
+		)
+		settings.save()
+
+		self.assertIsNone(frappe.cache.hget("bootinfo", frappe.session.user))
+
 	def test_hiding_barcode_field_keeps_item_barcodes(self):
 		settings = frappe.get_doc("Stock Settings")
 		settings.show_barcode_field = 1
