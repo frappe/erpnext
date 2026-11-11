@@ -471,8 +471,16 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	# a component picked from several warehouses moves on to the rows not delivered yet
 	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	pending_rows = [row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0]
+	pending_rows = pending_rows or pl_rows
+	# kept serial nos stay on the warehouse and batch they were mapped from
 	pl_row = next(
-		(row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0), pl_rows[0]
+		(
+			row
+			for row in pending_rows
+			if pi_row.serial_no and (row.warehouse, row.batch_no) == (pi_row.warehouse, pi_row.batch_no)
+		),
+		pending_rows[0],
 	)
 
 	pi_row.warehouse = pl_row.warehouse
