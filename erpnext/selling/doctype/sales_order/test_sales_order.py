@@ -2659,12 +2659,12 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.insert()
@@ -2708,7 +2708,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.save()
 		so.submit()
 
@@ -2719,7 +2719,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		dn1.taxes.clear()
 		dn1.save().submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.items[0].delivery_note = dn1.name
@@ -2743,7 +2743,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.per_billed, 100)
 		self.assertEqual(so.per_delivered, 50)
 
-		cr_note = create_sales_invoice(is_return=1, qty=-1, do_not_submit=True)
+		cr_note = create_sales_invoice(is_return=1, qty=-1, uom="_Test UOM", do_not_submit=True)
 		cr_note.items[0].qty = -5
 		cr_note.items[0].sales_order = so.name
 		cr_note.items[0].so_detail = so.items[0].name
