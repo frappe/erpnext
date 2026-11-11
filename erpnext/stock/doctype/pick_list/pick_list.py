@@ -34,6 +34,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_batch_qty_for_stock,
 	get_reserved_serial_nos_for_sre,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
@@ -1989,6 +1990,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
+	serial_nos_in_stock = get_serial_nos_in_stock(
+		[location for location in pick_list.locations if location.sales_order == sales_order]
+	)
 
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
@@ -2016,7 +2020,7 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 				flt(child_item.conversion_factor) or 1
 			)
 			child_item.batch_no = location.batch_no
-			child_item.serial_no = location.serial_no
+			child_item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock)
 			child_item.use_serial_batch_fields = location.use_serial_batch_fields
 
 			if not child_item.qty:
@@ -2033,6 +2037,32 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 	target_doc.company = pick_list.company
 	if sales_order:
 		target_doc.customer = frappe.get_value("Sales Order", sales_order, "customer")
+
+
+def get_serial_nos_in_stock(locations):
+	"""Return (item_code, lower-cased serial_no, warehouse) of the partly delivered rows' serial nos."""
+	numbers = [number for row in locations if row.delivered_qty for number in get_serial_nos(row.serial_no)]
+	if not numbers:
+		return set()
+
+	records = frappe.get_all(
+		"Serial No",
+		filters={"serial_no": ("in", numbers)},
+		fields=["item_code", "serial_no", "warehouse"],
+	)
+	return {(record.item_code, record.serial_no.lower(), record.warehouse) for record in records}
+
+
+def get_pending_serial_nos(location, serial_nos_in_stock):
+	"""Drop the serial nos that earlier deliveries of a partly delivered row took."""
+	if not location.delivered_qty:
+		return location.serial_no
+
+	return "\n".join(
+		number
+		for number in get_serial_nos(location.serial_no)
+		if (location.item_code, number.lower(), location.warehouse) in serial_nos_in_stock
+	)
 
 
 def add_product_bundles_to_delivery_note(
