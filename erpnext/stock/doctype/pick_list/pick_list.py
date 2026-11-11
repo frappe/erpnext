@@ -1119,8 +1119,8 @@ class PickList(TransactionBase):
 		if not bundle_locations:
 			return
 
-		delivered_qty_by_key, delivered_serial_nos = self._get_delivered_bundle_component_qty(
-			{bundle_key[0] for bundle_key in bundle_locations}
+		delivered_qty_by_key, delivered_serial_nos = get_delivered_bundle_component_qty(
+			self.name, {bundle_key[0] for bundle_key in bundle_locations}
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
@@ -1157,59 +1157,6 @@ class PickList(TransactionBase):
 			remaining_qty -= qty
 
 		return qty_by_location
-
-	def _get_delivered_bundle_component_qty(self, sales_order_items):
-		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
-		delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
-		for parenttype in ("Delivery Note", "Sales Invoice"):
-			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
-				delivered_qty[key] += flt(row.delivered_qty)
-				delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
-
-		return delivered_qty, delivered_serial_nos
-
-	def _get_delivered_packed_items(self, parenttype, sales_order_items):
-		packed_item = frappe.qb.DocType("Packed Item")
-		transaction_item = frappe.qb.DocType(f"{parenttype} Item")
-		query = (
-			frappe.qb.from_(transaction_item)
-			.inner_join(packed_item)
-			.on(
-				(packed_item.parent == transaction_item.parent)
-				& (packed_item.parent_detail_docname == transaction_item.name)
-				& (packed_item.parenttype == parenttype)
-			)
-		)
-		conditions = (
-			(transaction_item.docstatus == 1)
-			& (transaction_item.against_pick_list == self.name)
-			& transaction_item.so_detail.isin(sales_order_items)
-		)
-
-		if parenttype == "Sales Invoice":
-			transaction = frappe.qb.DocType(parenttype)
-			query = query.inner_join(transaction).on(transaction.name == transaction_item.parent)
-			conditions &= transaction.update_stock == 1
-
-		return (
-			query.select(
-				transaction_item.so_detail,
-				packed_item.item_code,
-				packed_item.warehouse,
-				packed_item.batch_no,
-				packed_item.serial_no,
-				Sum(packed_item.qty).as_("delivered_qty"),
-			)
-			.where(conditions)
-			.groupby(
-				transaction_item.so_detail,
-				packed_item.item_code,
-				packed_item.warehouse,
-				packed_item.batch_no,
-				packed_item.serial_no,
-			)
-		).run(as_dict=True)
 
 	def _set_delivery_status_from_items(self):
 		per_delivered = self._calculate_target_parent_percentage(
@@ -2469,3 +2416,58 @@ def get_pick_list_query(doctype, txt, searchfield, start, page_len, filters):
 		query = query.where(txt_condition)
 
 	return query.run(as_dict=True)
+
+
+def get_delivered_bundle_component_qty(pick_list, sales_order_items):
+	"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
+	delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
+	for parenttype in ("Delivery Note", "Sales Invoice"):
+		for row in get_delivered_packed_items(pick_list, parenttype, sales_order_items):
+			key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
+			delivered_qty[key] += flt(row.delivered_qty)
+			delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
+
+	return delivered_qty, delivered_serial_nos
+
+
+def get_delivered_packed_items(pick_list, parenttype, sales_order_items):
+	packed_item = frappe.qb.DocType("Packed Item")
+	transaction_item = frappe.qb.DocType(f"{parenttype} Item")
+	query = (
+		frappe.qb.from_(transaction_item)
+		.inner_join(packed_item)
+		.on(
+			(packed_item.parent == transaction_item.parent)
+			& (packed_item.parent_detail_docname == transaction_item.name)
+			& (packed_item.parenttype == parenttype)
+		)
+	)
+	conditions = (
+		(transaction_item.docstatus == 1)
+		& (transaction_item.against_pick_list == pick_list)
+		& transaction_item.so_detail.isin(sales_order_items)
+	)
+
+	if parenttype == "Sales Invoice":
+		transaction = frappe.qb.DocType(parenttype)
+		query = query.inner_join(transaction).on(transaction.name == transaction_item.parent)
+		conditions &= transaction.update_stock == 1
+
+	return (
+		query.select(
+			transaction_item.so_detail,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.batch_no,
+			packed_item.serial_no,
+			Sum(packed_item.qty).as_("delivered_qty"),
+		)
+		.where(conditions)
+		.groupby(
+			transaction_item.so_detail,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.batch_no,
+			packed_item.serial_no,
+		)
+	).run(as_dict=True)
