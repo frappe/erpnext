@@ -1512,6 +1512,7 @@ class SerialBatchCreation:
 				if batch_no := frappe.db.get_value("Serial and Batch Entry", {"parent": bundle}, "batch_no"):
 					return batch_no
 
+		# auto-created like serial nos, so the voucher's user needs no Batch permissions
 		return make_batch(
 			frappe._dict(
 				{
@@ -1520,7 +1521,8 @@ class SerialBatchCreation:
 					"reference_name": self.get("voucher_no"),
 					"manufacturing_date": self.get_posting_date_for_new_batch(),
 				}
-			)
+			),
+			ignore_permissions=True,
 		)
 
 	def get_posting_date_for_new_batch(self):
