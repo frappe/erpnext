@@ -511,6 +511,34 @@ class SellingController(StockController):
 		if service.is_batch_check_needed():
 			service.validate_outward_bundle_batches(rows=packed_rows)
 
+	def make_item_bundles(self):
+		"""Make the auto-picked bundles of item rows before the stock reservations read them."""
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		if self.is_return:
+			return
+
+		rows = [
+			d
+			for d in self.items
+			if not d.serial_and_batch_bundle
+			and d.warehouse
+			and flt(d.stock_qty) > 0
+			and not d.get("delivered_by_supplier")
+			and not self.has_product_bundle(d.item_code)
+		]
+		if not rows:
+			return
+
+		service = SerialBatchBundleService(self)
+		picked_serial_nos = service.get_serial_nos_used_in_rows()
+		picked_batches = service.get_batches_used_in_rows()
+		for d in rows:
+			get_serial_and_batch_bundle(d, self, None, picked_serial_nos, picked_batches)
+
+		if service.is_batch_check_needed():
+			service.validate_outward_bundle_batches(rows=rows)
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
@@ -1383,7 +1411,7 @@ def get_serial_and_batch_bundle(
 			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": delivery_note_child.name if delivery_note_child else child.name,
 			"posting_datetime": get_combine_datetime(parent.posting_date, parent.posting_time),
-			"qty": child.qty,
+			"qty": child.get("stock_qty") or child.qty,
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",

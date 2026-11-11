@@ -475,6 +475,7 @@ class SalesInvoice(SellingController):
 			self.validate_standalone_serial_nos_customer()
 			# reservations read the delivered serial and batch nos from the bundles
 			self.make_packed_item_bundles()
+			self.make_item_bundles()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 
