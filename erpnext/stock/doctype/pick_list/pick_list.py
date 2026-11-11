@@ -1623,7 +1623,9 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 	if sales_dict:
 		delivery_note = create_dn_with_so(sales_dict, pick_list)
 
-	if not all(item.sales_order for item in pick_list.locations):
+	if any(
+		not row.sales_order and flt(row.picked_qty) > flt(row.delivered_qty) for row in pick_list.locations
+	):
 		delivery_note = create_dn_wo_so(pick_list)
 		delivery_note.flags.ignore_mandatory = True
 		delivery_note.save()
