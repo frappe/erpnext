@@ -2741,7 +2741,7 @@ def get_available_serial_nos(kwargs):
 		if kwargs.warehouse:
 			filters["warehouse"] = kwargs.warehouse
 
-	reserved_entries = get_reserved_serial_nos_for_sre(kwargs)
+	reserved_entries = [] if kwargs.get("ignore_reserved_stock") else get_reserved_serial_nos_for_sre(kwargs)
 
 	ignore_serial_nos = []
 	if reserved_entries:

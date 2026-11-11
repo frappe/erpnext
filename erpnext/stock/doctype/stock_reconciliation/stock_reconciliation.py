@@ -319,6 +319,7 @@ class StockReconciliation(StockController):
 							"warehouse": item.warehouse,
 							"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 							"ignore_warehouse": 1,
+							"ignore_reserved_stock": True,
 						}
 					)
 				)
@@ -343,6 +344,7 @@ class StockReconciliation(StockController):
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
 							"for_stock_levels": True,
+							"ignore_reserved_stock": True,
 							"ignore_voucher_nos": [self.name],
 						}
 					)
@@ -434,6 +436,7 @@ class StockReconciliation(StockController):
 					posting_date=self.posting_date,
 					posting_time=self.posting_time,
 					for_stock_levels=True,
+					ignore_reserved_stock=True,
 					consider_negative_batches=True,
 					do_not_check_future_batches=True,
 				)
@@ -1685,6 +1688,7 @@ def get_stock_balance_for(
 						"posting_datetime": combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 						"has_batch_no": 1,
+						"ignore_reserved_stock": True,
 					}
 				)
 			)
