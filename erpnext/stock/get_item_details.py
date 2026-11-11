@@ -436,13 +436,15 @@ def filter_batches(batches, doc):
 
 
 def get_row_stock_qty(row):
-	"""Rows inserted through the API may not have stock_qty yet."""
+	"""Rows of a sales document inserted through the API may not have stock_qty or uom yet."""
 	if row.get("stock_qty"):
 		return flt(row.get("stock_qty"))
 
 	conversion_factor = row.get("conversion_factor")
-	if not conversion_factor and row.get("uom"):
-		conversion_factor = get_uom_conversion_factor(row.get("item_code"), row.get("uom"))
+	# a row without uom gets the Default Sales UOM in get_basic_details
+	uom = row.get("uom") or frappe.get_cached_value("Item", row.get("item_code"), "sales_uom")
+	if not conversion_factor and uom:
+		conversion_factor = get_uom_conversion_factor(row.get("item_code"), uom)
 
 	return flt(row.get("qty")) * flt(conversion_factor or 1)
 
