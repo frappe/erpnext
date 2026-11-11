@@ -1091,17 +1091,13 @@ class SerialandBatchBundle(Document):
 
 		if future_entries:
 			if self.has_serial_no:
-				title = "Serial No Exists In Future Transaction(s)"
+				title = _("Serial No Exists In Future Transaction(s)")
 			else:
-				title = "Batches Exists In Future Transaction(s)"
+				title = _("Batches Exists In Future Transaction(s)")
 
-			msg = """Since the stock reconciliation exists
-				for future dates, cancel it first. For Serial/Batch,
-				if you want to make a backdated transaction,
-				avoid using stock reconciliation.
-				For more details about the transaction,
-				please refer to the list below.
-			"""
+			msg = _(
+				"Since the stock reconciliation exists for future dates, cancel it first. For Serial/Batch, if you want to make a backdated transaction, avoid using stock reconciliation. For more details about the transaction, please refer to the list below."
+			)
 
 			msg += "<br><br><ul>"
 
@@ -1112,7 +1108,7 @@ class SerialandBatchBundle(Document):
 					msg += f"<li>{d.batch_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
 			msg += "</li></ul>"
 
-			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransactionError)
+			frappe.throw(msg, title=title, exc=SerialNoExistsInFutureTransactionError)
 
 	def get_serial_nos_for_validate(self, is_cancelled=False):
 		serial_nos = [d.serial_no for d in self.entries if d.serial_no]
