@@ -2797,6 +2797,10 @@ def get_next_stock_reco(kwargs):
 		.limit(1)
 	)
 
+	# The caller's UPDATE shifts the latest committed rows, so find the bounding reco among them too.
+	if frappe.db.db_type == "mariadb":
+		query = query.for_update()
+
 	return query.run(as_dict=True)
 
 
