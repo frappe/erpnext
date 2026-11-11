@@ -10,7 +10,6 @@ frappe.listview_settings["Delivery Note"] = {
 		"is_return",
 		"status",
 		"currency",
-		"company",
 	],
 	get_indicator: function (doc) {
 		if (cint(doc.is_return) == 1 && doc.status == "Return") {
@@ -28,30 +27,29 @@ frappe.listview_settings["Delivery Note"] = {
 		}
 	},
 	onload: function (doclist) {
-		const action = () => {
-			const selected_docs = doclist.get_checked_items();
+		const action = async () => {
 			const docnames = doclist.get_checked_items(true);
 
-			if (selected_docs.length > 0) {
-				frappe.model.with_doctype("Delivery Trip", () => {
-					const target_doc = frappe.model.get_new_doc("Delivery Trip");
-					target_doc.company = selected_docs[0].company;
+			if (docnames.length > 0) {
+				await frappe.model.with_doctype("Delivery Trip");
+				const target_doc = frappe.model.get_new_doc("Delivery Trip");
+				const { message } = await frappe.db.get_value("Delivery Note", docnames[0], "company");
+				target_doc.company = message.company;
 
-					frappe.call({
-						type: "POST",
-						method: "frappe.model.mapper.map_docs",
-						args: {
-							method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
-							source_names: docnames,
-							target_doc: target_doc,
-						},
-						callback: function (r) {
-							if (!r.exc) {
-								frappe.model.sync(r.message);
-								frappe.set_route("Form", r.message.doctype, r.message.name);
-							}
-						},
-					});
+				frappe.call({
+					type: "POST",
+					method: "frappe.model.mapper.map_docs",
+					args: {
+						method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
+						source_names: docnames,
+						target_doc: target_doc,
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
+						}
+					},
 				});
 			}
 		};
