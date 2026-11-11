@@ -286,6 +286,7 @@ def _make_bundle_doc(parent_doc, child, type_of_transaction):
 		{
 			"doctype": "Serial and Batch Bundle",
 			"voucher_type": "Stock Entry",
+			"company": parent_doc.company,
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"type_of_transaction": type_of_transaction,
