@@ -1277,18 +1277,20 @@ class SellingController(StockController):
 				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
 
 				if bundle_id:
-					cls_obj = SerialBatchCreation(
+					package = SerialBatchCreation(
 						{
 							"type_of_transaction": "Outward",
 							"serial_and_batch_bundle": bundle_id,
 							"item_code": item.get("item_code"),
 							"warehouse": item.get("warehouse"),
+							"do_not_save": True,
 						}
-					)
+					).duplicate_package()
 
-					cls_obj.duplicate_package()
+					remove_delivered_serial_nos(package)
+					package.save()
 
-					item.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+					item.serial_and_batch_bundle = package.name
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
@@ -1296,6 +1298,23 @@ class SellingController(StockController):
 		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
 		for pick_list in pick_lists:
 			update_pick_list_status(pick_list)
+
+
+def remove_delivered_serial_nos(package):
+	"""Drop the serial nos an earlier delivery of a partly delivered pick list row took."""
+	serial_nos = [row.serial_no for row in package.entries if row.serial_no]
+	if not serial_nos:
+		return
+
+	in_stock = set(
+		frappe.get_all(
+			"Serial No",
+			filters={"name": ("in", serial_nos), "warehouse": package.warehouse},
+			pluck="name",
+		)
+	)
+	for row in [row for row in package.entries if row.serial_no and row.serial_no not in in_stock]:
+		package.remove(row)
 
 
 def set_default_income_account_for_item(obj):
