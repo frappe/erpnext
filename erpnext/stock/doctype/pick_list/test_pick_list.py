@@ -1591,27 +1591,24 @@ class TestPickList(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_bundle_delivery_takes_the_component_warehouse_not_delivered_yet(self):
-		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
-		component = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBWH-.#####"}
-		).name
-		make_stock_entry(item=component, to_warehouse=warehouse, qty=2, basic_rate=100)
-		make_stock_entry(item=component, to_warehouse=other_warehouse, qty=1, basic_rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
-		pick_list = create_pick_list(sales_order.name)
-		pick_list.submit()
-		other_location = next(row for row in pick_list.locations if row.warehouse == other_warehouse)
-
-		first_delivery = create_delivery_note(pick_list.name)
-		first_delivery.items[0].qty = 2
-		first_delivery.save()
-		first_delivery.submit()
+		pick_list, _first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
 
 		second_delivery = create_delivery_note(pick_list.name)
-		self.assertEqual(second_delivery.packed_items[0].warehouse, other_warehouse)
+		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
+		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
+		second_delivery.submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_draft_bundle_delivery_keeps_its_warehouse_after_earlier_delivery_is_cancelled(self):
+		pick_list, first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
+		second_delivery = create_delivery_note(pick_list.name)
+		second_delivery.save()
+
+		first_delivery.cancel()
+		second_delivery.reload()
+		second_delivery.save()
+
+		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
 		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
 		second_delivery.submit()
 
@@ -4122,3 +4119,26 @@ def make_work_order_pick_list_with_reserved_serials():
 	pick_list = create_pick_list_from_wo(work_order.name, None, 2)
 	pick_list.save()
 	return pick_list
+
+
+def deliver_bundle_from_first_of_two_warehouses():
+	"""Pick a serialized bundle component from two warehouses and deliver the first one."""
+	warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+	component = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBWH-.#####"}
+	).name
+	make_stock_entry(item=component, to_warehouse=warehouse, qty=2, basic_rate=100)
+	make_stock_entry(item=component, to_warehouse=other_warehouse, qty=1, basic_rate=100)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	other_location = next(row for row in pick_list.locations if row.warehouse == other_warehouse)
+
+	first_delivery = create_delivery_note(pick_list.name)
+	first_delivery.items[0].qty = 2
+	first_delivery.save()
+	first_delivery.submit()
+	return pick_list, first_delivery, other_location
