@@ -1404,7 +1404,7 @@ def get_serial_and_batch_bundle(
 			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": delivery_note_child.name if delivery_note_child else child.name,
 			"posting_datetime": get_combine_datetime(parent.posting_date, parent.posting_time),
-			"qty": child.qty,
+			"qty": child.get("stock_qty") or child.qty,
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
