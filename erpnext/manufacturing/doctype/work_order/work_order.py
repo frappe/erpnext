@@ -18,6 +18,7 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext import get_company_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
@@ -1077,6 +1078,7 @@ class WorkOrder(Document):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
 		bom.company = self.company
+		bom.currency = get_company_currency(self.company)
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
