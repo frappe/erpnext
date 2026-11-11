@@ -229,6 +229,16 @@ class TestStockSettings(ERPNextTestSuite):
 
 		self.assertIsNone(frappe.cache.hget("bootinfo", frappe.session.user))
 
+	def test_unchanged_save_keeps_site_cache(self):
+		settings = frappe.get_doc("Stock Settings")
+		settings.item_group = None
+		settings.save()
+
+		frappe.cache.set_value("stock_settings_probe", 1)
+		settings.save()
+
+		self.assertEqual(frappe.cache.get_value("stock_settings_probe"), 1)
+
 	def test_hiding_barcode_field_keeps_item_barcodes(self):
 		settings = frappe.get_doc("Stock Settings")
 		settings.show_barcode_field = 1
