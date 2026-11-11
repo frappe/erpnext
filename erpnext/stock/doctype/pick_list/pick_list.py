@@ -1192,7 +1192,7 @@ class PickList(TransactionBase):
 			for location in locations
 		}
 		remaining_qty = max(delivered_qty - sum(qty_by_location.values()), 0)
-		for location in sorted(locations, key=lambda row: not row.serial_no):
+		for location in locations:
 			qty = min(flt(location.picked_qty) - qty_by_location[location.name], remaining_qty)
 			qty_by_location[location.name] += qty
 			remaining_qty -= qty
