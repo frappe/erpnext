@@ -2589,14 +2589,6 @@ class TestPickList(FrappeTestCase):
 		sales_order.cancel()
 		stock_entry.cancel()
 
-<<<<<<< HEAD
-	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
-	def test_pick_skips_serial_nos_reserved_for_other_orders(self):
-		item = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRSN-.#####"}
-		).name
-		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=3, basic_rate=100)
-=======
 	def test_delivery_from_pick_list_whose_rows_without_so_are_delivered(self):
 		warehouse = "_Test Warehouse - _TC"
 		item_with_so = make_item().name
@@ -2625,12 +2617,12 @@ class TestPickList(FrappeTestCase):
 		delivery_note = create_delivery_note(pick_list.name)
 		self.assertEqual([(row.item_code, row.qty) for row in delivery_note.items], [(item_with_so, 3)])
 
-	def test_creating_dn_from_so_with_different_addresses(self):
-		warehouse = "_Test Warehouse - _TC"
-		item1 = make_item().name
-		item2 = make_item().name
-		item3 = make_item().name
->>>>>>> 225dcfa (test: deliver a pick list whose rows without a sales order are delivered)
+	@change_settings("Stock Settings", {"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1})
+	def test_pick_skips_serial_nos_reserved_for_other_orders(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRSN-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=3, basic_rate=100)
 
 		reserving_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=2, rate=100)
 		reserving_order.create_stock_reservation_entries(notify=False)
