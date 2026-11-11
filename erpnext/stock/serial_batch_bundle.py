@@ -1353,6 +1353,9 @@ class SerialBatchCreation:
 
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
+			if self.get("voucher_type") == "POS Invoice":
+				# a submitted POS Invoice's own reserved batch qty is already in already_picked_batches
+				kwargs["ignore_voucher_nos"] = [self.voucher_no]
 
 		if self.has_serial_no and not self.get("serial_nos"):
 			kwargs["sales_order_item"] = self.get_sales_order_item()
