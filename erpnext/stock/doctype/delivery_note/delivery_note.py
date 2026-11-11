@@ -459,7 +459,8 @@ class DeliveryNote(SellingController):
 	def validate_warehouse(self):
 		super().validate_warehouse()
 
-		for d in self.get_item_list():
+		# packed rows get their qty only later in validate
+		for d in self.get_item_list(make_bundles=False):
 			if not d["warehouse"] and frappe.get_cached_value("Item", d["item_code"], "is_stock_item") == 1:
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
