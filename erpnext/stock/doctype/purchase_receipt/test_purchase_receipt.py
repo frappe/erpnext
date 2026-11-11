@@ -1963,6 +1963,15 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		dn.cancel()
 		pr1.cancel()
 
+	def test_stock_user_can_save_purchase_receipt(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		user = create_user_with_roles("pr-stock-user@example.com", "Stock User").name
+		with self.set_user(user):
+			pr = make_purchase_receipt(do_not_submit=True)
+
+		self.assertTrue(pr.name)
+
 	def test_warehouse_restricted_user_gets_items_from_internal_delivery_note(self):
 		from frappe.permissions import add_user_permission
 
