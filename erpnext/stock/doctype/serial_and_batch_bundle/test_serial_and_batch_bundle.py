@@ -2729,6 +2729,34 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			)
 			self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle, "modified"), modified)
 
+	def test_accounts_and_sales_users_submit_serialized_vouchers(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SABB-ROLE-.####"}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		serial_nos = frappe.get_all(
+			"Serial No", filters={"item_code": item_code}, pluck="serial_no", order_by="serial_no"
+		)
+		vouchers = (
+			("Accounts User", create_sales_invoice, {"update_stock": 1}),
+			("Sales User", create_delivery_note, {}),
+		)
+		for (role, make_voucher, kwargs), serial_no in zip(vouchers, serial_nos, strict=True):
+			user = make_fenced_user(f"sabb-{frappe.scrub(role)}@example.com", [role])
+			with self.subTest(role=role), as_user(user):
+				voucher = make_voucher(
+					item_code=item_code, qty=1, warehouse="_Test Warehouse - _TC", do_not_save=1, **kwargs
+				)
+				voucher.items[0].use_serial_batch_fields = 1
+				voucher.items[0].serial_no = serial_no
+				voucher.insert()
+				voucher.submit()
+				bundle = voucher.items[0].serial_and_batch_bundle
+				self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus"), 1)
+
 	def test_same_new_serial_on_two_rows_of_one_receipt_is_refused(self):
 		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		serial_no = f"{item_code}-SN1"
