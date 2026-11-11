@@ -3381,7 +3381,7 @@ def get_auto_batch_nos(kwargs):
 		kwargs.against_sales_order = next(iter(get_reserved_voucher_details(kwargs)), None)
 
 	if kwargs.against_sales_order and (
-		only_consider_batches := get_batches_to_be_considered(kwargs.against_sales_order)
+		only_consider_batches := get_batches_to_be_considered(kwargs.against_sales_order, kwargs.item_code)
 	):
 		batches, warehouses = [], []
 		for item in only_consider_batches:
@@ -3539,7 +3539,7 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def get_batches_to_be_considered(sales_order_name):
+def get_batches_to_be_considered(sales_order_name, item_code):
 	parent = frappe.qb.DocType("Stock Reservation Entry")
 	child = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -3552,6 +3552,7 @@ def get_batches_to_be_considered(sales_order_name):
 		.where(
 			(parent.docstatus == 1)
 			& (parent.voucher_no == sales_order_name)
+			& (parent.item_code == item_code)
 			& (child.delivered_qty < child.qty)
 		)
 	)
