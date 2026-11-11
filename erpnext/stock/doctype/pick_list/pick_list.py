@@ -26,6 +26,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_picked_serial_nos,
 	get_reserved_serial_nos_for_sre,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_company_total_stock, get_conversion_factor
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
@@ -1826,6 +1827,9 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None, se
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
+	serial_nos_in_stock = get_serial_nos_in_stock(
+		[location for location in pick_list.locations if location.sales_order == sales_order]
+	)
 
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
@@ -1853,7 +1857,7 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None, se
 				flt(dn_item.conversion_factor) or 1
 			)
 			dn_item.batch_no = location.batch_no
-			dn_item.serial_no = location.serial_no
+			dn_item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock)
 			dn_item.use_serial_batch_fields = location.use_serial_batch_fields
 
 			update_delivery_note_item(source_doc, dn_item, delivery_note)
@@ -1868,6 +1872,34 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None, se
 	delivery_note.company = pick_list.company
 	if sales_order:
 		delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
+
+
+def get_serial_nos_in_stock(locations, moved_qty_field="delivered_qty"):
+	"""Return (item_code, lower-cased serial_no, warehouse) of the partly moved rows' serial nos."""
+	numbers = [
+		number for row in locations if row.get(moved_qty_field) for number in get_serial_nos(row.serial_no)
+	]
+	if not numbers:
+		return set()
+
+	records = frappe.get_all(
+		"Serial No",
+		filters={"serial_no": ("in", numbers)},
+		fields=["item_code", "serial_no", "warehouse"],
+	)
+	return {(record.item_code, record.serial_no.lower(), record.warehouse) for record in records}
+
+
+def get_pending_serial_nos(location, serial_nos_in_stock, moved_qty_field="delivered_qty"):
+	"""Drop the serial nos that earlier deliveries or transfers of a partly moved row took."""
+	if not location.get(moved_qty_field):
+		return location.serial_no
+
+	return "\n".join(
+		number
+		for number in get_serial_nos(location.serial_no)
+		if (location.item_code, number.lower(), location.warehouse) in serial_nos_in_stock
+	)
 
 
 def add_product_bundles_to_delivery_note(
@@ -2034,11 +2066,12 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 	stock_entry.project = work_order.project
 
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 		item.t_warehouse = wip_warehouse
 
 		stock_entry.append("items", item)
@@ -2047,6 +2080,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
@@ -2056,7 +2090,7 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 				"Material Request Item", location.material_request_item, "warehouse"
 			)
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 		item.t_warehouse = target_warehouse
 		stock_entry.append("items", item)
 
@@ -2064,11 +2098,12 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 
 
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 
 		stock_entry.append("items", item)
 
@@ -2080,7 +2115,7 @@ def get_pending_transfer_stock_qty(location):
 	return flt(location.picked_qty) - flt(location.transferred_qty)
 
 
-def update_common_item_properties(item, location):
+def update_common_item_properties(item, location, serial_nos_in_stock):
 	pending_stock_qty = get_pending_transfer_stock_qty(location)
 	item.item_code = location.item_code
 	item.item_name = location.item_name
@@ -2091,7 +2126,7 @@ def update_common_item_properties(item, location):
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
 	item.material_request = location.material_request
-	item.serial_no = location.serial_no
+	item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock, "transferred_qty")
 	item.batch_no = location.batch_no
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name
