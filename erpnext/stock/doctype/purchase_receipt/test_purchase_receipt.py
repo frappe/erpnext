@@ -5029,6 +5029,28 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, repost_doc.save)
 
+	def test_validate_recreate_stock_ledgers_for_batch_item_without_stock_ledger_entries(self):
+		item_code = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-TRSLR-.#####"}
+		).name
+		pr = make_purchase_receipt(item_code=item_code, qty=10, rate=100)
+		frappe.db.delete("Stock Ledger Entry", {"voucher_type": pr.doctype, "voucher_no": pr.name})
+
+		repost_doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Transaction",
+				"voucher_type": pr.doctype,
+				"voucher_no": pr.name,
+				"posting_date": pr.posting_date,
+				"posting_time": pr.posting_time,
+				"company": pr.company,
+				"recreate_stock_ledgers": 1,
+			}
+		)
+
+		self.assertRaises(frappe.ValidationError, repost_doc.save)
+
 	def test_internal_pr_qty_change_only_single_batch(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
