@@ -1596,7 +1596,7 @@ class TestPickList(ERPNextTestSuite):
 		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
 		pick_list = pick()  # picks only B
 
-		self.assertFalse(create_delivery_note(pick_list.name).items)
+		self.assertRaises(frappe.ValidationError, create_delivery_note, pick_list.name)
 
 	def test_bundle_picked_qty_skips_non_stock_and_pools_repeated_components(self):
 		warehouse = "_Test Warehouse - _TC"
