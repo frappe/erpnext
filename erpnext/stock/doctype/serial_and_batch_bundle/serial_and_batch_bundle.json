@@ -254,7 +254,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-11 01:00:24.588805",
+ "modified": "2026-11-11 01:00:29.969157",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Bundle",
@@ -414,8 +414,13 @@
    "select": 1
   },
   {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "read": 1,
    "role": "Quality Manager",
-   "select": 1
+   "submit": 1,
+   "write": 1
   },
   {
    "cancel": 1,
