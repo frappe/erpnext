@@ -47,7 +47,9 @@ def create_delivery(
 	if sales_dict:
 		documents.extend(create_delivery_with_so(sales_dict, pick_list, target))
 
-	if not all(item.sales_order for item in pick_list.locations):
+	if any(
+		not row.sales_order and flt(row.picked_qty) > flt(row.delivered_qty) for row in pick_list.locations
+	):
 		documents.append(create_delivery_wo_so(pick_list, target, target_doc))
 
 	if len(documents) == 1:
