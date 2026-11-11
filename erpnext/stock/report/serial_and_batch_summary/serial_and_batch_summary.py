@@ -4,7 +4,14 @@
 import frappe
 from frappe import _
 
+<<<<<<< HEAD
 from erpnext.accounts.report.utils import validate_date_range
+=======
+from erpnext.accounts.report.utils import get_filter_values, validate_date_range
+from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+>>>>>>> 6d5a4a3 (fix(stock): leave unconsolidated pos invoice bundles out of the serial and batch summary and ledger lots)
 
 
 def execute(filters=None):
@@ -46,9 +53,11 @@ def get_filter_conditions(filters):
 		["Serial and Batch Bundle", "is_cancelled", "=", 0],
 	]
 
-	# a Pick List only reserves; show its bundles only when asked for
+	# show reserving bundles only when asked for
 	if not filters.get("voucher_type"):
-		filter_conditions.append(["Serial and Batch Bundle", "voucher_type", "!=", "Pick List"])
+		filter_conditions.append(
+			["Serial and Batch Bundle", "voucher_type", "not in", RESERVING_VOUCHER_TYPES]
+		)
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
