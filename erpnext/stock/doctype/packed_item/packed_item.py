@@ -360,16 +360,21 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	if so_packed_item:
 		filters["product_bundle_item"] = so_packed_item.name
 
-	pl_row = frappe.db.get_value(
+	pl_rows = frappe.get_all(
 		"Pick List Item",
 		filters,
-		["item_code", "warehouse", "batch_no", "serial_no", "delivered_qty"],
-		as_dict=True,
+		["item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
 		order_by="qty desc",
 	)
 
-	if not pl_row:
+	if not pl_rows:
 		return
+
+	# a component picked from several warehouses moves on to the rows not delivered yet
+	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	pl_row = next(
+		(row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0), pl_rows[0]
+	)
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
