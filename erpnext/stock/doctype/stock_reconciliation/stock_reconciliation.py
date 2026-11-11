@@ -436,6 +436,7 @@ class StockReconciliation(StockController):
 					posting_date=self.posting_date,
 					posting_time=self.posting_time,
 					for_stock_levels=True,
+					ignore_reserved_stock=True,
 					consider_negative_batches=True,
 					do_not_check_future_batches=True,
 				)
