@@ -1874,9 +1874,11 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None, se
 		delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
 
 
-def get_serial_nos_in_stock(locations):
-	"""Return (item_code, lower-cased serial_no, warehouse) of the partly delivered rows' serial nos."""
-	numbers = [number for row in locations if row.delivered_qty for number in get_serial_nos(row.serial_no)]
+def get_serial_nos_in_stock(locations, moved_qty_field="delivered_qty"):
+	"""Return (item_code, lower-cased serial_no, warehouse) of the partly moved rows' serial nos."""
+	numbers = [
+		number for row in locations if row.get(moved_qty_field) for number in get_serial_nos(row.serial_no)
+	]
 	if not numbers:
 		return set()
 
@@ -1888,9 +1890,9 @@ def get_serial_nos_in_stock(locations):
 	return {(record.item_code, record.serial_no.lower(), record.warehouse) for record in records}
 
 
-def get_pending_serial_nos(location, serial_nos_in_stock):
-	"""Drop the serial nos that earlier deliveries of a partly delivered row took."""
-	if not location.delivered_qty:
+def get_pending_serial_nos(location, serial_nos_in_stock, moved_qty_field="delivered_qty"):
+	"""Drop the serial nos that earlier deliveries or transfers of a partly moved row took."""
+	if not location.get(moved_qty_field):
 		return location.serial_no
 
 	return "\n".join(
@@ -2064,11 +2066,12 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 	stock_entry.project = work_order.project
 
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 		item.t_warehouse = wip_warehouse
 
 		stock_entry.append("items", item)
@@ -2077,6 +2080,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
@@ -2086,7 +2090,7 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 				"Material Request Item", location.material_request_item, "warehouse"
 			)
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 		item.t_warehouse = target_warehouse
 		stock_entry.append("items", item)
 
@@ -2094,11 +2098,12 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 
 
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 
 		stock_entry.append("items", item)
 
@@ -2110,7 +2115,7 @@ def get_pending_transfer_stock_qty(location):
 	return flt(location.picked_qty) - flt(location.transferred_qty)
 
 
-def update_common_item_properties(item, location):
+def update_common_item_properties(item, location, serial_nos_in_stock):
 	pending_stock_qty = get_pending_transfer_stock_qty(location)
 	item.item_code = location.item_code
 	item.item_name = location.item_name
@@ -2121,7 +2126,7 @@ def update_common_item_properties(item, location):
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
 	item.material_request = location.material_request
-	item.serial_no = location.serial_no
+	item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock, "transferred_qty")
 	item.batch_no = location.batch_no
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name
