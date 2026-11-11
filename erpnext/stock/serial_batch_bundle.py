@@ -240,13 +240,7 @@ class SerialBatchBundle:
 		).run(as_dict=True)
 
 		held_batches = frappe._dict()
-		for row in entries:
-			if row.batch_no:
-				held = held_batches.setdefault(
-					(row.batch_no, row.warehouse),
-					frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=0),
-				)
-				held.qty += row.qty
+		add_picked_batches(held_batches, entries)
 
 		return {
 			"ignore_serial_nos": [row.serial_no for row in entries if row.serial_no],
@@ -1748,3 +1742,13 @@ def get_serial_batch_list_from_item(item):
 		batch_list = [item.batch_no] if item.get("batch_no") else []
 
 	return serial_list, batch_list
+
+
+def add_picked_batches(picked_batches, entries):
+	for entry in entries:
+		if entry.batch_no:
+			picked = picked_batches.setdefault(
+				(entry.batch_no, entry.warehouse),
+				frappe._dict(batch_no=entry.batch_no, warehouse=entry.warehouse, qty=0),
+			)
+			picked.qty += entry.qty
