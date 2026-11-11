@@ -1261,10 +1261,7 @@ class TestPOSInvoice(unittest.TestCase):
 			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
 			self.assertEqual({d.batch_no for d in entries}, {batch_no})
 
-<<<<<<< HEAD
-	@change_settings("Stock Settings", {"allow_negative_stock": 0})
-=======
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1308,7 +1305,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertEqual(pos.docstatus, 1)
 
->>>>>>> 98bd22a (test: POS packed row counts batch qty of an item row once)
+	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_stock_check_adds_up_rows_of_same_item(self):
 		item_code = make_stock_item_with_qty(20)
 		pos = create_pos_invoice(item=item_code, qty=15, rate=100, do_not_save=1)

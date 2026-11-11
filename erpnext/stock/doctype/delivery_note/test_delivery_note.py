@@ -43,12 +43,8 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 	set_valuation_method,
 )
-<<<<<<< HEAD
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse, get_warehouse
-=======
-from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
->>>>>>> 7fba3c1 (test: read picked batch qty with get_batches_from_bundle)
 from erpnext.stock.stock_ledger import get_previous_sle
 
 
@@ -1719,7 +1715,7 @@ class TestDeliveryNote(FrappeTestCase):
 	def test_bundle_rows_of_a_repeated_batched_component_do_not_overdraw_a_batch(self):
 		self.assertEqual(sorted(self.deliver_bundle_of_a_repeated_batched_component().values()), [1, 2])
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1760,7 +1756,7 @@ class TestDeliveryNote(FrappeTestCase):
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_picked_row_skips_batch_qty_of_a_row_with_batch_no_without_batch_fields(self):
 		item = make_item(
 			properties={
@@ -1784,7 +1780,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(get_batches_from_bundle(dn.items[1].serial_and_batch_bundle)[first_batch], -2)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
