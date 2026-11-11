@@ -1904,6 +1904,32 @@ class TestDeliveryNote(ERPNextTestSuite):
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
+	def test_packed_row_bundle_made_at_submit_rejects_an_expired_batch(self):
+		from erpnext.exceptions import BatchExpiredError
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TPSE-.#####",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TPBE-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		se = make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
+
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		self.assertRaises(BatchExpiredError, dn.submit)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
 	def test_packed_row_skips_batch_qty_an_item_row_takes_by_batch_no(self):
 		component = make_item(
 			properties={
