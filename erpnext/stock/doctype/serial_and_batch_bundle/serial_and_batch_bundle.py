@@ -1056,7 +1056,7 @@ class SerialandBatchBundle(Document):
 			and frappe.get_cached_value(self.voucher_type, self.voucher_no, "docstatus") != 1
 		):
 			self.throw_error_message(
-				_("The {0} # {1} should be submit first.").format(self.voucher_type, self.voucher_no)
+				_("The {0} # {1} should be submitted first.").format(self.voucher_type, self.voucher_no)
 			)
 
 	def check_future_entries_exists(self, is_cancelled=False):
