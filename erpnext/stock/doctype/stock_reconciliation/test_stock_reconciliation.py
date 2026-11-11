@@ -1393,6 +1393,9 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(len(get_serial_nos_from_bundle(sr.items[0].current_serial_and_batch_bundle)), 3)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 708d04c (test: stock reconciliation cannot move stock out of a reserved batch)
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reconciliation_cannot_move_stock_out_of_a_reserved_batch(self):
 		item, _sales_order = self.make_item_with_reserved_stock(
@@ -1410,6 +1413,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			batch_no=new_batch,
 		)
 
+<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_batch_wise_reconciliation_counts_reserved_batch_qty(self):
 		item, _sales_order = self.make_item_with_reserved_stock(
@@ -1443,6 +1447,8 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 >>>>>>> 84dceb2 (test: full stock reconciliation counts reserved serial and batch nos)
 =======
 >>>>>>> 0a0d04c (test: serial / batch fields reconciliation counts reserved serial nos)
+=======
+>>>>>>> 708d04c (test: stock reconciliation cannot move stock out of a reserved batch)
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
