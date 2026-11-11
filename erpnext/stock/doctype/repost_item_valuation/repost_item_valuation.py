@@ -186,8 +186,19 @@ class RepostItemValuation(Document):
 		if self.based_on == "Item and Warehouse":
 			items.append(self.item_code)
 		else:
-			items = get_items_to_be_repost(self.voucher_type, self.voucher_no)
-			items = list(set([d.item_code for d in items]))
+			items = [d.item_code for d in get_items_to_be_repost(self.voucher_type, self.voucher_no)]
+			# the voucher's stock ledger entries may be the ones to recreate, so they can be missing
+			items += frappe.get_all(
+				"Serial and Batch Bundle",
+				filters={
+					"voucher_type": self.voucher_type,
+					"voucher_no": self.voucher_no,
+					"docstatus": 1,
+					"is_cancelled": 0,
+				},
+				pluck="item_code",
+			)
+			items = list(set(items))
 
 		if serial_batch_items := frappe.get_all(
 			"Item", or_filters={"has_serial_no": 1, "has_batch_no": 1}, filters={"name": ("in", items)}
