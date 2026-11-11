@@ -701,6 +701,54 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"auto_create_serial_and_batch_bundle_for_outward": 1,
 		},
 	)
+	def test_delivery_auto_picks_from_its_own_warehouse_when_another_row_is_reserved(self) -> None:
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		items_details = create_items("batch")
+		(item,) = items_details
+		create_material_receipt(items_details, self.warehouse, qty=2)
+		create_material_receipt(items_details, other_warehouse, qty=2)
+		so = make_sales_order(
+			item_list=[
+				{"item_code": item, "warehouse": self.warehouse, "qty": 2, "rate": 100},
+				{"item_code": item, "warehouse": other_warehouse, "qty": 2, "rate": 100},
+			],
+			warehouse=self.warehouse,
+		)
+		so.create_stock_reservation_entries(
+			items_details=[
+				{
+					"sales_order_item": so.items[0].name,
+					"item_code": item,
+					"warehouse": self.warehouse,
+					"qty_to_reserve": 2,
+				}
+			]
+		)
+
+		dn = make_delivery_note(so.name)
+		dn.items = [row for row in dn.items if row.warehouse == other_warehouse]
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Entry",
+				{"parent": dn.items[0].serial_and_batch_bundle},
+				"warehouse",
+			),
+			other_warehouse,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
 	def test_delivery_auto_picks_the_reserved_batch_in_stock_uom(self) -> None:
 		items_details = create_items("batch")
 		(item,) = items_details
