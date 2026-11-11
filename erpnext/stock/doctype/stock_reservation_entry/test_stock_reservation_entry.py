@@ -1226,6 +1226,40 @@ class TestStockReservationEntry(ERPNextTestSuite):
 				"Delivered",
 			)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	def test_delivery_consumes_batch_reservation_of_a_bundle_component(self) -> None:
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		batch_item = make_item(properties=SR_ITEM_PROPERTIES["batch"])
+		create_material_receipt({batch_item.name: batch_item}, self.warehouse, qty=5)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [batch_item.name])
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_save=True)
+		so.reserve_stock = 1
+		so.insert()
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Reservation Entry",
+				{"voucher_detail_no": so.packed_items[0].name, "docstatus": 1},
+				"status",
+			),
+			"Delivered",
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_bundle_added_to_saved_sales_order_is_reserved(self) -> None:
 		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
