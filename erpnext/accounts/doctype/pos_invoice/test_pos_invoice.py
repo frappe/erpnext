@@ -1268,6 +1268,7 @@ class TestPOSInvoice(unittest.TestCase):
 	def test_packed_row_counts_batch_qty_of_an_item_row_once(self):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
+		frappe.set_user("Administrator")
 		component = make_item(
 			properties={
 				"is_stock_item": 1,
