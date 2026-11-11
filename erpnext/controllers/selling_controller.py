@@ -1233,7 +1233,7 @@ def get_serial_and_batch_bundle(
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
 
-	if child.get("use_serial_batch_fields"):
+	if child.get("use_serial_batch_fields") or child.get("serial_no") or child.get("batch_no"):
 		return
 
 	if not frappe.db.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"):
