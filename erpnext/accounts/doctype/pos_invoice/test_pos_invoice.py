@@ -1210,6 +1210,50 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
 			self.assertEqual({d.batch_no for d in entries}, {batch_no})
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_packed_row_counts_batch_qty_of_an_item_row_once(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PPB-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+		se = make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+
+		pos = create_pos_invoice(
+			item=component,
+			rate=100,
+			use_serial_batch_fields=1,
+			batch_no=get_batch_from_bundle(se.items[0].serial_and_batch_bundle),
+			do_not_save=1,
+		)
+		pos.append(
+			"items",
+			{
+				"item_code": bundle,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		self.assertEqual(pos.docstatus, 1)
+
 	def test_stock_check_adds_up_rows_of_same_item(self):
 		item_code = make_stock_item_with_qty(20)
 		pos = create_pos_invoice(item=item_code, qty=15, rate=100, do_not_save=1)
