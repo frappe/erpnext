@@ -1014,60 +1014,12 @@
    "options": "POS Invoice",
    "print_hide": 1,
    "search_index": 1
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "scio_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "SCIO Detail",
-   "read_only": 1
-  },
-  {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "print_hide": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "apply_tds",
-   "fieldtype": "Check",
-   "label": "Consider for Tax Withholding",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "against_pick_list",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Against Pick List",
-   "no_copy": 1,
-   "options": "Pick List",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "pick_list_item",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Pick List Item",
-   "no_copy": 1,
-   "read_only": 1,
-   "search_index": 1
->>>>>>> eae2099 (fix(stock): index pick_list_item on Delivery Note Item and Sales Invoice Item)
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2026-11-05 17:18:50.501521",
-=======
- "modified": "2026-11-11 09:30:00.000000",
->>>>>>> eae2099 (fix(stock): index pick_list_item on Delivery Note Item and Sales Invoice Item)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
