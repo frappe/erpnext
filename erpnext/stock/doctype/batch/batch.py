@@ -448,10 +448,11 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 	frappe.throw(_("There is no batch found against the {0}: {1}").format(message, serial_no_link))
 
 
-def make_batch(kwargs, ignore_permissions=False):
+def make_batch(kwargs):
 	if frappe.db.get_value("Item", kwargs.item, "has_batch_no"):
 		kwargs.doctype = "Batch"
-		return frappe.get_doc(kwargs).insert(ignore_permissions=ignore_permissions).name
+		# auto-created like serial nos, so the voucher's user needs no Batch permissions
+		return frappe.get_doc(kwargs).insert(ignore_permissions=True).name
 
 
 @frappe.whitelist()
