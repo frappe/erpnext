@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
+from frappe.utils import cstr
 from frappe.utils.html_utils import clean_html
 
 from erpnext.stock.utils import check_pending_reposting
@@ -84,12 +85,11 @@ class StockSettings(Document):
 			"item_group",
 			"stock_uom",
 			"allow_negative_stock",
-			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
 			"enable_serial_and_batch_no_for_item",
 			"set_serial_and_batch_bundle_naming_based_on_naming_series",
 		]:
-			frappe.db.set_default(key, self.get(key, ""))
+			frappe.db.set_default(key, cstr(self.get(key)))
 
 		self.update_item_naming_settings()
 		self.update_barcode_field_visibility()
