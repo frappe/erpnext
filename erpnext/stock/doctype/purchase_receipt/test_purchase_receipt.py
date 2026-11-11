@@ -1529,6 +1529,15 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			},
 		)
 
+	def test_stock_user_can_save_purchase_receipt(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		user = create_user_with_roles("pr-stock-user@example.com", "Stock User").name
+		with self.set_user(user):
+			pr = make_purchase_receipt(do_not_submit=True)
+
+		self.assertTrue(pr.name)
+
 	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
 		item = make_item(
