@@ -43,6 +43,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	set_valuation_method,
 )
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1782,14 +1783,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.insert()
 		dn.submit()
 
-		picked = defaultdict(float)
-		for entry in frappe.get_all(
-			"Serial and Batch Entry",
-			filters={"parent": dn.items[1].serial_and_batch_bundle},
-			fields=["batch_no", "qty"],
-		):
-			picked[entry.batch_no] += abs(entry.qty)
-		self.assertEqual(picked[first_batch], 2)
+		self.assertEqual(get_batches_from_bundle(dn.items[1].serial_and_batch_bundle)[first_batch], -2)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
