@@ -348,6 +348,8 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
+	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
+
 	filters = {
 		"item_code": pi_row.item_code,
 		"sales_order": main_item_row.get("against_sales_order"),
@@ -361,15 +363,8 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	pl_rows = frappe.get_all(
 		"Pick List Item",
 		filters,
-<<<<<<< HEAD
-		["warehouse", "batch_no", "serial_no"],
-		as_dict=True,
-		order_by="qty desc",
-=======
 		["item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
-		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
-		order_by="qty desc, name asc",
->>>>>>> 414fbd5 (fix(stock): map a bundle component's undelivered pick list row to the next delivery)
+		order_by="qty desc",
 	)
 
 	if not pl_rows:
@@ -383,7 +378,9 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
-	pi_row.serial_no = pl_row.serial_no
+	# keep the serial nos picked on the packed row for a partial delivery
+	if not pi_row.serial_no:
+		pi_row.serial_no = get_pending_serial_nos(pl_row, get_serial_nos_in_stock([pl_row]))
 
 
 def update_packed_item_price_data(pi_row, item_data, doc):
