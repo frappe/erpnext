@@ -186,7 +186,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		target = frappe.new_doc("Purchase Order", supplier=sq.supplier, company=sq.company)
 		target.append("taxes", tax)
 
-		po = make_purchase_order(sq.name, target.as_dict())
+		po = make_purchase_order(sq.name, target.as_json())
 
 		self.assertEqual(len(po.taxes), 1)
 
