@@ -1026,7 +1026,7 @@ class TestPickList(FrappeTestCase):
 			get_batches_from_bundle(delivery_note.packed_items[0].serial_and_batch_bundle), {batch_no: -4}
 		)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1034,7 +1034,7 @@ class TestPickList(FrappeTestCase):
 		component, pick_list = self.make_serialized_bundle_pick_list()
 		self.assert_delivers_picked_serial_nos(component, pick_list)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1066,8 +1066,8 @@ class TestPickList(FrappeTestCase):
 		delivery_note = create_delivery_note(pick_list.name)
 		delivery_note.submit()
 
-		delivered_serial_nos = SerialBatchIdentity("Serial No").get_numbers(
-			component, get_serial_nos_from_bundle(delivery_note.packed_items[0].serial_and_batch_bundle)
+		delivered_serial_nos = get_serial_nos_from_bundle(
+			delivery_note.packed_items[0].serial_and_batch_bundle
 		)
 		self.assertEqual(
 			sorted(delivered_serial_nos), sorted(get_serial_nos(pick_list.locations[0].serial_no))
