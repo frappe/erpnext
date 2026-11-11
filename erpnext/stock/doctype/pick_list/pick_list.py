@@ -1754,6 +1754,9 @@ def create_delivery(
 	if not all(item.sales_order for item in pick_list.locations):
 		documents.append(create_delivery_wo_so(pick_list, target, target_doc))
 
+	if not documents:
+		frappe.throw(_("Nothing picked in this Pick List is left to deliver."))
+
 	if len(documents) == 1:
 		return documents[0]
 	else:
@@ -1930,7 +1933,8 @@ def create_delivery_with_so(sales_dict, pick_list, target):
 
 	for key in sales_dict:
 		document = create_delivery_from_so(pick_list, sales_dict[key], target)
-		if document:
+		# e.g. less than one product bundle is picked
+		if document and document.get("items"):
 			document.flags.ignore_mandatory = True
 			# updates packed_items on save
 			# save as multiple customers are possible
