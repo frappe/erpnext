@@ -355,7 +355,7 @@ class StockLedgerEntry(Document):
 
 		if item_detail.has_variants:
 			frappe.throw(
-				_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
+				_("Stock cannot exist for Item {0} since it has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock,
 			)
 
