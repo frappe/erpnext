@@ -1076,6 +1076,7 @@ class WorkOrder(Document):
 	def make_bom(self):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
+		bom.company = self.company
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
