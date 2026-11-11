@@ -6000,6 +6000,7 @@ def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=N
 		{
 			"doctype": "Serial and Batch Bundle",
 			"voucher_type": "Stock Entry",
+			"company": parent_doc.company,
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"type_of_transaction": type_of_transaction,
