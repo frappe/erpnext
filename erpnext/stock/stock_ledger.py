@@ -1554,7 +1554,11 @@ class update_entries_after:
 		A serial / batch reconciliation takes out its current qty and puts the counted qty back,
 		so only the reserved qty beyond the counted qty must stay."""
 		reserved_stock = flt(self.get_reserved_stock(sle.item_code, sle.warehouse))
+<<<<<<< HEAD
 		if not reserved_stock or sle.voucher_type != "Stock Reconciliation" or flt(sle.actual_qty) >= 0:
+=======
+		if sle.voucher_type != "Stock Reconciliation" or flt(sle.actual_qty) >= 0:
+>>>>>>> 64a9a3d (fix(stock): check reserved stock against the counted qty of a stock reconciliation)
 			return reserved_stock
 
 		counted_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
