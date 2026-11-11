@@ -6,10 +6,10 @@ import re
 from datetime import date
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Concat_ws, Max, Min, Sum
+from frappe.query_builder.functions import Concat_ws, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -17,8 +17,7 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle, get_serial_nos
-from erpnext.stock.serial_batch_identity import SerialBatchIdentity
-from erpnext.stock.valuation_adjustment import validate_no_later_adjustment_entry
+from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -104,7 +103,6 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
-		validate_no_later_adjustment_entry(self)
 		self.validate_inventory_dimension_negative_stock()
 		self.validate_serial_no_inventory_dimension()
 
@@ -140,7 +138,9 @@ class StockLedgerEntry(Document):
 			return
 
 		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
-		balance = flt(self.get_available_qty_after_prev_transaction(dimensions), flt_precision)
+		balance = flt(
+			self.get_available_qty_after_prev_transaction(dimensions, include_same_time=True), flt_precision
+		)
 		self.validate_future_inventory_dimension_balance(balance, dimensions, flt_precision)
 
 	def validate_future_inventory_dimension_balance(self, balance, dimensions, precision):
@@ -149,12 +149,17 @@ class StockLedgerEntry(Document):
 			if balance < 0 and abs(balance) > 0.0001:
 				self.throw_validation_error(balance, dimensions)
 
-	def get_available_qty_after_prev_transaction(self, dimensions):
+	def get_available_qty_after_prev_transaction(self, dimensions, include_same_time=False):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
+		posting_condition = (
+			sle.posting_datetime <= self.posting_datetime
+			if include_same_time
+			else sle.posting_datetime < self.posting_datetime
+		)
 		available_qty = (
 			self.get_dimension_sle_query(sle, dimensions)
 			.select(Sum(sle.actual_qty))
-			.where(sle.posting_datetime <= self.posting_datetime)
+			.where(posting_condition)
 			.run()
 		)
 
@@ -217,7 +222,7 @@ class StockLedgerEntry(Document):
 		return inv_dimension_dict
 
 	def validate_serial_no_inventory_dimension(self):
-		if self.is_cancelled or self.actual_qty >= 0 or not self.has_serial_no:
+		if self.is_cancelled or self.actual_qty >= 0:
 			return
 
 		dimensions = get_inventory_dimensions()
@@ -250,8 +255,7 @@ class StockLedgerEntry(Document):
 			if mismatches:
 				frappe.throw(
 					_("Serial No {0} is not available in the selected inventory dimensions: {1}").format(
-						frappe.bold(SerialBatchIdentity("Serial No").get_label(serial_no)),
-						frappe.bold(", ".join(mismatches)),
+						frappe.bold(serial_no), frappe.bold(", ".join(mismatches))
 					),
 					title=_("Incorrect Inventory Dimension"),
 					exc=SerialNoInventoryDimensionError,
@@ -304,11 +308,10 @@ class StockLedgerEntry(Document):
 		self.check_stock_frozen_date()
 
 		# Added to handle few test cases where serial_and_batch_bundles are not required
-		if frappe.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
+		if frappe.flags.in_test and frappe.flags.ignore_serial_batch_bundle_validation:
 			return
 
-		# a write-off moves no serial no or batch; the reset of an Adjustment Entry does
-		if self.is_adjustment_entry and not self.serial_and_batch_bundle:
+		if self.is_adjustment_entry:
 			return
 
 		if not self.get("via_landed_cost_voucher"):
@@ -325,7 +328,7 @@ class StockLedgerEntry(Document):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(self.meta.get_translated_label(k)))
+				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
 
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))
@@ -367,7 +370,7 @@ class StockLedgerEntry(Document):
 			if not self.serial_and_batch_bundle:
 				frappe.throw(_("Serial No / Batch No are mandatory for Item {0}").format(self.item_code))
 
-		if self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no:
+		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
 			frappe.throw(_("Serial No and Batch No are not allowed for Item {0}").format(self.item_code))
 
 	def check_stock_frozen_date(self):
@@ -388,9 +391,7 @@ class StockLedgerEntry(Document):
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):
 					frappe.throw(
-						_("Batch {0} of Item {1} has expired.").format(
-							SerialBatchIdentity("Batch").get_label(self.batch_no), self.item_code
-						)
+						_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code)
 					)
 
 	def validate_and_set_fiscal_year(self):
@@ -409,23 +410,19 @@ class StockLedgerEntry(Document):
 		is_group_warehouse(self.warehouse)
 
 	def validate_with_last_transaction_posting_time(self):
-		authorized_role = frappe.get_single_value(
+		authorized_role = frappe.db.get_single_value(
 			"Stock Settings", "role_allowed_to_create_edit_back_dated_transactions"
 		)
 		if authorized_role:
 			authorized_users = get_users(authorized_role)
 			if authorized_users and frappe.session.user not in authorized_users:
-				sle = frappe.qb.DocType("Stock Ledger Entry")
-				last_transaction_time = (
-					frappe.qb.from_(sle)
-					.select(Max(sle.posting_datetime))
-					.where(
-						(sle.docstatus == 1)
-						& (sle.is_cancelled == 0)
-						& (sle.item_code == self.item_code)
-						& (sle.warehouse == self.warehouse)
-					)
-					.run()
+				last_transaction_time = frappe.db.sql(
+					"""
+					select MAX(timestamp(posting_date, posting_time)) as posting_time
+					from `tabStock Ledger Entry`
+					where docstatus = 1 and is_cancelled = 0 and item_code = %s
+					and warehouse = %s""",
+					(self.item_code, self.warehouse),
 				)[0][0]
 
 				cur_doc_posting_datetime = "{} {}".format(
@@ -446,7 +443,7 @@ class StockLedgerEntry(Document):
 						"You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 					).format(frappe.bold(self.item_code), frappe.bold(self.warehouse))
 
-					msg += "<br><br>" + _("Please contact any of the following users for this transaction.")
+					msg += "<br><br>" + _("Please contact any of the following users to {} this transaction.")
 					msg += "<br>" + "<br>".join(authorized_users)
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
@@ -458,19 +455,8 @@ class StockLedgerEntry(Document):
 
 def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
+	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["item_code", "warehouse", "posting_datetime", "creation"])
-
-	if frappe.db.db_type == "postgres":
-		# Postgres-only partial index for date-range stock reports (Stock Ledger / Stock Balance)
-		# that scan across all items: they filter `is_cancelled = 0` and sort by posting_datetime.
-		# The existing item_code-leading composite can't serve an all-items date scan. `where` is a
-		# no-op on MariaDB, so this is added only on postgres.
-		frappe.db.add_index(
-			"Stock Ledger Entry",
-			["company", "posting_datetime", "creation"],
-			index_name="sle_active_posting",
-			where="is_cancelled = 0",
-		)
 
 
 def check_stock_frozen_date(posting_date):
