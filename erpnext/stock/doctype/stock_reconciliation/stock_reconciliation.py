@@ -1687,6 +1687,7 @@ def get_stock_balance_for(
 						"posting_datetime": combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 						"has_batch_no": 1,
+						"ignore_reserved_stock": True,
 					}
 				)
 			)
