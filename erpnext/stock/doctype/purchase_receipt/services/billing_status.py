@@ -280,7 +280,7 @@ def get_percent_billed_by_amount(pr_doc, items: list, bill_for_rejected: bool) -
 		amount = flt(item.amount) + rejected_amount
 
 		if amount and item.billed_amt > amount:
-			per_over_billed = (flt(item.billed_amt / amount, 2) * 100) - 100
+			per_over_billed = flt(item.billed_amt / amount * 100 - 100, 2)
 			if (
 				per_over_billed > over_billing_allowance
 				and role_allowed_to_over_bill not in frappe.get_roles()
