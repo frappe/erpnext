@@ -443,7 +443,10 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 		return
 
 	# a component picked from several warehouses moves on to the rows not delivered yet
-	pl_row = next((row for row in pl_rows if flt(row.picked_qty) > flt(row.delivered_qty)), pl_rows[0])
+	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	pl_row = next(
+		(row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0), pl_rows[0]
+	)
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
