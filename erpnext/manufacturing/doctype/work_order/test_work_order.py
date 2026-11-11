@@ -1633,6 +1633,26 @@ class TestWorkOrder(ERPNextTestSuite):
 		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_manufacturing_user_submits_work_order_that_creates_batches(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "MUWO-.#####",
+			}
+		).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		user = create_user_with_roles("wo-manufacturing-user@example.com", "Manufacturing User").name
+		with self.set_user(user):
+			wo = make_wo_order_test_record(item=fg_item, qty=2, batch_size=1, skip_transfer=1)
+
+		self.assertEqual(frappe.db.count("Batch", {"reference_name": wo.name}), 2)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_auto_batch_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
