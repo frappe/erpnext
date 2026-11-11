@@ -368,6 +368,7 @@ class PickList(TransactionBase):
 	def before_submit(self):
 		self.validate_sales_order()
 		self.validate_picked_items()
+		self.validate_picked_serial_and_batch()
 		self.validate_pending_qty_in_work_order()
 
 	def validate_pending_qty_in_work_order(self):
@@ -431,6 +432,33 @@ class PickList(TransactionBase):
 				# if the user has not entered any picked qty, set it to stock_qty, before submit
 				item.picked_qty = item.stock_qty
 
+	def validate_picked_serial_and_batch(self):
+		bundle_qty = self.get_bundle_qty()
+		for row in self.locations:
+			selected_qty = bundle_qty.get(row.serial_and_batch_bundle) or len(get_serial_nos(row.serial_no))
+			precision = row.precision("picked_qty")
+			if selected_qty and flt(selected_qty, precision) != flt(row.picked_qty, precision):
+				frappe.throw(
+					_(
+						"Row #{0}: the selected serial / batch qty is {1} but the picked qty is {2}. Select only what was picked."
+					).format(row.idx, selected_qty, row.picked_qty),
+					title=_("Selected Qty Does Not Match Picked Qty"),
+				)
+
+	def get_bundle_qty(self):
+		bundles = [row.serial_and_batch_bundle for row in self.locations if row.serial_and_batch_bundle]
+		if not bundles:
+			return {}
+
+		return {
+			bundle.name: abs(bundle.total_qty)
+			for bundle in frappe.get_all(
+				"Serial and Batch Bundle",
+				filters={"name": ("in", bundles)},
+				fields=["name", "total_qty"],
+			)
+		}
+
 	def on_submit(self):
 		self.validate_serial_and_batch_bundle()
 		self.make_bundle_using_old_serial_batch_fields()
@@ -488,13 +516,13 @@ class PickList(TransactionBase):
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"voucher_detail_no": row.name,
-						"qty": row.stock_qty,
+						"qty": row.picked_qty,
 						"type_of_transaction": "Outward",
 						"company": self.company,
 						"serial_nos": SerialBatchIdentity("Serial No").resolve(
 							row.item_code, get_serial_nos(row.serial_no), ignore_permissions=True
 						),
-						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
+						"batches": frappe._dict({row.batch_no: row.picked_qty}) if row.batch_no else None,
 						"batch_no": row.batch_no,
 					}
 				).make_serial_and_batch_bundle()
