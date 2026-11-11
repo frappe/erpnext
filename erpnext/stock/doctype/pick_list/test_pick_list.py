@@ -1369,8 +1369,8 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note = create_delivery_note(pick_list.name)
 		delivery_note.submit()
 
-		delivered_serial_nos = SerialBatchIdentity("Serial No").get_numbers(
-			component, get_serial_nos_from_bundle(delivery_note.packed_items[0].serial_and_batch_bundle)
+		delivered_serial_nos = get_serial_nos_from_bundle(
+			delivery_note.packed_items[0].serial_and_batch_bundle
 		)
 		self.assertEqual(
 			sorted(delivered_serial_nos), sorted(get_serial_nos(pick_list.locations[0].serial_no))
