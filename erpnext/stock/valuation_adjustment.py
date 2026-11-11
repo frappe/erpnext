@@ -255,6 +255,8 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 			& (entry.warehouse == warehouse)
 			& (entry.docstatus == 1)
 			& (entry.is_cancelled == 0)
+			# a Pick List only reserves; its bundles move no stock
+			& (entry.voucher_type != "Pick List")
 			& (entry.posting_datetime <= cutoff)
 		)
 		.orderby(entry.posting_datetime)
