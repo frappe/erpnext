@@ -1350,6 +1350,37 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(delivery_note.items[0].qty, 2)
 		self.assertEqual([row.qty for row in delivery_note.packed_items], [2, 4])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_serialized_bundle_is_delivered_partly_from_pick_list(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLPSB-.#####"}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=5, basic_rate=100)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+
+		first_delivery = create_delivery_note(pick_list.name)
+		first_delivery.items[0].qty = 2
+		first_delivery.packed_items[0].qty = 2
+		first_delivery.packed_items[0].serial_no = "\n".join(picked_serial_nos[:2])
+		first_delivery.save()
+		self.assertEqual(get_serial_nos(first_delivery.packed_items[0].serial_no), picked_serial_nos[:2])
+		first_delivery.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].delivered_qty, 2)
+
+		second_delivery = create_delivery_note(pick_list.name)
+		self.assertEqual(second_delivery.items[0].qty, 1)
+		self.assertEqual(get_serial_nos(second_delivery.packed_items[0].serial_no), picked_serial_nos[2:])
+		second_delivery.submit()
+
 	def test_next_pick_list_picks_what_is_left_on_each_bundle_component(self):
 		warehouse = "_Test Warehouse - _TC"
 		bundle, (component_a, component_b) = create_product_bundle([1, 2])
