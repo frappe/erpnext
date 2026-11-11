@@ -3120,6 +3120,184 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		pr.cancel()
 
+	@patch(
+		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		return_value=None,
+	)
+	def test_invoice_cancellation_retains_advance_payment_request(self, mocked_get_payment_url):
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
+		so = make_sales_order(qty=1, rate=100)
+		pr = make_payment_request(
+			dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True, mute_email=True
+		)
+		pe = pr.set_as_paid()
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+		pe.reload()
+		self.assertTrue(
+			any(r.reference_name == si.name and r.payment_request == pr.name for r in pe.references)
+		)
+		payment_gl = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+			order_by="account, name",
+		)
+		self.assertTrue(payment_gl)
+		payment_ledger_amount = sum(
+			r.amount
+			for r in frappe.get_all(
+				"Payment Ledger Entry",
+				filters={
+					"voucher_type": "Payment Entry",
+					"voucher_no": pe.name,
+					"docstatus": 1,
+					"delinked": 0,
+				},
+				fields=["amount"],
+			)
+		)
+		self.assertNotEqual(payment_ledger_amount, 0)
+		advance_ledger_before = frappe.get_all(
+			"Advance Payment Ledger Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "docstatus": 1},
+			fields=["against_voucher_type", "against_voucher_no", "amount", "base_amount", "delinked"],
+		)
+		self.assertEqual(len(advance_ledger_before), 1)
+		self.assertEqual(advance_ledger_before[0].amount, -100)
+		self.assertEqual(advance_ledger_before[0].against_voucher_no, so.name)
+
+		si.cancel()
+		pr.reload()
+		pe.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount, pe.docstatus), ("Paid", 0, 1))
+		self.assertEqual(
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "is_cancelled": 0},
+				fields=["account", "debit", "credit"],
+				order_by="account, name",
+			),
+			payment_gl,
+		)
+		self.assertEqual(
+			sum(
+				r.amount
+				for r in frappe.get_all(
+					"Payment Ledger Entry",
+					filters={
+						"voucher_type": "Payment Entry",
+						"voucher_no": pe.name,
+						"docstatus": 1,
+						"delinked": 0,
+					},
+					fields=["amount"],
+				)
+			),
+			payment_ledger_amount,
+		)
+		advance_ledger_after = frappe.get_all(
+			"Advance Payment Ledger Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "docstatus": 1},
+			fields=["against_voucher_type", "against_voucher_no", "amount", "base_amount", "delinked"],
+		)
+		self.assertEqual(advance_ledger_after, advance_ledger_before)
+		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == so.name), 100)
+		self.assertTrue(
+			all(
+				r.total_amount and r.outstanding_amount and r.account
+				for r in pe.references
+				if r.reference_name == so.name
+			)
+		)
+		with self.assertRaises(frappe.ValidationError):
+			pr.create_payment_entry()
+		replacement_invoice = make_sales_invoice(so.name)
+		replacement_invoice.allocate_advances_automatically = 1
+		replacement_invoice.save()
+		replacement_invoice.submit()
+		pr.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Paid", 0))
+		replacement_invoice.cancel()
+
+		pe.reload()
+		pe.cancel()
+		pr.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Requested", 100))
+		gl_by_account = {}
+		for row in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=["account", "debit", "credit"],
+		):
+			gl_by_account[row.account] = gl_by_account.get(row.account, 0) + row.debit - row.credit
+		self.assertTrue(gl_by_account)
+		self.assertTrue(all(amount == 0 for amount in gl_by_account.values()))
+		self.assertEqual(
+			sum(
+				r.amount
+				for r in frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+					fields=["amount"],
+				)
+			),
+			0,
+		)
+		self.assertFalse(
+			frappe.get_all(
+				"Advance Payment Ledger Entry",
+				filters={
+					"voucher_type": "Payment Entry",
+					"voucher_no": pe.name,
+					"docstatus": 1,
+					"delinked": 0,
+				},
+				limit=1,
+			)
+		)
+		self.assertEqual(
+			sum(
+				r.amount
+				for r in frappe.get_all(
+					"Advance Payment Ledger Entry",
+					filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+					fields=["amount"],
+				)
+			),
+			0,
+		)
+
+	@patch(
+		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		return_value=None,
+	)
+	def test_partial_invoice_cancellation_restores_order_advance(self, mocked_get_payment_url):
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
+		so = make_sales_order(qty=2, rate=50)
+		pr = make_payment_request(
+			dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True, mute_email=True
+		)
+		pe = pr.set_as_paid()
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 1
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+		pe.reload()
+		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == si.name), 50)
+		si.cancel()
+		pe.reload()
+		pr.reload()
+		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == so.name), 100)
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Paid", 0))
+
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
 			"_Test Serial and Batch Item for Rejected Materials",
