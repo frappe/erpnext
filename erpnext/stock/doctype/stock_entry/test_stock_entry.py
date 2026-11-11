@@ -6085,19 +6085,11 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
 	def test_make_stock_entry_needs_stock_entry_permission(self):
-		user = "test_make_stock_entry_perm@example.com"
-		if not frappe.db.exists("User", user):
-			frappe.get_doc(
-				{
-					"doctype": "User",
-					"email": user,
-					"first_name": "Make Stock Entry",
-					"send_welcome_email": 0,
-					"roles": [{"role": "Delivery User"}],
-				}
-			).insert(ignore_permissions=True)
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
-		with self.set_user(user):
+		user = create_user("test_make_stock_entry_perm@example.com", "Delivery User")
+
+		with self.set_user(user.name):
 			self.assertRaises(
 				frappe.PermissionError,
 				make_stock_entry,
