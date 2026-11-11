@@ -213,6 +213,52 @@ class TestEmployee(ERPNextTestSuite):
 		self.assertEqual(qb_employee_list, employee_list)
 		frappe.set_user("Administrator")
 
+	def test_disabled_department_cannot_be_assigned(self):
+		department = frappe.get_doc(
+			{
+				"doctype": "Department",
+				"department_name": "Employee Disabled Department",
+				"company": "_Test Company",
+			}
+		).insert()
+		employee = frappe.get_doc(
+			"Employee",
+			make_employee(
+				"test_disabled_department@company.com",
+				company="_Test Company",
+				department=department.name,
+			),
+		)
+		other_doc = frappe.get_doc(
+			"Employee",
+			make_employee(
+				"test_other_department@company.com", company="_Test Company", department=department.name
+			),
+		)
+		department.disabled = 1
+		department.save()
+
+		# Existing assignments remain valid until the department link changes.
+		employee.save()
+		other_doc.department = None
+		other_doc.save()
+		other_doc.department = department.name
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled Department"):
+			other_doc.save()
+
+		with self.assertRaisesRegex(frappe.ValidationError, "disabled Department"):
+			frappe.get_doc(
+				{
+					"doctype": "Employee",
+					"first_name": "Disabled Department Test",
+					"company": "_Test Company",
+					"department": department.name,
+					"gender": "Female",
+					"date_of_birth": "1990-05-08",
+					"date_of_joining": "2013-01-01",
+				}
+			).insert()
+
 	def test_create_user_automatically(self):
 		def get_new_employee(email: str, create_user_permission: int):
 			return frappe.get_doc(
