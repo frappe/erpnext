@@ -1612,6 +1612,24 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
 		second_delivery.submit()
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_draft_bundle_delivery_keeps_its_warehouse_when_order_reserves_stock(self):
+		pick_list, first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses(
+			reserve_stock=1
+		)
+		second_delivery = create_delivery_note(pick_list.name)
+		second_delivery.save()
+
+		first_delivery.cancel()
+		second_delivery.reload()
+		second_delivery.save()
+
+		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
+		second_delivery.submit()
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -4121,7 +4139,7 @@ def make_work_order_pick_list_with_reserved_serials():
 	return pick_list
 
 
-def deliver_bundle_from_first_of_two_warehouses():
+def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):
 	"""Pick a serialized bundle component from two warehouses and deliver the first one."""
 	warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
 	component = make_item(
@@ -4132,7 +4150,14 @@ def deliver_bundle_from_first_of_two_warehouses():
 	bundle = make_item(properties={"is_stock_item": 0}).name
 	make_product_bundle(bundle, [component])
 
-	sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+	sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100, do_not_save=True)
+	sales_order.reserve_stock = reserve_stock
+	sales_order.insert()
+	sales_order.submit()
+	if reserve_stock:
+		# a pick list needs the order's stock unreserved
+		sales_order.cancel_stock_reservation_entries(notify=False)
+
 	pick_list = create_pick_list(sales_order.name)
 	pick_list.submit()
 	other_location = next(row for row in pick_list.locations if row.warehouse == other_warehouse)
