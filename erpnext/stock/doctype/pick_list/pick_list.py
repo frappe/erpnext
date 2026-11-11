@@ -1069,29 +1069,17 @@ class PickList(TransactionBase):
 		)
 		components = {}
 		qty_map = defaultdict(lambda: defaultdict(list))
-<<<<<<< HEAD
-		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
+		for so_row, packed_items in bundles.items():
 			parent_item = packed_items[0].parent_item
 			if parent_item not in components:
 				components[parent_item] = [
-=======
-		for so_row, packed_items in bundles.items():
-			bundle, parent_item = packed_items[0].product_bundle, packed_items[0].parent_item
-			if bundle not in components:
-				components[bundle] = [
->>>>>>> 25b6c28 (fix(stock): count a picked bundle from its stock components, pooling repeated ones)
 					(component, get_component_stock_qty_per_unit(component, None))
 					for component in get_product_bundle_items(parent_item)
 				]
 
-<<<<<<< HEAD
 			for component, qty_per_unit in components[parent_item]:
-				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
-=======
-			for component, qty_per_unit in components[bundle]:
 				packed_item = pop_order_packed_item(packed_items, parent_item, component.item_code)
 				if packed_item and component.item_code in stock_items:
->>>>>>> 25b6c28 (fix(stock): count a picked bundle from its stock components, pooling repeated ones)
 					qty_map[so_row][component.item_code].append(
 						get_ordered_qty_per_unit(qty_per_unit, packed_item)
 					)
