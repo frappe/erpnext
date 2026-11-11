@@ -1408,6 +1408,25 @@ class TestPickList(ERPNextTestSuite):
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	def test_bundle_delivery_from_pick_list_keeps_the_picked_serial_nos(self):
+		component, pick_list = self.make_serialized_bundle_pick_list()
+		self.assert_delivers_picked_serial_nos(component, pick_list)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_bundle_delivery_from_pick_list_keeps_manually_picked_serial_nos(self):
+		component, pick_list = self.make_serialized_bundle_pick_list()
+		serial_nos = frappe.get_all(
+			"Serial No", {"item_code": component}, pluck="serial_no", order_by="serial_no"
+		)
+		pick_list.pick_manually = 1
+		pick_list.locations[0].serial_no = "\n".join(serial_nos[3:])
+		pick_list.locations[0].serial_and_batch_bundle = None
+		self.assert_delivers_picked_serial_nos(component, pick_list)
+
+	def make_serialized_bundle_pick_list(self):
+		"""Draft Pick List for a bundle of 2 serialized components, with 5 in stock."""
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
 			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBS-.#####"}
@@ -1417,7 +1436,9 @@ class TestPickList(ERPNextTestSuite):
 		make_product_bundle(bundle, [component], qty=2)
 
 		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)
-		pick_list = create_pick_list(sales_order.name)
+		return component, create_pick_list(sales_order.name)
+
+	def assert_delivers_picked_serial_nos(self, component, pick_list):
 		pick_list.submit()
 		delivery_note = create_delivery_note(pick_list.name)
 		delivery_note.submit()
