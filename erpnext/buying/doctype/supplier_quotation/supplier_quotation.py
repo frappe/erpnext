@@ -320,9 +320,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 				and (item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0)
 				and select_item(item),
 			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -350,7 +348,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				},
 			},
 			"Supplier Quotation Item": {"doctype": "Purchase Invoice Item"},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 	)
