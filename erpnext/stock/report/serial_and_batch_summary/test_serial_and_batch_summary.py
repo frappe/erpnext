@@ -163,15 +163,20 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
 	def test_unconsolidated_pos_invoice_bundle_moves_no_stock(self):
+		from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+			make_closing_entry_from_opening,
+		)
 		from erpnext.stock.valuation_adjustment import get_ledger_lots
 
-		_, pos_invoice = self.make_open_pos_invoice()
+		opening_entry, pos_invoice = self.make_open_pos_invoice()
 		item = pos_invoice.items[0].item_code
 
 		self.assertEqual({row.voucher_type for row in self.run_report(item_code=item)}, {"Stock Entry"})
 
 		lots = get_ledger_lots(item, "_Test Warehouse - _TC", frappe.utils.add_days(frappe.utils.now(), 1))
 		self.assertEqual(sum(lots.batch_qty.values()), 10)
+		# an open entry blocks restoring the POS Settings invoice type
+		make_closing_entry_from_opening(opening_entry).submit()
 
 	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
 	def test_consolidated_pos_invoice_bundle_with_old_entries_moves_stock(self):
