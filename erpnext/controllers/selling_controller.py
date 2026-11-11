@@ -409,12 +409,26 @@ class SellingController(StockController):
 					"valuation rate",
 				)
 
+<<<<<<< HEAD
 	def get_item_list(self):
 		il = []
 		picked_serial_nos = picked_batches = None
 		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
 			picked_serial_nos = self.get_serial_nos_used_in_rows()
 			picked_batches = self.get_batches_used_in_rows()
+=======
+	def get_item_list(self, make_bundles=True):
+		"""make_bundles: make the missing bundles of packed rows; off while their qty may still change."""
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		il = []
+		picked_serial_nos = picked_batches = None
+		make_bundles = make_bundles and any(not p.serial_and_batch_bundle for p in self.get("packed_items"))
+		if make_bundles:
+			service = SerialBatchBundleService(self)
+			picked_serial_nos = service.get_serial_nos_used_in_rows()
+			picked_batches = service.get_batches_used_in_rows()
+>>>>>>> b7d99de (fix(stock): make packed rows' bundles only at submit)
 
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
@@ -431,8 +445,12 @@ class SellingController(StockController):
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
-									or get_serial_and_batch_bundle(
-										p, self, d, picked_serial_nos, picked_batches
+									or (
+										get_serial_and_batch_bundle(
+											p, self, d, picked_serial_nos, picked_batches
+										)
+										if make_bundles
+										else None
 									),
 									"name": d.name,
 									"project": d.get("project"),

@@ -1209,7 +1209,8 @@ class SalesInvoice(SellingController):
 	def validate_warehouse(self):
 		super().validate_warehouse()
 
-		for d in self.get_item_list():
+		# packed rows get their qty only later in validate
+		for d in self.get_item_list(make_bundles=False):
 			if (
 				not d.warehouse
 				and d.item_code
