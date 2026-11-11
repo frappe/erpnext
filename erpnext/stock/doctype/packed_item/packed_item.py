@@ -95,7 +95,7 @@ def make_packing_list(doc, order_packed_items=None):
 				update_packed_item_price_data(pi_row, item_data, doc)
 
 				if item_row.get("against_pick_list"):
-					update_packed_item_with_pick_list_info(item_row, pi_row)
+					update_packed_item_with_pick_list_info(item_row, pi_row, so_packed_item)
 
 				update_packed_item_from_cancelled_doc(item_row, bundle_item, pi_row, doc)
 
@@ -262,7 +262,11 @@ def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=Non
 	"""Component stock qty per bundle stock unit; a Sales Order's packed row keeps the qty it was ordered with."""
 	# component qty is in the bundle row's UOM; convert to stock qty
 	qty_per_unit = flt(packing_item.qty) * get_component_conversion_factor(packing_item, stock_uom)
+	return get_ordered_qty_per_unit(qty_per_unit, so_packed_item)
 
+
+def get_ordered_qty_per_unit(qty_per_unit, so_packed_item=None):
+	"""``qty_per_unit``, or the order's own ratio if the conversion changed after the order was packed."""
 	# the order's ratio comes from its rounded packed qty, so use it only once the conversion has changed
 	if so_packed_item and so_packed_item.qty_per_unit:
 		ordered_qty = flt(
@@ -304,10 +308,12 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 		.join(order_item)
 		.on(order_item.name == packed_item.parent_detail_docname)
 		.select(
+			packed_item.name,
 			packed_item.parent_detail_docname,
 			packed_item.parent_item,
 			packed_item.item_code,
 			packed_item.qty,
+			packed_item.picked_qty,
 			order_item.stock_qty.as_("order_stock_qty"),
 		)
 		.where((packed_item.parenttype == doctype) & packed_item.parent_detail_docname.isin(list(order_rows)))
@@ -356,15 +362,20 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
 
 
-def update_packed_item_with_pick_list_info(main_item_row, pi_row):
+def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
+	filters = {
+		"item_code": pi_row.item_code,
+		"sales_order": main_item_row.get("against_sales_order"),
+		"sales_order_item": main_item_row.get("so_detail"),
+		"parent": main_item_row.against_pick_list,
+	}
+	# a component repeated on the bundle has a pick list row per packed row
+	if so_packed_item:
+		filters["product_bundle_item"] = so_packed_item.name
+
 	pl_row = frappe.db.get_value(
 		"Pick List Item",
-		{
-			"item_code": pi_row.item_code,
-			"sales_order": main_item_row.get("against_sales_order"),
-			"sales_order_item": main_item_row.get("so_detail"),
-			"parent": main_item_row.against_pick_list,
-		},
+		filters,
 		["warehouse", "batch_no", "serial_no"],
 		as_dict=True,
 		order_by="qty desc",

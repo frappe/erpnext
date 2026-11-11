@@ -4888,6 +4888,30 @@ class TestPurchaseReceipt(FrappeTestCase):
 		batch_return.save()
 		batch_return.submit()
 
+	def test_return_of_a_disabled_batch(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		item = make_item(
+			"_Test PR Disabled Batch Return Item",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TPDBR-.#####",
+			},
+		).name
+		pr = make_purchase_receipt(item_code=item, qty=10, rate=100)
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items[0].update({"qty": -4, "received_qty": -4})
+		pr_return.submit()
+
+		bundle = pr_return.items[0].serial_and_batch_bundle
+		self.assertEqual(get_batch_from_bundle(bundle), batch_no)
+		self.assertEqual(frappe.db.get_value("Serial and Batch Bundle", bundle, "total_qty"), -4)
+
 	def test_pr_status_based_on_invoices_with_update_stock(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import (
 			make_purchase_invoice as _make_purchase_invoice,
@@ -6580,7 +6604,10 @@ class TestPurchaseReceiptReviewFixes(FrappeTestCase):
 		receipt.submit()
 		return receipt
 
-	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	@change_settings(
+		"Buying Settings",
+		{"bill_for_rejected_quantity_in_purchase_invoice": 1, "set_valuation_rate_for_rejected_materials": 1},
+	)
 	def test_rejected_material_is_valued_without_the_valuation_charges(self):
 		company = "_Test Company with perpetual inventory"
 		receipt = make_purchase_receipt(

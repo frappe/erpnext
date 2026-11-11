@@ -19,9 +19,16 @@ from pypika.terms import ExistsCriterion
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
-from erpnext.stock.doctype.packed_item.packed_item import get_packed_items_of_order_rows
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_component_stock_qty_per_unit,
+	get_ordered_qty_per_unit,
+	get_packed_items_of_order_rows,
+	get_product_bundle_items,
+	pop_order_packed_item,
+)
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_batch_qty_for_stock,
 	get_picked_serial_nos,
 	get_reserved_serial_nos_for_sre,
 )
@@ -160,15 +167,13 @@ class PickList(TransactionBase):
 			self.validate_warehouses()
 
 	def validate_stock_qty(self):
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
-
 		for row in self.get("locations"):
 			row_qty = self.get_qty_to_pick(row)
 			if not row_qty:
 				continue
 
 			if row.batch_no:
-				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
+				batch_qty = get_batch_qty_for_stock(row.batch_no, row.warehouse, item_code=row.item_code)
 
 				if row_qty > batch_qty:
 					frappe.throw(
@@ -321,8 +326,8 @@ class PickList(TransactionBase):
 		self.validate_serial_and_batch_bundle()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_status()
-		self.update_bundle_picked_qty()
 		self.update_reference_qty()
+		self.update_bundle_picked_qty()
 		self.update_sales_order_picking_status()
 
 	def validate_expired_batches(self):
@@ -397,8 +402,8 @@ class PickList(TransactionBase):
 		]
 
 		self.update_status()
-		self.update_bundle_picked_qty()
 		self.update_reference_qty()
+		self.update_bundle_picked_qty()
 		self.update_sales_order_picking_status()
 		self.delink_serial_and_batch_bundle()
 
@@ -815,22 +820,27 @@ class PickList(TransactionBase):
 			item.idx = idx
 
 	def update_bundle_picked_qty(self):
-		product_bundles = self._get_product_bundles()
-		product_bundle_qty_map = self._get_product_bundle_qty_map(product_bundles)
-
-		for so_row in product_bundles:
+		"""Set each bundle's Picked Qty to the whole bundles that all Pick Lists picked of its components."""
+		so_rows = self._get_product_bundles()
+		product_bundle_qty_map = self._get_product_bundle_qty_map(so_rows)
+		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
 			bundle_items = product_bundle_qty_map.get(so_row)
 			if not bundle_items:
 				continue
-			picked_qty = self._compute_picked_qty_for_bundle(so_row, bundle_items)
-			item_table = "Sales Order Item"
-			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
-			frappe.db.set_value(
-				item_table,
-				so_row,
-				"picked_qty",
-				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
+
+			picked_qty = defaultdict(float)
+			for row in packed_items:
+				if bundle_items.get(row.item_code):
+					picked_qty[row.item_code] += flt(row.picked_qty)
+
+			bundles = min(
+				(
+					get_whole_bundle_count(qty, bundle_items[item_code])
+					for item_code, qty in picked_qty.items()
+				),
+				default=0,
 			)
+			frappe.db.set_value("Sales Order Item", so_row, "picked_qty", bundles)
 
 	def get_own_vouchers(self):
 		"""Vouchers whose stock reservations this pick list may pick."""
@@ -958,30 +968,39 @@ class PickList(TransactionBase):
 		)
 		return [name for name in so_item_names if name in existing]
 
-	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, float]]:
-		"""Component stock qty per bundle, by Sales Order row and item, as the order packed it."""
-		qty_map = defaultdict(lambda: defaultdict(float))
+	def _get_product_bundle_qty_map(self, so_rows) -> dict[str, dict[str, list[float]]]:
+		"""Component stock qty per bundle of each packed row, by Sales Order row and item, as a delivery packs it."""
+		components = {}
+		qty_map = defaultdict(lambda: defaultdict(list))
 		for so_row, packed_items in get_packed_items_of_order_rows(so_rows).items():
-			for row in packed_items:
-				if row.qty_per_unit:
-					qty_map[so_row][row.item_code] += row.qty_per_unit
+			parent_item = packed_items[0].parent_item
+			if parent_item not in components:
+				components[parent_item] = [
+					(component, get_component_stock_qty_per_unit(component, None))
+					for component in get_product_bundle_items(parent_item)
+				]
+
+			for component, qty_per_unit in components[parent_item]:
+				if packed_item := pop_order_packed_item(packed_items, parent_item, component.item_code):
+					qty_map[so_row][component.item_code].append(
+						get_ordered_qty_per_unit(qty_per_unit, packed_item)
+					)
 
 		return qty_map
 
 	def _compute_picked_qty_for_bundle(self, bundle_row, bundle_items, pending_only=False) -> int:
 		"""Compute how many full bundles can be created from picked (or picked but undelivered) items."""
-		precision = frappe.get_precision("Stock Ledger Entry", "qty_after_transaction")
-		possible_bundles = {}
+		picked_qty = defaultdict(float)
 		for item in self.locations:
-			if item.sales_order_item != bundle_row:
-				continue
+			if item.sales_order_item == bundle_row and bundle_items.get(item.item_code):
+				picked_qty[item.item_code] += flt(item.picked_qty) - (
+					flt(item.delivered_qty) if pending_only else 0
+				)
 
-			if qty_in_bundle := bundle_items.get(item.item_code):
-				qty = flt(item.picked_qty) - (flt(item.delivered_qty) if pending_only else 0)
-				possible_bundles.setdefault(item.item_code, 0)
-				possible_bundles[item.item_code] += qty / qty_in_bundle
-
-		return int(flt(min(possible_bundles.values()), precision or 6)) if possible_bundles else 0
+		return min(
+			(get_whole_bundle_count(qty, bundle_items[item_code]) for item_code, qty in picked_qty.items()),
+			default=0,
+		)
 
 	def update_bundle_delivered_qty(self):
 		bundle_locations = defaultdict(list)
@@ -1171,6 +1190,24 @@ def validate_item_locations(pick_list):
 		frappe.throw(_("Add items in the Item Locations table"))
 
 
+def get_whole_bundle_count(qty: float, qty_per_bundle: list[float]) -> int:
+	"""Most whole bundles that fit in ``qty``, with each packed row's qty rounded the way a delivery packs it."""
+	precision = frappe.get_precision("Packed Item", "qty")
+	qty = flt(qty, precision)
+	bundles = int(qty / sum(qty_per_bundle))
+	while get_packed_bundle_qty(bundles + 1, qty_per_bundle, precision) <= qty:
+		bundles += 1
+
+	while bundles and get_packed_bundle_qty(bundles, qty_per_bundle, precision) > qty:
+		bundles -= 1
+
+	return bundles
+
+
+def get_packed_bundle_qty(bundles: int, qty_per_bundle: list[float], precision: int) -> float:
+	return sum(flt(bundles * qty_per_unit, precision) for qty_per_unit in qty_per_bundle)
+
+
 def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
@@ -1216,9 +1253,9 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 		# if extra quantity is available push current warehouse to available locations
 		if qty_diff > 0:
 			item_location.qty = qty_diff
-			if item_location.serial_no:
+			if item_location.serial_nos:
 				# set remaining serial numbers
-				item_location.serial_no = item_location.serial_no[-int(qty_diff) :]
+				item_location.serial_nos = item_location.serial_nos[cint(stock_qty) :]
 			available_locations = [item_location, *available_locations]
 
 	# update available locations for the item
@@ -1366,13 +1403,16 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			filterd_locations.append(row)
 			continue
 		if picked_qty > row.qty:
-			row.qty = 0
 			picked_item_details[key]["picked_qty"] -= row.qty
+			row.qty = 0
 		else:
 			row.qty -= picked_qty
 			picked_item_details[key]["picked_qty"] = 0.0
 			if row.serial_nos:
-				row.serial_nos = list(set(row.serial_nos) - set(picked_item_details[key].get("serial_no")))
+				picked_serial_nos = set(picked_item_details[key].get("serial_no") or [])
+				row.serial_nos = [
+					serial_no for serial_no in row.serial_nos if serial_no not in picked_serial_nos
+				]
 
 		if flt(row.qty, precision) > 0:
 			filterd_locations.append(row)
@@ -1872,7 +1912,9 @@ def add_product_bundles_to_delivery_note(
 			continue
 
 		dn_bundle_item = map_child_doc(sales_order_item, delivery_note, item_mapper)
-		dn_bundle_item.qty = pending_qty
+		dn_bundle_item.qty = flt(
+			pending_qty / (flt(dn_bundle_item.conversion_factor) or 1), dn_bundle_item.precision("qty")
+		)
 		dn_bundle_item.against_pick_list = pick_list.name
 		update_delivery_note_item(sales_order_item, dn_bundle_item, delivery_note)
 

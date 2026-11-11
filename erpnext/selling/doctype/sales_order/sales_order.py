@@ -1939,14 +1939,18 @@ def create_pick_list(source_name: str, target_doc: str | dict | Document | None 
 		target.actual_qty = bin_details.get("actual_qty")
 		target.company_total_stock = bin_details.get("company_total_stock")
 
+	def get_packed_qty_to_pick(packed_item, parent) -> float:
+		# what is left on this component, as components of one bundle can be picked unevenly
+		delivered_qty = flt(packed_item.qty) * flt(parent.delivered_qty) / flt(parent.qty)
+		return flt(
+			flt(packed_item.qty) - max(flt(packed_item.picked_qty), delivered_qty),
+			packed_item.precision("qty"),
+		)
+
 	def update_packed_item_qty(source, target, source_parent) -> None:
-		qty = flt(source.qty)
-		for item in source_parent.items:
-			if source.parent_detail_docname == item.name:
-				picked_qty = flt(item.picked_qty) / (flt(item.conversion_factor) or 1)
-				pending_percent = (item.qty - max(picked_qty, item.delivered_qty)) / item.qty
-				target.qty = target.stock_qty = qty * pending_percent
-				return
+		parent = source_parent.get("items", {"name": source.parent_detail_docname})[0]
+		target.qty = target.stock_qty = get_packed_qty_to_pick(source, parent)
+		target.conversion_factor = 1
 
 	def should_pick_order_item(item) -> bool:
 		return (
