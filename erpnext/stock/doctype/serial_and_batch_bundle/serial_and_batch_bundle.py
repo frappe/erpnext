@@ -1147,7 +1147,8 @@ class SerialandBatchBundle(Document):
 					number = SerialBatchIdentity("Serial No").get_label(d.serial_no)
 				else:
 					number = SerialBatchIdentity("Batch").get_label(d.batch_no)
-				msg += f"<li>{number} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
+				link = get_link_to_form(d.voucher_type, d.voucher_no)
+				msg += "<li>" + _("{0} in {1}").format(number, link) + "</li>"
 			msg += "</li></ul>"
 
 			frappe.throw(msg, title=title, exc=SerialNoExistsInFutureTransactionError)
