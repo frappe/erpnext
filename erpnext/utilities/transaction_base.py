@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing import get_effective_base_rate
 from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
 from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
 from erpnext.stock.utils import _get_incoming_rate
@@ -325,6 +326,9 @@ class TransactionBase(StatusUpdater):
 					"barcode": item.get("barcode"),
 					"serial_no": item.get("serial_no"),
 					"batch_no": item.get("batch_no"),
+					"against_blanket_order": item.get("against_blanket_order")
+					or bool(item.get("blanket_order")),
+					"blanket_order": item.get("blanket_order"),
 					"set_warehouse": self.get("set_warehouse"),
 					"warehouse": item.get("warehouse"),
 					"customer": self.get("customer") or self.get("party_name"),
@@ -546,13 +550,9 @@ class TransactionBase(StatusUpdater):
 			item_obj.stock_uom_rate = flt(item_obj.rate) / flt(item_obj.conversion_factor)
 
 	def set_item_rate_and_discounts(self, item_obj: object, item_details: dict) -> None:
-		effective_item_rate = item_details.price_list_rate
-		item_rate = item_details.rate
-
 		# Field order precedance
 		# blanket_order_rate -> margin_type -> discount_percentage -> discount_amount
-		if item_obj.parenttype in ["Sales Order", "Quotation"] and item_obj.blanket_order_rate:
-			effective_item_rate = flt(item_obj.blanket_order_rate) * (flt(item_obj.conversion_factor) or 1)
+		effective_item_rate = get_effective_base_rate(item_obj, item_details)
 
 		if item_obj.margin_type == "Percentage":
 			item_obj.rate_with_margin = flt(effective_item_rate) + flt(effective_item_rate) * (
