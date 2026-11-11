@@ -428,7 +428,11 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 def filter_batches(batches, doc):
 	for row in doc.get("items"):
 		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= flt(row.get("stock_qty"))
+			# rows inserted through the API may not have stock_qty yet
+			stock_qty = flt(row.get("stock_qty")) or flt(row.get("qty")) * flt(
+				row.get("conversion_factor") or 1
+			)
+			batches[row.get("batch_no")] -= stock_qty
 			if batches[row.get("batch_no")] <= 0:
 				del batches[row.get("batch_no")]
 
