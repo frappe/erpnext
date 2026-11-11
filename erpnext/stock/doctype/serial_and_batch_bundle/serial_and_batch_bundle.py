@@ -3409,6 +3409,9 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
+	if kwargs.against_sales_order:
+		query = query.where(sre.voucher_no != kwargs.against_sales_order)
+
 	data = query.run(as_dict=True)
 
 	reserved_batches_details = frappe._dict()
@@ -3439,6 +3442,10 @@ def get_batch_qty_for_stock(batch_no=None, warehouse=None, posting_date=None, po
 
 
 def get_auto_batch_nos(kwargs):
+	if kwargs.pick_reserved_items and not kwargs.against_sales_order:
+		# a delivery may use the batches its own Sales Order reserved
+		kwargs.against_sales_order = next(iter(get_reserved_voucher_details(kwargs)), None)
+
 	if kwargs.against_sales_order and (
 		only_consider_batches := get_batches_to_be_considered(kwargs.against_sales_order)
 	):
