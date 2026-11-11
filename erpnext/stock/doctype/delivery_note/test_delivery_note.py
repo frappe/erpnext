@@ -1971,7 +1971,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.docstatus, 1)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
