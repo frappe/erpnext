@@ -267,7 +267,10 @@ frappe.ui.form.on("Sales Order", {
 					onchange: () => {
 						if (dialog.get_value("set_warehouse")) {
 							dialog.fields_dict.items.df.data.forEach((row) => {
-								row.warehouse = dialog.get_value("set_warehouse");
+								// a bundle component reserves in its packed row's warehouse
+								if (!row.is_packed_item) {
+									row.warehouse = dialog.get_value("set_warehouse");
+								}
 							});
 							dialog.fields_dict.items.grid.refresh();
 						}
@@ -964,6 +967,7 @@ frappe.ui.form.on("Sales Order Item", {
 
 erpnext.selling.SalesOrderController = class SalesOrderController extends erpnext.selling.SellingController {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		super.setup(doc);
 	}
 	onload(doc, dt, dn) {
@@ -1275,10 +1279,20 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	}
 
 	items_add(doc, cdt, cdn) {
+		const row = frappe.get_doc(cdt, cdn);
+		const field_copy = [];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
 		if (doc.delivery_date) {
 			frappe.model.set_value(cdt, cdn, "delivery_date", doc.delivery_date);
 		} else {
-			this.frm.script_manager.copy_from_first_row("items", frappe.get_doc(cdt, cdn), ["delivery_date"]);
+			field_copy.push("delivery_date");
+		}
+		if (field_copy.length) {
+			this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 		}
 	}
 
@@ -1520,8 +1534,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var d = new frappe.ui.Dialog({
 			title: __("Items for Raw Material Request"),
 			fields: fields,
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				me.frm.call({
 					method: "erpnext.selling.doctype.sales_order.mapper.make_raw_material_request",
 					args: {
@@ -1850,8 +1863,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					reqd: 1,
 				},
 			],
-			primary_action: function () {
-				var data = d.get_values();
+			primary_action: function (data) {
 				frappe.call({
 					method: "frappe.desk.form.utils.add_comment",
 					args: {
@@ -1883,7 +1895,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				qty_field: "delivered_qty",
 				qty_label: __("Delivered Qty"),
 				help: __(
-					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note or Sales Invoice."
+					"Closed rows stop being expected. Their pending quantity is written off, stock is no longer reserved for them, and they are skipped when creating a Delivery Note, Sales Invoice or Work Order."
 				),
 			})
 		);

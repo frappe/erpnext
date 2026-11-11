@@ -10,3 +10,8 @@ frappe.pages["visual-plant-floor"].on_page_load = function (wrapper) {
 		wrapper.page
 	);
 };
+
+frappe.pages["visual-plant-floor"].on_page_show = function () {
+	frappe.visual_plant_floor.bind_realtime();
+	frappe.visual_plant_floor.render_plant_visualization();
+};

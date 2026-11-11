@@ -12,7 +12,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	restore_asset,
 	scrap_asset,
 )
-from erpnext.assets.doctype.asset.test_asset import create_asset, set_depreciation_settings_in_company
+from erpnext.assets.doctype.asset.test_asset import create_asset
 from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
 	make_asset_value_adjustment,
 	make_difference_account,
@@ -21,9 +21,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAssetDepreciationsAndBalancesReport(ERPNextTestSuite):
-	def setUp(self):
-		set_depreciation_settings_in_company()
-
 	def test_report_runs_on_both_engines(self):
 		"""The report compared IfNull(asset.disposal_date, 0) against 0 -- coalescing a DATE
 		column with integer 0. Postgres rejects that (COALESCE types date and integer cannot be

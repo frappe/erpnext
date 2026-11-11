@@ -52,7 +52,7 @@ frappe.ui.form.on("Plant Floor", {
 		let wrapper = $(frm.fields_dict["plant_dashboard"].wrapper);
 		wrapper.empty();
 
-		frappe.visual_plant_floor = new frappe.ui.VisualPlantFloor({
+		frm.visual_plant_floor = new frappe.ui.VisualPlantFloor({
 			wrapper: wrapper,
 			skip_filters: true,
 			plant_floor: frm.doc.name,
@@ -60,9 +60,22 @@ frappe.ui.form.on("Plant Floor", {
 	},
 
 	update_realtime_status(frm) {
-		frappe.realtime.on("update_workstation_status", (data) => {
-			frappe.visual_plant_floor.update_status(data);
-		});
+		frappe.realtime.doctype_subscribe("Workstation");
+		if (frm.workstation_status_handler) {
+			frappe.realtime.off("list_update", frm.workstation_status_handler);
+		}
+		frm.workstation_status_handler = (data) => {
+			const route = frappe.get_route();
+			if (
+				route[0] === "Form" &&
+				route[1] === frm.doctype &&
+				route[2] === frm.doc.name &&
+				data.doctype === "Workstation"
+			) {
+				frm.visual_plant_floor.prepare_data();
+			}
+		};
+		frappe.realtime.on("list_update", frm.workstation_status_handler);
 	},
 
 	prepare_stock_dashboard(frm) {

@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.purchase_invoice_trends.purchase_invoice_trends import execute
@@ -11,17 +12,24 @@ FISCAL_YEAR = "_Test Fiscal Year 2026"
 COMPANY = "_Test Company"
 SUPPLIER = "_Test Supplier"
 ITEM = "_Test Item"
+OTHER_ITEM = "_Test Item 2"
 POSTING_DATE = "2026-06-01"
 
 
-def make_dated_purchase_invoice(qty, rate):
+def make_dated_purchase_invoice(qty, rate, bill_date=None, item_code=ITEM):
 	# make_purchase_invoice ignores posting_date unless posting time is explicitly set, so build the
 	# invoice unsubmitted, pin the posting date, then submit to land it in the intended period bucket.
 	pi = make_purchase_invoice(
-		supplier=SUPPLIER, item_code=ITEM, qty=qty, rate=rate, posting_date=POSTING_DATE, do_not_submit=1
+		supplier=SUPPLIER,
+		item_code=item_code,
+		qty=qty,
+		rate=rate,
+		posting_date=POSTING_DATE,
+		do_not_submit=1,
 	)
 	pi.set_posting_time = 1
 	pi.posting_date = POSTING_DATE
+	pi.bill_date = bill_date
 	pi.submit()
 	return pi
 
@@ -43,7 +51,8 @@ class TestPurchaseInvoiceTrends(ERPNextTestSuite):
 
 	@staticmethod
 	def _cell(labels, row, label):
-		return row[labels.index(label)]
+		# Period columns are SUM(CASE ... ELSE NULL), so a month with no invoices comes back as None.
+		return flt(row[labels.index(label)])
 
 	def _find_row(self, data, key):
 		for row in data:
@@ -169,3 +178,28 @@ class TestPurchaseInvoiceTrends(ERPNextTestSuite):
 
 		self.assertEqual(self._cell(labels, row, "Total(Qty)") - before_tqty, qty)
 		self.assertEqual(self._cell(labels, row, "Total(Amt)") - before_tamt, qty * rate)
+
+	def test_billing_date_falls_back_to_posting_date(self):
+		filters = {"period": "Monthly", "period_based_on": "bill_date"}
+		labels, data = self.run_report(**filters)
+		before = self._find_row(data, ITEM)
+		before_june = self._cell(labels, before, "Jun (Qty)") if before else 0
+		before_july = self._cell(labels, before, "Jul (Qty)") if before else 0
+
+		make_dated_purchase_invoice(7, 100, bill_date="2026-07-10")
+		make_dated_purchase_invoice(5, 100)
+
+		labels, data = self.run_report(**filters)
+		row = self._find_row(data, ITEM)
+		self.assertEqual(self._cell(labels, row, "Jul (Qty)") - before_july, 7)
+		self.assertEqual(self._cell(labels, row, "Jun (Qty)") - before_june, 5)
+
+	def test_item_filter_restricts_rows(self):
+		# the Item filter is applied in the query, so the excluded item never reaches the rows
+		make_dated_purchase_invoice(4, 250)
+		make_dated_purchase_invoice(2, 250, item_code=OTHER_ITEM)
+
+		labels, data = self.run_report(item_code=[ITEM])
+		items = {row[labels.index("Item")] for row in data}
+		self.assertIn(ITEM, items)
+		self.assertNotIn(OTHER_ITEM, items)

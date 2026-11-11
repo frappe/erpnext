@@ -22,7 +22,7 @@ rate on the date. On submit, every item-warehouse is reset:
 3. Counted in: the rows.
 
 Every entry of the reset carries is_adjustment_entry, which reports use to show the reset as the
-net change it is (see net_adjustment_entries). A later repost through the date values the count
+net change it is (see AdjustmentNetting). A later repost through the date values the count
 out at whatever the ledger then holds, so the reset keeps setting the stock to its rows.
 
 As the ledger after an Adjustment Entry no longer follows from the ledger before it, no stock
@@ -48,6 +48,10 @@ QTY_NOISE = 1e-9
 
 
 class BackdatedEntryBeforeAdjustmentError(frappe.ValidationError):
+	pass
+
+
+class ManualAdjustmentEntryError(frappe.ValidationError):
 	pass
 
 
@@ -247,25 +251,24 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 	"""The qty of every serial no and batch in the warehouse, and the value of every batch, as the
 	ledger holds them at `posting_datetime`, in the order they were first received: from the bundles,
 	and from the serial and batch nos of entries made before bundles."""
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	entry = frappe.qb.DocType("Serial and Batch Entry")
 	ledger = frappe.qb.DocType("Stock Ledger Entry")
 	cutoff = get_datetime(posting_datetime)
 
 	bundle_entries = (
-		frappe.qb.from_(bundle)
-		.inner_join(entry)
-		.on(entry.parent == bundle.name)
+		frappe.qb.from_(entry)
 		.select(entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
 		.where(
-			(bundle.item_code == item_code)
-			& (bundle.warehouse == warehouse)
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-			& (bundle.posting_datetime <= cutoff)
+			(entry.item_code == item_code)
+			& (entry.warehouse == warehouse)
+			& (entry.docstatus == 1)
+			& (entry.is_cancelled == 0)
+			# a Pick List only reserves; its bundles move no stock
+			& (entry.voucher_type != "Pick List")
+			& (entry.posting_datetime <= cutoff)
 		)
-		.orderby(bundle.posting_datetime)
-		.orderby(bundle.creation)
+		.orderby(entry.posting_datetime)
+		.orderby(entry.creation)
 	)
 	legacy_entries = (
 		frappe.qb.from_(ledger)
@@ -280,7 +283,7 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 		)
 	)
 	if exclude_voucher_no:
-		bundle_entries = bundle_entries.where(bundle.voucher_no != exclude_voucher_no)
+		bundle_entries = bundle_entries.where(entry.voucher_no != exclude_voucher_no)
 		legacy_entries = legacy_entries.where(ledger.voucher_no != exclude_voucher_no)
 
 	lots = LedgerLots()
@@ -317,6 +320,7 @@ def make_adjustment_entry(
 	doc.update(
 		{
 			"purpose": ADJUSTMENT_ENTRY,
+			"is_made_from_valuation_comparison": 1,
 			"company": company,
 			"posting_date": posting_date,
 			"posting_time": posting_time,
@@ -427,6 +431,18 @@ class AdjustmentEntry:
 
 		self.doc.difference_amount = flt(
 			sum(flt(row.amount_difference) for row in self.doc.items), self.doc.precision("difference_amount")
+		)
+
+	def validate_made_from_report(self) -> None:
+		if self.doc.is_made_from_valuation_comparison:
+			return
+
+		frappe.throw(
+			_(
+				"Adjustment Entry can only be used by the system from the Stock Valuation Comparison report. Users can only select the purpose Opening Stock to add opening stock, or Stock Reconciliation to update stock quantity or valuation rate."
+			),
+			title=_("Not Allowed Purpose"),
+			exc=ManualAdjustmentEntryError,
 		)
 
 	def set_row_amounts(self, plan: AdjustmentPlan, rows) -> None:
@@ -727,9 +743,12 @@ class AdjustmentNetting:
 	"""
 
 	def __init__(self, by_lot: bool = False):
+		# cancelled ones too: a snapshot synced before the cancel still holds their entries
 		self.vouchers = set(
 			frappe.get_all(
-				"Stock Reconciliation", filters={"purpose": ADJUSTMENT_ENTRY, "docstatus": 1}, pluck="name"
+				"Stock Reconciliation",
+				filters={"purpose": ADJUSTMENT_ENTRY, "docstatus": ("!=", 0)},
+				pluck="name",
 			)
 		)
 		self.lot_changes = get_adjustment_lot_changes(self.vouchers) if by_lot and self.vouchers else {}
@@ -744,7 +763,8 @@ class AdjustmentNetting:
 	def net(self, entries, key_fields: tuple[str, ...] = ("item_code", "warehouse")):
 		"""The entries, with those of one Adjustment Entry and the same `key_fields` merged into one:
 		the sum of their qty and value, and the balance after the last of them. The merged entry keeps
-		is_adjustment_entry, so it reads as a change, not as a reconciled balance.
+		is_adjustment_entry: Stock Balance reads its balance as the one the reset sets, while reports
+		that age or count stock read its qty and value as a change.
 
 		`entries` must be in posting order, in which the entries of a reset follow each other."""
 		merged = None

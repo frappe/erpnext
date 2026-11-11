@@ -290,6 +290,8 @@ class BaseStockGLComposer(BaseGLComposer):
 
 @frappe.request_cache
 def get_expenses_added_to_stock_accounts(item_code, company):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 	from erpnext.stock.doctype.item.item import get_item_defaults
 
 	fields = ["expenses_added_to_stock_account", "expenses_added_to_stock_contra_account"]
@@ -298,15 +300,12 @@ def get_expenses_added_to_stock_accounts(item_code, company):
 	details = frappe._dict({field: defaults.get(field) for field in fields})
 
 	if not details.expenses_added_to_stock_account:
-		details = frappe.db.get_value(
-			"Item Default", {"parent": defaults.item_group, "company": company}, fields, as_dict=1
-		) or frappe._dict({})
+		details = get_item_group_defaults(item_code, company)
 
-	if not details.expenses_added_to_stock_account and defaults.get("brand"):
-		details = frappe.db.get_value(
-			"Item Default", {"parent": defaults.brand, "company": company}, fields, as_dict=1
-		) or frappe._dict({})
+	if not details.expenses_added_to_stock_account:
+		details = get_brand_defaults(item_code, company)
 
+	details = frappe._dict({field: details.get(field) for field in fields})
 	for field in fields:
 		if not details.get(field):
 			details[field] = frappe.get_cached_value("Company", company, field)

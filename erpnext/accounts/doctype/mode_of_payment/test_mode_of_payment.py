@@ -26,9 +26,68 @@ class TestModeofPayment(ERPNextTestSuite):
 		return doc
 
 	def test_valid_mode_of_payment_saves(self):
-		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC")])
-		doc.insert()
-		self.assertTrue(doc.name)
+		for account in ("_Test Bank - _TC", "Cash - _TC", "Debtors - _TC"):
+			with self.subTest(account=account):
+				doc = self.make_mop(accounts=[(COMPANY, account)]).insert()
+				self.assertTrue(doc.name)
+
+	def test_invalid_default_accounts_are_rejected(self):
+		frappe.db.set_value("Account", "Cash - _TC", "disabled", 1)
+		for account, error in (
+			("Bank Accounts - _TC", "must be a ledger account"),
+			("Sales - _TC", "must be a ledger account"),
+			("Creditors - _TC", "must be a ledger account"),
+			("Cash - _TC", "is disabled"),
+		):
+			with self.subTest(account=account):
+				doc = self.make_mop(accounts=[(COMPANY, account)])
+				with self.assertRaisesRegex(frappe.ValidationError, error):
+					doc.insert()
+
+	def test_disabled_mode_cannot_be_used_on_transactions(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		mode = self.make_mop(accounts=[(COMPANY, "Cash - _TC")]).insert()
+		payment = create_payment_entry()
+		payment.mode_of_payment = mode.name
+		payment.insert()
+		mode.enabled = 0
+		mode.save()
+		with self.assertRaisesRegex(frappe.ValidationError, "Mode of Payment .* is disabled"):
+			payment.submit()
+
+		payment.reload()
+		mode.enabled = 1
+		mode.save()
+		payment.submit()
+		self.assertEqual(payment.docstatus, 1)
+		mode.enabled = 0
+		mode.save()
+		payment.cancel()
+		self.assertEqual(payment.docstatus, 2)
+
+		invoice = create_sales_invoice()
+		request = frappe.get_doc(
+			{
+				"doctype": "Payment Request",
+				"payment_request_type": "Inward",
+				"company": invoice.company,
+				"reference_doctype": invoice.doctype,
+				"reference_name": invoice.name,
+				"grand_total": invoice.grand_total,
+				"currency": invoice.currency,
+				"mode_of_payment": mode.name,
+				"mute_email": 1,
+			}
+		)
+		with self.assertRaisesRegex(frappe.ValidationError, "Mode of Payment .* is disabled"):
+			request.insert()
+
+		invoice = create_sales_invoice(is_pos=1, do_not_save=True)
+		invoice.append("payments", {"mode_of_payment": mode.name, "amount": 100, "account": "Cash - _TC"})
+		with self.assertRaisesRegex(frappe.ValidationError, "Mode of Payment .* is disabled"):
+			invoice.insert()
 
 	def test_account_of_wrong_company_throws(self):
 		other_account = frappe.db.get_value("Account", {"company": "_Test Company 1", "is_group": 0}, "name")
@@ -40,19 +99,15 @@ class TestModeofPayment(ERPNextTestSuite):
 		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC"), (COMPANY, "Debtors - _TC")])
 		self.assertRaises(frappe.ValidationError, doc.insert)
 
-	def test_disabling_mode_referenced_by_pos_profile_is_not_blocked(self):
-		# SUSPECTED BUG: validate_pos_mode_of_payment queries "Sales Invoice Payment"
-		# rows with parenttype "POS Profile", but a POS Profile's payments are stored
-		# as "POS Payment Method" rows. The filter never matches, so the guard is dead
-		# and a mode still referenced by a POS Profile disables without complaint.
-		# Locking the current (wrong) behaviour so a fix to the guard trips this test.
+	def test_disabling_mode_referenced_by_pos_profile_is_blocked(self):
 		from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 		make_pos_profile()  # its payments row references the "Cash" mode of payment
 		cash = frappe.get_doc("Mode of Payment", "Cash")
 		cash.enabled = 0
-		cash.save()
-		self.assertEqual(frappe.db.get_value("Mode of Payment", "Cash", "enabled"), 0)
+		with self.assertRaisesRegex(frappe.ValidationError, "Please remove them to disable this mode"):
+			cash.save()
+		self.assertEqual(frappe.db.get_value("Mode of Payment", "Cash", "enabled"), 1)
 
 	def test_disabling_unreferenced_mode_succeeds(self):
 		doc = self.make_mop(accounts=[(COMPANY, "Cash - _TC")], enabled=0)

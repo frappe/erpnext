@@ -78,10 +78,15 @@ class AssetRepair(AccountsController):
 		self.set_downtime()
 
 	def on_update(self):
-		self.update_status()
+		# Logged in the save, as the status job only sees the final state of quick successive saves
+		if self.has_value_changed("repair_status"):
+			self.add_repair_activity(self.repair_status)
+		# On submit the job is queued from on_submit, after this repair saves its asset
+		if self.docstatus.is_draft():
+			self.update_status()
 
 	def validate_asset(self):
-		if self.asset_doc.status in ("Sold", "Scrapped"):
+		if self.asset_doc.status in ("Sold", "Scrapped", "Capitalized"):
 			frappe.throw(
 				_("Asset {0} is in {1} status and cannot be repaired.").format(
 					get_link_to_form("Asset", self.asset), self.asset_doc.status
@@ -172,11 +177,12 @@ class AssetRepair(AccountsController):
 
 	def validate_purchase_invoice_repair_cost(self, row):
 		"""Validate that repair cost doesn't exceed available amount."""
-		available_amount = get_unallocated_repair_cost(
+		available_amount = _get_unallocated_repair_cost(
 			row.purchase_invoice, row.expense_account, exclude_asset_repair=self.name
 		)
 
-		if flt(row.repair_cost) > available_amount:
+		row.repair_cost = flt(row.repair_cost, row.precision("repair_cost"))
+		if row.repair_cost > available_amount:
 			frappe.throw(
 				_(
 					"Row #{0}: Repair cost {1} exceeds available amount {2} for Purchase Invoice {3} and Account {4}"
@@ -189,16 +195,23 @@ class AssetRepair(AccountsController):
 				)
 			)
 
+	def add_repair_activity(self, event: str):
+		subject = {
+			"Pending": _("Asset out of order due to Asset Repair {0}"),
+			"Completed": _("Asset Repair {0} marked as Completed"),
+			"Cancelled": _("Asset Repair {0} marked as Cancelled"),
+			"Discarded": _("Asset Repair {0} discarded"),
+			"Deleted": _("Asset Repair {0} deleted"),
+		}[event]
+		self.add_asset_activity(subject.format(get_link_to_form("Asset Repair", self.name)))
+
 	def update_status(self):
-		if self.repair_status == "Pending" and self.asset_doc.status != "Out of Order":
-			frappe.db.set_value("Asset", self.asset, "status", "Out of Order")
-			self.add_asset_activity(
-				_("Asset out of order due to Asset Repair {0}").format(
-					get_link_to_form("Asset Repair", self.name)
-				),
-			)
-		else:
-			self.asset_doc.set_status()
+		frappe.enqueue(
+			update_asset_status_after_repair,
+			asset=self.asset,
+			enqueue_after_commit=True,
+			now=frappe.in_test,
+		)
 
 	def calculate_consumed_items_cost(self):
 		consumed_items_cost = 0.0
@@ -223,9 +236,11 @@ class AssetRepair(AccountsController):
 
 			depreciation_note = self.get_depreciation_note()
 			reschedule_depreciation(self.asset_doc, depreciation_note)
-			self.add_asset_activity()
 
 			self.make_gl_entries()
+
+		self.add_asset_activity()
+		self.update_status()
 
 	def cancel_sabb(self):
 		for row in self.stock_items:
@@ -246,20 +261,28 @@ class AssetRepair(AccountsController):
 
 			depreciation_note = self.get_depreciation_note()
 			reschedule_depreciation(self.asset_doc, depreciation_note)
-			self.add_asset_activity()
 
+		self.add_asset_activity()
 		self.cancel_sabb()
 
 	def cancel_stock_entry(self):
 		stock_entry = frappe.db.get_value("Stock Entry", {"asset_repair": self.name, "docstatus": 1})
 		if stock_entry:
-			frappe.get_doc("Stock Entry", stock_entry).cancel()
+			stock_entry = frappe.get_doc("Stock Entry", stock_entry)
+			stock_entry.flags.ignore_permissions = True
+			stock_entry.cancel()
 
 	def after_delete(self):
-		frappe.get_lazy_doc("Asset", self.asset).set_status()
+		self.close_pending_repair_activity("Deleted")
+		self.update_status()
 
 	def on_discard(self):
-		frappe.get_lazy_doc("Asset", self.asset).set_status()
+		self.close_pending_repair_activity("Discarded")
+		self.update_status()
+
+	def close_pending_repair_activity(self, event: str):
+		if self.repair_status == "Pending":
+			self.add_repair_activity(event)
 
 	def check_repair_status(self):
 		if self.repair_status != "Completed" and self.docstatus == 1:
@@ -285,6 +308,7 @@ class AssetRepair(AccountsController):
 			self.update_value_after_depreciation(total_repair_cost)
 
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
+		self.asset_doc.flags.ignore_permissions = True
 		self.asset_doc.save()
 
 	def update_value_after_depreciation(self, total_repair_cost: float):
@@ -336,6 +360,7 @@ class AssetRepair(AccountsController):
 				},
 			)
 
+		stock_entry.flags.ignore_permissions = True
 		stock_entry.insert()
 		stock_entry.submit()
 
@@ -413,6 +438,15 @@ class AssetRepair(AccountsController):
 			)
 
 		add_asset_activity(self.asset, subject)
+
+
+def update_asset_status_after_repair(asset: str) -> None:
+	"""Set the asset status from its pending repairs, after a repair change commits.
+
+	Takes no repair row locks. Each committed repair change enqueues this job, and the job
+	started last sees every commit, so the status settles on the right value."""
+	# set_status always writes the row, so on Postgres an older job's lock fails and it retries
+	frappe.get_doc("Asset", asset, for_update=True).set_status()
 
 
 def check_asset_repair_access(company: str | None = None) -> None:
@@ -557,10 +591,17 @@ def get_unallocated_repair_cost(
 
 	frappe.has_permission("Purchase Invoice", "read", purchase_invoice, throw=True)
 
+	return _get_unallocated_repair_cost(purchase_invoice, expense_account, exclude_asset_repair)
+
+
+def _get_unallocated_repair_cost(
+	purchase_invoice: str, expense_account: str, exclude_asset_repair: str | None = None
+) -> float:
 	used_amount = get_allocated_repair_cost(purchase_invoice, expense_account, exclude_asset_repair)
 	total_amount = get_total_expense_amount(purchase_invoice, expense_account)
 
-	return flt(total_amount - used_amount)
+	precision = frappe.get_precision("Asset Repair Purchase Invoice", "repair_cost")
+	return flt(total_amount - used_amount, precision)
 
 
 def get_allocated_repair_cost(

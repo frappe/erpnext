@@ -595,7 +595,8 @@ class TestInventoryDimension(ERPNextTestSuite):
 		warehouse = create_warehouse("Serialized Inventory Dimension Warehouse")
 
 		create_inventory_dimension(
-			apply_to_all_doctypes=1,
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
 			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
@@ -656,7 +657,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Empty Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -677,7 +678,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		issue.items[0].empty_serial_rack = "Rack 1"
+		issue.items[0].serial_rack = "Rack 1"
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
@@ -692,7 +693,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		create_inventory_dimension(
 			apply_to_all_doctypes=1,
-			dimension_name="Required Serial Rack",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -705,7 +706,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		receipt.items[0].to_required_serial_rack = "Rack 1"
+		receipt.items[0].to_serial_rack = "Rack 1"
 		receipt.save()
 		receipt.submit()
 
@@ -727,17 +728,24 @@ class TestInventoryDimension(ERPNextTestSuite):
 			)
 		)
 
-	def test_serial_no_inventory_dimension_with_legacy_inward_sle(self):
+	def test_end_transit_takes_serial_no_from_transit_inventory_dimension(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry import make_stock_in_entry
+
 		item = make_item(
-			"Test Serialized Legacy Inventory Dimension Item",
+			"Test Serialized Transit Inventory Dimension Item",
 			{"has_serial_no": 1, "is_stock_item": 1},
 		)
-		serial_no = "Test Serialized Legacy Inventory Dimension Serial No"
-		warehouse = create_warehouse("Serialized Legacy Inventory Dimension Warehouse")
+		serial_no = "Test Serialized Transit Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Transit Dimension Source Warehouse")
+		transit_warehouse = create_warehouse(
+			"Serialized Transit Dimension Transit Warehouse", properties={"warehouse_type": "Transit"}
+		)
+		target_warehouse = create_warehouse("Serialized Transit Dimension Target Warehouse")
 
 		create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Legacy Serial Rack",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="Serial Rack",
 			reference_document="Rack",
 			validate_negative_stock=0,
 		)
@@ -750,7 +758,97 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		receipt.items[0].to_legacy_serial_rack = "Rack 2"
+		receipt.items[0].to_serial_rack = "Rack 1"
+		receipt.save()
+		receipt.submit()
+
+		# the serial no reaches transit without a rack
+		transit_entry = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			to_warehouse=transit_warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			add_to_transit=1,
+			do_not_submit=True,
+		)
+		transit_entry.items[0].serial_rack = "Rack 1"
+		transit_entry.save()
+		transit_entry.submit()
+
+		end_transit_entry = make_stock_in_entry(transit_entry.name)
+		self.assertFalse(end_transit_entry.items[0].serial_rack)
+
+		end_transit_entry.items[0].t_warehouse = target_warehouse
+		end_transit_entry.save()
+		end_transit_entry.submit()
+
+		self.assertEqual(end_transit_entry.docstatus, 1)
+
+	def test_blank_inventory_dimension_matches_unset_dimension(self):
+		item = make_item(
+			"Test Serialized Blank Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Blank Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Blank Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+		)
+
+		issue = make_stock_entry(
+			item_code=item.name,
+			from_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		issue.items[0].serial_rack = ""
+		issue.save()
+		issue.submit()
+
+		self.assertEqual(issue.docstatus, 1)
+
+	def test_serial_no_inventory_dimension_with_legacy_inward_sle(self):
+		item = make_item(
+			"Test Serialized Legacy Inventory Dimension Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+		serial_no = "Test Serialized Legacy Inventory Dimension Serial No"
+		warehouse = create_warehouse("Serialized Legacy Inventory Dimension Warehouse")
+
+		create_inventory_dimension(
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="Serial Rack",
+			reference_document="Rack",
+			validate_negative_stock=0,
+		)
+
+		receipt = make_stock_entry(
+			item_code=item.name,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		receipt.items[0].to_serial_rack = "Rack 2"
 		receipt.save()
 		receipt.submit()
 		serial_id = frappe.db.get_value("Serial No", {"item_code": item.name, "serial_no": serial_no}, "name")
@@ -769,7 +867,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			use_serial_batch_fields=1,
 			do_not_submit=True,
 		)
-		issue.items[0].legacy_serial_rack = "Rack 1"
+		issue.items[0].serial_rack = "Rack 1"
 		issue.save()
 
 		self.assertRaises(SerialNoInventoryDimensionError, issue.submit)
@@ -779,10 +877,10 @@ class TestInventoryDimension(ERPNextTestSuite):
 
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		inv_dimension = create_inventory_dimension(
-			apply_to_all_doctypes=1,
-			dimension_name="Inv Site",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			dimension_name="SE Site",
 			reference_document="Inv Site",
-			document_type="Inv Site",
 			validate_negative_stock=1,
 		)
 		inv_dimension.db_set("validate_negative_stock", 1)
@@ -793,7 +891,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 			make_stock_entry(
 				item_code=item_code, target=warehouse, qty=20, posting_date=add_days(nowdate(), -10)
 			)
-			for qty, days, field in ((10, -5, "to_inv_site"), (-8, -1, "inv_site"), (-5, -3, "inv_site")):
+			for qty, days, field in ((10, -5, "to_se_site"), (-8, -1, "se_site"), (-5, -3, "se_site")):
 				kwargs = {"target": warehouse} if qty > 0 else {"source": warehouse}
 				doc = make_stock_entry(
 					item_code=item_code,
@@ -808,7 +906,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 				else:
 					doc.submit()
 
-	def test_backdated_transfer_keeping_checked_dimension_is_allowed(self):
+	def test_backdated_issue_before_a_transfer_within_the_dimension_is_allowed(self):
 		from frappe.utils import add_days
 
 		item_code = make_item(properties={"is_stock_item": 1}).name
@@ -834,6 +932,59 @@ class TestInventoryDimension(ERPNextTestSuite):
 				receipt.items[0].update({"to_inv_site": site, "to_rack": "Rack 1"})
 				receipt.submit()
 
+			transfer = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				target=warehouse,
+				qty=10,
+				posting_date=add_days(nowdate(), -2),
+				do_not_submit=True,
+			)
+			transfer.items[0].update(
+				{"inv_site": "Site 1", "to_inv_site": "Site 1", "rack": "Rack 1", "to_rack": "Rack 2"}
+			)
+			transfer.submit()
+
+			issue = make_stock_entry(
+				item_code=item_code,
+				source=warehouse,
+				qty=1,
+				posting_date=add_days(nowdate(), -5),
+				do_not_submit=True,
+			)
+			issue.items[0].update({"inv_site": "Site 1", "rack": "Rack 1"})
+			issue.submit()
+			self.assertEqual(issue.docstatus, 1)
+
+	def test_backdated_transfer_keeping_checked_dimension_is_allowed(self):
+		from frappe.utils import add_days
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		for dimension_name, reference_document, validate_negative_stock in (
+			("SE Site", "Inv Site", 1),
+			("SE Rack", "Rack", 0),
+		):
+			create_inventory_dimension(
+				apply_to_all_doctypes=0,
+				document_type="Stock Entry Detail",
+				dimension_name=dimension_name,
+				reference_document=reference_document,
+			).db_set("validate_negative_stock", validate_negative_stock)
+		frappe.clear_cache(doctype="Inventory Dimension")
+		with ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0}):
+			warehouse = create_warehouse("Negative Stock Warehouse")
+
+			for site in ("Site 1", "Site 2"):
+				receipt = make_stock_entry(
+					item_code=item_code,
+					target=warehouse,
+					qty=10,
+					posting_date=add_days(nowdate(), -10),
+					do_not_submit=True,
+				)
+				receipt.items[0].update({"to_se_site": site, "to_se_rack": "Rack 1"})
+				receipt.submit()
+
 			issue = make_stock_entry(
 				item_code=item_code,
 				source=warehouse,
@@ -841,7 +992,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 				posting_date=add_days(nowdate(), -1),
 				do_not_submit=True,
 			)
-			issue.items[0].update({"inv_site": "Site 1", "rack": "Rack 1"})
+			issue.items[0].update({"se_site": "Site 1", "se_rack": "Rack 1"})
 			issue.submit()
 
 			transfer = make_stock_entry(
@@ -853,7 +1004,7 @@ class TestInventoryDimension(ERPNextTestSuite):
 				do_not_submit=True,
 			)
 			transfer.items[0].update(
-				{"inv_site": "Site 1", "to_inv_site": "Site 1", "rack": "Rack 1", "to_rack": "Rack 2"}
+				{"se_site": "Site 1", "to_se_site": "Site 1", "se_rack": "Rack 1", "to_se_rack": "Rack 2"}
 			)
 			transfer.submit()
 
@@ -977,22 +1128,6 @@ def prepare_data_for_internal_transfer():
 	pr_doc = make_purchase_receipt(company=company, warehouse=warehouse, qty=10, rate=100, do_not_submit=True)
 	pr_doc.items[0].store = "Inter Transfer Store 1"
 	pr_doc.submit()
-
-	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
-		account = "Unrealized Profit and Loss - TCP1"
-		if not frappe.db.exists("Account", account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "Unrealized Profit and Loss",
-					"parent_account": "Direct Income - TCP1",
-					"company": company,
-					"is_group": 0,
-					"account_type": "Income Account",
-				}
-			).insert()
-
-		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
 
 	cost_center = frappe.db.get_value("Company", company, "cost_center") or frappe.db.get_value(
 		"Cost Center", {"company": company}, "name"

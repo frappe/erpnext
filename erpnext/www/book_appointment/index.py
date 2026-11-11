@@ -8,6 +8,7 @@ from frappe.rate_limiter import rate_limit
 from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 
+SLOT_REQUESTS_PER_MINUTE = 60
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 no_cache = 1
@@ -30,6 +31,7 @@ def handle_appointment_booking_disabled():
 		raise frappe.Redirect
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
 	handle_appointment_booking_disabled()
@@ -41,14 +43,16 @@ def get_appointment_settings():
 	return settings
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
 	handle_appointment_booking_disabled()
 	return zoneinfo.available_timezones()
 
 
-# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; returns free slots only, booking must be enabled
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; rate limited, returns free slots only, booking must be enabled
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=SLOT_REQUESTS_PER_MINUTE, seconds=60)
 def get_appointment_slots(date: str, timezone: str):
 	# Convert query to local timezones
 	handle_appointment_booking_disabled()

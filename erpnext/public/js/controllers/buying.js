@@ -75,7 +75,7 @@ erpnext.buying = {
 				if (this.frm.fields_dict.tc_name) {
 					this.frm.set_query("tc_name", function () {
 						return {
-							filters: { buying: 1 },
+							filters: { buying: 1, disabled: 0 },
 						};
 					});
 				}
@@ -289,6 +289,18 @@ erpnext.buying = {
 							company: doc.company,
 							include_child_warehouses: true,
 						},
+					});
+				}
+			}
+
+			project(doc, cdt, cdn) {
+				var item = frappe.get_doc(cdt, cdn);
+				if (item.project) {
+					$.each(this.frm.doc["items"] || [], function (i, other_item) {
+						if (!other_item.project) {
+							other_item.project = item.project;
+							refresh_field("project", other_item.name, other_item.parentfield);
+						}
 					});
 				}
 			}

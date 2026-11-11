@@ -1,8 +1,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-from unittest.mock import patch
-
 import frappe
 
 from erpnext.buying.test_utils import create_user_with_roles
@@ -30,25 +28,13 @@ class TestUAEVATSettings(ERPNextTestSuite):
 
 		make_settings(COMPANY, [vat_account]).insert()
 
-	@patch("erpnext.setup.doctype.company.company.install_country_fixtures")
-	def test_settings_follow_a_company_rename(self, install_country_fixtures):
-		company = frappe.get_doc(
-			{
-				"doctype": "Company",
-				"company_name": "_Test UAE Rename",
-				"abbr": "_TUR",
-				"default_currency": "AED",
-				"country": "United Arab Emirates",
-			}
-		).insert()
-		vat_account = get_account(company.name)
-		make_settings(company.name, [vat_account]).insert()
+	def test_settings_follow_a_company_rename(self):
+		vat_account = get_account(COMPANY)
+		make_settings(COMPANY, [vat_account]).insert()
 
 		create_user_with_roles("test_uae_vat_hr_manager@example.com", "HR Manager")
-		frappe.set_user("test_uae_vat_hr_manager@example.com")
-		self.addCleanup(frappe.set_user, "Administrator")
-		frappe.rename_doc("Company", company.name, "_Test UAE Renamed")
-		frappe.set_user("Administrator")
+		with self.set_user("test_uae_vat_hr_manager@example.com"):
+			frappe.rename_doc("Company", COMPANY, "_Test UAE Renamed")
 
 		self.assertEqual(list(get_tax_accounts("_Test UAE Renamed")), [vat_account])
 

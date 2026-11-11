@@ -12,6 +12,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 	erpnext.selling.SellingController
 ) {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 		this.frm.make_methods = {
@@ -152,9 +153,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					);
 				}
 
-				const payment_is_overdue = doc.payment_schedule
-					.map((row) => Date.parse(row.due_date) < Date.now())
-					.reduce((prev, current) => prev || current, false);
+				const payment_is_overdue =
+					doc.payment_schedule.some((row) => Date.parse(row.due_date) < Date.now()) ||
+					(doc.is_opening === "Yes" && Date.parse(doc.due_date) < Date.now());
 
 				if (payment_is_overdue && frappe.model.can_create("Dunning")) {
 					this.frm.add_custom_button(__("Dunning"), this.make_dunning.bind(this), __("Create"));
@@ -350,8 +351,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 							default: me.frm.doc.project,
 						},
 					],
-					primary_action: function () {
-						const data = d.get_values();
+					primary_action: function (data) {
 						me.frm.events.add_timesheet_data(me.frm, {
 							from_time: data.from_time,
 							to_time: data.to_time,
@@ -423,7 +423,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					],
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Lost"],
+						status: ["not in", ["Lost", "Expired"]],
 						company: me.frm.doc.company,
 					},
 					allow_child_item_selection: true,
@@ -581,7 +581,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "discount_account"]);
+		const field_copy = ["income_account", "discount_account", "cost_center"];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
+		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 	}
 
 	set_dynamic_labels() {
@@ -718,7 +724,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			this.frm.doc.is_cash_or_non_trade_discount
 		);
 
-		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+		if (this.frm.doc.is_cash_or_non_trade_discount) {
+			this.clear_mapped_discounts();
+		} else {
 			this.frm.set_value("additional_discount_account", "");
 		}
 

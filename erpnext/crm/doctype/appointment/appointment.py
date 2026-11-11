@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 
 import frappe
 from frappe import _
-from frappe.desk.form.assign_to import add as add_assignment
+from frappe.desk.form.assign_to import _add as add_assignment
 from frappe.desk.form.assign_to import clear as clear_assignments
 from frappe.model.document import Document
 from frappe.share import add_docshare
@@ -226,7 +226,7 @@ class Appointment(Document):
 		frappe.sendmail(
 			recipients=[self.customer_email],
 			template=template,
-			args={"full_name": self.customer_name, "site_url": frappe.utils.get_url(), **args},
+			args={"full_name": self.customer_name, "site_url": get_url(allow_header_override=False), **args},
 			subject=subject,
 			**kwargs,
 		)
@@ -374,7 +374,10 @@ class Appointment(Document):
 		if not frappe.has_permission(doc=self, user=agent):
 			add_docshare(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
 
-		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+		# the assigning user may be the Guest verifying a portal booking
+		add_assignment(
+			{"doctype": self.doctype, "name": self.name, "assign_to": [agent]}, ignore_permissions=True
+		)
 
 	def create_calendar_event(self):
 		if self.calendar_event:
@@ -405,7 +408,7 @@ class Appointment(Document):
 
 	def _get_verify_url(self):
 		key = self.generate_verification_key()
-		return get_url("/book_appointment/verify?" + urlencode({"key": key}))
+		return get_url("/book_appointment/verify?" + urlencode({"key": key}), allow_header_override=False)
 
 	def generate_verification_key(self):
 		# store only the hash; the raw key lives solely in the emailed link

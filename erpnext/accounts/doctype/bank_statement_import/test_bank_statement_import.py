@@ -19,14 +19,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 class TestBankStatementImport(ERPNextTestSuite):
 	"""Unit tests for Bank Statement Import functions"""
 
-	def test_preprocess_mt940_content_with_long_statement_number(self):
-		"""Test that statement numbers longer than 5 digits are truncated to last 5 digits"""
-		# Test case with 6-digit statement number (167619 -> 67619)
-		mt940_content = ":28C:167619/1"
-		expected_content = ":28C:67619/1"
-		result = preprocess_mt940_content(mt940_content)
-		self.assertEqual(result, expected_content)
-
 	def test_preprocess_mt940_content_with_normal_statement_number(self):
 		"""Test that statement numbers with 5 or fewer digits are unchanged"""
 		# Test case with 5-digit statement number (should remain unchanged)

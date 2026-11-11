@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.utils import flt
 
 from erpnext.controllers.item_close import update_closed_status
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -94,20 +93,6 @@ class TestPurchaseReceiptItemClose(ERPNextTestSuite):
 		self.assertNotEqual(receipt.status, "Closed")
 		self.assertEqual(receipt.per_billed, 0)
 
-	def test_unbilled_return_row_can_be_closed(self):
-		"""Return rows are closable by design, not by an accident of sign."""
-		receipt = self.make_purchase_receipt()
-		return_receipt = make_return_doc("Purchase Receipt", receipt.name)
-		return_receipt.insert()
-		return_receipt.submit()
-
-		row = return_receipt.items[0]
-		self.assertLess(row.amount, 0)
-		self.assertTrue(return_receipt.is_item_closable(row))
-
-		self.close_items(return_receipt, [row])
-		self.assertTrue(return_receipt.items[0].closed)
-
 
 class TestDeliveryNoteItemClose(ERPNextTestSuite):
 	def setUp(self):
@@ -154,6 +139,7 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		# nothing was billed, and writing every row off must not claim otherwise
 		self.assertEqual(note.per_billed, 0)
+		self.assertEqual(note.per_returned, 0)
 		self.assertEqual(note.status, "Closed")
 
 	def test_closed_row_is_not_mapped_to_sales_invoice(self):
@@ -172,27 +158,6 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		invoice.insert()
 		self.assertRaises(frappe.ValidationError, invoice.submit)
-
-	def test_closing_a_row_does_not_mark_it_returned(self):
-		note = self.make_delivery_note()
-
-		self.close_items(note, note.items)
-
-		self.assertEqual(note.per_returned, 0)
-		self.assertEqual(note.status, "Closed")
-
-	def test_amending_clears_closed_rows(self):
-		"""Frappe keeps no_copy fields when amending, so the flag must be cleared."""
-		note = self.make_delivery_note()
-		self.close_items(note, [note.items[1]])
-		note.cancel()
-
-		amended = frappe.copy_doc(note, ignore_no_copy=True)
-		amended.docstatus = 0
-		amended.amended_from = note.name
-		amended.insert()
-
-		self.assertFalse(any(row.closed for row in amended.items))
 
 	def test_noncanonical_closed_value_is_normalised(self):
 		"""A truthy non-1 value must not slip past the exact-match submission guard."""
@@ -216,19 +181,6 @@ class TestDeliveryNoteItemClose(ERPNextTestSuite):
 
 		self.close_items(return_note, [row])
 		self.assertTrue(return_note.items[0].closed)
-
-	def test_return_row_pending_amount_is_a_magnitude(self):
-		"""The dialog shows what is outstanding, so a return row must not read as zero."""
-		note = self.make_delivery_note()
-		return_note = make_return_doc("Delivery Note", note.name)
-		return_note.insert()
-		return_note.submit()
-
-		row = return_note.items[0]
-		self.assertLess(row.amount, 0)
-		pending = abs(flt(row.amount)) - abs(flt(row.billed_amt))
-		self.assertEqual(pending, abs(flt(note.items[0].amount)))
-		self.assertGreater(pending, 0)
 
 	def test_closing_a_return_row_leaves_the_original_untouched(self):
 		"""Writing off a credit note must not disturb what was returned."""

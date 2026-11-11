@@ -48,7 +48,7 @@ def get_data():
 			bin_table.ordered_qty,
 			bin_table.projected_qty,
 		)
-		.where(bin_table.projected_qty < 0)
+		.where((bin_table.projected_qty < 0) & (item.disabled == 0))
 		.orderby(bin_table.projected_qty)
 	)
 

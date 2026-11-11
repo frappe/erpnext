@@ -5,19 +5,16 @@ import frappe
 from frappe.search.sqlite_search import get_search_classes, index_docs_in_queue, update_doc_index
 
 from erpnext.controllers import queries
-from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query
+from erpnext.stock.doctype.item.item_search import ItemSearch, build_match_query, get_barcodes_by_item
 from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestBuildMatchQuery(ERPNextTestSuite):
-	def test_quotes_the_term(self):
-		self.assertEqual(build_match_query("widget"), '"widget"')
-
 	def test_escapes_embedded_quotes(self):
 		self.assertEqual(build_match_query('say "hi"'), '"say ""hi"""')
 
 	def test_skips_terms_shorter_than_a_trigram(self):
-		for txt in ("", "a", "ab", "  b "):
+		for txt in ("", "a", "ab", "  b ", "ab%cd", "ab_cd", "a%b%c"):
 			self.assertIsNone(build_match_query(txt), txt)
 
 	def test_splits_on_like_wildcards(self):
@@ -25,13 +22,24 @@ class TestBuildMatchQuery(ERPNextTestSuite):
 		self.assertEqual(build_match_query("RAW_MAT_000123"), '"RAW" AND "MAT" AND "000123"')
 		self.assertEqual(build_match_query("abc%def"), '"abc" AND "def"')
 
-	def test_skips_terms_with_no_usable_fragment(self):
-		for txt in ("ab%cd", "ab_cd", "a%b%c"):
-			self.assertIsNone(build_match_query(txt), txt)
+	def test_folds_small_kana_to_full_size(self):
+		"""LIKE treats small and full-size kana as equal, so the index must too."""
+		self.assertEqual(build_match_query("フイルター"), build_match_query("ﾌｨﾙﾀｰ"))
+
+	def test_folds_digits_of_any_script(self):
+		"""LIKE treats every digit as its ASCII digit, so the index must too."""
+		for txt in ("ABC١٢٣", "ABC۱۲۳", "ABC१२३", "ABC❶❷❸"):
+			self.assertEqual(build_match_query(txt), '"ABC123"', txt)
 
 	def test_skips_escaped_terms(self):
 		"""Backslash escapes the next LIKE wildcard, so the split would be wrong."""
 		self.assertIsNone(build_match_query("ab\\_cd"))
+
+
+class TestBarcodePreload(ERPNextTestSuite):
+	def test_an_item_without_barcodes_is_preloaded(self):
+		"""A batch preload missing it sends the build back to one Item Barcode query per Item."""
+		self.assertEqual(get_barcodes_by_item(["ZZ-NO-BARCODE"]), {"ZZ-NO-BARCODE": ""})
 
 
 class TestItemSearchSetting(ERPNextTestSuite):
@@ -41,6 +49,64 @@ class TestItemSearchSetting(ERPNextTestSuite):
 
 		with self.change_settings("Global Defaults", enable_item_search_index=1):
 			self.assertTrue(ItemSearch().is_search_enabled())
+
+	def test_old_sqlite_keeps_the_index_off(self):
+		with (
+			self.change_settings("Global Defaults", enable_item_search_index=1),
+			patch.object(sqlite3, "sqlite_version_info", (3, 31, 1)),
+		):
+			self.assertFalse(ItemSearch().is_search_enabled())
+
+	def test_old_sqlite_blocks_enabling_the_index(self):
+		with self.change_settings("Global Defaults", enable_item_search_index=0):
+			global_defaults = frappe.get_single("Global Defaults")
+			global_defaults.enable_item_search_index = 1
+
+			with patch.object(sqlite3, "sqlite_version_info", (3, 31, 1)):
+				self.assertRaises(frappe.ValidationError, global_defaults.save)
+
+
+class TestItemSearchOnOldSQLite(ERPNextTestSuite):
+	"""SQLite 3.34 to 3.44 has the trigram tokenizer without remove_diacritics."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		cls.patches = [
+			patch.object(ItemSearch, "is_search_enabled", return_value=True),
+			patch.object(sqlite3, "sqlite_version_info", (3, 40, 1)),
+		]
+		for active in cls.patches:
+			active.start()
+
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-CRÈME-7782",
+				"item_name": "Crème Filter",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		cls.search = ItemSearch(db_name="item_search_old_sqlite.db")
+		cls.search.drop_index()
+		cls.search.build_index()
+
+	@classmethod
+	def tearDownClass(cls):
+		cls.search.drop_index()
+		for active in cls.patches:
+			active.stop()
+		super().tearDownClass()
+
+	def test_an_accented_item_is_found_by_an_unaccented_term(self):
+		self.assertIn("ZZ-CRÈME-7782", self.candidates("creme-7782"))
+
+	def test_a_differently_accented_term_finds_the_item(self):
+		self.assertIn("ZZ-CRÈME-7782", self.candidates("crême filter"))
+
+	def candidates(self, txt):
+		return self.search.get_candidate_item_codes(txt, ["name", "item_code", "item_name"])
 
 
 class TestItemSearchIndex(ERPNextTestSuite):
@@ -110,10 +176,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 		finally:
 			connection.close()
 
-	def test_tokenizer_folds_accents(self):
-		"""MariaDB's utf8mb4_unicode_ci LIKE is accent insensitive, so the index must be too."""
-		self.assertEqual(self.search.schema["tokenizer"], "trigram remove_diacritics 1")
-
 	def test_an_accented_item_is_found_by_an_unaccented_term(self):
 		item = frappe.get_doc(
 			{
@@ -145,21 +207,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 				self.schema["text_fields"] = extra
 
 		return DriftedItemSearch()
-
-	def test_an_item_without_barcodes_is_still_indexed(self):
-		"""A text column left unset drops the document from the index entirely."""
-		frappe.get_doc(
-			{
-				"doctype": "Item",
-				"item_code": "ZZ-NO-BARCODE-3312",
-				"item_name": "No Barcode Probe",
-				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
-				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
-			}
-		).insert()
-		index_docs_in_queue()
-
-		self.assertIn("ZZ-NO-BARCODE-3312", self.candidates("3312"))
 
 	def test_a_drifted_schema_reports_the_index_as_absent(self):
 		"""A site that adds an Item search field leaves the built table a column short."""
@@ -216,6 +263,24 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 		for txt in ("Valve  3", "example.com"):
 			with self.subTest(txt=txt):
+				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
+
+	def test_kana_and_width_variants_match_the_scan(self):
+		"""LIKE treats katakana and hiragana, voiced and unvoiced kana, and full and half width as equal."""
+		frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "ZZ-KANA-6613",
+				"item_name": "カタカナ フィルター バルブ Ｐａｒｔ",
+				"item_group": frappe.db.get_value("Item Group", {"is_group": 0}, "name"),
+				"stock_uom": frappe.db.get_value("UOM", {}, "name"),
+			}
+		).insert()
+		index_docs_in_queue()
+
+		for txt in ("かたかな", "ﾌｨﾙﾀｰ", "はるふ", "part"):
+			with self.subTest(txt=txt):
+				self.assertIn("ZZ-KANA-6613", self.candidates(txt))
 				self.assertEqual(self.run_query(txt, None), self.run_query(txt, None, False))
 
 	def test_an_index_write_failure_saves_the_item_and_drops_the_index(self):
@@ -277,35 +342,23 @@ class TestItemSearchIndex(ERPNextTestSuite):
 
 	def test_item_query_output_is_unchanged(self):
 		cases = [
-			("Test", None),
-			("Item", None),
-			("EST", None),
-			("Test", {"is_stock_item": 1}),
-			("_Test", None),
-			("ab", None),
-			("%est", None),
-			("", None),
+			("Test", None, {}),
+			("Item", None, {}),
+			("EST", None, {}),
+			("Test", {"is_stock_item": 1}, {}),
+			("_Test", None, {}),
+			("ab", None, {}),
+			("%est", None, {}),
+			("", None, {}),
+			("Test", None, {"page_len": 3, "start": 0}),
+			("Test", None, {"page_len": 3, "start": 3}),
+			("Test", None, {"page_len": 3, "start": 6}),
 		]
-		for txt, filters in cases:
-			with self.subTest(txt=txt, filters=filters):
-				self.assertEqual(self.run_query(txt, filters), self.run_query(txt, filters, False))
-
-	def test_underscore_in_the_term_still_narrows(self):
-		"""_ is a LIKE wildcard, but the fragments around it are still indexable."""
-		candidates = self.candidates("_Test Item")
-		self.assertIsNotNone(candidates)
-		matched = frappe.get_all(
-			"Item",
-			filters={"name": ("like", "%_Test Item%"), "disabled": 0, "has_variants": 0},
-			pluck="name",
-		)
-		self.assertTrue(set(matched) <= set(candidates))
-
-	def test_no_candidates_returns_no_rows(self):
-		"""An empty candidate list must not reach the query, IN () is a syntax error."""
-		with patch.object(queries, "get_item_search_candidates", return_value=[]):
-			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None), ())
-			self.assertEqual(queries.item_query("Item", "Test", "name", 0, 20, None, as_dict=True), [])
+		for txt, filters, paging in cases:
+			with self.subTest(txt=txt, filters=filters, paging=paging):
+				self.assertEqual(
+					self.run_query(txt, filters, **paging), self.run_query(txt, filters, False, **paging)
+				)
 
 	def test_empty_result_matches_the_scan_shape(self):
 		"""The early return must give back what the query itself would, tuple or list."""
@@ -317,13 +370,6 @@ class TestItemSearchIndex(ERPNextTestSuite):
 					scanned = queries.item_query("Item", "ZZQQNOTHING", "name", 0, 20, None, as_dict=as_dict)
 				self.assertEqual(early, scanned)
 				self.assertIs(type(early), type(scanned))
-
-	def test_item_query_paging_is_unchanged(self):
-		for start in (0, 3, 6):
-			with self.subTest(start=start):
-				indexed = self.run_query("Test", None, page_len=3, start=start)
-				scanned = self.run_query("Test", None, False, page_len=3, start=start)
-				self.assertEqual(indexed, scanned)
 
 	def candidates(self, txt, searched_fields=None):
 		return self.search.get_candidate_item_codes(

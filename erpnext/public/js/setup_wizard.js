@@ -15,7 +15,12 @@ frappe.setup.on("before_load", function () {
 		return;
 	}
 
-	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
+	let slides = erpnext.setup.slides_settings;
+	// HR trials get the HRMS persona step instead
+	if (frappe.boot.hr_only_setup) {
+		slides = slides.filter((slide) => slide.name !== "persona");
+	}
+	slides.map(frappe.setup.add_slide);
 });
 
 erpnext.setup.slides_settings = [
@@ -26,22 +31,6 @@ erpnext.setup.slides_settings = [
 		// subtitle shown under the title
 		help: __("A few quick questions so we can set things up the way you work."),
 		fields: [
-			{
-				fieldname: "persona_implementing_for",
-				label: __("Who are you setting this up for?"),
-				fieldtype: "Select",
-				options: ["", "My own business", "A company I work for", "A client I'm consulting for"].join(
-					"\n"
-				),
-				reqd: 1,
-			},
-			{
-				fieldname: "persona_company_size",
-				label: __("How big is the team?"),
-				fieldtype: "Select",
-				options: ["", "1–10", "11–50", "51–200", "201–1,000", "1,000+"].join("\n"),
-				reqd: 1,
-			},
 			{
 				fieldname: "persona_industry",
 				label: __("What kind of work do you do?"),
@@ -65,6 +54,20 @@ erpnext.setup.slides_settings = [
 				reqd: 1,
 			},
 			{
+				fieldname: "persona_implementing_for",
+				label: __("Who are you setting this up for?"),
+				fieldtype: "Select",
+				options: ["", "My own business", "A company I work for", "A client I'm consulting for"].join(
+					"\n"
+				),
+			},
+			{
+				fieldname: "persona_company_size",
+				label: __("How big is the team?"),
+				fieldtype: "Select",
+				options: ["", "1–10", "11–50", "51–200", "201–1,000", "1,000+"].join("\n"),
+			},
+			{
 				fieldname: "persona_current_system",
 				label: __("What do you use today?"),
 				fieldtype: "Select",
@@ -83,7 +86,6 @@ erpnext.setup.slides_settings = [
 					"Nothing yet - starting fresh",
 					"Other",
 				].join("\n"),
-				reqd: 1,
 			},
 			{
 				fieldtype: "Section Break",
@@ -146,13 +148,6 @@ erpnext.setup.slides_settings = [
 			{ fieldname: "fy_start_date", label: __("Financial Year Begins On"), fieldtype: "Date", reqd: 1 },
 			// end date should be hidden (auto calculated)
 			{ fieldname: "fy_end_date", label: __("End Date"), fieldtype: "Date", reqd: 1, hidden: 1 },
-			{ fieldtype: "Section Break" },
-			{
-				fieldname: "setup_demo",
-				label: __("Add demo data so you can explore"),
-				fieldtype: "Check",
-				description: __("You can delete it anytime."),
-			},
 		],
 
 		onload: function (slide) {

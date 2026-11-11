@@ -2,9 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _, bold, throw
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
@@ -12,8 +14,9 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
 from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import set_item_default, validate_item_uoms
-from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
+from erpnext.stock.get_item_details import _get_bin_details, get_conversion_factor
 from erpnext.stock.utils import _get_incoming_rate, get_combine_datetime, get_valuation_method
 
 
@@ -32,7 +35,7 @@ class SellingController(StockController):
 				company = self.company
 
 				item.update(
-					get_bin_details(
+					_get_bin_details(
 						item.item_code, item.warehouse, company=company, include_child_warehouses=True
 					)
 				)
@@ -45,12 +48,15 @@ class SellingController(StockController):
 				),
 			)
 
-		if self.get("company") and not self.get("terms"):
+		if self.docstatus.is_draft() and self.get("company") and not self.get("terms"):
 			if not self.get("tc_name"):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
-			self.set_missing_terms()
+			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
+			if tnc and not tnc.disabled and tnc.get("selling"):
+				self.set_missing_terms()
 
 	def validate(self):
+		validate_terms_and_conditions(self.get("tc_name"), "selling")
 		super().validate()
 		self.ensure_customer_is_not_blocked()
 		self.validate_items()
@@ -66,11 +72,48 @@ class SellingController(StockController):
 		self.validate_price_list_country()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		if self.doctype == "Sales Invoice":
+			self.validate_against_stock_reservation_entries()
 		self.validate_auto_repeat_subscription_dates()
 		self.validate_sample_retention_warehouse()
 		for table_field in ["items", "packed_items"]:
 			if self.get(table_field):
 				self.set_serial_and_batch_bundle(table_field)
+
+	def before_update_after_submit(self):
+		if self.meta.get_field("sales_team") and self.is_child_table_same("sales_team"):
+			return
+
+		self.calculate_commission()
+		self.calculate_contribution()
+
+	def validate_against_stock_reservation_entries(self):
+		if self.get("is_return") or (self.doctype == "Sales Invoice" and not cint(self.get("update_stock"))):
+			return
+
+		so_field = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
+		rows = [item for item in self.get("items") if item.get(so_field) and item.so_detail]
+		reserved_warehouses = get_reserved_warehouses_by_order_row([item.so_detail for item in rows])
+		for item in rows:
+			warehouses = reserved_warehouses.get(item.so_detail)
+			if not warehouses:
+				continue
+
+			if not item.warehouse:
+				item.warehouse = warehouses[0]
+			elif item.warehouse not in warehouses:
+				frappe.throw(
+					_("Row #{0}: Stock is reserved for item {1} in warehouse {2}.").format(
+						item.idx,
+						frappe.bold(item.item_code),
+						frappe.bold(warehouses[0])
+						if len(warehouses) == 1
+						else _("{0} and {1}").format(
+							frappe.bold(", ".join(warehouses[:-1])), frappe.bold(warehouses[-1])
+						),
+					),
+					title=_("Stock Reservation Warehouse Mismatch"),
+				)
 
 	def validate_price_list_country(self):
 		from erpnext.stock.doctype.price_list.price_list import validate_price_list_country
@@ -152,6 +195,8 @@ class SellingController(StockController):
 			)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
+			if self.get("sales_partner"):
+				party_details.pop("commission_rate", None)
 			self.update_if_missing(party_details)
 
 		elif lead:
@@ -215,6 +260,17 @@ class SellingController(StockController):
 		if not self.meta.get_field("commission_rate"):
 			return
 
+		if not self.get("sales_partner"):
+			self.commission_rate = 0
+		elif self.commission_rate is None or (
+			self.get_doc_before_save()
+			and self.has_value_changed("sales_partner")
+			and not self.has_value_changed("commission_rate")
+		):
+			self.commission_rate = (
+				frappe.get_cached_value("Sales Partner", self.sales_partner, "commission_rate") or 0
+			)
+
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
 
 		if not (0 <= self.commission_rate <= 100.0):
@@ -251,11 +307,10 @@ class SellingController(StockController):
 				self.precision("allocated_amount", sales_person),
 			)
 
-			if sales_person.commission_rate:
-				sales_person.incentives = flt(
-					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
-					self.precision("incentives", sales_person),
-				)
+			sales_person.incentives = flt(
+				sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0,
+				self.precision("incentives", sales_person),
+			)
 
 			total += sales_person.allocated_percentage
 
@@ -263,25 +318,107 @@ class SellingController(StockController):
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
+		# Rows without a Sales Person are left to the mandatory check, which runs after validate.
+		sales_team = [row for row in sales_team if row.sales_person]
 		sales_persons = [d.sales_person for d in sales_team]
 
 		if not sales_persons:
 			return
 
 		sales_person_status = frappe.db.get_all(
-			"Sales Person", filters={"name": ["in", sales_persons]}, fields=["name", "enabled"]
+			"Sales Person",
+			filters={"name": ["in", sales_persons]},
+			fields=["name", "enabled", "is_group", "commission_rate"],
 		)
 
+		inherited = set()
+		if any(not row.enabled for row in sales_person_status):
+			# rows carried over from a source document are historical references,
+			# but a sales person newly assigned here is still a new assignment
+			inherited = self.get_inherited_sales_persons()
+
 		for row in sales_person_status:
-			if not row.enabled:
+			if row.is_group:
+				frappe.throw(_("Sales Person {0} is a group.").format(frappe.bold(row.name)))
+			if not row.enabled and row.name not in inherited:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
+
+		seen = set()
+		for row in sales_team:
+			if row.sales_person in seen:
+				frappe.throw(
+					_("Sales Person {0} is repeated in the sales team.").format(frappe.bold(row.sales_person))
+				)
+			seen.add(row.sales_person)
+			if not 0 <= flt(row.allocated_percentage) <= 100:
+				frappe.throw(_("Row #{0}: Contribution (%) must be between 0 and 100").format(row.idx))
+
+		previous = self.get_doc_before_save()
+		previous_rows = {row.name: row for row in previous.get("sales_team")} if previous else {}
+		master_rates = {row.name: flt(row.commission_rate) for row in sales_person_status}
+		return_rates = {}
+		if self.get("is_return") and self.get("return_against"):
+			source = frappe.get_doc(self.doctype, self.return_against)
+			return_rates = {row.sales_person: row.commission_rate for row in source.sales_team}
+		for row in sales_team:
+			previous_row = previous_rows.get(row.name)
+			if previous_row and previous_row.sales_person == row.sales_person:
+				commission_rate = previous_row.commission_rate
+			else:
+				commission_rate = return_rates.get(row.sales_person, master_rates[row.sales_person])
+
+			if any(not 0 <= flt(rate) <= 100 for rate in (row.commission_rate, commission_rate)):
+				frappe.throw(_("Row #{0}: Commission Rate must be between 0 and 100").format(row.idx))
+			row.commission_rate = commission_rate
+
+	def get_inherited_sales_persons(self):
+		"""Return the sales persons already on the documents this one inherits its sales team from."""
+		inherited = set()
+
+		for doctype, names in self.get_sales_team_sources().items():
+			inherited.update(
+				frappe.get_all(
+					"Sales Team",
+					filters={"parenttype": doctype, "parent": ["in", list(names)]},
+					pluck="sales_person",
+				)
+			)
+
+		return inherited
+
+	def get_sales_team_sources(self):
+		"""Return the documents whose sales team may be carried over here, grouped by doctype."""
+		sources = {}
+
+		def add(doctype, name):
+			if name:
+				sources.setdefault(doctype, set()).add(name)
+
+		if self.get("is_return"):
+			add(self.doctype, self.get("return_against"))
+		add(self.doctype, self.get("amended_from"))
+
+		# goods are already out, so billing them must not be blocked. every earlier step
+		# in the flow can still be corrected, and is left to the enabled check
+		if self.doctype == "Sales Invoice":
+			for item in self.get("items") or []:
+				add("Delivery Note", item.get("delivery_note"))
+
+		return sources
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
 			if d.item_code:
 				discount = flt(frappe.get_cached_value("Item", d.item_code, "max_discount"))
 
-				if discount and flt(d.discount_percentage) > discount:
+				if discount and (
+					flt(d.discount_percentage) > discount
+					or (
+						flt(d.rate_with_margin) > 0
+						and flt(d.discount_amount)
+						> flt(flt(d.rate_with_margin) * discount / 100, d.precision("discount_amount"))
+					)
+				):
 					frappe.throw(_("Maximum discount for Item {0} is {1}%").format(d.item_code, discount))
 
 	def set_qty_as_per_stock_uom(self):
@@ -354,7 +491,15 @@ class SellingController(StockController):
 				)
 
 	def get_item_list(self):
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
 		il = []
+		picked_serial_nos = picked_batches = None
+		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
+			service = SerialBatchBundleService(self)
+			picked_serial_nos = service.get_serial_nos_used_in_rows()
+			picked_batches = service.get_batches_used_in_rows()
+
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
@@ -370,8 +515,11 @@ class SellingController(StockController):
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
-									or get_serial_and_batch_bundle(p, self, d),
+									or get_serial_and_batch_bundle(
+										p, self, d, picked_serial_nos, picked_batches
+									),
 									"name": d.name,
+									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
 									"voucher_type": self.doctype,
@@ -397,6 +545,7 @@ class SellingController(StockController):
 							"conversion_factor": d.conversion_factor,
 							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"name": d.name,
+							"project": d.get("project"),
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,
 							"voucher_type": self.doctype,
@@ -490,7 +639,8 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def ensure_customer_is_not_blocked(self):
-		if self.doctype == "Quotation":
+		# Consolidated POS invoices only merge POS invoices that already passed this check
+		if self.doctype == "Quotation" or self.get("is_consolidated") or self.get("is_return"):
 			return
 
 		if self.customer and is_customer_blocked(self.customer):
@@ -549,10 +699,18 @@ class SellingController(StockController):
 				):
 					d.incoming_rate = 0
 
-		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+		is_standalone = self.get("is_return") and not self.get("return_against")
+
+		if self.doctype not in ("Delivery Note", "Sales Invoice") and not (
+			self.doctype == "POS Invoice" and is_standalone
+		):
 			return
 
-		if self.doctype == "Sales Invoice" and not self.update_stock and not self.is_internal_transfer():
+		if (
+			self.doctype in ("Sales Invoice", "POS Invoice")
+			and not self.update_stock
+			and not self.is_internal_transfer()
+		):
 			return
 
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
@@ -563,8 +721,6 @@ class SellingController(StockController):
 		set_zero_rate_for_expired_batch = frappe.db.get_single_value(
 			"Selling Settings", "set_zero_rate_for_expired_batch"
 		)
-
-		is_standalone = self.is_return and not self.return_against
 
 		old_doc = self.get_doc_before_save()
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -600,12 +756,13 @@ class SellingController(StockController):
 					reset_incoming_rate()
 
 				if (
-					(not d.incoming_rate or self.is_new())
-					and not is_standalone
+					not d.incoming_rate
+					or (self.is_new() and not is_standalone)
 					or self.is_internal_transfer()
 					or (
 						get_valuation_method(d.item_code, self.company) == "Moving Average"
 						and self.get("is_return")
+						and not is_standalone
 					)
 				):
 					d.incoming_rate = _get_incoming_rate(
@@ -815,8 +972,9 @@ class SellingController(StockController):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(
-					((flt(item.stock_uom_rate) - flt(item.valuation_rate)) * item.stock_qty),
-					self.precision("amount", item),
+					(flt(item.stock_uom_rate) * flt(self.conversion_rate) - flt(item.valuation_rate))
+					* item.stock_qty,
+					self.precision("gross_profit", item),
 				)
 
 	def set_customer_address(self):
@@ -942,34 +1100,22 @@ class SellingController(StockController):
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+
 		# Don't update Delivered Qty on Return.
 		if self.is_return:
 			return
 
 		so_field = "sales_order" if self.doctype == "Sales Invoice" else "against_sales_order"
 
-		items = []
-		for item in self.items:
-			packed_items = [
-				packed_item
-				for packed_item in self.packed_items
-				if packed_item.parent_detail_docname == item.name
-			]
-			if not packed_items:
-				items.append(item)
-			else:
-				for d in packed_items:
-					d.set(so_field, item.get(so_field))
-					d.so_detail = frappe.get_value(
-						"Packed Item",
-						{
-							"parent_detail_docname": item.so_detail,
-							"parent_item": item.item_code,
-							"item_code": d.item_code,
-							"warehouse": d.warehouse,
-						},
-					)
-					items.append(d)
+		bundle_rows = {packed_item.parent_detail_docname for packed_item in self.packed_items}
+		items = [item for item in self.items if item.name not in bundle_rows]
+		items_by_name = {item.name: item for item in self.items}
+		# a component reserves against the order's packed row, whatever warehouse it is delivered from
+		for packed_item, so_packed_item in get_order_packed_item_pairs(self):
+			packed_item.set(so_field, items_by_name[packed_item.parent_detail_docname].get(so_field))
+			packed_item.so_detail = so_packed_item.name
+			items.append(packed_item)
 
 		if self._action == "submit":
 			for item in items:
@@ -1045,6 +1191,7 @@ class SellingController(StockController):
 
 					# Update Reserved Stock in Bin.
 					sre_doc.update_reserved_stock_in_bin()
+					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
 
 					qty_to_deliver -= qty_can_be_deliver
 
@@ -1112,6 +1259,7 @@ class SellingController(StockController):
 
 					# Update Reserved Stock in Bin.
 					sre_doc.update_reserved_stock_in_bin()
+					sre_doc.update_reserved_qty_in_voucher(update_modified=False)
 
 					qty_to_undelivered -= qty_can_be_undelivered
 
@@ -1133,18 +1281,20 @@ class SellingController(StockController):
 				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
 
 				if bundle_id:
-					cls_obj = SerialBatchCreation(
+					package = SerialBatchCreation(
 						{
 							"type_of_transaction": "Outward",
 							"serial_and_batch_bundle": bundle_id,
 							"item_code": item.get("item_code"),
 							"warehouse": item.get("warehouse"),
+							"do_not_save": True,
 						}
-					)
+					).duplicate_package()
 
-					cls_obj.duplicate_package()
+					remove_delivered_entries(package, item.pick_list_item)
+					package.save()
 
-					item.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+					item.serial_and_batch_bundle = package.name
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
@@ -1152,6 +1302,56 @@ class SellingController(StockController):
 		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
 		for pick_list in pick_lists:
 			update_pick_list_status(pick_list)
+
+
+def remove_delivered_entries(package, pick_list_item):
+	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
+	delivered = get_delivered_entries(pick_list_item)
+	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
+	delivered_batch_qty = defaultdict(float)
+	for row in delivered:
+		if row.batch_no and not row.serial_no:
+			delivered_batch_qty[row.batch_no] += abs(row.qty)
+
+	for row in list(package.entries):
+		if row.serial_no:
+			if row.serial_no in delivered_serial_nos:
+				package.remove(row)
+			continue
+
+		taken = min(delivered_batch_qty[row.batch_no], abs(row.qty))
+		delivered_batch_qty[row.batch_no] -= taken
+		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
+		if not row.qty:
+			package.remove(row)
+
+
+def get_delivered_entries(pick_list_item):
+	"""Return the serial and batch entries that submitted deliveries of a pick list row took."""
+	voucher_detail_nos = [
+		name
+		for doctype in ("Delivery Note Item", "Sales Invoice Item")
+		for name in frappe.get_all(
+			doctype, filters={"pick_list_item": pick_list_item, "docstatus": 1}, pluck="name"
+		)
+	]
+	if not voucher_detail_nos:
+		return []
+
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	return (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.select(entry.serial_no, entry.batch_no, entry.qty)
+		.where(
+			bundle.voucher_detail_no.isin(voucher_detail_nos)
+			& (bundle.type_of_transaction == "Outward")
+			& (bundle.docstatus == 1)
+			& (bundle.is_cancelled == 0)
+		)
+	).run(as_dict=True)
 
 
 def set_default_income_account_for_item(obj):
@@ -1170,8 +1370,11 @@ def set_default_income_account_for_item(obj):
 			set_item_default(d.item_code, obj.company, "income_account", income_account)
 
 
-def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+def get_serial_and_batch_bundle(
+	child, parent, delivery_note_child=None, picked_serial_nos=None, picked_batches=None
+):
+	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
@@ -1199,11 +1402,19 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
+			"ignore_serial_nos": picked_serial_nos[child.item_code] if picked_serial_nos else None,
+			"already_picked_batches": picked_batches,
 		}
 	)
 
 	doc = sn_doc.make_serial_and_batch_bundle()
 	child.db_set("serial_and_batch_bundle", doc.name)
+	if picked_serial_nos is not None:
+		picked_serial_nos[child.item_code].extend(
+			d.serial_no for d in doc.get("entries") or [] if d.serial_no
+		)
+	if picked_batches is not None:
+		add_picked_batches(picked_batches, doc.get("entries") or [])
 
 	return doc.name
 
@@ -1237,6 +1448,31 @@ def get_delivered_serial_batch_for_reservation(item):
 			batch_qty[item.batch_no] = abs(flt(item.get("stock_qty") or item.get("qty")))
 
 	return serial_nos, batch_qty
+
+
+def get_reserved_warehouses_by_order_row(so_details: list) -> dict:
+	if not so_details:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	rows = (
+		frappe.qb.from_(sre)
+		.select(sre.voucher_detail_no, sre.warehouse)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no.isin(so_details))
+			& (sre.delivered_qty < sre.reserved_qty)
+		)
+		.groupby(sre.voucher_detail_no, sre.warehouse)
+		.orderby(Min(sre.creation))
+	).run(as_dict=True)
+
+	reserved_warehouses = {}
+	for row in rows:
+		reserved_warehouses.setdefault(row.voucher_detail_no, []).append(row.warehouse)
+
+	return reserved_warehouses
 
 
 def get_ledger_qty(qty) -> float:

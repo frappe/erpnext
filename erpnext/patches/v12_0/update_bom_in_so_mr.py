@@ -10,6 +10,7 @@ def execute():
 		if doctype == "Material Request":
 			condition = " and doc.per_ordered < 100 and doc.material_request_type = 'Manufacture'"
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f""" UPDATE `tab{doctype}` as doc, `tab{doctype} Item` as child_doc, tabItem as item
 			SET

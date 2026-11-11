@@ -75,6 +75,32 @@ class TestPOSProfile(ERPNextTestSuite):
 
 			self.assertEqual(pos_profile.disabled, 1)
 
+	def test_write_off_fields_reject_groups(self):
+		for fieldname, doctype in (
+			("write_off_account", "Account"),
+			("write_off_cost_center", "Cost Center"),
+		):
+			with self.subTest(fieldname=fieldname):
+				profile = make_pos_profile(do_not_insert=True)
+				group = frappe.db.get_value(doctype, {"company": profile.company, "is_group": 1})
+				self.assertTrue(group)
+				profile.set(fieldname, group)
+				with self.assertRaisesRegex(frappe.ValidationError, "cannot be a group"):
+					profile.insert()
+
+	def test_write_off_fields_reject_other_company(self):
+		for fieldname, doctype in (
+			("write_off_account", "Account"),
+			("write_off_cost_center", "Cost Center"),
+		):
+			with self.subTest(fieldname=fieldname):
+				profile = make_pos_profile()
+				value = frappe.db.get_value(doctype, {"company": "_Test Company 1", "is_group": 0})
+				self.assertTrue(value)
+				profile.set(fieldname, value)
+				with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Company"):
+					profile.save()
+
 
 def get_customers_list(pos_profile=None):
 	if pos_profile is None:

@@ -11,6 +11,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "supplier_name",
   "alias",
@@ -54,6 +57,10 @@
   "column_break_27",
   "tax_withholding_category",
   "tax_withholding_group",
+  "items_tab",
+  "frequently_bought_html",
+  "party_specific_items_section",
+  "party_specific_items_html",
   "settings_tab",
   "company_restrictions_section",
   "restrict_to_companies",
@@ -88,6 +95,22 @@
   "dashboard_tab"
  ],
  "fields": [
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -390,16 +413,17 @@
   {
    "fieldname": "primary_address_and_contact_detail_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Primary Contact",
    "no_copy": 1,
-   "options": "Contact"
+   "options": "Contact",
+   "show_on_timeline": 1
   },
   {
    "fetch_from": "supplier_primary_contact.mobile_no",
@@ -431,15 +455,37 @@
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Primary Address",
    "no_copy": 1,
-   "options": "Address"
+   "options": "Address",
+   "show_on_timeline": 1
   },
   {
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "frequently_bought_html",
+   "fieldtype": "HTML",
+   "label": "Frequently Bought HTML"
+  },
+  {
+   "fieldname": "party_specific_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_specific_items_html",
+   "fieldtype": "HTML",
+   "label": "Party Specific Items HTML"
   },
   {
    "fieldname": "settings_tab",
@@ -606,7 +652,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-22 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

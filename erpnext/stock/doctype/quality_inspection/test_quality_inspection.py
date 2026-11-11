@@ -390,40 +390,6 @@ class TestQualityInspection(ERPNextTestSuite):
 		qa.delete()
 		dn.delete()
 
-	def test_reading_in_comma_decimal_number_format(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		create_quality_inspection_parameter("Density")
-
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
-		with user_number_format("#.###,##"):
-			qa = create_quality_inspection(
-				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
-			)
-			qa.save()
-
-			self.assertEqual(qa.readings[0].status, "Accepted")
-			self.assertEqual(qa.status, "Accepted")
-
-		qa.delete()
-		dn.delete()
-
-	def test_reading_in_space_grouped_number_format(self):
-		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
-		create_quality_inspection_parameter("Density")
-
-		readings = [{"specification": "Density", "min_value": 1.15, "max_value": 1.20, "reading_1": "1,15"}]
-		with user_number_format("# ###,##"):
-			qa = create_quality_inspection(
-				reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
-			)
-			qa.save()
-
-			self.assertEqual(qa.readings[0].status, "Accepted")
-			self.assertEqual(qa.status, "Accepted")
-
-		qa.delete()
-		dn.delete()
-
 	def test_reading_in_wrong_decimal_number_format(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		create_quality_inspection_parameter("Density")

@@ -10,6 +10,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/project",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "project_name",
   "status",
@@ -28,6 +31,11 @@
   "actual_start_date",
   "actual_end_date",
   "actual_time",
+  "accounting_section",
+  "company",
+  "estimated_costing",
+  "column_break_accounting",
+  "cost_center",
   "tasks_tab",
   "tasks_html",
   "more_info_tab",
@@ -38,12 +46,8 @@
   "section_break0",
   "notes",
   "costing_tab",
-  "accounting_section",
-  "company",
-  "column_break_accounting",
-  "cost_center",
+  "costing_dashboard",
   "project_details",
-  "estimated_costing",
   "total_costing_amount",
   "total_purchase_cost",
   "column_break_28",
@@ -55,6 +59,8 @@
   "gross_margin",
   "column_break_37",
   "per_gross_margin",
+  "budgets_tab",
+  "budgets_html",
   "monitor_progress_tab",
   "section_break_sjmx",
   "collect_progress",
@@ -77,6 +83,22 @@
   "connections_tab"
  ],
  "fields": [
+  {
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "project_name",
    "fieldtype": "Data",
@@ -340,7 +362,7 @@
   {
    "fieldname": "total_consumed_material_cost",
    "fieldtype": "Currency",
-   "label": "Total consumed Material cost (via Stock Entry)",
+   "label": "Total Consumed Material Cost",
    "read_only": 1
   },
   {
@@ -477,6 +499,24 @@
    "label": "Costing"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "costing_dashboard",
+   "fieldtype": "Vue Component",
+   "label": "Costing Dashboard",
+   "options": "erpnext.project_costing"
+  },
+  {
+   "fieldname": "budgets_tab",
+   "fieldtype": "Tab Break",
+   "label": "Budgets"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "budgets_html",
+   "fieldtype": "HTML",
+   "label": "Budgets"
+  },
+  {
    "fieldname": "monitor_progress_tab",
    "fieldtype": "Tab Break",
    "label": "Progress updates"
@@ -525,7 +565,7 @@
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2026-10-05 12:07:33.920918",
+ "modified": "2026-11-03 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

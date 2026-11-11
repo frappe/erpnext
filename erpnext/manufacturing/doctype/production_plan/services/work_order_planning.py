@@ -8,6 +8,7 @@ from functools import cached_property
 
 import frappe
 from frappe import _, msgprint
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt, get_filtered_list_link, getdate, nowdate
 
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import set_default_warehouses
@@ -125,7 +126,12 @@ class WorkOrderCreationService:
 		bom_warehouse_map = self.get_bom_source_warehouse_map(self.doc.sub_assembly_items)
 		for row in self.doc.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
-				subcontracted_po.setdefault(row.supplier, []).append(row)
+				order_qty = ProductionPlanWorkOrderQuantities.get_order_qty(
+					row, "production_plan_sub_assembly_item"
+				)
+				subcontracted_po.setdefault(row.supplier, []).append(
+					frappe._dict(row.as_dict(), qty=order_qty)
+				)
 				continue
 			if row.type_of_manufacturing == "Material Request":
 				continue
@@ -165,10 +171,21 @@ class WorkOrderCreationService:
 		if not subcontracted_po:
 			return
 
-		subcontracted_po = _consolidate_subcontracted_po(subcontracted_po)
+		subcontracted_po = _consolidate_subcontracted_po(subcontracted_po, self.get_subcontracted_qty())
 		for supplier, po_list in subcontracted_po.items():
 			po = self._create_subcontract_po(supplier, po_list)
 			purchase_orders.append(po.name)
+
+	def get_subcontracted_qty(self):
+		po_item = frappe.qb.DocType("Purchase Order Item")
+		return frappe._dict(
+			(
+				frappe.qb.from_(po_item)
+				.select(po_item.production_plan_sub_assembly_item, Sum(po_item.fg_item_qty))
+				.where((po_item.production_plan == self.doc.name) & (po_item.docstatus < 2))
+				.groupby(po_item.production_plan_sub_assembly_item)
+			).run()
+		)
 
 	def _create_subcontract_po(self, supplier, po_list):
 		po = frappe.new_doc("Purchase Order")
@@ -236,14 +253,15 @@ class WorkOrderCreationService:
 		return wo
 
 
-def _consolidate_subcontracted_po(subcontracted_po):
+def _consolidate_subcontracted_po(subcontracted_po, subcontracted_qty):
 	items_to_remove = defaultdict(list)
 	for supplier, items in subcontracted_po.items():
 		for item in items:
-			if item.qty == item.received_qty:
+			ordered_qty = flt(subcontracted_qty.get(item.name))
+			if flt(item.qty) <= ordered_qty:
 				items_to_remove[supplier].append(item)
-			elif item.received_qty:
-				item.qty -= item.received_qty
+			elif ordered_qty:
+				item.qty -= ordered_qty
 
 		subcontracted_po[supplier] = [item for item in items if item not in items_to_remove[supplier]]
 	return {key: value for key, value in subcontracted_po.items() if value}

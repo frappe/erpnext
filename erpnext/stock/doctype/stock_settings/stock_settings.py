@@ -12,6 +12,12 @@ from frappe.utils.html_utils import clean_html
 
 from erpnext.stock.utils import check_pending_reposting
 
+BOOT_FIELDS = (
+	"disable_serial_no_and_batch_selector",
+	"use_inline_serial_batch_editor",
+	"pick_serial_and_batch_based_on",
+)
+
 
 class StockSettings(Document):
 	# begin: auto-generated types
@@ -98,6 +104,16 @@ class StockSettings(Document):
 		self.change_precision_for_purchase()
 		self.change_precision_for_stock_entry()
 		self.validate_do_not_use_batchwise_valuation()
+
+	def on_update(self):
+		self.clear_boot_cache()
+
+	def clear_boot_cache(self):
+		"""Boot sends `BOOT_FIELDS` in sysdefaults."""
+		if any(self.has_value_changed(field) for field in BOOT_FIELDS):
+			frappe.cache.delete_key("bootinfo")
+			# Requests before commit can cache the old boot again.
+			frappe.db.after_commit.add(lambda: frappe.cache.delete_key("bootinfo"))
 
 	def update_item_naming_settings(self):
 		if not self.has_value_changed("item_naming_by"):
@@ -194,6 +210,7 @@ class StockSettings(Document):
 						.where(item.valuation_method.isnull() | (item.valuation_method == ""))
 					)
 				)
+				.where(sle_dt.is_cancelled == 0)
 				.limit(1)
 				.run()
 			)
@@ -253,9 +270,7 @@ class StockSettings(Document):
 			# Enable -> Disable
 			else:
 				# Don't allow if there are open Stock Reservation Entries
-				has_reserved_stock = frappe.db.exists(
-					"Stock Reservation Entry", {"docstatus": 1, "status": ["!=", "Delivered"]}
-				)
+				has_reserved_stock = has_open_stock_reservation()
 
 				if has_reserved_stock:
 					frappe.throw(
@@ -376,3 +391,17 @@ def get_transaction_barcode_fields():
 				fields.append((table_field.options, "barcode"))
 
 	return fields
+
+
+def has_open_stock_reservation() -> bool:
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	return bool(
+		frappe.qb.from_(sre)
+		.select(sre.name)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty > 0)
+		)
+		.limit(1)
+		.run()
+	)

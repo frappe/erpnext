@@ -7,7 +7,7 @@ from frappe.desk.query_report import run
 class SalesPartnerTransactionSummaryAssertions:
 	def assert_sales_partner_transaction_summary_report(self):
 		filters = self.filters.copy()
-		filters["show_return_entries"] = 1
+		filters["account_for_return_entries"] = 1
 		report_data = run("Sales Partner Transaction Summary", filters)
 
 		self.transaction_report_result = report_data.get("result")
@@ -26,6 +26,8 @@ class SalesPartnerTransactionSummaryAssertions:
 
 		if self.filters["doctype"] != "Sales Order":
 			self.assert_transaction_returned_doc()
+			self.assert_transaction_returns_excluded_when_untoggled()
+			self.assert_transaction_old_filter_key_still_accounts_returns()
 
 	def assert_transaction_7pc_commission(self):
 		row = self._get_transaction_report_row(self.seven_pc_doc.name)
@@ -93,6 +95,30 @@ class SalesPartnerTransactionSummaryAssertions:
 		self.assertEqual(outward_row["commission"], 45)
 		self.assertEqual(inward_row["amount"], -900)
 		self.assertEqual(inward_row["commission"], -45)
+
+	def assert_transaction_returns_excluded_when_untoggled(self):
+		# Unchecking the box drops the key entirely, which must exclude returns
+		result = run("Sales Partner Transaction Summary", self.filters.copy()).get("result")
+		rows = result[:-1]
+
+		outward_row = next((row for row in rows if row.get("name") == self.to_be_returned_doc.name), None)
+		inward_row = next((row for row in rows if row.get("name") == self.returned_doc.name), None)
+
+		self.assertIsNotNone(outward_row)
+		self.assertIsNone(inward_row)
+
+		total_row = result[-1]
+		self.assertEqual(total_row[-4], 2940)
+		self.assertEqual(total_row[-1], 127)
+
+	def assert_transaction_old_filter_key_still_accounts_returns(self):
+		# Saved reports pass the old key; it must still include returns
+		filters = self.filters.copy()
+		filters["show_return_entries"] = 1
+		rows = run("Sales Partner Transaction Summary", filters).get("result")[:-1]
+
+		inward_row = next((row for row in rows if row.get("name") == self.returned_doc.name), None)
+		self.assertIsNotNone(inward_row)
 
 	def _get_transaction_report_row(self, doc_name, item_code=None):
 		return next(

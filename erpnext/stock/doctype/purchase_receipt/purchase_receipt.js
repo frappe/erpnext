@@ -182,6 +182,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	erpnext.buying.BuyingController
 ) {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -259,6 +260,52 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 							allow_child_item_selection: true,
 							child_fieldname: "items",
 							child_columns: ["item_code", "item_name", "qty", "received_qty"],
+						});
+					},
+					__("Get Items From")
+				);
+
+				this.frm.add_custom_button(
+					__("Delivery Note"),
+					function () {
+						if (me.frm.doc.supplier && !me.frm.doc.is_internal_supplier) {
+							frappe.throw({
+								title: __("Invalid Action"),
+								message: __("Delivery Notes can only be fetched for internal suppliers."),
+							});
+						}
+
+						erpnext.utils.map_current_doc({
+							method: "erpnext.stock.doctype.delivery_note.mapper.make_inter_company_purchase_receipt",
+							source_doctype: "Delivery Note",
+							target: me.frm,
+							setters: [
+								{
+									fieldtype: "Link",
+									label: __("Supplier"),
+									options: "Supplier",
+									fieldname: "supplier",
+									default: me.frm.doc.supplier,
+									get_query: () => {
+										return {
+											filters: {
+												is_internal_supplier: 1,
+											},
+										};
+									},
+								},
+							],
+							get_query_filters: {
+								docstatus: 1,
+								is_return: 0,
+								is_internal_customer: 1,
+								status: ["not in", ["Closed", "Stopped"]],
+								represents_company: me.frm.doc.company,
+								supplier: me.frm.doc.supplier || undefined,
+								delivery_note: me.frm.doc.inter_company_reference || undefined,
+							},
+							get_query_method: "erpnext.controllers.queries.get_delivery_notes_to_be_received",
+							columns: ["name", "customer", "posting_date"],
 						});
 					},
 					__("Get Items From")
@@ -433,7 +480,13 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["expense_account"]);
+		const field_copy = ["expense_account", "cost_center"];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
+		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 	}
 };
 

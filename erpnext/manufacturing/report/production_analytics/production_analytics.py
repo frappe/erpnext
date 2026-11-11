@@ -6,6 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import get_datetime, getdate, today
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.report.stock_analytics.stock_analytics import (
 	get_period,
 	get_period_columns,
@@ -16,6 +17,8 @@ WORK_ORDER_STATUS_LIST = ["Not Started", "Overdue", "Pending", "Completed", "Clo
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	period_columns = get_period_columns(filters)
 	columns = get_columns(period_columns)
 	data, chart = get_data(filters, period_columns)
@@ -38,15 +41,15 @@ def get_work_orders(filters):
 	WorkOrder = frappe.qb.DocType("Work Order")
 
 	return (
-		frappe.qb.from_(WorkOrder)
-		.select(WorkOrder.creation, WorkOrder.actual_end_date, WorkOrder.planned_end_date, WorkOrder.status)
+		frappe.qb.get_query(
+			"Work Order",
+			fields=["creation", "actual_end_date", "planned_end_date", "status"],
+			filters={"docstatus": 1, "company": filters.get("company")},
+			ignore_permissions=False,
+		)
 		.where(
-			(WorkOrder.docstatus == 1)
-			& (WorkOrder.company == filters.get("company"))
-			& (
-				(WorkOrder.creation.between(from_date, to_date))
-				| (WorkOrder.actual_end_date.between(from_date, to_date))
-			)
+			(WorkOrder.creation.between(from_date, to_date))
+			| (WorkOrder.actual_end_date.between(from_date, to_date))
 		)
 		.run(as_dict=True)
 	)

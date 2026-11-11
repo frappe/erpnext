@@ -1,10 +1,13 @@
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder import Order
 from frappe.query_builder.functions import Count, Date
-from frappe.utils import cint, flt, get_datetime, getdate, now_datetime, time_diff_in_seconds
+from frappe.utils import cint, flt, get_datetime, getdate, now_datetime
 from pypika.terms import ExistsCriterion
 
+from erpnext.manufacturing.doctype.job_card.job_card import get_workstation_minutes
 from erpnext.manufacturing.doctype.workstation.workstation import (
 	get_status_color,
 	get_time_logs,
@@ -12,6 +15,7 @@ from erpnext.manufacturing.doctype.workstation.workstation import (
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
+from erpnext.utilities.query import get_match_conditions_qb
 
 JOB_CARD_FIELDS = [
 	"name",
@@ -128,7 +132,8 @@ def save_and_continue(
 	frappe.has_permission("Job Card", "write", throw=True)
 	doc = _record_session(job_card, qty, for_quantity, pending_qty, process_loss_qty, end_time)
 	if doc.docstatus == 0:
-		doc.db_set("is_paused", 1)
+		doc.is_paused = 1
+		doc.save()
 	return {"name": doc.name}
 
 
@@ -171,7 +176,7 @@ def get_quality_inspection_checklist(job_card: str):
 	job card. Returns the resolved template, its parameter rows, any already-linked inspection,
 	and the item being inspected.
 	"""
-	frappe.has_permission("Job Card", "read", throw=True)
+	frappe.has_permission("Job Card", "read", doc=job_card, throw=True)
 
 	jc = frappe.db.get_value(
 		"Job Card",
@@ -214,7 +219,7 @@ def get_quality_inspection_checklist(job_card: str):
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def submit_quality_inspection(job_card: str, readings: str | None = None):
 	"""Create + submit an In-Process Quality Inspection for the job card and link it back, so the
 	standard Job Card.validate_inspection() gate passes when the card is submitted.
@@ -229,6 +234,9 @@ def submit_quality_inspection(job_card: str, readings: str | None = None):
 	frappe.has_permission("Quality Inspection", "submit", throw=True)
 
 	jc = frappe.get_doc("Job Card", job_card)
+	jc.check_permission("write")
+	if jc.docstatus != 0:
+		frappe.throw(_("Quality Inspection can be added only to a draft Job Card"))
 
 	# Idempotent: if a submitted inspection is already linked, don't create another.
 	if jc.quality_inspection:
@@ -351,21 +359,30 @@ def _has_job_cards_criterion(wo, docstatus):
 
 
 def _bucket_criterion(wo, status_group):
-	"""The floor is done with a Work Order once every job card is submitted, even though the
-	Work Order stays "In Process" until the finished goods are received. Such operationally
-	complete orders belong on the Completed tab — not stranded under Pending / In Progress."""
+	"""Submitted cards can leave quantity for another card. Require completed operations
+	before moving an open Work Order to Completed, even before finished goods are received."""
 	open_statuses = WORK_ORDER_STATUS_GROUPS["open"]
-	all_job_cards_done = _has_job_cards_criterion(wo, 1) & _has_job_cards_criterion(wo, 0).negate()
-	if status_group == "completed":
-		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_job_cards_done)
-	return wo.status.isin(open_statuses) & (
-		_has_job_cards_criterion(wo, 1).negate() | _has_job_cards_criterion(wo, 0)
+	operation = frappe.qb.DocType("Work Order Operation")
+	incomplete_operations = ExistsCriterion(
+		frappe.qb.from_(operation)
+		.select(operation.name)
+		.where((operation.parent == wo.name) & (operation.status != "Completed"))
 	)
+	all_operations_done = (
+		_has_job_cards_criterion(wo, 1)
+		& _has_job_cards_criterion(wo, 0).negate()
+		& incomplete_operations.negate()
+	)
+	if status_group == "completed":
+		return (wo.status == "Completed") | (wo.status.isin(open_statuses) & all_operations_done)
+	return wo.status.isin(open_statuses) & all_operations_done.negate()
 
 
 def _apply_work_order_filters(query, wo, status_group, search, with_job_cards_only):
 	"""Shared WHERE clauses for the board's row + count queries (bucket, search, job-card toggle)."""
 	query = query.where((wo.docstatus == 1) & _bucket_criterion(wo, status_group))
+	for condition in get_match_conditions_qb("Work Order", wo):
+		query = query.where(condition)
 	if search:
 		like = f"%{search}%"
 		query = query.where(wo.name.like(like) | wo.production_item.like(like) | wo.item_name.like(like))
@@ -555,7 +572,7 @@ def _fetch_job_cards(filters, mode):
 	# This must be part of the query, not a post-filter: a busy workstation's history would
 	# otherwise fill the row limit with old submitted cards and hide the active drafts.
 	or_filters = [["docstatus", "=", 0], ["status", "=", "To Manufacture"]] if mode == "workstation" else None
-	return frappe.get_all(
+	return frappe.get_list(
 		"Job Card",
 		fields=JOB_CARD_FIELDS,
 		filters=filters,
@@ -719,7 +736,7 @@ def get_today_sessions(workstation: str | None, work_order: str | None) -> list[
 	if filters is None:
 		return []
 
-	rows = frappe.get_all(
+	rows = frappe.get_list(
 		"Job Card",
 		filters=filters,
 		fields=TODAY_SESSION_FIELDS,
@@ -763,8 +780,13 @@ def get_workstation_oee(workstation: str) -> dict | None:
 	"""
 	today = getdate()
 	scheduled_min = flt(frappe.db.get_value("Workstation", workstation, "total_working_hours")) * 60
-	actual_run_min, ideal_min = _get_run_and_ideal_minutes(workstation, today)
+	actual_run_min, ideal_min, worked_job_cards = _get_run_and_ideal_minutes(workstation, today)
 	completed_jcs = _get_completed_jcs_today(workstation, today)
+	ideal_min += sum(
+		flt(j.time_required) / flt(j.for_quantity) * flt(j.process_loss_qty)
+		for j in completed_jcs
+		if flt(j.for_quantity) and j.name in worked_job_cards
+	)
 
 	# No activity at all today — nothing to display.
 	if actual_run_min == 0 and not completed_jcs:
@@ -772,22 +794,23 @@ def get_workstation_oee(workstation: str) -> dict | None:
 	return _build_oee(scheduled_min, actual_run_min, ideal_min, completed_jcs)
 
 
-def _get_run_and_ideal_minutes(workstation, today) -> tuple[float, float]:
+def _get_run_and_ideal_minutes(workstation, today) -> tuple[float, float, set]:
 	"""Sum actual run minutes (clipped to today) and the ideal minutes for produced qty."""
 	today_start = get_datetime(f"{today} 00:00:00")
 	today_end = get_datetime(f"{today} 23:59:59")
 	now = now_datetime()
-	actual_run_min = 0.0
 	ideal_min = 0.0
+	run_intervals = defaultdict(list)
 	for log in _get_oee_time_logs(workstation, today_start, today_end):
 		# Clip the log's interval to today's window for fair attribution.
 		start = max(get_datetime(log.from_time), today_start)
 		end = min(get_datetime(log.to_time) if log.to_time else now, today_end)
 		if end > start:
-			actual_run_min += time_diff_in_seconds(end, start) / 60
+			run_intervals[log.job_card].append(frappe._dict(from_time=start, to_time=end))
 		if log.completed_qty and log.for_quantity and log.time_required:
 			ideal_min += (flt(log.time_required) / flt(log.for_quantity)) * flt(log.completed_qty)
-	return actual_run_min, ideal_min
+	actual_run_min = sum(get_workstation_minutes(intervals) for intervals in run_intervals.values())
+	return actual_run_min, ideal_min, set(run_intervals)
 
 
 def _get_oee_time_logs(workstation, today_start, today_end) -> list[dict]:
@@ -798,7 +821,14 @@ def _get_oee_time_logs(workstation, today_start, today_end) -> list[dict]:
 		frappe.qb.from_(tl)
 		.inner_join(jc)
 		.on(jc.name == tl.parent)
-		.select(tl.from_time, tl.to_time, tl.completed_qty, jc.for_quantity, jc.time_required)
+		.select(
+			jc.name.as_("job_card"),
+			tl.from_time,
+			tl.to_time,
+			tl.completed_qty,
+			jc.for_quantity,
+			jc.time_required,
+		)
 		.where(jc.workstation == workstation)
 		.where(jc.docstatus < 2)
 		.where(tl.from_time <= today_end)
@@ -811,7 +841,7 @@ def _get_completed_jcs_today(workstation, today) -> list[dict]:
 	jc = frappe.qb.DocType("Job Card")
 	return (
 		frappe.qb.from_(jc)
-		.select(jc.total_completed_qty, jc.process_loss_qty)
+		.select(jc.name, jc.total_completed_qty, jc.process_loss_qty, jc.for_quantity, jc.time_required)
 		.where(jc.workstation == workstation)
 		.where(jc.status.isin(["Completed", "Submitted"]))
 		.where(Date(jc.modified) == today)
@@ -824,7 +854,8 @@ def _build_oee(scheduled_min, actual_run_min, ideal_min, completed_jcs) -> dict:
 	total_loss = sum(flt(j.process_loss_qty) for j in completed_jcs)
 	availability = min(actual_run_min / scheduled_min, 1.0) if scheduled_min > 0 else None
 	performance = min(ideal_min / actual_run_min, 1.0) if actual_run_min > 0 else 0.0
-	quality = max(total_completed - total_loss, 0.0) / total_completed if total_completed > 0 else 1.0
+	total_made = total_completed + total_loss
+	quality = total_completed / total_made if total_made > 0 else 1.0
 	# OEE requires all three factors; without a schedule, Availability is unknown.
 	oee_val = round(availability * performance * quality * 100, 1) if availability is not None else None
 	return {

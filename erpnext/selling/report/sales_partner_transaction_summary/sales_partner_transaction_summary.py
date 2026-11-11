@@ -72,7 +72,8 @@ class SalesPartnerTransactionSummaryReport(SalesPartnerSummaryReport):
 		)
 
 	def apply_filters(self):
-		if not self.filters.get("show_return_entries"):
+		# fall back to the old key so saved reports (e.g. Auto Email Report) keep their behaviour
+		if not self.filters.get("account_for_return_entries", self.filters.get("show_return_entries")):
 			self.query = self.query.where(self.dt_item.qty > 0.0)
 
 		if self.filters.get("brand"):

@@ -10,6 +10,7 @@ erpnext.buying.setup_buying_controller();
 
 erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
 	setup(doc) {
+		this.setup_accounting_dimension_triggers();
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 
@@ -296,8 +297,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			fields: fields,
 		});
 
-		this.dialog.set_primary_action(__("Save"), function () {
-			const dialog_data = me.dialog.get_values();
+		this.dialog.set_primary_action(__("Save"), function (dialog_data) {
 			me.frm.call(
 				"block_invoice",
 				{
@@ -333,8 +333,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			fields: fields,
 		});
 
-		this.dialog.set_primary_action(__("Save"), function () {
-			me.dialog_data = me.dialog.get_values();
+		this.dialog.set_primary_action(__("Save"), function (values) {
+			me.dialog_data = values;
 			if (me.can_change_release_date(me.dialog_data.release_date)) {
 				me.dialog_data.name = me.frm.doc.name;
 				me.set_release_date(me.dialog_data);
@@ -459,7 +459,13 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	items_add(doc, cdt, cdn) {
 		const row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("items", row, ["expense_account", "discount_account"]);
+		const field_copy = ["expense_account", "discount_account", "cost_center"];
+		if (doc.project) {
+			frappe.model.set_value(cdt, cdn, "project", doc.project);
+		} else {
+			field_copy.push("project");
+		}
+		this.frm.script_manager.copy_from_first_row("items", row, field_copy);
 	}
 
 	on_submit() {

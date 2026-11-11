@@ -5,6 +5,8 @@ from frappe.model.document import bulk_insert
 from frappe.utils import flt
 from pypika.terms import ValueWrapper
 
+from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX
+
 DOCTYPES_TO_PATCH = {
 	"Sales Taxes and Charges": [
 		"Sales Invoice",
@@ -206,6 +208,8 @@ class ItemTax:
 				if tax_row.item_wise_tax_detail:
 					# tax rate
 					tax_rate = self._get_item_tax_rate(item, tax_row)
+					if tax_rate == NOT_APPLICABLE_TAX:
+						continue
 					# tax amount
 					if tax_rate:
 						multiplier = (

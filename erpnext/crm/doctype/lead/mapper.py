@@ -9,9 +9,12 @@ from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
+from erpnext.exceptions import PartyDisabled
+
 
 @frappe.whitelist()
 def make_customer(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_lead_is_enabled(source_name, "Customer")
 	return _make_customer(source_name, target_doc)
 
 
@@ -61,6 +64,8 @@ def _make_customer(
 
 @frappe.whitelist()
 def make_opportunity(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_lead_is_enabled(source_name, "Opportunity")
+
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -91,6 +96,8 @@ def make_opportunity(source_name: str, target_doc: str | dict | Document | None 
 
 @frappe.whitelist()
 def make_quotation(source_name: str, target_doc: str | dict | Document | None = None):
+	validate_lead_is_enabled(source_name, "Quotation")
+
 	def set_missing_values(source, target):
 		_set_missing_values(source, target)
 
@@ -176,3 +183,11 @@ def _set_missing_values(source, target):
 
 	if contact:
 		target.contact_person = contact[0].parent
+
+
+def validate_lead_is_enabled(lead: str, doctype: str) -> None:
+	if frappe.db.get_value("Lead", lead, "disabled"):
+		frappe.throw(
+			_("Lead {0} is disabled. Enable it to create a new {1}.").format(lead, _(doctype)),
+			PartyDisabled,
+		)

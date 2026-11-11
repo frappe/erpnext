@@ -40,7 +40,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		self.schedules_before_clearing = rows
 		gap_idx = next((idx for idx, row in enumerate(rows) if not row.journal_entry), None)
 
-		self.first_non_depreciated_row_idx = gap_idx or 0
+		self.first_non_depreciated_row_idx = len(rows) if gap_idx is None else gap_idx
 		self.depreciation_schedule = list(rows) if gap_idx is None else rows[:gap_idx]
 		self.booked_rows_after_gap = (
 			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
@@ -478,7 +478,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			shift = (
 				self.schedules_before_clearing[row_idx].shift
 				if (self.schedules_before_clearing and len(self.schedules_before_clearing) > row_idx)
-				else frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
+				else get_default_shift_name()
 			)
 
 		self.append(
@@ -534,6 +534,13 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			fy_end_date = add_days(add_years(fy_start_date, 1), -1)
 
 		return fy_start_date, fy_end_date
+
+
+def get_default_shift_name() -> str:
+	shift_name = frappe.get_cached_value("Asset Shift Factor", {"default": 1}, "shift_name")
+	if not shift_name:
+		frappe.throw(_("Please set a default Asset Shift Factor to use shift based depreciation."))
+	return shift_name
 
 
 def get_elapsed_months(from_date, to_date, frequency: int) -> float:

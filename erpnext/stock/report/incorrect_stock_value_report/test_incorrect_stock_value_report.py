@@ -2,7 +2,9 @@
 # See license.txt
 
 import frappe
+from frappe.utils import add_days, today
 
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.report.incorrect_stock_value_report.incorrect_stock_value_report import execute
@@ -54,3 +56,85 @@ class TestIncorrectStockValueReport(ERPNextTestSuite):
 
 		offending = [row for row in rows if row.get("warehouse") == warehouse or row.get("item_code") == item]
 		self.assertEqual(offending, [], f"Balanced perpetual account flagged as incorrect: {offending}")
+
+	def test_account_is_required(self):
+		self.assertRaises(frappe.MandatoryError, self.run_report)
+
+	def make_stock(self, posting_date):
+		warehouse = create_warehouse("_Test ISV WH", company=COMPANY)
+		item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=10,
+			basic_rate=100,
+			company=COMPANY,
+			posting_date=posting_date,
+		)
+		return warehouse, frappe.get_value("Warehouse", warehouse, "account"), item
+
+	def issue(self, item, warehouse, qty, posting_date):
+		entry = make_stock_entry(
+			item_code=item, from_warehouse=warehouse, qty=qty, company=COMPANY, posting_date=posting_date
+		)
+		return frappe.db.get_value("Stock Ledger Entry", {"voucher_no": entry.name}, "name")
+
+	def test_differences_dated_today_are_checked(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		sle = self.issue(item, warehouse, 2, today())
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value_difference", -150)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -1))
+
+		self.assertEqual([row.name for row in rows], [sle])
+
+	def test_later_entries_of_the_same_day_follow_the_running_value(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		other_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(
+			item_code=other_item,
+			to_warehouse=warehouse,
+			qty=10,
+			basic_rate=100,
+			company=COMPANY,
+			posting_date=add_days(today(), -5),
+		)
+		self.issue(item, warehouse, 2, add_days(today(), -3))
+		self.issue(item, warehouse, 3, add_days(today(), -3))
+		changed = self.issue(other_item, warehouse, 1, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", changed, "stock_value_difference", -50)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -4))
+
+		self.assertEqual([row.name for row in rows], [changed])
+
+	def test_wrong_stock_value_is_found_when_the_ledger_matches_the_accounts(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		sle = self.issue(item, warehouse, 2, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value", 1300)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -4))
+
+		self.assertEqual([(row.name, row.difference_value) for row in rows], [(sle, 500)])
+
+	def test_rows_of_warehouses_under_another_account_are_left_out(self):
+		warehouse, account, item = self.make_stock(add_days(today(), -5))
+		other_warehouse = create_warehouse("_Test ISV Other WH", company=COMPANY)
+		other_account = frappe.get_value("Warehouse", other_warehouse, "account")
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=other_warehouse,
+			qty=10,
+			basic_rate=100,
+			company=COMPANY,
+			posting_date=add_days(today(), -5),
+		)
+		sle = self.issue(item, other_warehouse, 2, add_days(today(), -3))
+		frappe.db.set_value("Stock Ledger Entry", sle, "stock_value", 1300)
+
+		rows = self.run_report(account=account, from_date=add_days(today(), -4))
+		other_rows = self.run_report(account=other_account, from_date=add_days(today(), -4))
+
+		self.assertNotEqual(account, other_account)
+		self.assertNotIn(sle, [row.name for row in rows])
+		self.assertEqual([(row.name, row.difference_value) for row in other_rows], [(sle, 500)])

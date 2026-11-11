@@ -5,7 +5,6 @@ from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_inward_order.test_subcontracting_inward_order import (
 	create_so_scio,
-	create_test_data,
 )
 from erpnext.subcontracting.report.subcontracted_raw_materials_to_be_received.subcontracted_raw_materials_to_be_received import (
 	execute,
@@ -15,7 +14,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestSubcontractedRawMaterialsToBeReceived(ERPNextTestSuite):
 	def setUp(self):
-		create_test_data()
 		make_stock_entry(
 			item_code="Self RM", qty=100, to_warehouse="Stores - _TC", purpose="Material Receipt"
 		)
@@ -34,10 +32,7 @@ class TestSubcontractedRawMaterialsToBeReceived(ERPNextTestSuite):
 		self.assertEqual(rows["Basic RM"].pending_qty, 4)
 		self.assertEqual(rows["RM with Batch"].pending_qty, 5)
 
-	def test_fully_received_raw_material_is_excluded(self):
-		_so, scio = create_so_scio()
-		receive_basic_rm(scio, 5)
-
+		receive_basic_rm(scio, 4)
 		rows = get_report_rows(scio)
 
 		self.assertNotIn("Basic RM", rows)

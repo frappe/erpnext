@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Concat_ws, Max, Sum
+from frappe.query_builder.functions import Concat_ws, Max, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -164,10 +164,11 @@ class StockLedgerEntry(Document):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		return (
 			self.get_dimension_sle_query(sle, dimensions)
-			.select(sle.actual_qty)
+			.select(Sum(sle.actual_qty))
 			.where(sle.posting_datetime > self.posting_datetime)
+			.groupby(sle.posting_datetime, sle.voucher_type, sle.voucher_no)
 			.orderby(sle.posting_datetime)
-			.orderby(sle.creation)
+			.orderby(Min(sle.creation))
 			.run(pluck=True)
 		)
 
@@ -234,13 +235,15 @@ class StockLedgerEntry(Document):
 			mismatches = []
 			for dimension in dimensions:
 				fieldname = dimension.fieldname
-				expected_value = values.get(fieldname)
-				if expected_value != self.get(fieldname):
+				# a blank value and NULL both mean the dimension is not set
+				expected_value = values.get(fieldname) or None
+				actual_value = self.get(fieldname) or None
+				if expected_value != actual_value:
 					mismatches.append(
 						_('{0}: expected "{1}", got "{2}"').format(
 							dimension.dimension_name,
 							expected_value or _("Not Set"),
-							self.get(fieldname),
+							actual_value or _("Not Set"),
 						)
 					)
 
@@ -361,20 +364,11 @@ class StockLedgerEntry(Document):
 			self.throw_error_message(f"Item {self.item_code} must be a stock Item")
 
 		if item_detail.has_serial_no or item_detail.has_batch_no:
-			if not self.serial_and_batch_bundle and not self.is_standard_cost_revaluation():
+			if not self.serial_and_batch_bundle:
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
 
 		if self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no:
 			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
-
-	def is_standard_cost_revaluation(self):
-		"""A Standard Cost item is revalued through a Stock Reconciliation that changes the rate only
-		(qty unchanged); it carries no serial/batch bundle, so the bundle requirement is bypassed."""
-		from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import is_standard_cost_item
-
-		return self.voucher_type == "Stock Reconciliation" and is_standard_cost_item(
-			self.item_code, self.company
-		)
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
 		frappe.throw(_(message), exception)

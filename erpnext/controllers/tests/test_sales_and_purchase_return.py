@@ -135,6 +135,60 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_sales_return(dn.name).insert)
 
+	def test_bundle_return_keeps_order_qty_after_component_uom_change(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		make_stock_entry(item=component.name, to_warehouse=warehouse, qty=100, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=2)  # 20 Nos
+		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
+		component.save()
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.submit()
+
+		return_note = make_sales_return(delivery_note.name)
+		return_note.submit()
+		self.assertEqual(return_note.packed_items[0].qty, -20)
+
+	def test_bundle_return_keeps_delivered_qty_after_component_uom_change(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"stock_uom": "Nos", "uoms": [{"uom": "Box", "conversion_factor": 10}]}
+		)
+		make_stock_entry(item=component.name, to_warehouse=warehouse, qty=100, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component.name, "qty": 1, "uom": "Box"})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		delivery_note = create_delivery_note(item_code=bundle, warehouse=warehouse, qty=2)  # 20 Nos
+		next(row for row in component.uoms if row.uom == "Box").conversion_factor = 12
+		component.save()
+
+		return_note = make_sales_return(delivery_note.name)
+		return_note.submit()
+		self.assertEqual(return_note.packed_items[0].qty, -20)
+
 	def test_purchase_invoice_zero_qty_return_is_rejected(self):
 		# A return with every item at qty 0 moves no stock and no value, so it must be
 		# rejected the same way a return with no items at all would be.
@@ -231,6 +285,27 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		second_return = make_return_doc(si.doctype, si.name)
 		self.assertEqual(second_return.items[0].qty, -24)
 		second_return.save().submit()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_sales_invoice_return_rows_share_the_original_row_qty(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		self.assert_split_return_over_original_qty_is_rejected(create_sales_invoice(qty=10))
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_purchase_invoice_return_rows_share_the_original_row_qty(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		self.assert_split_return_over_original_qty_is_rejected(make_purchase_invoice(qty=10))
+
+	def assert_split_return_over_original_qty_is_rejected(self, original):
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+
+		return_doc = make_return_doc(original.doctype, original.name)
+		return_doc.items[0].qty = -6
+		return_doc.append("items", return_doc.items[0].as_dict(no_default_fields=True))
+
+		self.assertRaises(StockOverReturnError, return_doc.insert)
 
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):

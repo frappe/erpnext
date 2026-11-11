@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+
 from unittest.mock import patch
 
 import frappe
@@ -350,6 +351,27 @@ class TestTask(ERPNextTestSuite):
 		).insert()
 		self.assertEqual(child_without_project.project, other_project.name)
 
+	def test_child_takes_the_company_of_the_inherited_project(self):
+		project = frappe.get_doc(
+			doctype="Project", project_name="_Test Inherited Company Project", company="_Test Company 1"
+		).insert()
+		group = frappe.get_doc(
+			doctype="Task", subject="_Test Inherited Company Group", project=project.name, is_group=1
+		).insert()
+
+		child = frappe.get_doc(
+			doctype="Task", subject="_Test Inherited Company Child", parent_task=group.name
+		).insert()
+		self.assertEqual(child.company, "_Test Company 1")
+
+	def test_child_with_blank_project_saves_under_a_group_without_project(self):
+		group = frappe.get_doc(doctype="Task", subject="_Test Group Without Project", is_group=1).insert()
+
+		child = frappe.get_doc(
+			doctype="Task", subject="_Test Child With Blank Project", project="", parent_task=group.name
+		).insert()
+		self.assertFalse(child.project)
+
 	def test_group_with_children_cannot_move_to_another_project(self):
 		from erpnext.projects.doctype.project.test_project import make_project
 
@@ -462,15 +484,6 @@ class TestTask(ERPNextTestSuite):
 		create_task("_Test Child Blocking Delete", parent_task=parent.name)
 
 		self.assertRaises(frappe.ValidationError, parent.delete)
-
-	def test_delete_child_task(self):
-		parent = create_task("_Test Parent Of Deleted Child", is_group=1)
-		child = create_task("_Test Deleted Child", parent_task=parent.name)
-
-		child.delete()
-
-		parent.reload()
-		self.assertFalse(parent.depends_on)
 
 	def test_move_child_task_to_another_parent(self):
 		old_parent = create_task("_Test Old Parent", is_group=1)

@@ -100,3 +100,16 @@ class TestLedgerMerge(ERPNextTestSuite):
 
 		self.assertFalse(frappe.db.exists("Account", "Indirect Test Income - _TC"))
 		self.assertTrue(frappe.db.exists("Account", "Administrative Test Income - _TC"))
+
+	def test_account_type_is_fetched_from_account(self):
+		doc = frappe.get_doc(
+			{
+				"doctype": "Ledger Merge",
+				"company": "_Test Company",
+				"root_type": "Asset",
+				"account": "Debtors - _TC",
+				"merge_accounts": [{"account": "_Test Receivable - _TC", "account_name": "_Test Receivable"}],
+			}
+		).insert(ignore_permissions=True)
+
+		self.assertEqual(doc.account_type, "Receivable")

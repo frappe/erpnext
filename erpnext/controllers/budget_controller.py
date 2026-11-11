@@ -4,7 +4,7 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import fmt_money
+from frappe.utils import flt, fmt_money
 
 from erpnext.accounts.doctype.budget.budget import BudgetError, get_accumulated_monthly_budget
 from erpnext.accounts.utils import get_fiscal_year
@@ -33,6 +33,7 @@ class BudgetValidation:
 		self.exception_approver_role = frappe.get_cached_value(
 			"Company", self.company, "exception_budget_approver_role"
 		)
+		self.amount_precision = frappe.get_precision("Budget", "budget_amount")
 
 	def validate(self):
 		self.build_validation_map()
@@ -217,11 +218,8 @@ class BudgetValidation:
 			conditions.append(po.status.ne("Closed"))
 			conditions.append(po.transaction_date[self.fy_start_date : self.fy_end_date])
 			conditions.append(poi.amount.gt(poi.billed_amt))
+			conditions.append(poi.closed.eq(0))
 			conditions.append(poi.expense_account.eq(key[2]))
-
-			if self.document_type in ["Purchase Order", "Material Request"]:
-				if items := set([x.item_code for x in self.doc.items]):
-					conditions.append(poi.item_code.isin(items))
 
 			# key structure - (dimension_type, dimension, GL account)
 			conditions.append(poi[key[0]].eq(key[1]))
@@ -251,11 +249,8 @@ class BudgetValidation:
 			conditions.append(mr.material_request_type.eq("Purchase"))
 			conditions.append(mr.status.ne("Stopped"))
 			conditions.append(mr.transaction_date[self.fy_start_date : self.fy_end_date])
+			conditions.append(mri.stock_qty.gt(mri.ordered_qty))
 			conditions.append(mri.expense_account.eq(key[2]))
-
-			if self.document_type in ["Purchase Order", "Material Request"]:
-				if items := set([x.item_code for x in self.doc.items]):
-					conditions.append(mri.item_code.isin(items))
 
 			# key structure - (dimension_type, dimension, GL account)
 			conditions.append(mri[key[0]].eq(key[1]))
@@ -265,9 +260,11 @@ class BudgetValidation:
 				.inner_join(mri)
 				.on(mr.name == mri.parent)
 				.select(
-					Sum((IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0)) * IfNull(mri.rate, 0)).as_(
-						"amount"
-					)
+					Sum(
+						(IfNull(mri.stock_qty, 0) - IfNull(mri.ordered_qty, 0))
+						* IfNull(mri.rate, 0)
+						/ mri.conversion_factor
+					).as_("amount")
 				)
 				.where(Criterion.all(conditions))
 				.run(as_dict=True)
@@ -317,7 +314,7 @@ class BudgetValidation:
 	):
 		if config.applies:
 			currency = frappe.get_cached_value("Company", self.company, "default_currency")
-			annual_diff = (existing_amt + current_amt) - budget_amt
+			annual_diff = flt((existing_amt + current_amt) - budget_amt, self.amount_precision)
 			if annual_diff > 0:
 				_msg = _(
 					"Annual Budget for Account {0} against {1}: {2} is {3}. It will be exceeded by {4}"
@@ -330,7 +327,7 @@ class BudgetValidation:
 				)
 				self.execute_action(config.action_for_annual, _msg)
 
-			monthly_diff = (existing_amt + current_amt) - acc_monthly_budget
+			monthly_diff = flt((existing_amt + current_amt) - acc_monthly_budget, self.amount_precision)
 			if monthly_diff > 0:
 				_msg = _(
 					"Accumulated Monthly Budget for Account {0} against {1}: {2} is {3}. It will be exceeded by {4}"
@@ -425,9 +422,14 @@ class BudgetValidation:
 		current_amt = (
 			v_map.current_ordered_amount + v_map.current_requested_amount + v_map.current_actual_exp_amount
 		)
-		monthly_diff = (
-			v_map.ordered_amount + v_map.requested_amount + v_map.actual_expense + current_amt
-		) - v_map.accumulated_monthly_budget
+		monthly_diff = flt(
+			v_map.ordered_amount
+			+ v_map.requested_amount
+			+ v_map.actual_expense
+			+ current_amt
+			- v_map.accumulated_monthly_budget,
+			self.amount_precision,
+		)
 		if monthly_diff > 0:
 			currency = frappe.get_cached_value("Company", self.company, "default_currency")
 			_msg = _(
@@ -449,9 +451,14 @@ class BudgetValidation:
 		current_amt = (
 			v_map.current_ordered_amount + v_map.current_requested_amount + v_map.current_actual_exp_amount
 		)
-		total_diff = (
-			v_map.ordered_amount + v_map.requested_amount + v_map.actual_expense + current_amt
-		) - v_map.budget_amount
+		total_diff = flt(
+			v_map.ordered_amount
+			+ v_map.requested_amount
+			+ v_map.actual_expense
+			+ current_amt
+			- v_map.budget_amount,
+			self.amount_precision,
+		)
 		if total_diff > 0:
 			currency = frappe.get_cached_value("Company", self.company, "default_currency")
 			_msg = _(

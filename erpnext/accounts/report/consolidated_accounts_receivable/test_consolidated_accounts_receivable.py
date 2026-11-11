@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe
 from frappe.utils import today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -42,30 +41,13 @@ class ConsolidatedReportMixin(AccountsTestMixin):
 			price_list_rate=rate,
 		)
 
-	def create_test_company(self, company_name, abbr, currency="INR", is_group=0, parent=None):
-		if frappe.db.exists("Company", company_name):
-			return company_name
-
-		company = frappe.new_doc("Company")
-		company.company_name = company_name
-		company.abbr = abbr
-		company.country = "India"
-		company.default_currency = currency
-		company.create_chart_of_accounts_based_on = "Standard Template"
-		company.chart_of_accounts = "Standard"
-		company.is_group = is_group
-		company.parent_company = parent
-		company.insert()
-
-		return company.name
-
 
 class TestConsolidatedAccountsReceivable(ERPNextTestSuite, ConsolidatedReportMixin):
 	def setUp(self):
 		self.maxDiff = None
 		# deliberately unrelated companies, no parent/child link
-		self.company_a = self.create_test_company("_Test Unrelated A", "_TUNA")
-		self.company_b = self.create_test_company("_Test Unrelated B", "_TUNB")
+		self.company_a = "_Test Unrelated A"
+		self.company_b = "_Test Unrelated B"
 		self.create_customer("_Test Consolidation Customer")
 		# the mixin would otherwise pass company=None, which Item Default rejects
 		self.create_item("_Test Consolidation Item", company=self.company_a)
@@ -123,9 +105,9 @@ class TestConsolidatedAccountsReceivable(ERPNextTestSuite, ConsolidatedReportMix
 		self.assertEqual(result[5], 1)
 
 	def test_no_total_or_chart_when_companies_use_different_currencies(self):
-		usd = self.create_test_company("_Test Unrelated USD", "_TUNU", currency="USD")
+		usd = "_Test Company 1"
 		self.create_invoice(self.company_a, "_TUNA", 200)
-		self.create_invoice(usd, "_TUNU", 300, currency="USD")
+		self.create_invoice(usd, "_TC1", 300, currency="USD")
 
 		result = execute(self.filters(companies=[self.company_a, usd]))
 
@@ -135,9 +117,9 @@ class TestConsolidatedAccountsReceivable(ERPNextTestSuite, ConsolidatedReportMix
 		self.assertTrue(execute(self.filters(companies=[self.company_a]))[3])
 
 	def test_group_company_expands_to_its_subsidiaries(self):
-		group = self.create_test_company("_Test Consolidation Group", "_TCGRP", is_group=1)
-		child = self.create_test_company("_Test Consolidation Child", "_TCCLD", parent=group)
-		self.create_invoice(child, "_TCCLD", 400)
+		group = "Parent Group Company India"
+		child = "Child Company India"
+		self.create_invoice(child, "CCI", 400)
 
 		rows = execute(self.filters(companies=[group]))[1]
 

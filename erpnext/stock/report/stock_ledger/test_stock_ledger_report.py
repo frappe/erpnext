@@ -347,3 +347,377 @@ class TestStockLedgerReport(ERPNextTestSuite):
 			opening_rows[0]["qty_after_transaction"],
 			sum(sle.qty_after_transaction for sle in sle_rows),
 		)
+
+	def test_opening_row_keeps_its_balance_in_the_stock_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=17, basic_rate=100, posting_date=add_days(today(), -3)
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			include_uom="Nos",
+		)
+		opening = execute(filters)[1][0]
+
+		self.assertEqual(opening["qty_after_transaction_nos"], 17)
+
+	def test_opening_of_a_warehouse_the_user_may_not_read_is_hidden(self):
+		from frappe.permissions import add_user_permission
+
+		item = "_Test Item"
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 20,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -5),
+				}
+			],
+		)
+		user = create_user("stock-ledger-opening@example.com", "Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user.name)
+
+		with self.set_user(user.name):
+			rows = self.run_report(item)
+
+		self.assertEqual(rows, [])
+
+	def test_batch_opening_includes_the_warehouses_of_a_group(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch = frappe.get_doc(
+			{"doctype": "Batch", "item": item, "batch_id": frappe.generate_hash(length=10)}
+		).insert()
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 10,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 200,
+					"batch_no": batch.name,
+					"use_serial_batch_fields": 1,
+					"posting_date": add_days(today(), -9),
+				}
+			],
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			batch_no=batch.name,
+			warehouse=[frappe.db.get_value("Warehouse", WAREHOUSE, "parent_warehouse")],
+		)
+		rows = list(execute(filters)[1])
+
+		self.assertEqual(rows[0]["qty_after_transaction"], 10)
+
+	def test_project_filter_keeps_the_opening_without_a_warehouse(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": frappe.generate_hash(length=10),
+				"company": "_Test Company",
+			}
+		).insert()
+		for qty, days in ((10, -10), (2, -2)):
+			entry = make_stock_entry(
+				item_code=item,
+				to_warehouse=WAREHOUSE,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), days),
+				do_not_submit=True,
+			)
+			entry.project = project.name
+			for row in entry.items:
+				row.project = project.name
+			entry.save()
+			entry.submit()
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			project=project.name,
+		)
+		rows = list(execute(filters)[1])
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [10, 12])
+
+	def test_include_uom_works_with_segregated_bundles(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SLU-.#####",
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		for _receipt in range(3):
+			make_stock_entry(item_code=item, to_warehouse=WAREHOUSE, qty=10, basic_rate=100)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			include_uom="Box",
+			segregate_serial_batch_bundle=1,
+		)
+		rows = list(execute(filters)[1])
+
+		self.assertEqual([row.get("in_qty_box") for row in rows if row.get("in_qty")], [1, 1, 1])
+
+	def test_opening_row_is_converted_to_the_include_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		make_stock_entry(
+			item_code=item, to_warehouse=WAREHOUSE, qty=17, basic_rate=100, posting_date=add_days(today(), -3)
+		)
+
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -1),
+			to_date=today(),
+			item_code=[item],
+			warehouse=WAREHOUSE,
+			include_uom="Box",
+		)
+		opening = execute(filters)[1][0]
+
+		self.assertEqual(opening["qty_after_transaction_box"], 1.7)
+
+	def test_reconciliation_first_in_the_range_shows_its_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item,
+			to_warehouse=WAREHOUSE,
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -10),
+		)
+		create_stock_reconciliation(
+			item_code=item, warehouse=WAREHOUSE, qty=15, rate=100, posting_date=add_days(today(), -2)
+		)
+
+		rows = self.run_report(item, from_date=add_days(today(), -5))
+		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
+
+		self.assertEqual(reconciliation["in_qty"], 5)
+
+	def test_batch_rows_show_the_batch_valuation_rate(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batches = [
+			frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": frappe.generate_hash(length=10)})
+			.insert()
+			.name
+			for _batch in range(2)
+		]
+		for batch_no, rate in zip(batches, (100, 200), strict=True):
+			make_stock_entry(
+				item_code=item,
+				to_warehouse=WAREHOUSE,
+				qty=10,
+				basic_rate=rate,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+		make_stock_entry(
+			item_code=item, from_warehouse=WAREHOUSE, qty=3, batch_no=batches[1], use_serial_batch_fields=1
+		)
+
+		for segregate in (0, 1):
+			filters = frappe._dict(
+				company="_Test Company",
+				from_date=add_days(today(), -1),
+				to_date=today(),
+				item_code=[item],
+				warehouse=WAREHOUSE,
+				batch_no=batches[1],
+				segregate_serial_batch_bundle=segregate,
+			)
+			rows = [row for row in execute(filters)[1] if row.get("voucher_no")]
+
+			self.assertEqual([row["valuation_rate"] for row in rows], [200, 200], f"segregate={segregate}")
+
+	def test_midnight_entry_on_from_date_is_not_in_the_opening(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		self.make_movements(
+			item,
+			[
+				{
+					"qty": 10,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -20),
+				},
+				{
+					"qty": 4,
+					"to_warehouse": WAREHOUSE,
+					"basic_rate": 100,
+					"posting_date": add_days(today(), -5),
+					"posting_time": "00:00:00",
+				},
+			],
+		)
+
+		rows = self.run_report(item, from_date=add_days(today(), -5))
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [10, 14])
+
+	def test_reconciliation_after_opening_stock_on_from_date_shows_its_change(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		from_date = add_days(today(), -2)
+		for qty, posting_time, purpose in ((25, "10:00:00", "Opening Stock"), (30, "12:00:00", None)):
+			create_stock_reconciliation(
+				item_code=item,
+				warehouse=WAREHOUSE,
+				qty=qty,
+				rate=100,
+				posting_date=from_date,
+				posting_time=posting_time,
+				purpose=purpose,
+			)
+
+		rows = self.run_report(item, from_date=from_date)
+		reconciliation = next(row for row in rows if row.get("voucher_type") == "Stock Reconciliation")
+
+		self.assertEqual(reconciliation["in_qty"], 5)
+
+	def test_project_opening_counts_only_permitted_items(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		items = [make_item(properties={"is_stock_item": 1}).name for _item in range(2)]
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": frappe.generate_hash(length=10),
+				"company": "_Test Company",
+			}
+		).insert()
+		for item, qty in zip(items, (4, 9), strict=True):
+			entry = make_stock_entry(
+				item_code=item,
+				to_warehouse=WAREHOUSE,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), -10),
+				do_not_submit=True,
+			)
+			entry.project = project.name
+			for row in entry.items:
+				row.project = project.name
+			entry.save()
+			entry.submit()
+
+		user = create_user("stock-ledger-project-item@example.com", "Stock User")
+		add_user_permission("Item", items[0], user.name)
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			project=project.name,
+		)
+		with self.set_user(user.name):
+			rows = list(execute(filters)[1])
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [4])
+
+	def test_item_group_filter_lists_only_permitted_items(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.report.stock_ledger.stock_ledger import get_items
+
+		user = create_user("stock-ledger-item-group@example.com", "Stock User")
+		add_user_permission("Item", "_Test Item", user.name)
+		with self.set_user(user.name):
+			items = get_items(frappe._dict(item_group="_Test Item Group"))
+
+		self.assertEqual(items, ["_Test Item"])
+
+	def test_project_opening_counts_only_permitted_warehouses(self):
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": frappe.generate_hash(length=10),
+				"company": "_Test Company",
+			}
+		).insert()
+		for warehouse, qty in ((WAREHOUSE, 10), ("Finished Goods - _TC", 3)):
+			entry = make_stock_entry(
+				item_code=item,
+				to_warehouse=warehouse,
+				qty=qty,
+				basic_rate=100,
+				posting_date=add_days(today(), -10),
+				do_not_submit=True,
+			)
+			entry.project = project.name
+			for row in entry.items:
+				row.project = project.name
+			entry.save()
+			entry.submit()
+
+		user = create_user("stock-ledger-project@example.com", "Stock User")
+		add_user_permission("Warehouse", "Finished Goods - _TC", user.name)
+		filters = frappe._dict(
+			company="_Test Company",
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			item_code=[item],
+			project=project.name,
+		)
+		with self.set_user(user.name):
+			rows = list(execute(filters)[1])
+
+		self.assertEqual([row["qty_after_transaction"] for row in rows], [3])

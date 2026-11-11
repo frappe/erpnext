@@ -44,7 +44,8 @@ frappe.ui.form.on("POS Opening Entry", {
 			frappe.db.get_doc("POS Profile", frm.doc.pos_profile).then(({ payments }) => {
 				if (payments.length) {
 					frm.doc.balance_details = [];
-					payments.forEach(({ mode_of_payment }) => {
+					const modes_of_payment = new Set(payments.map((pay) => pay.mode_of_payment));
+					modes_of_payment.forEach((mode_of_payment) => {
 						frm.add_child("balance_details", { mode_of_payment });
 					});
 					frm.refresh_field("balance_details");

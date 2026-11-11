@@ -6,7 +6,11 @@ from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, escape_html, flt, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_or_batch_items
+from erpnext.stock.serial_batch_bundle import (
+	SerialBatchCreation,
+	add_picked_batches,
+	get_serial_or_batch_items,
+)
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
@@ -39,15 +43,8 @@ class StockEntrySABB(BaseStockEntry):
 			row.serial_and_batch_bundle = bundle_doc.name
 
 	def add_picked_entries(self, bundle_doc, already_picked_serial_nos, already_picked_batches):
-		for entry in bundle_doc.entries:
-			if entry.serial_no:
-				already_picked_serial_nos.append(entry.serial_no)
-			if entry.batch_no:
-				key = (entry.batch_no, bundle_doc.warehouse)
-				picked = already_picked_batches.setdefault(
-					key, frappe._dict(batch_no=entry.batch_no, warehouse=bundle_doc.warehouse, qty=0)
-				)
-				picked.qty += entry.qty
+		already_picked_serial_nos.extend(entry.serial_no for entry in bundle_doc.entries if entry.serial_no)
+		add_picked_batches(already_picked_batches, bundle_doc.entries)
 
 	def _create_or_update_bundle_for_row(
 		self, row, serial_nos, batch_nos, already_picked_serial_nos, already_picked_batches
@@ -354,10 +351,18 @@ def get_batchwise_serial_nos(item_code, row):
 
 @frappe.whitelist()
 def get_expired_batch_items():
+	frappe.has_permission("Batch", "read", throw=True)
 	expired_batches = get_expired_batches()
 	if not expired_batches:
 		return []
-	return _enrich_expired_batches_with_stock(expired_batches)
+
+	rows = _enrich_expired_batches_with_stock(expired_batches)
+	permitted_warehouses = set(
+		frappe.get_list(
+			"Warehouse", filters={"name": ("in", list({row.warehouse for row in rows}))}, pluck="name"
+		)
+	)
+	return [row for row in rows if row.warehouse in permitted_warehouses]
 
 
 def _enrich_expired_batches_with_stock(expired_batches):
@@ -372,13 +377,12 @@ def _enrich_expired_batches_with_stock(expired_batches):
 
 
 def get_expired_batches():
-	batch = frappe.qb.DocType("Batch")
-
-	data = (
-		frappe.qb.from_(batch)
-		.select(batch.item, batch.name.as_("batch_no"), batch.stock_uom)
-		.where((batch.expiry_date <= nowdate()) & (batch.expiry_date.isnotnull()))
-	).run(as_dict=True)
+	data = frappe.get_list(
+		"Batch",
+		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"], ["disabled", "=", 0]],
+		fields=["item", "name as batch_no", "stock_uom"],
+		limit_page_length=0,
+	)
 
 	if not data:
 		return []

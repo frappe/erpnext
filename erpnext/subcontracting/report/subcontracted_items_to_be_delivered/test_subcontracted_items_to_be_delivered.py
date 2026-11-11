@@ -5,7 +5,6 @@ from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_inward_order.test_subcontracting_inward_order import (
 	create_so_scio,
-	create_test_data,
 )
 from erpnext.subcontracting.report.subcontracted_items_to_be_delivered.subcontracted_items_to_be_delivered import (
 	execute,
@@ -15,7 +14,6 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestSubcontractedItemsToBeDelivered(ERPNextTestSuite):
 	def setUp(self):
-		create_test_data()
 		make_stock_entry(
 			item_code="Self RM", qty=100, to_warehouse="Stores - _TC", purpose="Material Receipt"
 		)
@@ -33,10 +31,7 @@ class TestSubcontractedItemsToBeDelivered(ERPNextTestSuite):
 		self.assertEqual(rows[0].delivered_qty, 2)
 		self.assertEqual(rows[0].pending_qty, 3)
 
-	def test_fully_delivered_item_is_excluded(self):
-		_so, scio = create_so_scio()
-		produce_and_deliver(scio, 5)
-
+		deliver(scio, 3)
 		self.assertEqual(get_report_rows(scio), [])
 
 	def test_customer_return_does_not_reopen_pending_qty(self):
@@ -60,7 +55,10 @@ def produce_and_deliver(scio, qty):
 	work_order.submit()
 	frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(work_order.name, "Manufacture")).submit()
 	scio.reload()
+	deliver(scio, qty)
 
+
+def deliver(scio, qty):
 	delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 	delivery.items[0].qty = qty
 	delivery.submit()

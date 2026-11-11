@@ -38,6 +38,7 @@ class SupplierQuotationItem(Document):
 		lead_time_days: DF.Int
 		manufacturer: DF.Link | None
 		manufacturer_part_no: DF.Data | None
+		mapped_additional_discount_amount: DF.Currency
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
 		material_request: DF.Link | None

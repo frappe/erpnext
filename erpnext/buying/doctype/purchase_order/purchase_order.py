@@ -20,7 +20,6 @@ from erpnext.buying.doctype.purchase_order.services.status import StatusService
 from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.controllers.status_updater import get_allowance_for
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
@@ -206,6 +205,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_supplier()
 		self.validate_schedule_date()
 		validate_for_items(self)
+		self.set_last_purchase_rate()
 		self.check_for_on_hold_or_closed_status("Material Request", "material_request")
 
 		self.validate_uom_is_integer("uom", "qty")
@@ -226,11 +226,25 @@ class PurchaseOrder(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.set_missing_terms()
 
+	def set_last_purchase_rate(self):
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return
+
+		for d in self.get("items"):
+			if d.item_code:
+				d.last_purchase_rate = flt(
+					item_last_purchase_rate(
+						self.name, self.conversion_rate, d.item_code, d.conversion_factor
+					),
+					d.precision("last_purchase_rate"),
+				)
+
 	def set_has_unit_price_items(self):
 		"""
 		If permitted in settings and any item has 0 qty, the PO has unit price items.
 		"""
 		if not frappe.db.get_single_value("Buying Settings", "allow_zero_qty_in_purchase_order"):
+			self.has_unit_price_items = 0
 			return
 
 		self.has_unit_price_items = any(
@@ -388,9 +402,10 @@ class PurchaseOrder(BuyingController):
 						"Item", d.item_code, "last_purchase_rate"
 					)
 					if item_last_purchase_rate:
-						d.base_price_list_rate = (
-							d.base_rate
-						) = d.price_list_rate = d.rate = d.last_purchase_rate = item_last_purchase_rate
+						d.base_price_list_rate = d.base_rate = item_last_purchase_rate * (
+							flt(d.conversion_factor) or 1.0
+						)
+						d.price_list_rate = d.rate = d.last_purchase_rate = d.base_rate / conversion_rate
 
 	def update_ordered_qty(self, po_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
@@ -442,8 +457,7 @@ class PurchaseOrder(BuyingController):
 			self.update_status_updater_if_from_pp()
 
 		self.update_prevdoc_status()
-		if not self.is_subcontracted:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 		self.validate_budget()
@@ -489,8 +503,7 @@ class PurchaseOrder(BuyingController):
 
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
-		if not self.is_subcontracted:
-			self.update_requested_qty()
+		self.update_requested_qty()
 
 		self.update_ordered_qty()
 
@@ -530,7 +543,7 @@ class PurchaseOrder(BuyingController):
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Production Plan Sub Assembly Item",
 				"join_field": "production_plan_sub_assembly_item",
-				"target_field": "received_qty",
+				"target_field": "ordered_qty",
 				"target_parent_dt": "Production Plan",
 				"target_parent_field": "",
 				"target_ref_field": "qty",
@@ -540,6 +553,7 @@ class PurchaseOrder(BuyingController):
 
 	@frappe.whitelist()
 	def update_dropship_received_qty(self, data: list[dict]):
+		self.check_permission("write")
 		DropShipService(self).update_dropship_received_qty(data)
 
 	def is_against_so(self):
@@ -564,9 +578,7 @@ class PurchaseOrder(BuyingController):
 		for item in self.get("items", []):
 			if item.delivered_by_supplier or item.closed:
 				continue
-			tolerance = flt(get_allowance_for(item.item_code, qty_or_amount="qty")[0])
-			max_receivable_qty = flt(item.qty) * (100 + tolerance) / 100
-			if abs(flt(item.received_qty)) < abs(max_receivable_qty):
+			if abs(flt(item.received_qty)) < abs(item.max_receivable_qty):
 				return True
 		return False
 
@@ -610,7 +622,7 @@ def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=
 	else:
 		item_last_purchase_rate = frappe.get_cached_value("Item", item_code, "last_purchase_rate")
 		if item_last_purchase_rate:
-			return item_last_purchase_rate
+			return item_last_purchase_rate * (flt(conversion_factor) or 1.0) / conversion_rate
 
 
 @frappe.whitelist(methods=["POST"])

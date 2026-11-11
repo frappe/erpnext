@@ -20,12 +20,12 @@ from frappe.query_builder.functions import (
 	Substring,
 	Sum,
 )
-from frappe.utils import nowdate, today, unique
+from frappe.utils import nowdate, unique
 from pypika import Order
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
-from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item import get_allowed_uoms
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
@@ -292,13 +292,13 @@ def item_query(
 
 	filters = frappe.parse_json(filters)
 	company = filters.pop("company", None) if isinstance(filters, dict) else None
-	restricted_items_condition = None
+	allowed_items_condition = None
 
 	if filters and isinstance(filters, dict):
 		if filters.get("customer") or filters.get("supplier"):
 			party_type = "Customer" if filters.get("customer") else "Supplier"
 			party = filters.get("customer") or filters.get("supplier")
-			restricted_items_condition = get_restricted_items_condition(party_type, party)
+			allowed_items_condition = get_allowed_items_condition(party_type, party)
 
 			if filters.get("customer"):
 				del filters["customer"]
@@ -417,8 +417,8 @@ def item_query(
 	if company:
 		query = query.where(get_restriction_criterion("Item", [company]))
 
-	if restricted_items_condition is not None:
-		query = query.where(~restricted_items_condition)
+	if allowed_items_condition is not None:
+		query = query.where(allowed_items_condition)
 
 	return query.run(as_dict=as_dict)
 
@@ -579,7 +579,7 @@ def get_delivery_notes_to_be_billed(
 	query = (
 		query.where(
 			(DeliveryNote.docstatus == 1)
-			& (DeliveryNote.status.notin(["Stopped", "Closed"]))
+			& (DeliveryNote.status.notin(["Stopped", "Closed", "Return Issued"]))
 			& (DeliveryNote[searchfield].like(f"%{txt}%"))
 			& (
 				((DeliveryNote.is_return == 0) & (DeliveryNote.per_billed < 100))
@@ -595,6 +595,119 @@ def get_delivery_notes_to_be_billed(
 		.limit(page_len)
 		.offset(start)
 	)
+
+	return query.run(as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_delivery_notes_to_be_received(
+	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict, as_dict: bool = False
+):
+	from erpnext.stock.doctype.delivery_note.mapper import get_allowed_on_purchase_receipt
+
+	filters = filters or {}
+	receiving_company = filters.get("represents_company") or filters.get("company")
+	if not receiving_company:
+		return []
+
+	# the receiver may not read the sender's DN, so gate on creating a PR for the receiving company
+	frappe.has_permission("Purchase Receipt", "create", throw=True)
+	allowed_companies = get_allowed_on_purchase_receipt("Company")
+	if allowed_companies and receiving_company not in allowed_companies:
+		frappe.throw(
+			_("You are not permitted to receive into Company {0}").format(frappe.bold(receiving_company)),
+			frappe.PermissionError,
+		)
+
+	DeliveryNote = frappe.qb.DocType("Delivery Note")
+	DeliveryNoteItem = frappe.qb.DocType("Delivery Note Item")
+	PackedItem = frappe.qb.DocType("Packed Item")
+	BundleItem = frappe.qb.DocType("Delivery Note Item").as_("bundle_item")
+
+	fields = get_fields(doctype, ["name", "customer", "posting_date", "company"])
+	allowed_warehouses = get_allowed_on_purchase_receipt("Warehouse")
+
+	bundle_rows = (
+		frappe.qb.from_(PackedItem)
+		.select(PackedItem.parent_detail_docname)
+		.where(PackedItem.parenttype == "Delivery Note")
+	)
+	# returned_qty is in stock uom; mirrors get_pending_receipt_qty
+	returned_qty = DeliveryNoteItem.returned_qty / (
+		Case().when(DeliveryNoteItem.conversion_factor != 0, DeliveryNoteItem.conversion_factor).else_(1)
+	)
+	pending_dni = (
+		frappe.qb.from_(DeliveryNoteItem)
+		.select(DeliveryNoteItem.parent)
+		.where(
+			(DeliveryNoteItem.docstatus == 1)
+			& (DeliveryNoteItem.closed == 0)
+			& (DeliveryNoteItem.qty > (DeliveryNoteItem.received_qty + returned_qty))
+			& (DeliveryNoteItem.name.notin(bundle_rows))
+		)
+	)
+
+	# mirrors get_pending_component_qty: components still in transit after the bundle's returns
+	bundle_qty = Case().when(BundleItem.stock_qty != 0, BundleItem.stock_qty).else_(BundleItem.qty)
+	pending_pi = (
+		frappe.qb.from_(PackedItem)
+		.join(BundleItem)
+		.on(BundleItem.name == PackedItem.parent_detail_docname)
+		.select(PackedItem.parent)
+		.where(
+			(PackedItem.parenttype == "Delivery Note")
+			& (PackedItem.docstatus == 1)
+			& (BundleItem.closed == 0)
+			& (bundle_qty != 0)
+			& (PackedItem.qty * (1 - BundleItem.returned_qty / bundle_qty) > PackedItem.received_qty)
+		)
+	)
+
+	query = frappe.qb.get_query(
+		"Delivery Note",
+		fields=fields,
+		ignore_permissions=True,
+	)
+
+	query = query.where(
+		(DeliveryNote.docstatus == 1)
+		& (DeliveryNote.is_return == 0)
+		& (DeliveryNote.is_internal_customer == 1)
+		& (DeliveryNote.represents_company == receiving_company)
+		& (DeliveryNote.status.notin(["Closed", "Stopped"]))
+		& (DeliveryNote[searchfield].like(f"%{txt}%"))
+		& (DeliveryNote.name.isin(pending_dni) | DeliveryNote.name.isin(pending_pi))
+	)
+
+	if allowed_warehouses:
+		# the mapper rejects a receipt with any row outside the user's warehouses
+		blocked_dni = pending_dni.where(DeliveryNoteItem.target_warehouse.notin(allowed_warehouses))
+		blocked_pi = pending_pi.where(PackedItem.target_warehouse.notin(allowed_warehouses))
+		query = query.where(DeliveryNote.name.notin(blocked_dni) & DeliveryNote.name.notin(blocked_pi))
+
+	if allowed_suppliers := get_allowed_on_purchase_receipt("Supplier"):
+		# the mapper sets the internal supplier that represents the sending company
+		Supplier = frappe.qb.DocType("Supplier")
+		sending_companies = (
+			frappe.qb.from_(Supplier)
+			.select(Supplier.represents_company)
+			.where(
+				Supplier.name.isin(allowed_suppliers)
+				& (Supplier.is_internal_supplier == 1)
+				& (Supplier.disabled == 0)
+			)
+		)
+		query = query.where(DeliveryNote.company.isin(sending_companies))
+
+	if delivery_note := filters.get("delivery_note"):
+		query = query.where(DeliveryNote.name == delivery_note)
+
+	if supplier := filters.get("supplier"):
+		supplier_company = frappe.get_cached_value("Supplier", supplier, "represents_company")
+		query = query.where(DeliveryNote.company == (supplier_company or ""))
+
+	query = query.orderby(DeliveryNote[searchfield], order=Order.asc).limit(page_len).offset(start)
 
 	return query.run(as_dict=as_dict)
 
@@ -670,7 +783,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
-	expiry_date = filters.get("posting_date") or today()
+	expiry_date = filters.get("posting_date") or nowdate()
 
 	query = (
 		frappe.qb.from_(stock_ledger_entry)
@@ -734,7 +847,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
-	expiry_date = filters.get("posting_date") or today()
+	expiry_date = filters.get("posting_date") or nowdate()
 
 	bundle_query = (
 		frappe.qb.from_(bundle)
@@ -1063,7 +1176,7 @@ def get_batch_numbers(doctype: str, txt: str, searchfield: str, start: int, page
 	batch = frappe.qb.DocType("Batch")
 	query = frappe.qb.get_query("Batch", fields=["name", "batch_id", "item"], ignore_permissions=False).where(
 		(batch.disabled == 0)
-		& (batch.expiry_date.isnull() | (batch.expiry_date >= today()))
+		& (batch.expiry_date.isnull() | (batch.expiry_date >= nowdate()))
 		& (batch.batch_id.like(f"%{txt}%") | batch.name.like(f"%{txt}%"))
 	)
 

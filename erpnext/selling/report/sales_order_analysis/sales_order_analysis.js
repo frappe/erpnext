@@ -49,14 +49,18 @@ frappe.query_reports["Sales Order Analysis"] = {
 				const to_date = frappe.query_report.get_filter_value("to_date");
 				if (from_date && to_date) filters["transaction_date"] = ["between", [from_date, to_date]];
 
-				return frappe.db.get_link_options("Sales Order", txt, filters);
+				return erpnext.utils.get_link_options("Sales Order", txt, filters);
 			},
 		},
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			options: "Warehouse",
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return erpnext.utils.get_link_options("Warehouse", txt, company ? { company } : {});
+			},
 		},
 		{
 			fieldname: "status",

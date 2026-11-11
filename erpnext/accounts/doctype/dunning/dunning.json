@@ -17,6 +17,7 @@
   "posting_date",
   "posting_time",
   "status",
+  "superseded_by",
   "section_break_9",
   "currency",
   "column_break_11",
@@ -116,9 +117,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fetch_from": "dunning_type.dunning_fee",
-   "fetch_if_empty": 1,
    "fieldname": "dunning_fee",
    "fieldtype": "Currency",
    "label": "Dunning Fee",
@@ -237,12 +235,22 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "Unresolved",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nResolved\nUnresolved\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "superseded_by",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Superseded By",
+   "no_copy": 1,
+   "options": "Dunning",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -402,8 +410,9 @@
  ],
  "icon": "bell-ring",
  "is_submittable": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2026-05-30 23:18:04.712528",
+ "modified": "2026-11-11 04:54:15.740643",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
@@ -426,6 +435,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -440,6 +450,8 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -449,6 +461,7 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

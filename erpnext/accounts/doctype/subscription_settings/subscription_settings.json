@@ -13,7 +13,7 @@
  "fields": [
   {
    "default": "1",
-   "description": "Number of days after invoice date has elapsed before canceling subscription or marking subscription as unpaid",
+   "description": "Number of days after the invoice due date before canceling the subscription or marking it as unpaid",
    "fieldname": "grace_period",
    "fieldtype": "Int",
    "label": "Grace Period"
@@ -36,7 +36,7 @@
  "icon": "settings",
  "issingle": 1,
  "links": [],
- "modified": "2026-03-16 13:28:20.485964",
+ "modified": "2026-10-19 16:50:55.834144",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Settings",

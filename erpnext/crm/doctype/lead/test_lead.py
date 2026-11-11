@@ -47,6 +47,28 @@ class TestLead(ERPNextTestSuite):
 		make_customer(lead.name).insert()
 		self.assertRaises(frappe.DuplicateEntryError, make_customer(lead.name).insert)
 
+	def test_disabled_lead_cannot_be_converted(self):
+		from erpnext.crm.doctype.lead.mapper import make_customer, make_quotation
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation as make_test_quotation
+
+		lead = make_lead()
+		quotation = make_test_quotation(do_not_save=1)
+		quotation.update({"quotation_to": "Lead", "party_name": lead.name})
+		quotation.insert().submit()
+		lead.db_set("disabled", 1)
+
+		for mapper in (make_customer, make_opportunity, make_quotation):
+			self.assertRaisesRegex(frappe.ValidationError, "is disabled", mapper, lead.name)
+
+		new_quotation = make_test_quotation(do_not_save=1)
+		new_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
+		self.assertRaisesRegex(frappe.ValidationError, "is disabled", new_quotation.insert)
+
+		quotation.cancel()
+		amended = frappe.copy_doc(quotation)
+		amended.update({"amended_from": quotation.name, "docstatus": 0})
+		amended.insert()
+
 	def test_customer_from_lead_takes_over_its_quotations_and_opportunities(self):
 		from erpnext.crm.doctype.lead.mapper import make_customer
 		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
@@ -158,6 +180,25 @@ class TestLead(ERPNextTestSuite):
 		self.assertEqual(event.event_participants[1].reference_doctype, "Prospect")
 		self.assertEqual(event.event_participants[1].reference_docname, prospect)
 
+	def test_edited_note_is_cleaned_and_needs_write(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		lead = make_lead(first_name="Note", last_name="Editor", email_id=f"{random_string(8)}@example.com")
+		lead.add_note("first note")
+		row_id = str(lead.notes[0].name)
+
+		with as_user(make_fenced_user("lead-note-editor@example.com", ["Sales User"])):
+			frappe.get_doc("Lead", lead.name).edit_note('<b>edited</b><img src=x onerror="alert(1)">', row_id)
+		note = frappe.db.get_value("CRM Note", row_id, "note")
+		self.assertIn("<b>edited</b>", note)
+		self.assertNotIn("onerror", note)
+
+		with as_user(make_fenced_user("lead-note-reader@example.com", [])):
+			self.assertRaises(
+				frappe.PermissionError, frappe.get_doc("Lead", lead.name).edit_note, "changed", row_id
+			)
+		self.assertEqual(frappe.db.get_value("CRM Note", row_id, "note"), note)
+
 	def test_opportunity_from_lead(self):
 		lead = make_lead(
 			first_name="Rahul",
@@ -258,6 +299,28 @@ class TestLead(ERPNextTestSuite):
 		contact.save()
 		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
 		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800011111")
+
+		contact.phone_nos = []
+		contact.save()
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "phone"))
+		self.assertFalse(frappe.db.get_value("Lead", lead.name, "mobile_no"))
+
+	def test_contact_number_not_marked_primary_fills_the_lead(self):
+		frappe.db.set_single_value("CRM Settings", "auto_creation_of_contact", 1)
+		lead = frappe.get_doc(
+			{"doctype": "Lead", "lead_name": "_Test Email Lead", "email_id": "phone_sync_lead@example.com"}
+		).insert()
+		contact_name = frappe.db.get_value(
+			"Dynamic Link",
+			{"parenttype": "Contact", "link_doctype": "Lead", "link_name": lead.name},
+			"parent",
+		)
+		contact = frappe.get_doc("Contact", contact_name)
+		contact.add_phone("9800022222")
+		contact.save()
+
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "phone"), "9800022222")
+		self.assertEqual(frappe.db.get_value("Lead", lead.name, "mobile_no"), "9800022222")
 
 	def test_do_not_contact_is_kept_on_a_lead_with_an_opportunity(self):
 		lead = make_lead()

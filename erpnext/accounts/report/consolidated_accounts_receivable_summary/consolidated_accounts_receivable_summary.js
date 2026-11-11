@@ -9,7 +9,7 @@ frappe.query_reports["Consolidated Accounts Receivable Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Company",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Company", txt);
+				return erpnext.utils.get_link_options("Company", txt);
 			},
 			description: __("Totals are dropped when the companies use different currencies"),
 		},
@@ -63,7 +63,7 @@ frappe.query_reports["Consolidated Accounts Receivable Summary"] = {
 				let party_type = frappe.query_report.get_filter_value("party_type");
 				if (!party_type) return;
 
-				return frappe.db.get_link_options(party_type, txt);
+				return erpnext.utils.get_link_options(party_type, txt);
 			},
 		},
 		{
@@ -78,7 +78,7 @@ frappe.query_reports["Consolidated Accounts Receivable Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Territory",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Territory", txt);
+				return erpnext.utils.get_link_options("Territory", txt);
 			},
 		},
 		{

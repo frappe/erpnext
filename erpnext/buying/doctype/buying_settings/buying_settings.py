@@ -6,6 +6,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class BuyingSettings(Document):
@@ -42,7 +43,6 @@ class BuyingSettings(Document):
 		role_to_override_stop_action: DF.Link | None
 		set_landed_cost_based_on_purchase_invoice_rate: DF.Check
 		set_valuation_rate_for_rejected_materials: DF.Check
-		show_pay_button: DF.Check
 		supp_master_name: DF.Literal["Supplier Name", "Naming Series", "Auto Name"]
 		supplier_group: DF.Link | None
 		use_transaction_date_exchange_rate: DF.Check
@@ -86,7 +86,11 @@ def is_rejected_material_valued(voucher_type: str, voucher_detail_no: str | None
 	warehouse. A Purchase Receipt books rejected material against Stock Received But Not Billed, so
 	the supplier still owes an invoice for it, and Buying Settings decides. A stock updating Purchase
 	Invoice pays for it only when it bills the received qty, which is what the settings ask for.
+	A Subcontracting Receipt books the whole cost on the accepted qty, so its rejected material has none.
 	"""
+	if voucher_type == "Subcontracting Receipt":
+		return False
+
 	if is_material_from_in_transit_warehouse(voucher_type, voucher_detail_no):
 		return True
 
@@ -119,3 +123,14 @@ def bills_rejected_quantity(doc) -> bool:
 		return False
 
 	return is_rejected_material_valued(doc.doctype)
+
+
+def get_billed_qty(doc, item) -> float:
+	if not flt(item.get("rejected_qty")) or not bills_rejected_quantity(doc):
+		return flt(item.qty)
+
+	return flt(item.qty) + flt(item.rejected_qty)
+
+
+def get_billed_stock_qty(doc, item) -> float:
+	return get_billed_qty(doc, item) * (flt(item.get("conversion_factor")) or 1)

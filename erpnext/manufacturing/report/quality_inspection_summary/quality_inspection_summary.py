@@ -5,10 +5,13 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns, data = [], []
 	data = get_data(filters)
 	columns = get_columns(filters)
@@ -17,7 +20,7 @@ def execute(filters=None):
 
 
 def get_data(filters):
-	query_filters = {"docstatus": ("<", 2)}
+	query_filters = {"docstatus": 1}
 
 	fields = [
 		"name",
@@ -43,7 +46,7 @@ def get_data(filters):
 	if condition := get_allowed_companies_condition(company, "Quality Inspection"):
 		inspection_filters.append(condition)
 
-	return frappe.get_all(
+	return frappe.get_list(
 		"Quality Inspection", fields=fields, filters=inspection_filters, order_by="report_date asc"
 	)
 
@@ -56,7 +59,8 @@ def get_chart_data(periodic_data, columns):
 	datasets = []
 
 	for d in periodic_data:
-		status_wise_data[d.status] += 1
+		if d.status in status_wise_data:
+			status_wise_data[d.status] += 1
 
 	datasets.append(
 		{

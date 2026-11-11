@@ -30,7 +30,7 @@ frappe.query_reports["Serial No and Batch Traceability"] = {
 					filters.item = ["in", item_code];
 				}
 
-				return frappe.db.get_link_options("Batch", txt, filters);
+				return erpnext.utils.get_link_options("Batch", txt, filters);
 			},
 		},
 		{
@@ -46,7 +46,7 @@ frappe.query_reports["Serial No and Batch Traceability"] = {
 					filters.item_code = ["in", item_code];
 				}
 
-				return frappe.db.get_link_options("Serial No", txt, filters);
+				return erpnext.utils.get_link_options("Serial No", txt, filters);
 			},
 		},
 		{

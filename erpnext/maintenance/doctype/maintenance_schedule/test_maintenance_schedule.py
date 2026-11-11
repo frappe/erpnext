@@ -399,12 +399,6 @@ class TestMaintenanceSchedule(ERPNextTestSuite):
 		ms = make_maintenance_schedule(end_date=add_days(today(), 364), no_of_visits=52)
 		self.assertEqual(getdate(ms.items[0].end_date), getdate(add_days(today(), 364)))
 
-	def test_calendar_quarter_fits_one_quarterly_visit(self):
-		ms = make_maintenance_schedule(
-			start_date="2027-01-01", end_date="2027-03-31", periodicity="Quarterly", no_of_visits=1
-		)
-		self.assertEqual(getdate(ms.items[0].end_date), getdate("2027-03-31"))
-
 	def test_short_calendar_period_fits_one_visit(self):
 		for periodicity, start_date, end_date in (
 			("Monthly", "2027-02-01", "2027-02-28"),

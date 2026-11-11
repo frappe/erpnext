@@ -3,8 +3,8 @@
 
 
 import frappe
-from frappe import _, qb
-from frappe.query_builder import Criterion
+from frappe import _
+from frappe.utils import flt, nowdate
 
 from erpnext import get_default_company
 from erpnext.accounts.party import _get_party_details
@@ -12,6 +12,7 @@ from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_masters_condition,
 	get_allowed_warehouses_condition,
 )
+from erpnext.stock.get_item_details import get_item_price
 
 
 def execute(filters=None):
@@ -54,85 +55,58 @@ def get_columns(filters=None):
 	]
 
 
-def fetch_item_prices(
-	customer: str | None = None,
-	price_list: str | None = None,
-	selling_price_list: str | None = None,
-	items: list | None = None,
-):
-	price_list_map = frappe._dict()
-	ip = qb.DocType("Item Price")
-	and_conditions = []
-	or_conditions = []
-	if items:
-		and_conditions.append(ip.item_code.isin([x.item_code for x in items]))
-		and_conditions.append(ip.selling.eq(1))
-
-		or_conditions.append(ip.customer.isnull())
-		or_conditions.append(ip.price_list.isnull())
-
-		if customer:
-			or_conditions.append(ip.customer == customer)
-
-		if price_list:
-			or_conditions.append(ip.price_list == price_list)
-
-		if selling_price_list:
-			or_conditions.append(ip.price_list == selling_price_list)
-
-		res = (
-			qb.from_(ip)
-			.select(ip.item_code, ip.price_list, ip.price_list_rate)
-			.where(Criterion.all(and_conditions))
-			.where(Criterion.any(or_conditions))
-			.run(as_dict=True)
-		)
-		for x in res:
-			price_list_map.update({(x.item_code, x.price_list): x.price_list_rate})
-
-	return price_list_map
-
-
 def get_data(filters=None):
-	data = []
 	customer_details = get_customer_details(filters)
-
 	items = get_selling_items(filters)
+	item_stock_map = get_item_stock_map()
+
+	# the price lists a selling transaction would consult, in order of preference
+	price_lists = [customer_details.price_list]
+	if frappe.get_single_value("Selling Settings", "fallback_to_default_price_list"):
+		price_lists.append(frappe.get_single_value("Selling Settings", "selling_price_list"))
+	price_lists = list(dict.fromkeys(pl for pl in price_lists if pl))
+
+	data = []
+	for item in items:
+		rate, price_list = get_item_selling_rate(item, customer_details.customer, price_lists)
+		data.append(
+			{
+				"item_code": item.item_code,
+				"item_name": item.item_name,
+				"selling_rate": rate,
+				"price_list": price_list,
+				"available_stock": item_stock_map.get(item.item_code),
+			}
+		)
+
+	return data
+
+
+def get_item_selling_rate(item, customer, price_lists):
+	"""Resolve the rate the given customer would get, scoped and filtered as a transaction is."""
+	ctx = frappe._dict({"customer": customer, "uom": item.stock_uom, "transaction_date": nowdate()})
+	for price_list in price_lists:
+		ctx.price_list = price_list
+		prices = get_item_price(ctx, item.item_code)
+		# a zero rate falls through to the next list, as a selling transaction does
+		if prices and (rate := flt(prices[0].price_list_rate)):
+			return rate, price_list
+
+	return 0.0, price_lists[0] if price_lists else None
+
+
+def get_item_stock_map():
 	bin_filters = []
 	if condition := get_allowed_warehouses_condition(frappe.qb.DocType("Bin").warehouse):
 		bin_filters.append(condition)
 
-	item_stock_map = frappe.get_all(
+	item_stock = frappe.get_all(
 		"Bin",
 		fields=["item_code", {"SUM": "actual_qty", "as": "available"}],
 		filters=bin_filters,
 		group_by="item_code",
 	)
-	item_stock_map = {item.item_code: item.available for item in item_stock_map}
-	price_list_map = fetch_item_prices(
-		customer_details.customer,
-		customer_details.price_list,
-		customer_details.selling_price_list,
-		items,
-	)
-
-	for item in items:
-		price_list_rate = price_list_map.get(
-			(item.item_code, customer_details.price_list or customer_details.selling_price_list), 0.0
-		)
-		available_stock = item_stock_map.get(item.item_code)
-
-		data.append(
-			{
-				"item_code": item.item_code,
-				"item_name": item.item_name,
-				"selling_rate": price_list_rate,
-				"price_list": customer_details.get("price_list"),
-				"available_stock": available_stock,
-			}
-		)
-
-	return data
+	return {item.item_code: item.available for item in item_stock}
 
 
 def get_customer_details(filters):
@@ -154,7 +128,7 @@ def get_selling_items(filters):
 		item_filters.append(condition)
 
 	items = frappe.get_all(
-		"Item", filters=item_filters, fields=["item_code", "item_name"], order_by="item_name"
+		"Item", filters=item_filters, fields=["item_code", "item_name", "stock_uom"], order_by="item_name"
 	)
 
 	return items

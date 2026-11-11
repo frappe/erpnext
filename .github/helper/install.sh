@@ -293,7 +293,7 @@ if ! restore_warm_bench; then
     sed -i 's/socketio:/# socketio:/g' Procfile
     sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
-    CI=Yes bench build --app frappe
+    if [ "$TYPE" != "patch" ]; then CI=Yes bench build --app frappe; fi
     save_warm_bench
 fi
 
@@ -357,7 +357,7 @@ fi
 
 cd ~/frappe-bench || exit
 
-run_ci_step "Get payments app" bench get-app payments --branch develop
+if [ "$TYPE" != "patch" ]; then run_ci_step "Get payments app" bench get-app payments --branch develop; fi
 
 # Opt-in: skip building erpnext's frontend assets. Server tests don't need them, but PDF
 # tests (print formats) do — they pass only if the PDF renderer ignores missing assets.
@@ -408,4 +408,4 @@ wait_for_redis
 # Site setup: build the schema (~1000 DocTypes) into the DB. This is the single-threaded-Python
 # bottleneck, but the fan-out amortises it — it runs once here in the setup job, and the test
 # shards start the DB on the baked datadir instead of repeating the reinstall.
-run_ci_step "Reinstall test site" bench --site test_site reinstall --yes
+if [ "$TYPE" != "patch" ]; then run_ci_step "Reinstall test site" bench --site test_site reinstall --yes; fi

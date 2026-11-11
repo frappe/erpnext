@@ -12,6 +12,25 @@ from frappe.query_builder.functions import Lower, Max
 from frappe.utils import cint, flt, has_common
 from frappe.utils.user import is_website_user
 
+# fields read by templates/includes/transaction_row.html
+PORTAL_ROW_FIELDS = (
+	"name",
+	"docstatus",
+	"status",
+	"modified",
+	"currency",
+	"grand_total",
+	"rounded_total",
+	"disable_rounded_total",
+)
+PORTAL_ROW_DISPLAY_KEYS = (
+	"indicator_color",
+	"indicator_title",
+	"status_percent",
+	"status_display",
+	"items_preview",
+)
+
 
 def get_list_context(context=None):
 	return {
@@ -224,9 +243,21 @@ def post_process(doctype, data):
 
 		doc.status_display = ", ".join(doc.status_display)
 		doc.items_preview = ", ".join(d.item_name for d in doc.items if d.item_name)
-		result.append(doc)
+		result.append(get_portal_row(doc))
 
 	return result
+
+
+def get_portal_row(doc):
+	"""Return a copy of `doc` with only the values the portal row shows.
+
+	The list is also returned as JSON, so the full document would expose cost and margin fields.
+	"""
+	row = frappe.get_doc({"doctype": doc.doctype, **{f: doc.get(f) for f in PORTAL_ROW_FIELDS}})
+	for key in PORTAL_ROW_DISPLAY_KEYS:
+		row.set(key, doc.get(key))
+
+	return row
 
 
 def get_customers_suppliers(doctype, user):
@@ -240,8 +271,8 @@ def get_customers_suppliers(doctype, user):
 	has_supplier_field = meta.has_field("supplier")
 
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
-		suppliers = get_parents_for_user("Supplier")
-		customers = get_parents_for_user("Customer")
+		suppliers = get_parents_for_user("Supplier", user)
+		customers = get_parents_for_user("Customer", user)
 	elif frappe.has_permission(doctype, "read", user=user) and frappe.has_permission(
 		"Customer", "read", user=user
 	):
@@ -251,27 +282,33 @@ def get_customers_suppliers(doctype, user):
 	return customers if has_customer_field else None, suppliers if has_supplier_field else None
 
 
-def get_parents_for_user(parenttype: str) -> list[str]:
+def get_parents_for_user(parenttype: str, user: str | None = None) -> list[str]:
 	portal_user = frappe.qb.DocType("Portal User")
 
 	return (
 		frappe.qb.from_(portal_user)
 		.select(portal_user.parent)
-		.where(portal_user.user == frappe.session.user)
+		.where(portal_user.user == (user or frappe.session.user))
 		.where(portal_user.parenttype == parenttype)
 	).run(pluck="name")
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
+	# only portal users get access through their Customer / Supplier, everyone else
+	# goes through `has_permission`, which applies their User Permissions
+	if not has_common(["Supplier", "Customer"], frappe.get_roles(user)):
+		return False
+
 	doctype = doc.doctype
 	customers, suppliers = get_customers_suppliers(doctype, user)
-	if customers:
-		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
-	elif suppliers:
+	if customers and frappe.db.exists(doctype, get_customer_filter(doc, customers)):
+		return True
+
+	if suppliers:
 		fieldname = "suppliers" if doctype == "Request for Quotation" else "supplier"
-		return frappe.db.exists(doctype, {"name": doc.name, fieldname: ["in", suppliers]})
-	else:
-		return False
+		return bool(frappe.db.exists(doctype, {"name": doc.name, fieldname: ["in", suppliers]}))
+
+	return False
 
 
 def get_customer_filter(doc, customers):

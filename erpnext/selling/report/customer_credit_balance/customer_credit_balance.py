@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+from erpnext.selling.doctype.customer.customer import get_credit_limit_settings, get_customer_outstanding
 
 
 def execute(filters=None):
@@ -22,12 +22,11 @@ def execute(filters=None):
 
 	for d in customer_list:
 		row = []
+		credit_limit, bypass_credit_limit_check = get_credit_limit_settings(d.name, filters.get("company"))
 
 		outstanding_amt = get_customer_outstanding(
-			d.name, filters.get("company"), ignore_outstanding_sales_order=d.bypass_credit_limit_check
+			d.name, filters.get("company"), ignore_outstanding_sales_order=bypass_credit_limit_check
 		)
-
-		credit_limit = get_credit_limit(d.name, filters.get("company"))
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
@@ -38,7 +37,7 @@ def execute(filters=None):
 				credit_limit,
 				outstanding_amt,
 				bal,
-				d.bypass_credit_limit_check,
+				bypass_credit_limit_check,
 				d.is_frozen,
 				d.disabled,
 			]
@@ -48,7 +47,7 @@ def execute(filters=None):
 				credit_limit,
 				outstanding_amt,
 				bal,
-				d.bypass_credit_limit_check,
+				bypass_credit_limit_check,
 				d.is_frozen,
 				d.disabled,
 			]
@@ -77,18 +76,32 @@ def get_columns(customer_naming_type):
 
 
 def get_details(filters):
+	company = filters.get("company")
+
 	c = frappe.qb.DocType("Customer")
 	ccl = frappe.qb.DocType("Customer Credit Limit")
+
 	query = (
 		frappe.qb.from_(c)
-		.inner_join(ccl)
-		.on(c.name == ccl.parent)
-		.select(c.name, c.customer_name, ccl.bypass_credit_limit_check, c.is_frozen, c.disabled)
-		.where(ccl.company == filters.get("company"))
+		.left_join(ccl)
+		.on((ccl.parent == c.name) & (ccl.parenttype == "Customer") & (ccl.company == company))
+		.select(c.name, c.customer_name, c.customer_group, c.is_frozen, c.disabled)
 	)
 
 	# customer filter is optional.
 	if filters.get("customer"):
 		query = query.where(c.name == filters.get("customer"))
+
+	# without a company-wide limit, keep only customers with an own-row or group limit
+	if not flt(frappe.get_cached_value("Company", company, "credit_limit")):
+		gccl = frappe.qb.DocType("Customer Credit Limit").as_("gccl")
+		groups_with_limit = (
+			frappe.qb.from_(gccl)
+			.select(gccl.parent)
+			.where(
+				(gccl.parenttype == "Customer Group") & (gccl.company == company) & (gccl.credit_limit > 0)
+			)
+		)
+		query = query.where(ccl.name.isnotnull() | c.customer_group.isin(groups_with_limit))
 
 	return query.run(as_dict=1)

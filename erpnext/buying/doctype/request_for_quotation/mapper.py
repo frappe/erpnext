@@ -78,6 +78,8 @@ def create_supplier_quotation(doc: str | Document | dict):
 			"currency": doc.get("currency") or get_party_account_currency("Supplier", supplier, rfq.company),
 			"buying_price_list": doc.get("buying_price_list")
 			or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
+			# the supplier's quoted rate is final, so buying pricing rules must not change it
+			"ignore_pricing_rule": 1,
 		}
 	)
 	add_items(sq_doc, supplier, rfq, doc.get("items"))
@@ -153,10 +155,11 @@ def create_rfq_items(sq_doc, supplier, rfq_row, data):
 			"cost_center",
 		]
 	}
+	rate = flt(data.get("rate"), sq_doc.precision("rate", "items"))
 	args.update(
 		{
 			"qty": flt(data.get("qty")),
-			"rate": flt(data.get("rate")),
+			"rate": rate,
 			"request_for_quotation_item": rfq_row.name,
 			"request_for_quotation": rfq_row.parent,
 			"supplier_part_no": frappe.db.get_value(
@@ -164,6 +167,11 @@ def create_rfq_items(sq_doc, supplier, rfq_row, data):
 			),
 		}
 	)
+
+	# a quoted zero is otherwise replaced by the price list rate on save; the desk form avoids
+	# this by turning a typed rate into a discount. A row sent without a rate keeps that default.
+	if data.get("rate") not in (None, "") and not rate:
+		args["discount_percentage"] = 100
 
 	sq_doc.append("items", args)
 

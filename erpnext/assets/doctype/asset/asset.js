@@ -41,7 +41,7 @@ frappe.ui.form.on("Asset", {
 	},
 
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Journal Entry"];
+		frm.ignore_doctypes_on_cancel_all = ["Journal Entry", "Asset Capitalization"];
 
 		frm.make_methods = {
 			"Asset Movement": () => {
@@ -659,8 +659,7 @@ frappe.ui.form.on("Asset", {
 			],
 		});
 
-		dialog.set_primary_action(__("Sell"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Sell"), function (dialog_data) {
 			const sell_qty = cint(dialog_data.sell_qty);
 			const asset_qty = cint(frm.doc.asset_quantity);
 
@@ -709,8 +708,7 @@ frappe.ui.form.on("Asset", {
 			fields: fields,
 		});
 
-		dialog.set_primary_action(__("Split"), function () {
-			const dialog_data = dialog.get_values();
+		dialog.set_primary_action(__("Split"), function (dialog_data) {
 			frappe.call({
 				args: {
 					asset_name: frm.doc.name,
@@ -805,6 +803,7 @@ frappe.ui.form.on("Asset", {
 				purchase_doc_name: frm.doc.purchase_receipt || frm.doc.purchase_invoice,
 				item_code: frm.doc.item_code,
 				doctype: doctype,
+				asset: frm.is_new() ? null : frm.doc.name,
 			},
 			callback: (r) => {
 				if (r.message) {

@@ -74,6 +74,8 @@ class TestUpdateItemsWithClosedRows(ERPNextTestSuite):
 		po = self.make_purchase_order()
 		closed_row = po.items[1]
 
+		update_child_qty_rate("Purchase Order", self.as_payload(po.items), po.name)
+
 		self.assertRaises(
 			frappe.ValidationError,
 			update_child_qty_rate,
@@ -83,14 +85,6 @@ class TestUpdateItemsWithClosedRows(ERPNextTestSuite):
 		)
 
 		po.reload()
-		self.assertEqual(po.items[1].qty, 10)
-
-	def test_unchanged_closed_row_in_the_payload_is_tolerated(self):
-		"""A caller sending the whole table untouched should not be rejected."""
-		po = self.make_purchase_order()
-
-		update_child_qty_rate("Purchase Order", self.as_payload(po.items), po.name)
-
-		po.reload()
 		self.assertEqual(len(po.items), 2)
 		self.assertTrue(po.items[1].closed)
+		self.assertEqual(po.items[1].qty, 10)

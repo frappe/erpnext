@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
@@ -251,40 +252,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		job_card.cancel()
 		self.assertEqual(first.reload().process_loss_qty, 0)
 
-	def test_expected_loss_does_not_allow_extra_quantity(self):
-		plan = self.make_plan()
-		for field in REFERENCE_FIELDS:
-			with self.subTest(field=field):
-				work_order = self.create_work_order(plan, field)
-				self.assert_overproduction(work_order, 110)
-
-	def test_overproduction_allowance(self):
-		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 10)
-		plan = self.make_plan()
-		for field in REFERENCE_FIELDS:
-			with self.subTest(field=field):
-				first = self.create_work_order(plan, field)
-				self.assertEqual(first.qty, 100)
-				first.submit()
-				self.assert_pending_qty(plan, field, 0)
-				second = self.copy_work_order(first)
-				self.assert_overproduction(second, 11)
-				second.qty = 10
-				second.submit()
-
-	def test_drafts_and_cancelled_orders_do_not_consume_quantity(self):
-		plan = self.make_plan()
-		for field in REFERENCE_FIELDS:
-			with self.subTest(field=field):
-				first = self.create_work_order(plan, field)
-				second = self.create_work_order(plan, field)
-				self.assertEqual(first.qty, second.qty)
-				first.submit()
-				self.assert_overproduction(second, 100)
-				first.cancel()
-				second.submit()
-				self.assert_pending_qty(plan, field, 0)
-
 	def test_process_loss_and_overproduction_allowance(self):
 		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 10)
 		plan = self.make_plan()
@@ -301,6 +268,80 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				second.submit()
 				self.assert_pending_qty(plan, field, 0)
 
+	def test_sub_assembly_plan_includes_process_loss(self):
+		field = "production_plan_sub_assembly_item"
+		plan = self.make_plan(qty=81, consider_process_loss=True)
+		row = self.plan_row(plan, field)
+		self.assertEqual((row.required_qty, row.process_loss_percentage, row.qty), (90, 10, 90))
+
+		work_order = self.create_work_order(plan, field)
+		self.assertEqual(work_order.qty, 100)
+		self.assert_overproduction(work_order, 101)
+		work_order.qty = 100
+		work_order.submit()
+		self.manufacture_with_loss(work_order)
+		self.assertEqual(work_order.reload().process_loss_qty, 10)
+		self.assert_pending_qty(plan, field, 0)
+
+	def test_unplanned_sub_assembly_loss_creates_replacement(self):
+		field = "production_plan_sub_assembly_item"
+		plan = self.make_plan(qty=81, consider_process_loss=True)
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		self.manufacture_with_loss(work_order, loss_qty=25)
+		self.assert_pending_qty(plan, field, flt(15 / 0.9, frappe.get_precision("Work Order", "qty")))
+
+	def test_work_order_losing_less_than_planned_completes(self):
+		field = "production_plan_sub_assembly_item"
+		plan = self.make_plan(qty=81, consider_process_loss=True)
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		self.manufacture_with_loss(work_order, loss_qty=0)
+		self.assertEqual(work_order.reload().produced_qty, 100)
+		self.assert_pending_qty(plan, field, 0)
+
+	def test_whole_number_replacement_rounds_up(self):
+		field = "production_plan_sub_assembly_item"
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg", "valuation_rate": 10}).name
+		sub_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos"}).name
+		make_bom(item=sub_item, raw_materials=[rm_item], quantity=10, process_loss_percentage=10)
+		make_bom(item=fg_item, raw_materials=[sub_item])
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=90,
+			warehouse=self.warehouse,
+			sub_assembly_warehouse=self.warehouse,
+			stock_uom="Nos",
+			consider_process_loss=1,
+			skip_getting_mr_items=True,
+			do_not_submit=True,
+		)
+		plan.get_sub_assembly_items()
+		plan.submit()
+		work_order = self.create_work_order(plan, field)
+		work_order.submit()
+		self.manufacture_with_loss(work_order, loss_qty=25)
+
+		replacement = self.create_work_order(plan, field)
+		self.assertEqual(replacement.qty, 17)
+		replacement.submit()
+
+	def test_finished_good_plan_includes_process_loss(self):
+		field = "production_plan_item"
+		plan = self.make_plan(qty=90, consider_process_loss=True)
+		row = self.plan_row(plan, field)
+		self.assertEqual((row.planned_qty, row.process_loss_percentage), (90, 10))
+
+		work_order = self.create_work_order(plan, field)
+		self.assertEqual(work_order.qty, 100)
+		self.assert_overproduction(work_order, 101)
+		work_order.qty = 100
+		work_order.submit()
+		self.manufacture_with_loss(work_order)
+		self.assertEqual(work_order.reload().produced_qty, 90)
+		self.assert_pending_qty(plan, field, 0)
+
 	def test_stopped_and_closed_orders_consume_quantity(self):
 		plan = self.make_plan()
 		for field in REFERENCE_FIELDS:
@@ -309,7 +350,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 				first.submit()
 				stop_unstop(first.name, "Stopped")
 				self.assert_pending_qty(plan, field, 0)
-				stop_unstop(first.name, "Not Started")
+				stop_unstop(first.name, "Resumed")
 				close_work_order(first.name, "Closed")
 				self.assert_pending_qty(plan, field, 0)
 
@@ -340,7 +381,7 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		plan.onload()
 		pending = plan.get_onload()["pending_work_order_qty"]["production_plan_item"]
 		self.assertEqual(pending[plan.po_items[0].name], 0)
-		self.assertEqual(pending[plan.po_items[1].name], 50)
+		self.assertEqual(pending[plan.po_items[1].name], 0)
 		second_name = frappe.db.get_value(
 			"Work Order", {"production_plan_item": plan.po_items[1].name, "docstatus": 0}, "name"
 		)
@@ -377,13 +418,14 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "must reference a row"):
 			work_order.submit()
 
-	def make_plan(self, qty=100, submit=True):
+	def make_plan(self, qty=100, submit=True, consider_process_loss=False):
 		plan = create_production_plan(
 			item_code=self.finished_good,
 			planned_qty=qty,
 			stock_uom="Kg",
 			warehouse=self.warehouse,
 			sub_assembly_warehouse=self.warehouse,
+			consider_process_loss=consider_process_loss,
 			skip_getting_mr_items=True,
 			do_not_submit=True,
 		)
@@ -426,15 +468,6 @@ class TestProductionPlanWorkOrderQuantities(ERPNextTestSuite):
 			{"skip_transfer": 1, "source_warehouse": self.warehouse, "fg_warehouse": self.warehouse}
 		)
 		return work_order
-
-	def copy_work_order(self, work_order):
-		copy = frappe.copy_doc(work_order)
-		copy.docstatus = 0
-		copy.production_plan = work_order.production_plan
-		for field in REFERENCE_FIELDS:
-			copy.set(field, work_order.get(field))
-		copy.insert()
-		return copy
 
 	def manufacture_with_loss(self, work_order, qty=None, *, loss_qty=None, submit=True):
 		for item in work_order.required_items:

@@ -44,7 +44,7 @@ frappe.query_reports["Work Order Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Sales Order",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Sales Order", txt);
+				return erpnext.utils.get_link_options("Sales Order", txt);
 			},
 		},
 		{
@@ -53,7 +53,7 @@ frappe.query_reports["Work Order Summary"] = {
 			fieldtype: "MultiSelectList",
 			options: "Item",
 			get_data: function (txt) {
-				return frappe.db.get_link_options("Item", txt);
+				return erpnext.utils.get_link_options("Item", txt);
 			},
 		},
 		{

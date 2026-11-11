@@ -138,6 +138,7 @@ def upsert_bundle_entries(
 	csv_entries = parse_json(csv_entries) or []
 
 	validate_parent_document(child_row, doc)
+	set_bundle_item_and_warehouse(child_row, doc)
 
 	bundle_field = (
 		"rejected_serial_and_batch_bundle" if child_row.get("is_rejected") else "serial_and_batch_bundle"
@@ -188,6 +189,13 @@ def validate_parent_document(child_row, doc):
 
 	if child_row.get("parenttype") != doc.get("doctype"):
 		frappe.throw(_("The selected row does not belong to the {0}").format(doc.get("doctype")))
+
+
+def set_bundle_item_and_warehouse(child_row, doc):
+	"""Supplied-item rows keep the item in `rm_item_code` and the warehouse on the parent."""
+	if child_row.get("doctype") == "Subcontracting Receipt Supplied Item":
+		child_row.item_code = child_row.get("rm_item_code")
+		child_row.warehouse = doc.get("supplier_warehouse")
 
 
 def remove_empty_bundle(bundle, child_row, bundle_field):

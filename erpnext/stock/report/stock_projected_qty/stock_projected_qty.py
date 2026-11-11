@@ -50,13 +50,13 @@ def execute(filters=None):
 				re_order_level = d.warehouse_reorder_level
 				re_order_qty = d.warehouse_reorder_qty
 
-		shortage_qty = 0
-		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
-			shortage_qty = re_order_level - flt(bin.projected_qty)
-
 		reserved_qty_for_pos = get_pos_reserved_qty(bin.item_code, bin.warehouse)
 		if reserved_qty_for_pos:
 			bin.projected_qty -= reserved_qty_for_pos
+
+		shortage_qty = 0
+		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
+			shortage_qty = re_order_level - flt(bin.projected_qty)
 
 		data.append(
 			[

@@ -21,6 +21,7 @@ def execute(filters=None):
 		filters.periodicity,
 		filters.accumulated_values,
 		filters.company,
+		split_on_fiscal_year=bool(filters.accumulated_values),
 	)
 
 	columns, data = [], []

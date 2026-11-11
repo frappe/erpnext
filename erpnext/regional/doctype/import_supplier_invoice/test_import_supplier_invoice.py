@@ -165,14 +165,25 @@ class TestImportSupplierInvoice(ERPNextTestSuite):
 		self.assertNotEqual(supplier, "_Test ISI Namesake")
 		self.assertEqual(frappe.db.get_value("Supplier", supplier, "tax_id"), "IT01234567890")
 
+	def test_setup_does_not_grant_the_all_role(self):
+		add_permissions()
+		self.addCleanup(frappe.clear_cache, doctype="Import Supplier Invoice")
+		self.assertFalse(
+			frappe.db.exists("Custom DocPerm", {"parent": "Import Supplier Invoice", "role": "All"})
+		)
+
 	def test_accounts_user_can_import_a_file_from_a_new_supplier(self):
 		add_permissions()
 		self.addCleanup(frappe.clear_cache, doctype="Import Supplier Invoice")
 		frappe.clear_cache(doctype="Import Supplier Invoice")
 		user = frappe.get_doc(
-			{"doctype": "User", "email": "isi-accounts-user@example.com", "first_name": "ISI"}
+			{
+				"doctype": "User",
+				"email": "isi-accounts-user@example.com",
+				"first_name": "ISI",
+				"roles": [{"role": "Accounts User"}],
+			}
 		).insert()
-		user.add_roles("Accounts User")
 
 		lines = [make_line("Bolts", "10.00", "50.00", qty="5.00", uom="_Test ISI Box")]
 		xml = make_invoice_xml("ISI-ACC-USER", lines, supplier="_Test ISI New Seller", vat_code="11111111111")

@@ -7,10 +7,13 @@ from frappe import N_, _, scrub
 from frappe.query_builder import DocType
 from frappe.utils import add_days, add_to_date, flt, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	filters = frappe._dict(filters or {})
 	# Special report showing all doctype totals on a single chart; overrides some filters
 	if filters.doc_type == "All":
@@ -108,7 +111,13 @@ class Analytics:
 		# Skipping total row for tree-view reports
 		skip_total_row = 0
 
-		if self.filters.tree_type in ["Supplier Group", "Item Group", "Customer Group", "Territory"]:
+		if self.filters.tree_type in [
+			"Supplier Group",
+			"Item Group",
+			"Customer Group",
+			"Territory",
+			"Order Type",
+		]:
 			skip_total_row = 1
 
 		return self.columns, self.data, None, self.chart, None, skip_total_row
@@ -232,25 +241,21 @@ class Analytics:
 		self.get_teams()
 
 	def get_sales_transactions_based_on_customers_or_suppliers(self):
+		if self.filters.doc_type == "Payment Entry":
+			self.get_payment_entries("Customer" if self.filters.tree_type == "Customer" else "Supplier")
+			return
+
 		value_field = self.value_field
 
 		if self.filters.tree_type == "Customer":
 			entity_name = "customer_name as entity_name"
 			if self.filters.doc_type == "Quotation":
 				entity = "party_name as entity"
-			elif self.filters.doc_type == "Payment Entry":
-				entity = "party as entity"
-				entity_name = "party_name as entity_name"
-				value_field = "base_received_amount as value_field"
 			else:
 				entity = "customer as entity"
 		else:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
-			if self.filters.doc_type == "Payment Entry":
-				entity = "party as entity"
-				entity_name = "party_name as entity_name"
-				value_field = "base_paid_amount as value_field"
 
 		self.entries = frappe.qb.get_query(
 			table=self.filters.doc_type,
@@ -259,6 +264,36 @@ class Analytics:
 			ignore_permissions=False,
 		).run(as_dict=True)
 
+		self.entity_names = {}
+		for d in self.entries:
+			self.entity_names.setdefault(d.entity, d.entity_name)
+
+	def get_payment_entries(self, party_type):
+		entries = frappe.qb.get_query(
+			table="Payment Entry",
+			fields=[
+				"party as entity",
+				"party_name as entity_name",
+				"payment_type",
+				"base_received_amount",
+				"base_paid_amount",
+				self.date_field,
+			],
+			filters={
+				**self.document_filters,
+				"party_type": party_type,
+				"payment_type": ["in", ["Receive", "Pay"]],
+			},
+			ignore_permissions=False,
+		).run(as_dict=True)
+
+		# Receive adds to a customer's receipts and Pay (a refund) subtracts; the signs mirror for suppliers.
+		inflow = "Receive" if party_type == "Customer" else "Pay"
+		for d in entries:
+			amount = d.base_received_amount if d.payment_type == "Receive" else d.base_paid_amount
+			d.value_field = amount if d.payment_type == inflow else -amount
+
+		self.entries = entries
 		self.entity_names = {}
 		for d in self.entries:
 			self.entity_names.setdefault(d.entity, d.entity_name)

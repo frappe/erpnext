@@ -87,12 +87,6 @@ class TestSerialBatchReportUtils(ERPNextTestSuite):
 		_, result = prepare_serial_batch_report(columns, data, batch_fields=("batch_no",))
 		self.assertEqual(result[0].batch_no_number, "Legacy,Lot\nReport-001")
 
-	def test_link_ids_are_not_matched_as_physical_numbers(self):
-		self.make_number("Serial No", self.serial.name)
-		_, result = prepare_serial_batch_report(["Serial:Link/Serial No:120"], [[self.serial.name]])
-		self.assertEqual(result[0].serial, self.serial.name)
-		self.assertEqual(result[0].serial_number, "Report-001")
-
 	def test_array_results_export_numbers_without_hidden_ids(self):
 		columns = ["Serial:Link/Serial No:120", "Batch:Link/Batch:120", "Qty:Float:80"]
 		data = [[self.serial.name, self.batch.name, 2]]

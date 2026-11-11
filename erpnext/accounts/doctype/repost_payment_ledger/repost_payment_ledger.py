@@ -119,7 +119,7 @@ class RepostPaymentLedger(Document):
 		frappe.msgprint(_("Repost started in the background"))
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def execute_repost_payment_ledger(docname: str):
 	"""Repost Payment Ledger Entries by background job."""
 

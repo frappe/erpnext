@@ -9,7 +9,7 @@
  "idx": 0, 
  "is_standard": "Yes", 
  "json": "{\"add_total_row\": 0, \"sort_by\": \"Asset Maintenance.modified\", \"add_totals_row\": 0, \"sort_order\": \"desc\", \"sort_by_next\": null, \"filters\": [], \"sort_order_next\": \"desc\", \"columns\": [[\"name\", \"Asset Maintenance\"], [\"asset_name\", \"Asset Maintenance\"], [\"item_code\", \"Asset Maintenance\"], [\"maintenance_type\", \"Asset Maintenance Task\"], [\"maintenance_task\", \"Asset Maintenance Task\"], [\"description\", \"Asset Maintenance Task\"], [\"assign_to_name\", \"Asset Maintenance Task\"], [\"maintenance_status\", \"Asset Maintenance Task\"], [\"next_due_date\", \"Asset Maintenance Task\"], [\"last_completion_date\", \"Asset Maintenance Task\"]]}", 
- "modified": "2017-10-27 22:49:56.286781", 
+ "modified": "2026-10-05 12:00:00.000000", 
  "modified_by": "Administrator", 
  "module": "Assets", 
  "name": "Asset Maintenance", 
@@ -19,7 +19,10 @@
  "report_type": "Report Builder", 
  "roles": [
   {
-   "role": "System Manager"
+   "role": "Quality Manager"
+  },
+  {
+   "role": "Manufacturing User"
   }
  ]
 }

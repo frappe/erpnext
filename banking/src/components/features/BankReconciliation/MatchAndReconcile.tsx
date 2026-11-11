@@ -17,7 +17,7 @@ import { getCurrencySymbol } from "@/lib/currency"
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { formatDate } from "@/lib/date"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, getCurrencyFormatInfo } from "@/lib/numbers"
+import { flt, formatCurrency, getCurrencyFormatInfo, getCurrencyPrecision } from "@/lib/numbers"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip"
 import { Skeleton } from "@/components/ui/skeleton"
 import { slug } from "@/lib/frappe"
@@ -840,7 +840,9 @@ const VoucherItem = ({ voucher, index }: { voucher: LinkedPayment, index: number
         // Reference/Description: Full or partial
         // Whether this is suggested or not - depends on the above scores
 
-        const amountMatches = voucher.paid_amount === transaction?.unallocated_amount
+        const precision = getCurrencyPrecision(voucher.currency)
+        const amountMatches = transaction?.unallocated_amount != null &&
+            flt(voucher.paid_amount, precision) === flt(transaction.unallocated_amount, precision)
         const postingDateMatches = voucher.posting_date === transaction?.date
         const referenceDateMatches = voucher.reference_date === transaction?.date
         const referenceMatchesFull = voucher.reference_no === transaction?.reference_number || voucher.reference_no === transaction?.description

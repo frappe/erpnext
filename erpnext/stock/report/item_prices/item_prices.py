@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import flt
+from frappe.utils import flt, today
 
 from erpnext.stock.doctype.company_restriction.company_restriction import (
 	get_allowed_companies_condition,
@@ -115,15 +115,22 @@ def get_price_list():
 			(IfNull(cu.symbol, ip.currency)).as_("currency"),
 			ip.price_list_rate,
 			ip.price_list,
+			ip.uom,
+			ip.customer,
+			ip.supplier,
+			ip.batch_no,
 		)
-		.where((ip.price_list == pl.name) & (pl.currency == cu.name) & (pl.enabled == 1))
+		.where(
+			(ip.price_list == pl.name)
+			& (pl.currency == cu.name)
+			& (pl.enabled == 1)
+			& (ip.valid_from.isnull() | (ip.valid_from <= today()))
+			& (ip.valid_upto.isnull() | (ip.valid_upto >= today()))
+		)
 	).run(as_dict=True)
 
 	for d in price_list:
-		d.update({"price": f"{d.currency} {round(d.price_list_rate, 2)} - {d.price_list}"})
-		d.pop("currency")
-		d.pop("price_list_rate")
-		d.pop("price_list")
+		d.price = get_price_label(d)
 
 		if d.price:
 			rate.setdefault(d.item_code, {}).setdefault("Buying" if d.buying else "Selling", []).append(
@@ -141,6 +148,17 @@ def get_price_list():
 	return item_rate_map
 
 
+def get_price_label(price):
+	label = f"{price.currency} {round(price.price_list_rate, 2)} - {price.price_list}"
+	if price.uom:
+		label += f" / {price.uom}"
+
+	if details := [value for value in (price.customer, price.supplier, price.batch_no) if value]:
+		label += f" ({', '.join(details)})"
+
+	return label
+
+
 def get_last_purchase_rate():
 	item_last_purchase_rate_map = {}
 
@@ -151,7 +169,7 @@ def get_last_purchase_rate():
 			+ get_purchase_rate_query("Purchase Invoice", "posting_date")
 		)
 		.select("*")
-		.orderby("item_code", "posting_date")
+		.orderby("item_code", "posting_date", "creation")
 	)
 
 	for d in query.run(as_dict=True):
@@ -166,7 +184,12 @@ def get_purchase_rate_query(doctype, date_field):
 	query = (
 		frappe.qb.from_(parent)
 		.from_(child)
-		.select(child.item_code, parent[date_field].as_("posting_date"), child.base_rate)
+		.select(
+			child.item_code,
+			parent[date_field].as_("posting_date"),
+			(child.base_rate / child.conversion_factor).as_("base_rate"),
+			child.creation,
+		)
 		.where((parent.name == child.parent) & (parent.docstatus == 1))
 	)
 

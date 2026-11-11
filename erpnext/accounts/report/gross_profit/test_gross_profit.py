@@ -2,6 +2,7 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import BLANK_ACCOUNTING_DIMENSION
 from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
@@ -14,6 +15,72 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGrossProfit(ERPNextTestSuite):
+	def test_dimension_filter_preserves_native_sales_invoice_filter(self):
+		dimension = frappe.get_doc(
+			{"doctype": "Accounting Dimension", "document_type": "Sales Invoice"}
+		).insert()
+		self.addCleanup(dimension.delete)
+		self.assertEqual(dimension.fieldname, "sales_invoice")
+
+		invoice_with_dimension = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		invoice_with_blank_dimension = self.create_sales_invoice(do_not_save=True, do_not_submit=True)
+		invoice_with_dimension.insert()
+		invoice_with_blank_dimension.insert()
+		invoice_with_dimension.items[0].sales_invoice = invoice_with_blank_dimension.name
+		invoice_with_dimension.save().submit()
+		invoice_with_blank_dimension.submit()
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=invoice_with_dimension.posting_date,
+			to_date=invoice_with_dimension.posting_date,
+			group_by="Invoice",
+		)
+
+		filters.sales_invoice = invoice_with_dimension.name
+		vouchers = {row.get("sales_invoice") for row in execute(filters)[1] if row.get("indent") == 0}
+		self.assertEqual(vouchers, {invoice_with_dimension.name})
+
+		filters.pop("sales_invoice")
+		filters.accounting_dimension_sales_invoice = [invoice_with_blank_dimension.name]
+		vouchers = {row.get("sales_invoice") for row in execute(filters)[1] if row.get("indent") == 0}
+		self.assertEqual(vouchers, {invoice_with_dimension.name})
+
+		filters.accounting_dimension_sales_invoice = [BLANK_ACCOUNTING_DIMENSION]
+		vouchers = {row.get("sales_invoice") for row in execute(filters)[1] if row.get("indent") == 0}
+		self.assertEqual(vouchers, {invoice_with_blank_dimension.name})
+
+	def test_blank_and_multiple_tree_filters(self):
+		invoice = self.create_sales_invoice()
+		for fieldname, doctype in (("warehouse", "Warehouse"), ("item_group", "Item Group")):
+			value = invoice.items[0].get(fieldname)
+			parent = frappe.db.get_value(doctype, value, "parent_" + fieldname)
+			for stored_value in (None, "", value):
+				frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, fieldname, stored_value)
+				if fieldname == "item_group":
+					frappe.db.set_value("Item", invoice.items[0].item_code, fieldname, stored_value)
+				for selected, expected in (
+					([BLANK_ACCOUNTING_DIMENSION], not stored_value),
+					([value], bool(stored_value)),
+					([parent], bool(stored_value)),
+					([parent, value], bool(stored_value)),
+					([BLANK_ACCOUNTING_DIMENSION, parent], True),
+					(value, bool(stored_value)),
+				):
+					with self.subTest(fieldname=fieldname, stored_value=stored_value, selected=selected):
+						filters = frappe._dict(
+							company=invoice.company,
+							from_date=invoice.posting_date,
+							to_date=invoice.posting_date,
+							group_by="Invoice",
+						)
+						filters[fieldname] = selected
+						vouchers = {row.get("sales_invoice") for row in execute(filters)[1]}
+						self.assertEqual(invoice.name in vouchers, expected)
+			frappe.db.set_value(invoice.items[0].doctype, invoice.items[0].name, fieldname, value)
+			if fieldname == "item_group":
+				frappe.db.set_value("Item", invoice.items[0].item_code, fieldname, value)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.cost_center = "Main - _TC"
@@ -641,6 +708,48 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(total.buying_amount, -100.0)
 		self.assertEqual(total.gross_profit, -100.0)
 		self.assertEqual(total.get("gross_profit_%"), -50.0)
+
+	def test_blank_and_multiple_sales_person_filters(self):
+		invoices = []
+		for people in (
+			[],
+			["_Test Sales Person"],
+			["_Test Sales Person 1"],
+			["_Test Sales Person", "_Test Sales Person 1"],
+		):
+			invoice = self.create_sales_invoice(do_not_save=True)
+			invoice.set("sales_team", [])
+			for person in people:
+				invoice.append(
+					"sales_team", {"sales_person": person, "allocated_percentage": 100 / len(people)}
+				)
+			invoice.submit()
+			invoices.append(invoice)
+
+		for selected, expected in (
+			([BLANK_ACCOUNTING_DIMENSION], {invoices[0].name}),
+			(["_Test Sales Person"], {invoices[1].name, invoices[3].name}),
+			(["_Test Sales Person", "_Test Sales Person 1"], {invoice.name for invoice in invoices[1:]}),
+			(
+				[BLANK_ACCOUNTING_DIMENSION, "_Test Sales Person"],
+				{invoices[0].name, invoices[1].name, invoices[3].name},
+			),
+			("_Test Sales Person", {invoices[1].name, invoices[3].name}),
+		):
+			with self.subTest(selected=selected):
+				filters = frappe._dict(
+					company=self.company,
+					from_date=nowdate(),
+					to_date=nowdate(),
+					group_by="Invoice",
+					sales_person=selected,
+				)
+				rows = execute(filters)[1]
+				invoice_rows = [row for row in rows if row.get("sales_invoice") and row.indent == 0]
+				self.assertEqual({row.sales_invoice for row in invoice_rows}, expected)
+				self.assertEqual(len(invoice_rows), len(expected))
+				if expected:
+					self.assertEqual(rows[-1].selling_amount, 100 * len(expected))
 
 	def test_sales_person_wise_gross_profit(self):
 		sales_person = frappe.get_doc("Sales Person", "_Test Sales Person")
@@ -1318,18 +1427,37 @@ class TestGrossProfit(ERPNextTestSuite):
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), flt(delivered_value, 2))
 
 	def test_sales_order_with_fully_returned_delivery_uses_valuation_rate(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
 		item = create_item("_Test Gross Profit Returned Delivery Item").name
 		make_stock_entry(company=self.company, item_code=item, target=self.warehouse, qty=2, basic_rate=100)
 		so = make_sales_order(
-			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=2
+			customer=self.customer, company=self.company, warehouse=self.warehouse, item=item, qty=2, rate=100
 		)
 		dnote = make_delivery_note(so.name).submit()
+		# full return restores the stock and leaves the summed delivered qty for the SO line at zero
 		make_sales_return(dnote.name).submit()
-		sinv = make_sales_invoice(so.name).submit()
+
+		# a fully returned SO has nothing left to bill, so link the invoice row to the SO line directly
+		# to exercise the zero-delivered-qty fallback to the valuation rate
+		sinv = create_sales_invoice(
+			company=self.company,
+			customer=self.customer,
+			item_code=item,
+			qty=2,
+			rate=100,
+			warehouse=self.warehouse,
+			cost_center=self.cost_center,
+			debit_to=self.debit_to,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=True,
+		)
+		sinv.items[0].sales_order = so.name
+		sinv.items[0].so_detail = so.items[0].name
+		sinv.submit()
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 200)
 

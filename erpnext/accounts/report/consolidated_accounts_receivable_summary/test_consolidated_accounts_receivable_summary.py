@@ -21,8 +21,8 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 	def setUp(self):
 		self.maxDiff = None
 		# deliberately unrelated companies, no parent/child link
-		self.company_a = self.create_test_company("_Test Unrelated A", "_TUNA")
-		self.company_b = self.create_test_company("_Test Unrelated B", "_TUNB")
+		self.company_a = "_Test Unrelated A"
+		self.company_b = "_Test Unrelated B"
 		self.create_customer("_Test Consolidation Customer")
 		# the mixin would otherwise pass company=None, which Item Default rejects
 		self.create_item("_Test Consolidation Item", company=self.company_a)
@@ -84,9 +84,9 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 		self.assertEqual([r.outstanding for r in rows], [200.0, 200.0])
 
 	def test_no_total_when_companies_use_different_currencies(self):
-		usd = self.create_test_company("_Test Unrelated USD", "_TUNU", currency="USD")
+		usd = "_Test Company 1"
 		self.create_invoice(self.company_a, "_TUNA", 200)
-		self.create_invoice(usd, "_TUNU", 300, currency="USD")
+		self.create_invoice(usd, "_TC1", 300, currency="USD")
 
 		rows = execute(self.filters(companies=[self.company_a, usd]))[1]
 
@@ -94,9 +94,8 @@ class TestConsolidatedAccountsReceivableSummary(ERPNextTestSuite, ConsolidatedRe
 		self.assertFalse(any(row.get("bold") for row in rows))
 
 	def test_user_restricted_to_a_subsidiary_sees_its_rows(self):
-		group = self.create_test_company("_Test Consolidation Group", "_TCGRP", is_group=1)
-		child = self.create_test_company("_Test Consolidation Child", "_TCCLD", parent=group)
-		self.create_invoice(child, "_TCCLD", 400)
+		child = "Child Company India"
+		self.create_invoice(child, "CCI", 400)
 		user = self.restricted_user(child)
 
 		frappe.set_user(user)

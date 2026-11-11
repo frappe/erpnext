@@ -8,6 +8,11 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.utils import QueryBuilder
 from frappe.utils.data import comma_or
 
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+)
+
 SALES_TRANSACTION_DOCTYPES = ["Sales Order", "Sales Invoice", "Delivery Note", "POS Invoice"]
 
 
@@ -52,12 +57,7 @@ class SalesPartnerSummaryReport:
 		if not self.filters.get("company"):
 			frappe.throw(_("Please select a company."))
 
-		if (
-			self.filters.get("from_date")
-			and self.filters.get("to_date")
-			and self.filters.get("from_date") > self.filters.get("to_date")
-		):
-			frappe.throw(_("From Date cannot be greater than To Date."))
+		validate_date_range(self.filters)
 
 		self._set_date_field_and_label()
 
@@ -117,6 +117,10 @@ class SalesPartnerSummaryReport:
 		for field in ["company", "customer", "territory", "sales_partner"]:
 			if self.filters.get(field):
 				self.query = self.query.where(Field(field, table=self.dt) == self.filters.get(field))
+
+		# Company is not a report column, so restrict allowed companies here
+		if condition := get_allowed_companies_condition(self.dt.company, self.filters.get("doctype")):
+			self.query = self.query.where(condition)
 
 		if self.filters.get("from_date"):
 			self.query = self.query.where(

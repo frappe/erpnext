@@ -54,20 +54,6 @@ class TestCustomer(ERPNextTestSuite):
 		finally:
 			frappe.defaults.set_user_default("company", original_company)
 
-	def test_get_customer_name_dedupes_with_numeric_suffix(self):
-		# When a customer name already exists, get_customer_name appends "- <max suffix + 1>". The
-		# Postgres branch extracts the suffix with regexp_replace/NULLIF/CAST (pypika's Substring cannot
-		# do regex extraction); this exercises that path on both engines.
-		base = "_Test PG Dedup Customer"
-		for nm in (base, f"{base} - 3"):
-			if not frappe.db.exists("Customer", nm):
-				frappe.get_doc(
-					{"doctype": "Customer", "customer_name": nm, "customer_type": "Individual"}
-				).insert()
-
-		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
-		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
-
 	def test_get_customer_name_dedupe_handles_mixed_suffix(self):
 		# The suffix extractor must read the LEADING digits of the last whitespace-token, like MariaDB's
 		# CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED): "<base> - 3a" -> 3, so the next name is
@@ -83,6 +69,18 @@ class TestCustomer(ERPNextTestSuite):
 		doc = frappe.get_doc({"doctype": "Customer", "customer_name": base, "customer_type": "Individual"})
 		self.assertEqual(doc.get_customer_name(), f"{base} - 4")
 
+	def test_buying_price_list_cannot_be_customer_default(self):
+		customer = frappe.get_doc(
+			{
+				"doctype": "Customer",
+				"customer_name": "_Test Buying Price Customer",
+				"customer_type": "Individual",
+				"default_price_list": "Standard Buying",
+			}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			customer.insert()
+
 	def test_get_customer_group_details(self):
 		doc = frappe.new_doc("Customer Group")
 		doc.customer_group_name = "_Testing Customer Group"
@@ -93,11 +91,13 @@ class TestCustomer(ERPNextTestSuite):
 		test_account_details = {
 			"company": "_Test Company",
 			"account": "Debtors - _TC",
+			"advance_account": "Debtors - _TC",
 		}
 		test_credit_limits = {
 			"company": "_Test Company",
 			"credit_limit": 350000,
 			"overdue_billing_threshold": 5000,
+			"bypass_credit_limit_check": 1,
 		}
 		doc.append("accounts", test_account_details)
 		doc.append("credit_limits", test_credit_limits)
@@ -115,10 +115,12 @@ class TestCustomer(ERPNextTestSuite):
 
 		self.assertEqual(c_doc.accounts[0].company, "_Test Company")
 		self.assertEqual(c_doc.accounts[0].account, "Debtors - _TC")
+		self.assertEqual(c_doc.accounts[0].advance_account, "Debtors - _TC")
 
 		self.assertEqual(c_doc.credit_limits[0].company, "_Test Company")
 		self.assertEqual(c_doc.credit_limits[0].credit_limit, 350000)
 		self.assertEqual(c_doc.credit_limits[0].overdue_billing_threshold, 5000)
+		self.assertEqual(c_doc.credit_limits[0].bypass_credit_limit_check, 1)
 		c_doc.delete()
 		doc.delete()
 
@@ -257,6 +259,12 @@ class TestCustomer(ERPNextTestSuite):
 		customer.mobile_no = "8989889890"
 		customer.save()
 		self.assertTrue(customer.customer_primary_contact)
+
+		# another customer's contact cannot be made primary
+		other_customer = frappe.get_doc("Customer", "_Test Customer")
+		other_customer.customer_primary_contact = customer.customer_primary_contact
+		self.assertRaises(frappe.ValidationError, other_customer.save)
+
 		frappe.delete_doc("Customer", customer.name)
 
 	def test_disabled_customer(self):
@@ -278,7 +286,7 @@ class TestCustomer(ERPNextTestSuite):
 
 		customer = frappe.get_doc("Customer", "_Test Customer")
 		customer.on_hold = 1
-		customer.release_date = nowdate()
+		customer.release_date = add_days(nowdate(), 1)
 		customer.save()
 
 		make_quotation(do_not_save=True).save()
@@ -289,6 +297,21 @@ class TestCustomer(ERPNextTestSuite):
 		customer.release_date = add_days(nowdate(), -1)
 		customer.save()
 		sales_order.save()
+
+	def test_customer_hold_ends_on_release_date(self):
+		from erpnext.selling.doctype.customer.customer import is_customer_blocked
+
+		frappe.db.set_value("Customer", "_Test Customer", {"on_hold": 1, "release_date": nowdate()})
+		self.assertFalse(is_customer_blocked("_Test Customer"))
+
+	def test_blocked_customer_can_make_returns(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		sales_invoice = create_sales_invoice()
+		frappe.db.set_value("Customer", sales_invoice.customer, "on_hold", 1)
+
+		make_sales_return(sales_invoice.name).submit()
 
 	def test_duplicate_customer(self):
 		if not frappe.db.get_value("Customer", "_Test Customer 1"):
@@ -380,6 +403,14 @@ class TestCustomer(ERPNextTestSuite):
 		)
 
 	def test_customer_credit_limit_on_change(self):
+		new_customer = frappe.new_doc("Customer")
+		new_customer.customer_name = "_Test Duplicate Credit Limit"
+		new_customer.customer_group = "_Test Customer Group"
+		new_customer.territory = "_Test Territory"
+		new_customer.append("credit_limits", {"credit_limit": 100, "company": "_Test Company"})
+		new_customer.append("credit_limits", {"credit_limit": 1000000, "company": "_Test Company"})
+		self.assertRaises(frappe.ValidationError, new_customer.insert)
+
 		outstanding_amt = self.get_customer_outstanding_amount()
 		customer = frappe.get_doc("Customer", "_Test Customer")
 		customer.append(

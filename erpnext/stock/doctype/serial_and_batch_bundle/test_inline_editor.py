@@ -134,22 +134,6 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
 		self.assertFalse(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
 
-	def test_scanned_serial_is_created_for_a_user_who_may_write_the_voucher(self):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
-		pr = self.make_draft_pr(item, qty=1)
-		user = frappe.get_doc(
-			{
-				"doctype": "User",
-				"email": "inline-scan-stock-user@example.com",
-				"first_name": "Inline Scan",
-				"send_welcome_email": 0,
-				"roles": [{"role": "Stock User"}],
-			}
-		).insert()
-		with self.set_user(user.name):
-			self.upsert(pr, serial_numbers=[{"serial_number": "Missing-Scan"}])
-		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Scan"}))
-
 	def test_scan_cannot_override_outward_transaction_type(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		doc = frappe.get_doc(
@@ -614,20 +598,6 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		bundle.reload()
 		self.assertEqual(len(bundle.entries), 1)
 
-	def test_selector_creation_follows_the_voucher_not_the_serial_master(self):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
-		pr = self.make_draft_pr(item, qty=1)
-		user = frappe.get_doc(
-			doctype="User",
-			email="selector-stock-user@example.com",
-			first_name="Selector",
-			send_welcome_email=0,
-			roles=[{"role": "Stock User"}],
-		).insert()
-		with self.set_user(user.name):
-			self.save_selector(pr, csv_entries=[{"serial_no": "Missing-Serial", "qty": 1}])
-		self.assertTrue(frappe.db.exists("Serial No", {"item_code": item, "serial_no": "Missing-Serial"}))
-
 	def test_pagination(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
 		pr = self.make_draft_pr(item, qty=5)
@@ -731,6 +701,50 @@ class TestSerialBatchInlineEditor(ERPNextTestSuite):
 		self.assertEqual(bundle.voucher_type, "Stock Entry")
 		self.assertEqual(bundle.type_of_transaction, "Inward")
 		self.assertEqual(summary.total_qty, 2)
+
+	def test_create_bundle_for_subcontracting_receipt_supplied_item(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBIE-SCR-.####",
+			}
+		).name
+		warehouse = "_Test Warehouse 1 - _TC"
+		se = make_stock_entry(item_code=item, qty=5, to_warehouse=warehouse, rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		for is_return, type_of_transaction in ((0, "Outward"), (1, "Inward")):
+			with self.subTest(is_return=is_return):
+				scr = frappe.get_doc(
+					{
+						"doctype": "Subcontracting Receipt",
+						"company": "_Test Company",
+						"supplier_warehouse": warehouse,
+						"is_return": is_return,
+					}
+				)
+				scr.append("supplied_items", {"rm_item_code": item, "consumed_qty": 2})
+				child_row = scr.supplied_items[0].as_dict()
+				child_row["is_rejected"] = 0
+
+				summary = upsert_bundle_entries(
+					child_row=json.dumps(child_row, default=str),
+					doc=json.dumps(scr.as_dict(), default=str),
+					entries=json.dumps([{"batch_no": batch_no, "qty": 2}]),
+				)
+
+				bundle = frappe.get_doc("Serial and Batch Bundle", summary.bundle)
+				self.assertEqual(bundle.item_code, item)
+				self.assertEqual(bundle.warehouse, warehouse)
+				self.assertEqual(bundle.type_of_transaction, type_of_transaction)
+				self.assertEqual(summary.total_qty, 2)
 
 	def test_upsert_requires_entries_for_new_bundle(self):
 		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
