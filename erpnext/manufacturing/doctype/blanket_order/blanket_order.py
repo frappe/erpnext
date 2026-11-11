@@ -10,6 +10,7 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, getdate
 
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 ORDER_DOCTYPES_BY_TYPE = {
@@ -54,6 +55,9 @@ class BlanketOrder(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		validate_terms_and_conditions(
+			self.get("tc_name"), "selling" if self.blanket_order_type == "Selling" else "buying"
+		)
 		if not self.blanket_order_type:
 			return
 
