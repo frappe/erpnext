@@ -1121,7 +1121,7 @@ class TestPickList(FrappeTestCase):
 		picklist_2 = create_pick_list(sales_order_2.name)
 		self.assertEqual(picklist_2.locations[0].qty, 5)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_short_picked_serial_row_needs_only_the_picked_serial_nos(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
@@ -1145,7 +1145,7 @@ class TestPickList(FrappeTestCase):
 		dn.submit()
 		self.assertEqual(dn.items[0].qty, 1)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_short_picked_batch_row_bundle_holds_the_picked_qty(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
