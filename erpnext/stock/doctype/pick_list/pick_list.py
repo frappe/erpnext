@@ -1628,6 +1628,9 @@ def create_delivery_note(source_name: str, target_doc: str | dict | Document | N
 		delivery_note.flags.ignore_mandatory = True
 		delivery_note.save()
 
+	if not delivery_note:
+		frappe.throw(_("Nothing picked in this Pick List is left to deliver."))
+
 	frappe.msgprint(_("Delivery Note(s) created for the Pick List"))
 	return delivery_note
 
@@ -1782,12 +1785,14 @@ def create_dn_with_so(sales_dict, pick_list):
 	delivery_note = None
 
 	for key in sales_dict:
-		delivery_note = create_dn_from_so(pick_list, sales_dict[key], None)
-		if delivery_note:
-			delivery_note.flags.ignore_mandatory = True
+		document = create_dn_from_so(pick_list, sales_dict[key], None)
+		# e.g. less than one product bundle is picked
+		if document and document.get("items"):
+			document.flags.ignore_mandatory = True
 			# updates packed_items on save
 			# save as multiple customers are possible
-			delivery_note.save()
+			document.save()
+			delivery_note = document
 
 	return delivery_note
 
