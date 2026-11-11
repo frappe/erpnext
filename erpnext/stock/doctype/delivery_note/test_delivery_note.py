@@ -1714,7 +1714,7 @@ class TestDeliveryNote(FrappeTestCase):
 	def test_bundle_rows_of_a_repeated_batched_component_do_not_overdraw_a_batch(self):
 		self.assertEqual(sorted(self.deliver_bundle_of_a_repeated_batched_component().values()), [1, 2])
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
