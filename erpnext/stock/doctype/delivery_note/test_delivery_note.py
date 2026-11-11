@@ -1921,13 +1921,27 @@ class TestDeliveryNote(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_batch_skips_batch_qty_of_a_later_row_without_stock_qty(self):
+		self.assert_auto_set_batch_skips_later_row_without_stock_qty({"qty": 8})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_batch_qty_of_a_later_row_without_conversion_factor(self):
+		self.assert_auto_set_batch_skips_later_row_without_stock_qty(
+			{"qty": 4, "uom": "Box", "conversion_factor": None}
+		)
+
+	def assert_auto_set_batch_skips_later_row_without_stock_qty(self, later_row):
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
 				"batch_number_series": "TRLS-.#####",
-			}
+			},
+			uoms=[{"uom": "Box", "conversion_factor": 2}],
 		).name
 		first = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		second = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
@@ -1937,7 +1951,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 		# e.g. through the REST API: rows without stock_qty
 		dn = create_delivery_note(item_code=item, qty=5, do_not_save=True)
 		dn.append(
-			"items", {**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 8, "batch_no": first_batch}
+			"items",
+			{**dn.items[0].as_dict(), "name": None, "idx": None, "batch_no": first_batch, **later_row},
 		)
 		for row in dn.items:
 			row.update({"use_serial_batch_fields": 1, "stock_qty": None})
