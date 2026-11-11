@@ -1364,6 +1364,25 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			batch_no=new_batch,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_batch_wise_reconciliation_counts_reserved_batch_qty(self):
+		item, _sales_order = self.make_item_with_reserved_stock(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRRW-.#####"}
+		)
+		batch_no = frappe.db.get_value("Batch", {"item": item}, "name")
+
+		sr = create_stock_reconciliation(
+			item_code=item,
+			warehouse="_Test Warehouse - _TC",
+			qty=3,
+			rate=150,
+			batch_no=batch_no,
+			reconcile_all_serial_batch=0,
+		)
+
+		self.assertEqual(sr.docstatus, 1)
+		self.assertEqual(sr.items[0].current_qty, 3)
+
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
