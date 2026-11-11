@@ -409,8 +409,9 @@
  ],
  "icon": "bell-ring",
  "is_submittable": 1,
+ "link_display_mode": "Search",
  "links": [],
- "modified": "2026-10-27 12:26:10.799506",
+ "modified": "2026-11-11 04:54:15.740643",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
@@ -433,6 +434,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -447,6 +449,8 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -456,6 +460,7 @@
    "report": 1,
    "role": "Accounts User",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
