@@ -308,7 +308,7 @@ class SerialBatchBundleService:
 		bundle_items = {}
 		for row in self.doc.get("items") + self.get_current_packed_rows():
 			item_code = row.get("rm_item_code") or row.item_code
-			if row.get("serial_no"):
+			if row.get("serial_no") and self.keeps_serial_batch_fields(row):
 				numbers_by_item[item_code].extend(get_serial_nos(row.serial_no))
 			elif row.get("serial_and_batch_bundle"):
 				bundle_items[row.serial_and_batch_bundle] = item_code
@@ -327,8 +327,7 @@ class SerialBatchBundleService:
 		for row in self.doc.get("items") + self.get_current_packed_rows():
 			if row.get("serial_and_batch_bundle"):
 				bundles.append(row.serial_and_batch_bundle)
-			# a packed row without the flag gets an auto-picked bundle that ignores its batch no
-			elif row.get("batch_no") and (row.doctype != "Packed Item" or row.get("use_serial_batch_fields")):
+			elif row.get("batch_no") and self.keeps_serial_batch_fields(row):
 				qty = row.qty if row.doctype == "Packed Item" else row.stock_qty
 				entries.append(frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty)))
 
@@ -342,6 +341,11 @@ class SerialBatchBundleService:
 		picked_batches = frappe._dict()
 		add_picked_batches(picked_batches, entries)
 		return picked_batches
+
+	@staticmethod
+	def keeps_serial_batch_fields(row):
+		"""A packed row without the flag gets an auto-picked bundle that ignores its serial and batch nos."""
+		return row.doctype != "Packed Item" or row.get("use_serial_batch_fields")
 
 	def get_current_packed_rows(self):
 		"""Packed rows of the current item rows; rows of removed items stay until the packing list is rebuilt."""
