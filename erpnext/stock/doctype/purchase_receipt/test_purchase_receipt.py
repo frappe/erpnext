@@ -1972,6 +1972,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertTrue(pr.name)
 
+	def test_purchase_user_can_submit_receipt_of_an_item_that_auto_creates_batches(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PUAB-.#####",
+			}
+		).name
+		user = create_user_with_roles("pr-purchase-user@example.com", "Purchase User").name
+		with self.set_user(user):
+			pr = make_purchase_receipt(item_code=item, qty=1)
+
+		self.assertTrue(get_batch_from_bundle(pr.items[0].serial_and_batch_bundle))
+
 	def test_warehouse_restricted_user_gets_items_from_internal_delivery_note(self):
 		from frappe.permissions import add_user_permission
 
