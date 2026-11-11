@@ -325,13 +325,6 @@ class StockSettings(Document):
 	@staticmethod
 	def make_property_setter_for_precision(doctypes):
 		for doctype in doctypes:
-			if property_name := frappe.db.exists(
-				"Property Setter",
-				{"doc_type": doctype, "field_name": "conversion_factor", "property": "precision"},
-			):
-				frappe.db.set_value("Property Setter", property_name, "value", 9)
-				continue
-
 			make_property_setter(
 				doctype,
 				"conversion_factor",
