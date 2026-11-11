@@ -315,33 +315,22 @@ class SerialandBatchBundle(Document):
 				reservation = get_serial_no_reservation(self.item_code, serial_no, self.warehouse)
 				if reservation:
 					self.throw_error_message(
-<<<<<<< HEAD
-						f"Serial No {bold(serial_no)} is in warehouse {bold(self.warehouse)}"
-						f" but is reserved for {reservation.voucher_type} {bold(reservation.voucher_no)}"
-						f" via {get_link_to_form('Stock Reservation Entry', reservation.name)}."
-						f" Please use an unreserved serial number or cancel the reservation.",
-=======
 						_(
 							"Serial No {0} is in warehouse {1} but is reserved for {2} {3} via {4}. Please use an unreserved serial number or cancel the reservation."
 						).format(
-							bold(serial_number),
+							bold(serial_no),
 							bold(self.warehouse),
 							reservation.voucher_type,
 							bold(reservation.voucher_no),
 							get_link_to_form("Stock Reservation Entry", reservation.name),
 						),
->>>>>>> c242f84 (fix(stock): make serial and batch error messages translatable)
 						SerialNoWarehouseError,
 					)
 				else:
 					self.throw_error_message(
-<<<<<<< HEAD
-						f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}.",
-=======
 						_("Serial No {0} is not present in the warehouse {1}.").format(
-							bold(serial_number), bold(self.warehouse)
+							bold(serial_no), bold(self.warehouse)
 						),
->>>>>>> c242f84 (fix(stock): make serial and batch error messages translatable)
 						SerialNoWarehouseError,
 					)
 
@@ -377,13 +366,9 @@ class SerialandBatchBundle(Document):
 		for data in available_serial_nos:
 			if data.serial_no in serial_nos:
 				self.throw_error_message(
-<<<<<<< HEAD
-					f"Serial No {bold(data.serial_no)} is already present in the warehouse {bold(data.warehouse)}.",
-=======
 					_("Serial No {0} is already present in the warehouse {1}.").format(
-						bold(serial_number), bold(data.warehouse)
+						bold(data.serial_no), bold(data.warehouse)
 					),
->>>>>>> c242f84 (fix(stock): make serial and batch error messages translatable)
 					SerialNoDuplicateError,
 				)
 
@@ -1455,13 +1440,7 @@ class SerialandBatchBundle(Document):
 		for serial_no, batch_no in serial_batches.items():
 			if correct_batches.get(serial_no) and correct_batches.get(serial_no) != batch_no:
 				self.throw_error_message(
-<<<<<<< HEAD
-					f"Serial No {bold(serial_no)} does not belong to Batch No {bold(batch_no)}"
-=======
-					_("Serial No {0} does not belong to Batch No {1}").format(
-						bold(serial_number), bold(batch_number)
-					)
->>>>>>> c242f84 (fix(stock): make serial and batch error messages translatable)
+					_("Serial No {0} does not belong to Batch No {1}").format(bold(serial_no), bold(batch_no))
 				)
 
 	def validate_incorrect_serial_nos(self, serial_nos):
@@ -1865,13 +1844,9 @@ class SerialandBatchBundle(Document):
 					self.validate_negative_batch(batch_no, available_batches[batch_no])
 
 				self.throw_error_message(
-<<<<<<< HEAD
-					f"Batch {bold(batch_no)} is not available in the selected warehouse {self.warehouse}"
-=======
 					_("Batch {0} is not available in the selected warehouse {1}").format(
-						bold(batch_number), self.warehouse
+						bold(batch_no), self.warehouse
 					)
->>>>>>> c242f84 (fix(stock): make serial and batch error messages translatable)
 				)
 
 	def on_cancel(self):
