@@ -1289,6 +1289,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
 		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
 
+<<<<<<< HEAD
 	def make_item_with_reserved_stock(self, properties):
 		"""Receive 3 units of a new item and reserve 1 for a Sales Order."""
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -1306,13 +1307,29 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reconcile_all_serial_batch_counts_reserved_stock(self):
+=======
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reconcile_all_serial_batch_counts_reserved_stock(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+>>>>>>> 84dceb2 (test: full stock reconciliation counts reserved serial and batch nos)
 		warehouse = "_Test Warehouse - _TC"
 		for properties in (
 			{"has_serial_no": 1, "serial_no_series": "TRRS-.#####"},
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRRB-.#####"},
 		):
 			with self.subTest(properties=properties):
+<<<<<<< HEAD
 				item, sales_order = self.make_item_with_reserved_stock(properties)
+=======
+				item = self.make_item(properties={"is_stock_item": 1, **properties}).name
+				make_stock_entry(item_code=item, target=warehouse, qty=3, basic_rate=100)
+				sales_order = make_sales_order(item_code=item, warehouse=warehouse, qty=1, do_not_submit=True)
+				sales_order.reserve_stock = 1
+				sales_order.items[0].reserve_stock = 1
+				sales_order.submit()
+>>>>>>> 84dceb2 (test: full stock reconciliation counts reserved serial and batch nos)
 
 				sr = create_stock_reconciliation(item_code=item, warehouse=warehouse, qty=3, rate=150)
 
@@ -1327,6 +1344,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 					"Reserved",
 				)
 
+<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "use_serial_batch_fields": 1}
 	)
@@ -1393,6 +1411,8 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 
 		self.assertEqual(sr.docstatus, 1)
 
+=======
+>>>>>>> 84dceb2 (test: full stock reconciliation counts reserved serial and batch nos)
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
