@@ -328,7 +328,8 @@ class SerialBatchBundleService:
 		for row in self.doc.get("items") + self.get_current_packed_rows():
 			if row.get("serial_and_batch_bundle"):
 				bundles.append(row.serial_and_batch_bundle)
-			elif row.get("use_serial_batch_fields") and row.get("batch_no"):
+			# a packed row without the flag gets an auto-picked bundle that ignores its batch no
+			elif row.get("batch_no") and (row.doctype != "Packed Item" or row.get("use_serial_batch_fields")):
 				qty = row.qty if row.doctype == "Packed Item" else row.stock_qty
 				entries.append(frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty)))
 
