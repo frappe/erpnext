@@ -1154,22 +1154,26 @@ class PickList(TransactionBase):
 						location.item_code,
 						location.warehouse,
 						location.batch_no or "",
-						location.serial_no or "",
 					)
 				].append(location)
 
 		if not bundle_locations:
 			return
 
-		delivered_component_qty = self._get_delivered_bundle_component_qty(
+		delivered_qty_by_key, delivered_serial_nos = self._get_delivered_bundle_component_qty(
 			{bundle_key[0] for bundle_key in bundle_locations}
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
-			remaining_qty = max(delivered_component_qty.get(bundle_key, 0), 0)
-			for location in locations:
+			remaining_qty = max(delivered_qty_by_key.get(bundle_key, 0), 0)
+			# rows with serial nos take what they delivered first, the rest share the remaining qty
+			for location in sorted(locations, key=lambda row: not row.serial_no):
 				precision = location.precision("delivered_qty")
-				delivered_qty = flt(min(flt(location.picked_qty), remaining_qty), precision)
+				if location.serial_no:
+					picked_serial_nos = {number.lower() for number in get_serial_nos(location.serial_no)}
+					delivered_qty = len(picked_serial_nos & delivered_serial_nos[bundle_key])
+				else:
+					delivered_qty = flt(min(flt(location.picked_qty), remaining_qty), precision)
 				remaining_qty -= delivered_qty
 				if flt(location.delivered_qty, precision) == delivered_qty:
 					continue
@@ -1183,19 +1187,15 @@ class PickList(TransactionBase):
 		self._set_delivery_status_from_items()
 
 	def _get_delivered_bundle_component_qty(self, sales_order_items):
-		delivered_qty = defaultdict(float)
+		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
+		delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
 		for parenttype in ("Delivery Note", "Sales Invoice"):
 			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				key = (
-					row.so_detail,
-					row.item_code,
-					row.warehouse,
-					row.batch_no or "",
-					row.serial_no or "",
-				)
+				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
 				delivered_qty[key] += flt(row.delivered_qty)
+				delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
 
-		return delivered_qty
+		return delivered_qty, delivered_serial_nos
 
 	def _get_delivered_packed_items(self, parenttype, sales_order_items):
 		packed_item = frappe.qb.DocType("Packed Item")
