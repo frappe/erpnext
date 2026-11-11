@@ -22,6 +22,14 @@ from erpnext.controllers.accounts_controller import (
 	validate_inclusive_tax,
 	validate_taxes_and_charges,
 )
+<<<<<<< HEAD
+=======
+from erpnext.deprecation_dumpster import deprecated
+from erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing import (
+	get_effective_base_rate,
+	refresh_order_rates,
+)
+>>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_item_tax_map,
@@ -45,10 +53,14 @@ class calculate_taxes_and_totals:
 			)
 
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
+<<<<<<< HEAD
 
 		get_round_off_applicable_accounts(
 			self.doc.company, frappe.flags.round_off_applicable_accounts, self.doc
 		)
+=======
+		refresh_order_rates(self.doc)
+>>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 		self.calculate()
 
 	def filter_rows(self):
@@ -227,6 +239,57 @@ class calculate_taxes_and_totals:
 
 		self.doc.conversion_rate = flt(self.doc.conversion_rate)
 
+<<<<<<< HEAD
+=======
+	def calculate_item_rate(self, item):
+		base_rate = get_effective_base_rate(item, self.doc)
+		if not base_rate:
+			remove_margin(item)
+			remove_discount(item)
+			item.rate_with_margin = 0
+			return
+
+		# An item no rule applied to may still hold "[]", which must not override the rate typed in
+		applied_rules = get_applied_pricing_rules(item.pricing_rules)
+		has_pricing_rules = bool(applied_rules) and not self.doc.ignore_pricing_rule
+		if has_pricing_rules:
+			remove_margin(item)
+
+			for d in applied_rules:
+				pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
+				apply_pricing_rule_margin(pricing_rule, item, self.doc)
+
+		item.rate_with_margin = get_rate_with_margin(item, base_rate)
+		if item.discount_percentage > 0:
+			item.discount_amount = flt(
+				item.rate_with_margin * item.discount_percentage / 100.0, item.precision("discount_amount")
+			)
+
+		calculated_rate = flt(item.rate_with_margin - item.discount_amount, item.precision("rate"))
+
+		# if rate is 0 or pricing rules are applicable, calculated rate is preferred
+		if has_pricing_rules or not item.rate:
+			item.rate = calculated_rate
+			return
+
+		# discount and margin are correct, exit early
+		if item.rate == calculated_rate:
+			return
+
+		# item rate does not match calculated rate. prefer item rate, reset margin / discount
+		if item.rate > base_rate:
+			item.margin_type = "Amount"
+			item.margin_rate_or_amount = flt(item.rate - base_rate, item.precision("margin_rate_or_amount"))
+			item.rate_with_margin = item.rate
+			remove_discount(item)
+			return
+
+		item.rate_with_margin = base_rate
+		item.discount_amount = flt(item.rate_with_margin - item.rate, item.precision("discount_amount"))
+		item.discount_percentage = 0
+		remove_margin(item)
+
+>>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 	def calculate_item_values(self):
 		if self.doc.flags.is_consolidated:
 			return
@@ -1350,6 +1413,35 @@ class calculate_taxes_and_totals:
 				)
 
 
+<<<<<<< HEAD
+=======
+def remove_discount(item):
+	item.discount_percentage = 0.0
+	item.discount_amount = 0.0
+
+
+def remove_margin(item):
+	item.margin_type = None
+	item.margin_rate_or_amount = 0.0
+
+
+def get_rate_with_margin(item, base_rate=None):
+	if base_rate is None:
+		base_rate = item.price_list_rate
+
+	if not item.margin_type:
+		return base_rate
+
+	if item.margin_type == "Percentage":
+		return flt(
+			base_rate * (1 + (item.margin_rate_or_amount / 100.0)),
+			item.precision("rate_with_margin"),
+		)
+
+	return flt(base_rate + item.margin_rate_or_amount, item.precision("rate_with_margin"))
+
+
+>>>>>>> e439cc8 (fix(buying): retain blanket order rate on purchase order quantity change)
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:
 		return
