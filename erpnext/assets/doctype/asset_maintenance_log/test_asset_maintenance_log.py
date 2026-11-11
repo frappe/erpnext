@@ -17,6 +17,24 @@ from erpnext.assets.doctype.asset_maintenance_log.asset_maintenance_log import (
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
+class TestAssetMaintenanceLogTaskRequired(FrappeTestCase):
+	def test_log_without_task_cannot_be_saved(self):
+		frappe.db.savepoint("test_asset_maintenance_log_requires_task")
+		try:
+			log = frappe.get_doc(
+				{
+					"doctype": "Asset Maintenance Log",
+					"naming_series": "ACC-AML-.YYYY.-",
+					"maintenance_status": "Completed",
+					"completion_date": nowdate(),
+				}
+			)
+			with self.assertRaisesRegex(frappe.ValidationError, "Please select a Task"):
+				log.insert(ignore_permissions=True)
+		finally:
+			frappe.db.rollback(save_point="test_asset_maintenance_log_requires_task")
+
+
 class TestAssetMaintenanceLog(FrappeTestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
