@@ -158,7 +158,12 @@ class RepostItemValuation(Document):
 			# the voucher's stock ledger entries may be the ones to recreate, so they can be missing
 			items += frappe.get_all(
 				"Serial and Batch Bundle",
-				filters={"voucher_type": self.voucher_type, "voucher_no": self.voucher_no, "docstatus": 1},
+				filters={
+					"voucher_type": self.voucher_type,
+					"voucher_no": self.voucher_no,
+					"docstatus": 1,
+					"is_cancelled": 0,
+				},
 				pluck="item_code",
 			)
 			items = list(set(items))
