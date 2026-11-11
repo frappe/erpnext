@@ -224,12 +224,12 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		frappe.qb.from_(dn_item)
 		.join(dn)
 		.on(dn.name == dn_item.parent)
-		.select(dn_item.name, dn_item.dn_detail, dn_item.qty)
+		.select(dn_item.name, dn_item.dn_detail, dn_item.qty, dn_item.conversion_factor)
 		.where(
 			(dn.return_against == delivery_note)
 			& (dn.is_return == 1)
 			& (dn.docstatus == 1)
-			& (dn_item.dn_detail.isnotnull())
+			& (IfNull(dn_item.dn_detail, "") != "")
 		)
 		.orderby(dn.posting_date, dn.posting_time, dn.name)
 		.run(as_dict=True)
@@ -242,16 +242,22 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		for row in frappe.get_all(
 			"Delivery Note Item",
 			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
-			fields=["name", "qty", "so_detail"],
+			fields=["name", "qty", "conversion_factor", "so_detail"],
 		)
 	}
 	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
 	so_overbilled_qty = get_so_overbilled_qty(
 		{row.so_detail for row in original_rows.values() if row.so_detail}
 	)
+	# A return row can use another UOM than its original row: compare qty in the original's UOM.
+	for row in return_rows:
+		original_factor = flt(original_rows[row.dn_detail].conversion_factor) or 1
+		row.to_original_uom = (flt(row.conversion_factor) or 1) / original_factor
+		row.original_qty = abs(flt(row.qty)) * row.to_original_uom
+
 	returned_qty = {}
 	for row in return_rows:
-		returned_qty[row.dn_detail] = flt(returned_qty.get(row.dn_detail)) + abs(flt(row.qty))
+		returned_qty[row.dn_detail] = flt(returned_qty.get(row.dn_detail)) + row.original_qty
 
 	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
 	settleable_qty = {}
@@ -268,9 +274,9 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 
 	settled_qty = {}
 	for row in return_rows:
-		settled = min(abs(flt(row.qty)), settleable_qty[row.dn_detail])
+		settled = min(row.original_qty, settleable_qty[row.dn_detail])
 		settleable_qty[row.dn_detail] -= settled
-		settled_qty[row.name] = settled
+		settled_qty[row.name] = flt(settled / row.to_original_uom, qty_precision)
 
 	return settled_qty
 

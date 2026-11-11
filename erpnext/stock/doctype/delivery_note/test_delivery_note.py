@@ -4787,6 +4787,33 @@ class TestDeliveryNote(ERPNextTestSuite):
 			deducted_return.reload()
 			self.assertEqual(deducted_return.per_billed, 100)
 
+	def test_return_in_another_unit_deducted_on_original_invoice_is_billed(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
+		delivery_note = create_delivery_note(item_code=item, qty=2, rate=1000, do_not_submit=True)
+		delivery_note.items[0].update({"uom": "Box", "conversion_factor": 10})
+		delivery_note.submit()
+
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].update({"uom": "Nos", "conversion_factor": 1, "qty": -10, "rate": 100})
+		deducted_return.submit()
+
+		invoice = make_sales_invoice(delivery_note.name)
+		self.assertEqual(invoice.items[0].qty, 1)
+		invoice.submit()
+
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
 	def test_return_after_mixed_dn_and_so_billing_is_not_settled(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
