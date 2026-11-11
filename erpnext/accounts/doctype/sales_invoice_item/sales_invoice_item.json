@@ -1059,7 +1059,8 @@
    "label": "Against Pick List",
    "no_copy": 1,
    "options": "Pick List",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "pick_list_item",
