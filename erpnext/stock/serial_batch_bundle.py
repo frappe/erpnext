@@ -281,12 +281,12 @@ class SerialBatchBundle:
 				"The type of transaction of Serial and Batch Bundle {0} is {1} but as per the Actual Qty {2} for the item {3} in the {4} {5} the type of transaction should be {6}"
 			).format(
 				link,
-				bold(sn_doc.type_of_transaction),
+				bold(_(sn_doc.type_of_transaction)),
 				self.sle.actual_qty,
 				bold(self.sle.item_code),
-				self.sle.voucher_type,
+				_(self.sle.voucher_type),
 				self.sle.voucher_no,
-				bold(correct_type),
+				bold(_(correct_type)),
 			)
 			frappe.throw(msg, title=_("Incorrect Type of Transaction"))
 
@@ -298,7 +298,7 @@ class SerialBatchBundle:
 				flt(sn_doc.total_qty, precision),
 				link,
 				flt(self.sle.actual_qty, precision),
-				self.sle.voucher_type,
+				_(self.sle.voucher_type),
 				self.sle.voucher_no,
 			)
 			frappe.throw(msg)
@@ -473,7 +473,7 @@ class SerialBatchBundle:
 					bold(self.sle.serial_and_batch_bundle),
 					bold(self.item_code),
 					bold(self.warehouse),
-					self.sle.voucher_type,
+					_(self.sle.voucher_type),
 					bold(self.sle.voucher_no),
 				)
 			)
