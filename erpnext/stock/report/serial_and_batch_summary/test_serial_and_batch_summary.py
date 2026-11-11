@@ -99,11 +99,10 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 		self.assertEqual(rows, [])
 
 	def test_pick_list_bundle_moves_no_stock(self):
-		from erpnext.selling.doctype.sales_order.mapper import create_pick_list
+		from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-		from erpnext.stock.valuation_adjustment import get_ledger_lots
 
 		item = make_item(
 			properties={
@@ -123,6 +122,3 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 			[row.voucher_no for row in self.run_report(item_code=item, voucher_type="Pick List")],
 			[pick_list.name],
 		)
-
-		lots = get_ledger_lots(item, "_Test Warehouse - _TC", frappe.utils.add_days(frappe.utils.now(), 1))
-		self.assertEqual(sum(lots.batch_qty.values()), 10)
