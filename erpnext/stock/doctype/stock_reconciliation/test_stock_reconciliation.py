@@ -1383,6 +1383,16 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(sr.docstatus, 1)
 		self.assertEqual(sr.items[0].current_qty, 3)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reconcile_all_serial_nos_of_an_item_allowing_negative_stock_with_reserved_stock(self):
+		item, _sales_order = self.make_item_with_reserved_stock(
+			{"has_serial_no": 1, "serial_no_series": "TRRN-.#####", "allow_negative_stock": 1}
+		)
+
+		sr = create_stock_reconciliation(item_code=item, warehouse="_Test Warehouse - _TC", qty=3, rate=150)
+
+		self.assertEqual(sr.docstatus, 1)
+
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
