@@ -94,7 +94,7 @@ frappe.ui.form.on("Blanket Order", {
 			}
 
 			frm.set_query("tc_name", function () {
-				return { filters: { selling: 1 } };
+				return { filters: { selling: 1, disabled: 0 } };
 			});
 		}
 		if (frm.doc.blanket_order_type === "Purchasing") {
@@ -105,7 +105,7 @@ frappe.ui.form.on("Blanket Order", {
 			}
 
 			frm.set_query("tc_name", function () {
-				return { filters: { buying: 1 } };
+				return { filters: { buying: 1, disabled: 0 } };
 			});
 		}
 	},
