@@ -341,7 +341,6 @@ class TestTermsTransactionValidation(FrappeTestCase):
 		).insert()
 		# saved before the terms sandbox lost frappe.db.get_value
 		terms.db_set("terms", "{{ frappe.db.get_value('Customer', customer, 'customer_group') }}")
-		self.addCleanup(frappe.db.rollback)
 		sales_order = make_sales_order(do_not_save=True)
 		sales_order.tc_name = terms.name
 		sales_order.insert()
