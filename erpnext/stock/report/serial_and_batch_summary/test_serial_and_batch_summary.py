@@ -122,3 +122,50 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 			[row.voucher_no for row in self.run_report(item_code=item, voucher_type="Pick List")],
 			[pick_list.name],
 		)
+<<<<<<< HEAD
+=======
+
+		lots = get_ledger_lots(item, "_Test Warehouse - _TC", frappe.utils.add_days(frappe.utils.now(), 1))
+		self.assertEqual(sum(lots.batch_qty.values()), 10)
+
+	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "POS Invoice"})
+	def test_unconsolidated_pos_invoice_bundle_moves_no_stock(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+		from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.valuation_adjustment import get_ledger_lots
+
+		user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, user.name)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBPOS-.#####",
+			}
+		).name
+		receipt = make_stock_entry(
+			item_code=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=50
+		)
+		pos_invoice = create_pos_invoice(
+			item=item,
+			qty=3,
+			rate=100,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			use_serial_batch_fields=1,
+			do_not_save=1,
+		)
+		pos_invoice.append("payments", {"mode_of_payment": "Cash", "amount": 300, "default": 1})
+		pos_invoice.submit()
+
+		self.assertEqual({row.voucher_type for row in self.run_report(item_code=item)}, {"Stock Entry"})
+
+		lots = get_ledger_lots(item, "_Test Warehouse - _TC", frappe.utils.add_days(frappe.utils.now(), 1))
+		self.assertEqual(sum(lots.batch_qty.values()), 10)
+>>>>>>> 7edf4dc (test: unconsolidated pos invoice bundle moves no stock)
