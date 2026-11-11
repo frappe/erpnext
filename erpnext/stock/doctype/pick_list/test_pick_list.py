@@ -1179,6 +1179,64 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
 		second_delivery.submit()
 
+<<<<<<< HEAD
+=======
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUSB-.#####"}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=5, basic_rate=100)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+		unpicked_serial_no = frappe.db.get_value(
+			"Serial No", {"item_code": component, "serial_no": ("not in", picked_serial_nos)}, "serial_no"
+		)
+
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.items[0].qty = 1
+		delivery_note.packed_items[0].qty = 1
+		delivery_note.packed_items[0].serial_no = unpicked_serial_no
+		delivery_note.save()
+		delivery_note.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].delivered_qty, 1)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_with_repeated_serial_component_delivers_serials_per_packed_row(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRPT-.#####"}
+		).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=10, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 1})
+		bundle_doc.append("items", {"item_code": component, "qty": 2})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
+		self.assertEqual(
+			[row.serial_no for row in delivery_note.packed_items],
+			[row.serial_no for row in pick_list.locations],
+		)
+		delivery_note.submit()
+
+>>>>>>> b7ace94 (test: bundle delivered with an unpicked serial no counts on the pick list)
 	def test_next_pick_list_picks_what_is_left_on_each_bundle_component(self):
 		warehouse = "_Test Warehouse - _TC"
 		bundle, (component_a, component_b) = create_product_bundle([1, 2])
