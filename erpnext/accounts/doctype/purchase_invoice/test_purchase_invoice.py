@@ -4015,6 +4015,19 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 10})
+	def test_pr_pi_billing_exactly_the_over_billing_allowance(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_pr,
+		)
+
+		pr = make_purchase_receipt(qty=10, rate=1000)
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.items[0].qty = 11
+		pi.submit()
+
+		self.assertEqual(pi.docstatus, 1)
+
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings",
