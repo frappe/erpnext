@@ -88,7 +88,7 @@ class InventoryDimension(Document):
 				frappe.throw(
 					_(
 						"The user can not change value of the field {0} because stock transactions exists against the dimension {1}."
-					).format(bold(field.label), bold(self.name)),
+					).format(bold(_(field.label)), bold(self.name)),
 					DoNotChangeError,
 				)
 
