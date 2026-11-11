@@ -449,6 +449,10 @@ class SellingController(StockController):
 				p, self, item_rows[p.parent_detail_docname], picked_serial_nos, picked_batches
 			)
 
+		# validate ran before these bundles existed
+		if service.is_batch_check_needed():
+			service.validate_outward_bundle_batches(rows=packed_rows)
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
