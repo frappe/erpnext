@@ -1052,26 +1052,12 @@ class PickList(TransactionBase):
 		self._set_delivery_status_from_items()
 
 	def _get_delivered_bundle_component_qty(self, sales_order_items):
-<<<<<<< HEAD
-		delivered_qty = defaultdict(float)
-		for row in self._get_delivered_packed_items(sales_order_items):
-			key = (
-				row.so_detail,
-				row.item_code,
-				row.warehouse,
-				row.batch_no or "",
-				row.serial_no or "",
-			)
-			delivered_qty[key] += flt(row.delivered_qty)
-=======
 		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
 		delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
-		for parenttype in ("Delivery Note", "Sales Invoice"):
-			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
-				delivered_qty[key] += flt(row.delivered_qty)
-				delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
->>>>>>> a946ccd (fix(stock): count delivered serial nos per pick list row of a product bundle)
+		for row in self._get_delivered_packed_items(sales_order_items):
+			key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
+			delivered_qty[key] += flt(row.delivered_qty)
+			delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
 
 		return delivered_qty, delivered_serial_nos
 

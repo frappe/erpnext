@@ -1047,9 +1047,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(delivery_note.items[0].qty, 2)
 		self.assertEqual([row.qty for row in delivery_note.packed_items], [2, 4])
 
-<<<<<<< HEAD
-=======
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_serialized_bundle_is_delivered_partly_from_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
@@ -1080,34 +1078,6 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_delivery.packed_items[0].serial_no), picked_serial_nos[2:])
 		second_delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	def test_bundle_with_repeated_serial_component_delivers_serials_per_packed_row(self):
-		warehouse = "_Test Warehouse - _TC"
-		component = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRPT-.#####"}
-		).name
-		make_stock_entry(item=component, to_warehouse=warehouse, qty=10, rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component, "qty": 1})
-		bundle_doc.append("items", {"item_code": component, "qty": 2})
-		bundle_doc.insert()
-		bundle_doc.submit()
-
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=1)
-		pick_list = create_pick_list(sales_order.name)
-		for row in pick_list.locations:
-			row.picked_qty = row.qty
-		pick_list.submit()
-
-		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
-		self.assertEqual(
-			[row.serial_no for row in delivery_note.packed_items],
-			[row.serial_no for row in pick_list.locations],
-		)
-		delivery_note.submit()
-
->>>>>>> be706b1 (test: serialized product bundle is delivered partly from a pick list)
 	def test_next_pick_list_picks_what_is_left_on_each_bundle_component(self):
 		warehouse = "_Test Warehouse - _TC"
 		bundle, (component_a, component_b) = create_product_bundle([1, 2])
