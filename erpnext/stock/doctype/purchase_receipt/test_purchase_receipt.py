@@ -35,6 +35,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 class TestPurchaseReceipt(ERPNextTestSuite):
 	def setUp(self):
+		# Database rollback does not reset the perpetual-inventory cache.
+		self.addCleanup(setattr, frappe.local, "enable_perpetual_inventory", {})
 		frappe.local.future_sle = {}
 		self.load_test_records("Purchase Receipt")
 
@@ -4745,10 +4747,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 		pr.cancel()
 
-		company_doc.enable_perpetual_inventory = False
-		company_doc.stock_received_but_not_billed = None
-		company_doc.default_inventory_account = None
-		company_doc.save()
+		# The stock ledger remains, so restore the fixture without the perpetual inventory check.
+		company_doc.db_set(
+			{
+				"enable_perpetual_inventory": 0,
+				"stock_received_but_not_billed": None,
+				"default_inventory_account": None,
+			}
+		)
 
 	def create_lcv(self, receipt_document_type, receipt_document, company, expense_account, charges=50):
 		ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
@@ -4881,10 +4887,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.reload()
 		pr.cancel()
 
-		company_doc.enable_perpetual_inventory = False
-		company_doc.stock_received_but_not_billed = None
-		company_doc.default_inventory_account = None
-		company_doc.save()
+		# The stock ledger remains, so restore the fixture without the perpetual inventory check.
+		company_doc.db_set(
+			{
+				"enable_perpetual_inventory": 0,
+				"stock_received_but_not_billed": None,
+				"default_inventory_account": None,
+			}
+		)
 
 	def test_do_not_use_batchwise_valuation_rate(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
