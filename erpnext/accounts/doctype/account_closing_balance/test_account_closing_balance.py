@@ -121,6 +121,40 @@ class TestAccountClosingBalance(ERPNextTestSuite):
 			(1500, 17),
 		)
 
+	def test_carried_balance_is_restated_when_reporting_currency_changes(self):
+		company = "_Test Company"
+		frappe.db.set_value("Company", company, "reporting_currency", "USD")
+		frappe.clear_document_cache("Company", company)
+		self.addCleanup(frappe.clear_document_cache, "Company", company)
+
+		module = "erpnext.accounts.doctype.account_closing_balance.account_closing_balance"
+		previous = entry(
+			company=company,
+			account="Sales - _TC",
+			closing_date="2025-04-30",
+			credit=1000,
+			credit_in_account_currency=1000,
+			credit_in_reporting_currency=1000,
+			reporting_currency="INR",
+		)
+		current = entry(company=company, account="Sales - _TC", credit=500, credit_in_account_currency=500)
+		rates = {"2025-04-30": 0.012, "2025-05-31": 0.01}
+
+		with (
+			patch(f"{module}.get_previous_closing_entries", return_value=[previous]),
+			patch(f"{module}.get_reporting_currency_exchange_rate", side_effect=lambda _, date: rates[date]),
+		):
+			make_closing_entries([current], "ACB-TEST-PCV", company, "2025-05-31")
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Account Closing Balance",
+				{"period_closing_voucher": "ACB-TEST-PCV"},
+				["credit", "credit_in_reporting_currency", "reporting_currency"],
+			),
+			(1500, 17, "USD"),
+		)
+
 
 def make_test_closing_entries(count):
 	closing_entries = [
