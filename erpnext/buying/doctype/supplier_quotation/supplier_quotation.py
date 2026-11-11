@@ -283,9 +283,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 				# no qty tracking between the two, so dedupe on the row reference alone
 				"condition": lambda d: d.name not in mapped_items and select_item(d),
 			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -307,7 +305,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				},
 			},
 			"Supplier Quotation Item": {"doctype": "Purchase Invoice Item"},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 	)
