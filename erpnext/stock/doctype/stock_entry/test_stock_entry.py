@@ -6078,6 +6078,29 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		with self.set_user(user):
 			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
+	def test_make_stock_entry_needs_stock_entry_permission(self):
+		user = "test_make_stock_entry_perm@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Make Stock Entry",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Delivery User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		with self.set_user(user):
+			self.assertRaises(
+				frappe.PermissionError,
+				make_stock_entry,
+				item_code="_Test Item",
+				target="_Test Warehouse - _TC",
+				qty=1,
+				do_not_save=1,
+			)
+
 	# ── get_expired_batches ────────────────────────────────────────────────────
 
 	def test_get_expired_batches_includes_expired_batch(self):
