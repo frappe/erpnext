@@ -97,3 +97,28 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 			rows = get_batch_nos("Batch", "Summary-Hidden", "name", 0, 5, {"item_code": item})
 
 		self.assertEqual(rows, [])
+
+	def test_pick_list_bundle_moves_no_stock(self):
+		from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SBPL-.#####",
+			}
+		).name
+		make_stock_entry(item_code=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=50)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		self.assertEqual({row.voucher_type for row in self.run_report(item_code=item)}, {"Stock Entry"})
+		self.assertEqual(
+			[row.voucher_no for row in self.run_report(item_code=item, voucher_type="Pick List")],
+			[pick_list.name],
+		)
