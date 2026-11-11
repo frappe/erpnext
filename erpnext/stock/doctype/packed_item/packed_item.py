@@ -358,16 +358,25 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	if so_packed_item:
 		filters["product_bundle_item"] = so_packed_item.name
 
-	pl_row = frappe.db.get_value(
+	pl_rows = frappe.get_all(
 		"Pick List Item",
 		filters,
+<<<<<<< HEAD
 		["warehouse", "batch_no", "serial_no"],
 		as_dict=True,
 		order_by="qty desc",
+=======
+		["item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
+		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
+		order_by="qty desc, name asc",
+>>>>>>> 414fbd5 (fix(stock): map a bundle component's undelivered pick list row to the next delivery)
 	)
 
-	if not pl_row:
+	if not pl_rows:
 		return
+
+	# a component picked from several warehouses moves on to the rows not delivered yet
+	pl_row = next((row for row in pl_rows if flt(row.picked_qty) > flt(row.delivered_qty)), pl_rows[0])
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
