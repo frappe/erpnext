@@ -1304,6 +1304,23 @@ class TestPurchaseReceipt(FrappeTestCase):
 			},
 		)
 
+	def test_purchase_user_can_submit_receipt_of_an_item_that_auto_creates_batches(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PUAB-.#####",
+			}
+		).name
+		user = create_user("pr-purchase-user@example.com", "Purchase User").name
+		with self.set_user(user):
+			pr = make_purchase_receipt(item_code=item, qty=1)
+
+		self.assertTrue(get_batch_from_bundle(pr.items[0].serial_and_batch_bundle))
+
 	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
 		item = make_item(
