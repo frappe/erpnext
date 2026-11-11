@@ -53,6 +53,9 @@ def after_install():
 	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
 	frappe.db.commit()
 
+	if "payments" in frappe.get_installed_apps():
+		frappe.get_attr("payments.utils.make_payments_erpnext_custom_fields")()
+
 
 def grant_address_read_to_accounts_manager():
 	if not frappe.db.exists("Role", "Accounts Manager"):

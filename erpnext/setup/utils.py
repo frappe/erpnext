@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import os
 from math import isfinite
 from urllib.parse import quote
 
@@ -279,3 +280,15 @@ def set_root_as_default_parent(doc):
 	root = get_root_of(doc.doctype)
 	if root != doc.name:
 		doc.set(doc.nsm_parent_field, root)
+
+
+def validate_payments_compatibility():
+	if "payments" not in frappe.get_installed_apps():
+		return
+
+	# Payment Gateway Account moved to payments, so an older payments app doesn't ship it
+	doctype_json = frappe.get_app_path(
+		"payments", "payments", "doctype", "payment_gateway_account", "payment_gateway_account.json"
+	)
+	if not os.path.exists(doctype_json):
+		frappe.throw(_("Incompatible Payments app version detected. Please update the Payments app."))

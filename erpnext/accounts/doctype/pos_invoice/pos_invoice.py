@@ -32,6 +32,7 @@ from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.stock_ledger import is_negative_stock_allowed
 from erpnext.stock.utils import get_bin_qty_map
+from erpnext.utilities import payment_app_import_guard
 
 
 class ProductBundleStockValidationError(frappe.ValidationError):
@@ -845,7 +846,9 @@ class POSInvoice(SalesInvoice):
 				if not self.contact_mobile:
 					frappe.throw(_("Please enter the phone number first"))
 
-				pay_req = self.get_existing_payment_request(pay)
+				with payment_app_import_guard():
+					pay_req = self.get_existing_payment_request(pay)
+
 				if not pay_req:
 					pay_req = self.get_new_payment_request(pay)
 					pay_req.submit()
@@ -871,20 +874,25 @@ class POSInvoice(SalesInvoice):
 				)
 
 	def get_new_payment_request(self, mop):
-		payment_gateway_account = frappe.db.get_value(
+		payment_gateway_details = frappe.db.get_value(
 			"Payment Gateway Account",
 			{
 				"payment_account": mop.account,
 			},
-			["name"],
+			["parent", "payment_account"],
+			as_dict=1,
 		)
+
+		if not payment_gateway_details:
+			frappe.throw(_("No Payment Gateway Account is configured for account {0}").format(mop.account))
 
 		args = {
 			"dt": "POS Invoice",
 			"dn": self.name,
 			"recipient_id": self.contact_mobile,
 			"mode_of_payment": mop.mode_of_payment,
-			"payment_gateway_account": payment_gateway_account,
+			"payment_gateway": payment_gateway_details.parent,
+			"payment_account": payment_gateway_details.payment_account,
 			"payment_request_type": "Inward",
 			"party_type": "Customer",
 			"party": self.customer,
@@ -893,18 +901,10 @@ class POSInvoice(SalesInvoice):
 		return make_payment_request(**args)
 
 	def get_existing_payment_request(self, pay):
-		payment_gateway_account = frappe.db.get_value(
-			"Payment Gateway Account",
-			{
-				"payment_account": pay.account,
-			},
-			["name"],
-		)
-
 		filters = {
 			"reference_doctype": "POS Invoice",
 			"reference_name": self.name,
-			"payment_gateway_account": payment_gateway_account,
+			"payment_account": pay.account,
 			"email_to": self.contact_mobile,
 		}
 		pr = frappe.db.get_value("Payment Request", filters=filters)

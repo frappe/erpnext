@@ -25,7 +25,6 @@
   "payment_plan_section",
   "product_price_id",
   "column_break_16",
-  "payment_gateway",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -123,12 +122,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "payment_gateway",
-   "fieldtype": "Link",
-   "label": "Payment Gateway",
-   "options": "Payment Gateway Account"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -152,7 +145,7 @@
  ],
  "icon": "calendar-sync",
  "links": [],
- "modified": "2024-03-27 13:10:47.998597",
+ "modified": "2026-11-06 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",

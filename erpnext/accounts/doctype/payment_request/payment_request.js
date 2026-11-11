@@ -1,20 +1,22 @@
 frappe.ui.form.on("Payment Request", {
 	setup: function (frm) {
-		frm.add_fetch("payment_gateway_account", "message", "message");
-
 		frm.set_query("party_type", function () {
 			return {
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
 
-		frm.set_query("payment_gateway_account", function () {
-			return {
-				filters: {
-					company: frm.doc.company,
-				},
-			};
-		});
+		if (frm.fields_dict.payment_account) {
+			frm.set_query("payment_account", function () {
+				return {
+					query: "erpnext.accounts.doctype.payment_request.payment_request.get_payment_account",
+					filters: {
+						payment_gateway: frm.doc.payment_gateway,
+						company: frm.doc.company,
+					},
+				};
+			});
+		}
 
 		frm.set_query("bank_account", function () {
 			return {
@@ -26,6 +28,34 @@ frappe.ui.form.on("Payment Request", {
 				},
 			};
 		});
+	},
+
+	payment_gateway: function (frm) {
+		frm.set_value("payment_account", null);
+	},
+
+	payment_account: function (frm) {
+		if (!frm.doc.payment_account) {
+			frm.set_value("payment_channel", null);
+			return;
+		}
+
+		frappe.db.get_value(
+			"Payment Gateway Account",
+			{
+				parent: frm.doc.payment_gateway,
+				company: frm.doc.company,
+				payment_account: frm.doc.payment_account,
+			},
+			["payment_channel", "message"],
+			(r) => {
+				frm.set_value("payment_channel", r?.payment_channel || null);
+				if (r?.message) {
+					frm.set_value("message", r.message);
+				}
+			},
+			"Payment Gateway"
+		);
 	},
 });
 
@@ -91,7 +121,9 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 });
 
 frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
-	frm.toggle_reqd("payment_gateway_account", frm.doc.is_a_subscription);
+	if (frm.fields_dict.payment_gateway) {
+		frm.toggle_reqd("payment_gateway", frm.doc.is_a_subscription);
+	}
 	frm.toggle_reqd("subscription_plans", frm.doc.is_a_subscription);
 
 	if (frm.doc.is_a_subscription && frm.doc.reference_doctype && frm.doc.reference_name) {
