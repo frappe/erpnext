@@ -1289,6 +1289,110 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
 		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
 
+	def make_item_with_reserved_stock(self, properties):
+		"""Receive 3 units of a new item and reserve 1 for a Sales Order."""
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = self.make_item(properties={"is_stock_item": 1, **properties}).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+		sales_order = make_sales_order(
+			item_code=item, warehouse="_Test Warehouse - _TC", qty=1, do_not_submit=True
+		)
+		sales_order.reserve_stock = 1
+		sales_order.items[0].reserve_stock = 1
+		sales_order.submit()
+		return item, sales_order
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reconcile_all_serial_batch_counts_reserved_stock(self):
+		warehouse = "_Test Warehouse - _TC"
+		for properties in (
+			{"has_serial_no": 1, "serial_no_series": "TRRS-.#####"},
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRRB-.#####"},
+		):
+			with self.subTest(properties=properties):
+				item, sales_order = self.make_item_with_reserved_stock(properties)
+
+				sr = create_stock_reconciliation(item_code=item, warehouse=warehouse, qty=3, rate=150)
+
+				self.assertEqual(sr.items[0].current_qty, 3)
+				self.assertEqual(
+					frappe.db.get_value("Bin", {"item_code": item, "warehouse": warehouse}, "actual_qty"), 3
+				)
+				self.assertEqual(
+					frappe.db.get_value(
+						"Stock Reservation Entry", {"voucher_no": sales_order.name}, "status"
+					),
+					"Reserved",
+				)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "use_serial_batch_fields": 1}
+	)
+	def test_serial_batch_fields_reconciliation_counts_reserved_serial_nos(self):
+		item, _sales_order = self.make_item_with_reserved_stock(
+			{"has_serial_no": 1, "serial_no_series": "TRRF-.#####"}
+		)
+
+		sr = create_stock_reconciliation(
+			item_code=item,
+			warehouse="_Test Warehouse - _TC",
+			qty=3,
+			rate=150,
+			use_serial_batch_fields=1,
+			reconcile_all_serial_batch=0,
+		)
+
+		self.assertEqual(sr.docstatus, 1)
+		self.assertEqual(len(get_serial_nos_from_bundle(sr.items[0].current_serial_and_batch_bundle)), 3)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reconciliation_cannot_move_stock_out_of_a_reserved_batch(self):
+		item, _sales_order = self.make_item_with_reserved_stock(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRRM-.#####"}
+		)
+		new_batch = frappe.get_doc({"doctype": "Batch", "item": item, "batch_id": "TRRM-NEW"}).insert().name
+
+		self.assertRaises(
+			frappe.ValidationError,
+			create_stock_reconciliation,
+			item_code=item,
+			warehouse="_Test Warehouse - _TC",
+			qty=3,
+			rate=100,
+			batch_no=new_batch,
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_batch_wise_reconciliation_counts_reserved_batch_qty(self):
+		item, _sales_order = self.make_item_with_reserved_stock(
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TRRW-.#####"}
+		)
+		batch_no = frappe.db.get_value("Batch", {"item": item}, "name")
+
+		sr = create_stock_reconciliation(
+			item_code=item,
+			warehouse="_Test Warehouse - _TC",
+			qty=3,
+			rate=150,
+			batch_no=batch_no,
+			reconcile_all_serial_batch=0,
+		)
+
+		self.assertEqual(sr.docstatus, 1)
+		self.assertEqual(sr.items[0].current_qty, 3)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reconcile_all_serial_nos_of_an_item_allowing_negative_stock_with_reserved_stock(self):
+		item, _sales_order = self.make_item_with_reserved_stock(
+			{"has_serial_no": 1, "serial_no_series": "TRRN-.#####", "allow_negative_stock": 1}
+		)
+
+		sr = create_stock_reconciliation(item_code=item, warehouse="_Test Warehouse - _TC", qty=3, rate=150)
+
+		self.assertEqual(sr.docstatus, 1)
+
 	def test_not_reconcile_all_batch(self):
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
