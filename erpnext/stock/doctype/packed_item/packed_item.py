@@ -413,7 +413,12 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
+<<<<<<< HEAD
 	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
+=======
+	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos, get_serial_nos_in_stock
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+>>>>>>> 40bce48 (fix(stock): match a packed row's kept serial nos to their pick list row by serial no)
 
 	filters = {
 		"item_code": pi_row.item_code,
@@ -439,12 +444,13 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	precision = frappe.get_precision("Pick List Item", "delivered_qty")
 	pending_rows = [row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0]
 	pending_rows = pending_rows or pl_rows
-	# kept serial nos stay on the warehouse and batch they were mapped from
+	# kept serial nos stay on the pick list row they were mapped from
+	kept_serial_nos = {number.lower() for number in get_serial_nos(pi_row.serial_no)}
 	pl_row = next(
 		(
 			row
 			for row in pending_rows
-			if pi_row.serial_no and (row.warehouse, row.batch_no) == (pi_row.warehouse, pi_row.batch_no)
+			if kept_serial_nos & {number.lower() for number in get_serial_nos(row.serial_no)}
 		),
 		pending_rows[0],
 	)
