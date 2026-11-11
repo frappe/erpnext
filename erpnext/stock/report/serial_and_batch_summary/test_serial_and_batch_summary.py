@@ -7,6 +7,11 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestSerialAndBatchSummary(ERPNextTestSuite):
+	def run_report(self, **extra):
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import execute
+
+		return execute(frappe._dict(extra))[1]
+
 	def test_serial_filter_needs_voucher_and_item_read(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_serial_nos
@@ -92,7 +97,7 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 		self.assertEqual(rows, [])
 
 	def test_pick_list_bundle_moves_no_stock(self):
-		from erpnext.selling.doctype.sales_order.mapper import create_pick_list
+		from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
