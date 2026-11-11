@@ -366,12 +366,6 @@ class StockReconciliation(StockController):
 			if not item.item_code:
 				continue
 
-			# A Standard Cost item is valued at the standard rate regardless of serial/batch, so no
-			# serial/batch bundle is created; update_stock_ledger routes these rows through the single
-			# SLE path (qty may change, valuation always comes from the standard rate).
-			if is_standard_cost_item(item.item_code, self.company):
-				continue
-
 			item_details = frappe.get_cached_value(
 				"Item", item.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
@@ -678,10 +672,6 @@ class StockReconciliation(StockController):
 			if not item.item_code:
 				continue
 
-			# Standard Cost items are valued at the standard rate; no serial/batch bundle needed.
-			if is_standard_cost_item(item.item_code, self.company):
-				continue
-
 			if item.use_serial_batch_fields:
 				continue
 
@@ -780,9 +770,7 @@ class StockReconciliation(StockController):
 				if item.valuation_rate is None and (item_dict.get("rate") or item_dict.get("qty")):
 					item.valuation_rate = item_dict.get("rate")
 
-				# Standard Cost items are valued at the standard rate; don't pull serial nos onto the row,
-				# or a serial/batch bundle would be built for what stays a single standard-rate SLE.
-				if item_dict.get("serial_nos") and not is_standard_cost_item(item.item_code, self.company):
+				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
 					if self.purpose == "Stock Reconciliation" and not item.serial_no and item.qty:
 						item.serial_no = item.current_serial_no
@@ -1027,12 +1015,7 @@ class StockReconciliation(StockController):
 				"Item", row.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 			)
 
-			# A Standard Cost item is always valued at the standard rate (qty may change, the rate does
-			# not), so even a serialized/batched one is posted through the single SLE path without a
-			# serial/batch bundle, the same as a non-serial item.
-			if (item.has_serial_no or item.has_batch_no) and not is_standard_cost_item(
-				row.item_code, self.company
-			):
+			if item.has_serial_no or item.has_batch_no:
 				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
 				if row.serial_and_batch_bundle:

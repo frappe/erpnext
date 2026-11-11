@@ -1297,11 +1297,12 @@ class update_entries_after:
 				).format(bold(sle.item_code), bold(self.company), bold(sle.posting_date))
 			)
 
-		# an adjustment entry moves stock rather than setting a balance
+		# an adjustment entry or a bundle leg moves stock rather than setting a balance
 		if (
 			sle.voucher_type == "Stock Reconciliation"
 			and sle.get("qty_after_transaction") is not None
 			and not sle.is_adjustment_entry
+			and not sle.serial_and_batch_bundle
 		):
 			self.wh_data.qty_after_transaction = flt(sle.qty_after_transaction)
 		else:
