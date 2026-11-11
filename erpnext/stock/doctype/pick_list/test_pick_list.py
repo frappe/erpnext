@@ -3340,6 +3340,45 @@ class TestPickList(ERPNextTestSuite):
 		second_transfer.save().submit()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_next_delivery_from_pick_list_skips_a_returned_serial_no(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLRSN-.#####"}
+		).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=5, basic_rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+
+		for item_code, table in ((component, "items"), (bundle, "packed_items")):
+			with self.subTest(table=table):
+				sales_order = make_sales_order(item_code=item_code, warehouse=warehouse, qty=3, rate=100)
+				pick_list = create_pick_list(sales_order.name)
+				pick_list.submit()
+				picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+
+				first_delivery = create_delivery_note(pick_list.name)
+				first_delivery.items[0].qty = 2
+				first_delivery.get(table)[0].qty = 2
+				first_delivery.get(table)[0].serial_no = "\n".join(picked_serial_nos[:2])
+				first_delivery.save()
+				first_delivery.submit()
+
+				sales_return = make_sales_return(first_delivery.name)
+				sales_return.items[0].qty = -1
+				sales_return.get(table)[0].qty = -1
+				sales_return.get(table)[0].serial_no = picked_serial_nos[0]
+				sales_return.save()
+				sales_return.submit()
+
+				second_delivery = create_delivery_note(pick_list.name)
+				self.assertEqual(
+					get_serial_nos(second_delivery.get(table)[0].serial_no), picked_serial_nos[2:]
+				)
+				second_delivery.submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_stock_entry_from_pick_list_skips_a_serial_no_moved_back_to_its_warehouse(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as pick_list_for_wo
