@@ -909,89 +909,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(len(serial_nos), 3)
 		self.assertEqual(len(set(serial_nos)), 3)
 
-<<<<<<< HEAD
-	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-=======
-		self.assertFalse(
-			frappe.db.exists(
-				"Stock Reservation Entry",
-				{"from_voucher_type": "Pick List", "from_voucher_no": pick_list.name, "docstatus": 1},
-			)
-		)
-
-	def test_delivery_pick_prefers_the_order_warehouse_and_skips_transit(self):
-		item = make_item(properties={"is_stock_item": 1}).name
-		for warehouse in ("Goods In Transit - _TC", "_Test Warehouse 1 - _TC", "_Test Warehouse - _TC"):
-			make_stock_entry(item=item, to_warehouse=warehouse, qty=10, basic_rate=100)
-
-		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=15, rate=100)
-		pick_list = create_pick_list(sales_order.name)
-
-		self.assertEqual(
-			[(row.warehouse, row.qty) for row in pick_list.locations],
-			[("_Test Warehouse - _TC", 10), ("_Test Warehouse 1 - _TC", 5)],
-		)
-
-	def test_work_order_pick_leaves_out_the_wip_warehouse(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.mapper import (
-			create_pick_list as create_pick_list_from_wo,
-		)
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-		root_warehouse = frappe.db.get_value(
-			"Warehouse", {"company": "_Test Company", "parent_warehouse": ["IS", "NOT SET"], "is_group": 1}
-		)
-		wip_warehouse = create_warehouse("_Test Pick List WIP", {"parent_warehouse": root_warehouse})
-		raw_material = make_item(properties={"is_stock_item": 1}).name
-		finished_good = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=finished_good, raw_materials=[raw_material], rm_qty=2)
-		make_stock_entry(item=raw_material, to_warehouse="_Test Warehouse - _TC", qty=6, basic_rate=100)
-		make_stock_entry(item=raw_material, to_warehouse=wip_warehouse, qty=50, basic_rate=100)
-		work_order = make_wo_order_test_record(
-			production_item=finished_good,
-			bom_no=bom.name,
-			qty=5,
-			source_warehouse="_Test Warehouse - _TC",
-			wip_warehouse=wip_warehouse,
-		)
-
-		pick_list = create_pick_list_from_wo(work_order.name, None, 5)
-		self.assertNotIn(wip_warehouse, [row.warehouse for row in pick_list.locations])
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
-	def test_work_order_pick_uses_serials_reserved_for_it(self):
-		pick_list = make_work_order_pick_list_with_reserved_serials()
-		sre_name = frappe.db.get_value("Stock Reservation Entry", {"voucher_no": pick_list.work_order})
-		reserved_serial_nos = frappe.get_all(
-			"Serial and Batch Entry", filters={"parent": sre_name}, pluck="serial_no"
-		)
-
-		self.assertEqual(
-			sorted(sn for row in pick_list.locations for sn in get_serial_nos(row.serial_no)),
-			sorted(
-				SerialBatchIdentity("Serial No").get_numbers(
-					pick_list.locations[0].item_code, reserved_serial_nos
-				)
-			),
-		)
-		pick_list.submit()
-
-		self.assertEqual(pick_list.docstatus, 1)
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
-	def test_stock_entry_from_work_order_pick_list_moves_picked_serials(self):
-		pick_list = make_work_order_pick_list_with_reserved_serials()
-		pick_list.submit()
-
-		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
-		stock_entry.submit()
-
-		self.assertEqual(stock_entry.items[0].serial_no, pick_list.locations[0].serial_no)
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_delivery_from_pick_list_gets_only_undelivered_serial_nos(self):
 		item = make_item(
 			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUND-.#####"}
@@ -1012,9 +930,8 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_delivery.items[0].serial_no), picked_serial_nos[2:])
 		second_delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
->>>>>>> 4de8f8a (test: next delivery from a pick list gets only undelivered serial nos)
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_rows_of_the_same_serialized_item_get_the_oldest_serial_nos_in_a_fractional_uom(self):
 		frappe.db.set_value("UOM", "Kg", "must_be_whole_number", 0)
 		item = make_item(
