@@ -209,10 +209,60 @@ class SerialBatchBundle:
 				"is_rejected": self.is_rejected_entry(),
 				"make_bundle_from_sle": 1,
 				"sle": self.sle,
+				**self.get_entries_held_by_voucher(),
 			}
 		).make_serial_and_batch_bundle()
 
 		self.set_serial_and_batch_bundle(sn_doc)
+
+	def get_entries_held_by_voucher(self):
+		"""Serial nos and batch qty that draft bundles on this voucher's rows hold, to skip when picking."""
+		if self.sle.actual_qty > 0:
+			return {}
+
+		item_doctype = self.child_doctype
+		if item_doctype == "Packed Item":
+			item_doctype = self.sle.voucher_type + " Item"
+
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		entries = (
+			frappe.qb.from_(bundle)
+			.inner_join(entry)
+			.on(entry.parent == bundle.name)
+			.select(entry.serial_no, entry.batch_no, entry.qty, bundle.warehouse)
+			.where(
+				(
+					bundle.name.isin(self.get_bundles_on_voucher_rows(item_doctype))
+					| bundle.name.isin(self.get_bundles_on_voucher_rows("Packed Item"))
+				)
+				& (bundle.item_code == self.item_code)
+				& (bundle.type_of_transaction == "Outward")
+				& (bundle.docstatus == 0)
+			)
+		).run(as_dict=True)
+
+		held_batches = frappe._dict()
+		for row in entries:
+			if row.batch_no:
+				held = held_batches.setdefault(
+					(row.batch_no, row.warehouse),
+					frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=0),
+				)
+				held.qty += row.qty
+
+		return {
+			"ignore_serial_nos": [row.serial_no for row in entries if row.serial_no],
+			"already_picked_batches": held_batches,
+		}
+
+	def get_bundles_on_voucher_rows(self, doctype):
+		row = frappe.qb.DocType(doctype)
+		return (
+			frappe.qb.from_(row)
+			.select(row.serial_and_batch_bundle)
+			.where((row.parenttype == self.sle.voucher_type) & (row.parent == self.sle.voucher_no))
+		)
 
 	def validate_actual_qty(self, sn_doc):
 		link = get_link_to_form("Serial and Batch Bundle", sn_doc.name)
