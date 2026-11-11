@@ -6,7 +6,7 @@ from frappe.model.naming import parse_naming_series
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
-	set_amount_in_reporting_currency,
+	get_reporting_currency_exchange_rate,
 )
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
@@ -250,6 +250,4 @@ class TestGLEntry(ERPNextTestSuite):
 		self.assertTrue(exchange_rates)
 		self.assertFalse(any(exchange_rates))
 
-		closing_entry = frappe._dict(debit=100, credit=0)
-		set_amount_in_reporting_currency(closing_entry, company, je.posting_date)
-		self.assertEqual(closing_entry, {"debit": 100, "credit": 0})
+		self.assertEqual(get_reporting_currency_exchange_rate(company, je.posting_date), 0)
