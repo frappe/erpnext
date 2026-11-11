@@ -26,6 +26,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
+from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -1350,6 +1351,36 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note = frappe.get_doc(create_delivery_note(pick_list.name))
 		self.assertEqual(delivery_note.items[0].qty, 2)
 		self.assertEqual(delivery_note.packed_items[0].qty, 20)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_bundle_delivery_from_pick_list_keeps_the_picked_batch(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PLBB-.#####",
+			}
+		).name
+		stock_entry = make_stock_entry(item=component, to_warehouse=warehouse, qty=5, rate=100)
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=10, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=4)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.submit()
+
+		batch_no = get_batch_from_bundle(stock_entry.items[0].serial_and_batch_bundle)
+		self.assertEqual(
+			get_batches_from_bundle(delivery_note.packed_items[0].serial_and_batch_bundle), {batch_no: -4}
+		)
 
 	def test_bundle_with_repeated_component_is_picked_per_packed_row(self):
 		warehouse = "_Test Warehouse - _TC"
