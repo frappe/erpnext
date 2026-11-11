@@ -2171,11 +2171,17 @@ class update_entries_after:
 					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
 
 					if allowed_qty > 0:
-						msg = "{} As {} units are reserved for other sales orders, you are allowed to consume only {} units.".format(
-							msg, frappe.bold(reserved_stock), frappe.bold(allowed_qty)
-						)
+						msg = _(
+							"{0} As {1} units are reserved for other sales orders, you are allowed to consume only {2} units."
+						).format(msg, frappe.bold(reserved_stock), frappe.bold(allowed_qty))
 					else:
+<<<<<<< HEAD
 						msg = f"{msg} As the full stock is reserved for other sales orders, you're not allowed to consume the stock."
+=======
+						msg = _(
+							"{0} As the full stock is reserved for other transactions, you're not allowed to consume the stock."
+						).format(msg)
+>>>>>>> c242f84 (fix(stock): make serial and batch error messages translatable)
 
 				msg_list.append(msg)
 
