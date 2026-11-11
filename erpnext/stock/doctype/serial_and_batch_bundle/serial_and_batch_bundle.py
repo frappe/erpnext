@@ -304,15 +304,22 @@ class SerialandBatchBundle(Document):
 				reservation = get_serial_no_reservation(self.item_code, serial_no, self.warehouse)
 				if reservation:
 					self.throw_error_message(
-						f"Serial No {bold(serial_no)} is in warehouse {bold(self.warehouse)}"
-						f" but is reserved for {reservation.voucher_type} {bold(reservation.voucher_no)}"
-						f" via {get_link_to_form('Stock Reservation Entry', reservation.name)}."
-						f" Please use an unreserved serial number or cancel the reservation.",
+						_(
+							"Serial No {0} is in warehouse {1} but is reserved for {2} {3} via {4}. Please use an unreserved serial number or cancel the reservation."
+						).format(
+							bold(serial_no),
+							bold(self.warehouse),
+							reservation.voucher_type,
+							bold(reservation.voucher_no),
+							get_link_to_form("Stock Reservation Entry", reservation.name),
+						),
 						SerialNoWarehouseError,
 					)
 				else:
 					self.throw_error_message(
-						f"Serial No {bold(serial_no)} is not present in the warehouse {bold(self.warehouse)}.",
+						_("Serial No {0} is not present in the warehouse {1}.").format(
+							bold(serial_no), bold(self.warehouse)
+						),
 						SerialNoWarehouseError,
 					)
 
@@ -348,7 +355,9 @@ class SerialandBatchBundle(Document):
 		for data in available_serial_nos:
 			if data.serial_no in serial_nos:
 				self.throw_error_message(
-					f"Serial No {bold(data.serial_no)} is already present in the warehouse {bold(data.warehouse)}.",
+					_("Serial No {0} is already present in the warehouse {1}.").format(
+						bold(data.serial_no), bold(data.warehouse)
+					),
 					SerialNoDuplicateError,
 				)
 
@@ -377,7 +386,7 @@ class SerialandBatchBundle(Document):
 					)
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):
-		frappe.throw(_(message), exception, title=_("Error"))
+		frappe.throw(message, exception, title=_("Error"))
 
 	def set_incoming_rate(self, parent=None, row=None, save=False, allow_negative_stock=False, prev_sle=None):
 		if self.type_of_transaction not in ["Inward", "Outward"] or self.voucher_type in [
@@ -998,7 +1007,9 @@ class SerialandBatchBundle(Document):
 			and self.voucher_no
 			and not frappe.db.exists(self.voucher_type, self.voucher_no)
 		):
-			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} does not exist")
+			self.throw_error_message(
+				_("The {0} # {1} does not exist").format(self.voucher_type, self.voucher_no)
+			)
 
 		if self.flags.ignore_voucher_validation:
 			return
@@ -1007,7 +1018,9 @@ class SerialandBatchBundle(Document):
 			self.docstatus == 1
 			and frappe.get_cached_value(self.voucher_type, self.voucher_no, "docstatus") != 1
 		):
-			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
+			self.throw_error_message(
+				_("The {0} # {1} should be submitted first.").format(self.voucher_type, self.voucher_no)
+			)
 
 	def check_future_entries_exists(self, is_cancelled=False):
 		if self.flags and self.flags.via_landed_cost_voucher:
@@ -1197,7 +1210,16 @@ class SerialandBatchBundle(Document):
 			total_qty = frappe.format_value(abs(flt(self.total_qty)), "Float", row)
 			set_qty = frappe.format_value(abs(flt(row.get(qty_field))), "Float", row)
 			self.throw_error_message(
-				f"Total quantity {total_qty} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {set_qty} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
+				_(
+					"Total quantity {0} in the Serial and Batch Bundle {1} does not match with the quantity {2} for the Item {3} in the {4} # {5}"
+				).format(
+					total_qty,
+					bold(self.name),
+					set_qty,
+					bold(self.item_code),
+					self.voucher_type,
+					self.voucher_no,
+				)
 			)
 
 	def get_transfer_rates(self) -> dict:
@@ -1387,7 +1409,7 @@ class SerialandBatchBundle(Document):
 		for serial_no, batch_no in serial_batches.items():
 			if correct_batches.get(serial_no) and correct_batches.get(serial_no) != batch_no:
 				self.throw_error_message(
-					f"Serial No {bold(serial_no)} does not belong to Batch No {bold(batch_no)}"
+					_("Serial No {0} does not belong to Batch No {1}").format(bold(serial_no), bold(batch_no))
 				)
 
 	def validate_incorrect_serial_nos(self, serial_nos):
@@ -1421,7 +1443,9 @@ class SerialandBatchBundle(Document):
 		if incorrect_serial_nos:
 			incorrect_serial_nos = ", ".join(incorrect_serial_nos)
 			self.throw_error_message(
-				f"Serial Nos {bold(incorrect_serial_nos)} does not belong to Item {bold(self.item_code)}"
+				_("Serial Nos {0} does not belong to Item {1}").format(
+					bold(incorrect_serial_nos), bold(self.item_code)
+				)
 			)
 
 	def get_serial_nos_consumed_in_same_entry(self):
@@ -1480,7 +1504,9 @@ class SerialandBatchBundle(Document):
 		if incorrect_batch_nos:
 			incorrect_batch_nos = ", ".join([d.name for d in incorrect_batch_nos])
 			self.throw_error_message(
-				f"Batch Nos {bold(incorrect_batch_nos)} does not belong to Item {bold(self.item_code)}"
+				_("Batch Nos {0} does not belong to Item {1}").format(
+					bold(incorrect_batch_nos), bold(self.item_code)
+				)
 			)
 
 	def validate_serial_and_batch_no_for_returned(self):
@@ -1819,7 +1845,9 @@ class SerialandBatchBundle(Document):
 					self.validate_negative_batch(batch_no, available_batches[batch_no])
 
 				self.throw_error_message(
-					f"Batch {bold(batch_no)} is not available in the selected warehouse {self.warehouse}"
+					_("Batch {0} is not available in the selected warehouse {1}").format(
+						bold(batch_no), self.warehouse
+					)
 				)
 
 	def on_cancel(self):
