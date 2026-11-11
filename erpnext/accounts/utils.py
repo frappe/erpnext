@@ -1110,6 +1110,79 @@ def remove_ref_doc_link_from_pe(
 	if not reference_rows:
 		return
 
+	# An invoice can consume an advance that was collected against an order. When
+	# the invoice is unlinked, put that allocation back on the order reference:
+	# the submitted Payment Entry still holds the money for its Payment Request.
+	transferred_rows = set()
+	for row in reference_rows:
+		if not (
+			row.payment_request
+			and row.advance_voucher_type
+			and row.advance_voucher_no
+			and row.allocated_amount
+		):
+			continue
+
+		advance_row = (
+			qb.from_(per)
+			.select(per.name, per.allocated_amount, per.payment_request)
+			.where(per.parent == row.parent)
+			.where(per.parenttype == "Payment Entry")
+			.where(per.reference_doctype == row.advance_voucher_type)
+			.where(per.reference_name == row.advance_voucher_no)
+			.where(per.docstatus == 1)
+		).run(as_dict=True)
+		advance_row = next((r for r in advance_row if r.payment_request == row.payment_request), None)
+		if advance_row:
+			(
+				qb.update(per)
+				.set(per.allocated_amount, per.allocated_amount + row.allocated_amount)
+				.where(per.name == advance_row.name)
+			).run()
+		else:
+			order_totals = frappe.db.get_value(
+				row.advance_voucher_type,
+				row.advance_voucher_no,
+				["company", "grand_total", "rounded_total", "base_grand_total", "base_rounded_total"],
+				as_dict=True,
+			)
+			payment_currencies = frappe.db.get_value(
+				"Payment Entry",
+				row.parent,
+				["payment_type", "paid_from_account_currency", "paid_to_account_currency"],
+				as_dict=True,
+			)
+			party_account_currency = (
+				payment_currencies.paid_from_account_currency
+				if payment_currencies.payment_type == "Receive"
+				else payment_currencies.paid_to_account_currency
+			)
+			company_currency = erpnext.get_company_currency(order_totals.company)
+			if party_account_currency == company_currency:
+				total_amount = order_totals.base_rounded_total or order_totals.base_grand_total
+			else:
+				total_amount = order_totals.rounded_total or order_totals.grand_total
+			advance_reference = frappe.get_doc(
+				{
+					"doctype": "Payment Entry Reference",
+					"parent": row.parent,
+					"parenttype": "Payment Entry",
+					"parentfield": "references",
+					"idx": row.idx,
+					"docstatus": 1,
+					"reference_doctype": row.advance_voucher_type,
+					"reference_name": row.advance_voucher_no,
+					"total_amount": total_amount,
+					"outstanding_amount": row.allocated_amount,
+					"allocated_amount": row.allocated_amount,
+					"payment_request": row.payment_request,
+					"account": row.account,
+					"exchange_rate": row.exchange_rate,
+				}
+			)
+			advance_reference.db_insert()
+		transferred_rows.add(row.name)
+
 	linked_pe = set()
 	row_names = set()
 	advance_vouchers = set()
@@ -1125,7 +1198,9 @@ def remove_ref_doc_link_from_pe(
 	)
 
 	# Update payment request amount
-	update_payment_requests_as_per_pe_references(reference_rows, cancel=True)
+	update_payment_requests_as_per_pe_references(
+		[row for row in reference_rows if row.name not in transferred_rows], cancel=True
+	)
 
 	# Update allocated amounts and modified fields in one go
 	(
