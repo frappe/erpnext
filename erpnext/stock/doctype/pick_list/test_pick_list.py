@@ -1417,6 +1417,63 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order", sales_order.name, "per_picked"), 100)
 
+	def test_bundle_picked_qty_counts_components_picked_across_pick_lists(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle(quantities=[1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=3, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		def pick():
+			pick_list = create_pick_list(sales_order.name)
+			for row in pick_list.locations:
+				row.picked_qty = row.qty
+			pick_list.submit()
+			return frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty")
+
+		self.assertEqual(pick(), 0)  # no B picked yet
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
+		self.assertEqual(pick(), 3)
+
+	def test_delivery_from_a_pick_list_skips_bundles_it_does_not_complete(self):
+		warehouse = "_Test Warehouse - _TC"
+		bundle, (component_a, component_b) = create_product_bundle(quantities=[1, 2])
+		make_stock_entry(item=component_a, to_warehouse=warehouse, qty=3, rate=100)
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		def pick():
+			pick_list = create_pick_list(sales_order.name)
+			for row in pick_list.locations:
+				row.picked_qty = row.qty
+			pick_list.submit()
+			return pick_list
+
+		pick()  # picks only A
+		make_stock_entry(item=component_b, to_warehouse=warehouse, qty=6, rate=100)
+		pick_list = pick()  # picks only B
+
+		self.assertFalse(create_delivery_note(pick_list.name).items)
+
+	def test_bundle_picked_qty_skips_non_stock_and_pools_repeated_components(self):
+		warehouse = "_Test Warehouse - _TC"
+		component = make_item(properties={"is_stock_item": 1}).name
+		service = make_item(properties={"is_stock_item": 0}).name
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=3, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		for item_code, qty in [(component, 1), (component, 2), (service, 1)]:
+			product_bundle.append("items", {"item_code": item_code, "qty": qty})
+		product_bundle.insert()
+		product_bundle.submit()
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3)
+
+		pick_list = create_pick_list(sales_order.name)
+		for row in pick_list.locations:
+			row.picked_qty = row.qty
+		pick_list.submit()
+
+		# 3 picked of the 3 per bundle, the service is not picked
+		self.assertEqual(frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "picked_qty"), 1)
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3})
 	def test_bundle_picked_qty_counts_component_qty_a_delivery_packs(self):
 		cases = (
