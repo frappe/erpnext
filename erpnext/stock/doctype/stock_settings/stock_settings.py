@@ -126,6 +126,8 @@ class StockSettings(Document):
 		"""Boot sends `BOOT_FIELDS` in sysdefaults."""
 		if any(self.has_value_changed(field) for field in BOOT_FIELDS):
 			frappe.cache.delete_key("bootinfo")
+			# Requests before commit can cache the old boot again.
+			frappe.db.after_commit.add(lambda: frappe.cache.delete_key("bootinfo"))
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
