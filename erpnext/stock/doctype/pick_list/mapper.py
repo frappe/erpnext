@@ -339,7 +339,7 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 
 def get_moved_serial_nos(locations, moved_qty_field="delivered_qty"):
 	"""Return the lower-cased serial nos that earlier deliveries or transfers of the partly moved rows took."""
-	moved = get_moved_entries([row.name for row in locations if row.get(moved_qty_field)])
+	moved = get_moved_entries([row.name for row in locations if row.serial_no and row.get(moved_qty_field)])
 	numbers = SerialBatchIdentity("Serial No").get_number_map(
 		[entry.serial_no for entries in moved.values() for entry in entries if entry.serial_no]
 	)
