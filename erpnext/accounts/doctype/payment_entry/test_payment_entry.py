@@ -24,6 +24,10 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
+from erpnext.accounts.party import get_party_account, get_party_gle_account, get_party_gle_currency
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.selling.doctype.customer.test_customer import make_customer
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.permission_test_utils import as_user, make_bank_account, make_fenced_user
@@ -2737,6 +2741,83 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.expected_ple = pre_reconciliation_ple
 		self.check_gl_entries()
 		self.check_pl_entries()
+
+	def test_party_account_ignores_separate_advances(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.book_advance_payments_in_separate_party_account = 1
+		for party_type, account_type, parent_account, party_account in (
+			("Supplier", "Payable", "Current Assets - _TC", "_Test Payable USD - _TC"),
+			("Customer", "Receivable", "Current Liabilities - _TC", "_Test Receivable USD - _TC"),
+		):
+			with self.subTest(party_type=party_type):
+				advance_account = create_account(
+					account_name=f"_Test {party_type} Advance Currency",
+					parent_account=parent_account,
+					account_type=account_type,
+					company=company.name,
+				)
+				company.set(
+					"default_advance_paid_account"
+					if party_type == "Supplier"
+					else "default_advance_received_account",
+					advance_account,
+				)
+				company.save()
+				if party_type == "Supplier":
+					party = create_supplier(default_currency="USD", party_account=party_account)
+				else:
+					party = frappe.get_doc("Customer", make_customer(frappe.generate_hash(length=10)))
+					party.default_currency = "USD"
+					party.append("accounts", {"company": company.name, "account": party_account})
+					party.save()
+
+				payment = create_payment_entry(
+					party_type=party_type,
+					party=party.name,
+					payment_type="Pay" if party_type == "Supplier" else "Receive",
+					paid_from="_Test Cash - _TC" if party_type == "Supplier" else advance_account,
+					paid_to=advance_account if party_type == "Supplier" else "_Test Cash - _TC",
+				)
+				payment.insert()
+				payment.submit()
+				self.assertEqual(
+					frappe.get_all(
+						"GL Entry",
+						filters={"party": party.name, "party_type": party_type, "is_cancelled": 0},
+						pluck="account",
+					),
+					[advance_account],
+				)
+				self.assertIsNone(get_party_gle_currency(party_type, party.name, company.name))
+				self.assertIsNone(get_party_gle_account(party_type, party.name, company.name))
+				self.assertEqual(
+					get_party_account(party_type, party.name, company.name, include_advance=True),
+					[party_account, advance_account],
+				)
+				party.save()
+				if party_type == "Supplier":
+					invoice = make_purchase_invoice(
+						supplier=party.name,
+						currency="USD",
+						conversion_rate=80,
+					)
+				else:
+					invoice = create_sales_invoice(
+						customer=party.name,
+						currency="USD",
+						conversion_rate=80,
+						debit_to=get_party_account(party_type, party.name, company.name),
+					)
+				self.assertEqual(
+					invoice.get("credit_to" if party_type == "Supplier" else "debit_to"), party_account
+				)
+				self.assertEqual(get_party_gle_currency(party_type, party.name, company.name), "USD")
+				self.assertEqual(get_party_gle_account(party_type, party.name, company.name), party_account)
+				party.accounts[0].account = "Creditors - _TC" if party_type == "Supplier" else "Debtors - _TC"
+				with self.assertRaises(InvalidAccountCurrency):
+					party.save()
+				invoice.cancel()
+				payment.cancel()
 
 	def test_advance_as_liability_against_order(self):
 		from erpnext.buying.doctype.purchase_order.mapper import (
