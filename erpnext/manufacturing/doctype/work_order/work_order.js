@@ -1058,6 +1058,18 @@ erpnext.work_order = {
 								// all materials transferred for manufacturing, make this primary
 								finish_btn.addClass("btn-primary");
 							}
+						} else if (frm.doc.__onload && frm.doc.__onload.overproduction_percentage) {
+							let allowance_percentage = frm.doc.__onload.overproduction_percentage;
+
+							if (allowance_percentage > 0) {
+								let allowed_qty = frm.doc.qty + (allowance_percentage / 100) * frm.doc.qty;
+
+								if (flt(doc.produced_qty) < allowed_qty) {
+									frm.add_custom_button(__("Finish"), function () {
+										erpnext.work_order.make_se(frm, "Manufacture");
+									});
+								}
+							}
 						}
 					}
 				} else {
