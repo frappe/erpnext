@@ -80,12 +80,12 @@ class StockSettings(Document):
 			"item_group",
 			"stock_uom",
 			"allow_negative_stock",
-			"set_qty_in_transactions_based_on_serial_no_input",
 			"use_serial_batch_fields",
 			"enable_serial_and_batch_no_for_item",
 			"set_serial_and_batch_bundle_naming_based_on_naming_series",
 		]:
-			frappe.db.set_default(key, self.get(key, ""))
+			value = self.get(key)
+			frappe.db.set_default(key, "" if value is None else value)
 
 		from erpnext.utilities.naming import set_by_naming_series
 
@@ -322,13 +322,6 @@ class StockSettings(Document):
 	@staticmethod
 	def make_property_setter_for_precision(doctypes):
 		for doctype in doctypes:
-			if property_name := frappe.db.exists(
-				"Property Setter",
-				{"doc_type": doctype, "field_name": "conversion_factor", "property": "precision"},
-			):
-				frappe.db.set_value("Property Setter", property_name, "value", 9)
-				continue
-
 			make_property_setter(
 				doctype,
 				"conversion_factor",
