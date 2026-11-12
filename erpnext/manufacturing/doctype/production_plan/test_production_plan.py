@@ -5685,6 +5685,54 @@ class TestProductionPlan(ERPNextTestSuite):
 		# Min() keeps the real material; the old Max() returned 1 and get_subitems dropped it.
 		self.assertEqual(component_rows[0].is_phantom_item, 0)
 
+	def test_sales_order_query_follows_company_user_permission(self):
+		from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		sales_order = make_sales_order(item_code=item, qty=5, rate=100).name
+		other_company_planner = create_manufacturing_user("planner-tc1@example.com", "_Test Company 1")
+		same_company_planner = create_manufacturing_user("planner-tc@example.com", "_Test Company")
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(other_company_planner)
+		self.assertFalse(sales_order_query(filters={"item_code": item}))
+		self.assertFalse(sales_order_query(filters={"company": "_Test Company", "item_code": item}))
+
+		frappe.set_user(same_company_planner)
+		rows = sales_order_query(filters={"company": "_Test Company", "item_code": item})
+		self.assertEqual([row[0] for row in rows], [sales_order])
+
+	def test_sales_order_query_without_user_permission_lists_all_open_orders(self):
+		from erpnext.manufacturing.doctype.production_plan.mapper import sales_order_query
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		sales_order = make_sales_order(item_code=item, qty=5, rate=100).name
+		planner = create_manufacturing_user("planner-unrestricted@example.com")
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(planner)
+		self.assertEqual([row[0] for row in sales_order_query(filters={"item_code": item})], [sales_order])
+
+
+def create_manufacturing_user(email, company=None):
+	if not frappe.db.exists("User", email):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": email,
+				"first_name": email.split("@")[0],
+				"send_welcome_email": 0,
+				"roles": [{"role": "Manufacturing User"}],
+			}
+		).insert(ignore_permissions=True)
+
+	if company and not frappe.db.exists("User Permission", {"user": email, "allow": "Company"}):
+		frappe.get_doc(
+			{"doctype": "User Permission", "user": email, "allow": "Company", "for_value": company}
+		).insert(ignore_permissions=True)
+
+	return email
+
 
 def create_production_plan(**args):
 	"""

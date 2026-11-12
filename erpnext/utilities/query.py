@@ -44,6 +44,14 @@ def get_match_conditions_qb(doctype, table=None, user=None):
 	return [condition] if condition is not None else []
 
 
+def get_user_permission_conditions_qb(doctype, table=None):
+	from frappe.database.query import Engine
+
+	engine = Engine()
+	engine.get_query(doctype)
+	return engine.get_user_permission_conditions(doctype, table or engine.table)
+
+
 def get_filter_conditions_qb(doctype, filters, ignore_permissions=None):
 	"""Return ``filters`` for ``doctype`` as a list of query-builder criteria.
 
