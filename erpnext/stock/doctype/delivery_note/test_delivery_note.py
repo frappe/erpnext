@@ -4928,6 +4928,64 @@ class TestDeliveryNote(ERPNextTestSuite):
 		deducted_return.reload()
 		self.assertEqual(deducted_return.per_billed, 100)
 
+	def test_overbilled_qty_is_shared_between_returns_of_sibling_deliveries(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.items[0].qty = 2
+		so_invoice.submit()
+
+		returns = []
+		for _i in range(2):
+			delivery_note = create_dn_against_so(so.name, delivered_qty=5)
+			sales_return = make_sales_return(delivery_note.name)
+			sales_return.items[0].qty = -2
+			sales_return.submit()
+			returns.append(sales_return)
+			dn_invoice = make_sales_invoice(delivery_note.name)
+			self.assertEqual(dn_invoice.items[0].qty, 3)
+			dn_invoice.submit()
+
+		# Billed 8 for a net delivery of 6: the 2 over-billed through the Sales Order cover the
+		# first return, so only that one needs a credit note.
+		first_return, second_return = returns
+		first_return.reload()
+		self.assertEqual(first_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(first_return.name).items[0].qty, -2)
+		second_return.reload()
+		self.assertEqual(second_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, second_return.name)
+
+	def test_return_in_another_unit_settled_when_sales_order_billing_goes_to_next_delivery(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		so = make_sales_order(item_code=item, qty=10, rate=1000, uom="Box")
+		so_invoice = make_si_from_so(so.name)
+		so_invoice.items[0].qty = 3
+		so_invoice.submit()
+
+		delivery_note = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].update({"uom": "Nos", "conversion_factor": 1, "qty": -10, "rate": 100})
+		deducted_return.submit()
+		make_sales_invoice(delivery_note.name).submit()
+		create_dn_against_so(so.name, delivered_qty=5)
+
+		# Billed 7 boxes for a net delivery of 9: nothing is over-billed, whatever the unit of the return.
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
 	def test_credit_note_for_a_return_in_another_unit(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 

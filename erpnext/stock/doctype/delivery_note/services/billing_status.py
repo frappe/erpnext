@@ -246,7 +246,7 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		)
 	}
 	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
-	so_overbilled_qty = get_so_overbilled_qty(
+	overbilled_qty = get_overbilled_qty_of_delivery_rows(
 		{row.so_detail for row in original_rows.values() if row.so_detail}
 	)
 	# A return row can use another UOM than its original row: compare qty in the original's UOM.
@@ -269,7 +269,7 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		fully_invoiced = net_invoiced > 0 and returned >= uninvoiced
 		settleable = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
 		# Billing of the Sales Order row above its net delivered qty covers returned qty.
-		overbilled = flt(so_overbilled_qty.get(original_rows[original].so_detail))
+		overbilled = flt(overbilled_qty.get(original))
 		settleable_qty[original] = max(settleable - overbilled, 0)
 
 	settled_qty = {}
@@ -281,9 +281,57 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 	return settled_qty
 
 
-def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
-	"""Qty of each Sales Order row invoiced above its net delivered qty (deliveries less returns),
-	limited to the qty invoiced directly against the Sales Order."""
+def get_overbilled_qty_of_delivery_rows(so_details: set) -> dict[str, float]:
+	"""Share the over-billed qty of each Sales Order row between its Delivery Note rows.
+
+	Like billing against the Sales Order, it goes to the earliest deliveries first. Each row takes
+	up to its returned qty that its own invoices did not bill.
+	"""
+	so_overbilled_stock_qty = get_so_overbilled_stock_qty(so_details)
+	if not any(so_overbilled_stock_qty.values()):
+		return {}
+
+	dn = frappe.qb.DocType("Delivery Note")
+	dn_item = frappe.qb.DocType("Delivery Note Item")
+	delivery_rows = (
+		frappe.qb.from_(dn_item)
+		.join(dn)
+		.on(dn.name == dn_item.parent)
+		.select(dn_item.name, dn_item.parent, dn_item.so_detail, dn_item.qty, dn_item.conversion_factor)
+		.where(dn_item.so_detail.isin(list(so_details)) & (dn.docstatus == 1) & (dn.is_return == 0))
+		.orderby(dn.posting_date, dn.posting_time, dn.name, dn_item.idx)
+		.run(as_dict=True)
+	)
+	# Return rows have a negative qty.
+	returned_stock_qty = dict(
+		frappe.qb.from_(dn_item)
+		.select(dn_item.dn_detail, Sum(dn_item.stock_qty))
+		.where(dn_item.dn_detail.isin([row.name for row in delivery_rows]) & (dn_item.docstatus == 1))
+		.groupby(dn_item.dn_detail)
+		.run()
+	)
+	invoiced_qty = {}
+	for delivery_note in {row.parent for row in delivery_rows}:
+		invoiced_qty.update(get_invoiced_qty_against_dn(delivery_note=delivery_note))
+
+	# Rows, returns and invoices can use different UOMs: share in stock qty.
+	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
+	overbilled_qty = {}
+	for row in delivery_rows:
+		factor = flt(row.conversion_factor) or 1
+		returned = abs(flt(returned_stock_qty.get(row.name)))
+		uninvoiced = (flt(row.qty) - flt(invoiced_qty.get(row.name))) * factor
+		uninvoiced_returned = max(min(returned, uninvoiced), 0)
+		share = min(uninvoiced_returned, so_overbilled_stock_qty[row.so_detail])
+		so_overbilled_stock_qty[row.so_detail] -= share
+		overbilled_qty[row.name] = flt(share / factor, qty_precision)
+
+	return overbilled_qty
+
+
+def get_so_overbilled_stock_qty(so_details: set) -> dict[str, float]:
+	"""Stock qty of each Sales Order row invoiced above its net delivered stock qty (deliveries
+	less returns), limited to the stock qty invoiced directly against the Sales Order."""
 	if not so_details:
 		return {}
 
@@ -295,8 +343,8 @@ def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
 		.on(si.name == si_item.parent)
 		.select(
 			si_item.so_detail,
-			Sum(si_item.qty),
-			Sum(Case().when(IfNull(si_item.dn_detail, "") == "", si_item.qty).else_(0)),
+			Sum(si_item.stock_qty),
+			Sum(Case().when(IfNull(si_item.dn_detail, "") == "", si_item.stock_qty).else_(0)),
 		)
 		.where(
 			si_item.so_detail.isin(list(so_details))
@@ -315,13 +363,13 @@ def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
 	dn_item = frappe.qb.DocType("Delivery Note Item")
 	delivered_qty = dict(
 		frappe.qb.from_(dn_item)
-		.select(dn_item.so_detail, Sum(dn_item.qty))
+		.select(dn_item.so_detail, Sum(dn_item.stock_qty))
 		.where(dn_item.so_detail.isin(list(so_details)) & (dn_item.docstatus == 1))
 		.groupby(dn_item.so_detail)
 		.run()
 	)
 
-	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
+	qty_precision = frappe.get_precision("Delivery Note Item", "stock_qty")
 	overbilled_qty = {}
 	for so_detail in so_details:
 		overbilled = flt(flt(billed_qty.get(so_detail)) - flt(delivered_qty.get(so_detail)), qty_precision)

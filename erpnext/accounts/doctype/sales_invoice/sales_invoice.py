@@ -1226,6 +1226,16 @@ class SalesInvoice(SellingController):
 
 		for dn in set(updated_delivery_notes):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
+
+		# Returns of all deliveries of a Sales Order row share the row's over-billed qty.
+		so_details = [d.so_detail for d in self.items if d.so_detail]
+		sibling_delivery_notes = frappe.get_all(
+			"Delivery Note Item",
+			filters={"so_detail": ("in", so_details), "docstatus": 1},
+			pluck="parent",
+			distinct=True,
+		)
+		for dn in set(updated_delivery_notes + sibling_delivery_notes):
 			update_billing_percentage_of_returns(dn)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
