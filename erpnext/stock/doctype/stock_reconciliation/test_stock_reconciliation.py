@@ -2752,11 +2752,16 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		warehouse = "_Test Warehouse - _TC"
 		batch_args = {"item_code": item, "batch_no": batch, "use_serial_batch_fields": 1}
 
-		# the other batch keeps the warehouse total positive, so only the batch goes negative
-		for batch_no in (batch, other_batch):
+		# the other batch keeps the warehouse total positive and the second warehouse keeps the batch total
+		# positive, so only the batch in this warehouse goes negative
+		for batch_no, target in (
+			(batch, warehouse),
+			(other_batch, warehouse),
+			(batch, "_Test Warehouse 1 - _TC"),
+		):
 			make_stock_entry(
 				**{**batch_args, "batch_no": batch_no},
-				target=warehouse,
+				target=target,
 				qty=10,
 				rate=100,
 				posting_date=add_days(nowdate(), -3),
