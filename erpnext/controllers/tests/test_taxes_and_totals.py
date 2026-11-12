@@ -269,6 +269,45 @@ class TestTaxesAndTotals(ERPNextTestSuite):
 		self.assertEqual(so.net_total, 880.0)
 		self.assertEqual(so.grand_total, 1000.0)
 
+	def test_base_rounded_total_without_transaction_rounding(self):
+		"""Rounding the USD total changes nothing, so the base totals must agree too."""
+		so = make_sales_order(do_not_save=True)
+		so.currency = "USD"
+		so.conversion_rate = 89.7
+		so.set("taxes", [])
+		so.items[0].qty = 15
+		so.append("items", so.items[0].as_dict() | {"name": None, "qty": 155})
+		for item in so.items:
+			item.rate = item.price_list_rate = 99.07
+			item.discount_percentage = item.discount_amount = 0
+
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.grand_total, 16841.9)
+		self.assertEqual(so.rounding_adjustment, 0)
+		self.assertEqual(so.base_grand_total, 1510718.42)
+		self.assertEqual(so.base_rounding_adjustment, 0)
+		self.assertEqual(so.base_rounded_total, 1510718.42)
+
+	def test_base_rounded_total_with_transaction_rounding(self):
+		"""JPY rounds to whole units; retain its converted balance for settlement."""
+		so = make_sales_order(do_not_save=True)
+		so.currency = "JPY"
+		so.conversion_rate = 0.567
+		so.set("taxes", [])
+		so.items[0].qty = 1
+		so.items[0].rate = so.items[0].price_list_rate = 1701.4
+		so.items[0].discount_percentage = so.items[0].discount_amount = 0
+
+		calculate_taxes_and_totals(so)
+
+		self.assertEqual(so.rounded_total, 1701)
+		self.assertEqual(so.rounding_adjustment, -0.4)
+		self.assertEqual(so.base_grand_total, 964.69)
+		self.assertEqual(so.base_rounding_adjustment, -0.22)
+		self.assertEqual(so.base_rounded_total, 964.47)
+		self.assertEqual(so.base_grand_total + so.base_rounding_adjustment, so.base_rounded_total)
+
 	def test_disabling_rounded_total_resets_base_fields(self):
 		"""Disabling rounded total should also clear base rounded values."""
 		so = make_sales_order(do_not_save=True)
