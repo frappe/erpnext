@@ -14,7 +14,10 @@ from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
 from erpnext.buying.doctype.request_for_quotation.test_request_for_quotation import (
 	make_request_for_quotation,
 )
-from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
+from erpnext.buying.doctype.supplier_quotation.supplier_quotation import (
+	make_purchase_order,
+	make_quotation,
+)
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 
 
@@ -196,6 +199,39 @@ class TestPurchaseOrder(FrappeTestCase):
 				doc.set("schedule_date", add_days(today(), 1))
 
 		po.insert()
+
+	def test_quotation_drops_terms_not_applicable_to_selling(self):
+		quotation = self.make_quotation_with_terms(selling=0)
+		quotation.insert()
+
+		self.assertFalse(quotation.tc_name)
+		self.assertFalse(quotation.terms)
+
+	def test_quotation_keeps_terms_applicable_to_selling(self):
+		quotation = self.make_quotation_with_terms(selling=1)
+		quotation.insert()
+
+		self.assertEqual(quotation.tc_name, "_Test SQ Terms")
+		self.assertEqual(quotation.terms, "Delivery in 30 days")
+
+	def make_quotation_with_terms(self, selling):
+		frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="_Test SQ Terms",
+			buying=1,
+			selling=selling,
+			terms="Delivery in 30 days",
+		).insert()
+		# v15 test cases roll back once per class, so the next test can reuse the title.
+		self.addCleanup(frappe.db.rollback)
+		sq = frappe.copy_doc(test_records[0])
+		sq.tc_name = "_Test SQ Terms"
+		sq.terms = "Delivery in 30 days"
+		sq.submit()
+
+		quotation = make_quotation(sq.name)
+		quotation.party_name = "_Test Customer"
+		return quotation
 
 	def test_purchase_order_mapping_replaces_existing_taxes(self):
 		tax = {

@@ -1059,6 +1059,41 @@ class TestDeliveryNote(FrappeTestCase):
 			{"warehouse": "_Test Warehouse - _TC"},
 		)
 
+	def test_inter_company_purchase_receipt_drops_selling_only_terms(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		frappe.get_doc(
+			doctype="Terms and Conditions", title="_Test Sell Only Terms", selling=1, buying=0, terms="Net 30"
+		).insert()
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, target="Stores - TCP1", qty=1, basic_rate=100)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			do_not_save=True,
+		)
+		dn.tc_name = "_Test Sell Only Terms"
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].from_warehouse = "Work In Progress - TCP1"
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.insert()
+
+		self.assertFalse(pr.tc_name)
+		self.assertFalse(pr.terms)
+
 	def test_delivery_note_internal_transfer_serial_no_status(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 
