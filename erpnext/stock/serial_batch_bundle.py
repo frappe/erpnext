@@ -208,6 +208,7 @@ class SerialBatchBundle:
 				"company": self.company,
 				"is_rejected": self.is_rejected_entry(),
 				"is_packed": self.is_packed_entry(),
+				"against_sales_order_item": self.get_sales_order_item(),
 				"make_bundle_from_sle": 1,
 				"sle": self.sle,
 				**self.get_entries_held_by_voucher(),
@@ -403,6 +404,18 @@ class SerialBatchBundle:
 				return frappe.db.get_value("Item", item_code, "is_stock_item") == 0
 
 		return False
+
+	def get_sales_order_item(self):
+		"""The delivered row's Sales Order row; none for a component, whose reservation is on the order's packed row."""
+		if self.sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+			row = frappe.db.get_value(
+				f"{self.sle.voucher_type} Item",
+				self.sle.voucher_detail_no,
+				["item_code", "so_detail"],
+				as_dict=True,
+			)
+			if row.item_code == self.sle.item_code:
+				return row.so_detail
 
 	def process_batch_no(self):
 		if (
