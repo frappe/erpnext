@@ -1,6 +1,9 @@
+import copy
+
 import frappe
 from frappe import _
 from frappe.email import sendmail_to_system_managers
+from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -271,6 +274,14 @@ def calculate_amount(doc, item, last_gl_entry, total_days, total_booking_days, a
 
 
 def get_already_booked_amount(doc, item):
+	return get_already_booked_amounts(doc, [item])[item.name]
+
+
+def get_already_booked_amounts(doc, items):
+	"""Get recognized or reserved amounts for invoice rows in both currencies."""
+	if not items:
+		return {}
+
 	if doc.doctype == "Sales Invoice":
 		total_credit_debit, total_credit_debit_currency = "debit", "debit_in_account_currency"
 		deferred_account = "deferred_revenue_account"
@@ -278,42 +289,143 @@ def get_already_booked_amount(doc, item):
 		total_credit_debit, total_credit_debit_currency = "credit", "credit_in_account_currency"
 		deferred_account = "deferred_expense_account"
 
-	gl_entries_details = frappe.db.sql(
-		"""
-		select sum({}) as total_credit, sum({}) as total_credit_in_account_currency, voucher_detail_no
-		from `tabGL Entry` where company=%s and account=%s and voucher_type=%s and voucher_no=%s and voucher_detail_no=%s
-		and is_cancelled = 0
-		group by voucher_detail_no
-	""".format(total_credit_debit, total_credit_debit_currency),
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
+	accounts = {item.name: item.get(deferred_account) for item in items}
+	gle = frappe.qb.DocType("GL Entry")
+	gl_entries_details = (
+		frappe.qb.from_(gle)
+		.select(
+			Sum(gle[total_credit_debit]).as_("total_credit"),
+			Sum(gle[total_credit_debit_currency]).as_("total_credit_in_account_currency"),
+			gle.voucher_detail_no.as_("item_name"),
+			gle.account,
+		)
+		.where(
+			(gle.company == doc.company)
+			& gle.account.isin(set(accounts.values()))
+			& (gle.voucher_type == doc.doctype)
+			& (gle.voucher_no == doc.name)
+			& gle.voucher_detail_no.isin(list(accounts))
+			& (gle.is_cancelled == 0)
+		)
+		.groupby(gle.voucher_detail_no, gle.account)
+		.run(as_dict=True)
 	)
 
-	journal_entry_details = frappe.db.sql(
-		"""
-		SELECT sum(c.{}) as total_credit, sum(c.{}) as total_credit_in_account_currency, reference_detail_no
-		FROM `tabJournal Entry` p , `tabJournal Entry Account` c WHERE p.name = c.parent and
-		p.company = %s and c.account=%s and c.reference_type=%s and c.reference_name=%s and c.reference_detail_no=%s
-		and p.docstatus < 2 group by reference_detail_no
-	""".format(total_credit_debit, total_credit_debit_currency),
-		(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name),
-		as_dict=True,
+	je = frappe.qb.DocType("Journal Entry")
+	jea = frappe.qb.DocType("Journal Entry Account")
+	journal_entry_details = (
+		frappe.qb.from_(je)
+		.inner_join(jea)
+		.on(je.name == jea.parent)
+		.select(
+			Sum(jea[total_credit_debit]).as_("total_credit"),
+			Sum(jea[total_credit_debit_currency]).as_("total_credit_in_account_currency"),
+			jea.reference_detail_no.as_("item_name"),
+			jea.account,
+		)
+		.where(
+			(je.company == doc.company)
+			& jea.account.isin(set(accounts.values()))
+			& (jea.reference_type == doc.doctype)
+			& (jea.reference_name == doc.name)
+			& jea.reference_detail_no.isin(list(accounts))
+			& (je.docstatus < 2)
+		)
+		.groupby(jea.reference_detail_no, jea.account)
+		.run(as_dict=True)
 	)
 
-	already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0
-	already_booked_amount += journal_entry_details[0].total_credit if journal_entry_details else 0
-
-	if doc.currency == doc.company_currency:
-		already_booked_amount_in_account_currency = already_booked_amount
-	else:
-		already_booked_amount_in_account_currency = (
-			gl_entries_details[0].total_credit_in_account_currency if gl_entries_details else 0
+	booked_amounts = {item.name: (0, 0) for item in items}
+	for entry in gl_entries_details + journal_entry_details:
+		if entry.account != accounts[entry.item_name]:
+			continue
+		amount, account_amount = booked_amounts[entry.item_name]
+		booked_amounts[entry.item_name] = (
+			amount + entry.total_credit,
+			account_amount
+			+ (
+				entry.total_credit
+				if doc.currency == doc.company_currency
+				else entry.total_credit_in_account_currency
+			),
 		)
-		already_booked_amount_in_account_currency += (
-			journal_entry_details[0].total_credit_in_account_currency if journal_entry_details else 0
+
+	return booked_amounts
+
+
+def validate_deferred_revenue_return_cancellation(doc):
+	if not doc.is_return or not doc.return_against:
+		return
+
+	items = [item for item in doc.items if item.enable_deferred_revenue and item.sales_invoice_item]
+	if not items:
+		return
+
+	frappe.db.get_value("Sales Invoice", doc.return_against, "name", for_update=True)
+	entries = {
+		(entry.voucher_detail_no, entry.account)
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": doc.doctype, "voucher_no": doc.name, "is_cancelled": 0},
+			fields=["voucher_detail_no", "account"],
+		)
+	}
+	deferred_items = {
+		item.sales_invoice_item for item in items if (item.name, item.deferred_revenue_account) in entries
+	}
+	if not deferred_items:
+		return
+
+	invoice = frappe.get_doc("Sales Invoice", doc.return_against)
+	booked_amounts = get_already_booked_amounts(
+		invoice, [item for item in invoice.items if item.name in deferred_items]
+	)
+	if any(any(amounts) for amounts in booked_amounts.values()):
+		frappe.throw(
+			_(
+				"Cancel or delete the deferred revenue entries for Sales Invoice {0} before cancelling this credit note."
+			).format(get_link_to_form("Sales Invoice", invoice.name))
 		)
 
-	return already_booked_amount, already_booked_amount_in_account_currency
+
+def get_deferred_revenue_returns(doc):
+	"""Return net amounts of credit note rows posted to deferred revenue, grouped by original row."""
+	if doc.doctype != "Sales Invoice":
+		return {}
+
+	invoice = frappe.qb.DocType("Sales Invoice")
+	item = frappe.qb.DocType("Sales Invoice Item")
+	gle = frappe.qb.DocType("GL Entry")
+	returns = (
+		frappe.qb.from_(invoice)
+		.join(item)
+		.on(item.parent == invoice.name)
+		.select(
+			item.sales_invoice_item,
+			Sum(-item.base_net_amount).as_("base_amount"),
+			Sum(-item.net_amount).as_("amount"),
+		)
+		.where(
+			(invoice.return_against == doc.name)
+			& (invoice.company == doc.company)
+			& (invoice.is_return == 1)
+			& (invoice.docstatus == 1)
+			& item.name.isin(
+				frappe.qb.from_(gle)
+				.select(gle.voucher_detail_no)
+				.where(
+					(gle.voucher_type == "Sales Invoice")
+					& (gle.voucher_no == invoice.name)
+					& (gle.company == doc.company)
+					& (gle.account == item.deferred_revenue_account)
+					& (gle.is_cancelled == 0)
+				)
+			)
+		)
+		.groupby(item.sales_invoice_item)
+		.run(as_dict=True)
+	)
+	return {row.sales_invoice_item: row for row in returns}
 
 
 def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
@@ -423,8 +535,17 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		"Accounts Settings", "book_deferred_entries_based_on"
 	)
 
+	if doc.doctype == "Sales Invoice":
+		# Serialize the first recognition with credit notes choosing the deferred account.
+		frappe.db.get_value("Sales Invoice", doc.name, "name", for_update=True)
+	returned_amounts = get_deferred_revenue_returns(doc)
 	for item in doc.get("items"):
 		if item.get(enable_check):
+			if returned_amount := returned_amounts.get(item.name):
+				# Recognize only the retained sale without changing the submitted invoice.
+				item = copy.copy(item)
+				item.base_net_amount = max(0, flt(item.base_net_amount - returned_amount.base_amount))
+				item.net_amount = max(0, flt(item.net_amount - returned_amount.amount))
 			_book_deferred_revenue_or_expense(
 				item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on
 			)
