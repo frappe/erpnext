@@ -1862,6 +1862,37 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertNotEqual(frappe.db.get_value("Batch", batch_no, "reference_name"), wo_order.name)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_batch_finished_good_bundle_is_net_of_process_loss(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg", "has_batch_no": 1, "create_new_batch": 1}
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1, process_loss_percentage=10)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100
+		)
+
+		wo_order = make_wo_order_test_record(
+			item=fg_item, qty=10, skip_transfer=True, source_warehouse="_Test Warehouse - _TC"
+		)
+		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		stock_entry.insert()
+		stock_entry.submit()
+
+		fg_row = next(row for row in stock_entry.items if row.is_finished_item)
+		self.assertEqual(fg_row.qty, 9)
+		bundle = frappe.get_doc("Serial and Batch Bundle", fg_row.serial_and_batch_bundle)
+		self.assertEqual(bundle.total_qty, 9)
+		self.assertEqual(
+			frappe.db.get_value("Batch", bundle.entries[0].batch_no, "reference_name"), wo_order.name
+		)
+
+		wo_order.reload()
+		self.assertEqual(wo_order.status, "Completed")
+		self.assertEqual(wo_order.produced_qty, 9)
+		self.assertEqual(wo_order.process_loss_qty, 1)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_work_order_without_serial_no_series_is_not_submitted(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
