@@ -111,6 +111,28 @@ class TestQueries(ERPNextTestSuite):
 		with self.set_user(website_manager.name), self.assertRaises(frappe.PermissionError):
 			query(filters={"item_code": item_code, "company": "_Test Company"})
 
+	def test_tax_template_query_applies_company_user_permission(self):
+		query = add_default_params(queries.get_tax_template, "Item Tax Template")
+		filters = {"item_code": "_Test Item Home Desktop 100", "company": "_Test Company"}
+		user = create_user("tax_template_company_user@example.com", "Sales User")
+		unrestricted_user = create_user("tax_template_sales_user@example.com", "Sales User")
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user.name,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+			}
+		).insert()
+
+		with self.set_user(user.name):
+			self.assertFalse(query(filters=filters))
+
+		with self.set_user(unrestricted_user.name):
+			self.assertEqual(
+				[row[0] for row in query(filters=filters)], ["_Test Account Excise Duty @ 10 - _TC"]
+			)
+
 	def test_account_query(self):
 		query = add_default_params(queries.get_account_list, "Account")
 

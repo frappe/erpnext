@@ -1344,7 +1344,11 @@ def get_tax_template(doctype: str, txt: str, searchfield: str, start: int, page_
 
 		taxes = _get_item_tax_template(ctx, taxes, for_validate=True)
 		txt = txt.lower()
-		return [(d,) for d in set(taxes) if not txt or txt in d.lower()]
+		templates = [d for d in set(taxes) if not txt or txt in d.lower()]
+		if not templates:
+			return []
+
+		return frappe.get_list("Item Tax Template", filters={"name": ["in", templates]}, as_list=True)
 
 
 def get_fields(doctype, fields=None):
