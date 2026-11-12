@@ -436,6 +436,31 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(so.items[0].discount_percentage, 0)
 		self.assertEqual(so.items[0].rate, 100)
 
+	def test_pricing_rule_min_qty_with_conversion_factor_float_precision(self):
+		item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Box", "conversion_factor": 100}])
+		make_item_price(item.name, "_Test Price List", 100)
+		make_item_pricing_rule(item.name, min_qty=57, discount_percentage=10)
+
+		details = get_item_details(
+			frappe._dict(
+				item_code=item.name,
+				company="_Test Company",
+				price_list="_Test Price List",
+				currency="INR",
+				doctype="Sales Order",
+				conversion_rate=1,
+				price_list_currency="INR",
+				plc_conversion_rate=1,
+				order_type="Sales",
+				customer="_Test Customer",
+				uom="Box",
+				qty=0.57,
+			)
+		)
+
+		self.assertEqual(details.discount_percentage, 10)
+		self.assertEqual(details.stock_qty, 57)
+
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
 		make_pricing_rule(
