@@ -685,6 +685,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		dn.items = [item for item in dn.items if item.item_code == unreserved_item]
 		dn.save()
 		dn.submit()
+		dn.reload()
 
 		self.assertEqual(
 			frappe.db.get_value("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle, "total_qty"),
@@ -729,6 +730,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		dn.items = [row for row in dn.items if row.warehouse == other_warehouse]
 		dn.save()
 		dn.submit()
+		dn.reload()
 
 		self.assertEqual(
 			frappe.db.get_value(
