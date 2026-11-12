@@ -557,3 +557,4 @@ erpnext.patches.v16_0.update_operation_status_for_upstream_process_loss
 erpnext.patches.v16_0.drop_item_code_warehouse_posting_datetime_index_from_sabb
 erpnext.patches.v16_0.drop_unfolded_item_search_index #2026-11-09
 erpnext.patches.v16_0.round_open_job_card_required_qty
+erpnext.patches.v16_0.restrict_company_address_flag
