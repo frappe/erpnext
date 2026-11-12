@@ -1369,7 +1369,9 @@ class SellingController(StockController):
 
 def remove_delivered_entries(package, pick_list_item):
 	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
-	delivered = get_delivered_entries(pick_list_item)
+	from erpnext.stock.doctype.pick_list.pick_list import get_moved_entries
+
+	delivered = get_moved_entries([pick_list_item]).get(pick_list_item, [])
 	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
 	delivered_batch_qty = defaultdict(float)
 	for row in delivered:
@@ -1387,34 +1389,6 @@ def remove_delivered_entries(package, pick_list_item):
 		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
 		if not row.qty:
 			package.remove(row)
-
-
-def get_delivered_entries(pick_list_item):
-	"""Return the serial and batch entries that submitted deliveries of a pick list row took."""
-	voucher_detail_nos = [
-		name
-		for doctype in ("Delivery Note Item", "Sales Invoice Item")
-		for name in frappe.get_all(
-			doctype, filters={"pick_list_item": pick_list_item, "docstatus": 1}, pluck="name"
-		)
-	]
-	if not voucher_detail_nos:
-		return []
-
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	return (
-		frappe.qb.from_(entry)
-		.join(bundle)
-		.on(entry.parent == bundle.name)
-		.select(entry.serial_no, entry.batch_no, entry.qty)
-		.where(
-			bundle.voucher_detail_no.isin(voucher_detail_nos)
-			& (bundle.type_of_transaction == "Outward")
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-		)
-	).run(as_dict=True)
 
 
 def set_default_income_account_for_item(obj):
