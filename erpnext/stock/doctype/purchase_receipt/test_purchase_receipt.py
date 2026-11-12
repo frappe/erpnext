@@ -4043,6 +4043,69 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			-1,
 		)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_rejected_batch_material_of_a_transfer_in_another_uom_keeps_its_transit_value(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
+
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BT-RTUOM-.####",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		receipt = make_purchase_receipt(
+			item_code=item, company=company, warehouse=from_warehouse, qty=50, rate=7
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=3,
+			rate=70,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			do_not_save=True,
+		)
+		dn.items[0].uom = "Box"
+		dn.items[0].conversion_factor = 10
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": to_warehouse,
+				"qty": 2,
+				"rejected_qty": 1,
+				"received_qty": 3,
+				"rejected_warehouse": rejected_warehouse,
+				"use_serial_batch_fields": 1,
+				"batch_no": batch_no,
+			}
+		)
+		pr.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+				"stock_value_difference",
+			),
+			70,
+		)
+
 	def test_return_of_a_transfer_that_rejected_batch_material(self):
 		"""Returning the whole receipt puts the accepted and the rejected material back into the
 		in-transit warehouse, and leaves the batch qty where it started."""
