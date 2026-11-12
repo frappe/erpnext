@@ -505,6 +505,9 @@ class ProductionPlan(Document):
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
 		self.check_permission("write")
 
+		if close is not None and self.docstatus != 1:
+			frappe.throw(_("Only a submitted Production Plan can be closed or re-opened"))
+
 		if close is None and self.status == "Closed":
 			return
 
