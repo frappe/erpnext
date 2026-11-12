@@ -94,6 +94,12 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.3334, delivery_rows=3)
 		return_dn.insert()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_split_return_of_one_row_when_stock_qty_is_editable(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
+		return_dn.insert()
+
 	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
