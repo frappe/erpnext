@@ -1117,13 +1117,17 @@ class SellingController(StockController):
 			picked.serial_nos = service.get_serial_nos_used_in_rows()
 			picked.batches = service.get_batches_used_in_rows()
 
-		get_serial_and_batch_bundle(
+		bundle = get_serial_and_batch_bundle(
 			item,
 			self,
 			items_by_name.get(item.get("parent_detail_docname")),
 			picked.serial_nos,
 			picked.batches,
 		)
+		if bundle:
+			# the stock ledger only syncs the rate of bundles it makes itself
+			avg_rate = frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
+			item.db_set("incoming_rate", flt(avg_rate, item.precision("incoming_rate")))
 
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
