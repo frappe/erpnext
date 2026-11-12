@@ -1360,13 +1360,14 @@ class SubcontractingController(StockController):
 
 	def get_cumulative_bom_qty(self, row, bom_item, received_qty, earlier_receipts):
 		"""BOM qty of all that a row's order row received on its BOM with ``received_qty``, less what earlier
-		receipts consumed, so rounding per receipt does not add up."""
+		receipts consumed (never below zero), so rounding per receipt does not add up."""
 		precision = frappe.get_precision(self.subcontract_data.receipt_supplied_items_field, "consumed_qty")
 		key = (row.subcontracting_order_item, row.bom, bom_item.bom_detail_no)
 		total_received_qty = earlier_receipts.received_qty[key] + received_qty
-		return (
+		return max(
 			flt(flt(bom_item.qty_consumed_per_unit) * total_received_qty, precision)
-			- earlier_receipts.consumed_qty[key]
+			- earlier_receipts.consumed_qty[key],
+			0,
 		)
 
 	def __set_supplied_or_received_items(self):
