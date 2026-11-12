@@ -3,6 +3,7 @@
 
 
 import json
+from unittest.mock import patch
 
 import frappe
 from frappe import qb
@@ -29,6 +30,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details, get_item_tax_map, get_item_tax_template
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
+from erpnext.utilities.transaction_base import get_whole_number_uoms
 
 
 def make_item(item_code=None, properties=None, uoms=None, barcode=None):
@@ -1118,6 +1120,28 @@ class TestItem(ERPNextTestSuite):
 		frappe.rename_doc("Item", "Test Item Bundle Item 1", "Test Item Bundle Item 2", merge=True)
 
 		self.assertFalse(frappe.db.exists("Item", "Test Item Bundle Item 1"))
+
+	def test_whole_number_uom_lookup_refreshes_after_changes(self):
+		uom = frappe.get_doc(
+			{"doctype": "UOM", "uom_name": frappe.generate_hash(length=10), "must_be_whole_number": 1}
+		).insert()
+		uoms = [uom.name, "Nos", None, uom.name]
+		whole_number_uoms = get_whole_number_uoms(uoms)
+		self.assertIn(uom.name, whole_number_uoms)
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			self.assertEqual(get_whole_number_uoms(reversed(uoms)), whole_number_uoms)
+			self.assertEqual(queries.call_count, 0)
+		whole_number_uoms.clear()
+		self.assertIn(uom.name, get_whole_number_uoms(uoms))
+
+		frappe.db.savepoint("whole_number_uom")
+		uom.must_be_whole_number = 0
+		uom.save()
+		self.assertNotIn(uom.name, get_whole_number_uoms(uoms))
+		frappe.db.rollback(save_point="whole_number_uom")
+		self.assertIn(uom.name, get_whole_number_uoms(uoms))
+		frappe.delete_doc("UOM", uom.name)
+		self.assertNotIn(uom.name, get_whole_number_uoms(uoms))
 
 	def test_uom_conversion_factor(self):
 		if frappe.db.exists("Item", "Test Item UOM"):
