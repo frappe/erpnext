@@ -58,3 +58,13 @@ class TestSellingSettings(ERPNextTestSuite):
 			settings.save()
 
 		self.assertEqual(make_property_setter.call_count, 13)
+
+	def test_unchanged_save_keeps_site_cache(self):
+		settings = frappe.get_single("Selling Settings")
+		settings.customer_group = None
+		settings.save()
+
+		frappe.cache.set_value("selling_settings_probe", 1)
+		settings.save()
+
+		self.assertEqual(frappe.cache.get_value("selling_settings_probe"), 1)
