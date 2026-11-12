@@ -21,7 +21,10 @@ from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
 	assert_refused_for_names,
+<<<<<<< HEAD
 	assert_refused_without,
+=======
+>>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 	make_company_fenced_user,
 	make_fenced_user,
 )
@@ -859,6 +862,160 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(rate["billing_rate"], 80)
 		self.assertEqual(rate["costing_rate"], 40)
 
+<<<<<<< HEAD
+=======
+	def test_billing_helpers_for_timesheet_detail(self):
+		from erpnext.projects.doctype.timesheet.timesheet import (
+			get_timesheet_data,
+			get_timesheet_detail_rate,
+		)
+
+		employee = make_employee("_test_timesheet_billing_helpers@example.com", company="_Test Company")
+		timesheet = make_timesheet(employee, is_billable=1, simulate=True)
+		detail = timesheet.time_logs[0]
+
+		# 2 billable hours at a billing rate of 50
+		data = get_timesheet_data(timesheet.name, project="")
+		self.assertEqual(data["billing_hours"], 2)
+		self.assertEqual(data["billing_amount"], 100)
+
+		# same currency on both sides, so the rate is the raw billing amount
+		rate = get_timesheet_detail_rate(detail.name, timesheet.currency)
+		self.assertEqual(rate, detail.billing_amount)
+
+	def test_get_activity_cost_requires_timesheet_access_and_the_employee(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		inside_employee = make_employee("activity-in@example.com", company="_Test Company")
+		outside_employee = make_employee("activity-out@example.com", company="_Test Company")
+
+		def activity_kwargs(name):
+			return {"employee": name, "activity_type": "_Test Activity Type"}
+
+		user = make_fenced_user(
+			"activity-fenced@example.com", ["Projects User"], [("Employee", inside_employee)]
+		)
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				get_activity_cost,
+				activity_kwargs,
+				[outside_employee],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			self.assertIn("billing_rate", get_activity_cost(inside_employee, "_Test Activity Type"))
+		stock_manager = make_fenced_user("activity-stock@example.com", ["Stock Manager"])
+		with as_user(stock_manager):
+			assert_refused(self, get_activity_cost, inside_employee, "_Test Activity Type")
+
+	def test_get_activity_cost_checks_the_activity_type_on_the_employee_path(self):
+		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
+
+		employee = make_employee("activity-type-in@example.com", company="_Test Company")
+		hidden = (
+			frappe.db.exists("Activity Type", "UP Hidden Activity")
+			or frappe.get_doc(
+				{"doctype": "Activity Type", "activity_type": "UP Hidden Activity", "billing_rate": 999}
+			)
+			.insert()
+			.name
+		)
+		frappe.get_doc(
+			{
+				"doctype": "Activity Cost",
+				"employee": employee,
+				"activity_type": "_Test Activity Type",
+				"billing_rate": 150,
+				"costing_rate": 90,
+			}
+		).insert()
+
+		def activity_kwargs(name):
+			return {"employee": employee, "activity_type": name}
+
+		user = make_fenced_user(
+			"activity-type-fenced@example.com",
+			["Projects User"],
+			[("Employee", employee), ("Activity Type", "_Test Activity Type")],
+		)
+		with as_user(user):
+			assert_refused_for_names(
+				self,
+				get_activity_cost,
+				activity_kwargs,
+				[hidden],
+				type_gated=True,
+				caller_supplied=True,
+			)
+			self.assertEqual(get_activity_cost(employee, "_Test Activity Type")["billing_rate"], 150)
+
+	def test_time_logs_need_access_to_their_task_and_project(self):
+		f = make_timesheet_access_fixtures("Timesheet Fenced")
+
+		def tracked_figures():
+			return (
+				frappe.db.get_value("Project", f.other_project, "actual_time"),
+				frappe.db.get_value("Task", f.other_task, ["actual_time", "status"]),
+			)
+
+		start = add_to_date(now_datetime(), days=-30)
+		untouched = tracked_figures()
+		with as_user(f.user):
+			for links in (
+				{"project": f.other_project, "task": f.other_task},
+				{"task": f.other_task},
+				{"project": f.other_project},
+			):
+				assert_refused(self, make_logged_timesheet(start, **links).insert)
+
+			make_logged_timesheet(start, project=f.own_project, task=f.own_task).submit()
+		self.assertEqual(tracked_figures(), untouched)
+		self.assertEqual(frappe.db.get_value("Project", f.own_project, "actual_time"), 2)
+
+		submitted = make_logged_timesheet(
+			add_to_date(start, hours=4), project=f.other_project, task=f.other_task
+		).submit()
+		logged = tracked_figures()
+		with as_user(f.user):
+			submitted = frappe.get_doc("Timesheet", submitted.name)
+			# saves after submit, as Salary Slip makes them, do not re-check the existing rows
+			submitted.flags.ignore_validate_update_after_submit = True
+			submitted.save()
+			assert_refused(self, submitted.cancel)
+		self.assertEqual(tracked_figures(), logged)
+
+	def test_submitted_timesheet_changes_need_access(self):
+		f = make_timesheet_access_fixtures("Timesheet Submitted")
+		start = add_to_date(now_datetime(), days=-60)
+
+		def submitted_timesheet(hours_from_start, task):
+			return make_logged_timesheet(add_to_date(start, hours=hours_from_start), task=task).submit().name
+
+		emptied = submitted_timesheet(0, f.own_task)
+		moved = submitted_timesheet(4, f.own_task)
+		edited = submitted_timesheet(8, f.other_task)
+		with as_user(f.user):
+			# cancel does not validate, so it must not save rows it was sent
+			timesheet = frappe.get_doc("Timesheet", emptied)
+			timesheet.set("time_logs", [])
+			self.assertRaises(frappe.ValidationError, timesheet.cancel)
+
+			# a change after submit is checked again, even one that rounding would hide
+			timesheet = frappe.get_doc("Timesheet", edited)
+			timesheet.flags.ignore_validate_update_after_submit = True
+			timesheet.time_logs[0].hours = 2.0000000005
+			assert_refused(self, timesheet.save)
+
+		self.assertEqual(frappe.db.get_value("Timesheet Detail", {"parent": emptied}, "docstatus"), 1)
+		self.assertEqual(frappe.db.get_value("Task", f.other_task, "actual_time"), 2)
+
+		# cancel also checks the project the task is in now
+		frappe.db.set_value("Task", f.own_task, "project", f.other_project)
+		with as_user(f.user):
+			assert_refused(self, frappe.get_doc("Timesheet", moved).cancel)
+
+>>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 
 def make_portal_user(customer):
 	user = make_fenced_user("_test_timesheet_portal_user@example.com", ["Customer"])
@@ -887,6 +1044,30 @@ def make_timesheet_without_employee(start, hours):
 			"time_logs": [{"from_time": start, "to_time": add_to_date(start, hours=hours)}],
 		}
 	)
+
+
+def make_timesheet_access_fixtures(label):
+	"""A project and task of _Test Company, a project and task of another company,
+	and a Projects User limited to _Test Company."""
+	from erpnext.projects.doctype.project.test_project import make_project
+
+	fixtures = frappe._dict()
+	for side, company in (("own", "_Test Company"), ("other", OTHER_COMPANY)):
+		project = make_project({"project_name": f"_Test Project {label} {side}", "company": company}).name
+		task = create_task(f"_Test {label} {side} Task", save=False)
+		task.project = project
+		task.save()
+		fixtures[f"{side}_project"], fixtures[f"{side}_task"] = project, task.name
+
+	email = f"{label.lower().replace(' ', '-')}@example.com"
+	fixtures.user = make_company_fenced_user(email, ["Projects User"], "_Test Company")
+	return fixtures
+
+
+def make_logged_timesheet(start, **links):
+	timesheet = make_timesheet_without_employee(start, 2)
+	timesheet.time_logs[0].update(links)
+	return timesheet
 
 
 def make_timesheet(
