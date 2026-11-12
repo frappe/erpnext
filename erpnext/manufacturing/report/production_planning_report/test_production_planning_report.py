@@ -15,6 +15,8 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
 WAREHOUSE = "_Test Warehouse - _TC"
+GROUP_WAREHOUSE = "_Test Warehouse Group - _TC"
+CHILD_WAREHOUSES = ["_Test Warehouse Group-C1 - _TC", "_Test Warehouse Group-C2 - _TC"]
 
 
 class TestProductionPlanningReport(ERPNextTestSuite):
@@ -190,3 +192,66 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		self.assertEqual(
 			[(d.required_qty, d.arrival_qty) for d in data if d.get("item_code") == material], [(30, 24)]
 		)
+
+	def allotments(self, data, material):
+		return [(d.warehouse, d.required_qty, d.allotted_qty) for d in data if d.get("item_code") == material]
+
+	def test_material_is_allotted_from_its_default_warehouse(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		other_warehouse = "_Test Warehouse 1 - _TC"
+		material = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": COMPANY, "default_warehouse": other_warehouse}],
+			}
+		).name
+		frappe.db.delete("Item Default", {"parent": material, "default_warehouse": WAREHOUSE})
+		make_stock_entry(item_code=material, target=other_warehouse, qty=100, basic_rate=10)
+		create_purchase_order(item_code=material, warehouse=other_warehouse, qty=7, rate=10)
+		fg_item = self.make_fg_with_bom([(material, 2, None, 1)])
+		sales_order = make_sales_order(item_code=fg_item, qty=5, warehouse=WAREHOUSE)
+
+		data = self.run_report("Sales Order", [sales_order.name])
+
+		self.assertEqual(self.allotments(data, material), [(other_warehouse, 10, 10)])
+		self.assertEqual([d.arrival_qty for d in data if d.get("item_code") == material], [7])
+
+	def test_next_warehouse_allots_only_the_remaining_qty(self):
+		material = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=material, target=CHILD_WAREHOUSES[0], qty=4, basic_rate=10)
+		make_stock_entry(item_code=material, target=CHILD_WAREHOUSES[1], qty=20, basic_rate=10)
+		fg_item = self.make_fg_with_bom([(material, 2, None, 1)])
+		orders = [make_sales_order(item_code=fg_item, qty=5, warehouse=WAREHOUSE).name for _order in range(2)]
+
+		data = self.run_report("Sales Order", orders, raw_material_warehouse=GROUP_WAREHOUSE)
+
+		self.assertEqual(
+			self.allotments(data, material),
+			[(CHILD_WAREHOUSES[0], 10, 4), (CHILD_WAREHOUSES[1], 10, 6), (CHILD_WAREHOUSES[1], 10, 10)],
+		)
+
+	def test_shortfall_is_reported_once(self):
+		material = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=material, target=CHILD_WAREHOUSES[0], qty=4, basic_rate=10)
+		fg_item = self.make_fg_with_bom([(material, 2, None, 1)])
+		sales_order = make_sales_order(item_code=fg_item, qty=5, warehouse=WAREHOUSE)
+
+		data = self.run_report("Sales Order", [sales_order.name], raw_material_warehouse=GROUP_WAREHOUSE)
+		self.assertEqual(
+			self.allotments(data, material), [(CHILD_WAREHOUSES[0], 10, 4), (GROUP_WAREHOUSE, 6, 0)]
+		)
+
+		make_stock_entry(item_code=material, source=CHILD_WAREHOUSES[0], qty=4)
+		data = self.run_report("Sales Order", [sales_order.name], raw_material_warehouse=GROUP_WAREHOUSE)
+		self.assertEqual(self.allotments(data, material), [(GROUP_WAREHOUSE, 10, 0)])
+
+	def test_fractional_requirement_is_fully_allotted(self):
+		material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_stock_entry(item_code=material, target=WAREHOUSE, qty=0.3, basic_rate=10)
+		fg_item = self.make_fg_with_bom([(material, 0.1, None, 1)])
+		sales_order = make_sales_order(item_code=fg_item, qty=3, warehouse=WAREHOUSE)
+
+		for filters in ({}, {"raw_material_warehouse": WAREHOUSE}):
+			data = self.run_report("Sales Order", [sales_order.name], **filters)
+			self.assertEqual(self.allotments(data, material), [(WAREHOUSE, 0.3, 0.3)])
