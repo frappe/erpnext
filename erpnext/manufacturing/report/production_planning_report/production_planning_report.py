@@ -128,7 +128,7 @@ class ProductionPlanReport:
 			)
 			d.qty_to_manufacture = flt(d.qty_to_manufacture) - done_qty
 
-		self.orders = [d for d in self.orders if flt(d.qty_to_manufacture, self.precision) > 0]
+		self.orders = [d for d in self.orders if d.qty_to_manufacture > 0]
 
 	def get_raw_materials(self):
 		"""Retrieve raw materials and source warehouses for production orders.
@@ -302,7 +302,7 @@ class ProductionPlanReport:
 					else d.qty_to_manufacture
 				)
 
-				bin_data["actual_qty"] = flt(bin_data["actual_qty"] - d.available_qty, self.precision)
+				bin_data["actual_qty"] -= d.available_qty
 
 			self.update_raw_materials(d, key)
 
