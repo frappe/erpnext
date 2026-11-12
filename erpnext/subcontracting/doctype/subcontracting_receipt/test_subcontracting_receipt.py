@@ -5170,46 +5170,66 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_receipts_add_up_to_the_order_requirement(self):
 		set_backflush_based_on("BOM")
-		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
-		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
-		service_item = make_item(properties={"is_stock_item": 0}).name
-		make_bom(item=fg_item, raw_materials=[raw_material], rm_qty=0.375, currency="INR")
-		sco = get_subcontracting_order(
-			service_items=[
-				{
-					"warehouse": "_Test Warehouse - _TC",
-					"item_code": service_item,
-					"qty": 2,
-					"rate": 100,
-					"fg_item": fg_item,
-					"fg_item_qty": 2,
-				}
-			]
-		)
-		rm_items = [
+		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.375, transferred_qty=0.75), [0.38, 0.37])
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_bom_backflush_receipt_rounding_up_on_submit(self):
+		set_backflush_based_on("BOM")
+		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.124, transferred_qty=0.25), [0.12, 0.13])
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract",
+			"validate_consumed_qty": 1,
+		},
+	)
+	def test_material_transferred_receipts_validate_against_their_own_bom_qty(self):
+		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.5, transferred_qty=1), [0.5, 0.5])
+
+
+def receive_order_of_two_one_by_one(rm_qty, transferred_qty):
+	"""Consumed qty of two receipts of 1 for an order of 2 whose BOM needs ``rm_qty`` per unit."""
+	raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+	service_item = make_item(properties={"is_stock_item": 0}).name
+	make_bom(item=fg_item, raw_materials=[raw_material], rm_qty=rm_qty, currency="INR")
+	sco = get_subcontracting_order(
+		service_items=[
 			{
-				"main_item_code": fg_item,
-				"item_code": raw_material,
-				"qty": 0.75,
-				"rate": 100,
-				"stock_uom": "Kg",
 				"warehouse": "_Test Warehouse - _TC",
+				"item_code": service_item,
+				"qty": 2,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 2,
 			}
 		]
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
-		)
+	)
+	rm_items = [
+		{
+			"main_item_code": fg_item,
+			"item_code": raw_material,
+			"qty": transferred_qty,
+			"rate": 100,
+			"stock_uom": "Kg",
+			"warehouse": "_Test Warehouse - _TC",
+		}
+	]
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+	)
 
-		consumed_qty = []
-		for _receipt in range(2):
-			scr = make_subcontracting_receipt(sco.name)
-			scr.items[0].qty = 1
-			scr.save()
-			scr.submit()
-			consumed_qty.append(scr.supplied_items[0].consumed_qty)
+	consumed_qty = []
+	for _receipt in range(2):
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.save()
+		scr.submit()
+		consumed_qty.append(scr.supplied_items[0].consumed_qty)
 
-		self.assertEqual(consumed_qty, [0.38, 0.37])
+	return consumed_qty
 
 
 def make_order_with_two_batches_transferred():
