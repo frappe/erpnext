@@ -691,14 +691,13 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				doc.party_account_currency = source.party_account_currency
 				doc.set("payments", [])
 				doc.update_billed_amount_in_delivery_note = True
+				# the change was already handed back, so it isn't refunded
+				change_by_row = get_change_by_payment_row(source)
 				for data in source.payments:
-					paid_amount = 0.00
-					base_paid_amount = 0.00
-					data.base_amount = flt(
-						data.amount * source.conversion_rate, source.precision("base_paid_amount")
+					paid_amount = flt(data.amount - change_by_row[data.idx], data.precision("amount"))
+					base_paid_amount = flt(
+						paid_amount * source.conversion_rate, source.precision("base_paid_amount")
 					)
-					paid_amount += data.amount
-					base_paid_amount += data.base_amount
 					doc.append(
 						"payments",
 						{
@@ -711,7 +710,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 						},
 					)
 				if doc.is_pos:
-					doc.paid_amount = -1 * source.paid_amount
+					doc.paid_amount = flt(
+						flt(source.change_amount) - source.paid_amount, doc.precision("paid_amount")
+					)
 			elif doc.doctype == "Purchase Invoice":
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
@@ -1666,3 +1667,19 @@ def is_batch_expired(batch_no, posting_date):
 		return True
 
 	return False
+
+
+def get_change_by_payment_row(invoice):
+	from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import get_change_payment_row
+
+	change_row = get_change_payment_row(invoice.payments, invoice.account_for_change_amount)
+	# take the change off its own row first, a smaller row spills over to the rest
+	rows = sorted(invoice.payments, key=lambda row: row is not change_row)
+
+	change_left = flt(invoice.change_amount)
+	change_by_row = {}
+	for row in rows:
+		change_by_row[row.idx] = min(change_left, flt(row.amount))
+		change_left -= change_by_row[row.idx]
+
+	return change_by_row
