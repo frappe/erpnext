@@ -65,6 +65,53 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertRaises(UOMMustBeIntegerError, scr.save)
 
+	def test_fractional_scrap_qty_in_whole_number_uom(self):
+		# Scrap rows take their qty from the BOM, which can be a fraction.
+		self.addCleanup(frappe.db.rollback)
+		set_backflush_based_on("BOM")
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+
+		fg_item = "Subcontracted Item SA1"
+		raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+
+		bom = make_bom(
+			item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True
+		)
+		bom.append("scrap_items", {"item_code": scrap_item, "stock_qty": 0.5, "rate": 10})
+		bom.save()
+		bom.submit()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 3,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 3,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.get_scrap_items()
+		scrap_row = next(row for row in scr.items if row.is_scrap_item)
+		self.assertEqual(scrap_row.stock_uom, "Nos")
+		self.assertEqual(flt(scrap_row.qty), 1.5)
+
+		scr.save()
+		scr.submit()
+		self.assertEqual(scr.docstatus, 1)
+
 	def test_project_is_carried_over_from_subcontracting_order(self):
 		project = make_project({"project_name": "_Test SCR Project"}).name
 		po = make_subcontracted_purchase_order(project)

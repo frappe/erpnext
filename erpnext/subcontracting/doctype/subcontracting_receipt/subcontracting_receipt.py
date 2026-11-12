@@ -155,8 +155,12 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.throw(_("Posting Date cannot be future date"))
 
 		super().validate()
+		# Scrap rows take their qty from the BOM, which can be a fraction.
 		self.validate_item_stock_uom_is_integer(
-			"item_code", ["qty", "received_qty", "rejected_qty"], "Subcontracting Receipt Item"
+			"item_code",
+			["qty", "received_qty", "rejected_qty"],
+			"Subcontracting Receipt Item",
+			row_filter=lambda row: not row.is_scrap_item,
 		)
 
 		if self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
