@@ -1234,9 +1234,80 @@ class SubcontractingController(StockController):
 		)
 		return {(d.parent, d.item_code): d.source_warehouse for d in rows}
 
+	def get_earlier_receipts_bom_consumption(self):
+		"""Received stock qty by order row and consumed qty by (order row, BOM row) of the submitted receipts."""
+		if self.doctype != "Subcontracting Receipt" or self.is_return:
+			return None
+
+		earlier = frappe._dict(received_qty=defaultdict(float), consumed_qty=defaultdict(float))
+		order_items = [
+			row.subcontracting_order_item for row in self.items if row.get("subcontracting_order_item")
+		]
+		if not order_items:
+			return earlier
+
+		receipt_items = frappe.get_all(
+			"Subcontracting Receipt Item",
+			filters={"docstatus": 1, "subcontracting_order_item": ("in", order_items)},
+			fields=[
+				"name",
+				"subcontracting_order_item",
+				"received_qty",
+				"qty",
+				"rejected_qty",
+				"conversion_factor",
+			],
+		)
+		order_item_of = {row.name: row.subcontracting_order_item for row in receipt_items}
+		for row in receipt_items:
+			earlier.received_qty[row.subcontracting_order_item] += get_received_stock_qty(row)
+
+		if order_item_of:
+			for row in frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"docstatus": 1, "reference_name": ("in", list(order_item_of))},
+				fields=["reference_name", "bom_detail_no", "consumed_qty"],
+			):
+				earlier.consumed_qty[
+					(order_item_of[row.reference_name], row.bom_detail_no)
+				] += row.consumed_qty
+
+		return earlier
+
+	def get_bom_qty(self, row, bom_item, earlier_receipts):
+		"""BOM qty a row consumes; a receipt row takes the order row's requirement so far, less what was consumed for it."""
+		order_item = row.get("subcontracting_order_item")
+		if earlier_receipts is None or not order_item:
+			return flt(bom_item.qty_consumed_per_unit) * get_received_stock_qty(row)
+
+		earlier_rows = [
+			d for d in self.items if d.idx < row.idx and d.get("subcontracting_order_item") == order_item
+		]
+		earlier_names = {d.name for d in earlier_rows}
+		received_qty = sum(get_received_stock_qty(d) for d in [*earlier_rows, row])
+		consumed_qty = sum(
+			flt(d.consumed_qty)
+			for d in self.get(self.raw_material_table)
+			if d.reference_name in earlier_names and d.bom_detail_no == bom_item.bom_detail_no
+		)
+		return (
+			self.get_cumulative_bom_qty(order_item, bom_item, received_qty, earlier_receipts) - consumed_qty
+		)
+
+	def get_cumulative_bom_qty(self, order_item, bom_item, received_qty, earlier_receipts):
+		"""BOM qty of all that an order row received with ``received_qty``, less what earlier receipts consumed,
+		so rounding per receipt does not add up."""
+		precision = frappe.get_precision(self.subcontract_data.receipt_supplied_items_field, "consumed_qty")
+		total_received_qty = earlier_receipts.received_qty[order_item] + received_qty
+		return (
+			flt(flt(bom_item.qty_consumed_per_unit) * total_received_qty, precision)
+			- earlier_receipts.consumed_qty[(order_item, bom_item.bom_detail_no)]
+		)
+
 	def __set_supplied_or_received_items(self):
 		self.bom_items = {}
 		job_card_warehouses = self.get_job_card_source_warehouses()
+		earlier_receipts = self.get_earlier_receipts_bom_consumption()
 
 		has_items = True if self.get(self.raw_material_table) else False
 		for row in self.items:
@@ -1252,11 +1323,7 @@ class SubcontractingController(StockController):
 				for bom_item in self._get_materials_from_bom(
 					row.item_code, row.bom, row.get("include_exploded_items")
 				):
-					qty = (
-						flt(bom_item.qty_consumed_per_unit)
-						* flt(row.get("received_qty") or (row.qty + (row.get("rejected_qty") or 0)))
-						* row.conversion_factor
-					)
+					qty = self.get_bom_qty(row, bom_item, earlier_receipts)
 					bom_item.main_item_code = row.item_code
 					self.__update_reserve_warehouse(bom_item, row, job_card_warehouses)
 					self.__set_alternative_item(bom_item)
@@ -1655,6 +1722,10 @@ class SubcontractingController(StockController):
 					)
 
 				mr_obj.update_requested_qty(mr_item_rows)
+
+
+def get_received_stock_qty(row):
+	return flt(row.get("received_qty") or (row.qty + (row.get("rejected_qty") or 0))) * row.conversion_factor
 
 
 def get_item_details(items):
