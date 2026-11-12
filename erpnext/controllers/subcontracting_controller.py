@@ -1278,10 +1278,12 @@ class SubcontractingController(StockController):
 			filters={"docstatus": 1, "reference_name": ("in", list(receipt_items))},
 			fields=["reference_name", "bom_detail_no", "rm_item_code", "consumed_qty"],
 		):
-			# rows backflushed on transferred material do not keep their BOM row
-			bom_detail_no = row.bom_detail_no or self.get_bom_rows_by_raw_material(
-				receipt_items[row.reference_name], bom_rows
-			).get(row.rm_item_code)
+			bom_detail_no = row.bom_detail_no
+			if not bom_detail_no and self.backflush_based_on != "BOM":
+				# rows backflushed on transferred material keep no BOM row; BOM backflush leaves them out
+				bom_detail_no = self.get_bom_rows_by_raw_material(
+					receipt_items[row.reference_name], bom_rows
+				).get(row.rm_item_code)
 			if bom_detail_no:
 				consumed_qty[(row.reference_name, bom_detail_no)] += row.consumed_qty
 
