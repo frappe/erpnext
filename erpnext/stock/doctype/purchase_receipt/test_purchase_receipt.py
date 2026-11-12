@@ -3942,6 +3942,38 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			-1,
 		)
 
+	def test_return_of_rejected_qty_bought_in_another_uom(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRRUOM-.#####",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=5,
+			rejected_qty=1,
+			received_qty=6,
+			uom="Box",
+			conversion_factor=10,
+			rate=100,
+		)
+
+		returned = make_purchase_return(pr.name)
+		returned.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", returned.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+			-10,
+		)
+
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
