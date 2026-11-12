@@ -272,3 +272,21 @@ class TestProductionPlanningReport(ERPNextTestSuite):
 		data = self.run_report("Sales Order", [sales_order.name])
 
 		self.assertEqual(self.required_qty(data, material), 125)
+
+	def test_fractional_requirements_are_fully_allotted_across_orders(self):
+		material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		make_stock_entry(item_code=material, target=CHILD_WAREHOUSES[0], qty=0.7, basic_rate=10)
+		make_stock_entry(item_code=material, target=CHILD_WAREHOUSES[1], qty=5, basic_rate=10)
+		fg_item = self.make_fg_with_bom([(material, 0.1, None, 1)])
+		orders = [make_sales_order(item_code=fg_item, qty=qty, warehouse=WAREHOUSE).name for qty in (3, 4, 2)]
+
+		data = self.run_report("Sales Order", orders, raw_material_warehouse=GROUP_WAREHOUSE)
+
+		self.assertEqual(
+			self.allotments(data, material),
+			[
+				(CHILD_WAREHOUSES[0], 0.3, 0.3),
+				(CHILD_WAREHOUSES[0], 0.4, 0.4),
+				(CHILD_WAREHOUSES[1], 0.2, 0.2),
+			],
+		)
