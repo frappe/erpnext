@@ -1331,7 +1331,7 @@ def create_asset_value_adjustment(asset, asset_category, company):
 	return asset_value_adjustment
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def transfer_asset(args):
 	args = json.loads(args)
 
