@@ -1446,6 +1446,8 @@ def get_serial_and_batch_bundle(
 			"do_not_submit": "True",
 			"ignore_serial_nos": picked_serial_nos[child.item_code] if picked_serial_nos else None,
 			"already_picked_batches": picked_batches,
+			# a delivery takes only its own order row's reservation
+			"against_sales_order_item": child.get("so_detail"),
 		}
 	)
 

@@ -1434,6 +1434,7 @@ class SerialBatchCreation:
 			"sabb_voucher_type": self.voucher_type,
 			"sabb_voucher_no": self.get("voucher_no"),
 			"sabb_voucher_detail_no": self.get("voucher_detail_no"),
+			"against_sales_order_item": self.get("against_sales_order_item"),
 		}
 
 	def set_auto_serial_batch_entries_for_inward(self):
