@@ -348,12 +348,8 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
-<<<<<<< HEAD
 	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
-=======
-	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos, get_serial_nos_in_stock
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
->>>>>>> 40bce48 (fix(stock): match a packed row's kept serial nos to their pick list row by serial no)
 
 	filters = {
 		"item_code": pi_row.item_code,

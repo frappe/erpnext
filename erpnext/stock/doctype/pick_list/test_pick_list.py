@@ -1186,7 +1186,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
 		second_delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_draft_bundle_delivery_keeps_its_warehouse_after_earlier_delivery_is_cancelled(self):
 		pick_list, first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
 		second_delivery = create_delivery_note(pick_list.name)
@@ -1200,10 +1200,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
 		second_delivery.submit()
 
-<<<<<<< HEAD
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-=======
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "enable_stock_reservation": 1, "allow_partial_reservation": 1},
 	)
@@ -1221,8 +1218,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
 		second_delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
->>>>>>> a16382b (test: keep a draft bundle delivery's warehouse when its order reserves stock)
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
@@ -3308,7 +3304,6 @@ class TestPickList(FrappeTestCase):
 		row = pick_list.locations[0]
 		self.assertEqual((row.conversion_factor, row.stock_qty, row.picked_qty), (10, 20, 20))
 
-<<<<<<< HEAD
 	def test_draft_pick_list_loads_with_the_ordered_conversion_factor(self):
 		item = make_item(
 			properties={
@@ -3554,10 +3549,6 @@ class TestPickList(FrappeTestCase):
 		pick_list.reload()
 		self.assertEqual(pick_list.locations[0].transferred_qty, 0.013)
 		self.assertEqual(pick_list.status, "Completed")
-=======
-	pick_list = create_pick_list_from_wo(work_order.name, None, 2)
-	pick_list.save()
-	return pick_list
 
 
 def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):
@@ -3588,4 +3579,3 @@ def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):
 	first_delivery.save()
 	first_delivery.submit()
 	return pick_list, first_delivery, other_location
->>>>>>> aad793a (test: keep a draft bundle delivery's warehouse after an earlier delivery is cancelled)
