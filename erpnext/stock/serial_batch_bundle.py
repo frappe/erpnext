@@ -36,6 +36,9 @@ INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES = ("Disassemble", "Material Receipt")
 
 SERIAL_NO_QUERY_BATCH_SIZE = 500
 
+# their bundles only reserve stock; a POS Invoice's bundle moves to its Sales Invoice on consolidation
+RESERVING_VOUCHER_TYPES = ("Pick List", "POS Invoice")
+
 
 def get_serial_no_status(sle):
 	warehouse = sle.warehouse if sle.actual_qty > 0 else None
