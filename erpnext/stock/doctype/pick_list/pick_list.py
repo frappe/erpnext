@@ -1165,16 +1165,12 @@ class PickList(TransactionBase):
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
-			remaining_qty = max(delivered_qty_by_key.get(bundle_key, 0), 0)
-			# rows with serial nos take what they delivered first, the rest share the remaining qty
-			for location in sorted(locations, key=lambda row: not row.serial_no):
+			qty_by_location = self._get_bundle_location_delivered_qty(
+				locations, delivered_qty_by_key.get(bundle_key, 0), delivered_serial_nos[bundle_key]
+			)
+			for location in locations:
 				precision = location.precision("delivered_qty")
-				if location.serial_no:
-					picked_serial_nos = {number.lower() for number in get_serial_nos(location.serial_no)}
-					delivered_qty = len(picked_serial_nos & delivered_serial_nos[bundle_key])
-				else:
-					delivered_qty = flt(min(flt(location.picked_qty), remaining_qty), precision)
-				remaining_qty -= delivered_qty
+				delivered_qty = flt(qty_by_location[location.name], precision)
 				if flt(location.delivered_qty, precision) == delivered_qty:
 					continue
 
@@ -1185,6 +1181,23 @@ class PickList(TransactionBase):
 			frappe.db.bulk_update("Pick List Item", updates, update_modified=False)
 
 		self._set_delivery_status_from_items()
+
+	@staticmethod
+	def _get_bundle_location_delivered_qty(locations, delivered_qty, delivered_serial_nos):
+		"""Rows take their picked serial nos that were delivered, then the rest of the delivered qty by picked qty."""
+		qty_by_location = {
+			location.name: len(
+				{number.lower() for number in get_serial_nos(location.serial_no)} & delivered_serial_nos
+			)
+			for location in locations
+		}
+		remaining_qty = max(delivered_qty - sum(qty_by_location.values()), 0)
+		for location in locations:
+			qty = min(flt(location.picked_qty) - qty_by_location[location.name], remaining_qty)
+			qty_by_location[location.name] += qty
+			remaining_qty -= qty
+
+		return qty_by_location
 
 	def _get_delivered_bundle_component_qty(self, sales_order_items):
 		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
