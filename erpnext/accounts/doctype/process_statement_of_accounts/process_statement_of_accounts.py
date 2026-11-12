@@ -499,7 +499,7 @@ def download_statements(document_name):
 		frappe.local.response.type = "download"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_emails(document_name, from_scheduler=False, posting_date=None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	doc.check_permission()
