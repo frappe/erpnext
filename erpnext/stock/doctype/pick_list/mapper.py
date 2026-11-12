@@ -355,7 +355,9 @@ def get_pending_serial_nos(location, moved_serial_nos, moved_qty_field="delivere
 		return location.serial_no
 
 	moved = moved_serial_nos.get(location.name, set())
-	pending_serial_nos = [number for number in get_serial_nos(location.serial_no) if number.lower() not in moved]
+	pending_serial_nos = [
+		number for number in get_serial_nos(location.serial_no) if number.lower() not in moved
+	]
 	pending_qty = max(cint(flt(location.picked_qty) - flt(location.get(moved_qty_field))), 0)
 	return "\n".join(pending_serial_nos[:pending_qty])
 
