@@ -451,7 +451,7 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	filters = {
 		"item_code": pi_row.item_code,
-		"sales_order": main_item_row.get("against_sales_order"),
+		"sales_order": main_item_row.get("against_sales_order") or main_item_row.get("sales_order"),
 		"sales_order_item": main_item_row.get("so_detail"),
 		"parent": main_item_row.against_pick_list,
 	}
