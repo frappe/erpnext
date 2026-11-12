@@ -68,7 +68,10 @@ class GlobalDefaults(Document):
 
 		# enable default currency
 		if self.default_currency:
-			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
+			currency = frappe.get_doc("Currency", self.default_currency)
+			if not currency.enabled:
+				currency.enabled = 1
+				currency.save(ignore_permissions=True)
 
 		self.toggle_rounded_total()
 		self.toggle_in_words()
