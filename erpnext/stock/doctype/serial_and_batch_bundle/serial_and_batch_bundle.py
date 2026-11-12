@@ -3409,6 +3409,10 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
+	if kwargs.delivery_reservations:
+		# offered separately by put_delivery_reservations_first
+		query = query.where(sre.voucher_detail_no.notin(list(kwargs.delivery_reservations.rows)))
+
 	data = query.run(as_dict=True)
 
 	reserved_batches_details = frappe._dict()
@@ -3439,6 +3443,13 @@ def get_batch_qty_for_stock(batch_no=None, warehouse=None, posting_date=None, po
 
 
 def get_auto_batch_nos(kwargs):
+	if (
+		kwargs.pick_reserved_items
+		and not kwargs.ignore_reserved_stock
+		and kwargs.delivery_reservations is None
+	):
+		kwargs.delivery_reservations = get_delivery_reservations(kwargs)
+
 	if not kwargs.get("posting_datetime") and kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
@@ -3477,8 +3488,8 @@ def get_auto_batch_nos(kwargs):
 	if not kwargs.get("do_not_check_future_batches") and available_batches and kwargs.get("posting_datetime"):
 		filter_zero_near_batches(available_batches, kwargs)
 
-	if kwargs.pick_reserved_items and not kwargs.ignore_reserved_stock:
-		available_batches = put_delivery_reservations_first(available_batches, kwargs)
+	if kwargs.delivery_reservations:
+		available_batches = put_delivery_reservations_first(available_batches, kwargs.delivery_reservations)
 
 	if not kwargs.consider_negative_batches:
 		precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
@@ -3586,35 +3597,38 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def put_delivery_reservations_first(available_batches, kwargs) -> list:
-	"""Offer what is reserved for the delivered Sales Order row first, then free stock.
+def get_delivery_reservations(kwargs) -> frappe._dict:
+	"""Outstanding batch reservations of the Sales Order rows a delivery delivers, by (batch_no, warehouse)."""
+	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+		return frappe._dict()
 
-	A batch's qty excludes every reservation and what the delivery's earlier rows picked. Those
-	picks come out of the delivery's own reservations first, so they are not deducted twice.
-	"""
 	own_rows, delivery_rows = get_delivery_order_rows(kwargs)
-	if not delivery_rows:
-		return available_batches
-
 	own_qty, delivery_qty = defaultdict(float), defaultdict(float)
 	for d in get_outstanding_reservations(kwargs, delivery_rows):
 		delivery_qty[(d.batch_no, d.warehouse)] += d.qty
 		if d.voucher_detail_no in own_rows:
 			own_qty[(d.batch_no, d.warehouse)] += d.qty
 
+	if not delivery_qty:
+		return frappe._dict()
+
+	return frappe._dict(rows=delivery_rows, own=own_qty, delivery=delivery_qty)
+
+
+def put_delivery_reservations_first(available_batches, reservations) -> list:
+	"""Split each batch's qty into what is reserved for the delivered row, free stock, and what is
+	reserved for the delivery's other rows, and offer them in that order."""
 	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
-	picked = kwargs.already_picked_batches or {}
-	own_batches = []
+	own, free, others = [], [], []
 	for batch in available_batches:
 		key = (batch.batch_no, batch.warehouse)
-		if own_qty[key]:
-			qty = min(own_qty[key], batch.qty + delivery_qty[key])
-			own_batches.append(frappe._dict(batch, qty=flt(qty, precision)))
+		own_qty = max(min(reservations.own[key], batch.qty), 0)
+		other_qty = max(min(reservations.delivery[key] - reservations.own[key], batch.qty - own_qty), 0)
+		own.append(frappe._dict(batch, qty=flt(own_qty, precision)))
+		others.append(frappe._dict(batch, qty=flt(other_qty, precision)))
+		free.append(frappe._dict(batch, qty=flt(batch.qty - own_qty - other_qty, precision)))
 
-		picked_qty = -flt(picked[key].qty) if key in picked else 0
-		batch.qty = flt(batch.qty + min(picked_qty, delivery_qty[key]), precision)
-
-	return own_batches + available_batches
+	return own + free + others
 
 
 def get_delivery_order_rows(kwargs) -> tuple[set, set]:
