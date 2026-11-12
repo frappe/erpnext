@@ -414,6 +414,7 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
 	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	filters = {
 		"item_code": pi_row.item_code,
@@ -436,8 +437,17 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	# a component picked from several warehouses moves on to the rows not delivered yet
 	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	pending_rows = [row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0]
+	pending_rows = pending_rows or pl_rows
+	# kept serial nos stay on the pick list row they were mapped from
+	kept_serial_nos = {number.lower() for number in get_serial_nos(pi_row.serial_no)}
 	pl_row = next(
-		(row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0), pl_rows[0]
+		(
+			row
+			for row in pending_rows
+			if kept_serial_nos & {number.lower() for number in get_serial_nos(row.serial_no)}
+		),
+		pending_rows[0],
 	)
 
 	pi_row.warehouse = pl_row.warehouse
