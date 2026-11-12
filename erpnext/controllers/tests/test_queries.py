@@ -95,6 +95,22 @@ class TestQueries(ERPNextTestSuite):
 
 		self.assertGreaterEqual(len(query(txt="_Test Project")), 1)
 
+	def test_tax_template_query_requires_item_read_permission(self):
+		query = add_default_params(queries.get_tax_template, "Item Tax Template")
+		item_code = "_Test Item Home Desktop 100"
+		sales_user = create_user("tax_template_sales_user@example.com", "Sales User")
+		website_manager = create_user("tax_template_website_manager@example.com", "Website Manager")
+
+		with self.set_user(sales_user.name):
+			templates = query(filters={"item_code": item_code, "company": "_Test Company"})
+			self.assertEqual([row[0] for row in templates], ["_Test Account Excise Duty @ 10 - _TC"])
+
+			with self.assertRaises(frappe.PermissionError):
+				query(filters={"item_code": {"name": item_code}, "company": "_Test Company"})
+
+		with self.set_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"item_code": item_code, "company": "_Test Company"})
+
 	def test_account_query(self):
 		query = add_default_params(queries.get_account_list, "Account")
 
