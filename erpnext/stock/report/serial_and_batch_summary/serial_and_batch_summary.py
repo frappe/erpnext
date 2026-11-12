@@ -288,6 +288,7 @@ def get_serial_batch_options(doctype, txt, start, page_len, filters):
 		order_by=f"{identity.number_field} asc, name asc",
 		limit=page_len,
 		offset=start,
+		ignore_permissions=False,
 	)
 	if voucher_nos:
 		entry_field = "serial_no" if doctype == "Serial No" else "batch_no"
