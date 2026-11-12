@@ -145,8 +145,13 @@ def make_serial_and_batch_bundles_for_preview(doc):
 		("items", "supplied_items") if doc.doctype == "Subcontracting Receipt" else ("items", "packed_items")
 	)
 	for table_name in table_names:
-		if doc.get(table_name):
-			doc.make_bundle_using_old_serial_batch_fields(table_name)
+		if not doc.get(table_name):
+			continue
+
+		# a return takes back the serial / batch nos of the original voucher, as on submit
+		if table_name != "supplied_items":
+			doc.make_bundle_for_sales_purchase_return(table_name)
+		doc.make_bundle_using_old_serial_batch_fields(table_name)
 
 
 def get_columns(raw_columns, fields, currency, masked_fields):
