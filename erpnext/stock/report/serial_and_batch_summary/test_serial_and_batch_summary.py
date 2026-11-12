@@ -133,8 +133,6 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 		)
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-		user, pos_profile = init_user_and_profile()
-		create_opening_entry(pos_profile, user.name)
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
@@ -146,6 +144,9 @@ class TestSerialAndBatchSummary(FrappeTestCase):
 		receipt = make_stock_entry(
 			item_code=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=50
 		)
+		self.addCleanup(frappe.set_user, "Administrator")
+		user, pos_profile = init_user_and_profile()
+		create_opening_entry(pos_profile, user.name)
 		pos_invoice = create_pos_invoice(
 			item=item,
 			qty=3,
