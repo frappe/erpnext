@@ -883,6 +883,59 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	def test_delivery_of_two_order_rows_reserving_one_batch(self) -> None:
+		items_details = create_items("batch")
+		(item,) = items_details
+		create_material_receipt(items_details, self.warehouse, qty=4)
+		row = {"item_code": item, "warehouse": self.warehouse, "qty": 2, "rate": 100}
+		so = make_sales_order(item_list=[row, row], warehouse=self.warehouse)
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual([get_row_reservation(d)[0] for d in so.items], ["Delivered", "Delivered"])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	def test_delivery_takes_the_reserved_qty_of_each_batch_first(self) -> None:
+		items_details = create_items("batch")
+		(item,) = items_details
+		first_receipt = create_material_receipt(items_details, self.warehouse, qty=1)
+		create_material_receipt(items_details, self.warehouse, qty=1)
+		so = make_sales_order(item_code=item, warehouse=self.warehouse, qty=2, rate=100)
+		so.create_stock_reservation_entries()
+		# free stock in the older of the two reserved batches
+		first_batch = get_batch_from_bundle(first_receipt.items[0].serial_and_batch_bundle)
+		make_stock_entry(item_code=item, to_warehouse=self.warehouse, qty=1, batch_no=first_batch, rate=100)
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(get_row_reservation(so.items[0])[0], "Delivered")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
