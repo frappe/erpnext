@@ -1237,7 +1237,14 @@ class SubcontractingController(StockController):
 	def get_earlier_receipts_bom_consumption(self):
 		"""Received stock qty and consumed qty by (order row, BOM row) of the other submitted receipts
 		that backflushed on the BOM."""
-		if self.doctype != "Subcontracting Receipt" or self.is_return:
+		if (
+			self.doctype != "Subcontracting Receipt"
+			or self.is_return
+			or frappe.db.get_single_value(
+				"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
+			)
+			!= "BOM"
+		):
 			return None
 
 		earlier = frappe._dict(received_qty=defaultdict(float), consumed_qty=defaultdict(float))
