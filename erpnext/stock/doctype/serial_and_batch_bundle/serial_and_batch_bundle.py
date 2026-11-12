@@ -1127,16 +1127,9 @@ class SerialandBatchBundle(Document):
 			msg += "<br><br><ul>"
 
 			for d in future_entries:
-				if self.has_serial_no:
-					msg += f"<li>{d.serial_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
-				else:
-<<<<<<< HEAD
-					msg += f"<li>{d.batch_no} in {get_link_to_form(d.voucher_type, d.voucher_no)}</li>"
-=======
-					number = SerialBatchIdentity("Batch").get_label(d.batch_no)
+				number = d.serial_no if self.has_serial_no else d.batch_no
 				link = get_link_to_form(d.voucher_type, d.voucher_no)
 				msg += "<li>" + _("{0} in {1}").format(number, link) + "</li>"
->>>>>>> e60dd96 (fix(stock): translate labels and doctype names in the stock messages)
 			msg += "</li></ul>"
 
 			frappe.throw(msg, title=title, exc=SerialNoExistsInFutureTransactionError)
