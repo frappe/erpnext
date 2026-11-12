@@ -1119,8 +1119,8 @@ class PickList(TransactionBase):
 		if not bundle_locations:
 			return
 
-		delivered_qty_by_key, delivered_serial_nos = self._get_delivered_bundle_component_qty(
-			{bundle_key[0] for bundle_key in bundle_locations}
+		delivered_qty_by_key, delivered_serial_nos = get_delivered_bundle_component_qty(
+			self.name, {bundle_key[0] for bundle_key in bundle_locations}
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
@@ -1157,59 +1157,6 @@ class PickList(TransactionBase):
 			remaining_qty -= qty
 
 		return qty_by_location
-
-	def _get_delivered_bundle_component_qty(self, sales_order_items):
-		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
-		delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
-		for parenttype in ("Delivery Note", "Sales Invoice"):
-			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
-				delivered_qty[key] += flt(row.delivered_qty)
-				delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
-
-		return delivered_qty, delivered_serial_nos
-
-	def _get_delivered_packed_items(self, parenttype, sales_order_items):
-		packed_item = frappe.qb.DocType("Packed Item")
-		transaction_item = frappe.qb.DocType(f"{parenttype} Item")
-		query = (
-			frappe.qb.from_(transaction_item)
-			.inner_join(packed_item)
-			.on(
-				(packed_item.parent == transaction_item.parent)
-				& (packed_item.parent_detail_docname == transaction_item.name)
-				& (packed_item.parenttype == parenttype)
-			)
-		)
-		conditions = (
-			(transaction_item.docstatus == 1)
-			& (transaction_item.against_pick_list == self.name)
-			& transaction_item.so_detail.isin(sales_order_items)
-		)
-
-		if parenttype == "Sales Invoice":
-			transaction = frappe.qb.DocType(parenttype)
-			query = query.inner_join(transaction).on(transaction.name == transaction_item.parent)
-			conditions &= transaction.update_stock == 1
-
-		return (
-			query.select(
-				transaction_item.so_detail,
-				packed_item.item_code,
-				packed_item.warehouse,
-				packed_item.batch_no,
-				packed_item.serial_no,
-				Sum(packed_item.qty).as_("delivered_qty"),
-			)
-			.where(conditions)
-			.groupby(
-				transaction_item.so_detail,
-				packed_item.item_code,
-				packed_item.warehouse,
-				packed_item.batch_no,
-				packed_item.serial_no,
-			)
-		).run(as_dict=True)
 
 	def _set_delivery_status_from_items(self):
 		per_delivered = self._calculate_target_parent_percentage(
@@ -2023,7 +1970,7 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
-	serial_nos_in_stock = get_serial_nos_in_stock(
+	moved_serial_nos = get_moved_serial_nos(
 		[location for location in pick_list.locations if location.sales_order == sales_order]
 	)
 
@@ -2053,7 +2000,7 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 				flt(child_item.conversion_factor) or 1
 			)
 			child_item.batch_no = location.batch_no
-			child_item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock)
+			child_item.serial_no = get_pending_serial_nos(location, moved_serial_nos)
 			child_item.use_serial_batch_fields = location.use_serial_batch_fields
 
 			if not child_item.qty:
@@ -2072,34 +2019,66 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		target_doc.customer = frappe.get_value("Sales Order", sales_order, "customer")
 
 
-def get_serial_nos_in_stock(locations, moved_qty_field="delivered_qty"):
-	"""Return (item_code, lower-cased serial_no, warehouse) of the partly moved rows' serial nos."""
-	numbers = [
-		number for row in locations if row.get(moved_qty_field) for number in get_serial_nos(row.serial_no)
-	]
-	if not numbers:
-		return set()
-
-	records = frappe.get_all(
-		"Serial No",
-		filters={"serial_no": ("in", numbers)},
-		fields=["item_code", "serial_no", "warehouse"],
-	)
-	return {(record.item_code, record.serial_no.lower(), record.warehouse) for record in records}
+def get_moved_serial_nos(locations, moved_qty_field="delivered_qty"):
+	"""Return the lower-cased serial nos that earlier deliveries or transfers of the partly moved rows took."""
+	moved = get_moved_entries([row.name for row in locations if row.serial_no and row.get(moved_qty_field)])
+	return {
+		row: {entry.serial_no.lower() for entry in entries if entry.serial_no}
+		for row, entries in moved.items()
+	}
 
 
-def get_pending_serial_nos(location, serial_nos_in_stock, moved_qty_field="delivered_qty"):
+def get_pending_serial_nos(location, moved_serial_nos, moved_qty_field="delivered_qty"):
 	"""Return the serial nos a partly moved row still has to move, capped at its pending qty."""
 	if not location.get(moved_qty_field):
 		return location.serial_no
 
+	moved = moved_serial_nos.get(location.name, set())
 	pending_serial_nos = [
-		number
-		for number in get_serial_nos(location.serial_no)
-		if (location.item_code, number.lower(), location.warehouse) in serial_nos_in_stock
+		number for number in get_serial_nos(location.serial_no) if number.lower() not in moved
 	]
 	pending_qty = max(cint(flt(location.picked_qty) - flt(location.get(moved_qty_field))), 0)
 	return "\n".join(pending_serial_nos[:pending_qty])
+
+
+def get_moved_entries(pick_list_items):
+	"""Return the serial and batch entries that submitted vouchers of the pick list rows took, by row."""
+	if not pick_list_items:
+		return {}
+
+	pick_list_item_by_voucher_detail = {}
+	for doctype in ("Delivery Note Item", "Sales Invoice Item", "Stock Entry Detail"):
+		pick_list_item_by_voucher_detail.update(
+			frappe.get_all(
+				doctype,
+				filters={"pick_list_item": ("in", pick_list_items), "docstatus": 1},
+				fields=["name", "pick_list_item"],
+				as_list=True,
+			)
+		)
+	if not pick_list_item_by_voucher_detail:
+		return {}
+
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	entries = (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.select(bundle.voucher_detail_no, entry.serial_no, entry.batch_no, entry.qty)
+		.where(
+			bundle.voucher_detail_no.isin(list(pick_list_item_by_voucher_detail))
+			& (bundle.type_of_transaction == "Outward")
+			& (bundle.docstatus == 1)
+			& (bundle.is_cancelled == 0)
+		)
+	).run(as_dict=True)
+
+	moved = defaultdict(list)
+	for row in entries:
+		moved[pick_list_item_by_voucher_detail[row.voucher_detail_no]].append(row)
+
+	return moved
 
 
 def add_product_bundles_to_delivery_note(
@@ -2293,12 +2272,12 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 
 	job_card_items = get_job_card_items_by_material_request_item(pick_list)
 
-	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location, serial_nos_in_stock)
+		update_common_item_properties(item, location, moved_serial_nos)
 		item.t_warehouse = job_card.wip_warehouse
 		item.job_card_item = job_card_items.get(location.material_request_item)
 		stock_entry.append("items", item)
@@ -2345,12 +2324,12 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 	stock_entry.project = work_order.project
 
-	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location, serial_nos_in_stock)
+		update_common_item_properties(item, location, moved_serial_nos)
 		item.t_warehouse = wip_warehouse
 
 		stock_entry.append("items", item)
@@ -2359,7 +2338,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
-	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
@@ -2369,7 +2348,7 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 				"Material Request Item", location.material_request_item, "warehouse"
 			)
 		item = frappe._dict()
-		update_common_item_properties(item, location, serial_nos_in_stock)
+		update_common_item_properties(item, location, moved_serial_nos)
 		item.t_warehouse = target_warehouse
 		stock_entry.append("items", item)
 
@@ -2377,12 +2356,12 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 
 
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
-	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location, serial_nos_in_stock)
+		update_common_item_properties(item, location, moved_serial_nos)
 
 		stock_entry.append("items", item)
 
@@ -2394,7 +2373,7 @@ def get_pending_transfer_stock_qty(location):
 	return flt(location.picked_qty) - flt(location.transferred_qty)
 
 
-def update_common_item_properties(item, location, serial_nos_in_stock):
+def update_common_item_properties(item, location, moved_serial_nos):
 	pending_stock_qty = get_pending_transfer_stock_qty(location)
 	item.item_code = location.item_code
 	item.item_name = location.item_name
@@ -2405,7 +2384,7 @@ def update_common_item_properties(item, location, serial_nos_in_stock):
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
 	item.material_request = location.material_request
-	item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock, "transferred_qty")
+	item.serial_no = get_pending_serial_nos(location, moved_serial_nos, "transferred_qty")
 	item.batch_no = location.batch_no
 	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
@@ -2469,3 +2448,58 @@ def get_pick_list_query(doctype, txt, searchfield, start, page_len, filters):
 		query = query.where(txt_condition)
 
 	return query.run(as_dict=True)
+
+
+def get_delivered_bundle_component_qty(pick_list, sales_order_items):
+	"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
+	delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
+	for parenttype in ("Delivery Note", "Sales Invoice"):
+		for row in get_delivered_packed_items(pick_list, parenttype, sales_order_items):
+			key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
+			delivered_qty[key] += flt(row.delivered_qty)
+			delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
+
+	return delivered_qty, delivered_serial_nos
+
+
+def get_delivered_packed_items(pick_list, parenttype, sales_order_items):
+	packed_item = frappe.qb.DocType("Packed Item")
+	transaction_item = frappe.qb.DocType(f"{parenttype} Item")
+	query = (
+		frappe.qb.from_(transaction_item)
+		.inner_join(packed_item)
+		.on(
+			(packed_item.parent == transaction_item.parent)
+			& (packed_item.parent_detail_docname == transaction_item.name)
+			& (packed_item.parenttype == parenttype)
+		)
+	)
+	conditions = (
+		(transaction_item.docstatus == 1)
+		& (transaction_item.against_pick_list == pick_list)
+		& transaction_item.so_detail.isin(sales_order_items)
+	)
+
+	if parenttype == "Sales Invoice":
+		transaction = frappe.qb.DocType(parenttype)
+		query = query.inner_join(transaction).on(transaction.name == transaction_item.parent)
+		conditions &= transaction.update_stock == 1
+
+	return (
+		query.select(
+			transaction_item.so_detail,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.batch_no,
+			packed_item.serial_no,
+			Sum(packed_item.qty).as_("delivered_qty"),
+		)
+		.where(conditions)
+		.groupby(
+			transaction_item.so_detail,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.batch_no,
+			packed_item.serial_no,
+		)
+	).run(as_dict=True)
