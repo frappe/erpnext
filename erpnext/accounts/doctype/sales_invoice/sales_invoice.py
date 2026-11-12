@@ -10,7 +10,11 @@ from frappe.model.utils import get_fetch_values
 from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
-from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.deferred_revenue import (
+	get_already_booked_amounts,
+	validate_deferred_revenue_return_cancellation,
+	validate_service_stop_date,
+)
 from erpnext.accounts.doctype.dunning.dunning import (
 	get_invoice_outstanding,
 	get_payment_schedule_outstanding,
@@ -630,6 +634,7 @@ class SalesInvoice(SellingController):
 		return result[0][0] if result else None
 
 	def before_cancel(self):
+		validate_deferred_revenue_return_cancellation(self)
 		self.check_if_consolidated_invoice()
 
 		super().before_cancel()
@@ -1587,15 +1592,16 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
+		deferred_return_items = self.get_deferred_return_items()
 
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
-		self.make_item_gl_entries(gl_entries)
+		self.make_item_gl_entries(gl_entries, deferred_return_items)
 		self.make_precision_loss_gl_entry(gl_entries)
-		self.make_discount_gl_entries(gl_entries)
+		self.make_discount_gl_entries(gl_entries, deferred_return_items)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -1702,7 +1708,7 @@ class SalesInvoice(SellingController):
 				)
 			)
 
-	def make_item_gl_entries(self, gl_entries):
+	def make_item_gl_entries(self, gl_entries, deferred_return_items=None):
 		# income account gl entries
 		enable_discount_accounting = cint(
 			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
@@ -1722,11 +1728,7 @@ class SalesInvoice(SellingController):
 					self.get_gl_entries_for_fixed_asset(item, gl_entries)
 
 				else:
-					income_account = (
-						item.income_account
-						if (not item.enable_deferred_revenue or self.is_return)
-						else item.deferred_revenue_account
-					)
+					income_account = self.get_item_income_account(item, deferred_return_items)
 
 					amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 
@@ -1735,6 +1737,9 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict(
 							{
 								"account": income_account,
+								"voucher_detail_no": item.name
+								if self.is_return and item.enable_deferred_revenue
+								else None,
 								"against": self.customer,
 								"credit": flt(base_amount, item.precision("base_net_amount")),
 								"credit_in_account_currency": (
@@ -1754,6 +1759,65 @@ class SalesInvoice(SellingController):
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super().get_gl_entries()
+
+	def get_item_income_account(self, item, deferred_return_items=None):
+		if not item.enable_deferred_revenue:
+			return item.income_account
+		if not self.is_return:
+			return item.deferred_revenue_account
+		if not self.return_against or not item.sales_invoice_item:
+			return item.income_account
+
+		if deferred_return_items is None:
+			deferred_return_items = self.get_deferred_return_items()
+		if item.name in deferred_return_items:
+			return item.deferred_revenue_account
+		return item.income_account
+
+	def get_deferred_return_items(self):
+		if not self.is_return or not self.return_against:
+			return set()
+
+		items = [item for item in self.items if item.enable_deferred_revenue and item.sales_invoice_item]
+		if not items:
+			return set()
+
+		frappe.db.get_value("Sales Invoice", self.return_against, "name", for_update=True)
+		# Stock reposting composes entries before replacing the existing ledger.
+		entries = {
+			(entry.voucher_detail_no, entry.account)
+			for entry in frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": "Sales Invoice", "voucher_no": self.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "account"],
+			)
+		}
+		deferred_items = {
+			item.name for item in items if (item.name, item.deferred_revenue_account) in entries
+		}
+		items = [item for item in items if item.name not in deferred_items]
+		if not items:
+			return deferred_items
+
+		invoice = frappe.get_cached_doc("Sales Invoice", self.return_against)
+		original_names = {item.sales_invoice_item for item in items}
+		original_items = {
+			item.name: item
+			for item in invoice.items
+			if item.name in original_names and item.enable_deferred_revenue
+		}
+		booked_amounts = get_already_booked_amounts(invoice, list(original_items.values()))
+		# Keep the existing treatment once recognition has started, including draft journals.
+		for item in items:
+			original_item = original_items.get(item.sales_invoice_item)
+			if (
+				original_item
+				and original_item.deferred_revenue_account == item.deferred_revenue_account
+				and not any(booked_amounts[original_item.name])
+			):
+				deferred_items.add(item.name)
+
+		return deferred_items
 
 	def get_gl_entries_for_fixed_asset(self, item, gl_entries):
 		asset = frappe.get_cached_doc("Asset", item.asset)
