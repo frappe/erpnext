@@ -973,6 +973,47 @@ class TestPaymentRequest(FrappeTestCase):
 			pr.insert,
 		)
 
+	def test_resend_unpaid_gateway_payment_request(self):
+		so = make_sales_order()
+		payment_url = "https://payments.example.com/request"
+		with (
+			patch(
+				"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller"
+			) as get_gateway,
+			patch("frappe.attach_print", return_value={}),
+			patch("erpnext.accounts.doctype.payment_request.payment_request.enqueue") as enqueue,
+		):
+			get_gateway.return_value.get_payment_url.return_value = payment_url
+			pr = make_payment_request(
+				dt="Sales Order",
+				dn=so.name,
+				recipient_id="customer@example.com",
+				payment_gateway_account="_Test Gateway - INR - _TC",
+				return_doc=1,
+			)
+			pr.message = '<a href="{{ payment_url }}">Make Payment</a>'
+			pr.save()
+			pr.submit()
+			pr.reload()
+			self.assertEqual(pr.status, "Requested")
+			self.assertEqual(pr.payment_url, payment_url)
+
+			with self.set_user(get_accounts_user()):
+				pr.resend_payment_email()
+				pr.resend_payment_email()
+
+			self.assertEqual(enqueue.call_count, 3)
+			for call in enqueue.call_args_list:
+				self.assertEqual(call.kwargs["recipients"], "customer@example.com")
+				self.assertIn(payment_url, call.kwargs["message"])
+			get_gateway.return_value.get_payment_url.assert_called_once()
+			self.assertEqual(pr.reload().status, "Requested")
+
+			pr.cancel()
+			with self.assertRaises(frappe.ValidationError):
+				pr.resend_payment_email()
+			self.assertEqual(enqueue.call_count, 3)
+
 	def test_resend_payment_email_uses_saved_values(self):
 		so = make_sales_order()
 		pr = make_payment_request(
