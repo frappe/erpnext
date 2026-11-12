@@ -419,7 +419,7 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 		filter_batches(batches, doc)
 
 	batch_no = next(iter(batches), None)
-	if batch_no and flt(batches[batch_no]) >= flt(qty):
+	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
 		return batch_no
 
 	return None
