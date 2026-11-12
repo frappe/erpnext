@@ -38,7 +38,6 @@ from erpnext.stock.get_item_details import (
 )
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import _get_incoming_rate, is_serial_no_wise_valuation_disabled
-from erpnext.utilities.transaction_base import get_whole_number_uoms
 
 
 class QtyMismatchError(ValidationError):
@@ -1054,11 +1053,6 @@ class BuyingController(SubcontractingController):
 				)
 
 	def set_qty_as_per_stock_uom(self):
-		allow_to_edit_stock_qty = frappe.get_single_value(
-			"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"
-		)
-		whole_number_uoms = get_whole_number_uoms(d.get("stock_uom") for d in self.get("items"))
-
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
 				# Check if item code is present
@@ -1070,18 +1064,12 @@ class BuyingController(SubcontractingController):
 							field_label=d.meta.get_translated_label("conversion_factor"),
 						)
 					)
-				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+				d.stock_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 
 				if self.doctype == "Purchase Receipt" and d.meta.get_field("received_stock_qty"):
-					# Set Received Qty in Stock UOM
-					d.received_stock_qty = flt(d.received_qty) * flt(
-						d.conversion_factor, d.precision("conversion_factor")
+					d.received_stock_qty = flt(
+						flt(d.received_qty) * flt(d.conversion_factor), d.precision("received_stock_qty")
 					)
-
-				if allow_to_edit_stock_qty or d.get("stock_uom") in whole_number_uoms:
-					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
-					if d.get("received_stock_qty") and d.meta.get_field("received_stock_qty"):
-						d.received_stock_qty = flt(d.received_stock_qty, d.precision("received_stock_qty"))
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):
