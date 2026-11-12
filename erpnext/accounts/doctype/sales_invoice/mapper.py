@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.dunning.dunning import (
 )
 from erpnext.accounts.doctype.sales_invoice.services.inter_company import get_inter_company_counterpart
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 
 @frappe.whitelist()
@@ -207,6 +208,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			_apply_purchase_party_details(target_doc, source_doc, details)
 		else:
 			_apply_sales_party_details(target_doc, source_doc, details)
+		clear_inapplicable_terms(target_doc)
 
 	def get_pending_qty(row):
 		received_stock_qty = received_items.get(row.name, 0.0)
