@@ -50,6 +50,35 @@ class TestTrialBalance(FrappeTestCase):
 			total_row = execute(frappe._dict(filters))[1][-1]
 		self.assertEqual((total_row["opening_debit"], total_row["opening_credit"]), (0, 0))
 
+	def test_company_permission_follows_applicable_for(self):
+		from erpnext.accounts.utils import get_fiscal_year
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		user = make_fenced_user("tb-company@example.com", ["Accounts User"])
+		user_permission = frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Company",
+				"for_value": self.company,
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Sales Invoice",
+			}
+		).insert(ignore_permissions=True)
+		filters = frappe._dict(
+			company="_Test Company",
+			fiscal_year=get_fiscal_year(today(), company="_Test Company")[0],
+		)
+
+		# a Company permission limited to Sales Invoice does not restrict the report
+		with as_user(user):
+			execute(frappe._dict(filters))
+
+		user_permission.db_set({"apply_to_all_doctypes": 1, "applicable_for": None})
+		frappe.cache.hdel("user_permissions", user)
+		with as_user(user), self.assertRaises(frappe.PermissionError):
+			execute(frappe._dict(filters))
+
 	def test_offsetting_entries_for_accounting_dimensions(self):
 		"""
 		Checks if Trial Balance Report is balanced when filtered using a particular Accounting Dimension
