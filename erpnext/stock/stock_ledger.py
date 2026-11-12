@@ -1486,10 +1486,13 @@ class update_entries_after:
 
 		if (
 			not self.args.get("sle_id")
-			# Stock Entry recalculates its amounts only for bundles picked while posting
 			or (
 				sle.serial_and_batch_bundle
-				and (sle.auto_created_serial_and_batch_bundle or sle.voucher_type != "Stock Entry")
+				and (
+					sle.auto_created_serial_and_batch_bundle
+					# sales rows get their bundles before the ledger
+					or sle.voucher_type in ("Delivery Note", "Sales Invoice")
+				)
 			)
 			or self.is_outward_internal_transfer_leg(sle)
 		):
