@@ -19,6 +19,8 @@ def create_user_with_roles(email, *roles):
 		user = frappe.new_doc("User")
 		user.email = email
 		user.first_name = email.split("@", 1)[0]
+		# sending it commits the test's transaction
+		user.send_welcome_email = 0
 		user.insert(ignore_permissions=True)
 
 	user.set("roles", [])
