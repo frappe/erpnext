@@ -21,6 +21,7 @@ from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges, merge_taxes
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.stock.stock_ledger import validate_reserved_stock
 from erpnext.stock.utils import get_bin_qty_map
 
@@ -1609,6 +1610,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 		target_doc.inter_company_invoice_reference = source_doc.name
+		clear_inapplicable_terms(target_doc)
 		if target_doc.doctype == "Purchase Receipt":
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
