@@ -386,6 +386,22 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		frappe.set_user(self.make_delivery_user("Delivery User"))
 		self.assertIn("<b>", get_contact_display(contact))
 
+	def test_dispatch_mail_needs_delivery_note_access(self):
+		from unittest.mock import patch
+
+		self.delivery_trip.delivery_stops[0].delivery_note = self.make_delivery_note_with_address().name
+		self.delivery_trip.submit()
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		with patch("frappe.sendmail") as sendmail:
+			frappe.set_user(self.make_delivery_user("Fulfillment User"))
+			self.assertRaises(frappe.PermissionError, notify_customers, self.delivery_trip.name)
+			self.assertFalse(sendmail.called)
+
+			frappe.set_user(self.make_delivery_user("Stock User"))
+			notify_customers(self.delivery_trip.name)
+			self.assertEqual(sendmail.call_count, 2)
+
 	def process_route_with_locks(self, locks):
 		from unittest.mock import patch
 
