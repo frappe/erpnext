@@ -917,7 +917,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	def test_delivery_consumes_batch_reservation_of_a_bundle_component(self) -> None:
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
-		batch_item = make_item(properties=SR_ITEM_PROPERTIES["batch"])
+		batch_item = make_batch_item()
 		create_material_receipt({batch_item.name: batch_item}, self.warehouse, qty=5)
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		make_product_bundle(bundle, [batch_item.name])

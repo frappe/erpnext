@@ -448,40 +448,14 @@ class SellingController(StockController):
 					"valuation rate",
 				)
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-	def get_item_list(self):
-		il = []
-		picked_serial_nos = picked_batches = None
-		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-			picked_serial_nos = self.get_serial_nos_used_in_rows()
-			picked_batches = self.get_batches_used_in_rows()
-=======
-	def get_item_list(self, make_bundles=True):
-		"""make_bundles: make the missing bundles of packed rows; off while their qty may still change."""
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
-		il = []
-		picked_serial_nos = picked_batches = None
-		make_bundles = make_bundles and any(not p.serial_and_batch_bundle for p in self.get("packed_items"))
-		if make_bundles:
-			service = SerialBatchBundleService(self)
-			picked_serial_nos = service.get_serial_nos_used_in_rows()
-			picked_batches = service.get_batches_used_in_rows()
->>>>>>> b7d99de (fix(stock): make packed rows' bundles only at submit)
-=======
 	def make_packed_item_bundles(self):
 		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
-		service = SerialBatchBundleService(self)
-		packed_rows = [p for p in service.get_current_packed_rows() if not p.serial_and_batch_bundle]
+		packed_rows = [p for p in self.get_current_packed_rows() if not p.serial_and_batch_bundle]
 		if not packed_rows:
 			return
->>>>>>> c4b94b8 (fix(stock): make packed rows' bundles before updating stock reservations)
 
-		picked_serial_nos = service.get_serial_nos_used_in_rows()
-		picked_batches = service.get_batches_used_in_rows()
+		picked_serial_nos = self.get_serial_nos_used_in_rows()
+		picked_batches = self.get_batches_used_in_rows()
 		item_rows = {d.name: d for d in self.items}
 		for p in packed_rows:
 			get_serial_and_batch_bundle(
@@ -489,8 +463,8 @@ class SellingController(StockController):
 			)
 
 		# validate ran before these bundles existed
-		if service.is_batch_check_needed():
-			service.validate_outward_bundle_batches(rows=packed_rows)
+		if self.is_batch_check_needed():
+			self.validate_outward_bundle_batches(rows=packed_rows)
 
 	def get_item_list(self):
 		il = []
