@@ -403,6 +403,36 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertIn("<b>Steel Sheet</b>", preview["message"])
 		self.assertNotIn("onclick", preview["message"])
 
+	def test_send_supplier_emails_needs_write_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+			RequestforQuotation,
+			send_supplier_emails,
+		)
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		rfq = make_request_for_quotation()
+		email_id = "rfq-send-email-supplier@example.com"
+		rfq.suppliers[0].db_set({"email_id": email_id, "send_email": 1})
+		reader = make_fenced_user("rfq-send-email-reader@example.com", ["Stock User"])
+		manager = make_fenced_user("rfq-send-email-manager@example.com", ["Purchase Manager"])
+
+		with patch.object(RequestforQuotation, "send_email") as send_email:
+			with as_user(reader):
+				self.assertRaises(frappe.PermissionError, send_supplier_emails, rfq.name)
+			self.assertFalse(frappe.db.exists("User", email_id))
+			send_email.assert_not_called()
+
+			with as_user(manager):
+				send_supplier_emails(rfq.name)
+			send_email.assert_called_once()
+
+		self.assertTrue(frappe.db.exists("User", email_id))
+		self.assertEqual(
+			frappe.db.get_value("Request for Quotation Supplier", rfq.suppliers[0].name, "email_sent"), 1
+		)
+
 	def test_get_pdf(self):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
