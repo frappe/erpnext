@@ -2275,13 +2275,11 @@ def get_warehouse_details(args: str | dict):
 
 	args = frappe._dict(args)
 
-	# Restored explicitly: both checks were inherited from get_incoming_rate until it was split into
-	# a guarded whitelist wrapper and the unguarded _get_incoming_rate this now calls.
-	# `select`, not `read`: this is reached from stock_entry.js:740, and the desk roles that open
-	# that form clear select through the Desk User row while holding no Item read of their own.
-	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Stock Entry", "read", throw=True)
 	check_warehouse_company(args.get("warehouse"))
 	check_company(args.get("company"))
+	if args.warehouse:
+		erpnext.require_user_permission("Warehouse", args.warehouse)
 
 	ret = {}
 	if args.warehouse and args.item_code:
