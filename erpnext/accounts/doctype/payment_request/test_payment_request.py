@@ -908,6 +908,28 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(pr.status, "Requested")
 		self.assertEqual(pr.outstanding_amount, so.base_grand_total)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	def test_cancelling_invoice_keeps_payment_request_of_its_advance_paid(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+
+		so = make_sales_order(qty=1, rate=100)
+		pr = make_payment_request(dt="Sales Order", dn=so.name, mute_email=1, submit_doc=1, return_doc=1)
+		pe = pr.create_payment_entry()
+
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.insert()
+		si.submit()
+		self.assertEqual(si.advances[0].reference_name, pe.name)
+
+		# the advance goes back to the payment entry unallocated, so the request is still paid
+		si.cancel()
+		pe.reload()
+		self.assertEqual(pe.unallocated_amount, 100)
+		pr.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Paid", 0))
+		self.assertRaises(frappe.ValidationError, pr.create_payment_entry)
+
 	def test_requested_amount_currency_based_precision(self):
 		from unittest.mock import patch
 

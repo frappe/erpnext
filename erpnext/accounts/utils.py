@@ -1124,8 +1124,10 @@ def remove_ref_doc_link_from_pe(
 		update_payment_requests_as_per_pe_references,
 	)
 
-	# Update payment request amount
-	update_payment_requests_as_per_pe_references(reference_rows, cancel=True)
+	# An allocated advance goes back to the payment entry as unallocated, so its payment request stays paid
+	update_payment_requests_as_per_pe_references(
+		[row for row in reference_rows if not row.advance_voucher_no], cancel=True
+	)
 
 	# Update allocated amounts and modified fields in one go
 	(
