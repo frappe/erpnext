@@ -103,7 +103,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		# manqala 19/09/2016: Should this be an empty return or should it throw and exception?
 		return
 	for currency in (from_currency, to_currency):
-		if not isinstance(currency, str) or not frappe.db.exists("Currency", currency):
+		if not isinstance(currency, str) or not frappe.db.exists("Currency", currency, cache=True):
 			frappe.throw(_("Invalid currency: {0}").format(currency))
 
 	if from_currency == to_currency:
