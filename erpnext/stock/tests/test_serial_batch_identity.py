@@ -1475,6 +1475,31 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				auto_fetch_serial_number(1, self.item.name, warehouse, as_numbers=True), ["Fetch-001"]
 			)
 
+	def test_serial_auto_fetch_checks_warehouse_permission(self):
+		from frappe.permissions import add_user_permission
+
+		serial = self.make_number("Serial No", "Fetch-Warehouse-001")
+		serial.db_set("warehouse", "_Test Warehouse - _TC")
+		self.make_number("Serial No", "Fetch-Warehouse-002").db_set("warehouse", "_Test Warehouse 1 - _TC")
+
+		stock_user = self.make_role_user("identity-warehouse-stock-user@example.com", "Stock User")
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", stock_user)
+		projects_user = self.make_role_user("identity-projects-user@example.com", "Projects User")
+
+		with self.set_user(stock_user):
+			self.assertEqual(
+				auto_fetch_serial_number(5, self.item.name, "_Test Warehouse - _TC", as_numbers=True),
+				["Fetch-Warehouse-001"],
+			)
+			self.assertRaises(
+				frappe.PermissionError, auto_fetch_serial_number, 5, self.item.name, "_Test Warehouse 1 - _TC"
+			)
+
+		with self.set_user(projects_user):
+			self.assertRaises(
+				frappe.PermissionError, auto_fetch_serial_number, 5, self.item.name, "_Test Warehouse - _TC"
+			)
+
 	def test_pos_auto_selection_excludes_reserved_and_selected_serial_ids(self):
 		reserved = self.make_number("Serial No", "POS-Reserved")
 		selected = self.make_number("Serial No", "POS-Selected")
