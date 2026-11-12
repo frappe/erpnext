@@ -515,9 +515,6 @@ class SellingController(StockController):
 		"""Make the auto-picked bundles of item rows before the stock reservations read them."""
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
-		if self.is_return:
-			return
-
 		rows = [
 			d
 			for d in self.items
