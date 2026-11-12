@@ -350,17 +350,14 @@ class ProductionPlanReport:
 
 			args.allotted_qty = 0
 			if bin_data and bin_data.get("actual_qty") > 0:
-				args.allotted_qty = (
-					bin_data.get("actual_qty")
-					if (args.required_qty > bin_data.get("actual_qty"))
-					else args.required_qty
-				)
-
+				args.allotted_qty = min(args.remaining_qty, bin_data.get("actual_qty"))
 				args.remaining_qty -= args.allotted_qty
 				bin_data["actual_qty"] -= args.allotted_qty
 
+			nothing_allotted = args.remaining_qty == args.required_qty
+			is_last_warehouse = index == len(warehouses) - 1
 			if (
-				self.mrp_warehouses and (args.allotted_qty or index == len(warehouses) - 1)
+				self.mrp_warehouses and (args.allotted_qty or (is_last_warehouse and nothing_allotted))
 			) or not self.mrp_warehouses:
 				if not self.index:
 					row.update(order_data)
