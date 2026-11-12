@@ -126,6 +126,7 @@ export default function setup(context) {
 	})
 
 	// ---------------------------------------------------------------- items
+	const itemsTitle = computed(() => __("Items ordered"))
 	// empty means the site's own currency
 	const currency = computed(() => doc.value.currency || "")
 
@@ -217,7 +218,7 @@ export default function setup(context) {
 		copyValue,
 		docId, crumbs, statusLabel, statusTheme: theme, printDocument: () => printDocument("Sales Order", docId.value), goTo,
 		salesInfo, addressDetails, noteTitle, noteTheme, noteIcon,
-		items: numbered(items), itemImages, totals, amountInWords, termsText, comments, postComment, posting, clearing,
+		itemsTitle, items: numbered(items), itemImages, totals, amountInWords, termsText, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 		formatDate, formatMoney,
 	}

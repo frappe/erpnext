@@ -148,6 +148,8 @@ export default function setup(context) {
 		return [__("Order {0}", [row.against_sales_order]), text].filter(Boolean).join(" · ")
 	}
 
+	const itemsTitle = computed(() => (isReturn.value ? __("Items returned") : __("Items shipped")))
+
 	const items = computed(() =>
 		(doc.value.items ?? []).map((row: any) => {
 			// a return takes goods back, so it has no share of the order still to ship
@@ -261,7 +263,7 @@ export default function setup(context) {
 		copyValue,
 		docId, crumbs, status, statusTheme: theme, printDocument: () => printDocument("Delivery Note", docId.value), goTo,
 		labels, isReturn, dispatchInfo, tracking, addressDetails, noteTitle, noteTheme, noteIcon,
-		items: numbered(items), itemImages, itemColumns, termsText, comments, postComment, posting, clearing,
+		itemsTitle, items: numbered(items), itemImages, itemColumns, termsText, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 		formatDate,
 	}

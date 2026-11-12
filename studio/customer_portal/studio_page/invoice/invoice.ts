@@ -143,6 +143,8 @@ export default function setup(context) {
 		return [...names].sort()
 	})
 
+	const itemsTitle = computed(() => (doc.value.is_return ? __("Items credited") : __("Items billed")))
+
 	const items = computed(() =>
 		(doc.value.items ?? []).map((row: any) => ({
 			name: row.item_name || row.item_code,
@@ -258,7 +260,7 @@ export default function setup(context) {
 		copyValue,
 		docId, crumbs, statusLabel, statusTheme: theme, printDocument: () => printDocument("Sales Invoice", docId.value), goTo,
 		invoiceInfo, addressDetails, noteTitle, noteTheme, noteIcon,
-		items: numbered(items), itemImages, totals, balance, amountInWords, termsText, payments, comments, postComment, posting, clearing,
+		itemsTitle, items: numbered(items), itemImages, totals, balance, amountInWords, termsText, payments, comments, postComment, posting, clearing,
 		companyName, companyLogo, user,
 		formatDate, formatMoney,
 	}

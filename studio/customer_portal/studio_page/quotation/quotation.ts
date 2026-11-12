@@ -142,6 +142,7 @@ export default function setup(context) {
 	})
 
 	// ---------------------------------------------------------------- items
+	const itemsTitle = computed(() => __("Items quoted"))
 	// empty means the site's own currency
 	const currency = computed(() => doc.value.currency || "")
 
@@ -380,7 +381,7 @@ export default function setup(context) {
 		crumbs, status, statusTheme: theme, goTo, canAct, moreActions, noteTitle, noteTheme, noteIcon,
 		printDocument: () => printDocument("Quotation", docId.value),
 		salesInfo, addressDetails,
-		items: numbered(items), itemImages, totals, amountInWords, termsText,
+		itemsTitle, items: numbered(items), itemImages, totals, amountInWords, termsText,
 		sheet, openSheet, dialogOpen, dialogActions, response, sendError, signature,
 		sheetTitle, dialogIcon, dialogTheme, dialogMessage,
 		fieldLabel, fieldPlaceholder,
