@@ -105,6 +105,28 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
 		return_dn.insert()
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_bundle_return_counts_components_on_rounded_stock_qty(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		conversion_factor = 0.301
+		_component, bundle = make_bundle_with_component(
+			component_qty=10,
+			bundle_properties={
+				"stock_uom": "Kg",
+				"uoms": [
+					{"uom": "Kg", "conversion_factor": 1},
+					{"uom": "Box", "conversion_factor": conversion_factor},
+				],
+			},
+		)
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
+		dn.submit()
+
+		make_sales_return(dn.name).insert()
+
 	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -351,13 +373,13 @@ def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	return return_dn
 
 
-def make_bundle_with_component(component_qty):
+def make_bundle_with_component(component_qty, bundle_properties=None):
 	from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 	component = make_item(properties={"is_stock_item": 1}).name
-	bundle = make_item(properties={"is_stock_item": 0}).name
+	bundle = make_item(properties={"is_stock_item": 0, **(bundle_properties or {})}).name
 	make_product_bundle(bundle, [component], qty=component_qty)
 	make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
 	return component, bundle
