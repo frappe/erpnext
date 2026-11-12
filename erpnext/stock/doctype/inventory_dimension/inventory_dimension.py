@@ -6,6 +6,7 @@ from typing import Any
 import frappe
 from frappe import _, bold, scrub
 from frappe.custom.doctype.property_setter.property_setter import delete_property_setter
+from frappe.model.base_document import BaseDocument
 from frappe.model.document import Document
 from frappe.utils.caching import request_cache
 
@@ -385,16 +386,27 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 			) and sl_dict.actual_qty > 0:
 				continue
 
-		evals = {"doc": doc}
-		if parent_doc:
-			evals["parent"] = parent_doc
-
-		if row.condition and not frappe.safe_eval(row.condition, evals):
+		if row.condition and not frappe.safe_eval(row.condition, get_condition_values(doc, parent_doc)):
 			continue
 
 		filter_dimensions.append(row)
 
 	return filter_dimensions
+
+
+def get_condition_values(doc, parent_doc=None):
+	values = {"doc": get_field_values(doc)}
+	if parent_doc:
+		values["parent"] = get_field_values(parent_doc)
+
+	return values
+
+
+def get_field_values(doc):
+	if isinstance(doc, BaseDocument):
+		return frappe._dict(doc.get_valid_dict(sanitize=False, ignore_virtual=True), doctype=doc.doctype)
+
+	return frappe._dict(doc)
 
 
 @request_cache
