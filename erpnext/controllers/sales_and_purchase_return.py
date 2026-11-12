@@ -867,6 +867,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		target_doc.payment_amount = -source_doc.payment_amount
 
 	def item_condition(doc):
+		# Subcontracting Receipt rebuilds scrap rows from the finished good rows on save
+		if doc.get("is_scrap_item"):
+			return False
+
 		if return_against_rejected_qty:
 			return doc.rejected_qty
 
