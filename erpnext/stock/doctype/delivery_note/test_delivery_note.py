@@ -4814,6 +4814,55 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(deducted_return.per_billed, 100)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
 
+	def test_full_return_of_unbilled_delivery_is_settled(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(qty=10, rate=500)
+		full_return = make_sales_return(delivery_note.name)
+		full_return.submit()
+
+		# Nothing was billed and nothing is left to bill, so no credit note is due.
+		full_return.reload()
+		self.assertEqual(full_return.per_billed, 100)
+		self.assertEqual(full_return.status, "Completed")
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, full_return.name)
+		delivery_note.reload()
+		self.assertEqual(delivery_note.per_billed, 0)
+		self.assertEqual(delivery_note.status, "Return Issued")
+
+	def test_full_return_of_delivery_made_from_invoice_is_not_settled(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note as make_dn_from_invoice
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		invoice = create_sales_invoice(qty=5, rate=500)
+		delivery_note = make_dn_from_invoice(invoice.name)
+		delivery_note.insert()
+		delivery_note.submit()
+		full_return = make_sales_return(delivery_note.name)
+		full_return.submit()
+
+		# The invoice billed the delivery, so the return needs a credit note.
+		full_return.reload()
+		self.assertEqual(full_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(full_return.name).items[0].qty, -5)
+
+	def test_full_return_of_delivery_billed_through_sales_order_is_not_settled(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(qty=10)
+		make_si_from_so(so.name).submit()
+		delivery_note = create_dn_against_so(so.name, delivered_qty=10)
+		full_return = make_sales_return(delivery_note.name)
+		full_return.submit()
+
+		# The Sales Order invoice billed the delivery, so the return needs a credit note.
+		full_return.reload()
+		self.assertEqual(full_return.per_billed, 0)
+		self.assertEqual(make_sales_invoice(full_return.name).items[0].qty, -10)
+
 	def test_return_after_mixed_dn_and_so_billing_is_not_settled(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

@@ -242,7 +242,7 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		for row in frappe.get_all(
 			"Delivery Note Item",
 			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
-			fields=["name", "qty", "conversion_factor", "so_detail"],
+			fields=["name", "qty", "conversion_factor", "so_detail", "si_detail"],
 		)
 	}
 	invoiced_qty = get_invoiced_qty_against_dn(delivery_note=delivery_note)
@@ -266,7 +266,9 @@ def get_settled_return_qty(delivery_note: str) -> dict[str, float]:
 		net_invoiced = flt(invoiced_qty.get(original))
 		uninvoiced = flt(flt(original_rows[original].qty) - net_invoiced, qty_precision)
 		# Until the net qty is fully invoiced, the next invoice still deducts the returns.
-		fully_invoiced = net_invoiced > 0 and returned >= uninvoiced
+		# A row delivered from a Sales Invoice is billed there, so its returns need a credit note.
+		delivered_from_invoice = bool(original_rows[original].si_detail)
+		fully_invoiced = returned >= uninvoiced and not delivered_from_invoice
 		settleable = max(min(returned, uninvoiced), 0) if fully_invoiced else 0
 		# Billing of the Sales Order row above its net delivered qty covers returned qty.
 		overbilled = flt(overbilled_qty.get(original))
