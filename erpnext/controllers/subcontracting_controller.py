@@ -1235,7 +1235,8 @@ class SubcontractingController(StockController):
 		return {(d.parent, d.item_code): d.source_warehouse for d in rows}
 
 	def get_earlier_receipts_bom_consumption(self):
-		"""Received stock qty by order row and consumed qty by (order row, BOM row) of the submitted receipts."""
+		"""Received stock qty and consumed qty by (order row, BOM row) of the other submitted receipts
+		that backflushed on the BOM."""
 		if self.doctype != "Subcontracting Receipt" or self.is_return:
 			return None
 
@@ -1246,31 +1247,45 @@ class SubcontractingController(StockController):
 		if not order_items:
 			return earlier
 
-		receipt_items = frappe.get_all(
-			"Subcontracting Receipt Item",
-			filters={"docstatus": 1, "subcontracting_order_item": ("in", order_items)},
-			fields=[
-				"name",
-				"subcontracting_order_item",
-				"received_qty",
-				"qty",
-				"rejected_qty",
-				"conversion_factor",
-			],
-		)
-		order_item_of = {row.name: row.subcontracting_order_item for row in receipt_items}
-		for row in receipt_items:
-			earlier.received_qty[row.subcontracting_order_item] += get_received_stock_qty(row)
-
-		if order_item_of:
+		receipt_items = {
+			row.name: row
 			for row in frappe.get_all(
-				"Subcontracting Receipt Supplied Item",
-				filters={"docstatus": 1, "reference_name": ("in", list(order_item_of))},
-				fields=["reference_name", "bom_detail_no", "consumed_qty"],
-			):
-				earlier.consumed_qty[
-					(order_item_of[row.reference_name], row.bom_detail_no)
-				] += row.consumed_qty
+				"Subcontracting Receipt Item",
+				filters={
+					"docstatus": 1,
+					"parent": ("!=", self.name),
+					"subcontracting_order_item": ("in", order_items),
+				},
+				fields=[
+					"name",
+					"subcontracting_order_item",
+					"received_qty",
+					"qty",
+					"rejected_qty",
+					"conversion_factor",
+				],
+			)
+		}
+		if not receipt_items:
+			return earlier
+
+		consumed_qty = defaultdict(float)
+		for row in frappe.get_all(
+			"Subcontracting Receipt Supplied Item",
+			filters={
+				"docstatus": 1,
+				"reference_name": ("in", list(receipt_items)),
+				"bom_detail_no": ("is", "set"),
+			},
+			fields=["reference_name", "bom_detail_no", "consumed_qty"],
+		):
+			consumed_qty[(row.reference_name, row.bom_detail_no)] += row.consumed_qty
+
+		for (receipt_item, bom_detail_no), qty in consumed_qty.items():
+			row = receipt_items[receipt_item]
+			key = (row.subcontracting_order_item, bom_detail_no)
+			earlier.received_qty[key] += get_received_stock_qty(row)
+			earlier.consumed_qty[key] += qty
 
 		return earlier
 
@@ -1298,10 +1313,11 @@ class SubcontractingController(StockController):
 		"""BOM qty of all that an order row received with ``received_qty``, less what earlier receipts consumed,
 		so rounding per receipt does not add up."""
 		precision = frappe.get_precision(self.subcontract_data.receipt_supplied_items_field, "consumed_qty")
-		total_received_qty = earlier_receipts.received_qty[order_item] + received_qty
+		key = (order_item, bom_item.bom_detail_no)
+		total_received_qty = earlier_receipts.received_qty[key] + received_qty
 		return (
 			flt(flt(bom_item.qty_consumed_per_unit) * total_received_qty, precision)
-			- earlier_receipts.consumed_qty[(order_item, bom_item.bom_detail_no)]
+			- earlier_receipts.consumed_qty[key]
 		)
 
 	def __set_supplied_or_received_items(self):
