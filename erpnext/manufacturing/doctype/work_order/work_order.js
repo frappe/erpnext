@@ -1271,10 +1271,10 @@ erpnext.work_order = {
 		if (purpose === "Manufacture") {
 			max = flt(Math.max(max - flt(frm.doc.process_loss_qty), 0), precision("qty"));
 		}
-		const allowed_qty = flt(
-			max + (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100,
-			precision("qty")
-		);
+		// a passed qty is already the caller's cap
+		const allowance =
+			qty == null ? (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100 : 0;
+		const allowed_qty = flt(max + allowance, precision("qty"));
 		// only the overproduction allowance may be left
 		const default_qty = max || allowed_qty;
 		const pending_process_loss =
