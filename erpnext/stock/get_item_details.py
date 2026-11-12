@@ -1089,6 +1089,8 @@ def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = N
 def calculate_service_end_date(ctx: ItemDetailsCtx, item: Document | None = None):
 	_preprocess_ctx(ctx)
 	if not item:
+		if not isinstance(ctx.item_code, str):
+			frappe.throw(_("Invalid Item Code"))
 		item = frappe.get_cached_doc("Item", ctx.item_code)
 
 	doctype = ctx.parenttype or ctx.doctype
