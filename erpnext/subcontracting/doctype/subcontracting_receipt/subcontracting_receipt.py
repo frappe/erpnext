@@ -15,6 +15,7 @@ from erpnext.controllers.subcontracting_controller import (
 	SubcontractingController,
 	get_received_stock_qty,
 	get_repeated_bom_rows,
+	get_repeated_raw_material_rows,
 )
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -915,6 +916,10 @@ class SubcontractingReceipt(SubcontractingController):
 		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped.
 		An order row needs the BOM qty of all it received so far, less what earlier receipts consumed."""
 		earlier_receipts = self.get_earlier_receipts_bom_consumption()
+		on_transferred_material = (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			!= "BOM"
+		)
 		rm_dict, order_rows = {}, {}
 
 		for row in self.items:
@@ -926,6 +931,9 @@ class SubcontractingReceipt(SubcontractingController):
 				row.item_code, row.bom, row.get("include_exploded_items")
 			)
 			repeated_bom_rows = get_repeated_bom_rows(materials)
+			if on_transferred_material:
+				# earlier consumption of a raw material on several BOM rows cannot be split between them
+				repeated_bom_rows |= get_repeated_raw_material_rows(materials)
 			for bom_item in materials:
 				required = rm_dict.setdefault(
 					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
