@@ -72,6 +72,7 @@ from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.utils import get_bin_qty_map
@@ -3014,6 +3015,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 		_, reference_field = get_inter_company_counterpart(target_doc.doctype)
 		target_doc.set(reference_field, source_doc.name)
+		clear_inapplicable_terms(target_doc)
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
