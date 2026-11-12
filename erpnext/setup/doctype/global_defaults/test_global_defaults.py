@@ -25,8 +25,6 @@ class TestGlobalDefaults(ERPNextTestSuite):
 
 		with (
 			patch("frappe.db.set_default"),
-			patch("frappe.db.set_value"),
-			patch("frappe.clear_cache"),
 			patch.object(defaults, "toggle_rounded_total"),
 			patch.object(defaults, "toggle_in_words"),
 			patch.object(defaults, "set_disable_rounded_total_on_pos_profiles") as update_profiles,
