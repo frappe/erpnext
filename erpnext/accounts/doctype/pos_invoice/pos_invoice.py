@@ -254,6 +254,9 @@ class POSInvoice(SalesInvoice):
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.make_packed_item_bundles()
+		for table_name in ["items", "packed_items"]:
 			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code:
