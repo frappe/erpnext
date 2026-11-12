@@ -13,7 +13,7 @@ import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import CombineDatetime, Concat, Lower, NullIf, Sum
+from frappe.query_builder.functions import Coalesce, CombineDatetime, Concat, Lower, NullIf, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -3037,6 +3037,8 @@ def get_next_stock_reco(kwargs):
 			& (sle.voucher_type == "Stock Reconciliation")
 			& (sle.voucher_no != kwargs.get("voucher_no"))
 			& (sle.is_cancelled == 0)
+			& (sle.has_batch_no == 0)
+			& (Coalesce(sle.batch_no, "") == "")
 			& get_next_reco_datetime_condition(sle, kwargs)
 		)
 		.orderby(sle.posting_datetime)
