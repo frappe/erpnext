@@ -354,6 +354,11 @@ class TestTermsTransactionValidation(IntegrationTestCase):
 		from erpnext.controllers.stock_controller import StockController
 		from erpnext.controllers.subcontracting_controller import SubcontractingController
 
+		get_cached_doc = frappe.get_cached_doc
+
+		def get_doc(doctype, *args, **kwargs):
+			return tnc if doctype == "Terms and Conditions" else get_cached_doc(doctype, *args, **kwargs)
+
 		for controller, parent, module, doctype in (
 			(SellingController, StockController, "selling", "Other"),
 			(BuyingController, SubcontractingController, "buying", "Purchase Order"),
@@ -367,7 +372,7 @@ class TestTermsTransactionValidation(IntegrationTestCase):
 					tnc = frappe._dict(disabled=disabled, **{module: applicable})
 					with (
 						patch.object(parent, "onload"),
-						patch("frappe.get_cached_doc", return_value=tnc),
+						patch("frappe.get_cached_doc", side_effect=get_doc),
 						patch.object(controller, "set_missing_terms") as render,
 					):
 						doc.onload()
