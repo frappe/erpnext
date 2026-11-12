@@ -152,9 +152,81 @@ class StockReconciliation(StockController):
 		self.make_bundle_for_current_qty()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
+		self.validate_future_batch_quantity()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 
+<<<<<<< HEAD
+=======
+	def validate_future_batch_quantity(self):
+		"""Block a batch this reconciliation lowers from going negative in later entries."""
+		for row in self.items:
+			if row.current_serial_and_batch_bundle:
+				frappe.get_doc(
+					"Serial and Batch Bundle", row.current_serial_and_batch_bundle
+				).validate_future_batch_quantity()
+
+	def set_standard_cost_from_reconciliation(self):
+		if self.flags.via_item_standard_cost:
+			return
+
+		from erpnext.stock.doctype.item_standard_cost.item_standard_cost import (
+			get_item_standard_rate,
+			has_item_standard_cost,
+		)
+
+		created = set()
+		for item in self.items:
+			if not item.item_code or item.item_code in created:
+				continue
+			if not is_standard_cost_item(item.item_code, self.company) or not flt(item.valuation_rate):
+				continue
+
+			if has_item_standard_cost(item.item_code, self.company):
+				standard_rate = get_item_standard_rate(item.item_code, self.company, self.posting_date)
+				precision = item.precision("valuation_rate")
+				if flt(item.valuation_rate, precision) == flt(standard_rate, precision):
+					# Rate unchanged: a plain quantity adjustment, valued at the existing standard rate.
+					continue
+
+			isc = frappe.new_doc("Item Standard Cost")
+			isc.item_code = item.item_code
+			isc.company = self.company
+			isc.effective_date = self.posting_date
+			isc.standard_rate = item.valuation_rate
+			isc.revaluation_entry = self.name
+			isc.insert()
+			isc.submit()
+			created.add(item.item_code)
+
+	def cancel_created_item_standard_cost(self):
+		if self.flags.via_item_standard_cost:
+			return
+
+		records = frappe.get_all(
+			"Item Standard Cost",
+			filters={
+				"revaluation_entry": self.name,
+				"docstatus": 1,
+				"creation": [">", self.creation],
+			},
+			fields=["name", "item_code", "company"],
+		)
+		for record in records:
+			isc = frappe.get_doc("Item Standard Cost", record.name)
+
+			# This runs after make_sle_on_cancel has already marked this reco's SLEs is_cancelled=1, so
+			# the only remaining activity on/after the effective date is genuine later stock (receipts,
+			# issues) valued at this standard rate. Skip those — cancelling would corrupt their valuation.
+			# Checking on-hand Bin qty instead would falsely skip a plain rate change, whose on-hand qty
+			# reverts on cancellation, silently leaving the standard rate out of sync with every SLE.
+			if isc.has_stock_activity_on_or_after_effective_date():
+				continue
+
+			isc.flags.from_source_reconciliation = True
+			isc.cancel()
+
+>>>>>>> 63377e6 (fix(stock): block a backdated reconciliation from leaving later batch entries negative)
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
