@@ -349,6 +349,40 @@ class TestTermsTransactionValidation(FrappeTestCase):
 		sales_order.run_method("onload")
 		self.assertFalse(sales_order.terms)
 
+	def test_draft_with_terms_calling_a_helper_wrongly_still_opens(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="Wrong helper arguments sentinel",
+			selling=1,
+			terms="{{ frappe.db.get_list('Customer', limit=5) }}",
+		).insert()
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.tc_name = terms.name
+		sales_order.insert()
+
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+		sales_order.run_method("onload")
+		self.assertFalse(sales_order.terms)
+
+	def test_purchase_order_save_refuses_terms_it_cannot_render(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="Unrenderable buying terms sentinel",
+			buying=1,
+			terms="Terms",
+		).insert()
+		# saved before the terms sandbox lost frappe.db.get_value
+		terms.db_set("terms", "{{ frappe.db.get_value('Supplier', supplier, 'supplier_group') }}")
+		purchase_order = create_purchase_order(do_not_save=True)
+		purchase_order.tc_name = terms.name
+
+		with self.assertRaisesRegex(frappe.ValidationError, "could not be rendered"):
+			purchase_order.insert()
+
 	def test_render_cannot_bypass_flags_with_client_docstatus(self):
 		terms = frappe.get_doc(
 			doctype="Terms and Conditions",
