@@ -51,8 +51,9 @@ def execute(filters=None):
 def validate_company_permission(company: str | None) -> None:
 	"""Check role access to Company and the user's User Permissions that apply to Company.
 
-	A document check would also match the Company's default accounts against the user's
-	Account restrictions, and refuse a user who is restricted to some accounts.
+	Only the user permissions on the Company itself apply. A document check would also match
+	the Company's link fields, such as its default accounts, against the user's restrictions,
+	and refuse a user who is restricted to some accounts.
 	"""
 	if not company:
 		return
