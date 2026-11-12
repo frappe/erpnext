@@ -222,7 +222,7 @@ export default function setup(context) {
 	const sendLabel = computed(() => (revising.value ? __("Send revision") : __("Send quotation")))
 	/** Over the item list: the form, the quote that was sent, or (nothing to quote) what was asked for. */
 	const itemsHeading = computed(() =>
-		quoting.value ? formHeading.value : quotation.value ? __("What you quoted") : __("What the buyer asks for"),
+		quoting.value ? formHeading.value : quotation.value ? __("Items quoted") : __("Items requested"),
 	)
 
 	// ---------------------------------------------------------------- the sent quote

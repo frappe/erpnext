@@ -121,7 +121,7 @@ export default function setup(context) {
 	// ---------------------------------------------------------------- items
 	const currency = computed(() => doc.value.currency || "")
 
-	const itemsTitle = computed(() => __("What was ordered"))
+	const itemsTitle = computed(() => __("Items ordered"))
 
 	const items = computed(() =>
 		(doc.value.items ?? []).map((row: any) => {

@@ -119,7 +119,7 @@ export default function setup(context) {
 		return [{ key: "delivered", label, name: doc.value.company ?? "", address }]
 	})
 
-	const itemsTitle = computed(() => (isReturn.value ? __("What was returned") : __("What the buyer received")))
+	const itemsTitle = computed(() => (isReturn.value ? __("Items returned") : __("Items received")))
 
 	// ---------------------------------------------------------------- items
 	const orderLines = computed(() => {

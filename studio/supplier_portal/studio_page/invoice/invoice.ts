@@ -119,7 +119,7 @@ export default function setup(context) {
 		].filter((row) => row.address)
 	})
 
-	const itemsTitle = computed(() => (doc.value.is_return ? __("What the debit note covers") : __("What was billed")))
+	const itemsTitle = computed(() => (doc.value.is_return ? __("Items returned") : __("Items billed")))
 
 	// ---------------------------------------------------------------- items
 	const items = computed(() =>
