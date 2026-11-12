@@ -1855,7 +1855,9 @@ def get_stock_ledger_preview(doc, filters):
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
 		doc.docstatus = 1
-		doc.make_bundle_using_old_serial_batch_fields()
+		for table_name in ("items", "packed_items"):
+			if doc.get(table_name):
+				doc.make_bundle_using_old_serial_batch_fields(table_name)
 		doc.update_stock_ledger()
 
 		columns = get_sl_columns(filters)
