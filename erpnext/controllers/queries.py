@@ -1004,12 +1004,8 @@ def get_income_account(doctype: str, txt: str, searchfield: str, start: int, pag
 	if filters.get("company"):
 		condition.append(acc.company.eq(filters.get("company")))
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
 	return (
-		qb.from_(acc)
-		.select(acc.name)
+		frappe.qb.get_query(dt, fields=["name"], ignore_permissions=False)
 		.where(Criterion.all(condition))
 		.orderby(acc.idx, order=Order.desc)
 		.orderby(acc.name)
