@@ -469,7 +469,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.remove_secondary_items()
 
 		for item in list(self.items):
-			if item.bom:
+			# rejected goods yield no secondary items
+			if item.bom and not item.return_qty_from_rejected_warehouse:
 				self.add_secondary_items_of_fg_row(item)
 
 		if recalculate_rate:
