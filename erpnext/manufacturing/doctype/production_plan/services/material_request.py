@@ -767,6 +767,22 @@ def _set_stock_quantity(row, stock_qty):
 	if frappe.get_cached_value("UOM", row.get("uom"), "must_be_whole_number"):
 		quantity = ceil(quantity)
 	row["quantity"] = quantity
+	_keep_stock_qty_whole(row, stock_qty)
+
+
+def _keep_stock_qty_whole(row, stock_qty):
+	"""Request ``stock_qty`` in the stock UOM when the row's qty is a fraction of a whole number stock UOM."""
+	stock_uom = row.get("stock_uom")
+	if not frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"):
+		return
+
+	row_stock_qty = flt(_stock_quantity(row), frappe.get_precision("Material Request Item", "stock_qty"))
+	if row_stock_qty.is_integer():
+		return
+
+	row.update(
+		{"uom": stock_uom, "conversion_factor": 1.0, "quantity": _round_up_whole_uom(stock_qty, stock_uom)}
+	)
 
 
 def _adjust_required_qty_for_uom(row, required_qty):
@@ -844,7 +860,7 @@ def _material_request_item_row(
 		quantity = _round_up_whole_uom(
 			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
 		)
-	return {
+	item = {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
 		"quantity": quantity,
@@ -866,6 +882,9 @@ def _material_request_item_row(
 		"main_item_code": row.get("main_bom_item"),
 		"from_bom": row.get("main_bom"),
 	}
+	if not is_transfer:
+		_keep_stock_qty_whole(item, required_qty)
+	return item
 
 
 def get_materials_from_other_locations(
@@ -926,6 +945,7 @@ def _add_remaining_purchase_request(item, new_mr_items, required_qty, consider_m
 	min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
 	quantity = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
 	item["quantity"] = _round_up_whole_uom(quantity, item.get("uom"))
+	_keep_stock_qty_whole(item, required_qty)
 	new_mr_items.append(item)
 
 
