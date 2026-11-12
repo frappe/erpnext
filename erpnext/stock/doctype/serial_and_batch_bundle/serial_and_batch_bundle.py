@@ -1348,14 +1348,23 @@ class SerialandBatchBundle(Document):
 		return {key: identity.rate for key, identity in consumed.items()}
 
 	def get_transit_rate(self, row) -> float:
-		"""What the material was worth on its way into the in-transit warehouse."""
-		if row and row.get("sales_incoming_rate"):
-			return flt(row.get("sales_incoming_rate"))
+		"""What one stock unit of the material was worth on its way into the in-transit warehouse."""
+		if not (row and row.get("sales_incoming_rate")):
+			if not (self.voucher_detail_no and self.voucher_no):
+				return 0.0
 
-		if not (self.voucher_detail_no and self.voucher_no):
-			return 0.0
+			row = (
+				frappe.db.get_value(
+					self.child_table,
+					self.voucher_detail_no,
+					["sales_incoming_rate", "conversion_factor"],
+					as_dict=True,
+				)
+				or {}
+			)
 
-		return flt(frappe.db.get_value(self.child_table, self.voucher_detail_no, "sales_incoming_rate"))
+		# sales_incoming_rate is per purchase UOM, but the entries of the bundle hold stock UOM qty
+		return flt(row.get("sales_incoming_rate")) / (flt(row.get("conversion_factor")) or 1.0)
 
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:
