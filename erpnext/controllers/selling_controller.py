@@ -53,7 +53,7 @@ class SellingController(StockController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("selling"):
-				self.set_missing_terms()
+				self.set_missing_terms_for_display()
 
 	def validate(self):
 		validate_terms_and_conditions(self.get("tc_name"), "selling")
