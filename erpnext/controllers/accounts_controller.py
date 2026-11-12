@@ -888,13 +888,17 @@ class AccountsController(TransactionBase):
 		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
 
 	def set_missing_terms_for_display(self):
-		"""Render missing terms to show or print, leaving them empty if the user cannot read what they list."""
+		"""Render missing terms to show or print, leaving them empty if a permission check fails."""
+		message_count = len(frappe.message_log)
 		try:
 			self.set_missing_terms()
 		except frappe.PermissionError:
-			frappe.clear_last_message()
+			# a check on the template's last editor fails without logging a message
+			del frappe.message_log[message_count:]
 			frappe.msgprint(
-				_("Terms and Conditions {0} could not be rendered for you.").format(bold(self.tc_name)),
+				_("Terms and Conditions {0} could not be rendered due to missing permissions.").format(
+					bold(self.tc_name)
+				),
 				alert=True,
 			)
 
