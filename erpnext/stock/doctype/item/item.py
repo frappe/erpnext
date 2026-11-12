@@ -779,7 +779,7 @@ class Item(Document):
 			"Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 		).format(frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+		frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_properties_before_merge(self, new_name):
 		# Validate properties before merging
