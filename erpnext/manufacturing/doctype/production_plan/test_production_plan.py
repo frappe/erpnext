@@ -1636,6 +1636,32 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (2, "Box", 10))
 
+	def test_purchase_uom_without_a_whole_stock_qty_is_requested_in_stock_uom(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test PP Fraction Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		fg_item = make_item("_Test PP Fraction Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		row = get_items_for_material_requests(plan.as_dict())[0]
+
+		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (13, "Nos", 1))
+
 	def test_download_raw_materials_shows_uom_of_required_qty(self):
 		rm_item = make_item(
 			"_Test PP Download Box RM",
