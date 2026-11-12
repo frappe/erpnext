@@ -93,6 +93,13 @@ class TestSerialBatchLinkQueries(ERPNextTestSuite):
 				rows = get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
 				self.assertEqual(rows[0][:3], (batch.name, "Link-Batch", 2))
 
+	def test_batch_link_search_requires_batch_permission(self):
+		batch = self.make_number("Batch", "Link-Batch")
+		self.make_ledger(batch_no=batch.name, actual_qty=2)
+		filters = {"item_code": self.item.name, "warehouse": self.warehouse}
+		with self.set_user(self.make_user("Website Manager")), self.assertRaises(frappe.PermissionError):
+			get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+
 	def test_report_links_include_all_selected_vouchers_and_preserve_item_scope(self):
 		serials = [self.make_number("Serial No", f"Link-Serial-{i}") for i in (1, 2)]
 		batches = [self.make_number("Batch", f"Link-Batch-{i}") for i in (1, 2)]
