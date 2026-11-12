@@ -725,7 +725,8 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 		).get("conversion_factor")
 
 	ctx.conversion_factor = out.conversion_factor
-	out.stock_qty = out.qty * out.conversion_factor
+	stock_qty_field = frappe.get_meta(f"{ctx.doctype} Item").get_field("stock_qty")
+	out.stock_qty = flt(out.qty * out.conversion_factor, get_field_precision(stock_qty_field))
 	ctx.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
