@@ -5199,7 +5199,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.375), [0.38, 0.37])
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
-	def test_bom_backflush_after_a_receipt_consumed_more_than_the_bom(self):
+	def test_bom_backflush_leaves_out_material_transferred_receipts(self):
 		set_backflush_based_on("Material Transferred for Subcontract")
 		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
@@ -5216,7 +5216,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr = make_subcontracting_receipt(sco.name)
 		scr.items[0].qty = 1
 		scr.save()
-		self.assertEqual(sum(row.consumed_qty for row in scr.supplied_items), 0)
+		self.assertEqual([row.consumed_qty for row in scr.supplied_items], [0.38])
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_of_a_phantom_bom_used_twice(self):
