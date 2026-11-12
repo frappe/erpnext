@@ -5211,6 +5211,34 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(receive_one_by_one(fg_item), [[0.12, 0.25], [0.12, 0.25]])
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_bom_backflush_draft_with_batch_follows_earlier_receipts(self):
+		set_backflush_based_on("BOM")
+		raw_material = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BFD-.#####",
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[raw_material], rm_qty=0.375, currency="INR")
+		sco = make_order_of_two_with_raw_materials_transferred(fg_item)
+
+		drafts = []
+		for _receipt in range(2):
+			scr = make_subcontracting_receipt(sco.name)
+			scr.items[0].qty = 1
+			scr.save()
+			drafts.append(scr)
+
+		drafts[0].submit()
+		drafts[1].submit()
+
+		self.assertEqual([row.consumed_qty for row in drafts[1].supplied_items], [0.37])
+
 
 def receive_order_of_two_one_by_one(rm_qty):
 	"""Consumed qty of two receipts of 1 for an order of 2 whose BOM needs ``rm_qty`` per unit."""
@@ -5223,6 +5251,20 @@ def receive_order_of_two_one_by_one(rm_qty):
 def receive_one_by_one(fg_item):
 	"""Consumed qty of each supplied row of two receipts of 1 for an order of 2 ``fg_item``,
 	after its raw materials are transferred."""
+	sco = make_order_of_two_with_raw_materials_transferred(fg_item)
+
+	consumed_qty = []
+	for _receipt in range(2):
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.save()
+		scr.submit()
+		consumed_qty.append([row.consumed_qty for row in scr.supplied_items])
+
+	return consumed_qty
+
+
+def make_order_of_two_with_raw_materials_transferred(fg_item):
 	service_item = make_item(properties={"is_stock_item": 0}).name
 	sco = get_subcontracting_order(
 		service_items=[
@@ -5253,15 +5295,7 @@ def receive_one_by_one(fg_item):
 		sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
 	)
 
-	consumed_qty = []
-	for _receipt in range(2):
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].qty = 1
-		scr.save()
-		scr.submit()
-		consumed_qty.append([row.consumed_qty for row in scr.supplied_items])
-
-	return consumed_qty
+	return sco
 
 
 def make_order_with_two_batches_transferred():
