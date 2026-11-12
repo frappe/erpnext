@@ -47,8 +47,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git fetch origin "$GITHUB_REF_NAME" --tags --force
-          tag=$(git tag --points-at "origin/$GITHUB_REF_NAME" 'v*' | head -1)
+          tag=$(git tag --points-at HEAD 'v*' | head -1)
           [ -n "$tag" ] || exit 0
           prev=$(git describe --tags --abbrev=0 --match 'v*' "$tag^")
           body=$(printf ':tada: This PR is included in version %s :tada:\n\nThe release is available on [GitHub release](%s)' \
