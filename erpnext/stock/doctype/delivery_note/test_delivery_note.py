@@ -1809,7 +1809,7 @@ class TestDeliveryNote(FrappeTestCase):
 		},
 	)
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
-	@change_settings("System Settings", {"float_precision": 3})
+	@change_settings("System Settings", {"float_precision": 2})
 	def test_auto_set_batch_counts_a_row_at_its_rounded_stock_qty(self):
 		item = make_item(
 			properties={
@@ -1819,10 +1819,10 @@ class TestDeliveryNote(FrappeTestCase):
 				"batch_number_series": "TRRS-.#####",
 				"stock_uom": "Kg",
 			},
-			uoms=[{"uom": "Box", "conversion_factor": 0.3335}],
+			uoms=[{"uom": "Box", "conversion_factor": 0.335}],
 		)
 		first = make_stock_entry(
-			item_code=item.name, target="_Test Warehouse - _TC", qty=0.999, basic_rate=100
+			item_code=item.name, target="_Test Warehouse - _TC", qty=0.99, basic_rate=100
 		)
 		second = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
@@ -1830,18 +1830,18 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn = create_delivery_note(item_code=item.name, qty=1, do_not_save=True)
 		dn.items[0].update(
-			{"uom": "Box", "conversion_factor": 0.3335, "batch_no": first_batch, "use_serial_batch_fields": 1}
+			{"uom": "Box", "conversion_factor": 0.335, "batch_no": first_batch, "use_serial_batch_fields": 1}
 		)
 		dn.insert()
 
-		# the first row takes 0.334 (not 0.3335) of the first batch, so 0.665 is left
+		# the first row takes 0.34 (not 0.335) of the first batch, so 0.65 is left
 		dn.append(
 			"items",
 			{
 				**dn.items[0].as_dict(),
 				"name": None,
 				"idx": None,
-				"qty": 0.666,
+				"qty": 0.66,
 				"uom": "Kg",
 				"conversion_factor": 1,
 				"batch_no": None,
@@ -1852,7 +1852,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(
 			get_batches_from_bundle(dn.items[1].serial_and_batch_bundle),
-			{first_batch: -0.665, second_batch: -0.001},
+			{first_batch: -0.65, second_batch: -0.01},
 		)
 
 	@change_settings(
