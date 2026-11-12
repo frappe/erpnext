@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 
 from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
 
 
 def execute(filters=None):
@@ -46,9 +47,11 @@ def get_filter_conditions(filters):
 		["Serial and Batch Bundle", "is_cancelled", "=", 0],
 	]
 
-	# a Pick List only reserves; show its bundles only when asked for
+	# show reserving bundles only when asked for
 	if not filters.get("voucher_type"):
-		filter_conditions.append(["Serial and Batch Bundle", "voucher_type", "!=", "Pick List"])
+		filter_conditions.append(
+			["Serial and Batch Bundle", "voucher_type", "not in", RESERVING_VOUCHER_TYPES]
+		)
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
