@@ -469,8 +469,7 @@ def get_columns():
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
+			"fieldtype": "Data",
 			"hidden": 1,
 		},
 		{
