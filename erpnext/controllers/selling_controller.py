@@ -1139,44 +1139,6 @@ class SellingController(StockController):
 					title=_("Not Allowed"),
 				)
 
-	def make_reserved_serial_and_batch_bundle(self, item, items_by_name, picked):
-		"""Auto-pick the row's serial / batch nos before its reservation is updated, not at stock ledger time."""
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
-		if not picked:
-			service = SerialBatchBundleService(self)
-			picked.serial_nos = service.get_serial_nos_used_in_rows()
-			picked.batches = service.get_batches_used_in_rows()
-
-		if get_serial_and_batch_bundle(
-			item,
-			self,
-			items_by_name.get(item.get("parent_detail_docname")),
-			picked.serial_nos,
-			picked.batches,
-		):
-			# the stock ledger only syncs the rate of bundles it makes itself
-			self.set_row_incoming_rate(item)
-
-	def set_row_incoming_rate(self, item):
-		incoming_rate = _get_incoming_rate(
-			{
-				"item_code": item.item_code,
-				"warehouse": item.warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-				"qty": -1 * flt(item.get("stock_qty") or item.qty),
-				"serial_and_batch_bundle": item.serial_and_batch_bundle,
-				"company": self.company,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"voucher_detail_no": item.name,
-				"allow_zero_valuation": item.get("allow_zero_valuation_rate"),
-			},
-			raise_error_if_no_rate=False,
-		)
-		item.db_set("incoming_rate", flt(incoming_rate, item.precision("incoming_rate")))
-
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
@@ -1198,7 +1160,6 @@ class SellingController(StockController):
 			items.append(packed_item)
 
 		if self._action == "submit":
-			picked = frappe._dict()
 			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if not item.get(so_field) or not item.so_detail:
@@ -1233,9 +1194,6 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						if not item.get("serial_and_batch_bundle"):
-							self.make_reserved_serial_and_batch_bundle(item, items_by_name, picked)
-
 						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
 						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
 						# present so this never crashes on a missing bundle.
