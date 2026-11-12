@@ -110,7 +110,7 @@ class BuyingController(SubcontractingController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_buying_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("buying"):
-				self.set_missing_terms()
+				self.set_missing_terms_for_display()
 
 	def validate_posting_date_with_po(self):
 		po_list = {x.purchase_order for x in self.items if x.purchase_order}

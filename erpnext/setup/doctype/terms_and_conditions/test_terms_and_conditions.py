@@ -179,6 +179,25 @@ class TestTermsPermissions(IntegrationTestCase):
 		with self.assertRaises(frappe.PermissionError):
 			get_terms_list("Administrator", "Purchase Invoice", fields=["name"])
 
+	def test_draft_opens_when_caller_cannot_read_listed_doctype(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title=f"Unreadable terms {frappe.generate_hash(length=8)}",
+			selling=1,
+			terms="{% for d in frappe.db.get_list('Purchase Invoice') %}{{ d.name }}{% endfor %}",
+		).insert()
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.tc_name = terms.name
+		sales_order.terms = None
+		sales_order.insert()
+
+		frappe.set_user(self.author)
+		sales_order.run_method("onload")
+		sales_order.before_print(frappe._dict())
+		self.assertFalse(sales_order.terms)
+
 	def test_get_list_blocks_field_and_query_bypasses(self):
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_list
 
