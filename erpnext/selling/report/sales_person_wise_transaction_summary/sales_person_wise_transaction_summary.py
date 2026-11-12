@@ -9,9 +9,12 @@ from frappe.query_builder import Case, Criterion
 from pypika.terms import LiteralValue
 
 from erpnext import get_company_currency
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = {}
 

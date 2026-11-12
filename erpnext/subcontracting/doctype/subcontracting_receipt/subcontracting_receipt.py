@@ -13,6 +13,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.utils import get_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -154,12 +155,21 @@ class SubcontractingReceipt(SubcontractingController):
 			frappe.throw(_("Posting Date cannot be future date"))
 
 		super().validate()
+		# Scrap rows take their qty from the BOM, which can be a fraction.
+		self.validate_item_stock_uom_is_integer(
+			"item_code",
+			["qty", "received_qty", "rejected_qty"],
+			"Subcontracting Receipt Item",
+			row_filter=lambda row: not row.is_scrap_item,
+		)
 
 		if self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
 			self.get_scrap_items()
 
 		self.set_missing_values()
 		self.validate_with_previous_doc()
+		validate_return(self)
+		self.validate_return_supplier_warehouse()
 
 		if self.get("_action") == "submit":
 			self.validate_scrap_items()
@@ -176,6 +186,21 @@ class SubcontractingReceipt(SubcontractingController):
 	def validate_purchase_orders_share_terms(self):
 		if not can_combine_purchase_orders(purchase_orders := get_purchase_orders(self)):
 			frappe.throw(get_uncombinable_orders_message(purchase_orders), title=_("Cannot Combine Orders"))
+
+	def validate_return_supplier_warehouse(self):
+		if not (self.is_return and self.return_against):
+			return
+
+		original = frappe.db.get_value("Subcontracting Receipt", self.return_against, "supplier_warehouse")
+		if self.supplier_warehouse != original:
+			frappe.throw(
+				_("{0} must be {1}, the same as in {2}").format(
+					_(self.meta.get_label("supplier_warehouse")),
+					frappe.bold(original),
+					frappe.bold(self.return_against),
+				),
+				title=_("Warehouse Mismatch"),
+			)
 
 	def validate_with_previous_doc(self):
 		super().validate_with_previous_doc(
@@ -202,14 +227,34 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status(update_bin=False)
 		self.set_consumed_qty_in_subcontract_order()
+		self.make_bundle_for_sales_purchase_return()
 
 		for table_name in ["items", "supplied_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.validate_returned_serial_batches()
 		self.update_stock_ledger()
+		self.validate_consumed_batches()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.update_status()
 		self.auto_create_purchase_receipt()
+
+	def validate_consumed_batches(self):
+		bundles = frappe._dict(
+			frappe.get_all(
+				"Subcontracting Receipt Supplied Item",
+				filters={"parent": self.name},
+				fields=["name", "serial_and_batch_bundle"],
+				as_list=True,
+			)
+		)
+		for row in self.supplied_items:
+			row.serial_and_batch_bundle = bundles.get(row.name) or row.serial_and_batch_bundle
+
+		self.validate_outward_bundle_batches(
+			check_expiry=False, rows=self.supplied_items, qty_field="consumed_qty"
+		)
 
 	def on_update(self):
 		for table_field in ["items", "supplied_items"]:
@@ -222,6 +267,7 @@ class SubcontractingReceipt(SubcontractingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Quality Inspection",
 		)
 		self.validate_closed_subcontracting_order()
 		self.update_status_updater_args()
@@ -241,9 +287,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.create_raw_materials_supplied()
 
 	def validate_closed_subcontracting_order(self):
-		for item in self.items:
-			if item.subcontracting_order:
-				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
+		if reference := self.get_on_hold_or_closed_reference("Subcontracting Order", "subcontracting_order"):
+			check_on_hold_or_closed_status("Subcontracting Order", reference[0])
 
 	def set_service_expense_account(self, default_expense_account):
 		for row in self.get("items"):
@@ -524,9 +569,17 @@ class SubcontractingReceipt(SubcontractingController):
 				else:
 					scrap_cost_map[item.reference_name] = item.amount
 
+		rejected_return_rows = self.get_rejected_return_rows()
+		returned_service_costs = self.get_returned_service_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.is_scrap_item:
+				# rejected qty is received without service cost
+				if item.name in returned_service_costs:
+					item.service_cost_per_qty = (
+						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
+					)
+
 				if item.qty:
 					if item.name in rm_cost_map:
 						item.rm_supp_cost = rm_cost_map[item.name]
@@ -554,6 +607,25 @@ class SubcontractingReceipt(SubcontractingController):
 		else:
 			self.total_qty = total_qty
 			self.total = total_amount
+
+	def get_returned_service_costs(self) -> dict[str, float]:
+		"""Service cost per qty of the returned receipt row, for each return row."""
+		if not (self.is_return and self.return_against):
+			return {}
+
+		service_costs = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
+				fields=["name", "service_cost_per_qty"],
+				as_list=True,
+			)
+		)
+		return {
+			item.name: service_costs[item.subcontracting_receipt_item]
+			for item in self.items
+			if item.subcontracting_receipt_item in service_costs
+		}
 
 	def validate_scrap_items(self):
 		for item in self.items:

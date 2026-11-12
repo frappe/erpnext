@@ -5,9 +5,10 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
-from frappe.utils.nestedset import NestedSet, get_root_of
+from frappe.utils.nestedset import NestedSet
 
 from erpnext.setup.doctype.target_detail.target_detail import validate_targets
+from erpnext.setup.utils import set_root_as_default_parent
 
 
 class Territory(NestedSet):
@@ -35,8 +36,7 @@ class Territory(NestedSet):
 
 	def validate(self):
 		validate_targets(self.get("targets"))
-		if not self.parent_territory:
-			self.parent_territory = get_root_of("Territory")
+		set_root_as_default_parent(self)
 
 		for d in self.get("targets") or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):

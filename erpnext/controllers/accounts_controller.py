@@ -851,7 +851,8 @@ class AccountsController(TransactionBase):
 				item.service_end_date = add_days(to_date, 1)
 
 	def before_print(self, settings=None):
-		self.set_missing_terms()
+		if self.docstatus.is_draft():
+			self.set_missing_terms()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -995,7 +996,7 @@ class AccountsController(TransactionBase):
 			field = frappe.scrub(label)
 
 			for row in self.get("items"):
-				if not row.get(field):
+				if not row.get(field) and not row.get("delivery_note_packed_item"):
 					msg = f"At Row {row.idx}: The field {bold(label)} is mandatory for internal transfer"
 					frappe.throw(_(msg), title=_("Internal Transfer Reference Missing"))
 
@@ -1052,7 +1053,9 @@ class AccountsController(TransactionBase):
 
 	def validate_line_items(self, ref_dt, ref_dn_field, ref_link_field):
 		action, role_allowed_to_override = frappe.get_cached_value(
-			"Accounts Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+			"Accounts Settings",
+			"Accounts Settings",
+			["maintain_same_rate_action", "role_to_override_stop_action"],
 		)
 
 		reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
@@ -2286,7 +2289,7 @@ class AccountsController(TransactionBase):
 
 		return amount, base_amount
 
-	def make_discount_gl_entries(self, gl_entries):
+	def make_discount_gl_entries(self, gl_entries, deferred_return_items=None):
 		if self.doctype == "Purchase Invoice":
 			enable_discount_accounting = cint(
 				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
@@ -2317,11 +2320,7 @@ class AccountsController(TransactionBase):
 							else item.deferred_expense_account
 						)
 					else:
-						income_or_expense_account = (
-							item.income_account
-							if (not item.enable_deferred_revenue or self.is_return)
-							else item.deferred_revenue_account
-						)
+						income_or_expense_account = self.get_item_income_account(item, deferred_return_items)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
@@ -2349,6 +2348,11 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_or_expense_account,
+								"voucher_detail_no": item.name
+								if self.doctype == "Sales Invoice"
+								and self.is_return
+								and item.enable_deferred_revenue
+								else None,
 								"against": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"),
@@ -2860,6 +2864,7 @@ class AccountsController(TransactionBase):
 			and allocate_payment_based_on_payment_terms
 			and self.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
 		):
+			keep_settled = self.docstatus == 1 and getattr(self, "_action", None) != "submit"
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
@@ -2868,18 +2873,29 @@ class AccountsController(TransactionBase):
 					d.base_payment_amount = flt(
 						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
 					)
-					d.outstanding = d.payment_amount
-					d.base_outstanding = d.base_payment_amount
 				elif not d.invoice_portion:
 					d.base_payment_amount = flt(
 						d.payment_amount * self.get("conversion_rate"), d.precision("base_payment_amount")
 					)
-					d.base_outstanding = d.base_payment_amount
+				self.set_term_outstanding(d, keep_settled)
 		else:
 			self.fetch_payment_terms_from_order(
 				po_or_so, doctype, grand_total, base_grand_total, automatically_fetch_payment_terms
 			)
 			self.ignore_default_payment_terms_template = 1
+
+	def set_term_outstanding(self, term, keep_settled: bool) -> None:
+		settled = base_settled = 0
+		if keep_settled:
+			settled = flt(term.paid_amount) + flt(term.discounted_amount)
+			base_settled = flt(term.base_paid_amount) + flt(term.discounted_amount) * flt(
+				self.get("conversion_rate")
+			)
+
+		term.outstanding = flt(term.payment_amount - settled, term.precision("outstanding"))
+		term.base_outstanding = flt(
+			term.base_payment_amount - base_settled, term.precision("base_outstanding")
+		)
 
 	def get_order_details(self):
 		if not self.get("items"):
@@ -2987,6 +3003,13 @@ class AccountsController(TransactionBase):
 
 			if not schedule.invoice_portion:
 				payment_schedule["payment_amount"] = schedule.payment_amount
+				payment_schedule["base_payment_amount"] = flt(
+					schedule.payment_amount * self.get("conversion_rate"),
+					schedule.precision("base_payment_amount"),
+				)
+				payment_schedule["outstanding"] = schedule.payment_amount
+
+			payment_schedule["base_outstanding"] = payment_schedule["base_payment_amount"]
 
 			self.append("payment_schedule", payment_schedule)
 
@@ -3721,6 +3744,27 @@ def validate_inclusive_tax(tax, doc):
 			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
+def is_deduct_with_valuation(tax) -> bool:
+	return tax.get("category") == "Valuation" and tax.get("add_deduct_tax") == "Deduct"
+
+
+def validate_deduct_with_valuation_category(
+	taxes: list | None, allowed_account_heads: set | None = None
+) -> None:
+	for tax in taxes or []:
+		if is_deduct_with_valuation(tax) and tax.account_head not in (allowed_account_heads or set()):
+			throw(
+				_("Row {0}: {1} cannot be {2} when {3} is {4}").format(
+					tax.idx,
+					frappe.bold(_("Add or Deduct")),
+					frappe.bold(_("Deduct")),
+					frappe.bold(_("Consider Tax or Charge for")),
+					frappe.bold(_("Valuation")),
+				),
+				title=_("Invalid Tax Row"),
+			)
+
+
 def set_balance_in_account_currency(
 	gl_dict, account_currency=None, conversion_rate=None, company_currency=None
 ):
@@ -4324,6 +4368,35 @@ def update_bin_on_delete(row, doctype):
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
+def validate_blanket_order_changes(parent, data) -> None:
+	if parent.doctype not in ("Sales Order", "Purchase Order"):
+		return
+
+	new_rows = {d.get("docname"): d for d in data if d.get("docname")}
+	precision = frappe.get_precision(parent.doctype + " Item", "stock_qty")
+	changes = defaultdict(float)
+	for row in parent.items:
+		if not (row.blanket_order and row.against_blanket_order):
+			continue
+
+		new_row = new_rows.get(row.name)
+		if new_row and not new_row.get("item_code"):
+			continue
+
+		new_stock_qty = 0.0
+		if new_row:
+			conversion_factor = flt(new_row.get("conversion_factor")) or flt(row.conversion_factor) or 1
+			new_stock_qty = flt(flt(new_row.get("qty")) * conversion_factor, precision)
+
+		changes[(row.blanket_order, row.item_code)] += new_stock_qty - flt(row.stock_qty)
+
+	for (blanket_order, item_code), change in sorted(changes.items()):
+		if change > 0:
+			frappe.get_doc("Blanket Order", blanket_order, for_update=True).validate_qty_can_be_ordered(
+				{item_code: change}, parent.doctype
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept_reservation=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
@@ -4580,6 +4653,7 @@ def update_child_qty_rate(
 	check_doc_permissions(parent, "write")
 	rows_with_kept_reservation = get_rows_with_kept_reservation(parent)
 	validate_parent_status(parent)
+	validate_blanket_order_changes(parent, data)
 
 	if parent_doctype == "Quotation":
 		ordered_items = get_ordered_items(parent.name)
@@ -4765,7 +4839,7 @@ def update_child_qty_rate(
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)
 	frappe.get_doc("Authorization Control").validate_approving_authority(
-		parent.doctype, parent.company, parent.base_grand_total
+		parent.doctype, parent.company, parent.base_grand_total, parent
 	)
 
 	if parent_doctype != "Supplier Quotation":

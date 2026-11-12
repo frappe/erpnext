@@ -13,6 +13,12 @@ from frappe.utils.html_utils import clean_html
 
 from erpnext.stock.utils import check_pending_reposting
 
+BOOT_FIELDS = (
+	"disable_serial_no_and_batch_selector",
+	"sample_retention_warehouse",
+	"pick_serial_and_batch_based_on",
+)
+
 
 class StockSettings(Document):
 	# begin: auto-generated types
@@ -93,15 +99,18 @@ class StockSettings(Document):
 			make_mandatory=0,
 		)
 
-		# show/hide barcode field
-		for name in ["barcode", "barcodes", "scan_barcode"]:
+		for doctype, fieldname in get_transaction_barcode_fields():
 			frappe.make_property_setter(
-				{"fieldname": name, "property": "hidden", "value": 0 if self.show_barcode_field else 1},
+				{
+					"doctype": doctype,
+					"fieldname": fieldname,
+					"property": "hidden",
+					"value": 0 if self.show_barcode_field else 1,
+				},
 				validate_fields_for_doctype=False,
 			)
 
 		self.validate_warehouses()
-		self.validate_over_delivery_receipt_allowance()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 		self.validate_pending_reposts()
@@ -111,9 +120,15 @@ class StockSettings(Document):
 		self.change_precision_for_purchase()
 		self.validate_do_not_use_batchwise_valuation()
 
-	def validate_over_delivery_receipt_allowance(self):
-		if not self.over_delivery_receipt_allowance:
-			self.role_allowed_to_over_deliver_receive = None
+	def on_update(self):
+		self.clear_boot_cache()
+
+	def clear_boot_cache(self):
+		"""Boot sends `BOOT_FIELDS` in sysdefaults."""
+		if any(self.has_value_changed(field) for field in BOOT_FIELDS):
+			frappe.cache.delete_key("bootinfo")
+			# Requests before commit can cache the old boot again.
+			frappe.db.after_commit.add(lambda: frappe.cache.delete_key("bootinfo"))
 
 	def validate_do_not_use_batchwise_valuation(self):
 		doc_before_save = self.get_doc_before_save()
@@ -304,3 +319,14 @@ def get_enable_stock_uom_editing():
 		["allow_to_edit_stock_uom_qty_for_sales", "allow_to_edit_stock_uom_qty_for_purchase"],
 		as_dict=1,
 	)
+
+
+def get_transaction_barcode_fields():
+	fields = []
+	for doctype in frappe.get_all("DocField", filters={"fieldname": "scan_barcode"}, pluck="parent"):
+		fields.append((doctype, "scan_barcode"))
+		for table_field in frappe.get_meta(doctype).get_table_fields():
+			if frappe.get_meta(table_field.options).has_field("barcode"):
+				fields.append((table_field.options, "barcode"))
+
+	return fields

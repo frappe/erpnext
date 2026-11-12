@@ -22,10 +22,13 @@
 			</button>
 			<ul class="dropdown-menu dropdown-menu-right" role="menu">
 				{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
-					<a class="dropdown-item"
-						href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
-						data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}
-					</a>
+					<form action="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal" method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token | e }}">
+						<input type="hidden" name="purchase_order_name" value="{{ doc.name | e }}">
+						<button type="submit" class="dropdown-item" data-action="make_purchase_invoice">
+							{{ _("Make Purchase Invoice") }}
+						</button>
+					</form>
 				{% endif %}
 				<a class="dropdown-item"
 					href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank"

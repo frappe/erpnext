@@ -12,6 +12,7 @@ from frappe.utils import flt, getdate, nowdate
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -124,6 +125,7 @@ class SupplierQuotation(BuyingController):
 		validate_for_items(self)
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_valid_till()
 
 	def on_submit(self):
@@ -283,9 +285,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 				# no qty tracking between the two, so dedupe on the row reference alone
 				"condition": lambda d: d.name not in mapped_items and select_item(d),
 			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -307,7 +307,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				},
 			},
 			"Supplier Quotation Item": {"doctype": "Purchase Invoice Item"},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 	)
@@ -326,6 +326,7 @@ def make_quotation(source_name, target_doc=None):
 				"field_map": {
 					"name": "supplier_quotation",
 				},
+				"postprocess": lambda source, target, source_parent: clear_inapplicable_terms(target),
 			},
 			"Supplier Quotation Item": {
 				"doctype": "Quotation Item",

@@ -20,6 +20,7 @@ from erpnext.accounts.report.utils import (
 	convert_to_presentation_currency,
 	get_currency,
 	has_gl_entry_restrictions,
+	validate_date_range,
 )
 from erpnext.accounts.utils import get_account_currency
 
@@ -56,7 +57,7 @@ def validate_filters(filters, account_details):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
-	if not filters.get("from_date") and not filters.get("to_date"):
+	if not filters.get("from_date") or not filters.get("to_date"):
 		frappe.throw(
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
@@ -80,8 +81,7 @@ def validate_filters(filters, account_details):
 	if filters.get("voucher_no") and filters.get("categorize_by") in ["Categorize by Voucher"]:
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range(filters)
 
 	if filters.get("project"):
 		filters.project = frappe.parse_json(filters.get("project"))
@@ -191,6 +191,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
 		)
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- filters use placeholders; fields come from config
 	gl_entries = frappe.db.sql(
 		f"""
 		select
@@ -213,10 +214,19 @@ def get_gl_entries(filters, accounting_dimensions):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
-	else:
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
+
+
+def convert_gl_entries_currency(gl_entries, currency_map, filters):
+	if not filters.get("presentation_currency"):
 		return gl_entries
+
+	return convert_to_presentation_currency(
+		gl_entries,
+		currency_map,
+		filters,
+		use_account_currency=not filters.get("convert_at_reporting_date_rate"),
+	)
 
 
 def get_conditions(filters):
@@ -471,28 +481,34 @@ def get_totals_dict():
 	)
 
 
-def group_by_field(group_by):
+def get_group_by_fields(group_by: str | None) -> tuple[str, ...]:
 	if group_by == "Categorize by Party":
-		return "party"
+		return ("party_type", "party")
 	elif group_by in ["Categorize by Voucher (Consolidated)", "Categorize by Account"]:
-		return "account"
+		return ("account",)
 	else:
-		return "voucher_no"
+		return ("voucher_no",)
+
+
+def get_group_by_value(gle: dict, group_by_fields: tuple[str, ...]) -> tuple:
+	return tuple(gle.get(field) for field in group_by_fields)
 
 
 def initialize_gle_map(gl_entries, filters, totals_dict):
 	gle_map = OrderedDict()
-	group_by = group_by_field(filters.get("categorize_by"))
+	group_by = get_group_by_fields(filters.get("categorize_by"))
 
 	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=copy.deepcopy(totals_dict), entries=[]))
+		gle_map.setdefault(
+			get_group_by_value(gle, group_by), _dict(totals=copy.deepcopy(totals_dict), entries=[])
+		)
 	return gle_map
 
 
 def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, totals):
 	entries = []
 	consolidated_gle = OrderedDict()
-	group_by = group_by_field(filters.get("categorize_by"))
+	group_by = get_group_by_fields(filters.get("categorize_by"))
 	group_by_voucher_consolidated = filters.get("categorize_by") == "Categorize by Voucher (Consolidated)"
 
 	if filters.get("show_net_values_in_party_account"):
@@ -543,7 +559,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, tot
 	show_opening_entries = filters.get("show_opening_entries")
 
 	for gle in gl_entries:
-		group_by_value = gle.get(group_by)
+		group_by_value = get_group_by_value(gle, group_by)
 		gle.voucher_type = gle.voucher_type
 
 		if gle.posting_date < from_date or (
@@ -945,9 +961,7 @@ def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
-	return gl_entries
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
 
 
 def _build_gl_conditions_duckdb(filters):

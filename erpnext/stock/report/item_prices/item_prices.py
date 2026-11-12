@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import flt
+from frappe.utils import flt, today
 
 
 def execute(filters=None):
@@ -106,15 +106,22 @@ def get_price_list():
 			(IfNull(cu.symbol, ip.currency)).as_("currency"),
 			ip.price_list_rate,
 			ip.price_list,
+			ip.uom,
+			ip.customer,
+			ip.supplier,
+			ip.batch_no,
 		)
-		.where((ip.price_list == pl.name) & (pl.currency == cu.name) & (pl.enabled == 1))
+		.where(
+			(ip.price_list == pl.name)
+			& (pl.currency == cu.name)
+			& (pl.enabled == 1)
+			& (ip.valid_from.isnull() | (ip.valid_from <= today()))
+			& (ip.valid_upto.isnull() | (ip.valid_upto >= today()))
+		)
 	).run(as_dict=True)
 
 	for d in price_list:
-		d.update({"price": f"{d.currency} {round(d.price_list_rate, 2)} - {d.price_list}"})
-		d.pop("currency")
-		d.pop("price_list_rate")
-		d.pop("price_list")
+		d.price = get_price_label(d)
 
 		if d.price:
 			rate.setdefault(d.item_code, {}).setdefault("Buying" if d.buying else "Selling", []).append(
@@ -132,6 +139,17 @@ def get_price_list():
 	return item_rate_map
 
 
+def get_price_label(price):
+	label = f"{price.currency} {round(price.price_list_rate, 2)} - {price.price_list}"
+	if price.uom:
+		label += f" / {price.uom}"
+
+	if details := [value for value in (price.customer, price.supplier, price.batch_no) if value]:
+		label += f" ({', '.join(details)})"
+
+	return label
+
+
 def get_last_purchase_rate():
 	item_last_purchase_rate_map = {}
 
@@ -147,24 +165,39 @@ def get_last_purchase_rate():
 			(
 				frappe.qb.from_(po)
 				.from_(po_item)
-				.select(po_item.item_code, po.transaction_date.as_("posting_date"), po_item.base_rate)
+				.select(
+					po_item.item_code,
+					po.transaction_date.as_("posting_date"),
+					(po_item.base_rate / po_item.conversion_factor).as_("base_rate"),
+					po_item.creation,
+				)
 				.where((po.name == po_item.parent) & (po.docstatus == 1))
 			)
 			+ (
 				frappe.qb.from_(pr)
 				.from_(pr_item)
-				.select(pr_item.item_code, pr.posting_date, pr_item.base_rate)
+				.select(
+					pr_item.item_code,
+					pr.posting_date,
+					(pr_item.base_rate / pr_item.conversion_factor).as_("base_rate"),
+					pr_item.creation,
+				)
 				.where((pr.name == pr_item.parent) & (pr.docstatus == 1))
 			)
 			+ (
 				frappe.qb.from_(pi)
 				.from_(pi_item)
-				.select(pi_item.item_code, pi.posting_date, pi_item.base_rate)
+				.select(
+					pi_item.item_code,
+					pi.posting_date,
+					(pi_item.base_rate / pi_item.conversion_factor).as_("base_rate"),
+					pi_item.creation,
+				)
 				.where((pi.name == pi_item.parent) & (pi.docstatus == 1) & (pi.update_stock == 1))
 			)
 		)
 		.select("*")
-		.orderby("item_code", "posting_date")
+		.orderby("item_code", "posting_date", "creation")
 	)
 
 	for d in query.run(as_dict=True):

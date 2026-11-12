@@ -9,7 +9,7 @@ import frappe
 from frappe import _, bold
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.query_builder.functions import Concat_ws, Sum
+from frappe.query_builder.functions import Concat_ws, Min, Sum
 from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
@@ -126,27 +126,69 @@ class StockLedgerEntry(Document):
 		if diff < 0 and abs(diff) > 0.0001:
 			self.throw_validation_error(diff, dimensions)
 
-	def get_available_qty_after_prev_transaction(self, dimensions):
+		if not self.flags.defer_future_dimension_check:
+			self.validate_future_inventory_dimension_balance(diff, dimensions, flt_precision)
+
+	def validate_future_dimension_balance_after_voucher(self):
+		if self.is_cancelled or self.actual_qty >= 0:
+			return
+
+		dimensions = self._get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		balance = flt(
+			self.get_available_qty_after_prev_transaction(dimensions, include_same_time=True), flt_precision
+		)
+		self.validate_future_inventory_dimension_balance(balance, dimensions, flt_precision)
+
+	def validate_future_inventory_dimension_balance(self, balance, dimensions, precision):
+		for actual_qty in self.get_future_dimension_qty(dimensions):
+			balance = flt(balance + flt(actual_qty), precision)
+			if balance < 0 and abs(balance) > 0.0001:
+				self.throw_validation_error(balance, dimensions)
+
+	def get_available_qty_after_prev_transaction(self, dimensions, include_same_time=False):
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		available_qty_query = (
-			frappe.qb.from_(sle)
+		posting_condition = (
+			sle.posting_datetime <= self.posting_datetime
+			if include_same_time
+			else sle.posting_datetime < self.posting_datetime
+		)
+		available_qty = (
+			self.get_dimension_sle_query(sle, dimensions)
 			.select(Sum(sle.actual_qty))
-			.where(
-				(sle.item_code == self.item_code)
-				& (sle.warehouse == self.warehouse)
-				& (sle.posting_datetime < self.posting_datetime)
-				& (sle.company == self.company)
-				& (sle.is_cancelled == 0)
-			)
+			.where(posting_condition)
+			.run()
+		)
+
+		return available_qty[0][0] or 0
+
+	def get_future_dimension_qty(self, dimensions):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		return (
+			self.get_dimension_sle_query(sle, dimensions)
+			.select(Sum(sle.actual_qty))
+			.where(sle.posting_datetime > self.posting_datetime)
+			.groupby(sle.posting_datetime, sle.voucher_type, sle.voucher_no)
+			.orderby(sle.posting_datetime)
+			.orderby(Min(sle.creation))
+			.run(pluck=True)
+		)
+
+	def get_dimension_sle_query(self, sle, dimensions):
+		query = frappe.qb.from_(sle).where(
+			(sle.item_code == self.item_code)
+			& (sle.warehouse == self.warehouse)
+			& (sle.company == self.company)
+			& (sle.is_cancelled == 0)
 		)
 
 		for dimension, values in dimensions.items():
-			dimension_value = values.get("value")
-			available_qty_query = available_qty_query.where(sle[dimension] == dimension_value)
+			query = query.where(sle[dimension] == values.get("value"))
 
-		available_qty = available_qty_query.run()
-
-		return available_qty[0][0] or 0
+		return query
 
 	def throw_validation_error(self, diff, dimensions):
 		msg = _(
@@ -198,13 +240,15 @@ class StockLedgerEntry(Document):
 			mismatches = []
 			for dimension in dimensions:
 				fieldname = dimension.fieldname
-				expected_value = values.get(fieldname)
-				if expected_value != self.get(fieldname):
+				# a blank value and NULL both mean the dimension is not set
+				expected_value = values.get(fieldname) or None
+				actual_value = self.get(fieldname) or None
+				if expected_value != actual_value:
 					mismatches.append(
 						_('{0}: expected "{1}", got "{2}"').format(
 							dimension.dimension_name,
 							expected_value or _("Not Set"),
-							self.get(fieldname),
+							actual_value or _("Not Set"),
 						)
 					)
 
@@ -311,54 +355,26 @@ class StockLedgerEntry(Document):
 			self.db_set(values_to_be_change)
 
 		if not item_detail:
-			self.throw_error_message(f"Item {self.item_code} not found")
+			frappe.throw(_("Item {0} not found").format(self.item_code))
 
 		if item_detail.has_variants:
-			self.throw_error_message(
-				f"Stock cannot exist for Item {self.item_code} since has variants",
+			frappe.throw(
+				_("Stock cannot exist for Item {0} since it has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock,
 			)
 
 		if item_detail.is_stock_item != 1:
-			self.throw_error_message("Item {0} must be a stock Item").format(self.item_code)
+			frappe.throw(_("Item {0} must be a stock Item").format(self.item_code))
 
 		if item_detail.has_serial_no or item_detail.has_batch_no:
 			if not self.serial_and_batch_bundle:
-				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
+				frappe.throw(_("Serial No / Batch No are mandatory for Item {0}").format(self.item_code))
 
 		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
-			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
-
-	def throw_error_message(self, message, exception=frappe.ValidationError):
-		frappe.throw(_(message), exception)
+			frappe.throw(_("Serial No and Batch No are not allowed for Item {0}").format(self.item_code))
 
 	def check_stock_frozen_date(self):
-		stock_settings = frappe.get_cached_doc("Stock Settings")
-
-		if stock_settings.stock_frozen_upto:
-			if (
-				getdate(self.posting_date) <= getdate(stock_settings.stock_frozen_upto)
-				and stock_settings.stock_auth_role not in frappe.get_roles()
-			):
-				frappe.throw(
-					_("Stock transactions before {0} are frozen").format(
-						formatdate(stock_settings.stock_frozen_upto)
-					),
-					StockFreezeError,
-				)
-
-		stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
-		if stock_frozen_upto_days:
-			older_than_x_days_ago = (
-				add_days(getdate(self.posting_date), stock_frozen_upto_days) <= date.today()
-			)
-			if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
-				frappe.throw(
-					_("Not allowed to update stock transactions older than {0}").format(
-						stock_frozen_upto_days
-					),
-					StockFreezeError,
-				)
+		check_stock_frozen_date(self.posting_date)
 
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == "00:0":
@@ -441,3 +457,28 @@ def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["item_code", "warehouse", "posting_datetime", "creation"])
+
+
+def check_stock_frozen_date(posting_date):
+	stock_settings = frappe.get_cached_doc("Stock Settings")
+
+	if stock_settings.stock_frozen_upto:
+		if (
+			getdate(posting_date) <= getdate(stock_settings.stock_frozen_upto)
+			and stock_settings.stock_auth_role not in frappe.get_roles()
+		):
+			frappe.throw(
+				_("Stock transactions before {0} are frozen").format(
+					formatdate(stock_settings.stock_frozen_upto)
+				),
+				StockFreezeError,
+			)
+
+	stock_frozen_upto_days = cint(stock_settings.stock_frozen_upto_days)
+	if stock_frozen_upto_days:
+		older_than_x_days_ago = add_days(getdate(posting_date), stock_frozen_upto_days) <= date.today()
+		if older_than_x_days_ago and stock_settings.stock_auth_role not in frappe.get_roles():
+			frappe.throw(
+				_("Not allowed to update stock transactions older than {0}").format(stock_frozen_upto_days),
+				StockFreezeError,
+			)

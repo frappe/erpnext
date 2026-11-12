@@ -78,11 +78,25 @@ class BOMUpdateLog(Document):
 			frappe.throw(_("Current BOM and New BOM can not be same"))
 
 	def validate_bom_items(self):
-		current_bom_item = frappe.db.get_value("BOM", self.current_bom, "item")
-		new_bom_item = frappe.db.get_value("BOM", self.new_bom, "item")
+		boms = {
+			bom.name: bom
+			for bom in frappe.get_all(
+				"BOM",
+				filters={"name": ["in", [self.current_bom, self.new_bom]]},
+				fields=["name", "item", "company", "currency", "docstatus", "is_active"],
+			)
+		}
+		current_bom = boms.get(self.current_bom) or frappe._dict()
+		new_bom = boms.get(self.new_bom) or frappe._dict()
 
-		if current_bom_item != new_bom_item:
+		if current_bom.item != new_bom.item:
 			frappe.throw(_("The selected BOMs are not for the same item"))
+
+		if new_bom.docstatus != 1 or not new_bom.is_active:
+			frappe.throw(_("New BOM {0} must be submitted and active").format(frappe.bold(self.new_bom)))
+
+		if (current_bom.company, current_bom.currency) != (new_bom.company, new_bom.currency):
+			frappe.throw(_("Current BOM and New BOM must have the same company and currency"))
 
 	def validate_bom_cost_update_in_progress(self):
 		"If another Cost Updation Log is still in progress, dont make new ones."
@@ -130,6 +144,7 @@ def run_replace_bom_job(
 		doc.db_set("status", "In Progress")
 
 		if not frappe.flags.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		frappe.db.auto_commit_on_many_writes = 1
@@ -159,6 +174,10 @@ def process_boms_cost_level_wise(
 			# First level yet to process. On Submit.
 			current_level = 0
 			current_boms = get_leaf_boms()
+			if not current_boms:
+				set_values_in_log(update_doc.name, {"status": "Completed"}, commit=True)
+				return
+
 			values = {
 				"processed_boms": json.dumps({}),
 				"status": "In Progress",

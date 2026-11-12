@@ -27,7 +27,6 @@ def execute(filters=None):
 		item_groups.append(filters.item_group)
 		item_groups.extend(get_descendants_of("Item Group", filters.item_group))
 
-	warehouse_company = {}
 	data = []
 	conversion_factors = []
 	for bin in bin_list:
@@ -37,18 +36,10 @@ def execute(filters=None):
 			# likely an item that has reached its end of life
 			continue
 
-		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
-		company = warehouse_company.setdefault(
-			bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company")
-		)
-
 		if filters.brand and filters.brand != item.brand:
 			continue
 
 		elif item_groups and item.item_group not in item_groups:
-			continue
-
-		elif filters.company and filters.company != company:
 			continue
 
 		re_order_level = re_order_qty = 0
@@ -58,13 +49,13 @@ def execute(filters=None):
 				re_order_level = d.warehouse_reorder_level
 				re_order_qty = d.warehouse_reorder_qty
 
-		shortage_qty = 0
-		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
-			shortage_qty = re_order_level - flt(bin.projected_qty)
-
 		reserved_qty_for_pos = get_pos_reserved_qty(bin.item_code, bin.warehouse)
 		if reserved_qty_for_pos:
 			bin.projected_qty -= reserved_qty_for_pos
+
+		shortage_qty = 0
+		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
+			shortage_qty = re_order_level - flt(bin.projected_qty)
 
 		data.append(
 			[
@@ -262,6 +253,16 @@ def get_bin_list(filters):
 
 	if filters.item_code:
 		query = query.where(bin.item_code == filters.item_code)
+
+	if filters.company:
+		wh = frappe.qb.DocType("Warehouse")
+		query = query.where(
+			ExistsCriterion(
+				frappe.qb.from_(wh)
+				.select(wh.name)
+				.where((wh.name == bin.warehouse) & (wh.company == filters.company))
+			)
+		)
 
 	if filters.warehouse:
 		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)

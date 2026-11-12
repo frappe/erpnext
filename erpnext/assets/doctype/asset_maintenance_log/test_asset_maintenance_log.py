@@ -1,8 +1,149 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
+import frappe
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_months, getdate, nowdate
+
+from erpnext.assets.doctype.asset_maintenance.test_asset_maintenance import (
+	create_asset_data,
+	create_maintenance_team,
+	get_maintenance_tasks,
+	set_depreciation_settings_in_company,
+)
+from erpnext.assets.doctype.asset_maintenance_log.asset_maintenance_log import (
+	get_maintenance_tasks as task_query,
+)
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
-class TestAssetMaintenanceLog(unittest.TestCase):
-	pass
+class TestAssetMaintenanceLogTaskRequired(FrappeTestCase):
+	def test_log_without_task_cannot_be_saved(self):
+		frappe.db.savepoint("test_asset_maintenance_log_requires_task")
+		try:
+			log = frappe.get_doc(
+				{
+					"doctype": "Asset Maintenance Log",
+					"naming_series": "ACC-AML-.YYYY.-",
+					"maintenance_status": "Completed",
+					"completion_date": nowdate(),
+				}
+			)
+			with self.assertRaisesRegex(frappe.ValidationError, "Please select a Task"):
+				log.insert(ignore_permissions=True)
+		finally:
+			frappe.db.rollback(save_point="test_asset_maintenance_log_requires_task")
+
+
+class TestAssetMaintenanceLog(FrappeTestCase):
+	def setUp(self):
+		set_depreciation_settings_in_company()
+		create_asset_data()
+		create_maintenance_team()
+		self.asset_maintenance = make_asset_maintenance()
+
+	def test_task_query_returns_task_names(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+
+		tasks = task_query(
+			"Asset Maintenance Task", "Oil", "name", 0, 20, {"asset_maintenance": self.asset_maintenance.name}
+		)
+
+		self.assertEqual(list(tasks), [(task.name, "Change Oil")])
+
+		user = "test_asset_maintenance_log_outsider@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Outsider",
+					"roles": [{"role": "Sales User"}],
+				}
+			).insert()
+		frappe.set_user(user)
+		try:
+			with self.assertRaises(frappe.PermissionError):
+				task_query(
+					"Asset Maintenance Task",
+					"",
+					"name",
+					0,
+					20,
+					{"asset_maintenance": self.asset_maintenance.name},
+				)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_cancelling_a_completed_log_reverts_the_task(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		log = get_open_log(task.name)
+		log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		log.submit()
+		self.assertEqual(getdate(get_open_log(task.name).due_date), add_months(getdate(), 1))
+
+		log.cancel()
+
+		task.reload()
+		self.assertIsNone(task.last_completion_date)
+		self.assertEqual(getdate(task.next_due_date), getdate())
+		self.assertEqual(getdate(get_open_log(task.name).due_date), getdate())
+
+	def test_cancelling_a_superseded_completed_log_keeps_the_schedule(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		first_log = get_open_log(task.name)
+		first_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		first_log.submit()
+		second_log = get_open_log(task.name)
+		second_log.update({"maintenance_status": "Completed", "completion_date": nowdate()})
+		second_log.submit()
+
+		first_log.cancel()
+
+		task.reload()
+		self.assertEqual(getdate(task.last_completion_date), getdate())
+		self.assertEqual(getdate(task.next_due_date), add_months(getdate(), 1))
+
+	def test_cancelled_log_does_not_reschedule_the_task(self):
+		task = self.asset_maintenance.asset_maintenance_tasks[0]
+		log = get_open_log(task.name)
+		log.maintenance_status = "Cancelled"
+		log.submit()
+
+		self.asset_maintenance.reload()
+		self.asset_maintenance.save()
+
+		task.reload()
+		self.assertEqual(task.maintenance_status, "Cancelled")
+		self.assertFalse(frappe.db.exists("Asset Maintenance Log", {"task": task.name, "docstatus": 0}))
+
+	def test_task_must_belong_to_the_asset_maintenance(self):
+		other_task = make_asset_maintenance().asset_maintenance_tasks[0]
+		log = get_open_log(self.asset_maintenance.asset_maintenance_tasks[0].name)
+		log.task = other_task.name
+
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong", log.save)
+
+
+def get_open_log(task: str):
+	return frappe.get_doc("Asset Maintenance Log", {"task": task, "docstatus": 0})
+
+
+def make_asset_maintenance():
+	purchase_receipt = make_purchase_receipt(
+		item_code="Photocopier", qty=1, rate=100000.0, location="Test Location"
+	)
+	asset = frappe.db.get_value("Asset", {"purchase_receipt": purchase_receipt.name}, "name")
+	tasks = get_maintenance_tasks()
+	for task in tasks:
+		task["next_due_date"] = nowdate()
+
+	return frappe.get_doc(
+		{
+			"doctype": "Asset Maintenance",
+			"asset_name": asset,
+			"maintenance_team": "Team Awesome",
+			"company": "_Test Company",
+			"asset_maintenance_tasks": tasks,
+		}
+	).insert()

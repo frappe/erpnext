@@ -32,6 +32,7 @@ from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+from erpnext.utilities.transaction_base import get_whole_number_uoms, validate_qty_is_integer
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -377,7 +378,7 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if not item.bom:
 				frappe.throw(
-					_("Row #{0}: BOM is not specified for subcontracting item {0}").format(
+					_("Row #{0}: BOM is not specified for subcontracting item {1}").format(
 						item.idx, item.item_code
 					)
 				)
@@ -407,10 +408,30 @@ class PurchaseOrder(BuyingController):
 							)
 					if not item.fg_item_qty:
 						frappe.throw(_("Row #{0}: Finished Good Item Qty can not be zero").format(item.idx))
+
+				self.validate_finished_good_qty()
 		else:
 			for item in self.items:
 				item.set("fg_item", None)
 				item.set("fg_item_qty", 0)
+
+	def validate_finished_good_qty(self):
+		finished_good_uoms = {
+			item.name: item.stock_uom
+			for item in frappe.get_all(
+				"Item",
+				filters={"name": ["in", list({item.fg_item for item in self.items})]},
+				fields=["name", "stock_uom"],
+			)
+		}
+		integer_uoms = get_whole_number_uoms(finished_good_uoms.values())
+
+		for item in self.items:
+			if stock_uom := finished_good_uoms.get(item.fg_item):
+				if stock_uom in integer_uoms:
+					validate_qty_is_integer(
+						item.fg_item_qty, stock_uom, item.precision("fg_item_qty"), item.idx
+					)
 
 	def get_schedule_dates(self):
 		for d in self.get("items"):
@@ -490,8 +511,15 @@ class PurchaseOrder(BuyingController):
 		super().update_prevdoc_status()
 
 	def update_status(self, status):
+		from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+			validate_reopen_against_blanket_order,
+		)
+
 		self.check_modified_date()
 		was_closed = self.status == "Closed"
+		if status != "Closed" and was_closed:
+			validate_reopen_against_blanket_order(self)
+
 		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
@@ -827,7 +855,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 	return get_mapped_purchase_invoice(source_name, target_doc, args=args)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_purchase_invoice_from_portal(purchase_order_name):
 	doc = get_mapped_purchase_invoice(purchase_order_name, ignore_permissions=True)
 	if frappe.session.user not in frappe.get_all(
@@ -837,7 +865,6 @@ def make_purchase_invoice_from_portal(purchase_order_name):
 	for item in [item for item in doc.items if not item.qty]:
 		doc.remove(item)
 	doc.save()
-	frappe.db.commit()
 	frappe.response["type"] = "redirect"
 	frappe.response.location = "/purchase-invoices/" + doc.name
 

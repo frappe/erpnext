@@ -215,6 +215,7 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		self.update_booked_depreciation()
+		self.update_payment_order_requests()
 
 	def on_update_after_submit(self):
 		# Flag will be set on Reconciliation
@@ -222,8 +223,8 @@ class JournalEntry(AccountsController):
 		if self.flags.get("ignore_reposting_on_reconciliation"):
 			return
 
-		self.needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
-		if self.needs_repost:
+		needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
+		if needs_repost:
 			self.validate_for_repost()
 			self.repost_accounting_entries()
 
@@ -255,6 +256,20 @@ class JournalEntry(AccountsController):
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
 		self.update_booked_depreciation(1)
+		self.update_payment_order_requests(cancel=True)
+
+	def on_trash(self):
+		from erpnext.accounts.doctype.payment_order.payment_order import clear_payment_reference
+
+		super().on_trash()
+		clear_payment_reference(self)
+
+	def update_payment_order_requests(self, cancel=False):
+		from erpnext.accounts.doctype.payment_order.payment_order import (
+			update_payment_requests_from_journal_entry,
+		)
+
+		update_payment_requests_from_journal_entry(self, cancel=cancel)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -534,23 +549,13 @@ class JournalEntry(AccountsController):
 			)
 		)
 		if customers:
-			from erpnext.selling.doctype.customer.customer import check_credit_limit
-
-			customer_details = frappe._dict(
-				frappe.db.get_all(
-					"Customer Credit Limit",
-					filters={
-						"parent": ["in", customers],
-						"parenttype": ["=", "Customer"],
-						"company": ["=", self.company],
-					},
-					fields=["parent", "bypass_credit_limit_check"],
-					as_list=True,
-				)
+			from erpnext.selling.doctype.customer.customer import (
+				check_credit_limit,
+				is_sales_order_credit_check_bypassed,
 			)
 
 			for customer in customers:
-				ignore_outstanding_sales_order = bool(customer_details.get(customer))
+				ignore_outstanding_sales_order = is_sales_order_credit_check_bypassed(customer, self.company)
 				check_credit_limit(customer, self.company, ignore_outstanding_sales_order)
 
 	def validate_cheque_info(self):
@@ -1937,6 +1942,12 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 	if not frappe.has_permission("Journal Entry", doc=source_name):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
+	return map_reverse_journal_entry(source_name, target_doc)
+
+
+def map_reverse_journal_entry(
+	source_name: str, target_doc: str | dict | Document | None = None, ignore_permissions: bool = False
+) -> Document:
 	reversal_of = frappe.db.get_value("Journal Entry", source_name, "reversal_of")
 	if reversal_of:
 		frappe.throw(
@@ -1976,6 +1987,7 @@ def make_reverse_journal_entry(source_name: str, target_doc: str | dict | Docume
 		},
 		target_doc,
 		post_process,
+		ignore_permissions=ignore_permissions,
 	)
 
 	return doclist

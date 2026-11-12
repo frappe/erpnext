@@ -8,6 +8,9 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestStockQtyVsSerialNoCount(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_sync_serial_no_status(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.report.stock_qty_vs_serial_no_count.stock_qty_vs_serial_no_count import (
@@ -39,3 +42,46 @@ class TestStockQtyVsSerialNoCount(FrappeTestCase):
 		details = frappe.db.get_value("Serial No", serial_no, ["status", "warehouse"], as_dict=True)
 		self.assertEqual(details.status, "Delivered")
 		self.assertFalse(details.warehouse)
+
+	def test_sync_on_a_group_warehouse_corrects_its_warehouses(self):
+		from erpnext.stock.report.stock_qty_vs_serial_no_count.stock_qty_vs_serial_no_count import (
+			sync_serial_no_status_for_warehouse,
+		)
+
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=1, rate=100)
+		serial_no = frappe.get_all(
+			"Serial and Batch Entry", {"parent": se.items[0].serial_and_batch_bundle}, pluck="serial_no"
+		)[0]
+		make_stock_entry(
+			item_code=item,
+			from_warehouse="Stores - _TC",
+			qty=1,
+			serial_no=frappe.db.get_value("Serial No", serial_no, "serial_no"),
+			use_serial_batch_fields=1,
+		)
+		frappe.db.set_value("Serial No", serial_no, {"status": "Active", "warehouse": "Stores - _TC"})
+
+		sync_serial_no_status_for_warehouse(
+			frappe.db.get_value("Warehouse", "Stores - _TC", "parent_warehouse"), item_code=item
+		)
+
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Consumed")
+
+	def test_sync_restores_serial_nos_in_stock(self):
+		from erpnext.stock.report.stock_qty_vs_serial_no_count.stock_qty_vs_serial_no_count import (
+			sync_serial_no_status_for_warehouse,
+		)
+
+		item = "_Test Serialized Item With Series"
+		se = make_stock_entry(item_code=item, to_warehouse="Stores - _TC", qty=1, rate=100)
+		serial_no = frappe.get_all(
+			"Serial and Batch Entry", {"parent": se.items[0].serial_and_batch_bundle}, pluck="serial_no"
+		)[0]
+		frappe.db.set_value("Serial No", serial_no, {"status": "Inactive", "warehouse": None})
+
+		sync_serial_no_status_for_warehouse("Stores - _TC", item_code=item)
+
+		self.assertEqual(
+			frappe.db.get_value("Serial No", serial_no, ["status", "warehouse"]), ("Active", "Stores - _TC")
+		)

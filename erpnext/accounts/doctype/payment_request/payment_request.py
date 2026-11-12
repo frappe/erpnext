@@ -1,10 +1,11 @@
 import json
+from contextlib import contextmanager
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import cstr, flt, nowdate
+from frappe.utils import cint, cstr, flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext import _refuse, get_company_currency
@@ -29,6 +30,19 @@ ALLOWED_DOCTYPES_FOR_PAYMENT_REQUEST = [
 	"POS Invoice",
 	"Fees",
 ]
+
+
+@contextmanager
+def run_as_administrator():
+	previous_session = frappe._dict(frappe.session)
+	previous_form_dict = frappe.local.form_dict
+	frappe.set_user("Administrator")
+	try:
+		yield
+	finally:
+		frappe.set_user(previous_session.user)
+		frappe.local.session.update(previous_session)
+		frappe.local.form_dict = previous_form_dict
 
 
 def _get_payment_gateway_controller(*args, **kwargs):
@@ -110,11 +124,38 @@ class PaymentRequest(Document):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		ref_doc.check_permission("read")
 		self.validate_reference_company(ref_doc)
+		self.validate_party(ref_doc)
 		self.validate_bank_account()
 		self.validate_print_format()
 		self.validate_payment_request_amount(ref_doc)
 		# self.validate_currency()
 		self.validate_subscription_details()
+
+	def validate_party(self, ref_doc):
+		if not self.party_type:
+			return
+
+		party_field = frappe.scrub(self.party_type)
+		if not ref_doc.meta.has_field(party_field):
+			frappe.throw(
+				_("Party Type {0} is not valid for {1} {2}").format(
+					frappe.bold(_(self.party_type)),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Party Type"),
+			)
+
+		if self.party and self.party != ref_doc.get(party_field):
+			frappe.throw(
+				_("{0} {1} is not the {0} of {2} {3}").format(
+					_(self.party_type),
+					frappe.bold(self.party),
+					_(self.reference_doctype),
+					frappe.bold(self.reference_name),
+				),
+				title=_("Invalid Party"),
+			)
 
 	def validate_bank_account(self):
 		if not self.bank_account:
@@ -373,13 +414,18 @@ class PaymentRequest(Document):
 			}
 		)
 
+	def on_payment_authorized(self, status: str | None = None):
+		if status in ("Authorized", "Completed") and self.status != "Paid":
+			self.set_as_paid()
+
 	def set_as_paid(self):
 		if self.payment_channel == "Phone":
 			self.db_set({"status": "Paid", "outstanding_amount": 0})
 
 		else:
-			payment_entry = self.create_payment_entry()
-			self.make_invoice()
+			with run_as_administrator():
+				payment_entry = self.create_payment_entry()
+				self.make_invoice()
 
 			return payment_entry
 
@@ -402,17 +448,17 @@ class PaymentRequest(Document):
 			or get_account_currency(party_account)
 		)
 
-		party_amount = bank_amount = self.outstanding_amount
-
+		bank_amount = None
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			exchange_rate = ref_doc.get("conversion_rate")
+			# Keep the request-currency amount based on the rate used for the reference document.
 			bank_amount = flt(self.outstanding_amount / exchange_rate, self.precision("grand_total"))
 
-		# outstanding amount is already in Part's account currency
+		# The Payment Request outstanding amount is in the party account currency.
 		payment_entry = get_payment_entry(
 			self.reference_doctype,
 			self.reference_name,
-			party_amount=party_amount,
+			party_amount=self.outstanding_amount,
 			bank_account=self.payment_account,
 			bank_amount=bank_amount,
 			created_from_payment_request=True,
@@ -638,15 +684,8 @@ def make_payment_request(**args):
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
 	if not grand_total:
 		frappe.throw(_("Payment Entry is already created"))
-	if args.loyalty_points and args.dt == "Sales Order":
-		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
-
-		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
-		frappe.db.set_value(
-			"Sales Order", args.dn, "loyalty_points", int(args.loyalty_points), update_modified=False
-		)
-		frappe.db.set_value("Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False)
-		grand_total = grand_total - loyalty_amount
+	if args.loyalty_points and ref_doc.doctype == "Sales Order":
+		grand_total -= apply_loyalty_points(ref_doc, cint(args.loyalty_points))
 
 	# fetches existing payment request `grand_total` amount
 	existing_payment_request_amount = get_existing_payment_request_amount(ref_doc)
@@ -681,11 +720,12 @@ def make_payment_request(**args):
 		)
 		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
-		bank_account = (
-			get_party_bank_account(args.get("party_type"), args.get("party"))
-			if args.get("party_type")
-			else ""
+		party_type = args.get("party_type") or (
+			"Supplier" if ref_doc.doctype in ["Purchase Order", "Purchase Invoice"] else "Customer"
 		)
+		party_field = frappe.scrub(party_type)
+		party = ref_doc.get(party_field)
+		bank_account = get_party_bank_account(party_type, party) if args.get("party_type") else ""
 		pr = frappe.new_doc("Payment Request")
 
 		if not args.get("payment_request_type"):
@@ -693,11 +733,10 @@ def make_payment_request(**args):
 				"Outward" if args.get("dt") in ["Purchase Order", "Purchase Invoice"] else "Inward"
 			)
 
-		party_type = args.get("party_type") or "Customer"
 		party_account_currency = ref_doc.get("party_account_currency")
 
 		if not party_account_currency:
-			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
+			party_account = get_party_account(party_type, party, ref_doc.company)
 			party_account_currency = get_account_currency(party_account)
 
 		pr.update(
@@ -718,9 +757,9 @@ def make_payment_request(**args):
 				"reference_name": args.dn,
 				"company": ref_doc.get("company"),
 				"party_type": party_type,
-				"party": args.get("party") or ref_doc.get("customer"),
+				"party": party,
 				"bank_account": bank_account,
-				"party_name": args.get("party_name") or ref_doc.get("customer_name"),
+				"party_name": ref_doc.get(f"{party_field}_name"),
 				"phone_number": args.get("phone_number") if args.get("phone_number") else None,
 			}
 		)
@@ -744,6 +783,7 @@ def make_payment_request(**args):
 		if args.submit_doc:
 			if pr.get("__unsaved"):
 				pr.insert(ignore_permissions=True)
+			pr.flags.ignore_permissions = False
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
@@ -755,6 +795,59 @@ def make_payment_request(**args):
 		return pr
 
 	return pr.as_dict()
+
+
+def apply_loyalty_points(sales_order, loyalty_points: int) -> float:
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+
+	if sales_order.order_type != "Shopping Cart":
+		frappe.throw(_("Loyalty Points can be redeemed in a Payment Request only for Shopping Cart orders"))
+
+	sales_order.check_permission("write")
+	loyalty_amount = validate_loyalty_points(sales_order, loyalty_points)
+	if loyalty_amount is None:
+		frappe.throw(_("Customer {0} is not enrolled in a Loyalty Program").format(sales_order.customer))
+
+	validate_loyalty_points_used_in_other_orders(sales_order, loyalty_points)
+	sales_order.db_set(
+		{"loyalty_points": loyalty_points, "loyalty_amount": loyalty_amount}, update_modified=False
+	)
+	return loyalty_amount
+
+
+def validate_loyalty_points_used_in_other_orders(sales_order, loyalty_points: int):
+	from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
+
+	loyalty_program = frappe.db.get_value("Customer", sales_order.customer, "loyalty_program")
+	available_points = cint(
+		get_loyalty_details(sales_order.customer, loyalty_program, company=sales_order.company).get(
+			"loyalty_points"
+		)
+	)
+
+	so = frappe.qb.DocType("Sales Order")
+	points_in_other_orders = (
+		frappe.qb.from_(so)
+		.select(Sum(so.loyalty_points))
+		.where(
+			(so.customer == sales_order.customer)
+			& (so.company == sales_order.company)
+			& (so.order_type == "Shopping Cart")
+			& (so.docstatus == 1)
+			& (so.per_billed == 0)
+			& (so.status != "Closed")
+			& (so.name != sales_order.name)
+		)
+		.run()[0][0]
+	)
+
+	free_points = max(available_points - cint(points_in_other_orders), 0)
+	if loyalty_points > free_points:
+		frappe.throw(
+			_(
+				"Only {0} Loyalty Points of Customer {1} are free. The other points are used in open Shopping Cart orders."
+			).format(free_points, sales_order.customer)
+		)
 
 
 def get_amount(ref_doc, payment_account=None):
@@ -819,7 +912,7 @@ def get_irequest_status(payment_requests: None | list = None) -> list:
 	return res
 
 
-def cancel_old_payment_requests(ref_dt, ref_dn):
+def cancel_old_payment_requests(ref_dt, ref_dn, ignore_permissions=False):
 	PR = frappe.qb.DocType("Payment Request")
 
 	if res := (
@@ -836,7 +929,7 @@ def cancel_old_payment_requests(ref_dt, ref_dn):
 		else:
 			for x in res:
 				doc = frappe.get_doc("Payment Request", x.name)
-				doc.flags.ignore_permissions = True
+				doc.flags.ignore_permissions = ignore_permissions
 				doc.cancel()
 
 				if ireqs := get_irequests_of_payment_request(doc.name):
@@ -953,26 +1046,12 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		return
 
 	precision = frappe.get_precision("Payment Entry Reference", "allocated_amount")
-	referenced_payment_requests = frappe.get_all(
-		"Payment Request",
-		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},
-		fields=[
-			"name",
-			"grand_total",
-			"outstanding_amount",
-			"payment_request_type",
-			"currency",
-			"party_account_currency",
-			"company",
-			"reference_doctype",
-			"reference_name",
-		],
-	)
-
-	for pr in referenced_payment_requests:
-		pr.total_requested = get_requested_amount_in_party_account_currency(pr)
-
-	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
+	referenced_payment_requests = {
+		pr.name: pr
+		for pr in get_payment_requests_with_total_requested(
+			list({row.payment_request for row in references if row.payment_request})
+		)
+	}
 	doc_updates = {}
 
 	for ref in references:
@@ -999,24 +1078,46 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 				title=_("Invalid Allocated Amount"),
 			)
 
-		# determine status
-		total_requested = payment_request.total_requested
-		if total_requested > 0 and flt(new_outstanding_amount, precision) >= flt(total_requested, precision):
-			status = "Initiated" if payment_request["payment_request_type"] == "Outward" else "Requested"
-		elif new_outstanding_amount <= 0:
-			status = "Paid"
-		elif new_outstanding_amount > 0:
-			status = "Partially Paid"
-
 		# prepare bulk update data
 		doc_updates[ref.payment_request] = {
 			"outstanding_amount": new_outstanding_amount,
-			"status": status,
+			"status": get_payment_request_status(
+				payment_request, new_outstanding_amount, payment_request.total_requested, precision
+			),
 		}
 
 	# bulk update all payment requests
 	if doc_updates:
 		frappe.db.bulk_update("Payment Request", doc_updates)
+
+
+def get_payment_requests_with_total_requested(names: list[str]) -> list[frappe._dict]:
+	payment_requests = frappe.get_all(
+		"Payment Request",
+		filters={"name": ["in", names]},
+		fields=[
+			"name",
+			"grand_total",
+			"outstanding_amount",
+			"payment_request_type",
+			"currency",
+			"party_account_currency",
+			"company",
+			"reference_doctype",
+			"reference_name",
+		],
+	)
+	for payment_request in payment_requests:
+		payment_request.total_requested = get_requested_amount_in_party_account_currency(payment_request)
+
+	return payment_requests
+
+
+def get_payment_request_status(payment_request, outstanding_amount, total_requested, precision):
+	if total_requested > 0 and flt(outstanding_amount, precision) >= flt(total_requested, precision):
+		return "Initiated" if payment_request.payment_request_type == "Outward" else "Requested"
+
+	return "Paid" if outstanding_amount <= 0 else "Partially Paid"
 
 
 def get_dummy_message(doc):

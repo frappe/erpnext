@@ -11,6 +11,7 @@
   "column_break_tdae",
   "finance_book",
   "amended_from",
+  "previous_depreciation_schedule",
   "depreciation_schedule_section",
   "depreciation_schedule"
  ],
@@ -48,6 +49,16 @@
    "options": "Finance Book"
   },
   {
+   "description": "The depreciation schedule this allocation replaced, restored when the allocation is cancelled",
+   "fieldname": "previous_depreciation_schedule",
+   "fieldtype": "Link",
+   "label": "Previous Depreciation Schedule",
+   "no_copy": 1,
+   "options": "Asset Depreciation Schedule",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "depreciation_schedule_section",
    "fieldtype": "Section Break",
@@ -70,7 +81,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-29 04:05:04.683518",
+ "modified": "2026-10-15 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Shift Allocation",

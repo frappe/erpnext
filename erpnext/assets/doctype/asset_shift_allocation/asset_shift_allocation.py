@@ -10,6 +10,7 @@ from frappe.utils import (
 	flt,
 	get_last_day,
 	get_link_to_form,
+	getdate,
 	is_last_day_of_the_month,
 )
 
@@ -39,6 +40,7 @@ class AssetShiftAllocation(Document):
 		depreciation_schedule: DF.Table[DepreciationSchedule]
 		finance_book: DF.Link | None
 		naming_series: DF.Literal["ACC-ASA-.YYYY.-"]
+		previous_depreciation_schedule: DF.Link | None
 	# end: auto-generated types
 
 	def after_insert(self):
@@ -46,12 +48,21 @@ class AssetShiftAllocation(Document):
 
 	def validate(self):
 		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
+		if self.get("depreciation_schedule"):
+			self.set_booked_journal_entries()
+			self.validate_invalid_shift_change()
+			self.update_depr_schedule()
 
-		self.validate_invalid_shift_change()
-		self.update_depr_schedule()
+	def before_submit(self):
+		self.previous_depreciation_schedule = self.asset_depr_schedule_doc.name
 
 	def on_submit(self):
 		self.create_new_asset_depr_schedule()
+
+	def on_cancel(self):
+		# allocations submitted before the replaced schedule was recorded keep the schedule as it is
+		if self.previous_depreciation_schedule:
+			self.restore_previous_depr_schedule()
 
 	def fetch_and_set_depr_schedule(self):
 		if self.asset_depr_schedule_doc:
@@ -83,10 +94,16 @@ class AssetShiftAllocation(Document):
 				)
 			)
 
-	def validate_invalid_shift_change(self):
-		if not self.get("depreciation_schedule") or self.docstatus == 1:
-			return
+	def set_booked_journal_entries(self):
+		"""Take booked entries from the active schedule, as depreciation may be posted after the allocation was saved."""
+		journal_entries = {
+			getdate(row.schedule_date): row.journal_entry
+			for row in self.asset_depr_schedule_doc.depreciation_schedule
+		}
+		for row in self.depreciation_schedule:
+			row.journal_entry = journal_entries.get(getdate(row.schedule_date))
 
+	def validate_invalid_shift_change(self):
 		for i, sch in enumerate(self.depreciation_schedule):
 			if sch.journal_entry and self.asset_depr_schedule_doc.depreciation_schedule[i].shift != sch.shift:
 				frappe.throw(
@@ -96,9 +113,6 @@ class AssetShiftAllocation(Document):
 				)
 
 	def update_depr_schedule(self):
-		if not self.get("depreciation_schedule") or self.docstatus == 1:
-			return
-
 		self.allocate_shift_diff_in_depr_schedule()
 
 		asset_doc = frappe.get_doc("Asset", self.asset)
@@ -245,11 +259,7 @@ class AssetShiftAllocation(Document):
 		)
 
 		new_asset_depr_schedule_doc.notes = notes
-
-		self.asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
-		self.asset_depr_schedule_doc.cancel()
-
-		new_asset_depr_schedule_doc.submit()
+		replace_active_depr_schedule(self.asset_depr_schedule_doc, new_asset_depr_schedule_doc)
 
 		add_asset_activity(
 			self.asset,
@@ -257,6 +267,48 @@ class AssetShiftAllocation(Document):
 				get_link_to_form(self.doctype, self.name)
 			),
 		)
+
+	def restore_previous_depr_schedule(self):
+		active_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
+		self.validate_previous_depr_schedule_restorable(active_schedule_doc)
+
+		restored_schedule_doc = frappe.copy_doc(
+			frappe.get_doc("Asset Depreciation Schedule", self.previous_depreciation_schedule)
+		)
+		restored_schedule_doc.notes = _(
+			"This schedule was restored when Asset Shift Allocation {0} was cancelled."
+		).format(get_link_to_form(self.doctype, self.name))
+		replace_active_depr_schedule(active_schedule_doc, restored_schedule_doc)
+
+	def validate_previous_depr_schedule_restorable(self, active_schedule_doc: Document) -> None:
+		if get_schedule_rows(active_schedule_doc.depreciation_schedule) != get_schedule_rows(
+			self.depreciation_schedule
+		):
+			frappe.throw(
+				_(
+					"Cannot cancel since the asset's depreciation schedule has changed or depreciation has been posted after this allocation was submitted"
+				)
+			)
+
+
+def replace_active_depr_schedule(active_schedule_doc: Document, new_schedule_doc: Document) -> None:
+	active_schedule_doc.flags.should_not_cancel_depreciation_entries = True
+	# The submitting allocation links the schedule it replaces, which would otherwise block this cancel
+	active_schedule_doc.ignore_linked_doctypes = ("Asset Shift Allocation",)
+	active_schedule_doc.cancel()
+	new_schedule_doc.submit()
+
+
+def get_schedule_rows(schedule: list) -> list[tuple]:
+	return [
+		(
+			getdate(row.schedule_date),
+			flt(row.depreciation_amount, 2),
+			row.shift,
+			row.journal_entry or None,
+		)
+		for row in schedule
+	]
 
 
 def find_subsets_with_sum(numbers, k, target_sum, current_subset, result):

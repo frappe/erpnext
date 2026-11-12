@@ -67,6 +67,18 @@ frappe.query_reports["Profitability Analysis"] = {
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 		},
 		{
+			fieldname: "finance_book",
+			label: __("Finance Book"),
+			fieldtype: "Link",
+			options: "Finance Book",
+		},
+		{
+			fieldname: "include_default_book_entries",
+			label: __("Include Default FB Entries"),
+			fieldtype: "Check",
+			default: 1,
+		},
+		{
 			fieldname: "show_zero_values",
 			label: __("Show zero values"),
 			fieldtype: "Check",
@@ -104,6 +116,10 @@ frappe.query_reports["Profitability Analysis"] = {
 			company: frappe.query_report.get_filter_value("company"),
 			from_fiscal_year: data.fiscal_year,
 			to_fiscal_year: data.fiscal_year,
+			finance_book: frappe.query_report.get_filter_value("finance_book"),
+			include_default_book_entries: frappe.query_report.get_filter_value(
+				"include_default_book_entries"
+			),
 		};
 
 		if (data.based_on == "Cost Center") {

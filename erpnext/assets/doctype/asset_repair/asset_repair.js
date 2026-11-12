@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Asset Repair", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Stock Entry"];
 
 		frm.fields_dict.cost_center.get_query = function (doc) {
 			return {

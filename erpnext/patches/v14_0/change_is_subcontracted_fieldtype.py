@@ -6,12 +6,14 @@ import frappe
 
 def execute():
 	for doctype in ["Purchase Order", "Purchase Receipt", "Purchase Invoice", "Supplier Quotation"]:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f"""
 				UPDATE `tab{doctype}`
 				SET is_subcontracted = 0
 				where is_subcontracted in ('', 'No') or is_subcontracted is null"""
 		)
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f"""
 				UPDATE `tab{doctype}`

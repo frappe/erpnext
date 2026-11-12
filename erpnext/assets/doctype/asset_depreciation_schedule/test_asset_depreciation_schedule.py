@@ -3,22 +3,117 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 
+from erpnext.accounts.utils import FiscalYearError
+from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
+	_make_depreciation_entry,
+	make_depreciation_entry_for_all_asset_depr_schedules,
 	post_depreciation_entries,
+	restore_asset,
+	scrap_asset,
 )
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.test_asset import (
+	create_asset,
+	create_asset_data,
+	set_depreciation_settings_in_company,
+)
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_asset_depreciation_schedule,
 	get_depr_schedule,
+)
+from erpnext.assets.doctype.asset_repair.test_asset_repair import create_asset_repair
+from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment import (
+	make_asset_value_adjustment,
 )
 
 
 class TestAssetDepreciationSchedule(FrappeTestCase):
 	def setUp(self):
 		create_asset_data()
+
+	def test_wdv_schedule_uses_asset_company_fiscal_year(self):
+		self.addCleanup(frappe.cache().delete_value, "fiscal_years")
+
+		india_fiscal_year = frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": "_Test Asset India FY 2092",
+				"year_start_date": "2092-04-01",
+				"year_end_date": "2093-03-31",
+				"companies": [{"company": "_Test Company"}],
+			}
+		).insert()
+		self.addCleanup(frappe.delete_doc, "Fiscal Year", india_fiscal_year.name)
+		australia_fiscal_year = frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": "_Test Asset Australia FY 2092",
+				"year_start_date": "2092-07-01",
+				"year_end_date": "2093-06-30",
+				"companies": [{"company": "_Test Company 1"}],
+			}
+		).insert()
+		self.addCleanup(frappe.delete_doc, "Fiscal Year", australia_fiscal_year.name)
+
+		self.assertEqual(india_fiscal_year.disabled, 0)
+		self.assertEqual(australia_fiscal_year.disabled, 0)
+
+		asset = create_asset(
+			company="_Test Company",
+			calculate_depreciation=1,
+			purchase_date="2092-11-01",
+			available_for_use_date="2092-11-01",
+			depreciation_start_date="2092-11-30",
+			depreciation_method="Written Down Value",
+			gross_purchase_amount=100000,
+			rate_of_depreciation=40,
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+		)
+
+		schedule = get_depr_schedule(asset.name, "Draft")
+		self.assertEqual(getdate(schedule[5].schedule_date), getdate("2093-04-30"))
+		self.assertEqual(flt(schedule[5].depreciation_amount, 2), 3333.33)
+
+		india_fiscal_year.disabled = 1
+		india_fiscal_year.save()
+		asset.finance_books[0].depreciation_start_date = "2092-12-31"
+		with self.assertRaises(FiscalYearError):
+			asset.save()
+
+	def test_restore_after_scrap_on_last_booked_schedule_date(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			opening_accumulated_depreciation=8333.32,
+			opening_number_of_booked_depreciations=4,
+			gross_purchase_amount=125000,
+			purchase_amount=125000,
+			purchase_date="2025-09-01",
+			available_for_use_date="2025-09-01",
+			depreciation_start_date="2026-01-01",
+			total_number_of_depreciations=60,
+			frequency_of_depreciation=1,
+			submit=1,
+		)
+		make_depreciation_entry_for_all_asset_depr_schedules(asset, date="2026-10-01")
+
+		booked_entries = {
+			row.journal_entry for row in get_depr_schedule(asset.name, "Active") if row.journal_entry
+		}
+		self.assertEqual(len(booked_entries), 10)
+
+		scrap_asset(asset.name, scrap_date="2026-10-01")
+		restore_asset(asset.name)
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		self.assertEqual(len(schedule), 56)
+		self.assertEqual(len({row.schedule_date for row in schedule}), 56)
+		self.assertEqual(cstr(schedule[10].schedule_date), "2026-11-01")
+		self.assertEqual({row.journal_entry for row in schedule if row.journal_entry}, booked_entries)
+		self.assertEqual(asset.reload().get_value_after_depreciation(), 95833.38)
 
 	def test_throw_error_if_another_asset_depr_schedule_exist(self):
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
@@ -412,3 +507,160 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		self.assertEqual(get_asset_depreciation_schedule(asset.name, "Active").asset, asset.name)
 		with self.set_user("Guest"):
 			self.assertRaises(frappe.PermissionError, get_asset_depreciation_schedule, asset.name, "Active")
+
+	def test_index_range_does_not_repost_booked_or_future_rows(self):
+		asset = create_monthly_asset()
+		schedule_name = get_asset_depr_schedule_doc(asset.name, "Active").name
+		_make_depreciation_entry(schedule_name, "2023-05-31")
+		cancel_depreciation_entry(asset.name, "2023-02-28")
+
+		# indexes as passed by the scheduler for the unbooked due rows (Feb to Jun)
+		_make_depreciation_entry(schedule_name, "2023-06-30", 1, 6)
+		_make_depreciation_entry(schedule_name, "2023-06-30", 1, 12)
+
+		self.assertEqual(get_depreciation_entry_count(asset.name), 6)
+		self.assertEqual(get_finance_book_value(asset.name), 600)
+
+	def test_reschedule_keeps_rows_booked_after_a_cancelled_entry(self):
+		asset = create_monthly_asset()
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-05-31")
+		cancel_depreciation_entry(asset.name, "2023-02-28")
+
+		make_asset_value_adjustment(
+			asset=asset.name, date="2023-06-01", current_asset_value=800, new_asset_value=700
+		).submit()
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		booked_dates = [cstr(d.schedule_date) for d in schedule if d.journal_entry]
+		self.assertEqual(booked_dates, ["2023-01-31", "2023-03-31", "2023-04-30", "2023-05-31"])
+		self.assertEqual(len({d.schedule_date for d in schedule}), 12)
+		self.assertEqual(sum(d.depreciation_amount for d in schedule if not d.journal_entry), 700)
+		self.assertEqual(schedule[-1].accumulated_depreciation_amount, 1100)
+
+	def test_wdv_requires_rate_or_salvage_value(self):
+		args = {
+			"depreciation_method": "Written Down Value",
+			"frequency_of_depreciation": 12,
+			"total_number_of_depreciations": 5,
+			"depreciation_start_date": "2023-12-31",
+			"submit": 0,
+		}
+		self.assertRaises(frappe.ValidationError, create_monthly_asset, **args)
+
+		asset = create_monthly_asset(**args, expected_value_after_useful_life=100)
+		self.assertLess(asset.finance_books[0].rate_of_depreciation, 100)
+
+	def test_repair_keeps_entered_wdv_rate(self):
+		set_depreciation_settings_in_company()
+		asset = create_yearly_wdv_asset(rate_of_depreciation=40)
+		finance_book = asset.finance_books[0]
+		self.assertTrue(finance_book.is_rate_of_depreciation_entered)
+
+		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
+		self.assertEqual(get_rate_of_depreciation(finance_book), 40)
+		self.assertEqual(get_asset_depr_schedule_doc(asset.name, "Active").rate_of_depreciation, 40)
+
+		# Finance books saved before the flag existed are judged by their first schedule
+		finance_book.db_set("is_rate_of_depreciation_entered", 0)
+		create_asset_repair(asset=frappe.get_doc("Asset", asset.name), capitalize_repair_cost=1, submit=1)
+		self.assertEqual(get_rate_of_depreciation(finance_book), 40)
+
+	def test_repair_recomputes_derived_wdv_rate(self):
+		set_depreciation_settings_in_company()
+		asset = create_yearly_wdv_asset()
+		finance_book = asset.finance_books[0]
+		self.assertFalse(finance_book.is_rate_of_depreciation_entered)
+		derived_rate = get_rate_of_depreciation(finance_book)
+
+		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
+		self.assertNotEqual(get_rate_of_depreciation(finance_book), derived_rate)
+
+	def test_reschedule_of_fully_booked_schedule_adds_no_rows(self):
+		asset = create_monthly_asset(expected_value_after_useful_life=200)
+		_make_depreciation_entry(get_asset_depr_schedule_doc(asset.name, "Active").name, "2023-12-31")
+
+		make_asset_value_adjustment(
+			asset=asset.name, date="2024-01-01", current_asset_value=200, new_asset_value=260
+		).submit()
+
+		schedule = get_depr_schedule(asset.name, "Active")
+		self.assertEqual(len(schedule), 12)
+		self.assertEqual(len({d.schedule_date for d in schedule}), 12)
+		self.assertTrue(all(d.journal_entry for d in schedule))
+
+	def test_manual_schedule_rows_are_validated(self):
+		asset = create_monthly_asset(depreciation_method="Manual", submit=0)
+
+		def edit_schedule(second_row_amount, third_row_amount):
+			schedule = get_asset_depr_schedule_doc(asset.name, "Draft")
+			schedule.depreciation_schedule[1].depreciation_amount = second_row_amount
+			schedule.depreciation_schedule[2].depreciation_amount = third_row_amount
+			schedule.save()
+			return schedule
+
+		self.assertRaises(frappe.ValidationError, edit_schedule, -100, 300)
+		self.assertRaises(frappe.ValidationError, edit_schedule, 150, 100)
+
+		schedule = edit_schedule(150, 50)
+		self.assertEqual(
+			[row.accumulated_depreciation_amount for row in schedule.depreciation_schedule[:3]],
+			[100, 250, 300],
+		)
+
+	def test_manual_asset_split_with_rounded_rows(self):
+		asset = create_monthly_asset(depreciation_method="Manual", asset_quantity=3)
+
+		new_asset = split_asset(asset.name, 1)
+
+		schedule = get_depr_schedule(new_asset.name, "Active")
+		self.assertEqual(flt(schedule[0].depreciation_amount, 2), 33.33)
+
+
+def create_monthly_asset(**args):
+	defaults = {
+		"item_code": "Macbook Pro",
+		"gross_purchase_amount": 1200,
+		"purchase_amount": 1200,
+		"calculate_depreciation": 1,
+		"depreciation_method": "Straight Line",
+		"available_for_use_date": "2023-01-01",
+		"depreciation_start_date": "2023-01-31",
+		"frequency_of_depreciation": 1,
+		"total_number_of_depreciations": 12,
+		"submit": 1,
+	}
+	return create_asset(**{**defaults, **args})
+
+
+def cancel_depreciation_entry(asset_name: str, schedule_date: str):
+	schedule = get_asset_depr_schedule_doc(asset_name, "Active")
+	row = next(d for d in schedule.depreciation_schedule if cstr(d.schedule_date) == schedule_date)
+	frappe.get_doc("Journal Entry", row.journal_entry).cancel()
+
+
+def get_depreciation_entry_count(asset_name: str) -> int:
+	return frappe.db.count(
+		"Journal Entry Account",
+		{"reference_type": "Asset", "reference_name": asset_name, "docstatus": 1, "debit": [">", 0]},
+	)
+
+
+def get_finance_book_value(asset_name: str) -> float:
+	return frappe.db.get_value("Asset Finance Book", {"parent": asset_name}, "value_after_depreciation")
+
+
+def create_yearly_wdv_asset(**args):
+	return create_monthly_asset(
+		gross_purchase_amount=120000,
+		purchase_amount=120000,
+		depreciation_method="Written Down Value",
+		expected_value_after_useful_life=10000,
+		depreciation_start_date="2023-12-31",
+		frequency_of_depreciation=12,
+		total_number_of_depreciations=5,
+		**args,
+	)
+
+
+def get_rate_of_depreciation(finance_book) -> float:
+	return flt(frappe.db.get_value(finance_book.doctype, finance_book.name, "rate_of_depreciation"), 2)

@@ -21,6 +21,12 @@ frappe.query_reports["Incorrect Balance Qty After Transaction"] = {
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			fieldname: "warehouse",
+			options: "Warehouse",
+			get_query: function () {
+				return {
+					filters: { company: frappe.query_report.get_filter_value("company") },
+				};
+			},
 		},
 	],
 };

@@ -18,7 +18,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
 		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
-			effective_item_rate = item.blanket_order_rate;
+			effective_item_rate = flt(item.blanket_order_rate) * (flt(item.conversion_factor) || 1);
 		}
 		if (item.margin_type == "Percentage") {
 			item.rate_with_margin = flt(effective_item_rate)
@@ -153,6 +153,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			precision("net_amount", item)
 		);
 		item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
+		item._unrounded_net_amount = null;
 		this.set_in_company_currency(item, ["net_rate", "net_amount"]);
 	}
 
@@ -324,7 +325,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		});
 		if(has_inclusive_tax==false) return;
 
-		$.each(this.frm.doc.items || [], function(n, item) {
+		const net_totals = {};
+		$.each(this.frm.doc.items || [], function (n, item) {
+			if (!me.discount_amount_applied) item._unrounded_net_amount = null;
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var total_tax_slope = 0.0;
 			var total_tax_intercept = 0;
@@ -357,7 +360,23 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 			if(!me.discount_amount_applied && item.qty && (total_tax_intercept || total_tax_slope)) {
 				var amount = flt(item.amount) - total_tax_intercept;
-				item.net_amount = flt(amount / (1 + total_tax_slope), precision("net_amount", item));
+				item._unrounded_net_amount = amount / (1 + total_tax_slope);
+				item.net_amount = flt(item._unrounded_net_amount, precision("net_amount", item));
+				if (
+					!frappe.flags.round_row_wise_tax &&
+					!(me.frm.doc.doctype === "Quotation" && item.is_alternative)
+				) {
+					// Carry rounding between items with the same taxes, without mixing tax groups.
+					const tax_key = JSON.stringify(Object.entries(item_tax_map).sort());
+					const net_total = (net_totals[tax_key] ||= { unrounded: 0, rounded: 0 });
+					net_total.unrounded += item._unrounded_net_amount;
+					item.net_amount = flt(
+						flt(net_total.unrounded, precision("net_amount", item)) - net_total.rounded,
+						precision("net_amount", item)
+					);
+					net_total.rounded += item.net_amount;
+				}
+
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -664,15 +683,20 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			if (tax.account_head in item_tax_map) {
 				current_net_amount = item.net_amount
 			}
-			current_tax_amount = (tax_rate / 100.0) * item.net_amount;
-		} else if(tax.charge_type == "On Previous Row Amount") {
-			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item
-			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
-		} else if(tax.charge_type == "On Previous Row Total") {
-			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item
-			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+			// Use unrounded net for inclusive taxes to avoid double rounding
+			var net_for_tax =
+				cint(tax.included_in_print_rate) && item._unrounded_net_amount !== null
+					? item._unrounded_net_amount
+					: item.net_amount;
+			current_tax_amount = (tax_rate / 100.0) * net_for_tax;
+		} else if (tax.charge_type == "On Previous Row Amount") {
+			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
+			current_tax_amount =
+				(tax_rate / 100.0) * this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
+		} else if (tax.charge_type == "On Previous Row Total") {
+			current_net_amount = this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+			current_tax_amount =
+				(tax_rate / 100.0) * this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
 		} else if (tax.charge_type == "On Item Quantity") {
 			// don't sum current net amount due to the field being a currency field
 			current_tax_amount = tax_rate * item.qty;
@@ -872,6 +896,20 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			this.set_in_company_currency(this.frm.doc, ["rounding_adjustment", "rounded_total"]);
+
+			if (this.frm.doc.rounding_adjustment) {
+				// Preserve the converted payable/receivable when the transaction currency rounds.
+				this.frm.doc.base_rounding_adjustment = flt(
+					this.frm.doc.base_rounded_total - this.frm.doc.base_grand_total,
+					precision("base_rounding_adjustment")
+				);
+			} else if (this.frm.doc.rounded_total) {
+				// keep the base rounded total tied to the base totals the ledger is posted with
+				this.frm.doc.base_rounded_total = flt(
+					this.frm.doc.base_grand_total + this.frm.doc.base_rounding_adjustment,
+					precision("base_rounded_total")
+				);
+			}
 		}
 	}
 
@@ -916,7 +954,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	apply_discount_amount() {
 		var me = this;
-		var distributed_amount = 0.0;
 		this.frm.doc.base_discount_amount = 0.0;
 
 		if (this.frm.doc.discount_amount) {
@@ -931,25 +968,43 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 
 			const total_for_discount_amount = this.get_total_for_discount_amount();
-			let net_total = 0;
-			let expected_net_total = 0;
+			const net_totals = {};
+			const use_unrounded_net =
+				this.frm.doc.apply_discount_on == "Grand Total" &&
+				!frappe.flags.round_row_wise_tax &&
+				(this.frm.doc.taxes || []).some((tax) => cint(tax.included_in_print_rate));
 
 			// calculate item amount after Discount Amount
 			if (total_for_discount_amount) {
-				$.each(this.frm._items || [], function(i, item) {
-					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
-
-					const adjusted_net_amount = item.net_amount - distributed_amount;
-					expected_net_total += adjusted_net_amount
+				$.each(this.frm._items || [], function (i, item) {
+					const tax_key = use_unrounded_net
+						? JSON.stringify(Object.entries(me._load_item_tax_rate(item.item_tax_rate)).sort())
+						: "";
+					const net_total = (net_totals[tax_key] ||= { unrounded: 0, rounded: 0 });
+					const net_amount =
+						use_unrounded_net && item._unrounded_net_amount != null
+							? item._unrounded_net_amount
+							: item.net_amount;
+					const adjusted_net_amount =
+						net_amount -
+						(flt(me.frm.doc.discount_amount) * net_amount) / total_for_discount_amount;
+					item._unrounded_net_amount = use_unrounded_net ? adjusted_net_amount : null;
+					net_total.unrounded += adjusted_net_amount;
 					item.net_amount = flt(adjusted_net_amount, precision("net_amount", item));
-					net_total += item.net_amount;
+					net_total.rounded += item.net_amount;
 
 					// discount amount rounding adjustment
 					// assignment to rounding_difference is intentional
-					const rounding_difference = flt(expected_net_total - net_total, precision("net_total"));
+					const rounding_difference = flt(
+						net_total.unrounded - net_total.rounded,
+						precision("net_total")
+					);
 					if (rounding_difference) {
-						item.net_amount = flt(item.net_amount + rounding_difference, precision("net_amount", item));
-						net_total += rounding_difference;
+						item.net_amount = flt(
+							item.net_amount + rounding_difference,
+							precision("net_amount", item)
+						);
+						net_total.rounded += rounding_difference;
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);

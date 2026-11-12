@@ -9,7 +9,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: this.frm });
 
 		this.set_fields_onload_for_line_item();
-		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		this.frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Quality Inspection"];
 
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
@@ -714,13 +714,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => {
 									// check if batch serial selector is disabled or not
-									if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
-										return frappe.db.get_single_value('Stock Settings', 'disable_serial_no_and_batch_selector')
-											.then((value) => {
-												if (value) {
-													frappe.flags.hide_serial_batch_dialog = true;
-												}
-											});
+									if (show_batch_dialog && frappe.boot.sysdefaults.disable_serial_no_and_batch_selector) {
+										frappe.flags.hide_serial_batch_dialog = true;
+									}
 								},
 								() => {
 									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {

@@ -119,6 +119,150 @@ class TestLandedCostVoucher(FrappeTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "of all items is zero"):
 			lcv.set_applicable_charges_on_item()
 
+	def test_stock_account_cannot_be_charge_account(self):
+		receipt = make_purchase_receipt(qty=10, rate=100)
+		stock_account = frappe.db.get_value(
+			"Account", {"company": receipt.company, "account_type": "Stock", "is_group": 0}, "name"
+		)
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			expense_account=stock_account,
+			do_not_save=True,
+		)
+		self.assertRaises(frappe.ValidationError, lcv.insert)
+
+	def test_purchase_and_return_with_qty_based_charges_can_be_submitted(self):
+		purchase = make_purchase_receipt(qty=2, rate=100)
+		original = make_purchase_receipt(qty=1, rate=100)
+		purchase_return = make_purchase_receipt(qty=-1, rate=100, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase.doctype,
+			receipt_document=purchase.name,
+			charges=80,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": purchase_return.doctype, "receipt_document": purchase_return.name},
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual(sorted(item.applicable_charges for item in lcv.items), sorted([160, -80]))
+
+	def test_return_only_voucher_with_qty_based_charges_can_be_submitted(self):
+		original = make_purchase_receipt(qty=1, rate=100)
+		purchase_return = make_purchase_receipt(qty=-1, rate=100, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase_return.doctype,
+			receipt_document=purchase_return.name,
+			charges=80,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual([item.applicable_charges for item in lcv.items], [80])
+
+	def test_rounding_difference_stays_off_return_rows(self):
+		purchase = make_purchase_receipt(qty=10000, rate=1, do_not_save=True)
+		for _i in range(2):
+			purchase.append("items", purchase.items[0].as_dict().copy().update({"name": None}))
+		purchase.insert()
+		purchase.submit()
+		original = make_purchase_receipt(qty=1, rate=1)
+		purchase_return = make_purchase_receipt(qty=-1, rate=1, is_return=1, return_against=original.name)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=purchase.doctype,
+			receipt_document=purchase.name,
+			charges=100,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": purchase_return.doctype, "receipt_document": purchase_return.name},
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.insert()
+		lcv.submit()
+
+		charges = sorted(item.applicable_charges for item in lcv.items)
+		self.assertEqual(charges, [0, 33.33, 33.33, 33.34])
+
+	def test_manual_distribution_refuses_negative_charges(self):
+		receipt = make_purchase_receipt(qty=10, rate=100, do_not_save=True)
+		receipt.append(
+			"items",
+			receipt.items[0]
+			.as_dict()
+			.copy()
+			.update({"name": None, "qty": 1, "received_qty": 1, "stock_qty": 1}),
+		)
+		receipt.insert()
+		receipt.submit()
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 300
+		lcv.items[1].applicable_charges = -200
+		lcv.insert()
+		self.assertRaises(frappe.ValidationError, lcv.submit)
+
+	def make_receipt_with_rows(self, row_count):
+		receipt = make_purchase_receipt(qty=1, rate=100, do_not_save=True)
+		for _i in range(row_count - 1):
+			receipt.append("items", receipt.items[0].as_dict().copy().update({"name": None}))
+		receipt.insert()
+		receipt.submit()
+		return receipt
+
+	def test_small_charge_distribution_has_no_negative_share(self):
+		receipt = self.make_receipt_with_rows(7)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=0.04,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+		lcv.insert()
+		lcv.submit()
+
+		shares = [flt(row.applicable_charges) for row in lcv.items]
+		self.assertTrue(all(share >= 0 for share in shares))
+		self.assertEqual(flt(sum(shares), 2), 0.04)
+
+	def test_manual_rounding_difference_keeps_shares_non_negative(self):
+		receipt = self.make_receipt_with_rows(2)
+		lcv = make_landed_cost_voucher(
+			receipt_document_type=receipt.doctype,
+			receipt_document=receipt.name,
+			charges=100,
+			distribute_charges_based_on="Distribute Manually",
+			do_not_save=True,
+		)
+		lcv.get_items_from_purchase_receipts()
+		lcv.items[0].applicable_charges = 100.01
+		lcv.items[1].applicable_charges = 0
+		lcv.insert()
+		lcv.submit()
+
+		self.assertEqual([flt(row.applicable_charges) for row in lcv.items], [100.0, 0.0])
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 

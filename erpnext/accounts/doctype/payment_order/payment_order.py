@@ -2,11 +2,18 @@
 # For license information, please see license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import nowdate
+from frappe.utils import flt, nowdate
 
+from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_payment_request_status,
+	get_payment_requests_with_total_requested,
+	update_payment_requests_as_per_pe_references,
+)
 from erpnext.accounts.party import get_party_account
 
 
@@ -37,33 +44,92 @@ class PaymentOrder(Document):
 
 	def validate(self):
 		self.validate_company_bank_account()
-		self.validate_reference_company()
+		self.validate_references()
+		self.validate_references_not_in_other_orders()
 
-	def validate_reference_company(self):
-		if not self.payment_order_type:
+	@property
+	def reference_field(self):
+		return "payment_request" if self.payment_order_type == "Payment Request" else "reference_name"
+
+	def get_reference_names(self):
+		return list({d.get(self.reference_field) for d in self.references if d.get(self.reference_field)})
+
+	def validate_references(self):
+		references = self.get_reference_names()
+		if not self.payment_order_type or not references:
 			return
 
-		ref_field = "payment_request" if self.payment_order_type == "Payment Request" else "reference_name"
-		references = {d.get(ref_field) for d in self.references if d.get(ref_field)}
-		if not references:
-			return
-
-		reference_company = frappe._dict(
-			frappe.get_all(
-				self.payment_order_type,
-				filters={"name": ["in", list(references)]},
-				fields=["name", "company"],
-				as_list=True,
-			)
+		order_status_field = (
+			"status" if self.payment_order_type == "Payment Request" else "payment_order_status"
 		)
+		reference_details = {
+			reference.name: reference
+			for reference in frappe.qb.get_query(
+				self.payment_order_type,
+				fields=["name", "company", "docstatus", "status", f"{order_status_field} as order_status"],
+				filters={"name": ["in", references]},
+				for_update=self.docstatus == 1,
+			).run(as_dict=True)
+		}
 		for d in self.references:
-			company = reference_company.get(d.get(ref_field))
-			if company and company != self.company:
-				frappe.throw(
-					_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
-						d.idx, _(self.payment_order_type), d.get(ref_field), company, self.company
-					)
+			self.validate_reference(d, reference_details.get(d.get(self.reference_field)))
+
+	def validate_reference(self, row, reference):
+		reference_name = row.get(self.reference_field)
+		if not reference or reference.docstatus != 1:
+			frappe.throw(
+				_("Row #{0}: {1} {2} must be submitted").format(
+					row.idx, _(self.payment_order_type), reference_name
 				)
+			)
+
+		if reference.company and reference.company != self.company:
+			frappe.throw(
+				_("Row #{0}: {1} {2} belongs to Company {3}, not {4}").format(
+					row.idx, _(self.payment_order_type), reference_name, reference.company, self.company
+				)
+			)
+
+		if reference.status == "Paid":
+			frappe.throw(
+				_("Row #{0}: {1} {2} is already paid").format(
+					row.idx, _(self.payment_order_type), reference_name
+				)
+			)
+
+		if self.docstatus == 1 and reference.order_status == "Payment Ordered":
+			frappe.throw(
+				_("Row #{0}: {1} {2} is already in another Payment Order").format(
+					row.idx, _(self.payment_order_type), reference_name
+				)
+			)
+
+	def validate_references_not_in_other_orders(self):
+		references = self.get_reference_names()
+		if not self.payment_order_type or not references:
+			return
+
+		order = frappe.qb.DocType("Payment Order")
+		order_reference = frappe.qb.DocType("Payment Order Reference")
+		reference_column = order_reference[self.reference_field]
+		other_order = (
+			frappe.qb.from_(order_reference)
+			.join(order)
+			.on(order.name == order_reference.parent)
+			.select(reference_column, order.name)
+			.where(order.docstatus == 1)
+			.where(order.payment_order_type == self.payment_order_type)
+			.where(order.name != (self.name or ""))
+			.where(reference_column.isin(references))
+			.limit(1)
+			.run()
+		)
+		if other_order:
+			frappe.throw(
+				_("{0} {1} is already in Payment Order {2}").format(
+					_(self.payment_order_type), other_order[0][0], other_order[0][1]
+				)
+			)
 
 	def validate_company_bank_account(self):
 		if not self.company_bank_account:
@@ -95,19 +161,40 @@ class PaymentOrder(Document):
 		self.update_payment_status(cancel=True)
 
 	def update_payment_status(self, cancel=False):
-		status = "Payment Ordered"
-		if cancel:
-			status = "Initiated"
-
 		if self.payment_order_type == "Payment Request":
-			ref_field = "status"
-			ref_doc_field = frappe.scrub(self.payment_order_type)
-		else:
-			ref_field = "payment_order_status"
-			ref_doc_field = "reference_name"
+			if cancel:
+				self.reset_payment_request_status()
+			else:
+				set_payment_requests_as_ordered(self.get_reference_names())
+			return
 
+		status = "Initiated" if cancel else "Payment Ordered"
 		for d in self.references:
-			frappe.db.set_value(self.payment_order_type, d.get(ref_doc_field), ref_field, status)
+			frappe.db.set_value(self.payment_order_type, d.reference_name, "payment_order_status", status)
+
+	def reset_payment_request_status(self):
+		precision = frappe.get_precision("Payment Request", "outstanding_amount")
+		payment_requests = get_payment_requests_with_total_requested(self.get_reference_names())
+
+		status_updates = {
+			payment_request.name: {
+				"status": get_payment_request_status(
+					payment_request,
+					payment_request.outstanding_amount,
+					payment_request.total_requested,
+					precision,
+				)
+			}
+			for payment_request in payment_requests
+		}
+		frappe.db.bulk_update("Payment Request", status_updates)
+
+
+def set_payment_requests_as_ordered(payment_requests: list[str]):
+	if payment_requests:
+		frappe.db.set_value(
+			"Payment Request", {"name": ["in", payment_requests]}, "status", "Payment Ordered"
+		)
 
 
 def _readable_payment_order(filters):
@@ -163,7 +250,7 @@ def get_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def make_payment_records(name, supplier, mode_of_payment=None):
 	doc = frappe.get_doc("Payment Order", name)
 	doc.check_permission()
@@ -171,6 +258,7 @@ def make_payment_records(name, supplier, mode_of_payment=None):
 
 
 def make_journal_entry(doc, supplier, mode_of_payment=None):
+	rows = get_unpaid_rows(doc, supplier, mode_of_payment)
 	je = frappe.new_doc("Journal Entry")
 	je.company = doc.company
 	je.payment_order = doc.name
@@ -181,26 +269,106 @@ def make_journal_entry(doc, supplier, mode_of_payment=None):
 	if mode_of_payment and mode_of_payment_type.get(mode_of_payment) == "Cash":
 		je.voucher_type = "Cash Entry"
 
-	paid_amt = 0
 	party_account = get_party_account("Supplier", supplier, doc.company)
-	for d in doc.references:
-		if d.supplier == supplier and (not mode_of_payment or mode_of_payment == d.mode_of_payment):
-			je.append(
-				"accounts",
-				{
-					"account": party_account,
-					"debit_in_account_currency": d.amount,
-					"party_type": "Supplier",
-					"party": supplier,
-					"reference_type": d.reference_doctype,
-					"reference_name": d.reference_name,
-				},
-			)
+	for d in rows:
+		je.append(
+			"accounts",
+			{
+				"account": party_account,
+				"debit_in_account_currency": d.amount,
+				"party_type": "Supplier",
+				"party": supplier,
+				"reference_type": d.reference_doctype,
+				"reference_name": d.reference_name,
+			},
+		)
 
-			paid_amt += d.amount
-
-	je.append("accounts", {"account": doc.account, "credit_in_account_currency": paid_amt})
+	je.append("accounts", {"account": doc.account, "credit_in_account_currency": sum(d.amount for d in rows)})
 
 	je.flags.ignore_mandatory = True
 	je.save()
+	set_payment_reference([d.name for d in rows], je.name)
 	frappe.msgprint(_("{0} {1} created").format(je.doctype, je.name))
+
+
+def get_unpaid_rows(doc, supplier, mode_of_payment=None):
+	rows = [
+		d
+		for d in doc.references
+		if d.supplier == supplier
+		and not d.payment_reference
+		and (not mode_of_payment or mode_of_payment == d.mode_of_payment)
+	]
+	if rows:
+		payment_references = dict(
+			frappe.qb.get_query(
+				"Payment Order Reference",
+				fields=["name", "payment_reference"],
+				filters={"name": ["in", [d.name for d in rows]]},
+				for_update=True,
+			).run()
+		)
+		rows = [d for d in rows if not payment_references.get(d.name)]
+
+	if not rows:
+		frappe.throw(_("Journal Entries are already created for Supplier {0}").format(supplier))
+
+	return rows
+
+
+def set_payment_reference(rows: list[str], journal_entry: str):
+	order_reference = frappe.qb.DocType("Payment Order Reference")
+	frappe.qb.update(order_reference).set(order_reference.payment_reference, journal_entry).where(
+		order_reference.name.isin(rows)
+	).run()
+
+
+def clear_payment_reference(journal_entry):
+	if not journal_entry.payment_order:
+		return
+
+	order_reference = frappe.qb.DocType("Payment Order Reference")
+	frappe.qb.update(order_reference).set(order_reference.payment_reference, None).where(
+		order_reference.parent == journal_entry.payment_order
+	).where(order_reference.payment_reference == journal_entry.name).run()
+
+
+def update_payment_requests_from_journal_entry(journal_entry, cancel=False):
+	if not journal_entry.payment_order:
+		return
+
+	references = get_payment_request_allocations(journal_entry)
+	update_payment_requests_as_per_pe_references(references, cancel=cancel)
+
+	if cancel:
+		set_payment_requests_as_ordered([row.payment_request for row in references])
+		clear_payment_reference(journal_entry)
+
+
+def get_payment_request_allocations(journal_entry):
+	paid_amounts = defaultdict(float)
+	for row in journal_entry.accounts:
+		if row.reference_type and row.reference_name:
+			paid_amounts[(row.reference_type, row.reference_name)] += flt(row.debit_in_account_currency)
+
+	allocations = []
+	for row in frappe.get_all(
+		"Payment Order Reference",
+		filters={
+			"parent": journal_entry.payment_order,
+			"parenttype": "Payment Order",
+			"payment_reference": journal_entry.name,
+			"payment_request": ["is", "set"],
+		},
+		fields=["payment_request", "amount", "reference_doctype", "reference_name"],
+		order_by="idx",
+	):
+		key = (row.reference_doctype, row.reference_name)
+		allocated_amount = min(flt(row.amount), paid_amounts[key])
+		paid_amounts[key] -= allocated_amount
+		if allocated_amount > 0:
+			allocations.append(
+				frappe._dict(payment_request=row.payment_request, allocated_amount=allocated_amount)
+			)
+
+	return allocations

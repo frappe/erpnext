@@ -143,6 +143,9 @@ def get_stock_ledger_entries_for_batch_no(filters):
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
 
+	if filters.to_datetime:
+		query = query.where(sle.posting_datetime <= get_datetime(filters.to_datetime))
+
 	return query.run(as_dict=True) or []
 
 
@@ -191,6 +194,9 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 			else:
 				query = query.where(sle[field] == filters.get(field))
 
+	if filters.to_datetime:
+		query = query.where(sle.posting_datetime <= get_datetime(filters.to_datetime))
+
 	return query.run(as_dict=True) or []
 
 
@@ -235,7 +241,7 @@ def set_pooled_batch_values(filters, iwb_map):
 		return
 
 	warehouses = {warehouse for item in pooled_items for warehouse in iwb_map[item]}
-	cutoff = get_datetime(f"{filters.get('to_date')} 23:59:59")
+	cutoff = get_datetime(filters.get("to_datetime") or f"{filters.get('to_date')} 23:59:59")
 	rates = get_last_valuation_rates(pooled_items, warehouses, cutoff)
 
 	for item in pooled_items:

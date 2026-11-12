@@ -213,21 +213,18 @@ class Project(Document):
 	def get_stock_entry_additional_costs(self) -> float:
 		stock_entry = qb.DocType("Stock Entry")
 		stock_entry_item = qb.DocType("Stock Entry Detail")
-		amount = (
+		query = (
 			qb.from_(stock_entry_item)
 			.join(stock_entry)
 			.on(stock_entry.name == stock_entry_item.parent)
 			.select(Sum(stock_entry_item.additional_cost))
-			.where(
-				(
-					(stock_entry_item.project == self.name)
-					| ((IfNull(stock_entry_item.project, "") == "") & (stock_entry.project == self.name))
-				)
-				& (stock_entry.docstatus == 1)
-				& (stock_entry.purpose != "Material Receipt")
-			)
+			.where((stock_entry.docstatus == 1) & (stock_entry.purpose != "Material Receipt"))
+		)
+		on_row = query.where(stock_entry_item.project == self.name).run()
+		on_parent = query.where(
+			(IfNull(stock_entry_item.project, "") == "") & (stock_entry.project == self.name)
 		).run()
-		return flt(amount[0][0])
+		return flt(on_row[0][0]) + flt(on_parent[0][0])
 
 	def check_depends_on_value(self, template_task, project_task, project_tasks):
 		if template_task.get("depends_on") and not project_task.get("depends_on"):

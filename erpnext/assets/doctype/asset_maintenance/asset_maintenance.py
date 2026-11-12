@@ -35,7 +35,14 @@ class AssetMaintenance(Document):
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
-			if getdate(task.next_due_date) < getdate(nowdate()):
+			if not task.next_due_date and task.periodicity:
+				task.next_due_date = (
+					calculate_next_due_date(
+						task.periodicity, task.start_date, task.end_date, task.last_completion_date
+					)
+					or None
+				)
+			if task.maintenance_status != "Cancelled" and getdate(task.next_due_date) < getdate(nowdate()):
 				task.maintenance_status = "Overdue"
 			if not task.assign_to and self.docstatus == 0:
 				throw(_("Row #{}: Please asign task to a member.").format(task.idx))
@@ -53,6 +60,8 @@ class AssetMaintenance(Document):
 	def sync_maintenance_tasks(self):
 		tasks_names = []
 		for task in self.get("asset_maintenance_tasks"):
+			if task.maintenance_status == "Cancelled":
+				continue
 			tasks_names.append(task.name)
 			update_maintenance_log(
 				asset_maintenance=self.name, item_code=self.item_code, item_name=self.item_name, task=task
@@ -60,7 +69,12 @@ class AssetMaintenance(Document):
 		asset_maintenance_logs = frappe.get_all(
 			"Asset Maintenance Log",
 			fields=["name"],
-			filters={"asset_maintenance": self.name, "task": ("not in", tasks_names)},
+			filters={
+				"asset_maintenance": self.name,
+				"task": ("not in", tasks_names),
+				"docstatus": 0,
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+			},
 		)
 		if asset_maintenance_logs:
 			for asset_maintenance_log in asset_maintenance_logs:
@@ -114,9 +128,9 @@ def calculate_next_due_date(
 	if periodicity == "3 Yearly":
 		next_due_date = add_years(start_date, 3)
 	if end_date and (
-		(start_date and start_date >= end_date)
-		or (last_completion_date and last_completion_date >= end_date)
-		or next_due_date
+		(start_date and getdate(start_date) >= getdate(end_date))
+		or (last_completion_date and getdate(last_completion_date) >= getdate(end_date))
+		or (next_due_date and getdate(next_due_date) > getdate(end_date))
 	):
 		next_due_date = ""
 	return next_due_date
@@ -150,7 +164,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 				"due_date": task.next_due_date,
 			}
 		)
-		asset_maintenance_log.insert()
+		asset_maintenance_log.insert(ignore_permissions=True)
 	else:
 		maintenance_log = frappe.get_doc("Asset Maintenance Log", asset_maintenance_log)
 		maintenance_log.assign_to_name = task.assign_to_name
@@ -159,15 +173,15 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 		maintenance_log.periodicity = str(task.periodicity)
 		maintenance_log.maintenance_type = task.maintenance_type
 		maintenance_log.due_date = task.next_due_date
-		maintenance_log.save()
+		maintenance_log.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_team_members(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.get_values(
-		"Maintenance Team Member", {"parent": filters.get("maintenance_team")}, "team_member"
-	)
+	team = filters.get("maintenance_team")
+	frappe.has_permission("Asset Maintenance Team", "select", team, throw=True)
+	return frappe.db.get_values("Maintenance Team Member", {"parent": team}, "team_member")
 
 
 @frappe.whitelist()

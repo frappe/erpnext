@@ -7,7 +7,7 @@ erpnext.landed_cost_taxes_and_charges.setup_triggers("Stock Entry");
 
 frappe.ui.form.on("Stock Entry", {
 	setup: function (frm) {
-		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle", "Quality Inspection"];
 
 		frm.set_indicator_formatter("item_code", function (doc) {
 			if (!doc.s_warehouse) {
@@ -130,11 +130,9 @@ frappe.ui.form.on("Stock Entry", {
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 
-		frappe.db.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector").then((value) => {
-			if (value) {
-				frappe.flags.hide_serial_batch_dialog = true;
-			}
-		});
+		if (frappe.boot.sysdefaults.disable_serial_no_and_batch_selector) {
+			frappe.flags.hide_serial_batch_dialog = true;
+		}
 		attach_bom_items(frm.doc.bom_no);
 
 		if (!check_should_not_attach_bom_items(frm.doc.bom_no)) {
@@ -1129,23 +1127,17 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	set_source_warehouse_query() {
-		frappe.db.get_value(
-			"Stock Settings",
-			{ name: "Stock Settings" },
-			"sample_retention_warehouse",
-			(r) => {
-				const source_warehouse_query = () => {
-					const query = erpnext.queries.warehouse(this.frm.doc);
-					if (r?.sample_retention_warehouse) {
-						query.filters.push(["Warehouse", "name", "!=", r.sample_retention_warehouse]);
-					}
-					return query;
-				};
-
-				this.frm.set_query("from_warehouse", source_warehouse_query);
-				this.frm.set_query("s_warehouse", "items", source_warehouse_query);
+		const source_warehouse_query = () => {
+			const query = erpnext.queries.warehouse(this.frm.doc);
+			const sample_retention_warehouse = frappe.boot.sysdefaults.sample_retention_warehouse;
+			if (sample_retention_warehouse) {
+				query.filters.push(["Warehouse", "name", "!=", sample_retention_warehouse]);
 			}
-		);
+			return query;
+		};
+
+		this.frm.set_query("from_warehouse", source_warehouse_query);
+		this.frm.set_query("s_warehouse", "items", source_warehouse_query);
 	}
 
 	setup() {

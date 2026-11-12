@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -64,47 +65,78 @@ def get_columns(filters):
 
 
 def get_data(filters):
-	wo = frappe.qb.DocType("Work Order")
-	query = (
-		frappe.qb.from_(wo)
-		.select(wo.name.as_("work_order"), wo.qty, wo.produced_qty, wo.production_item, wo.bom_no)
-		.where((wo.produced_qty > wo.qty) & (wo.docstatus == 1))
-	)
-
+	work_order_filters = {}
 	if filters.get("bom_no") and not filters.get("work_order"):
-		query = query.where(wo.bom_no == filters.get("bom_no"))
+		work_order_filters["bom_no"] = filters.get("bom_no")
 
 	if filters.get("work_order"):
-		query = query.where(wo.name == filters.get("work_order"))
+		work_order_filters["name"] = filters.get("work_order")
+
+	work_orders = get_produced_work_orders(
+		["name as work_order", "qty", "produced_qty", "production_item", "bom_no"], work_order_filters
+	)
+	materials = get_materials_by_work_order([d.work_order for d in work_orders])
+	planned_loss = get_planned_loss_percentage({d.bom_no for d in work_orders})
 
 	results = []
-	for d in query.run(as_dict=True):
+	for d in work_orders:
 		results.append(d)
-
-		for data in frappe.get_all(
-			"Work Order Item",
-			fields=["item_code as raw_material_code", "required_qty", "consumed_qty"],
-			filters={"parent": d.work_order, "parenttype": "Work Order"},
-		):
+		expected_output = flt(d.qty) * (1 - flt(planned_loss.get(d.bom_no)) / 100)
+		for data in materials.get(d.work_order, []):
+			data.required_qty = flt(data.required_qty) * flt(d.produced_qty) / (expected_output or flt(d.qty))
 			results.append(data)
 
 	return results
 
 
+def get_planned_loss_percentage(boms):
+	return frappe._dict(
+		frappe.get_all(
+			"BOM",
+			filters={"name": ("in", list(boms))},
+			fields=["name", "process_loss_percentage"],
+			as_list=True,
+		)
+	)
+
+
+def get_produced_work_orders(fields, filters, **kwargs):
+	return frappe.get_list(
+		"Work Order",
+		fields=fields,
+		filters={"docstatus": 1, "produced_qty": [">", 0], **filters},
+		**kwargs,
+	)
+
+
+def get_materials_by_work_order(work_orders):
+	if not work_orders:
+		return {}
+
+	materials = {}
+	for row in frappe.get_all(
+		"Work Order Item",
+		fields=["parent", "item_code as raw_material_code", "required_qty", "consumed_qty"],
+		filters={"parent": ["in", work_orders], "parenttype": "Work Order"},
+		order_by="idx",
+	):
+		materials.setdefault(row.pop("parent"), []).append(row)
+
+	return materials
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
-	wo = frappe.qb.DocType("Work Order")
-	query = (
-		frappe.qb.from_(wo)
-		.select(wo.name)
-		.where((wo.name.like(f"{txt}%")) & (wo.produced_qty > wo.qty) & (wo.docstatus == 1))
-		.orderby(wo.name)
-		.limit(page_len)
-		.offset(start)
-	)
-
+	work_order_filters = {"name": ["like", f"{txt}%"]}
 	if filters.get("bom_no"):
-		query = query.where(wo.bom_no == filters.get("bom_no"))
+		work_order_filters["bom_no"] = filters.get("bom_no")
 
-	return query.run(as_list=True)
+	return get_produced_work_orders(
+		["name"],
+		work_order_filters,
+		order_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+	)

@@ -73,7 +73,7 @@ class TestTaxes(unittest.TestCase):
 			{
 				"doctype": "Supplier",
 				"supplier_name": uuid4(),
-				"supplier_group": "All Supplier Groups",
+				"supplier_group": "Services",
 			}
 		).insert()
 

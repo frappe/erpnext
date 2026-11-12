@@ -536,7 +536,7 @@ frappe.ui.form.on("Material Request Plan Item", {
 					for_warehouse: row.warehouse,
 				},
 				callback: function (r) {
-					if (r.message) {
+					if (r.message && r.message.length) {
 						let { projected_qty, actual_qty } = r.message[0];
 
 						frappe.model.set_value(cdt, cdn, {

@@ -30,6 +30,7 @@ def execute():
 				)
 
 		if time_logs:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 			frappe.db.sql(
 				""" INSERT INTO
                 `tabJob Card Time Log`

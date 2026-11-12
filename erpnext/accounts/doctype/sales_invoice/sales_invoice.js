@@ -44,6 +44,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			"Serial and Batch Bundle",
 			"Bank Transaction",
 			"Packing Slip",
+			"Quality Inspection",
 		];
 
 		if (!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
@@ -156,9 +157,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					);
 				}
 
-				const payment_is_overdue = doc.payment_schedule
-					.map((row) => Date.parse(row.due_date) < Date.now())
-					.reduce((prev, current) => prev || current, false);
+				const payment_is_overdue =
+					doc.payment_schedule.some((row) => Date.parse(row.due_date) < Date.now()) ||
+					(doc.is_opening === "Yes" && Date.parse(doc.due_date) < Date.now());
 
 				if (payment_is_overdue && frappe.model.can_create("Dunning")) {
 					this.frm.add_custom_button(__("Dunning"), this.make_dunning.bind(this), __("Create"));

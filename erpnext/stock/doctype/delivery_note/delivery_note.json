@@ -904,6 +904,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
+   "no_copy": 1,
    "options": "Driver",
    "print_hide": 1
   },
@@ -911,6 +912,7 @@
    "fieldname": "lr_no",
    "fieldtype": "Data",
    "label": "Transport Receipt No",
+   "no_copy": 1,
    "oldfieldname": "lr_no",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -921,6 +923,7 @@
    "fieldname": "vehicle_no",
    "fieldtype": "Data",
    "label": "Vehicle No",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -942,6 +945,7 @@
    "fieldname": "driver_name",
    "fieldtype": "Data",
    "label": "Driver Name",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -949,6 +953,7 @@
    "fieldname": "lr_date",
    "fieldtype": "Date",
    "label": "Transport Receipt Date",
+   "no_copy": 1,
    "oldfieldname": "lr_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -1183,8 +1188,6 @@
    "width": "50%"
   },
   {
-   "fetch_from": "sales_partner.commission_rate",
-   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "label": "Commission Rate (%)",
@@ -1406,7 +1409,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-13 12:12:32.911258",
+ "modified": "2026-11-04 15:45:03.338943",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -14,6 +14,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.analytics import RowNumber
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.stock_ageing.stock_ageing import (
@@ -41,6 +42,7 @@ SLEntry = dict[str, Any]
 
 
 def execute(filters: StockBalanceFilter | None = None):
+	validate_date_range(filters)
 	return StockBalanceReport(filters).run()
 
 
@@ -570,11 +572,13 @@ class StockBalanceReport:
 		if self.filters.get("warehouse"):
 			query = apply_warehouse_filter(query, sle, self.filters)
 
-		elif warehouse_type := self.filters.get("warehouse_type"):
-			query = (
-				query.join(warehouse_table)
-				.on(warehouse_table.name == sle.warehouse)
-				.where(warehouse_table.warehouse_type == warehouse_type)
+		if warehouse_type := self.filters.get("warehouse_type"):
+			query = query.where(
+				sle.warehouse.isin(
+					frappe.qb.from_(warehouse_table)
+					.select(warehouse_table.name)
+					.where(warehouse_table.warehouse_type == warehouse_type)
+				)
 			)
 
 		return query

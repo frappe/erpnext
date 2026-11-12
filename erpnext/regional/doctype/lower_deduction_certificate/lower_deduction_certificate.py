@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form, getdate
+from frappe.utils import flt, get_link_to_form, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -32,8 +32,17 @@ class LowerDeductionCertificate(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.set_pan_from_supplier()
 		self.validate_dates()
+		self.validate_rate_and_limit()
 		self.validate_supplier_against_tax_category()
+
+	def set_pan_from_supplier(self):
+		"""Certificates are matched to invoices by the supplier's PAN, so keep the PAN in line with it."""
+		if not (self.supplier and frappe.get_meta("Supplier").has_field("pan")):
+			return
+		if pan := frappe.db.get_value("Supplier", self.supplier, "pan"):
+			self.pan_no = pan
 
 	def validate_dates(self):
 		if getdate(self.valid_upto) < getdate(self.valid_from):
@@ -46,6 +55,12 @@ class LowerDeductionCertificate(Document):
 
 		if not (fiscal_year.year_start_date <= getdate(self.valid_upto) <= fiscal_year.year_end_date):
 			frappe.throw(_("Valid Upto date not in Fiscal Year {0}").format(frappe.bold(self.fiscal_year)))
+
+	def validate_rate_and_limit(self):
+		if not 0 <= flt(self.rate) < 100:
+			frappe.throw(_("Rate must be at least 0 and less than 100"))
+		if flt(self.certificate_limit) <= 0:
+			frappe.throw(_("Certificate Limit must be greater than 0"))
 
 	def validate_supplier_against_tax_category(self):
 		duplicate_certificate = frappe.db.get_value(

@@ -51,11 +51,11 @@ class TestTaxesAndTotals(AccountsTestMixin, FrappeTestCase):
 
 		calculate_taxes_and_totals(so)
 
-		# like in test_distributed_discount_amount, but reduced by the included tax
-		self.assertAlmostEqual(so.items[0].distributed_discount_amount, 33.33 / 1.1, places=2)
-		self.assertAlmostEqual(so.items[1].distributed_discount_amount, 66.67 / 1.1, places=2)
-		self.assertAlmostEqual(so.items[0].net_amount, 466.67 / 1.1, places=2)
-		self.assertAlmostEqual(so.items[1].net_amount, 933.33 / 1.1, places=2)
+		# Each discount is the difference between the rounded net amounts before and after discount.
+		self.assertEqual(so.items[0].distributed_discount_amount, 30.31)
+		self.assertEqual(so.items[1].distributed_discount_amount, 60.60)
+		self.assertEqual(so.items[0].net_amount, 424.24)
+		self.assertEqual(so.items[1].net_amount, 848.49)
 		self.assertEqual(so.total, 1500)
 		self.assertAlmostEqual(so.net_total, 1272.73, places=2)
 		self.assertEqual(so.grand_total, 1400)

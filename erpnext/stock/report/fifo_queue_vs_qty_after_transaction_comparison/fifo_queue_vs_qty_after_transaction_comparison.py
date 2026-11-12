@@ -8,6 +8,12 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
+	maintains_fifo_queue,
+)
+from erpnext.stock.utils import get_valuation_method
+
 SLE_FIELDS = (
 	"name",
 	"item_code",
@@ -21,12 +27,15 @@ SLE_FIELDS = (
 	"qty_after_transaction",
 	"stock_queue",
 	"batch_no",
+	"serial_no",
+	"serial_and_batch_bundle",
 	"stock_value",
 	"valuation_rate",
 )
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns = get_columns()
 	data = get_data(filters)
 	return columns, data
@@ -57,9 +66,11 @@ def get_stock_ledger_entries(filters):
 			frappe.get_all("Item", filters=item_group_filter, pluck="name", order_by=None),
 		)
 
-	if filters.from_date:
+	if filters.from_date and filters.to_date:
+		sle_filters["posting_date"] = ("between", [filters.from_date, filters.to_date])
+	elif filters.from_date:
 		sle_filters["posting_date"] = (">=", filters.from_date)
-	if filters.to_date:
+	elif filters.to_date:
 		sle_filters["posting_date"] = ("<=", filters.to_date)
 
 	return frappe.get_all(
@@ -76,25 +87,22 @@ def find_first_bad_queue(sles):
 		item_warehouse_sles.setdefault((sle.item_code, sle.warehouse), []).append(sle)
 
 	data = []
+	valuation_methods = {}
 
-	for _item_wh, sles in item_warehouse_sles.items():
+	for (item_code, _warehouse), sles in item_warehouse_sles.items():
 		for idx, sle in enumerate(sles):
-			queue = json.loads(sle.stock_queue or "[]")
-
-			sle.fifo_queue_qty = 0.0
-			sle.fifo_stock_value = 0.0
-			for qty, rate in queue:
-				sle.fifo_queue_qty += flt(qty)
-				sle.fifo_stock_value += flt(qty) * flt(rate)
-
-			sle.fifo_qty_diff = sle.qty_after_transaction - sle.fifo_queue_qty
-			sle.fifo_value_diff = sle.stock_value - sle.fifo_stock_value
+			if item_code not in valuation_methods:
+				valuation_methods[item_code] = get_valuation_method(item_code)
 
 			if sle.batch_no:
 				sle.use_batchwise_valuation = frappe.db.get_value(
 					"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
 				)
 
+			if not maintains_fifo_queue(sle, valuation_methods[item_code]):
+				continue
+
+			set_queue_totals(sle)
 			if abs(sle.fifo_qty_diff) > 0.001 or abs(sle.fifo_value_diff) > 0.1:
 				if idx:
 					data.append(sles[idx - 1])
@@ -103,6 +111,17 @@ def find_first_bad_queue(sles):
 				break
 
 	return data
+
+
+def set_queue_totals(sle):
+	sle.fifo_queue_qty = 0.0
+	sle.fifo_stock_value = 0.0
+	for qty, rate in json.loads(sle.stock_queue or "[]"):
+		sle.fifo_queue_qty += flt(qty)
+		sle.fifo_stock_value += flt(qty) * flt(rate)
+
+	sle.fifo_qty_diff = sle.qty_after_transaction - sle.fifo_queue_qty
+	sle.fifo_value_diff = sle.stock_value - sle.fifo_stock_value
 
 
 def get_columns():

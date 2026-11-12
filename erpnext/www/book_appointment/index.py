@@ -5,6 +5,7 @@ import frappe
 import pytz
 from frappe import _
 from frappe.rate_limiter import rate_limit
+from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 
 SLOT_REQUESTS_PER_MINUTE = 60
@@ -30,6 +31,7 @@ def handle_appointment_booking_disabled():
 		raise frappe.Redirect
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
 	handle_appointment_booking_disabled()
@@ -41,6 +43,7 @@ def get_appointment_settings():
 	return settings
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- public booking page settings
 @frappe.whitelist(allow_guest=True)
 def get_timezones():
 	handle_appointment_booking_disabled()
@@ -60,7 +63,7 @@ def get_appointment_slots(date: str, timezone: str):
 	query_end_time = datetime.datetime.strptime(date + " 23:59:59", format_string)
 	query_start_time = convert_to_system_timezone(timezone, query_start_time)
 	query_end_time = convert_to_system_timezone(timezone, query_end_time)
-	now = convert_to_guest_timezone(timezone, datetime.datetime.now())
+	now = convert_to_guest_timezone(timezone, frappe.utils.now_datetime())
 
 	# Database queries
 	settings = frappe.get_single_value(
@@ -78,7 +81,8 @@ def get_appointment_slots(date: str, timezone: str):
 	for timeslot in timeslots:
 		converted_timeslot = convert_to_guest_timezone(timezone, timeslot)
 		# Check if holiday
-		if _is_holiday(converted_timeslot.date(), holiday_list):
+		# holidays are business dates: check the slot's system-time date
+		if _is_holiday(timeslot.date(), holiday_list):
 			converted_timeslots.append(dict(time=converted_timeslot, availability=False))
 			continue
 		# Check availability
@@ -108,6 +112,7 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 	return timeslots
 
 
+# nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method -- reviewed: public booking page; rate limited, slot and capacity validated, unverified until confirmed by email
 @frappe.whitelist(allow_guest=True, methods=["POST"])
 @rate_limit(limit=5, seconds=300)
 def create_appointment(date, time, tz, contact):
@@ -168,6 +173,10 @@ def get_booked_slot_times_for(timeslots, appointment_duration):
 
 
 def is_slot_available(timeslot, booked_times, settings):
+	# no agents means unlimited capacity, as in Appointment.validate_available_time_slot
+	if not cint(settings.number_of_agents):
+		return True
+
 	# mirror the server capacity check: count non-Closed appointments whose
 	# duration window overlaps this slot, without a per-slot query
 	duration = datetime.timedelta(minutes=settings.appointment_duration)
