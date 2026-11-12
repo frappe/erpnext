@@ -161,6 +161,30 @@ class TestPackingSlipReferences(ERPNextTestSuite):
 			make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=qty, basic_rate=100)
 		return create_delivery_note(item_code=item_code, qty=qty, do_not_submit=True)
 
+	def test_item_search_needs_delivery_note_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.packing_slip.packing_slip import item_details
+
+		delivery_note = self.make_draft_delivery_note()
+		search = {
+			"doctype": "Item",
+			"txt": "",
+			"searchfield": "name",
+			"start": 0,
+			"page_len": 20,
+			"filters": {"delivery_note": delivery_note.name},
+		}
+		item_manager = create_user("packing-slip-item-manager@example.com", "Item Manager").name
+		stock_user = create_user("packing-slip-stock-user@example.com", "Stock User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(item_manager)
+		self.assertRaises(frappe.PermissionError, item_details, **search)
+
+		frappe.set_user(stock_user)
+		self.assertEqual([row[0] for row in item_details(**search)], [delivery_note.items[0].item_code])
+
 	def test_row_must_belong_to_slip_delivery_note_and_item(self):
 		dn_a = self.make_draft_delivery_note()
 		dn_b = self.make_draft_delivery_note()

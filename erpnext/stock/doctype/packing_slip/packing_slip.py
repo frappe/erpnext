@@ -252,6 +252,7 @@ def item_details(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	item = frappe.qb.DocType("Item")
 	dn_item = frappe.qb.DocType("Delivery Note Item")
 	delivery_note = (filters or {}).get("delivery_note")
+	frappe.has_permission("Delivery Note", "read", delivery_note, throw=True)
 
 	query = frappe.qb.get_query(
 		"Item",
