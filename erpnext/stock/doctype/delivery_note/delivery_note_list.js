@@ -31,25 +31,30 @@ frappe.listview_settings["Delivery Note"] = {
 			const docnames = doclist.get_checked_items(true);
 
 			if (docnames.length > 0) {
-				await frappe.model.with_doctype("Delivery Trip");
-				const target_doc = frappe.model.get_new_doc("Delivery Trip");
 				const { message } = await frappe.db.get_value("Delivery Note", docnames[0], "company");
-				target_doc.company = message.company;
+				frappe.new_doc("Delivery Trip", { company: message.company }).then(() => {
+					// Empty out the child table before inserting new ones
+					cur_frm.set_value("delivery_stops", []);
 
-				frappe.call({
-					type: "POST",
-					method: "frappe.model.mapper.map_docs",
-					args: {
-						method: "erpnext.stock.doctype.delivery_note.mapper.make_delivery_trip",
-						source_names: docnames,
-						target_doc: target_doc,
-					},
-					callback: function (r) {
-						if (!r.exc) {
-							frappe.model.sync(r.message);
-							frappe.set_route("Form", r.message.doctype, r.message.name);
-						}
-					},
+					// We don't want to use `map_current_doc` since it brings up
+					// the dialog to select more items. We just want the mapper
+					// function to be called.
+					frappe.call({
+						type: "POST",
+						method: "frappe.model.mapper.map_docs",
+						args: {
+							method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
+							source_names: docnames,
+							target_doc: cur_frm.doc,
+						},
+						callback: function (r) {
+							if (!r.exc) {
+								frappe.model.sync(r.message);
+								cur_frm.dirty();
+								cur_frm.refresh();
+							}
+						},
+					});
 				});
 			}
 		};
