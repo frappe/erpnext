@@ -867,10 +867,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		target_doc.payment_amount = -source_doc.payment_amount
 
 	def item_condition(doc):
-		# Subcontracting Receipt rebuilds scrap rows from the finished good rows on save
-		if doc.get("is_scrap_item"):
-			return False
-
 		if return_against_rejected_qty:
 			return doc.rejected_qty
 
@@ -888,7 +884,13 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			},
 			doctype + " Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
+				# is_scrap_item is no_copy, but a Subcontracting Receipt return needs it
+				"field_map": {
+					"serial_no": "serial_no",
+					"batch_no": "batch_no",
+					"bom": "bom",
+					"is_scrap_item": "is_scrap_item",
+				},
 				"postprocess": update_item,
 				"condition": item_condition,
 			},
