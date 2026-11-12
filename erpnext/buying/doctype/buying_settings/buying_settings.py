@@ -6,7 +6,7 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 class BuyingSettings(Document):
@@ -51,7 +51,7 @@ class BuyingSettings(Document):
 
 	def validate(self):
 		for key in ["supplier_group", "supp_master_name", "maintain_same_rate", "buying_price_list"]:
-			frappe.db.set_default(key, self.get(key, ""))
+			frappe.db.set_default(key, cstr(self.get(key)))
 
 		self.update_supplier_naming_settings()
 
