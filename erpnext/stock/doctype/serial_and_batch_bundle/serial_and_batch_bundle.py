@@ -3406,16 +3406,6 @@ def get_auto_batch_nos(kwargs):
 		# a delivery may use the batches its own Sales Order reserved
 		kwargs.against_sales_order = next(iter(get_reserved_voucher_details(kwargs)), None)
 
-	if kwargs.against_sales_order and (only_consider_batches := get_batches_to_be_considered(kwargs)):
-		batches, warehouses = [], []
-		for item in only_consider_batches:
-			batches.append(item.batch_no)
-			warehouses.append(item.warehouse)
-
-		if batches:
-			kwargs.batch_no = batches
-			kwargs.warehouse = warehouses
-
 	if not kwargs.get("posting_datetime") and kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
@@ -3429,9 +3419,6 @@ def get_auto_batch_nos(kwargs):
 	sre_reserved_batches = frappe._dict()
 	if not kwargs.ignore_reserved_stock:
 		sre_reserved_batches = get_reserved_batches_for_sre(kwargs)
-
-	if kwargs.against_sales_order and only_consider_batches:
-		kwargs.batch_no = kwargs.warehouse = None
 
 	picked_batches = frappe._dict()
 	if kwargs.get("is_pick_list"):
@@ -3453,6 +3440,11 @@ def get_auto_batch_nos(kwargs):
 
 	if kwargs.based_on == "Expiry":
 		available_batches = sorted(available_batches, key=lambda x: x.expiry_date or getdate("9999-12-31"))
+
+	if kwargs.against_sales_order:
+		reserved_batches = get_batches_to_be_considered(kwargs.against_sales_order)
+		# the order's own reserved batches first, then free stock
+		available_batches.sort(key=lambda d: d.batch_no not in reserved_batches)
 
 	if not kwargs.get("do_not_check_future_batches") and available_batches and kwargs.get("posting_datetime"):
 		filter_zero_near_batches(available_batches, kwargs)
@@ -3563,7 +3555,7 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def get_batches_to_be_considered(kwargs):
+def get_batches_to_be_considered(sales_order_name):
 	parent = frappe.qb.DocType("Stock Reservation Entry")
 	child = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -3571,19 +3563,14 @@ def get_batches_to_be_considered(kwargs):
 		frappe.qb.from_(parent)
 		.join(child)
 		.on(parent.name == child.parent)
-		.select(child.batch_no, child.warehouse)
-		.distinct()
+		.select(child.batch_no)
 		.where(
 			(parent.docstatus == 1)
-			& (parent.voucher_no == kwargs.against_sales_order)
-			& (parent.item_code == kwargs.item_code)
+			& (parent.voucher_no == sales_order_name)
 			& (child.delivered_qty < child.qty)
 		)
 	)
-	if kwargs.warehouse:
-		query = query.where(parent.warehouse == kwargs.warehouse)
-
-	return query.run(as_dict=True)
+	return set(query.run(pluck=True))
 
 
 def filter_zero_near_batches(available_batches, kwargs):
