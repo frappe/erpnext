@@ -7,9 +7,13 @@
 import frappe
 from frappe.model.document import Document
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from frappe.utils import cstr, flt
 >>>>>>> d6b758f (fix(selling): stop Selling and Buying Settings save from clearing the whole site cache)
+=======
+from frappe.utils import flt
+>>>>>>> 2abe9c4 (fix(selling): keep boolean Selling and Buying Settings defaults as 1 or 0)
 
 
 class BuyingSettings(Document):
@@ -55,7 +59,8 @@ class BuyingSettings(Document):
 
 	def validate(self):
 		for key in ["supplier_group", "supp_master_name", "maintain_same_rate", "buying_price_list"]:
-			frappe.db.set_default(key, cstr(self.get(key)))
+			value = self.get(key)
+			frappe.db.set_default(key, "" if value is None else value)
 
 		from erpnext.utilities.naming import set_by_naming_series
 
