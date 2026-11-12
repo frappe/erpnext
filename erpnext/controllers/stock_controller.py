@@ -1812,7 +1812,11 @@ def get_accounting_ledger_preview(doc, filters):
 
 	doc.docstatus = 1
 
+<<<<<<< HEAD
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note"):
+=======
+	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
+>>>>>>> deb7145 (fix(stock): use the serial / batch nos of the row in the Accounting Ledger Preview)
 		make_serial_and_batch_bundles_for_preview(doc)
 		doc.update_stock_ledger()
 
