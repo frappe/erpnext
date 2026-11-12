@@ -3,24 +3,14 @@
 
 import json
 import re
-<<<<<<< HEAD
 import unittest
+from itertools import product
 from unittest.mock import patch
 
 import frappe
 from frappe.handler import execute_cmd
-from frappe.utils import add_days, cint, nowdate, set_request
-=======
-import sys
-from itertools import product
-from unittest.mock import MagicMock, patch
-
-import frappe
-from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.query_builder.functions import Sum
-from frappe.tests import change_settings
-from frappe.utils import add_days, cint, nowdate
->>>>>>> c28c27c (test(accounts): cover advance ledger reversal on invoice unlink)
+from frappe.utils import add_days, cint, nowdate, set_request
 
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
@@ -29,19 +19,11 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-<<<<<<< HEAD
-=======
-from erpnext.accounts.doctype.subscription.test_subscription import (
-	create_plan,
-	create_subscription,
-	make_plans,
-)
-from erpnext.buying.doctype.purchase_order.mapper import (
+from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_purchase_invoice_from_order,
 )
->>>>>>> c28c27c (test(accounts): cover advance ledger reversal on invoice unlink)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.tests.utils import ERPNextTestSuite
@@ -1110,7 +1092,7 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		self.assertEqual(pr.grand_total, pi.outstanding_amount)
 
-	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_unlink_advance_request_reverses_separate_account(self):
 		company = frappe.get_doc("Company", "_Test Company")
 		company.book_advance_payments_in_separate_party_account = 1
