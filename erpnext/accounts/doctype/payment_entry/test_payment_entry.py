@@ -1571,6 +1571,76 @@ class TestPaymentEntry(ERPNextTestSuite):
 
 		self.validate_gl_entries(pe.name, expected_gle)
 
+	def test_reallocation_with_deductions(self):
+		for make_invoice in (create_sales_invoice, make_purchase_invoice):
+			for currency, total, party_amount, deduction, exchange_difference in (
+				("INR", 1000, 950, 50, 0),
+				("INR", 1000, 1050, -50, 0),
+				("USD", 100, 99, 83, 0),
+				("USD", 100, 101, -83, 0),
+				("USD", 100, 100, 0, 50),
+				("USD", 100, 99, 83, 10),
+				("USD", 100, 49, 83, 10),
+			):
+				with self.subTest(
+					invoice=make_invoice.__name__,
+					currency=currency,
+					party_amount=party_amount,
+					deduction=deduction,
+					exchange_difference=exchange_difference,
+				):
+					invoice = make_invoice(qty=1, rate=total, currency=currency, do_not_save=True)
+					if currency == "USD":
+						invoice.conversion_rate = 83
+						if invoice.doctype == "Sales Invoice":
+							invoice.customer = "_Test Customer USD"
+							invoice.debit_to = "_Test Receivable USD - _TC"
+						else:
+							invoice.supplier = "_Test Supplier USD"
+							invoice.credit_to = "_Test Payable USD - _TC"
+					invoice.insert().submit()
+
+					payment = get_payment_entry(
+						invoice.doctype, invoice.name, bank_account="_Test Cash - _TC"
+					)
+					if payment.payment_type == "Receive":
+						payment.paid_amount = party_amount
+						payment.source_exchange_rate = invoice.conversion_rate
+						payment.received_amount = party_amount * invoice.conversion_rate - exchange_difference
+					else:
+						payment.received_amount = party_amount
+						payment.target_exchange_rate = invoice.conversion_rate
+						payment.paid_amount = party_amount * invoice.conversion_rate + exchange_difference
+					if deduction:
+						payment.append(
+							"deductions",
+							{
+								"account": "_Test Write Off - _TC",
+								"cost_center": "_Test Cost Center - _TC",
+								"amount": deduction * (1 if payment.payment_type == "Receive" else -1),
+							},
+						)
+					payment.set_amounts()
+					expected_allocation = 50 if party_amount == 49 else total
+					for paid_amount_change in (False, True):
+						payment.references[0].allocated_amount = 0
+						payment.allocate_amount_to_references(party_amount, paid_amount_change, True)
+						self.assertEqual(payment.references[0].allocated_amount, expected_allocation)
+						payment.save()
+						self.assertEqual(payment.unallocated_amount, 0)
+						self.assertEqual(payment.difference_amount, 0)
+					payment.submit()
+					self.assertEqual(invoice.reload().outstanding_amount, total - expected_allocation)
+					entries = self.get_gle(payment.name)
+					self.assertEqual(sum(row.debit - row.credit for row in entries), 0)
+					self.assertEqual(
+						sum(row.debit + row.credit for row in entries if row.against_voucher == invoice.name),
+						expected_allocation * invoice.conversion_rate,
+					)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, total)
+					invoice.cancel()
+
 	def test_payment_entry_exchange_gain_loss(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
