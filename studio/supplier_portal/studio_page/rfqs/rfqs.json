@@ -69,7 +69,7 @@
            "componentId": "Breadcrumbs-c7665y5dw",
            "componentName": "Breadcrumbs",
            "componentProps": {
-            "items": "{{ [{ label: __('RFQs'), route: '/rfqs' }] }}"
+            "items": "{{ [{ label: __('Requests for Quotation'), route: '/rfqs' }] }}"
            }
           }
          ],
@@ -690,12 +690,12 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-28 12:00:00.000000",
+ "modified": "2026-11-12 16:00:00.000000",
  "modified_by": "Administrator",
  "name": "rfqs",
  "owner": "Administrator",
  "page_name": "page-042db671",
- "page_title": "RFQs",
+ "page_title": "Requests for Quotation",
  "published": 1,
  "resources": [],
  "route": "/rfqs",

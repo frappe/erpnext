@@ -74,7 +74,7 @@ export default function setup(context) {
 
 	// ---------------------------------------------------------------- header
 	const crumbs = computed(() => [
-		{ label: __("RFQs"), route: "/rfqs" },
+		{ label: __("Requests for Quotation"), route: "/rfqs" },
 		...(docId.value ? [{ label: docId.value }] : []),
 	])
 

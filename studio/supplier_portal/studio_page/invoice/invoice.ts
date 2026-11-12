@@ -112,7 +112,7 @@ export default function setup(context) {
 		const billing = postalAddress(doc.value.billing_address_display)
 		const shipping = postalAddress(doc.value.shipping_address_display) || billing
 		if (!billing && !shipping) return []
-		if (billing === shipping) return [{ key: "billed", label: __("Billed to"), name: company, address: billing }]
+		if (billing === shipping) return [{ key: "billed", label: __("Billed and delivered to"), name: company, address: billing }]
 		return [
 			{ key: "billed", label: __("Billed to"), name: company, address: billing },
 			{ key: "deliver", label: __("Delivered to"), name: company, address: shipping },

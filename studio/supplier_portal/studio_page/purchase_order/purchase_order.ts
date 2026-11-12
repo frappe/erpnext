@@ -113,7 +113,7 @@ export default function setup(context) {
 		if (!billing && !shipping) return []
 		if (billing === shipping) return [{ key: "both", label: __("Bill and deliver to"), name: company, address: billing }]
 		return [
-			{ key: "bill", label: __("Billing address"), name: company, address: billing },
+			{ key: "bill", label: __("Bill to"), name: company, address: billing },
 			{ key: "deliver", label: __("Deliver to"), name: company, address: shipping },
 		]
 	})
