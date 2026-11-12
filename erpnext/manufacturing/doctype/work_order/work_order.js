@@ -1352,12 +1352,16 @@ erpnext.work_order = {
 	},
 
 	make_se: function (frm, purpose, qty, is_additional_transfer_entry) {
-		if (qty) {
+		const only_leftover_items_pending =
+			purpose === "Material Transfer for Manufacture" &&
+			this.get_max_transferable_qty(frm, purpose) <= 0;
+
+		if (qty || only_leftover_items_pending) {
 			frappe
 				.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: purpose,
-					qty: qty,
+					qty: qty || 0,
 					is_additional_transfer_entry: is_additional_transfer_entry || 0,
 				})
 				.then((stock_entry) => {
