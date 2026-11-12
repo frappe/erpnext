@@ -8,8 +8,11 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns = get_columns(filters)
 	data = get_data(filters)
 	return columns, data

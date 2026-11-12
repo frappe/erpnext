@@ -20,6 +20,7 @@ class JobCardOperation(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		process_loss_qty: DF.Float
 		status: DF.Literal["Complete", "Pause", "Pending", "Work In Progress"]
 		sub_operation: DF.Link | None
 	# end: auto-generated types

@@ -346,6 +346,7 @@ def get_html(doc, filters, entry, col, res, ageing):
 		if letter_head.get("footer"):
 			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti
 			letter_head["footer"] = frappe.render_template(letter_head["footer"], {"doc": doc})
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-ssti -- template is a file path or a Print Format
 	html = frappe.render_template(
 		template_path,
 		{
@@ -545,7 +546,7 @@ def download_statements(document_name):
 		frappe.local.response.type = "download"
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_emails(document_name, from_scheduler=False, posting_date=None):
 	doc = frappe.get_doc("Process Statement Of Accounts", document_name)
 	doc.check_permission()
@@ -605,7 +606,7 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 		return False
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_auto_email():
 	frappe.has_permission("Process Statement Of Accounts", throw=True)
 	for report, date_field in (("General Ledger", "to_date"), ("Accounts Receivable", "posting_date")):

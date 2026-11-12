@@ -897,7 +897,7 @@ class BOM(WebsiteGenerator):
 		items = []
 		for m in self.get("items"):
 			if m.bom_no:
-				validate_bom_no(m.item_code, m.bom_no)
+				validate_production_bom(m.item_code, m.bom_no)
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 			check_list.append(m)
@@ -1701,7 +1701,7 @@ def get_bom_items_as_dict(
 		query = query.format(  # nosemgrep
 			table="BOM Secondary Item",
 			where_conditions=")",
-			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.valuation_type, bom_item.cost / nullif(bom_item.stock_qty, 0) as manual_rate",
+			select_columns=", item.description, bom_item.cost_allocation_per, bom_item.process_loss_per, bom_item.secondary_item_type, bom_item.name, bom_item.valuation_type, bom_item.base_cost / nullif(bom_item.stock_qty, 0) as manual_rate",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			group_by_cond=group_by_cond,
@@ -1800,12 +1800,7 @@ def get_bom_items(bom, company, qty=1, fetch_exploded=1):
 
 def validate_bom_no(item, bom_no):
 	"""Validate BOM No of sub-contracted items"""
-	bom = frappe.get_doc("BOM", bom_no)
-	if not bom.is_active:
-		frappe.throw(_("BOM {0} must be active").format(bom_no))
-	if bom.docstatus != 1:
-		if not frappe.in_test:
-			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	bom = get_usable_bom(bom_no)
 	if item:
 		rm_item_exists = False
 		for d in bom.items:
@@ -1814,13 +1809,34 @@ def validate_bom_no(item, bom_no):
 		for d in bom.secondary_items:
 			if d.item_code.lower() == item.lower():
 				rm_item_exists = True
-		if (
-			bom.item.lower() == item.lower()
-			or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
-		):
+		if _bom_produces_item(bom, item):
 			rm_item_exists = True
 		if not rm_item_exists:
 			frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def validate_production_bom(item, bom_no):
+	"""Validate that the BOM manufactures the item or its template."""
+	bom = get_usable_bom(bom_no)
+	if not _bom_produces_item(bom, item):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
+
+def get_usable_bom(bom_no):
+	bom = frappe.get_doc("BOM", bom_no)
+	if not bom.is_active:
+		frappe.throw(_("BOM {0} must be active").format(bom_no))
+	if bom.docstatus != 1:
+		if not frappe.in_test:
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	return bom
+
+
+def _bom_produces_item(bom, item):
+	return (
+		bom.item.lower() == item.lower()
+		or bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()
+	)
 
 
 @frappe.whitelist()
@@ -2037,6 +2053,16 @@ def _append_operating_cost(stock_entry, expense_account, amount, **operation_fie
 	)
 
 
+def _add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card=None):
+	"""FG-based costs of the multi-level BOM tree, next to the costs of its operations."""
+	if job_card or not work_order.use_multi_level_bom:
+		return
+
+	unit_cost = get_op_cost_from_sub_assemblies(work_order.bom_no, skip_boms_with_operations=True)
+	if unit_cost:
+		_append_operating_cost(stock_entry, expense_account, unit_cost * flt(stock_entry.fg_completed_qty))
+
+
 @frappe.request_cache
 def get_component_account(parent, company):
 	return frappe.db.get_value(
@@ -2081,10 +2107,13 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None, job_
 			job_card=job_card,
 		)
 
-		if not cost_added and not job_card:
+		if cost_added:
+			_add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card)
+		elif not job_card:
 			if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
 				for operation in work_order.operations:
 					_add_operation_cost(stock_entry, work_order, operation, expense_account)
+				_add_fg_based_operating_cost(stock_entry, work_order, expense_account)
 			else:
 				_append_operating_cost(
 					stock_entry, expense_account, remaining_operating_cost * flt(stock_entry.fg_completed_qty)
@@ -2304,6 +2333,7 @@ def make_variant_bom(
 		add_variant_item(variant_items, doc, source_name)
 		for row in doc.items[mapped_rows:]:
 			row.qty = flt(row.qty) * (flt(source.quantity) or 1)
+			row.stock_qty = flt(row.qty * row.conversion_factor, row.precision("stock_qty"))
 
 	doc = get_mapped_doc(
 		"BOM",
@@ -2324,25 +2354,30 @@ def make_variant_bom(
 	return doc
 
 
-def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0, skip_boms_with_operations=False):
+	"""Per unit operating cost of the BOM tree. Skipped BOMs are costed by Work Order operations."""
 	conversion_rate = flt(frappe.get_cached_value("BOM", bom_no, "conversion_rate")) or 1
-	return flt(op_cost) + _get_unit_operating_cost(bom_no, {}) * conversion_rate
+	unit_cost = _get_unit_operating_cost(bom_no, {}, skip_boms_with_operations)
+	return flt(op_cost) + unit_cost * conversion_rate
 
 
-def _get_unit_operating_cost(bom_no, unit_costs):
+def _get_unit_operating_cost(bom_no, unit_costs, skip_boms_with_operations=False):
 	if bom_no in unit_costs:
 		return unit_costs[bom_no]
 
-	bom = frappe.get_cached_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=True)
+	bom = frappe.get_cached_value(
+		"BOM", bom_no, ["operating_cost", "quantity", "with_operations"], as_dict=True
+	)
 	quantity = flt(bom.quantity) or 1
-	cost = flt(bom.operating_cost) / quantity
+	cost = 0 if skip_boms_with_operations and bom.with_operations else flt(bom.operating_cost) / quantity
 
 	for row in frappe.get_all(
 		"BOM Item",
 		filters={"parent": bom_no, "parenttype": "BOM", "docstatus": 1, "bom_no": ("is", "set")},
 		fields=["bom_no", "stock_qty"],
 	):
-		cost += flt(row.stock_qty) / quantity * _get_unit_operating_cost(row.bom_no, unit_costs)
+		child_cost = _get_unit_operating_cost(row.bom_no, unit_costs, skip_boms_with_operations)
+		cost += flt(row.stock_qty) / quantity * child_cost
 
 	unit_costs[bom_no] = cost
 	return cost

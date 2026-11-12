@@ -128,6 +128,14 @@ class Employee(NestedSet):
 		self.validate_email()
 		self.validate_status()
 		self.validate_reports_to()
+		department_to_restore = self.flags.pop("department_to_restore", None)
+		if (
+			self.department
+			and self.has_value_changed("department")
+			and self.department != department_to_restore
+		):
+			if frappe.db.get_value("Department", self.department, "disabled"):
+				frappe.throw(_("Cannot assign a disabled Department"))
 		self.set_preferred_email()
 		self.validate_preferred_email()
 
@@ -447,9 +455,9 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 	        :param only_non_weekly: Check only non-weekly holidays, default is False
 	"""
 
-	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception, as_on=date)
 
 	if not holiday_list:
 		return False

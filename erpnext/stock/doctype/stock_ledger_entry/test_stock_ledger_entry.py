@@ -1524,6 +1524,29 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		self.assertTrue(result)
 		self.assertEqual(result[0].voucher_no, reco.name)
 
+	def test_get_next_stock_reco_uses_locking_read(self):
+		# A plain read uses the snapshot, which misses a reco committed meanwhile by another session.
+		from erpnext.stock.stock_ledger import get_next_stock_reco
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		reco = create_stock_reconciliation(
+			item_code=item, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -1)
+		)
+
+		result = get_next_stock_reco(
+			{
+				"item_code": item,
+				"warehouse": warehouse,
+				"voucher_no": "SOME-OTHER-VOUCHER",
+				"posting_date": add_days(today(), -2),
+				"posting_time": "00:00:00",
+			}
+		)
+		self.assertEqual(result[0].voucher_no, reco.name)
+		if frappe.db.db_type == "mariadb":
+			self.assertIn("for update", frappe.db.last_query.lower())
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
 	def test_transfer_invariants(self):
 		"""Extact stock value should be transferred."""
@@ -2116,6 +2139,100 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(
 			frappe.db.get_value("Bin", {"item_code": item_b, "warehouse": warehouse}, "actual_qty"), 5
 		)
+
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_transfer_after_cancel_with_pending_repost(self):
+		item, transfer = make_transfer_with_later_receipts("Moving Average")
+		transfer.cancel()
+
+		new_transfer = make_stock_entry(
+			item_code=item, source="Stores - TCP1", target="Work In Progress - TCP1", qty=100
+		)
+
+		self.assertSLEs(
+			new_transfer,
+			[
+				{"warehouse": "Stores - TCP1", "stock_value": 50, "stock_value_difference": -1000},
+				{"warehouse": "Work In Progress - TCP1", "stock_value": 1100, "stock_value_difference": 1000},
+			],
+		)
+		self.assertFalse(frappe.get_all("GL Entry", {"voucher_no": new_transfer.name, "is_cancelled": 0}))
+
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_fifo_transfer_after_cancel_with_pending_repost(self):
+		item, transfer = make_transfer_with_later_receipts("FIFO")
+		transfer.cancel()
+
+		new_transfer = make_stock_entry(
+			item_code=item, source="Stores - TCP1", target="Work In Progress - TCP1", qty=100
+		)
+
+		self.assertSLEs(
+			new_transfer,
+			[
+				{"stock_value_difference": -1000, "valuation_rate": 10, "stock_queue": [[5, 10]]},
+				{"stock_value_difference": 1000, "valuation_rate": 10, "stock_queue": [[110, 10]]},
+			],
+		)
+
+	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
+	def test_issue_after_backdated_receipt_with_pending_repost(self):
+		item = make_item(properties={"valuation_method": "Moving Average"}).name
+		posting_date = add_days(today(), -1)
+		for posting_time, qty, rate in (("06:00:00", 10, 10), ("08:00:00", 10, 10), ("07:00:00", 20, 25)):
+			make_stock_entry(
+				item_code=item,
+				target="Stores - TCP1",
+				qty=qty,
+				rate=rate,
+				posting_date=posting_date,
+				posting_time=posting_time,
+			)
+
+		issue = make_stock_entry(item_code=item, source="Stores - TCP1", qty=40)
+
+		self.assertSLEs(
+			issue, [{"qty_after_transaction": 0, "stock_value": 0, "stock_value_difference": -700}]
+		)
+
+
+def make_transfer_with_later_receipts(valuation_method):
+	item = make_item(properties={"valuation_method": valuation_method}).name
+	posting_date = add_days(today(), -1)
+	make_stock_entry(
+		item_code=item,
+		target="Stores - TCP1",
+		qty=100,
+		rate=10,
+		posting_date=posting_date,
+		posting_time="06:00:00",
+	)
+	transfer = make_stock_entry(
+		item_code=item,
+		source="Stores - TCP1",
+		target="Work In Progress - TCP1",
+		qty=100,
+		posting_date=posting_date,
+		posting_time="07:00:00",
+	)
+	make_stock_entry(
+		item_code=item,
+		target="Stores - TCP1",
+		qty=5,
+		rate=10,
+		posting_date=posting_date,
+		posting_time="08:00:00",
+	)
+	make_stock_entry(
+		item_code=item,
+		target="Work In Progress - TCP1",
+		qty=10,
+		rate=10,
+		posting_date=posting_date,
+		posting_time="09:00:00",
+	)
+
+	return item, transfer
 
 
 def create_repack_entry(**args):

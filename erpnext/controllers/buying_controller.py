@@ -23,6 +23,7 @@ from erpnext.controllers.accounts_controller import (
 )
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
@@ -42,6 +43,7 @@ class BuyingController(SubcontractingController):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
 	def validate(self):
+		validate_terms_and_conditions(self.get("tc_name"), "buying")
 		self.set_rate_for_standalone_debit_note()
 
 		super().validate()
@@ -98,7 +100,9 @@ class BuyingController(SubcontractingController):
 		if self.docstatus.is_draft() and self.get("company") and not self.get("terms"):
 			if not self.get("tc_name"):
 				self.tc_name = frappe.get_value("Company", self.company, "default_buying_terms")
-			self.set_missing_terms()
+			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
+			if tnc and not tnc.disabled and tnc.get("buying"):
+				self.set_missing_terms()
 
 	def validate_posting_date_with_po(self):
 		po_list = {x.purchase_order for x in self.items if x.purchase_order}
@@ -362,17 +366,18 @@ class BuyingController(SubcontractingController):
 			return
 
 		purchase_doc_field = "purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
-		not_cancelled_asset = []
-		if self.return_against:
-			not_cancelled_asset = [
-				d.name
-				for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
-			]
+		detail_field = purchase_doc_field + "_item"
+		asset_filters = {purchase_doc_field: self.return_against, "docstatus": 1}
+		if (self.doctype == "Purchase Receipt" or self.get("update_stock")) and all(
+			row.get(detail_field) for row in self.items if row.is_fixed_asset
+		):
+			# Linked assets are checked against the quantity retained in each purchase row below.
+			asset_filters[detail_field] = ("is", "not set")
 
-		if self.is_return and len(not_cancelled_asset):
+		if self.return_against and frappe.db.exists("Asset", asset_filters):
 			frappe.throw(
 				_(
-					"{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
+					"{0} has submitted assets linked to it. You need to cancel the assets to create purchase return."
 				).format(self.return_against),
 				title=_("Not Allowed"),
 			)
@@ -395,7 +400,7 @@ class BuyingController(SubcontractingController):
 			if flt(asset_qty) > kept_qty[detail]:
 				frappe.throw(
 					_(
-						"Row #{0}: {1} assets of {2} are linked to {3}, which keeps only {4} after this return. Delete the extra draft assets first."
+						"Row #{0}: {1} assets of {2} are linked to {3}, which keeps only {4} after this return. Cancel the extra submitted assets or delete the extra draft assets first."
 					).format(
 						rows[detail].idx,
 						flt(asset_qty),
@@ -693,7 +698,7 @@ class BuyingController(SubcontractingController):
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Capitalize the full amount onto stock/asset items only (e.g. Freight)
 				stock_item_charges.append(amount)
-			else:
+			elif d.charge_type != "On Item Quantity":
 				all_item_charges.append(amount)
 
 		return tax_accounts, total_valuation_amount, all_item_charges, stock_item_charges
@@ -735,7 +740,28 @@ class BuyingController(SubcontractingController):
 			self._spread_charge_over_items(charge_per_item, charge, all_items)
 		for charge in stock_item_charges:
 			self._spread_charge_over_items(charge_per_item, charge, stock_items)
+		for tax in self.get("taxes"):
+			if tax.charge_type == "On Item Quantity" and tax.category in ("Valuation", "Valuation and Total"):
+				for item_idx, amount in self.get_quantity_based_tax_amounts(tax).items():
+					charge_per_item[item_idx] = charge_per_item.get(item_idx, 0.0) + amount
 		return charge_per_item
+
+	def get_quantity_based_tax_amounts(self, tax):
+		# Reuse the signed, rounded base amounts calculated for each item.
+		if self.get("_item_wise_tax_details"):
+			return {
+				row.item.idx: flt(row.amount)
+				for row in self.get("_item_wise_tax_details")
+				if row.tax.idx == tax.idx
+			}
+
+		# Revaluation and GL reposting can run on a saved document without recalculating taxes.
+		item_indices = {item.name: item.idx for item in self.get("items")}
+		return {
+			item_indices[row.item_row]: flt(row.amount)
+			for row in self.get("item_wise_tax_details") or []
+			if row.tax_row == tax.name
+		}
 
 	def _spread_charge_over_items(self, charge_per_item, total_charge, items):
 		"""Add each item's proportional share of `total_charge` into `charge_per_item`.
@@ -779,7 +805,13 @@ class BuyingController(SubcontractingController):
 			if not amount:
 				continue
 
-			if tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
+			if tax.charge_type == "On Item Quantity":
+				amount = sum(
+					charge
+					for item_idx, charge in self.get_quantity_based_tax_amounts(tax).items()
+					if item_idx in stock_item_idx
+				)
+			elif tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
 				# Spread across all items; only the stock/asset items' share is capitalized.
 				charge_per_item = {}
 				self._spread_charge_over_items(charge_per_item, amount, all_items)
@@ -1536,6 +1568,9 @@ def get_linked_asset_qty(detail_field, details, exclude_asset=None):
 
 @frappe.request_cache
 def get_purchase_expense_account(item_code, company):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
 	defaults = get_item_defaults(item_code, company)
 
 	details = frappe._dict(
@@ -1546,22 +1581,17 @@ def get_purchase_expense_account(item_code, company):
 	)
 
 	if not details.purchase_expense_account:
-		details = frappe.db.get_value(
-			"Item Default",
-			{"parent": defaults.item_group, "company": company},
-			["purchase_expense_account", "purchase_expense_contra_account"],
-			as_dict=1,
-		) or frappe._dict({})
+		details = get_item_group_defaults(item_code, company)
 
 	if not details.purchase_expense_account:
-		details = frappe.db.get_value(
-			"Item Default",
-			{"parent": defaults.brand, "company": company},
-			["purchase_expense_account", "purchase_expense_contra_account"],
-			as_dict=1,
-		)
+		details = get_brand_defaults(item_code, company)
 
-	return details or frappe._dict({})
+	return frappe._dict(
+		{
+			field: details.get(field)
+			for field in ("purchase_expense_account", "purchase_expense_contra_account")
+		}
+	)
 
 
 def get_stock_qty(row, qty) -> float:

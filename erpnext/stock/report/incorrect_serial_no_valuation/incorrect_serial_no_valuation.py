@@ -7,10 +7,12 @@ import frappe
 from frappe import _
 from frappe.utils import getdate
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 def execute(filters=None):
+	validate_date_range(filters)
 	columns, data = [], []
 	columns = get_columns()
 	data = get_data(filters)

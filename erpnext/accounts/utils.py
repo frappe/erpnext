@@ -395,6 +395,7 @@ def get_count_on(account, fieldname, date):
 		else:
 			cond.append(f"""gle.account = {frappe.db.escape(account)} """)
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- values are escaped
 		entries = frappe.db.sql(
 			"""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
@@ -773,6 +774,7 @@ def update_reference_in_payment_entry(
 			if existing_row.reference_doctype in advance_payment_doctypes:
 				new_row.advance_voucher_type = existing_row.reference_doctype
 				new_row.advance_voucher_no = existing_row.reference_name
+				new_row.payment_request = existing_row.payment_request
 
 			row = new_row
 
@@ -1113,8 +1115,10 @@ def remove_ref_doc_link_from_pe(
 		update_payment_requests_as_per_pe_references,
 	)
 
-	# Update payment request amount
-	update_payment_requests_as_per_pe_references(reference_rows, cancel=True)
+	# An allocated advance goes back to the payment entry as unallocated, so its payment request stays paid
+	update_payment_requests_as_per_pe_references(
+		[row for row in reference_rows if not row.advance_voucher_no], cancel=True
+	)
 
 	# Update allocated amounts and modified fields in one go
 	(
@@ -1722,6 +1726,7 @@ def repost_gle_for_stock_vouchers(
 				_delete_accounting_ledger_entries(voucher_type, voucher_no)
 
 		if not frappe.in_test:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
 		if repost_doc:
@@ -2656,38 +2661,49 @@ def get_vouchers_reported_by(report_name, companies, filters):
 
 
 def sync_auto_reconcile_config(auto_reconciliation_job_trigger: int = 15):
-	auto_reconciliation_job_trigger = auto_reconciliation_job_trigger or frappe.get_single_value(
-		"Accounts Settings", "auto_reconciliation_job_trigger"
+	auto_reconciliation_job_trigger = (
+		auto_reconciliation_job_trigger
+		or frappe.get_single_value("Accounts Settings", "auto_reconciliation_job_trigger")
+		or 15
 	)
 	method = "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_reconciliation_for_queued_docs"
 
-	sch_event = frappe.get_doc(
-		"Scheduler Event", {"scheduled_against": "Process Payment Reconciliation", "method": method}
-	)
-	if frappe.db.get_value("Scheduled Job Type", {"method": method}):
+	event_filters = {"scheduled_against": "Process Payment Reconciliation", "method": method}
+	# Serialize registration so concurrent settings saves cannot create duplicate records.
+	frappe.db.get_value("DocType", "Scheduler Event", "name", for_update=True)
+	sch_event = frappe.db.get_value("Scheduler Event", event_filters, "name")
+	if not sch_event:
+		sch_event = (
+			frappe.get_doc({"doctype": "Scheduler Event", **event_filters})
+			.insert(ignore_permissions=True)
+			.name
+		)
+	job_name = frappe.db.get_value("Scheduled Job Type", {"method": method}, "name")
+	if job_name:
 		frappe.get_doc(
 			"Scheduled Job Type",
-			{
-				"method": method,
-			},
+			job_name,
 		).update(
 			{
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event,
+				"frequency": "Cron",
+				"create_log": True,
+				"stopped": False,
 			}
-		).save()
+		).save(ignore_permissions=True)
 	else:
 		frappe.get_doc(
 			{
 				"doctype": "Scheduled Job Type",
 				"method": method,
-				"scheduler_event": sch_event.name,
+				"scheduler_event": sch_event,
 				"cron_format": f"0/{auto_reconciliation_job_trigger} * * * *",
 				"create_log": True,
 				"stopped": False,
 				"frequency": "Cron",
 			}
-		).save()
+		).insert(ignore_permissions=True)
 
 
 def get_link_fields_grouped_by_option(doctype):

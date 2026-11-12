@@ -475,16 +475,24 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 	will search in group (Customer Group / Supplier Group),
 	finally will return default."""
 
-	def account_perm_check(account):
-		ptype = "select" if frappe.only_has_select_perm("Account") else "read"
-		if frappe.has_permission("Account", ptype, account):
-			return
+	account = find_party_account(party_type, party, company)
+	if account:
+		check_account_permission(account)
 
-		# Using custom message to prevent data leak in case of `apply_strict_permission` is enabled.
-		frappe.throw(
-			_("User don't have permissions to select/read this account."), exc=frappe.PermissionError
-		)
+	if include_advance and party and party_type in ["Customer", "Supplier", "Student"]:
+		advance_account = get_party_advance_account(party_type, party, company)
 
+		if advance_account:
+			check_account_permission(advance_account)
+			return [account, advance_account]
+
+		return [account]
+
+	return account
+
+
+def find_party_account(party_type, party, company):
+	"""Resolve the account after the caller has authorized access to the party."""
 	if not party_type:
 		frappe.throw(_("Party Type is mandatory"))
 	if not company:
@@ -529,19 +537,16 @@ def get_party_account(party_type, party=None, company=None, include_advance=Fals
 			default_account_name = "default_" + account_type.lower() + "_account"
 			account = frappe.get_cached_value("Company", company, default_account_name)
 
-	if account:
-		account_perm_check(account)
-
-	if include_advance and party and party_type in ["Customer", "Supplier", "Student"]:
-		advance_account = get_party_advance_account(party_type, party, company)
-
-		if advance_account:
-			account_perm_check(advance_account)
-			return [account, advance_account]
-
-		return [account]
-
 	return account
+
+
+def check_account_permission(account):
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if frappe.has_permission("Account", ptype, account):
+		return
+
+	# Using custom message to prevent data leak in case of `apply_strict_permission` is enabled.
+	frappe.throw(_("User don't have permissions to select/read this account."), exc=frappe.PermissionError)
 
 
 def get_party_advance_account(party_type, party, company):
@@ -571,7 +576,7 @@ def get_party_advance_account(party_type, party, company):
 
 def get_party_account_currency(party_type, party, company):
 	def generator():
-		party_account = get_party_account(party_type, party, company)
+		party_account = find_party_account(party_type, party, company)
 		return frappe.get_cached_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
@@ -647,19 +652,9 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 
 
 def validate_party_accounts(doc):
-	from erpnext.controllers.accounts_controller import validate_account_head
-
-	companies = []
+	validate_party_account_rows(doc, "Customer" if doc.doctype == "Customer Group" else doc.doctype)
 
 	for account in doc.get("accounts"):
-		if account.company in companies:
-			frappe.throw(
-				_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
-				DuplicatePartyAccountError,
-			)
-		else:
-			companies.append(account.company)
-
 		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value(
@@ -681,15 +676,33 @@ def validate_party_accounts(doc):
 					)
 				)
 
-		# validate if account is mapped for same company
-		if account.account:
-			validate_account_head(account.idx, account.account, account.company, _("Debtor/Creditor"))
-		if account.advance_account:
-			validate_account_head(
-				account.idx, account.advance_account, account.company, _("Debtor/Creditor Advance")
-			)
 
-		validate_party_account_type(doc.doctype, account)
+def validate_party_account_rows(doc, party_type):
+	from erpnext.controllers.accounts_controller import validate_account_head
+
+	companies = set()
+	for row in doc.get("accounts"):
+		if row.company in companies:
+			frappe.throw(
+				_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
+				DuplicatePartyAccountError,
+			)
+		companies.add(row.company)
+
+		for account, context in (
+			(row.account, _("Debtor/Creditor")),
+			(row.advance_account, _("Debtor/Creditor Advance")),
+		):
+			if not account:
+				continue
+			validate_account_head(row.idx, account, row.company, context)
+			if frappe.get_cached_value("Account", account, "disabled"):
+				frappe.throw(
+					_("Row {0}: Account {1} is disabled").format(row.idx, frappe.bold(account)),
+					title=_("Invalid Account"),
+				)
+
+		validate_party_account_type(party_type, row)
 
 
 def validate_party_account_type(party_type, row):
@@ -922,7 +935,8 @@ def validate_account_party_type(self):
 
 def get_dashboard_info(party_type, party, loyalty_program=None):
 	doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
-	if not frappe.has_permission(doctype, "read"):
+	# totals cover all of the party's invoices, so a shared invoice is not enough
+	if not frappe.has_permission(doctype, "read", ignore_share_permissions=True):
 		return None
 
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)
@@ -1164,6 +1178,7 @@ def add_party_account(party_type, party, company, account):
 
 
 def render_address(address, check_permissions=True):
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-codeinjection-eval -- calls a local function
 	return frappe.call(_render_address, address, check_permissions=check_permissions)
 
 

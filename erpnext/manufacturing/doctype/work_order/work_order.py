@@ -5,6 +5,7 @@ import json
 import math
 from collections import defaultdict
 from functools import partial
+from itertools import groupby
 
 import frappe
 from dateutil.relativedelta import relativedelta
@@ -30,9 +31,8 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import (
-	get_bom_item_rate,
 	get_bom_items_as_dict,
-	validate_bom_no,
+	validate_production_bom,
 )
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_capacity_planning_days,
@@ -45,7 +45,11 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	clear_reserve_stock_if_disabled,
+)
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from erpnext.stock.utils import get_bin, get_latest_stock_qty_for_items, validate_warehouse_company
 from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -186,6 +190,10 @@ class WorkOrder(Document):
 		self.set_onload("transfer_extra_materials_percentage", ms.transfer_extra_materials_percentage)
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
+			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
+		)
+		self.set_onload("upstream_process_loss", get_upstream_process_loss(self))
+		self.set_onload(
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
@@ -228,14 +236,15 @@ class WorkOrder(Document):
 					"secondary_items.secondary_item_type",
 					"secondary_items.qty",
 					"secondary_items.uom",
-					"secondary_items.cost as amount",
+					"secondary_items.base_cost as amount",
 					"quantity as bom_qty",
 				],
 			).run(as_dict=True)
 			secondary_items = [item for item in secondary_items if item.item_code]
+			precision = frappe.get_precision("Work Order Additional Item", "amount")
 			for item in secondary_items:
 				item["qty"] = (item.qty / item.bom_qty) * self.qty
-				item["amount"] = flt(item.amount) * item.qty
+				item["amount"] = flt(flt(item.amount) * self.qty / item.bom_qty, precision)
 			return secondary_items
 
 	@property
@@ -270,7 +279,10 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = get_operation_qty(self, d) - flt(operation_details.get(d.name))
+			job_card_qty = flt(
+				get_operation_target_qty(self, d) - flt(operation_details.get(d.name)),
+				d.precision("completed_qty"),
+			)
 			if job_card_qty > 0:
 				return True
 
@@ -285,7 +297,7 @@ class WorkOrder(Document):
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
-			validate_bom_no(self.production_item, self.bom_no)
+			validate_production_bom(self.production_item, self.bom_no)
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
@@ -294,13 +306,14 @@ class WorkOrder(Document):
 		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
+		self.reset_use_multi_level_bom()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
 		self.validate_operations()
 		self.status = self.get_status()
 		self.validate_workstation_type()
-		self.reset_use_multi_level_bom()
+		self.clear_reserve_stock_if_disabled()
 		self.set_reserve_stock()
 		self.validate_fg_warehouse_for_reservation()
 		self.validate_dates()
@@ -314,7 +327,10 @@ class WorkOrder(Document):
 			"Manufacturing Settings", "allow_editing_of_items_and_quantities_in_work_order"
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		else:
+			self.set_rate_for_edited_items()
 
+		self.set_required_item_amounts()
 		self.enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
@@ -362,6 +378,11 @@ class WorkOrder(Document):
 			"Sales Order Item", self.sales_order_item, "ensure_delivery_based_on_produced_serial_no"
 		):
 			self.reserve_stock = 1
+
+	def clear_reserve_stock_if_disabled(self):
+		"""Subcontracting Inward Work Orders always reserve the customer's materials."""
+		if not self.subcontracting_inward_order:
+			clear_reserve_stock_if_disabled(self)
 
 	def set_reserve_stock(self):
 		for row in self.required_items:
@@ -550,7 +571,6 @@ class WorkOrder(Document):
 			if not saved or is_fixed or flt(saved.time_in_mins) != flt(d.time_in_mins):
 				continue
 			d.time_in_mins = flt(saved.time_in_mins) * flt(self.qty) / flt(previous.qty)
-		self.calculate_operating_cost()
 
 	def get_fixed_time_flags(self):
 		boms = {d.bom or self.bom_no for d in self.get("operations")}
@@ -1746,7 +1766,13 @@ class WorkOrder(Document):
 			)
 
 		self.set("operations", [])
-		if not self.bom_no or not frappe.get_cached_value("BOM", self.bom_no, "with_operations"):
+		if not self.bom_no:
+			return
+
+		# With multi-level BOM, sub-assembly operations apply even when the top-level BOM has none
+		if not self.use_multi_level_bom and not frappe.get_cached_value(
+			"BOM", self.bom_no, "with_operations"
+		):
 			return
 
 		groups = []
@@ -1852,9 +1878,10 @@ class WorkOrder(Document):
 			operation_qty = get_operation_qty(self, d)
 			max_allowed_qty_for_wo = operation_qty + (allowance_percentage / 100 * operation_qty)
 			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
-			if not qty:
+			operation_target_qty = get_operation_target_qty(self, d)
+			if not qty and operation_target_qty:
 				d.status = "Pending"
-			elif qty < flt(operation_qty, precision):
+			elif qty < operation_target_qty:
 				d.status = "Work in Progress"
 			elif qty == flt(operation_qty, precision):
 				d.status = "Completed"
@@ -2070,6 +2097,23 @@ class WorkOrder(Document):
 						self.project = item.get("project")
 
 			self.set_available_qty()
+
+	def set_rate_for_edited_items(self):
+		"""Fetch rate afresh for rows whose item was added or changed by hand."""
+		previous = self.get_doc_before_save()
+		previous_items = {d.name: d.item_code for d in previous.required_items} if previous else {}
+		bom_items = get_bom_items_as_dict(self.bom_no, self.company, fetch_exploded=self.use_multi_level_bom)
+		edited_rows = [d for d in self.get("required_items") if is_edited_item(d, previous_items, bom_items)]
+		if not edited_rows:
+			return
+
+		bom_doc = frappe.get_cached_doc("BOM", self.bom_no)
+		for d in edited_rows:
+			d.rate = flt(get_raw_material_rate(d, self, bom_doc), d.precision("rate"))
+
+	def set_required_item_amounts(self):
+		for d in self.get("required_items"):
+			d.amount = flt(flt(d.rate) * flt(d.required_qty), d.precision("amount"))
 
 	def update_transferred_qty_for_required_items(self):
 		if self.skip_transfer:
@@ -3333,8 +3377,6 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		args = frappe._dict(
 			{
 				"item_code": item.get("variant_item_code"),
-				"required_qty": item.get("qty"),
-				"qty": item.get("qty"),  # for bom
 				"source_warehouse": item.get("source_warehouse"),
 				"operation": item.get("operation"),
 			}
@@ -3343,18 +3385,9 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		bom_doc = frappe.get_cached_doc("BOM", bom_no)
 		item_data = get_item_details(args.item_code, skip_bom_info=True)
 		args.update(item_data)
+		args.update(_variant_row_qty(args.item_code, item, item_data.stock_uom))
 
-		args["rate"] = get_bom_item_rate(
-			{
-				"company": wo_doc.company,
-				"item_code": args.get("item_code"),
-				"qty": args.get("required_qty"),
-				"uom": args.get("stock_uom"),
-				"stock_uom": args.get("stock_uom"),
-				"conversion_factor": 1,
-			},
-			bom_doc,
-		)
+		args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 
 		if not args.source_warehouse:
 			args["source_warehouse"] = get_item_defaults(
@@ -3362,15 +3395,51 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 			).default_warehouse
 
 		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
-		args["uom"] = item_data.stock_uom
 
-		existing_row = (
-			get_template_rm_item(wo_doc, item.get("item_code")) if table_name == "required_items" else None
-		)
+		if table_name != "required_items":
+			# bom rows are costed per row uom, work order rows per stock uom
+			args["rate"] = flt(args.rate * args.conversion_factor, frappe.get_precision("BOM Item", "rate"))
+			wo_doc.append(table_name, args)
+			continue
+
+		existing_row = get_template_rm_item(wo_doc, item.get("item_code"))
 		if existing_row:
 			existing_row.update(args)
 		else:
 			wo_doc.append(table_name, args)
+
+
+def _variant_row_qty(item_code, item, stock_uom):
+	"""The dialog qty is in the template row's uom; the work order needs the stock qty."""
+	uom = item.get("uom") or stock_uom
+	conversion_factor = flt(get_conversion_factor(item_code, uom)["conversion_factor"])
+	stock_qty = flt(
+		flt(item.get("qty")) * conversion_factor, frappe.get_precision("Work Order Item", "required_qty")
+	)
+	return {
+		"qty": flt(item.get("qty")),  # for bom
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"stock_qty": stock_qty,
+		"required_qty": stock_qty,
+	}
+
+
+def get_raw_material_rate(args, wo_doc, bom_doc):
+	"""Rate in company currency, costed the way the BOM costs its raw materials."""
+	rate = bom_doc.get_rm_rate(
+		{
+			"company": wo_doc.company,
+			"item_code": args.get("item_code"),
+			"qty": args.get("required_qty"),
+			"uom": args.get("stock_uom"),
+			"stock_uom": args.get("stock_uom"),
+			"conversion_factor": 1,
+			"source_warehouse": args.get("source_warehouse"),
+		},
+		notify=False,
+	)
+	return rate * flt(bom_doc.conversion_rate or 1)
 
 
 def get_template_rm_item(wo_doc, item_code):
@@ -3561,6 +3630,12 @@ def split_item_qty(rows, qty, qty_by_row):
 	qty_by_row[rows[-1].name] = remaining_qty
 
 
+def is_edited_item(row, previous_items, bom_items):
+	if row.name in previous_items:
+		return previous_items[row.name] != row.item_code
+	return not row.rate or not find_bom_item(bom_items, row)
+
+
 def find_bom_item(item_dict, row):
 	for key in ((row.item_code, row.operation), (row.item_code, row.operation_row_id), row.item_code):
 		if key in item_dict:
@@ -3720,6 +3795,43 @@ def get_operation_qty(work_order, operation):
 		return flt(operation.get("output_qty"))
 
 	return flt(work_order.get("qty"))
+
+
+def get_upstream_process_loss(work_order, operation=None):
+	"""Loss before an operation, or before finished goods when no operation is supplied."""
+	if work_order.get("track_semi_finished_goods"):
+		return 0
+
+	process_loss_qty = 0
+	available_qty = None
+	for sequence_id, rows in groupby(
+		sorted(work_order.get("operations") or [], key=lambda row: cint(row.sequence_id)),
+		key=lambda row: cint(row.sequence_id),
+	):
+		if operation is not None and sequence_id >= cint(operation.get("sequence_id")):
+			break
+
+		rows = list(rows)
+		# Cap new loss at the previous output; legacy cards can repeat upstream loss.
+		process_loss_qty += max(
+			(
+				flt(row.process_loss_qty)
+				if available_qty is None
+				else min(flt(row.process_loss_qty), max(available_qty - flt(row.completed_qty), 0))
+			)
+			for row in rows
+		)
+		available_qty = min(flt(row.completed_qty) for row in rows)
+
+	return flt(process_loss_qty)
+
+
+def get_operation_target_qty(work_order, operation):
+	"""Operation qty less the process loss booked before it."""
+	return flt(
+		get_operation_qty(work_order, operation) - get_upstream_process_loss(work_order, operation),
+		operation.precision("completed_qty"),
+	)
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):

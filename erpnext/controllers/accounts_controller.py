@@ -72,7 +72,10 @@ from erpnext.exceptions import InvalidCurrency
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_packed_items_of_order_rows,
+	make_packing_list,
+)
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	ItemDetailsCtx,
@@ -880,7 +883,8 @@ class AccountsController(TransactionBase):
 				item.service_end_date = add_days(to_date, 1)
 
 	def before_print(self, settings=None):
-		self.set_missing_terms()
+		if self.docstatus.is_draft():
+			self.set_missing_terms()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -2369,7 +2373,7 @@ class AccountsController(TransactionBase):
 
 		return amount, base_amount
 
-	def make_discount_gl_entries(self, gl_entries):
+	def make_discount_gl_entries(self, gl_entries, deferred_return_items=None):
 		enable_discount_accounting = cint(
 			frappe.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
@@ -2378,11 +2382,7 @@ class AccountsController(TransactionBase):
 			for item in self.get("items"):
 				if item.get("discount_amount") and item.get("discount_account"):
 					discount_amount = item.discount_amount * item.qty
-					income_account = (
-						item.income_account
-						if (not item.enable_deferred_revenue or self.is_return)
-						else item.deferred_revenue_account
-					)
+					income_account = self.get_item_income_account(item, deferred_return_items)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
@@ -2410,6 +2410,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_account,
+								"voucher_detail_no": item.name
+								if self.is_return and item.enable_deferred_revenue
+								else None,
 								"against": self.customer,
 								"credit": flt(
 									discount_amount * self.get("conversion_rate"),
@@ -4875,6 +4878,10 @@ def update_child_qty_rate(
 	validate_parent_status(parent)
 	validate_blanket_order_changes(parent, data)
 
+	packed_items_before_update = {}
+	if parent_doctype == "Sales Order":
+		packed_items_before_update = get_packed_items_of_order_rows({row.name for row in parent.items})
+
 	if parent_doctype == "Quotation":
 		transacted_stock_qty = get_ordered_items(parent.name)
 		_removed_items = validate_and_delete_children(parent, data, transacted_stock_qty)
@@ -5041,12 +5048,12 @@ def update_child_qty_rate(
 	parent.set_total_in_words()
 	parent.validate_party_specific_items()
 	if parent_doctype == "Sales Order" and not parent.is_subcontracted:
-		make_packing_list(parent)
+		make_packing_list(parent, packed_items_before_update)
 		parent.set_gross_profit()
 	elif parent_doctype == "Quotation":
 		make_packing_list(parent)
 	frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-		parent.doctype, parent.company, parent.base_grand_total
+		parent.doctype, parent.company, parent.base_grand_total, parent
 	)
 
 	if parent_doctype != "Supplier Quotation":
@@ -5268,7 +5275,7 @@ def get_missing_company_details(doctype: str, docname: str):
 	required_fields.append(company_address)
 	required_fields.append(address_line)
 
-	if all(required_fields):
+	if all(required_fields) and not needs_optional_company_details(company, company_details):
 		return False
 	return {
 		"company_logo": company_details.get("company_logo"),
@@ -5280,6 +5287,19 @@ def get_missing_company_details(doctype: str, docname: str):
 		"company_address": company_address,
 		"name": docname,
 	}
+
+
+def needs_optional_company_details(company, company_details):
+	from frappe.model.utils.user_settings import get_user_settings
+
+	if company_details.get("company_logo") and company_details.get("website"):
+		return False
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		return False
+
+	skipped = frappe.parse_json(get_user_settings("Company")).get("skipped_print_details") or []
+	return company not in skipped
 
 
 @frappe.whitelist(methods=["POST"])

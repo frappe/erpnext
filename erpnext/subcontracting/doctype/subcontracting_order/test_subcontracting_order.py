@@ -47,6 +47,15 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		make_service_items()
 		make_bom_for_subcontracted_items()
 
+	def test_finished_good_qty_uses_item_stock_uom(self):
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.items[0].qty = 2.5
+		sco.items[0].stock_uom = "Kg"
+
+		self.assertRaises(UOMMustBeIntegerError, sco.save)
+
 	def test_set_missing_values(self):
 		sco = get_subcontracting_order()
 		before = {sco.total_qty, sco.total, sco.total_additional_costs}
@@ -1165,6 +1174,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(sco.supplied_items[0].required_qty, 210.149)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_stock_reservation(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_details_for_voucher,
@@ -1207,6 +1217,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)[:3]:
 			self.assertEqual(status, "Delivered")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_releases_stock_reservations(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
 
@@ -1220,6 +1231,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertFalse(has_reserved_stock(sco.doctype, sco.name))
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_keeps_reservations_of_transferred_material(self):
 		sco = get_subcontracting_order(do_not_submit=1)
 		sco.reserve_stock = 1
@@ -1241,6 +1253,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		for row in reservations:
 			self.assertEqual(row.docstatus, 1 if row.transferred_qty else 2)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_releases_unused_balance_of_partly_transferred_reservation(self):
 		sco = get_subcontracting_order(do_not_submit=1)
 		sco.reserve_stock = 1
@@ -1265,6 +1278,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(reservation[0].reserved_qty, reservation[0].transferred_qty)
 		self.assertEqual(reservation[0].status, "Closed")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_releases_unused_batches_of_partly_transferred_reservation(self):
 		service_items = [
 			{
@@ -1309,6 +1323,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			reservation = frappe.get_doc("Stock Reservation Entry", name)
 			self.assertLessEqual(reservation.transferred_qty, reservation.reserved_qty)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
 			{
@@ -1359,6 +1374,7 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(sbe_pp_list, get_serial_batch_entries("Subcontracting Order", sco.name))
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_gives_the_unused_balance_back_to_the_plan(self):
 		plan = make_reserved_production_plan()
 		sco = make_subcontracting_order_from_plan(plan)

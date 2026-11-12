@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, today
+from frappe.utils.background_jobs import FrappeWorker, get_queue, get_queues_timeout
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
@@ -13,6 +14,7 @@ from erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation impo
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	fetch_and_allocate,
 	get_pr_instance,
+	is_job_running,
 	reconcile,
 )
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -61,6 +63,52 @@ class TestProcessPaymentReconciliation(ERPNextTestSuite):
 		doc.insert()
 		doc.submit()
 		self.assertEqual(doc.status, "Queued")
+
+	def test_job_status_without_system_manager(self):
+		user = "accounting-jobs@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Accounting Jobs",
+					"send_welcome_email": 0,
+					"roles": [{"role": "Accounts Manager"}],
+				}
+			).insert()
+
+		job_name = f"reconcile_{frappe.generate_hash(length=10)}"
+		# Keep live workers from consuming the job before its status is checked.
+		with patch.dict(get_queues_timeout(), {job_name: 300}):
+			queue = get_queue(job_name)
+			worker = FrappeWorker([queue], connection=queue.connection)
+			job = None
+			try:
+				with as_user(user):
+					self.assertFalse(frappe.has_permission("RQ Job"))
+					self.assertFalse(is_job_running(job_name))
+					job = frappe.enqueue("frappe.utils.now", queue=job_name, job_name=job_name)
+					self.assertTrue(is_job_running(job_name))
+					self.assertFalse(is_job_running(f"{job_name}_other"))
+
+					job.kwargs = {**job.kwargs, "site": "another-site.localhost"}
+					job.save()
+					self.assertFalse(is_job_running(job_name))
+					job.kwargs = {**job.kwargs, "site": frappe.local.site}
+					job.save()
+
+					queue.remove(job)
+					worker.register_birth()
+					worker.prepare_job_execution(job)
+					self.assertTrue(is_job_running(job_name))
+					worker.set_current_job_id(None)
+					job.cancel()
+					self.assertFalse(is_job_running(job_name))
+			finally:
+				worker.register_death()
+				if job:
+					job.delete()
+				queue.delete()
 
 	def test_get_pr_instance_copies_filters_and_caps_limits(self):
 		doc = self.make_ppr(from_invoice_date="2026-01-01", to_invoice_date="2026-06-30")

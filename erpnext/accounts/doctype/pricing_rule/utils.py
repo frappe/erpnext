@@ -169,6 +169,7 @@ def _get_pricing_rules(apply_on, args, values):
 	values["price_list"] = args.get("price_list")
 
 	pricing_rules = (
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 		frappe.db.sql(
 			"""select `tabPricing Rule`.*,
 			{child_doc}.{apply_on_field}, {child_doc}.uom
@@ -627,6 +628,7 @@ def apply_pricing_rule_on_transaction(doc):
 	conditions = get_other_conditions(conditions, values, doc)
 	conditions += " and coalesce(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 	pricing_rules = frappe.db.sql(
 		f""" Select `tabPricing Rule`.* from `tabPricing Rule`
 		where  {conditions} and `tabPricing Rule`.disable = 0
@@ -736,6 +738,7 @@ def get_transaction_pricing_rules(doc):
 		values,
 		doc_before_save,
 	)
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 	coupon_rules = frappe.db.sql(f"select * from `tabPricing Rule` where {conditions}", values, as_dict=True)
 	coupon_rules = filter_pricing_rules_for_qty_amount(
 		doc_before_save.total_qty, doc_before_save.total, coupon_rules

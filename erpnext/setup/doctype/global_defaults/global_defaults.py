@@ -142,6 +142,11 @@ class GlobalDefaults(Document):
 				"Check",
 				validate_fields_for_doctype=False,
 			)
+
+			# Payment Entry and Subcontracting Receipt keep their standard print visibility
+			if doctype in ("Payment Entry", "Subcontracting Receipt"):
+				continue
+
 			make_property_setter(
 				doctype,
 				"in_words",

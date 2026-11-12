@@ -49,6 +49,7 @@ class SubcontractingReceiptItem(Document):
 		rejected_serial_and_batch_bundle: DF.Link | None
 		rejected_serial_no: DF.SmallText | None
 		rejected_warehouse: DF.Link | None
+		return_qty_from_rejected_warehouse: DF.Check
 		returned_qty: DF.Float
 		rm_cost_per_qty: DF.Currency
 		rm_supp_cost: DF.Currency

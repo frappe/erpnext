@@ -49,6 +49,17 @@ class TestQuotation(ERPNextTestSuite):
 		self.assertEqual(quotation.order_lost_reason, "Too expensive")
 		self.assertEqual([row.lost_reason for row in quotation.lost_reasons], [reason])
 
+	def test_cancel_clears_lost_reasons(self):
+		reason = "_Test Quotation Lost Reason"
+		if not frappe.db.exists("Quotation Lost Reason", reason):
+			frappe.get_doc({"doctype": "Quotation Lost Reason", "order_lost_reason": reason}).insert()
+		quotation = make_quotation()
+		quotation.declare_enquiry_lost([{"lost_reason": reason}], [], "Too expensive")
+
+		quotation.reload().cancel()
+
+		self.assertFalse(quotation.reload().lost_reasons)
+
 	def setUp(self):
 		self.load_test_records("Quotation")
 

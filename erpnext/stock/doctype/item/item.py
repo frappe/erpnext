@@ -33,6 +33,7 @@ from erpnext.controllers.item_variant import (
 	make_variant_item_code,
 	validate_item_variant_attributes,
 )
+from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item_default.item_default import ItemDefault
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -185,9 +186,19 @@ class Item(Document):
 	def after_insert(self):
 		"""set opening stock and item price"""
 		if self.standard_rate and not self.has_variants:
+			from erpnext.setup.doctype.brand.brand import get_brand_defaults
+			from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
+			group_rows = frappe.get_cached_doc("Item Group", self.item_group).item_group_defaults
+			brand_rows = frappe.get_cached_doc("Brand", self.brand).brand_defaults if self.brand else []
+			companies = {row.company for row in (*self.item_defaults, *group_rows, *brand_rows)}
 			price_lists = {
-				self.get_selling_price_list(default.default_price_list)
-				for default in self.item_defaults or [frappe._dict()]
+				self.get_selling_price_list(
+					get_item_defaults(self.name, company).get("default_price_list")
+					or get_item_group_defaults(self.name, company).get("default_price_list")
+					or get_brand_defaults(self.name, company).get("default_price_list")
+				)
+				for company in companies or {None}
 			}
 			if [price_list for price_list in price_lists if self.add_price(price_list)]:
 				frappe.msgprint(
@@ -325,7 +336,10 @@ class Item(Document):
 			if not exchange_rate:
 				return False
 
-			price_list_rate = price_list_rate / exchange_rate
+			price_list_rate = flt(
+				price_list_rate / exchange_rate,
+				frappe.get_precision("Item Price", "price_list_rate", currency),
+			)
 
 		frappe.get_doc(
 			{
@@ -886,12 +900,7 @@ class Item(Document):
 			)
 
 	def validate_item_defaults(self):
-		companies = {row.company for row in self.item_defaults}
-
-		if len(companies) != len(self.item_defaults):
-			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
-
-		validate_item_default_company_links(self.item_defaults)
+		validate_item_defaults(self.item_defaults)
 
 	def update_defaults_from_item_group(self):
 		"""Get defaults from Item Group"""
@@ -1108,6 +1117,7 @@ class Item(Document):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
+		validate_uoms_are_enabled([self.stock_uom, *(d.uom for d in self.uoms)])
 		allow_different_uom = frappe.get_cached_value(
 			"Item Variant Settings", "Item Variant Settings", "allow_different_uom"
 		)
@@ -1673,13 +1683,19 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 	from_uom, to_uom = uom, stock_uom  # renaming for readability
 
 	exact_match = frappe.db.get_value(
-		"UOM Conversion Factor", {"to_uom": to_uom, "from_uom": from_uom}, ["value"], as_dict=1
+		"UOM Conversion Factor",
+		{"to_uom": to_uom, "from_uom": from_uom, "value": [">", 0]},
+		["value"],
+		as_dict=1,
 	)
 	if exact_match:
 		return exact_match.value
 
 	inverse_match = frappe.db.get_value(
-		"UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1
+		"UOM Conversion Factor",
+		{"to_uom": from_uom, "from_uom": to_uom, "value": [">", 0]},
+		["value"],
+		as_dict=1,
 	)
 	if inverse_match and inverse_match.value:
 		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
@@ -1696,7 +1712,9 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 		.join(second)
 		.on((first.from_uom == second.from_uom) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first.to_uom == to_uom) & (second.to_uom == from_uom) & (second.value != 0))
+		.where(
+			(first.to_uom == to_uom) & (second.to_uom == from_uom) & (first.value > 0) & (second.value > 0)
+		)
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
@@ -1710,7 +1728,12 @@ def get_uom_conv_factor(uom: str | None, stock_uom: str | None):
 		.join(second)
 		.on((first.to_uom == second.to_uom) & (first.category == second.category))
 		.select((first.value / second.value).as_("value"))
-		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
+		.where(
+			(first.from_uom == from_uom)
+			& (second.from_uom == to_uom)
+			& (first.value > 0)
+			& (second.value > 0)
+		)
 		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
@@ -1741,6 +1764,14 @@ def update_variants(variants, template, publish_progress=True):
 		variant.save()
 		if publish_progress:
 			frappe.publish_progress(count / total * 100, title=_("Updating Variants..."))
+
+
+def validate_item_defaults(item_defaults: list[ItemDefault]) -> None:
+	companies = {row.company for row in item_defaults}
+	if len(companies) != len(item_defaults):
+		frappe.throw(_("Cannot set multiple Item Defaults for a company."))
+
+	validate_item_default_company_links(item_defaults)
 
 
 def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> None:

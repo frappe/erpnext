@@ -5,8 +5,10 @@ from contextlib import contextmanager
 from unittest.mock import patch
 
 import frappe
+from frappe.utils import add_days, get_time, getdate, nowdate
 
 from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import (
+	get_invoices,
 	make_closing_entry_from_opening,
 )
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
@@ -58,6 +60,133 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
+
+	def test_closing_with_disabled_sales_person(self):
+		opening = create_opening_entry(self.pos_profile, self.test_user.name)
+		frappe.set_user("Administrator")
+		person = frappe.get_doc(
+			doctype="Sales Person",
+			sales_person_name=f"_Test Closing {frappe.generate_hash(length=10)}",
+			commission_rate=10,
+			enabled=1,
+		).insert()
+		invoice = create_pos_invoice(rate=100, do_not_submit=1)
+		invoice.append("payments", {"mode_of_payment": "Cash", "amount": 100})
+		invoice.append("sales_team", {"sales_person": person.name, "allocated_percentage": 100})
+		invoice.save()
+		invoice.submit()
+		person.enabled = 0
+		person.save()
+
+		closing = make_closing_entry_from_opening(opening)
+		closing.flags.in_test = True
+		closing.submit()
+		invoice.reload()
+		self.assertTrue(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+		closing.cancel()
+		invoice.reload()
+		self.assertFalse(invoice.consolidated_invoice)
+		self.assertEqual(invoice.sales_team[0].incentives, 10)
+
+	def test_backdated_pos_session(self):
+		posting_date = add_days(nowdate(), -5)
+		make_stock_entry(
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=100,
+			posting_date=posting_date,
+			posting_time="07:00:00",
+		)
+
+		for invoice_type in ("POS Invoice", "Sales Invoice"):
+			with self.subTest(invoice_type=invoice_type):
+				frappe.db.set_single_value("POS Settings", "invoice_type", invoice_type)
+				opening = frappe.get_doc(
+					doctype="POS Opening Entry",
+					company=self.pos_profile.company,
+					pos_profile=self.pos_profile.name,
+					user=frappe.session.user,
+					posting_date=posting_date,
+					period_start_date=f"{posting_date} 08:00:00",
+					balance_details=[{"mode_of_payment": "Cash", "opening_amount": 0}],
+				).insert()
+				opening.submit()
+
+				make_invoice = create_pos_invoice if invoice_type == "POS Invoice" else create_sales_invoice
+				invoice = make_invoice(
+					pos_profile=self.pos_profile.name,
+					is_created_using_pos=1,
+					update_stock=1,
+					rate=100,
+					do_not_save=1,
+				)
+				invoice.set("payments", [{"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 100}])
+				with self.assertRaisesRegex(frappe.ValidationError, "is outdated"):
+					invoice.insert()
+
+				invoice.set_posting_time = 1
+				invoice.posting_date = posting_date
+				invoice.posting_time = "09:00:00"
+				invoice.insert()
+				invoice.submit()
+
+				invalid_invoice = frappe.copy_doc(invoice)
+				invalid_invoice.set_posting_time = 1
+				invalid_invoice.posting_date = nowdate()
+				with self.assertRaisesRegex(frappe.ValidationError, "Posting date and time"):
+					invalid_invoice.insert()
+				invalid_invoice.posting_date = posting_date
+				invalid_invoice.posting_time = "07:59:59"
+				with self.assertRaisesRegex(frappe.ValidationError, "Posting date and time"):
+					invalid_invoice.insert()
+
+				closing = make_closing_entry_from_opening(opening)
+				closing.posting_date = add_days(posting_date, 1)
+				closing.posting_time = "00:00:00"
+				closing.period_end_date = f"{closing.posting_date} 00:00:00"
+				invoices = get_invoices(
+					closing.period_start_date, closing.period_end_date, closing.pos_profile, closing.user
+				)["invoices"]
+				self.assertEqual([row.name for row in invoices], [invoice.name])
+				self.assertEqual(
+					[row.pos_invoice for row in closing.pos_invoices]
+					+ [row.sales_invoice for row in closing.sales_invoices],
+					[invoice.name],
+				)
+				closing.flags.in_test = True
+				closing.insert()
+				closing.reload()
+				closing.submit()
+				self.assertEqual(getdate(closing.posting_date), getdate(add_days(posting_date, 1)))
+				self.assertEqual(get_time(closing.posting_time), get_time("00:00:00"))
+				self.assertEqual(opening.reload().status, "Closed")
+
+				invoice.reload()
+				sales_invoice = (
+					frappe.get_doc("Sales Invoice", invoice.consolidated_invoice)
+					if invoice_type == "POS Invoice"
+					else invoice
+				)
+				self.assertEqual(sales_invoice.docstatus, 1)
+				self.assertEqual(getdate(sales_invoice.posting_date), getdate(posting_date))
+				self.assertEqual(get_time(sales_invoice.posting_time), get_time("09:00:00"))
+				for doctype in ("GL Entry", "Stock Ledger Entry"):
+					self.assertEqual(
+						set(
+							frappe.get_all(
+								doctype,
+								filters={"voucher_type": "Sales Invoice", "voucher_no": sales_invoice.name},
+								pluck="posting_date",
+							)
+						),
+						{getdate(posting_date)},
+					)
+
+				closing.reload().cancel()
+				self.assertEqual(opening.reload().status, "Open")
+				invoice.reload().cancel()
+				opening.cancel()
 
 	def test_pos_closing_without_item_code(self):
 		"""
@@ -292,6 +421,147 @@ class TestPOSClosingEntry(ERPNextTestSuite):
 
 		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
 		self.assertEqual(batch_qty_with_pos, 10.0)
+
+	def test_closing_consolidates_sale_of_batch_disabled_after_sale(self):
+		item_code = make_item(
+			"_Test POS Closing Batch Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-POS-CLOSING-.####",
+				"create_new_batch": 1,
+			},
+		).name
+		se = make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+
+		pos_inv = create_pos_invoice(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			do_not_submit=1,
+		)
+		pos_inv.payments[0].amount = pos_inv.grand_total
+		pos_inv.save()
+		pos_inv.submit()
+		frappe.db.set_value("Batch", batch_no, "disabled", 1)
+
+		make_closing_entry_from_opening(opening_entry).submit()
+
+		pos_inv.load_from_db()
+		self.assertTrue(pos_inv.consolidated_invoice)
+
+	def test_cancelling_pos_closing_entry_restores_batch_qty(self):
+		from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		item_code = make_item(
+			"_Test Item With Batch For POS Closing Cancel",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-POS-CLOSING-CANCEL-.####",
+				"create_new_batch": 1,
+			},
+		).name
+		se = make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		pos_inv = create_pos_invoice(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			do_not_submit=True,
+		)
+		pos_inv.payments[0].amount = pos_inv.grand_total
+		pos_inv.submit()
+
+		pos_return = make_sales_return(pos_inv.name)
+		pos_return.items[0].qty = -1
+		pos_return.payments[0].amount = -300
+		pos_return.submit()
+
+		pcv_doc = make_closing_entry_from_opening(opening_entry)
+		pcv_doc.submit()
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 9)
+
+		pcv_doc.reload()
+		pcv_doc.cancel()
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 10)
+
+		bundle = frappe.db.get_value(
+			"Serial and Batch Bundle",
+			pos_inv.items[0].serial_and_batch_bundle,
+			["voucher_type", "voucher_no", "docstatus", "is_cancelled"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			bundle,
+			{"voucher_type": "POS Invoice", "voucher_no": pos_inv.name, "docstatus": 1, "is_cancelled": 0},
+		)
+
+		make_closing_entry_from_opening(opening_entry).submit()
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "batch_qty"), 9)
+		self.assertEqual(get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code), 9)
+
+	def test_closing_again_after_cancel_keeps_bundle_entries_in_sync(self):
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_data
+
+		item_code = make_item(
+			"_Test Item With Batch For POS Closing Again",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-POS-CLOSING-AGAIN-.####",
+				"create_new_batch": 1,
+			},
+		).name
+		se = make_stock_entry(target="_Test Warehouse - _TC", item_code=item_code, qty=10, basic_rate=100)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		opening_entry = create_opening_entry(self.pos_profile, self.test_user.name)
+		pos_inv = create_pos_invoice(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			do_not_submit=True,
+		)
+		pos_inv.payments[0].amount = pos_inv.grand_total
+		pos_inv.submit()
+
+		closing_entry = make_closing_entry_from_opening(opening_entry)
+		closing_entry.submit()
+		closing_entry.reload()
+		closing_entry.cancel()
+		make_closing_entry_from_opening(opening_entry).submit()
+
+		pos_inv.reload()
+		fields = ["voucher_type", "voucher_no", "voucher_detail_no", "posting_datetime", "is_cancelled"]
+		bundle = frappe.db.get_value(
+			"Serial and Batch Bundle", pos_inv.items[0].serial_and_batch_bundle, fields, as_dict=True
+		)
+		entry = frappe.db.get_value(
+			"Serial and Batch Entry",
+			{"parent": pos_inv.items[0].serial_and_batch_bundle},
+			fields,
+			as_dict=True,
+		)
+		self.assertEqual(bundle.voucher_no, pos_inv.consolidated_invoice)
+		self.assertEqual(entry, bundle)
+
+		rows = get_data(frappe._dict(item_code=item_code))
+		self.assertEqual(
+			sorted((row.voucher_no, row.qty) for row in rows),
+			sorted([(se.name, 10), (pos_inv.consolidated_invoice, -2)]),
+		)
 
 	@ERPNextTestSuite.change_settings("POS Settings", {"invoice_type": "Sales Invoice"})
 	def test_closing_entries_with_sales_invoice(self):

@@ -163,8 +163,8 @@ class POSInvoiceMergeLog(Document):
 		credit_notes = self.get_consolidated_credit_notes()
 
 		self.update_pos_invoices(pos_invoice_docs)
-		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.cancel_linked_invoices(credit_notes)
+		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.delink_serial_and_batch_bundle()
 
 	def process_merging_into_sales_invoice(self, data):
@@ -684,6 +684,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			raise
 
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 
@@ -718,6 +719,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 			raise
 
 		finally:
+			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 			frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 

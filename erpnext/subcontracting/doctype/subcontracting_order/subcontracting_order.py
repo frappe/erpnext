@@ -15,6 +15,7 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	clear_reserve_stock_if_disabled,
 	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
 )
@@ -123,6 +124,8 @@ class SubcontractingOrder(SubcontractingController):
 
 	def validate(self):
 		super().validate()
+		self.validate_uom_is_integer("stock_uom", "qty", "Subcontracting Order Item")
+		self.validate_item_stock_uom_is_integer("item_code", "qty", "Subcontracting Order Item")
 		self.validate_purchase_order_for_subcontracting()
 		self.validate_items()
 		self.validate_service_items()
@@ -132,6 +135,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 		self.validate_with_previous_doc()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		clear_reserve_stock_if_disabled(self)
 
 	def on_submit(self):
 		self.update_status()

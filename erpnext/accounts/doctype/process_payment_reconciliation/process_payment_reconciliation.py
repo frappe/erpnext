@@ -7,6 +7,7 @@ import frappe
 from frappe import _, qb
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
+from frappe.utils.background_jobs import get_jobs
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -123,11 +124,7 @@ def get_pr_instance(doc: str):
 
 
 def is_job_running(job_name: str) -> bool:
-	jobs = frappe.db.get_all("RQ Job", filters={"status": ["in", ["started", "queued"]]})
-	for x in jobs:
-		if x.job_name == job_name:
-			return True
-	return False
+	return job_name in get_jobs(site=frappe.local.site, key="job_name")[frappe.local.site]
 
 
 @frappe.whitelist()
@@ -140,7 +137,7 @@ def pause_job_for_doc(docname: str | None = None):
 			frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Paused")
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def trigger_job_for_doc(docname: str | None = None):
 	"""
 	Trigger background job

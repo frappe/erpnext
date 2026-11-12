@@ -7,6 +7,7 @@ def execute():
 	for doctype in ["Sales Invoice", "Purchase Invoice", "Journal Entry"]:
 		frappe.reload_doc("accounts", "doctype", frappe.scrub(doctype))
 
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names, or fixed conditions
 		frappe.db.sql(
 			f""" UPDATE `tabGL Entry`, `tab{doctype}`
             SET

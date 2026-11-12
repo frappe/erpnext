@@ -9,7 +9,9 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import IfNull
 from frappe.utils import add_days, cint, flt, get_link_to_form, getdate, parse_json
 
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import update_sales_forecast_status
+from erpnext.stock.get_item_details import get_conversion_factor
 
 
 class MasterProductionSchedule(Document):
@@ -66,6 +68,14 @@ class MasterProductionSchedule(Document):
 		self.set_to_date()
 		self.validate_company()
 		self.validate_sales_forecast_not_used()
+		self.validate_items()
+
+	def validate_items(self):
+		for item_code, uom in {(row.item_code, row.uom) for row in self.items if row.item_code and row.uom}:
+			get_conversion_factor(item_code, uom, throw_if_missing=True)
+
+		for item_code, bom_no in {(row.item_code, row.bom_no) for row in self.items if row.bom_no}:
+			validate_production_bom(item_code, bom_no)
 
 	def validate_sales_forecast_not_used(self):
 		if not self.sales_forecast:
@@ -99,17 +109,14 @@ class MasterProductionSchedule(Document):
 				)
 
 	def set_to_date(self):
+		dates = [row.delivery_date for row in self.items if row.delivery_date]
 		if self.to_date:
-			return
+			dates.append(self.to_date)
+		else:
+			dates.extend(self.get_sales_forecast_data())
 
-		for row in self.items:
-			if not self.to_date or getdate(row.delivery_date) > getdate(self.to_date):
-				self.to_date = row.delivery_date
-
-		forecast_delivery_dates = self.get_sales_forecast_data()
-		for date in forecast_delivery_dates:
-			if not self.to_date or getdate(date) > getdate(self.to_date):
-				self.to_date = date
+		if dates:
+			self.to_date = max(getdate(date) for date in dates)
 
 	def get_sales_forecast_data(self):
 		if not self.sales_forecast:
@@ -542,7 +549,14 @@ class MasterProductionSchedule(Document):
 		self.enqueue_mrp_creation()
 
 	def enqueue_mrp_creation(self):
-		frappe.enqueue_doc("Master Production Schedule", self.name, "make_mrp", queue="long", timeout=1800)
+		frappe.enqueue_doc(
+			"Master Production Schedule",
+			self.name,
+			"make_mrp",
+			queue="long",
+			timeout=1800,
+			enqueue_after_commit=True,
+		)
 
 		frappe.msgprint(
 			_("MRP Log documents are being created in the background."),

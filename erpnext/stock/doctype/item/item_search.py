@@ -12,28 +12,29 @@ CANDIDATE_LIMIT = 25000
 LIKE_WILDCARDS = r"[%_]"
 BARCODE_COLUMN = "barcodes"
 MINIMUM_SQLITE_VERSION = (3, 34, 0)
-DIACRITICS_SQLITE_VERSION = (3, 45, 0)
+KATAKANA_TO_HIRAGANA = {code: code - 0x60 for code in range(ord("ァ"), ord("ヶ") + 1)}
+SMALL_KANA_TO_FULL_SIZE = str.maketrans(
+	"ぁぃぅぇぉっゃゅょゎゕゖㇰㇱㇲㇳㇴㇵㇶㇷㇸㇹㇺㇻㇼㇽㇾㇿ",
+	"あいうえおつやゆよわかけくしすとぬはひふへほむらりるれろ",
+)
 
 
 def has_trigram_tokenizer() -> bool:
 	return sqlite3.sqlite_version_info >= MINIMUM_SQLITE_VERSION
 
 
-def has_diacritics_option() -> bool:
-	"""The trigram tokenizer takes remove_diacritics from SQLite 3.45 on."""
-	return sqlite3.sqlite_version_info >= DIACRITICS_SQLITE_VERSION
+def fold_text(text: str) -> str:
+	"""Fold what MariaDB's utf8mb4_unicode_ci treats as equal: accents, kana voicing marks,
+	character width, small and full-size kana, katakana with hiragana, and digits of any script."""
+	decomposed = (
+		unicodedata.normalize("NFKD", text).translate(KATAKANA_TO_HIRAGANA).translate(SMALL_KANA_TO_FULL_SIZE)
+	)
+	return "".join(fold_digit(char) for char in decomposed if not unicodedata.combining(char))
 
 
-def get_tokenizer() -> str:
-	return "trigram remove_diacritics 1" if has_diacritics_option() else "trigram"
-
-
-def fold_diacritics(text: str) -> str:
-	"""Strip accents in Python where the tokenizer cannot."""
-	if has_diacritics_option():
-		return text
-
-	return "".join(char for char in unicodedata.normalize("NFKD", text) if not unicodedata.combining(char))
+def fold_digit(char: str) -> str:
+	digit = unicodedata.digit(char, None)
+	return char if digit is None else str(digit)
 
 
 def validate_sqlite_version():
@@ -75,7 +76,7 @@ class ItemSearch(SQLiteSearch):
 			}
 		}
 		self.INDEX_SCHEMA = {
-			"tokenizer": get_tokenizer(),
+			"tokenizer": "trigram",
 			"text_fields": [
 				"title",
 				"content",
@@ -92,40 +93,29 @@ class ItemSearch(SQLiteSearch):
 		return [f for f in fieldnames if f not in ("item_code", "item_name")]
 
 	def index_exists(self) -> bool:
-		"""A table missing a searched column, or built for another SQLite, cannot answer, so it
-		reports itself absent.
+		"""A table missing a searched column cannot answer, so it reports itself absent.
 
 		The searched fields come from the Item meta, so a site that adds one leaves an older table
-		short. A SQLite upgrade or downgrade changes whether the tokenizer or Python folds accents.
-		Callers fall back and the builder replaces it. One connection: this runs on every save.
+		short. Callers fall back and the builder replaces it.
 		"""
 		if not os.path.exists(self.db_path):
 			return False
 
-		columns, definition = self.get_index_table()
-		return (
-			set(self.schema["text_fields"]) <= columns
-			and ("remove_diacritics" in definition) == has_diacritics_option()
-		)
+		return set(self.schema["text_fields"]) <= self.get_index_columns()
 
-	def get_index_table(self) -> tuple[set[str], str]:
-		"""Columns and CREATE statement of the built table, empty when there is no table."""
+	def get_index_columns(self) -> set[str]:
+		"""Columns of the built table, empty when there is no table."""
 		try:
 			connection = self._get_connection(read_only=True)
 		except SQLiteSearchIndexMissingError:
-			return set(), ""
+			return set()
 
 		try:
-			definition = connection.execute(
-				"SELECT sql FROM sqlite_master WHERE name = 'search_fts'"
-			).fetchone()
-			columns = {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
+			return {row["name"] for row in connection.execute("PRAGMA table_info(search_fts)")}
 		except sqlite3.Error:
-			return set(), ""
+			return set()
 		finally:
 			connection.close()
-
-		return columns, definition["sql"] if definition else ""
 
 	def get_documents_paginated(self, doctype, *args, **kwargs):
 		"""Preload the batch's barcodes: reading them per document would be one query each."""
@@ -144,17 +134,17 @@ class ItemSearch(SQLiteSearch):
 		if document is None:
 			return None
 
-		document[BARCODE_COLUMN] = fold_diacritics(self.get_barcode_text(doc.name))
+		document[BARCODE_COLUMN] = fold_text(self.get_barcode_text(doc.name))
 		return document
 
 	def _process_content(self, content):
-		"""Store values verbatim, except accents folded on SQLite older than 3.45.
+		"""Store values verbatim, except for the folding the search term gets too.
 
 		item_query rechecks every candidate with LIKE against the column in MariaDB, so the
 		indexed text has to be what that column holds. The framework's cleaning collapses
 		whitespace and replaces a URL with "[link]", which would lose those rows.
 		"""
-		return "" if content is None else fold_diacritics(str(content))
+		return "" if content is None else fold_text(str(content))
 
 	def get_barcode_text(self, item_code: str) -> str:
 		"""Always a string: a text column left unset drops the document from the index entirely."""
@@ -219,7 +209,7 @@ def build_match_query(txt: str) -> str | None:
 	if "\\" in txt:
 		return None
 
-	fragments = [fold_diacritics(fragment).strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
+	fragments = [fold_text(fragment).strip() for fragment in re.split(LIKE_WILDCARDS, txt)]
 	usable = [fragment for fragment in fragments if len(fragment) >= MINIMUM_TERM_LENGTH]
 	if not usable:
 		return None
@@ -233,7 +223,8 @@ def quote_fragment(fragment: str) -> str:
 
 
 def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
-	"""Barcodes of each item, joined into the one string the index column holds."""
+	"""Barcodes of each item, joined into the one string the index column holds. Empty for an item
+	without any, so a preloaded batch answers for every item in it."""
 	if not item_codes:
 		return {}
 
@@ -243,7 +234,7 @@ def get_barcodes_by_item(item_codes: list[str]) -> dict[str, str]:
 		fields=["parent", "barcode"],
 	)
 
-	barcodes = {}
+	barcodes = dict.fromkeys(item_codes, "")
 	for row in rows:
 		barcodes[row.parent] = f"{barcodes.get(row.parent, '')} {row.barcode}".strip()
 

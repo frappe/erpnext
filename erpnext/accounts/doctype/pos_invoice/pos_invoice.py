@@ -213,9 +213,9 @@ class POSInvoice(SalesInvoice):
 
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
+		self.validate_auto_set_posting_time()
 		self.validate_pos_opening_entry()
 		self.validate_is_pos_using_sales_invoice()
-		self.validate_auto_set_posting_time()
 		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -259,6 +259,9 @@ class POSInvoice(SalesInvoice):
 		self.make_bundle_for_sales_purchase_return()
 		for table_name in ["items", "packed_items"]:
 			self.make_bundle_using_old_serial_batch_fields(table_name)
+
+		self.make_packed_item_bundles()
+		for table_name in ["items", "packed_items"]:
 			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code and self.counts_coupon_use():

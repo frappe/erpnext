@@ -2773,12 +2773,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.insert()
@@ -2789,7 +2789,7 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.items[0].rate = so.items[0].price_list_rate = 0
 		so.save()
 		so.submit()
@@ -2797,7 +2797,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.net_total, 0)
 		self.assertEqual(so.billing_status, "Not Billed")
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.price_list = "_Test Price List"
 		si.items[0].rate = 0
 		si.items[0].price_list_rate = 0
@@ -2821,7 +2821,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.save()
 		so.submit()
 
@@ -2832,7 +2832,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn1.taxes.clear()
 		dn1.save().submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.items[0].delivery_note = dn1.name
@@ -2856,7 +2856,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.per_billed, 100)
 		self.assertEqual(so.per_delivered, 50)
 
-		cr_note = create_sales_invoice(is_return=1, qty=-1, do_not_submit=True)
+		cr_note = create_sales_invoice(is_return=1, qty=-1, uom="_Test UOM", do_not_submit=True)
 		cr_note.items[0].qty = -5
 		cr_note.items[0].sales_order = so.name
 		cr_note.items[0].so_detail = so.items[0].name
@@ -3225,11 +3225,9 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		pe.cancel()
 		pr.reload()
-		self.assertEqual(pr.status, "Paid")  # TODO: this might be a bug
+		self.assertEqual(pr.status, "Requested")
 		so.reload()  # reload
-		# regardless, since the references have already "handed-over" to SI,
-		# the SO keeps its historical state at the time of hand over
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
 
 		pr.cancel()
 		self.assertEqual(
@@ -3947,6 +3945,23 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(serial_nos, serial_nos_in_bundle)
 		self.assertEqual(batch_nos, batches_in_bundle)
+
+	def test_sales_team_disabled_sales_person_blocks_downstream(self):
+		sales_person = "_Test Sales Person 2"
+
+		so = make_sales_order(do_not_save=True)
+		so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		so.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		try:
+			with self.subTest("delivery note against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, so.name)
+
+			with self.subTest("sales invoice against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_sales_invoice, so.name)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
 
 
 def compare_payment_schedules(doc, doc1, doc2):

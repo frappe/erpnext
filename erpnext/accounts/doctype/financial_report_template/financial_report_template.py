@@ -109,6 +109,7 @@ class FinancialReportTemplate(Document):
 		existing_categories = {}
 		if os.path.exists(categories_file):
 			try:
+				# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- module path; writes only in developer mode
 				with open(categories_file) as f:
 					existing_data = json.load(f)
 					existing_categories = {cat["account_category_name"]: cat for cat in existing_data}
@@ -131,6 +132,7 @@ class FinancialReportTemplate(Document):
 
 		# Write to file
 		os.makedirs(os.path.dirname(categories_file), exist_ok=True)
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- module path; writes only in developer mode
 		with open(categories_file, "w") as f:
 			json.dump(sorted_categories, f, indent=2)
 
@@ -184,6 +186,7 @@ def _sync_templates_for(app_name):
 	frappe.flags.in_import = True
 
 	for template_path in templates:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- module path; writes only in developer mode
 		with open(template_path) as f:
 			template_data = frappe._dict(frappe.parse_json(f.read()))
 

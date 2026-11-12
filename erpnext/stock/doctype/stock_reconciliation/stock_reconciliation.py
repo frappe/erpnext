@@ -7,6 +7,7 @@ from datetime import timedelta
 
 import frappe
 from frappe import _, bold, json, msgprint
+from frappe.model.docstatus import DocStatus
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 from frappe.utils.data import DateTimeLikeObject
@@ -14,11 +15,12 @@ from frappe.utils.data import DateTimeLikeObject
 import erpnext
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.batch.batch import get_available_batches, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_available_batches
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	combine_datetime,
 	get_available_serial_nos,
+	get_batch_qty_for_stock,
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -317,6 +319,7 @@ class StockReconciliation(StockController):
 							"warehouse": item.warehouse,
 							"posting_datetime": combine_datetime(self.posting_date, self.posting_time),
 							"ignore_warehouse": 1,
+							"ignore_reserved_stock": True,
 						}
 					)
 				)
@@ -341,6 +344,7 @@ class StockReconciliation(StockController):
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
 							"for_stock_levels": True,
+							"ignore_reserved_stock": True,
 							"ignore_voucher_nos": [self.name],
 						}
 					)
@@ -424,14 +428,15 @@ class StockReconciliation(StockController):
 
 				current_qty = entry.qty
 			else:
-				current_qty = get_batch_qty(
+				current_qty = get_batch_qty_for_stock(
 					entry.batch_no,
 					row.warehouse,
-					row.item_code,
+					item_code=row.item_code,
 					ignore_voucher_nos=[self.name],
 					posting_date=self.posting_date,
 					posting_time=self.posting_time,
 					for_stock_levels=True,
+					ignore_reserved_stock=True,
 					consider_negative_batches=True,
 					do_not_check_future_batches=True,
 				)
@@ -1374,6 +1379,10 @@ class StockReconciliation(StockController):
 
 	def submit(self):
 		if len(self.items) > 100:
+			# the background job loads the document from the database, so save the current version
+			self.check_permission("submit")
+			self.docstatus = DocStatus.draft()
+			self.save()
 			msgprint(
 				_(
 					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage"
@@ -1658,7 +1667,7 @@ def get_stock_balance_for(
 
 	if item_dict.get("has_batch_no"):
 		qty = (
-			get_batch_qty(
+			get_batch_qty_for_stock(
 				batch_no,
 				warehouse,
 				posting_date=posting_date,
@@ -1679,6 +1688,7 @@ def get_stock_balance_for(
 						"posting_datetime": combine_datetime(posting_date, posting_time),
 						"ignore_warehouse": 1,
 						"has_batch_no": 1,
+						"ignore_reserved_stock": True,
 					}
 				)
 			)

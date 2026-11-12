@@ -40,6 +40,22 @@ class TestMaterialRequest(ERPNextTestSuite):
 		mr.save()
 		self.assertEqual(mr.items[0].qty, 1)
 
+	def test_whole_number_stock_qty_must_not_be_fractional(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Kg", "conversion_factor": 0.5}])
+
+		self.assertRaises(
+			UOMMustBeIntegerError,
+			make_material_request,
+			item_code=item.name,
+			qty=3,
+			uom="Kg",
+			conversion_factor=0.5,
+			do_not_submit=1,
+		)
+
 	def test_production_plan_qty_with_repeated_references(self):
 		from unittest.mock import patch
 
@@ -196,6 +212,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 			mr.material_request_type = "Subcontracting"
 			mr.items = mr.items[:1]
 			mr.items[0].item_code = item.name
+			mr.items[0].uom = item.stock_uom
 			self.assertRaises(frappe.ValidationError, mr.insert)
 
 		frappe.db.set_value("Item", stock_item.name, "is_sub_contracted_item", 1)
@@ -669,7 +686,7 @@ class TestMaterialRequest(ERPNextTestSuite):
 				"item_name": "_Test FG Item",
 				"qty": 10,
 				"schedule_date": today(),
-				"uom": "_Test UOM 1",
+				"uom": "_Test UOM",
 				"warehouse": "_Test Warehouse - _TC",
 			},
 		)

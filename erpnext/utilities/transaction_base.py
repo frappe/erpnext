@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, get_time, now_datetime
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.setup.doctype.uom.uom import validate_uoms_are_enabled
 from erpnext.stock.get_item_details import NOT_APPLICABLE_TAX, _get_item_details
 from erpnext.stock.utils import _get_incoming_rate
 
@@ -43,6 +44,9 @@ class TransactionBase(StatusUpdater):
 
 	def validate_uom_is_integer(self, uom_field, qty_fields, child_dt=None):
 		validate_uom_is_integer(self, uom_field, qty_fields, child_dt)
+
+	def validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt, row_filter=None):
+		validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt, row_filter)
 
 	def copy_terms_and_conditions_attachments(self):
 		if (
@@ -101,11 +105,12 @@ class TransactionBase(StatusUpdater):
 			is_child = val.get("is_child_table")
 			ref_doc = {}
 			item_ref_dn = []
+			child_rows = []
 			for d in self.get_all_children(self.doctype + " Item"):
 				ref_dn = d.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:
-						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
+						child_rows.append((ref_dn, d))
 						if ref_dn not in item_ref_dn:
 							item_ref_dn.append(ref_dn)
 						elif not val.get("allow_duplicate_prev_row_id"):
@@ -114,6 +119,12 @@ class TransactionBase(StatusUpdater):
 						ref_doc.setdefault(key, [])
 						if ref_dn not in ref_doc[key]:
 							ref_doc[key].append(ref_dn)
+			if child_rows:
+				prev_doc_detail_map = self.get_prev_doc_reference_details(
+					item_ref_dn, key, val["compare_fields"]
+				)
+				for ref_dn, d in child_rows:
+					self.compare_prev_doc_values(prev_doc_detail_map, key, ref_dn, val["compare_fields"], d)
 			if ref_doc:
 				self.compare_values(ref_doc, val["compare_fields"])
 
@@ -121,13 +132,20 @@ class TransactionBase(StatusUpdater):
 		for reference_doctype, ref_dn_list in ref_doc.items():
 			prev_doc_detail_map = self.get_prev_doc_reference_details(ref_dn_list, reference_doctype, fields)
 			for reference_name in ref_dn_list:
-				prevdoc_values = prev_doc_detail_map.get(reference_name)
-				if not prevdoc_values:
-					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+				self.compare_prev_doc_values(
+					prev_doc_detail_map, reference_doctype, reference_name, fields, doc
+				)
 
-				for field, condition in fields:
-					if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
-						self.validate_value(field, condition, prevdoc_values[field], doc)
+	def compare_prev_doc_values(
+		self, prev_doc_detail_map, reference_doctype, reference_name, fields, doc=None
+	):
+		prevdoc_values = prev_doc_detail_map.get(reference_name)
+		if not prevdoc_values:
+			frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+
+		for field, condition in fields:
+			if prevdoc_values[field] not in [None, ""] and field not in self.exclude_fields:
+				self.validate_value(field, condition, prevdoc_values[field], doc)
 
 	def get_prev_doc_reference_details(self, reference_names, reference_doctype, fields):
 		prev_doc_detail_map = {}
@@ -649,7 +667,9 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, str):
 		qty_fields = [qty_fields]
 
-	integer_uoms = get_whole_number_uoms(d.get(uom_field) for d in doc.get_all_children())
+	uoms = {d.get(uom_field) for d in doc.get_all_children()}
+	validate_uoms_are_enabled(uoms)
+	integer_uoms = get_whole_number_uoms(uoms)
 
 	if not integer_uoms:
 		return
@@ -657,18 +677,50 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	for d in doc.get_all_children(parenttype=child_dt):
 		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
-				qty = d.get(f)
-				if qty:
-					qty = flt(qty, d.precision(f))
-					if qty != cint(qty):
-						frappe.throw(
-							_(
-								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
-							).format(
-								qty,
-								d.idx,
-								frappe.bold(_("Must be Whole Number")),
-								frappe.bold(d.get(uom_field)),
-							),
-							UOMMustBeIntegerError,
-						)
+				validate_qty_is_integer(d.get(f), d.get(uom_field), d.precision(f), d.idx)
+
+
+def validate_item_stock_uom_is_integer(doc, item_field, qty_fields, child_dt, row_filter=None):
+	if isinstance(qty_fields, str):
+		qty_fields = [qty_fields]
+
+	rows = doc.get_all_children(parenttype=child_dt)
+	if row_filter:
+		rows = [d for d in rows if row_filter(d)]
+
+	item_codes = {d.get(item_field) for d in rows if d.get(item_field)}
+	if not item_codes:
+		return
+
+	item_stock_uoms = dict(
+		frappe.get_all(
+			"Item", filters={"name": ["in", item_codes]}, fields=["name", "stock_uom"], as_list=True
+		)
+	)
+	validate_uoms_are_enabled(item_stock_uoms.values())
+	integer_uoms = get_whole_number_uoms(item_stock_uoms.values())
+
+	for d in rows:
+		if stock_uom := item_stock_uoms.get(d.get(item_field)):
+			if stock_uom in integer_uoms:
+				for f in qty_fields:
+					validate_qty_is_integer(d.get(f), stock_uom, d.precision(f), d.idx)
+
+
+def validate_qty_is_integer(qty, uom, precision, row_idx):
+	if not qty:
+		return
+
+	qty = flt(qty, precision)
+	if qty != cint(qty):
+		frappe.throw(
+			_(
+				"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
+			).format(
+				qty,
+				row_idx,
+				frappe.bold(_("Must be Whole Number")),
+				frappe.bold(uom),
+			),
+			UOMMustBeIntegerError,
+		)

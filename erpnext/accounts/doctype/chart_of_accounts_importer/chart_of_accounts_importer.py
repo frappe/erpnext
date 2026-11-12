@@ -132,6 +132,7 @@ def get_file(file_name):
 def generate_data_from_csv(file_doc, as_dict=False):
 	"""read csv file and return the generated nested tree"""
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path comes from a File document or upload
 	with open(file_doc.get_full_path()) as in_file:
 		return generate_data_from_rows(list(csv.reader(in_file)), as_dict)
 
@@ -296,8 +297,10 @@ def build_forest(data):
 
 def build_response_as_excel(writer):
 	filename = frappe.generate_hash("", 10)
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- temporary file with a generated name
 	with open(filename, "wb") as f:
 		f.write(cstr(writer.getvalue()).encode("utf-8"))
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- temporary file with a generated name
 	f = open(filename)
 	reader = csv.reader(f)
 
@@ -362,6 +365,7 @@ def get_template(template_type, company):
 
 def get_sample_template(writer, company):
 	currency = frappe.db.get_value("Company", company, "default_currency")
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 	with open(os.path.join(os.path.dirname(__file__), "coa_sample_template.csv")) as f:
 		for row in f:
 			row = [*row.strip().split(","), currency]
@@ -535,5 +539,9 @@ def set_default_accounts(company):
 	)
 
 	company.save()
+	company.update_default_account = True
+	company.set_default_accounts()
+	if company.default_cash_account:
+		company.set_mode_of_payment_account()
 	install_country_fixtures(company.name, company.country)
 	company.create_default_tax_template()

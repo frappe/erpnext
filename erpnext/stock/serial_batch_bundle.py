@@ -36,6 +36,9 @@ INACTIVE_SERIAL_NO_STOCK_ENTRY_PURPOSES = ("Disassemble", "Material Receipt")
 
 SERIAL_NO_QUERY_BATCH_SIZE = 500
 
+# their bundles only reserve stock; a POS Invoice's bundle moves to its Sales Invoice on consolidation
+RESERVING_VOUCHER_TYPES = ("Pick List", "POS Invoice")
+
 
 def get_serial_no_status(sle):
 	warehouse = sle.warehouse if sle.actual_qty > 0 else None
@@ -210,10 +213,56 @@ class SerialBatchBundle:
 				"is_packed": self.is_packed_entry(),
 				"make_bundle_from_sle": 1,
 				"sle": self.sle,
+				**self.get_entries_held_by_voucher(),
 			}
 		).make_serial_and_batch_bundle()
 
 		self.set_serial_and_batch_bundle(sn_doc)
+
+	def get_entries_held_by_voucher(self):
+		"""Serial nos and batch qty that draft bundles on this voucher's rows hold, to skip when picking."""
+		if self.sle.actual_qty > 0:
+			return {}
+
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		entries = (
+			frappe.qb.from_(bundle)
+			.inner_join(entry)
+			.on(entry.parent == bundle.name)
+			.select(entry.serial_no, entry.batch_no, entry.qty, bundle.warehouse)
+			.where(
+				(
+					bundle.name.isin(self.get_bundles_on_voucher_rows(self.child_doctype))
+					| bundle.name.isin(self.get_bundles_on_voucher_rows("Packed Item"))
+				)
+				& (bundle.item_code == self.item_code)
+				& (bundle.type_of_transaction == "Outward")
+				& (bundle.docstatus == 0)
+			)
+		).run(as_dict=True)
+
+		held_batches = frappe._dict()
+		for row in entries:
+			if row.batch_no:
+				held = held_batches.setdefault(
+					(row.batch_no, row.warehouse),
+					frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=0),
+				)
+				held.qty += row.qty
+
+		return {
+			"ignore_serial_nos": [row.serial_no for row in entries if row.serial_no],
+			"already_picked_batches": held_batches,
+		}
+
+	def get_bundles_on_voucher_rows(self, doctype):
+		row = frappe.qb.DocType(doctype)
+		return (
+			frappe.qb.from_(row)
+			.select(row.serial_and_batch_bundle)
+			.where((row.parenttype == self.sle.voucher_type) & (row.parent == self.sle.voucher_no))
+		)
 
 	def validate_actual_qty(self, sn_doc):
 		link = get_link_to_form("Serial and Batch Bundle", sn_doc.name)
@@ -485,7 +534,10 @@ class SerialBatchBundle:
 		if (
 			self.sle.voucher_type == "Sales Invoice"
 			and self.sle.serial_and_batch_bundle
-			and voucher_type == "POS Invoice"
+			and (
+				voucher_type == "POS Invoice"
+				or frappe.get_cached_value("Sales Invoice", self.sle.voucher_no, "is_consolidated")
+			)
 		):
 			return True
 
@@ -799,7 +851,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 
 def is_rejected(voucher_type, voucher_detail_no, warehouse):
-	if voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 		return warehouse == frappe.get_cached_value(
 			voucher_type + " Item", voucher_detail_no, "rejected_warehouse"
 		)
@@ -1335,6 +1387,9 @@ class SerialBatchCreation:
 
 		if self.get("already_picked_batches"):
 			kwargs["already_picked_batches"] = self.already_picked_batches
+			if self.get("voucher_type") == "POS Invoice":
+				# a submitted POS Invoice's own reserved batch qty is already in already_picked_batches
+				kwargs["ignore_voucher_nos"] = [self.voucher_no]
 
 		kwargs.update(self.get_reservation_kwargs())
 

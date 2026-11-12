@@ -13,6 +13,7 @@ from frappe.utils import cint, flt, get_link_to_form, today
 from frappe.utils.data import DateTimeLikeObject, add_days
 
 import erpnext
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_batch_qty_for_stock
 
 
 class UnableToSelectBatchError(frappe.ValidationError):
@@ -154,6 +155,7 @@ class Batch(Document):
 	def validate(self):
 		self.item_has_batch_enabled()
 		self.set_batchwise_valuation()
+		self.validate_from_to_dates("manufacturing_date", "expiry_date")
 
 	def item_has_batch_enabled(self):
 		if frappe.db.get_value("Item", self.item, "has_batch_no") == 0:
@@ -163,7 +165,7 @@ class Batch(Document):
 	def recalculate_batch_qty(self):
 		self.check_permission("write")
 
-		batches = get_batch_qty(
+		batches = get_batch_qty_for_stock(
 			batch_no=self.name,
 			item_code=self.item,
 			for_stock_levels=True,
@@ -285,40 +287,36 @@ def get_batch_qty(
 
 	frappe.has_permission("Batch", "select", throw=True)
 
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-		combine_datetime,
-		get_auto_batch_nos,
+	if warehouse:
+		erpnext.require_user_permission("Warehouse", warehouse)
+
+	batches = get_batch_qty_for_stock(
+		batch_no=batch_no,
+		warehouse=warehouse,
+		item_code=item_code,
+		creation=creation,
+		posting_datetime=posting_datetime,
+		posting_date=posting_date,
+		posting_time=posting_time,
+		ignore_voucher_nos=ignore_voucher_nos,
+		for_stock_levels=for_stock_levels,
+		consider_negative_batches=consider_negative_batches,
+		do_not_check_future_batches=do_not_check_future_batches,
+		ignore_reserved_stock=ignore_reserved_stock,
 	)
 
-	batchwise_qty = defaultdict(float)
-	kwargs = frappe._dict(
-		{
-			"item_code": item_code,
-			"warehouse": warehouse,
-			"creation": creation,
-			"batch_no": batch_no,
-			"based_on": frappe.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
-			"ignore_voucher_nos": ignore_voucher_nos,
-			"for_stock_levels": for_stock_levels,
-			"consider_negative_batches": consider_negative_batches,
-			"do_not_check_future_batches": do_not_check_future_batches,
-			"ignore_reserved_stock": ignore_reserved_stock,
-		}
-	)
-
-	kwargs["posting_datetime"] = posting_datetime
-	if not kwargs.get("posting_datetime") and posting_date:
-		kwargs["posting_datetime"] = combine_datetime(posting_date, posting_time)
-
-	batches = get_auto_batch_nos(kwargs)
-
-	if not (batch_no and warehouse):
+	if warehouse or not batches:
 		return batches
 
-	for batch in batches:
-		batchwise_qty[batch.get("batch_no")] += batch.get("qty")
-
-	return batchwise_qty[batch_no]
+	warehouses = set(
+		frappe.get_list(
+			"Warehouse",
+			filters={"name": ("in", {row.warehouse for row in batches})},
+			pluck="name",
+			limit=0,
+		)
+	)
+	return [row for row in batches if row.warehouse in warehouses]
 
 
 @frappe.whitelist()
@@ -453,7 +451,8 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 def make_batch(kwargs):
 	if frappe.db.get_value("Item", kwargs.item, "has_batch_no"):
 		kwargs.doctype = "Batch"
-		return frappe.get_doc(kwargs).insert().name
+		# auto-created like serial nos, so the voucher's user needs no Batch permissions
+		return frappe.get_doc(kwargs).insert(ignore_permissions=True).name
 
 
 @frappe.whitelist()

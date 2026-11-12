@@ -20,6 +20,7 @@ from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.controllers.accounts_controller import _get_taxes_and_charges, merge_taxes
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -520,6 +521,8 @@ class DeliveryNote(SellingController):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
 		self.validate_standalone_serial_nos_customer()
+		# reservations read the delivered serial and batch nos from the bundles
+		self.make_packed_item_bundles()
 		self.update_stock_reservation_entries()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -1437,6 +1440,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			)
 
 		target_doc.inter_company_invoice_reference = source_doc.name
+		clear_inapplicable_terms(target_doc)
 		if target_doc.doctype == "Purchase Receipt":
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
