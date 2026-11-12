@@ -1305,7 +1305,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 	def test_purchase_user_can_submit_receipt_of_an_item_that_auto_creates_batches(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from erpnext.manufacturing.doctype.bom.test_bom import make_user_with_roles
 
 		item = make_item(
 			properties={
@@ -1315,7 +1315,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 				"batch_number_series": "PUAB-.#####",
 			}
 		).name
-		user = create_user("pr-purchase-user@example.com", "Purchase User").name
+		user = make_user_with_roles("pr-purchase-user@example.com", "Purchase User")
 		with self.set_user(user):
 			pr = make_purchase_receipt(item_code=item, qty=1)
 
