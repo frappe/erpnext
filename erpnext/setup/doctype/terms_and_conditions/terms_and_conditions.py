@@ -163,6 +163,15 @@ def validate_terms_and_conditions(template_name, module=None):
 		)
 
 
+def clear_inapplicable_terms(doc):
+	"""Clear a template mapped from the other side, and the terms rendered from it."""
+	module = get_terms_module(doc)
+	tc_name = doc.get("tc_name")
+	if module and tc_name and not cint(frappe.get_cached_value("Terms and Conditions", tc_name, module)):
+		doc.tc_name = None
+		doc.terms = None
+
+
 def get_terms_module(doc):
 	doctype = doc.get("doctype")
 	if doctype in (

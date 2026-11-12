@@ -2289,6 +2289,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			frappe.db.get_value("Purchase Order", po.name, "inter_company_order_reference"), so.name
 		)
 
+	def test_internal_sales_order_drops_buying_only_terms(self):
+		frappe.get_doc(
+			doctype="Terms and Conditions", title="_Test Buy Only Terms", buying=1, selling=0, terms="FOB"
+		).insert()
+		po = make_internal_purchase_order(do_not_submit=True)
+		po.tc_name = "_Test Buy Only Terms"
+		po.submit()
+
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		so.insert()
+
+		self.assertFalse(so.tc_name)
+		self.assertFalse(so.terms)
+
 	def test_internal_sales_order_maps_only_open_unordered_rows_of_submitted_po(self):
 		draft_po = make_internal_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_inter_company_sales_order, draft_po.name)
