@@ -925,7 +925,11 @@ erpnext.work_order = {
 
 				if (!frm.doc.skip_transfer) {
 					if (flt(doc.material_transferred_for_manufacturing) > 0) {
-						if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
+						let remaining_qty =
+							flt(doc.material_transferred_for_manufacturing) -
+							flt(doc.produced_qty) -
+							flt(doc.process_loss_qty);
+						if (remaining_qty > 0) {
 							frm.has_finish_btn = true;
 
 							let finish_btn = frm.add_custom_button(__("Finish"), function () {
@@ -935,18 +939,6 @@ erpnext.work_order = {
 							if (doc.material_transferred_for_manufacturing >= doc.qty) {
 								// all materials transferred for manufacturing, make this primary
 								finish_btn.addClass("btn-primary");
-							}
-						} else if (frm.doc.__onload && frm.doc.__onload.overproduction_percentage) {
-							let allowance_percentage = frm.doc.__onload.overproduction_percentage;
-
-							if (allowance_percentage > 0) {
-								let allowed_qty = frm.doc.qty + (allowance_percentage / 100) * frm.doc.qty;
-
-								if (flt(doc.produced_qty) < allowed_qty) {
-									frm.add_custom_button(__("Finish"), function () {
-										erpnext.work_order.make_se(frm, "Manufacture");
-									});
-								}
 							}
 						}
 					}
