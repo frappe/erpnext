@@ -617,7 +617,9 @@ class TestTask(ERPNextTestSuite):
 		own_project, other_project, user = make_project_access_fixtures("Task Web Form")
 		task = insert_completed_task("_Test Web Form Task", other_project)
 		frappe.db.set_value("Task", task.name, "owner", user)
-		move_out = {"doctype": "Task", "name": task.name, "subject": task.subject, "project": own_project}
+		move_out = frappe.as_json(
+			{"doctype": "Task", "name": task.name, "subject": task.subject, "project": own_project}
+		)
 
 		try:
 			with as_user(user):

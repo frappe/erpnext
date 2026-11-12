@@ -7,20 +7,12 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
 from frappe.query_builder.functions import Coalesce, Date
-from frappe.utils import cstr, flt, get_datetime, getdate, nowdate
-from frappe.utils.deprecations import deprecated
-
-from erpnext import _refuse
-from erpnext.controllers.queries import get_match_cond
-=======
-from frappe.query_builder.functions import Coalesce, Concat, Date, Round
 from frappe.utils import cint, cstr, flt, get_datetime, getdate, nowdate
 from frappe.utils.deprecations import deprecated
 
 from erpnext import _refuse, require_permission
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
+from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 
 

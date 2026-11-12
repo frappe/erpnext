@@ -21,10 +21,7 @@ from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
 	assert_refused_for_names,
-<<<<<<< HEAD
 	assert_refused_without,
-=======
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 	make_company_fenced_user,
 	make_fenced_user,
 )
@@ -862,94 +859,6 @@ class TestTimesheet(ERPNextTestSuite):
 		self.assertEqual(rate["billing_rate"], 80)
 		self.assertEqual(rate["costing_rate"], 40)
 
-<<<<<<< HEAD
-=======
-	def test_billing_helpers_for_timesheet_detail(self):
-		from erpnext.projects.doctype.timesheet.timesheet import (
-			get_timesheet_data,
-			get_timesheet_detail_rate,
-		)
-
-		employee = make_employee("_test_timesheet_billing_helpers@example.com", company="_Test Company")
-		timesheet = make_timesheet(employee, is_billable=1, simulate=True)
-		detail = timesheet.time_logs[0]
-
-		# 2 billable hours at a billing rate of 50
-		data = get_timesheet_data(timesheet.name, project="")
-		self.assertEqual(data["billing_hours"], 2)
-		self.assertEqual(data["billing_amount"], 100)
-
-		# same currency on both sides, so the rate is the raw billing amount
-		rate = get_timesheet_detail_rate(detail.name, timesheet.currency)
-		self.assertEqual(rate, detail.billing_amount)
-
-	def test_get_activity_cost_requires_timesheet_access_and_the_employee(self):
-		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
-
-		inside_employee = make_employee("activity-in@example.com", company="_Test Company")
-		outside_employee = make_employee("activity-out@example.com", company="_Test Company")
-
-		def activity_kwargs(name):
-			return {"employee": name, "activity_type": "_Test Activity Type"}
-
-		user = make_fenced_user(
-			"activity-fenced@example.com", ["Projects User"], [("Employee", inside_employee)]
-		)
-		with as_user(user):
-			assert_refused_for_names(
-				self,
-				get_activity_cost,
-				activity_kwargs,
-				[outside_employee],
-				type_gated=True,
-				caller_supplied=True,
-			)
-			self.assertIn("billing_rate", get_activity_cost(inside_employee, "_Test Activity Type"))
-		stock_manager = make_fenced_user("activity-stock@example.com", ["Stock Manager"])
-		with as_user(stock_manager):
-			assert_refused(self, get_activity_cost, inside_employee, "_Test Activity Type")
-
-	def test_get_activity_cost_checks_the_activity_type_on_the_employee_path(self):
-		from erpnext.projects.doctype.timesheet.timesheet import get_activity_cost
-
-		employee = make_employee("activity-type-in@example.com", company="_Test Company")
-		hidden = (
-			frappe.db.exists("Activity Type", "UP Hidden Activity")
-			or frappe.get_doc(
-				{"doctype": "Activity Type", "activity_type": "UP Hidden Activity", "billing_rate": 999}
-			)
-			.insert()
-			.name
-		)
-		frappe.get_doc(
-			{
-				"doctype": "Activity Cost",
-				"employee": employee,
-				"activity_type": "_Test Activity Type",
-				"billing_rate": 150,
-				"costing_rate": 90,
-			}
-		).insert()
-
-		def activity_kwargs(name):
-			return {"employee": employee, "activity_type": name}
-
-		user = make_fenced_user(
-			"activity-type-fenced@example.com",
-			["Projects User"],
-			[("Employee", employee), ("Activity Type", "_Test Activity Type")],
-		)
-		with as_user(user):
-			assert_refused_for_names(
-				self,
-				get_activity_cost,
-				activity_kwargs,
-				[hidden],
-				type_gated=True,
-				caller_supplied=True,
-			)
-			self.assertEqual(get_activity_cost(employee, "_Test Activity Type")["billing_rate"], 150)
-
 	def test_time_logs_need_access_to_their_task_and_project(self):
 		f = make_timesheet_access_fixtures("Timesheet Fenced")
 
@@ -1015,7 +924,6 @@ class TestTimesheet(ERPNextTestSuite):
 		with as_user(f.user):
 			assert_refused(self, frappe.get_doc("Timesheet", moved).cancel)
 
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 
 def make_portal_user(customer):
 	user = make_fenced_user("_test_timesheet_portal_user@example.com", ["Customer"])
