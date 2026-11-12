@@ -122,6 +122,24 @@ class TestVideo(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, make_video, "Test Bad URL", "https://www.youtube.com/")
 
+	def test_non_youtube_url_must_be_a_web_link(self):
+		with self.set_user(make_desk_user()):
+			self.assert_non_youtube_urls()
+
+	def assert_non_youtube_urls(self):
+		for title, url in (
+			("Test Vimeo Link", "https://vimeo.com/76979871"),
+			("Test Drive Link", "https://drive.google.com/file/d/abc123/view"),
+		):
+			self.assertEqual(make_video(title, url, provider="Vimeo").url, url)
+
+		for url in (
+			'V01X" style="animation:spinner-border 1s" onanimationstart="alert(1)',
+			"javascript:alert(1)",
+			'https://x" onmouseover="alert(1)',
+		):
+			self.assertRaises(frappe.ValidationError, make_video, "Test Bad Link", url, provider="Vimeo")
+
 	def test_batch_update_needs_video_settings_permission(self):
 		user = frappe.get_doc(
 			{
@@ -140,3 +158,19 @@ def make_video(title: str, url: str, provider: str = "YouTube"):
 	return frappe.get_doc(
 		{"doctype": "Video", "title": title, "provider": provider, "url": url, "description": "Test"}
 	).insert()
+
+
+def make_desk_user():
+	return (
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "test-video-desk-user@example.com",
+				"first_name": "Test Video Desk",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Stock User"}],
+			}
+		)
+		.insert(ignore_if_duplicate=True)
+		.name
+	)
