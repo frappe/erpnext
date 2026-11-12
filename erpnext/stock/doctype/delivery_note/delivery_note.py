@@ -530,15 +530,12 @@ class DeliveryNote(SellingController):
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
 		self.validate_standalone_serial_nos_customer()
-<<<<<<< HEAD
 
 		if not self.is_return:
 			self.validate_reserved_stock()
 
-=======
 		# reservations read the delivered serial and batch nos from the bundles
 		self.make_packed_item_bundles()
->>>>>>> c4b94b8 (fix(stock): make packed rows' bundles before updating stock reservations)
 		self.update_stock_reservation_entries()
 
 		# Updating stock ledger should always be called after updating prevdoc status,

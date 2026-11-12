@@ -1822,7 +1822,7 @@ class TestDeliveryNote(FrappeTestCase):
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_packed_row_skips_batch_qty_of_a_packed_row_bundle_set_on_the_draft(self):
 		component = make_item(
 			properties={
@@ -1865,7 +1865,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertNotEqual(get_batch_from_bundle(dn.packed_items[1].serial_and_batch_bundle), first_batch)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1895,7 +1895,7 @@ class TestDeliveryNote(FrappeTestCase):
 			-2,
 		)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
@@ -1921,7 +1921,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
 		self.assertRaises(BatchExpiredError, dn.submit)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
