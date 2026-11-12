@@ -28,7 +28,7 @@ from erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost import 
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.stock.utils import get_bin
+from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 	update_subcontracting_order_status,
@@ -250,6 +250,40 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco = get_subcontracting_order(do_not_submit=1)
 		sco.supplied_items[0].reserve_warehouse = sco.supplier_warehouse
 		self.assertRaises(frappe.ValidationError, sco.validate_supplied_items)
+
+	def test_warehouses_must_belong_to_the_order_company(self):
+		other_company_warehouse = "_Test Warehouse 2 - _TC1"
+		for fieldname in ("warehouse", "set_reserve_warehouse", "supplier_warehouse"):
+			sco = get_subcontracting_order(do_not_save=1)
+			if fieldname == "warehouse":
+				sco.set_warehouse = None
+				sco.items[0].warehouse = other_company_warehouse
+			else:
+				sco.set(fieldname, other_company_warehouse)
+			self.assertRaises(InvalidWarehouseCompany, sco.insert)
+
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse - _TC"
+		sco.insert()
+		self.assertEqual(sco.supplied_items[0].reserve_warehouse, "_Test Warehouse - _TC")
+
+	def test_receipt_supplier_warehouse_must_belong_to_the_receipt_company(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.supplier_warehouse = "_Test Warehouse 1 - _TC"
+		scr.reset_raw_materials()
+		raw_material = scr.supplied_items[0].rm_item_code
+		make_stock_entry(item_code=raw_material, qty=7, target="_Test Warehouse 1 - _TC", basic_rate=100)
+		scr.get_current_stock()
+		expected = frappe.db.get_value(
+			"Bin", {"item_code": raw_material, "warehouse": "_Test Warehouse 1 - _TC"}, "actual_qty"
+		)
+		self.assertEqual(scr.supplied_items[0].current_stock, expected)
+
+		scr.supplier_warehouse = "_Test Warehouse 2 - _TC1"
+		self.assertRaises(InvalidWarehouseCompany, scr.get_current_stock)
+		self.assertRaises(InvalidWarehouseCompany, scr.reset_raw_materials)
 
 	def test_subcontracting_receipt_applies_bom_process_loss(self):
 		sco = get_subcontracting_order()
