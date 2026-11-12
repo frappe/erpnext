@@ -1900,7 +1900,7 @@ class TestDeliveryNote(FrappeTestCase):
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	def test_packed_row_bundle_made_at_submit_rejects_an_expired_batch(self):
-		from erpnext.exceptions import BatchExpiredError
+		from erpnext.controllers.stock_controller import BatchExpiredError
 
 		component = make_item(
 			properties={
