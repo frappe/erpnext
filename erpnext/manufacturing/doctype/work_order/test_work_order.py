@@ -8518,6 +8518,33 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, make_stock_entry, restricted.name, "Manufacture")
 			self.assertRaises(frappe.PermissionError, make_stock_return_entry, restricted.name)
 
+	def test_default_warehouse_follows_company_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
+
+		frappe.db.set_value("Company", "_Test Company", "default_wip_warehouse", "_Test Warehouse - _TC")
+		user = create_user("wo-default-warehouse-planner@example.com", "Manufacturing User")
+		add_user_permission("Company", "_Test Company", user.name)
+		website_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "wo-default-warehouse-website@example.com",
+				"first_name": "Website",
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(user.name):
+			defaults = get_default_warehouse("_Test Company")
+			self.assertRaises(frappe.PermissionError, get_default_warehouse, "_Test Company 1")
+
+		self.assertEqual(defaults["wip_warehouse"], "_Test Warehouse - _TC")
+		with self.set_user(website_user.name):
+			self.assertRaises(frappe.PermissionError, get_default_warehouse, "_Test Company")
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_qty_change_scales_a_normal_row_of_a_repeated_fixed_operation(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
