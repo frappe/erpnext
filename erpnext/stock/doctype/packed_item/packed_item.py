@@ -465,7 +465,9 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	# keep the serial nos picked on the packed row for a partial delivery
 	if not pi_row.serial_no:
 		delivered = (
-			get_delivered_component_serial_nos(main_item_row, pl_row) if pl_row.delivered_qty else set()
+			get_delivered_component_serial_nos(main_item_row, pl_row)
+			if pl_row.serial_no and pl_row.delivered_qty
+			else set()
 		)
 		pi_row.serial_no = get_pending_serial_nos(pl_row, {pl_row.name: delivered})
 
