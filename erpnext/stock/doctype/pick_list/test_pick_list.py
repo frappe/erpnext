@@ -1351,6 +1351,25 @@ class TestPickList(ERPNextTestSuite):
 		pick_list.locations[0].serial_and_batch_bundle = None
 		self.assert_delivers_picked_serial_nos(component, pick_list)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_invoice_from_pick_list_keeps_the_picked_warehouse_and_serial_nos(self):
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBSI-.#####"}
+		).name
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=2, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+
+		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=2)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		sales_invoice = create_delivery(pick_list.name, target="Sales Invoice")
+		sales_invoice.save()
+
+		packed_item = sales_invoice.packed_items[0]
+		self.assertEqual(packed_item.warehouse, "_Test Warehouse 1 - _TC")
+		self.assertEqual(packed_item.serial_no, pick_list.locations[0].serial_no)
+
 	def make_serialized_bundle_pick_list(self):
 		"""Draft Pick List for a bundle of 2 serialized components, with 5 in stock."""
 		warehouse = "_Test Warehouse - _TC"
