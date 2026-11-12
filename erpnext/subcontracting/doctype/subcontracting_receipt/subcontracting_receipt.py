@@ -940,13 +940,14 @@ class SubcontractingReceipt(SubcontractingController):
 					continue
 
 				order_row = order_rows.setdefault(
-					(order_item, bom_item.bom_detail_no), frappe._dict(bom_item=bom_item, received_qty=0.0)
+					(order_item, row.bom, bom_item.bom_detail_no),
+					frappe._dict(row=row, bom_item=bom_item, received_qty=0.0),
 				)
 				order_row.received_qty += get_received_stock_qty(row)
 
-		for (order_item, _bom_detail_no), order_row in order_rows.items():
+		for order_row in order_rows.values():
 			rm_dict[order_row.bom_item.rm_item_code].qty += self.get_cumulative_bom_qty(
-				order_item, order_row.bom_item, order_row.received_qty, earlier_receipts
+				order_row.row, order_row.bom_item, order_row.received_qty, earlier_receipts
 			)
 
 		return rm_dict

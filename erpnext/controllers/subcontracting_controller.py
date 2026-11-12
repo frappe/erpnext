@@ -1235,7 +1235,7 @@ class SubcontractingController(StockController):
 		return {(d.parent, d.item_code): d.source_warehouse for d in rows}
 
 	def get_earlier_receipts_bom_consumption(self):
-		"""Received stock qty and consumed qty by (order row, BOM row) of the other submitted receipts
+		"""Received stock qty and consumed qty by (order row, BOM, BOM row) of the other submitted receipts
 		that backflushed on the BOM."""
 		if (
 			self.doctype != "Subcontracting Receipt"
@@ -1266,6 +1266,7 @@ class SubcontractingController(StockController):
 				fields=[
 					"name",
 					"subcontracting_order_item",
+					"bom",
 					"received_qty",
 					"qty",
 					"rejected_qty",
@@ -1290,7 +1291,7 @@ class SubcontractingController(StockController):
 
 		for (receipt_item, bom_detail_no), qty in consumed_qty.items():
 			row = receipt_items[receipt_item]
-			key = (row.subcontracting_order_item, bom_detail_no)
+			key = (row.subcontracting_order_item, row.bom, bom_detail_no)
 			earlier.received_qty[key] += get_received_stock_qty(row)
 			earlier.consumed_qty[key] += qty
 
@@ -1303,7 +1304,9 @@ class SubcontractingController(StockController):
 			return flt(bom_item.qty_consumed_per_unit) * get_received_stock_qty(row)
 
 		earlier_rows = [
-			d for d in self.items if d.idx < row.idx and d.get("subcontracting_order_item") == order_item
+			d
+			for d in self.items
+			if d.idx < row.idx and d.get("subcontracting_order_item") == order_item and d.bom == row.bom
 		]
 		earlier_names = {d.name for d in earlier_rows}
 		received_qty = sum(get_received_stock_qty(d) for d in [*earlier_rows, row])
@@ -1312,15 +1315,13 @@ class SubcontractingController(StockController):
 			for d in self.get(self.raw_material_table)
 			if d.reference_name in earlier_names and d.bom_detail_no == bom_item.bom_detail_no
 		)
-		return (
-			self.get_cumulative_bom_qty(order_item, bom_item, received_qty, earlier_receipts) - consumed_qty
-		)
+		return self.get_cumulative_bom_qty(row, bom_item, received_qty, earlier_receipts) - consumed_qty
 
-	def get_cumulative_bom_qty(self, order_item, bom_item, received_qty, earlier_receipts):
-		"""BOM qty of all that an order row received with ``received_qty``, less what earlier receipts consumed,
-		so rounding per receipt does not add up."""
+	def get_cumulative_bom_qty(self, row, bom_item, received_qty, earlier_receipts):
+		"""BOM qty of all that a row's order row received on its BOM with ``received_qty``, less what earlier
+		receipts consumed, so rounding per receipt does not add up."""
 		precision = frappe.get_precision(self.subcontract_data.receipt_supplied_items_field, "consumed_qty")
-		key = (order_item, bom_item.bom_detail_no)
+		key = (row.subcontracting_order_item, row.bom, bom_item.bom_detail_no)
 		total_received_qty = earlier_receipts.received_qty[key] + received_qty
 		return (
 			flt(flt(bom_item.qty_consumed_per_unit) * total_received_qty, precision)
