@@ -1266,7 +1266,11 @@ erpnext.work_order = {
 		});
 	},
 
-	show_prompt_for_qty_input: function (frm, purpose, { qty, additional_transfer_entry, target } = {}) {
+	show_prompt_for_qty_input: function (
+		frm,
+		purpose,
+		{ qty, additional_transfer_entry, target, allow_zero_qty } = {}
+	) {
 		let max = qty == null ? this.get_max_transferable_qty(frm, purpose) : qty;
 		if (purpose === "Manufacture") {
 			max = flt(Math.max(max - flt(frm.doc.process_loss_qty), 0), precision("qty"));
@@ -1319,7 +1323,13 @@ erpnext.work_order = {
 				(data) => {
 					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
 
-					if (!data.qty || data.qty <= 0) {
+					if (data.qty < 0) {
+						frappe.msgprint(__("Quantity cannot be negative."));
+						reject();
+						return;
+					}
+					// 0 transfers every pending raw material
+					if (!data.qty && !allow_zero_qty) {
 						frappe.msgprint(__("Quantity must be greater than zero."));
 						reject();
 						return;
@@ -1365,7 +1375,9 @@ erpnext.work_order = {
 					frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
 				});
 		} else {
-			this.show_prompt_for_qty_input(frm, purpose)
+			this.show_prompt_for_qty_input(frm, purpose, {
+				allow_zero_qty: purpose === "Material Transfer for Manufacture",
+			})
 				.then((data) => {
 					return frappe.xcall("erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry", {
 						work_order_id: frm.doc.name,
