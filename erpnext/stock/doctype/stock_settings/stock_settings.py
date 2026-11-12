@@ -16,6 +16,7 @@ from erpnext.stock.utils import check_pending_reposting
 BOOT_FIELDS = (
 	"disable_serial_no_and_batch_selector",
 	"sample_retention_warehouse",
+	"pick_serial_and_batch_based_on",
 )
 
 
