@@ -165,9 +165,9 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_team_members(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.get_values(
-		"Maintenance Team Member", {"parent": filters.get("maintenance_team")}, "team_member"
-	)
+	team = filters.get("maintenance_team")
+	frappe.has_permission("Asset Maintenance Team", "select", team, throw=True)
+	return frappe.db.get_values("Maintenance Team Member", {"parent": team}, "team_member")
 
 
 @frappe.whitelist()
