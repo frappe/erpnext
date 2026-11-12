@@ -1486,7 +1486,11 @@ class update_entries_after:
 
 		if (
 			not self.args.get("sle_id")
-			or (sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle)
+			# Stock Entry recalculates its amounts only for bundles picked while posting
+			or (
+				sle.serial_and_batch_bundle
+				and (sle.auto_created_serial_and_batch_bundle or sle.voucher_type != "Stock Entry")
+			)
 			or self.is_outward_internal_transfer_leg(sle)
 		):
 			self.update_outgoing_rate_on_transaction(sle)
