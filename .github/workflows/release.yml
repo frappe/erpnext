@@ -7,6 +7,8 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    concurrency:
+      group: release-${{ github.ref_name }}
     steps:
       - name: Checkout Entire Repository
         uses: actions/checkout@v4
@@ -41,6 +43,7 @@ jobs:
           GIT_COMMITTER_EMAIL: "346168705+frappe-release-bot[bot]@users.noreply.github.com"
         run: npx semantic-release
       - name: Comment on released pull requests
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
