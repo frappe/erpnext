@@ -2089,15 +2089,17 @@ def get_serial_nos_in_stock(locations, moved_qty_field="delivered_qty"):
 
 
 def get_pending_serial_nos(location, serial_nos_in_stock, moved_qty_field="delivered_qty"):
-	"""Drop the serial nos that earlier deliveries or transfers of a partly moved row took."""
+	"""Return the serial nos a partly moved row still has to move, capped at its pending qty."""
 	if not location.get(moved_qty_field):
 		return location.serial_no
 
-	return "\n".join(
+	pending_serial_nos = [
 		number
 		for number in get_serial_nos(location.serial_no)
 		if (location.item_code, number.lower(), location.warehouse) in serial_nos_in_stock
-	)
+	]
+	pending_qty = max(cint(flt(location.picked_qty) - flt(location.get(moved_qty_field))), 0)
+	return "\n".join(pending_serial_nos[:pending_qty])
 
 
 def add_product_bundles_to_delivery_note(
