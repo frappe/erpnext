@@ -889,15 +889,15 @@ class AccountsController(TransactionBase):
 
 		try:
 			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
-		except TemplateError as e:
-			if raise_exception:
-				raise
-			# loading or printing a draft must not fail on a template it cannot render
-			frappe.msgprint(
-				_("Terms and Conditions {0} could not be rendered: {1}").format(frappe.bold(self.tc_name), e),
-				indicator="orange",
-				alert=True,
+		except (TemplateError, TypeError) as e:
+			# TypeError: a helper called with arguments the terms sandbox does not take
+			message = _("Terms and Conditions {0} could not be rendered: {1}").format(
+				frappe.bold(self.tc_name), e
 			)
+			if raise_exception:
+				frappe.throw(message)
+			# loading or printing a draft must not fail on a template it cannot render
+			frappe.msgprint(message, indicator="orange", alert=True)
 
 	def set_missing_terms_for_display(self):
 		"""Render missing terms to show or print, leaving them empty if they cannot be rendered."""
