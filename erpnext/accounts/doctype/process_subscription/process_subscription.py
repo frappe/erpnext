@@ -26,14 +26,7 @@ class ProcessSubscription(Document):
 		self.process_all_subscription()
 
 	def process_all_subscription(self):
-		filters = {"status": ("!=", "Cancelled")}
-
-		if self.subscription:
-			filters["name"] = self.subscription
-
-		subscriptions = frappe.get_all("Subscription", filters, pluck="name")
-
-		for subscription in create_batch(subscriptions, 500):
+		for subscription in create_batch(self.get_subscriptions(), 500):
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.subscription.subscription.process_all",
 				queue="long",
@@ -41,6 +34,13 @@ class ProcessSubscription(Document):
 				posting_date=self.posting_date,
 				enqueue_after_commit=True,
 			)
+
+	def get_subscriptions(self):
+		filters = {"status": ("!=", "Cancelled")}
+		if self.subscription:
+			filters["name"] = self.subscription
+
+		return frappe.get_list("Subscription", filters=filters, pluck="name")
 
 
 def create_subscription_process(

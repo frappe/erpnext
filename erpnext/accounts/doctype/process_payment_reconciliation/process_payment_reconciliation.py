@@ -82,6 +82,7 @@ class ProcessPaymentReconciliation(Document):
 def get_reconciled_count(docname: str | None = None) -> float:
 	current_status = {}
 	if docname:
+		frappe.has_permission("Process Payment Reconciliation", "read", doc=docname, throw=True)
 		reconcile_log = frappe.db.get_value(
 			"Process Payment Reconciliation Log", filters={"process_pr": docname}, fieldname="name"
 		)
