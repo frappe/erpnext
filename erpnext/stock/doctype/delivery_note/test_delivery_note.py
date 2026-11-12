@@ -1990,6 +1990,37 @@ class TestDeliveryNote(ERPNextTestSuite):
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_covering_a_fractional_stock_qty_exactly(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRFQ-.#####",
+				"stock_uom": "Kg",
+			},
+			uoms=[{"uom": "Box", "conversion_factor": 0.1}],
+		)
+		se = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(item_code=item.name, qty=0.7, do_not_save=True)
+		dn.items[0].update({"uom": "Kg", "batch_no": batch, "use_serial_batch_fields": 1})
+		# 3 x 0.1 is 0.30000000000000004, the 0.3 left in the batch
+		dn.append(
+			"items",
+			{**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 3, "uom": "Box", "batch_no": None},
+		)
+		dn.items[1].update({"conversion_factor": 0.1, "stock_qty": None})
+		dn.insert()
+
+		self.assertEqual(dn.items[1].batch_no, batch)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_batch_counts_the_current_qty_of_a_row_with_stale_stock_qty(self):
 		item = make_item(
 			properties={
