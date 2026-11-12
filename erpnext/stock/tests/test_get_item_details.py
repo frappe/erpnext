@@ -684,7 +684,7 @@ class TestGetItemDetail(FrappeTestCase):
 
 		return item_code, batches
 
-	def get_item_details_for_row(self, item_code, qty, items=None, batch_no=None):
+	def get_item_details_for_row(self, item_code, qty, items=None, batch_no=None, **fields):
 		ctx = frappe._dict(
 			{
 				"doctype": "Delivery Note",
@@ -700,6 +700,7 @@ class TestGetItemDetail(FrappeTestCase):
 				"price_list_currency": "INR",
 				"plc_conversion_rate": 1.0,
 				"ignore_pricing_rule": 1,
+				**fields,
 			}
 		)
 		doc = {"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": items or []}
@@ -750,7 +751,244 @@ class TestGetItemDetail(FrappeTestCase):
 
 			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
 			dn.reload()
+<<<<<<< HEAD
 			self.assertEqual(len(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle)), 5)
+=======
+			self.assertEqual(len(get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle)), 5)
+
+	def test_serial_nos_auto_picked_from_selected_batch(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 3], has_serial_no=1, serial_no_series="SBP-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			details = self.get_item_details_for_row(item_code, 3, batch_no=batches[1])
+			self.assertFalse(details.get("serial_no"))
+
+			dn = create_delivery_note(
+				item_code=item_code, qty=3, use_serial_batch_fields=1, batch_no=batches[1]
+			)
+			dn.reload()
+			self.assertFalse(dn.items[0].serial_no)
+
+			entries = frappe.get_all(
+				"Serial and Batch Entry",
+				{"parent": dn.items[0].serial_and_batch_bundle},
+				["serial_no", "batch_no"],
+			)
+			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 3)
+			self.assertEqual({d.batch_no for d in entries}, {batches[1]})
+
+	def test_reserved_serial_nos_picked_for_sales_order_delivery(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_numbers_from_bundle,
+		)
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2], has_serial_no=1, serial_no_series="SRV-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"pick_serial_and_batch_based_on": "FIFO",
+				"auto_create_serial_and_batch_bundle_for_outward": 1,
+				"enable_stock_reservation": 1,
+				"allow_negative_stock": 0,
+			},
+		):
+			so = make_sales_order(
+				item_code=item_code, warehouse="_Test Warehouse - _TC", qty=2, rate=100, do_not_submit=True
+			)
+			so.reserve_stock = 1
+			so.items[0].reserve_stock = 1
+			so.submit()
+
+			dn = make_delivery_note(so.name)
+			dn.items[0].use_serial_batch_fields = 1
+			dn.items[0].serial_no = None
+			dn.insert()
+			self.assertFalse(dn.items[0].serial_no)
+
+			dn.submit()
+			self.assertEqual(len(get_serial_numbers_from_bundle(dn.items[0].serial_and_batch_bundle)), 2)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_rows_of_same_item_get_different_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[5], has_serial_no=1, serial_no_series="SRD-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			dn = create_delivery_note(
+				item_code=item_code, qty=2, use_serial_batch_fields=1, do_not_submit=True
+			)
+			first_row = dn.items[0].as_dict()
+			dn.append("items", {k: v for k, v in first_row.items() if k not in ("name", "idx")})
+			dn.save()
+			dn.submit()
+
+			picked = frappe.get_all(
+				"Serial and Batch Entry",
+				{"parent": ("in", [row.serial_and_batch_bundle for row in dn.items])},
+				pluck="serial_no",
+			)
+			self.assertEqual(len(picked), 4)
+			self.assertEqual(len(set(picked)), 4)
+
+	def test_serial_nos_picked_for_float_noise_stock_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "FNS-SN-.#####",
+				"stock_uom": "Nos",
+				"uoms": [
+					{"uom": "Nos", "conversion_factor": 1},
+					{"uom": "_Test UOM 1", "conversion_factor": 100},
+				],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=100, basic_rate=100)
+
+		with self.change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}):
+			details = self.get_item_details_for_row(item_code, 0.57, uom="_Test UOM 1", conversion_factor=100)
+
+		self.assertEqual(details.stock_qty, 57)
+		self.assertEqual(len(details.serial_no.split()), 57)
+
+	def test_reserved_serial_nos_follow_selected_batch(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[2, 2], has_serial_no=1, serial_no_series="SRB-SN-.#####"
+		)
+
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"pick_serial_and_batch_based_on": "FIFO",
+				"auto_create_serial_and_batch_bundle_for_outward": 1,
+				"enable_stock_reservation": 1,
+				"allow_negative_stock": 0,
+			},
+		):
+			so = make_sales_order(
+				item_code=item_code, warehouse="_Test Warehouse - _TC", qty=4, rate=100, do_not_submit=True
+			)
+			so.reserve_stock = 1
+			so.items[0].reserve_stock = 1
+			so.submit()
+
+			dn = make_delivery_note(so.name)
+			dn.items[0].update(
+				{"qty": 2, "use_serial_batch_fields": 1, "batch_no": batches[1], "serial_no": None}
+			)
+			dn.insert()
+			dn.submit()
+
+			picked_batches = frappe.get_all(
+				"Serial and Batch Entry", {"parent": dn.items[0].serial_and_batch_bundle}, pluck="batch_no"
+			)
+			self.assertEqual(picked_batches, [batches[1], batches[1]])
+
+	def test_item_row_and_product_bundle_get_different_serial_nos(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code, batches = self.make_batched_item_with_stock(
+			[3], has_serial_no=1, serial_no_series="SPB-SN-.#####"
+		)
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [item_code])
+
+		with self.change_settings(
+			"Stock Settings",
+			{
+				"pick_serial_and_batch_based_on": "FIFO",
+				"auto_create_serial_and_batch_bundle_for_outward": 1,
+				"use_serial_batch_fields": 1,
+			},
+		):
+			dn = create_delivery_note(
+				item_code=item_code, qty=1, use_serial_batch_fields=1, do_not_submit=True
+			)
+			first_row = dn.items[0].as_dict()
+			dn.append(
+				"items",
+				{k: v for k, v in first_row.items() if k not in ("name", "idx", "batch_no", "serial_no")}
+				| {"item_code": bundle_item, "item_name": bundle_item},
+			)
+			dn.save()
+			dn.submit()
+			dn.reload()
+
+			bundles = [
+				row.serial_and_batch_bundle
+				for row in dn.items + dn.packed_items
+				if row.serial_and_batch_bundle
+			]
+			picked = frappe.get_all("Serial and Batch Entry", {"parent": ("in", bundles)}, pluck="serial_no")
+			self.assertEqual(len(picked), 2)
+			self.assertEqual(len(set(picked)), 2)
+
+	def test_same_document_rows_reduce_batch_by_stock_qty(self):
+		item_code, batches = self.make_batched_item_with_stock(
+			[10], uoms=[{"uom": "Box", "conversion_factor": 5}]
+		)
+		box_row = [{"batch_no": batches[0], "uom": "Box", "qty": 1, "stock_qty": 5}]
+
+		with self.change_settings(
+			"Stock Settings",
+			{"pick_serial_and_batch_based_on": "FIFO", "auto_create_serial_and_batch_bundle_for_outward": 1},
+		):
+			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
+			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
+
+	def test_price_not_uom_dependent_is_applied_to_item_rows(self):
+		"""An Item Price saved for the stock UOM is scaled to the row UOM unless the Price List
+		is marked Price Not UOM Dependent."""
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		self.make_item_price(item_code, price_list.name, 100)
+
+		for not_uom_dependent, expected_rate in ((0, 1000), (1, 100)):
+			with self.subTest(price_not_uom_dependent=not_uom_dependent):
+				price_list.price_not_uom_dependent = not_uom_dependent
+				price_list.save()
+				details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
+				self.assertEqual(details.price_list_rate, expected_rate)
+
+	def test_fallback_price_list_uses_its_own_uom_setting(self):
+		item_code = self.make_multi_uom_item()
+		selected_list = self.make_selling_price_list("_Test UOM Price List", not_uom_dependent=1)
+		default_list = self.make_selling_price_list("_Test UOM Default Price List", not_uom_dependent=0)
+		self.make_item_price(item_code, default_list.name, 100)
+
+		with self.change_settings(
+			"Selling Settings",
+			{"fallback_to_default_price_list": 1, "selling_price_list": default_list.name},
+		):
+			details = get_item_details(self.get_uom_rate_context(item_code, selected_list.name))
+
+		self.assertEqual(details.price_list_rate, 1000)
+>>>>>>> 9f565d6 (test: auto-pick serial nos for a stock qty with float noise)
 
 	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
