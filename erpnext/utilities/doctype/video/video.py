@@ -13,6 +13,13 @@ from frappe.utils import cint
 from frappe.utils.data import get_system_timezone
 from pyyoutube import Api
 
+<<<<<<< HEAD
+=======
+YOUTUBE_DOMAINS = ("youtube.com", "youtu.be", "youtube-nocookie.com")
+YOUTUBE_VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}")
+HOSTNAME = re.compile(r"[a-z0-9.-]+")
+
+>>>>>>> 0f66a75 (fix(video): allow only web URLs for non-YouTube videos)
 
 class Video(Document):
 	# begin: auto-generated types
@@ -38,9 +45,23 @@ class Video(Document):
 	# end: auto-generated types
 
 	def validate(self):
+<<<<<<< HEAD
 		if self.provider == "YouTube" and is_tracking_enabled():
 			self.set_video_id()
+=======
+		if self.provider != "YouTube":
+			self.validate_web_url()
+			return
+
+		self.set_video_id()
+		if is_tracking_enabled():
+>>>>>>> 0f66a75 (fix(video): allow only web URLs for non-YouTube videos)
 			self.set_youtube_statistics()
+
+	def validate_web_url(self):
+		parsed = urlparse(self.url.strip())
+		if parsed.scheme not in ("http", "https") or not HOSTNAME.fullmatch(parsed.hostname or ""):
+			frappe.throw(_("Enter a valid http or https URL"), title=_("Invalid URL"))
 
 	def set_video_id(self):
 		if self.url and not self.get("youtube_video_id"):
