@@ -1413,7 +1413,11 @@ def get_serial_and_batch_bundle(
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
 	from erpnext.stock.doctype.packed_item.packed_item import set_incoming_rate_from_bundle
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
+	from erpnext.stock.serial_batch_bundle import (
+		SerialBatchCreation,
+		add_picked_batches,
+		get_serial_batch_fields_of_auto_bundle,
+	)
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
@@ -1449,7 +1453,7 @@ def get_serial_and_batch_bundle(
 	)
 
 	doc = sn_doc.make_serial_and_batch_bundle()
-	child.db_set("serial_and_batch_bundle", doc.name)
+	child.db_set({"serial_and_batch_bundle": doc.name, **get_serial_batch_fields_of_auto_bundle(doc)})
 	set_incoming_rate_from_bundle(child, doc)
 	if picked_serial_nos is not None:
 		picked_serial_nos[child.item_code].extend(
