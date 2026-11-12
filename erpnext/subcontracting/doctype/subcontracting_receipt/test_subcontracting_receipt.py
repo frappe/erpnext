@@ -3758,6 +3758,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
+<<<<<<< HEAD
 	def test_purchase_receipt_keeps_purchase_order_currency(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
@@ -3804,6 +3805,65 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.conversion_rate, 80)
 		self.assertEqual(pr.grand_total, 1000)
 		self.assertEqual(pr.base_grand_total, 80000)
+=======
+	def test_return_of_rejected_qty_gets_no_secondary_items(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		service_item = make_item(properties={"is_stock_item": 0}).name
+		raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+
+		bom = make_bom(
+			item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True
+		)
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": scrap_item,
+				"secondary_item_type": "Scrap",
+				"stock_qty": 1,
+				"valuation_type": "Valuation Rate",
+			},
+		)
+		bom.save()
+		bom.submit()
+
+		sco = get_subcontracting_order(
+			service_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": service_item,
+					"qty": 2,
+					"rate": 100,
+					"fg_item": fg_item,
+					"fg_item_qty": 2,
+				}
+			]
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.items[0].rejected_qty = 1
+		scr.items[0].rejected_warehouse = create_warehouse("_Test Rejected Warehouse Without Secondary Items")
+		scr.save()
+		scr.submit()
+
+		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual([item.item_code for item in scr_return.items], [fg_item])
+>>>>>>> 9e7e8cb (test: return of rejected qty gets no secondary items)
 
 	def test_rejected_return_brings_back_raw_materials_at_zero_value(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
