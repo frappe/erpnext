@@ -8,14 +8,7 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
-<<<<<<< HEAD
-<<<<<<< HEAD
 from frappe.utils import cint
-=======
-from frappe.utils import cstr
->>>>>>> 0d279c3 (fix(stock): stop Stock Settings save from clearing the whole site cache)
-=======
->>>>>>> 37a4947 (fix(stock): keep boolean Stock Settings defaults as 1 or 0)
 from frappe.utils.html_utils import clean_html
 
 from erpnext.stock.utils import check_pending_reposting
@@ -89,11 +82,7 @@ class StockSettings(Document):
 			"item_group",
 			"stock_uom",
 			"allow_negative_stock",
-<<<<<<< HEAD
 			"default_warehouse",
-			"set_qty_in_transactions_based_on_serial_no_input",
-=======
->>>>>>> 0d279c3 (fix(stock): stop Stock Settings save from clearing the whole site cache)
 			"use_serial_batch_fields",
 			"set_serial_and_batch_bundle_naming_based_on_naming_series",
 		]:

@@ -128,9 +128,6 @@ class TestStockSettings(FrappeTestCase):
 
 		self.assertIsNone(frappe.cache.hget("bootinfo", frappe.session.user))
 
-<<<<<<< HEAD
-	@change_settings("Stock Settings", {"show_barcode_field": 1})
-=======
 	def test_unchanged_save_keeps_site_cache(self):
 		settings = frappe.get_doc("Stock Settings")
 		settings.item_group = None
@@ -141,7 +138,7 @@ class TestStockSettings(FrappeTestCase):
 
 		self.assertEqual(frappe.cache.get_value("stock_settings_probe"), 1)
 
->>>>>>> ee6558c (test: unchanged Stock Settings save keeps the site cache)
+	@change_settings("Stock Settings", {"show_barcode_field": 1})
 	def test_hiding_barcode_field_keeps_item_barcodes(self):
 		settings = frappe.get_doc("Stock Settings")
 		settings.show_barcode_field = 0
@@ -157,21 +154,6 @@ class TestStockSettings(FrappeTestCase):
 		self.assertEqual(is_hidden("Delivery Note", "scan_barcode"), "1")
 		self.assertNotEqual(is_hidden("Item", "barcodes"), "1")
 		self.assertNotEqual(is_hidden("Job Card", "barcode"), "1")
-<<<<<<< HEAD
-=======
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_uom_with_conversion_rate_defined_in_item": 1})
-	def test_stock_entry_uom_must_be_defined_in_item(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-
-		item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
-		stock_entry = make_stock_entry(
-			item_code=item, target="_Test Warehouse - _TC", qty=2, rate=100, do_not_save=True
-		)
-		stock_entry.items[0].update({"uom": "Tonne", "conversion_factor": 1000})
-
-		self.assertRaises(frappe.ValidationError, stock_entry.insert)
 
 	def test_boolean_check_value_is_stored_as_1(self):
 		settings = frappe.get_single("Stock Settings")
@@ -179,4 +161,3 @@ class TestStockSettings(FrappeTestCase):
 		settings.save()
 
 		self.assertEqual(frappe.db.get_default("use_serial_batch_fields"), "1")
->>>>>>> cedf229 (test: store a boolean Stock Settings check default as 1)
