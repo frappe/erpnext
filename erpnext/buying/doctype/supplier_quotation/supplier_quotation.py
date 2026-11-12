@@ -12,6 +12,7 @@ from frappe.utils import flt, getdate, nowdate
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -325,6 +326,7 @@ def make_quotation(source_name, target_doc=None):
 				"field_map": {
 					"name": "supplier_quotation",
 				},
+				"postprocess": lambda source, target, source_parent: clear_inapplicable_terms(target),
 			},
 			"Supplier Quotation Item": {
 				"doctype": "Quotation Item",
