@@ -227,6 +227,8 @@ class ProductionPlanReport:
 			filters={"company": self.filters.company, "parent": ("in", self.item_codes)},
 		):
 			self.item_details[d.parent] = d
+			if d.default_warehouse:
+				self.warehouses.append(d.default_warehouse)
 
 	def get_bin_details(self):
 		if not (self.orders and self.raw_materials_dict):
