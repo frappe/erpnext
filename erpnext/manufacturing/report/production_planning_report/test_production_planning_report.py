@@ -230,3 +230,20 @@ class TestProductionPlanningReport(FrappeTestCase):
 		for filters in ({}, {"raw_material_warehouse": WAREHOUSE}):
 			data = self.run_report("Sales Order", [sales_order.name], **filters)
 			self.assertEqual(self.allotments(data, material), [(WAREHOUSE, 0.3, 0.3)])
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_pending_qty_is_not_rounded_before_bom_expansion(self):
+		material = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Gram", "conversion_factor": 0.001}],
+			}
+		).name
+		make_bom(item=fg_item, raw_materials=[material], rm_qty=1000)
+		sales_order = make_sales_order(item_code=fg_item, qty=125, uom="Gram", warehouse=WAREHOUSE)
+
+		data = self.run_report("Sales Order", [sales_order.name])
+
+		self.assertEqual(self.required_qty(data, material), 125)
