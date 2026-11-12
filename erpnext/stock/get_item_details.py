@@ -660,9 +660,16 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			item.name, args.uom, throw_if_missing=True
 		).get("conversion_factor")
 
+<<<<<<< HEAD
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
 	args.stock_qty = out.stock_qty
+=======
+	ctx.conversion_factor = out.conversion_factor
+	stock_qty_field = frappe.get_meta(f"{ctx.doctype} Item").get_field("stock_qty")
+	out.stock_qty = flt(out.qty * out.conversion_factor, get_field_precision(stock_qty_field))
+	ctx.stock_qty = out.stock_qty
+>>>>>>> 5d8aabe (fix(accounts): honor stock quantity precision in pricing rules)
 
 	# calculate last purchase rate
 	if args.get("doctype") in purchase_doctypes and not frappe.db.get_single_value(
