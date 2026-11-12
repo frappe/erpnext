@@ -705,6 +705,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be the same."));
 		}
 
+		// "Qty to Fetch" is only part of the dialog for outward transactions
+		if (!this.dialog.fields_dict.qty) {
+			this.create_bundle_entries(entries, warehouse, csv_entries);
+			return;
+		}
+
 		let qty_to_fetch = flt(this.dialog.get_value("qty"));
 		let total_qty = [...entries, ...csv_entries].reduce((total, row) => total + (flt(row.qty) || 1.0), 0);
 
