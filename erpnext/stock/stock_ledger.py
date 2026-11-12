@@ -13,7 +13,7 @@ import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import CombineDatetime, Concat, Sum
+from frappe.query_builder.functions import Coalesce, CombineDatetime, Concat, Sum
 from frappe.utils import (
 	add_to_date,
 	cint,
@@ -2884,7 +2884,49 @@ def get_next_stock_reco(kwargs):
 	if frappe.db.db_type == "mariadb":
 		query = query.for_update()
 
-	return query.run(as_dict=True)
+	next_reco = query.run(as_dict=True)
+	if next_reco and is_batch_reco(next_reco[0]):
+		next_reco = query.where(get_balance_setting_reco_condition(sle, kwargs)).run(as_dict=True)
+
+	return next_reco
+
+
+def is_batch_reco(reco):
+	return bool(reco.has_batch_no or reco.batch_no)
+
+
+def get_balance_setting_reco_condition(sle, kwargs):
+	condition = (sle.has_batch_no == 0) & (Coalesce(sle.batch_no, "") == "")
+	batches = get_batches_of_entry(kwargs)
+	if not batches:
+		return condition
+
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	bundles_counting_batches = (
+		frappe.qb.from_(entry)
+		.select(entry.parent)
+		.where(
+			(entry.warehouse == kwargs.get("warehouse"))
+			& (entry.batch_no.isin(batches))
+			& (entry.voucher_type == "Stock Reconciliation")
+		)
+	)
+
+	return condition | sle.batch_no.isin(batches) | sle.serial_and_batch_bundle.isin(bundles_counting_batches)
+
+
+def get_batches_of_entry(kwargs):
+	batches = {kwargs.get("batch_no")} - {None, ""}
+	if kwargs.get("serial_and_batch_bundle"):
+		batches.update(
+			frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": kwargs.get("serial_and_batch_bundle"), "batch_no": ("is", "set")},
+				pluck="batch_no",
+			)
+		)
+
+	return list(batches)
 
 
 def get_datetime_limit_condition(sle, detail):
