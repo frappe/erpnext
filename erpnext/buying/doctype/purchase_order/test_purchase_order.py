@@ -2628,6 +2628,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "returned_qty"), 3)
 
+	def test_stock_qty_is_rounded_to_its_precision(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 0.3356}],
+			}
+		).name
+		po = create_purchase_order(item_code=item_code, qty=1, do_not_save=True)
+		po.items[0].uom, po.items[0].conversion_factor = "Box", 0.3356
+		po.insert()
+
+		row = po.items[0]
+		self.assertEqual(row.stock_qty, flt(0.3356, row.precision("stock_qty")))
+
 
 def create_po_for_sc_testing():
 	service_items = [

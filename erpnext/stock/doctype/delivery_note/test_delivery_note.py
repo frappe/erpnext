@@ -5500,6 +5500,22 @@ class TestDeliveryNote(ERPNextTestSuite):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
 			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
 
+	def test_stock_qty_is_rounded_to_its_precision(self):
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 0.3356}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		dn = create_delivery_note(item_code=item_code, qty=1, do_not_save=True)
+		dn.items[0].uom, dn.items[0].conversion_factor = "Box", 0.3356
+		dn.insert()
+
+		row = dn.items[0]
+		self.assertEqual(row.stock_qty, flt(0.3356, row.precision("stock_qty")))
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
