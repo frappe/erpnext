@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe import qb
+from frappe.cache_manager import clear_doctype_map
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, getdate, nowdate
 from frappe.utils.data import getdate as convert_to_date
@@ -2478,7 +2479,12 @@ class TestAccountsController(ERPNextTestSuite):
 	def test_document_naming_rule_based_on_posting_date(self):
 		frappe.new_doc(
 			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
+<<<<<<< HEAD
 		).submit()
+=======
+		).insert()
+		self.addCleanup(clear_doctype_map, "Document Naming Rule", "Sales Invoice")
+>>>>>>> 6bb6d0c (test: clear the Sales Invoice naming rule map after the posting date naming test)
 
 		si = create_sales_invoice(do_not_save=True)
 		si.set_posting_time = 1
