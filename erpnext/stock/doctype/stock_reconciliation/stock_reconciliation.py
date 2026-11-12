@@ -1994,6 +1994,9 @@ def _require_reconciliation_permission(doctype, name):
 
 @frappe.whitelist()
 def get_difference_account(purpose: str, company: str):
+	frappe.has_permission("Stock Reconciliation", "read", throw=True)
+	frappe.has_permission("Company", "select", doc=company, throw=True)
+
 	if purpose in ("Stock Reconciliation", ADJUSTMENT_ENTRY):
 		account = get_company_default(company, "stock_adjustment_account")
 	else:
