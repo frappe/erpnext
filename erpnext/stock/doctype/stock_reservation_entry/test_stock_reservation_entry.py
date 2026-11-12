@@ -2490,6 +2490,32 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		},
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_unreserved_bundle_row_does_not_count_a_prefilled_reservation_twice(self):
+		# batch A has 5: row 1 reserves 2 and holds them, so row 2 still finds 3 free in batch A
+		sales_order = make_bundle_sales_order([5], rows=2, qty=2, reserved_rows=1)
+		delivery_note = make_delivery_note(sales_order.name, kwargs={"for_reserved_stock": True})
+		delivery_note.save()
+		delivery_note.submit()
+
+		delivered = frappe.get_all(
+			"Serial and Batch Entry",
+			{"parent": delivery_note.packed_items[1].serial_and_batch_bundle},
+			pluck="batch_no",
+		)
+		self.assertEqual(set(delivered), get_reserved_batch_nos(sales_order.name))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_of_two_bundle_rows_reserving_the_same_batch(self):
 		sales_order = make_bundle_sales_order([2], rows=2, qty=1, reserved_rows=2)
 		self.assertEqual(len(get_reserved_batch_nos(sales_order.name)), 1)
