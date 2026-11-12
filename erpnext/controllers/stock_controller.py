@@ -1857,6 +1857,8 @@ def get_stock_ledger_preview(doc, filters):
 		doc.docstatus = 1
 		for table_name in ("items", "packed_items"):
 			if doc.get(table_name):
+				# a return takes back the serial / batch nos of the original voucher, as on submit
+				doc.make_bundle_for_sales_purchase_return(table_name)
 				doc.make_bundle_using_old_serial_batch_fields(table_name)
 		doc.update_stock_ledger()
 
