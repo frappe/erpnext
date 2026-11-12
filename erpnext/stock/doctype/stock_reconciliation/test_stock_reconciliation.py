@@ -2623,6 +2623,120 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertRaises(SerialNoExistsInFutureTransactionError, transfer.submit)
 
+	def test_backdated_entry_shifts_balance_across_batch_reconciliation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 0)
+		self.addCleanup(frappe.db.set_single_value, "Stock Settings", "allow_negative_stock", 1)
+		item = make_item(
+			properties={
+				"valuation_method": "FIFO",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{frappe.generate_hash(length=6)}-.###",
+			}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_stock_entry(
+			item_code=item, target=warehouse, qty=10, basic_rate=100, posting_date=add_days(nowdate(), -10)
+		)
+		first_batch = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		reconciliation = create_stock_reconciliation(
+			item_code=item,
+			warehouse=warehouse,
+			qty=15,
+			rate=120,
+			batch_no=first_batch,
+			posting_date=add_days(nowdate(), -7),
+		)
+		issue = make_stock_entry(
+			item_code=item,
+			source=warehouse,
+			qty=3,
+			batch_no=first_batch,
+			use_serial_batch_fields=1,
+			posting_date=add_days(nowdate(), -6),
+		)
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			backdated_receipt = make_stock_entry(
+				item_code=item, target=warehouse, qty=4, basic_rate=200, posting_date=add_days(nowdate(), -9)
+			)
+			second_batch = get_batch_from_bundle(backdated_receipt.items[0].serial_and_batch_bundle)
+
+			balances = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={
+					"voucher_no": ("in", [reconciliation.name, issue.name]),
+					"item_code": item,
+					"is_cancelled": 0,
+				},
+				fields=["qty_after_transaction", "stock_value"],
+				order_by="posting_datetime, creation",
+			)
+			self.assertEqual(
+				[(flt(row.qty_after_transaction), flt(row.stock_value)) for row in balances],
+				[(4.0, 800.0), (19.0, 2600.0), (16.0, 2240.0)],
+			)
+
+			for batch_no, qty in ((second_batch, 4), (first_batch, 12)):
+				make_stock_entry(
+					item_code=item, source=warehouse, qty=qty, batch_no=batch_no, use_serial_batch_fields=1
+				)
+
+		last_entry = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"item_code": item, "warehouse": warehouse, "is_cancelled": 0},
+			fields=["qty_after_transaction", "stock_value"],
+			order_by="posting_datetime desc, creation desc",
+			limit=1,
+		)[0]
+		self.assertEqual((flt(last_entry.qty_after_transaction), flt(last_entry.stock_value)), (0.0, 0.0))
+
+	def test_landed_cost_before_batch_reconciliation_keeps_later_balances(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		item = make_item(
+			properties={
+				"valuation_method": "FIFO",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"{frappe.generate_hash(length=6)}-.###",
+			}
+		).name
+		warehouse = "_Test Warehouse - _TC"
+
+		receipt = make_purchase_receipt(
+			item_code=item, warehouse=warehouse, qty=6, rate=80, posting_date=add_days(nowdate(), -12)
+		)
+		reconciliation = create_stock_reconciliation(
+			item_code=item,
+			warehouse=warehouse,
+			qty=4,
+			rate=120,
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			posting_date=add_days(nowdate(), -7),
+		)
+
+		with patch.dict(frappe.flags, {"dont_execute_stock_reposts": True}):
+			create_landed_cost_voucher("Purchase Receipt", receipt.name, receipt.company, charges=60)
+
+			balances = frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": reconciliation.name, "item_code": item, "is_cancelled": 0},
+				fields=["qty_after_transaction", "stock_value"],
+				order_by="posting_datetime, creation",
+			)
+			self.assertEqual(
+				[(flt(row.qty_after_transaction), flt(row.stock_value)) for row in balances],
+				[(0.0, 0.0), (4.0, 480.0)],
+			)
+
 	def test_stock_balance_lookup_without_valuation_rate(self):
 		item_code = create_item(f"_Test Reco Balance Without Rate {frappe.generate_hash(length=8)}").name
 		create_stock_reconciliation(item_code=item_code, qty=7, rate=100)
