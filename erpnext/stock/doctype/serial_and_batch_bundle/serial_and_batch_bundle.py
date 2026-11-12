@@ -3409,8 +3409,8 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
-	if kwargs.against_sales_order:
-		query = query.where(sre.voucher_no != kwargs.against_sales_order)
+	if kwargs.delivered_order_rows:
+		query = query.where(sre.voucher_detail_no.notin(kwargs.delivered_order_rows))
 
 	data = query.run(as_dict=True)
 
@@ -3442,9 +3442,9 @@ def get_batch_qty_for_stock(batch_no=None, warehouse=None, posting_date=None, po
 
 
 def get_auto_batch_nos(kwargs):
-	if kwargs.pick_reserved_items and not kwargs.against_sales_order:
-		# a delivery may use the batches its own Sales Order reserved
-		kwargs.against_sales_order = next(iter(get_reserved_voucher_details(kwargs)), None)
+	if kwargs.pick_reserved_items:
+		# a delivery may use the batches reserved for the Sales Order row it delivers
+		kwargs.delivered_order_rows = get_delivered_order_rows(kwargs)
 
 	if not kwargs.get("posting_datetime") and kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
@@ -3481,9 +3481,9 @@ def get_auto_batch_nos(kwargs):
 	if kwargs.based_on == "Expiry":
 		available_batches = sorted(available_batches, key=lambda x: x.expiry_date or getdate("9999-12-31"))
 
-	if kwargs.against_sales_order:
-		reserved_batches = get_batches_to_be_considered(kwargs.against_sales_order)
-		# the order's own reserved batches first, then free stock
+	if kwargs.delivered_order_rows:
+		reserved_batches = get_batches_to_be_considered(kwargs.delivered_order_rows)
+		# the row's own reserved batches first, then free stock
 		available_batches.sort(key=lambda d: d.batch_no not in reserved_batches)
 
 	if not kwargs.get("do_not_check_future_batches") and available_batches and kwargs.get("posting_datetime"):
@@ -3595,7 +3595,26 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def get_batches_to_be_considered(sales_order_name):
+def get_delivered_order_rows(kwargs) -> list:
+	"""The Sales Order row a delivery row delivers, with its packed rows."""
+	so_detail = kwargs.so_detail
+	if not so_detail and kwargs.sabb_voucher_type in ("Delivery Note", "Sales Invoice"):
+		so_detail = frappe.db.get_value(
+			f"{kwargs.sabb_voucher_type} Item", kwargs.sabb_voucher_detail_no, "so_detail"
+		)
+
+	if not so_detail:
+		return []
+
+	packed_rows = frappe.get_all(
+		"Packed Item",
+		filters={"parenttype": "Sales Order", "parent_detail_docname": so_detail},
+		pluck="name",
+	)
+	return [so_detail, *packed_rows]
+
+
+def get_batches_to_be_considered(order_rows):
 	parent = frappe.qb.DocType("Stock Reservation Entry")
 	child = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -3606,7 +3625,7 @@ def get_batches_to_be_considered(sales_order_name):
 		.select(child.batch_no)
 		.where(
 			(parent.docstatus == 1)
-			& (parent.voucher_no == sales_order_name)
+			& (parent.voucher_detail_no.isin(order_rows))
 			& (child.delivered_qty < child.qty)
 		)
 	)
