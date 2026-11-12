@@ -1369,7 +1369,7 @@ class SellingController(StockController):
 
 def remove_delivered_entries(package, pick_list_item):
 	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
-	from erpnext.stock.doctype.pick_list.mapper import get_moved_entries
+	from erpnext.stock.doctype.pick_list.pick_list import get_moved_entries
 
 	delivered = get_moved_entries([pick_list_item]).get(pick_list_item, [])
 	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}

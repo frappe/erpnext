@@ -413,11 +413,7 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
-<<<<<<< HEAD
-	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
-=======
-	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
->>>>>>> 62bc811 (fix(stock): map only serial nos not yet delivered from a pick list bundle component)
+	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	filters = {
@@ -432,14 +428,8 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	pl_rows = frappe.get_all(
 		"Pick List Item",
 		filters,
-<<<<<<< HEAD
-		["item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
-		order_by="qty desc",
-=======
 		["name", "item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
-		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
-		order_by="qty desc, name asc",
->>>>>>> 62bc811 (fix(stock): map only serial nos not yet delivered from a pick list bundle component)
+		order_by="qty desc",
 	)
 
 	if not pl_rows:
