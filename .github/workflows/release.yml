@@ -40,3 +40,23 @@ jobs:
           GIT_COMMITTER_NAME: "frappe-release-bot[bot]"
           GIT_COMMITTER_EMAIL: "346168705+frappe-release-bot[bot]@users.noreply.github.com"
         run: npx semantic-release
+      - name: Comment on released pull requests
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          git fetch origin "$GITHUB_REF_NAME" --tags --force
+          tag=$(git tag --points-at "origin/$GITHUB_REF_NAME" 'v*' | head -1)
+          [ -n "$tag" ] || exit 0
+          prev=$(git describe --tags --abbrev=0 --match 'v*' "$tag^")
+          body=$(printf ':tada: This PR is included in version %s :tada:\n\nThe release is available on [GitHub release](%s)' \
+            "${tag#v}" "https://github.com/$GITHUB_REPOSITORY/releases/tag/$tag")
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" -f tag_name="$tag" -f previous_tag_name="$prev" --jq .body \
+            | grep -oE "/$GITHUB_REPOSITORY/pull/[0-9]+" | grep -oE '[0-9]+$' | sort -un \
+            | while read -r pr; do
+                if gh api "repos/$GITHUB_REPOSITORY/issues/$pr/labels" --jq '.[].name' | grep -qx released; then
+                  continue
+                fi
+                gh api "repos/$GITHUB_REPOSITORY/issues/$pr/comments" -f body="$body" > /dev/null
+                gh api "repos/$GITHUB_REPOSITORY/issues/$pr/labels" -f "labels[]=released" > /dev/null
+                sleep 2
+              done
