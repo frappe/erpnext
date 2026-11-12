@@ -855,7 +855,7 @@ class PaymentEntry(AccountsController):
 							)
 						)
 
-					if ref_doc.doctype == "Purchase Invoice" and ref_doc.get("on_hold"):
+					if ref_doc.doctype == "Purchase Invoice" and ref_doc.invoice_is_blocked():
 						frappe.throw(
 							_("{0} {1} is on hold").format(_(d.reference_doctype), d.reference_name),
 							title=_("Invalid Purchase Invoice"),
@@ -1196,32 +1196,25 @@ class PaymentEntry(AccountsController):
 			self.received_amount = self.paid_amount
 
 	def set_amounts_after_tax(self):
-		applicable_tax = 0
-		base_applicable_tax = 0
-		for tax in self.get("taxes"):
-			if tax.included_in_paid_amount:
-				continue
-
-			amount = -1 * tax.tax_amount if tax.add_deduct_tax == "Deduct" else tax.tax_amount
-			base_amount = -1 * tax.base_tax_amount if tax.add_deduct_tax == "Deduct" else tax.base_tax_amount
-
-			applicable_tax += amount
-			base_applicable_tax += base_amount
+		base_applicable_tax = sum(
+			(-1 if tax.add_deduct_tax == "Deduct" else 1) * flt(tax.base_tax_amount)
+			for tax in self.get("taxes")
+			if not tax.included_in_paid_amount
+		)
 
 		self.paid_amount_after_tax = flt(
-			flt(self.paid_amount) + flt(applicable_tax), self.precision("paid_amount_after_tax")
+			self.paid_amount + base_applicable_tax / self.source_exchange_rate,
+			self.precision("paid_amount_after_tax"),
 		)
 		self.base_paid_amount_after_tax = flt(
-			flt(self.paid_amount_after_tax) * flt(self.source_exchange_rate),
-			self.precision("base_paid_amount_after_tax"),
+			self.base_paid_amount + base_applicable_tax, self.precision("base_paid_amount_after_tax")
 		)
-
 		self.received_amount_after_tax = flt(
-			flt(self.received_amount) + flt(applicable_tax), self.precision("paid_amount_after_tax")
+			self.received_amount + base_applicable_tax / self.target_exchange_rate,
+			self.precision("received_amount_after_tax"),
 		)
 		self.base_received_amount_after_tax = flt(
-			flt(self.received_amount_after_tax) * flt(self.target_exchange_rate),
-			self.precision("base_paid_amount_after_tax"),
+			self.base_received_amount + base_applicable_tax, self.precision("base_received_amount_after_tax")
 		)
 
 	def set_amounts_in_company_currency(self):
