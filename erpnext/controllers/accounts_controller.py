@@ -681,7 +681,7 @@ class AccountsController(TransactionBase):
 
 	def before_print(self, settings=None):
 		if self.docstatus.is_draft():
-			self.set_missing_terms()
+			self.set_missing_terms_for_display()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -715,6 +715,21 @@ class AccountsController(TransactionBase):
 		)
 
 		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+
+	def set_missing_terms_for_display(self):
+		"""Render missing terms to show or print, leaving them empty if a permission check fails."""
+		message_count = len(frappe.message_log)
+		try:
+			self.set_missing_terms()
+		except frappe.PermissionError:
+			# a check on the template's last editor fails without logging a message
+			del frappe.message_log[message_count:]
+			frappe.msgprint(
+				_("Terms and Conditions {0} could not be rendered due to missing permissions.").format(
+					bold(self.tc_name)
+				),
+				alert=True,
+			)
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
