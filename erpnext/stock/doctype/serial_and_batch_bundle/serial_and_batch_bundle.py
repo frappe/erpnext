@@ -2860,8 +2860,8 @@ def get_reserved_then_free_serial_nos(kwargs, filters, fields, order_by, reserve
 			{**filters, "name": ("in", reserved_serial_nos)}, fields, order_by, kwargs
 		)
 
-	pending_qty = flt(kwargs.qty) - len(reserved)
-	if not kwargs.qty or pending_qty <= 0:
+	pending_qty = cint(kwargs.qty) - len(reserved)
+	if pending_qty <= 0:
 		return reserved
 
 	free_kwargs = frappe._dict(
