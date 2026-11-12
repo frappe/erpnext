@@ -2421,7 +2421,9 @@ class update_entries_after:
 			if msg:
 				reserved_stock = self.get_reserved_stock(exceptions[0]["item_code"], warehouse)
 				if reserved_stock:
-					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
+					allowed_qty = flt(
+						abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"]), self.flt_precision
+					)
 
 					if allowed_qty > 0:
 						msg = _(
