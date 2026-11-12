@@ -258,11 +258,7 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
 		return None
 
-	row = (
-		next((d for d in doc.get("items") or [] if d.get("name") == ctx.child_docname), None)
-		if ctx.child_docname
-		else ctx
-	)
+	row = get_ctx_row(ctx, doc)
 	if not row:
 		return None
 
@@ -277,6 +273,14 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 				return source
 			return None
 	return None
+
+
+def get_ctx_row(ctx: ItemDetailsCtx, doc) -> dict | None:
+	"""The document row the details are fetched for; ``ctx`` itself when no row name is given."""
+	if not ctx.child_docname:
+		return ctx
+
+	return next((d for d in (doc or {}).get("items") or [] if d.get("name") == ctx.child_docname), None)
 
 
 def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
@@ -356,6 +360,10 @@ def update_stock(ctx, out, doc=None):
 			kwargs["against_sales_order"] = ctx.get("against_sales_order")
 		elif ctx.get("doctype") == "Sales Invoice":
 			kwargs["against_sales_order"] = ctx.get("sales_order")
+
+		if kwargs.get("against_sales_order") and (row := get_ctx_row(ctx, doc)):
+			# a delivery takes only its own order row's reservation
+			kwargs["against_sales_order_item"] = row.get("so_detail")
 
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
