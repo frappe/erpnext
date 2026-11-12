@@ -2501,6 +2501,24 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_auto_picks_only_its_order_row_reservation(self):
+		self.assert_delivery_auto_picks_only_its_order_row_reservation()
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_delivery_with_serial_batch_fields_auto_picks_only_its_order_row_reservation(self):
+		self.assert_delivery_auto_picks_only_its_order_row_reservation()
+
+	def assert_delivery_auto_picks_only_its_order_row_reservation(self):
 		warehouse = "_Test Warehouse - _TC"
 		for item_code, item in create_items("serial", "batch").items():
 			with self.subTest(item=item_code):
