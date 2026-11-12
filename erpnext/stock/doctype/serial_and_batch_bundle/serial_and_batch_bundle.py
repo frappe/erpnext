@@ -3409,9 +3409,6 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
-	if kwargs.delivered_order_rows:
-		query = query.where(sre.voucher_detail_no.notin(kwargs.delivered_order_rows))
-
 	data = query.run(as_dict=True)
 
 	reserved_batches_details = frappe._dict()
@@ -3442,10 +3439,6 @@ def get_batch_qty_for_stock(batch_no=None, warehouse=None, posting_date=None, po
 
 
 def get_auto_batch_nos(kwargs):
-	if kwargs.pick_reserved_items:
-		# a delivery may use the batches reserved for the Sales Order row it delivers
-		kwargs.delivered_order_rows = get_delivered_order_rows(kwargs)
-
 	if not kwargs.get("posting_datetime") and kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
@@ -3481,13 +3474,11 @@ def get_auto_batch_nos(kwargs):
 	if kwargs.based_on == "Expiry":
 		available_batches = sorted(available_batches, key=lambda x: x.expiry_date or getdate("9999-12-31"))
 
-	if kwargs.delivered_order_rows:
-		reserved_batches = get_batches_to_be_considered(kwargs.delivered_order_rows)
-		# the row's own reserved batches first, then free stock
-		available_batches.sort(key=lambda d: d.batch_no not in reserved_batches)
-
 	if not kwargs.get("do_not_check_future_batches") and available_batches and kwargs.get("posting_datetime"):
 		filter_zero_near_batches(available_batches, kwargs)
+
+	if kwargs.pick_reserved_items and not kwargs.ignore_reserved_stock:
+		available_batches = put_delivery_reservations_first(available_batches, kwargs)
 
 	if not kwargs.consider_negative_batches:
 		precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
@@ -3595,41 +3586,95 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def get_delivered_order_rows(kwargs) -> list:
-	"""The Sales Order row a delivery row delivers, with its packed rows."""
-	so_detail = kwargs.so_detail
-	if not so_detail and kwargs.sabb_voucher_type in ("Delivery Note", "Sales Invoice"):
-		so_detail = frappe.db.get_value(
-			f"{kwargs.sabb_voucher_type} Item", kwargs.sabb_voucher_detail_no, "so_detail"
-		)
+def put_delivery_reservations_first(available_batches, kwargs) -> list:
+	"""Offer what is reserved for the delivered Sales Order row first, then free stock.
 
-	if not so_detail:
-		return []
+	A batch's qty excludes every reservation and what the delivery's earlier rows picked. Those
+	picks come out of the delivery's own reservations first, so they are not deducted twice.
+	"""
+	own_rows, delivery_rows = get_delivery_order_rows(kwargs)
+	if not delivery_rows:
+		return available_batches
+
+	own_qty, delivery_qty = defaultdict(float), defaultdict(float)
+	for d in get_outstanding_reservations(kwargs, delivery_rows):
+		delivery_qty[(d.batch_no, d.warehouse)] += d.qty
+		if d.voucher_detail_no in own_rows:
+			own_qty[(d.batch_no, d.warehouse)] += d.qty
+
+	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
+	picked = kwargs.already_picked_batches or {}
+	own_batches = []
+	for batch in available_batches:
+		key = (batch.batch_no, batch.warehouse)
+		if own_qty[key]:
+			qty = min(own_qty[key], batch.qty + delivery_qty[key])
+			own_batches.append(frappe._dict(batch, qty=flt(qty, precision)))
+
+		picked_qty = -flt(picked[key].qty) if key in picked else 0
+		batch.qty = flt(batch.qty + min(picked_qty, delivery_qty[key]), precision)
+
+	return own_batches + available_batches
+
+
+def get_delivery_order_rows(kwargs) -> tuple[set, set]:
+	"""Sales Order rows, with their packed rows, of the delivered row and of its whole delivery."""
+	own = kwargs.so_detail
+	delivered = {own} if own else set()
+	if kwargs.sabb_voucher_type in ("Delivery Note", "Sales Invoice") and kwargs.sabb_voucher_no:
+		for row in frappe.get_all(
+			f"{kwargs.sabb_voucher_type} Item",
+			filters={"parent": kwargs.sabb_voucher_no, "so_detail": ("is", "set")},
+			fields=["name", "so_detail"],
+		):
+			delivered.add(row.so_detail)
+			if not own and row.name == kwargs.sabb_voucher_detail_no:
+				own = row.so_detail
+
+	if not delivered:
+		return set(), set()
 
 	packed_rows = frappe.get_all(
 		"Packed Item",
-		filters={"parenttype": "Sales Order", "parent_detail_docname": so_detail},
-		pluck="name",
+		filters={"parenttype": "Sales Order", "parent_detail_docname": ("in", delivered)},
+		fields=["name", "parent_detail_docname"],
 	)
-	return [so_detail, *packed_rows]
+	own_rows = {p.name for p in packed_rows if p.parent_detail_docname == own}
+	if own:
+		own_rows.add(own)
+
+	return own_rows, delivered | {p.name for p in packed_rows}
 
 
-def get_batches_to_be_considered(order_rows):
-	parent = frappe.qb.DocType("Stock Reservation Entry")
-	child = frappe.qb.DocType("Serial and Batch Entry")
+def get_outstanding_reservations(kwargs, order_rows) -> list:
+	"""Batch qty still reserved for the given Sales Order rows, as deducted by get_reserved_batches_for_sre."""
+	if not order_rows:
+		return []
 
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	query = (
-		frappe.qb.from_(parent)
-		.join(child)
-		.on(parent.name == child.parent)
-		.select(child.batch_no)
+		frappe.qb.from_(sre)
+		.join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sre.voucher_detail_no,
+			sb_entry.batch_no,
+			sre.warehouse,
+			(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
+		)
 		.where(
-			(parent.docstatus == 1)
-			& (parent.voucher_detail_no.isin(order_rows))
-			& (child.delivered_qty < child.qty)
+			(sre.docstatus == 1)
+			& (sre.item_code == kwargs.item_code)
+			& (sre.voucher_detail_no.isin(list(order_rows)))
+			& (sre.delivered_qty < sre.reserved_qty)
+			& (sre.reservation_based_on == "Serial and Batch")
 		)
 	)
-	return set(query.run(pluck=True))
+	if kwargs.ignore_voucher_nos:
+		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
+
+	return query.run(as_dict=True)
 
 
 def filter_zero_near_batches(available_batches, kwargs):
