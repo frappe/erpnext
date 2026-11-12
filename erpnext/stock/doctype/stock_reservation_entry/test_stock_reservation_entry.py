@@ -957,6 +957,36 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"auto_create_serial_and_batch_bundle_for_outward": 1,
 		},
 	)
+	def test_delivery_of_orders_with_an_unreserved_row_before_a_reserved_one(self) -> None:
+		items_details = create_items("batch")
+		(item,) = items_details
+		create_material_receipt(items_details, self.warehouse, qty=2)
+		reserves_older_batch = make_sales_order(item_code=item, warehouse=self.warehouse, qty=2, rate=100)
+		reserves_older_batch.create_stock_reservation_entries()
+		create_material_receipt(items_details, self.warehouse, qty=4)
+		reserves_newer_batch = make_sales_order(item_code=item, warehouse=self.warehouse, qty=2, rate=100)
+		reserves_newer_batch.create_stock_reservation_entries()
+		unreserved = make_sales_order(item_code=item, warehouse=self.warehouse, qty=2, rate=100)
+
+		dn = None
+		for so in (reserves_newer_batch, unreserved, reserves_older_batch):
+			dn = make_delivery_note(so.name, dn)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(get_row_reservation(reserves_older_batch.items[0])[0], "Delivered")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
 	def test_delivery_takes_the_reserved_qty_of_each_batch_first(self) -> None:
 		items_details = create_items("batch")
 		(item,) = items_details
