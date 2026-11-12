@@ -2160,6 +2160,42 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_delivery_auto_picks_only_its_order_row_reservation(self):
+		warehouse = "_Test Warehouse - _TC"
+		for item_code, item in create_items("serial", "batch").items():
+			with self.subTest(item=item_code):
+				create_material_receipt({item_code: item}, warehouse, qty=2)
+				create_material_receipt({item_code: item}, warehouse, qty=2)
+				row = {"item_code": item_code, "warehouse": warehouse, "qty": 2, "rate": 100}
+				sales_order = make_sales_order(item_list=[row, row], warehouse=warehouse)
+				sales_order.create_stock_reservation_entries(notify=False)
+
+				delivery_note = make_delivery_note(sales_order.name)
+				delivery_note.remove(delivery_note.items[0])
+				delivery_note.submit()
+
+				for so_item, status in zip(sales_order.items, ("Reserved", "Delivered"), strict=True):
+					self.assertEqual(
+						frappe.db.get_value(
+							"Stock Reservation Entry",
+							{"voucher_no": sales_order.name, "voucher_detail_no": so_item.name},
+							"status",
+						),
+						status,
+					)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
 			"enable_stock_reservation": 1,
 			"allow_negative_stock": 0,
 			"auto_reserve_serial_and_batch": 1,
