@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
@@ -1178,6 +1179,9 @@ class SellingController(StockController):
 						& (table.warehouse == item.warehouse)
 						& (table.delivered_qty < table.reserved_qty)
 					)
+					# Serial and Batch reservations match the row's serial / batch nos exactly, so they go
+					# before Qty ones; this keeps submit and cancel independent of the order of rows
+					.orderby(table.reservation_based_on, order=Order.desc)
 					.orderby(table.creation)
 				)
 				sre_list = query.run(pluck="name")
@@ -1257,7 +1261,7 @@ class SellingController(StockController):
 						"warehouse": item.warehouse,
 						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
 					},
-					order_by="creation",
+					order_by="reservation_based_on desc, creation",
 				)
 
 				# Skip if no Stock Reservation Entries.
