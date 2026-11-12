@@ -527,6 +527,12 @@ class SellingController(StockController):
 		if not rows:
 			return
 
+		# reserved rows first, so an earlier unreserved row cannot take what a later row reserved
+		reserved_rows = get_reserved_warehouses_by_order_row(
+			[d.so_detail for d in rows if d.get("so_detail")]
+		)
+		rows.sort(key=lambda d: d.get("so_detail") not in reserved_rows)
+
 		service = SerialBatchBundleService(self)
 		picked_serial_nos = service.get_serial_nos_used_in_rows()
 		picked_batches = service.get_batches_used_in_rows()
