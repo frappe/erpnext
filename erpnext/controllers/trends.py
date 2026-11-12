@@ -336,7 +336,7 @@ def get_period_wise_terms(bet_dates, trans_date, t2):
 	]
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	from dateutil.relativedelta import relativedelta
 
