@@ -976,7 +976,14 @@ erpnext.work_order = {
 	},
 
 	make_se: function (frm, purpose) {
-		this.show_prompt_for_qty_input(frm, purpose)
+		const only_leftover_items_pending =
+			purpose === "Material Transfer for Manufacture" &&
+			this.get_max_transferable_qty(frm, purpose) <= 0;
+		const get_qty = only_leftover_items_pending
+			? Promise.resolve({ qty: 0 })
+			: this.show_prompt_for_qty_input(frm, purpose);
+
+		get_qty
 			.then((data) => {
 				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,
