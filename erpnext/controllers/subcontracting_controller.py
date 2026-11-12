@@ -3,7 +3,7 @@
 
 import copy
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import frappe
 from frappe import _
@@ -1343,10 +1343,16 @@ class SubcontractingController(StockController):
 			if self.doctype == self.subcontract_data.order_doctype or (
 				self.backflush_based_on == "BOM" or self.is_return
 			):
-				for bom_item in self._get_materials_from_bom(
+				materials = self._get_materials_from_bom(
 					row.item_code, row.bom, row.get("include_exploded_items")
-				):
-					qty = self.get_bom_qty(row, bom_item, earlier_receipts)
+				)
+				repeated_bom_rows = get_repeated_bom_rows(materials)
+				for bom_item in materials:
+					qty = self.get_bom_qty(
+						row,
+						bom_item,
+						None if bom_item.bom_detail_no in repeated_bom_rows else earlier_receipts,
+					)
 					bom_item.main_item_code = row.item_code
 					self.__update_reserve_warehouse(bom_item, row, job_card_warehouses)
 					self.__set_alternative_item(bom_item)
@@ -1745,6 +1751,11 @@ class SubcontractingController(StockController):
 					)
 
 				mr_obj.update_requested_qty(mr_item_rows)
+
+
+def get_repeated_bom_rows(materials):
+	"""BOM rows a repeated phantom BOM brings in more than once; their earlier consumption cannot be told apart."""
+	return {name for name, count in Counter(d.bom_detail_no for d in materials).items() if count > 1}
 
 
 def get_received_stock_qty(row):
