@@ -1317,6 +1317,33 @@ class SubcontractingController(StockController):
 		)
 		return self.get_cumulative_bom_qty(row, bom_item, received_qty, earlier_receipts) - consumed_qty
 
+	def update_kept_supplied_items_qty(self, row, earlier_receipts):
+		"""Supplied rows kept for their serial / batch nos take the change in BOM qty that other receipts
+		caused since they were made; the last row of a BOM row split over batches takes it."""
+		materials = self._get_materials_from_bom(row.item_code, row.bom, row.get("include_exploded_items"))
+		repeated_bom_rows = get_repeated_bom_rows(materials)
+		for bom_item in materials:
+			supplied_rows = [
+				d
+				for d in self.get(self.raw_material_table)
+				if d.reference_name == row.name and d.bom_detail_no == bom_item.bom_detail_no
+			]
+			if not supplied_rows or bom_item.bom_detail_no in repeated_bom_rows:
+				continue
+
+			precision = supplied_rows[0].precision("required_qty")
+			required_qty = flt(self.get_bom_qty(row, bom_item, earlier_receipts), precision)
+			difference = flt(required_qty - flt(supplied_rows[0].required_qty), precision)
+			if not difference:
+				continue
+
+			last_row = supplied_rows[-1]
+			last_row.consumed_qty = flt(
+				last_row.consumed_qty + difference, last_row.precision("consumed_qty")
+			)
+			for supplied_row in supplied_rows:
+				supplied_row.required_qty = required_qty
+
 	def get_cumulative_bom_qty(self, row, bom_item, received_qty, earlier_receipts):
 		"""BOM qty of all that a row's order row received on its BOM with ``received_qty``, less what earlier
 		receipts consumed, so rounding per receipt does not add up."""
@@ -1339,6 +1366,8 @@ class SubcontractingController(StockController):
 				(self.__changed_name and row.name not in self.__changed_name)
 				or (has_items and not self.__changed_name)
 			):
+				if earlier_receipts is not None:
+					self.update_kept_supplied_items_qty(row, earlier_receipts)
 				continue
 
 			if self.doctype == self.subcontract_data.order_doctype or (
