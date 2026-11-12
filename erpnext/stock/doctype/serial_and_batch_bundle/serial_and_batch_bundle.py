@@ -2799,18 +2799,15 @@ def get_available_serial_nos(kwargs):
 		else:
 			reserved_voucher_details = get_reserved_voucher_details(kwargs)
 
-		# Check if serial nos are reserved for the current voucher then fetch only those serial nos
 		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
 			kwargs, reserved_entries, reserved_voucher_details
 		):
 			ignore = set(kwargs.get("ignore_serial_nos") or [])
 			reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
-			if not reserved_serial_nos or not set_batch_filter(filters, kwargs):
+			if not set_batch_filter(filters, kwargs):
 				return []
 
-			filters["name"] = ("in", reserved_serial_nos)
-
-			return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+			return get_reserved_then_free_serial_nos(kwargs, filters, fields, order_by, reserved_serial_nos)
 
 		# Check if serial nos are reserved for other vouchers then ignore those serial nos
 		elif ignore_reserved_serial_nos := get_other_doc_reserved_serials(
@@ -2853,6 +2850,27 @@ def get_available_serial_nos(kwargs):
 		return []
 
 	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def get_reserved_then_free_serial_nos(kwargs, filters, fields, order_by, reserved_serial_nos):
+	"""The voucher's own reserved serial nos first, then free ones for the rest of the qty."""
+	reserved = []
+	if reserved_serial_nos:
+		reserved = get_serial_nos_based_on_filters(
+			{**filters, "name": ("in", reserved_serial_nos)}, fields, order_by, kwargs
+		)
+
+	pending_qty = flt(kwargs.qty) - len(reserved)
+	if not kwargs.qty or pending_qty <= 0:
+		return reserved
+
+	free_kwargs = frappe._dict(
+		kwargs,
+		qty=pending_qty,
+		pick_reserved_items=False,
+		ignore_serial_nos=[*(kwargs.get("ignore_serial_nos") or []), *(d.serial_no for d in reserved)],
+	)
+	return reserved + get_available_serial_nos(free_kwargs)
 
 
 def set_batch_filter(filters, kwargs):
