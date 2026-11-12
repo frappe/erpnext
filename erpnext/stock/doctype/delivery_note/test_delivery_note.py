@@ -2104,6 +2104,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.save()
 		dn.remove(dn.items[0])
 		dn.save()
+		dn.submit()
 
 		self.assertEqual(len(get_serial_nos_from_bundle(dn.packed_items[0].serial_and_batch_bundle)), 2)
 
