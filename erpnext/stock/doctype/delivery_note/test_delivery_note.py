@@ -2265,6 +2265,20 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_component_packed_twice_gets_the_posted_rate_of_each_row(self):
+		component = make_batch_item_received_at_100_and_500()
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component, component], qty=2)
+
+		dn = create_delivery_note(item_code=bundle, qty=1)
+		dn.reload()
+
+		self.assertEqual(sorted(row.incoming_rate for row in dn.packed_items), [100, 500])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{
 			"use_serial_batch_fields": 0,
 			"auto_create_serial_and_batch_bundle_for_outward": 1,
