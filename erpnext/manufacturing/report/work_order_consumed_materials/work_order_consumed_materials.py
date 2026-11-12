@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import flt
 
 from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
 
 
 def execute(filters=None):
@@ -20,7 +21,9 @@ def execute(filters=None):
 
 def get_data(report_filters):
 	fields = get_fields()
-	filters = get_filter_condition(report_filters)
+	filters = [get_filter_condition(report_filters)]
+	if condition := get_allowed_companies_condition(frappe.qb.DocType("Work Order").company, "Work Order"):
+		filters.append(condition)
 
 	wo_items = {}
 
