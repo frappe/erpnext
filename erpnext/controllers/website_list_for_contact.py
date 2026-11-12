@@ -267,8 +267,8 @@ def get_customers_suppliers(doctype, user):
 
 	customer_field_name = get_customer_field_name(doctype)
 
-	has_customer_field = meta.has_field(customer_field_name)
 	has_supplier_field = meta.has_field("supplier")
+	has_customer_field = meta.has_field(customer_field_name) and not has_supplier_field
 
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
 		suppliers = get_parents_for_user("Supplier", user)
