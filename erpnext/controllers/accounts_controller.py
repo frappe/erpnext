@@ -352,7 +352,9 @@ class AccountsController(TransactionBase):
 
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
-				self.set_advances()
+				from erpnext.accounts.services.advances import set_advances
+
+				set_advances(self)
 
 			self.set_advance_gain_or_loss()
 
@@ -1207,7 +1209,16 @@ class AccountsController(TransactionBase):
 
 	@frappe.whitelist()
 	def set_advances(self):
-		from erpnext.accounts.services.advances import set_advances
+		from erpnext.accounts.services.advances import can_read_advance_vouchers, set_advances
+
+		if not self.flags.ignore_permissions and not can_read_advance_vouchers():
+			frappe.throw(
+				_("You need read permission on {0} and {1} to get advances.").format(
+					_("Payment Entry"), _("Journal Entry")
+				),
+				frappe.PermissionError,
+				title=_("Not Permitted"),
+			)
 
 		set_advances(self)
 

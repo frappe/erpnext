@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
@@ -988,6 +989,41 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				pluck="name",
 			)
 		)
+
+	def test_set_advances_needs_read_permission_on_advance_vouchers(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		payment_entry = create_payment_entry(paid_amount=500, save=True, submit=True)
+		invoice = {
+			"doctype": "Purchase Invoice",
+			"company": "_Test Company",
+			"supplier": "_Test Supplier",
+			"grand_total": 0,
+		}
+
+		for role in ("Purchase User", "Auditor"):
+			with self.set_user(create_user(f"advance-{frappe.scrub(role)}@example.com", role).name):
+				self.assertRaises(frappe.PermissionError, frappe.get_doc(dict(invoice)).set_advances)
+
+		with self.set_user(create_user("advance-accounts-user@example.com", "Accounts User").name):
+			purchase_invoice = frappe.get_doc(dict(invoice))
+			purchase_invoice.set_advances()
+
+		self.assertIn(payment_entry.name, [row.reference_name for row in purchase_invoice.advances])
+
+	def test_set_advances_rejects_credit_to_of_another_company(self):
+		invoice = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"company": "_Test Company",
+				"supplier": "_Test Supplier",
+				"credit_to": "Creditors - TCP1",
+				"grand_total": 0,
+			}
+		)
+
+		with self.set_user(create_user("advance-accounts-user@example.com", "Accounts User").name):
+			self.assertRaisesRegex(frappe.ValidationError, "does not belong to company", invoice.set_advances)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_invoice_with_advance_and_multi_payment_terms(self):
