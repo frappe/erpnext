@@ -2006,7 +2006,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		dn = create_delivery_note(item_code=item.name, qty=0.7, do_not_save=True)
 		dn.items[0].update({"uom": "Kg", "batch_no": batch, "use_serial_batch_fields": 1})
-		# 3 x 0.1 is 0.30000000000000004, the 0.3 left in the batch
+		# 3 x 0.1 is 0.30000000000000004 and the batch has 0.3 left
 		dn.append(
 			"items",
 			{**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 3, "uom": "Box", "batch_no": None},
