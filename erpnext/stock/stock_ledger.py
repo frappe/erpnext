@@ -2792,7 +2792,6 @@ def get_next_stock_reco(kwargs):
 			& (sle.voucher_type == "Stock Reconciliation")
 			& (sle.voucher_no != kwargs.get("voucher_no"))
 			& (sle.is_cancelled == 0)
-			& get_balance_setting_reco_condition(sle, kwargs)
 			& get_next_reco_datetime_condition(sle, kwargs)
 		)
 		.orderby(sle.posting_datetime)
@@ -2804,7 +2803,15 @@ def get_next_stock_reco(kwargs):
 	if frappe.db.db_type == "mariadb":
 		query = query.for_update()
 
-	return query.run(as_dict=True)
+	next_reco = query.run(as_dict=True)
+	if next_reco and is_batch_reco(next_reco[0]):
+		next_reco = query.where(get_balance_setting_reco_condition(sle, kwargs)).run(as_dict=True)
+
+	return next_reco
+
+
+def is_batch_reco(reco):
+	return bool(reco.has_batch_no or reco.batch_no)
 
 
 def get_balance_setting_reco_condition(sle, kwargs):
