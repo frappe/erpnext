@@ -303,6 +303,35 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get("payments")[0].amount, -500)
 		self.assertEqual(pos_return.get("payments")[1].amount, -500)
 
+	def test_pos_return_with_disabled_sales_person(self):
+		sales_person = "_Test Sales Person 2"
+		other_sales_person = "_Test Sales Person 1"
+
+		pos = create_pos_invoice(qty=1, rate=1000, do_not_save=True)
+		pos.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		frappe.db.set_value("Sales Person", other_sales_person, "enabled", 0)
+		try:
+			with self.subTest("sales person newly assigned on the return is rejected"):
+				pos_return = make_sales_return(pos.name)
+				pos_return.sales_team = []
+				pos_return.append(
+					"sales_team", {"sales_person": other_sales_person, "allocated_percentage": 100}
+				)
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", pos_return.save)
+
+			with self.subTest("return against the pos invoice is allowed"):
+				pos_return = make_sales_return(pos.name)
+				pos_return.submit()
+				self.assertEqual([d.sales_person for d in pos_return.sales_team], [sales_person])
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
+
 	def test_pos_return_for_serialized_item(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
