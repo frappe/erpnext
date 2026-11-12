@@ -126,9 +126,9 @@ class ProductionPlanReport:
 			done_qty = max(
 				flt(d.produced_qty), flt(d.delivered_qty) * flt(d.conversion_factor), flt(d.ordered_qty)
 			)
-			d.qty_to_manufacture = flt(flt(d.qty_to_manufacture) - done_qty, self.precision)
+			d.qty_to_manufacture = flt(d.qty_to_manufacture) - done_qty
 
-		self.orders = [d for d in self.orders if d.qty_to_manufacture > 0]
+		self.orders = [d for d in self.orders if flt(d.qty_to_manufacture, self.precision) > 0]
 
 	def get_raw_materials(self):
 		"""Retrieve raw materials and source warehouses for production orders.
