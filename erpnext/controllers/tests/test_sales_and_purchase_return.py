@@ -100,6 +100,11 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
 		return_dn.insert()
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
+		return_dn.insert()
+
 	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
