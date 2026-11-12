@@ -269,3 +269,10 @@ class TestStockSettings(ERPNextTestSuite):
 		stock_entry.items[0].update({"uom": "Tonne", "conversion_factor": 1000})
 
 		self.assertRaises(frappe.ValidationError, stock_entry.insert)
+
+	def test_boolean_check_value_is_stored_as_1(self):
+		settings = frappe.get_single("Stock Settings")
+		settings.use_serial_batch_fields = True
+		settings.save()
+
+		self.assertEqual(frappe.db.get_default("use_serial_batch_fields"), "1")
