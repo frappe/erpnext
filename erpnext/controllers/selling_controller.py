@@ -1155,6 +1155,10 @@ class SellingController(StockController):
 			packed_item.so_detail = so_packed_item.name
 			items.append(packed_item)
 
+		# rows that already hold a bundle (e.g. components picked at save) deliver their reservation
+		# before other rows auto-pick, so a batch is not counted both as picked and as reserved
+		items.sort(key=lambda item: not item.get("serial_and_batch_bundle"))
+
 		if self._action == "submit":
 			picked = frappe._dict()
 			for item in items:
