@@ -2610,6 +2610,39 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		with as_user(unfenced):
 			self.assertEqual(len(get_serial_batch_ledgers(name=bundle)), 1)
 
+	def test_get_auto_data_checks_warehouse_permission(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_data
+
+		item = make_item(
+			"_Test Auto Data Batch Item",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "ADBW-.#####",
+				"is_stock_item": 1,
+			},
+		).name
+		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
+			make_stock_entry(item_code=item, target=warehouse, qty=5, rate=100)
+
+		def get_batches(warehouse=None):
+			rows = get_auto_data(item_code=item, has_batch_no=1, qty=10, warehouse=warehouse)
+			return sorted((row.warehouse, row.qty) for row in rows)
+
+		self.assertEqual(get_batches(), [("_Test Warehouse - _TC", 5), ("_Test Warehouse 1 - _TC", 5)])
+		fenced = make_fenced_user(
+			"sabb-auto-data@example.com", ["Stock User"], [("Warehouse", "_Test Warehouse - _TC")]
+		)
+		with as_user(fenced):
+			self.assertEqual(get_batches(), [("_Test Warehouse - _TC", 5)])
+			self.assertEqual(get_batches("_Test Warehouse - _TC"), [("_Test Warehouse - _TC", 5)])
+			self.assertRaises(frappe.PermissionError, get_batches, "_Test Warehouse 1 - _TC")
+
+		no_stock_role = make_fenced_user("sabb-auto-data-projects@example.com", ["Projects User"])
+		with as_user(no_stock_role):
+			self.assertRaises(frappe.PermissionError, get_batches, "_Test Warehouse - _TC")
+			self.assertRaises(frappe.PermissionError, get_batches)
+
 	def test_add_serial_batch_ledgers_checks_write_on_an_existing_bundle(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 

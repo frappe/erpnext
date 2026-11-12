@@ -2745,10 +2745,22 @@ def get_serial_and_batch_ledger(**kwargs):
 @frappe.whitelist()
 def get_auto_data(**kwargs):
 	kwargs = frappe._dict(kwargs)
+	if kwargs.warehouse:
+		require_permission("Warehouse", kwargs.warehouse, "select")
+
+	data = None
 	if cint(kwargs.has_serial_no):
-		return get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
+		data = get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
 	elif cint(kwargs.has_batch_no):
-		return get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
+		data = get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
+
+	if not data:
+		return data
+
+	warehouses = frappe.get_list(
+		"Warehouse", filters={"name": ("in", {row.warehouse for row in data})}, pluck="name", limit=0
+	)
+	return [row for row in data if row.warehouse in warehouses]
 
 
 def get_available_batches_qty(available_batches):
