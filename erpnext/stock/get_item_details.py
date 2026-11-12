@@ -941,7 +941,7 @@ def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out
 	        }
 	"""
 	if not item:
-		if not ctx.get("item_code"):
+		if not ctx.get("item_code") or not isinstance(ctx.item_code, str):
 			frappe.throw(_("Item/Item Code required to get Item Tax Template."))
 		else:
 			item = frappe.get_cached_doc("Item", ctx.item_code)
