@@ -137,6 +137,25 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertTrue(any(r[0] == pi.name for r in rows))
 
+	def test_vendor_invoice_search_applies_company_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_vendor_invoices
+
+		vendor_invoice = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=100).name
+		filters = {"company": "_Test Company", "name": vendor_invoice}
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for company, expected in (("_Test Company 1", []), ("_Test Company", [vendor_invoice])):
+			user = create_user(f"lcv-vendor-{frappe.scrub(company)}@example.com", "Purchase User")
+			if not frappe.db.exists("User Permission", {"user": user.name, "allow": "Company"}):
+				add_user_permission("Company", company, user.name)
+			frappe.set_user(user.name)
+			rows = get_vendor_invoices("Purchase Invoice", "", "name", 0, 20, filters)
+			self.assertEqual([row[0] for row in rows], expected)
+			frappe.set_user("Administrator")
+
 	def make_claiming_voucher(self, receipt, vendor_invoice, amount):
 		lcv = make_landed_cost_voucher(
 			receipt_document_type=receipt.doctype,
