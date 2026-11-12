@@ -50,18 +50,14 @@ frappe.ui.form.on("Customer", {
 		frm.set_query("default_price_list", () => ({ filters: { selling: 1 } }));
 		frm.set_query("account", "accounts", function (doc, cdt, cdn) {
 			let d = locals[cdt][cdn];
-			let filters = {
-				account_type: "Receivable",
-				root_type: "Asset",
-				company: d.company,
-				is_group: 0,
-			};
-
-			if (doc.party_account_currency) {
-				$.extend(filters, { account_currency: doc.party_account_currency });
-			}
 			return {
-				filters: filters,
+				filters: {
+					account_type: "Receivable",
+					root_type: "Asset",
+					company: d.company,
+					is_group: 0,
+					account_currency: erpnext.utils.get_party_account_currency(doc, d.company),
+				},
 			};
 		});
 

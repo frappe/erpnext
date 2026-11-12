@@ -8,8 +8,12 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import flt
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return IssueSummary(filters).run()
 
 

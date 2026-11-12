@@ -11,12 +11,26 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import Case
-from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate, strip_html
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	strip_html,
+)
 from frappe.utils.data import comma_and
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
@@ -439,8 +453,15 @@ class SalesInvoice(SellingController):
 		if self.doctype != "Sales Invoice":
 			return
 
+		seen_assets = set()
 		for d in self.get("items"):
 			if d.is_fixed_asset:
+				if d.asset and not self.is_return:
+					if d.asset in seen_assets:
+						frappe.throw(
+							_("Row #{0}: Asset {1} is already added in another row").format(d.idx, d.asset)
+						)
+					seen_assets.add(d.asset)
 				if d.asset:
 					if not self.is_return:
 						asset_status, asset_docstatus = frappe.db.get_value(
@@ -499,10 +520,9 @@ class SalesInvoice(SellingController):
 	def on_submit(self):
 		self.validate_pos_paid_amount()
 
-		if not self.auto_repeat:
-			frappe.get_cached_doc("Authorization Control").validate_approving_authority(
-				self.doctype, self.company, self.base_grand_total, self
-			)
+		frappe.get_cached_doc("Authorization Control").validate_approving_authority(
+			self.doctype, self.company, self.base_grand_total, self
+		)
 
 		self.check_prev_docstatus()
 
@@ -529,6 +549,8 @@ class SalesInvoice(SellingController):
 				self.make_bundle_using_old_serial_batch_fields(table_name)
 
 			self.validate_standalone_serial_nos_customer()
+			# reservations read the delivered serial and batch nos from the bundles
+			self.make_packed_item_bundles()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 			self.validate_produced_serial_nos_against_reservation()
@@ -1388,6 +1410,7 @@ class SalesInvoice(SellingController):
 			)
 
 	def validate_pos_opening_entry(self):
+		"""Require an open session matching the invoice's posting date."""
 		opening_entries = frappe.get_all(
 			"POS Opening Entry",
 			fields=["name", "period_start_date"],
@@ -1408,7 +1431,21 @@ class SalesInvoice(SellingController):
 					"POS Profile - {0} has multiple open POS Opening Entries. Please close or cancel the existing entries before proceeding."
 				).format(self.pos_profile),
 			)
-		if frappe.utils.get_date_str(opening_entries[0].get("period_start_date")) != frappe.utils.today():
+		opening_entry = opening_entries[0]
+		if self.set_posting_time:
+			posting_datetime = get_datetime(f"{self.posting_date} {self.posting_time or '00:00:00'}")
+			if getdate(posting_datetime) != getdate(opening_entry.period_start_date) or (
+				posting_datetime < get_datetime(opening_entry.period_start_date)
+			):
+				frappe.throw(
+					_(
+						"Posting date and time must be on the same day as, and at or after, the start of POS Opening Entry {0}: {1}."
+					).format(opening_entry.name, opening_entry.period_start_date)
+				)
+			if getdate(posting_datetime) < getdate():
+				return
+
+		if getdate(opening_entry.period_start_date) != getdate():
 			frappe.throw(
 				title=_("Outdated POS Opening Entry"),
 				msg=_(
@@ -2603,16 +2640,10 @@ class SalesInvoice(SellingController):
 
 	@frappe.whitelist()
 	def is_subcontracted(self):
-		if not self.has_subcontracted:
+		sales_orders = [item.sales_order for item in self.items if item.sales_order]
+		if not self.has_subcontracted and sales_orders:
 			self.has_subcontracted = bool(
-				frappe.get_cached_value(
-					"Sales Order",
-					{
-						"name": ["in", [item.sales_order for item in self.items if item.sales_order]],
-						"is_subcontracted": 1,
-					},
-					"name",
-				)
+				frappe.db.exists("Sales Order", {"name": ["in", sales_orders], "is_subcontracted": 1})
 			)
 		if self.has_subcontracted:
 			self.update_stock = 0
@@ -3510,27 +3541,29 @@ def create_dunning(source_name, target_doc=None, args=None, ignore_permissions=F
 			target.cost_center = dunning_type.cost_center
 			target.language = source.language
 
-		# update outstanding from doc
-		if source.payment_schedule and len(source.payment_schedule) == 1:
-			for row in target.overdue_payments:
-				if row.payment_schedule == source.payment_schedule[0].name:
-					# outstanding_amount is in the party account currency, but the Overdue Payment
-					# row is in the invoice's transaction currency. When they differ, use the
-					# payment schedule's own outstanding — it is kept in transaction currency and
-					# updated as payments are allocated, so it stays correct even when the invoice
-					# and its payments post at different exchange rates (#56006).
-					if source.party_account_currency and source.party_account_currency != source.currency:
-						row.outstanding = source.payment_schedule[0].outstanding
-					else:
-						row.outstanding = source.get("outstanding_amount")
-
-		if len(source.payment_schedule) > 1 and source.party_account_currency == source.currency:
+		if source.payment_schedule:
 			outstanding = get_payment_schedule_outstanding(source, source.payment_schedule)
 			for row in target.overdue_payments[:]:
-				if row.sales_invoice == source.name:
+				if row.sales_invoice == source.name and row.payment_schedule in outstanding:
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))

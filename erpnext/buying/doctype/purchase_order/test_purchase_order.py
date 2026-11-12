@@ -816,6 +816,47 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po = create_purchase_order(company="_Test Company 1", do_not_save=True)
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
+	def test_disabled_uom_cannot_be_used_by_purchase_order(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 1}])
+		frappe.db.set_value("UOM", "Box", "enabled", 0)
+		po = create_purchase_order(item_code=item.name, do_not_save=True)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 1
+
+		self.assertRaises(frappe.ValidationError, po.insert)
+
+	def test_subcontracting_finished_good_qty_must_be_whole_number(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		po = create_purchase_order(
+			rm_items=[
+				{
+					"warehouse": "_Test Warehouse - _TC",
+					"item_code": "Subcontracted Service Item 1",
+					"qty": 1,
+					"rate": 100,
+					"fg_item": "Subcontracted Item SA1",
+					"fg_item_qty": 2.5,
+				}
+			],
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+			do_not_save=True,
+		)
+
+		self.assertRaises(UOMMustBeIntegerError, po.insert)
+
 	def test_marginal_min_order_qty_overage_toast(self):
 		original_precision = frappe.db.get_default("float_precision")
 		frappe.db.set_default("float_precision", "3")

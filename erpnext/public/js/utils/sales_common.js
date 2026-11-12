@@ -65,7 +65,7 @@ erpnext.sales_common = {
 
 				if (this.frm.fields_dict.tc_name) {
 					this.frm.set_query("tc_name", function () {
-						return { filters: { selling: 1 } };
+						return { filters: { selling: 1, disabled: 0 } };
 					});
 				}
 
@@ -201,8 +201,23 @@ erpnext.sales_common = {
 				erpnext.utils.get_address_display(this.frm, "dispatch_address_name", "dispatch_address");
 			}
 
-			sales_partner() {
+			async sales_partner() {
 				this.apply_pricing_rule();
+				if (!this.frm.fields_dict.commission_rate) return;
+
+				const partner = this.frm.doc.sales_partner;
+				const rate = partner
+					? await frappe.xcall(
+							"erpnext.setup.doctype.sales_partner.sales_partner.get_commission_rate",
+							{
+								sales_partner: partner,
+							}
+					  )
+					: 0;
+				if (partner === this.frm.doc.sales_partner) {
+					await this.frm.set_value("commission_rate", rate);
+					this.calculate_commission();
+				}
 			}
 
 			campaign() {
@@ -273,8 +288,17 @@ erpnext.sales_common = {
 				}
 			}
 
-			sales_person(doc, cdt, cdn) {
-				var row = frappe.get_doc(cdt, cdn);
+			async sales_person(doc, cdt, cdn) {
+				const row = frappe.get_doc(cdt, cdn);
+				const sales_person = row.sales_person;
+				const commission_rate = sales_person
+					? await frappe.xcall(
+							"erpnext.setup.doctype.sales_person.sales_person.get_commission_rate",
+							{ sales_person }
+					  )
+					: 0;
+				if (row.sales_person !== sales_person) return;
+				await frappe.model.set_value(cdt, cdn, "commission_rate", flt(commission_rate));
 				this.calculate_incentive(row);
 				refresh_field("incentives", row.name, row.parentfield);
 			}
@@ -386,12 +410,10 @@ erpnext.sales_common = {
 			}
 
 			calculate_incentive(row) {
-				if (row.allocated_amount) {
-					row.incentives = flt(
-						(row.allocated_amount * row.commission_rate) / 100.0,
-						precision("incentives", row)
-					);
-				}
+				row.incentives = flt(
+					(flt(row.allocated_amount) * flt(row.commission_rate)) / 100.0,
+					precision("incentives", row)
+				);
 			}
 
 			set_dynamic_labels() {

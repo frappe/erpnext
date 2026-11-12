@@ -9,8 +9,12 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import getdate
 from pypika import Order
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = {}
 

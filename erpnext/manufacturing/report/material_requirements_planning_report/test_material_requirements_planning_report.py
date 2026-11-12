@@ -17,7 +17,8 @@ from erpnext.manufacturing.report.material_requirements_planning_report.material
 	get_item_lead_time,
 	make_order,
 )
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.selling.doctype.sales_order.test_sales_order import create_dn_against_so, make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -607,6 +608,20 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
 		self.assertEqual(rows[plan.rm_item].required_qty, 20)
 
+	def test_bom_selected_on_the_mps_row_is_used(self):
+		plan = make_mrp_plan(self)
+		default_rm = make_item(properties={"is_stock_item": 1, "is_purchase_item": 1}).name
+		make_bom(item=plan.fg_item, raw_materials=[default_rm], rate=100)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.items[0].bom_no = plan.bom
+		mps.save()
+
+		rows = get_mrp_rows(mps)
+
+		self.assertEqual(rows[plan.fg_item].bom_no, plan.bom)
+		self.assertEqual(rows[plan.rm_item].planned_qty, 20)
+		self.assertNotIn(default_rm, rows)
+
 	def test_sales_order_in_the_mps_is_not_added_again(self):
 		plan = make_mrp_plan(self)
 		make_mrp_sales_order(plan.fg_item, 10, add_days(today(), 30))
@@ -635,6 +650,47 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertEqual(
 			[(row.qty, row.uom, row.conversion_factor, row.stock_qty) for row in purchase_order.items],
 			[(2, "Box", 12, 24)],
+		)
+
+	def test_mps_qty_in_another_uom_is_ordered_in_that_uom(self):
+		uom = frappe.get_doc(
+			{"doctype": "UOM", "uom_name": "_Test MRP Tenth Pack", "must_be_whole_number": 1}
+		).insert(ignore_if_duplicate=True)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"is_purchase_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": uom.name, "conversion_factor": 0.1}],
+				"item_defaults": [
+					{"company": COMPANY, "default_warehouse": WAREHOUSE, "default_supplier": SUPPLIER}
+				],
+			}
+		).name
+		mps = frappe.get_doc(
+			{
+				"doctype": "Master Production Schedule",
+				"company": COMPANY,
+				"posting_date": today(),
+				"from_date": today(),
+				"parent_warehouse": WAREHOUSE,
+				"items": [
+					{
+						"item_code": item,
+						"warehouse": WAREHOUSE,
+						"delivery_date": add_days(today(), 30),
+						"planned_qty": 3,
+						"uom": uom.name,
+					}
+				],
+			}
+		).insert()
+
+		make_order(get_mrp_row_list(mps), COMPANY, warehouse=WAREHOUSE, mps=mps.name)
+
+		purchase_order = get_created_order(mps.name, "Purchase Order")
+		self.assertEqual(
+			[(row.qty, row.uom, row.stock_qty) for row in purchase_order.items], [(3, uom.name, 0.3)]
 		)
 
 	def test_safety_stock_is_ordered_once_and_only_when_stock_is_short(self):
@@ -695,6 +751,17 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rm_row = get_mrp_rows(mps)[plan.rm_item]
 		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty, rm_row.required_qty), (24, 14, 24))
 
+	def test_bundle_sales_orders_count_only_undelivered_components(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		bundle = make_item(properties={"is_stock_item": 0, "uoms": [{"uom": "Box", "conversion_factor": 2}]})
+		make_product_bundle(bundle.name, [plan.rm_item])
+		sales_order = make_sales_order(item_code=bundle.name, qty=5, uom="Box", warehouse=WAREHOUSE)
+		create_dn_against_so(sales_order.name, delivered_qty=2)
+
+		rm_row = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))[plan.rm_item]
+
+		self.assertEqual((rm_row.planned_qty, rm_row.adhoc_qty), (16, 6))
+
 	def test_open_orders_booked_before_from_date_are_demand(self):
 		plan = make_mrp_plan(self)
 		make_mrp_sales_order(plan.fg_item, 6, add_days(today(), 20), transaction_date=add_days(today(), -10))
@@ -737,6 +804,55 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		rm_row = get_mrp_rows(frappe.get_doc("Master Production Schedule", plan.mps))[plan.rm_item]
 
 		self.assertEqual((rm_row.po_ordered_qty, rm_row.required_qty), (8, 2))
+
+	def test_float_noise_in_qty_does_not_round_up_chart_and_lead_time(self):
+		qty = 7 / 3 * 27  # 63.00000000000001
+		report = MaterialRequirementsPlanningReport(frappe._dict())
+		chart = report.get_detailed_view_chart_data([make_chart_row(add_days(today(), 1), planned_qty=qty)])
+		self.assertEqual(chart["data"]["datasets"][0]["values"], [63])
+
+		item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{"doctype": "Item Lead Time", "item_code": item, "manufacturing_time_in_mins": 160}
+		).insert()
+		row = frappe._dict(
+			item_code=item, type_of_material="Manufacture", required_qty=qty, delivery_date=today()
+		)
+		report.set_lead_time(row)
+		self.assertEqual(row.lead_time, 7)
+
+	def test_sales_order_of_an_mps_item_used_in_a_bom_is_counted_once(self):
+		plan = make_mrp_plan(self, rm_qty=1)
+		delivery_date = add_days(today(), 30)
+		make_mrp_sales_order(plan.rm_item, 5, delivery_date)
+		mps = frappe.get_doc("Master Production Schedule", plan.mps)
+		mps.append(
+			"items",
+			{
+				"item_code": plan.rm_item,
+				"warehouse": WAREHOUSE,
+				"delivery_date": delivery_date,
+				"planned_qty": 5,
+				"uom": frappe.get_cached_value("Item", plan.rm_item, "stock_uom"),
+			},
+		)
+		mps.save()
+
+		rows = get_mrp_row_list(mps)
+		rm_rows = sorted((row.indent, row.required_qty) for row in rows if row.item_code == plan.rm_item)
+		self.assertEqual(rm_rows, [(0, 5), (1, 10)])
+
+	def test_sales_orders_of_other_items_are_left_out_when_no_mps_row_is_in_range(self):
+		plan = make_mrp_plan(self)
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		make_mrp_sales_order(other_item, 3, add_days(today(), 15))
+
+		rows = get_mrp_row_list(
+			frappe.get_doc("Master Production Schedule", plan.mps),
+			from_date=add_days(today(), 11),
+			to_date=add_days(today(), 20),
+		)
+		self.assertFalse([row for row in rows if row.item_code == other_item])
 
 
 def make_chart_row(delivery_date, planned_qty=1):

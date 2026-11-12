@@ -199,6 +199,22 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertRaises(frappe.CannotChangeConstantError, si.save)
 
+	def test_historical_print_preserves_empty_terms_after_template_disabled(self):
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions", title="Historical invoice terms", selling=1
+		).insert()
+		invoice = create_sales_invoice(do_not_save=True)
+		invoice.tc_name = terms.name
+		invoice.insert()
+		invoice.submit()
+		terms.disabled = 1
+		terms.save()
+		invoice.before_print(frappe._dict())
+		self.assertFalse(invoice.terms)
+		invoice.cancel()
+		invoice.before_print(frappe._dict())
+		self.assertFalse(invoice.terms)
+
 	def test_add_terms_after_save(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
 		si.insert()
@@ -4217,6 +4233,18 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	def test_sales_commission(self):
 		si = frappe.copy_doc(self.globalTestRecords["Sales Invoice"][2])
+		si.sales_partner = (
+			frappe.get_doc(
+				{
+					"doctype": "Sales Partner",
+					"partner_name": "Test Invoice Commission " + frappe.generate_hash(length=10),
+					"territory": "All Territories",
+					"commission_rate": 0,
+				}
+			)
+			.insert()
+			.name
+		)
 
 		frappe.db.set_value("Item", si.get("items")[0].item_code, "grant_commission", 1)
 		frappe.db.set_value("Item", si.get("items")[1].item_code, "grant_commission", 0)
@@ -5934,6 +5962,30 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		frappe.get_doc("Purchase Invoice", purchase_invoices[0]).cancel()
 		self.assertFalse(si.get_db_value("inter_company_invoice_reference"))
+
+	def test_fixed_asset_cannot_be_added_to_multiple_invoice_rows(self):
+		asset = create_asset(item_code="Macbook Pro", asset_quantity=2, calculate_depreciation=0, submit=1)
+		si = create_sales_invoice(
+			item_code="Macbook Pro", asset=asset.name, qty=1, rate=25000, do_not_save=True
+		)
+		si.items[0].is_fixed_asset = 1
+		si.append(
+			"items",
+			{
+				"item_code": "Macbook Pro",
+				"asset": asset.name,
+				"qty": 1,
+				"rate": 25000,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.items[1].is_fixed_asset = 1
+
+		with self.assertRaisesRegex(
+			frappe.ValidationError, "Row #2: Asset .* is already added in another row"
+		):
+			si.insert()
 
 
 def make_item_for_si(item_code, properties=None):

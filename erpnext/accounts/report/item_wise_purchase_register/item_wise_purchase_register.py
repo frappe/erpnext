@@ -14,10 +14,12 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 	get_grouped_data,
 	get_tax_accounts,
 )
-from erpnext.accounts.report.utils import get_values_for_columns
+from erpnext.accounts.report.utils import get_values_for_columns, validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return _execute(filters)
 
 
