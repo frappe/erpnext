@@ -5508,7 +5508,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 0.3356}],
 			}
 		).name
-		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 		dn = create_delivery_note(item_code=item_code, qty=1, do_not_save=True)
 		dn.items[0].uom, dn.items[0].conversion_factor = "Box", 0.3356
 		dn.insert()
