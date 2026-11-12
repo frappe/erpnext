@@ -350,10 +350,10 @@ class ProductionPlanReport:
 				row.update(bin_data)
 
 			args.allotted_qty = 0
-			if bin_data and bin_data.get("actual_qty") > 0:
-				args.allotted_qty = min(args.remaining_qty, bin_data.get("actual_qty"))
+			if bin_data and flt(bin_data.get("actual_qty"), self.precision) > 0:
+				args.allotted_qty = flt(min(args.remaining_qty, bin_data.get("actual_qty")), self.precision)
 				args.remaining_qty = flt(args.remaining_qty - args.allotted_qty, self.precision)
-				bin_data["actual_qty"] = flt(bin_data["actual_qty"] - args.allotted_qty, self.precision)
+				bin_data["actual_qty"] -= args.allotted_qty
 
 			nothing_allotted = args.remaining_qty == args.required_qty
 			is_last_warehouse = index == len(warehouses) - 1
