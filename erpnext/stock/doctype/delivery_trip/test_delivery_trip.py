@@ -376,6 +376,16 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		trip.insert()
 		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), trip.name)
 
+	def test_contact_display_needs_delivery_trip_access(self):
+		contact = get_contact_and_address("_Test Customer").contact_person.parent
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(self.make_delivery_user("Projects User"))
+		self.assertRaises(frappe.PermissionError, get_contact_display, contact)
+
+		frappe.set_user(self.make_delivery_user("Delivery User"))
+		self.assertIn("<b>", get_contact_display(contact))
+
 	def process_route_with_locks(self, locks):
 		from unittest.mock import patch
 
