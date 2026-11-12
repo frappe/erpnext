@@ -2729,7 +2729,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			item_code=item,
 			qty=5,
 			rejected_qty=1,
-			received_qty=6,
 			uom="Box",
 			conversion_factor=10,
 			rate=100,
