@@ -2133,6 +2133,8 @@ def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, pa
 	if not filters.get("company"):
 		frappe.throw(_("Please select a Company"))
 
+	check_pick_list_company(filters.get("company"))
+
 	PICK_LIST = frappe.qb.DocType("Pick List")
 	PICK_LIST_ITEM = frappe.qb.DocType("Pick List Item")
 	SALES_ORDER = frappe.qb.DocType("Sales Order")
