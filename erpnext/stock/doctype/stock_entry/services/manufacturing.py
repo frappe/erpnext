@@ -228,7 +228,7 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			self.add_batchwise_finished_good(batches, item_details, existing_row=existing_row)
 
 	def add_batchwise_finished_good(self, batches, item_details, existing_row=None):
-		qty = flt(self.doc.fg_completed_qty)
+		qty = flt(item_details.qty)
 		row = frappe._dict({"batches_to_be_consume": defaultdict(float)})
 		self.update_batches_to_be_consume(batches, row, qty)
 		if row.batches_to_be_consume:
