@@ -5184,7 +5184,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			"validate_consumed_qty": 1,
 		},
 	)
-	def test_material_transferred_receipts_validate_against_their_own_bom_qty(self):
+	def test_material_transferred_receipts_pass_consumed_qty_validation(self):
 		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.5), [0.5, 0.5])
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
