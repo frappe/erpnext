@@ -44,6 +44,16 @@ class SellingController(StockController):
 				),
 			)
 
+<<<<<<< HEAD
+=======
+		if self.docstatus.is_draft() and self.get("company") and not self.get("terms"):
+			if not self.get("tc_name"):
+				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
+			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
+			if tnc and not tnc.disabled and tnc.get("selling"):
+				self.set_missing_terms_for_display()
+
+>>>>>>> 10d5563 (fix(selling): open and print drafts whose terms the user cannot render)
 	def validate(self):
 		validate_terms_and_conditions(self.get("tc_name"), "selling")
 		super().validate()
