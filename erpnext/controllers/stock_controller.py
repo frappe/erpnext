@@ -2481,6 +2481,7 @@ def get_accounting_ledger_preview(doc, filters):
 	doc.docstatus = 1
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
+		make_serial_and_batch_bundles_for_preview(doc)
 		doc.update_stock_ledger()
 
 	doc.make_gl_entries()
@@ -2524,11 +2525,7 @@ def get_stock_ledger_preview(doc, filters):
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
 		doc.docstatus = 1
-		for table_name in ("items", "packed_items"):
-			if doc.get(table_name):
-				# a return takes back the serial / batch nos of the original voucher, as on submit
-				doc.make_bundle_for_sales_purchase_return(table_name)
-				doc.make_bundle_using_old_serial_batch_fields(table_name)
+		make_serial_and_batch_bundles_for_preview(doc)
 		doc.update_stock_ledger()
 
 		columns = get_sl_columns(filters)
@@ -2543,6 +2540,14 @@ def get_stock_ledger_preview(doc, filters):
 		sl_data = get_data(columns_fields, sl_entries)
 
 	return sl_columns, sl_data
+
+
+def make_serial_and_batch_bundles_for_preview(doc):
+	for table_name in ("items", "packed_items"):
+		if doc.get(table_name):
+			# a return takes back the serial / batch nos of the original voucher, as on submit
+			doc.make_bundle_for_sales_purchase_return(table_name)
+			doc.make_bundle_using_old_serial_batch_fields(table_name)
 
 
 def get_sl_entries_for_preview(doctype, docname, fields):
