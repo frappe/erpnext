@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import cint, cstr
 
 UTM_DOCTYPES = [
 	"Lead",
@@ -90,7 +90,7 @@ class SellingSettings(Document):
 			"editable_price_list_rate",
 			"selling_price_list",
 		]:
-			frappe.db.set_default(key, self.get(key, ""))
+			frappe.db.set_default(key, cstr(self.get(key)))
 
 		self.update_customer_naming_settings()
 
