@@ -68,4 +68,14 @@ class TestSellingSettings(unittest.TestCase):
 		settings.save()
 
 		self.assertEqual(frappe.cache.get_value("selling_settings_probe"), 1)
+<<<<<<< HEAD
 >>>>>>> 2c95a6b (test: keep the site cache on an unchanged Selling or Buying Settings save)
+=======
+
+	def test_boolean_check_value_is_stored_as_1(self):
+		settings = frappe.get_single("Selling Settings")
+		settings.editable_price_list_rate = True
+		settings.save()
+
+		self.assertEqual(frappe.db.get_default("editable_price_list_rate"), "1")
+>>>>>>> 81a4115 (test: store a boolean Selling Settings check default as 1)
