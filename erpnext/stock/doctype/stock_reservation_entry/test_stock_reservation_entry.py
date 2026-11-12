@@ -2236,6 +2236,56 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	def test_delivery_of_an_item_and_a_bundle_reserving_the_same_batch(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		warehouse = "_Test Warehouse - _TC"
+		component = make_batch_item()
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component.name])
+		create_material_receipt({component.name: component}, warehouse, qty=2)
+		sales_order = make_sales_order(
+			item_list=[
+				{"item_code": component.name, "warehouse": warehouse, "qty": 1, "rate": 100},
+				{"item_code": bundle, "warehouse": warehouse, "qty": 1, "rate": 100},
+			],
+			warehouse=warehouse,
+		)
+		sales_order.create_stock_reservation_entries(
+			items_details=[
+				{
+					"sales_order_item": row.name,
+					"item_code": component.name,
+					"warehouse": warehouse,
+					"qty_to_reserve": 1,
+				}
+				for row in (sales_order.items[0], sales_order.packed_items[0])
+			],
+			notify=False,
+		)
+		# a free batch the auto-pick must not prefer over the reserved one
+		create_material_receipt({component.name: component}, warehouse, qty=1)
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.save()
+		delivery_note.submit()
+
+		self.assertEqual(
+			set(frappe.get_all("Stock Reservation Entry", {"voucher_no": sales_order.name}, pluck="status")),
+			{"Delivered"},
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
 			"enable_stock_reservation": 1,
 			"allow_negative_stock": 0,
 			"auto_reserve_serial_and_batch": 1,
