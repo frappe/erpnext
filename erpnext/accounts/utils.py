@@ -1184,12 +1184,12 @@ def remove_ref_doc_link_from_pe(
 		transferred_rows.add(row.name)
 
 	linked_pe = set()
-	row_names = set()
+	reference_amounts = {}
 	advance_vouchers = set()
 
 	for row in reference_rows:
 		linked_pe.add(row.parent)
-		row_names.add(row.name)
+		reference_amounts[row.name] = row.allocated_amount
 		if row.advance_voucher_type and row.advance_voucher_no:
 			advance_vouchers.add((row.advance_voucher_type, row.advance_voucher_no))
 
@@ -1208,7 +1208,7 @@ def remove_ref_doc_link_from_pe(
 		.set(per.allocated_amount, 0)
 		.set(per.modified, now())
 		.set(per.modified_by, frappe.session.user)
-		.where(per.name.isin(row_names))
+		.where(per.name.isin(list(reference_amounts)))
 		.where(per.parenttype == "Payment Entry")
 		.run()
 	)
@@ -1219,8 +1219,11 @@ def remove_ref_doc_link_from_pe(
 			pe_doc.set_amounts()
 
 			# Call cancel on only removed reference
-			references = [x for x in pe_doc.references if x.name in row_names]
-			[pe_doc.make_advance_gl_entries(x, cancel=1) for x in references]
+			for reference in pe_doc.references:
+				if reference.name in reference_amounts:
+					reference.allocated_amount = reference_amounts[reference.name]
+					pe_doc.make_advance_gl_entries(reference, cancel=1)
+					reference.allocated_amount = 0
 
 			pe_doc.clear_unallocated_reference_document_rows()
 			pe_doc.validate_payment_type_with_outstanding()
