@@ -2187,9 +2187,9 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_transfer.items[0].serial_no), picked_serial_nos[2:])
 		second_transfer.save().submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_delivery_from_pick_list_skips_a_returned_serial_no(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
@@ -2226,10 +2226,10 @@ class TestPickList(FrappeTestCase):
 				)
 				second_delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_stock_entry_from_pick_list_skips_a_serial_no_moved_back_to_its_warehouse(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as pick_list_for_wo
+		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list as pick_list_for_wo
 		from erpnext.manufacturing.doctype.work_order.work_order import make_work_order
 
 		fg_item = make_item(properties={"is_stock_item": 1}).name
