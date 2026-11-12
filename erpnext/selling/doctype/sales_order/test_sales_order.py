@@ -11,7 +11,11 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+<<<<<<< HEAD
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+=======
+from erpnext.accounts.party import get_party_details
+>>>>>>> c28c27c (test(accounts): cover advance ledger reversal on invoice unlink)
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
@@ -3125,9 +3129,10 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		return_value=None,
 	)
 	def test_invoice_cancellation_retains_advance_payment_request(self, mocked_get_payment_url):
-		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-
 		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
+		company = frappe.get_doc("Company", "_Test Company")
+		company.book_advance_payments_in_separate_party_account = 0
+		company.save()
 		so = make_sales_order(qty=1, rate=100)
 		pr = make_payment_request(
 			dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True, mute_email=True
@@ -3277,8 +3282,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		return_value=None,
 	)
 	def test_partial_invoice_cancellation_restores_order_advance(self, mocked_get_payment_url):
-		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-
 		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
 		so = make_sales_order(qty=2, rate=50)
 		pr = make_payment_request(

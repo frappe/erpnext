@@ -2,13 +2,26 @@
 # See license.txt
 
 import re
+<<<<<<< HEAD
 import unittest
 from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import cint
+=======
+import sys
+from itertools import product
+from unittest.mock import MagicMock, patch
 
+import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.query_builder.functions import Sum
+from frappe.tests import change_settings
+from frappe.utils import add_days, cint, nowdate
+>>>>>>> c28c27c (test(accounts): cover advance ledger reversal on invoice unlink)
+
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -19,7 +32,19 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
 )
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+<<<<<<< HEAD
+=======
+from erpnext.accounts.doctype.subscription.test_subscription import (
+	create_plan,
+	create_subscription,
+	make_plans,
+)
+from erpnext.buying.doctype.purchase_order.mapper import (
+	make_purchase_invoice as make_purchase_invoice_from_order,
+)
+>>>>>>> c28c27c (test(accounts): cover advance ledger reversal on invoice unlink)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 
@@ -676,9 +701,11 @@ class TestPaymentRequest(FrappeTestCase):
 			patch.object(
 				frappe,
 				"get_system_settings",
-				side_effect=lambda k: 1
-				if k == "use_number_format_from_currency"
-				else frappe.db.get_single_value("System Settings", k),
+				side_effect=lambda k: (
+					1
+					if k == "use_number_format_from_currency"
+					else frappe.db.get_single_value("System Settings", k)
+				),
 			),
 			patch.object(pr_module, "get_company_currency", return_value="JPY"),
 			patch.object(
@@ -867,6 +894,252 @@ class TestPaymentRequest(FrappeTestCase):
 
 		self.assertEqual(pr.grand_total, pi.outstanding_amount)
 
+<<<<<<< HEAD
+=======
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	def test_unlink_advance_request_reverses_separate_account(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.book_advance_payments_in_separate_party_account = 1
+		company.default_advance_received_account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Customer Advance Request",
+			company=company.name,
+			account_type="Receivable",
+		)
+		company.default_advance_paid_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Supplier Advance Request",
+			company=company.name,
+			account_type="Payable",
+		)
+		company.save()
+
+		for order_type, qty, cancel_invoice in product(
+			("Sales Order", "Purchase Order"), (1, 2), (False, True)
+		):
+			with self.subTest(order_type=order_type, qty=qty, cancel_invoice=cancel_invoice):
+				order = (make_sales_order if order_type == "Sales Order" else create_purchase_order)(
+					qty=2, rate=50
+				)
+				request = make_payment_request(
+					dt=order.doctype, dn=order.name, submit_doc=True, return_doc=True, mute_email=True
+				)
+				payment = request.create_payment_entry()
+				invoice = (
+					make_sales_invoice if order_type == "Sales Order" else make_purchase_invoice_from_order
+				)(order.name)
+				invoice.items[0].qty = qty
+				invoice.allocate_advances_automatically = 1
+				invoice.insert().submit()
+
+				if cancel_invoice:
+					invoice.cancel()
+				else:
+					frappe.get_doc(
+						{
+							"doctype": "Unreconcile Payment",
+							"company": company.name,
+							"voucher_type": payment.doctype,
+							"voucher_no": payment.name,
+							"allocations": [
+								{"reference_doctype": invoice.doctype, "reference_name": invoice.name}
+							],
+						}
+					).insert().submit()
+					self.assertEqual(invoice.reload().outstanding_amount, qty * 50)
+
+				self.assertEqual((request.reload().status, request.outstanding_amount), ("Paid", 0))
+				self.assertEqual(payment.reload().total_allocated_amount, 100)
+				self.assertEqual(payment.unallocated_amount, 0)
+				party_account = invoice.debit_to if order_type == "Sales Order" else invoice.credit_to
+				for ledger in ("GL Entry", "Payment Ledger Entry"):
+					table = frappe.qb.DocType(ledger)
+					amount = table.debit - table.credit if ledger == "GL Entry" else table.amount
+					balance = (
+						frappe.qb.from_(table)
+						.select(Sum(amount))
+						.where(table.voucher_type == payment.doctype)
+						.where(table.voucher_no == payment.name)
+						.where(table.account == party_account)
+					).run()[0][0]
+					self.assertEqual(balance, 0, ledger)
+
+				if not cancel_invoice:
+					invoice.cancel()
+				payment.cancel()
+				self.assertEqual(request.reload().outstanding_amount, 100)
+
+	def test_payment_request_grand_total_from_selected_schedules(self):
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
+		po.payment_schedule = []
+
+		po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 30})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 1), "payment_amount": 30})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 2), "payment_amount": 40})
+
+		po.save()
+		po.submit()
+
+		schedules = json.dumps(
+			[
+				{
+					"payment_term": row.payment_term,
+					"name": row.name,
+					"due_date": row.due_date,
+					"payment_amount": row.payment_amount,
+					"description": row.description,
+				}
+				for row in [po.payment_schedule[0], po.payment_schedule[2]]
+			]
+		)
+		pr = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=False,
+			return_doc=True,
+			schedules=schedules,
+		)
+
+		pr.submit()
+
+		self.assertEqual(pr.grand_total, 70)
+		self.assertEqual(len(pr.payment_reference), 2)
+
+	def make_po_with_schedule(self):
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
+		po.payment_schedule = []
+		po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 30})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 1), "payment_amount": 70})
+		po.save()
+		po.submit()
+		return po
+
+	def request_for_schedules(self, po, schedules):
+		return make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			return_doc=True,
+			schedules=json.dumps(schedules),
+		)
+
+	def test_schedule_amounts_are_taken_from_the_reference(self):
+		po = self.make_po_with_schedule()
+		row = po.payment_schedule[0]
+
+		pr = self.request_for_schedules(
+			po, [{"name": row.name, "payment_amount": 250000}, {"name": row.name, "payment_amount": 250000}]
+		)
+
+		self.assertEqual(pr.grand_total, 30)
+		self.assertEqual(
+			[(ref.payment_schedule, ref.amount) for ref in pr.payment_reference], [(row.name, 30)]
+		)
+
+	def test_schedule_of_another_reference_is_rejected(self):
+		po = self.make_po_with_schedule()
+		other_po = self.make_po_with_schedule()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"does not belong to",
+			self.request_for_schedules,
+			po,
+			[{"name": other_po.payment_schedule[0].name, "payment_amount": 30}],
+		)
+
+	def test_draft_pr_reuse_merges_payment_references(self):
+		from frappe.utils import add_days, nowdate
+
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
+		po.payment_schedule = []
+		po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 50})
+		po.append("payment_schedule", {"due_date": add_days(nowdate(), 1), "payment_amount": 50})
+		po.save()
+		po.submit()
+		schedules = json.dumps(
+			[
+				{
+					"payment_term": row.payment_term,
+					"name": row.name,
+					"due_date": row.due_date,
+					"payment_amount": row.payment_amount,
+					"description": row.description,
+				}
+				for row in [po.payment_schedule[0]]
+			]
+		)
+		pr = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=False,
+			return_doc=True,
+			schedules=schedules,
+		)
+
+		pr.save()
+		schedules = json.dumps(
+			[
+				{
+					"payment_term": row.payment_term,
+					"name": row.name,
+					"due_date": row.due_date,
+					"payment_amount": row.payment_amount,
+					"description": row.description,
+				}
+				for row in [po.payment_schedule[1]]
+			]
+		)
+		# call make_payment_request again → reuse draft
+		pr_reused = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=False,
+			return_doc=True,
+			schedules=schedules,
+		)
+
+		self.assertEqual(pr.name, pr_reused.name)
+		self.assertEqual(pr_reused.grand_total, 100)
+		self.assertEqual(len(pr_reused.payment_reference), 2)
+
+	def test_schedule_pr_not_allowed_if_payment_entry_exists(self):
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
+		po.payment_schedule = []
+		row = po.append("payment_schedule", {"due_date": nowdate(), "payment_amount": 100})
+		po.save()
+		po.submit()
+
+		# create PE first
+		pr = make_payment_request(dt="Purchase Order", dn=po.name, mute_email=1, submit_doc=1, return_doc=1)
+		pr.create_payment_entry()
+
+		schedules = json.dumps(
+			[
+				{
+					"name": row.name,
+					"payment_term": row.payment_term,
+					"due_date": row.due_date,
+					"payment_amount": row.payment_amount,
+					"description": row.description,
+				}
+			]
+		)
+
+		with self.assertRaises(frappe.ValidationError):
+			make_payment_request(
+				dt="Purchase Order",
+				dn=po.name,
+				mute_email=1,
+				submit_doc=False,
+				return_doc=True,
+				schedules=schedules,
+			)
+
+>>>>>>> c28c27c (test(accounts): cover advance ledger reversal on invoice unlink)
 	def test_payment_request_company_must_match_reference_company(self):
 		po = create_purchase_order()
 
