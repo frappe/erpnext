@@ -6093,6 +6093,60 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 				do_not_save=1,
 			)
 
+	def test_get_items_checks_work_order_and_bom_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		fg_item = make_item("_Test Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Steel Sheet", {"is_stock_item": 1}).name
+		own_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3)
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3, company="_Test Company 1")
+		other_work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=other_bom.name,
+			company="_Test Company 1",
+			qty=7,
+			source_warehouse=create_warehouse("_Test Stores", company="_Test Company 1"),
+		)
+
+		user = create_user("test_get_items_company_perm@example.com", "Stock User")
+		add_user_permission("Company", "_Test Company", user.name)
+		self.addCleanup(remove_user_permission, "Company", "_Test Company", user.name)
+
+		def new_stock_entry(**fields):
+			return frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"company": "_Test Company",
+					"posting_date": today(),
+					"posting_time": nowtime(),
+					**fields,
+				}
+			)
+
+		with self.set_user(user.name):
+			own_entry = new_stock_entry(
+				purpose="Material Issue", from_bom=1, bom_no=own_bom.name, fg_completed_qty=2
+			)
+			own_entry.get_items()
+			self.assertEqual([(d.item_code, d.qty) for d in own_entry.items], [(rm_item, 6)])
+
+			for fields in (
+				{"purpose": "Material Issue", "from_bom": 1, "bom_no": other_bom.name, "fg_completed_qty": 1},
+				{
+					"purpose": "Material Transfer for Manufacture",
+					"work_order": other_work_order.name,
+					"fg_completed_qty": 7,
+				},
+			):
+				self.assertRaises(frappe.PermissionError, new_stock_entry(**fields).get_items)
+
+			entry = new_stock_entry(purpose="Manufacture", work_order=other_work_order.name)
+			self.assertRaises(frappe.PermissionError, entry.get_stock_and_rate)
+
 	# ── get_expired_batches ────────────────────────────────────────────────────
 
 	def test_get_expired_batches_includes_expired_batch(self):
