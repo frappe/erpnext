@@ -897,8 +897,14 @@ class SubcontractingReceipt(SubcontractingController):
 		precision = frappe.get_precision("Subcontracting Receipt Item", "qty")
 		rm_consumed_dict = self.get_rm_wise_consumed_qty()
 
+<<<<<<< HEAD
 		for rm_item_code, required in self.get_rm_wise_required_qty(precision).items():
 			diff = flt(rm_consumed_dict.get(rm_item_code, 0), precision) - flt(required.qty, precision)
+=======
+		for rm_item_code, required in self.get_rm_wise_required_qty().items():
+			consumed_qty = rm_consumed_dict.get(rm_item_code, 0)
+			diff = flt(consumed_qty - required.qty, precision)
+>>>>>>> 63ce8a3 (fix(subcontracting): round the BOM qty difference once in Subcontracting Receipt)
 
 			if diff < 0:
 				msg = _(
