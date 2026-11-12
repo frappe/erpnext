@@ -90,26 +90,41 @@
           },
           {
            "baseStyles": {
+            "alignItems": "center",
+            "display": "flex",
+            "flexDirection": "row",
+            "flexShrink": 0,
+            "gap": "8px",
             "marginLeft": "auto"
            },
-           "blockName": "Print",
-           "classes": [
-            "portal-no-print"
-           ],
-           "componentEvents": {
-            "click": {
-             "action": "Run Script",
-             "script": "printDocument()"
+           "blockName": "Header actions",
+           "children": [
+            {
+             "baseStyles": {},
+             "blockName": "Print",
+             "classes": [
+              "portal-no-print",
+              "portal-below-xl"
+             ],
+             "componentEvents": {
+              "click": {
+               "action": "Run Script",
+               "script": "printDocument()"
+              }
+             },
+             "componentId": "Button-0sauija9d",
+             "componentName": "Button",
+             "componentProps": {
+              "iconLeft": "lucide-printer",
+              "label": "{{ __('Print') }}",
+              "variant": "subtle"
+             },
+             "visibilityCondition": "{{ loaded && !notFound }}"
             }
-           },
-           "componentId": "Button-0sauija9d",
-           "componentName": "Button",
-           "componentProps": {
-            "iconLeft": "lucide-printer",
-            "label": "{{ __('Print') }}",
-            "variant": "subtle"
-           },
-           "visibilityCondition": "{{ loaded && !notFound }}"
+           ],
+           "componentId": "div-c3598817ae",
+           "componentName": "div",
+           "originalElement": "div"
           }
          ],
          "componentId": "div-9shgs5mbn",
@@ -761,11 +776,68 @@
            "baseStyles": {
             "display": "flex",
             "flexDirection": "column",
-            "gap": "24px",
             "minWidth": "0px"
            },
            "blockName": "Side panel",
            "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "12px",
+              "justifyContent": "space-between",
+              "minWidth": "0px",
+              "width": "100%"
+             },
+             "blockName": "Panel header",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)",
+                "minWidth": "0px",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "whiteSpace": "nowrap"
+               },
+               "blockName": "Seller",
+               "componentId": "TextBlock-106b27c69f",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "span",
+                "text": "{{ companyName }}"
+               }
+              },
+              {
+               "attributes": {
+                "aria-label": "{{ __('Print') }}"
+               },
+               "blockName": "Panel print",
+               "classes": [
+                "portal-xl-only"
+               ],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "script": "printDocument()"
+                }
+               },
+               "componentId": "Button-b3bba9e371",
+               "componentName": "Button",
+               "componentProps": {
+                "icon": "lucide-printer",
+                "variant": "ghost"
+               }
+              }
+             ],
+             "classes": [
+              "portal-side-section"
+             ],
+             "componentId": "div-6af09e009a",
+             "componentName": "div",
+             "originalElement": "div"
+            },
             {
              "baseStyles": {
               "display": "flex",
@@ -778,13 +850,13 @@
              "children": [
               {
                "baseStyles": {
-                "color": "var(--ink-gray-5)"
+                "color": "var(--ink-gray-8)"
                },
                "blockName": "TextBlock",
                "componentId": "TextBlock-ttrzckms9",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-sm",
+                "fontSize": "text-base",
                 "tag": "h3",
                 "text": "{{ __('Details') }}"
                }
@@ -794,7 +866,7 @@
                 "alignItems": "baseline",
                 "columnGap": "16px",
                 "display": "grid",
-                "gridTemplateColumns": "8rem minmax(0, 1fr)",
+                "gridTemplateColumns": "auto minmax(0, 1fr)",
                 "rowGap": "12px",
                 "width": "100%"
                },
@@ -866,9 +938,7 @@
                           "justifySelf": "start",
                           "maxWidth": "100%",
                           "minWidth": "0px",
-                          "overflow": "hidden",
-                          "textOverflow": "ellipsis",
-                          "whiteSpace": "nowrap"
+                          "whiteSpace": "normal"
                          },
                          "blockName": "Link",
                          "componentEvents": {
@@ -952,13 +1022,13 @@
              "children": [
               {
                "baseStyles": {
-                "color": "var(--ink-gray-5)"
+                "color": "var(--ink-gray-8)"
                },
                "blockName": "TextBlock",
                "componentId": "TextBlock-e7de624594",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-sm",
+                "fontSize": "text-base",
                 "tag": "h3",
                 "text": "{{ addressDetails.length > 1 ? __('Addresses') : addressDetails[0]?.label }}"
                }
@@ -1392,7 +1462,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-28 12:00:00.000000",
+ "modified": "2026-11-12 18:30:00.000000",
  "modified_by": "Administrator",
  "name": "purchase_order",
  "owner": "Administrator",

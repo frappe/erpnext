@@ -201,16 +201,19 @@ Line.props = ["text", "width", "end"];
 }
 .portal-doc-aside {
 	margin-top: 32px;
-	padding: 24px;
+	padding: 0 24px 32px;
 	border-top: 1px solid var(--outline-gray-1);
 }
 .portal-doc-aside > * {
 	max-width: 880px;
 	margin-inline: auto;
 }
+/* as a desk form's sidebar: every section gets the same 20px above and below, with a line between */
+.portal-side-section {
+	padding-block: 20px;
+}
 .portal-side-section + .portal-side-section {
 	border-top: 1px solid var(--outline-gray-1);
-	padding-top: 24px;
 }
 @media (max-width: 767px) {
 	.portal-doc-lead,
@@ -221,7 +224,7 @@ Line.props = ["text", "width", "end"];
 }
 @media (min-width: 1280px) {
 	.portal-doc {
-		grid-template-columns: minmax(0, 1fr) 22rem;
+		grid-template-columns: minmax(0, 1fr) 20rem;
 		grid-template-rows: auto 1fr;
 		min-height: 100%;
 	}
@@ -238,7 +241,7 @@ Line.props = ["text", "width", "end"];
 		grid-column: 2;
 		grid-row: 1 / span 2;
 		margin-top: 0;
-		padding: 24px 20px 40px;
+		padding: 0 0 40px;
 		border-top: 0;
 		border-left: 1px solid var(--outline-gray-1);
 		align-self: stretch;
@@ -246,10 +249,22 @@ Line.props = ["text", "width", "end"];
 	.portal-doc-aside > * {
 		max-width: none;
 	}
+	/* the side padding sits on each section, so the lines between them run edge to edge */
+	.portal-doc-aside > .portal-side-section {
+		padding-inline: 20px;
+	}
 }
-@media (min-width: 1536px) {
-	.portal-doc {
-		grid-template-columns: minmax(0, 1fr) 24rem;
+/* Shown or hidden at the width where the side panel sits beside the items: Print moves from the
+   page header to the top of the panel, as on a desk form. */
+.portal-xl-only {
+	display: none !important;
+}
+@media (min-width: 1280px) {
+	.portal-xl-only {
+		display: inline-flex !important;
+	}
+	.portal-below-xl {
+		display: none !important;
 	}
 }
 /* Printing a page (an RFQ, a receipt): the document only, without the sidebar, buttons or comment

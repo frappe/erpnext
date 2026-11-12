@@ -93,27 +93,42 @@
           },
           {
            "baseStyles": {
+            "alignItems": "center",
+            "display": "flex",
+            "flexDirection": "row",
+            "flexShrink": 0,
+            "gap": "8px",
             "marginLeft": "auto"
            },
-           "blockName": "Print",
-           "children": [],
-           "classes": [
-            "portal-no-print"
-           ],
-           "componentEvents": {
-            "click": {
-             "action": "Run Script",
-             "script": "printDocument()"
+           "blockName": "Header actions",
+           "children": [
+            {
+             "baseStyles": {},
+             "blockName": "Print",
+             "children": [],
+             "classes": [
+              "portal-no-print",
+              "portal-below-xl"
+             ],
+             "componentEvents": {
+              "click": {
+               "action": "Run Script",
+               "script": "printDocument()"
+              }
+             },
+             "componentId": "Button-ph9huq2x5",
+             "componentName": "Button",
+             "componentProps": {
+              "iconLeft": "lucide-printer",
+              "label": "{{ __('Print') }}",
+              "variant": "subtle"
+             },
+             "visibilityCondition": "{{ loaded && !notFound }}"
             }
-           },
-           "componentId": "Button-ph9huq2x5",
-           "componentName": "Button",
-           "componentProps": {
-            "iconLeft": "lucide-printer",
-            "label": "{{ __('Print') }}",
-            "variant": "subtle"
-           },
-           "visibilityCondition": "{{ loaded && !notFound }}"
+           ],
+           "componentId": "div-ee476e3be2",
+           "componentName": "div",
+           "originalElement": "div"
           }
          ],
          "componentId": "div-lwdvbwd2g",
@@ -580,11 +595,68 @@
            "baseStyles": {
             "display": "flex",
             "flexDirection": "column",
-            "gap": "24px",
             "minWidth": "0px"
            },
            "blockName": "Side panel",
            "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "12px",
+              "justifyContent": "space-between",
+              "minWidth": "0px",
+              "width": "100%"
+             },
+             "blockName": "Panel header",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)",
+                "minWidth": "0px",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "whiteSpace": "nowrap"
+               },
+               "blockName": "Seller",
+               "componentId": "TextBlock-8012e3ecc3",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "span",
+                "text": "{{ companyName }}"
+               }
+              },
+              {
+               "attributes": {
+                "aria-label": "{{ __('Print') }}"
+               },
+               "blockName": "Panel print",
+               "classes": [
+                "portal-xl-only"
+               ],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "script": "printDocument()"
+                }
+               },
+               "componentId": "Button-bb530af0a5",
+               "componentName": "Button",
+               "componentProps": {
+                "icon": "lucide-printer",
+                "variant": "ghost"
+               }
+              }
+             ],
+             "classes": [
+              "portal-side-section"
+             ],
+             "componentId": "div-e664af4768",
+             "componentName": "div",
+             "originalElement": "div"
+            },
             {
              "baseStyles": {
               "display": "flex",
@@ -597,14 +669,14 @@
              "children": [
               {
                "baseStyles": {
-                "color": "var(--ink-gray-5)"
+                "color": "var(--ink-gray-8)"
                },
                "blockName": "TextBlock",
                "children": [],
                "componentId": "TextBlock-j7ebovvqw",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-sm",
+                "fontSize": "text-base",
                 "tag": "h3",
                 "text": "{{ __('Details') }}"
                }
@@ -614,7 +686,7 @@
                 "alignItems": "baseline",
                 "columnGap": "16px",
                 "display": "grid",
-                "gridTemplateColumns": "8rem minmax(0, 1fr)",
+                "gridTemplateColumns": "auto minmax(0, 1fr)",
                 "rowGap": "12px",
                 "width": "100%"
                },
@@ -688,9 +760,7 @@
                           "justifySelf": "start",
                           "maxWidth": "100%",
                           "minWidth": "0px",
-                          "overflow": "hidden",
-                          "textOverflow": "ellipsis",
-                          "whiteSpace": "nowrap"
+                          "whiteSpace": "normal"
                          },
                          "blockName": "Link",
                          "children": [],
@@ -776,14 +846,14 @@
              "children": [
               {
                "baseStyles": {
-                "color": "var(--ink-gray-5)"
+                "color": "var(--ink-gray-8)"
                },
                "blockName": "TextBlock",
                "children": [],
                "componentId": "TextBlock-7huz5j51b",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-sm",
+                "fontSize": "text-base",
                 "tag": "h3",
                 "text": "{{ __('Transport') }}"
                }
@@ -793,7 +863,7 @@
                 "alignItems": "baseline",
                 "columnGap": "16px",
                 "display": "grid",
-                "gridTemplateColumns": "8rem minmax(0, 1fr)",
+                "gridTemplateColumns": "auto minmax(0, 1fr)",
                 "rowGap": "12px",
                 "width": "100%"
                },
@@ -867,9 +937,7 @@
                           "justifySelf": "start",
                           "maxWidth": "100%",
                           "minWidth": "0px",
-                          "overflow": "hidden",
-                          "textOverflow": "ellipsis",
-                          "whiteSpace": "nowrap"
+                          "whiteSpace": "normal"
                          },
                          "blockName": "Link",
                          "children": [],
@@ -970,13 +1038,13 @@
              "children": [
               {
                "baseStyles": {
-                "color": "var(--ink-gray-5)"
+                "color": "var(--ink-gray-8)"
                },
                "blockName": "TextBlock",
                "componentId": "TextBlock-6365bbd6bf",
                "componentName": "TextBlock",
                "componentProps": {
-                "fontSize": "text-sm",
+                "fontSize": "text-base",
                 "tag": "h3",
                 "text": "{{ addressDetails.length > 1 ? __('Addresses') : addressDetails[0]?.label }}"
                }
@@ -1414,7 +1482,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-28 12:00:00.000000",
+ "modified": "2026-11-12 18:30:00.000000",
  "modified_by": "Administrator",
  "name": "receipt",
  "owner": "Administrator",
