@@ -5188,6 +5188,17 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.5), [0.5, 0.5])
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract",
+			"validate_consumed_qty": 1,
+		},
+	)
+	def test_material_transferred_receipts_add_up_to_the_order_requirement(self):
+		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.375), [0.38, 0.37])
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_of_a_phantom_bom_used_twice(self):
 		set_backflush_based_on("BOM")
 		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
