@@ -779,6 +779,34 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"auto_create_serial_and_batch_bundle_for_outward": 1,
 		},
 	)
+	def test_delivery_of_an_auto_picked_reserved_batch_sets_its_incoming_rate(self) -> None:
+		items_details = create_items("batch")
+		(item,) = items_details
+		items_details[item].valuation_rate = 100
+		create_material_receipt(items_details, self.warehouse, qty=2)
+		# an older order reserves the cheaper batch
+		make_sales_order(item_code=item, warehouse=self.warehouse, qty=2).create_stock_reservation_entries()
+		items_details[item].valuation_rate = 500
+		create_material_receipt(items_details, self.warehouse, qty=2)
+		so = make_sales_order(item_code=item, warehouse=self.warehouse, qty=2, rate=1000)
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(frappe.db.get_value("Delivery Note Item", dn.items[0].name, "incoming_rate"), 500)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
 	def test_delivery_auto_picks_the_reserved_batch_in_stock_uom(self) -> None:
 		items_details = create_items("batch")
 		(item,) = items_details
