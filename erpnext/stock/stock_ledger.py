@@ -2121,12 +2121,12 @@ class update_entries_after:
 			)
 		else:
 			# packed item
-			frappe.db.set_value(
-				"Packed Item",
-				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
-				"incoming_rate",
-				outgoing_rate,
-			)
+			filters = {"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code}
+			if sle.serial_and_batch_bundle:
+				# a component can be packed more than once under one row
+				filters["serial_and_batch_bundle"] = sle.serial_and_batch_bundle
+
+			frappe.db.set_value("Packed Item", filters, "incoming_rate", outgoing_rate)
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
