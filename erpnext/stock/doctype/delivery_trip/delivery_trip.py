@@ -382,8 +382,11 @@ class DeliveryTrip(Document):
 
 		try:
 			directions = maps_client.directions(**directions_data)
-		except Exception as e:
-			frappe.throw(_(str(e)))
+		except googlemaps.exceptions.ApiError as e:
+			frappe.throw(str(e))
+		except Exception:
+			frappe.log_error(_("Google Maps directions request failed"))
+			frappe.throw(_("Could not get directions from Google Maps. Please check the Error Log."))
 
 		return directions[0] if directions else False
 
