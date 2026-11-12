@@ -5199,6 +5199,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(receive_order_of_two_one_by_one(rm_qty=0.375), [0.38, 0.37])
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_bom_backflush_after_a_receipt_consumed_more_than_the_bom(self):
+		set_backflush_based_on("Material Transferred for Subcontract")
+		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[raw_material], rm_qty=0.375, currency="INR")
+		sco = make_order_with_raw_materials_transferred(fg_item, qty=4)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.save()
+		scr.supplied_items[0].consumed_qty = 1
+		scr.submit()
+
+		set_backflush_based_on("BOM")
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.save()
+		self.assertEqual(sum(row.consumed_qty for row in scr.supplied_items), 0)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_of_a_phantom_bom_used_twice(self):
 		set_backflush_based_on("BOM")
 		raw_material = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
@@ -5225,7 +5245,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_draft_with_batch_follows_earlier_receipts(self):
 		set_backflush_based_on("BOM")
-		sco = make_order_of_two_with_raw_materials_transferred(make_fg_item_with_batched_raw_material())
+		sco = make_order_with_raw_materials_transferred(make_fg_item_with_batched_raw_material())
 
 		drafts = []
 		for _receipt in range(2):
@@ -5261,9 +5281,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_draft_split_over_batches_follows_earlier_receipts(self):
 		set_backflush_based_on("BOM")
-		sco = make_order_of_two_with_raw_materials_transferred(
-			make_fg_item_with_batched_raw_material(), batches=3
-		)
+		sco = make_order_with_raw_materials_transferred(make_fg_item_with_batched_raw_material(), batches=3)
 		draft = make_subcontracting_receipt(sco.name)
 		draft.items[0].qty = 1
 		draft.save()
@@ -5289,7 +5307,7 @@ def receive_order_of_two_one_by_one(rm_qty):
 def receive_one_by_one(fg_item):
 	"""Consumed qty of each supplied row of two receipts of 1 for an order of 2 ``fg_item``,
 	after its raw materials are transferred."""
-	sco = make_order_of_two_with_raw_materials_transferred(fg_item)
+	sco = make_order_with_raw_materials_transferred(fg_item)
 
 	consumed_qty = []
 	for _receipt in range(2):
@@ -5318,18 +5336,18 @@ def make_fg_item_with_batched_raw_material():
 	return fg_item
 
 
-def make_order_of_two_with_raw_materials_transferred(fg_item, batches=1):
-	"""Subcontracting Order for 2 ``fg_item`` whose raw materials are transferred in ``batches`` equal parts."""
+def make_order_with_raw_materials_transferred(fg_item, qty=2, batches=1):
+	"""Subcontracting Order for ``qty`` ``fg_item`` whose raw materials are transferred in ``batches`` equal parts."""
 	service_item = make_item(properties={"is_stock_item": 0}).name
 	sco = get_subcontracting_order(
 		service_items=[
 			{
 				"warehouse": "_Test Warehouse - _TC",
 				"item_code": service_item,
-				"qty": 2,
+				"qty": qty,
 				"rate": 100,
 				"fg_item": fg_item,
-				"fg_item_qty": 2,
+				"fg_item_qty": qty,
 			}
 		],
 		include_exploded_items=0,
