@@ -4858,6 +4858,32 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(deducted_return.per_billed, 100)
 		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
 
+	def test_return_settled_when_sales_order_is_also_billed_with_update_stock(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_si_from_so
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		so = make_sales_order(qty=10)
+		stock_invoice = make_si_from_so(so.name)
+		stock_invoice.update_stock = 1
+		stock_invoice.items[0].qty = 5
+		stock_invoice.items[0].warehouse = "_Test Warehouse - _TC"
+		stock_invoice.submit()
+
+		delivery_note = create_dn_against_so(so.name, delivered_qty=5)
+		deducted_return = make_sales_return(delivery_note.name)
+		deducted_return.items[0].qty = -2
+		deducted_return.submit()
+		dn_invoice = make_sales_invoice(delivery_note.name)
+		self.assertEqual(dn_invoice.items[0].qty, 3)
+		dn_invoice.submit()
+
+		# The invoice with stock update delivers its own qty, so it does not over-bill the row.
+		deducted_return.reload()
+		self.assertEqual(deducted_return.per_billed, 100)
+		self.assertEqual(deducted_return.status, "Completed")
+		self.assertRaises(frappe.ValidationError, make_sales_invoice, deducted_return.name)
+
 	def test_return_stays_settled_when_sibling_delivery_has_unsettled_return(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 

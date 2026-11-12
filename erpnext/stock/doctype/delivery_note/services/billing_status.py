@@ -298,7 +298,12 @@ def get_so_overbilled_qty(so_details: set) -> dict[str, float]:
 			Sum(si_item.qty),
 			Sum(Case().when(IfNull(si_item.dn_detail, "") == "", si_item.qty).else_(0)),
 		)
-		.where(si_item.so_detail.isin(list(so_details)) & (si_item.docstatus == 1) & (si.is_return == 0))
+		.where(
+			si_item.so_detail.isin(list(so_details))
+			& (si_item.docstatus == 1)
+			& (si.is_return == 0)
+			& (si.update_stock == 0)
+		)
 		.groupby(si_item.so_detail)
 		.run()
 	)
