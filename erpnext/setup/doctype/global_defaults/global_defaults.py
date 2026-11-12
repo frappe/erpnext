@@ -7,7 +7,7 @@
 import frappe
 import frappe.defaults
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.utils import cint
+from frappe.utils import cint, cstr
 
 from erpnext.stock.doctype.item.item_search import validate_sqlite_version
 
@@ -17,7 +17,6 @@ keydict = {
 	"currency": "default_currency",
 	"country": "country",
 	"hide_currency_symbol": "hide_currency_symbol",
-	"account_url": "account_url",
 	"disable_rounded_total": "disable_rounded_total",
 	"disable_in_words": "disable_in_words",
 }
@@ -65,7 +64,7 @@ class GlobalDefaults(Document):
 	def on_update(self):
 		"""update defaults"""
 		for key in keydict:
-			frappe.db.set_default(key, self.get(keydict[key], ""))
+			frappe.db.set_default(key, cstr(self.get(keydict[key])))
 
 		# enable default currency
 		if self.default_currency:
@@ -75,8 +74,6 @@ class GlobalDefaults(Document):
 		self.toggle_in_words()
 		if self.has_value_changed("disable_rounded_total"):
 			self.set_disable_rounded_total_on_pos_profiles()
-
-		frappe.clear_cache()
 
 	@frappe.whitelist()
 	def get_defaults(self):
