@@ -3170,7 +3170,7 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 		return serial_nos
 
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(kwargs, entry, reserved_voucher_details):
 			serial_nos.append(entry.serial_no)
 			continue
 
@@ -3192,12 +3192,21 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 def get_other_doc_reserved_serials(kwargs, reserved_entries, reserved_voucher_details):
 	serial_nos = []
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(kwargs, entry, reserved_voucher_details):
 			continue
 
 		serial_nos.append(entry.serial_no)
 
 	return serial_nos
+
+
+def is_reserved_for_voucher(kwargs, entry, reserved_voucher_details):
+	"""Reserved for the voucher's order, and for its order row when known."""
+	if entry.voucher_no not in reserved_voucher_details:
+		return False
+
+	order_row = kwargs.get("against_sales_order_item")
+	return not order_row or entry.voucher_detail_no == order_row
 
 
 def get_reserved_serial_nos_for_sre(kwargs) -> list:
@@ -3212,6 +3221,7 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 		.select(
 			sb_entry.serial_no,
 			sre.voucher_no,
+			sre.voucher_detail_no,
 			sre.voucher_type,
 		)
 		.where(
@@ -3387,7 +3397,9 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
-	if kwargs.against_sales_order:
+	if kwargs.against_sales_order_item:
+		query = query.where(sre.voucher_detail_no != kwargs.against_sales_order_item)
+	elif kwargs.against_sales_order:
 		query = query.where(sre.voucher_no != kwargs.against_sales_order)
 
 	data = query.run(as_dict=True)
@@ -3460,7 +3472,9 @@ def get_auto_batch_nos(kwargs):
 		available_batches = sorted(available_batches, key=lambda x: x.expiry_date or getdate("9999-12-31"))
 
 	if kwargs.against_sales_order:
-		reserved_batches = get_batches_to_be_considered(kwargs.against_sales_order)
+		reserved_batches = get_batches_to_be_considered(
+			kwargs.against_sales_order, kwargs.against_sales_order_item
+		)
 		# the order's own reserved batches first, then free stock
 		available_batches.sort(key=lambda d: d.batch_no not in reserved_batches)
 
@@ -3573,7 +3587,7 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def get_batches_to_be_considered(sales_order_name):
+def get_batches_to_be_considered(sales_order_name, sales_order_item=None):
 	parent = frappe.qb.DocType("Stock Reservation Entry")
 	child = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -3588,6 +3602,9 @@ def get_batches_to_be_considered(sales_order_name):
 			& (child.delivered_qty < child.qty)
 		)
 	)
+	if sales_order_item:
+		query = query.where(parent.voucher_detail_no == sales_order_item)
+
 	return set(query.run(pluck=True))
 
 
