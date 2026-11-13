@@ -378,7 +378,10 @@ class StockController(AccountsController):
 
 		amount_precision = self.precision("amount", "items")
 		total_amount = flt(sum(flt(item.amount) for item in items), amount_precision)
-		total_returned = flt(sum(item.returned_qty * flt(item.rate) for item in items), amount_precision)
+		# Round each row like its stored amount, so a full return matches the total amount.
+		total_returned = flt(
+			sum(flt(item.returned_qty * flt(item.rate), amount_precision) for item in items), amount_precision
+		)
 		# Preserve the original amount basis once the entire Delivery Note is returned.
 		use_original_amount = total_returned >= total_amount
 
