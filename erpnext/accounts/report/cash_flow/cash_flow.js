@@ -3,7 +3,7 @@
 
 const CF_REPORT_NAME = "Cash Flow";
 
-frappe.query_reports[CF_REPORT_NAME] = $.extend(erpnext.financial_statements, {
+frappe.query_reports[CF_REPORT_NAME] = $.extend({}, erpnext.financial_statements, {
 	name_field: "section",
 	parent_field: "parent_section",
 });
@@ -44,6 +44,13 @@ frappe.query_reports[CF_REPORT_NAME]["filters"].push(
 		label: __("Include Default FB Entries"),
 		fieldtype: "Check",
 		default: 1,
+	},
+	{
+		fieldname: "accumulated_values",
+		label: __("Accumulated Values"),
+		fieldtype: "Check",
+		default: 0,
+		depends_on: "eval: !doc.report_template",
 	},
 	{
 		fieldname: "show_opening_and_closing_balance",

@@ -37,6 +37,12 @@ def boot_session(bootinfo):
 		bootinfo.sysdefaults.disable_serial_no_and_batch_selector = cint(
 			frappe.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector")
 		)
+		bootinfo.sysdefaults.use_inline_serial_batch_editor = cint(
+			frappe.get_single_value("Stock Settings", "use_inline_serial_batch_editor")
+		)
+		bootinfo.sysdefaults.pick_serial_and_batch_based_on = frappe.get_single_value(
+			"Stock Settings", "pick_serial_and_batch_based_on"
+		)
 
 		remove_disabled_price_list_defaults(bootinfo)
 

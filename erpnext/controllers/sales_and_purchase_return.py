@@ -691,14 +691,13 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				doc.party_account_currency = source.party_account_currency
 				doc.set("payments", [])
 				doc.update_billed_amount_in_delivery_note = True
+				# the change was already handed back, so it isn't refunded
+				change_by_row = get_change_by_payment_row(source)
 				for data in source.payments:
-					paid_amount = 0.00
-					base_paid_amount = 0.00
-					data.base_amount = flt(
-						data.amount * source.conversion_rate, source.precision("base_paid_amount")
+					paid_amount = flt(data.amount - change_by_row[data.idx], data.precision("amount"))
+					base_paid_amount = flt(
+						paid_amount * source.conversion_rate, source.precision("base_paid_amount")
 					)
-					paid_amount += data.amount
-					base_paid_amount += data.base_amount
 					doc.append(
 						"payments",
 						{
@@ -711,7 +710,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 						},
 					)
 				if doc.is_pos:
-					doc.paid_amount = -1 * source.paid_amount
+					doc.paid_amount = flt(
+						flt(source.change_amount) - source.paid_amount, doc.precision("paid_amount")
+					)
 			elif doc.doctype == "Purchase Invoice":
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
@@ -1431,7 +1432,7 @@ def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field
 		warehouse_field = "warehouse"
 
 	warehouse = row.get(warehouse_field)
-	qty = abs(row.get(qty_field))
+	qty = abs(get_return_bundle_qty(row, qty_field))
 
 	filterd_serial_batch = frappe._dict(
 		{
@@ -1558,13 +1559,23 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 			"voucher_type": parent_doc.doctype,
 			"voucher_no": parent_doc.name,
 			"voucher_detail_no": child_doc.name,
-			"qty": child_doc.get(qty_field),
+			"qty": get_return_bundle_qty(child_doc, qty_field),
 			"company": parent_doc.company,
 			"do_not_submit": True,
 		}
 	).make_serial_and_batch_bundle()
 
 	return cls_obj.name
+
+
+def get_return_bundle_qty(row, qty_field):
+	"""Rejected qty is in the transaction UOM, a bundle in the stock UOM."""
+	from erpnext.controllers.buying_controller import get_stock_qty
+
+	if qty_field == "rejected_qty":
+		return get_stock_qty(row, row.rejected_qty)
+
+	return row.get(qty_field)
 
 
 def get_available_serial_nos(serial_nos, warehouse):
@@ -1666,3 +1677,19 @@ def is_batch_expired(batch_no, posting_date):
 		return True
 
 	return False
+
+
+def get_change_by_payment_row(invoice):
+	from erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry import get_change_payment_row
+
+	change_row = get_change_payment_row(invoice.payments, invoice.account_for_change_amount)
+	# take the change off its own row first, a smaller row spills over to the rest
+	rows = sorted(invoice.payments, key=lambda row: row is not change_row)
+
+	change_left = flt(invoice.change_amount)
+	change_by_row = {}
+	for row in rows:
+		change_by_row[row.idx] = min(change_left, flt(row.amount))
+		change_left -= change_by_row[row.idx]
+
+	return change_by_row

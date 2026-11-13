@@ -45,8 +45,8 @@ class TransactionBase(StatusUpdater):
 	def validate_uom_is_integer(self, uom_field, qty_fields, child_dt=None):
 		validate_uom_is_integer(self, uom_field, qty_fields, child_dt)
 
-	def validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt):
-		validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt)
+	def validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt, row_filter=None):
+		validate_item_stock_uom_is_integer(self, item_field, qty_fields, child_dt, row_filter)
 
 	def copy_terms_and_conditions_attachments(self):
 		if (
@@ -676,11 +676,14 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 				validate_qty_is_integer(d.get(f), d.get(uom_field), d.precision(f), d.idx)
 
 
-def validate_item_stock_uom_is_integer(doc, item_field, qty_fields, child_dt):
+def validate_item_stock_uom_is_integer(doc, item_field, qty_fields, child_dt, row_filter=None):
 	if isinstance(qty_fields, str):
 		qty_fields = [qty_fields]
 
 	rows = doc.get_all_children(parenttype=child_dt)
+	if row_filter:
+		rows = [d for d in rows if row_filter(d)]
+
 	item_codes = {d.get(item_field) for d in rows if d.get(item_field)}
 	if not item_codes:
 		return

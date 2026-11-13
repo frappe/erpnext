@@ -1420,9 +1420,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		pos.is_pos = 1
 		pos.pos_profile = pos_profile.name
+		pos.account_for_change_amount = "Cash - _TC"
 
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 500})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 500})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 512.07})
 		pos.insert()
 		pos.submit()
 
@@ -2169,6 +2170,67 @@ class TestSalesInvoice(ERPNextTestSuite):
 		cr_note.items[0].qty = 0
 		self.assertRaises(frappe.ValidationError, cr_note.save)
 
+	def test_sales_team_disabled_sales_person_carried_over(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_delivery_note, make_sales_return
+
+		sales_person = "_Test Sales Person 2"
+		other_sales_person = "_Test Sales Person 1"
+
+		si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		si.submit()
+
+		cancelled_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+		cancelled_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		cancelled_si.submit()
+		cancelled_si.reload()
+		cancelled_si.cancel()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		frappe.db.set_value("Sales Person", other_sales_person, "enabled", 0)
+		try:
+			with self.subTest("return against the invoice is allowed"):
+				cr_note = make_sales_return(si.name)
+				cr_note.submit()
+				self.assertEqual([d.sales_person for d in cr_note.sales_team], [sales_person])
+
+			with self.subTest("sales person newly assigned on the return is rejected"):
+				cr_note = make_sales_return(si.name)
+				cr_note.sales_team = []
+				cr_note.append(
+					"sales_team", {"sales_person": other_sales_person, "allocated_percentage": 100}
+				)
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", cr_note.save)
+
+			with self.subTest("amending the invoice is allowed"):
+				amended = frappe.copy_doc(cancelled_si)
+				amended.amended_from = cancelled_si.name
+				amended.docstatus = 0
+				amended.insert()
+				self.assertEqual([d.sales_person for d in amended.sales_team], [sales_person])
+
+			with self.subTest("delivery note against the invoice is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, si.name)
+
+			with self.subTest("standalone credit note with a disabled sales person is rejected"):
+				cr_note = create_sales_invoice(qty=-1, rate=1000, is_return=1, do_not_save=True)
+				cr_note.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", cr_note.save)
+
+			with self.subTest("non-return invoice linked through return_against is rejected"):
+				linked_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+				linked_si.return_against = si.name
+				linked_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", linked_si.save)
+
+			with self.subTest("new invoice with the same sales person is still rejected"):
+				new_si = create_sales_invoice(qty=1, rate=1000, do_not_save=True)
+				new_si.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", new_si.save)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
+
 	def test_return_invoice_with_account_mismatch(self):
 		debtors2 = create_account(
 			parent_account="Accounts Receivable - _TC",
@@ -2770,6 +2832,99 @@ class TestSalesInvoice(ERPNextTestSuite):
 			self.assertEqual(expected_values[gle.account][0], gle.account)
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
+
+	def test_rounding_adjustment_in_foreign_currency(self):
+		"""The receivable is posted at the base rounded total and the round off at the base
+		adjustment, so the entries balance without a second round off."""
+		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		debit_to = create_account(
+			account_name="_Test Receivable JPY",
+			parent_account="Accounts Receivable - _TC",
+			company="_Test Company",
+			account_currency="JPY",
+			account_type="Receivable",
+		)
+		if not frappe.db.exists("Customer", "_Test Customer JPY"):
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Customer JPY",
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+					"default_currency": "JPY",
+				}
+			).insert()
+
+		si = create_sales_invoice(
+			customer="_Test Customer JPY",
+			currency="JPY",
+			conversion_rate=0.567,
+			debit_to=debit_to,
+			rate=1701.4,
+		)
+
+		self.assertEqual(si.rounded_total, 1701)
+		self.assertEqual(si.rounding_adjustment, -0.4)
+		self.assertEqual(si.base_grand_total, 964.69)
+		self.assertEqual(si.base_rounding_adjustment, -0.22)
+		self.assertEqual(si.base_rounded_total, 964.47)
+
+		round_off_account = frappe.get_cached_value("Company", si.company, "round_off_account")
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit", "debit_in_account_currency"],
+			order_by="account asc",
+		)
+		expected_values = {
+			debit_to: [964.47, 0.0],
+			round_off_account: [0.22, 0.0],
+			"Sales - _TC": [0.0, 964.69],
+		}
+		self.assertEqual({gle.account for gle in gl_entries}, set(expected_values))
+		for gle in gl_entries:
+			self.assertEqual([gle.debit, gle.credit], expected_values[gle.account])
+			if gle.account == round_off_account:
+				# the round off account is in company currency, so both amounts are the base adjustment
+				self.assertEqual(gle.debit_in_account_currency, 0.22)
+
+		payment = get_payment_entry(
+			si.doctype,
+			si.name,
+			bank_account="_Test Cash - _TC",
+			bank_amount=964.47,
+		)
+		payment.source_exchange_rate = si.conversion_rate
+		payment.insert()
+		payment.submit()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"account": debit_to, "voucher_no": ["in", [si.name, payment.name]], "is_cancelled": 0},
+			fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(gle.debit - gle.credit for gle in gl_entries), 0, places=2)
+		self.assertAlmostEqual(
+			sum(gle.debit_in_account_currency - gle.credit_in_account_currency for gle in gl_entries),
+			0,
+			places=2,
+		)
+		self.assertAlmostEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": si.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+			places=2,
+		)
+		payment.cancel()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1701)
+		si.cancel()
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_rounding_adjustment_2(self):
@@ -3676,6 +3831,38 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
+		frappe.get_doc(
+			doctype="Terms and Conditions", title="_Test Sell Only Terms", selling=1, buying=0, terms="Net 30"
+		).insert()
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.tc_name = "_Test Sell Only Terms"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC1",
+				"cost_center": "Main - _TC1",
+				"warehouse": "Stores - _TC1",
+			}
+		)
+		pi.insert()
+
+		self.assertFalse(pi.tc_name)
+		self.assertFalse(pi.terms)
 
 	def make_cross_currency_inter_company_purchase_invoice(self):
 		for doctype, party, company in (

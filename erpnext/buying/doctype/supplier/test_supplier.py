@@ -304,6 +304,18 @@ class TestSupplier(ERPNextTestSuite):
 		# Rollback
 		address.delete()
 
+	def test_dashboard_hidden_from_user_with_only_a_shared_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.accounts.party import get_dashboard_info
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		pi = make_purchase_invoice(supplier="_Test Supplier")
+		user = create_user_with_roles("supplier-dashboard-user@example.com", "Stock User").name
+		frappe.share.add_docshare(pi.doctype, pi.name, user, read=1, flags={"ignore_share_permission": True})
+
+		with self.set_user(user):
+			self.assertIsNone(get_dashboard_info("Supplier", "_Test Supplier"))
+
 
 def create_supplier(**args):
 	args = frappe._dict(args)

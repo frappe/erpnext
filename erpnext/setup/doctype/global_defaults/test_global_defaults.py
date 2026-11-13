@@ -11,14 +11,19 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGlobalDefaults(ERPNextTestSuite):
+	def test_save_without_changes_keeps_site_cache(self):
+		frappe.get_doc("Global Defaults").save()
+		frappe.cache.set_value("global_defaults_probe", 1)
+
+		frappe.get_doc("Global Defaults").save()
+		self.assertEqual(frappe.cache.get_value("global_defaults_probe"), 1)
+
 	def test_unrelated_save_preserves_pos_profile_rounding(self):
 		defaults = frappe.get_doc("Global Defaults")
 		defaults._doc_before_save = frappe._dict(disable_rounded_total=defaults.disable_rounded_total)
 
 		with (
 			patch("frappe.db.set_default"),
-			patch("frappe.db.set_value"),
-			patch("frappe.clear_cache"),
 			patch.object(defaults, "toggle_rounded_total"),
 			patch.object(defaults, "toggle_in_words"),
 			patch.object(defaults, "set_disable_rounded_total_on_pos_profiles") as update_profiles,

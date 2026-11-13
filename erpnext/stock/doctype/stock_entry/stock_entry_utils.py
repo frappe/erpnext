@@ -55,6 +55,8 @@ def make_stock_entry(**args):
 	"""
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
+	frappe.has_permission("Stock Entry", "create", throw=True)
+
 	def process_serial_numbers(serial_nos_list):
 		serial_nos_list = [
 			"\n".join(serial_num["serial_no"] for serial_num in serial_nos_list if serial_num.serial_no)

@@ -1461,6 +1461,29 @@ class TestStockLedgerEntry(ERPNextTestSuite, StockTestMixin):
 		self.assertTrue(result)
 		self.assertEqual(result[0].voucher_no, reco.name)
 
+	def test_get_next_stock_reco_uses_locking_read(self):
+		# A plain read uses the snapshot, which misses a reco committed meanwhile by another session.
+		from erpnext.stock.stock_ledger import get_next_stock_reco
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		reco = create_stock_reconciliation(
+			item_code=item, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(today(), -1)
+		)
+
+		result = get_next_stock_reco(
+			{
+				"item_code": item,
+				"warehouse": warehouse,
+				"voucher_no": "SOME-OTHER-VOUCHER",
+				"posting_date": add_days(today(), -2),
+				"posting_time": "00:00:00",
+			}
+		)
+		self.assertEqual(result[0].voucher_no, reco.name)
+		if frappe.db.db_type == "mariadb":
+			self.assertIn("for update", frappe.db.last_query.lower())
+
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
 	def test_transfer_invariants(self):
 		"""Extact stock value should be transferred."""

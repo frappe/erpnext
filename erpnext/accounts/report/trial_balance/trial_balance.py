@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.desk.reportview import build_match_conditions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
 from pypika.terms import Bracket, LiteralValue
@@ -47,7 +49,19 @@ def execute(filters=None):
 
 
 def validate_company_permission(company: str | None) -> None:
-	if company and not frappe.has_permission("Company", "select", company):
+	"""Check role access to Company and the user's User Permissions that apply to Company.
+
+	Only the user permissions on the Company itself apply. A document check would also match
+	the Company's link fields, such as its default accounts, against the user's restrictions,
+	and refuse a user who is restricted to some accounts.
+	"""
+	if not company:
+		return
+
+	allowed_companies = get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), "Company")
+	if not frappe.has_permission("Company", "select") or (
+		allowed_companies and company not in allowed_companies
+	):
 		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 

@@ -591,7 +591,7 @@ def get_party_advance_account(party_type, party, company):
 
 def get_party_account_currency(party_type, party, company):
 	def generator():
-		party_account = get_party_account(party_type, party, company)
+		party_account = find_party_account(party_type, party, company)
 		return frappe.get_cached_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
@@ -959,7 +959,8 @@ def validate_account_party_type(self):
 
 def get_dashboard_info(party_type, party, loyalty_program=None):
 	doctype = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
-	if not frappe.has_permission(doctype, "read"):
+	# totals cover all of the party's invoices, so a shared invoice is not enough
+	if not frappe.has_permission(doctype, "read", ignore_share_permissions=True):
 		return None
 
 	current_fiscal_year = get_fiscal_year(nowdate(), as_dict=True)

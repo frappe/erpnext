@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections import defaultdict
+
 import frappe
 from frappe import _, bold, throw
 from frappe.query_builder.functions import Min, Sum
@@ -51,7 +53,7 @@ class SellingController(StockController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("selling"):
-				self.set_missing_terms()
+				self.set_missing_terms_for_display()
 
 	def validate(self):
 		validate_terms_and_conditions(self.get("tc_name"), "selling")
@@ -316,6 +318,8 @@ class SellingController(StockController):
 			throw(_("Total allocated percentage for sales team should be 100"))
 
 	def validate_sales_team(self, sales_team):
+		# Rows without a Sales Person are left to the mandatory check, which runs after validate.
+		sales_team = [row for row in sales_team if row.sales_person]
 		sales_persons = [d.sales_person for d in sales_team]
 
 		if not sales_persons:
@@ -327,10 +331,16 @@ class SellingController(StockController):
 			fields=["name", "enabled", "is_group", "commission_rate"],
 		)
 
+		inherited = set()
+		if any(not row.enabled for row in sales_person_status):
+			# rows carried over from a source document are historical references,
+			# but a sales person newly assigned here is still a new assignment
+			inherited = self.get_inherited_sales_persons()
+
 		for row in sales_person_status:
 			if row.is_group:
 				frappe.throw(_("Sales Person {0} is a group.").format(frappe.bold(row.name)))
-			if not row.enabled:
+			if not row.enabled and row.name not in inherited:
 				frappe.throw(_("Sales Person <b>{0}</b> is disabled.").format(row.name))
 
 		seen = set()
@@ -360,6 +370,41 @@ class SellingController(StockController):
 			if any(not 0 <= flt(rate) <= 100 for rate in (row.commission_rate, commission_rate)):
 				frappe.throw(_("Row #{0}: Commission Rate must be between 0 and 100").format(row.idx))
 			row.commission_rate = commission_rate
+
+	def get_inherited_sales_persons(self):
+		"""Return the sales persons already on the documents this one inherits its sales team from."""
+		inherited = set()
+
+		for doctype, names in self.get_sales_team_sources().items():
+			inherited.update(
+				frappe.get_all(
+					"Sales Team",
+					filters={"parenttype": doctype, "parent": ["in", list(names)]},
+					pluck="sales_person",
+				)
+			)
+
+		return inherited
+
+	def get_sales_team_sources(self):
+		"""Return the documents whose sales team may be carried over here, grouped by doctype."""
+		sources = {}
+
+		def add(doctype, name):
+			if name:
+				sources.setdefault(doctype, set()).add(name)
+
+		if self.get("is_return"):
+			add(self.doctype, self.get("return_against"))
+		add(self.doctype, self.get("amended_from"))
+
+		# goods are already out, so billing them must not be blocked. every earlier step
+		# in the flow can still be corrected, and is left to the enabled check
+		if self.doctype == "Sales Invoice":
+			for item in self.get("items") or []:
+				add("Delivery Note", item.get("delivery_note"))
+
+		return sources
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
@@ -445,6 +490,27 @@ class SellingController(StockController):
 					"valuation rate",
 				)
 
+	def make_packed_item_bundles(self):
+		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		service = SerialBatchBundleService(self)
+		packed_rows = [p for p in service.get_current_packed_rows() if not p.serial_and_batch_bundle]
+		if not packed_rows:
+			return
+
+		picked_serial_nos = service.get_serial_nos_used_in_rows()
+		picked_batches = service.get_batches_used_in_rows()
+		item_rows = {d.name: d for d in self.items}
+		for p in packed_rows:
+			get_serial_and_batch_bundle(
+				p, self, item_rows[p.parent_detail_docname], picked_serial_nos, picked_batches
+			)
+
+		# validate ran before these bundles existed
+		if service.is_batch_check_needed():
+			service.validate_outward_bundle_batches(rows=packed_rows)
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
@@ -461,8 +527,7 @@ class SellingController(StockController):
 									"serial_no": p.serial_no if self.docstatus == 2 else None,
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
-									"serial_and_batch_bundle": p.serial_and_batch_bundle
-									or get_serial_and_batch_bundle(p, self, d),
+									"serial_and_batch_bundle": p.serial_and_batch_bundle,
 									"name": d.name,
 									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
@@ -789,6 +854,7 @@ class SellingController(StockController):
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		self.update_reserved_qty()
+		self.make_packed_item_bundles()
 
 		sl_entries = []
 		# Loop over items and packed items table
@@ -1226,18 +1292,20 @@ class SellingController(StockController):
 				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
 
 				if bundle_id:
-					cls_obj = SerialBatchCreation(
+					package = SerialBatchCreation(
 						{
 							"type_of_transaction": "Outward",
 							"serial_and_batch_bundle": bundle_id,
 							"item_code": item.get("item_code"),
 							"warehouse": item.get("warehouse"),
+							"do_not_save": True,
 						}
-					)
+					).duplicate_package()
 
-					cls_obj.duplicate_package()
+					remove_delivered_entries(package, item.pick_list_item)
+					package.save()
 
-					item.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+					item.serial_and_batch_bundle = package.name
 
 	def update_pick_list_status(self):
 		from erpnext.stock.doctype.pick_list.pick_list import update_pick_list_status
@@ -1245,6 +1313,30 @@ class SellingController(StockController):
 		pick_lists = {row.against_pick_list for row in self.items if row.against_pick_list}
 		for pick_list in pick_lists:
 			update_pick_list_status(pick_list)
+
+
+def remove_delivered_entries(package, pick_list_item):
+	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
+	from erpnext.stock.doctype.pick_list.mapper import get_moved_entries
+
+	delivered = get_moved_entries([pick_list_item]).get(pick_list_item, [])
+	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
+	delivered_batch_qty = defaultdict(float)
+	for row in delivered:
+		if row.batch_no and not row.serial_no:
+			delivered_batch_qty[row.batch_no] += abs(row.qty)
+
+	for row in list(package.entries):
+		if row.serial_no:
+			if row.serial_no in delivered_serial_nos:
+				package.remove(row)
+			continue
+
+		taken = min(delivered_batch_qty[row.batch_no], abs(row.qty))
+		delivered_batch_qty[row.batch_no] -= taken
+		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
+		if not row.qty:
+			package.remove(row)
 
 
 def set_default_income_account_for_item(obj):
@@ -1263,13 +1355,16 @@ def set_default_income_account_for_item(obj):
 			set_item_default(d.item_code, obj.company, "income_account", income_account)
 
 
-def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+def get_serial_and_batch_bundle(
+	child, parent, delivery_note_child=None, picked_serial_nos=None, picked_batches=None
+):
+	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
 
-	if child.get("use_serial_batch_fields"):
+	if child.get("use_serial_batch_fields") or child.get("serial_no") or child.get("batch_no"):
 		return
 
 	if not frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"):
@@ -1292,11 +1387,19 @@ def get_serial_and_batch_bundle(child, parent, delivery_note_child=None):
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
+			"ignore_serial_nos": picked_serial_nos[child.item_code] if picked_serial_nos else None,
+			"already_picked_batches": picked_batches,
 		}
 	)
 
 	doc = sn_doc.make_serial_and_batch_bundle()
 	child.db_set("serial_and_batch_bundle", doc.name)
+	if picked_serial_nos is not None:
+		picked_serial_nos[child.item_code].extend(
+			d.serial_no for d in doc.get("entries") or [] if d.serial_no
+		)
+	if picked_batches is not None:
+		add_picked_batches(picked_batches, doc.get("entries") or [])
 
 	return doc.name
 
