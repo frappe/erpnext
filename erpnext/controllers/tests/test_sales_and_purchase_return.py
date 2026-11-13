@@ -39,6 +39,17 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, return_dn.insert)
 
+	def test_return_row_without_source_row_reference_is_rejected(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		pr = make_purchase_receipt(qty=5)
+
+		return_pr = make_return_doc("Purchase Receipt", pr.name)
+		return_pr.items[0].purchase_receipt_item = None
+
+		self.assertRaisesRegex(frappe.ValidationError, "must refer to the row it returns", return_pr.insert)
+
 	def test_delivery_note_return_row_without_reference_is_limited_to_delivered_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
