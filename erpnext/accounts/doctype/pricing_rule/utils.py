@@ -423,6 +423,7 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 
 def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	rules = []
+	qty = flt(qty, frappe.get_precision("Pricing Rule", "min_qty"))
 
 	for rule in pricing_rules:
 		status = False
