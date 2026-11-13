@@ -1553,6 +1553,11 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		{
 			"price_list_rate": out.base_price_list_rate / conversion_rate,
 			"rate": out.base_rate / conversion_rate,
+			# a rate typed below the price list rate is stored as a discount amount, not a percentage
+			"discount_amount": flt(last_purchase.discount_amount)
+			* flt(last_purchase.conversion_rate)
+			/ conversion_factor
+			/ conversion_rate,
 			"base_rate": out.base_rate,
 			"base_net_rate": out.base_net_rate,
 		}
@@ -1575,6 +1580,7 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 			child_doc.conversion_factor,
 			child_doc.base_price_list_rate,
 			child_doc.discount_percentage,
+			child_doc.discount_amount,
 			child_doc.base_rate,
 			child_doc.base_net_rate,
 		)
