@@ -1302,6 +1302,24 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.per_billed, 100)
 		self.assertEqual(dn.status, "Completed")
 
+	def test_dn_is_completed_after_return_of_a_fraction_of_its_uom(self):
+		item = make_item(properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 8}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		dn = create_delivery_note(item_code=item.name, qty=1.01, do_not_save=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 8})
+		dn.submit()
+
+		# 1 Kg is 0.125 Box, so the 0.88 Box left to bill is rounded
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].update({"uom": "Kg", "conversion_factor": 1, "qty": -1})
+		dn_return.submit()
+
+		make_sales_invoice(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
 	def test_dn_is_completed_when_unbilled_item_is_returned(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
