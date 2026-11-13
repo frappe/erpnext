@@ -538,7 +538,7 @@
                         "alignSelf": "flex-start",
                         "justifyContent": "flex-end",
                         "paddingBottom": "12px",
-                        "paddingTop": "13px"
+                        "paddingTop": "11px"
                        },
                        "blockName": "No. cell",
                        "children": [
@@ -986,7 +986,7 @@
                         "alignSelf": "flex-start",
                         "justifyContent": "flex-end",
                         "paddingBottom": "12px",
-                        "paddingTop": "13px"
+                        "paddingTop": "11px"
                        },
                        "blockName": "No. cell",
                        "children": [

@@ -367,7 +367,7 @@
                         "alignSelf": "flex-start",
                         "justifyContent": "flex-end",
                         "paddingBottom": "12px",
-                        "paddingTop": "13px"
+                        "paddingTop": "11px"
                        },
                        "blockName": "No. cell",
                        "children": [
@@ -1482,7 +1482,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-11-12 18:30:00.000000",
+ "modified": "2026-11-13 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "receipt",
  "owner": "Administrator",
