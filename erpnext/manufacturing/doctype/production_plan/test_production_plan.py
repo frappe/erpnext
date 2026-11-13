@@ -4675,6 +4675,10 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, draft_plan.set_status, close=True)
 		self.assertEqual(frappe.db.get_value("Production Plan", draft_plan.name, "status"), "Draft")
 
+		draft_plan.docstatus = 1
+		self.assertRaises(frappe.ValidationError, draft_plan.set_status, close=True)
+		self.assertEqual(frappe.db.get_value("Production Plan", draft_plan.name, "status"), "Draft")
+
 		cancelled_plan = create_production_plan(
 			item_code=finished_good, planned_qty=3, skip_getting_mr_items=1
 		)
