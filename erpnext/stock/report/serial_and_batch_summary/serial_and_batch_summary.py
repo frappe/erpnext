@@ -9,6 +9,7 @@ from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -51,6 +52,12 @@ def get_filter_conditions(filters):
 		["Serial and Batch Entry", "docstatus", "=", 1],
 		["Serial and Batch Entry", "is_cancelled", "=", 0],
 	]
+
+	# show reserving bundles only when asked for
+	if not filters.get("voucher_type"):
+		filter_conditions.append(
+			["Serial and Batch Bundle", "voucher_type", "not in", RESERVING_VOUCHER_TYPES]
+		)
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):

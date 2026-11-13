@@ -273,7 +273,13 @@ class calculate_taxes_and_totals:
 			self.calculate_item_rate(item)
 
 			item.net_rate = item.rate
-			if not item.qty and self.doc.get("is_return") and self.doc.get("doctype") != "Purchase Receipt":
+			# A return row that moves nothing adjusts the rate. A fully rejected row moves its
+			# rejected qty, so it bills what the original invoice billed.
+			if (
+				not (flt(item.qty) or flt(item.get("rejected_qty")))
+				and self.doc.get("is_return")
+				and self.doc.get("doctype") != "Purchase Receipt"
+			):
 				item.amount = flt(-1 * item.rate, item.precision("amount"))
 			elif not item.qty and self.doc.get("is_debit_note"):
 				item.amount = flt(item.rate, item.precision("amount"))
@@ -985,6 +991,20 @@ class calculate_taxes_and_totals:
 				)
 
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
+
+			if self.doc.rounding_adjustment:
+				# Keep the converted payable/receivable consistent with payments and returns.
+				self.doc.base_rounding_adjustment = flt(
+					self.doc.base_rounded_total - self.doc.base_grand_total,
+					self.doc.precision("base_rounding_adjustment"),
+				)
+			elif self.doc.rounded_total:
+				# converting the rounded total on its own can differ from the row-wise base total by a
+				# currency fraction; derive it from the base totals the ledger is posted with
+				self.doc.base_rounded_total = flt(
+					self.doc.base_grand_total + self.doc.base_rounding_adjustment,
+					self.doc.precision("base_rounded_total"),
+				)
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:

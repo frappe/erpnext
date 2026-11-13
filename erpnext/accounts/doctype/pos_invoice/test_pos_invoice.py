@@ -298,6 +298,35 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		self.assertEqual(pos_return.get("payments")[0].amount, -500)
 		self.assertEqual(pos_return.get("payments")[1].amount, -500)
 
+	def test_pos_return_with_disabled_sales_person(self):
+		sales_person = "_Test Sales Person 2"
+		other_sales_person = "_Test Sales Person 1"
+
+		pos = create_pos_invoice(qty=1, rate=1000, do_not_save=True)
+		pos.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 1000, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		frappe.db.set_value("Sales Person", other_sales_person, "enabled", 0)
+		try:
+			with self.subTest("sales person newly assigned on the return is rejected"):
+				pos_return = make_sales_return(pos.name)
+				pos_return.sales_team = []
+				pos_return.append(
+					"sales_team", {"sales_person": other_sales_person, "allocated_percentage": 100}
+				)
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", pos_return.save)
+
+			with self.subTest("return against the pos invoice is allowed"):
+				pos_return = make_sales_return(pos.name)
+				pos_return.submit()
+				self.assertEqual([d.sales_person for d in pos_return.sales_team], [sales_person])
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
+			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
+
 	def test_pos_return_for_serialized_item(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
@@ -414,14 +443,17 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		)
 
 		pos.set("payments", [])
-		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 50})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 60, "default": 1})
+		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 108})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 2, "default": 1})
 
 		pos.insert()
 		pos.submit()
 
 		self.assertEqual(pos.grand_total, 105.0)
 		self.assertEqual(pos.change_amount, 5.0)
+
+		pos_return = make_sales_return(pos.name).insert()
+		self.assertEqual([row.amount for row in pos_return.payments], [-105, 0])
 
 	def test_without_payment(self):
 		inv = create_pos_invoice(do_not_save=1)
@@ -1192,6 +1224,81 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 			)
 			self.assertEqual(len({d.serial_no for d in entries if d.serial_no}), 2)
 			self.assertEqual({d.batch_no for d in entries}, {batch_no})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_packed_row_counts_batch_qty_of_an_item_row_once(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PPB-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+		se = make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+
+		pos = create_pos_invoice(
+			item=component,
+			rate=100,
+			use_serial_batch_fields=1,
+			batch_no=get_batch_from_bundle(se.items[0].serial_and_batch_bundle),
+			do_not_save=1,
+		)
+		pos.append(
+			"items",
+			{
+				"item_code": bundle,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"income_account": "Sales - _TC",
+				"expense_account": "Cost of Goods Sold - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		self.assertEqual(pos.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_packed_row_gets_a_bundle_at_submit(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PPS-.#####",
+			}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		pos = create_pos_invoice(item=bundle, qty=2, rate=100, do_not_save=1)
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 200, "default": 1})
+		pos.insert()
+		pos.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", pos.packed_items[0].serial_and_batch_bundle, "total_qty"
+			),
+			-2,
+		)
 
 	def test_stock_check_adds_up_rows_of_same_item(self):
 		item_code = make_stock_item_with_qty(20)

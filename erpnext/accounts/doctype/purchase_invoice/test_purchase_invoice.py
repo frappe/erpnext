@@ -3124,6 +3124,71 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			"set_valuation_rate_for_rejected_materials": 1,
 		},
 	)
+	def test_return_of_a_stock_updating_invoice_that_rejected_every_unit(self):
+		"""The return bills the rejected qty the invoice billed, not one unit's rate."""
+		pi = make_fully_rejected_stock_invoice()
+		rejected_warehouse = pi.items[0].rejected_warehouse
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.submit()
+
+		self.assertEqual(returned.grand_total, -200)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": returned.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+				["actual_qty", "stock_value_difference"],
+			),
+			(-2, -200),
+		)
+
+		booked = {}
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": returned.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			booked.setdefault(entry.account, 0)
+			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(
+			booked,
+			{returned.credit_to: 200, get_inventory_account(pi.company, rejected_warehouse): -200},
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 0,
+		},
+	)
+	def test_return_of_an_unvalued_fully_rejected_invoice(self):
+		"""Rejected material the invoice neither billed nor valued goes back with no amount."""
+		pi = make_fully_rejected_stock_invoice()
+		rejected_warehouse = pi.items[0].rejected_warehouse
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.submit()
+
+		self.assertEqual(returned.grand_total, 0)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": returned.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+				["actual_qty", "stock_value_difference"],
+			),
+			(-2, 0),
+		)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": returned.name, "is_cancelled": 0}))
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
 	def test_stock_updating_invoice_bills_the_rejected_quantity(self):
 		"""With the rejected quantity billed and valued, the invoice pays for every unit received and
 		the stock it moves matches the entries it books."""
@@ -3676,6 +3741,105 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			acc.save()
 			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc.name)
 
+	def test_rounding_adjustment_in_foreign_currency(self):
+		"""The payable is posted at the base rounded total and the round off row, on a company
+		currency account, carries the base adjustment in both amounts."""
+		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		credit_to = create_account(
+			account_name="_Test Payable JPY",
+			parent_account="Accounts Payable - _TC",
+			company="_Test Company",
+			account_currency="JPY",
+			account_type="Payable",
+		)
+		if not frappe.db.exists("Supplier", "_Test Supplier JPY"):
+			frappe.get_doc(
+				{
+					"doctype": "Supplier",
+					"supplier_name": "_Test Supplier JPY",
+					"supplier_group": "_Test Supplier Group",
+					"default_currency": "JPY",
+				}
+			).insert()
+
+		pi = make_purchase_invoice(
+			supplier="_Test Supplier JPY",
+			currency="JPY",
+			conversion_rate=0.567,
+			qty=1,
+			rate=1701.4,
+			do_not_save=1,
+		)
+		pi.credit_to = credit_to
+		pi.save()
+		pi.submit()
+
+		self.assertEqual(pi.rounded_total, 1701)
+		self.assertEqual(pi.base_grand_total, 964.69)
+		self.assertEqual(pi.base_rounding_adjustment, -0.22)
+		self.assertEqual(pi.base_rounded_total, 964.47)
+
+		round_off_account = frappe.get_cached_value("Company", pi.company, "round_off_account")
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Purchase Invoice", "voucher_no": pi.name},
+			fields=[
+				"account",
+				"debit",
+				"credit",
+				"debit_in_transaction_currency",
+				"credit_in_transaction_currency",
+				"credit_in_account_currency",
+			],
+		)
+		by_account = {gle.account: gle for gle in gl_entries}
+		self.assertEqual([by_account[credit_to].debit, by_account[credit_to].credit], [0.0, 964.47])
+		self.assertEqual(
+			[by_account[round_off_account].credit, by_account[round_off_account].credit_in_account_currency],
+			[0.22, 0.22],
+		)
+		self.assertEqual(by_account[round_off_account].debit_in_transaction_currency, 0)
+		self.assertEqual(by_account[round_off_account].credit_in_transaction_currency, 0.4)
+		self.assertEqual(sum(gle.debit for gle in gl_entries), sum(gle.credit for gle in gl_entries))
+
+		payment = get_payment_entry(
+			pi.doctype,
+			pi.name,
+			bank_account="_Test Cash - _TC",
+			bank_amount=964.47,
+		)
+		payment.target_exchange_rate = pi.conversion_rate
+		payment.insert()
+		payment.submit()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 0)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"account": credit_to, "voucher_no": ["in", [pi.name, payment.name]], "is_cancelled": 0},
+			fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(gle.debit - gle.credit for gle in gl_entries), 0, places=2)
+		self.assertAlmostEqual(
+			sum(gle.debit_in_account_currency - gle.credit_in_account_currency for gle in gl_entries),
+			0,
+			places=2,
+		)
+		self.assertAlmostEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": pi.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+			places=2,
+		)
+		payment.cancel()
+		pi.reload()
+		self.assertEqual(pi.outstanding_amount, 1701)
+		pi.cancel()
+
 	def test_ledger_entries_of_opening_invoice_with_rounding_adjustment(self):
 		pi = make_purchase_invoice(do_not_save=1)
 		pi.items[0].rate = 99.98
@@ -3915,6 +4079,19 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		# Test 4 - Since this PI is overbilled by 130% and only 120% is allowed, it will fail
 		self.assertRaises(frappe.ValidationError, pi.submit)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 10})
+	def test_pr_pi_billing_exactly_the_over_billing_allowance(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_invoice as make_purchase_invoice_from_pr,
+		)
+
+		pr = make_purchase_receipt(qty=10, rate=1000)
+		pi = make_purchase_invoice_from_pr(pr.name)
+		pi.items[0].qty = 11
+		pi.submit()
+
+		self.assertEqual(pi.docstatus, 1)
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 0})
 	@ERPNextTestSuite.change_settings(
@@ -4259,6 +4436,29 @@ def make_purchase_invoice(**args):
 		pi.insert()
 		if not args.do_not_submit:
 			pi.submit()
+	return pi
+
+
+def make_fully_rejected_stock_invoice():
+	"""A stock updating invoice that rejects both units of its only row, at 100 each."""
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	company = "_Test Company with perpetual inventory"
+	rejected_warehouse = create_warehouse("_Test Fully Rejected Invoice Warehouse", company=company)
+	pi = make_purchase_invoice(
+		company=company,
+		item_code=make_item(properties={"is_stock_item": 1}).name,
+		warehouse="Stores - TCP1",
+		qty=0,
+		rejected_qty=2,
+		received_qty=2,
+		rate=100,
+		rejected_warehouse=rejected_warehouse,
+		update_stock=1,
+		cost_center="Main - TCP1",
+		do_not_save=True,
+	)
+	pi.submit()
 	return pi
 
 

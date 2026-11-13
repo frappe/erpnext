@@ -4718,6 +4718,88 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual([job_card.docstatus for job_card in job_cards], [1, 1, 1])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_last_split_job_card_transfers_the_rounding_remainder(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=1)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=3,
+			bom_quantity=3,
+			transfer_material_against="Job Card",
+		)
+		for index, job_card in enumerate(get_jc_review_job_cards(wo.name)):
+			frappe.get_doc(make_stock_entry_from_jc(job_card.name)).submit()
+			job_card.reload()
+			job_card.append("time_logs", jc_review_log(f"2031-03-07 0{index}:00:00", 60, 1))
+			job_card.submit()
+
+		wo.reload()
+		self.assertEqual(wo.required_items[0].transferred_qty, 1)
+		manufacture = frappe.get_doc(make_stock_entry_for_work_order(wo.name, "Manufacture", 3))
+		manufacture.submit()
+		self.assertEqual(manufacture.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_split_job_card_raised_above_operation_qty_gets_its_full_share(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=5)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 1, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=10,
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[1]
+		job_card.for_quantity = 6
+		job_card.items = []
+		job_card.get_required_items()
+
+		self.assertEqual(job_card.items[0].required_qty, 6)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"disable_capacity_planning": 1, "overproduction_percentage_for_work_order": 100},
+	)
+	def test_split_job_cards_keep_rounded_shares_on_recalculation_and_submit(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=1)
+		raw_material = make_jc_review_item(stock_uom="Kg")
+		make_stock_entry(item_code=raw_material, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": raw_material, "qty": 2, "operation": operation}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			qty=3,
+			bom_quantity=3,
+			transfer_material_against="Job Card",
+		)
+		job_card = get_jc_review_job_cards(wo.name)[1]
+		for for_quantity in (2, 1):
+			job_card.for_quantity = for_quantity
+			job_card.items = []
+			job_card.get_required_items()
+			job_card.save()
+
+		job_cards = get_jc_review_job_cards(wo.name)
+		self.assertEqual(flt(sum(job_card.items[0].required_qty for job_card in job_cards), 3), 2)
+		for index, job_card in enumerate(job_cards):
+			frappe.get_doc(make_stock_entry_from_jc(job_card.name)).submit()
+			job_card.reload()
+			job_card.append("time_logs", jc_review_log(f"2031-03-08 0{index}:00:00", 60, 1))
+			job_card.submit()
+
+		self.assertEqual([job_card.docstatus for job_card in job_cards], [1, 1, 1])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_repeated_operation_gets_only_its_own_materials(self):
 		workstation = make_jc_review_workstation()
 		cutting = make_jc_review_operation(workstation)

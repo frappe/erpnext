@@ -300,9 +300,14 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 			to_date=year_end,
 		)
 
-		frappe.set_user(
-			make_restricted_user("test_trial_balance_account@example.com", "Account", permitted_account)
+		user = make_restricted_user("test_trial_balance_account@example.com", "Account", permitted_account)
+		# a perpetual inventory company links an account the user is not permitted
+		inventory_account = frappe.db.get_value("Company", "_Test Company", "default_inventory_account")
+		self.addCleanup(
+			frappe.db.set_value, "Company", "_Test Company", "default_inventory_account", inventory_account
 		)
+		frappe.db.set_value("Company", "_Test Company", "default_inventory_account", "Stock In Hand - _TC")
+		frappe.set_user(user)
 		try:
 			total_row = execute(frappe._dict(filters))[1][-1]
 		finally:
@@ -323,6 +328,38 @@ class TestTrialBalanceReport(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 		self.assertEqual(total_row["opening_debit"], total_row["opening_credit"])
+
+	def test_company_permission_follows_applicable_for(self):
+		from erpnext.accounts.utils import get_fiscal_year
+
+		company = "_Test Company"
+		user = make_restricted_user("test_trial_balance_applicable_for@example.com", "Account", "Cash - _TC")
+		# a permission for another company, limited to Sales Invoice
+		user_permission = frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": user,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+				"apply_to_all_doctypes": 0,
+				"applicable_for": "Sales Invoice",
+			}
+		).insert(ignore_permissions=True)
+		filters = frappe._dict(company=company, fiscal_year=get_fiscal_year(today(), company=company)[0])
+
+		frappe.set_user(user)
+		try:
+			execute(frappe._dict(filters))
+		finally:
+			frappe.set_user("Administrator")
+
+		user_permission.update({"apply_to_all_doctypes": 1, "applicable_for": None})
+		user_permission.save(ignore_permissions=True)
+		frappe.set_user(user)
+		try:
+			self.assertRaisesRegex(frappe.PermissionError, company, execute, frappe._dict(filters))
+		finally:
+			frappe.set_user("Administrator")
 
 	def close_fiscal_year_2021_for_pcv_company(self):
 		"""Post a 400 balance to Cash - TPC in FY 2021 and close it with a PCV. Returns the surplus account."""

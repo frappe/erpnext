@@ -19,6 +19,7 @@ from erpnext.stock.doctype.pick_list.pick_list import (
 	get_pick_list_holders,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_available_serial_nos,
 	get_batch_nos_from_sre,
 	get_reserved_serial_nos_for_pos,
 	get_serial_batch_numbers,
@@ -508,6 +509,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					"serial_no": "pick-001",
 					"batch_no": batch.name,
 					"stock_qty": 1,
+					"picked_qty": 1,
 					"use_serial_batch_fields": 1,
 					"warehouse": "_Test Warehouse - _TC",
 				}
@@ -1537,7 +1539,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			patch("frappe.get_all", return_value=[row]),
 			patch(
 				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle._get_serial_batch_ledgers",
-				return_value=[frappe._dict(serial_no=serial.name)],
+				return_value=[frappe._dict(serial_no=serial.name, name="POS-Bundle")],
 			),
 			patch(
 				"erpnext.controllers.sales_and_purchase_return.get_returned_serial_nos",
@@ -1562,6 +1564,48 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 			self.assertEqual(
 				get_reserved_serial_nos_for_pos(frappe._dict(item_code=self.item.name)), [serial.name]
 			)
+
+	def test_pos_reservations_are_limited_to_requested_serial_nos(self):
+		requested = self.make_number("Serial No", "POS-Requested")
+		self.make_number("Serial No", "POS-Not-Requested")
+		rows = [
+			frappe._dict(serial_no="POS-Requested", parent_docname="POS-Sale-1", child_docname="POS-Row-1"),
+			frappe._dict(
+				serial_no="POS-Not-Requested", parent_docname="POS-Sale-2", child_docname="POS-Row-2"
+			),
+		]
+		kwargs = frappe._dict(item_code=self.item.name, check_serial_nos=True, serial_nos=[requested.name])
+		with (
+			patch("frappe.get_all", return_value=rows),
+			patch(
+				"erpnext.controllers.sales_and_purchase_return.get_returned_serial_nos", return_value=[]
+			) as returned_serial_nos,
+		):
+			self.assertEqual(get_reserved_serial_nos_for_pos(kwargs), [requested.name])
+
+		self.assertEqual(returned_serial_nos.call_count, 1)
+
+	def test_serial_validation_reads_only_requested_serial_nos(self):
+		warehouse = "_Test Warehouse - _TC"
+		requested = self.make_number("Serial No", "Check-Requested")
+		reserved = self.make_number("Serial No", "Check-Reserved")
+		free = self.make_number("Serial No", "Check-Free")
+		for serial in (requested, reserved, free):
+			serial.db_set("warehouse", warehouse)
+
+		def available(serial_nos):
+			kwargs = frappe._dict(
+				item_code=self.item.name, warehouse=warehouse, check_serial_nos=True, serial_nos=serial_nos
+			)
+			return [row.serial_no for row in get_available_serial_nos(kwargs)]
+
+		with patch(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			return_value=[reserved.name],
+		):
+			self.assertEqual(available([requested.name]), [requested.name])
+			self.assertEqual(available([reserved.name]), [])
+			self.assertEqual(available([requested.name, reserved.name]), [requested.name])
 
 	def test_serial_case_variant_is_rejected_by_database(self):
 		self.check_duplicate("Serial No", "number-001")

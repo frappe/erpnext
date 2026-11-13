@@ -435,7 +435,8 @@
    "no_copy": 1,
    "options": "Pick List Item",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "original_item",
@@ -703,7 +704,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-06 20:00:00.000000",
+ "modified": "2026-11-11 09:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

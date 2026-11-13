@@ -1656,6 +1656,26 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual([row.item_code for row in stock_entry.items if row.is_finished_item], [fg_item])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_manufacturing_user_submits_work_order_that_creates_batches(self):
+		from erpnext.buying.test_utils import create_user_with_roles
+
+		fg_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "MUWO-.#####",
+			}
+		).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		user = create_user_with_roles("wo-manufacturing-user@example.com", "Manufacturing User").name
+		with self.set_user(user):
+			wo = make_wo_order_test_record(item=fg_item, qty=2, batch_size=1, skip_transfer=1)
+
+		self.assertEqual(frappe.db.count("Batch", {"reference_name": wo.name}), 2)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_auto_batch_creation(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 
@@ -2290,6 +2310,18 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		mr = make_material_request(work_order.name, for_qty=1)
 		self.assertEqual([row.qty for row in mr.items], [1])
+
+	def test_request_for_pending_qty_below_qty_precision(self):
+		rm = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
+		).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 100}])
+		work_order = make_review_work_order(fg, bom.name, 10)
+		self.submit_material_request(work_order.name, for_qty=9.9996)
+
+		mr = make_material_request(work_order.name, for_qty=0.01)
+		self.assertEqual([row.qty for row in mr.items], [0.04])
 
 	def test_nonpositive_qty_is_rejected(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list

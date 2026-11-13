@@ -506,26 +506,6 @@ class Item(Document):
 					)
 				)
 
-	def update_template_tables(self):
-		template = frappe.get_cached_doc("Item", self.variant_of)
-
-		# add item taxes from template
-		for d in template.get("taxes"):
-			self.append("taxes", d)
-
-		# copy re-order table if empty
-		if not self.get("reorder_levels"):
-			for d in template.get("reorder_levels"):
-				n = {}
-				for k in (
-					"warehouse",
-					"warehouse_reorder_level",
-					"warehouse_reorder_qty",
-					"material_request_type",
-				):
-					n[k] = d.get(k)
-				self.append("reorder_levels", n)
-
 	def validate_conversion_factor(self):
 		check_list = []
 		for d in self.get("uoms"):
@@ -778,7 +758,7 @@ class Item(Document):
 			"Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 		).format(frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+		frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_properties_before_merge(self, new_name):
 		# Validate properties before merging

@@ -41,6 +41,7 @@ from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.expected_valuation import ADJUSTMENT_ENTRY, QueuePool, iterate_expected_stock_at
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
 from erpnext.stock.stock_ledger import make_sl_entries
 from erpnext.stock.utils import get_combine_datetime
 
@@ -252,17 +253,22 @@ def get_ledger_lots(item_code: str, warehouse: str, posting_datetime, exclude_vo
 	ledger holds them at `posting_datetime`, in the order they were first received: from the bundles,
 	and from the serial and batch nos of entries made before bundles."""
 	entry = frappe.qb.DocType("Serial and Batch Entry")
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
 	ledger = frappe.qb.DocType("Stock Ledger Entry")
 	cutoff = get_datetime(posting_datetime)
 
 	bundle_entries = (
 		frappe.qb.from_(entry)
+		.inner_join(bundle)
+		.on(entry.parent == bundle.name)
 		.select(entry.serial_no, entry.batch_no, entry.qty, entry.stock_value_difference)
 		.where(
 			(entry.item_code == item_code)
 			& (entry.warehouse == warehouse)
 			& (entry.docstatus == 1)
 			& (entry.is_cancelled == 0)
+			# older POS consolidations left their entries on the POS Invoice, not the Sales Invoice
+			& (bundle.voucher_type.notin(RESERVING_VOUCHER_TYPES))
 			& (entry.posting_datetime <= cutoff)
 		)
 		.orderby(entry.posting_datetime)

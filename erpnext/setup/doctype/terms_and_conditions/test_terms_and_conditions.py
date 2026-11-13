@@ -59,6 +59,21 @@ class TestTermsAndConditions(UnitTestCase):
 			with self.subTest(expression=expression), self.assertRaises(UndefinedError):
 				get_terms_environment("editor@example.com").from_string("{{ " + expression + " }}").render({})
 
+	def test_save_refuses_globals_the_sandbox_lacks(self):
+		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_globals
+
+		for terms in (
+			"{% if customer %}{{ frappe.db.get_value('Customer', customer, 'customer_group') }}{% endif %}",
+			"{{ frappe.get_fullname() }}",
+			"{{ frappe.utils.global_date_format(transaction_date) }}",
+		):
+			with self.subTest(terms=terms), self.assertRaises(frappe.ValidationError):
+				validate_terms_globals(terms)
+
+		validate_terms_globals(
+			"{{ frappe.utils.formatdate(transaction_date) }} {{ customer_address.split()[0] }} {{ frappe.db.get_list('ToDo') }}"
+		)
+
 	def test_template_preserves_formatting_and_context(self):
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_environment
 
@@ -178,6 +193,25 @@ class TestTermsPermissions(IntegrationTestCase):
 		frappe.set_user(self.author)
 		with self.assertRaises(frappe.PermissionError):
 			get_terms_list("Administrator", "Purchase Invoice", fields=["name"])
+
+	def test_draft_opens_when_caller_cannot_read_listed_doctype(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title=f"Unreadable terms {frappe.generate_hash(length=8)}",
+			selling=1,
+			terms="{% for d in frappe.db.get_list('Purchase Invoice') %}{{ d.name }}{% endfor %}",
+		).insert()
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.tc_name = terms.name
+		sales_order.terms = None
+		sales_order.insert()
+
+		frappe.set_user(self.author)
+		sales_order.run_method("onload")
+		sales_order.before_print(frappe._dict())
+		self.assertFalse(sales_order.terms)
 
 	def test_get_list_blocks_field_and_query_bypasses(self):
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_list
@@ -311,6 +345,56 @@ class TestTermsTransactionValidation(IntegrationTestCase):
 		with self.assertRaisesRegex(frappe.ValidationError, "not applicable"):
 			doc.insert()
 
+	def test_draft_with_terms_it_cannot_render_still_opens(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions", title="Unrenderable terms sentinel", selling=1, terms="Terms"
+		).insert()
+		# saved before the terms sandbox lost frappe.db.get_value
+		terms.db_set("terms", "{{ frappe.db.get_value('Customer', customer, 'customer_group') }}")
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.tc_name = terms.name
+		sales_order.insert()
+
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+		sales_order.run_method("onload")
+		self.assertFalse(sales_order.terms)
+
+	def test_draft_with_terms_calling_a_helper_wrongly_still_opens(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="Wrong helper arguments sentinel",
+			selling=1,
+			terms="{{ frappe.db.get_list('Customer', limit=5) }}",
+		).insert()
+		sales_order = make_sales_order(do_not_save=True)
+		sales_order.tc_name = terms.name
+		sales_order.insert()
+
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+		sales_order.run_method("onload")
+		self.assertFalse(sales_order.terms)
+
+	def test_purchase_order_save_refuses_terms_it_cannot_render(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		terms = frappe.get_doc(
+			doctype="Terms and Conditions",
+			title="Unrenderable buying terms sentinel",
+			buying=1,
+			terms="Terms",
+		).insert()
+		# saved before the terms sandbox lost frappe.db.get_value
+		terms.db_set("terms", "{{ frappe.db.get_value('Supplier', supplier, 'supplier_group') }}")
+		purchase_order = create_purchase_order(do_not_save=True)
+		purchase_order.tc_name = terms.name
+
+		with self.assertRaisesRegex(frappe.ValidationError, "could not be rendered"):
+			purchase_order.insert()
+
 	def test_render_cannot_bypass_flags_with_client_docstatus(self):
 		terms = frappe.get_doc(
 			doctype="Terms and Conditions",
@@ -354,6 +438,11 @@ class TestTermsTransactionValidation(IntegrationTestCase):
 		from erpnext.controllers.stock_controller import StockController
 		from erpnext.controllers.subcontracting_controller import SubcontractingController
 
+		get_cached_doc = frappe.get_cached_doc
+
+		def get_doc(doctype, *args, **kwargs):
+			return tnc if doctype == "Terms and Conditions" else get_cached_doc(doctype, *args, **kwargs)
+
 		for controller, parent, module, doctype in (
 			(SellingController, StockController, "selling", "Other"),
 			(BuyingController, SubcontractingController, "buying", "Purchase Order"),
@@ -367,7 +456,7 @@ class TestTermsTransactionValidation(IntegrationTestCase):
 					tnc = frappe._dict(disabled=disabled, **{module: applicable})
 					with (
 						patch.object(parent, "onload"),
-						patch("frappe.get_cached_doc", return_value=tnc),
+						patch("frappe.get_cached_doc", side_effect=get_doc),
 						patch.object(controller, "set_missing_terms") as render,
 					):
 						doc.onload()
