@@ -171,8 +171,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_missing_values()
 		# after set_missing_values, so the secondary rates are computed from the same
 		# calculated per-qty costs the Get Secondary Items button uses, and before
-		# validate_return, so a return validates the rows it saves
-		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
+		# validate_return, so a return validates the rows it saves, also when inserted as submitted
+		if self.is_new() and (self.get("_action") == "save" or self.is_return) and not frappe.in_test:
 			self.get_secondary_items(recalculate_rate=True)
 
 		self.validate_with_previous_doc()
