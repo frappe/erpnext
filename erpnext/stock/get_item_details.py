@@ -921,6 +921,9 @@ def get_item_tax_info(
 			as_json=True,
 		)
 
+	for item_tax_template in {row.item_tax_template for row in out.values() if row.item_tax_template}:
+		erpnext.require_permission("Item Tax Template", item_tax_template, "select")
+
 	return out
 
 
