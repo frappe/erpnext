@@ -5239,6 +5239,24 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([row.consumed_qty for row in drafts[1].supplied_items], [0.37])
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bom_backflush_draft_split_over_batches_keeps_its_qty_after_another_receipt(self):
+		set_backflush_based_on("BOM")
+		sco = make_order_with_two_batches_transferred()
+		draft = make_subcontracting_receipt(sco.name)
+		draft.items[0].qty = 6
+		draft.save()
+		supplied_qty = [(row.batch_no, row.consumed_qty) for row in draft.supplied_items]
+		self.assertEqual(sorted(qty for _batch_no, qty in supplied_qty), [1, 5])
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.submit()
+
+		draft.reload()
+		draft.save()
+		self.assertEqual([(row.batch_no, row.consumed_qty) for row in draft.supplied_items], supplied_qty)
+
 
 def receive_order_of_two_one_by_one(rm_qty):
 	"""Consumed qty of two receipts of 1 for an order of 2 whose BOM needs ``rm_qty`` per unit."""
