@@ -423,6 +423,29 @@ class TestItemAlternative(ERPNextTestSuite):
 		self.assertIn(matching, returned)
 		self.assertNotIn(other, returned)
 
+	def test_get_alternative_items_needs_item_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
+
+		suffix = random_string(8)
+		base = f"_Test IA Permission Base {suffix}"
+		alternative = f"_Test IA Permission Alternative {suffix}"
+		for item_code in (base, alternative):
+			create_item(item_code)
+			frappe.db.set_value("Item", item_code, "allow_alternative_item", 1)
+		make_item_alternative(base, alternative, two_way=1)
+
+		for user, roles in (
+			("_test_ia_no_role@example.com", []),
+			("_test_ia_desk@example.com", ["Desk User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				assert_refused(self, get_alternative_items, "Item", "", "name", 0, 20, {"item_code": base})
+
+		with as_user(make_fenced_user("_test_ia_manufacturing@example.com", ["Manufacturing User"])):
+			for item_code, expected in ((base, alternative), (alternative, base)):
+				results = get_alternative_items("Item", "", "name", 0, 20, {"item_code": item_code})
+				self.assertEqual(results, [[expected]])
+
 	def test_get_alternative_items_case_insensitive_match(self):
 		"""The txt match must stay case-insensitive on BOTH engines: MariaDB LIKE is
 		case-insensitive by default, and frappe compiles the `like` filter to ILIKE on
