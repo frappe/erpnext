@@ -2243,6 +2243,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			{
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
+				"uom": item.get("uom"),
 				"schedule_date": schedule_date,
 				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,
