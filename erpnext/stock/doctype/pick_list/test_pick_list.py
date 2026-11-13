@@ -1182,17 +1182,7 @@ class TestPickList(FrappeTestCase):
 =======
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_lowered_bundle_qty_keeps_as_many_picked_serial_nos(self):
-		warehouse = "_Test Warehouse - _TC"
-		component = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLLBQ-.#####"}
-		).name
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		make_stock_entry(item=component, to_warehouse=warehouse, qty=4, basic_rate=100)
-
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=4, rate=100)
-		pick_list = create_pick_list(sales_order.name)
-		pick_list.submit()
+		pick_list = make_serialized_bundle_pick_list()
 		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
 
 		delivery = create_delivery_note(pick_list.name)
@@ -1203,7 +1193,24 @@ class TestPickList(FrappeTestCase):
 		delivery.submit()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+<<<<<<< HEAD
 >>>>>>> 1bc9959 (test: lowered bundle qty keeps as many picked serial nos)
+=======
+	def test_raised_bundle_qty_tops_up_picked_serial_nos(self):
+		pick_list = make_serialized_bundle_pick_list()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+
+		delivery = create_delivery_note(pick_list.name)
+		delivery.items[0].qty = 1
+		delivery.save()
+		delivery.items[0].qty = 4
+		delivery.save()
+
+		self.assertEqual(get_serial_nos(delivery.packed_items[0].serial_no), picked_serial_nos)
+		delivery.submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+>>>>>>> 6f0cd69 (test: raised bundle qty tops up picked serial nos)
 	def test_next_bundle_delivery_takes_the_component_warehouse_not_delivered_yet(self):
 		pick_list, _first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
 
@@ -3575,6 +3582,22 @@ class TestPickList(FrappeTestCase):
 		pick_list.reload()
 		self.assertEqual(pick_list.locations[0].transferred_qty, 0.013)
 		self.assertEqual(pick_list.status, "Completed")
+
+
+def make_serialized_bundle_pick_list():
+	"""Pick 4 bundles of 1 serialized component each."""
+	warehouse = "_Test Warehouse - _TC"
+	component = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLLBQ-.#####"}
+	).name
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+	make_stock_entry(item=component, to_warehouse=warehouse, qty=4, basic_rate=100)
+
+	sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	return pick_list
 
 
 def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):
