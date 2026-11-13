@@ -984,7 +984,17 @@ def _revisable_quotation(supplier: str, rfq: str) -> str | None:
 def _has_draft_order(quotation: str) -> bool:
 	"""Whether the buyer has a draft purchase order from this quotation. Revising would cancel the
 	quotation, and ERPNext then refuses to submit that order."""
-	return bool(frappe.db.exists("Purchase Order Item", {"supplier_quotation": quotation, "docstatus": 0}))
+	po, poi = frappe.qb.DocType("Purchase Order"), frappe.qb.DocType("Purchase Order Item")
+	# by the order's own status: discarding a draft cancels the order, not its rows
+	return bool(
+		frappe.qb.from_(poi)
+		.inner_join(po)
+		.on(poi.parent == po.name)
+		.select(po.name)
+		.where((poi.supplier_quotation == quotation) & (po.docstatus == 0))
+		.limit(1)
+		.run()
+	)
 
 
 def _buyer_drafting(supplier: str, rfq: str) -> bool:
