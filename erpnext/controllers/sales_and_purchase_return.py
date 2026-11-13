@@ -222,11 +222,11 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 	"""Hold the components of returned bundles to what is left of each delivered component."""
 	from erpnext.stock.doctype.packed_item.packed_item import (
 		get_bundle_version_for_row,
+		get_component_order_rows,
 		get_component_stock_qty_per_unit,
 		get_order_packed_items,
 		get_order_row,
 		get_product_bundle_items_by_name,
-		pop_order_packed_item,
 	)
 
 	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
@@ -255,8 +255,9 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 
 		bundle_stock_qty = get_returned_stock_qty(doc, row)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
-		for component in components[bundle]:
-			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
+		for component, so_packed_item in get_component_order_rows(
+			doc, row.item_code, components[bundle], so_packed_items
+		):
 			ref = valid_items.get(component.item_code)
 			if not ref:
 				continue
