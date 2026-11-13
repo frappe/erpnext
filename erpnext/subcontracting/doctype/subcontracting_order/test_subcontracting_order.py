@@ -267,6 +267,33 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		sco.insert()
 		self.assertEqual(sco.supplied_items[0].reserve_warehouse, "_Test Warehouse - _TC")
 
+	def test_reserve_warehouse_from_job_card_must_belong_to_the_order_company(self):
+		def make_order_from_job_card(company, source_warehouse):
+			sco = get_subcontracting_order(do_not_save=1)
+			raw_materials = frappe.get_all("BOM Item", {"parent": sco.items[0].bom}, pluck="item_code")
+			job_card = frappe.get_doc(
+				{
+					"doctype": "Job Card",
+					"company": company,
+					"items": [
+						{"item_code": item, "source_warehouse": source_warehouse} for item in raw_materials
+					],
+				}
+			)
+			job_card.flags.ignore_validate = job_card.flags.ignore_mandatory = True
+			job_card.flags.ignore_links = True
+			job_card.insert()
+			sco.set_reserve_warehouse = None
+			sco.items[0].job_card = job_card.name
+			return sco
+
+		sco = make_order_from_job_card("_Test Company 1", "_Test Warehouse 2 - _TC1")
+		self.assertRaises(InvalidWarehouseCompany, sco.insert)
+
+		sco = make_order_from_job_card("_Test Company", "Stores - _TC")
+		sco.insert()
+		self.assertEqual({row.reserve_warehouse for row in sco.supplied_items}, {"Stores - _TC"})
+
 	def test_receipt_supplier_warehouse_must_belong_to_the_receipt_company(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()

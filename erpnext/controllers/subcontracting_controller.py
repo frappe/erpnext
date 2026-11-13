@@ -69,13 +69,13 @@ class SubcontractingController(StockController):
 
 	def validate(self):
 		if self.doctype in ["Subcontracting Order", "Subcontracting Receipt", "Subcontracting Inward Order"]:
-			self.validate_company_of_warehouses()
 			self.validate_items()
 			self.create_raw_materials_supplied_or_received(
 				raw_material_table="supplied_items"
 				if self.doctype != "Subcontracting Inward Order"
 				else "received_items"
 			)
+			self.validate_company_of_warehouses()
 			self.set_valuation_rate_for_rm()
 		else:
 			super().validate()
