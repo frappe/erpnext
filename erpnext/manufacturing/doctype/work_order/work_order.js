@@ -1080,7 +1080,10 @@ erpnext.work_order = {
 			const pending = required[item_code] - covered[item_code];
 			max_fraction = Math.max(max_fraction, pending / required[item_code]);
 		});
-		return flt(max_fraction * flt(frm.doc.qty), precision("qty"));
+		// round up, so a pending qty below the qty precision is still requestable;
+		// the server caps each item at its pending qty
+		const factor = Math.pow(10, precision("qty"));
+		return flt(Math.ceil(flt(max_fraction * flt(frm.doc.qty) * factor, 9)) / factor, precision("qty"));
 	},
 
 	show_disassembly_prompt: function (frm) {

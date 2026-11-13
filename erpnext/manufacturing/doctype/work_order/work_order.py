@@ -4011,12 +4011,12 @@ def _allocate_material_demand(work_order, fraction):
 		key = _allocation_key(row)
 		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
 
+	precision = frappe.get_precision("Work Order Item", "required_qty")
 	pending_pool = {
-		item_code: required_qty - covered_by_item[item_code]
+		item_code: flt(required_qty - covered_by_item[item_code], precision)
 		for item_code, required_qty in required_by_item.items()
 	}
 
-	precision = frappe.get_precision("Work Order Item", "required_qty")
 	remaining_by_item = {
 		item_code: min(
 			_round_demand(required_qty * fraction, uom_by_item[item_code], precision),
