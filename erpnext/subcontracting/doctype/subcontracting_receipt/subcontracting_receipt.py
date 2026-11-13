@@ -163,7 +163,10 @@ class SubcontractingReceipt(SubcontractingController):
 			row_filter=lambda row: not row.is_scrap_item,
 		)
 
-		if self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
+		# a return takes back the scrap rows of the receipt as they were received
+		if self.is_return:
+			self.set_scrap_item_references_for_return()
+		elif self.is_new() and self.get("_action") == "save" and not frappe.flags.in_test:
 			self.get_scrap_items()
 
 		self.set_missing_values()
@@ -442,6 +445,28 @@ class SubcontractingReceipt(SubcontractingController):
 		if recalculate_rate:
 			self.set_additional_costs()
 			self.calculate_items_qty_and_amount()
+
+	def set_scrap_item_references_for_return(self):
+		"""Point each returned scrap row at the return row of its finished good."""
+		scrap_rows = [row for row in self.items if row.is_scrap_item and row.subcontracting_receipt_item]
+		if not scrap_rows:
+			return
+
+		received_finished_goods = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"name": ("in", [row.subcontracting_receipt_item for row in scrap_rows])},
+				fields=["name", "reference_name"],
+				as_list=True,
+			)
+		)
+		returned_finished_goods = {
+			row.subcontracting_receipt_item: row.name for row in self.items if not row.is_scrap_item
+		}
+		for row in scrap_rows:
+			row.reference_name = returned_finished_goods.get(
+				received_finished_goods.get(row.subcontracting_receipt_item)
+			)
 
 	def remove_scrap_items(self, recalculate_rate=False):
 		for item in list(self.items):
