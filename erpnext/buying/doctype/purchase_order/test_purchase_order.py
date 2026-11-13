@@ -21,7 +21,7 @@ from erpnext.buying.doctype.purchase_order.mapper import (
 from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
-from erpnext.stock.doctype.item.item import get_last_purchase_details
+from erpnext.stock.doctype.item.item import get_last_purchase_details, make_item_price
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -791,6 +791,19 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assertEqual(po.items[0].discount_amount, 39)
 		self.assertEqual(po.items[0].rate, 0)
+
+	def test_rate_pricing_rule_drops_last_purchase_discount_amount(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+		make_item_price(item, "Standard Buying", 0)
+		make_pricing_rule(item_code=item, buying=1, rate_or_discount="Rate", rate=50)
+
+		details = get_purchase_order_item_details(item)
+
+		self.assertEqual(details.price_list_rate, 50)
+		self.assertEqual(details.discount_amount, 0)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
@@ -2138,27 +2151,9 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		(via the standard item lookup the form uses) without going through
 		the Sales Order → Purchase Order mapping pipeline.
 		"""
-		from erpnext.stock.get_item_details import get_item_details
-
 		item = make_item("_Test Drop Ship From Master", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
-		ctx = frappe._dict(
-			{
-				"item_code": item.item_code,
-				"doctype": "Purchase Order",
-				"company": "_Test Company",
-				"supplier": "_Test Supplier",
-				"transaction_date": nowdate(),
-				"currency": "INR",
-				"conversion_rate": 1.0,
-				"buying_price_list": "Standard Buying",
-				"price_list_currency": "INR",
-				"plc_conversion_rate": 1.0,
-				"qty": 1,
-			}
-		)
-
-		details = get_item_details(ctx, frappe.new_doc("Purchase Order"))
+		details = get_purchase_order_item_details(item.item_code)
 		self.assertEqual(details.get("delivered_by_supplier"), 1)
 
 	def test_drop_ship_po_allows_non_company_shipping_address_without_so(self):
@@ -2759,6 +2754,27 @@ def get_same_items():
 			"schedule_date": add_days(nowdate(), 1),
 		},
 	]
+
+
+def get_purchase_order_item_details(item_code):
+	from erpnext.stock.get_item_details import get_item_details
+
+	ctx = frappe._dict(
+		{
+			"item_code": item_code,
+			"doctype": "Purchase Order",
+			"company": "_Test Company",
+			"supplier": "_Test Supplier",
+			"transaction_date": nowdate(),
+			"currency": "INR",
+			"conversion_rate": 1.0,
+			"buying_price_list": "Standard Buying",
+			"price_list_currency": "INR",
+			"plc_conversion_rate": 1.0,
+			"qty": 1,
+		}
+	)
+	return get_item_details(ctx, frappe.new_doc("Purchase Order"))
 
 
 def make_fully_discounted_purchase_order(item_code):
