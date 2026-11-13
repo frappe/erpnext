@@ -404,6 +404,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def get_scrap_items(self, recalculate_rate=False):
+		# a return keeps the scrap rows of its receipt
+		if not self.is_return:
+			self.add_scrap_items()
+
+		if recalculate_rate:
+			self.set_additional_costs()
+			self.calculate_items_qty_and_amount()
+
+	def add_scrap_items(self):
 		self.remove_scrap_items()
 
 		for item in list(self.items):
@@ -441,10 +450,6 @@ class SubcontractingReceipt(SubcontractingController):
 							"rejected_warehouse": self.rejected_warehouse,
 						},
 					)
-
-		if recalculate_rate:
-			self.set_additional_costs()
-			self.calculate_items_qty_and_amount()
 
 	def set_scrap_item_references_for_return(self):
 		"""Point each returned scrap row at the return row of its finished good."""
