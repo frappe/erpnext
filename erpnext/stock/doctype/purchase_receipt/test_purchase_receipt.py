@@ -3298,7 +3298,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_rejected_batch_of_a_transfer_bought_in_another_uom_keeps_its_value(self):
 		"""Rejected material is valued per stock unit at the rate it had in transit. The row's
 		sales_incoming_rate is per purchase UOM, so a row in Box must not value each Nos at it."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
