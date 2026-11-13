@@ -169,14 +169,15 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 		self.set_missing_values()
+		# after set_missing_values, so the secondary rates are computed from the same
+		# calculated per-qty costs the Get Secondary Items button uses, and before
+		# validate_return, so a return validates the rows it saves
+		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
+			self.get_secondary_items(recalculate_rate=True)
+
 		self.validate_with_previous_doc()
 		validate_return(self)
 		self.validate_return_supplier_warehouse()
-
-		# after set_missing_values, so the secondary rates are computed from the same
-		# calculated per-qty costs the Get Secondary Items button uses
-		if self.is_new() and self.get("_action") == "save" and not frappe.in_test:
-			self.get_secondary_items(recalculate_rate=True)
 
 		if self.get("_action") == "submit":
 			self.validate_secondary_items()
@@ -581,6 +582,7 @@ class SubcontractingReceipt(SubcontractingController):
 				"received_qty": received_qty,
 				"process_loss_qty": received_qty - qty,
 				"stock_uom": secondary_item.stock_uom,
+				"conversion_factor": 1,
 				"rate": rate,
 				"rm_cost_per_qty": 0,
 				"service_cost_per_qty": 0,
