@@ -753,61 +753,14 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		# incoming rate after reposting should be 150
 		self.assertSLEs(pr, [{"incoming_rate": 150}])
 
-	def test_recalculate_valuation_rate_for_stock_entry(self):
+	def test_recalculate_valuation_rate_not_allowed_for_stock_entry(self):
 		item = self.make_item().name
-
-		# receive item at rate 100
-		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
-		self.assertSLEs(se, [{"incoming_rate": 100}])
-
-		# change the rate from 100 to 150
-		se.items[0].db_set("basic_rate", 150)
-
-		# repost with recalculate valuation rate
-		riv = frappe.get_doc(
-			doctype="Repost Item Valuation",
-			based_on="Transaction",
-			voucher_type=se.doctype,
-			voucher_no=se.name,
-			recalculate_valuation_rate=1,
-			posting_date=se.posting_date,
-			posting_time=se.posting_time,
-		)
-		riv.submit()
-
-		# incoming rate after reposting should be 150
-		self.assertSLEs(se, [{"incoming_rate": 150}])
-
-	def test_recalculate_valuation_rate_not_allowed_for_material_transfer(self):
-		item = self.make_item().name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
+		receipt = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1, rate=100)
 		transfer = make_stock_entry(
 			item_code=item, source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
 		)
 
-		riv = frappe.get_doc(
-			doctype="Repost Item Valuation",
-			based_on="Transaction",
-			voucher_type=transfer.doctype,
-			voucher_no=transfer.name,
-			recalculate_valuation_rate=1,
-			posting_date=transfer.posting_date,
-			posting_time=transfer.posting_time,
-		)
-		self.assertRaises(frappe.ValidationError, riv.save)
-
-	def test_recalculate_valuation_rate_not_allowed_for_stock_entry_with_source_warehouse(self):
-		item = self.make_item().name
-		fg = self.make_item().name
-		warehouse = "_Test Warehouse - _TC"
-		make_stock_entry(item_code=item, target=warehouse, qty=10, rate=100)
-
-		issue = make_stock_entry(item_code=item, source=warehouse, qty=1)
-		repack = make_stock_entry(item_code=item, source=warehouse, qty=1, purpose="Repack", do_not_save=True)
-		repack.append("items", {"item_code": fg, "t_warehouse": warehouse, "qty": 1, "is_finished_item": 1})
-		repack.submit()
-
-		for entry in (issue, repack):
+		for entry in (receipt, transfer):
 			riv = frappe.get_doc(
 				doctype="Repost Item Valuation",
 				based_on="Transaction",
@@ -822,13 +775,7 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 
 	def test_recalculate_valuation_rate_skips_later_vouchers(self):
 		item = self.make_item(properties={"valuation_method": "Moving Average"}).name
-		receipt = make_stock_entry(
-			item_code=item,
-			target="_Test Warehouse - _TC",
-			qty=10,
-			rate=100,
-			posting_date=add_days(today(), -2),
-		)
+		receipt = make_purchase_receipt(item_code=item, qty=10, rate=100, posting_date=add_days(today(), -2))
 		transfer = make_stock_entry(
 			item_code=item,
 			source="_Test Warehouse - _TC",
