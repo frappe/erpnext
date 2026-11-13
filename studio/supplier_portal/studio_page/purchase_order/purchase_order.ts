@@ -72,7 +72,7 @@ export default function setup(context) {
 		sourceQuotations.value.forEach((name, i) => {
 			rows.push({
 				key: "quotation:" + name,
-				label: i > 0 ? "" : sourceQuotations.value.length > 1 ? __("From quotations") : __("From quotation"),
+				label: i > 0 ? "" : sourceQuotations.value.length > 1 ? __("Quotations") : __("Quotation"),
 				value: name,
 				color: INK8,
 				weight: "420",
@@ -166,7 +166,7 @@ export default function setup(context) {
 		if (!left.length) {
 			return Number(doc.value.per_billed ?? 0) >= 100
 				? { title: __("Delivered and billed in full."), theme: "green", icon: "lucide-circle-check" }
-				: { title: __("Delivered in full. The buyer bills it next."), theme: "green", icon: "lucide-circle-check" }
+				: { title: __("Delivered in full. Billing is next."), theme: "green", icon: "lucide-circle-check" }
 		}
 		// up to three lines by name; more than that is said as a count
 		const what = left.length <= 3
