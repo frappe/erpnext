@@ -1963,6 +1963,7 @@ class TestWorkOrder(FrappeTestCase):
 
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+		close_work_order(work_order.name, "Closed")
 
 		return_entry = make_stock_return_entry(work_order.name)
 		return_entry.company = work_order.company
