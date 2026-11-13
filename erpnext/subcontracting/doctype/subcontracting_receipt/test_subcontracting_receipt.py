@@ -3814,6 +3814,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr, _scrap_item = make_receipt_with_rejected_qty_and_scrap()
 
 		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		scr_return.save()
 		scr_return.get_secondary_items(recalculate_rate=True)
 		scr_return.save()
 		scr_return.submit()
@@ -3833,6 +3834,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
 		scr_return.items[0].warehouse = scr.items[0].warehouse
+		scr_return.save()
 		scr_return.get_secondary_items(recalculate_rate=True)
 		scr_return.save()
 		scr_return.submit()
