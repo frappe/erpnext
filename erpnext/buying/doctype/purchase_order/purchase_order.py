@@ -20,6 +20,7 @@ from erpnext.buying.doctype.purchase_order.services.status import StatusService
 from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.taxes_and_totals import remove_margin
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
@@ -402,6 +403,7 @@ class PurchaseOrder(BuyingController):
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.rate = d.base_rate / conversion_rate
 					d.last_purchase_rate = d.rate
+					remove_margin(d)
 				else:
 					item_last_purchase_rate = frappe.get_cached_value(
 						"Item", d.item_code, "last_purchase_rate"
@@ -411,6 +413,7 @@ class PurchaseOrder(BuyingController):
 							flt(d.conversion_factor) or 1.0
 						)
 						d.price_list_rate = d.rate = d.last_purchase_rate = d.base_rate / conversion_rate
+						remove_margin(d)
 
 	def update_ordered_qty(self, po_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
