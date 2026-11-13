@@ -96,6 +96,27 @@ class TestGetItemDetail(ERPNextTestSuite):
 		details = get_item_details(args)
 		self.assertEqual(details.get("price_list_rate"), 100)
 
+	def test_item_tax_info_needs_item_code_as_text(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.get_item_details import get_item_tax_info
+
+		template = "_Test Account Excise Duty @ 10 - _TC"
+		item = make_item(properties={"taxes": [{"item_tax_template": template}]})
+		kwargs = {"doc": {"company": "_Test Company"}, "tax_category": "", "item_tax_templates": {"row": "x"}}
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Invalid Item Code",
+			get_item_tax_info,
+			item_codes=[[{"item_name": ["=", item.item_name]}, "row"]],
+			**kwargs,
+		)
+		details = get_item_tax_info(item_codes=[[item.name, "row"]], **kwargs)
+		self.assertEqual(details["row"]["item_tax_template"], template)
+		self.assertEqual(
+			frappe.parse_json(details["row"]["item_tax_rate"]), {"_Test Account Excise Duty - _TC": 10}
+		)
+
 	def test_bin_details_for_selling_doctypes(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
