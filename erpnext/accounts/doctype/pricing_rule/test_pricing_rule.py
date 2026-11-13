@@ -437,9 +437,7 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 100)
 
 	def test_pricing_rule_min_qty_with_conversion_factor_float_precision(self):
-		item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Box", "conversion_factor": 100}])
-		make_item_price(item.name, "_Test Price List", 100)
-		make_item_pricing_rule(item.name, min_qty=57, discount_percentage=10)
+		item = make_box_item_with_min_qty_pricing_rule()
 
 		details = get_item_details(
 			frappe._dict(
@@ -460,6 +458,34 @@ class TestPricingRule(ERPNextTestSuite):
 
 		self.assertEqual(details.discount_percentage, 10)
 		self.assertEqual(details.stock_qty, 57)
+
+	def test_price_list_applies_min_qty_pricing_rule_with_conversion_factor_float_precision(self):
+		item = make_box_item_with_min_qty_pricing_rule()
+
+		result = apply_price_list(
+			frappe._dict(
+				company="_Test Company",
+				price_list="_Test Price List",
+				currency="INR",
+				doctype="Sales Order",
+				conversion_rate=1,
+				price_list_currency="INR",
+				plc_conversion_rate=1,
+				customer="_Test Customer",
+				transaction_date=today(),
+				items=[
+					frappe._dict(
+						doctype="Sales Order Item",
+						item_code=item.name,
+						uom="Box",
+						conversion_factor=100,
+						qty=0.57,
+					)
+				],
+			)
+		)
+
+		self.assertEqual(result["children"][0].discount_percentage, 10)
 
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -2453,6 +2479,14 @@ def setup_pricing_rule_data():
 		frappe.get_doc(
 			{"doctype": "UTM Campaign", "description": "_Test Campaign", "name": "_Test Campaign"}
 		).insert()
+
+
+def make_box_item_with_min_qty_pricing_rule():
+	"""0.57 Box x 100 is 56.99999999999999 Nos, just below the rule's Min Qty of 57."""
+	item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Box", "conversion_factor": 100}])
+	make_item_price(item.name, "_Test Price List", 100)
+	make_item_pricing_rule(item.name, min_qty=57, discount_percentage=10)
+	return item
 
 
 def make_item_price(item, price_list_name, item_price):
