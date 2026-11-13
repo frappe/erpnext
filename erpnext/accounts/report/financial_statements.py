@@ -97,7 +97,9 @@ def get_period_list(
 				label = get_label(periodicity, opts["from_date"], opts["to_date"])
 			else:
 				if reset_period_on_fy_change:
-					label = get_label(periodicity, opts.from_date_fiscal_year_start_date, opts["to_date"])
+					# a date range can start after its fiscal year does
+					label_start_date = max(opts.from_date_fiscal_year_start_date, year_start_date)
+					label = get_label(periodicity, label_start_date, opts["to_date"])
 				else:
 					label = get_label(periodicity, period_list[0].from_date, opts["to_date"])
 
