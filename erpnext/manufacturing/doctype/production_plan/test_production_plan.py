@@ -5713,6 +5713,30 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.set_user(planner)
 		self.assertEqual([row[0] for row in sales_order_query(filters={"item_code": item})], [sales_order])
 
+	def test_sales_order_query_follows_item_user_permission_on_order_rows(self):
+		from erpnext.manufacturing.doctype.production_plan.mapper import get_so_details, sales_order_query
+
+		allowed_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		allowed_order = make_sales_order(item_code=allowed_item, qty=5, rate=100).name
+		mixed_order = make_sales_order(
+			item_list=[
+				{"item_code": allowed_item, "warehouse": "_Test Warehouse - _TC", "qty": 5, "rate": 100},
+				{"item_code": other_item, "warehouse": "_Test Warehouse - _TC", "qty": 3, "rate": 100},
+			]
+		).name
+		planner = create_manufacturing_user("planner-item@example.com")
+		frappe.get_doc(
+			{"doctype": "User Permission", "user": planner, "allow": "Item", "for_value": allowed_item}
+		).insert(ignore_permissions=True)
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(planner)
+		rows = sales_order_query(filters={"item_code": allowed_item})
+		self.assertEqual([row[0] for row in rows], [allowed_order])
+		self.assertEqual(get_so_details(allowed_order).customer, "_Test Customer")
+		self.assertRaises(frappe.PermissionError, get_so_details, mixed_order)
+
 
 def create_manufacturing_user(email, company=None):
 	if not frappe.db.exists("User", email):
