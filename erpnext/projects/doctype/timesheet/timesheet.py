@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Coalesce, Date
 from frappe.utils import (
 	add_to_date,
+	cint,
 	cstr,
 	flt,
 	get_datetime,
@@ -19,7 +20,7 @@ from frappe.utils import (
 	time_diff_in_seconds,
 )
 
-from erpnext import _refuse
+from erpnext import _refuse, require_permission
 from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 
@@ -81,6 +82,7 @@ class Timesheet(Document):
 		self.validate_dates()
 		self.calculate_hours()
 		self.validate_time_logs()
+		self.check_task_and_project_access(self.time_logs)
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -160,6 +162,13 @@ class Timesheet(Document):
 
 	def before_cancel(self):
 		self.set_status()
+		# cancel does not run validate, but still saves the rows it is sent
+		if self.get_time_logs_that_change_totals():
+			frappe.throw(
+				_("Time logs cannot be changed when a Timesheet is cancelled."),
+				title=_("Cannot Cancel Timesheet"),
+			)
+		self.check_task_and_project_access(self.time_logs)
 
 	def on_cancel(self):
 		self.update_task_and_project()
@@ -225,6 +234,38 @@ class Timesheet(Document):
 		_to_time = get_datetime(add_to_date(data.from_time, hours=data.hours, as_datetime=True))
 		if abs(time_diff_in_seconds(_to_time, data.to_time)) >= 1:
 			data.to_time = _to_time
+
+	def get_time_logs_that_change_totals(self):
+		"""Saved and new versions of the rows whose values used in totals change, and the removed rows."""
+		previous = self.get_doc_before_save()
+		saved_rows = {row.name: row for row in previous.time_logs} if previous else {}
+		changed = []
+		for row in self.time_logs:
+			saved_row = saved_rows.pop(row.name, None)
+			if get_values_used_in_totals(row) != get_values_used_in_totals(saved_row):
+				changed.extend(log for log in (row, saved_row) if log)
+		return changed + list(saved_rows.values())
+
+	def check_task_and_project_access(self, time_logs):
+		"""update_task_and_project saves the Task and Project of these rows ignoring permissions,
+		so the user must be allowed to pick them."""
+		if self.flags.ignore_permissions:
+			return
+
+		tasks = {log.task for log in time_logs if log.task}
+		projects = {log.project for log in time_logs if log.project}
+		# saving a task also recalculates the project it is in now
+		if tasks:
+			projects.update(
+				project
+				for project in frappe.get_all("Task", filters={"name": ["in", list(tasks)]}, pluck="project")
+				if project
+			)
+
+		for task in tasks:
+			require_permission("Task", task, "select")
+		for project in projects:
+			require_permission("Project", project, "select")
 
 	def validate_overlap(self, data):
 		settings = frappe.get_single("Projects Settings")
@@ -341,6 +382,30 @@ class Timesheet(Document):
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:
 			ts_detail.billing_rate = 0.0
+
+
+def get_values_used_in_totals(time_log: Document | None) -> tuple | None:
+	"""The values of a time log that Task and Project totals use, unrounded so that any change counts."""
+	if not time_log:
+		return None
+
+	return (
+		time_log.task or None,
+		time_log.project or None,
+		get_datetime(time_log.from_time) if time_log.from_time else None,
+		get_datetime(time_log.to_time) if time_log.to_time else None,
+		*(
+			flt(time_log.get(fieldname))
+			for fieldname in (
+				"hours",
+				"costing_amount",
+				"billing_amount",
+				"base_costing_amount",
+				"base_billing_amount",
+			)
+		),
+		cint(time_log.completed),
+	)
 
 
 @frappe.whitelist()
