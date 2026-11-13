@@ -934,9 +934,12 @@ class BuyingController(SubcontractingController):
 		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
 			return 0.0
 
-		# The returned rejected stock carried the charge only if its receipt row accepted nothing either.
+		# Returned rejected stock carried a charge only if its receipt row accepted nothing and got one.
 		if self.is_return and row.purchase_receipt_item:
-			if flt(frappe.db.get_value("Purchase Receipt Item", row.purchase_receipt_item, "qty")):
+			qty, item_tax_amount = frappe.db.get_value(
+				"Purchase Receipt Item", row.purchase_receipt_item, ["qty", "item_tax_amount"]
+			)
+			if flt(qty) or not flt(item_tax_amount):
 				return 0.0
 
 		return flt(row.rejected_qty)
