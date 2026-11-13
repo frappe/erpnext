@@ -522,7 +522,7 @@ class FIFOSlots:
 	def _prefetch_batchwise_valuations(self) -> None:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -559,7 +559,7 @@ class FIFOSlots:
 		company = self.filters.get("company")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = frappe.qb.DocType("Item")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -1095,7 +1095,7 @@ class FIFOSlots:
 	def _get_stock_ledger_entries(self) -> Iterator[dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		sle_query = (
 			frappe.qb.from_(sle)
@@ -1154,6 +1154,10 @@ class FIFOSlots:
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
+<<<<<<< HEAD
+=======
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
+>>>>>>> c7a4ee3 (fix(stock): include entries in the last second of the To Date in stock reports)
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -1190,6 +1194,10 @@ class FIFOSlots:
 		batch = frappe.qb.DocType("Batch")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
+<<<<<<< HEAD
+=======
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
+>>>>>>> c7a4ee3 (fix(stock): include entries in the last second of the To Date in stock reports)
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
