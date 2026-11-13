@@ -423,7 +423,8 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 
 def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	rules = []
-	qty = flt(qty, frappe.get_precision("Pricing Rule", "min_qty"))
+	precision = frappe.get_precision("Pricing Rule", "min_qty")
+	qty = flt(qty, precision)
 
 	for rule in pricing_rules:
 		status = False
@@ -432,8 +433,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 		if rule.get("uom"):
 			conversion_factor = get_conversion_factor(rule.item_code, rule.uom).get("conversion_factor", 1)
 
-		if flt(qty) >= (flt(rule.min_qty) * conversion_factor) and (
-			flt(qty) <= (rule.max_qty * conversion_factor) if rule.max_qty else True
+		if qty >= flt(flt(rule.min_qty) * conversion_factor, precision) and (
+			qty <= flt(rule.max_qty * conversion_factor, precision) if rule.max_qty else True
 		):
 			status = True
 
