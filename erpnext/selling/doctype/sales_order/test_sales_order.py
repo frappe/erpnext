@@ -2569,12 +2569,15 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				"stock_uom": "Nos",
 				"purchase_uom": "Box",
 				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+				"item_defaults": [{"default_warehouse": "_Test Warehouse - _TC", "company": "_Test Company"}],
 			},
 		).name
 		fg_item = make_item("_Test SO Fraction Box FG", {"is_stock_item": 1}).name
 		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
 
-		so = make_sales_order(item_list=[{"item_code": fg_item, "qty": 1, "rate": 1000}])
+		so = make_sales_order(
+			item_list=[{"item_code": fg_item, "qty": 1, "rate": 1000, "warehouse": "_Test Warehouse - _TC"}]
+		)
 		so.submit()
 		mr_dict = frappe._dict(
 			items=get_work_order_items(so.name, 1), include_exploded_items=0, ignore_existing_ordered_qty=1
