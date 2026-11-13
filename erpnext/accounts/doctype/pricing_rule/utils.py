@@ -423,7 +423,8 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 
 def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	rules = []
-	precision = frappe.get_precision("Pricing Rule", "min_qty")
+	# strip float noise only: Float columns hold 9 decimals, so no stored qty is cut
+	precision = 9
 	qty = flt(qty, precision)
 
 	for rule in pricing_rules:
