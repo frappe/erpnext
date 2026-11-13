@@ -213,6 +213,21 @@ class TestQueries(ERPNextTestSuite):
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
 
+	def test_warehouse_query_shows_stock_only_with_bin_permission(self):
+		query = add_default_params(queries.warehouse_query, "Warehouse")
+		stock_user = create_user("warehouse_query_stock_user@example.com", "Stock User")
+		website_manager = create_user("warehouse_query_website_manager@example.com", "Website Manager")
+
+		with self.set_user(stock_user.name):
+			rows = query(txt="_Test Warehouse - _TC", filters=[])
+			self.assertTrue(rows)
+			self.assertTrue(all(row[1].startswith("Actual Qty : ") for row in rows))
+
+		with self.set_user(website_manager.name):
+			rows = query(txt="_Test Warehouse - _TC", filters=[])
+			self.assert_nested_in("_Test Warehouse - _TC", rows)
+			self.assertTrue(all(len(row) == 1 for row in rows))
+
 	def test_get_batch_numbers_query(self):
 		# converted from raw SQL to query builder; assert it executes on both engines
 		query = add_default_params(queries.get_batch_numbers, "Batch")
