@@ -168,12 +168,7 @@ frappe.ui.form.on("Blanket Order Item", {
 		return apply_item_pricing(frm, cdt, cdn);
 	},
 
-	uom: function (frm, cdt, cdn) {
-		if (frm.__applying_blanket_order_price_list) {
-			return;
-		}
-		return apply_item_pricing(frm, cdt, cdn);
-	},
+	uom: apply_item_pricing,
 
 	qty: function (frm, cdt, cdn) {
 		calculate_stock_qty(cdt, cdn);
@@ -227,43 +222,34 @@ const blanket_order_pricing = {
 			return;
 		}
 
-		if (frm.__applying_blanket_order_price_list) {
-			frm.__pending_blanket_order_price_list = { item_name, options };
+		let response = await frappe.call({
+			method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.apply_price_list",
+			args: {
+				doc: frm.doc,
+				item_name,
+				reset_party_values: options.reset_party_values,
+				reset_conversion_rate: options.reset_conversion_rate,
+				reset_plc_conversion_rate: options.reset_plc_conversion_rate,
+			},
+		});
+		if (!response.message) {
 			return;
 		}
 
-		frm.__applying_blanket_order_price_list = true;
-		let pending;
-		try {
-			let response = await frappe.call({
-				method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.apply_price_list",
-				args: {
-					doc: frm.doc,
-					item_name,
-					reset_party_values: options.reset_party_values,
-					reset_conversion_rate: options.reset_conversion_rate,
-					reset_plc_conversion_rate: options.reset_plc_conversion_rate,
-				},
-			});
-			if (response.message) {
-				await frm.set_value(response.message.parent);
-				for (const values of response.message.children) {
-					let { name, ...fields } = values;
-					let item = (frm.doc.items || []).find((row) => row.name === name);
-					if (item) {
-						await frappe.model.set_value(item.doctype, item.name, fields);
-					}
-				}
-				this.update_labels(frm);
+		Object.assign(frm.doc, response.message.parent);
+		for (const fieldname of Object.keys(response.message.parent)) {
+			frm.refresh_field(fieldname);
+		}
+
+		for (const values of response.message.children) {
+			let { name, ...fields } = values;
+			let item = (frm.doc.items || []).find((row) => row.name === name);
+			if (item) {
+				Object.assign(item, fields);
 			}
-		} finally {
-			frm.__applying_blanket_order_price_list = false;
-			pending = frm.__pending_blanket_order_price_list;
-			frm.__pending_blanket_order_price_list = null;
 		}
-		if (pending) {
-			return this.apply(frm, pending.item_name, pending.options);
-		}
+		frm.refresh_field("items");
+		this.update_labels(frm);
 	},
 };
 
