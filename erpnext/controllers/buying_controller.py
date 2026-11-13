@@ -904,7 +904,7 @@ class BuyingController(SubcontractingController):
 			return
 
 		total_amount = sum(flt(d.base_net_amount) for d in items)
-		total_qty = sum(flt(d.qty) for d in items)
+		total_qty = sum(self.get_chargeable_qty(d) for d in items)
 
 		# Nothing to proportion against (all rows have zero amount and zero qty)
 		if not total_amount and not total_qty:
@@ -912,7 +912,11 @@ class BuyingController(SubcontractingController):
 
 		remaining = total_charge
 		for d in items[:-1]:
-			proportion = flt(d.base_net_amount) / total_amount if total_amount else flt(d.qty) / total_qty
+			proportion = (
+				flt(d.base_net_amount) / total_amount
+				if total_amount
+				else self.get_chargeable_qty(d) / total_qty
+			)
 			charge = flt(proportion * total_charge, self.precision("item_tax_amount", d))
 			charge_per_item[d.idx] = charge_per_item.get(d.idx, 0.0) + charge
 			remaining -= charge
@@ -921,6 +925,17 @@ class BuyingController(SubcontractingController):
 		charge_per_item[last.idx] = charge_per_item.get(last.idx, 0.0) + flt(
 			remaining, self.precision("item_tax_amount", last)
 		)
+
+	def get_chargeable_qty(self, row) -> float:
+		"""Qty a charge spreads over when no row has a net amount. A receipt row that accepts nothing
+		carries it on its rejected qty, when that material is valued."""
+		if flt(row.qty) or self.doctype != "Purchase Receipt" or self.is_internal_transfer():
+			return flt(row.qty)
+
+		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
+			return 0.0
+
+		return flt(row.rejected_qty)
 
 	def get_capitalized_valuation_tax(self):
 		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
