@@ -357,8 +357,21 @@ class StockController(AccountsController):
 		items = frappe.get_all(
 			"Delivery Note Item",
 			filters={"parent": self.name, "parenttype": "Delivery Note"},
-			fields=["name", "qty", "returned_qty", "rate", "amount", "billed_amt", "closed"],
+			fields=[
+				"name",
+				"qty",
+				"returned_qty",
+				"conversion_factor",
+				"rate",
+				"amount",
+				"billed_amt",
+				"closed",
+			],
 		)
+		for item in items:
+			# returned_qty is in stock UOM; qty and rate are in the row's UOM
+			item.returned_qty = flt(item.returned_qty) / flt(item.conversion_factor)
+
 		# A written off row leaves the basis. Once every row is written off there is
 		# nothing left to measure against, so fall back to the whole table.
 		items = [item for item in items if not item.closed] or items

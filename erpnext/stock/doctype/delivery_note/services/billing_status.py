@@ -348,7 +348,7 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 	dn_details = (
 		frappe.qb.from_(dn)
 		.from_(dn_item)
-		.select(dn_item.name, dn_item.qty, dn_item.returned_qty, dn_item.si_detail)
+		.select(dn_item.name, dn_item.qty, dn_item.returned_qty, dn_item.conversion_factor, dn_item.si_detail)
 		.where(
 			(dn.name == dn_item.parent)
 			& (dn_item.so_detail == so_detail)
@@ -362,7 +362,7 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 	qty_map = {}
 	for dnd in dn_details:
 		# Cap FIFO capacity at net delivered qty so returns free qty for later DNs
-		net_qty = flt(dnd.qty) - flt(dnd.returned_qty)
+		net_qty = flt(dnd.qty) - flt(dnd.returned_qty) / flt(dnd.conversion_factor)
 
 		# If delivered against Sales Invoice
 		if dnd.si_detail:
