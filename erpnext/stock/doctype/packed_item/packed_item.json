@@ -42,7 +42,8 @@
   "picked_qty",
   "page_break",
   "prevdoc_doctype",
-  "parent_detail_docname"
+  "parent_detail_docname",
+  "sales_order_packed_item"
  ],
  "fields": [
   {
@@ -211,6 +212,15 @@
    "search_index": 1
   },
   {
+   "fieldname": "sales_order_packed_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Sales Order Packed Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "depends_on": "batch_no",
    "fieldname": "actual_batch_qty",
    "fieldtype": "Float",
@@ -339,7 +349,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-10-30 12:00:00.000000",
+ "modified": "2026-11-12 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
