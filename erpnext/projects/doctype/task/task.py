@@ -270,7 +270,7 @@ class Task(NestedSet):
 		"""Saving this task recalculates its project, and the project it leaves, with no permission check.
 		So the user must be allowed to pick each project whose figures the save changes."""
 		if self.has_value_changed("project"):
-			projects = [self.get_value_before_save("project")]
+			projects = [(self.get_doc_before_save() or frappe._dict()).get("project")]
 			# validate_web_form_project_permission checks the project a web form task joins
 			if not frappe.flags.in_web_form:
 				projects.append(self.project)

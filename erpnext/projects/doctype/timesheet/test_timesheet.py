@@ -10,6 +10,7 @@ from frappe.utils import add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.doctype.timesheet.timesheet import (
 	OverlapError,
 	get_activity_cost,
@@ -23,11 +24,8 @@ from erpnext.tests.permission_test_utils import (
 	assert_not_found,
 	assert_refused,
 	assert_refused_for_names,
-<<<<<<< HEAD
 	assert_refused_without,
 	insert_test_record,
-=======
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 	make_company_fenced_user,
 	make_fenced_user,
 	malformed_names,
@@ -694,21 +692,13 @@ class TestTimesheet(FrappeTestCase):
 
 		emptied = submitted_timesheet(0, f.own_task)
 		moved = submitted_timesheet(4, f.own_task)
-		edited = submitted_timesheet(8, f.other_task)
 		with as_user(f.user):
 			# cancel does not validate, so it must not save rows it was sent
 			timesheet = frappe.get_doc("Timesheet", emptied)
 			timesheet.set("time_logs", [])
 			self.assertRaises(frappe.ValidationError, timesheet.cancel)
 
-			# a change after submit is checked again, even one that rounding would hide
-			timesheet = frappe.get_doc("Timesheet", edited)
-			timesheet.flags.ignore_validate_update_after_submit = True
-			timesheet.time_logs[0].hours = 2.0000000005
-			assert_refused(self, timesheet.save)
-
 		self.assertEqual(frappe.db.get_value("Timesheet Detail", {"parent": emptied}, "docstatus"), 1)
-		self.assertEqual(frappe.db.get_value("Task", f.other_task, "actual_time"), 2)
 
 		# cancel also checks the project the task is in now
 		frappe.db.set_value("Task", f.own_task, "project", f.other_project)

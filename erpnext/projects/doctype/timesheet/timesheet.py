@@ -7,10 +7,10 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-<<<<<<< HEAD
 from frappe.query_builder.functions import Coalesce, Date
 from frappe.utils import (
 	add_to_date,
+	cint,
 	cstr,
 	flt,
 	get_datetime,
@@ -20,15 +20,8 @@ from frappe.utils import (
 	time_diff_in_seconds,
 )
 
-from erpnext import _refuse
-from erpnext.controllers.queries import get_match_cond
-=======
-from frappe.query_builder.functions import Coalesce, Concat, Date, Round
-from frappe.utils import cint, cstr, flt, get_datetime, getdate, nowdate
-from frappe.utils.deprecations import deprecated
-
 from erpnext import _refuse, require_permission
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
+from erpnext.controllers.queries import get_match_cond
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -89,41 +82,12 @@ class Timesheet(Document):
 		self.validate_dates()
 		self.calculate_hours()
 		self.validate_time_logs()
-<<<<<<< HEAD
-=======
 		self.check_task_and_project_access(self.time_logs)
-		self.validate_tasks_not_cancelled()
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
 
-<<<<<<< HEAD
-=======
-	def validate_tasks_not_cancelled(self):
-		tasks = [log.task for log in self.time_logs if log.task]
-		if not tasks:
-			return
-
-		cancelled_tasks = frappe.get_all(
-			"Task", filters={"name": ["in", tasks], "status": "Cancelled"}, pluck="name"
-		)
-		if cancelled_tasks:
-			frappe.throw(_("Cannot log time against cancelled Tasks: {0}").format(", ".join(cancelled_tasks)))
-
-	def on_discard(self):
-		self.db_set("status", "Cancelled")
-
-	def before_update_after_submit(self):
-		self.check_task_and_project_access(self.get_time_logs_that_change_totals())
-
-	def on_update_after_submit(self):
-		self.validate_mandatory_fields()
-		self.update_task_and_project()
-		self.validate_time_logs()
-
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 	def calculate_hours(self):
 		for row in self.time_logs:
 			if row.to_time and row.from_time:
@@ -419,18 +383,6 @@ class Timesheet(Document):
 		if not ts_detail.is_billable:
 			ts_detail.billing_rate = 0.0
 
-<<<<<<< HEAD
-=======
-	def unlink_sales_invoice(self, sales_invoice: str):
-		"""Remove link to Sales Invoice from all time logs."""
-		for time_log in self.time_logs:
-			if time_log.sales_invoice == sales_invoice:
-				time_log.sales_invoice = None
-
-		self.calculate_total_amounts()
-		self.calculate_percentage_billed()
-		self.set_status()
-
 
 def get_values_used_in_totals(time_log: Document | None) -> tuple | None:
 	"""The values of a time log that Task and Project totals use, unrounded so that any change counts."""
@@ -455,22 +407,6 @@ def get_values_used_in_totals(time_log: Document | None) -> tuple | None:
 		cint(time_log.completed),
 	)
 
-
-def get_task_status(task: Document) -> str:
-	"""Status from the task's submitted time logs; a Completed or Cancelled task is never reopened."""
-	if task.status in ("Completed", "Cancelled"):
-		return task.status
-
-	completed = frappe.get_all(
-		"Timesheet Detail",
-		filters={"task": task.name, "docstatus": 1, "parenttype": "Timesheet"},
-		pluck="completed",
-	)
-	if not completed:
-		return "Open"
-	return "Completed" if any(completed) else "Working"
-
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):

@@ -12,16 +12,12 @@ from erpnext.projects.doctype.task.task import (
 	ParentIsGroupError,
 	set_tasks_as_overdue,
 )
-<<<<<<< HEAD
-=======
 from erpnext.tests.permission_test_utils import (
 	OTHER_COMPANY,
 	as_user,
 	assert_refused,
 	make_company_fenced_user,
 )
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 
 
 class TestTask(FrappeTestCase):
@@ -231,7 +227,6 @@ class TestTask(FrappeTestCase):
 		with self.set_user(user.name):
 			self.assertRaises(frappe.DoesNotExistError, check_if_child_exists, "")
 
-<<<<<<< HEAD
 	def test_actual_dates_outside_project_dates(self):
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 		frappe.db.set_value(
@@ -466,7 +461,7 @@ class TestTask(FrappeTestCase):
 			getdate(frappe.db.get_value("Task", dependent.name, "exp_start_date")),
 			getdate(add_days(nowdate(), 6)),
 		)
-=======
+
 	def test_task_needs_access_to_its_project(self):
 		own_project, other_project, user = make_project_access_fixtures("Task Joined")
 
@@ -518,7 +513,9 @@ class TestTask(FrappeTestCase):
 		own_project, other_project, user = make_project_access_fixtures("Task Web Form")
 		task = insert_completed_task("_Test Web Form Task", other_project)
 		frappe.db.set_value("Task", task.name, "owner", user)
-		move_out = {"doctype": "Task", "name": task.name, "subject": task.subject, "project": own_project}
+		move_out = frappe.as_json(
+			{"doctype": "Task", "name": task.name, "subject": task.subject, "project": own_project}
+		)
 
 		try:
 			with as_user(user):
@@ -552,7 +549,6 @@ def insert_completed_task(subject, project):
 	return frappe.get_doc(
 		{"doctype": "Task", "subject": subject, "project": project, "status": "Completed"}
 	).insert()
->>>>>>> 84a8a7e (fix(projects): check task and project access before the roll-up)
 
 
 def create_task(
