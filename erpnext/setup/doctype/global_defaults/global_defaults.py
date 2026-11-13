@@ -6,7 +6,7 @@
 import frappe
 import frappe.defaults
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.utils import cint
+from frappe.utils import cint, cstr
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
@@ -14,7 +14,6 @@ keydict = {
 	"currency": "default_currency",
 	"country": "country",
 	"hide_currency_symbol": "hide_currency_symbol",
-	"account_url": "account_url",
 	"disable_rounded_total": "disable_rounded_total",
 	"disable_in_words": "disable_in_words",
 }
@@ -44,16 +43,17 @@ class GlobalDefaults(Document):
 	def on_update(self):
 		"""update defaults"""
 		for key in keydict:
-			frappe.db.set_default(key, self.get(keydict[key], ""))
+			frappe.db.set_default(key, cstr(self.get(keydict[key])))
 
 		# enable default currency
 		if self.default_currency:
-			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
+			currency = frappe.get_doc("Currency", self.default_currency)
+			if not currency.enabled:
+				currency.enabled = 1
+				currency.save(ignore_permissions=True)
 
 		self.toggle_rounded_total()
 		self.toggle_in_words()
-
-		frappe.clear_cache()
 
 	@frappe.whitelist()
 	def get_defaults(self):
