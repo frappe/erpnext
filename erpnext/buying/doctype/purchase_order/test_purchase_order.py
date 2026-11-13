@@ -781,6 +781,22 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(details.discount_amount, 39)
 		self.assertEqual(details.rate, 0)
 
+	def test_last_purchase_discount_amount_leaves_out_its_margin(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].update(
+			{
+				"price_list_rate": 39,
+				"margin_type": "Amount",
+				"margin_rate_or_amount": 10,
+				"discount_amount": 49,
+				"rate": 0,
+			}
+		)
+		po.submit()
+
+		self.assertEqual(get_last_purchase_details(item).discount_amount, 39)
+
 	def test_update_rate_as_per_last_purchase_carries_discount_amount(self):
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
 		make_fully_discounted_purchase_order(item)
