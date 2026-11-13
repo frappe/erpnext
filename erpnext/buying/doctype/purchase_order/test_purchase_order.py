@@ -27,6 +27,11 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_pi_from_pr,
 )
+<<<<<<< HEAD
+=======
+from erpnext.tests.assertions import assert_raises_with_savepoint
+from erpnext.tests.utils import ERPNextTestSuite
+>>>>>>> 2611959 (test: orders for parts of a Material Request add up to its stock qty)
 
 
 class TestPurchaseOrder(FrappeTestCase):
@@ -127,6 +132,94 @@ class TestPurchaseOrder(FrappeTestCase):
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
 
+<<<<<<< HEAD
+=======
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.666666667}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+
+		def order(qty):
+			po = make_purchase_order(mr.name)
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = qty
+			return po
+
+		order(1).submit()
+		order(1).submit()
+		with assert_raises_with_savepoint(self, OverAllowanceError):
+			order(2).submit()
+		order(1).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"),
+			mr.items[0].stock_qty,
+		)
+
+	def test_over_order_allowance_against_material_request(self) -> None:
+		"""Over Order Allowance in Buying Settings must govern PO qty vs MR qty independently
+		from Over Delivery/Receipt Allowance which governs receipt/delivery against a PO."""
+		mr = make_material_request(qty=100)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = 110  # 10% over the MR qty
+
+		# Without any allowance, submitting should raise an OverAllowanceError
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+		self.assertRaises(OverAllowanceError, po.submit)
+
+		# Granting 10% in Over Order Allowance (Buying Settings) must allow the submit
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 10)
+		po.reload()
+		po.items[0].qty = 110
+		po.submit()
+		self.assertEqual(po.docstatus, 1)
+		po.cancel()
+
+		# Over Delivery/Receipt Allowance must remain independent — changing it must not
+		# affect the MR → PO validation when Over Order Allowance is 0.
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
+
+		mr2 = make_material_request(qty=100)
+		po2 = make_purchase_order(mr2.name)
+		po2.supplier = "_Test Supplier"
+		po2.items[0].qty = 110
+		self.assertRaises(OverAllowanceError, po2.submit)
+
+		# Stock over-delivery role must not bypass over-ordering against Material Request.
+		with self.change_settings(
+			"Stock Settings", {"role_allowed_to_over_deliver_receive": "Stock Manager"}
+		):
+			test_user = frappe.get_doc("User", "test@example.com")
+			test_user.add_roles("Stock Manager")
+
+			mr3 = make_material_request(qty=100)
+			po3 = make_purchase_order(mr3.name)
+			po3.supplier = "_Test Supplier"
+			po3.items[0].qty = 110
+			with self.set_user("test@example.com"):
+				po3.flags.ignore_permissions = True
+				self.assertRaises(OverAllowanceError, po3.submit)
+
+		# cleanup
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+
+>>>>>>> 2611959 (test: orders for parts of a Material Request add up to its stock qty)
 	def test_update_remove_child_linked_to_mr(self):
 		"""Test impact on linked PO and MR on deleting/updating row."""
 		mr = make_material_request(qty=10)
