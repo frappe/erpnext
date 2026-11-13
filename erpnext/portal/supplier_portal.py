@@ -614,34 +614,51 @@ def _invited_rfqs() -> dict[str, str]:
 
 def _all_ordered_elsewhere(pending: dict[str, str]) -> set[str]:
 	"""Of these RFQs (each with the supplier invited to it), those whose every item the buyer
-	already ordered from other suppliers. Two queries for the whole list, not two per RFQ."""
-	if not pending:
-		return set()
+	already ordered in full from other suppliers. Two queries for the whole list, not two per RFQ."""
+	return {
+		rfq for rfq, (lines, taken, _touched) in _lines_ordered_elsewhere(pending).items() if lines <= taken
+	}
+
+
+def _lines_ordered_elsewhere(suppliers: dict[str, str]) -> dict[str, tuple[set, set, set]]:
+	"""For each RFQ, with the supplier it is asked for: its lines, those the buyer already ordered in
+	full from other suppliers, and those ordered from them at all. A line ordered in part is still
+	open: counted in stock units, so an order in another unit adds up."""
+	if not suppliers:
+		return {}
 	po, poi = frappe.qb.DocType("Purchase Order"), frappe.qb.DocType("Purchase Order Item")
 	sqi = frappe.qb.DocType("Supplier Quotation Item")
-	ordered: dict[str, set[str]] = {}
-	for rfq, line, winner in (
+	ordered: dict[tuple[str, str], float] = {}
+	for rfq, line, winner, qty in (
 		frappe.qb.from_(poi)
 		.inner_join(po)
 		.on(poi.parent == po.name)
 		.inner_join(sqi)
 		.on(poi.supplier_quotation_item == sqi.name)
-		.select(sqi.request_for_quotation, sqi.request_for_quotation_item, po.supplier)
-		.distinct()
-		.where((po.docstatus == 1) & sqi.request_for_quotation.isin(list(pending)))
+		.select(sqi.request_for_quotation, sqi.request_for_quotation_item, po.supplier, poi.stock_qty)
+		.where((po.docstatus == 1) & sqi.request_for_quotation.isin(list(suppliers)))
 	).run():
-		if winner != pending[rfq]:
-			ordered.setdefault(rfq, set()).add(line)
+		if winner != suppliers[rfq]:
+			ordered[(rfq, line)] = ordered.get((rfq, line), 0) + flt(qty)
 	if not ordered:
-		return set()
-	asked: dict[str, set[str]] = {}
+		return {}
+	found: dict[str, tuple[set, set, set]] = {}
 	for row in frappe.get_all(
 		"Request for Quotation Item",
-		filters={"parenttype": "Request for Quotation", "parent": ["in", list(ordered)]},
-		fields=["parent", "name"],
+		filters={
+			"parenttype": "Request for Quotation",
+			"parent": ["in", list({rfq for rfq, _line in ordered})],
+		},
+		fields=["parent", "name", "qty", "stock_qty"],
 	):
-		asked.setdefault(row.parent, set()).add(row.name)
-	return {rfq for rfq, lines in asked.items() if lines <= ordered[rfq]}
+		lines, taken, touched = found.setdefault(row.parent, (set(), set(), set()))
+		lines.add(row.name)
+		got = ordered.get((row.parent, row.name), 0)
+		if got > 0:
+			touched.add(row.name)
+		if got >= flt(row.stock_qty or row.qty):
+			taken.add(row.name)
+	return found
 
 
 def _quoted(suppliers: list[str], rfqs: list[str]) -> set[tuple[str, str]]:
@@ -996,31 +1013,15 @@ def _latest_quotation(supplier: str, rfq: str) -> str | None:
 
 
 def _ordered_elsewhere(supplier: str, rfq: str, own_status: str | None = None) -> str:
-	"""How much of this RFQ the buyer ordered from other suppliers: "all" of its items, "some", or "".
-	Only that: who won, and at what price, is not this supplier's business. Nothing is said once the
-	supplier's own quote has been ordered from: its own status tells them what they need."""
+	"""How much of this RFQ the buyer ordered from other suppliers: "all" of its items, in full,
+	"some", or "". Only that: who won, and at what price, is not this supplier's business. Nothing is
+	said once the supplier's own quote has been ordered from: its own status tells them what they need."""
 	if own_status in ("Ordered", "Partially Ordered"):
 		return ""
-	po, poi = frappe.qb.DocType("Purchase Order"), frappe.qb.DocType("Purchase Order Item")
-	sqi = frappe.qb.DocType("Supplier Quotation Item")
-	ordered = (
-		frappe.qb.from_(poi)
-		.inner_join(po)
-		.on(poi.parent == po.name)
-		.inner_join(sqi)
-		.on(poi.supplier_quotation_item == sqi.name)
-		.select(sqi.request_for_quotation_item)
-		.distinct()
-		.where((po.docstatus == 1) & (po.supplier != supplier) & (sqi.request_for_quotation == rfq))
-	).run(pluck=True)
-	if not ordered:
-		return ""
-	asked = frappe.get_all(
-		"Request for Quotation Item",
-		filters={"parenttype": "Request for Quotation", "parent": rfq},
-		pluck="name",
-	)
-	return "all" if set(asked) <= set(ordered) else "some"
+	lines, taken, touched = _lines_ordered_elsewhere({rfq: supplier}).get(rfq, (set(), set(), set()))
+	if lines and lines <= taken:
+		return "all"
+	return "some" if touched else ""
 
 
 def _supplier_part_nos(supplier: str, item_codes: list[str]) -> dict[str, str]:
