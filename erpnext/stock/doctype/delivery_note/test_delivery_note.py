@@ -2026,6 +2026,22 @@ class TestDeliveryNote(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_batch_counts_a_row_at_its_rounded_stock_qty(self):
+		self.assert_auto_set_batch_counts_a_row_at_its_rounded_stock_qty()
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"use_serial_batch_fields": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"allow_to_edit_stock_uom_qty_for_sales": 0,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_row_at_its_rounded_bundle_qty(self):
+		# the stored stock qty stays 0.335 when it is not editable
+		self.assert_auto_set_batch_counts_a_row_at_its_rounded_stock_qty()
+
+	def assert_auto_set_batch_counts_a_row_at_its_rounded_stock_qty(self):
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
