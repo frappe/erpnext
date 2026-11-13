@@ -554,10 +554,11 @@ def get_invoiced_qty_based_on_so(so_detail: str) -> dict[str, float]:
 	if dn_details_without_si := [dnd.name for dnd in dn_details if not dnd.si_detail]:
 		billed_qty_against_dns = get_invoiced_qty_against_dn(dn_details=dn_details_without_si)
 
+	qty_precision = frappe.get_precision("Delivery Note Item", "qty")
 	qty_map = {}
 	for dnd in dn_details:
 		# Cap FIFO capacity at net delivered qty so returns free qty for later DNs
-		net_qty = flt(dnd.qty) - flt(dnd.returned_qty) / flt(dnd.conversion_factor)
+		net_qty = flt(dnd.qty - dnd.returned_qty / dnd.conversion_factor, qty_precision)
 
 		# If delivered against Sales Invoice
 		if dnd.si_detail:
