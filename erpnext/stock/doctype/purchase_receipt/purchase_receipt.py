@@ -605,6 +605,9 @@ class PurchaseReceipt(BuyingController):
 				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
+				if not flt(item.qty):
+					# Valuation charges are in the rejected stock value; the tax accounts are credited for them.
+					outgoing_amount -= flt(item.item_tax_amount)
 				credit_amount = outgoing_amount
 
 			if credit_amount:
