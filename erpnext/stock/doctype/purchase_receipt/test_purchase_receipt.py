@@ -9252,6 +9252,28 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(return_receipt.items[0].item_tax_amount, 0)
 		self.assertEqual({d.account: d.debit for d in debits}, {srbnb_account: 200})
 
+	def test_valuation_charge_remainder_skips_rows_without_a_share(self):
+		receipt = make_purchase_receipt(qty=1, rate=100, do_not_save=1)
+		receipt.append("items", receipt.items[0].as_dict(no_default_fields=True))
+		receipt.append("items", receipt.items[0].as_dict(no_default_fields=True)).update(
+			{"rate": 0, "price_list_rate": 0, "is_free_item": 1}
+		)
+		receipt.append(
+			"taxes",
+			{
+				"account_head": "_Test Account Shipping Charges - _TC",
+				"add_deduct_tax": "Add",
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"cost_center": "Main - _TC",
+				"description": "Freight",
+				"tax_amount": 0.05,
+			},
+		)
+		receipt.insert()
+
+		self.assertEqual([d.item_tax_amount for d in receipt.items], [0.02, 0.03, 0])
+
 	def test_landed_cost_of_returned_goods_is_not_posted_to_srbnb(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
