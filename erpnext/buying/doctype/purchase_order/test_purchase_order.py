@@ -27,6 +27,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_pi_from_pr,
 )
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -238,6 +239,38 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.666666667}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+
+		def order(qty):
+			po = make_purchase_order(mr.name)
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = qty
+			return po
+
+		order(1).submit()
+		order(1).submit()
+		with assert_raises_with_savepoint(self, OverAllowanceError):
+			order(2).submit()
+		order(1).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"),
+			mr.items[0].stock_qty,
+		)
 
 	def test_over_order_allowance_against_material_request(self) -> None:
 		"""Over Order Allowance in Buying Settings must govern PO qty vs MR qty independently
