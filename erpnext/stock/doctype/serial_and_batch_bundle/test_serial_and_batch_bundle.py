@@ -13,7 +13,9 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	add_serial_batch_ledgers,
 	combine_datetime,
 	get_available_batches_qty,
+	get_available_serial_nos,
 	get_qty_based_available_batches,
+	get_reserved_serial_nos_for_pos,
 	get_serial_batch_ledgers,
 	get_serial_nos_based_on_posting_date,
 	get_type_of_transaction,
@@ -2930,6 +2932,56 @@ class TestSerialandBatchBundleLogic(ERPNextTestSuite):
 			self.assertEqual(flt(sle.stock_value_difference, 2), flt(sle.actual_qty * outgoing_rate, 2))
 
 		self.assertEqual(flt(sl_entries[-1].stock_value, 2), flt(balance_value, 2))
+
+	def test_pos_reservations_are_limited_to_requested_serial_nos(self):
+		module = "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle"
+		rows = [
+			frappe._dict(
+				serial_and_batch_bundle="POS-Bundle-1",
+				parent_docname="POS-Sale-1",
+				child_docname="POS-Row-1",
+			),
+			frappe._dict(
+				serial_and_batch_bundle="POS-Bundle-2",
+				parent_docname="POS-Sale-2",
+				child_docname="POS-Row-2",
+			),
+		]
+		ledgers = [
+			frappe._dict(name="POS-Bundle-1", serial_no="POS-Requested"),
+			frappe._dict(name="POS-Bundle-2", serial_no="POS-Not-Requested"),
+		]
+		kwargs = frappe._dict(item_code="POS-Item", check_serial_nos=True, serial_nos=["POS-Requested"])
+		with (
+			patch("frappe.get_all", return_value=rows),
+			patch(f"{module}._get_serial_batch_ledgers", return_value=ledgers),
+			patch(
+				"erpnext.controllers.sales_and_purchase_return.get_returned_serial_nos", return_value=[]
+			) as returned_serial_nos,
+		):
+			self.assertEqual(get_reserved_serial_nos_for_pos(kwargs), ["POS-Requested"])
+
+		self.assertEqual(returned_serial_nos.call_count, 1)
+
+	def test_serial_validation_reads_only_requested_serial_nos(self):
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_item(properties={"has_serial_no": 1, "serial_no_series": "TEST-CHKSN-.#####"}).name
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=3, rate=100)
+		requested, reserved, _free = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		def available(serial_nos):
+			kwargs = frappe._dict(
+				item_code=item_code, warehouse=warehouse, check_serial_nos=True, serial_nos=serial_nos
+			)
+			return [row.serial_no for row in get_available_serial_nos(kwargs)]
+
+		with patch(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			return_value=[reserved],
+		):
+			self.assertEqual(available([requested]), [requested])
+			self.assertEqual(available([reserved]), [])
+			self.assertEqual(available([requested, reserved]), [requested])
 
 
 UP_STOCK_USER = "test_sbb_up_stock_user@example.com"
