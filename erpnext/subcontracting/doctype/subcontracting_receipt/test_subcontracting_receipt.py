@@ -3033,6 +3033,21 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
 
+	def test_return_does_not_rebuild_scrap_items(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
+			make_subcontract_return,
+		)
+
+		scr = make_receipt_with_scrap_item()
+		scr.submit()
+
+		scr_return = make_subcontract_return(scr.name)
+		scr_return.insert()
+		scr_return.get_scrap_items()
+		self.assertEqual(
+			[row.subcontracting_receipt_item for row in scr_return.items], [row.name for row in scr.items]
+		)
+
 	def test_scrap_items_for_subcontracting_receipt(self):
 		set_backflush_based_on("BOM")
 
