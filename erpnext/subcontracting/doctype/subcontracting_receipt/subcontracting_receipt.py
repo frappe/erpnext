@@ -503,26 +503,32 @@ class SubcontractingReceipt(SubcontractingController):
 			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against},
-				fields=["name", "reference_name", "bom_secondary_item", "returned_qty"],
+				fields=["name", "reference_name", "bom_secondary_item", "returned_qty", "warehouse"],
 			)
 		}
 
 	def link_returned_secondary_items(self, original_rows):
-		"""Link each rebuilt secondary row of a return to its row on the returned receipt."""
+		"""Link each rebuilt secondary row of a return to its row on the returned receipt,
+		and return it from the warehouse that row received it in."""
 		if not original_rows:
 			return
 
 		secondary_rows = {
-			(row.reference_name, row.bom_secondary_item): row.name
+			(row.reference_name, row.bom_secondary_item): row
 			for row in original_rows.values()
 			if row.bom_secondary_item
 		}
 		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
 		for row in self.items:
-			if row.bom_secondary_item:
-				row.subcontracting_receipt_item = secondary_rows.get(
-					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
-				)
+			if not row.bom_secondary_item:
+				continue
+
+			original_row = secondary_rows.get(
+				(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
+			)
+			if original_row:
+				row.subcontracting_receipt_item = original_row.name
+				row.warehouse = original_row.warehouse
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
