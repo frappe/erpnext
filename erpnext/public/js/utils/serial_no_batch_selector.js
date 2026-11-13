@@ -674,12 +674,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be same."));
 		}
 
-<<<<<<< HEAD
-		let qty_to_fetch = flt(this.dialog.get_value("qty"));
 		let total_qty = entries.reduce((total, row) => total + (flt(row.qty) || 1.0), 0);
-=======
-		let total_qty = [...entries, ...csv_entries].reduce((total, row) => total + (flt(row.qty) || 1.0), 0);
->>>>>>> 3589144 (fix(stock): compare batch selector rows against the item qty)
 
 		if (flt(total_qty, 6) !== flt(this.qty, 6)) {
 			const confirm_dialog = frappe.confirm(
