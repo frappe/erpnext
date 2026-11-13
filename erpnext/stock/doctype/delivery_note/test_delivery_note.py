@@ -1268,6 +1268,40 @@ class TestDeliveryNote(ERPNextTestSuite):
 		credit_note.submit()
 		self.assertEqual(make_sales_invoice(dn.name).items[0].qty, 0.25)
 
+	def make_dn_with_return_in_non_stock_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 5}])
+		so = make_sales_order(item_code=item.name, qty=3, uom="Box")
+		dn = create_dn_against_so(so.name, 3)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = -1
+		dn_return.submit()
+		return so, dn
+
+	def test_dn_is_completed_after_return_in_non_stock_uom(self):
+		_, dn = self.make_dn_with_return_in_non_stock_uom()
+
+		si = make_sales_invoice(dn.name)
+		self.assertEqual(si.items[0].qty, 2)
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
+	def test_dn_is_completed_after_return_in_non_stock_uom_billed_against_so(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_so_invoice
+
+		so, dn = self.make_dn_with_return_in_non_stock_uom()
+
+		si = make_so_invoice(so.name)
+		si.items[0].qty = 2
+		si.submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, "Completed")
+
 	def test_dn_is_completed_when_unbilled_item_is_returned(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
