@@ -10,7 +10,7 @@ from collections import Counter
 import frappe
 import frappe.defaults
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
 
@@ -390,7 +390,30 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 	pi_row.batch_no = pl_row.batch_no
 	# keep the serial nos picked on the packed row for a partial delivery
 	if not pi_row.serial_no:
+<<<<<<< HEAD
 		pi_row.serial_no = get_pending_serial_nos(pl_row, get_serial_nos_in_stock([pl_row]))
+=======
+		delivered = (
+			get_delivered_component_serial_nos(main_item_row, pl_row)
+			if pl_row.serial_no and pl_row.delivered_qty
+			else set()
+		)
+		pi_row.serial_no = get_pending_serial_nos(pl_row, {pl_row.name: delivered})
+
+	# a lowered bundle qty keeps only as many serial nos
+	serial_nos = get_serial_nos(pi_row.serial_no)
+	if len(serial_nos) > flt(pi_row.qty):
+		pi_row.serial_no = "\n".join(serial_nos[: cint(pi_row.qty)])
+
+
+def get_delivered_component_serial_nos(main_item_row, pl_row):
+	"""Lower-cased serial nos that submitted deliveries of the pick list took from a component location."""
+	from erpnext.stock.doctype.pick_list.pick_list import get_delivered_bundle_component_qty
+
+	so_detail = main_item_row.get("so_detail")
+	delivered_serial_nos = get_delivered_bundle_component_qty(main_item_row.against_pick_list, {so_detail})[1]
+	return delivered_serial_nos[(so_detail, pl_row.item_code, pl_row.warehouse, pl_row.batch_no or "")]
+>>>>>>> e8e716a (fix(stock): keep only as many picked serial nos as a lowered bundle qty)
 
 
 def update_packed_item_price_data(pi_row, item_data, doc):
