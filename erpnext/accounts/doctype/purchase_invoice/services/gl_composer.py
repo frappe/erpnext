@@ -10,7 +10,6 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
 from erpnext.accounts.utils import get_account_currency
-from erpnext.controllers.buying_controller import get_stock_qty
 
 
 class PurchaseInvoiceGLComposer(BaseGLComposer):
@@ -647,7 +646,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		net_amt_precision = item.precision("base_net_amount")
 
 		warehouse_debit_amount = flt(
-			flt(item.valuation_rate) * get_stock_qty(item, item.qty),
+			flt(item.valuation_rate) * flt(item.stock_qty),
 			net_amt_precision,
 		)
 
