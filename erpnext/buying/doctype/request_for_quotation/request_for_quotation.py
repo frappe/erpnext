@@ -15,6 +15,7 @@ from frappe.utils import flt, get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.party import (
 	_get_party_details,
 	get_party_account_currency,
@@ -486,6 +487,7 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 					"name": "request_for_quotation_item",
 					"parent": "request_for_quotation",
 					"project_name": "project",
+					"cost_center": "cost_center",
 				},
 			},
 		},
@@ -571,6 +573,7 @@ def validate_existing_supplier_quotation(supplier, request_for_quotation):
 
 def add_items(sq_doc, supplier, rfq, items):
 	rfq_rows = {row.name: row for row in rfq.items}
+	dimension_fields = get_accounting_dimensions()
 	for data in items:
 		if isinstance(data, dict):
 			data = frappe._dict(data)
@@ -578,10 +581,10 @@ def add_items(sq_doc, supplier, rfq, items):
 		if data.name not in rfq_rows:
 			frappe.throw(_("Row {0} is not part of Request for Quotation {1}.").format(data.idx, rfq.name))
 
-		create_rfq_items(sq_doc, supplier, rfq_rows[data.name], data)
+		create_rfq_items(sq_doc, supplier, rfq_rows[data.name], data, dimension_fields)
 
 
-def create_rfq_items(sq_doc, supplier, rfq_row, data):
+def create_rfq_items(sq_doc, supplier, rfq_row, data, dimension_fields):
 	"""Take the item and its UOM from the RFQ row; only the qty and rate come from the supplier."""
 	args = {
 		field: rfq_row.get(field)
@@ -594,8 +597,10 @@ def create_rfq_items(sq_doc, supplier, rfq_row, data):
 			"material_request",
 			"material_request_item",
 			"uom",
+			"cost_center",
 		]
 	}
+	args.update({field: rfq_row.get(field) for field in dimension_fields})
 	rate = flt(data.get("rate"), sq_doc.precision("rate", "items"))
 	args.update(
 		{
@@ -686,6 +691,7 @@ def get_item_from_material_requests_based_on_supplier(source_name, target_doc=No
 						["name", "material_request_item"],
 						["parent", "material_request"],
 						["uom", "uom"],
+						["cost_center", "cost_center"],
 					],
 				},
 			},
