@@ -368,9 +368,10 @@ class StockController(AccountsController):
 				"closed",
 			],
 		)
+		qty_precision = self.precision("qty", "items")
 		for item in items:
 			# returned_qty is in stock UOM; qty and rate are in the row's UOM
-			item.returned_qty = flt(item.returned_qty) / flt(item.conversion_factor)
+			item.returned_qty = flt(item.returned_qty / item.conversion_factor, qty_precision)
 
 		# A written off row leaves the basis. Once every row is written off there is
 		# nothing left to measure against, so fall back to the whole table.
