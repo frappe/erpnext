@@ -684,7 +684,7 @@ class TestGetItemDetail(FrappeTestCase):
 
 		return item_code, batches
 
-	def get_item_details_for_row(self, item_code, qty, items=None, batch_no=None):
+	def get_item_details_for_row(self, item_code, qty, items=None, batch_no=None, **fields):
 		ctx = frappe._dict(
 			{
 				"doctype": "Delivery Note",
@@ -700,6 +700,7 @@ class TestGetItemDetail(FrappeTestCase):
 				"price_list_currency": "INR",
 				"plc_conversion_rate": 1.0,
 				"ignore_pricing_rule": 1,
+				**fields,
 			}
 		)
 		doc = {"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": items or []}
@@ -751,6 +752,29 @@ class TestGetItemDetail(FrappeTestCase):
 			dn = create_delivery_note(item_code=item_code, qty=5, use_serial_batch_fields=1)
 			dn.reload()
 			self.assertEqual(len(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle)), 5)
+
+	def test_serial_nos_picked_for_float_noise_stock_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "FNS-SN-.#####",
+				"stock_uom": "Nos",
+				"uoms": [
+					{"uom": "Nos", "conversion_factor": 1},
+					{"uom": "_Test UOM 1", "conversion_factor": 100},
+				],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=100, basic_rate=100)
+
+		with change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}):
+			details = self.get_item_details_for_row(item_code, 0.57, uom="_Test UOM 1", conversion_factor=100)
+
+		self.assertEqual(details.stock_qty, 57)
+		self.assertEqual(len(details.serial_no.split()), 57)
 
 	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
