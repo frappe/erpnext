@@ -144,10 +144,45 @@ class TestQueries(ERPNextTestSuite):
 
 		self.assertGreaterEqual(len(query(filters={"company": "_Test Company"})), 1)
 
+	def test_income_account_query_requires_account_permission(self):
+		query = add_default_params(queries.get_income_account, "Account")
+		accounts_user = create_user("income_account_accounts_user@example.com", "Accounts User")
+		website_manager = create_user("income_account_website_manager@example.com", "Website Manager")
+
+		restricted_user = create_user("income_account_restricted_user@example.com", "Accounts User")
+		frappe.get_doc(
+			{
+				"doctype": "User Permission",
+				"user": restricted_user.name,
+				"allow": "Company",
+				"for_value": "_Test Company 1",
+			}
+		).insert()
+
+		with self.set_user(accounts_user.name):
+			self.assert_nested_in("Sales - _TC", query(filters={"company": "_Test Company"}))
+
+		with self.set_user(restricted_user.name):
+			self.assertFalse(query(filters={"company": "_Test Company"}))
+
+		with self.set_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"company": "_Test Company"})
+
 	def test_expense_account_query(self):
 		query = add_default_params(queries.get_expense_account, "Account")
 
 		self.assertGreaterEqual(len(query(filters={"company": "_Test Company"})), 1)
+
+	def test_expense_account_query_requires_account_permission(self):
+		query = add_default_params(queries.get_expense_account, "Account")
+		purchase_user = create_user("expense_account_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("expense_account_website_manager@example.com", "Website Manager")
+
+		with self.set_user(purchase_user.name):
+			self.assert_nested_in("Cost of Goods Sold - _TC", query(filters={"company": "_Test Company"}))
+
+		with self.set_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"company": "_Test Company"})
 
 	def test_warehouse_query(self):
 		query = add_default_params(queries.warehouse_query, "Account")
