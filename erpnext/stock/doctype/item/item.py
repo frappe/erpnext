@@ -1571,8 +1571,8 @@ def get_uom_conv_factor(uom, stock_uom):
 		["value"],
 		as_dict=1,
 	)
-	if inverse_match:
-		return 1 / inverse_match.value
+	if inverse_match and inverse_match.value:
+		return flt(1 / inverse_match.value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:
@@ -1581,7 +1581,7 @@ def get_uom_conv_factor(uom, stock_uom):
 	# therefore	 kg -> mg = 1000  / 0.001 = 1,000,000
 	first = frappe.qb.DocType("UOM Conversion Factor").as_("first")
 	second = frappe.qb.DocType("UOM Conversion Factor").as_("second")
-	intermediate_match = (
+	shared_source_match = (
 		frappe.qb.from_(first)
 		.join(second)
 		.on((first.from_uom == second.from_uom) & (first.category == second.category))
@@ -1589,12 +1589,27 @@ def get_uom_conv_factor(uom, stock_uom):
 		.where(
 			(first.to_uom == to_uom) & (second.to_uom == from_uom) & (first.value > 0) & (second.value > 0)
 		)
+		.orderby(first.name, second.name)
 		.limit(1)
 		.run(as_dict=1)
 	)
 
-	if intermediate_match:
-		return intermediate_match[0].value
+	if shared_source_match:
+		return flt(shared_source_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
+
+	shared_target_match = (
+		frappe.qb.from_(first)
+		.join(second)
+		.on((first.to_uom == second.to_uom) & (first.category == second.category))
+		.select((first.value / second.value).as_("value"))
+		.where((first.from_uom == from_uom) & (second.from_uom == to_uom) & (second.value != 0))
+		.orderby(first.name, second.name)
+		.limit(1)
+		.run(as_dict=1)
+	)
+
+	if shared_target_match:
+		return flt(shared_target_match[0].value, frappe.get_precision("UOM Conversion Factor", "value"))
 
 
 @frappe.whitelist()
