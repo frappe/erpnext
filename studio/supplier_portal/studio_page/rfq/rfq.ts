@@ -107,7 +107,7 @@ export default function setup(context) {
 		const q = quotation.value
 		if (!q) return []
 		return [
-			{ ...line(__("Number"), q.name, INK8), route: "/quotations/" + encodeURIComponent(q.name) },
+			{ ...line(__("Quotation"), q.name, INK8), route: "/quotations/" + encodeURIComponent(q.name) },
 			line(__("Status"), statusText(quoteStatus(q))),
 			line(__("Sent on"), formatDate(q.transaction_date)),
 			q.valid_till ? line(__("Valid till"), formatDate(q.valid_till)) : line(__("Valid till"), EMPTY, INK5),

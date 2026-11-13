@@ -156,9 +156,7 @@ export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: 
 	}
 	switch (q.status) {
 		case "Submitted":
-			// one the buyer typed in from an emailed quote has no RFQ, and so no form to revise it in
-			if (!q.rfq) return { title: __("Sent. The buyer accepts a quotation by placing an order from it."), theme: "blue", icon: "lucide-send" }
-			return { title: __("Sent. The buyer accepts a quotation by placing an order from it. Until then you can revise it."), theme: "blue", icon: "lucide-send" }
+			return { title: __("Quotation sent. If the buyer accepts it, you get a purchase order."), theme: "blue", icon: "lucide-send" }
 		case "Partially Ordered":
 			return { title: __("The buyer ordered part of this quotation."), theme: "amber", icon: "lucide-shopping-cart" }
 		case "Ordered":
