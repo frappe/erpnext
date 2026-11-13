@@ -909,21 +909,33 @@ class AccountsController(TransactionBase):
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
 
-	def set_missing_terms(self):
+	def set_missing_terms(self, raise_exception=True):
 		if not self.get("tc_name") or self.get("terms"):
 			return
+
+		from jinja2 import TemplateError
 
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
 			get_terms_and_conditions,
 		)
 
-		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		try:
+			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		except (TemplateError, TypeError) as e:
+			# TypeError: a helper called with arguments the terms sandbox does not take
+			message = _("Terms and Conditions {0} could not be rendered: {1}").format(
+				frappe.bold(self.tc_name), e
+			)
+			if raise_exception:
+				frappe.throw(message)
+			# loading or printing a draft must not fail on a template it cannot render
+			frappe.msgprint(message, indicator="orange", alert=True)
 
 	def set_missing_terms_for_display(self):
-		"""Render missing terms to show or print, leaving them empty if a permission check fails."""
+		"""Render missing terms to show or print, leaving them empty if they cannot be rendered."""
 		message_count = len(frappe.message_log)
 		try:
-			self.set_missing_terms()
+			self.set_missing_terms(raise_exception=False)
 		except frappe.PermissionError:
 			# a check on the template's last editor fails without logging a message
 			del frappe.message_log[message_count:]
