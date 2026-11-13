@@ -381,38 +381,34 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
 	def test_full_return_with_secondary_items_marks_the_receipt_returned(self):
-		set_backflush_based_on("BOM")
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item)
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 1",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": fg_item,
-				"fg_item_qty": 10,
-			},
-		]
-		sco = get_subcontracting_order(service_items=service_items)
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr = make_subcontracting_receipt(sco.name)
-		scr.save()
-		scr.get_secondary_items()
-		scr.save()
-		scr.submit()
+		scr = make_receipt_with_secondary_items(fg_item, 10)
 
 		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
 		scr_return.save()
 		scr_return.get_secondary_items()
 		scr_return.save()
 		scr_return.submit()
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_partial_returns_add_up_to_the_received_secondary_qty(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, quantity=3, secondary_qty=2)
+		scr = make_receipt_with_secondary_items(fg_item, 3)
+
+		for _ in range(3):
+			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+			# outside tests, the first save rebuilds the secondary rows before validating them
+			scr_return.items = scr_return.items[:1]
+			scr_return.items[0].qty = -1
+			scr_return.save()
+			scr_return.get_secondary_items()
+			scr_return.save()
+			scr_return.submit()
 
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
@@ -5520,25 +5516,62 @@ def make_receipt_with_rejected_qty_and_scrap():
 	return scr, scrap_item
 
 
-def make_bom_with_secondary_item(fg_item):
-	"""BOM with one raw material and 0.5 of a scrap item per unit."""
+def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5):
+	"""BOM with one raw material per unit and a scrap item."""
 	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
 
-	bom = make_bom(item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True)
+	bom = make_bom(
+		item=fg_item,
+		raw_materials=[raw_material],
+		rate=100,
+		currency="INR",
+		quantity=quantity,
+		rm_qty=quantity,
+		do_not_submit=True,
+	)
 	bom.append(
 		"secondary_items",
 		{
 			"item_code": secondary_item,
 			"secondary_item_type": "Scrap",
-			"qty": 0.5,
-			"stock_qty": 0.5,
+			"qty": secondary_qty,
+			"stock_qty": secondary_qty,
 			"valuation_type": "Valuation Rate",
 		},
 	)
 	bom.save()
 	bom.submit()
 	return bom
+
+
+def make_receipt_with_secondary_items(fg_item, qty):
+	"""Submitted receipt for qty of fg_item, with its secondary rows."""
+	set_backflush_based_on("BOM")
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": qty,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": qty,
+		},
+	]
+	sco = get_subcontracting_order(service_items=service_items)
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name,
+		rm_items=rm_items,
+		itemwise_details=copy.deepcopy(itemwise_details),
+	)
+	scr = make_subcontracting_receipt(sco.name)
+	scr.save()
+	scr.get_secondary_items()
+	scr.save()
+	scr.submit()
+	return scr
 
 
 def make_return_subcontracting_receipt(**args):
