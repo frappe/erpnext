@@ -368,10 +368,9 @@ class StockController(AccountsController):
 				"closed",
 			],
 		)
-		qty_precision = self.precision("qty", "items")
 		for item in items:
 			# returned_qty is in stock UOM; qty and rate are in the row's UOM
-			item.returned_qty = flt(item.returned_qty / item.conversion_factor, qty_precision)
+			item.returned_qty = flt(item.returned_qty) / flt(item.conversion_factor)
 
 		# A written off row leaves the basis. Once every row is written off there is
 		# nothing left to measure against, so fall back to the whole table.
@@ -397,7 +396,7 @@ class StockController(AccountsController):
 
 			# Qty basis: only raises billing when the amount is short; SO/SI-linked rows have
 			# no invoiced qty here, so the amount basis wins via max() below.
-			net_qty = flt(item.qty) - flt(item.returned_qty)
+			net_qty = flt(item.qty - item.returned_qty, self.precision("qty", "items"))
 			invoiced_qty = flt(invoiced_qty_map.get(item.name, 0))
 			qty_billed = net_amount * min(invoiced_qty / net_qty, 1) if net_qty else 0
 
