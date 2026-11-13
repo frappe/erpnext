@@ -849,6 +849,7 @@ def get_profit_gl_entries(
 
 @frappe.whitelist()
 def get_disposal_account_and_cost_center(company):
+	frappe.has_permission("Company", "read", company, throw=True)
 	disposal_account, depreciation_cost_center = frappe.get_cached_value(
 		"Company", company, ["disposal_account", "depreciation_cost_center"]
 	)
