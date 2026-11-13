@@ -437,6 +437,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_return_inserted_as_submitted_sets_accounts_of_secondary_rows(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		secondary_row = scr_return.items[1]
+		self.assertTrue(secondary_row.bom_secondary_item)
+		self.assertTrue(secondary_row.expense_account)
+		self.assertTrue(secondary_row.cost_center)
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
