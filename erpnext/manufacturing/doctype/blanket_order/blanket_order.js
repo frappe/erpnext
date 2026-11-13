@@ -1,41 +1,9 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-const BLANKET_ORDER_SELLING_ADDRESS_FIELDS = [
-	"customer_address",
-	"customer_address_display",
-	"contact_person",
-	"contact_display",
-	"contact_phone",
-	"contact_mobile",
-	"contact_email",
-	"shipping_address_name",
-	"shipping_address",
-	"dispatch_address_name",
-	"dispatch_address",
-	"company_address",
-	"company_address_display",
-	"company_contact_person",
-];
-
-const BLANKET_ORDER_PURCHASING_ADDRESS_FIELDS = [
-	"supplier_address",
-	"supplier_address_display",
-	"contact_person",
-	"contact_display",
-	"contact_phone",
-	"contact_mobile",
-	"contact_email",
-	"shipping_address_name",
-	"shipping_address",
-	"company_address",
-	"company_address_display",
-];
-
 frappe.ui.form.on("Blanket Order", {
 	onload: function (frm) {
 		frm.trigger("set_tc_name_filter");
-		frm.trigger("set_dynamic_link");
 		if (frm.is_new()) {
 			let has_pricing = frm.doc.currency || frm.doc.selling_price_list || frm.doc.buying_price_list;
 			blanket_order_pricing.apply(frm, null, { reset_party_values: !has_pricing });
@@ -60,22 +28,6 @@ frappe.ui.form.on("Blanket Order", {
 		frm.add_fetch("supplier", "supplier_name", "supplier_name");
 		frm.set_query("selling_price_list", () => ({ filters: { selling: 1 } }));
 		frm.set_query("buying_price_list", () => ({ filters: { buying: 1 } }));
-
-		frm.set_query("contact_person", erpnext.queries.contact_query);
-		frm.set_query("company_contact_person", erpnext.queries.company_contact_query);
-		frm.set_query("customer_address", erpnext.queries.address_query);
-		frm.set_query("supplier_address", erpnext.queries.address_query);
-		frm.set_query("dispatch_address_name", erpnext.queries.dispatch_address_query);
-		frm.set_query("company_address", erpnext.queries.company_address_query);
-		frm.set_query("shipping_address_name", () => {
-			if (frm.doc.blanket_order_type === "Selling" && frm.doc.customer) {
-				return {
-					query: "frappe.contacts.doctype.address.address.address_query",
-					filters: { link_doctype: "Customer", link_name: frm.doc.customer },
-				};
-			}
-			return erpnext.queries.company_address_query(frm.doc);
-		});
 	},
 
 	refresh: function (frm) {
@@ -175,130 +127,14 @@ frappe.ui.form.on("Blanket Order", {
 
 	blanket_order_type: function (frm) {
 		frm.trigger("set_tc_name_filter");
-		frm.trigger("set_dynamic_link");
-		frm.trigger("clear_address_and_contact");
 		return reset_party_pricing(frm);
 	},
 
-	company: function (frm) {
-		frm.trigger("set_party_address_details");
-		return reset_party_pricing(frm);
-	},
+	company: reset_party_pricing,
 
-	customer: function (frm) {
-		frm.trigger("set_dynamic_link");
-		frm.trigger("set_party_address_details");
-		return reset_party_pricing(frm);
-	},
+	customer: reset_party_pricing,
 
-	supplier: function (frm) {
-		frm.trigger("set_dynamic_link");
-		frm.trigger("set_party_address_details");
-		return reset_party_pricing(frm);
-	},
-
-	customer_address: function (frm) {
-		erpnext.utils.get_address_display(frm, "customer_address", "customer_address_display");
-	},
-
-	supplier_address: function (frm) {
-		erpnext.utils.get_address_display(frm, "supplier_address", "supplier_address_display");
-	},
-
-	shipping_address_name: function (frm) {
-		erpnext.utils.get_address_display(frm, "shipping_address_name", "shipping_address");
-	},
-
-	dispatch_address_name: function (frm) {
-		erpnext.utils.get_address_display(frm, "dispatch_address_name", "dispatch_address");
-	},
-
-	company_address: function (frm) {
-		erpnext.utils.get_address_display(frm, "company_address", "company_address_display", true);
-	},
-
-	contact_person: function (frm) {
-		erpnext.utils.get_contact_details(frm);
-	},
-
-	set_dynamic_link: function (frm) {
-		if (frm.doc.blanket_order_type === "Selling" && frm.doc.customer) {
-			frappe.dynamic_link = { doc: frm.doc, fieldname: "customer", doctype: "Customer" };
-		} else if (frm.doc.blanket_order_type === "Purchasing" && frm.doc.supplier) {
-			frappe.dynamic_link = { doc: frm.doc, fieldname: "supplier", doctype: "Supplier" };
-		}
-	},
-
-	clear_address_and_contact: function (frm) {
-		const fields =
-			frm.doc.blanket_order_type === "Selling"
-				? BLANKET_ORDER_PURCHASING_ADDRESS_FIELDS
-				: BLANKET_ORDER_SELLING_ADDRESS_FIELDS;
-		const update = {};
-		fields.forEach((field) => {
-			update[field] = "";
-		});
-		frm.set_value(update);
-	},
-
-	set_party_address_details: function (frm) {
-		const party = frm.doc.blanket_order_type === "Selling" ? frm.doc.customer : frm.doc.supplier;
-		if (!party || !frm.doc.company) {
-			return;
-		}
-
-		const party_type = frm.doc.blanket_order_type === "Selling" ? "Customer" : "Supplier";
-		const reference_doctype = frm.doc.blanket_order_type === "Selling" ? "Sales Order" : "Purchase Order";
-
-		frappe.call({
-			method: "erpnext.accounts.party.get_party_details",
-			args: {
-				party,
-				party_type,
-				company: frm.doc.company,
-				doctype: reference_doctype,
-				fetch_payment_terms_template: 0,
-			},
-			callback(r) {
-				if (!r.message) {
-					return;
-				}
-
-				const update =
-					frm.doc.blanket_order_type === "Selling"
-						? {
-								customer_address: r.message.customer_address,
-								customer_address_display: r.message.address_display,
-								contact_person: r.message.contact_person,
-								contact_display: r.message.contact_display,
-								contact_phone: r.message.contact_phone,
-								contact_mobile: r.message.contact_mobile,
-								contact_email: r.message.contact_email,
-								shipping_address_name: r.message.shipping_address_name,
-								shipping_address: r.message.shipping_address,
-								dispatch_address_name: r.message.dispatch_address_name,
-								dispatch_address: r.message.dispatch_address,
-								company_address: r.message.company_address,
-								company_address_display: r.message.company_address_display,
-								company_contact_person: r.message.company_contact_person,
-						  }
-						: {
-								supplier_address: r.message.supplier_address,
-								supplier_address_display: r.message.address_display,
-								contact_person: r.message.contact_person,
-								contact_display: r.message.contact_display,
-								contact_phone: r.message.contact_phone,
-								contact_mobile: r.message.contact_mobile,
-								contact_email: r.message.contact_email,
-								shipping_address_name: r.message.shipping_address,
-								shipping_address: r.message.shipping_address_display,
-								company_address: r.message.billing_address,
-								company_address_display: r.message.billing_address_display,
-						  };
-				frm.set_value(update);
-			},
-		});
-	},
+	supplier: reset_party_pricing,
 
 	currency: function (frm) {
 		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true });

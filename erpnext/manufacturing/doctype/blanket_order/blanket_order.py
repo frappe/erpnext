@@ -46,22 +46,10 @@ class BlanketOrder(StatusUpdater):
 		blanket_order_type: DF.Literal["", "Selling", "Purchasing"]
 		buying_price_list: DF.Link | None
 		company: DF.Link
-		company_address: DF.Link | None
-		company_address_display: DF.TextEditor | None
-		company_contact_person: DF.Link | None
-		contact_display: DF.SmallText | None
-		contact_email: DF.Data | None
-		contact_mobile: DF.SmallText | None
-		contact_person: DF.Link | None
-		contact_phone: DF.Data | None
 		conversion_rate: DF.Float
 		currency: DF.Link
 		customer: DF.Link | None
-		customer_address: DF.Link | None
-		customer_address_display: DF.TextEditor | None
 		customer_name: DF.Data | None
-		dispatch_address: DF.TextEditor | None
-		dispatch_address_name: DF.Link | None
 		from_date: DF.Date
 		items: DF.Table[BlanketOrderItem]
 		naming_series: DF.Literal["MFG-BLR-.YYYY.-"]
@@ -70,12 +58,8 @@ class BlanketOrder(StatusUpdater):
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		selling_price_list: DF.Link | None
-		shipping_address: DF.TextEditor | None
-		shipping_address_name: DF.Link | None
 		status: DF.Literal["Draft", "Submitted", "Closed", "Cancelled"]
 		supplier: DF.Link | None
-		supplier_address: DF.Link | None
-		supplier_address_display: DF.TextEditor | None
 		supplier_name: DF.Data | None
 		tc_name: DF.Link | None
 		terms: DF.TextEditor | None
@@ -432,12 +416,6 @@ def make_order(source_name: str):
 			target_doc.quotation_to = "Customer"
 			target_doc.party_name = source_doc.customer
 
-		if doctype == "Purchase Order":
-			target_doc.shipping_address = source_doc.shipping_address_name
-			target_doc.shipping_address_display = source_doc.shipping_address
-			target_doc.billing_address = source_doc.company_address
-			target_doc.billing_address_display = source_doc.company_address_display
-
 	def update_item(source, target, source_parent):
 		conversion_factor = flt(source.conversion_factor) or 1
 		remaining_stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
@@ -452,23 +430,13 @@ def make_order(source_name: str):
 			target.description = item.get("description")
 			target.against_blanket_order = 1
 
-	field_map = {}
-	field_no_map = ["naming_series"]
-	if doctype in ("Sales Order", "Quotation"):
-		field_map["customer_address_display"] = "address_display"
-	elif doctype == "Purchase Order":
-		# Purchase Order.shipping_address is the Address link, not the display text.
-		field_no_map.append("shipping_address")
-		field_map["supplier_address_display"] = "address_display"
-
 	target_doc = get_mapped_doc(
 		"Blanket Order",
 		source_name,
 		{
 			"Blanket Order": {
 				"doctype": doctype,
-				"field_map": field_map,
-				"field_no_map": field_no_map,
+				"field_no_map": ["naming_series"],
 				"postprocess": update_doc,
 			},
 			"Blanket Order Item": {

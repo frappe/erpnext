@@ -990,30 +990,6 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].blanket_order_rate, 100)
 		self.assertEqual(so.items[0].rate, 100)
 
-	def test_sales_order_address_from_blanket_order(self):
-		bo = make_blanket_order(blanket_order_type="Selling", submit=False)
-		address = make_party_address(bo.customer, bo.company, "Customer")
-		bo.customer_address = address.name
-		bo.shipping_address_name = address.name
-		bo.submit()
-
-		frappe.flags.args.doctype = "Sales Order"
-		so = make_order(bo.name)
-		self.assertEqual(so.customer_address, bo.customer_address)
-		self.assertEqual(so.shipping_address_name, bo.shipping_address_name)
-
-	def test_purchase_order_address_from_blanket_order(self):
-		bo = make_blanket_order(blanket_order_type="Purchasing", submit=False)
-		address = make_party_address(bo.supplier, bo.company, "Supplier")
-		bo.supplier_address = address.name
-		bo.shipping_address_name = address.name
-		bo.submit()
-
-		frappe.flags.args.doctype = "Purchase Order"
-		po = make_order(bo.name)
-		self.assertEqual(po.supplier_address, bo.supplier_address)
-		self.assertEqual(po.shipping_address, bo.shipping_address_name)
-
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
@@ -1035,8 +1011,7 @@ def make_blanket_order(**args):
 
 	bo.append("items", item_row)
 	bo.insert()
-	if args.submit is not False:
-		bo.submit()
+	bo.submit()
 	return bo
 
 
@@ -1052,21 +1027,6 @@ def make_uom_item(item_code, conversion_factor=2):
 			"uoms": [{"uom": "Box", "conversion_factor": conversion_factor}],
 		},
 	).name
-
-
-def make_party_address(party, company, party_type):
-	country = frappe.get_cached_value("Company", company, "country")
-	return frappe.get_doc(
-		{
-			"doctype": "Address",
-			"address_title": party,
-			"address_type": "Billing",
-			"address_line1": "Test Address Line",
-			"city": "Test City",
-			"country": country,
-			"links": [{"link_doctype": party_type, "link_name": party}],
-		}
-	).insert(ignore_permissions=True)
 
 
 def receive_purchase_order(po, qty):

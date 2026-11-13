@@ -32,31 +32,7 @@
   "section_break_12",
   "items",
   "amended_from",
-  "contact_info",
-  "billing_address_column",
-  "customer_address",
-  "customer_address_display",
-  "section_addresses",
-  "supplier_address",
-  "supplier_address_display",
-  "column_break_84",
-  "contact_person",
-  "contact_display",
-  "contact_phone",
-  "contact_mobile",
-  "contact_email",
-  "shipping_address_column",
-  "shipping_address_name",
-  "shipping_address",
-  "column_break_93",
-  "dispatch_address_name",
-  "dispatch_address",
-  "col_break46",
-  "company_address",
-  "company_address_display",
-  "column_break_92",
-  "company_contact_person",
-  "terms_tab",
+  "terms_and_conditions_section",
   "tc_name",
   "terms"
  ],
@@ -223,166 +199,9 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "depends_on": "eval:doc.customer || doc.supplier",
-   "fieldname": "contact_info",
-   "fieldtype": "Tab Break",
-   "label": "Address & Contact",
-   "options": "fa fa-bullhorn"
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
-   "fieldname": "billing_address_column",
+   "fieldname": "terms_and_conditions_section",
    "fieldtype": "Section Break",
-   "label": "Billing Address"
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
-   "fieldname": "customer_address",
-   "fieldtype": "Link",
-   "label": "Customer Address",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
-   "fieldname": "customer_address_display",
-   "fieldtype": "Text Editor",
-   "label": "Address",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Purchasing\"",
-   "fieldname": "section_addresses",
-   "fieldtype": "Section Break",
-   "label": "Supplier Address"
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Purchasing\"",
-   "fieldname": "supplier_address",
-   "fieldtype": "Link",
-   "label": "Supplier Address",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Purchasing\"",
-   "fieldname": "supplier_address_display",
-   "fieldtype": "Text Editor",
-   "label": "Supplier Address Details",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_84",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "contact_person",
-   "fieldtype": "Link",
-   "label": "Contact Person",
-   "options": "Contact",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "contact_display",
-   "fieldtype": "Small Text",
-   "in_global_search": 1,
-   "label": "Contact",
-   "read_only": 1
-  },
-  {
-   "fieldname": "contact_phone",
-   "fieldtype": "Data",
-   "label": "Phone",
-   "read_only": 1
-  },
-  {
-   "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
-   "label": "Mobile No",
-   "options": "Phone",
-   "read_only": 1
-  },
-  {
-   "fieldname": "contact_email",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Contact Email",
-   "options": "Email",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "shipping_address_column",
-   "fieldtype": "Section Break",
-   "label": "Shipping Address"
-  },
-  {
-   "fieldname": "shipping_address_name",
-   "fieldtype": "Link",
-   "label": "Shipping Address Name",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "shipping_address",
-   "fieldtype": "Text Editor",
-   "label": "Shipping Address",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_93",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
-   "fieldname": "dispatch_address_name",
-   "fieldtype": "Link",
-   "label": "Dispatch Address Name",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:doc.dispatch_address_name",
-   "fieldname": "dispatch_address",
-   "fieldtype": "Text Editor",
-   "label": "Dispatch Address",
-   "read_only": 1
-  },
-  {
-   "fieldname": "col_break46",
-   "fieldtype": "Section Break",
-   "label": "Company Address"
-  },
-  {
-   "fieldname": "company_address",
-   "fieldtype": "Link",
-   "label": "Company Address Name",
-   "options": "Address"
-  },
-  {
-   "fieldname": "company_address_display",
-   "fieldtype": "Text Editor",
-   "label": "Company Address",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_92",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
-   "fieldname": "company_contact_person",
-   "fieldtype": "Link",
-   "label": "Company Contact Person",
-   "options": "Contact",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "terms_tab",
-   "fieldtype": "Tab Break",
-   "label": "Terms"
+   "label": "Terms and Conditions"
   },
   {
    "fieldname": "tc_name",
@@ -411,7 +230,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-10 10:08:08.000000",
+ "modified": "2026-11-13 09:20:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",
