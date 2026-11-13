@@ -152,8 +152,17 @@ class StockReconciliation(StockController):
 		self.make_bundle_for_current_qty()
 		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
+		self.validate_future_batch_quantity()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
+
+	def validate_future_batch_quantity(self):
+		"""Block a batch this reconciliation lowers from going negative in later entries."""
+		for row in self.items:
+			if row.current_serial_and_batch_bundle:
+				frappe.get_doc(
+					"Serial and Batch Bundle", row.current_serial_and_batch_bundle
+				).validate_future_batch_quantity()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
