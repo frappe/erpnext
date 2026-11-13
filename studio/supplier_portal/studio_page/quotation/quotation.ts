@@ -5,7 +5,7 @@ import { computed } from "vue"
 import { usePortalIdentity } from "@app/composables/usePortalIdentity"
 import { useSession } from "@app/composables/useSession"
 import {
-	postalAddress,
+	billingAndDelivery,
 	descriptionOf,
 	EMPTY,
 	formatDate,
@@ -91,17 +91,9 @@ export default function setup(context) {
 	})
 
 	// the buyer's addresses: where to bill, and where to deliver; one row when they are one place
-	const addressDetails = computed(() => {
-		const company = doc.value.company ?? ""
-		const billing = postalAddress(doc.value.billing_address_display)
-		const shipping = postalAddress(doc.value.shipping_address_display) || billing
-		if (!billing && !shipping) return []
-		if (billing === shipping) return [{ key: "both", label: __("Bill and deliver to"), name: company, address: billing }]
-		return [
-			{ key: "bill", label: __("Bill to"), name: company, address: billing },
-			{ key: "deliver", label: __("Deliver to"), name: company, address: shipping },
-		]
-	})
+	const addressDetails = computed(() =>
+		billingAndDelivery(doc.value, __("Bill and deliver to"), __("Bill to"), __("Deliver to")),
+	)
 
 	// ---------------------------------------------------------------- items
 	const currency = computed(() => doc.value.currency || "")

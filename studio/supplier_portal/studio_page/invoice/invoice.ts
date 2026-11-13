@@ -13,7 +13,7 @@ import {
 	INK8,
 	line,
 	plainText,
-	postalAddress,
+	billingAndDelivery,
 	printDocument,
 	RED,
 	routeOpener,
@@ -107,17 +107,9 @@ export default function setup(context) {
 	})
 
 	// who the invoice is to, and where the goods went; once when they are the same place
-	const addressDetails = computed(() => {
-		const company = doc.value.company ?? ""
-		const billing = postalAddress(doc.value.billing_address_display)
-		const shipping = postalAddress(doc.value.shipping_address_display) || billing
-		if (!billing && !shipping) return []
-		if (billing === shipping) return [{ key: "billed", label: __("Billed and delivered to"), name: company, address: billing }]
-		return [
-			{ key: "billed", label: __("Billed to"), name: company, address: billing },
-			{ key: "deliver", label: __("Delivered to"), name: company, address: shipping },
-		].filter((row) => row.address)
-	})
+	const addressDetails = computed(() =>
+		billingAndDelivery(doc.value, __("Billed and delivered to"), __("Billed to"), __("Delivered to")),
+	)
 
 	const itemsTitle = computed(() => (doc.value.is_return ? __("Items returned") : __("Items billed")))
 

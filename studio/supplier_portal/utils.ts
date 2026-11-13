@@ -4,7 +4,7 @@
  *  lib/documents.ts. */
 
 import { computed, type Ref } from "vue"
-import { dayjs, toast } from "frappe-ui"
+import { dayjs } from "frappe-ui"
 import {
 	DEFAULT_NUMBER_FORMAT,
 	flt,
@@ -101,96 +101,35 @@ export function line(label: string, value: string, color = INK8, weight = "420")
 const CONTACT_LINE = /^[^:]{1,24}:\s*\S/
 
 /**
- * erpnext's rendered address HTML, split into the postal address and its contact lines.
- * The default template ends the postal part with a blank line before "Phone: …" / "Email: …".
- * An unset field (say, city) leaves a blank line too, so only the block after the *last*
+ * An address on one line, without its contact lines: what a Details row shows after the company.
+ * erpnext's rendered address HTML ends the postal part with a blank line before "Phone: …" /
+ * "Email: …". An unset field (say, city) leaves a blank line too, so only the block after the *last*
  * blank line counts as contacts, and only when every line in it reads "Label: value".
  */
-function splitAddress(display: string | null | undefined): { postal: string; contacts: string[] } {
+export function postalAddress(display: string | null | undefined): string {
 	const parts = (display || "").split(/<br\s*\/?>/i).map((part) => part.replace(/<[^>]+>/g, "").trim())
 	while (parts.length && !parts[parts.length - 1]) parts.pop()
 
 	const blank = parts.lastIndexOf("")
 	const tail = blank === -1 ? [] : parts.slice(blank + 1)
 	const hasContacts = tail.length > 0 && tail.every((part) => CONTACT_LINE.test(part))
-	const postal = (hasContacts ? parts.slice(0, blank) : parts).filter(Boolean)
-	const contacts = hasContacts ? tail.map((part) => part.replace(/^[^:]+:\s*/, "")) : []
-
 	// joined rather than one row per line: blank pieces would otherwise print ", ,"
-	return { postal: postal.join(", "), contacts }
+	return (hasContacts ? parts.slice(0, blank) : parts).filter(Boolean).join(", ")
 }
 
-/** An address on one line, without its contact lines: what a Details row shows after the company. */
-export function postalAddress(display: string | null | undefined): string {
-	return splitAddress(display).postal
-}
-
-/** A detail page's address column: who, where (when there is an address), and any extra line such as
- *  a tax id. Email and phone are not here: they go in the info column, see contactLines(). */
-export function addressRows(name: string, display: string | null | undefined, extras: (string | null | undefined)[] = []) {
-	const { postal } = splitAddress(display)
-	const rows = [{ key: "name", label: "", value: name, color: INK8, weight: "500" }]
-	if (postal) rows.push({ key: "address", label: "", value: postal, color: INK7, weight: "420" })
-	for (const value of extras) {
-		if (value) rows.push({ key: "extra:" + value, label: "", value, color: INK6, weight: "420" })
-	}
-	return rows
-}
-
-/** Who to reach, for the end of a detail page's info column: the contact person, then their email and
- *  phone (the document's contact first, else what its billing address lists). A row only when known. */
-export function contactLines(doc: any) {
-	const listed = splitAddress(doc.address_display).contacts
-	const contact = doc.contact_display || doc.contact_person
-	const email = doc.contact_email || listed.find((value) => value.includes("@"))
-	const phone = doc.contact_mobile || doc.contact_phone || listed.find((value) => PHONE.test(value))
-	// often cut off in the column: the page shows the full value on hover and copies it on click
-	const copyable = (label: string, value: string) => ({ ...line(label, value), copyable: true })
+/** Who a document is billed and delivered to, under the buyer's name: one row when both are the same
+ *  place. The labels are the page's own, "Bill to" on an order and "Billed to" on an invoice. */
+export function billingAndDelivery(doc: any, both: string, bill: string, deliver: string) {
+	const company = doc.company ?? ""
+	const billing = postalAddress(doc.billing_address_display)
+	const shipping = postalAddress(doc.shipping_address_display) || billing
+	if (!billing && !shipping) return []
+	if (billing === shipping) return [{ key: "both", label: both, name: company, address: billing }]
 	return [
-		...(contact ? [line(__("Contact"), contact)] : []),
-		...(email ? [copyable(__("Email"), email)] : []),
-		...(phone ? [copyable(__("Phone"), phone)] : []),
-	]
+		{ key: "bill", label: bill, name: company, address: billing },
+		{ key: "deliver", label: deliver, name: company, address: shipping },
+	].filter((row) => row.address)
 }
-
-/** Copies an info row's value (an email or a phone) when the supplier clicks it. */
-export async function copyValue(row: { label: string; value: string; copyable?: boolean }) {
-	if (!row.copyable) return
-	if (await copyText(row.value)) toast.success(__("{0} copied", [row.label]))
-	else toast.error(__("Could not copy. Select the text and copy it instead."))
-}
-
-/** The selection route first: it needs only the click, while the clipboard API can be refused
- *  outright (a permission the browser denies, in an incognito window say). */
-async function copyText(text: string): Promise<boolean> {
-	if (copyThroughSelection(text)) return true
-	try {
-		await navigator.clipboard.writeText(text)
-		return true
-	} catch {
-		return false
-	}
-}
-
-function copyThroughSelection(text: string): boolean {
-	const field = document.createElement("textarea")
-	field.value = text
-	field.setAttribute("readonly", "")
-	field.style.position = "fixed"
-	field.style.opacity = "0"
-	document.body.appendChild(field)
-	field.select()
-	try {
-		return document.execCommand("copy")
-	} catch {
-		return false
-	} finally {
-		field.remove()
-	}
-}
-
-// matched on the value: the address's own "Phone:" label is translated on other sites
-const PHONE = /^\+?[\d\s().-]{6,}$/
 
 /** How much, without the sign: a return stores its quantities and value as negatives. */
 export function magnitude(value: number | null | undefined): number | null {

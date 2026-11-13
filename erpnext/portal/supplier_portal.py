@@ -110,7 +110,7 @@ QUOTE_ITEM_FIELDS = (
 # the lines of an order, receipt or invoice; never the warehouse, cost centre or project: the buyer's own
 ITEM_FIELDS = ("item_code", "item_name", "description", "qty", "uom", "rate", "amount")
 
-TAX_FIELDS = ("description", "tax_amount", "included_in_print_rate", "add_deduct_tax")
+TAX_FIELDS = ("description", "tax_amount", "included_in_print_rate")
 
 # what a priced document's totals column needs
 TOTAL_FIELDS = (
