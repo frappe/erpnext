@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Cash Flow"] = $.extend(erpnext.financial_statements, {
+frappe.query_reports["Cash Flow"] = $.extend({}, erpnext.financial_statements, {
 	name_field: "section",
 	parent_field: "parent_section",
 });
@@ -20,6 +20,12 @@ frappe.query_reports["Cash Flow"]["filters"].push(
 		label: __("Include Default FB Entries"),
 		fieldtype: "Check",
 		default: 1,
+	},
+	{
+		fieldname: "accumulated_values",
+		label: __("Accumulated Values"),
+		fieldtype: "Check",
+		default: 0,
 	},
 	{
 		fieldname: "show_opening_and_closing_balance",

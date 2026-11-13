@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, getdate, today
+from frappe.utils import add_days, formatdate, getdate, today
 
 from erpnext.accounts.report.cash_flow.cash_flow import execute
 from erpnext.accounts.utils import get_fiscal_year
@@ -103,6 +103,12 @@ class TestCashFlow(FrappeTestCase):
 			],
 			[500] * len(before),
 		)
+
+		period_labels = [
+			column["label"] for column in execute(filters)[0] if column["fieldtype"] == "Currency"
+		]
+		range_start_label = formatdate(range_start_date, "MMM YY")
+		self.assertTrue(all(label.startswith(range_start_label) for label in period_labels), period_labels)
 
 	def test_opening_balance_is_cash_balance_before_period(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
