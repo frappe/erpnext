@@ -884,7 +884,13 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			},
 			doctype + " Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
+				# is_scrap_item is no_copy, but a Subcontracting Receipt return needs it
+				"field_map": {
+					"serial_no": "serial_no",
+					"batch_no": "batch_no",
+					"bom": "bom",
+					"is_scrap_item": "is_scrap_item",
+				},
 				"postprocess": update_item,
 				"condition": item_condition,
 			},
