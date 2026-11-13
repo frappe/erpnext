@@ -444,11 +444,16 @@ class StockEntry(StockController):
 				return True
 
 	def reset_serial_batch_on_fg_row(self, row):
+		# Runs before validate_item sets the conversion factor.
+		conversion_factor = flt(row.conversion_factor) or (
+			get_conversion_factor(row.item_code, row.uom)["conversion_factor"] if row.uom else 1
+		)
+		stock_qty = flt(flt(row.qty) * conversion_factor, row.precision("transfer_qty"))
 		item_details = frappe._dict(
 			{
 				"item_code": row.item_code,
 				"t_warehouse": row.t_warehouse,
-				"qty": row.qty,
+				"qty": stock_qty,
 			}
 		)
 
