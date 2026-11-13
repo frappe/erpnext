@@ -429,7 +429,7 @@ def filter_batches(batches, doc, item_code):
 	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for batch_no, stock_qty in get_batch_qty_taken_by_rows(doc, item_code):
 		if batch_no in batches:
-			batches[batch_no] = flt(batches[batch_no] - flt(stock_qty, precision), precision)
+			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
 			if batches[batch_no] <= 0:
 				del batches[batch_no]
 
