@@ -773,15 +773,24 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def test_last_purchase_details_carry_discount_amount(self):
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
-		po = create_purchase_order(item_code=item, do_not_save=True)
-		po.items[0].update({"price_list_rate": 39, "discount_amount": 39, "rate": 0})
-		po.submit()
+		make_fully_discounted_purchase_order(item)
 
 		details = get_last_purchase_details(item)
 
 		self.assertEqual(details.price_list_rate, 39)
 		self.assertEqual(details.discount_amount, 39)
 		self.assertEqual(details.rate, 0)
+
+	def test_update_rate_as_per_last_purchase_carries_discount_amount(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+
+		po = create_purchase_order(item_code=item, rate=50, do_not_save=True)
+		po.get_last_purchase_rate()
+		po.save()
+
+		self.assertEqual(po.items[0].discount_amount, 39)
+		self.assertEqual(po.items[0].rate, 0)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
@@ -2750,6 +2759,12 @@ def get_same_items():
 			"schedule_date": add_days(nowdate(), 1),
 		},
 	]
+
+
+def make_fully_discounted_purchase_order(item_code):
+	po = create_purchase_order(item_code=item_code, do_not_save=True)
+	po.items[0].update({"price_list_rate": 39, "discount_amount": 39, "rate": 0})
+	po.submit()
 
 
 def create_purchase_order(**args):
