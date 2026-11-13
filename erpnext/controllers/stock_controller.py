@@ -376,8 +376,9 @@ class StockController(AccountsController):
 		# nothing left to measure against, so fall back to the whole table.
 		items = [item for item in items if not item.closed] or items
 
-		total_amount = sum(flt(item.amount) for item in items)
-		total_returned = sum(flt(item.returned_qty) * flt(item.rate) for item in items)
+		amount_precision = self.precision("amount", "items")
+		total_amount = flt(sum(flt(item.amount) for item in items), amount_precision)
+		total_returned = flt(sum(item.returned_qty * flt(item.rate) for item in items), amount_precision)
 		# Preserve the original amount basis once the entire Delivery Note is returned.
 		use_original_amount = total_returned >= total_amount
 
@@ -386,7 +387,7 @@ class StockController(AccountsController):
 			net_amount = abs(
 				flt(item.amount)
 				if use_original_amount
-				else flt(item.amount) - flt(item.returned_qty) * flt(item.rate)
+				else flt(flt(item.amount) - item.returned_qty * flt(item.rate), amount_precision)
 			)
 			if not net_amount:
 				continue
