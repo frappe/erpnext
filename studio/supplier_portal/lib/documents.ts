@@ -56,13 +56,13 @@ export function statusText(status: string): string {
 }
 
 // ---------------------------------------------------------------- requests for quotation
-/** The RFQ's own status: whether the supplier still has to quote. It does not follow the quote after
- *  that — the quote has its own status — as the old portal kept the RFQ at "Submitted". */
+/** The RFQ's own status: whether the supplier still has to quote, or has nothing left to win. Past
+ *  that it does not follow the quote — the quote has its own status. */
 export function rfqStatus(r: any): string {
 	if (!r?.quote_status) return ""
-	if (r.quote_status === "Received") return "Quoted"
-	// not quoted, and the buyer already ordered every item from other suppliers
+	// quoted or not, the buyer already ordered every item from other suppliers
 	if (r.quote_status === "Closed" || r.ordered_elsewhere === "all") return "Closed"
+	if (r.quote_status === "Received") return "Quoted"
 	return "Awaiting your quote"
 }
 
@@ -73,18 +73,18 @@ export function rfqIsUrgent(r: any): boolean {
 	return left !== null && left <= 7
 }
 
-/** The deliver-by date counts down only while the supplier still has to quote. */
+/** The needed-by date counts down only while the supplier still has to quote. */
 export function rfqNote(r: any): string {
 	if (rfqStatus(r) === "Closed") return __("ordered from another supplier")
 	// not the request date: that has its own column
-	if (!r.schedule_date) return __("no delivery date set")
+	if (!r.schedule_date) return __("no date set")
 	const left = daysUntil(r.schedule_date)
 	if (r.quote_status !== "Pending" || left === null || left > 7) {
-		return __("deliver by {0}", [formatDate(r.schedule_date)])
+		return __("needed by {0}", [formatDate(r.schedule_date)])
 	}
-	if (left < 0) return __("delivery was due {0}", [formatDate(r.schedule_date)])
-	if (left === 0) return __("delivery due today")
-	return left === 1 ? __("deliver in 1 day") : __("deliver in {0} days", [left])
+	if (left < 0) return __("was needed by {0}", [formatDate(r.schedule_date)])
+	if (left === 0) return __("needed today")
+	return left === 1 ? __("needed in 1 day") : __("needed in {0} days", [left])
 }
 
 // ---------------------------------------------------------------- the supplier's quotation

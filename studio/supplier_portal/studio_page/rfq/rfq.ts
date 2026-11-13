@@ -81,14 +81,20 @@ export default function setup(context) {
 	const goTo = routeOpener(context)
 
 	// ---------------------------------------------------------------- info
+	const neededBy = computed(() => {
+		if (doc.value.schedule_date) return doc.value.schedule_date
+		const dates = new Set((doc.value.items ?? []).map((row: any) => row.schedule_date).filter(Boolean))
+		return dates.size === 1 ? [...dates][0] : null
+	})
+
 	const salesInfo = computed(() => {
 		const rows: any[] = [
 			line(__("Requested on"), formatDate(doc.value.transaction_date)),
 		]
-		// when the buyer needs the goods; without a date of its own, the RFQ's lines carry theirs
-		const needed = doc.value.schedule_date
-		if (needed && quoting.value && rfqIsUrgent(doc.value)) rows.push(line(__("Deliver by"), formatDate(needed), RED, "500"))
-		else if (needed) rows.push(line(__("Deliver by"), formatDate(needed)))
+		// when the buyer needs the goods: the RFQ's own date, or the one date all its lines share
+		const needed = neededBy.value
+		if (needed && quoting.value && rfqIsUrgent({ ...doc.value, schedule_date: needed })) rows.push(line(__("Needed by"), formatDate(needed), RED, "500"))
+		else if (needed) rows.push(line(__("Needed by"), formatDate(needed)))
 		if (doc.value.incoterm) {
 			const place = doc.value.named_place ? `${doc.value.incoterm}, ${doc.value.named_place}` : doc.value.incoterm
 			rows.push(line(__("Incoterm"), place))
@@ -187,9 +193,9 @@ export default function setup(context) {
 	/** Under the item name: by when, and the supplier's own part number. */
 	function askedFor(row: any): string {
 		const parts: string[] = []
-		// the RFQ's own date is in the header already; a line says so only when it needs its own
-		if (row.schedule_date && row.schedule_date !== doc.value.schedule_date) {
-			parts.push(__("deliver by {0}", [formatDate(row.schedule_date)]))
+		// the shared date is in the side panel; a line says so only when it needs its own
+		if (row.schedule_date && row.schedule_date !== neededBy.value) {
+			parts.push(__("needed by {0}", [formatDate(row.schedule_date)]))
 		}
 		if (row.supplier_part_no) parts.push(__("your part no. {0}", [row.supplier_part_no]))
 		return parts.join(" · ")
@@ -323,8 +329,8 @@ export default function setup(context) {
 	const messageText = computed(() => plainText(doc.value.message_for_supplier))
 	const termsText = computed(() => plainText(doc.value.terms))
 	const quoteNotes = computed(() => (quoting.value ? "" : plainText(quotation.value?.terms)))
-	const buyerWords = computed(() => Boolean(messageText.value || termsText.value))
-	const yourWords = computed(() => quoting.value || Boolean(quoteNotes.value))
+	const buyerWords = computed(() => Boolean(termsText.value))
+	const yourWords = computed(() => Boolean(quoteNotes.value))
 
 	// ---------------------------------------------------------------- what happens next
 	// while the form shows, only what to know before quoting; after, what happens next to the quote

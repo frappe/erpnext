@@ -50,9 +50,9 @@ export default function setup(context) {
 				sub: !rfqs.count
 					? __("none right now")
 					: rfqs.late
-						? __("{0} past the delivery date", [rfqs.late])
+						? __("{0} past the needed-by date", [rfqs.late])
 						: rfqs.next_needed
-							? __("next delivery by {0}", [formatDate(rfqs.next_needed)])
+							? __("next needed by {0}", [formatDate(rfqs.next_needed)])
 							: __("no date set"),
 			},
 			{

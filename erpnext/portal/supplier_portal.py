@@ -387,8 +387,32 @@ def _list_page(config: dict, scope, extra, tab: str, search: str, start: int, pa
 def _rfq_scope(invited: dict[str, str] | None = None):
 	"""The RFQs the user's suppliers are invited to, by their quote status, and that status per row."""
 	invited = _invited_rfqs() if invited is None else invited
-	return (lambda status: _scope(invited, status)), (
-		lambda rows: {row.name: {"quote_status": invited[row.name]} for row in rows}
+	return (lambda status: _scope(invited, status)), (lambda rows: _rfq_row_extras(rows, invited))
+
+
+def _rfq_row_extras(rows: list, invited: dict[str, str]) -> dict:
+	"""Each row's quote status, and for an RFQ with no date of its own, the earliest date on its lines."""
+	dates = _line_dates([row.name for row in rows if not row.schedule_date])
+	return {
+		row.name: {
+			"quote_status": invited[row.name],
+			**({"schedule_date": dates[row.name]} if row.name in dates else {}),
+		}
+		for row in rows
+	}
+
+
+def _line_dates(rfqs: list[str]) -> dict:
+	"""The earliest date on each RFQ's lines: when the buyer needs the first of the goods."""
+	if not rfqs:
+		return {}
+	line = frappe.qb.DocType("Request for Quotation Item")
+	return dict(
+		frappe.qb.from_(line)
+		.select(line.parent, Min(line.schedule_date))
+		.where(line.parent.isin(rfqs) & line.schedule_date.isnotnull())
+		.groupby(line.parent)
+		.run()
 	)
 
 
@@ -560,27 +584,26 @@ def _invited_rfqs() -> dict[str, str]:
 	)
 	quoted = _quoted(suppliers, list({row.parent for row in rows}))
 	invited = {}
-	pending_for = {}
+	supplier_for = {}
 	for row in rows:
 		if invited.get(row.parent) != "Pending":
 			invited[row.parent] = "Received" if (row.supplier, row.parent) in quoted else "Pending"
-			pending_for[row.parent] = row.supplier
+			supplier_for[row.parent] = row.supplier
 
 	# a draft is not the supplier's business, and a cancelled one is nobody's
 	submitted = frappe.get_all(
 		"Request for Quotation", filters={"name": ["in", list(invited)], "docstatus": 1}, pluck="name"
 	)
-	# not quoted, and every item already ordered from other suppliers: nothing waits on this supplier
-	# any more, so it leaves "To quote". "Closed" is the portal's own word; ERPNext has only Pending
+	# every item already ordered from other suppliers, quoted or not: nothing is left to win, so it
+	# leaves "To quote" and "Quoted". "Closed" is the portal's own word; ERPNext has only Pending
 	# and Received here.
-	pending = {name: pending_for[name] for name in submitted if invited[name] == "Pending"}
-	for name in _all_ordered_elsewhere(pending):
+	for name in _all_ordered_elsewhere({name: supplier_for[name] for name in submitted}):
 		invited[name] = "Closed"
 	return {name: invited[name] for name in submitted}
 
 
 def _all_ordered_elsewhere(pending: dict[str, str]) -> set[str]:
-	"""Of these RFQs (each with the supplier still to quote it), those whose every item the buyer
+	"""Of these RFQs (each with the supplier invited to it), those whose every item the buyer
 	already ordered from other suppliers. Two queries for the whole list, not two per RFQ."""
 	if not pending:
 		return set()
@@ -1489,24 +1512,28 @@ def get_home() -> dict:
 
 def _home_summary(invited: dict[str, str]) -> dict:
 	"""Home's figures, counted in the database."""
-	to_quote = _scope(invited, "Pending")
+	to_quote = [name for name, status in invited.items() if status == "Pending"]
+	# by the RFQ's own date, or else its lines' earliest: an RFQ without either is not late
+	header = dict(
+		frappe.get_all(
+			"Request for Quotation",
+			filters={"name": ["in", to_quote or [""]]},
+			fields=["name", "schedule_date"],
+			as_list=True,
+		)
+	)
+	lines = _line_dates([name for name, date in header.items() if not date])
+	needed = list(filter(None, (date or lines.get(name) for name, date in header.items())))
 	running = frappe.get_all("Purchase Order", filters=_running_orders(), pluck="name")
 	# by the lines still to deliver: ERPNext dates an order by its earliest line, delivered or not
 	due = list(_next_due(running).values())
 	unpaid = [*_supplier_filters("Purchase Invoice"), ["outstanding_amount", ">", 0]]
 	return {
 		"rfqs": {
-			**_aggregate(
-				"Request for Quotation",
-				to_quote,
-				{"count": ("COUNT", "*"), "next_needed": ("MIN", "schedule_date")},
-			),
+			"count": len(to_quote),
+			"next_needed": min(needed, default=None),
 			# an RFQ stays open after its date: the earliest one is then in the past, not "next"
-			"late": _aggregate(
-				"Request for Quotation",
-				[*to_quote, ["schedule_date", "<", today()]],
-				{"count": ("COUNT", "*")},
-			)["count"],
+			"late": sum(getdate(date) < getdate(today()) for date in needed),
 		},
 		"orders": {
 			"count": len(running),

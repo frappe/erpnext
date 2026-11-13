@@ -249,6 +249,51 @@
              "baseStyles": {
               "display": "flex",
               "flexDirection": "column",
+              "gap": "8px",
+              "marginBottom": "32px",
+              "width": "100%"
+             },
+             "blockName": "Message",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)"
+               },
+               "blockName": "TextBlock",
+               "componentId": "TextBlock-936604ddb9",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "h2",
+                "text": "{{ __('Buyer’s message') }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "borderLeft": "2px solid var(--outline-gray-2)",
+                "color": "var(--ink-gray-7)",
+                "paddingLeft": "12px",
+                "whiteSpace": "pre-line"
+               },
+               "blockName": "Terms text",
+               "componentId": "TextBlock-50945a39eb",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-base",
+                "tag": "p",
+                "text": "{{ messageText }}"
+               }
+              }
+             ],
+             "componentId": "div-89ab7f3ecb",
+             "componentName": "div",
+             "originalElement": "div",
+             "visibilityCondition": "{{ !!messageText }}"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
               "width": "100%"
              },
              "blockName": "Items section",
@@ -1317,6 +1362,111 @@
                 }
                },
                "visibilityCondition": "{{ totals.length > 0 }}"
+              },
+              {
+               "baseStyles": {
+                "display": "grid",
+                "gap": "12px",
+                "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                "marginTop": "24px",
+                "maxWidth": "32rem",
+                "width": "100%"
+               },
+               "blockName": "Fields",
+               "children": [
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Valid till",
+                 "componentId": "FormControl-c4cd24e3ab",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "format": "MMM D, YYYY",
+                  "label": "{{ __('Valid till') }}",
+                  "min": "{{ today }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "validTill"
+                  },
+                  "required": true,
+                  "type": "date"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Reference",
+                 "componentId": "FormControl-cc6fb5bc21",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "label": "{{ __('Your quotation no.') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "reference"
+                  },
+                  "placeholder": "{{ __('e.g. QTN-1042') }}",
+                  "type": "text"
+                 }
+                }
+               ],
+               "componentId": "div-ac4f96985f",
+               "componentName": "div",
+               "mobileStyles": {
+                "maxWidth": "none"
+               },
+               "originalElement": "div",
+               "visibilityCondition": "{{ quoting }}"
+              },
+              {
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "8px",
+                "marginTop": "32px",
+                "width": "100%"
+               },
+               "blockName": "Your terms field",
+               "children": [
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-8)"
+                 },
+                 "blockName": "Terms heading",
+                 "componentId": "TextBlock-ff877f3a72",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-lg-semibold",
+                  "tag": "h2",
+                  "text": "{{ __('Your terms and conditions') }}"
+                 }
+                },
+                {
+                 "attributes": {
+                  "aria-label": "{{ __('Your terms and conditions') }}"
+                 },
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Notes",
+                 "componentId": "FormControl-c62556457b",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "notes"
+                  },
+                  "placeholder": "{{ __('e.g. warranty, freight, taxes, or items you cannot supply') }}",
+                  "rows": 3,
+                  "type": "textarea"
+                 }
+                }
+               ],
+               "componentId": "div-b4c5484042",
+               "componentName": "div",
+               "originalElement": "div",
+               "visibilityCondition": "{{ quoting }}"
               }
              ],
              "componentId": "div-09t1qoxru",
@@ -1589,7 +1739,7 @@
                "componentProps": {
                 "fontSize": "text-base",
                 "tag": "h3",
-                "text": "{{ __('Request') }}"
+                "text": "{{ __('Details') }}"
                }
               },
               {
@@ -1909,50 +2059,6 @@
                   "gap": "8px",
                   "width": "100%"
                  },
-                 "blockName": "Message",
-                 "children": [
-                  {
-                   "baseStyles": {
-                    "color": "var(--ink-gray-8)"
-                   },
-                   "blockName": "TextBlock",
-                   "componentId": "TextBlock-936604ddb9",
-                   "componentName": "TextBlock",
-                   "componentProps": {
-                    "fontSize": "text-lg-semibold",
-                    "tag": "h2",
-                    "text": "{{ __('Buyer’s message') }}"
-                   }
-                  },
-                  {
-                   "baseStyles": {
-                    "borderLeft": "2px solid var(--outline-gray-2)",
-                    "color": "var(--ink-gray-7)",
-                    "paddingLeft": "12px",
-                    "whiteSpace": "pre-line"
-                   },
-                   "blockName": "Terms text",
-                   "componentId": "TextBlock-50945a39eb",
-                   "componentName": "TextBlock",
-                   "componentProps": {
-                    "fontSize": "text-p-base",
-                    "tag": "p",
-                    "text": "{{ messageText }}"
-                   }
-                  }
-                 ],
-                 "componentId": "div-89ab7f3ecb",
-                 "componentName": "div",
-                 "originalElement": "div",
-                 "visibilityCondition": "{{ !!messageText }}"
-                },
-                {
-                 "baseStyles": {
-                  "display": "flex",
-                  "flexDirection": "column",
-                  "gap": "8px",
-                  "width": "100%"
-                 },
                  "blockName": "Terms",
                  "children": [
                   {
@@ -2005,122 +2111,6 @@
                },
                "blockName": "Your words",
                "children": [
-                {
-                 "baseStyles": {
-                  "display": "flex",
-                  "flexDirection": "column",
-                  "gap": "24px",
-                  "width": "100%"
-                 },
-                 "blockName": "Quote details",
-                 "children": [
-                  {
-                   "baseStyles": {
-                    "display": "flex",
-                    "flexDirection": "column",
-                    "gap": "8px",
-                    "width": "100%"
-                   },
-                   "blockName": "Your terms field",
-                   "children": [
-                    {
-                     "baseStyles": {
-                      "color": "var(--ink-gray-8)"
-                     },
-                     "blockName": "Terms heading",
-                     "componentId": "TextBlock-ff877f3a72",
-                     "componentName": "TextBlock",
-                     "componentProps": {
-                      "fontSize": "text-lg-semibold",
-                      "tag": "h2",
-                      "text": "{{ __('Your terms and conditions') }}"
-                     }
-                    },
-                    {
-                     "attributes": {
-                      "aria-label": "{{ __('Your terms and conditions') }}"
-                     },
-                     "baseStyles": {
-                      "width": "100%"
-                     },
-                     "blockName": "Notes",
-                     "componentId": "FormControl-c62556457b",
-                     "componentName": "FormControl",
-                     "componentProps": {
-                      "modelValue": {
-                       "$type": "variable",
-                       "name": "notes"
-                      },
-                      "placeholder": "{{ __('e.g. warranty, freight, taxes, or items you cannot supply') }}",
-                      "rows": 3,
-                      "type": "textarea"
-                     }
-                    }
-                   ],
-                   "componentId": "div-b4c5484042",
-                   "componentName": "div",
-                   "originalElement": "div"
-                  },
-                  {
-                   "baseStyles": {
-                    "display": "grid",
-                    "gap": "12px",
-                    "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
-                    "maxWidth": "32rem",
-                    "width": "100%"
-                   },
-                   "blockName": "Fields",
-                   "children": [
-                    {
-                     "baseStyles": {
-                      "width": "100%"
-                     },
-                     "blockName": "Valid till",
-                     "componentId": "FormControl-c4cd24e3ab",
-                     "componentName": "FormControl",
-                     "componentProps": {
-                      "format": "MMM D, YYYY",
-                      "label": "{{ __('Valid till') }}",
-                      "min": "{{ today }}",
-                      "modelValue": {
-                       "$type": "variable",
-                       "name": "validTill"
-                      },
-                      "required": true,
-                      "type": "date"
-                     }
-                    },
-                    {
-                     "baseStyles": {
-                      "width": "100%"
-                     },
-                     "blockName": "Reference",
-                     "componentId": "FormControl-cc6fb5bc21",
-                     "componentName": "FormControl",
-                     "componentProps": {
-                      "label": "{{ __('Your quotation no.') }}",
-                      "modelValue": {
-                       "$type": "variable",
-                       "name": "reference"
-                      },
-                      "placeholder": "{{ __('e.g. QTN-1042') }}",
-                      "type": "text"
-                     }
-                    }
-                   ],
-                   "componentId": "div-ac4f96985f",
-                   "componentName": "div",
-                   "mobileStyles": {
-                    "maxWidth": "none"
-                   },
-                   "originalElement": "div"
-                  }
-                 ],
-                 "componentId": "div-3aaa6131c3",
-                 "componentName": "div",
-                 "originalElement": "div",
-                 "visibilityCondition": "{{ quoting }}"
-                },
                 {
                  "baseStyles": {
                   "display": "flex",
@@ -2182,7 +2172,8 @@
            ],
            "componentId": "div-1c3d247846",
            "componentName": "div",
-           "originalElement": "div"
+           "originalElement": "div",
+           "visibilityCondition": "{{ buyerWords || yourWords }}"
           },
           {
            "blockName": "Action dialog",
@@ -2392,7 +2383,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-11-12 18:30:00.000000",
+ "modified": "2026-11-13 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "rfq",
  "owner": "Administrator",
