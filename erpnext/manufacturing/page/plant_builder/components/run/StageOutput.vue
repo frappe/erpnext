@@ -62,17 +62,18 @@ function qualityErrors() {
 	if (!quality) return [];
 	return quality.parameters
 		.filter((p) => p.numeric)
-		.filter((p) => {
-			const value = num(local.readings[props.stage.idx]?.[p.specification]);
-			return value < num(p.min_value) || value > num(p.max_value);
+		.map((p) => {
+			const value = local.readings[props.stage.idx]?.[p.specification];
+			if (value === "" || value == null) return __("Enter the {0} reading", [p.specification]);
+			if (num(value) < num(p.min_value) || num(value) > num(p.max_value)) {
+				return __("{0} is outside {1} to {2}. Adjust the batch and test again.", [
+					p.specification,
+					fmt(p.min_value),
+					fmt(p.max_value),
+				]);
+			}
 		})
-		.map((p) =>
-			__("{0} is outside {1} to {2}. Adjust the batch and test again.", [
-				p.specification,
-				fmt(p.min_value),
-				fmt(p.max_value),
-			])
-		);
+		.filter(Boolean);
 }
 
 const facts = computed(() => {

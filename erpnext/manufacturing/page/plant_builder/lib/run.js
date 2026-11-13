@@ -114,12 +114,9 @@ export function useRun(workOrder) {
 			if (stage.phase === "ready") schedulePreview(stage, 0);
 			local.output[stage.idx] = stage.output.expected_qty || stage.output.planned_qty;
 			local.rejected[stage.idx] = 0;
-			if (stage.quality && !local.readings[stage.idx]) {
+			if (stage.quality) {
 				local.readings[stage.idx] = Object.fromEntries(
-					stage.quality.parameters.map((p) => [
-						p.specification,
-						round((num(p.min_value) + num(p.max_value)) / 2, 2),
-					])
+					stage.quality.parameters.map((p) => [p.specification, ""])
 				);
 			}
 		});
