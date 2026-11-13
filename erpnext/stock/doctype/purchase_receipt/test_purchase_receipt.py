@@ -6297,6 +6297,61 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
 
+	def make_rejected_only_receipt_with_valuation_charge(self):
+		company = "_Test Company with perpetual inventory"
+		receipt = make_purchase_receipt(
+			company=company,
+			warehouse=create_warehouse("_Test In-ward Warehouse", company=company),
+			rejected_warehouse=create_warehouse("_Test Warehouse - Rejected Material", company=company),
+			qty=0,
+			rejected_qty=2,
+			rate=100,
+			do_not_save=1,
+		)
+		receipt.append(
+			"taxes",
+			{
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"add_deduct_tax": "Add",
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 10,
+			},
+		)
+		receipt.insert()
+		receipt.submit()
+		return receipt
+
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	def test_valuation_charge_on_valued_receipt_with_only_rejected_qty(self):
+		receipt = self.make_rejected_only_receipt_with_valuation_charge()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": receipt.name, "warehouse": receipt.items[0].rejected_warehouse, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		srbnb_account = frappe.get_cached_value("Company", receipt.company, "stock_received_but_not_billed")
+		credits = {d.account: d.credit for d in gl_entries if d.credit}
+
+		self.assertEqual(stock_value, 210)
+		self.assertEqual(sum(d.debit for d in gl_entries), 210)
+		self.assertEqual(credits, {srbnb_account: 200, "Expenses Included In Valuation - TCP1": 10})
+
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_valuation_charge_on_unvalued_receipt_with_only_rejected_qty(self):
+		receipt = self.make_rejected_only_receipt_with_valuation_charge()
+
+		self.assertEqual(receipt.items[0].item_tax_amount, 0)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": receipt.name, "is_cancelled": 0}))
+
 	def test_purchase_return_with_and_without_return_against_rejected_qty(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return as _make_purchase_return,
