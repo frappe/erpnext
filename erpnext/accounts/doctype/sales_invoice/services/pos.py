@@ -89,6 +89,7 @@ class POSService:
 
 	def _copy_pos_profile_fields(self, pos, for_validate: bool) -> None:
 		doc = self.doc
+		previous_currency = doc.currency
 		for fieldname in (
 			"currency",
 			"letter_head",
@@ -103,6 +104,8 @@ class POSService:
 		):
 			if (not for_validate) or (for_validate and not doc.get(fieldname)):
 				doc.set(fieldname, pos.get(fieldname))
+		if doc.currency != previous_currency:
+			doc.conversion_rate = 0
 
 	def _set_selling_price_list(self, pos) -> None:
 		doc = self.doc
