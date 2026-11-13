@@ -437,30 +437,22 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 100)
 
 	def test_pricing_rule_min_qty_with_conversion_factor_float_precision(self):
-		item = make_box_item_with_min_qty_pricing_rule()
+		item = make_box_item_with_pricing_rule(min_qty=57)
 
-		details = get_item_details(
-			frappe._dict(
-				item_code=item.name,
-				company="_Test Company",
-				price_list="_Test Price List",
-				currency="INR",
-				doctype="Sales Order",
-				conversion_rate=1,
-				price_list_currency="INR",
-				plc_conversion_rate=1,
-				order_type="Sales",
-				customer="_Test Customer",
-				uom="Box",
-				qty=0.57,
-			)
-		)
+		details = get_box_item_details(item.name)
 
 		self.assertEqual(details.discount_percentage, 10)
 		self.assertEqual(details.stock_qty, 57)
 
+	def test_pricing_rule_max_qty_in_rule_uom_with_conversion_factor_float_precision(self):
+		item = make_box_item_with_pricing_rule(uom="Box", min_qty=0.5, max_qty=0.57)
+
+		details = get_box_item_details(item.name)
+
+		self.assertEqual(details.discount_percentage, 10)
+
 	def test_price_list_applies_min_qty_pricing_rule_with_conversion_factor_float_precision(self):
-		item = make_box_item_with_min_qty_pricing_rule()
+		item = make_box_item_with_pricing_rule(min_qty=57)
 
 		result = apply_price_list(
 			frappe._dict(
@@ -2481,12 +2473,31 @@ def setup_pricing_rule_data():
 		).insert()
 
 
-def make_box_item_with_min_qty_pricing_rule():
-	"""0.57 Box x 100 is 56.99999999999999 Nos, just below the rule's Min Qty of 57."""
+def make_box_item_with_pricing_rule(**rule_fields):
+	"""Item in Nos with a Box of 100, so 0.57 Box is 56.99999999999999 Nos."""
 	item = make_item(properties={"stock_uom": "Nos"}, uoms=[{"uom": "Box", "conversion_factor": 100}])
 	make_item_price(item.name, "_Test Price List", 100)
-	make_item_pricing_rule(item.name, min_qty=57, discount_percentage=10)
+	make_item_pricing_rule(item.name, discount_percentage=10, **rule_fields)
 	return item
+
+
+def get_box_item_details(item_code):
+	return get_item_details(
+		frappe._dict(
+			item_code=item_code,
+			company="_Test Company",
+			price_list="_Test Price List",
+			currency="INR",
+			doctype="Sales Order",
+			conversion_rate=1,
+			price_list_currency="INR",
+			plc_conversion_rate=1,
+			order_type="Sales",
+			customer="_Test Customer",
+			uom="Box",
+			qty=0.57,
+		)
+	)
 
 
 def make_item_price(item, price_list_name, item_price):
