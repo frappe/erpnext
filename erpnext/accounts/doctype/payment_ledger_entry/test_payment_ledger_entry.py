@@ -229,6 +229,7 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		)
 		cr_note1.is_return = 1
 		cr_note1.return_against = si3.name
+		cr_note1.items[0].sales_invoice_item = si3.items[0].name
 		cr_note1 = cr_note1.save().submit()
 
 		pl_entries_si3 = (
