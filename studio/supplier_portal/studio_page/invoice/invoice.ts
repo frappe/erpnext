@@ -139,8 +139,10 @@ export default function setup(context) {
 	const itemImages = computed(() => items.value.some((item: any) => item.image))
 	const totals = computed(() => totalRows(doc.value, currency.value))
 
-	/** Below the amount in words, which spells out Total, not what is left to be paid. */
+	/** Below the amount in words, which spells out Total, not what is left to be paid. Paid in full by
+	 *  payments alone, it would only repeat Total: the notice and the Payments table say it. */
 	const balance = computed(() => {
+		if (outstanding.value <= 0 && debited.value <= 0) return []
 		const rows: any[] = []
 		if (paid.value > 0) rows.push(totalRow(__("Paid"), paid.value, partyCurrency.value))
 		if (debited.value > 0) rows.push(totalRow(__("Debit notes"), debited.value, partyCurrency.value))
