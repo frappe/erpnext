@@ -4695,6 +4695,65 @@ class TestDeliveryNote(FrappeTestCase):
 		in_qty = [column["name"] for column in columns].index("In Qty")
 		self.assertEqual(data[0][in_qty], 1)
 
+	@change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_accounting_ledger_preview_of_return_uses_returned_serial_nos(self):
+		from erpnext.controllers.stock_controller import get_accounting_ledger_preview
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TALPR-.#####"}
+		).name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=3, basic_rate=100)
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			warehouse=warehouse,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+		)
+		dn_return = make_sales_return(dn.name)
+		dn_return.save()
+
+		_columns, data = get_accounting_ledger_preview(dn_return, frappe._dict(company=company))
+		credit_by_account = {row[1]: row[3] for row in data}
+		self.assertEqual(credit_by_account["Cost of Goods Sold - TCP1"], 100)
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_accounting_ledger_preview_uses_serial_nos_of_the_row(self):
+		from erpnext.controllers.stock_controller import get_accounting_ledger_preview
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TALPS-.#####"}
+		).name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=3, basic_rate=100)
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=2, basic_rate=500)
+		costlier_serial_no = frappe.get_all(
+			"Serial No", {"item_code": item}, pluck="serial_no", order_by="serial_no"
+		)[3]
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			warehouse=warehouse,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			serial_no=costlier_serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		_columns, data = get_accounting_ledger_preview(dn, frappe._dict(company=company))
+		debit_by_account = {row[1]: row[2] for row in data}
+		self.assertEqual(debit_by_account["Cost of Goods Sold - TCP1"], 500)
+
 
 def make_so_with_reserved_produced_serial_no():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
