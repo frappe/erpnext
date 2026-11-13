@@ -1679,6 +1679,30 @@ class TestPickList(ERPNextTestSuite):
 		)
 		sales_return.submit()
 
+	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=2, basic_rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+		bundle_doc.append("items", {"item_code": component, "qty": 3})
+		bundle_doc.append("items", {"item_code": component, "qty": 1})
+		bundle_doc.insert()
+		bundle_doc.submit()
+
+		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=1)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		delivery_note = create_delivery_note(pick_list.name)
+		self.assertEqual(len(delivery_note.packed_items), 3)
+		self.assertEqual(
+			[so_packed_item.name for _, so_packed_item in get_order_packed_item_pairs(delivery_note)],
+			[row.sales_order_packed_item for row in delivery_note.packed_items],
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
