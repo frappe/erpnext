@@ -1911,6 +1911,29 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(wo_order.process_loss_qty, 1)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_reset_batch_finished_good_bundle_takes_stock_qty(self):
+		for conversion_factor in (2, None):
+			wo_order = make_batch_finished_good_work_order(
+				fg_properties={"uoms": [{"uom": "Box", "conversion_factor": 2}]}
+			)
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+			fg_row = next(row for row in stock_entry.items if row.is_finished_item)
+			fg_row.update(
+				{
+					"serial_and_batch_bundle": None,
+					"uom": "Box",
+					"conversion_factor": conversion_factor,
+					"qty": 5,
+				}
+			)
+			stock_entry.insert()
+
+			self.assertEqual(
+				frappe.db.get_value("Serial and Batch Bundle", fg_row.serial_and_batch_bundle, "total_qty"),
+				10,
+			)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
 	def test_work_order_without_serial_no_series_is_not_submitted(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
