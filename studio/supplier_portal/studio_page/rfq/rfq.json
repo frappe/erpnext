@@ -2218,8 +2218,7 @@
                 },
                 {
                  "baseStyles": {
-                  "color": "var(--ink-red-7)",
-                  "marginTop": "8px"
+                  "color": "var(--ink-red-7)"
                  },
                  "blockName": "Send error",
                  "componentId": "TextBlock-1an5lxxri",

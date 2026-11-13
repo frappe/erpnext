@@ -379,12 +379,18 @@ export default function setup(context) {
 		// one whole sentence per case, so each translates as a sentence
 		if (revising.value) {
 			if (all === 1) return __("You are quoting {0} for the item. It replaces quotation {1}.", [total, replaced])
+			if (all === 2 && priced === all) {
+				return __("You are quoting {0} for both items. It replaces quotation {1}.", [total, replaced])
+			}
 			if (priced === all) {
 				return __("You are quoting {0} for all {1} items. It replaces quotation {2}.", [total, all, replaced])
 			}
 			return __("You are quoting {0} for {1} of {2} items. It replaces quotation {3}.", [total, priced, all, replaced])
 		}
 		if (all === 1) return __("You are quoting {0} for the item. You can revise it until the buyer orders from it.", [total])
+		if (all === 2 && priced === all) {
+			return __("You are quoting {0} for both items. You can revise it until the buyer orders from it.", [total])
+		}
 		if (priced === all) {
 			return __("You are quoting {0} for all {1} items. You can revise it until the buyer orders from it.", [total, all])
 		}
