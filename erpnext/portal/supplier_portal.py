@@ -755,6 +755,9 @@ def submit_rfq_quotation(
 	# ERPNext allows one live quotation per supplier and RFQ, so a revision takes the place of the old one
 	previous = _revisable_quotation(supplier, rfq.name)
 	if not previous:
+		latest = _latest_quotation(supplier, rfq.name)
+		if latest and _has_draft_order(latest):
+			frappe.throw(_("The buyer is preparing an order from your quotation. Contact them to change it."))
 		if _buyer_drafting(supplier, rfq.name):
 			frappe.throw(
 				_(
@@ -934,6 +937,7 @@ def _supplier_quotation(supplier: str, rfq: str) -> dict | None:
 		**_pick(quotation, (*QUOTE_FIELDS, "discount_amount", "apply_discount_on")),
 		"items": [_pick(row, QUOTE_ITEM_FIELDS) for row in quotation.items],
 		"taxes": _taxes(quotation),
+		"has_draft_order": _has_draft_order(name),
 	}
 
 
@@ -944,10 +948,16 @@ def _revisable_quotation(supplier: str, rfq: str) -> str | None:
 	if not name:
 		return None
 	docstatus, status = frappe.db.get_value("Supplier Quotation", name, ["docstatus", "status"])
-	if docstatus != 1 or status not in REVISABLE_STATUSES:
+	if docstatus != 1 or status not in REVISABLE_STATUSES or _has_draft_order(name):
 		return None
 	# the buyer ordered everything from other suppliers: there is nothing left to win
 	return None if _ordered_elsewhere(supplier, rfq, status) == "all" else name
+
+
+def _has_draft_order(quotation: str) -> bool:
+	"""Whether the buyer has a draft purchase order from this quotation. Revising would cancel the
+	quotation, and ERPNext then refuses to submit that order."""
+	return bool(frappe.db.exists("Purchase Order Item", {"supplier_quotation": quotation, "docstatus": 0}))
 
 
 def _buyer_drafting(supplier: str, rfq: str) -> bool:
@@ -1068,6 +1078,7 @@ def get_quotation(name: str) -> dict:
 			)
 		),
 		"ordered_elsewhere": _ordered_elsewhere(quotation.supplier, rfq, reply["status"]) if rfq else "",
+		"has_draft_order": _has_draft_order(name),
 	}
 
 

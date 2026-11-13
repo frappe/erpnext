@@ -120,7 +120,7 @@ export type OrderedElsewhere = "all" | "some" | ""
 
 /** Sent and nothing ordered from it yet, and something left to win: the supplier may still revise. */
 export function quoteCanBeRevised(q: any, orderedElsewhere: OrderedElsewhere): boolean {
-	return Number(q?.docstatus) === 1 && q.status === "Submitted" && orderedElsewhere !== "all"
+	return Number(q?.docstatus) === 1 && q.status === "Submitted" && orderedElsewhere !== "all" && !q.has_draft_order
 }
 
 /** Before quoting: what the supplier should know about the RFQ first. */
@@ -146,6 +146,9 @@ export function quoteNote(q: any, orderedElsewhere: OrderedElsewhere): { title: 
 	if (!q?.name) return null
 	if (q.status === "Submitted" && orderedElsewhere === "all") {
 		return { title: __("The buyer ordered these items from another supplier."), theme: "gray", icon: "lucide-circle-x" }
+	}
+	if (q.status === "Submitted" && q.has_draft_order) {
+		return { title: __("The buyer is preparing an order from this quotation."), theme: "blue", icon: "lucide-shopping-cart" }
 	}
 	if (q.status === "Submitted" && orderedElsewhere === "some") {
 		return {
