@@ -1332,11 +1332,12 @@ class SubcontractingController(StockController):
 				continue
 
 			precision = supplied_rows[0].precision("required_qty")
-			if not has_bom_row_required_qty(supplied_rows, precision):
+			kept_required_qty = get_kept_bom_row_required_qty(supplied_rows, precision)
+			if kept_required_qty is None:
 				continue
 
 			required_qty = flt(self.get_bom_qty(row, bom_item, earlier_receipts), precision)
-			difference = flt(required_qty - flt(supplied_rows[0].required_qty), precision)
+			difference = flt(required_qty - kept_required_qty, precision)
 			if not difference:
 				continue
 
@@ -1788,12 +1789,16 @@ class SubcontractingController(StockController):
 				mr_obj.update_requested_qty(mr_item_rows)
 
 
-def has_bom_row_required_qty(supplied_rows, precision):
-	"""Supplied rows of a BOM row all carry its required qty, which covers what they consume; rows split
-	over batches can instead carry their batch's share."""
-	required_qty = {flt(d.required_qty, precision) for d in supplied_rows}
+def get_kept_bom_row_required_qty(supplied_rows, precision):
+	"""Required qty of a BOM row as its supplied rows carry it: split over transferred batches, each row
+	carries its batch's share; otherwise all carry the whole, covering what they consume. None if neither."""
 	consumed_qty = flt(sum(flt(d.consumed_qty) for d in supplied_rows), precision)
-	return len(required_qty) == 1 and required_qty.pop() >= consumed_qty
+	if all(flt(d.required_qty, precision) == flt(d.consumed_qty, precision) for d in supplied_rows):
+		return consumed_qty
+
+	required_qty = {flt(d.required_qty, precision) for d in supplied_rows}
+	if len(required_qty) == 1 and (qty := required_qty.pop()) >= consumed_qty:
+		return qty
 
 
 def get_repeated_bom_rows(materials):
