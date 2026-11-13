@@ -574,12 +574,13 @@ def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_pack
 def allocate_picked_qty(pl_rows, qty):
 	"""Pick List rows that pack ``qty``, each up to its undelivered picked qty; the rest goes on the last one."""
 	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	qty_precision = frappe.get_precision("Packed Item", "qty")
 	locations = []
 	for row in pl_rows:
 		row.pack_qty = min(flt(row.picked_qty - row.delivered_qty, precision), qty)
 		if row.pack_qty > 0:
 			locations.append(row)
-			qty = flt(qty - row.pack_qty, precision)
+			qty = flt(qty - row.pack_qty, qty_precision)
 
 	if not locations:
 		pl_rows[0].pack_qty = 0
