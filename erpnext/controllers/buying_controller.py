@@ -899,7 +899,7 @@ class BuyingController(SubcontractingController):
 	def _spread_charge_over_items(self, charge_per_item, total_charge, items):
 		"""Add each item's proportional share of `total_charge` into `charge_per_item`.
 		Proportion is by net amount (falling back to qty); any rounding remainder is assigned
-		to the last item in the group."""
+		to the last item with a share."""
 		if not total_charge or not items:
 			return
 
@@ -912,13 +912,14 @@ class BuyingController(SubcontractingController):
 		if not total_basis:
 			return
 
+		items_with_share = [d for d in items if basis[d.idx]]
 		remaining = total_charge
-		for d in items[:-1]:
+		for d in items_with_share[:-1]:
 			charge = flt(basis[d.idx] / total_basis * total_charge, self.precision("item_tax_amount", d))
 			charge_per_item[d.idx] = charge_per_item.get(d.idx, 0.0) + charge
 			remaining -= charge
 
-		last = items[-1]
+		last = items_with_share[-1]
 		charge_per_item[last.idx] = charge_per_item.get(last.idx, 0.0) + flt(
 			remaining, self.precision("item_tax_amount", last)
 		)
