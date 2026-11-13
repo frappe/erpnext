@@ -23,7 +23,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, make_job_card
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder, close_work_order, make_job_card
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_stock_entry as make_stock_entry_for_work_order,
 )
@@ -603,6 +603,7 @@ class TestJobCard(FrappeTestCase):
 		for row in wo.required_items:
 			self.assertEqual(flt(row.transferred_qty), flt(row.required_qty) / 2)
 
+		close_work_order(wo.name, "Closed")
 		stock_return = make_stock_return_entry(wo.name)
 		stock_return.company = wo.company
 		for row in stock_return.items:
