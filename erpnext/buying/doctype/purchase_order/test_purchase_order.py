@@ -21,6 +21,7 @@ from erpnext.buying.doctype.purchase_order.mapper import (
 from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -769,6 +770,18 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		po.reload()
 
 		self.assertEqual(po.items[0].last_purchase_rate, 120)
+
+	def test_last_purchase_details_carry_discount_amount(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].update({"price_list_rate": 39, "discount_amount": 39, "rate": 0})
+		po.submit()
+
+		details = get_last_purchase_details(item)
+
+		self.assertEqual(details.price_list_rate, 39)
+		self.assertEqual(details.discount_amount, 39)
+		self.assertEqual(details.rate, 0)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 	def test_same_item_from_different_material_requests(self):
