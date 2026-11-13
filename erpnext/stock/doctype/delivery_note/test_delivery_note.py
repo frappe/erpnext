@@ -1922,6 +1922,33 @@ class TestDeliveryNote(ERPNextTestSuite):
 			item, first_batch, {"serial_and_batch_bundle": bundle.name}
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_batch_qty_of_a_row_in_another_warehouse(self):
+		item, first_batch = self.make_item_with_two_batches("TRBW-.#####")
+		make_stock_entry(
+			item_code=item,
+			target="_Test Warehouse 1 - _TC",
+			qty=10,
+			basic_rate=100,
+			batch_no=first_batch,
+			use_serial_batch_fields=1,
+		)
+
+		dn = create_delivery_note(item_code=item, qty=8, do_not_save=True)
+		dn.items[0].batch_no = first_batch
+		dn.append(
+			"items",
+			{**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "batch_no": None},
+		)
+		dn.items[1].update({"warehouse": "_Test Warehouse 1 - _TC", "use_serial_batch_fields": 1})
+		dn.insert()
+
+		self.assertEqual(dn.items[1].batch_no, first_batch)
+
 	def make_item_with_two_batches(self, batch_number_series):
 		"""Batched item received in two batches of 10."""
 		item = make_item(
