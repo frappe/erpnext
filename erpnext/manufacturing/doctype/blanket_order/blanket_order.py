@@ -176,10 +176,7 @@ class BlanketOrder(StatusUpdater):
 
 	def set_order_rates(self, order_doc) -> None:
 		# Blanket Order Item.rate is per its UOM. Orders compare against the stock UOM rate.
-		stock_uom_rates = {
-			row.item_code: flt(row.stock_uom_rate) or flt(row.rate) / (flt(row.conversion_factor) or 1)
-			for row in self.items
-		}
+		stock_uom_rates = {row.item_code: flt(row.stock_uom_rate) for row in self.items}
 		for row in order_doc.get("items"):
 			if row.blanket_order != self.name or row.item_code not in stock_uom_rates:
 				continue
