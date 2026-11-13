@@ -356,6 +356,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_items_qty(self):
 		for item in self.items:
+			# secondary rows are checked on submit, after a return has rebuilt them
+			if item.secondary_item_type or item.valuation_type:
+				continue
+
 			if not (item.qty or item.rejected_qty):
 				frappe.throw(
 					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(
