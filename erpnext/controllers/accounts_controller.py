@@ -3714,6 +3714,10 @@ class AccountsController(TransactionBase):
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if not frappe.has_permission("Account", ptype, account_head):
+		_refuse()
+
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
