@@ -134,8 +134,10 @@ export function rfqNoteBeforeQuoting(orderedElsewhere: OrderedElsewhere): { titl
 	return null
 }
 
-/** On a quote line, how much the buyer has ordered from it so far; nothing until they order. */
-export function orderedOfQuoted(line: any, uom?: string): string {
+/** On a quote line, how much the buyer has ordered from it so far. Only while the quote is partly
+ *  ordered: before that nothing is, and once all of it is, the status says so. */
+export function orderedOfQuoted(line: any, quoteStatus: string, uom?: string): string {
+	if (quoteStatus !== "Partially Ordered") return ""
 	const ordered = Number(line?.ordered_qty ?? 0)
 	if (ordered <= 0) return ""
 	return __("{0} of {1} ordered", [formatQty(ordered), formatQty(line.qty, uom)])

@@ -116,7 +116,7 @@ export default function setup(context) {
 				row.expected_delivery_date ? __("delivery by {0}", [formatDate(row.expected_delivery_date)]) : "",
 				descriptionOf(row),
 			].filter(Boolean).join(" · "),
-			ordered: orderedOfQuoted(row, row.uom),
+			ordered: orderedOfQuoted(row, doc.value.status, row.uom),
 			qty: formatQty(row.qty, row.uom),
 			rate: formatMoney(row.rate, currency.value),
 			// the list price and discount the rate comes from, under it
