@@ -898,7 +898,7 @@ class SubcontractingReceipt(SubcontractingController):
 		rm_consumed_dict = self.get_rm_wise_consumed_qty()
 
 		for rm_item_code, required in self.get_rm_wise_required_qty(precision).items():
-			diff = flt(rm_consumed_dict.get(rm_item_code, 0), precision) - flt(required.qty, precision)
+			diff = flt(rm_consumed_dict.get(rm_item_code, 0) - required.qty, precision)
 
 			if diff < 0:
 				msg = _(
