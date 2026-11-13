@@ -370,3 +370,16 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 
 		self.assertEqual(pi.company, "_Test Company 1")
 		self.assertNotEqual(pi.items[0].item_tax_template, seller_template.name)
+
+	def test_item_code_must_be_a_string_to_get_template(self):
+		template = self.make_tax_template(10)
+		item_code = self.make_item_with_taxes([{"item_tax_template": template}])
+		item_name = frappe.db.get_value("Item", item_code, "item_name")
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Item Code required",
+			self.get_template_for,
+			{"item_name": ["=", item_name]},
+		)
+		self.assertEqual(self.get_template_for(item_code), template)
