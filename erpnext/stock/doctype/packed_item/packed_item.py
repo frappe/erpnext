@@ -469,7 +469,6 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
-	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	filters = {
@@ -509,19 +508,25 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
-	# keep the serial nos picked on the packed row for a partial delivery
-	if not pi_row.serial_no:
-		delivered = (
-			get_delivered_component_serial_nos(main_item_row, pl_row)
-			if pl_row.serial_no and pl_row.delivered_qty
-			else set()
-		)
-		pi_row.serial_no = get_pending_serial_nos(pl_row, {pl_row.name: delivered})
+	pi_row.serial_no = get_packed_serial_nos(main_item_row, pi_row, pl_row)
 
-	# a lowered bundle qty keeps only as many serial nos
+
+def get_packed_serial_nos(main_item_row, pi_row, pl_row):
+	"""Serial nos kept on the packed row, topped up from the pick list row, up to the packed qty."""
+	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 	serial_nos = get_serial_nos(pi_row.serial_no)
-	if len(serial_nos) > flt(pi_row.qty):
-		pi_row.serial_no = "\n".join(serial_nos[: cint(pi_row.qty)])
+	qty = cint(pi_row.qty)
+	if len(serial_nos) < qty and pl_row.serial_no:
+		delivered = (
+			get_delivered_component_serial_nos(main_item_row, pl_row) if pl_row.delivered_qty else set()
+		)
+		kept = {number.lower() for number in serial_nos}
+		pending = get_serial_nos(get_pending_serial_nos(pl_row, {pl_row.name: delivered}))
+		serial_nos += [number for number in pending if number.lower() not in kept]
+
+	return "\n".join(serial_nos[:qty])
 
 
 def get_delivered_component_serial_nos(main_item_row, pl_row):
