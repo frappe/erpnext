@@ -2231,7 +2231,7 @@ class TestProductionPlan(FrappeTestCase):
 			item_code=fg_item, planned_qty=30, stock_uom="_Test UOM 1", do_not_submit=1
 		)
 		pln.for_warehouse = rm_warehouse
-		pln.ignore_existing_ordered_qty = 1
+		pln.ignore_existing_ordered_qty = 0
 		items = get_items_for_material_requests(pln.as_dict(), warehouses=[{"warehouse": store_warehouse}])
 
 		rows_by_type = {row.get("material_request_type"): row for row in items}
@@ -2386,7 +2386,7 @@ class TestProductionPlan(FrappeTestCase):
 		pln = create_production_plan(item_code=fg_item, planned_qty=10, do_not_submit=1)
 		pln.for_warehouse = rm_warehouse
 		pln.consider_minimum_order_qty = 1
-		pln.ignore_existing_ordered_qty = 1
+		pln.ignore_existing_ordered_qty = 0
 		mr_items = get_items_for_material_requests(
 			pln.as_dict(), warehouses=[{"warehouse": source_warehouse}]
 		)
