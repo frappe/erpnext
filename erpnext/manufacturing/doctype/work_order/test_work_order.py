@@ -2235,7 +2235,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		mr = make_material_request(work_order.name, for_qty=1)
 		self.assertEqual([row.qty for row in mr.items], [1])
 
-<<<<<<< HEAD
+	def test_request_for_pending_qty_below_qty_precision(self):
+		rm = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
+		).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 100}])
+		work_order = make_review_work_order(fg, bom.name, 10)
+		self.submit_material_request(work_order.name, for_qty=9.9996)
+
+		mr = make_material_request(work_order.name, for_qty=0.01)
+		self.assertEqual([row.qty for row in mr.items], [0.04])
+
 	def test_material_request_qty_capped_at_pending_qty(self):
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
@@ -2279,22 +2290,6 @@ class TestWorkOrder(ERPNextTestSuite):
 
 	def test_pick_list_rejects_nonpositive_qty(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import create_pick_list
-=======
-	def test_request_for_pending_qty_below_qty_precision(self):
-		rm = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
-		).name
-		fg = make_item(properties={"is_stock_item": 1}).name
-		bom = make_review_bom(fg, [{"item_code": rm, "qty": 100}])
-		work_order = make_review_work_order(fg, bom.name, 10)
-		self.submit_material_request(work_order.name, for_qty=9.9996)
-
-		mr = make_material_request(work_order.name, for_qty=0.01)
-		self.assertEqual([row.qty for row in mr.items], [0.04])
-
-	def test_nonpositive_qty_is_rejected(self):
-		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list
->>>>>>> 893d185 (test: request a pending raw material qty below the qty precision from a Work Order)
 
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
