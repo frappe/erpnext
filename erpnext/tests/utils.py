@@ -3435,3 +3435,19 @@ def make_email_template(subject: str, response: str) -> str:
 		}
 	).insert()
 	return template.name
+
+
+def set_return_row_references(doc) -> None:
+	"""Point each return row without a source row at the first source row of its item."""
+	field = frappe.scrub(doc.doctype) + "_item"
+	first_row_of_item = {}
+	for row in frappe.get_all(
+		f"{doc.doctype} Item",
+		filters={"parent": doc.return_against},
+		fields=["name", "item_code"],
+		order_by="idx",
+	):
+		first_row_of_item.setdefault(row.item_code, row.name)
+
+	for row in doc.items:
+		row.set(field, row.get(field) or first_row_of_item.get(row.item_code))
