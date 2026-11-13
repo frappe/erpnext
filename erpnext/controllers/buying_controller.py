@@ -903,20 +903,18 @@ class BuyingController(SubcontractingController):
 		if not total_charge or not items:
 			return
 
-		total_amount = sum(flt(d.base_net_amount) for d in items)
-		chargeable_qty = {d.idx: self.get_chargeable_qty(d) for d in items}
-		total_qty = sum(chargeable_qty.values())
+		basis = {d.idx: flt(d.base_net_amount) for d in items}
+		if not sum(basis.values()):
+			basis = self.get_chargeable_qty(items)
 
+		total_basis = sum(basis.values())
 		# Nothing to proportion against (all rows have zero amount and zero qty)
-		if not total_amount and not total_qty:
+		if not total_basis:
 			return
 
 		remaining = total_charge
 		for d in items[:-1]:
-			proportion = (
-				flt(d.base_net_amount) / total_amount if total_amount else chargeable_qty[d.idx] / total_qty
-			)
-			charge = flt(proportion * total_charge, self.precision("item_tax_amount", d))
+			charge = flt(basis[d.idx] / total_basis * total_charge, self.precision("item_tax_amount", d))
 			charge_per_item[d.idx] = charge_per_item.get(d.idx, 0.0) + charge
 			remaining -= charge
 
@@ -925,24 +923,32 @@ class BuyingController(SubcontractingController):
 			remaining, self.precision("item_tax_amount", last)
 		)
 
-	def get_chargeable_qty(self, row) -> float:
-		"""Qty a charge spreads over when no row has a net amount. A receipt row that accepts nothing
-		carries it on its rejected qty, when that material is valued."""
-		if flt(row.qty) or self.doctype != "Purchase Receipt" or self.is_internal_transfer():
-			return flt(row.qty)
+	def get_chargeable_qty(self, items) -> dict:
+		"""Qty each row spreads a charge over when no row has a net amount. A receipt row that accepts
+		nothing carries it on its rejected qty, when that material is valued."""
+		chargeable_qty = {d.idx: flt(d.qty) for d in items}
+		if self.doctype != "Purchase Receipt" or self.is_internal_transfer():
+			return chargeable_qty
 
 		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
-			return 0.0
+			return chargeable_qty
 
-		# Returned rejected stock carried a charge only if its receipt row accepted nothing and got one.
-		if self.is_return and row.purchase_receipt_item:
-			qty, item_tax_amount = frappe.db.get_value(
-				"Purchase Receipt Item", row.purchase_receipt_item, ["qty", "item_tax_amount"]
-			)
-			if flt(qty) or not flt(item_tax_amount):
-				return 0.0
+		rejected_rows = [d for d in items if not flt(d.qty)]
+		uncharged_rows = self.get_uncharged_receipt_rows(rejected_rows) if self.is_return else ()
+		for d in rejected_rows:
+			if d.purchase_receipt_item not in uncharged_rows:
+				chargeable_qty[d.idx] = flt(d.rejected_qty)
 
-		return flt(row.rejected_qty)
+		return chargeable_qty
+
+	def get_uncharged_receipt_rows(self, rows) -> set:
+		"""Receipt rows whose rejected stock carried no charge: they accepted qty or got none."""
+		receipt_rows = frappe.get_all(
+			"Purchase Receipt Item",
+			filters={"name": ["in", [d.purchase_receipt_item for d in rows if d.purchase_receipt_item]]},
+			fields=["name", "qty", "item_tax_amount"],
+		)
+		return {d.name for d in receipt_rows if flt(d.qty) or not flt(d.item_tax_amount)}
 
 	def get_capitalized_valuation_tax(self):
 		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
