@@ -15,6 +15,7 @@ import {
 	INK5,
 	INK8,
 	line,
+	numberInput,
 	parseNumber,
 	plainText,
 	postalAddress,
@@ -150,9 +151,9 @@ export default function setup(context) {
 		for (const row of doc.value.items ?? []) {
 			const before = sent[row.name]
 			typed[row.name] = {
-				qty: String(before?.qty ?? row.qty ?? ""),
-				rate: before ? String(before.price_list_rate || before.rate) : "",
-				discount: before?.discount_percentage ? String(before.discount_percentage) : "",
+				qty: numberInput(before?.qty ?? row.qty),
+				rate: before ? numberInput(before.price_list_rate || before.rate) : "",
+				discount: before?.discount_percentage ? numberInput(before.discount_percentage) : "",
 				delivery: before?.expected_delivery_date ?? "",
 			}
 		}

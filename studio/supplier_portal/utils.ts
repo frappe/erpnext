@@ -5,7 +5,12 @@
 
 import { computed, type Ref } from "vue"
 import { dayjs, toast } from "frappe-ui"
-import { DEFAULT_NUMBER_FORMAT, flt, formatNumber } from "@framework/ui/components/FormLayout/formatNumber"
+import {
+	DEFAULT_NUMBER_FORMAT,
+	flt,
+	formatNumber,
+	getNumberFormatInfo,
+} from "@framework/ui/components/FormLayout/formatNumber"
 import { __ } from "@app/lib/translate"
 
 export const EMPTY = "—"
@@ -60,6 +65,14 @@ function withMinusSign(text: string): string {
  *  1250, and "12,50" is 12.5 where the comma is the decimal mark. Empty or unreadable is 0. */
 export function parseNumber(text: string | number | null | undefined): number {
 	return flt(text, { numberFormat: boot.number_format || DEFAULT_NUMBER_FORMAT })
+}
+
+/** A saved number put back in an input, with the site's decimal mark and no grouping, so that
+ *  parseNumber reads it back as the same number: 12.5 is "12,5" where the comma is the decimal mark. */
+export function numberInput(value: number | string | null | undefined): string {
+	if (value == null || value === "") return ""
+	const { decimalStr } = getNumberFormatInfo(boot.number_format || DEFAULT_NUMBER_FORMAT)
+	return String(value).replace(".", decimalStr || ".")
 }
 
 export function daysUntil(date: string | null | undefined): number | null {
