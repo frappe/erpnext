@@ -279,6 +279,28 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
 		self.assertEqual(supplier_quotation.items[0].amount, 500)
 
+	def test_supplier_portal_user_can_submit_a_quotation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.templates.pages.rfq import get_portal_doc
+
+		user = create_user("rfq_portal_supplier@example.com", "Supplier").name
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+		frappe.new_doc(
+			"Portal User", user=user, parent=supplier, parentfield="portal_users", parenttype="Supplier"
+		).insert()
+
+		portal_doc = get_portal_doc(rfq)
+		portal_doc["supplier"] = supplier
+		for item in portal_doc["items"]:
+			item["rate"] = 100
+
+		with self.set_user(user):
+			supplier_quotation = create_supplier_quotation(portal_doc)
+
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", supplier_quotation, "supplier"), supplier)
+
 	def test_portal_row_left_untouched_is_quoted_at_zero(self):
 		from erpnext.templates.pages.rfq import get_portal_doc
 
