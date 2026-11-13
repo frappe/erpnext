@@ -2091,11 +2091,12 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 
 	job_card_items = get_job_card_items_by_material_request_item(pick_list)
 
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, serial_nos_in_stock)
 		item.t_warehouse = job_card.wip_warehouse
 		item.job_card_item = job_card_items.get(location.material_request_item)
 		stock_entry.append("items", item)
