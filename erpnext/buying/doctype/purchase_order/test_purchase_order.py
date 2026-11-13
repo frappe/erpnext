@@ -21,6 +21,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -612,7 +613,23 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 150)
 
+<<<<<<< HEAD
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+=======
+	def test_last_purchase_details_carry_discount_amount(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].update({"price_list_rate": 39, "discount_amount": 39, "rate": 0})
+		po.submit()
+
+		details = get_last_purchase_details(item)
+
+		self.assertEqual(details.price_list_rate, 39)
+		self.assertEqual(details.discount_amount, 39)
+		self.assertEqual(details.rate, 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+>>>>>>> ef70757 (test: carry the last purchase discount amount to new rows)
 	def test_same_item_from_different_material_requests(self):
 		po = make_purchase_order(make_material_request(qty=5).name)
 		po = make_purchase_order(make_material_request(qty=5).name, target_doc=po)
