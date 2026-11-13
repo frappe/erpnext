@@ -759,6 +759,23 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		self.assertEqual(pricing["children"], [])
 
+	def test_applying_price_list_needs_blanket_order_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		blanket_order, _price_list = make_priced_blanket_order(price_list_rate=4321.5)
+		expected = apply_price_list(blanket_order.as_dict())
+		self.assertEqual(expected["children"][0]["price_list_rate"], 4321.5)
+
+		for user, roles in (
+			("_test_bo_no_role@example.com", []),
+			("_test_bo_sales@example.com", ["Sales User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				self.assertRaises(frappe.PermissionError, apply_price_list, blanket_order.as_dict())
+
+		with as_user(make_fenced_user("_test_bo_manager@example.com", ["System Manager", "Sales User"])):
+			self.assertEqual(apply_price_list(blanket_order.as_dict()), expected)
+
 	def test_price_list_rate_is_fetched_on_item_selection(self):
 		company = "_Test Company"
 		company_currency = get_company_currency(company)
