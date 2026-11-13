@@ -169,7 +169,7 @@ def get_query_based_on_filters(query, batch, table, filters):
 	if filters.to_date == today():
 		query = query.where(batch.batch_qty > 0)
 
-	to_date = get_datetime(str(filters.to_date) + " 23:59:59")
+	to_date = get_datetime(str(filters.to_date) + " 23:59:59.999999")
 	query = query.where(table.posting_datetime <= to_date)
 
 	if filters.warehouse:
