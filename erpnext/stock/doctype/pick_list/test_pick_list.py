@@ -1665,6 +1665,21 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note.submit()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_split_bundle_delivery_is_returned_to_each_warehouse(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = create_delivery_note(pick_bundle_from_two_warehouses().name)
+		delivery_note.submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.save()
+		self.assertEqual(
+			[(row.warehouse, -row.qty, row.serial_no) for row in sales_return.packed_items],
+			[(row.warehouse, row.qty, row.serial_no) for row in delivery_note.packed_items],
+		)
+		sales_return.submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
