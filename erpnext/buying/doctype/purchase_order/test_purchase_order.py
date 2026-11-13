@@ -21,7 +21,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
-from erpnext.stock.doctype.item.item import get_last_purchase_details
+from erpnext.stock.doctype.item.item import get_last_purchase_details, make_item_price
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -636,6 +636,19 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(po.items[0].discount_amount, 39)
 		self.assertEqual(po.items[0].rate, 0)
+
+	def test_rate_pricing_rule_drops_last_purchase_discount_amount(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+		make_item_price(item, "Standard Buying", 0)
+		make_pricing_rule(item_code=item, buying=1, rate_or_discount="Rate", rate=50)
+
+		details = get_purchase_order_item_details(item)
+
+		self.assertEqual(details.price_list_rate, 50)
+		self.assertEqual(details.discount_amount, 0)
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
 >>>>>>> ef70757 (test: carry the last purchase discount amount to new rows)
@@ -1818,6 +1831,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi2 = make_pi_from_po(po.name)
 		self.assertEqual(len(pi2.items), 2)
 
+<<<<<<< HEAD
 	def test_update_child_uom_after_receipt_is_refused(self):
 		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
 		purchase_order = create_purchase_order(item_code=item.item_code, qty=10, do_not_save=True)
@@ -1842,6 +1856,118 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 
 		self.assertRaisesRegex(
+=======
+	def test_get_item_details_propagates_drop_ship_flag_to_po(self):
+		"""`get_item_details` should propagate the Item master's
+		`delivered_by_supplier` flag to Purchase Orders, not only to Sales
+		Orders/Invoices, so that POs can be created as drop-ship directly
+		(via the standard item lookup the form uses) without going through
+		the Sales Order → Purchase Order mapping pipeline.
+		"""
+		item = make_item("_Test Drop Ship From Master", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		details = get_purchase_order_item_details(item.item_code)
+		self.assertEqual(details.get("delivered_by_supplier"), 1)
+
+	def test_drop_ship_po_allows_non_company_shipping_address_without_so(self):
+		"""A PO with a drop-ship item should save with a non-company shipping
+		address even when there is no linked Sales Order.
+		Regression test for https://github.com/frappe/erpnext/issues/51629.
+		"""
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+
+		item = make_item("_Test Drop Ship Direct PO", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		customer_shipping = make_address(
+			address_title="Drop Ship Direct PO", address_type="Shipping", address_line1="1"
+		)
+		customer_shipping.append("links", {"link_doctype": "Customer", "link_name": "_Test Customer"})
+		customer_shipping.save()
+
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
+		# In the UI, `get_item_details` propagates the master flag to the row when
+		# the item is added; here we simulate that step explicitly.
+		po.items[0].delivered_by_supplier = 1
+		po.items[0].warehouse = ""
+		po.shipping_address = customer_shipping.name
+		po.save()
+
+		self.assertEqual(po.items[0].delivered_by_supplier, 1)
+		self.assertFalse(po.items[0].warehouse)
+		self.assertEqual(po.shipping_address, customer_shipping.name)
+
+	def test_drop_ship_flag_overridable_per_po_line(self):
+		"""The drop-ship default from the Item master should be overridable
+		on individual PO lines (e.g. ordering a normally drop-shipped item
+		into the own warehouse for samples or stock).
+		"""
+		item = make_item("_Test Drop Ship Override", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		po = create_purchase_order(item=item.item_code, qty=1, do_not_save=True)
+		po.items[0].delivered_by_supplier = 0
+		po.save()
+
+		self.assertEqual(po.items[0].delivered_by_supplier, 0)
+		self.assertEqual(po.items[0].warehouse, "_Test Warehouse - _TC")
+
+	def test_remove_unlinked_item_from_mixed_po_does_not_crash(self):
+		"""In a PO that mixes SO-linked and freely-added items, removing an
+		item that has no `sales_order_item` via Update Items must not crash
+		on the missing reference.
+		"""
+		po = create_purchase_order(do_not_submit=True)
+		# Force the SO codepath without needing a real linked Sales Order:
+		po.items[0].sales_order = "DUMMY-SO"
+
+		po.update_ordered_qty_in_so_for_removed_items([frappe._dict({"sales_order_item": None, "qty": 1})])
+
+	def test_cancelling_drop_ship_po_resets_sales_order_delivery(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test Drop Ship Cancel Item", {"is_stock_item": 1, "delivered_by_supplier": 1})
+		so_item = {
+			"item_code": item.name,
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[so_item])
+		po = make_po_from_so(so.name, selected_items=[so_item])[0]
+		po.submit()
+		po.update_dropship_received_qty([{"name": po.items[0].name, "qty_change": 2}])
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 100)
+
+		po.reload()
+		po.cancel()
+
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 0)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "delivered_qty"), 0)
+
+	def test_drop_ship_delivery_blocked_for_closed_row(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test Drop Ship Closed Row Item", {"is_stock_item": 1, "delivered_by_supplier": 1})
+		so_item = {
+			"item_code": item.name,
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[so_item])
+		po = make_po_from_so(so.name, selected_items=[so_item])[0]
+		po.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+
+		po.reload()
+		self.assertRaises(
+>>>>>>> 1a4485f (test: a Rate pricing rule drops the last purchase discount amount)
 			frappe.ValidationError,
 			"Cannot change the UOM or conversion factor",
 			update_child_qty_rate,
@@ -2491,6 +2617,27 @@ def get_same_items():
 			"schedule_date": add_days(nowdate(), 1),
 		},
 	]
+
+
+def get_purchase_order_item_details(item_code):
+	from erpnext.stock.get_item_details import get_item_details
+
+	ctx = frappe._dict(
+		{
+			"item_code": item_code,
+			"doctype": "Purchase Order",
+			"company": "_Test Company",
+			"supplier": "_Test Supplier",
+			"transaction_date": nowdate(),
+			"currency": "INR",
+			"conversion_rate": 1.0,
+			"buying_price_list": "Standard Buying",
+			"price_list_currency": "INR",
+			"plc_conversion_rate": 1.0,
+			"qty": 1,
+		}
+	)
+	return get_item_details(ctx, frappe.new_doc("Purchase Order"))
 
 
 def make_fully_discounted_purchase_order(item_code):
