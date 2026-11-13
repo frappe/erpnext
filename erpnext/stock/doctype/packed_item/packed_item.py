@@ -54,6 +54,7 @@ class PackedItem(Document):
 		received_qty: DF.Float
 		requested_qty: DF.Float
 		reserve_stock: DF.Check
+		sales_order_packed_item: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		target_warehouse: DF.Link | None
@@ -99,17 +100,18 @@ def make_packing_list(doc, order_packed_items=None):
 			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
 			so_packed_items = list(order_packed_items.get(order_row, []))
 			for bundle_item in get_product_bundle_items(item_row.item_code):
+				so_packed_item = pop_order_packed_item(
+					so_packed_items, item_row.item_code, bundle_item.item_code
+				)
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
 					main_item_row=item_row,
 					packed_items_table=stale_packed_items_table,
 					reset=reset,
+					sales_order_packed_item=get_sales_order_packed_item(doc, so_packed_item),
 				)
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				so_packed_item = pop_order_packed_item(
-					so_packed_items, item_row.item_code, bundle_item.item_code
-				)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc, so_packed_item)
 				update_packed_item_price_data(pi_row, item_data, doc)
@@ -139,15 +141,16 @@ def get_indexed_packed_items_table(doc):
 
 	A new doc (e.g. mapped) has no link to its item rows yet, so its packed rows are
 	consumed in order per parent item and component. This is only safe if the item rows
-	need exactly these rows, e.g. no item row was removed after mapping.
+	need exactly these rows, e.g. no item row was removed after mapping. Rows made from a
+	Sales Order are matched by that order's packed row instead.
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
-		key = (
-			packed_item.parent_item,
-			packed_item.item_code,
-			None if doc.is_new() else packed_item.parent_detail_docname,
-		)
+		parent_row = None if doc.is_new() else packed_item.parent_detail_docname
+		if doc.is_new() and packed_item.get("sales_order_packed_item"):
+			parent_row = packed_item.sales_order_packed_item
+
+		key = (packed_item.parent_item, packed_item.item_code, parent_row)
 
 		indexed_table.setdefault(key, []).append(packed_item)
 
@@ -157,7 +160,9 @@ def get_indexed_packed_items_table(doc):
 			for item_row in doc.get("items")
 			for bundle_item in get_product_bundle_items(item_row.item_code)
 		)
-		indexed_table = {key: rows for key, rows in indexed_table.items() if len(rows) == needed_counts[key]}
+		indexed_table = {
+			key: rows for key, rows in indexed_table.items() if key[2] or len(rows) == needed_counts[key]
+		}
 
 	return indexed_table
 
@@ -206,13 +211,16 @@ def get_product_bundle_items(item_code):
 	return query.run(as_dict=True)
 
 
-def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, reset):
+def add_packed_item_row(
+	doc, packing_item, main_item_row, packed_items_table, reset, sales_order_packed_item=None
+):
 	"""Add and return packed item row.
 	doc: Transaction document
 	packing_item (dict): Packed Item details
 	main_item_row (dict): Items table row corresponding to packed item
 	packed_items_table (dict): Packed Items table before save (indexed)
 	reset (bool): State if table is reset or preserved as is
+	sales_order_packed_item (str): the Sales Order's packed row this row delivers
 	"""
 	exists, pi_row = False, {}
 
@@ -222,6 +230,12 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 		packing_item.item_code,
 		None if doc.is_new() else main_item_row.name,
 	)
+	# an unsaved row made from a Sales Order is found by its order packed row, so it keeps
+	# its own packed row when a row above it is deleted
+	order_key = (main_item_row.item_code, packing_item.item_code, sales_order_packed_item)
+	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
+		key = order_key
+
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
 	if stale_rows := packed_items_table.get(key):
@@ -234,6 +248,8 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 		if doc.is_new():
 			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
+
+	pi_row.sales_order_packed_item = sales_order_packed_item
 
 	# a component added to a saved order (later save or Update Items) is reserved like a new order's
 	if doc.get("reserve_stock") and (doc.is_new() or not exists):
@@ -341,6 +357,12 @@ def get_order_packed_items(doc) -> dict:
 		{row for item in doc.get("items") if (row := get_order_row(doc, item))},
 		doc.doctype if doc.get("is_return") else "Sales Order",
 	)
+
+
+def get_sales_order_packed_item(doc, so_packed_item):
+	"""Name of the Sales Order packed row a row of a document made from that order delivers."""
+	if so_packed_item and doc.doctype != "Sales Order" and not doc.get("is_return"):
+		return so_packed_item.name
 
 
 def get_order_row(doc, item_row):

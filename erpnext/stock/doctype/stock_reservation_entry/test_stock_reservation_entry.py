@@ -938,6 +938,56 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"Delivered",
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_invoice_keeps_bundle_reservation_of_its_row_when_a_row_above_is_deleted(self) -> None:
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_rate": 300,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRBI-.#####.",
+			}
+		)
+		create_material_receipt({batch_item.name: batch_item}, self.warehouse, qty=2)
+		create_material_receipt({batch_item.name: batch_item}, self.warehouse, qty=2)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [batch_item.name])
+		row = {"item_code": bundle, "warehouse": self.warehouse, "qty": 2, "rate": 100}
+		so = make_sales_order(item_list=[row, row], warehouse=self.warehouse, do_not_save=True)
+		so.reserve_stock = 1
+		so.insert()
+		so.submit()
+
+		si = make_sales_invoice(so.name)
+		si.update_stock = 1
+		si.remove(si.items[0])
+		si.submit()
+
+		for packed_item, status in zip(so.packed_items, ("Reserved", "Delivered"), strict=True):
+			self.assertEqual(
+				frappe.db.get_value(
+					"Stock Reservation Entry",
+					{"voucher_detail_no": packed_item.name, "docstatus": 1},
+					"status",
+				),
+				status,
+			)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_bundle_added_to_saved_sales_order_is_reserved(self) -> None:
 		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
