@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.tests.utils import ERPNextTestSuite, set_return_row_references
+from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestPaymentLedgerEntry(ERPNextTestSuite):
@@ -229,7 +229,7 @@ class TestPaymentLedgerEntry(ERPNextTestSuite):
 		)
 		cr_note1.is_return = 1
 		cr_note1.return_against = si3.name
-		set_return_row_references(cr_note1)
+		cr_note1.items[0].sales_invoice_item = si3.items[0].name
 		cr_note1 = cr_note1.save().submit()
 
 		pl_entries_si3 = (
