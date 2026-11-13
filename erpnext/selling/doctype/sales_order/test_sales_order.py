@@ -2670,6 +2670,33 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_request_for_raw_materials_keeps_planned_uom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test SO Fraction Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		fg_item = make_item("_Test SO Fraction Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+
+		so = make_sales_order(item_list=[{"item_code": fg_item, "qty": 1, "rate": 1000}])
+		so.submit()
+		mr_dict = frappe._dict(
+			items=get_work_order_items(so.name, 1), include_exploded_items=0, ignore_existing_ordered_qty=1
+		)
+		mr = make_raw_material_request(mr_dict, so.company, so.name)
+
+		self.assertEqual((mr.items[0].qty, mr.items[0].uom, mr.items[0].stock_qty), (13, "Nos", 13))
+
 	def test_so_optional_blanket_order(self):
 		"""
 		Expected result: Blanket order Ordered Quantity should only be affected on Sales Order with against_blanket_order = 1.

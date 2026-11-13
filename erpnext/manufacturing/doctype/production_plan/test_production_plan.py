@@ -1636,6 +1636,32 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (2, "Box", 10))
 
+	def test_purchase_uom_without_a_whole_stock_qty_is_requested_in_stock_uom(self):
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test PP Fraction Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		fg_item = make_item("_Test PP Fraction Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			for_warehouse="Stores - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		row = get_items_for_material_requests(plan.as_dict())[0]
+
+		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (13, "Nos", 1))
+
 	def test_download_raw_materials_shows_uom_of_required_qty(self):
 		rm_item = make_item(
 			"_Test PP Download Box RM",
@@ -4270,8 +4296,12 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln.consider_minimum_order_qty = 1
 		mr_items = get_items_for_material_requests(pln.as_dict())
 
-		self.assertEqual(mr_items[0].get("quantity"), 110.232)
-		self.assertGreaterEqual(mr_items[0].get("quantity") * conversion_factor, 50000)
+		row = mr_items[0]
+		stock_uom = frappe.db.get_value("Item", rm_item, "stock_uom")
+		self.assertEqual(
+			(row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (50000, stock_uom, 1)
+		)
+		self.assertGreaterEqual(row.get("quantity") * row.get("conversion_factor"), 50000)
 
 	def test_min_order_qty_grid_ceiling_from_other_locations(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -4303,7 +4333,12 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		rows_by_type = {d.get("material_request_type"): d for d in mr_items}
 		self.assertEqual(rows_by_type["Material Transfer"].get("quantity"), 4)
-		self.assertEqual(rows_by_type["Purchase"].get("quantity"), 110.232)
+		purchase_row = rows_by_type["Purchase"]
+		stock_uom = frappe.db.get_value("Item", rm_item, "stock_uom")
+		self.assertEqual(
+			(purchase_row.get("quantity"), purchase_row.get("uom"), purchase_row.get("conversion_factor")),
+			(50000, stock_uom, 1),
+		)
 
 	def test_min_order_qty_round_trip_to_purchase_order(self):
 		from erpnext.stock.doctype.material_request.material_request import (
