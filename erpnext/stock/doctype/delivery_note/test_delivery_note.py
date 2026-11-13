@@ -1337,6 +1337,25 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn.reload()
 		self.assertEqual(dn.per_billed, 33.333333)
 
+	def test_dn_billed_on_original_amount_after_full_return_of_rows_in_non_stock_uom(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 10}])
+		make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=70, basic_rate=100)
+		dn = create_delivery_note(item_code=item.name, qty=3.5, rate=0.29, do_not_save=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 10})
+		dn.append("items", dn.items[0].as_dict(no_default_fields=True))
+		dn.submit()
+
+		si = make_sales_invoice(dn.name)
+		for row in si.items:
+			row.qty = 1
+		si.submit()
+
+		# Each row's 1.015 is stored as 1.02, so the returned amounts must be rounded per row
+		make_sales_return(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_billed, 28.431373)
+
 	def test_dn_is_completed_when_unbilled_item_is_returned(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
