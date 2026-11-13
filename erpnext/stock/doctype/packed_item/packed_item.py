@@ -99,14 +99,10 @@ def make_packing_list(doc, order_packed_items=None):
 		if is_product_bundle(item_row.item_code):
 			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
 			so_packed_items = list(order_packed_items.get(order_row, []))
-<<<<<<< HEAD
 			for bundle_item in get_product_bundle_items(item_row.item_code):
-=======
-			for bundle_item in get_product_bundle_items_by_name(bundle_name):
 				so_packed_item = pop_order_packed_item(
 					so_packed_items, item_row.item_code, bundle_item.item_code
 				)
->>>>>>> 14cc1da (fix(stock): keep an unsaved document's packed rows with their Sales Order packed row when a row is deleted)
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
@@ -145,22 +141,16 @@ def get_indexed_packed_items_table(doc):
 
 	A new doc (e.g. mapped) has no link to its item rows yet, so its packed rows are
 	consumed in order per parent item and component. This is only safe if the item rows
-	need exactly these rows, e.g. no item row was removed after mapping.
+	need exactly these rows, e.g. no item row was removed after mapping. Rows made from a
+	Sales Order are matched by that order's packed row instead.
 	"""
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
-<<<<<<< HEAD
-=======
-		parent_row = packed_item.parent_detail_docname
+		parent_row = None if doc.is_new() else packed_item.parent_detail_docname
 		if doc.is_new() and packed_item.get("sales_order_packed_item"):
 			parent_row = packed_item.sales_order_packed_item
 
->>>>>>> 14cc1da (fix(stock): keep an unsaved document's packed rows with their Sales Order packed row when a row is deleted)
-		key = (
-			packed_item.parent_item,
-			packed_item.item_code,
-			None if doc.is_new() else packed_item.parent_detail_docname,
-		)
+		key = (packed_item.parent_item, packed_item.item_code, parent_row)
 
 		indexed_table.setdefault(key, []).append(packed_item)
 
@@ -170,7 +160,9 @@ def get_indexed_packed_items_table(doc):
 			for item_row in doc.get("items")
 			for bundle_item in get_product_bundle_items(item_row.item_code)
 		)
-		indexed_table = {key: rows for key, rows in indexed_table.items() if len(rows) == needed_counts[key]}
+		indexed_table = {
+			key: rows for key, rows in indexed_table.items() if key[2] or len(rows) == needed_counts[key]
+		}
 
 	return indexed_table
 
@@ -238,8 +230,8 @@ def add_packed_item_row(
 		packing_item.item_code,
 		None if doc.is_new() else main_item_row.name,
 	)
-	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
-	# shifts when a row above it is deleted
+	# an unsaved row made from a Sales Order is found by its order packed row, so it keeps
+	# its own packed row when a row above it is deleted
 	order_key = (main_item_row.item_code, packing_item.item_code, sales_order_packed_item)
 	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
 		key = order_key

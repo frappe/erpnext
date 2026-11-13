@@ -952,9 +952,17 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_invoice_keeps_bundle_reservation_of_its_row_when_a_row_above_is_deleted(self) -> None:
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-		batch_item = make_item(properties=SR_ITEM_PROPERTIES["batch"])
+		batch_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_rate": 300,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRBI-.#####.",
+			}
+		)
 		create_material_receipt({batch_item.name: batch_item}, self.warehouse, qty=2)
 		create_material_receipt({batch_item.name: batch_item}, self.warehouse, qty=2)
 		bundle = make_item(properties={"is_stock_item": 0}).name

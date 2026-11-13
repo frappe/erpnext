@@ -349,11 +349,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-10-30 12:00:00.000000",
-=======
  "modified": "2026-11-12 12:00:00.000000",
->>>>>>> 14cc1da (fix(stock): keep an unsaved document's packed rows with their Sales Order packed row when a row is deleted)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",
