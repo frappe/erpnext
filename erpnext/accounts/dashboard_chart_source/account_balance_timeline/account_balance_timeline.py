@@ -133,6 +133,8 @@ def get_dates_from_timegrain(from_date, to_date, timegrain):
 		months = 1
 	elif "Quarterly" == timegrain:
 		months = 3
+	elif "Yearly" == timegrain:
+		years = 1
 
 	dates = [get_period_ending(from_date, timegrain)]
 	while getdate(dates[-1]) < getdate(to_date):
