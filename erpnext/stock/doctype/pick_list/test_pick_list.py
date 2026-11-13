@@ -1679,6 +1679,43 @@ class TestPickList(ERPNextTestSuite):
 		)
 		sales_return.submit()
 
+	def test_repost_keeps_the_rate_of_a_split_bundle_row_in_another_warehouse(self):
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		component = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		posting_date = add_days(nowdate(), -5)
+		make_stock_entry(
+			item=component, to_warehouse=warehouse, qty=2, basic_rate=100, posting_date=posting_date
+		)
+		make_stock_entry(
+			item=component, to_warehouse=other_warehouse, qty=2, basic_rate=200, posting_date=posting_date
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=4, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.submit()
+
+		# a backdated receipt reposts only the first warehouse
+		make_stock_entry(
+			item=component,
+			to_warehouse=warehouse,
+			qty=5,
+			basic_rate=150,
+			posting_date=add_days(posting_date, -1),
+		)
+		repost_entries()
+
+		rates = frappe.get_all(
+			"Packed Item", {"parent": delivery_note.name}, ["warehouse", "incoming_rate"], as_list=True
+		)
+		self.assertEqual(sorted(rates), [(warehouse, 150), (other_warehouse, 200)])
+
 	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 
