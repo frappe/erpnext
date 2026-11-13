@@ -3,7 +3,7 @@ from frappe import _
 from frappe.permissions import has_permission
 from frappe.utils import cint, flt
 
-from erpnext.manufacturing.doctype.bom_creator.process_formula import ProcessFormula
+from erpnext.manufacturing.doctype.bom_creator.operation_plan import OperationPlan
 from erpnext.manufacturing.doctype.work_order.mapper import make_work_order
 from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
 from erpnext.manufacturing.doctype.work_order.services.plant_run.state import PlantRunState
@@ -140,14 +140,17 @@ def get_open_work_orders(workstations):
 @frappe.whitelist()
 def check_design(doc: str | dict) -> dict:
 	frappe.has_permission("BOM Creator", "read", throw=True)
-	design = frappe.get_doc({**frappe.parse_json(doc), "doctype": "BOM Creator"})
-	formula = ProcessFormula(design)
+	design = frappe.get_doc(
+		{**frappe.parse_json(doc), "doctype": "BOM Creator", "track_semi_finished_goods": 1}
+	)
+	plan = OperationPlan(design)
+	formula = plan.formula
 	for workstation in {row.workstation for row in formula.stages if row.workstation}:
 		frappe.has_permission("Workstation", doc=workstation, throw=True)
 	formula.apply()
 	batch = flt(design.qty) or 1
 	return {
-		"errors": formula.get_problems(),
+		"errors": plan.get_problems(),
 		"item": formula.item,
 		"machines": add_machine_shapes(formula.machines),
 		"weight_factors": formula.weight_factors,
