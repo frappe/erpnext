@@ -474,9 +474,31 @@ class SubcontractingReceipt(SubcontractingController):
 			if item.bom and item.name not in rejected_return_rows:
 				self.add_secondary_items_of_fg_row(item)
 
+		self.link_returned_secondary_items()
+
 		if recalculate_rate:
 			self.set_additional_costs()
 			self.calculate_items_qty_and_amount()
+
+	def link_returned_secondary_items(self):
+		"""Link each rebuilt secondary row of a return to its row on the returned receipt."""
+		if not (self.is_return and self.return_against):
+			return
+
+		original_rows = {
+			(row.reference_name, row.bom_secondary_item): row.name
+			for row in frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against, "bom_secondary_item": ("is", "set")},
+				fields=["name", "reference_name", "bom_secondary_item"],
+			)
+		}
+		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
+		for row in self.items:
+			if row.bom_secondary_item:
+				row.subcontracting_receipt_item = original_rows.get(
+					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
+				)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
