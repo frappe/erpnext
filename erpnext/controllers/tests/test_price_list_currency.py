@@ -6,10 +6,73 @@ from unittest.mock import Mock, patch
 import frappe
 from frappe.tests import UnitTestCase
 
+from erpnext.accounts.doctype.sales_invoice.services.pos import POSService
 from erpnext.controllers.accounts_controller import AccountsController
 
 
 class TestPriceListCurrency(UnitTestCase):
+	def test_pos_profile_refreshes_invoice_rate_when_currency_changes(self):
+		invoice = Mock(
+			is_pos=1,
+			account_for_change_amount="Cash Account",
+			pos_profile="CDF POS",
+			customer=None,
+			company="Test Company",
+			meta=Mock(),
+			posting_date="2026-09-18",
+			selling_price_list="USD Price List",
+			price_list_currency="USD",
+			plc_conversion_rate=1,
+			company_currency="USD",
+			currency="USD",
+			conversion_rate=1,
+			items=[],
+			taxes=[],
+			tc_name=None,
+			terms=None,
+			taxes_and_charges=None,
+		)
+		invoice.flags.ignore_pos_profile = False
+		invoice.get.side_effect = lambda field: getattr(invoice, field)
+		invoice.set.side_effect = lambda field, value: setattr(invoice, field, value)
+		profile = frappe._dict(
+			name="CDF POS",
+			currency="CDF",
+			company="Test Company",
+			selling_price_list="CDF Price List",
+		)
+
+		with (
+			patch("erpnext.accounts.doctype.sales_invoice.services.pos.frappe.get_doc", return_value=profile),
+			patch("erpnext.accounts.doctype.sales_invoice.services.pos.update_multi_mode_option"),
+			patch("erpnext.controllers.accounts_controller.frappe") as mock_frappe,
+			patch(
+				"erpnext.controllers.accounts_controller.get_exchange_rate", return_value=0.000444444
+			) as exchange_rate,
+		):
+			mock_frappe.db.get_value.return_value = "CDF"
+			POSService(invoice).set_pos_fields()
+			AccountsController.set_price_list_currency(invoice, "Selling")
+			self.assertEqual(invoice.currency, "CDF")
+			self.assertEqual(invoice.price_list_currency, "CDF")
+			self.assertEqual(invoice.plc_conversion_rate, 0.000444444)
+			self.assertEqual(invoice.conversion_rate, 0.000444444)
+			self.assertEqual(exchange_rate.call_count, 2)
+
+			invoice.conversion_rate = 0.0005
+			exchange_rate.reset_mock()
+			POSService(invoice).set_pos_fields()
+			AccountsController.set_price_list_currency(invoice, "Selling")
+			self.assertEqual(invoice.conversion_rate, 0.0005)
+			exchange_rate.assert_not_called()
+
+			profile.currency = "USD"
+			POSService(invoice).set_pos_fields()
+			AccountsController.set_price_list_currency(invoice, "Selling")
+			self.assertEqual(invoice.currency, "USD")
+			self.assertEqual(invoice.conversion_rate, 1)
+			self.assertEqual(invoice.plc_conversion_rate, 0.000444444)
+
 	def test_price_list_currency_transition(self):
 		cases = (
 			("USD", "CDF", 1, 0.000444444, True),
