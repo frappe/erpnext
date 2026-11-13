@@ -444,6 +444,14 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(details.discount_percentage, 10)
 		self.assertEqual(details.stock_qty, 57)
 
+	def test_pricing_rule_min_amount_with_conversion_factor_float_precision(self):
+		# 0.57 Box at 10000 is 5699.999999999999
+		item = make_box_item_with_pricing_rule(min_amt=5700)
+
+		details = get_box_item_details(item.name)
+
+		self.assertEqual(details.discount_percentage, 10)
+
 	def test_pricing_rule_max_qty_in_rule_uom_with_conversion_factor_float_precision(self):
 		item = make_box_item_with_pricing_rule(uom="Box", min_qty=0.5, max_qty=0.57)
 
