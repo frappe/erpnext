@@ -139,6 +139,9 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_items_qty()
 		self.set_items_bom()
 		self.set_items_received_qty()
+		self.set_items_accounting_defaults()
+
+	def set_items_accounting_defaults(self):
 		self.set_items_cost_center()
 
 		if self.company:
@@ -174,6 +177,8 @@ class SubcontractingReceipt(SubcontractingController):
 		# validate_return, so a return validates the rows it saves, also when inserted as submitted
 		if self.is_new() and (self.get("_action") == "save" or self.is_return) and not frappe.in_test:
 			self.get_secondary_items(recalculate_rate=True)
+			# before_validate set them before the rows were rebuilt
+			self.set_items_accounting_defaults()
 
 		self.validate_with_previous_doc()
 		validate_return(self)
