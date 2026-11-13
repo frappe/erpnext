@@ -479,7 +479,7 @@
                          "children": [
                           {
                            "baseStyles": {
-                            "color": "{{ item.urgent ? 'var(--ink-red-7)' : 'var(--ink-gray-5)' }}",
+                            "color": "{{ item.urgent ? 'var(--ink-red-5)' : 'var(--ink-gray-5)' }}",
                             "fontFeatureSettings": "'tnum'"
                            },
                            "blockName": "TextBlock",
@@ -804,7 +804,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-28 12:00:00.000000",
+ "modified": "2026-11-13 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "home",
  "owner": "Administrator",

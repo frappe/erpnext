@@ -70,15 +70,15 @@ export function daysUntil(date: string | null | undefined): number | null {
 }
 
 // ---------------------------------------------------------------- detail pages
-/** Ink tokens the detail pages share. `-7` is the step frappe-ui uses for red text. */
+/** Ink tokens the detail pages share. */
 export const INK9 = "var(--ink-gray-9)"
 export const INK8 = "var(--ink-gray-8)"
 export const INK7 = "var(--ink-gray-7)"
 export const INK6 = "var(--ink-gray-6)"
 export const INK5 = "var(--ink-gray-5)"
-export const RED = "var(--ink-red-7)"
-export const GREEN = "var(--ink-green-7)"
-export const AMBER = "var(--ink-amber-7)"
+export const RED = "var(--ink-red-5)"
+export const GREEN = "var(--ink-green-5)"
+export const AMBER = "var(--ink-amber-5)"
 
 /** One label/value row of a detail page's info grid. */
 export function line(label: string, value: string, color = INK8, weight = "420") {
