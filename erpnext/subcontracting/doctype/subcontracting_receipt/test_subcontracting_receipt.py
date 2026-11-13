@@ -68,26 +68,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 
 		fg_item = "Subcontracted Item SA1"
-		raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-		secondary_item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}
-		).name
-
-		bom = make_bom(
-			item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True
-		)
-		bom.append(
-			"secondary_items",
-			{
-				"item_code": secondary_item,
-				"secondary_item_type": "Scrap",
-				"qty": 0.5,
-				"stock_qty": 0.5,
-				"valuation_type": "Valuation Rate",
-			},
-		)
-		bom.save()
-		bom.submit()
+		make_bom_with_secondary_item(fg_item)
 
 		service_items = [
 			{
@@ -398,6 +379,44 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertIsNotNone(scr2_return.items[0].bom)
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
+
+	def test_full_return_with_secondary_items_marks_the_receipt_returned(self):
+		set_backflush_based_on("BOM")
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.get_secondary_items()
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items()
+		scr_return.save()
+		scr_return.submit()
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
 
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
@@ -5499,6 +5518,27 @@ def make_receipt_with_rejected_qty_and_scrap():
 	scr.submit()
 
 	return scr, scrap_item
+
+
+def make_bom_with_secondary_item(fg_item):
+	"""BOM with one raw material and 0.5 of a scrap item per unit."""
+	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+
+	bom = make_bom(item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True)
+	bom.append(
+		"secondary_items",
+		{
+			"item_code": secondary_item,
+			"secondary_item_type": "Scrap",
+			"qty": 0.5,
+			"stock_qty": 0.5,
+			"valuation_type": "Valuation Rate",
+		},
+	)
+	bom.save()
+	bom.submit()
+	return bom
 
 
 def make_return_subcontracting_receipt(**args):
