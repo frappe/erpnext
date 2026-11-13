@@ -328,6 +328,7 @@ def update_stock(ctx, out, doc=None):
 		if doc and isinstance(doc, dict):
 			doc = frappe._dict(doc)
 
+		out.stock_qty = flt(out.stock_qty, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty"))
 		kwargs = frappe._dict(
 			{
 				"item_code": ctx.item_code,
