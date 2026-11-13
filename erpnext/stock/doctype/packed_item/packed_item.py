@@ -10,7 +10,7 @@ import frappe
 import frappe.defaults
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
 
@@ -94,28 +94,39 @@ def make_packing_list(doc, order_packed_items=None):
 			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
 			so_packed_items = list(order_packed_items.get(order_row, []))
 			for bundle_item in get_product_bundle_items_by_name(bundle_name):
+				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				so_packed_item = pop_order_packed_item(
 					so_packed_items, item_row.item_code, bundle_item.item_code
 				)
-				pi_row = add_packed_item_row(
-					doc=doc,
-					packing_item=bundle_item,
-					main_item_row=item_row,
-					packed_items_table=stale_packed_items_table,
-					reset=reset,
-					sales_order_packed_item=get_sales_order_packed_item(doc, so_packed_item),
+				# a component picked from several locations gets a packed row per location
+				locations = get_pick_list_locations(
+					doc, item_row, bundle_item, item_data, so_packed_item, stale_packed_items_table
 				)
-				pi_row.product_bundle = bundle_name
-				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
-				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc, so_packed_item)
-				update_packed_item_price_data(pi_row, item_data, doc)
+				for location in locations or [None]:
+					pi_row = add_packed_item_row(
+						doc=doc,
+						packing_item=bundle_item,
+						main_item_row=item_row,
+						packed_items_table=stale_packed_items_table,
+						reset=reset,
+						sales_order_packed_item=get_sales_order_packed_item(doc, so_packed_item),
+						location=location,
+					)
+					pi_row.product_bundle = bundle_name
+					update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
+					update_packed_item_stock_data(
+						item_row, pi_row, bundle_item, item_data, doc, so_packed_item
+					)
+					update_packed_item_price_data(pi_row, item_data, doc)
 
-				if item_row.get("against_pick_list"):
-					update_packed_item_with_pick_list_info(item_row, pi_row, so_packed_item)
+					if location:
+						update_packed_item_with_pick_list_info(item_row, pi_row, location)
 
-				if set_price_from_children:  # create/update bundle item wise price dict
-					update_product_bundle_rate(parent_items_price, pi_row, item_row)
+					if set_price_from_children:  # create/update bundle item wise price dict
+						update_product_bundle_rate(parent_items_price, pi_row, item_row)
+
+	if not reset:
+		remove_unused_pick_list_rows(doc, stale_packed_items_table)
 
 	if parent_items_price:
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
@@ -245,7 +256,7 @@ def get_bundle_version_for_row(item_row, doc=None):
 
 
 def add_packed_item_row(
-	doc, packing_item, main_item_row, packed_items_table, reset, sales_order_packed_item=None
+	doc, packing_item, main_item_row, packed_items_table, reset, sales_order_packed_item=None, location=None
 ):
 	"""Add and return packed item row.
 	doc: Transaction document
@@ -254,25 +265,18 @@ def add_packed_item_row(
 	packed_items_table (dict): Packed Items table before save (indexed)
 	reset (bool): State if table is reset or preserved as is
 	sales_order_packed_item (str): the Sales Order's packed row this row delivers
+	location (dict): Pick List row the packed row is packed from
 	"""
 	exists, pi_row = False, {}
 
 	# check if row already exists in packed items table
-	key = (
-		main_item_row.item_code,
-		packing_item.item_code,
-		main_item_row.idx if doc.is_new() else main_item_row.name,
+	key = get_packed_item_key(
+		doc, main_item_row, packing_item.item_code, packed_items_table, sales_order_packed_item
 	)
-	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
-	# shifts when a row above it is deleted
-	order_key = (main_item_row.item_code, packing_item.item_code, sales_order_packed_item)
-	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
-		key = order_key
-
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
 	if stale_rows := packed_items_table.get(key):
-		pi_row, exists = stale_rows.pop(0), True
+		pi_row, exists = stale_rows.pop(get_stale_row_idx(stale_rows, location)), True
 
 	if not exists:
 		pi_row = doc.append("packed_items", {})
@@ -289,6 +293,42 @@ def add_packed_item_row(
 		pi_row.reserve_stock = 1
 
 	return pi_row
+
+
+def get_packed_item_key(doc, main_item_row, item_code, packed_items_table, sales_order_packed_item=None):
+	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
+	# shifts when a row above it is deleted
+	order_key = (main_item_row.item_code, item_code, sales_order_packed_item)
+	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
+		return order_key
+
+	return (main_item_row.item_code, item_code, main_item_row.idx if doc.is_new() else main_item_row.name)
+
+
+def get_stale_row_idx(stale_rows, location=None):
+	"""Index of the stale row packed from the Pick List row ``location``, else of the first one."""
+	if not location:
+		return 0
+	return next((idx for idx, row in enumerate(stale_rows) if is_packed_from(row, location)), 0)
+
+
+def is_packed_from(pi_row, location):
+	"""Whether a packed row holds serial nos of the Pick List row ``location``, or its warehouse and batch."""
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serial_nos = {number.lower() for number in get_serial_nos(pi_row.serial_no)}
+	if serial_nos & {number.lower() for number in get_serial_nos(location.serial_no)}:
+		return True
+	return (pi_row.warehouse, pi_row.batch_no or "") == (location.warehouse, location.batch_no or "")
+
+
+def remove_unused_pick_list_rows(doc, packed_items_table):
+	"""Drop packed rows a re-save no longer packs from the Pick List, e.g. after the bundle qty is lowered."""
+	pick_list_rows = {item.name for item in doc.get("items") if item.get("against_pick_list")}
+	for rows in packed_items_table.values():
+		for row in rows:
+			if row.parent_detail_docname in pick_list_rows:
+				doc.remove(row)
 
 
 def get_packed_item_details(item_code, company):
@@ -317,16 +357,21 @@ def update_packed_item_basic_data(main_item_row, pi_row, packing_item, item_data
 	pi_row.item_code = packing_item.item_code
 	pi_row.item_name = item_data.item_name
 	pi_row.uom = item_data.stock_uom
-	pi_row.qty = flt(
-		get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
-		* flt(main_item_row.stock_qty),
-		pi_row.precision("qty"),
-	)
+	pi_row.qty = get_packed_qty(main_item_row, packing_item, item_data, so_packed_item)
 	pi_row.conversion_factor = main_item_row.conversion_factor
 	pi_row.delivered_by_supplier = main_item_row.get("delivered_by_supplier")
 
 	if not pi_row.description:
 		pi_row.description = packing_item.get("description")
+
+
+def get_packed_qty(main_item_row, packing_item, item_data, so_packed_item=None):
+	"""Component stock qty to pack for the bundle row."""
+	return flt(
+		get_component_stock_qty_per_unit(packing_item, item_data.stock_uom, so_packed_item)
+		* flt(main_item_row.stock_qty),
+		frappe.get_precision("Packed Item", "qty"),
+	)
 
 
 def get_component_stock_qty_per_unit(packing_item, stock_uom, so_packed_item=None):
@@ -456,24 +501,28 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 	pairs = []
 	for item in doc.get("items"):
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, item), []))
+		paired = {}
 		for packed_item in doc.get("packed_items"):
 			if packed_item.parent_detail_docname != (item.name or item.idx):
 				continue
 
+			# a component packed from several Pick List locations delivers the same order row
 			if so_packed_item := pop_order_packed_item(
 				so_packed_items, packed_item.parent_item, packed_item.item_code
-			):
+			) or paired.get(packed_item.item_code):
+				paired[packed_item.item_code] = so_packed_item
 				pairs.append((packed_item, so_packed_item))
 
 	return pairs
 
 
-def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
-	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_packed_item, packed_items_table):
+	"""Pick List rows to pack a component from, each with its ``pack_qty``."""
+	if not main_item_row.get("against_pick_list"):
+		return []
 
 	filters = {
-		"item_code": pi_row.item_code,
+		"item_code": packing_item.item_code,
 		"sales_order_item": main_item_row.get("so_detail"),
 		"parent": main_item_row.against_pick_list,
 	}
@@ -488,35 +537,59 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
 		order_by="qty desc, name asc",
 	)
-
 	if not pl_rows:
-		return
+		return []
 
-	# a component picked from several warehouses moves on to the rows not delivered yet
-	precision = frappe.get_precision("Pick List Item", "delivered_qty")
-	pending_rows = [row for row in pl_rows if flt(row.picked_qty - row.delivered_qty, precision) > 0]
-	pending_rows = pending_rows or pl_rows
-	# kept serial nos stay on the pick list row they were mapped from
-	kept_serial_nos = {number.lower() for number in get_serial_nos(pi_row.serial_no)}
-	pl_row = next(
-		(
-			row
-			for row in pending_rows
-			if kept_serial_nos & {number.lower() for number in get_serial_nos(row.serial_no)}
-		),
-		pending_rows[0],
+	# a re-save keeps packing from the rows it packed from before
+	key = get_packed_item_key(
+		doc,
+		main_item_row,
+		packing_item.item_code,
+		packed_items_table,
+		get_sales_order_packed_item(doc, so_packed_item),
 	)
+	stale_rows = packed_items_table.get(key, [])
+	pl_rows.sort(key=lambda row: not any(is_packed_from(stale_row, row) for stale_row in stale_rows))
+	qty = get_packed_qty(main_item_row, packing_item, item_data, so_packed_item)
+	return allocate_picked_qty(pl_rows, qty)
 
-	pi_row.warehouse = pl_row.warehouse
-	pi_row.batch_no = pl_row.batch_no
+
+def allocate_picked_qty(pl_rows, qty):
+	"""Pick List rows that pack ``qty``, each up to its undelivered picked qty; the rest goes on the last one."""
+	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	locations = []
+	for row in pl_rows:
+		row.pack_qty = min(flt(row.picked_qty - row.delivered_qty, precision), qty)
+		if row.pack_qty > 0:
+			locations.append(row)
+			qty = flt(qty - row.pack_qty, precision)
+
+	if not locations:
+		pl_rows[0].pack_qty = 0
+		locations = pl_rows[:1]
+
+	locations[-1].pack_qty += qty
+	return locations
+
+
+def update_packed_item_with_pick_list_info(main_item_row, pi_row, location):
+	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	# serial nos kept from another location are not in this one
+	if not is_packed_from(pi_row, location):
+		pi_row.serial_no = None
+
+	pi_row.qty = flt(location.pack_qty, pi_row.precision("qty"))
+	pi_row.warehouse = location.warehouse
+	pi_row.batch_no = location.batch_no
 	# keep the serial nos picked on the packed row for a partial delivery
-	if not pi_row.serial_no:
+	if location.serial_no and not pi_row.serial_no:
 		delivered = (
-			get_delivered_component_serial_nos(main_item_row, pl_row)
-			if pl_row.serial_no and pl_row.delivered_qty
-			else set()
+			get_delivered_component_serial_nos(main_item_row, location) if location.delivered_qty else set()
 		)
-		pi_row.serial_no = get_pending_serial_nos(pl_row, {pl_row.name: delivered})
+		serial_nos = get_serial_nos(get_pending_serial_nos(location, {location.name: delivered}))
+		pi_row.serial_no = "\n".join(serial_nos[: cint(pi_row.qty)])
 
 
 def get_delivered_component_serial_nos(main_item_row, pl_row):
