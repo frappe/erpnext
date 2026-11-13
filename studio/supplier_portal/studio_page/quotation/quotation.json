@@ -946,6 +946,7 @@
                           "color": "var(--ink-gray-8)",
                           "cursor": "pointer",
                           "justifySelf": "start",
+                          "marginBottom": "-1px",
                           "maxWidth": "100%",
                           "minWidth": "0px",
                           "whiteSpace": "normal"
