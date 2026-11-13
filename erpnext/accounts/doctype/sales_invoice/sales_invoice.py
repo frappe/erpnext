@@ -44,9 +44,9 @@ from erpnext.accounts.utils import (
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.depreciation import (
+	_get_disposal_account_and_cost_center,
 	depreciate_asset,
 	get_asset_disposal_values,
-	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
 	get_last_depreciation_date,
@@ -1421,7 +1421,7 @@ class SalesInvoice(SellingController):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
 				if not disposal_account:
-					disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(
+					disposal_account, depreciation_cost_center = _get_disposal_account_and_cost_center(
 						self.company
 					)
 
