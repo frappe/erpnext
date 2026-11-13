@@ -305,7 +305,7 @@
                 },
                 {
                  "baseStyles": {
-                  "color": "var(--ink-red-4)"
+                  "color": "var(--ink-red-7)"
                  },
                  "blockName": "Profile error",
                  "componentId": "TextBlock-c1296f5ebe",
@@ -452,7 +452,7 @@
               },
               {
                "baseStyles": {
-                "color": "var(--ink-red-4)"
+                "color": "var(--ink-red-7)"
                },
                "blockName": "Password hint",
                "componentId": "TextBlock-c1b149c8be",
@@ -492,7 +492,7 @@
                 },
                 {
                  "baseStyles": {
-                  "color": "var(--ink-red-4)"
+                  "color": "var(--ink-red-7)"
                  },
                  "blockName": "Password error",
                  "componentId": "TextBlock-5c67f22e88",
@@ -575,7 +575,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-28 12:00:00.000000",
+ "modified": "2026-11-13 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "account",
  "owner": "Administrator",

@@ -176,6 +176,12 @@ Line.props = ["text", "width", "end"];
 		opacity: 0;
 	}
 }
+@media (prefers-reduced-motion: reduce) {
+	.portal-skeleton,
+	.portal-reveal {
+		animation: none;
+	}
+}
 /* A document page: the items lead, the facts sit in a side panel on the right, and everything longer
    (terms, payments, comments) follows the items. The panel only sits beside the items on a wide
    screen, where the item table still has room; narrower, it is one column in the same order. Studio
@@ -253,6 +259,29 @@ Line.props = ["text", "width", "end"];
 	.portal-doc-aside > .portal-side-section {
 		padding-inline: 20px;
 	}
+}
+/* The status note, as the design's strip: tinted by its theme, body weight, and wrapping rather than
+   cut off. frappe-ui's Alert draws a grey box with a medium, one-line title. */
+.portal-doc-lead [data-slot="title"] {
+	font-weight: 420;
+	white-space: normal;
+	line-height: 1.5;
+}
+.portal-doc-lead [role][data-layout="row"] {
+	height: auto;
+	min-height: 2.5rem;
+}
+.portal-doc-lead [data-color="blue"] {
+	background: var(--surface-blue-2);
+}
+.portal-doc-lead [data-color="green"] {
+	background: var(--surface-green-2);
+}
+.portal-doc-lead [data-color="amber"] {
+	background: var(--surface-amber-2);
+}
+.portal-doc-lead [data-color="red"] {
+	background: var(--surface-red-2);
 }
 /* Shown or hidden at the width where the side panel sits beside the items: Print moves from the
    page header to the top of the panel, as on a desk form. */
