@@ -93,11 +93,10 @@ def make_packing_list(doc, order_packed_items=None):
 		if bundle_name:
 			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
 			so_packed_items = list(order_packed_items.get(order_row, []))
-			for bundle_item in get_product_bundle_items_by_name(bundle_name):
+			for bundle_item, so_packed_item in get_component_order_rows(
+				doc, item_row.item_code, get_product_bundle_items_by_name(bundle_name), so_packed_items
+			):
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				so_packed_item = pop_order_packed_item(
-					so_packed_items, item_row.item_code, bundle_item.item_code
-				)
 				# a component picked from several locations gets a packed row per location
 				locations = get_pick_list_locations(
 					doc, item_row, bundle_item, item_data, so_packed_item, stale_packed_items_table
@@ -493,6 +492,25 @@ def pop_order_packed_item(so_packed_items, parent_item, item_code):
 	for idx, row in enumerate(so_packed_items):
 		if row.parent_item == parent_item and row.item_code == item_code:
 			return so_packed_items.pop(idx)
+
+
+def get_component_order_rows(doc, parent_item, components, so_packed_items) -> list[tuple]:
+	"""Each component of a bundle row with the order's packed row it packs.
+
+	A return also packs every other returned row, e.g. of a component delivered from several warehouses."""
+	rows = [
+		(component, pop_order_packed_item(so_packed_items, parent_item, component.item_code))
+		for component in components
+	]
+	if doc.get("is_return"):
+		components_by_code = {component.item_code: component for component in components}
+		rows.extend(
+			(components_by_code[row.item_code], row)
+			for row in so_packed_items
+			if row.parent_item == parent_item and row.item_code in components_by_code
+		)
+
+	return rows
 
 
 def get_order_packed_item_pairs(doc) -> list[tuple]:
