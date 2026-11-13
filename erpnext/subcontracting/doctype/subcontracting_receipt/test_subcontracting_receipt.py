@@ -429,6 +429,47 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		self.assertEqual(stock_value_difference, -660)
 
+	def test_return_with_more_scrap_than_its_share_keeps_the_receipt_rate(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR", do_not_submit=True)
+		bom.append("scrap_items", {"item_code": scrap_item, "stock_qty": 1, "rate": 10})
+		bom.save()
+		bom.submit()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 2,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 2,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.get_scrap_items(recalculate_rate=True)
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -1
+		scr_return.remove_scrap_items()
+		scr_return.save()
+		scr_return.get_scrap_items()
+		scr_return.items[1].qty = -2
+		scr_return.save()
+
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_batch_return_uses_accepted_receipt_rate(self):
