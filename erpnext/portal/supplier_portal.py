@@ -1287,7 +1287,10 @@ def _payments(invoice) -> list[dict]:
 				"posting_date": invoice.posting_date,
 				"mode_of_payment": invoice.mode_of_payment,
 				"reference_no": None,
-				"allocated_amount": invoice.paid_amount,
+				# in the payable account's currency, as ERPNext counts it against the outstanding
+				"allocated_amount": invoice.paid_amount
+				if invoice.party_account_currency == invoice.currency
+				else invoice.base_paid_amount,
 			}
 		]
 		if invoice.is_paid and invoice.paid_amount
