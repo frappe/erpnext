@@ -3561,6 +3561,65 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		}
 		self.assertEqual(moved_qty, {rejected_warehouse: -10})
 
+	def test_return_of_rejected_qty_bought_in_another_uom(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRRUOM-.#####",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=5,
+			rejected_qty=1,
+			uom="Box",
+			conversion_factor=10,
+			rate=100,
+		)
+
+		returned = make_purchase_return(pr.name)
+		returned.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", returned.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+			-10,
+		)
+
+	def test_return_from_rejected_warehouse_bought_in_another_uom(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRWUOM-.#####",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			},
+		).name
+		pr = make_purchase_receipt(
+			item_code=item, qty=5, rejected_qty=1, uom="Box", conversion_factor=10, rate=100
+		)
+
+		returned = make_purchase_return_against_rejected_warehouse(pr.name)
+		returned.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", returned.items[0].serial_and_batch_bundle, "total_qty"
+			),
+			-10,
+		)
+
 	def test_return_of_a_transfer_that_rejected_batch_material(self):
 		"""Returning the whole receipt puts the accepted and the rejected material back into the
 		in-transit warehouse, and leaves the batch qty where it started."""
