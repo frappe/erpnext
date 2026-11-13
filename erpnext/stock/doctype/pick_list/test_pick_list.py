@@ -1631,6 +1631,40 @@ class TestPickList(ERPNextTestSuite):
 		second_delivery.submit()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_is_delivered_from_each_warehouse_it_is_picked_from(self):
+		pick_list = pick_bundle_from_two_warehouses()
+
+		delivery_note = create_delivery_note(pick_list.name)
+		self.assertEqual(get_packed_locations(delivery_note), get_packed_locations(pick_list, "locations"))
+		delivery_note.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.per_delivered, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_split_bundle_delivery_keeps_edited_serial_nos_on_save(self):
+		pick_list = pick_bundle_from_two_warehouses()
+		picked_serial_nos = [
+			number for row in pick_list.locations for number in get_serial_nos(row.serial_no)
+		]
+		unpicked = frappe.db.get_value(
+			"Serial No",
+			{"item_code": pick_list.locations[0].item_code, "serial_no": ("not in", picked_serial_nos)},
+			["serial_no", "warehouse"],
+			as_dict=True,
+		)
+
+		delivery_note = create_delivery_note(pick_list.name)
+		packed_item = next(row for row in delivery_note.packed_items if row.warehouse == unpicked.warehouse)
+		serial_nos = get_serial_nos(packed_item.serial_no)
+		packed_item.serial_no = "\n".join([*serial_nos[1:], unpicked.serial_no])
+		delivery_note.save()
+
+		self.assertEqual(len(delivery_note.packed_items), 2)
+		self.assertIn(unpicked.serial_no, get_serial_nos(packed_item.serial_no))
+		delivery_note.submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
@@ -4219,6 +4253,26 @@ def make_work_order_pick_list_with_reserved_serials():
 	pick_list = create_pick_list_from_wo(work_order.name, None, 2)
 	pick_list.save()
 	return pick_list
+
+
+def pick_bundle_from_two_warehouses():
+	"""Submitted Pick List of 4 bundles whose serialized component no single warehouse has enough of."""
+	component = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBTW-.#####"}
+	).name
+	make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=2, basic_rate=100)
+	make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=3, basic_rate=100)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	return pick_list
+
+
+def get_packed_locations(doc, table="packed_items"):
+	return sorted((row.warehouse, row.qty, row.serial_no) for row in doc.get(table))
 
 
 def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):
