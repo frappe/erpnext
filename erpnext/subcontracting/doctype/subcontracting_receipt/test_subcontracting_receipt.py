@@ -414,6 +414,23 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_return_leaves_out_a_secondary_qty_that_rounds_to_zero(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, quantity=1000, secondary_qty=0.6)
+		scr = make_receipt_with_secondary_items(fg_item, 1000)
+
+		for _ in range(2):
+			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+			scr_return.items = scr_return.items[:1]
+			scr_return.items[0].qty = -1
+			scr_return.save()
+			scr_return.get_secondary_items()
+			scr_return.save()
+			scr_return.submit()
+
+		scr.load_from_db()
+		self.assertEqual(scr.items[0].returned_qty, 2)
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
