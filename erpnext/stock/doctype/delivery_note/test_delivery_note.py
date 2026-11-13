@@ -3962,7 +3962,17 @@ class TestDeliveryNote(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_serial_no_skips_serial_nos_taken_by_a_packed_item(self):
+<<<<<<< HEAD
 		item, bundle, serial_nos = make_bundle_of_a_serial_item("TRPS-.#####")
+=======
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TRPS-.#####"}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [item])
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+		serial_nos = get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle)
+>>>>>>> 757c4e5 (test: auto-set serial no skips serial nos taken by a packed item)
 
 		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
 		dn.packed_items[0].update({"serial_no": "\n".join(serial_nos[:2]), "use_serial_batch_fields": 1})
@@ -3980,6 +3990,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
 
+<<<<<<< HEAD
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
@@ -4007,6 +4018,8 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
 
+=======
+>>>>>>> 757c4e5 (test: auto-set serial no skips serial nos taken by a packed item)
 	def test_auto_set_serial_batch_for_draft_dn(self):
 		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
 		frappe.db.set_single_value("Stock Settings", "pick_serial_and_batch_based_on", "FIFO")
