@@ -911,7 +911,8 @@ class BuyingController(SubcontractingController):
 			return
 
 		total_amount = sum(flt(d.base_net_amount) for d in items)
-		total_qty = sum(self.get_chargeable_qty(d) for d in items)
+		chargeable_qty = {d.idx: self.get_chargeable_qty(d) for d in items}
+		total_qty = sum(chargeable_qty.values())
 
 		# Nothing to proportion against (all rows have zero amount and zero qty)
 		if not total_amount and not total_qty:
@@ -920,9 +921,7 @@ class BuyingController(SubcontractingController):
 		remaining = total_charge
 		for d in items[:-1]:
 			proportion = (
-				flt(d.base_net_amount) / total_amount
-				if total_amount
-				else self.get_chargeable_qty(d) / total_qty
+				flt(d.base_net_amount) / total_amount if total_amount else chargeable_qty[d.idx] / total_qty
 			)
 			charge = flt(proportion * total_charge, self.precision("item_tax_amount", d))
 			charge_per_item[d.idx] = charge_per_item.get(d.idx, 0.0) + charge
@@ -941,6 +940,11 @@ class BuyingController(SubcontractingController):
 
 		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
 			return 0.0
+
+		# The returned rejected stock carried the charge only if its receipt row accepted nothing either.
+		if self.is_return and row.purchase_receipt_item:
+			if flt(frappe.db.get_value("Purchase Receipt Item", row.purchase_receipt_item, "qty")):
+				return 0.0
 
 		return flt(row.rejected_qty)
 
