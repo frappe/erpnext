@@ -599,6 +599,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def get_stock_and_rate(self):
 		self.check_source_documents_permission()
 		self.set_work_order_details()
+		if self.bom_no:
+			erpnext.require_permission("BOM", self.bom_no)
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
