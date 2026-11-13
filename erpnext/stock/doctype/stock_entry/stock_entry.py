@@ -352,6 +352,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		sbb = SerialBatchBundleService(self)
 
 		self.validate_reference_companies()
+		self.validate_row_reference_parents()
 		if self.purpose_cls:
 			self.purpose_cls(self).validate()
 
@@ -426,6 +427,30 @@ class StockEntry(StockController, SubcontractingInwardController):
 				frappe.throw(
 					_("{0} {1} does not belong to Company {2}").format(
 						_(doctype), other_company_document[0], self.company
+					)
+				)
+
+	def validate_row_reference_parents(self):
+		for row_field, child_doctype, parent_field in (
+			("pick_list_item", "Pick List Item", "pick_list"),
+			("job_card_item", "Job Card Item", "job_card"),
+		):
+			names = {row.get(row_field) for row in self.items if row.get(row_field)}
+			parent = self.get(parent_field) or ""
+			if names and (
+				other_parent_row := frappe.get_all(
+					child_doctype,
+					filters={"name": ("in", list(names)), "parent": ("!=", parent)},
+					pluck="name",
+					limit=1,
+				)
+			):
+				frappe.throw(
+					_("{0} {1} does not belong to {2} {3}").format(
+						_(child_doctype),
+						other_parent_row[0],
+						_(self.meta.get_label(parent_field)),
+						parent,
 					)
 				)
 
