@@ -31,6 +31,7 @@ from erpnext.accounts.utils import (
 	get_balance_on,
 	get_stock_accounts,
 	get_stock_and_account_balance,
+	sync_payment_schedule_outstanding,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
@@ -216,6 +217,7 @@ class JournalEntry(AccountsController):
 		self.update_invoice_discounting()
 		self.update_booked_depreciation()
 		self.update_payment_order_requests()
+		self.sync_payment_schedules()
 
 	def on_update_after_submit(self):
 		# Flag will be set on Reconciliation
@@ -257,6 +259,7 @@ class JournalEntry(AccountsController):
 		self.update_invoice_discounting()
 		self.update_booked_depreciation(1)
 		self.update_payment_order_requests(cancel=True)
+		self.sync_payment_schedules()
 
 	def on_trash(self):
 		from erpnext.accounts.doctype.payment_order.payment_order import clear_payment_reference
@@ -270,6 +273,12 @@ class JournalEntry(AccountsController):
 		)
 
 		update_payment_requests_from_journal_entry(self, cancel=cancel)
+
+	def sync_payment_schedules(self):
+		"""A reference moves the invoice outstanding through the ledger only, so follow it in the schedule."""
+		for reference in {(d.reference_type, d.reference_name) for d in self.accounts}:
+			if reference[0] in ("Sales Invoice", "Purchase Invoice"):
+				sync_payment_schedule_outstanding(*reference)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
