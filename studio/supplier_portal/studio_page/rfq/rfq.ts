@@ -111,7 +111,7 @@ export default function setup(context) {
 			line(__("Status"), statusText(quoteStatus(q))),
 			line(__("Sent on"), formatDate(q.transaction_date)),
 			q.valid_till ? line(__("Valid till"), formatDate(q.valid_till)) : line(__("Valid till"), EMPTY, INK5),
-			...(q.quotation_number ? [line(__("Your quotation no."), q.quotation_number)] : []),
+			...(q.quotation_number ? [line(__("Your ref."), q.quotation_number)] : []),
 		]
 	})
 

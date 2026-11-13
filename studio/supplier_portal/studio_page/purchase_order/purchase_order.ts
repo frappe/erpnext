@@ -81,7 +81,7 @@ export default function setup(context) {
 		})
 		// the supplier knows their quote by their own number, which ERPNext does not copy onto the order
 		const numbers = sourceQuotations.value.map((name) => doc.value.quotation_numbers?.[name]).filter(Boolean)
-		if (numbers.length) rows.push(line(__("Your quotation no."), numbers.join(", ")))
+		if (numbers.length) rows.push(line(__("Your ref."), numbers.join(", ")))
 		rows.push(line(__("Delivered"), progress(doc.value.per_received, __("All delivered"))))
 		rows.push(...links(doc.value.receipts, __("Receipt"), __("Receipts"), "/receipts/"))
 		rows.push(line(__("Billed"), progress(doc.value.per_billed, __("All billed"))))

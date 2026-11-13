@@ -95,12 +95,12 @@ export default function setup(context) {
 			...(dueLine.value ? [dueLine.value] : []),
 		]
 		// the supplier's own invoice number and date, as the buyer booked them
-		if (doc.value.bill_no) rows.push(line(__("Your invoice no."), doc.value.bill_no))
-		if (doc.value.bill_date) rows.push(line(__("Your invoice date"), formatDate(doc.value.bill_date)))
+		if (doc.value.bill_no) rows.push(line(__("Your ref."), doc.value.bill_no))
+		if (doc.value.bill_date) rows.push(line(__("Your ref. date"), formatDate(doc.value.bill_date)))
 		const against = doc.value.return_against
 		if (against) rows.push(link("against", __("Against invoice"), against, "/invoices/" + encodeURIComponent(against)))
 		sourceOrders.value.forEach((name, i) => {
-			const label = i > 0 ? "" : sourceOrders.value.length > 1 ? __("From orders") : __("From order")
+			const label = i > 0 ? "" : sourceOrders.value.length > 1 ? __("Purchase orders") : __("Purchase order")
 			rows.push(link("order", label, name, "/purchase-orders/" + encodeURIComponent(name)))
 		})
 		return rows

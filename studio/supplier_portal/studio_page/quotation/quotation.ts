@@ -76,7 +76,7 @@ export default function setup(context) {
 					? line(__("Valid till"), formatDate(till), RED, "500")
 					: line(__("Valid till"), formatDate(till)),
 		]
-		if (doc.value.quotation_number) rows.push(line(__("Your quotation no."), doc.value.quotation_number))
+		if (doc.value.quotation_number) rows.push(line(__("Your ref."), doc.value.quotation_number))
 		if (doc.value.rfq) {
 			rows.push({ ...line(__("RFQ"), doc.value.rfq, INK8), route: "/rfqs/" + encodeURIComponent(doc.value.rfq) })
 		}
