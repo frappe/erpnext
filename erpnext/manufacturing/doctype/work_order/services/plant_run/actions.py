@@ -150,10 +150,10 @@ class PlantRun:
 		lot.validate()
 		quantities = lot.resolved_quantities
 
+		job_card.db_set("for_quantity", lot.for_quantity)
 		job_card.set("items", [row for row in job_card.items if quantities[row.name] > 0])
 		for row in job_card.items:
 			row.required_qty = quantities[row.name]
-		job_card.for_quantity = lot.for_quantity
 		job_card.save()
 
 		entry = make_transfer_entry(job_card.name)
