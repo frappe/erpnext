@@ -1942,6 +1942,7 @@ class TestWorkOrder(FrappeTestCase):
 
 	def _make_shared_alternative_transfer(self):
 		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		allow_alternative_item(work_order, "_Test Item Home Desktop 100", "_Test Item")
 		test_stock_entry.make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
 		)
