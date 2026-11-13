@@ -154,7 +154,7 @@ class RepostItemValuation(Document):
 		if self.recalculate_valuation_rate and not self.can_recalculate_valuation_rate():
 			frappe.throw(
 				_(
-					"Recalculate Valuation Rate is only allowed for a Purchase Receipt, a Purchase Invoice with Update Stock or a Stock Entry with no Source Warehouse"
+					"Recalculate Valuation Rate is only allowed for a Purchase Receipt or a Purchase Invoice with Update Stock"
 				)
 			)
 
@@ -167,11 +167,6 @@ class RepostItemValuation(Document):
 
 		if self.voucher_type == "Purchase Invoice":
 			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
-
-		if self.voucher_type == "Stock Entry":
-			return not frappe.db.exists(
-				"Stock Entry Detail", {"parent": self.voucher_no, "s_warehouse": ("is", "set")}
-			)
 
 		return False
 
@@ -681,10 +676,7 @@ def repost(doc):
 			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
-		if (
-			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
-			and doc.recalculate_valuation_rate
-		):
+		if doc.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and doc.recalculate_valuation_rate:
 			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:
