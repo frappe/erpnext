@@ -564,8 +564,10 @@ class SubcontractingReceipt(SubcontractingController):
 		percentage_rows = []
 		for secondary_item in bom.secondary_items:
 			if secondary_item.valuation_type in ("Valuation Rate", "Manual"):
-				row = self.append_secondary_item(item, bom, secondary_item, warehouse, 0.0, fg_qty_before)
-				own_cost += flt(row.qty) * flt(row.rate)
+				if row := self.append_secondary_item(
+					item, bom, secondary_item, warehouse, 0.0, fg_qty_before
+				):
+					own_cost += flt(row.qty) * flt(row.rate)
 			else:
 				percentage_rows.append(secondary_item)
 
@@ -578,6 +580,10 @@ class SubcontractingReceipt(SubcontractingController):
 		qty = self.get_secondary_qty(
 			item, per_unit - (secondary_item.process_loss_qty / bom.quantity), fg_qty_before, "qty"
 		)
+		if self.is_return and not qty:
+			# rounds to nothing this time; the running total returns it with a later return
+			return
+
 		rate = self.get_secondary_item_rate(item, secondary_item, warehouse, qty, own_cost)
 
 		return self.append(
