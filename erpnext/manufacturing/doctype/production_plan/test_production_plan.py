@@ -1328,6 +1328,8 @@ class TestProductionPlan(FrappeTestCase):
 	def test_material_request_item_quantity_rounded_to_precision(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 0)
+
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
 			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Nos"}
@@ -2209,6 +2211,8 @@ class TestProductionPlan(FrappeTestCase):
 	def test_remaining_purchase_qty_rounded_to_precision(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 0)
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
