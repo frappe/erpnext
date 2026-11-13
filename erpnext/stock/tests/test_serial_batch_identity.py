@@ -673,7 +673,11 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 					doc = frappe._dict(items=[{"item_code": self.item.name, "serial_no": "SELECTED-001"}])
 					with patch(
 						"erpnext.stock.doctype.serial_no.serial_no.get_serial_nos_for_outward",
-						return_value=[selected.name, first.name, second.name],
+						side_effect=lambda kwargs: [
+							name
+							for name in (selected.name, first.name, second.name)
+							if name not in kwargs.ignore_serial_nos
+						],
 					) as lookup:
 						update_stock(ctx, out, doc)
 					self.assertEqual(out.serial_no, "Automatic-001")
