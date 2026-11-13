@@ -3,6 +3,7 @@
 
 
 import copy
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, cint, flt, nowtime, today
@@ -401,35 +402,23 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr = make_receipt_with_secondary_items(fg_item, 3)
 
 		for _ in range(3):
-			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-			# outside tests, the first save rebuilds the secondary rows before validating them
-			scr_return.items = scr_return.items[:1]
-			scr_return.items[0].qty = -1
-			scr_return.save()
-			scr_return.get_secondary_items()
-			scr_return.save()
-			scr_return.submit()
+			make_partial_return(scr.name, 1)
 
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
-	def test_return_leaves_out_a_secondary_qty_that_rounds_to_zero(self):
+	def test_return_of_the_rest_after_all_secondary_qty_is_returned(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item, quantity=1000, secondary_qty=0.6)
 		scr = make_receipt_with_secondary_items(fg_item, 1000)
 
-		for _ in range(2):
-			scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-			scr_return.items = scr_return.items[:1]
-			scr_return.items[0].qty = -1
-			scr_return.save()
-			scr_return.get_secondary_items()
-			scr_return.save()
-			scr_return.submit()
+		make_partial_return(scr.name, 992)
+		scr_return = make_partial_return(scr.name, 8)
 
+		self.assertEqual(len(scr_return.items), 1)
 		scr.load_from_db()
-		self.assertEqual(scr.items[0].returned_qty, 2)
+		self.assertEqual(scr.per_returned, 100)
 
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
@@ -5589,6 +5578,17 @@ def make_receipt_with_secondary_items(fg_item, qty):
 	scr.save()
 	scr.submit()
 	return scr
+
+
+def make_partial_return(scr_name, fg_qty):
+	"""Submitted return of fg_qty of the receipt's finished good, saved as outside tests."""
+	scr_return = make_return_doc("Subcontracting Receipt", scr_name)
+	scr_return.items[0].qty = -fg_qty
+	# outside tests, the first save rebuilds the secondary rows
+	with patch.object(frappe, "in_test", False):
+		scr_return.save()
+	scr_return.submit()
+	return scr_return
 
 
 def make_return_subcontracting_receipt(**args):
