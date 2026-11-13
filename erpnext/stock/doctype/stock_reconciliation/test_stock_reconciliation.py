@@ -178,6 +178,21 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		frappe.set_user(users["_Test Company"])
 		self.assertEqual(get_difference_account("Opening Stock", "_Test Company"), "Temporary Opening - _TC")
 
+	def test_difference_account_applies_company_permission_for_stock_reconciliation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		user = create_user("reco-account-scoped@example.com", "Stock Manager").name
+		if not frappe.db.exists("User Permission", {"user": user, "allow": "Company"}):
+			add_user_permission("Company", "_Test Company 1", user, applicable_for="Stock Reconciliation")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(user)
+		self.assertRaises(frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company")
+		self.assertEqual(
+			get_difference_account("Opening Stock", "_Test Company 1"), "Temporary Opening - _TC1"
+		)
+
 	def test_stock_reco_for_serialized_item(self):
 		to_delete_records = []
 
