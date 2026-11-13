@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 import frappe
 from frappe import qb
-from frappe.cache_manager import clear_doctype_map
 from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, getdate, nowdate
@@ -2550,31 +2549,3 @@ class TestAccountsController(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, po.save)
 		po.items[0].delivered_by_supplier = 1
 		po.save()
-<<<<<<< HEAD
-=======
-
-	@ERPNextTestSuite.change_settings("Global Defaults", {"use_posting_datetime_for_naming_documents": 1})
-	def test_document_naming_rule_based_on_posting_date(self):
-		frappe.new_doc(
-			"Document Naming Rule", document_type="Sales Invoice", prefix="SI-.MM.-.YYYY.-"
-		).insert()
-		self.addCleanup(clear_doctype_map, "Document Naming Rule", "Sales Invoice")
-
-		si = create_sales_invoice(do_not_save=True)
-		si.set_posting_time = 1
-		si.posting_date = "2025-12-31"
-		si.save()
-		self.assertEqual(si.name, "SI-12-2025-00001")
-
-		si = create_sales_invoice(do_not_save=True)
-		si.set_posting_time = 1
-		si.posting_date = "2026-01-01"
-		si.save()
-		self.assertEqual(si.name, "SI-01-2026-00001")
-
-		si = create_sales_invoice(do_not_save=True)
-		si.set_posting_time = 1
-		si.posting_date = "2026-01-15"
-		si.save()
-		self.assertEqual(si.name, "SI-01-2026-00002")
->>>>>>> 6bb6d0c (test: clear the Sales Invoice naming rule map after the posting date naming test)
