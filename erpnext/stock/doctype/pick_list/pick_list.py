@@ -2137,6 +2137,7 @@ def update_common_item_properties(item, location, moved_serial_nos):
 	item.material_request = location.material_request
 	item.serial_no = get_pending_serial_nos(location, moved_serial_nos, "transferred_qty")
 	item.batch_no = location.batch_no
+	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name
 
