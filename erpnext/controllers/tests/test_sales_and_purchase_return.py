@@ -101,6 +101,67 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_dn.insert()
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_split_return_of_one_row_submits_as_fully_returned(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
+		for row in return_dn.items:
+			row.dn_detail = return_dn.items[0].dn_detail
+		return_dn.submit()
+
+		self.assertEqual(frappe.db.get_value("Delivery Note", return_dn.return_against, "per_returned"), 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_return_of_rounded_stock_qty_in_stock_uom(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		# stock qty rounds up, then down
+		for conversion_factor in (0.3356, 0.3344):
+			with self.subTest(conversion_factor=conversion_factor):
+				dn = make_box_delivery_note(conversion_factor)
+				return_dn = make_sales_return(dn.name)
+				row = return_dn.items[0]
+				row.uom, row.conversion_factor, row.qty = "Kg", 1, -dn.items[0].stock_qty
+				return_dn.submit()
+
+				self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "per_returned"), 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_returns_of_invoiced_row_get_full_credit(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice, make_sales_return
+
+		dn = make_box_delivery_note(conversion_factor=0.3356)
+		make_sales_invoice(dn.name).submit()
+
+		for _ in range(3):
+			return_dn = make_sales_return(dn.name)
+			return_dn.items[0].qty = -1
+			return_dn.issue_credit_note = 1
+			return_dn.submit()
+			credited_qty = frappe.db.get_value(
+				"Sales Invoice Item", {"dn_detail": return_dn.items[0].name, "docstatus": 1}, "qty"
+			)
+			self.assertEqual(credited_qty, -1)
+
+	def test_purchase_receipt_split_return_of_one_row_submits_as_fully_returned(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		conversion_factor = 0.3356
+		item_code = make_box_item(conversion_factor)
+		# each return row moves its own rounded stock qty, a bit more than the receipt row
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		pr = make_purchase_receipt(item_code=item_code, qty=3, uom="Box", conversion_factor=conversion_factor)
+
+		return_pr = make_purchase_return(pr.name)
+		return_pr.items[0].qty = return_pr.items[0].received_qty = -1
+		for _ in range(2):
+			return_pr.append("items", dict(return_pr.items[0].as_dict(), name=None))
+		return_pr.submit()
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "per_returned"), 100)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
 		return_dn.insert()
@@ -341,13 +402,10 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertRaises(StockOverReturnError, return_doc.insert)
 
 
-def make_split_return_of_box_item(conversion_factor, delivery_rows):
-	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
-	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+def make_box_item(conversion_factor):
 	from erpnext.stock.doctype.item.test_item import make_item
-	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-	item_code = make_item(
+	return make_item(
 		properties={
 			"is_stock_item": 1,
 			"stock_uom": "Kg",
@@ -357,6 +415,14 @@ def make_split_return_of_box_item(conversion_factor, delivery_rows):
 			],
 		}
 	).name
+
+
+def make_box_delivery_note(conversion_factor, delivery_rows=1):
+	"""Deliver 3 Box over `delivery_rows` rows."""
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+	item_code = make_box_item(conversion_factor)
 	make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
 	dn = create_delivery_note(item_code=item_code, qty=3 // delivery_rows, do_not_submit=True)
 	for _ in range(delivery_rows - 1):
@@ -364,7 +430,13 @@ def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	for row in dn.items:
 		row.uom, row.conversion_factor = "Box", conversion_factor
 	dn.submit()
+	return dn
 
+
+def make_split_return_of_box_item(conversion_factor, delivery_rows):
+	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+	dn = make_box_delivery_note(conversion_factor, delivery_rows)
 	return_dn = make_sales_return(dn.name)
 	if delivery_rows == 1:
 		return_dn.items[0].qty = -1
