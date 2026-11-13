@@ -136,6 +136,16 @@ class TestProcessDesign(ERPNextTestSuite):
 		self.assertIn("Stage 1 needs a yield above 0% and up to 100%", result["errors"])
 		self.assertEqual(result["outputs"][1], 0)
 
+	def test_plant_builder_design_check_lists_what_blocks_the_boms(self):
+		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design
+
+		design = make_ketchup_design().as_dict()
+		design.operations[0].update(output_item=None, time_in_mins=0)
+		errors = "\n".join(check_design(design)["errors"])
+
+		self.assertIn("choose the item this step makes", errors)
+		self.assertIn("set the operation time", errors)
+
 	def test_plant_builder_design_check_needs_workstation_read(self):
 		from erpnext.manufacturing.page.plant_builder.plant_builder import check_design
 
