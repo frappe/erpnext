@@ -721,7 +721,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.subcontracting_order_item = source_doc.subcontracting_order_item
 				target_doc.rejected_warehouse = source_doc.rejected_warehouse
 				target_doc.subcontracting_receipt_item = source_doc.name
-				target_doc.is_scrap_item = source_doc.is_scrap_item
 				if return_against_rejected_qty:
 					target_doc.qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
 					target_doc.rejected_qty = 0.0
