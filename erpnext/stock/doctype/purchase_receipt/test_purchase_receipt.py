@@ -9176,6 +9176,53 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(sum(d.debit for d in gl_entries), 210)
 		self.assertEqual(credits, {srbnb_account: 200, "Expenses Included In Valuation - TCP1": 10})
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	def test_return_of_rejected_qty_leaves_out_the_accepted_valuation_charge(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		company = "_Test Company with perpetual inventory"
+		receipt = make_purchase_receipt(
+			company=company,
+			warehouse=create_warehouse("_Test In-ward Warehouse", company=company),
+			rejected_warehouse=create_warehouse("_Test Warehouse - Rejected Material", company=company),
+			qty=3,
+			rejected_qty=2,
+			rate=100,
+			do_not_save=1,
+		)
+		receipt.append(
+			"taxes",
+			{
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"add_deduct_tax": "Add",
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 40,
+			},
+		)
+		receipt.insert()
+		receipt.submit()
+
+		return_receipt = make_return_doc("Purchase Receipt", receipt.name)
+		return_receipt.items[0].qty = 0
+		return_receipt.items[0].received_qty = -2
+		return_receipt.items[0].rejected_qty = -2
+		return_receipt.submit()
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": return_receipt.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		srbnb_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
+		debits = {d.account: d.debit for d in gl_entries if d.debit}
+
+		self.assertEqual(return_receipt.items[0].item_tax_amount, 0)
+		self.assertEqual(debits, {srbnb_account: 200})
+		self.assertEqual(sum(d.credit for d in gl_entries), 200)
+
 	def test_landed_cost_of_returned_goods_is_not_posted_to_srbnb(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
