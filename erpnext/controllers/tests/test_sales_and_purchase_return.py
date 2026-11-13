@@ -150,7 +150,7 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		conversion_factor = 0.3356
 		item_code = make_box_item(conversion_factor)
-		# each return row moves its own rounded stock qty, a bit more than the receipt row
+		# spare stock, so this test checks only the return status
 		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
 		pr = make_purchase_receipt(item_code=item_code, qty=3, uom="Box", conversion_factor=conversion_factor)
 
