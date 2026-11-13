@@ -8827,6 +8827,51 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(sorted(stock_value), [200, 900])
 		self.assertEqual(srbnb_credit, 1000)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
+	def test_valuation_charge_on_receipt_with_only_rejected_qty(self):
+		company = "_Test Company with perpetual inventory"
+		rejected_warehouse = create_warehouse("_Test Warehouse - Rejected Material", company=company)
+		receipt = make_purchase_receipt(
+			company=company,
+			warehouse=create_warehouse("_Test In-ward Warehouse", company=company),
+			rejected_warehouse=rejected_warehouse,
+			qty=0,
+			rejected_qty=2,
+			rate=100,
+			do_not_save=1,
+		)
+		receipt.append(
+			"taxes",
+			{
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"add_deduct_tax": "Add",
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 10,
+			},
+		)
+		receipt.insert()
+		receipt.submit()
+
+		stock_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": receipt.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		)
+		srbnb_account = frappe.get_cached_value("Company", company, "stock_received_but_not_billed")
+		credits = {d.account: d.credit for d in gl_entries if d.credit}
+
+		self.assertEqual(stock_value, 210)
+		self.assertEqual(sum(d.debit for d in gl_entries), 210)
+		self.assertEqual(credits, {srbnb_account: 200, "Expenses Included In Valuation - TCP1": 10})
+
 	def test_landed_cost_of_returned_goods_is_not_posted_to_srbnb(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
