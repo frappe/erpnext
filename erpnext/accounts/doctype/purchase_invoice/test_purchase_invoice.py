@@ -4510,6 +4510,7 @@ def make_purchase_invoice(**args):
 
 def make_fully_rejected_stock_invoice():
 	"""A stock updating invoice that rejects both units of its only row, at 100 each."""
+	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
