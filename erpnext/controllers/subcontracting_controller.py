@@ -1319,7 +1319,7 @@ class SubcontractingController(StockController):
 
 	def update_kept_supplied_items_qty(self, row, earlier_receipts):
 		"""Supplied rows kept for their serial / batch nos take the change in BOM qty that other receipts
-		caused since they were made; the last row of a BOM row split over batches takes it."""
+		caused since they were made; a BOM row split over batches takes it from its last row back."""
 		materials = self._get_materials_from_bom(row.item_code, row.bom, row.get("include_exploded_items"))
 		repeated_bom_rows = get_repeated_bom_rows(materials)
 		for bom_item in materials:
@@ -1332,15 +1332,20 @@ class SubcontractingController(StockController):
 				continue
 
 			precision = supplied_rows[0].precision("required_qty")
+			if not has_bom_row_required_qty(supplied_rows, precision):
+				continue
+
 			required_qty = flt(self.get_bom_qty(row, bom_item, earlier_receipts), precision)
 			difference = flt(required_qty - flt(supplied_rows[0].required_qty), precision)
 			if not difference:
 				continue
 
-			last_row = supplied_rows[-1]
-			last_row.consumed_qty = flt(
-				last_row.consumed_qty + difference, last_row.precision("consumed_qty")
-			)
+			for supplied_row in reversed(supplied_rows):
+				change = max(difference, -flt(supplied_row.consumed_qty))
+				supplied_row.consumed_qty = flt(
+					supplied_row.consumed_qty + change, supplied_row.precision("consumed_qty")
+				)
+				difference = flt(difference - change, precision)
 			for supplied_row in supplied_rows:
 				supplied_row.required_qty = required_qty
 
@@ -1781,6 +1786,14 @@ class SubcontractingController(StockController):
 					)
 
 				mr_obj.update_requested_qty(mr_item_rows)
+
+
+def has_bom_row_required_qty(supplied_rows, precision):
+	"""Supplied rows of a BOM row all carry its required qty, which covers what they consume; rows split
+	over batches can instead carry their batch's share."""
+	required_qty = {flt(d.required_qty, precision) for d in supplied_rows}
+	consumed_qty = flt(sum(flt(d.consumed_qty) for d in supplied_rows), precision)
+	return len(required_qty) == 1 and required_qty.pop() >= consumed_qty
 
 
 def get_repeated_bom_rows(materials):
