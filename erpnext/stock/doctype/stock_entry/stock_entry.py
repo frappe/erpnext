@@ -7,8 +7,10 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
 	cint,
@@ -2280,6 +2282,7 @@ def get_warehouse_details(args: str | dict):
 	check_company(args.get("company"))
 	if args.warehouse:
 		erpnext.require_user_permission("Warehouse", args.warehouse)
+		check_stock_entry_warehouse_permission(args.warehouse)
 
 	ret = {}
 	if args.warehouse and args.item_code:
@@ -2294,3 +2297,10 @@ def get_warehouse_details(args: str | dict):
 			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret
+
+
+def check_stock_entry_warehouse_permission(warehouse: str) -> None:
+	permissions = get_user_permissions().get("Warehouse", [])
+	allowed_warehouses = get_allowed_docs_for_doctype(permissions, "Stock Entry")
+	if allowed_warehouses and warehouse not in allowed_warehouses:
+		frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
