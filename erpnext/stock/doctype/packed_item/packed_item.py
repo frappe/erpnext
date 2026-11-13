@@ -519,16 +519,15 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 	pairs = []
 	for item in doc.get("items"):
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, item), []))
-		paired = {}
+		so_packed_items_by_name = {row.name: row for row in so_packed_items}
 		for packed_item in doc.get("packed_items"):
 			if packed_item.parent_detail_docname != (item.name or item.idx):
 				continue
 
-			# a component packed from several Pick List locations delivers the same order row
-			if so_packed_item := pop_order_packed_item(
-				so_packed_items, packed_item.parent_item, packed_item.item_code
-			) or paired.get(packed_item.item_code):
-				paired[packed_item.item_code] = so_packed_item
+			# rows packed from several Pick List locations all deliver the order row they link to
+			if so_packed_item := so_packed_items_by_name.get(
+				packed_item.sales_order_packed_item
+			) or pop_order_packed_item(so_packed_items, packed_item.parent_item, packed_item.item_code):
 				pairs.append((packed_item, so_packed_item))
 
 	return pairs
