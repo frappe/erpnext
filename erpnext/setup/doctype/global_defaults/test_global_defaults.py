@@ -9,6 +9,13 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestGlobalDefaults(ERPNextTestSuite):
+	def test_save_without_changes_keeps_site_cache(self):
+		frappe.get_doc("Global Defaults").save()
+		frappe.cache.set_value("global_defaults_probe", 1)
+
+		frappe.get_doc("Global Defaults").save()
+		self.assertEqual(frappe.cache.get_value("global_defaults_probe"), 1)
+
 	def test_disable_in_words_preserves_payment_and_subcontracting_print_defaults(self):
 		for doctype in ("Payment Entry", "Subcontracting Receipt"):
 			make_property_setter(doctype, "in_words", "print_hide", 1, "Check")
