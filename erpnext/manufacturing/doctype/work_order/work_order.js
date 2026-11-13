@@ -1142,6 +1142,12 @@ erpnext.work_order = {
 		if (purpose === "Manufacture") {
 			max = flt(Math.max(max - flt(frm.doc.process_loss_qty), 0), precision("qty"));
 		}
+		// a passed qty is already the caller's cap
+		const allowance =
+			qty == null ? (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100 : 0;
+		const allowed_qty = flt(max + allowance, precision("qty"));
+		// only the overproduction allowance may be left
+		const default_qty = max || allowed_qty;
 		const pending_process_loss =
 			purpose === "Manufacture" ? this.get_pending_operation_process_loss(frm) : 0;
 
@@ -1150,8 +1156,8 @@ erpnext.work_order = {
 				fieldtype: "Float",
 				label: __("Qty for {0}", [target || __(purpose)]),
 				fieldname: "qty",
-				description: __("Max: {0}", [max]),
-				default: max,
+				description: __("Max: {0}", [allowed_qty]),
+				default: default_qty,
 				onchange: function () {
 					if (pending_process_loss && frm.qty_prompt) {
 						frm.qty_prompt.set_value(
@@ -1177,7 +1183,7 @@ erpnext.work_order = {
 					fieldtype: "Float",
 					label: __("Finished Good Qty"),
 					fieldname: "finished_good_qty",
-					default: flt(Math.max(max - pending_process_loss, 0), precision("qty")),
+					default: flt(Math.max(default_qty - pending_process_loss, 0), precision("qty")),
 					read_only: 1,
 					description: __("Actual quantity of the finished good that will be manufactured."),
 				}
@@ -1188,15 +1194,13 @@ erpnext.work_order = {
 			frm.qty_prompt = frappe.prompt(
 				fields,
 				(data) => {
-					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
-
 					if (!data.qty || data.qty <= 0) {
 						frappe.msgprint(__("Quantity must be greater than zero."));
 						reject();
 						return;
 					}
-					if (data.qty > max) {
-						frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+					if (data.qty > allowed_qty) {
+						frappe.msgprint(__("Quantity must not be more than {0}", [allowed_qty]));
 						reject();
 						return;
 					}
