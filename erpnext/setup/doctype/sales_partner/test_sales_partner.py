@@ -218,3 +218,28 @@ class TestSalesPartner(IntegrationTestCase):
 
 		with self.assertRaisesRegex(frappe.ValidationError, "Route .* is already used"):
 			self.make_partner(route="/" + route + "/.")
+
+	def test_published_partner_page_is_public(self):
+		from frappe.utils import set_request
+		from frappe.website.serve import get_response
+
+		published = self.make_partner(show_in_website=1)
+		hidden = self.make_partner()
+		with self.set_user("Guest"):
+			for partner, status_code in ((published, 200), (hidden, 404)):
+				with self.subTest(partner=partner.name):
+					set_request(method="GET", path=partner.route)
+					self.assertEqual(get_response().status_code, status_code)
+
+	def test_website_list_hides_internal_fields(self):
+		from frappe.www.list import get_list_data
+
+		published = self.make_partner(show_in_website=1)
+		hidden = self.make_partner()
+		with self.set_user("Guest"):
+			rows = get_list_data("Sales Partner")
+
+		names = [row.name for row in rows]
+		self.assertIn(published.name, names)
+		self.assertNotIn(hidden.name, names)
+		self.assertFalse(any("commission_rate" in row for row in rows))

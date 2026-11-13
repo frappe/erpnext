@@ -5,6 +5,10 @@ import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+	get_dimension_filter_condition,
+)
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -69,6 +73,96 @@ class TestGeneralLedger(ERPNextTestSuite):
 		self.assertTrue(columns)
 		self.assertTrue(data)
 		self.assertTrue(any("remarks" in row for row in data))
+
+	def test_blank_accounting_dimension_filter(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		blank_dimension_je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 100, save=False)
+		for account in blank_dimension_je.accounts:
+			account.cost_center = None
+			account.department = None
+		blank_dimension_je.insert()
+		blank_dimension_je.submit()
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": blank_dimension_je.name},
+			{"cost_center": None, "department": None},
+		)
+
+		dimensioned_je = make_journal_entry("_Test Bank - _TC", "_Test Cash - _TC", 200, save=False)
+		for account in dimensioned_je.accounts:
+			account.department = "_Test Department - _TC"
+		dimensioned_je.insert()
+		dimensioned_je.submit()
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=today(),
+			to_date=today(),
+			categorize_by="Categorize by Voucher",
+		)
+
+		def get_vouchers(**dimension_filters):
+			report_filters = filters.copy()
+			report_filters.update(dimension_filters)
+			return {row.voucher_no for row in execute(report_filters)[1] if row.get("voucher_no")}
+
+		all_vouchers = get_vouchers()
+		self.assertLessEqual({blank_dimension_je.name, dimensioned_je.name}, all_vouchers)
+
+		blank_cost_center_vouchers = get_vouchers(cost_center=[BLANK_ACCOUNTING_DIMENSION])
+		self.assertIn(blank_dimension_je.name, blank_cost_center_vouchers)
+		self.assertNotIn(dimensioned_je.name, blank_cost_center_vouchers)
+
+		blank_department_vouchers = get_vouchers(department=[BLANK_ACCOUNTING_DIMENSION])
+		self.assertIn(blank_dimension_je.name, blank_department_vouchers)
+		self.assertNotIn(dimensioned_je.name, blank_department_vouchers)
+
+		department_vouchers = get_vouchers(department=["_Test Department - _TC"])
+		self.assertNotIn(blank_dimension_je.name, department_vouchers)
+		self.assertIn(dimensioned_je.name, department_vouchers)
+
+		all_department_vouchers = get_vouchers(
+			department=[BLANK_ACCOUNTING_DIMENSION, "_Test Department - _TC"]
+		)
+		self.assertLessEqual({blank_dimension_je.name, dimensioned_je.name}, all_department_vouchers)
+
+		gl_entry = frappe.qb.DocType("GL Entry")
+		blank_department_condition = get_dimension_filter_condition(
+			gl_entry.department, [BLANK_ACCOUNTING_DIMENSION]
+		)
+		query_builder_vouchers = set(
+			frappe.qb.from_(gl_entry)
+			.select(gl_entry.voucher_no)
+			.where(gl_entry.voucher_no.isin([blank_dimension_je.name, dimensioned_je.name]))
+			.where(blank_department_condition)
+			.run(pluck=True)
+		)
+		self.assertEqual(query_builder_vouchers, {blank_dimension_je.name})
+
+	def test_blank_dimension_filter_keeps_party_and_voucher(self):
+		sales_invoice = create_sales_invoice(
+			company=self.company,
+			customer="_Test Customer",
+			debit_to="Debtors - _TC",
+		)
+		frappe.db.set_value(
+			"GL Entry",
+			{"voucher_no": sales_invoice.name},
+			{"department": None},
+		)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=sales_invoice.posting_date,
+			to_date=sales_invoice.posting_date,
+			categorize_by="Categorize by Voucher (Consolidated)",
+			department=[BLANK_ACCOUNTING_DIMENSION],
+		)
+		invoice_rows = [row for row in execute(filters)[1] if row.get("voucher_no") == sales_invoice.name]
+
+		self.assertTrue(invoice_rows)
+		self.assertIn("_Test Customer", {row.get("party") for row in invoice_rows})
 
 	def clear_old_entries(self):
 		doctype_list = [
@@ -539,6 +633,52 @@ class TestGeneralLedger(ERPNextTestSuite):
 		filters.update(show_amount_in_company_currency=0, presentation_currency="USD")
 		total = next(r for r in execute(filters)[1] if r.get("account") == "'Total'")
 		self.assertEqual(total["debit"], 100)
+
+	def test_convert_at_reporting_date_rate_for_foreign_currency_account(self):
+		from erpnext.accounts.report import utils as report_utils
+
+		account = frappe.get_doc(
+			doctype="Account",
+			account_name="Test USD Account for Reporting Date Rate",
+			company=self.company,
+			parent_account="Bank Accounts - _TC",
+			account_type="Bank",
+			account_currency="USD",
+		).insert(ignore_if_duplicate=True)
+		jv = frappe.new_doc(
+			"Journal Entry", posting_date=add_days(today(), -10), company=self.company, multi_currency=1
+		)
+		jv.append(
+			"accounts", {"account": account.name, "debit_in_account_currency": 100, "exchange_rate": 80}
+		)
+		jv.append("accounts", {"account": "Cash - _TC", "credit_in_account_currency": 8000})
+		jv.submit()
+
+		frappe.db.delete("Currency Exchange", {"from_currency": "USD", "to_currency": "INR"})
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date=today(),
+			from_currency="USD",
+			to_currency="INR",
+			exchange_rate=100,
+		).insert()
+		exchange_rates = getattr(report_utils, "__exchange_rates")
+		exchange_rates.clear()
+		self.addCleanup(exchange_rates.clear)
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=add_days(today(), -5),
+			to_date=today(),
+			account=[account.name],
+		)
+		opening = next(r for r in execute(filters)[1] if r.get("account") == "'Opening'")
+		self.assertEqual(opening["debit"], 100)
+
+		filters.update(convert_at_reporting_date_rate=1, presentation_currency=None)
+		opening = next(r for r in execute(filters)[1] if r.get("account") == "'Opening'")
+		self.assertEqual(opening["debit"], 80)
+		self.assertEqual(opening["presentation_currency"], "USD")
 
 	def test_presentation_currency_without_exchange_rate(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

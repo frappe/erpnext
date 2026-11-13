@@ -18,8 +18,9 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext import get_company_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
@@ -323,7 +324,7 @@ class WorkOrder(Document):
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
-			validate_bom_no(self.production_item, self.bom_no)
+			validate_production_bom(self.production_item, self.bom_no)
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
@@ -332,13 +333,13 @@ class WorkOrder(Document):
 		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
+		self.reset_use_multi_level_bom()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
 		self.validate_operations()
 		self.status = self.get_status()
 		self.validate_workstation_type()
-		self.reset_use_multi_level_bom()
 		WorkOrderStockReservation(self).clear_reserve_stock_if_disabled()
 		WorkOrderStockReservation(self).set_reserve_stock()
 		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
@@ -1076,6 +1077,8 @@ class WorkOrder(Document):
 	def make_bom(self):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
+		bom.company = self.company
+		bom.currency = get_company_currency(self.company)
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 

@@ -40,6 +40,7 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries
 	get_sub_assembly_items,
 )
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -440,7 +441,7 @@ def _explode_bom_items(
 
 
 def _plain_item_details(doc, data, planned_qty):
-	item_master = frappe.get_doc("Item", data["item_code"]).as_dict()
+	item_master = get_item_defaults(data["item_code"], doc.get("company"))
 	purchase_uom = item_master.purchase_uom or item_master.stock_uom
 	conversion_factor = (
 		get_uom_conversion_factor(item_master.name, purchase_uom) if item_master.purchase_uom else 1.0
@@ -542,6 +543,7 @@ def _mr_item_for_details(
 		bin_dict,
 		consumed_qty,
 		shortage_bin,
+		is_transfer,
 	)
 
 
@@ -660,6 +662,7 @@ def get_material_request_items(
 	bin_dict,
 	consumed_qty,
 	shortage_bin,
+	is_transfer=False,
 ):
 	required_qty = _required_qty_for_mr(
 		row, ignore_existing_ordered_qty, warehouse, shortage_bin, consumed_qty, include_safety_stock
@@ -676,6 +679,7 @@ def get_material_request_items(
 		conversion_factor,
 		item_group_defaults,
 		min_order_qty,
+		is_transfer,
 	)
 
 
@@ -796,7 +800,7 @@ def _quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty=0):
 
 def _round_up_whole_uom(quantity, uom):
 	if uom and frappe.get_cached_value("UOM", uom, "must_be_whole_number"):
-		return ceil(quantity)
+		return ceil(flt(quantity, frappe.get_precision("Material Request Plan Item", "quantity")))
 	return quantity
 
 
@@ -825,6 +829,7 @@ def _material_request_item_row(
 	conversion_factor,
 	item_group_defaults,
 	min_order_qty=0,
+	is_transfer=False,
 ):
 	warehouse = (
 		warehouse
@@ -833,12 +838,16 @@ def _material_request_item_row(
 		or item_group_defaults.get("default_warehouse")
 	)
 	uom = _mr_purchase_uom(row) or row.get("stock_uom")
+	if is_transfer:  # whole stock UOM; what is left to purchase rounds later
+		quantity = _round_up_whole_uom(required_qty, row.get("stock_uom")) / conversion_factor
+	else:
+		quantity = _round_up_whole_uom(
+			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
+		)
 	return {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
-		"quantity": _round_up_whole_uom(
-			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
-		),
+		"quantity": quantity,
 		"conversion_factor": conversion_factor,
 		"required_bom_qty": row.get("qty"),
 		"stock_uom": row.get("stock_uom"),
@@ -848,6 +857,7 @@ def _material_request_item_row(
 		"projected_qty": bin_dict.get("projected_qty", 0),
 		"ordered_qty": bin_dict.get("ordered_qty", 0),
 		"reserved_qty_for_production": bin_dict.get("reserved_qty_for_production", 0),
+		"planned_qty": bin_dict.get("planned_qty", 0),
 		"min_order_qty": row["min_order_qty"],
 		"material_request_type": row.get("default_material_request_type"),
 		"sales_order": sales_order,
@@ -949,19 +959,28 @@ def _raw_materials_header():
 		"Reserved Qty for Production",
 		"Safety Stock",
 		"Required Qty",
+		"UOM",
 	]
 
 
 def _build_download_rows(doc, items, item_list):
+	precision = frappe.get_precision("Material Request Plan Item", "quantity")
 	duplicate_item_wh_list = frappe._dict()
 	for d in items:
 		key = (d.get("item_code"), d.get("warehouse"))
 		if key in duplicate_item_wh_list:
-			duplicate_item_wh_list[key][12] += d.get("quantity")
+			# transfer rows are in stock UOM and purchase rows in purchase UOM, so add in the row's UOM
+			merged = duplicate_item_wh_list[key]
+			merged.quantity += _stock_quantity(d) / merged.conversion_factor
+			merged.row[12] = flt(merged.quantity, precision)
 			continue
 
 		rm_data = _raw_material_row(d)
-		duplicate_item_wh_list[key] = rm_data
+		duplicate_item_wh_list[key] = frappe._dict(
+			row=rm_data,
+			conversion_factor=flt(d.get("conversion_factor")) or 1,
+			quantity=flt(d.get("quantity")),
+		)
 		item_list.append(rm_data)
 
 		if not doc.get("for_warehouse"):
@@ -983,6 +1002,7 @@ def _raw_material_row(d):
 		d.get("reserved_qty_for_production"),
 		d.get("safety_stock"),
 		d.get("quantity"),
+		d.get("uom"),
 	]
 
 
@@ -997,11 +1017,13 @@ def _append_other_warehouse_bins(item_list, d, doc):
 				"",
 				"",
 				"",
+				"",
 				bin_dict.get("warehouse"),
 				"",
 				bin_dict.get("projected_qty", 0),
 				bin_dict.get("actual_qty", 0),
 				bin_dict.get("ordered_qty", 0),
+				bin_dict.get("planned_qty", 0),
 				bin_dict.get("reserved_qty_for_production", 0),
 			]
 		)

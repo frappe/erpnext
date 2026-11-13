@@ -6,7 +6,11 @@ from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, escape_html, flt, nowdate
 
 from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_or_batch_items
+from erpnext.stock.serial_batch_bundle import (
+	SerialBatchCreation,
+	add_picked_batches,
+	get_serial_or_batch_items,
+)
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.utils import get_combine_datetime
 
@@ -39,15 +43,8 @@ class StockEntrySABB(BaseStockEntry):
 			row.serial_and_batch_bundle = bundle_doc.name
 
 	def add_picked_entries(self, bundle_doc, already_picked_serial_nos, already_picked_batches):
-		for entry in bundle_doc.entries:
-			if entry.serial_no:
-				already_picked_serial_nos.append(entry.serial_no)
-			if entry.batch_no:
-				key = (entry.batch_no, bundle_doc.warehouse)
-				picked = already_picked_batches.setdefault(
-					key, frappe._dict(batch_no=entry.batch_no, warehouse=bundle_doc.warehouse, qty=0)
-				)
-				picked.qty += entry.qty
+		already_picked_serial_nos.extend(entry.serial_no for entry in bundle_doc.entries if entry.serial_no)
+		add_picked_batches(already_picked_batches, bundle_doc.entries)
 
 	def _create_or_update_bundle_for_row(
 		self, row, serial_nos, batch_nos, already_picked_serial_nos, already_picked_batches
@@ -286,6 +283,7 @@ def _make_bundle_doc(parent_doc, child, type_of_transaction):
 		{
 			"doctype": "Serial and Batch Bundle",
 			"voucher_type": "Stock Entry",
+			"company": parent_doc.company,
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"type_of_transaction": type_of_transaction,
@@ -382,7 +380,7 @@ def _enrich_expired_batches_with_stock(expired_batches):
 def get_expired_batches():
 	data = frappe.get_list(
 		"Batch",
-		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"]],
+		filters=[["expiry_date", "<", nowdate()], ["expiry_date", "is", "set"], ["disabled", "=", 0]],
 		fields=["item", "name as batch_no", "stock_uom"],
 		limit_page_length=0,
 	)

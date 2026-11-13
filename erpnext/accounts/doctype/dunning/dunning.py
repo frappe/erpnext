@@ -465,12 +465,16 @@ def get_invoice_outstanding(invoice):
 def get_payment_schedule_outstanding(invoice, payment_schedule, in_account_currency=False):
 	"""Apply payments without term allocations to the oldest installments first."""
 	outstanding = {row.name: flt(row.outstanding) for row in payment_schedule}
+	invoice_outstanding = flt(invoice.outstanding_amount)
 	if invoice.party_account_currency != invoice.currency:
-		if not in_account_currency:
-			return outstanding
-		outstanding = {name: amount * flt(invoice.conversion_rate) for name, amount in outstanding.items()}
+		if in_account_currency:
+			outstanding = {
+				name: amount * flt(invoice.conversion_rate) for name, amount in outstanding.items()
+			}
+		else:
+			invoice_outstanding = get_invoice_outstanding(invoice)
 
-	unallocated_payment = max(sum(outstanding.values()) - flt(invoice.outstanding_amount), 0)
+	unallocated_payment = max(sum(outstanding.values()) - invoice_outstanding, 0)
 	for row in sorted(payment_schedule, key=lambda row: (getdate(row.due_date), row.idx)):
 		paid_amount = min(outstanding[row.name], unallocated_payment)
 		unallocated_payment -= paid_amount

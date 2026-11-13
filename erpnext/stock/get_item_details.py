@@ -416,21 +416,41 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 	batches = get_available_batches(frappe._dict(kwargs, qty=0))
 	if doc:
-		filter_batches(batches, doc)
+		filter_batches(batches, doc, kwargs.item_code)
 
 	batch_no = next(iter(batches), None)
-	if batch_no and flt(batches[batch_no]) >= flt(qty):
+	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
 		return batch_no
 
 	return None
 
 
-def filter_batches(batches, doc):
+def filter_batches(batches, doc, item_code):
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for row in doc.get("items"):
-		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= flt(row.get("stock_qty"))
-			if batches[row.get("batch_no")] <= 0:
-				del batches[row.get("batch_no")]
+		batch_no = row.get("batch_no")
+		if batch_no in batches:
+			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
+			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
+			if batches[batch_no] <= 0:
+				del batches[batch_no]
+
+
+def get_row_stock_qty(row, item_code):
+	"""A row's stock_qty and conversion_factor can be missing or stale until validate resets them."""
+	item = frappe.get_cached_value("Item", item_code, ["stock_uom", "sales_uom"], as_dict=True)
+	# a row without uom gets the Default Sales UOM in get_basic_details
+	uom = row.get("uom") or item.sales_uom or item.stock_uom
+	if uom == item.stock_uom:
+		return flt(row.get("qty"))
+
+	conversion_factor = row.get("conversion_factor") or get_uom_conversion_factor(item_code, uom)
+	return flt(row.get("qty")) * flt(conversion_factor)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom)["conversion_factor"]
 
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
@@ -551,9 +571,6 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 
 	if not item:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
-
-	if item.variant_of and not item.taxes and frappe.db.exists("Item Tax", {"parent": item.variant_of}):
-		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, ctx.company)
 	item_group_defaults = get_item_group_defaults(item.name, ctx.company)
@@ -943,14 +960,13 @@ def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out
 
 
 def _get_item_tax_template_from_item_group(ctx, item_group, out=None):
-	from frappe.utils.nestedset import get_ancestors_of
-
-	ancestors = get_ancestors_of("Item Group", item_group)
-	for group in [item_group, *ancestors]:
-		group_doc = frappe.get_cached_doc("Item Group", group)
+	"""Return the first tax template found walking up from `item_group` to the root."""
+	while item_group:
+		group_doc = frappe.get_cached_doc("Item Group", item_group)
 		item_tax_template = _get_item_tax_template(ctx, group_doc.taxes, out)
 		if item_tax_template:
 			return item_tax_template
+		item_group = group_doc.parent_item_group
 	return None
 
 
@@ -1514,7 +1530,10 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 		if desired_qty := ctx.get("qty"):
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
 	else:
-		general_price_list_rate = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
+		# Without ignore_party this repeats the query above, which found nothing
+		general_price_list_rate = ctx.get("ignore_party") and get_item_price(
+			pctx, item_code, ignore_party=True
+		)
 
 		if not general_price_list_rate and ctx.get("uom") != ctx.get("stock_uom"):
 			pctx.uom = ctx.get("stock_uom")

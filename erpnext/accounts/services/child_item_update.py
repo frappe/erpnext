@@ -14,7 +14,10 @@ from frappe.utils import flt, get_link_to_form, getdate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.stock.doctype.item.item import validate_item_uoms
-from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.stock.doctype.packed_item.packed_item import (
+	get_packed_items_of_order_rows,
+	make_packing_list,
+)
 from erpnext.stock.get_item_details import (
 	_get_bin_details,
 	get_conversion_factor,
@@ -40,6 +43,7 @@ class ChildItemUpdater:
 		self._blanket_order_change = defaultdict(float)
 		self._transacted_stock_qty: dict | None = None
 		self._rfqs_before_update: set[str] = set()
+		self._packed_items_before_update: dict = {}
 
 	@cached_property
 	def _rows_with_kept_reservation(self) -> set[str]:
@@ -61,6 +65,11 @@ class ChildItemUpdater:
 		self._check_permissions("write")
 		self._validate_parent_status()
 		self._validate_changed_uoms(data)
+
+		if self.parent_doctype == "Sales Order":
+			self._packed_items_before_update = get_packed_items_of_order_rows(
+				{row.name for row in self.parent.items}
+			)
 
 		if self.parent_doctype == "Quotation":
 			self._transacted_stock_qty = get_ordered_items(self.parent.name)
@@ -191,7 +200,7 @@ class ChildItemUpdater:
 		parent.set_total_in_words()
 
 		if self.parent_doctype == "Sales Order" and not parent.is_subcontracted:
-			make_packing_list(parent)
+			make_packing_list(parent, self._packed_items_before_update)
 			parent.set_gross_profit()
 		elif self.parent_doctype == "Quotation":
 			make_packing_list(parent)

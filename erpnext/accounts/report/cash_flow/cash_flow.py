@@ -11,7 +11,7 @@ from pypika.terms import Bracket, LiteralValue
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
 )
 from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
 	FinancialReportEngine,
@@ -21,7 +21,6 @@ from erpnext.accounts.report.financial_statements import (
 	build_period_list,
 	get_appropriate_currency,
 	get_columns,
-	get_cost_centers_with_children,
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_keys_for_total,
@@ -40,7 +39,8 @@ def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	period_list = build_period_list(filters)
+	accumulated = bool(filters.accumulated_values)
+	period_list = build_period_list(filters, split_on_fiscal_year=accumulated, accumulated_values=accumulated)
 
 	if not period_list:
 		return
@@ -333,27 +333,28 @@ def apply_gl_filters(query, gl, company, filters):
 
 	# cost center (with children)
 	if filters.get("cost_center"):
-		cost_centers = get_cost_centers_with_children(filters.cost_center)
-		query = query.where(gl.cost_center.isin(cost_centers))
+		query = query.where(
+			get_dimension_filter_condition(gl.cost_center, filters.cost_center, "Cost Center")
+		)
 
 	# project
 	if filters.get("project"):
-		projects = filters.project
-		if not isinstance(projects, list):
-			projects = frappe.parse_json(projects)
-		query = query.where(gl.project.isin(projects))
+		query = query.where(get_dimension_filter_condition(gl.project, filters.project, "Project"))
 
 	# per-period group-by-dimension filter (always a single exact value)
 	if filters.get("dimension_field") and filters.get("dimension_value"):
-		query = query.where(gl[filters.dimension_field] == filters.dimension_value)
+		query = query.where(
+			get_dimension_filter_condition(gl[filters.dimension_field], [filters.dimension_value])
+		)
 
 	# accounting dimension filters selected in the filter bar
 	for dimension in get_accounting_dimensions(as_list=False):
 		if filters.get(dimension.fieldname):
-			values = filters[dimension.fieldname]
-			if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-				values = get_dimension_with_children(dimension.document_type, values)
-			query = query.where(gl[dimension.fieldname].isin(values))
+			query = query.where(
+				get_dimension_filter_condition(
+					gl[dimension.fieldname], filters[dimension.fieldname], dimension.document_type
+				)
+			)
 
 	# apply permission filters
 	from frappe.desk.reportview import build_match_conditions
@@ -370,7 +371,8 @@ def get_start_date(period, accumulated_values, company):
 
 	start_date = period["year_start_date"]
 	if accumulated_values:
-		start_date = get_fiscal_year(period.to_date, company=company)[1]
+		# a date range can start after its fiscal year, and profit is only counted from the range start
+		start_date = max(start_date, get_fiscal_year(period.to_date, company=company)[1])
 
 	return start_date
 
@@ -435,16 +437,21 @@ def show_opening_and_closing_balance(out, period_list, currency, net_change_in_c
 		"currency": currency,
 	}
 
-	opening_amount = get_opening_balance(filters.company, period_list, filters) or 0.0
-	running_total = opening_amount
+	opening = closing = get_opening_balance(filters.company, period_list, filters) or 0.0
+	movement_start_date = None
 
-	for i, period in enumerate(period_list):
+	for period in period_list:
 		key = period["key"]
-		change = net_change_in_cash.get(key, 0.0)
 
-		opening_balance[key] = opening_amount if i == 0 else running_total
-		running_total += change
-		closing_balance[key] = running_total
+		# accumulated values already include the earlier periods of their fiscal year
+		start_date = get_start_date(period, filters.accumulated_values, filters.company)
+		if start_date != movement_start_date:
+			opening = closing
+			movement_start_date = start_date
+
+		opening_balance[key] = opening
+		closing = opening + net_change_in_cash.get(key, 0.0)
+		closing_balance[key] = closing
 
 	opening_balance["total"] = opening_balance[period_list[0]["key"]]
 	closing_balance["total"] = closing_balance[period_list[-1]["key"]]

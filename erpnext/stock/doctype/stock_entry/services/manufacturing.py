@@ -529,12 +529,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self.add_raw_materials_based_on_work_order()
 			return
 
-		material_consumption = frappe.db.get_single_value("Manufacturing Settings", "material_consumption")
-
-		if material_consumption and self.raw_materials_already_consumed():
+		if self.doc.is_rm_cost_from_consumption_entries():
 			return
 
-		if not material_consumption:
+		if not frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
 			if self.backflush_based_on == "BOM" or self.wo_doc.skip_transfer:
 				self.add_raw_materials_based_on_work_order()
 			else:
@@ -543,21 +541,6 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			self.add_unconsumed_raw_materials()
 		else:
 			self.add_raw_materials_based_on_transfer()
-
-	def raw_materials_already_consumed(self) -> bool:
-		if not self.doc.work_order:
-			return False
-
-		return bool(
-			frappe.db.exists(
-				"Stock Entry",
-				{
-					"work_order": self.doc.work_order,
-					"purpose": "Material Consumption for Manufacture",
-					"docstatus": 1,
-				},
-			)
-		)
 
 	def add_unconsumed_raw_materials(self):
 		wo = self.wo_doc

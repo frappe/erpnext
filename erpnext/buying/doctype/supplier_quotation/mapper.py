@@ -11,6 +11,7 @@ from frappe.utils import flt
 
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.deprecation_dumpster import deprecated
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 
 @frappe.whitelist()
@@ -67,9 +68,7 @@ def make_purchase_order(
 				and (item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0)
 				and select_item(item),
 			},
-			"Purchase Taxes and Charges": {
-				"doctype": "Purchase Taxes and Charges",
-			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -97,7 +96,7 @@ def make_purchase_invoice(source_name: str, target_doc: str | dict | Document | 
 				},
 			},
 			"Supplier Quotation Item": {"doctype": "Purchase Invoice Item"},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges"},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 	)
@@ -116,6 +115,7 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 				"field_map": {
 					"name": "supplier_quotation",
 				},
+				"postprocess": lambda source, target, source_parent: clear_inapplicable_terms(target),
 			},
 			"Supplier Quotation Item": {
 				"doctype": "Quotation Item",

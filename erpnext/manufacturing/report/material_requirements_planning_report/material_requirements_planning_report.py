@@ -38,6 +38,7 @@ def execute(filters: dict | None = None):
 class MaterialRequirementsPlanningReport:
 	def __init__(self, filters):
 		self.filters = frappe._dict(filters or {})
+		self.qty_precision = frappe.get_precision("Master Production Schedule Item", "planned_qty")
 		self._warehouses = None
 		self._warehouses_with_groups = None
 
@@ -98,6 +99,9 @@ class MaterialRequirementsPlanningReport:
 		return data, chart
 
 	def add_non_planned_orders(self, items):
+		if not items:
+			return
+
 		_adhoc_so_details = frappe._dict({})
 
 		so = frappe.qb.DocType("Sales Order")
@@ -121,8 +125,7 @@ class MaterialRequirementsPlanningReport:
 			)
 		)
 
-		if items:
-			query = query.where(so_item.item_code.isin(items))
+		query = query.where(so_item.item_code.isin(items))
 
 		if self.filters.get("warehouse"):
 			query = query.where(so_item.warehouse.isin(self.get_warehouses()))
@@ -356,7 +359,7 @@ class MaterialRequirementsPlanningReport:
 				)
 
 			demand_supply_data = chart_data[delivery_date]
-			demand_supply_data.demand += math.ceil(flt(row.planned_qty))
+			demand_supply_data.demand += math.ceil(flt(row.planned_qty, self.qty_precision))
 			demand_supply_data.supply += (
 				flt(row.in_hand_qty) + flt(row.po_ordered_qty) + flt(row.wo_ordered_qty)
 			)
@@ -368,7 +371,7 @@ class MaterialRequirementsPlanningReport:
 			value = chart_data[row]
 
 			demand_data.append(math.ceil(flt(value.demand)))
-			supply_data.append(math.ceil(flt(value.supply)))
+			supply_data.append(math.ceil(flt(value.supply, self.qty_precision)))
 
 		return {
 			"data": {
@@ -425,7 +428,7 @@ class MaterialRequirementsPlanningReport:
 						)
 
 					demand_supply_data = chart_data[row.from_date]
-					demand_supply_data.demand += math.ceil(flt(d.planned_qty))
+					demand_supply_data.demand += math.ceil(flt(d.planned_qty, self.qty_precision))
 					demand_supply_data.supply += (
 						flt(d.in_hand_qty) + flt(d.po_ordered_qty) + flt(d.wo_ordered_qty)
 					)
@@ -437,7 +440,7 @@ class MaterialRequirementsPlanningReport:
 			value = chart_data[row]
 
 			demand_data.append(math.ceil(flt(value.demand)))
-			supply_data.append(math.ceil(flt(value.supply)))
+			supply_data.append(math.ceil(flt(value.supply, self.qty_precision)))
 
 		return {
 			"data": {
@@ -507,7 +510,11 @@ class MaterialRequirementsPlanningReport:
 		sorted_data = sorted(self.mps_data, key=lambda x: getdate(x["delivery_date"]))
 
 		for row in sorted_data:
-			rm_details = self.item_rm_details.get(row.item_code) or frappe._dict({})
+			rm_details = (
+				self.item_rm_details.get((row.item_code, row.get("bom_no")))
+				or self.item_rm_details.get(row.item_code)
+				or frappe._dict({})
+			)
 
 			row.indent = 0
 			row.bom_no = rm_details.get("bom_no")
@@ -548,7 +555,9 @@ class MaterialRequirementsPlanningReport:
 		return data
 
 	def set_lead_time(self, row):
-		lead_time = get_item_lead_time(row.item_code, row.type_of_material, row.required_qty)
+		lead_time = get_item_lead_time(
+			row.item_code, row.type_of_material, flt(row.required_qty, self.qty_precision)
+		)
 		row.lead_time = math.ceil(lead_time)
 		row.release_date = add_days(row.delivery_date, -row.lead_time)
 
@@ -698,6 +707,9 @@ class MaterialRequirementsPlanningReport:
 		if not self.rm_items:
 			return frappe._dict({})
 
+		# Sales Orders of MPS items are already in their MPS or non-planned rows
+		items = [item for item in self.rm_items if item not in self.fg_items]
+
 		so_details = frappe._dict({})
 
 		parent_doctype = frappe.qb.DocType("Sales Order")
@@ -718,13 +730,10 @@ class MaterialRequirementsPlanningReport:
 			)
 		)
 
-		if self.rm_items:
-			query = query.where(doctype.item_code.isin(self.rm_items))
-
 		if self.filters.get("warehouse"):
 			query = query.where(doctype.warehouse.isin(self.get_warehouses()))
 
-		data = query.run(as_dict=True)
+		data = query.where(doctype.item_code.isin(items)).run(as_dict=True) if items else []
 
 		for row in data:
 			key = (row.item_code, row.delivery_date)
@@ -747,6 +756,7 @@ class MaterialRequirementsPlanningReport:
 		parent_doctype = frappe.qb.DocType("Sales Order")
 		so_item = frappe.qb.DocType("Sales Order Item")
 		doctype = frappe.qb.DocType("Packed Item")
+		pending_qty = so_item.qty - so_item.delivered_qty
 
 		query = (
 			frappe.qb.from_(parent_doctype)
@@ -755,7 +765,7 @@ class MaterialRequirementsPlanningReport:
 			.inner_join(doctype)
 			.on(so_item.name == doctype.parent_detail_docname)
 			.select(
-				((doctype.qty) * doctype.conversion_factor).as_("qty"),
+				(doctype.qty * pending_qty / so_item.qty).as_("qty"),
 				doctype.item_code,
 				doctype.item_name,
 				so_item.delivery_date,
@@ -763,7 +773,7 @@ class MaterialRequirementsPlanningReport:
 			.where(
 				(doctype.docstatus == 1)
 				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
-				& ((so_item.qty - so_item.delivered_qty) > 0)
+				& (pending_qty > 0)
 			)
 		)
 
@@ -857,16 +867,19 @@ class MaterialRequirementsPlanningReport:
 				doctype.parent_warehouse,
 				child_doctype.name,
 				child_doctype.item_name,
+				child_doctype.bom_no,
 				child_doctype.planned_qty,
 				child_doctype.uom,
 			)
-			.where(
-				(doctype.from_date >= self.filters.from_date)
-				& (doctype.to_date <= self.filters.to_date)
-				& (child_doctype.parentfield == "items")
-			)
+			.where(child_doctype.parentfield == "items")
 			.orderby(child_doctype.delivery_date)
 		)
+
+		if self.filters.get("from_date"):
+			query = query.where(child_doctype.delivery_date >= self.filters.from_date)
+
+		if self.filters.get("to_date"):
+			query = query.where(child_doctype.delivery_date <= self.filters.to_date)
 
 		if self.filters.get("warehouse"):
 			query = query.where(doctype.parent_warehouse.isin(self.get_warehouses(True)))
@@ -885,7 +898,11 @@ class MaterialRequirementsPlanningReport:
 			else:
 				query = query.where(doctype[field] == value)
 
-		return query.run(as_dict=True)
+		rows = query.run(as_dict=True)
+		for row in rows:
+			row.planned_qty *= get_uom_conversion_factor(row.item_code, row.uom)
+
+		return rows
 
 	def get_items_from_mps(self, mps_data):
 		items = []
@@ -938,6 +955,17 @@ class MaterialRequirementsPlanningReport:
 
 			if item_data.bom_no:
 				item_data.raw_materials = self.get_raw_materials(item_data.bom_no, indent=0)
+
+		for row in self.mps_data:
+			key = (row.item_code, row.get("bom_no"))
+			if not row.get("bom_no") or key in item_wise_rm_details:
+				continue
+
+			item_data = item_wise_rm_details[row.item_code]
+			if row.bom_no != item_data.bom_no:
+				item_wise_rm_details[key] = frappe._dict(
+					item_data, bom_no=row.bom_no, raw_materials=self.get_raw_materials(row.bom_no)
+				)
 
 		return item_wise_rm_details
 
@@ -1517,9 +1545,14 @@ def get_purchase_order_item(item, warehouse=None):
 		uom = uom_details.purchase_uom or uom_details.stock_uom
 
 	conversion_factor = flt(get_conversion_factor(item.item_code, uom).get("conversion_factor")) or 1.0
-	qty = max(flt(item.required_qty), flt(item.min_order_qty)) / conversion_factor
+	stock_qty = max(flt(item.required_qty), flt(item.min_order_qty))
+	qty = stock_qty / conversion_factor
 	if is_whole_number(uom):
 		qty = math.ceil(qty)
+		# float noise can push an exact multiple of the conversion factor past a whole number
+		precision = frappe.get_precision("Purchase Order Item", "stock_qty")
+		if flt((qty - 1) * conversion_factor - stock_qty, precision) >= 0:
+			qty -= 1
 
 	return {
 		"item_code": item.item_code,
@@ -1535,7 +1568,7 @@ def make_work_orders(work_orders, company, warehouse=None, mps=None):
 	for item in work_orders:
 		uom = get_item_uom(item.item_code).stock_uom
 		if is_whole_number(uom):
-			item.required_qty = math.ceil(item.required_qty)
+			item.required_qty = math.ceil(flt(item.required_qty, frappe.get_precision("Work Order", "qty")))
 
 		wo = frappe.new_doc("Work Order")
 		wo.production_item = item.item_code
@@ -1559,6 +1592,11 @@ def make_work_orders(work_orders, company, warehouse=None, mps=None):
 @frappe.request_cache
 def get_item_uom(item_code):
 	return frappe.get_cached_value("Item", item_code, ["stock_uom", "purchase_uom"], as_dict=True)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom).get("conversion_factor")
 
 
 @frappe.request_cache

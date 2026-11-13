@@ -110,7 +110,7 @@ class BuyingController(SubcontractingController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_buying_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("buying"):
-				self.set_missing_terms()
+				self.set_missing_terms_for_display()
 
 	def validate_posting_date_with_po(self):
 		po_list = {x.purchase_order for x in self.items if x.purchase_order}
@@ -509,14 +509,15 @@ class BuyingController(SubcontractingController):
 			return
 
 		purchase_doc_field = "purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
-		not_cancelled_asset = []
-		if self.return_against:
-			not_cancelled_asset = [
-				d.name
-				for d in frappe.db.get_all("Asset", {purchase_doc_field: self.return_against, "docstatus": 1})
-			]
+		detail_field = purchase_doc_field + "_item"
+		asset_filters = {purchase_doc_field: self.return_against, "docstatus": 1}
+		if (self.doctype == "Purchase Receipt" or self.get("update_stock")) and all(
+			row.get(detail_field) for row in self.items if row.is_fixed_asset
+		):
+			# Linked assets are checked against the quantity retained in each purchase row below.
+			asset_filters[detail_field] = ("is", "not set")
 
-		if self.is_return and len(not_cancelled_asset):
+		if self.return_against and frappe.db.exists("Asset", asset_filters):
 			frappe.throw(
 				_(
 					"{0} has submitted assets linked to it. You need to cancel the assets to create purchase return."
@@ -542,7 +543,7 @@ class BuyingController(SubcontractingController):
 			if flt(asset_qty) > kept_qty[detail]:
 				frappe.throw(
 					_(
-						"Row #{0}: {1} assets of {2} are linked to {3}, which keeps only {4} after this return. Delete the extra draft assets first."
+						"Row #{0}: {1} assets of {2} are linked to {3}, which keeps only {4} after this return. Cancel the extra submitted assets or delete the extra draft assets first."
 					).format(
 						rows[detail].idx,
 						flt(asset_qty),

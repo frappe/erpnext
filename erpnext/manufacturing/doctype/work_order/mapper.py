@@ -21,6 +21,7 @@ from frappe.utils import cint, flt, get_link_to_form, nowdate
 
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -164,9 +165,13 @@ def _add_variant_row(item, wo_doc, bom_no, table_name):
 	bom_doc = frappe.get_cached_doc("BOM", bom_no)
 	args = _variant_item_args(item, wo_doc, bom_doc)
 
-	existing_row = (
-		get_template_rm_item(wo_doc, item.get("item_code")) if table_name == "required_items" else None
-	)
+	if table_name != "required_items":
+		# bom rows are costed per row uom, work order rows per stock uom
+		args["rate"] = flt(args.rate * args.conversion_factor, frappe.get_precision("BOM Item", "rate"))
+		wo_doc.append(table_name, args)
+		return
+
+	existing_row = get_template_rm_item(wo_doc, item.get("item_code"))
 	if existing_row:
 		existing_row.update(args)
 	else:
@@ -176,13 +181,12 @@ def _add_variant_row(item, wo_doc, bom_no, table_name):
 def _variant_item_args(item, wo_doc, bom_doc):
 	args = frappe._dict(
 		item_code=item.get("variant_item_code"),
-		required_qty=item.get("qty"),
-		qty=item.get("qty"),  # for bom
 		source_warehouse=item.get("source_warehouse"),
 		operation=item.get("operation"),
 	)
 	item_data = get_item_details(args.item_code, skip_bom_info=True)
 	args.update(item_data)
+	args.update(_variant_row_qty(args.item_code, item, item_data.stock_uom))
 
 	args["rate"] = get_raw_material_rate(args, wo_doc, bom_doc)
 	if not args.source_warehouse:
@@ -190,8 +194,23 @@ def _variant_item_args(item, wo_doc, bom_doc):
 		args["source_warehouse"] = default.default_warehouse
 
 	args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
-	args["uom"] = item_data.stock_uom
 	return args
+
+
+def _variant_row_qty(item_code, item, stock_uom):
+	"""The dialog qty is in the template row's uom; the work order needs the stock qty."""
+	uom = item.get("uom") or stock_uom
+	conversion_factor = flt(get_conversion_factor(item_code, uom)["conversion_factor"])
+	stock_qty = flt(
+		flt(item.get("qty")) * conversion_factor, frappe.get_precision("Work Order Item", "required_qty")
+	)
+	return {
+		"qty": flt(item.get("qty")),  # for bom
+		"uom": uom,
+		"conversion_factor": conversion_factor,
+		"stock_qty": stock_qty,
+		"required_qty": stock_qty,
+	}
 
 
 def get_raw_material_rate(args, wo_doc, bom_doc):

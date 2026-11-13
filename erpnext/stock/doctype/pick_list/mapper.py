@@ -2,13 +2,14 @@
 # For license information, please see license.txt
 
 import json
+from collections import defaultdict
 from itertools import groupby
 
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
-from frappe.utils import cstr, flt, get_link_to_form
+from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from erpnext.selling.doctype.sales_order.mapper import (
 	make_delivery_note as create_delivery_note_from_sales_order,
@@ -16,6 +17,8 @@ from erpnext.selling.doctype.sales_order.mapper import (
 from erpnext.selling.doctype.sales_order.mapper import (
 	make_sales_invoice as create_sales_invoice_from_sales_order,
 )
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
 def validate_item_locations(pick_list):
@@ -45,8 +48,13 @@ def create_delivery(
 	if sales_dict:
 		documents.extend(create_delivery_with_so(sales_dict, pick_list, target))
 
-	if not all(item.sales_order for item in pick_list.locations):
+	if any(
+		not row.sales_order and flt(row.picked_qty) > flt(row.delivered_qty) for row in pick_list.locations
+	):
 		documents.append(create_delivery_wo_so(pick_list, target, target_doc))
+
+	if not documents:
+		frappe.throw(_("Nothing picked in this Pick List is left to deliver."))
 
 	if len(documents) == 1:
 		return documents[0]
@@ -222,7 +230,8 @@ def create_delivery_with_so(sales_dict, pick_list, target):
 
 	for key in sales_dict:
 		document = create_delivery_from_so(pick_list, sales_dict[key], target)
-		if document:
+		# e.g. less than one product bundle is picked
+		if document and document.get("items"):
 			document.flags.ignore_mandatory = True
 			# updates packed_items on save
 			# save as multiple customers are possible
@@ -282,6 +291,9 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 		{d.name: d for d in frappe.get_doc("Sales Order", sales_order).items} if sales_order else {}
 	)
 	condition = item_mapper.get("condition")
+	moved_serial_nos = get_moved_serial_nos(
+		[location for location in pick_list.locations if location.sales_order == sales_order]
+	)
 
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
@@ -306,7 +318,7 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 				flt(child_item.conversion_factor) or 1
 			)
 			child_item.batch_no = location.batch_no
-			child_item.serial_no = location.serial_no
+			child_item.serial_no = get_pending_serial_nos(location, moved_serial_nos)
 			child_item.use_serial_batch_fields = location.use_serial_batch_fields
 
 			if not child_item.qty:
@@ -323,6 +335,71 @@ def map_pl_locations(pick_list, item_mapper, target_doc, sales_order=None, selec
 	target_doc.company = pick_list.company
 	if sales_order:
 		target_doc.customer = frappe.get_value("Sales Order", sales_order, "customer")
+
+
+def get_moved_serial_nos(locations, moved_qty_field="delivered_qty"):
+	"""Return the lower-cased serial nos that earlier deliveries or transfers of the partly moved rows took."""
+	moved = get_moved_entries([row.name for row in locations if row.serial_no and row.get(moved_qty_field)])
+	numbers = SerialBatchIdentity("Serial No").get_number_map(
+		[entry.serial_no for entries in moved.values() for entry in entries if entry.serial_no]
+	)
+	return {
+		row: {numbers[entry.serial_no].lower() for entry in entries if entry.serial_no in numbers}
+		for row, entries in moved.items()
+	}
+
+
+def get_pending_serial_nos(location, moved_serial_nos, moved_qty_field="delivered_qty"):
+	"""Return the serial nos a partly moved row still has to move, capped at its pending qty."""
+	if not location.get(moved_qty_field):
+		return location.serial_no
+
+	moved = moved_serial_nos.get(location.name, set())
+	pending_serial_nos = [
+		number for number in get_serial_nos(location.serial_no) if number.lower() not in moved
+	]
+	pending_qty = max(cint(flt(location.picked_qty) - flt(location.get(moved_qty_field))), 0)
+	return "\n".join(pending_serial_nos[:pending_qty])
+
+
+def get_moved_entries(pick_list_items):
+	"""Return the serial and batch entries that submitted vouchers of the pick list rows took, by row."""
+	if not pick_list_items:
+		return {}
+
+	pick_list_item_by_voucher_detail = {}
+	for doctype in ("Delivery Note Item", "Sales Invoice Item", "Stock Entry Detail"):
+		pick_list_item_by_voucher_detail.update(
+			frappe.get_all(
+				doctype,
+				filters={"pick_list_item": ("in", pick_list_items), "docstatus": 1},
+				fields=["name", "pick_list_item"],
+				as_list=True,
+			)
+		)
+	if not pick_list_item_by_voucher_detail:
+		return {}
+
+	bundle = frappe.qb.DocType("Serial and Batch Bundle")
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	entries = (
+		frappe.qb.from_(entry)
+		.join(bundle)
+		.on(entry.parent == bundle.name)
+		.select(bundle.voucher_detail_no, entry.serial_no, entry.batch_no, entry.qty)
+		.where(
+			bundle.voucher_detail_no.isin(list(pick_list_item_by_voucher_detail))
+			& (bundle.type_of_transaction == "Outward")
+			& (bundle.docstatus == 1)
+			& (bundle.is_cancelled == 0)
+		)
+	).run(as_dict=True)
+
+	moved = defaultdict(list)
+	for row in entries:
+		moved[pick_list_item_by_voucher_detail[row.voucher_detail_no]].append(row)
+
+	return moved
 
 
 def add_product_bundles_to_delivery_note(pick_list, delivery_note, item_mapper, sales_order=None) -> None:
@@ -343,16 +420,16 @@ def add_product_bundles_to_target(
 			for row in pick_list.locations
 			if row.product_bundle_item and row.name in selected_locations
 		}
-		product_bundles = {key: value for key, value in product_bundles.items() if key in selected_bundles}
+		product_bundles = [so_row for so_row in product_bundles if so_row in selected_bundles]
 
-	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles.values())
+	product_bundle_qty_map = pick_list._get_product_bundle_qty_map(product_bundles)
 
-	for so_row, value in product_bundles.items():
+	for so_row in product_bundles:
 		sales_order_item = frappe.get_doc("Sales Order Item", so_row)
 		if sales_order and sales_order_item.parent != sales_order:
 			continue
 
-		bundle_items = product_bundle_qty_map.get(value.product_bundle)
+		bundle_items = product_bundle_qty_map.get(so_row)
 		if not bundle_items:
 			frappe.throw(
 				_("Row #{0}: cannot resolve the Product Bundle version for Item {1}.").format(
@@ -365,7 +442,10 @@ def add_product_bundles_to_target(
 			continue
 
 		target_bundle_item = map_child_doc(sales_order_item, target_doc, item_mapper)
-		target_bundle_item.qty = pending_qty
+		target_bundle_item.qty = flt(
+			pending_qty / (flt(target_bundle_item.conversion_factor) or 1),
+			target_bundle_item.precision("qty"),
+		)
 		target_bundle_item.against_pick_list = pick_list.name
 		update_child_item(sales_order_item, target_bundle_item, target_doc)
 
@@ -470,11 +550,12 @@ def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
 
 	job_card_items = get_job_card_items_by_material_request_item(pick_list)
 
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, moved_serial_nos)
 		item.t_warehouse = job_card.wip_warehouse
 		item.job_card_item = job_card_items.get(location.material_request_item)
 		stock_entry.append("items", item)
@@ -521,11 +602,12 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 	stock_entry.project = work_order.project
 
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, moved_serial_nos)
 		item.t_warehouse = wip_warehouse
 
 		stock_entry.append("items", item)
@@ -534,6 +616,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 
 
 def update_stock_entry_based_on_material_request(pick_list, stock_entry):
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
@@ -543,7 +626,7 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 				"Material Request Item", location.material_request_item, "warehouse"
 			)
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, moved_serial_nos)
 		item.t_warehouse = target_warehouse
 		stock_entry.append("items", item)
 
@@ -551,11 +634,12 @@ def update_stock_entry_based_on_material_request(pick_list, stock_entry):
 
 
 def update_stock_entry_items_with_no_reference(pick_list, stock_entry):
+	moved_serial_nos = get_moved_serial_nos(pick_list.locations, "transferred_qty")
 	for location in pick_list.locations:
 		if get_pending_transfer_stock_qty(location) <= 0:
 			continue
 		item = frappe._dict()
-		update_common_item_properties(item, location)
+		update_common_item_properties(item, location, moved_serial_nos)
 
 		stock_entry.append("items", item)
 
@@ -567,7 +651,7 @@ def get_pending_transfer_stock_qty(location):
 	return flt(location.picked_qty) - flt(location.transferred_qty)
 
 
-def update_common_item_properties(item, location):
+def update_common_item_properties(item, location, moved_serial_nos):
 	pending_stock_qty = get_pending_transfer_stock_qty(location)
 	item.item_code = location.item_code
 	item.item_name = location.item_name
@@ -578,7 +662,7 @@ def update_common_item_properties(item, location):
 	item.conversion_factor = location.conversion_factor
 	item.stock_uom = location.stock_uom
 	item.material_request = location.material_request
-	item.serial_no = location.serial_no
+	item.serial_no = get_pending_serial_nos(location, moved_serial_nos, "transferred_qty")
 	item.batch_no = location.batch_no
 	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item

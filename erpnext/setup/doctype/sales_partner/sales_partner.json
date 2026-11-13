@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:partner_name",
@@ -194,7 +195,7 @@
  "icon": "handshake",
  "idx": 1,
  "links": [],
- "modified": "2026-08-21 23:11:48.371608",
+ "modified": "2026-11-06 01:16:48.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Partner",

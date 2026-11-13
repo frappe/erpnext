@@ -37,7 +37,12 @@ from erpnext.stock.get_item_details import (
 	get_default_cost_center,
 )
 from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import _get_incoming_rate, check_warehouse_company, get_combine_datetime
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	check_company,
+	check_warehouse_company,
+	get_combine_datetime,
+)
 
 from .services.disassemble import DisassembleStockEntry
 from .services.manufacturing import (
@@ -680,6 +685,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if any(d.s_warehouse for d in self.get("items")):
 			return True
 
+		return self.is_rm_cost_from_consumption_entries()
+
+	def is_rm_cost_from_consumption_entries(self) -> bool:
+		"""Whether the consumption entries replace the raw materials of this entry."""
 		settings = frappe.get_single("Manufacturing Settings")
 		if settings.material_consumption and settings.get_rm_cost_from_consumption_entry and self.work_order:
 			return bool(self.get_consumption_entries())
@@ -2272,6 +2281,7 @@ def get_warehouse_details(args: str | dict):
 	# that form clear select through the Desk User row while holding no Item read of their own.
 	frappe.has_permission("Item", ptype="select", throw=True)
 	check_warehouse_company(args.get("warehouse"))
+	check_company(args.get("company"))
 
 	ret = {}
 	if args.warehouse and args.item_code:

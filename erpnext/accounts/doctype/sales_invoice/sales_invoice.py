@@ -12,7 +12,10 @@ from frappe.utils import cint, flt, formatdate, get_link_to_form
 from frappe.utils.data import comma_and
 
 import erpnext
-from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from erpnext.accounts.deferred_revenue import (
+	validate_deferred_revenue_return_cancellation,
+	validate_service_stop_date,
+)
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	update_coupon_code_count,
@@ -470,6 +473,8 @@ class SalesInvoice(SellingController):
 				self.make_bundle_using_old_serial_batch_fields(table_name)
 
 			self.validate_standalone_serial_nos_customer()
+			# reservations read the delivered serial and batch nos from the bundles
+			self.make_packed_item_bundles()
 			self.update_stock_reservation_entries()
 			self.update_stock_ledger()
 
@@ -534,6 +539,7 @@ class SalesInvoice(SellingController):
 			self.refresh_subscription_status()
 
 	def before_cancel(self):
+		validate_deferred_revenue_return_cancellation(self)
 		POSService(self).check_if_created_using_pos_and_pos_closing_entry_generated()
 		POSService(self).check_if_consolidated_invoice()
 
@@ -1316,16 +1322,10 @@ class SalesInvoice(SellingController):
 
 	@frappe.whitelist()
 	def is_subcontracted(self):
-		if not self.has_subcontracted:
+		sales_orders = [item.sales_order for item in self.items if item.sales_order]
+		if not self.has_subcontracted and sales_orders:
 			self.has_subcontracted = bool(
-				frappe.get_cached_value(
-					"Sales Order",
-					{
-						"name": ["in", [item.sales_order for item in self.items if item.sales_order]],
-						"is_subcontracted": 1,
-					},
-					"name",
-				)
+				frappe.db.exists("Sales Order", {"name": ["in", sales_orders], "is_subcontracted": 1})
 			)
 		if self.has_subcontracted:
 			self.update_stock = 0

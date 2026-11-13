@@ -9,6 +9,7 @@ from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.report.utils import get_filter_values, validate_date_range
 from erpnext.stock.report.utils import prepare_serial_batch_report
+from erpnext.stock.serial_batch_bundle import RESERVING_VOUCHER_TYPES
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
 
@@ -48,16 +49,22 @@ def get_data(filters):
 
 def get_filter_conditions(filters):
 	filter_conditions = [
-		["Serial and Batch Bundle", "docstatus", "=", 1],
-		["Serial and Batch Bundle", "is_cancelled", "=", 0],
+		["Serial and Batch Entry", "docstatus", "=", 1],
+		["Serial and Batch Entry", "is_cancelled", "=", 0],
 	]
+
+	# show reserving bundles only when asked for
+	if not filters.get("voucher_type"):
+		filter_conditions.append(
+			["Serial and Batch Bundle", "voucher_type", "not in", RESERVING_VOUCHER_TYPES]
+		)
 
 	for field in ["voucher_type", "voucher_no", "item_code", "warehouse", "company"]:
 		if filters.get(field):
 			if field == "warehouse":
 				filter_conditions.append(
 					[
-						"Serial and Batch Bundle",
+						"Serial and Batch Entry",
 						field,
 						"in",
 						get_warehouses_with_descendants(filters.get(field)),
@@ -68,12 +75,13 @@ def get_filter_conditions(filters):
 					["Serial and Batch Bundle", field, "in", get_filter_values(filters.get(field))]
 				)
 			else:
-				filter_conditions.append(["Serial and Batch Bundle", field, "=", filters.get(field)])
+				doctype = "Serial and Batch Entry" if field == "item_code" else "Serial and Batch Bundle"
+				filter_conditions.append([doctype, field, "=", filters.get(field)])
 
 	if filters.get("from_date") and filters.get("to_date"):
 		filter_conditions.append(
 			[
-				"Serial and Batch Bundle",
+				"Serial and Batch Entry",
 				"posting_datetime",
 				"between",
 				[filters.get("from_date"), filters.get("to_date")],

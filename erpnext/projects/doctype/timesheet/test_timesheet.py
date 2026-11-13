@@ -16,9 +16,11 @@ from erpnext.projects.doctype.timesheet.timesheet import (
 )
 from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
 	as_user,
 	assert_refused,
 	assert_refused_for_names,
+	make_company_fenced_user,
 	make_fenced_user,
 )
 from erpnext.tests.utils import ERPNextTestSuite
@@ -916,6 +918,71 @@ class TestTimesheet(ERPNextTestSuite):
 			)
 			self.assertEqual(get_activity_cost(employee, "_Test Activity Type")["billing_rate"], 150)
 
+	def test_time_logs_need_access_to_their_task_and_project(self):
+		f = make_timesheet_access_fixtures("Timesheet Fenced")
+
+		def tracked_figures():
+			return (
+				frappe.db.get_value("Project", f.other_project, "actual_time"),
+				frappe.db.get_value("Task", f.other_task, ["actual_time", "status"]),
+			)
+
+		start = add_to_date(now_datetime(), days=-30)
+		untouched = tracked_figures()
+		with as_user(f.user):
+			for links in (
+				{"project": f.other_project, "task": f.other_task},
+				{"task": f.other_task},
+				{"project": f.other_project},
+			):
+				assert_refused(self, make_logged_timesheet(start, **links).insert)
+
+			make_logged_timesheet(start, project=f.own_project, task=f.own_task).submit()
+		self.assertEqual(tracked_figures(), untouched)
+		self.assertEqual(frappe.db.get_value("Project", f.own_project, "actual_time"), 2)
+
+		submitted = make_logged_timesheet(
+			add_to_date(start, hours=4), project=f.other_project, task=f.other_task
+		).submit()
+		logged = tracked_figures()
+		with as_user(f.user):
+			submitted = frappe.get_doc("Timesheet", submitted.name)
+			# saves after submit, as Salary Slip makes them, do not re-check the existing rows
+			submitted.flags.ignore_validate_update_after_submit = True
+			submitted.save()
+			assert_refused(self, submitted.cancel)
+		self.assertEqual(tracked_figures(), logged)
+
+	def test_submitted_timesheet_changes_need_access(self):
+		f = make_timesheet_access_fixtures("Timesheet Submitted")
+		start = add_to_date(now_datetime(), days=-60)
+
+		def submitted_timesheet(hours_from_start, task):
+			return make_logged_timesheet(add_to_date(start, hours=hours_from_start), task=task).submit().name
+
+		emptied = submitted_timesheet(0, f.own_task)
+		moved = submitted_timesheet(4, f.own_task)
+		edited = submitted_timesheet(8, f.other_task)
+		with as_user(f.user):
+			# cancel does not validate, so it must not save rows it was sent
+			timesheet = frappe.get_doc("Timesheet", emptied)
+			timesheet.set("time_logs", [])
+			self.assertRaises(frappe.ValidationError, timesheet.cancel)
+
+			# a change after submit is checked again, even one that rounding would hide
+			timesheet = frappe.get_doc("Timesheet", edited)
+			timesheet.flags.ignore_validate_update_after_submit = True
+			timesheet.time_logs[0].hours = 2.0000000005
+			assert_refused(self, timesheet.save)
+
+		self.assertEqual(frappe.db.get_value("Timesheet Detail", {"parent": emptied}, "docstatus"), 1)
+		self.assertEqual(frappe.db.get_value("Task", f.other_task, "actual_time"), 2)
+
+		# cancel also checks the project the task is in now
+		frappe.db.set_value("Task", f.own_task, "project", f.other_project)
+		with as_user(f.user):
+			assert_refused(self, frappe.get_doc("Timesheet", moved).cancel)
+
 
 def make_portal_user(customer):
 	user = make_fenced_user("_test_timesheet_portal_user@example.com", ["Customer"])
@@ -933,6 +1000,30 @@ def make_timesheet_without_employee(start, hours):
 			"time_logs": [{"from_time": start, "to_time": add_to_date(start, hours=hours)}],
 		}
 	)
+
+
+def make_timesheet_access_fixtures(label):
+	"""A project and task of _Test Company, a project and task of another company,
+	and a Projects User limited to _Test Company."""
+	from erpnext.projects.doctype.project.test_project import make_project
+
+	fixtures = frappe._dict()
+	for side, company in (("own", "_Test Company"), ("other", OTHER_COMPANY)):
+		project = make_project({"project_name": f"_Test Project {label} {side}", "company": company}).name
+		task = create_task(f"_Test {label} {side} Task", save=False)
+		task.project = project
+		task.save()
+		fixtures[f"{side}_project"], fixtures[f"{side}_task"] = project, task.name
+
+	email = f"{label.lower().replace(' ', '-')}@example.com"
+	fixtures.user = make_company_fenced_user(email, ["Projects User"], "_Test Company")
+	return fixtures
+
+
+def make_logged_timesheet(start, **links):
+	timesheet = make_timesheet_without_employee(start, 2)
+	timesheet.time_logs[0].update(links)
+	return timesheet
 
 
 def make_timesheet(

@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.desk.reportview import build_match_conditions
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder.functions import Max, Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
 from pypika.terms import Bracket, LiteralValue
@@ -12,12 +14,12 @@ from pypika.terms import Bracket, LiteralValue
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
+	get_dimension_filter_sql_condition,
 )
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
-	get_cost_centers_with_children,
 	set_gl_entries_by_account,
 )
 from erpnext.accounts.report.utils import (
@@ -47,7 +49,19 @@ def execute(filters=None):
 
 
 def validate_company_permission(company: str | None) -> None:
-	if company and not frappe.has_permission("Company", "select", company):
+	"""Check role access to Company and the user's User Permissions that apply to Company.
+
+	Only the user permissions on the Company itself apply. A document check would also match
+	the Company's link fields, such as its default accounts, against the user's restrictions,
+	and refuse a user who is restricted to some accounts.
+	"""
+	if not company:
+		return
+
+	allowed_companies = get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), "Company")
+	if not frappe.has_permission("Company", "select") or (
+		allowed_companies and company not in allowed_companies
+	):
 		frappe.throw(_("You are not permitted to view {0}").format(company), frappe.PermissionError)
 
 
@@ -331,11 +345,15 @@ def get_opening_balance(
 
 	if filters.cost_center:
 		opening_balance = opening_balance.where(
-			closing_balance.cost_center.isin(get_cost_centers_with_children(filters.get("cost_center")))
+			get_dimension_filter_condition(
+				closing_balance.cost_center, filters.get("cost_center"), "Cost Center"
+			)
 		)
 
 	if filters.project:
-		opening_balance = opening_balance.where(closing_balance.project.isin(filters.project))
+		opening_balance = opening_balance.where(
+			get_dimension_filter_condition(closing_balance.project, filters.project, "Project")
+		)
 
 	if frappe.db.count("Finance Book"):
 		if filters.get("include_default_book_entries"):
@@ -359,17 +377,13 @@ def get_opening_balance(
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-					filters[dimension.fieldname] = get_dimension_with_children(
-						dimension.document_type, filters.get(dimension.fieldname)
+				opening_balance = opening_balance.where(
+					get_dimension_filter_condition(
+						closing_balance[dimension.fieldname],
+						filters[dimension.fieldname],
+						dimension.document_type,
 					)
-					opening_balance = opening_balance.where(
-						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
-					)
-				else:
-					opening_balance = opening_balance.where(
-						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
-					)
+				)
 
 	if match_conditions := build_match_conditions(doctype):
 		opening_balance = opening_balance.where(Bracket(LiteralValue(match_conditions)))
@@ -676,14 +690,12 @@ def _extra_gl_conditions(filters):
 	conditions, params = [], []
 
 	if filters.get("cost_center"):
-		cc = get_cost_centers_with_children(filters.get("cost_center"))
-		conditions.append(f"cost_center IN ({', '.join(['?'] * len(cc))})")
-		params.extend(cc)
+		append_dimension_condition(
+			conditions, params, "cost_center", filters.get("cost_center"), "Cost Center"
+		)
 
 	if filters.get("project"):
-		proj = filters.project if isinstance(filters.project, list) else [filters.project]
-		conditions.append(f"project IN ({', '.join(['?'] * len(proj))})")
-		params.extend(proj)
+		append_dimension_condition(conditions, params, "project", filters.project, "Project")
 
 	if frappe.db.count("Finance Book"):
 		company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
@@ -700,19 +712,22 @@ def _extra_gl_conditions(filters):
 
 	for dim in get_accounting_dimensions(as_list=False):
 		if filters.get(dim.fieldname):
-			if frappe.get_cached_value("DocType", dim.document_type, "is_tree"):
-				filters[dim.fieldname] = get_dimension_with_children(
-					dim.document_type, filters.get(dim.fieldname)
-				)
-			vals = (
-				filters[dim.fieldname]
-				if isinstance(filters[dim.fieldname], list)
-				else [filters[dim.fieldname]]
+			append_dimension_condition(
+				conditions,
+				params,
+				dim.fieldname,
+				filters[dim.fieldname],
+				dim.document_type,
 			)
-			conditions.append(f"{dim.fieldname} IN ({', '.join(['?'] * len(vals))})")
-			params.extend(vals)
 
 	return conditions, params
+
+
+def append_dimension_condition(conditions, params, fieldname, selected_values, dimension_doctype):
+	condition, values = get_dimension_filter_sql_condition(fieldname, selected_values, dimension_doctype)
+	if condition:
+		conditions.append(condition)
+		params.extend(values)
 
 
 def _fetch_gl_rows_duckdb(conn, conditions, params):
