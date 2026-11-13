@@ -666,8 +666,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	args.stock_qty = out.stock_qty
 =======
 	ctx.conversion_factor = out.conversion_factor
-	stock_qty_field = frappe.get_meta(f"{ctx.doctype} Item").get_field("stock_qty")
-	out.stock_qty = flt(out.qty * out.conversion_factor, get_field_precision(stock_qty_field))
+	out.stock_qty = flt(
+		out.qty * out.conversion_factor, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty")
+	)
 	ctx.stock_qty = out.stock_qty
 >>>>>>> 5d8aabe (fix(accounts): honor stock quantity precision in pricing rules)
 
