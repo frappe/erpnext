@@ -1,0 +1,4 @@
+// the budget periods are a fixed list, so row selection has no use
+.budget-periods .row-check {
+	display: none;
+}

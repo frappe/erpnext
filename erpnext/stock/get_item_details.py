@@ -339,6 +339,7 @@ def update_stock(ctx, out, doc=None):
 		if doc and isinstance(doc, dict):
 			doc = frappe._dict(doc)
 
+		out.stock_qty = flt(out.stock_qty, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty"))
 		kwargs = frappe._dict(
 			{
 				"item_code": ctx.item_code,
@@ -416,35 +417,36 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 	batches = get_available_batches(frappe._dict(kwargs, qty=0))
 	if doc:
-		filter_batches(batches, doc)
+		filter_batches(batches, doc, kwargs.item_code)
 
 	batch_no = next(iter(batches), None)
-	if batch_no and flt(batches[batch_no]) >= flt(qty):
+	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
 		return batch_no
 
 	return None
 
 
-def filter_batches(batches, doc):
+def filter_batches(batches, doc, item_code):
 	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for row in doc.get("items"):
 		batch_no = row.get("batch_no")
 		if batch_no in batches:
-			batches[batch_no] = flt(batches[batch_no] - get_row_stock_qty(row), precision)
+			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
+			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
 			if batches[batch_no] <= 0:
 				del batches[batch_no]
 
 
-def get_row_stock_qty(row):
-	"""Rows inserted through the API may not have stock_qty yet."""
-	if row.get("stock_qty"):
-		return flt(row.get("stock_qty"))
+def get_row_stock_qty(row, item_code):
+	"""A row's stock_qty and conversion_factor can be missing or stale until validate resets them."""
+	item = frappe.get_cached_value("Item", item_code, ["stock_uom", "sales_uom"], as_dict=True)
+	# a row without uom gets the Default Sales UOM in get_basic_details
+	uom = row.get("uom") or item.sales_uom or item.stock_uom
+	if uom == item.stock_uom:
+		return flt(row.get("qty"))
 
-	conversion_factor = row.get("conversion_factor")
-	if not conversion_factor and row.get("uom"):
-		conversion_factor = get_uom_conversion_factor(row.get("item_code"), row.get("uom"))
-
-	return flt(row.get("qty")) * flt(conversion_factor or 1)
+	conversion_factor = row.get("conversion_factor") or get_uom_conversion_factor(item_code, uom)
+	return flt(row.get("qty")) * flt(conversion_factor)
 
 
 @frappe.request_cache

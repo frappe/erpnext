@@ -39,7 +39,6 @@ from erpnext.stock.stock_ledger import (
 	get_item_wh_first_reposted_from_reposting_data,
 	get_items_to_be_repost,
 	get_reposting_data,
-	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -159,7 +158,7 @@ class RepostItemValuation(Document):
 		if self.recalculate_valuation_rate and not self.can_recalculate_valuation_rate():
 			frappe.throw(
 				_(
-					"Recalculate Valuation Rate is only allowed for a Purchase Receipt, a Purchase Invoice with Update Stock or a Stock Entry with no row that has both a Source and Target Warehouse"
+					"Recalculate Valuation Rate is only allowed for a Purchase Receipt or a Purchase Invoice with Update Stock"
 				)
 			)
 
@@ -173,9 +172,6 @@ class RepostItemValuation(Document):
 		if self.voucher_type == "Purchase Invoice":
 			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
 
-		if self.voucher_type == "Stock Entry":
-			return not is_transfer_stock_entry(self.voucher_no)
-
 		return False
 
 	def validate_recreate_stock_ledgers(self):
@@ -186,8 +182,19 @@ class RepostItemValuation(Document):
 		if self.based_on == "Item and Warehouse":
 			items.append(self.item_code)
 		else:
-			items = get_items_to_be_repost(self.voucher_type, self.voucher_no)
-			items = list(set([d.item_code for d in items]))
+			items = [d.item_code for d in get_items_to_be_repost(self.voucher_type, self.voucher_no)]
+			# the voucher's stock ledger entries may be the ones to recreate, so they can be missing
+			items += frappe.get_all(
+				"Serial and Batch Bundle",
+				filters={
+					"voucher_type": self.voucher_type,
+					"voucher_no": self.voucher_no,
+					"docstatus": 1,
+					"is_cancelled": 0,
+				},
+				pluck="item_code",
+			)
+			items = list(set(items))
 
 		if serial_batch_items := frappe.get_all(
 			"Item", or_filters={"has_serial_no": 1, "has_batch_no": 1}, filters={"name": ("in", items)}
@@ -785,10 +792,7 @@ def repost(doc):
 			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
-		if (
-			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
-			and doc.recalculate_valuation_rate
-		):
+		if doc.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and doc.recalculate_valuation_rate:
 			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:

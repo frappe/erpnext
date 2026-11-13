@@ -11,6 +11,7 @@ from frappe.utils import flt
 
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.deprecation_dumpster import deprecated
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 
 @frappe.whitelist()
@@ -114,6 +115,7 @@ def make_quotation(source_name: str, target_doc: str | dict | Document | None = 
 				"field_map": {
 					"name": "supplier_quotation",
 				},
+				"postprocess": lambda source, target, source_parent: clear_inapplicable_terms(target),
 			},
 			"Supplier Quotation Item": {
 				"doctype": "Quotation Item",

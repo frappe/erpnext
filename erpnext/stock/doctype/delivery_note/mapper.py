@@ -19,6 +19,7 @@ from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.sales_and_purchase_return import get_returned_serial_nos
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 from erpnext.stock.doctype.delivery_note.services.billing_status import get_settled_return_qty
 from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_batch_list_from_item
@@ -230,11 +231,13 @@ def make_sales_invoice(
 def make_delivery_trip(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
-	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+	docstatus, company = frappe.db.get_value("Delivery Note", source_name, ["docstatus", "company"])
+	if docstatus == 2:
 		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
 
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+		target_doc.company = company
 
 	def update_address(source_doc, target_doc, source_parent):
 		target_doc.address = source_doc.shipping_address_name or source_doc.customer_address
@@ -535,6 +538,7 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 			)
 
 		target_doc.inter_company_invoice_reference = source_doc.name
+		clear_inapplicable_terms(target_doc)
 		if target_doc.doctype == "Purchase Receipt":
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")

@@ -53,7 +53,7 @@ class SellingController(StockController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("selling"):
-				self.set_missing_terms()
+				self.set_missing_terms_for_display()
 
 	def validate(self):
 		validate_terms_and_conditions(self.get("tc_name"), "selling")
@@ -490,16 +490,29 @@ class SellingController(StockController):
 					"valuation rate",
 				)
 
-	def get_item_list(self):
+	def make_packed_item_bundles(self):
+		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
-		il = []
-		picked_serial_nos = picked_batches = None
-		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-			service = SerialBatchBundleService(self)
-			picked_serial_nos = service.get_serial_nos_used_in_rows()
-			picked_batches = service.get_batches_used_in_rows()
+		service = SerialBatchBundleService(self)
+		packed_rows = [p for p in service.get_current_packed_rows() if not p.serial_and_batch_bundle]
+		if not packed_rows:
+			return
 
+		picked_serial_nos = service.get_serial_nos_used_in_rows()
+		picked_batches = service.get_batches_used_in_rows()
+		item_rows = {d.name: d for d in self.items}
+		for p in packed_rows:
+			get_serial_and_batch_bundle(
+				p, self, item_rows[p.parent_detail_docname], picked_serial_nos, picked_batches
+			)
+
+		# validate ran before these bundles existed
+		if service.is_batch_check_needed():
+			service.validate_outward_bundle_batches(rows=packed_rows)
+
+	def get_item_list(self):
+		il = []
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
@@ -514,10 +527,7 @@ class SellingController(StockController):
 									"serial_no": p.serial_no if self.docstatus == 2 else None,
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
-									"serial_and_batch_bundle": p.serial_and_batch_bundle
-									or get_serial_and_batch_bundle(
-										p, self, d, picked_serial_nos, picked_batches
-									),
+									"serial_and_batch_bundle": p.serial_and_batch_bundle,
 									"name": d.name,
 									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
@@ -844,6 +854,7 @@ class SellingController(StockController):
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		self.update_reserved_qty()
+		self.make_packed_item_bundles()
 
 		sl_entries = []
 		# Loop over items and packed items table
@@ -1306,7 +1317,9 @@ class SellingController(StockController):
 
 def remove_delivered_entries(package, pick_list_item):
 	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
-	delivered = get_delivered_entries(pick_list_item)
+	from erpnext.stock.doctype.pick_list.mapper import get_moved_entries
+
+	delivered = get_moved_entries([pick_list_item]).get(pick_list_item, [])
 	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
 	delivered_batch_qty = defaultdict(float)
 	for row in delivered:
@@ -1324,34 +1337,6 @@ def remove_delivered_entries(package, pick_list_item):
 		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
 		if not row.qty:
 			package.remove(row)
-
-
-def get_delivered_entries(pick_list_item):
-	"""Return the serial and batch entries that submitted deliveries of a pick list row took."""
-	voucher_detail_nos = [
-		name
-		for doctype in ("Delivery Note Item", "Sales Invoice Item")
-		for name in frappe.get_all(
-			doctype, filters={"pick_list_item": pick_list_item, "docstatus": 1}, pluck="name"
-		)
-	]
-	if not voucher_detail_nos:
-		return []
-
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	return (
-		frappe.qb.from_(entry)
-		.join(bundle)
-		.on(entry.parent == bundle.name)
-		.select(entry.serial_no, entry.batch_no, entry.qty)
-		.where(
-			bundle.voucher_detail_no.isin(voucher_detail_nos)
-			& (bundle.type_of_transaction == "Outward")
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-		)
-	).run(as_dict=True)
 
 
 def set_default_income_account_for_item(obj):
@@ -1379,7 +1364,7 @@ def get_serial_and_batch_bundle(
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
 
-	if child.get("use_serial_batch_fields"):
+	if child.get("use_serial_batch_fields") or child.get("serial_no") or child.get("batch_no"):
 		return
 
 	if not frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"):

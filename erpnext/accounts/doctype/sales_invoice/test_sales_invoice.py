@@ -1420,9 +1420,10 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		pos.is_pos = 1
 		pos.pos_profile = pos_profile.name
+		pos.account_for_change_amount = "Cash - _TC"
 
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 500})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 500})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 512.07})
 		pos.insert()
 		pos.submit()
 
@@ -3830,6 +3831,38 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
+		frappe.get_doc(
+			doctype="Terms and Conditions", title="_Test Sell Only Terms", selling=1, buying=0, terms="Net 30"
+		).insert()
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.tc_name = "_Test Sell Only Terms"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(
+			{
+				"expense_account": "Cost of Goods Sold - _TC1",
+				"cost_center": "Main - _TC1",
+				"warehouse": "Stores - _TC1",
+			}
+		)
+		pi.insert()
+
+		self.assertFalse(pi.tc_name)
+		self.assertFalse(pi.terms)
 
 	def make_cross_currency_inter_company_purchase_invoice(self):
 		for doctype, party, company in (

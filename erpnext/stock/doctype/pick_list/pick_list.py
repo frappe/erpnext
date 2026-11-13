@@ -1160,21 +1160,17 @@ class PickList(TransactionBase):
 		if not bundle_locations:
 			return
 
-		delivered_qty_by_key, delivered_serial_nos = self._get_delivered_bundle_component_qty(
-			{bundle_key[0] for bundle_key in bundle_locations}
+		delivered_qty_by_key, delivered_serial_nos = get_delivered_bundle_component_qty(
+			self.name, {bundle_key[0] for bundle_key in bundle_locations}
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
-			remaining_qty = max(delivered_qty_by_key.get(bundle_key, 0), 0)
-			# rows with serial nos take what they delivered first, the rest share the remaining qty
-			for location in sorted(locations, key=lambda row: not row.serial_no):
+			qty_by_location = self._get_bundle_location_delivered_qty(
+				locations, delivered_qty_by_key.get(bundle_key, 0), delivered_serial_nos[bundle_key]
+			)
+			for location in locations:
 				precision = location.precision("delivered_qty")
-				if location.serial_no:
-					picked_serial_nos = {number.lower() for number in get_serial_nos(location.serial_no)}
-					delivered_qty = len(picked_serial_nos & delivered_serial_nos[bundle_key])
-				else:
-					delivered_qty = flt(min(flt(location.picked_qty), remaining_qty), precision)
-				remaining_qty -= delivered_qty
+				delivered_qty = flt(qty_by_location[location.name], precision)
 				if flt(location.delivered_qty, precision) == delivered_qty:
 					continue
 
@@ -1186,58 +1182,22 @@ class PickList(TransactionBase):
 
 		self._set_delivery_status_from_items()
 
-	def _get_delivered_bundle_component_qty(self, sales_order_items):
-		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
-		delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
-		for parenttype in ("Delivery Note", "Sales Invoice"):
-			for row in self._get_delivered_packed_items(parenttype, sales_order_items):
-				key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
-				delivered_qty[key] += flt(row.delivered_qty)
-				delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
-
-		return delivered_qty, delivered_serial_nos
-
-	def _get_delivered_packed_items(self, parenttype, sales_order_items):
-		packed_item = frappe.qb.DocType("Packed Item")
-		transaction_item = frappe.qb.DocType(f"{parenttype} Item")
-		query = (
-			frappe.qb.from_(transaction_item)
-			.inner_join(packed_item)
-			.on(
-				(packed_item.parent == transaction_item.parent)
-				& (packed_item.parent_detail_docname == transaction_item.name)
-				& (packed_item.parenttype == parenttype)
+	@staticmethod
+	def _get_bundle_location_delivered_qty(locations, delivered_qty, delivered_serial_nos):
+		"""Rows take their picked serial nos that were delivered, then the rest of the delivered qty by picked qty."""
+		qty_by_location = {
+			location.name: len(
+				{number.lower() for number in get_serial_nos(location.serial_no)} & delivered_serial_nos
 			)
-		)
-		conditions = (
-			(transaction_item.docstatus == 1)
-			& (transaction_item.against_pick_list == self.name)
-			& transaction_item.so_detail.isin(sales_order_items)
-		)
+			for location in locations
+		}
+		remaining_qty = max(delivered_qty - sum(qty_by_location.values()), 0)
+		for location in locations:
+			qty = min(flt(location.picked_qty) - qty_by_location[location.name], remaining_qty)
+			qty_by_location[location.name] += qty
+			remaining_qty -= qty
 
-		if parenttype == "Sales Invoice":
-			transaction = frappe.qb.DocType(parenttype)
-			query = query.inner_join(transaction).on(transaction.name == transaction_item.parent)
-			conditions &= transaction.update_stock == 1
-
-		return (
-			query.select(
-				transaction_item.so_detail,
-				packed_item.item_code,
-				packed_item.warehouse,
-				packed_item.batch_no,
-				packed_item.serial_no,
-				Sum(packed_item.qty).as_("delivered_qty"),
-			)
-			.where(conditions)
-			.groupby(
-				transaction_item.so_detail,
-				packed_item.item_code,
-				packed_item.warehouse,
-				packed_item.batch_no,
-				packed_item.serial_no,
-			)
-		).run(as_dict=True)
+		return qty_by_location
 
 	def _set_delivery_status_from_items(self):
 		per_delivered = self._calculate_target_parent_percentage(
@@ -2161,3 +2121,58 @@ def get_pick_list_query(doctype: Any, txt: str, searchfield: Any, start: int, pa
 		query = query.where(txt_condition)
 
 	return query.run(as_dict=True)
+
+
+def get_delivered_bundle_component_qty(pick_list, sales_order_items):
+	"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
+	delivered_qty, delivered_serial_nos = defaultdict(float), defaultdict(set)
+	for parenttype in ("Delivery Note", "Sales Invoice"):
+		for row in get_delivered_packed_items(pick_list, parenttype, sales_order_items):
+			key = (row.so_detail, row.item_code, row.warehouse, row.batch_no or "")
+			delivered_qty[key] += flt(row.delivered_qty)
+			delivered_serial_nos[key].update(number.lower() for number in get_serial_nos(row.serial_no))
+
+	return delivered_qty, delivered_serial_nos
+
+
+def get_delivered_packed_items(pick_list, parenttype, sales_order_items):
+	packed_item = frappe.qb.DocType("Packed Item")
+	transaction_item = frappe.qb.DocType(f"{parenttype} Item")
+	query = (
+		frappe.qb.from_(transaction_item)
+		.inner_join(packed_item)
+		.on(
+			(packed_item.parent == transaction_item.parent)
+			& (packed_item.parent_detail_docname == transaction_item.name)
+			& (packed_item.parenttype == parenttype)
+		)
+	)
+	conditions = (
+		(transaction_item.docstatus == 1)
+		& (transaction_item.against_pick_list == pick_list)
+		& transaction_item.so_detail.isin(sales_order_items)
+	)
+
+	if parenttype == "Sales Invoice":
+		transaction = frappe.qb.DocType(parenttype)
+		query = query.inner_join(transaction).on(transaction.name == transaction_item.parent)
+		conditions &= transaction.update_stock == 1
+
+	return (
+		query.select(
+			transaction_item.so_detail,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.batch_no,
+			packed_item.serial_no,
+			Sum(packed_item.qty).as_("delivered_qty"),
+		)
+		.where(conditions)
+		.groupby(
+			transaction_item.so_detail,
+			packed_item.item_code,
+			packed_item.warehouse,
+			packed_item.batch_no,
+			packed_item.serial_no,
+		)
+	).run(as_dict=True)

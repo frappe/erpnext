@@ -252,7 +252,7 @@ erpnext.financial_statements = {
 	},
 
 	_format_standard_report: function (value, row, column, data, default_formatter, filter) {
-		if (data && column.fieldname == erpnext.financial_statements.name_field) {
+		if (data && column.fieldname == frappe.query_report.report_settings.name_field) {
 			value = data.section_name || data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {

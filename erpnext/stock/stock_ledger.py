@@ -13,7 +13,7 @@ import frappe
 from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import CombineDatetime, Concat, Lower, NullIf, Sum
+from frappe.query_builder.functions import Coalesce, CombineDatetime, Concat, Lower, NullIf, Sum
 from frappe.utils import (
 	cint,
 	flt,
@@ -1417,16 +1417,6 @@ class update_entries_after:
 				and not has_dimensions
 			):
 				# assert
-				if (
-					sle.voucher_detail_no
-					and self.repost_doc
-					and self.repost_doc.get("recalculate_valuation_rate")
-				):
-					source_rate = frappe.get_cached_value(
-						"Stock Reconciliation Item", sle.voucher_detail_no, "valuation_rate"
-					)
-					if source_rate:
-						sle.valuation_rate = source_rate
 				self.wh_data.valuation_rate = sle.valuation_rate
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
 				self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
@@ -1753,7 +1743,7 @@ class update_entries_after:
 			or self.has_landed_cost_based_on_pi(sle)
 			or (sle.voucher_type == "Stock Entry" and sle.actual_qty > 0 and is_repack_entry(sle.voucher_no))
 			or is_manufactured_finished_good(sle)
-			or (self.repost_doc and self.repost_doc.get("recalculate_valuation_rate"))
+			or self.recalculates_voucher(sle)
 		):
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 
@@ -1889,6 +1879,14 @@ class update_entries_after:
 			and self.valuation_method == "Moving Average"
 			and flt(sle.actual_qty) < 0
 			and flt(sle.outgoing_rate)
+		)
+
+	def recalculates_voucher(self, sle):
+		return bool(
+			self.repost_doc
+			and self.repost_doc.get("recalculate_valuation_rate")
+			and sle.voucher_type == self.repost_doc.voucher_type
+			and sle.voucher_no == self.repost_doc.voucher_no
 		)
 
 	def has_landed_cost_based_on_pi(self, sle):
@@ -2421,14 +2419,18 @@ class update_entries_after:
 			if msg:
 				reserved_stock = self.get_reserved_stock(exceptions[0]["item_code"], warehouse)
 				if reserved_stock:
-					allowed_qty = abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"])
+					allowed_qty = flt(
+						abs(exceptions[0]["actual_qty"]) - abs(exceptions[0]["diff"]), self.flt_precision
+					)
 
 					if allowed_qty > 0:
-						msg = "{} As {} units are reserved for other sales orders, you are allowed to consume only {} units.".format(
-							msg, frappe.bold(reserved_stock), frappe.bold(allowed_qty)
-						)
+						msg = _(
+							"{0} As {1} units are reserved for other sales orders, you are allowed to consume only {2} units."
+						).format(msg, frappe.bold(reserved_stock), frappe.bold(allowed_qty))
 					else:
-						msg = f"{msg} As the full stock is reserved for other transactions, you're not allowed to consume the stock."
+						msg = _(
+							"{0} As the full stock is reserved for other transactions, you're not allowed to consume the stock."
+						).format(msg)
 
 				msg_list.append(msg)
 
@@ -3046,7 +3048,49 @@ def get_next_stock_reco(kwargs):
 	if frappe.db.db_type == "mariadb":
 		query = query.for_update()
 
-	return query.run(as_dict=True)
+	next_reco = query.run(as_dict=True)
+	if next_reco and is_batch_reco(next_reco[0]):
+		next_reco = query.where(get_balance_setting_reco_condition(sle, kwargs)).run(as_dict=True)
+
+	return next_reco
+
+
+def is_batch_reco(reco):
+	return bool(reco.has_batch_no or reco.batch_no)
+
+
+def get_balance_setting_reco_condition(sle, kwargs):
+	condition = (sle.has_batch_no == 0) & (Coalesce(sle.batch_no, "") == "")
+	batches = get_batches_of_entry(kwargs)
+	if not batches:
+		return condition
+
+	entry = frappe.qb.DocType("Serial and Batch Entry")
+	bundles_counting_batches = (
+		frappe.qb.from_(entry)
+		.select(entry.parent)
+		.where(
+			(entry.warehouse == kwargs.get("warehouse"))
+			& (entry.batch_no.isin(batches))
+			& (entry.voucher_type == "Stock Reconciliation")
+		)
+	)
+
+	return condition | sle.batch_no.isin(batches) | sle.serial_and_batch_bundle.isin(bundles_counting_batches)
+
+
+def get_batches_of_entry(kwargs):
+	batches = {kwargs.get("batch_no")} - {None, ""}
+	if kwargs.get("serial_and_batch_bundle"):
+		batches.update(
+			frappe.get_all(
+				"Serial and Batch Entry",
+				filters={"parent": kwargs.get("serial_and_batch_bundle"), "batch_no": ("is", "set")},
+				pluck="batch_no",
+			)
+		)
+
+	return list(batches)
 
 
 def get_datetime_limit_condition(sle, detail):
@@ -3280,16 +3324,6 @@ def get_stock_value_difference(
 
 	difference_amount = query.run()
 	return flt(difference_amount[0][0]) if difference_amount else 0
-
-
-@frappe.request_cache
-def is_transfer_stock_entry(voucher_no):
-	return bool(
-		frappe.db.exists(
-			"Stock Entry Detail",
-			{"parent": voucher_no, "s_warehouse": ("is", "set"), "t_warehouse": ("is", "set")},
-		)
-	)
 
 
 @frappe.request_cache

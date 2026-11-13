@@ -14,6 +14,8 @@ from frappe.utils import add_days, add_to_date, date_diff, flt, get_datetime, ge
 from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
+from erpnext import require_permission
+
 
 class CircularReferenceError(frappe.ValidationError):
 	pass
@@ -96,6 +98,7 @@ class Task(NestedSet):
 		self.validate_parent_is_group()
 		self.validate_parent_not_completed()
 		self.validate_web_form_project_permission()
+		self.validate_project_access()
 
 	def validate_dates(self):
 		self.validate_from_to_dates("exp_start_date", "exp_end_date")
@@ -274,6 +277,29 @@ class Task(NestedSet):
 				title=_("Invalid Parent Task"),
 			)
 
+	def validate_project_access(self):
+		"""Saving this task recalculates its project, and the project it leaves, with no permission check.
+		So the user must be allowed to pick each project whose figures the save changes."""
+		if self.has_value_changed("project"):
+			projects = [self.get_value_before_save("project")]
+			# validate_web_form_project_permission checks the project a web form task joins
+			if not frappe.flags.in_web_form:
+				projects.append(self.project)
+		elif any(self.has_value_changed(fieldname) for fieldname in ("status", "progress", "task_weight")):
+			projects = [self.project]
+		else:
+			return
+
+		if frappe.flags.in_web_form:
+			self.check_project_access(*projects, allow_project_users=True)
+		elif not self.flags.ignore_permissions:
+			self.check_project_access(*projects)
+
+	def check_project_access(self, *projects, allow_project_users=False):
+		for project in {project for project in projects if project}:
+			if not (allow_project_users and self.has_webform_permission(project)):
+				require_permission("Project", project, "select")
+
 	def validate_children_project(self):
 		if self.is_new() or not self.has_value_changed("project"):
 			return
@@ -421,9 +447,9 @@ class Task(NestedSet):
 				task.flags.rescheduled = True
 				task.save(ignore_permissions=self.flags.ignore_permissions)
 
-	def has_webform_permission(self):
+	def has_webform_permission(self, project=None):
 		project_user = frappe.db.get_value(
-			"Project User", {"parent": self.project, "user": frappe.session.user}, "user"
+			"Project User", {"parent": project or self.project, "user": frappe.session.user}, "user"
 		)
 		if project_user:
 			return True
@@ -473,6 +499,8 @@ class Task(NestedSet):
 		if frappe.db.exists("Task", {"parent_task": self.name}):
 			throw(_("Child Task exists for this Task. You cannot delete this Task."))
 
+		# after_delete recalculates the project, and web forms delete with ignore_permissions
+		self.check_project_access(self.project, allow_project_users=True)
 		self.remove_from_parent_depends_on(self.parent_task)
 		self.update_nsm_model()
 
