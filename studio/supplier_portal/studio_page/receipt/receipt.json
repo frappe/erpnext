@@ -1003,20 +1003,6 @@
                 }
                },
                "visibilityCondition": "{{ tracking.length > 0 }}"
-              },
-              {
-               "baseStyles": {
-                "color": "var(--ink-gray-5)"
-               },
-               "blockName": "No transport",
-               "componentId": "TextBlock-f79ffa4c0e",
-               "componentName": "TextBlock",
-               "componentProps": {
-                "fontSize": "text-base",
-                "tag": "p",
-                "text": "{{ __('No transport details') }}"
-               },
-               "visibilityCondition": "{{ tracking.length === 0 }}"
               }
              ],
              "classes": [
@@ -1024,7 +1010,8 @@
              ],
              "componentId": "div-tgr4ufjnm",
              "componentName": "div",
-             "originalElement": "div"
+             "originalElement": "div",
+             "visibilityCondition": "{{ tracking.length > 0 }}"
             },
             {
              "baseStyles": {

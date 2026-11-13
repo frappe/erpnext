@@ -11,7 +11,6 @@ import {
 	formatMoneyExact as formatMoney,
 	formatQty,
 	INK5,
-	INK6,
 	INK7,
 	INK8,
 	line,
@@ -43,7 +42,7 @@ export default function setup(context) {
 		isReturn.value
 			? { date: __("Returned"), value: __("Value returned"), billed: __("Debit note"),
 				shipped: __("Returned"), pending: "", rejected: "" }
-			: { date: __("Received"), value: __("Goods value"), billed: __("Invoiced"),
+			: { date: __("Received"), value: __("Goods value"), billed: __("Billed"),
 				shipped: __("Ordered"), pending: __("Accepted"), rejected: __("Rejected") },
 	)
 
@@ -67,7 +66,7 @@ export default function setup(context) {
 	const dispatchInfo = computed(() => {
 		const rows: any[] = [
 			line(labels.value.date, formatDate(doc.value.posting_date) || EMPTY, doc.value.posting_date ? INK8 : INK5),
-			...present(__("Your delivery note"), doc.value.supplier_delivery_note),
+			...present(__("Delivery note"), doc.value.supplier_delivery_note),
 		]
 		const against = doc.value.return_against
 		if (against) {
@@ -83,7 +82,7 @@ export default function setup(context) {
 		sourceOrders.value.forEach((name, i) => {
 			rows.push({
 				key: "order:" + name,
-				label: i > 0 ? "" : sourceOrders.value.length > 1 ? __("For orders") : __("For order"),
+				label: i > 0 ? "" : sourceOrders.value.length > 1 ? __("Purchase orders") : __("Purchase order"),
 				value: name,
 				color: INK8,
 				weight: "420",
@@ -91,7 +90,7 @@ export default function setup(context) {
 			})
 		})
 		rows.push(line(labels.value.value, formatMoney(magnitude(doc.value.grand_total), doc.value.currency)))
-		rows.push(line(labels.value.billed, billedLine.value, INK6))
+		rows.push(line(labels.value.billed, billedLine.value))
 		return rows
 	})
 
@@ -163,7 +162,7 @@ export default function setup(context) {
 				shipped: ordered ? formatQty(ordered.qty, row.uom) : EMPTY,
 				pending: formatQty(row.qty, row.uom),
 				rejected: rejected ? formatQty(rejected, row.uom) : EMPTY,
-				rejectedColor: rejected ? RED : INK7,
+				rejectedColor: rejected ? RED : INK5,
 			}
 		}),
 	)
@@ -204,7 +203,7 @@ export default function setup(context) {
 			}
 		}
 		return {
-			title: several ? __("This completes the orders.") : __("This completes the order."),
+			title: several ? __("This delivery completes the orders.") : __("This delivery completes the order."),
 			theme: "green",
 			icon: "lucide-circle-check",
 		}
