@@ -909,7 +909,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(get_rm_value(scr_return.name), 3000)
 
 	def test_rejected_return_brings_back_batch_raw_materials_at_zero_value(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
