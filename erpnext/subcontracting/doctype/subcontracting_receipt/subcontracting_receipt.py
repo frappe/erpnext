@@ -521,12 +521,14 @@ class SubcontractingReceipt(SubcontractingController):
 					"secondary_item_type",
 					"valuation_type",
 					"returned_qty",
+					"warehouse",
 				],
 			)
 		}
 
 	def link_returned_secondary_items(self, original_rows):
-		"""Link each rebuilt secondary row of a return to its row on the returned receipt."""
+		"""Link each rebuilt secondary row of a return to its row on the returned receipt,
+		and return it from the warehouse that row received it in."""
 		if not original_rows:
 			return
 
@@ -546,10 +548,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
 		for row in self.items:
-			if row.bom_secondary_item:
-				row.subcontracting_receipt_item = secondary_rows.get(
-					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
-				)
+			if not row.bom_secondary_item:
+				continue
+
+			original_row_name = secondary_rows.get(
+				(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
+			)
+			if original_row_name:
+				row.subcontracting_receipt_item = original_row_name
+				row.warehouse = original_rows[original_row_name].warehouse
 
 	@staticmethod
 	def pair_legacy_secondary_rows(fg_row, receipt_rows):
