@@ -536,6 +536,22 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertTrue(secondary_row.expense_account)
 		self.assertTrue(secondary_row.cost_center)
 
+	def test_rejected_return_leaves_out_secondary_items(self):
+		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+			make_subcontract_return_against_rejected_warehouse,
+		)
+
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10, rejected_qty=4)
+
+		scr_return = make_subcontract_return_against_rejected_warehouse(scr.name)
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+		scr_return.submit()
+
+		self.assertEqual([row.item_code for row in scr_return.items], [fg_item])
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
@@ -5898,7 +5914,7 @@ def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, seconda
 	return bom
 
 
-def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0):
+def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0, rejected_qty=0):
 	"""Submitted receipt for qty of fg_item, with its secondary rows."""
 	set_backflush_based_on("BOM")
 	service_items = [
@@ -5922,6 +5938,11 @@ def make_receipt_with_secondary_items(fg_item, qty, process_loss_qty=0):
 	scr = make_subcontracting_receipt(sco.name)
 	scr.items[0].qty = qty - process_loss_qty
 	scr.items[0].process_loss_qty = process_loss_qty
+
+	if rejected_qty:
+		scr.items[0].qty -= rejected_qty
+		scr.items[0].rejected_qty = rejected_qty
+		scr.items[0].rejected_warehouse = "_Test Warehouse 1 - _TC"
 	scr.save()
 	scr.get_secondary_items()
 	scr.save()
