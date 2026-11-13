@@ -4699,6 +4699,11 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.set_status(close=False, update_bin=True)
 		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Submitted")
 
+		plan.docstatus = 2
+		plan.set_status(close=False, update_bin=True)
+		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Submitted")
+		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "docstatus"), 1)
+
 	def test_stock_reservation_against_production_plan(self):
 		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
