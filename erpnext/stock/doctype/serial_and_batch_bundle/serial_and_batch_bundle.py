@@ -1930,12 +1930,14 @@ class SerialandBatchBundle(Document):
 		self.remove_source_document_no()
 
 	def validate_batch_quantity(self):
-		if not self.has_batch_no:
+		# a reconciliation checks its outward bundles once its inward ones are posted
+		if self.type_of_transaction != "Outward" or self.voucher_type == "Stock Reconciliation":
 			return
 
-		if self.type_of_transaction != "Outward" or (
-			self.voucher_type == "Stock Reconciliation" and self.type_of_transaction == "Outward"
-		):
+		self.validate_future_batch_quantity()
+
+	def validate_future_batch_quantity(self):
+		if not self.has_batch_no:
 			return
 
 		batch_wise_available_qty = self.get_batchwise_available_qty()
