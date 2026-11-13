@@ -420,6 +420,23 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.load_from_db()
 		self.assertEqual(scr.per_returned, 100)
 
+	def test_return_inserted_as_submitted_after_a_partial_return(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_partial_return(scr.name, 3)
+
+		# e.g. through the REST API, without a save first
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -7
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
