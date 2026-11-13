@@ -3264,6 +3264,71 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			"set_valuation_rate_for_rejected_materials": 1,
 		},
 	)
+	def test_return_of_a_stock_updating_invoice_that_rejected_every_unit(self):
+		"""The return bills the rejected qty the invoice billed, not one unit's rate."""
+		pi = make_fully_rejected_stock_invoice()
+		rejected_warehouse = pi.items[0].rejected_warehouse
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.submit()
+
+		self.assertEqual(returned.grand_total, -200)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": returned.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+				["actual_qty", "stock_value_difference"],
+			),
+			(-2, -200),
+		)
+
+		booked = {}
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": returned.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			booked.setdefault(entry.account, 0)
+			booked[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(
+			booked,
+			{returned.credit_to: 200, get_inventory_account(pi.company, rejected_warehouse): -200},
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 0,
+		},
+	)
+	def test_return_of_an_unvalued_fully_rejected_invoice(self):
+		"""Rejected material the invoice neither billed nor valued goes back with no amount."""
+		pi = make_fully_rejected_stock_invoice()
+		rejected_warehouse = pi.items[0].rejected_warehouse
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.submit()
+
+		self.assertEqual(returned.grand_total, 0)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": returned.name, "warehouse": rejected_warehouse, "is_cancelled": 0},
+				["actual_qty", "stock_value_difference"],
+			),
+			(-2, 0),
+		)
+		self.assertFalse(frappe.db.exists("GL Entry", {"voucher_no": returned.name, "is_cancelled": 0}))
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
 	def test_stock_updating_invoice_bills_the_rejected_quantity(self):
 		"""With the rejected quantity billed and valued, the invoice pays for every unit received and
 		the stock it moves matches the entries it books."""
@@ -4440,6 +4505,30 @@ def make_purchase_invoice(**args):
 		pi.insert()
 		if not args.do_not_submit:
 			pi.submit()
+	return pi
+
+
+def make_fully_rejected_stock_invoice():
+	"""A stock updating invoice that rejects both units of its only row, at 100 each."""
+	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	company = "_Test Company with perpetual inventory"
+	rejected_warehouse = create_warehouse("_Test Fully Rejected Invoice Warehouse", company=company)
+	pi = make_purchase_invoice(
+		company=company,
+		item_code=make_item(properties={"is_stock_item": 1}).name,
+		warehouse="Stores - TCP1",
+		qty=0,
+		rejected_qty=2,
+		received_qty=2,
+		rate=100,
+		rejected_warehouse=rejected_warehouse,
+		update_stock=1,
+		cost_center="Main - TCP1",
+		do_not_save=True,
+	)
+	pi.submit()
 	return pi
 
 
