@@ -2643,6 +2643,53 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, get_batches, "_Test Warehouse - _TC")
 			self.assertRaises(frappe.PermissionError, get_batches)
 
+	def test_get_auto_data_fills_quantity_from_allowed_warehouses(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_data
+
+		batch_item = make_item(
+			"_Test Auto Data Allowed Batch Item",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "ADAW-.#####",
+				"is_stock_item": 1,
+			},
+		).name
+		serial_item = make_item(
+			"_Test Auto Data Allowed Serial Item",
+			{"has_serial_no": 1, "serial_no_series": "ADAWS-.#####", "is_stock_item": 1},
+		).name
+		for index, warehouse in enumerate(("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")):
+			make_stock_entry(item_code=batch_item, target=warehouse, qty=5, rate=100)
+			serial_nos = [
+				frappe.get_doc(
+					doctype="Serial No",
+					serial_no=f"ADAWS-{index}-{number}",
+					item_code=serial_item,
+					company="_Test Company",
+				)
+				.insert(ignore_permissions=True)
+				.name
+				for number in range(3)
+			]
+			make_stock_entry(item_code=serial_item, target=warehouse, qty=3, rate=100, serial_no=serial_nos)
+
+		def get_warehouses(item, flag, qty):
+			rows = get_auto_data(item_code=item, qty=qty, **{flag: 1})
+			return [(row.warehouse, row.get("qty", 1)) for row in rows]
+
+		self.assertEqual(get_warehouses(batch_item, "has_batch_no", 5), [("_Test Warehouse - _TC", 5)])
+		self.assertEqual(get_warehouses(serial_item, "has_serial_no", 2), [("_Test Warehouse - _TC", 1)] * 2)
+		fenced = make_fenced_user(
+			"sabb-auto-data-allowed@example.com", ["Stock User"], [("Warehouse", "_Test Warehouse 1 - _TC")]
+		)
+		with as_user(fenced):
+			self.assertEqual(get_warehouses(batch_item, "has_batch_no", 5), [("_Test Warehouse 1 - _TC", 5)])
+			self.assertEqual(get_warehouses(batch_item, "has_batch_no", 4), [("_Test Warehouse 1 - _TC", 4)])
+			self.assertEqual(
+				get_warehouses(serial_item, "has_serial_no", 2), [("_Test Warehouse 1 - _TC", 1)] * 2
+			)
+
 	def test_add_serial_batch_ledgers_checks_write_on_an_existing_bundle(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 

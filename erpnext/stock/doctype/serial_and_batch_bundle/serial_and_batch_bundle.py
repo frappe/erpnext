@@ -2748,19 +2748,31 @@ def get_auto_data(**kwargs):
 	if kwargs.warehouse:
 		require_permission("Warehouse", kwargs.warehouse, "select")
 
-	data = None
+	warehouses = frappe.get_list("Warehouse", pluck="name", limit=0)
+	if len(warehouses) == frappe.db.count("Warehouse"):
+		return get_auto_data_rows(kwargs)
+
+	return get_auto_data_rows_in_warehouses(kwargs, set(warehouses))
+
+
+def get_auto_data_rows(kwargs):
 	if cint(kwargs.has_serial_no):
-		data = get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
+		return get_serial_nos_from_sre(kwargs) if kwargs.scio_detail else get_available_serial_nos(kwargs)
 	elif cint(kwargs.has_batch_no):
-		data = get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
+		return get_batch_nos_from_sre(kwargs) if kwargs.scio_detail else get_auto_batch_nos(kwargs)
 
-	if not data:
-		return data
 
-	warehouses = frappe.get_list(
-		"Warehouse", filters={"name": ("in", {row.warehouse for row in data})}, pluck="name", limit=0
-	)
-	return [row for row in data if row.warehouse in warehouses]
+def get_auto_data_rows_in_warehouses(kwargs, warehouses):
+	qty = flt(kwargs.qty)
+	kwargs.qty = 0
+	rows = [row for row in get_auto_data_rows(kwargs) or [] if row.warehouse in warehouses]
+	if not qty:
+		return rows
+
+	if cint(kwargs.has_serial_no):
+		return rows[: cint(qty)]
+
+	return get_qty_based_available_batches(rows, qty)
 
 
 def get_available_batches_qty(available_batches):
