@@ -493,6 +493,7 @@ class SellingController(StockController):
 
 	def make_packed_item_bundles(self):
 		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
 		service = SerialBatchBundleService(self)
@@ -502,6 +503,21 @@ class SellingController(StockController):
 
 		picked_serial_nos = service.get_serial_nos_used_in_rows()
 		picked_batches = service.get_batches_used_in_rows()
+
+		# a POS Invoice does not deliver reservations, so it keeps picking around them
+		if self.doctype != "POS Invoice":
+			# a component reserves against the order's packed row it delivers
+			for packed_item, so_packed_item in get_order_packed_item_pairs(self):
+				packed_item.so_detail = so_packed_item.name
+
+			reserved_batches = self.get_open_reserved_batches()
+			self.remove_reserved_qty_held_by_rows(
+				picked_batches, reserved_batches, service.get_current_packed_rows()
+			)
+			# like an item row, a reserved component is picked when its reservation is delivered
+			reserved_rows = self.get_packed_items_with_open_reservation(reserved_batches)
+			packed_rows = [p for p in packed_rows if p not in reserved_rows]
+
 		item_rows = {d.name: d for d in self.items}
 		for p in packed_rows:
 			get_serial_and_batch_bundle(
@@ -511,6 +527,61 @@ class SellingController(StockController):
 		# validate ran before these bundles existed
 		if service.is_batch_check_needed():
 			service.validate_outward_bundle_batches(rows=packed_rows)
+
+	def get_open_reserved_batches(self) -> dict:
+		"""Undelivered Serial and Batch reservations of this document's order rows, by (order row, batch no, warehouse)."""
+		order_rows = {
+			row.so_detail for row in self.get("items") + self.get("packed_items") if row.get("so_detail")
+		}
+		if not order_rows:
+			return {}
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		reserved = (
+			frappe.qb.from_(sre)
+			.inner_join(entry)
+			.on(entry.parent == sre.name)
+			.select(
+				sre.voucher_detail_no, entry.batch_no, sre.warehouse, Sum(entry.qty - entry.delivered_qty)
+			)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == "Sales Order")
+				& (sre.voucher_detail_no.isin(list(order_rows)))
+				& (sre.reservation_based_on == "Serial and Batch")
+				& (sre.delivered_qty < sre.reserved_qty)
+			)
+			.groupby(sre.voucher_detail_no, entry.batch_no, sre.warehouse)
+		).run()
+		return {(order_row, batch_no, warehouse): qty for order_row, batch_no, warehouse, qty in reserved}
+
+	def remove_reserved_qty_held_by_rows(self, picked_batches, reserved_batches, packed_rows):
+		"""Batch qty a row holds for its own reservation is already counted as reserved, so it is not also picked."""
+		holders = {
+			row.serial_and_batch_bundle: row.so_detail
+			for row in self.get("items") + packed_rows
+			if row.serial_and_batch_bundle and row.get("so_detail")
+		}
+		if not holders or not reserved_batches:
+			return
+
+		reserved = dict(reserved_batches)
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ("in", list(holders)), "batch_no": ("is", "set")},
+			fields=["parent", "batch_no", "warehouse", "qty"],
+		):
+			key = (holders[entry.parent], entry.batch_no, entry.warehouse)
+			held_reserved_qty = min(-entry.qty, reserved.get(key, 0))
+			if held_reserved_qty > 0 and (entry.batch_no, entry.warehouse) in picked_batches:
+				reserved[key] -= held_reserved_qty
+				picked_batches[(entry.batch_no, entry.warehouse)].qty += held_reserved_qty
+
+	def get_packed_items_with_open_reservation(self, reserved_batches) -> list:
+		"""Packed rows whose order packed row has an open Serial and Batch reservation in their warehouse."""
+		reserved = {(order_row, warehouse) for order_row, _, warehouse in reserved_batches}
+		return [p for p in self.get("packed_items") if (p.get("so_detail"), p.warehouse) in reserved]
 
 	def get_item_list(self):
 		il = []
