@@ -540,9 +540,19 @@ def _late_orders(filters: list) -> list[str]:
 
 def _add_last_payments(rows: list) -> dict:
 	"""When each invoice was last paid: the date its note shows once paid."""
-	return _latest_dates(
+	latest = _latest_dates(
 		rows, "Payment Entry", "Payment Entry Reference", "reference_name", "last_payment", "Purchase Invoice"
 	)
+	# paid on the invoice itself, as a cash purchase is: paid the day it was booked
+	for name, date in frappe.get_all(
+		"Purchase Invoice",
+		filters={"name": ["in", [row.name for row in rows] or [""]], "is_paid": 1},
+		fields=["name", "posting_date"],
+		as_list=True,
+	):
+		before = latest.get(name, {}).get("last_payment")
+		latest[name] = {"last_payment": max(filter(None, (before, date)))}
+	return latest
 
 
 def _latest_dates(
@@ -1168,7 +1178,7 @@ def get_invoice(name: str) -> dict:
 	invoice = _supplier_doc("Purchase Invoice", name)
 	return {
 		**_reply(invoice, INVOICE_FIELDS, INVOICE_ITEM_FIELDS),
-		"payments": _payments(invoice.name),
+		"payments": _payments(invoice),
 		"party_total": get_total_in_party_account_currency(invoice),
 		"debited": 0 if invoice.is_return else _debited(invoice.name),
 	}
@@ -1256,19 +1266,33 @@ def _order_lines(receipt) -> list[dict]:
 	)
 
 
-def _payments(invoice: str) -> list[dict]:
+def _payments(invoice) -> list[dict]:
 	"""What the buyer has paid against one invoice, oldest first."""
+	# paid on the invoice itself, as a cash purchase is, with no payment entry of its own
+	on_invoice = (
+		[
+			{
+				"name": invoice.name,
+				"posting_date": invoice.posting_date,
+				"mode_of_payment": invoice.mode_of_payment,
+				"reference_no": None,
+				"allocated_amount": invoice.paid_amount,
+			}
+		]
+		if invoice.is_paid and invoice.paid_amount
+		else []
+	)
 	allocations = frappe.get_all(
 		"Payment Entry Reference",
 		filters={
 			"parenttype": "Payment Entry",
 			"reference_doctype": "Purchase Invoice",
-			"reference_name": invoice,
+			"reference_name": invoice.name,
 		},
 		fields=["parent", "allocated_amount"],
 	)
 	if not allocations:
-		return []
+		return on_invoice
 	entries = {
 		entry.name: entry
 		for entry in frappe.get_all(
@@ -1286,7 +1310,7 @@ def _payments(invoice: str) -> list[dict]:
 		if row.parent in entries:
 			allocated[row.parent] = allocated.get(row.parent, 0) + row.allocated_amount
 	payments = [{**entries[name], "allocated_amount": amount} for name, amount in allocated.items()]
-	return sorted(payments, key=lambda payment: (payment["posting_date"], payment["name"]))
+	return sorted(on_invoice + payments, key=lambda payment: (payment["posting_date"], payment["name"]))
 
 
 def _debited(invoice: str) -> float:
