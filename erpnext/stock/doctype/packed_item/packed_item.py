@@ -10,7 +10,7 @@ import frappe
 import frappe.defaults
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
 
@@ -517,6 +517,11 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 			else set()
 		)
 		pi_row.serial_no = get_pending_serial_nos(pl_row, {pl_row.name: delivered})
+
+	# a lowered bundle qty keeps only as many serial nos
+	serial_nos = get_serial_nos(pi_row.serial_no)
+	if len(serial_nos) > flt(pi_row.qty):
+		pi_row.serial_no = "\n".join(serial_nos[: cint(pi_row.qty)])
 
 
 def get_delivered_component_serial_nos(main_item_row, pl_row):
