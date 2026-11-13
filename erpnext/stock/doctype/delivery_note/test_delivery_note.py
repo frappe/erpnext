@@ -1893,27 +1893,10 @@ class TestDeliveryNote(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_picked_row_skips_batch_qty_of_a_row_with_batch_no_without_batch_fields(self):
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TRBF-.#####",
-			}
-		).name
-		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		first_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		item, first_batch = self.make_item_with_two_batches("TRBF-.#####")
 
 		# e.g. through the REST API: a batch_no without use_serial_batch_fields
-		dn = create_delivery_note(item_code=item, qty=8, do_not_save=True)
-		dn.items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 0})
-		dn.append("items", {**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "batch_no": None})
-		dn.items[1].use_serial_batch_fields = 1
-		dn.insert()
-		dn.submit()
-
-		self.assertEqual(get_batches_from_bundle(dn.items[1].serial_and_batch_bundle)[first_batch], -2)
+		self.assert_auto_picked_row_skips_first_row_batch_qty(item, first_batch, {"batch_no": first_batch})
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -1921,17 +1904,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_picked_row_skips_batch_qty_of_a_row_with_bundle(self):
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TRBS-.#####",
-			}
-		).name
-		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		first_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		item, first_batch = self.make_item_with_two_batches("TRBS-.#####")
 
 		# e.g. through the REST API: a draft bundle without use_serial_batch_fields
 		bundle = make_serial_batch_bundle(
@@ -1945,11 +1918,38 @@ class TestDeliveryNote(ERPNextTestSuite):
 				"do_not_submit": True,
 			}
 		)
+		self.assert_auto_picked_row_skips_first_row_batch_qty(
+			item, first_batch, {"serial_and_batch_bundle": bundle.name}
+		)
+
+	def make_item_with_two_batches(self, batch_number_series):
+		"""Batched item received in two batches of 10."""
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": batch_number_series,
+			}
+		).name
+		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		return item, get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+	def assert_auto_picked_row_skips_first_row_batch_qty(self, item, first_batch, first_row):
+		"""Second row (5, auto-picked) gets only the 2 left of first_batch after the first row (8)."""
 		dn = create_delivery_note(item_code=item, qty=8, do_not_save=True)
-		dn.items[0].update({"serial_and_batch_bundle": bundle.name, "use_serial_batch_fields": 0})
+		dn.items[0].update({**first_row, "use_serial_batch_fields": 0})
 		dn.append(
 			"items",
-			{**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "serial_and_batch_bundle": None},
+			{
+				**dn.items[0].as_dict(),
+				"name": None,
+				"idx": None,
+				"qty": 5,
+				"batch_no": None,
+				"serial_and_batch_bundle": None,
+			},
 		)
 		dn.items[1].use_serial_batch_fields = 1
 		dn.insert()
