@@ -28,6 +28,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_pi_from_pr,
 )
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -154,6 +155,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_orders_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+<<<<<<< HEAD
 		item = make_item_with_fractional_box()
 		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
 		self.assert_orders_for_parts_add_up(mr.items[0], lambda: make_purchase_order(mr.name))
@@ -244,19 +246,36 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	def assert_orders_for_parts_add_up(self, source_row, make_order):
 		"""Orders of 1 + 1 + 1 Box for a 3 Box source row add up to its stock qty; over-ordering fails."""
+=======
+>>>>>>> 2611959 (test: orders for parts of a Material Request add up to its stock qty)
 		from erpnext.controllers.status_updater import OverAllowanceError
 
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+<<<<<<< HEAD
 
 		def order(qty):
 			po = make_order()
+=======
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.666666667}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+
+		def order(qty):
+			po = make_purchase_order(mr.name)
+>>>>>>> 2611959 (test: orders for parts of a Material Request add up to its stock qty)
 			po.supplier = "_Test Supplier"
 			po.items[0].qty = qty
 			return po
 
 		order(1).submit()
 		order(1).submit()
+<<<<<<< HEAD
 		frappe.db.savepoint("over_order")
 		self.assertRaises(OverAllowanceError, order(2).submit)
 		frappe.db.rollback(save_point="over_order")
@@ -265,6 +284,15 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value(source_row.doctype, source_row.name, "ordered_qty"),
 			flt(source_row.stock_qty, source_row.precision("stock_qty")),
+=======
+		with assert_raises_with_savepoint(self, OverAllowanceError):
+			order(2).submit()
+		order(1).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"),
+			mr.items[0].stock_qty,
+>>>>>>> 2611959 (test: orders for parts of a Material Request add up to its stock qty)
 		)
 
 	def test_over_order_allowance_against_material_request(self) -> None:
