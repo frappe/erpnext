@@ -2,6 +2,7 @@
 # See license.txt
 
 import frappe
+from frappe.utils import flt
 
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -160,6 +161,36 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_pr.submit()
 
 		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "per_returned"), 100)
+
+	def test_purchase_receipt_split_return_takes_out_the_received_stock_qty(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		pr = make_purchase_receipt(
+			item_code=make_box_item(conversion_factor),
+			qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		return_pr = make_purchase_return(pr.name)
+		return_pr.items[0].qty = return_pr.items[0].received_qty = -1
+		for _ in range(2):
+			return_pr.append("items", dict(return_pr.items[0].as_dict(), name=None))
+		return_pr.submit()
+
+		self.assertEqual(get_posted_stock_qty(return_pr), -get_posted_stock_qty(pr))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_split_return_brings_back_the_delivered_stock_qty(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
+		return_dn.submit()
+
+		dn = frappe.get_doc("Delivery Note", return_dn.return_against)
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
@@ -400,6 +431,14 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_doc.append("items", return_doc.items[0].as_dict(no_default_fields=True))
 
 		self.assertRaises(StockOverReturnError, return_doc.insert)
+
+
+def get_posted_stock_qty(doc):
+	"""Stock qty the stock ledger moved for `doc`."""
+	actual_qty = frappe.get_all(
+		"Stock Ledger Entry", filters={"voucher_no": doc.name, "is_cancelled": 0}, pluck="actual_qty"
+	)
+	return flt(sum(actual_qty), frappe.get_precision("Stock Ledger Entry", "actual_qty"))
 
 
 def make_box_item(conversion_factor):
