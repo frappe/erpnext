@@ -5214,18 +5214,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_bom_backflush_draft_with_batch_follows_earlier_receipts(self):
 		set_backflush_based_on("BOM")
-		raw_material = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "Kg",
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "BFD-.#####",
-			}
-		).name
-		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
-		make_bom(item=fg_item, raw_materials=[raw_material], rm_qty=0.375, currency="INR")
-		sco = make_order_of_two_with_raw_materials_transferred(fg_item)
+		sco = make_order_of_two_with_raw_materials_transferred(make_fg_item_with_batched_raw_material())
 
 		drafts = []
 		for _receipt in range(2):
@@ -5257,6 +5246,26 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		draft.save()
 		self.assertEqual([(row.batch_no, row.consumed_qty) for row in draft.supplied_items], supplied_qty)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_bom_backflush_draft_split_over_batches_follows_earlier_receipts(self):
+		set_backflush_based_on("BOM")
+		sco = make_order_of_two_with_raw_materials_transferred(
+			make_fg_item_with_batched_raw_material(), batches=3
+		)
+		draft = make_subcontracting_receipt(sco.name)
+		draft.items[0].qty = 1
+		draft.save()
+		self.assertEqual([row.consumed_qty for row in draft.supplied_items], [0.13, 0.25])
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 1
+		scr.submit()
+
+		draft.reload()
+		draft.save()
+		self.assertEqual([row.consumed_qty for row in draft.supplied_items], [0.13, 0.24])
+
 
 def receive_order_of_two_one_by_one(rm_qty):
 	"""Consumed qty of two receipts of 1 for an order of 2 whose BOM needs ``rm_qty`` per unit."""
@@ -5282,7 +5291,24 @@ def receive_one_by_one(fg_item):
 	return consumed_qty
 
 
-def make_order_of_two_with_raw_materials_transferred(fg_item):
+def make_fg_item_with_batched_raw_material():
+	"""Finished good whose BOM needs 0.375 Kg of a batched raw material per unit."""
+	raw_material = make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"has_batch_no": 1,
+			"create_new_batch": 1,
+			"batch_number_series": "BFD-.#####",
+		}
+	).name
+	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+	make_bom(item=fg_item, raw_materials=[raw_material], rm_qty=0.375, currency="INR")
+	return fg_item
+
+
+def make_order_of_two_with_raw_materials_transferred(fg_item, batches=1):
+	"""Subcontracting Order for 2 ``fg_item`` whose raw materials are transferred in ``batches`` equal parts."""
 	service_item = make_item(properties={"is_stock_item": 0}).name
 	sco = get_subcontracting_order(
 		service_items=[
@@ -5301,12 +5327,13 @@ def make_order_of_two_with_raw_materials_transferred(fg_item):
 		{
 			"main_item_code": fg_item,
 			"item_code": row.rm_item_code,
-			"qty": row.required_qty,
+			"qty": row.required_qty / batches,
 			"rate": 100,
 			"stock_uom": "Kg",
 			"warehouse": "_Test Warehouse - _TC",
 		}
 		for row in sco.supplied_items
+		for _batch in range(batches)
 	]
 	itemwise_details = make_stock_in_entry(rm_items=rm_items)
 	make_stock_transfer_entry(
