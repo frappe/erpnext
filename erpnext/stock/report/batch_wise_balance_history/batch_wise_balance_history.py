@@ -153,11 +153,7 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	batch_package = frappe.qb.DocType("Serial and Batch Entry")
 
-<<<<<<< HEAD
-	to_date = get_datetime(filters.to_date + " 23:59:59")
-=======
-	to_date = get_datetime(str(filters.to_date) + " 23:59:59.999999")
->>>>>>> c7a4ee3 (fix(stock): include entries in the last second of the To Date in stock reports)
+	to_date = get_datetime(filters.to_date + " 23:59:59.999999")
 
 	query = (
 		frappe.qb.from_(sle)
@@ -245,11 +241,7 @@ def set_pooled_batch_values(filters, iwb_map):
 		return
 
 	warehouses = {warehouse for item in pooled_items for warehouse in iwb_map[item]}
-<<<<<<< HEAD
-	cutoff = get_datetime(filters.get("to_datetime") or f"{filters.get('to_date')} 23:59:59")
-=======
-	cutoff = get_datetime(filters.to_datetime or f"{filters.to_date} 23:59:59.999999")
->>>>>>> c7a4ee3 (fix(stock): include entries in the last second of the To Date in stock reports)
+	cutoff = get_datetime(filters.get("to_datetime") or f"{filters.get('to_date')} 23:59:59.999999")
 	rates = get_last_valuation_rates(pooled_items, warehouses, cutoff)
 
 	for item in pooled_items:

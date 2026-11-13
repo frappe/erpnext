@@ -1154,10 +1154,6 @@ class FIFOSlots:
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
-<<<<<<< HEAD
-=======
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
->>>>>>> c7a4ee3 (fix(stock): include entries in the last second of the To Date in stock reports)
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -1166,7 +1162,7 @@ class FIFOSlots:
 			.where((bundle.docstatus == 1) & (entry.serial_no.isnotnull()))
 		)
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 		query = (
 			query.join(sle)
 			.on(sle.serial_and_batch_bundle == bundle.name)
@@ -1194,10 +1190,6 @@ class FIFOSlots:
 		batch = frappe.qb.DocType("Batch")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
-<<<<<<< HEAD
-=======
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
->>>>>>> c7a4ee3 (fix(stock): include entries in the last second of the To Date in stock reports)
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -1217,7 +1209,7 @@ class FIFOSlots:
 		if sabb_name:
 			query = query.where(bundle.name == sabb_name)
 		else:
-			to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+			to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 			query = (
 				query.join(sle)
 				.on(sle.serial_and_batch_bundle == bundle.name)
