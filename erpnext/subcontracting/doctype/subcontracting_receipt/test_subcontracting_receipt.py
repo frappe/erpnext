@@ -468,6 +468,33 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual([row.item_code for row in scr_return.items], [fg_item])
 
+	def test_return_inserted_as_submitted_keeps_serial_nos_picked_on_secondary_rows(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(
+			fg_item,
+			secondary_qty=1,
+			secondary_properties={"has_serial_no": 1, "serial_no_series": "SCR-SEC-.####"},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+		serial_nos = frappe.get_all(
+			"Serial No",
+			filters={"item_code": scr.items[1].item_code},
+			order_by="serial_no",
+			pluck="serial_no",
+		)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.items[1].update(
+			{"qty": -2, "use_serial_batch_fields": 1, "serial_no": "\n".join(serial_nos[:2])}
+		)
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
+		self.assertEqual(sorted(returned), serial_nos[:2])
+
 	def test_return_takes_secondary_items_from_the_warehouse_they_were_received_in(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item)
@@ -5581,10 +5608,17 @@ def make_receipt_with_rejected_qty_and_scrap():
 	return scr, scrap_item
 
 
-def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5):
+def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, secondary_properties=None):
 	"""BOM with one raw material per unit and a scrap item."""
 	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+	secondary_item = make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Nos",
+			"valuation_rate": 10,
+			**(secondary_properties or {}),
+		}
+	).name
 
 	bom = make_bom(
 		item=fg_item,
