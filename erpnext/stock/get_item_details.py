@@ -417,7 +417,7 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 	batches = get_available_batches(frappe._dict(kwargs, qty=0))
 	if doc:
-		filter_batches(batches, doc, kwargs.item_code)
+		filter_batches(batches, doc, kwargs.item_code, kwargs.warehouse)
 
 	batch_no = next(iter(batches), None)
 	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
@@ -426,11 +426,11 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 	return None
 
 
-def filter_batches(batches, doc, item_code):
+def filter_batches(batches, doc, item_code, warehouse):
 	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for row in doc.get("items"):
 		batch_no = row.get("batch_no")
-		if batch_no in batches:
+		if batch_no in batches and row.get("warehouse") == warehouse:
 			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
 			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
 			if batches[batch_no] <= 0:
