@@ -948,6 +948,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 					flt(item.qty) * flt(item.conversion_factor), self.precision("transfer_qty", item)
 				)
 
+<<<<<<< HEAD
 			if self.purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
 				item.expense_account = frappe.get_value("Company", self.company, "default_expense_account")
 
@@ -967,6 +968,25 @@ class StockEntry(StockController, SubcontractingInwardController):
 		fg_item = next(iter(fg_qty.keys()))
 		fg_item_qty = flt(fg_qty[fg_item], precision)
 		fg_completed_qty = flt(self.fg_completed_qty, precision)
+=======
+	def validate_fg_completed_qty(self):
+		item_wise_qty = {}
+		if self.purpose == "Manufacture" and self.work_order:
+			for d in self.items:
+				if d.is_finished_item:
+					if self.process_loss_qty:
+						d.transfer_qty = flt(
+							self.fg_completed_qty - self.process_loss_qty, d.precision("transfer_qty")
+						)
+						d.qty = flt(d.transfer_qty / flt(d.conversion_factor), d.precision("qty"))
+
+					# Finished Good Quantity is in the stock UOM
+					item_wise_qty.setdefault(d.item_code, []).append(d.transfer_qty)
+
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
+		for item_code, qty_list in item_wise_qty.items():
+			total = flt(sum(qty_list), precision)
+>>>>>>> 7a28919 (fix(stock): compare the finished good stock qty with finished good quantity)
 
 		for d in self.items:
 			if not fg_qty.get(d.item_code):
