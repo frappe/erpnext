@@ -93,3 +93,15 @@ class TestCustomerGroup(ERPNextTestSuite):
 		group.accounts = []
 		group.append("accounts", {"company": "_Test Company", "account": "Debtors - _TC"})
 		group.insert()
+
+	def test_advance_account_without_receivable_account(self):
+		group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Advance Only Group",
+				"is_group": 0,
+				"accounts": [{"company": "_Test Company", "advance_account": "Debtors - _TC"}],
+			}
+		).insert()
+		self.assertFalse(group.accounts[0].account)
+		self.assertEqual(group.accounts[0].advance_account, "Debtors - _TC")
