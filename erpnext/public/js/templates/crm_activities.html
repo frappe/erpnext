@@ -31,7 +31,7 @@
 									</svg>
 								</span>
 								<a href="/app/todo/{{ frappe.utils.escape_html(tasks[i].name) }}" title="{{ __('Open Task') }}">
-									{%= tasks[i].description %}
+									{%= frappe.utils.escape_html(frappe.utils.html2text(tasks[i].description)) %}
 								</a>
 							</div>
 							<div class="checkbox">
@@ -47,7 +47,7 @@
 						{% if(tasks[i].allocated_to) { %}
 							<div class="text-muted  ml-1">
 								{{ __("Allocated To:") }}
-								{%= tasks[i].allocated_to %}
+								{%= frappe.utils.escape_html(tasks[i].allocated_to) %}
 							</div>
 						{% } %}
 						</div>
@@ -90,7 +90,7 @@
 				<div class="pl-2 mb-2 mt-2">
 					<div class="label-area font-md">
 						<a href="/app/todo/{{ frappe.utils.escape_html(t.name) }}" title="{{ __('Open Task') }}">
-							{%= t.description %}
+							{%= frappe.utils.escape_html(frappe.utils.html2text(t.description)) %}
 						</a>
 					</div>
 				</div>
