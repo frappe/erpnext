@@ -1850,7 +1850,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.packed_items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 1})
 		dn.save()
 		dn.items[0].qty = 10
-		dn.append("items", get_batch_item_row(item, 5))
+		dn.append("items", get_serial_batch_item_row(item, 5))
 		dn.save()
 		dn.submit()
 
@@ -1867,7 +1867,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = create_delivery_note(item_code=bundle, qty=10, do_not_submit=True)
 		dn.packed_items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 1})
 		dn.save()
-		dn.set("items", [get_batch_item_row(item, 5)])
+		dn.set("items", [get_serial_batch_item_row(item, 5)])
 		dn.save()
 
 		self.assertEqual(dn.items[0].batch_no, first_batch)
@@ -1879,33 +1879,11 @@ class TestDeliveryNote(FrappeTestCase):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 >>>>>>> af1949e (test: auto-set batch and serial no count packed rows as this save rebuilds them)
 	def test_auto_set_batch_skips_batch_qty_taken_by_a_packed_item(self):
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TRPI-.#####",
-			}
-		)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [item.name])
-		first = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		second = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
-		second_batch = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+		item, bundle, first_batch, second_batch = make_bundle_of_a_batch_item("TRPI-.#####")
 
 		dn = create_delivery_note(item_code=bundle, qty=10, do_not_submit=True)
 		dn.packed_items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 1})
-		dn.append(
-			"items",
-			{
-				"item_code": item.name,
-				"qty": 5,
-				"rate": 100,
-				"warehouse": "_Test Warehouse - _TC",
-				"use_serial_batch_fields": 1,
-			},
-		)
+		dn.append("items", get_serial_batch_item_row(item, 5))
 		dn.save()
 
 		self.assertEqual(dn.items[1].batch_no, second_batch)
@@ -3918,16 +3896,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
 		dn.packed_items[0].update({"serial_no": "\n".join(serial_nos[:2]), "use_serial_batch_fields": 1})
-		dn.append(
-			"items",
-			{
-				"item_code": item,
-				"qty": 1,
-				"rate": 100,
-				"warehouse": "_Test Warehouse - _TC",
-				"use_serial_batch_fields": 1,
-			},
-		)
+		dn.append("items", get_serial_batch_item_row(item, 1))
 		dn.save()
 
 		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
@@ -3943,18 +3912,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
 		dn.packed_items[0].update({"serial_no": serial_nos[0], "use_serial_batch_fields": 1})
 		dn.save()
-		dn.set(
-			"items",
-			[
-				{
-					"item_code": item,
-					"qty": 3,
-					"rate": 100,
-					"warehouse": "_Test Warehouse - _TC",
-					"use_serial_batch_fields": 1,
-				}
-			],
-		)
+		dn.set("items", [get_serial_batch_item_row(item, 3)])
 		dn.save()
 
 		self.assertEqual(sorted(dn.items[0].serial_no.split("\n")), sorted(serial_nos))
@@ -3972,16 +3930,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		dn = make_delivery_note(so.name)
 		dn.packed_items[0].update({"serial_no": "\n".join(serial_nos[:2]), "use_serial_batch_fields": 1})
-		dn.append(
-			"items",
-			{
-				"item_code": item,
-				"qty": 1,
-				"rate": 100,
-				"warehouse": "_Test Warehouse - _TC",
-				"use_serial_batch_fields": 1,
-			},
-		)
+		dn.append("items", get_serial_batch_item_row(item, 1))
 		dn.insert()
 
 		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
@@ -5254,7 +5203,7 @@ def make_bundle_of_a_batch_item(batch_number_series):
 	return item, bundle, *batches
 
 
-def get_batch_item_row(item, qty):
+def get_serial_batch_item_row(item, qty):
 	return {
 		"item_code": item,
 		"qty": qty,
