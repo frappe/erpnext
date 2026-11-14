@@ -2793,6 +2793,82 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		{
 			"enable_stock_reservation": 1,
 			"allow_negative_stock": 0,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_cancel_skips_a_reserved_serial_no_delivered_against_a_qty_reservation(self):
+		warehouse = "_Test Warehouse - _TC"
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target=warehouse,
+			qty=3,
+			basic_rate=100,
+			serial_no="\n".join(f"{item_code}-{i}" for i in range(3)),
+			use_serial_batch_fields=1,
+		)
+		sales_order = make_sales_order(item_code=item_code, warehouse=warehouse, qty=3)
+		qty_sre = make_stock_reservation_entry(
+			item_code=item_code,
+			voucher_type="Sales Order",
+			voucher_no=sales_order.name,
+			voucher_detail_no=sales_order.items[0].name,
+			available_qty=3,
+			voucher_qty=3,
+			reserved_qty=1,
+		)
+		sales_order.create_stock_reservation_entries(
+			items_details=[
+				{
+					"sales_order_item": sales_order.items[0].name,
+					"item_code": item_code,
+					"warehouse": warehouse,
+					"qty_to_reserve": 2,
+				}
+			],
+			notify=False,
+		)
+		serial_sre = frappe.get_doc(
+			"Stock Reservation Entry",
+			{"voucher_no": sales_order.name, "reservation_based_on": "Serial and Batch"},
+		)
+		reserved_serial_nos = [entry.serial_no for entry in serial_sre.sb_entries]
+
+		def deliver(serial_no):
+			delivery_note = make_delivery_note(sales_order.name)
+			delivery_note.items[0].qty = 1
+			delivery_note.items[0].serial_no = serial_no
+			return delivery_note.submit()
+
+		first_delivery = deliver(reserved_serial_nos[0])
+		# as delivered before Serial and Batch reservations went first: against the older Qty one
+		frappe.db.set_value(
+			"Serial and Batch Entry",
+			{"parent": serial_sre.name, "serial_no": reserved_serial_nos[0]},
+			"delivered_qty",
+			0,
+		)
+		frappe.db.set_value(
+			"Stock Reservation Entry", serial_sre.name, {"delivered_qty": 0, "status": "Reserved"}
+		)
+		frappe.db.set_value(
+			"Stock Reservation Entry", qty_sre.name, {"delivered_qty": 1, "status": "Delivered"}
+		)
+		deliver(reserved_serial_nos[1])
+
+		first_delivery.reload()
+		first_delivery.cancel()
+
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", qty_sre.name, "delivered_qty"), 0)
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", serial_sre.name, "delivered_qty"), 1)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_negative_stock": 0,
 			"auto_reserve_serial_and_batch": 1,
 			"use_serial_batch_fields": 1,
 		},
