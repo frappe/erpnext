@@ -487,19 +487,20 @@ class QualityInspection(Document):
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page_len: int, filters: dict):
 	reference_doctype = filters.get("reference_doctype")
+	reference_name = filters.get("reference_name")
 
-	if not reference_doctype:
+	if not reference_doctype or not reference_name or not isinstance(reference_name, str):
 		return []
 	elif reference_doctype == "Job Card":
 		return frappe.get_list(
 			"Job Card",
-			filters={"name": filters.get("reference_name")},
+			filters={"name": reference_name},
 			fields=["production_item", "item_name"],
 			as_list=True,
 		)
 	else:
 		my_filters = [
-			["items.parent", "=", filters.get("reference_name")],
+			["items.parent", "=", reference_name],
 			"and",
 			["items.item_code", "like", f"%{txt}%"],
 			"and",
@@ -511,7 +512,8 @@ def item_query(doctype: Any, txt: str | None, searchfield: Any, start: int, page
 		require_distinct_warehouse = False
 
 		if reference_doctype == "Stock Entry":
-			purpose = frappe.get_cached_value("Stock Entry", filters.get("reference_name"), "purpose")
+			purposes = frappe.get_list("Stock Entry", filters={"name": reference_name}, pluck="purpose")
+			purpose = purposes[0] if purposes else None
 			my_filters.extend(
 				[
 					"and",
