@@ -1260,6 +1260,11 @@ class SellingController(StockController):
 					continue
 
 				qty_to_undelivered = item.get("stock_qty") or item.qty
+				# shared by the row's reservations, so none reverses a delivered serial / batch qty twice
+				(
+					serial_nos_to_undelivered,
+					batch_qty_to_undelivered,
+				) = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break
@@ -1268,9 +1273,7 @@ class SellingController(StockController):
 
 					qty_can_be_undelivered = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in serial_nos_to_undelivered:
 									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
@@ -1278,7 +1281,6 @@ class SellingController(StockController):
 									qty_can_be_undelivered += 1
 									serial_nos_to_undelivered.remove(entry.serial_no)
 						else:
-							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty_to_undelivered:
 									undelivered_qty = min(
