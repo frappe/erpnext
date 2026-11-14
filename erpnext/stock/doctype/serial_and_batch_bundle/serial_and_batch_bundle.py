@@ -2503,18 +2503,20 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 
 
 def get_reference_serial_and_batch_bundle(child_row):
+	doctype = child_row.get("doctype")
 	field = {
 		"Sales Invoice Item": "sales_invoice_item",
 		"Delivery Note Item": "dn_detail",
 		"Purchase Receipt Item": "purchase_receipt_item",
 		"Purchase Invoice Item": "purchase_invoice_item",
 		"POS Invoice Item": "pos_invoice_item",
-	}.get(child_row.get("doctype"))
+	}.get(doctype)
 
 	if field:
-		return frappe.get_cached_value(
-			child_row.get("doctype"), child_row.get(field), "serial_and_batch_bundle"
+		bundle_field = (
+			"rejected_serial_and_batch_bundle" if child_row.get("is_rejected") else "serial_and_batch_bundle"
 		)
+		return frappe.get_cached_value(doctype, child_row.get(field), bundle_field)
 
 
 @frappe.whitelist(methods=["POST"])
