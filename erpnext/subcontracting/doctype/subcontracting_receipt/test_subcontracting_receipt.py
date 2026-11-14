@@ -441,6 +441,8 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		# the secondary row keeps the full receipt qty
 		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
 		scr_return.items[0].qty = -1
 		scr_return.submit()
 
