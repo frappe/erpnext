@@ -469,6 +469,17 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr_return.items[1].rate, scr.items[1].rate)
 		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
 
+	def test_return_values_manual_secondary_items_at_the_receipt_rate(self):
+		scr = make_receipt_with_scrap(valuation_type="Manual", scrap_rate=15)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[1].rate, 15)
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
@@ -5603,8 +5614,8 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	return scr
 
 
-def make_receipt_with_scrap():
-	"""Receipt of 2 finished goods at 190, with 2 scrap valued at 10."""
+def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None):
+	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate."""
 	set_backflush_based_on("BOM")
 	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 	secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
@@ -5617,7 +5628,7 @@ def make_receipt_with_scrap():
 			"secondary_item_type": "Scrap",
 			"qty": 1,
 			"stock_qty": 1,
-			"valuation_type": "Valuation Rate",
+			"valuation_type": valuation_type,
 		},
 	)
 	bom.save()
@@ -5641,6 +5652,8 @@ def make_receipt_with_scrap():
 	scr = make_subcontracting_receipt(sco.name)
 	scr.save()
 	scr.get_secondary_items(recalculate_rate=True)
+	if scrap_rate:
+		scr.items[1].rate = scrap_rate
 	scr.save()
 	scr.submit()
 	return scr
