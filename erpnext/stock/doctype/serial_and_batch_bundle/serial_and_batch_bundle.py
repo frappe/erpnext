@@ -2839,22 +2839,24 @@ def get_available_serial_nos(kwargs):
 		else:
 			reserved_voucher_details = get_reserved_voucher_details(kwargs)
 
-		# Check if serial nos are reserved for the current voucher then fetch only those serial nos
+		# a delivery takes only its own order row's reservation
+		own_order_rows = set()
+		if any(entry.voucher_no in reserved_voucher_details for entry in reserved_entries):
+			own_order_rows = get_own_order_rows(kwargs)
+
 		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
-			kwargs, reserved_entries, reserved_voucher_details
+			kwargs, reserved_entries, reserved_voucher_details, own_order_rows
 		):
 			ignore = set(kwargs.get("ignore_serial_nos") or [])
 			reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
-			if not reserved_serial_nos or not set_batch_filter(filters, kwargs):
+			if not set_batch_filter(filters, kwargs):
 				return []
 
-			filters["name"] = ("in", reserved_serial_nos)
-
-			return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+			return get_reserved_then_free_serial_nos(kwargs, filters, fields, order_by, reserved_serial_nos)
 
 		# Check if serial nos are reserved for other vouchers then ignore those serial nos
 		elif ignore_reserved_serial_nos := get_other_doc_reserved_serials(
-			kwargs, reserved_entries, reserved_voucher_details
+			reserved_entries, reserved_voucher_details, own_order_rows
 		):
 			ignore_serial_nos.extend(ignore_reserved_serial_nos)
 
@@ -2893,6 +2895,27 @@ def get_available_serial_nos(kwargs):
 		return []
 
 	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def get_reserved_then_free_serial_nos(kwargs, filters, fields, order_by, reserved_serial_nos):
+	"""The voucher's own reserved serial nos first, then free ones for the rest of the qty."""
+	reserved = []
+	if reserved_serial_nos:
+		reserved = get_serial_nos_based_on_filters(
+			{**filters, "name": ("in", reserved_serial_nos)}, fields, order_by, kwargs
+		)
+
+	pending_qty = cint(kwargs.qty) - len(reserved)
+	if pending_qty <= 0:
+		return reserved
+
+	free_kwargs = frappe._dict(
+		kwargs,
+		qty=pending_qty,
+		pick_reserved_items=False,
+		ignore_serial_nos=[*(kwargs.get("ignore_serial_nos") or []), *(d.serial_no for d in reserved)],
+	)
+	return reserved + get_available_serial_nos(free_kwargs)
 
 
 def set_batch_filter(filters, kwargs):
@@ -3186,13 +3209,13 @@ def get_pos_returned_serial_nos(pos_invoices, kwargs):
 	return returned_serial_nos
 
 
-def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_voucher_details):
+def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_voucher_details, own_order_rows):
 	serial_nos = []
 	if not kwargs.get("pick_reserved_items"):
 		return serial_nos
 
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(entry, reserved_voucher_details, own_order_rows):
 			serial_nos.append(entry.serial_no)
 			continue
 
@@ -3211,15 +3234,23 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 	return serial_nos
 
 
-def get_other_doc_reserved_serials(kwargs, reserved_entries, reserved_voucher_details):
+def get_other_doc_reserved_serials(reserved_entries, reserved_voucher_details, own_order_rows):
 	serial_nos = []
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(entry, reserved_voucher_details, own_order_rows):
 			continue
 
 		serial_nos.append(entry.serial_no)
 
 	return serial_nos
+
+
+def is_reserved_for_voucher(entry, reserved_voucher_details, own_order_rows):
+	"""Reserved for the voucher's order, and for its delivered order row when known."""
+	if entry.voucher_no not in reserved_voucher_details:
+		return False
+
+	return not own_order_rows or entry.voucher_detail_no in own_order_rows
 
 
 def get_reserved_serial_nos_for_sre(kwargs) -> list:
@@ -3234,6 +3265,7 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 		.select(
 			sb_entry.serial_no,
 			sre.voucher_no,
+			sre.voucher_detail_no,
 			sre.voucher_type,
 		)
 		.where(
@@ -3409,6 +3441,10 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
 
+	if kwargs.delivery_reservations:
+		# offered separately by put_delivery_reservations_first
+		query = query.where(sre.voucher_detail_no.notin(list(kwargs.delivery_reservations.rows)))
+
 	data = query.run(as_dict=True)
 
 	reserved_batches_details = frappe._dict()
@@ -3439,17 +3475,12 @@ def get_batch_qty_for_stock(batch_no=None, warehouse=None, posting_date=None, po
 
 
 def get_auto_batch_nos(kwargs):
-	if kwargs.against_sales_order and (
-		only_consider_batches := get_batches_to_be_considered(kwargs.against_sales_order)
+	if (
+		kwargs.pick_reserved_items
+		and not kwargs.ignore_reserved_stock
+		and kwargs.delivery_reservations is None
 	):
-		batches, warehouses = [], []
-		for item in only_consider_batches:
-			batches.append(item.batch_no)
-			warehouses.append(item.warehouse)
-
-		if batches:
-			kwargs.batch_no = batches
-			kwargs.warehouse = warehouses
+		kwargs.delivery_reservations = get_delivery_reservations(kwargs)
 
 	if not kwargs.get("posting_datetime") and kwargs.get("posting_date"):
 		kwargs["posting_datetime"] = combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
@@ -3464,9 +3495,6 @@ def get_auto_batch_nos(kwargs):
 	sre_reserved_batches = frappe._dict()
 	if not kwargs.ignore_reserved_stock:
 		sre_reserved_batches = get_reserved_batches_for_sre(kwargs)
-
-	if kwargs.against_sales_order and only_consider_batches:
-		kwargs.batch_no = kwargs.warehouse = None
 
 	picked_batches = frappe._dict()
 	if kwargs.get("is_pick_list"):
@@ -3491,6 +3519,9 @@ def get_auto_batch_nos(kwargs):
 
 	if not kwargs.get("do_not_check_future_batches") and available_batches and kwargs.get("posting_datetime"):
 		filter_zero_near_batches(available_batches, kwargs)
+
+	if kwargs.delivery_reservations:
+		available_batches = put_delivery_reservations_first(available_batches, kwargs.delivery_reservations)
 
 	if not kwargs.consider_negative_batches:
 		precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
@@ -3598,22 +3629,118 @@ def get_batch_nos_from_sre(kwargs):
 	return get_qty_based_available_batches(result, flt(kwargs.qty)) if flt(kwargs.qty) else result
 
 
-def get_batches_to_be_considered(sales_order_name):
-	parent = frappe.qb.DocType("Stock Reservation Entry")
-	child = frappe.qb.DocType("Serial and Batch Entry")
+def get_delivery_reservations(kwargs) -> frappe._dict:
+	"""Outstanding batch reservations of the Sales Order rows a delivery delivers, by (batch_no, warehouse)."""
+	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+		return frappe._dict()
 
+	own_rows, delivery_rows = get_delivery_order_rows(kwargs)
+	own_qty, delivery_qty = defaultdict(float), defaultdict(float)
+	for d in get_outstanding_reservations(kwargs, delivery_rows):
+		delivery_qty[(d.batch_no, d.warehouse)] += d.qty
+		if d.voucher_detail_no in own_rows:
+			own_qty[(d.batch_no, d.warehouse)] += d.qty
+
+	if not delivery_qty:
+		return frappe._dict()
+
+	return frappe._dict(rows=delivery_rows, own=own_qty, delivery=delivery_qty)
+
+
+def put_delivery_reservations_first(available_batches, reservations) -> list:
+	"""Split each batch's qty into what is reserved for the delivered row, free stock, and what is
+	reserved for the delivery's other rows, and offer them in that order."""
+	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
+	own, free, others = [], [], []
+	for batch in available_batches:
+		key = (batch.batch_no, batch.warehouse)
+		own_qty = max(min(reservations.own[key], batch.qty), 0)
+		other_qty = max(min(reservations.delivery[key] - reservations.own[key], batch.qty - own_qty), 0)
+		own.append(frappe._dict(batch, qty=flt(own_qty, precision)))
+		others.append(frappe._dict(batch, qty=flt(other_qty, precision)))
+		free.append(frappe._dict(batch, qty=flt(batch.qty - own_qty - other_qty, precision)))
+
+	return own + free + others
+
+
+def get_delivery_order_rows(kwargs) -> tuple[set, set]:
+	"""Sales Order rows, with their packed rows, of the delivered row and of its whole delivery."""
+	own = kwargs.so_detail
+	delivered = {own} if own else set()
+	if kwargs.sabb_voucher_type in ("Delivery Note", "Sales Invoice") and kwargs.sabb_voucher_no:
+		for row in frappe.get_all(
+			f"{kwargs.sabb_voucher_type} Item",
+			filters={"parent": kwargs.sabb_voucher_no, "so_detail": ("is", "set")},
+			fields=["name", "so_detail"],
+		):
+			delivered.add(row.so_detail)
+			if not own and row.name == kwargs.sabb_voucher_detail_no:
+				own = row.so_detail
+
+	if not delivered:
+		return set(), set()
+
+	packed_rows = frappe.get_all(
+		"Packed Item",
+		filters={"parenttype": "Sales Order", "parent_detail_docname": ("in", delivered)},
+		fields=["name", "parent_detail_docname"],
+	)
+	own_rows = {p.name for p in packed_rows if p.parent_detail_docname == own}
+	if own:
+		own_rows.add(own)
+
+	return own_rows, delivered | {p.name for p in packed_rows}
+
+
+def get_own_order_rows(kwargs) -> set:
+	"""Sales Order row, with its packed rows, of the delivered row."""
+	own = kwargs.so_detail
+	if (
+		not own
+		and kwargs.sabb_voucher_type in ("Delivery Note", "Sales Invoice")
+		and kwargs.sabb_voucher_detail_no
+	):
+		own = frappe.db.get_value(
+			f"{kwargs.sabb_voucher_type} Item", kwargs.sabb_voucher_detail_no, "so_detail"
+		)
+
+	if not own:
+		return set()
+
+	packed_rows = frappe.get_all(
+		"Packed Item", filters={"parenttype": "Sales Order", "parent_detail_docname": own}, pluck="name"
+	)
+	return {own, *packed_rows}
+
+
+def get_outstanding_reservations(kwargs, order_rows) -> list:
+	"""Batch qty still reserved for the given Sales Order rows, as deducted by get_reserved_batches_for_sre."""
+	if not order_rows:
+		return []
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
 	query = (
-		frappe.qb.from_(parent)
-		.join(child)
-		.on(parent.name == child.parent)
-		.select(child.batch_no, child.warehouse)
-		.distinct()
+		frappe.qb.from_(sre)
+		.join(sb_entry)
+		.on(sre.name == sb_entry.parent)
+		.select(
+			sre.voucher_detail_no,
+			sb_entry.batch_no,
+			sre.warehouse,
+			(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
+		)
 		.where(
-			(parent.docstatus == 1)
-			& (parent.voucher_no == sales_order_name)
-			& (child.delivered_qty < child.qty)
+			(sre.docstatus == 1)
+			& (sre.item_code == kwargs.item_code)
+			& (sre.voucher_detail_no.isin(list(order_rows)))
+			& (sre.delivered_qty < sre.reserved_qty)
+			& (sre.reservation_based_on == "Serial and Batch")
 		)
 	)
+	if kwargs.ignore_voucher_nos:
+		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
+
 	return query.run(as_dict=True)
 
 
