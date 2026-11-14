@@ -28,6 +28,11 @@ from erpnext.stock.serial_batch_bundle import (
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	validate_single_purchase_receipt,
 )
+<<<<<<< HEAD
+=======
+from erpnext.stock.doctype.purchase_receipt.services.return_charges import ReturnChargesService
+from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
+>>>>>>> e12ef8f (fix(stock): reverse only the Actual valuation charge the returned stock carried)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -273,6 +278,8 @@ class PurchaseReceipt(BuyingController):
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
 			_apply_putaway_rule(self.doctype, self.get("items"), self.company)
+
+		ReturnChargesService(self).set_returned_valuation_charges()
 
 	def validate(self):
 		self.validate_posting_time()
