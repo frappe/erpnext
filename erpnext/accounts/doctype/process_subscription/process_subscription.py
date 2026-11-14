@@ -2,8 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
-from frappe.utils import create_batch, getdate
+from frappe.utils import create_batch, getdate, nowdate
 
 from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject
 
@@ -21,6 +22,11 @@ class ProcessSubscription(Document):
 		posting_date: DF.Date
 		subscription: DF.Link | None
 	# end: auto-generated types
+
+	def validate(self):
+		# a future date would bill periods that have not started or ended yet
+		if getdate(self.posting_date) > getdate(nowdate()):
+			frappe.throw(_("Posting Date cannot be a future date"))
 
 	def on_submit(self):
 		self.process_all_subscription()
