@@ -13,20 +13,20 @@ class ReturnChargesService:
 	def set_returned_valuation_charges(self) -> None:
 		"""Set each Actual valuation charge to the share the returned stock carried on the receipt."""
 		doc = self.doc
-		charges = [
-			tax
-			for tax in doc.get("taxes")
-			if tax.charge_type == "Actual" and tax.category in ("Valuation", "Valuation and Total")
-		]
+		charges = get_actual_valuation_charges(doc)
 		if not (doc.is_return and doc.return_against and charges):
 			return
 
 		receipt = frappe.get_doc(doc.doctype, doc.return_against)
-		receipt_charges = {(tax.idx, tax.account_head): tax for tax in receipt.get("taxes")}
+		# rows can be removed from a return, so match each charge to the receipt's by account, in order
+		receipt_charges = {}
+		for tax in get_actual_valuation_charges(receipt):
+			receipt_charges.setdefault(tax.account_head, []).append(tax)
+
 		returned_qty = self.get_returned_qty_by_receipt_row()
 		for tax in charges:
-			if receipt_charge := receipt_charges.get((tax.idx, tax.account_head)):
-				share = self.get_returned_share(receipt, receipt_charge, returned_qty)
+			if same_account := receipt_charges.get(tax.account_head):
+				share = self.get_returned_share(receipt, same_account.pop(0), returned_qty)
 				tax.tax_amount = -flt(share, tax.precision("tax_amount"))
 
 	def get_returned_qty_by_receipt_row(self) -> dict:
@@ -63,3 +63,11 @@ class ReturnChargesService:
 				share += charge_per_item.get(row.idx, 0.0) * qty / carried_qty
 
 		return share
+
+
+def get_actual_valuation_charges(doc) -> list:
+	return [
+		tax
+		for tax in doc.get("taxes")
+		if tax.charge_type == "Actual" and tax.category in ("Valuation", "Valuation and Total")
+	]
