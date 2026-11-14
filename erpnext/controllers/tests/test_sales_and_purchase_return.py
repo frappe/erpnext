@@ -183,6 +183,39 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertEqual(get_posted_stock_qty(return_pr), -get_posted_stock_qty(pr))
 
+	def test_purchase_receipt_split_returns_take_out_the_rejected_stock_qty(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		for make_return in (make_purchase_return, make_purchase_return_against_rejected_warehouse):
+			with self.subTest(make_return=make_return.__name__):
+				pr = make_purchase_receipt(
+					item_code=make_box_item(conversion_factor),
+					qty=3,
+					rejected_qty=3,
+					uom="Box",
+					stock_uom="Kg",
+					conversion_factor=conversion_factor,
+				)
+				return_pr = make_return(pr.name)
+				row = return_pr.items[0]
+				row.qty = -1
+				row.rejected_qty = -1 if row.rejected_qty else 0
+				row.received_qty = row.qty + row.rejected_qty
+				for _ in range(2):
+					return_pr.append("items", dict(row.as_dict(), name=None))
+				return_pr.submit()
+
+				rejected_warehouse = pr.items[0].rejected_warehouse
+				self.assertEqual(
+					get_posted_stock_qty(return_pr, rejected_warehouse),
+					-get_posted_stock_qty(pr, rejected_warehouse),
+				)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_delivery_note_split_return_brings_back_the_delivered_stock_qty(self):
@@ -445,11 +478,12 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertRaises(StockOverReturnError, return_doc.insert)
 
 
-def get_posted_stock_qty(doc):
-	"""Stock qty the stock ledger moved for `doc`."""
-	actual_qty = frappe.get_all(
-		"Stock Ledger Entry", filters={"voucher_no": doc.name, "is_cancelled": 0}, pluck="actual_qty"
-	)
+def get_posted_stock_qty(doc, warehouse=None):
+	"""Stock qty the stock ledger moved for `doc`, in `warehouse` if given."""
+	filters = {"voucher_no": doc.name, "is_cancelled": 0}
+	if warehouse:
+		filters["warehouse"] = warehouse
+	actual_qty = frappe.get_all("Stock Ledger Entry", filters=filters, pluck="actual_qty")
 	return flt(sum(actual_qty), frappe.get_precision("Stock Ledger Entry", "actual_qty"))
 
 
