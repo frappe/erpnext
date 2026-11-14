@@ -10,7 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
-from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, validate_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -503,9 +503,14 @@ class SubcontractingReceipt(SubcontractingController):
 			item.amount = qty * flt(item.rate)
 
 	def get_secondary_item_valuation_rate(self, item):
-		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
-		return (
-			get_valuation_rate(
+		"""Valuation at the row's warehouse, or the receipt rate on a return; keeps the stored rate when none is found."""
+		if self.is_return and self.return_against:
+			# the stock ledger returns the secondary item at its receipt rate
+			rate = get_rate_for_return(
+				self.doctype, self.name, item.item_code, self.return_against, item_row=item
+			)
+		else:
+			rate = get_valuation_rate(
 				item.item_code,
 				item.warehouse or self.set_warehouse,
 				self.doctype,
@@ -513,8 +518,8 @@ class SubcontractingReceipt(SubcontractingController):
 				currency=erpnext.get_company_currency(self.company),
 				company=self.company,
 			)
-			or item.rate
-		)
+
+		return rate or item.rate
 
 	def add_secondary_items_of_fg_row(self, item):
 		"""Own-cost rows first: the percentage rows allocate from the cost net of them."""
