@@ -9,6 +9,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import getdate
 from pypika import Order
 
+import erpnext
 from erpnext.accounts.report.utils import validate_date_range
 
 
@@ -17,6 +18,9 @@ def execute(filters=None):
 
 	if not filters:
 		filters = {}
+
+	if filters.get("account"):
+		erpnext.require_permission("Account", filters.get("account"))
 
 	columns = get_columns()
 	data = get_entries(filters)
