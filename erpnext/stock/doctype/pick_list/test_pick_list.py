@@ -1685,25 +1685,12 @@ class TestPickList(ERPNextTestSuite):
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
 
 		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
-		component = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		posting_date = add_days(nowdate(), -5)
-		make_stock_entry(
-			item=component, to_warehouse=warehouse, qty=2, basic_rate=100, posting_date=posting_date
-		)
-		make_stock_entry(
-			item=component, to_warehouse=other_warehouse, qty=2, basic_rate=200, posting_date=posting_date
-		)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		make_product_bundle(bundle, [component])
-		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=4, rate=100)
-		pick_list = create_pick_list(sales_order.name)
-		pick_list.submit()
-		delivery_note = create_delivery_note(pick_list.name)
-		delivery_note.submit()
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates(posting_date)
 
 		# a backdated receipt reposts only the first warehouse
 		make_stock_entry(
-			item=component,
+			item=delivery_note.packed_items[0].item_code,
 			to_warehouse=warehouse,
 			qty=5,
 			basic_rate=150,
@@ -1715,6 +1702,22 @@ class TestPickList(ERPNextTestSuite):
 			"Packed Item", {"parent": delivery_note.name}, ["warehouse", "incoming_rate"], as_list=True
 		)
 		self.assertEqual(sorted(rates), [(warehouse, 150), (other_warehouse, 200)])
+
+	def test_partial_return_of_split_bundle_delivery_fills_each_delivered_row(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		first_return = make_sales_return(delivery_note.name)
+		first_return.items[0].qty = -1
+		first_return.submit()
+		self.assertEqual(sorted(row.qty for row in first_return.packed_items), [-1, 0])
+
+		second_return = make_sales_return(delivery_note.name)
+		second_return.submit()
+		returned = {}
+		for row in first_return.packed_items + second_return.packed_items:
+			returned[row.warehouse] = returned.get(row.warehouse, 0) - row.qty
+		self.assertEqual(returned, {row.warehouse: row.qty for row in delivery_note.packed_items})
 
 	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
@@ -4345,6 +4348,24 @@ def pick_bundle_from_two_warehouses():
 	pick_list = create_pick_list(sales_order.name)
 	pick_list.submit()
 	return pick_list
+
+
+def deliver_bundle_from_two_warehouses_at_two_rates(posting_date=None):
+	"""Submitted Delivery Note of 4 bundles whose FIFO component is picked 2 at 100 and 2 at 200 from two warehouses."""
+	component = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+	for warehouse, rate in (("_Test Warehouse - _TC", 100), ("_Test Warehouse 1 - _TC", 200)):
+		make_stock_entry(
+			item=component, to_warehouse=warehouse, qty=2, basic_rate=rate, posting_date=posting_date
+		)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	delivery_note = create_delivery_note(pick_list.name)
+	delivery_note.submit()
+	return delivery_note
 
 
 def get_packed_locations(doc, table="packed_items"):
