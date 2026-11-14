@@ -334,6 +334,31 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		plural, _ = get_auto_reconcile_message(["p1", "p2"], [])
 		self.assertIn("2 Transactions Partially Reconciled", plural)
 
+	def test_foreign_currency_journal_entry_balances_after_rounding(self):
+		self.enable_multi_currency_setup()
+
+		for deposit, expected_usd in ((1000, 12.05), (8300, 100)):
+			txn = self.make_multi_currency_txn(deposit=deposit, reference_number=f"TEST-FX-{deposit}")
+			with patch(RATE_METHOD, side_effect=[1, 83]):
+				journal_entry = create_journal_entry_bts(
+					txn.name,
+					entry_type="Bank Entry",
+					posting_date=today(),
+					second_account=self.debtors_usd,
+					party_type="Customer",
+					party="_Test Customer USD",
+					allow_edit=True,
+				)
+			journal_entry.insert()
+			journal_entry.submit()
+
+			self.assertEqual(journal_entry.docstatus, 1)
+			self.assertEqual(journal_entry.total_debit, deposit)
+			self.assertEqual(journal_entry.total_credit, deposit)
+			usd_row = next(row for row in journal_entry.accounts if row.account == self.debtors_usd)
+			self.assertEqual(usd_row.credit_in_account_currency, expected_usd)
+			self.assertEqual(usd_row.credit, deposit)
+
 	def test_multi_currency_pay_converts_and_balances(self):
 		# withdrawal from an INR bank paying a USD supplier; rate 3.0 makes 100/3 non-exact
 		self.enable_multi_currency_setup()
@@ -407,7 +432,7 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 			doc.append("accounts", {"company": self.company, "account": account})
 			doc.save()
 
-	def make_multi_currency_txn(self, withdrawal=0, deposit=0):
+	def make_multi_currency_txn(self, withdrawal=0, deposit=0, reference_number="TEST-FX-REF"):
 		return (
 			frappe.get_doc(
 				{
@@ -417,7 +442,7 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 					"deposit": deposit,
 					"bank_account": self.bank_account,
 					"currency": "INR",
-					"reference_number": "TEST-FX-REF",
+					"reference_number": reference_number,
 				}
 			)
 			.save()
