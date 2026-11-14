@@ -1987,7 +1987,7 @@ class TestDeliveryNote(FrappeTestCase):
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_batch_skips_rows_of_other_warehouses(self):
 		item = make_item(
 			properties={
@@ -2027,11 +2027,11 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[1].batch_no, first_batch)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_batch_counts_a_later_row_without_a_warehouse(self):
 		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
 		first = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
@@ -2055,7 +2055,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[0].batch_no, get_batch_from_bundle(second.items[0].serial_and_batch_bundle))
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
