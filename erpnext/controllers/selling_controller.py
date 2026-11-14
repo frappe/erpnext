@@ -511,6 +511,37 @@ class SellingController(StockController):
 		if service.is_batch_check_needed():
 			service.validate_outward_bundle_batches(rows=packed_rows)
 
+	def make_item_bundles(self):
+		"""Make the auto-picked bundles of item rows before the stock reservations read them."""
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		rows = [
+			d
+			for d in self.items
+			if not d.serial_and_batch_bundle
+			and d.warehouse
+			and flt(d.stock_qty) > 0
+			and not d.get("delivered_by_supplier")
+			and not self.has_product_bundle(d.item_code)
+		]
+		if not rows:
+			return
+
+		# reserved rows first, so an earlier unreserved row cannot take what a later row reserved
+		reserved_rows = get_reserved_warehouses_by_order_row(
+			[d.so_detail for d in rows if d.get("so_detail")]
+		)
+		rows.sort(key=lambda d: d.get("so_detail") not in reserved_rows)
+
+		service = SerialBatchBundleService(self)
+		picked_serial_nos = service.get_serial_nos_used_in_rows()
+		picked_batches = service.get_batches_used_in_rows()
+		for d in rows:
+			get_serial_and_batch_bundle(d, self, None, picked_serial_nos, picked_batches)
+
+		if service.is_batch_check_needed():
+			service.validate_outward_bundle_batches(rows=rows)
+
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
@@ -1359,7 +1390,11 @@ def get_serial_and_batch_bundle(
 	child, parent, delivery_note_child=None, picked_serial_nos=None, picked_batches=None
 ):
 	"""picked_serial_nos / picked_batches: what earlier rows took; extended with what is picked here."""
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation, add_picked_batches
+	from erpnext.stock.serial_batch_bundle import (
+		SerialBatchCreation,
+		add_picked_batches,
+		get_serial_batch_fields_of_auto_bundle,
+	)
 
 	if parent.get("is_return") and parent.get("packed_items"):
 		return
@@ -1370,7 +1405,9 @@ def get_serial_and_batch_bundle(
 	if not frappe.get_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"):
 		return
 
-	item_details = frappe.db.get_value("Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
+	item_details = frappe.get_cached_value(
+		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
+	)
 
 	if not item_details.has_serial_no and not item_details.has_batch_no:
 		return
@@ -1383,7 +1420,7 @@ def get_serial_and_batch_bundle(
 			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": delivery_note_child.name if delivery_note_child else child.name,
 			"posting_datetime": get_combine_datetime(parent.posting_date, parent.posting_time),
-			"qty": child.qty,
+			"qty": child.get("stock_qty") or child.qty,
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
@@ -1393,7 +1430,7 @@ def get_serial_and_batch_bundle(
 	)
 
 	doc = sn_doc.make_serial_and_batch_bundle()
-	child.db_set("serial_and_batch_bundle", doc.name)
+	child.db_set({"serial_and_batch_bundle": doc.name, **get_serial_batch_fields_of_auto_bundle(doc)})
 	if picked_serial_nos is not None:
 		picked_serial_nos[child.item_code].extend(
 			d.serial_no for d in doc.get("entries") or [] if d.serial_no

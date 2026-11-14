@@ -372,19 +372,7 @@ class SerialBatchBundle:
 				values_to_update["basic_rate"] = basic_rate
 				values_to_update["valuation_rate"] = basic_rate + additional_cost
 
-			if not frappe.get_single_value(
-				"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"
-			):
-				if sn_doc.has_serial_no:
-					serial_numbers = frappe.get_all(
-						"Serial and Batch Entry",
-						filters={"parent": sn_doc.name},
-						pluck="serial_no.serial_no",
-						order_by="idx",
-					)
-					values_to_update["serial_no"] = "\n".join(serial_numbers)
-				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
-					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
+			values_to_update.update(get_serial_batch_fields_of_auto_bundle(sn_doc))
 
 			doctype = self.child_doctype
 			name = self.sle.voucher_detail_no
@@ -697,6 +685,26 @@ class SerialBatchBundle:
 				.set(sn_table.batch_no, batch_no)
 				.where(sn_table.name.isin(serial_nos))
 			).run()
+
+
+def get_serial_batch_fields_of_auto_bundle(bundle):
+	"""Serial No / Batch No to show on the row of an auto-created bundle, as Stock Settings allow."""
+	if frappe.get_single_value("Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"):
+		return {}
+
+	if bundle.has_serial_no:
+		serial_nos = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": bundle.name},
+			pluck="serial_no.serial_no",
+			order_by="idx",
+		)
+		return {"serial_no": "\n".join(serial_nos)}
+
+	if bundle.has_batch_no and len(bundle.entries) == 1:
+		return {"batch_no": bundle.entries[0].batch_no}
+
+	return {}
 
 
 def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
