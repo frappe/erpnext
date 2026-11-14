@@ -10,7 +10,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 )
 from erpnext.assets.doctype.asset.mapper import split_asset
-from erpnext.assets.doctype.asset.test_asset import create_asset
+from erpnext.assets.doctype.asset.test_asset import create_asset, get_gl_entries
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_asset_depreciation_schedule,
@@ -1146,6 +1146,76 @@ class TestAssetDepreciationSchedule(ERPNextTestSuite):
 			for d in get_depr_schedule(asset.name, "Active")
 		]
 		self.assertEqual(schedules, expected_depreciation_after_adjustment)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"calculate_depr_using_total_days": 0})
+	def test_asset_sale_in_final_partial_period(self):
+		for salvage_value, partial_depreciation, full_depreciation in (
+			(0, 12444.45, 18666.67),
+			(12000, 11200, 16800),
+		):
+			asset = create_asset(
+				net_purchase_amount=120000,
+				calculate_depreciation=1,
+				available_for_use_date="2026-04-15",
+				depreciation_start_date="2026-04-30",
+				frequency_of_depreciation=1,
+				total_number_of_depreciations=3,
+				expected_value_after_useful_life=salvage_value,
+				submit=1,
+			)
+			schedule = get_asset_depr_schedule_doc(asset.name, "Active")
+			_make_depreciation_entry(schedule.name, "2026-06-30")
+			asset.reload()
+			original_value = asset.finance_books[0].value_after_depreciation
+			original_schedule = [
+				(row.schedule_date, row.depreciation_amount)
+				for row in get_depr_schedule(asset.name, "Active")
+			]
+
+			for sale_date, depreciation in (
+				("2026-07-10", partial_depreciation),
+				("2026-07-15", full_depreciation),
+				("2026-07-25", full_depreciation),
+			):
+				invoice = create_sales_invoice(
+					item_code=asset.item_code,
+					asset=asset.name,
+					qty=1,
+					rate=10000,
+					posting_date=sale_date,
+				)
+				with self.subTest(salvage_value=salvage_value, sale_date=sale_date):
+					asset.reload()
+					schedule = get_depr_schedule(asset.name, "Active")
+					self.assertEqual(schedule[-1].depreciation_amount, depreciation)
+					self.assertEqual(
+						asset.finance_books[0].value_after_depreciation, flt(original_value - depreciation, 2)
+					)
+					gain = flt(10000 - original_value + depreciation, 2)
+					self.assertCountEqual(
+						get_gl_entries("Sales Invoice", invoice.name),
+						[
+							("Debtors - _TC", 10000, 0),
+							("_Test Fixed Asset - _TC", 0, 120000),
+							(
+								"_Test Accumulated Depreciations - _TC",
+								flt(120000 - original_value + depreciation, 2),
+								0,
+							),
+							("_Test Gain/Loss on Asset Disposal - _TC", max(-gain, 0), max(gain, 0)),
+						],
+					)
+
+				invoice.cancel()
+				asset.reload()
+				self.assertEqual(asset.finance_books[0].value_after_depreciation, original_value)
+				self.assertEqual(
+					[
+						(row.schedule_date, row.depreciation_amount)
+						for row in get_depr_schedule(asset.name, "Active")
+					],
+					original_schedule,
+				)
 
 	def test_depreciation_schedule_after_sale_of_asset_wdv_method(self):
 		asset = create_asset(
