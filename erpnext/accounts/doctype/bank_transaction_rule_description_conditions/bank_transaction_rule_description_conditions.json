@@ -20,7 +20,7 @@
   },
   {
    "fieldname": "value",
-   "fieldtype": "Small Text",
+   "fieldtype": "Code",
    "in_list_view": 1,
    "label": "Value",
    "reqd": 1
@@ -30,7 +30,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-04-11 20:22:38.274393",
+ "modified": "2026-10-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transaction Rule Description Conditions",

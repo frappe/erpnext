@@ -18,7 +18,7 @@ class BankTransactionRuleDescriptionConditions(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		value: DF.SmallText
+		value: DF.Code
 	# end: auto-generated types
 
 	pass
