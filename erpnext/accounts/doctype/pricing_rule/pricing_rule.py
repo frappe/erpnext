@@ -748,7 +748,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 				}
 			)
 			item_details.has_pricing_rule_for_rate = True
-		item_details.update({"discount_percentage": 0.0})
+		item_details.update({"discount_percentage": 0.0, "discount_amount": 0.0})
 
 	discount_rate = flt(item_details.get("price_list_rate", args.price_list_rate))
 	if item_details.get("margin_type") == "Percentage":
