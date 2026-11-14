@@ -2510,6 +2510,7 @@ def get_reference_serial_and_batch_bundle(child_row):
 		"Purchase Receipt Item": "purchase_receipt_item",
 		"Purchase Invoice Item": "purchase_invoice_item",
 		"POS Invoice Item": "pos_invoice_item",
+		"Subcontracting Receipt Item": "subcontracting_receipt_item",
 	}.get(doctype)
 
 	if field:
