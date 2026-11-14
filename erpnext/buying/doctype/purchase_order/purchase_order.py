@@ -393,6 +393,11 @@ class PurchaseOrder(BuyingController):
 						flt(d.conversion_factor) or 1.0
 					)
 					d.discount_percentage = last_purchase_details["discount_percentage"]
+					d.discount_amount = (
+						last_purchase_details["discount_amount"]
+						* (flt(d.conversion_factor) or 1.0)
+						/ conversion_rate
+					)
 					d.base_rate = last_purchase_details["base_rate"] * (flt(d.conversion_factor) or 1.0)
 					d.price_list_rate = d.base_price_list_rate / conversion_rate
 					d.rate = d.base_rate / conversion_rate
