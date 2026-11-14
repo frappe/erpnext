@@ -352,6 +352,35 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_get_items_needs_receipt_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		receipt = make_purchase_receipt(qty=2, rate=100)
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.append("purchase_receipts", {"receipt_document_type": "Sales Invoice", "receipt_document": "X"})
+		self.assertRaises(frappe.ValidationError, lcv.get_items_from_purchase_receipts)
+
+		lcv.purchase_receipts[0].update(
+			{"receipt_document_type": "Purchase Receipt", "receipt_document": receipt.name}
+		)
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"lcv-items-{frappe.scrub(company)}@example.com", "Stock Manager"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(users["_Test Company 1"])
+		self.assertRaises(frappe.PermissionError, lcv.get_items_from_purchase_receipts)
+
+		frappe.set_user(users["_Test Company"])
+		lcv.get_items_from_purchase_receipts()
+		self.assertEqual([item.item_code for item in lcv.items], ["_Test Item"])
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
