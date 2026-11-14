@@ -920,17 +920,18 @@ class BuyingController(SubcontractingController):
 =======
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
 		delivered row left in transit, so partial receipts that round up add up to the delivery. A row with
-		a package is not capped, as its package holds the qty."""
+		a package is not capped, as its package holds the qty, and nor is one with nothing left to take."""
 		qty = self.get_received_stock_qty(row, accepted_qty)
 		is_delivered_row = row.get("delivery_note_item") and self.is_internal_receipt() and not self.is_return
-		if not is_delivered_row or row.get("serial_and_batch_bundle"):
+		has_package = row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle")
+		if not is_delivered_row or has_package:
 			return qty
 
 		if self.docstatus == 2:
 			return -flt(self.get_posted_qty(row.name, row.from_warehouse)) or qty
 
 		qty_left = self.get_qty_left_in_transit(row)
-		return qty if qty_left is None else min(qty, qty_left)
+		return min(qty, qty_left) if flt(qty_left) > 0 else qty
 
 	def get_qty_left_in_transit(self, row) -> float | None:
 		"""Stock qty the delivered row put in transit that its other receipts, net of their returns, have not
