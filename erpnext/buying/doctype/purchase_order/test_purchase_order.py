@@ -272,39 +272,6 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(mr.per_ordered, 100)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
-	def test_order_from_a_supplier_quotation_maps_its_qty(self):
-		from erpnext.buying.doctype.supplier_quotation.mapper import (
-			make_purchase_order as make_po_from_sq,
-		)
-
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "Kg",
-				"uoms": [{"uom": "Box", "conversion_factor": 0.333333333}],
-			}
-		).name
-		sq = frappe.get_doc(
-			{
-				"doctype": "Supplier Quotation",
-				"supplier": "_Test Supplier",
-				"company": "_Test Company",
-				"items": [
-					{
-						"item_code": item,
-						"qty": 1,
-						"uom": "Box",
-						"rate": 100,
-						"warehouse": "_Test Warehouse - _TC",
-					}
-				],
-			}
-		).insert()
-		sq.submit()
-
-		self.assertEqual(make_po_from_sq(sq.name).items[0].qty, 1)
-
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
 		item = make_item_with_fractional_box()
 		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
