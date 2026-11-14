@@ -204,6 +204,104 @@ class SubcontractingController(StockController):
 
 		return {(row.reference_name, row.rm_item_code): flt(row.rate) for row in rows}
 
+	def is_subcontracting_receipt_return(self):
+		return self.doctype == "Subcontracting Receipt" and self.is_return and self.return_against
+
+	def get_returnable_raw_materials(self) -> dict:
+		"""Raw materials the returned receipt consumed, by receipt item row and raw material, with the
+		finished good and raw material qty that earlier returns took back."""
+		if not self.is_subcontracting_receipt_return():
+			return {}
+
+		received_qty = dict(
+			frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={"parent": self.return_against},
+				fields=["name", "received_qty"],
+				as_list=True,
+			)
+		)
+		returned_fg_qty, returned_rm_qty = self.get_qty_taken_back_by_earlier_returns()
+
+		item_fields = [
+			"main_item_code",
+			"rm_item_code",
+			"item_name",
+			"description",
+			"stock_uom",
+			"bom_detail_no",
+		]
+		materials = defaultdict(dict)
+		for row in frappe.get_all(
+			"Subcontracting Receipt Supplied Item",
+			filters={"parent": self.return_against, "consumed_qty": ("!=", 0)},
+			fields=["reference_name", "consumed_qty", *item_fields],
+			order_by="idx",
+		):
+			material = materials[row.reference_name].setdefault(
+				row.rm_item_code,
+				frappe._dict(
+					item_details={fieldname: row[fieldname] for fieldname in item_fields},
+					consumed_qty=0,
+					received_qty=flt(received_qty.get(row.reference_name)),
+					returned_fg_qty=abs(flt(returned_fg_qty.get(row.reference_name))),
+					returned_qty=abs(flt(returned_rm_qty.get((row.reference_name, row.rm_item_code)))),
+				),
+			)
+			material.consumed_qty += flt(row.consumed_qty)
+
+		return materials
+
+	def get_qty_taken_back_by_earlier_returns(self):
+		"""Finished good qty by receipt item row, and raw material qty by (receipt item row, raw
+		material), of the submitted returns of the returned receipt."""
+		receipt = frappe.qb.DocType("Subcontracting Receipt")
+		item = frappe.qb.DocType("Subcontracting Receipt Item")
+		supplied_item = frappe.qb.DocType("Subcontracting Receipt Supplied Item")
+		submitted_return = (
+			(receipt.return_against == self.return_against)
+			& (receipt.is_return == 1)
+			& (receipt.docstatus == 1)
+		)
+
+		fg_qty = (
+			frappe.qb.from_(item)
+			.join(receipt)
+			.on(receipt.name == item.parent)
+			.select(item.subcontracting_receipt_item, Sum(item.received_qty))
+			.where(submitted_return)
+			.groupby(item.subcontracting_receipt_item)
+		).run()
+		rm_qty = (
+			frappe.qb.from_(supplied_item)
+			.join(receipt)
+			.on(receipt.name == supplied_item.parent)
+			.join(item)
+			.on(item.name == supplied_item.reference_name)
+			.select(
+				item.subcontracting_receipt_item, supplied_item.rm_item_code, Sum(supplied_item.consumed_qty)
+			)
+			.where(submitted_return)
+			.groupby(item.subcontracting_receipt_item, supplied_item.rm_item_code)
+		).run()
+
+		return dict(fg_qty), {(row, rm_item): qty for row, rm_item, qty in rm_qty}
+
+	def add_returned_raw_materials(self, row):
+		"""Take back the receipt's raw materials in proportion to the finished goods this return sends back."""
+		for material in self.returnable_raw_materials.get(row.subcontracting_receipt_item, {}).values():
+			if qty := self.get_return_consumed_qty(row, material):
+				self.__add_supplied_or_received_item(row, frappe._dict(material.item_details), qty)
+
+	def get_return_consumed_qty(self, row, material):
+		"""Rounded on the running finished good total, so that all returns add up to what the receipt consumed."""
+		returned_fg_qty = material.returned_fg_qty + abs(
+			flt(row.get("received_qty") or (row.qty + flt(row.get("rejected_qty"))))
+		)
+		share = min(returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
+		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
+		return -flt(flt(material.consumed_qty * share, precision) - material.returned_qty, precision)
+
 	def get_returnable_serial_batches(self):
 		"""Serial nos and batches the returned receipt consumed that no return has brought back yet,
 		keyed by (receipt item row, raw material)."""
@@ -1262,7 +1360,9 @@ class SubcontractingController(StockController):
 			):
 				continue
 
-			if self.doctype == self.subcontract_data.order_doctype or (
+			if self.is_subcontracting_receipt_return():
+				self.add_returned_raw_materials(row)
+			elif self.doctype == self.subcontract_data.order_doctype or (
 				self.backflush_based_on == "BOM" or self.is_return
 			):
 				for bom_item in self._get_materials_from_bom(
@@ -1364,6 +1464,7 @@ class SubcontractingController(StockController):
 		self.__get_pending_qty_to_receive()
 		self.get_available_materials()
 		self.returnable_serial_batches = self.get_returnable_serial_batches()
+		self.returnable_raw_materials = self.get_returnable_raw_materials()
 		self.__remove_changed_rows()
 		self.__set_supplied_or_received_items()
 		self.__modify_serial_and_batch_bundle()
