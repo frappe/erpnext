@@ -2509,10 +2509,12 @@ def get_reference_serial_and_batch_bundle(child_row):
 		"Purchase Receipt Item": "purchase_receipt_item",
 		"Purchase Invoice Item": "purchase_invoice_item",
 		"POS Invoice Item": "pos_invoice_item",
-	}.get(child_row.doctype)
+	}.get(child_row.get("doctype"))
 
 	if field:
-		return frappe.get_cached_value(child_row.doctype, child_row.get(field), "serial_and_batch_bundle")
+		return frappe.get_cached_value(
+			child_row.get("doctype"), child_row.get(field), "serial_and_batch_bundle"
+		)
 
 
 @frappe.whitelist(methods=["POST"])
