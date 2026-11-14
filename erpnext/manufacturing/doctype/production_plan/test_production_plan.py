@@ -1281,18 +1281,8 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (13, "Nos", 1))
 
-	def test_patch_sets_stock_uom_on_plan_rows_saved_with_purchase_uom(self):
-		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
-
-		rm_item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "Nos",
-				"purchase_uom": "Box",
-				"default_material_request_type": "Material Transfer",
-				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
-			},
-		).name
+	def make_plan_row_saved_with_purchase_uom(self, rm_item):
+		"""A submitted plan whose row for 13 Nos of `rm_item` is saved as 13 Box at conversion factor 1."""
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
 		plan = create_production_plan(
@@ -1309,6 +1299,10 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.db.set_value(
 			"Material Request Plan Item", plan.mr_items[0].name, {"uom": "Box", "conversion_factor": 1}
 		)
+		return plan
+
+	def assert_patched_plan_requests_stock_uom(self, plan):
+		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
 
 		execute()
 		plan.make_material_request()
@@ -1319,6 +1313,35 @@ class TestProductionPlan(ERPNextTestSuite):
 			fields=["qty", "uom", "stock_qty"],
 		)
 		self.assertEqual([(row.qty, row.uom, row.stock_qty) for row in requested], [(13, "Nos", 13)])
+
+	def test_patch_sets_stock_uom_on_plan_rows_saved_with_purchase_uom(self):
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+
+		self.assert_patched_plan_requests_stock_uom(self.make_plan_row_saved_with_purchase_uom(rm_item))
+
+	def test_patch_sets_stock_uom_on_plan_rows_of_a_variant_with_the_template_uom(self):
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.insert()
+
+		self.assert_patched_plan_requests_stock_uom(self.make_plan_row_saved_with_purchase_uom(variant.name))
 
 	def test_download_raw_materials_shows_uom_of_required_qty(self):
 		rm_item = make_item(
