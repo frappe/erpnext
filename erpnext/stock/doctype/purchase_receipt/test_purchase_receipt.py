@@ -2972,10 +2972,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 1000)
 
 	def test_internal_transfer_rejected_batch_takes_the_delivered_stock_qty_out_of_transit(self):
-		"""The package of a batch item leaving the in-transit warehouse holds the stock qty the receipt
-		takes out of it, also when the accepted and rejected qty round up on their own."""
+		"""The in-transit package of a batch item holds the stock qty the receipt, and its return, move
+		in or out of transit, also when the accepted and rejected qty round up on their own."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
 		company = "_Test Company with perpetual inventory"
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
@@ -3023,19 +3024,22 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			}
 		)
 		pr.submit()
+		purchase_return = make_purchase_return(pr.name)
+		purchase_return.submit()
 
-		transit_entry = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": pr.name, "warehouse": transit_warehouse, "is_cancelled": 0},
-			["actual_qty", "serial_and_batch_bundle"],
-			as_dict=True,
-		)
-		self.assertEqual(
-			frappe.db.get_value(
-				"Serial and Batch Bundle", transit_entry.serial_and_batch_bundle, "total_qty"
-			),
-			transit_entry.actual_qty,
-		)
+		for voucher_no in (pr.name, purchase_return.name):
+			transit_entry = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher_no, "warehouse": transit_warehouse, "is_cancelled": 0},
+				["actual_qty", "serial_and_batch_bundle"],
+				as_dict=True,
+			)
+			self.assertEqual(
+				frappe.db.get_value(
+					"Serial and Batch Bundle", transit_entry.serial_and_batch_bundle, "total_qty"
+				),
+				transit_entry.actual_qty,
+			)
 
 	def test_internal_transfer_rejected_qty_for_serial_item(self):
 		"""Rejected serial numbers leave the in-transit warehouse and stay out of the package of
