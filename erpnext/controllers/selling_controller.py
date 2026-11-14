@@ -1190,6 +1190,8 @@ class SellingController(StockController):
 					continue
 
 				qty_to_deliver = item.get("stock_qty") or item.qty
+				# shared by the row's reservations, so none counts a delivered serial / batch qty twice
+				delivered_serial_nos, delivered_batch_qty = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -1198,13 +1200,6 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
-						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
-						# present so this never crashes on a missing bundle.
-						(
-							delivered_serial_nos,
-							delivered_batch_qty,
-						) = get_delivered_serial_batch_for_reservation(item)
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
