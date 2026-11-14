@@ -10,7 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
-from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, validate_return
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -731,7 +731,12 @@ class SubcontractingReceipt(SubcontractingController):
 				continue
 
 			if item.valuation_type in ("Valuation Rate", "Manual"):
-				if item.valuation_type == "Valuation Rate":
+				if self.is_return and self.return_against:
+					# the stock ledger returns the secondary item at its receipt rate
+					item.rate = get_rate_for_return(
+						self.doctype, self.name, item.item_code, self.return_against, item_row=item
+					)
+				elif item.valuation_type == "Valuation Rate":
 					# Recomputed every time: a rate fetched against another warehouse
 					# must not stick to the row when the warehouse changes.
 					item.rate = self.get_secondary_item_valuation_rate(item)
@@ -746,14 +751,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 		rejected_return_rows = self.get_rejected_return_rows()
 		received_qty_ratios = self.get_received_qty_ratios_for_return(rejected_return_rows)
-		returned_service_costs = self.get_returned_service_costs()
+		returned_costs = self.get_returned_costs()
 		total_qty = total_amount = 0
 		for item in self.get("items") or []:
 			if not item.secondary_item_type and not item.valuation_type:
+				returned = returned_costs.get(item.name)
 				# rejected qty is received without service cost
-				if item.name in returned_service_costs:
+				if returned:
 					item.service_cost_per_qty = (
-						0.0 if item.name in rejected_return_rows else returned_service_costs[item.name]
+						0.0 if item.name in rejected_return_rows else returned.service_cost_per_qty
 					)
 
 				if item.qty:
@@ -762,7 +768,10 @@ class SubcontractingReceipt(SubcontractingController):
 						item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
 						rm_cost_map.pop(item.name)
 
-					if item.name in secondary_items_cost_map:
+					# the stock ledger returns the finished good at its receipt rate
+					if returned and item.name not in rejected_return_rows:
+						item.secondary_items_cost_per_qty = returned.secondary_items_cost_per_qty
+					elif item.name in secondary_items_cost_map:
 						item.secondary_items_cost_per_qty = secondary_items_cost_map[item.name] / (
 							item.received_qty or item.qty
 						)
@@ -805,23 +814,23 @@ class SubcontractingReceipt(SubcontractingController):
 		self.total_qty = total_qty
 		self.total = total_amount
 
-	def get_returned_service_costs(self) -> dict[str, float]:
-		"""Service cost per qty of the returned receipt row, for each return row."""
+	def get_returned_costs(self) -> dict[str, frappe._dict]:
+		"""Service and secondary items cost per qty of the returned receipt row, for each return row."""
 		if not (self.is_return and self.return_against):
 			return {}
 
-		service_costs = dict(
-			frappe.get_all(
+		received_rows = {
+			row.name: row
+			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against, "parenttype": "Subcontracting Receipt"},
-				fields=["name", "service_cost_per_qty"],
-				as_list=True,
+				fields=["name", "service_cost_per_qty", "secondary_items_cost_per_qty"],
 			)
-		)
+		}
 		return {
-			item.name: service_costs[item.subcontracting_receipt_item]
+			item.name: received_rows[item.subcontracting_receipt_item]
 			for item in self.items
-			if item.subcontracting_receipt_item in service_costs
+			if item.subcontracting_receipt_item in received_rows
 		}
 
 	def get_received_qty_ratios_for_return(self, rejected_return_rows: set[str]) -> dict[str, float]:
