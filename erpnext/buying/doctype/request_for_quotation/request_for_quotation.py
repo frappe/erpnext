@@ -9,6 +9,7 @@ from frappe.core.doctype.communication.email import make
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
 from frappe.utils import get_url
+from frappe.utils.html_utils import sanitize_html
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
@@ -194,6 +195,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_email_id(rfq_supplier)
 
 		message = self.supplier_rfq_mail(rfq_supplier, "", self.get_link(), True)
+		message["message"] = sanitize_html(message["message"])
 
 		return message
 
