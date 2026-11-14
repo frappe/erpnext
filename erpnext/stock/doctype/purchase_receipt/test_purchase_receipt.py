@@ -4126,6 +4126,47 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
+	def test_return_reverses_the_valuation_charges_its_row_carried_when_there_are_several(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			item_code=make_item(properties={"is_stock_item": 1}).name,
+			qty=1,
+			rate=100,
+			do_not_submit=True,
+		)
+		for _ in range(2):
+			item_code = make_item(properties={"is_stock_item": 1}).name
+			pr.append("items", {**pr.items[0].as_dict(), "name": None, "idx": None, "item_code": item_code})
+		for description in ("Freight", "Insurance"):
+			pr.append(
+				"taxes",
+				{
+					"category": "Valuation",
+					"charge_type": "Actual",
+					"account_head": "Expenses Included In Valuation - TCP1",
+					"description": description,
+					"tax_amount": 10,
+				},
+			)
+		pr.submit()
+		self.assertEqual(pr.items[2].item_tax_amount, 6.66)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items = [pr_return.items[2]]
+		pr_return.submit()
+
+		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-3.33, -3.33])
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{"voucher_no": pr_return.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+			)
+		)
+
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
