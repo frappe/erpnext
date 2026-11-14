@@ -330,6 +330,20 @@ class TestTaxWithholdingCategory(ERPNextTestSuite):
 
 		self.cleanup_invoices(invoices)
 
+	def test_totals_follow_tds_on_save(self):
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier1", "tax_withholding_category", "Single Threshold TDS"
+		)
+		pi = create_purchase_invoice(supplier="Test TDS Supplier1", rate=20000)
+		self.assertEqual(pi.grand_total, 18000)
+		self.assertEqual(sum(row.payment_amount for row in pi.payment_schedule), 18000)
+
+		# without TDS the totals do not keep the deduction
+		pi.apply_tds = 0
+		pi.save()
+		self.assertEqual(pi.grand_total, 20000)
+		self.assertEqual(sum(row.payment_amount for row in pi.payment_schedule), 20000)
+
 	def test_tax_withholding_category_checks(self):
 		invoices = []
 		self.setup_party_with_category("Supplier", "Test TDS Supplier3", "New TDS Category")
