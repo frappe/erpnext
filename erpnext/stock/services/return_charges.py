@@ -21,15 +21,15 @@ class ReturnChargesService:
 			return
 
 		original = frappe.get_doc(doc.doctype, doc.return_against)
-		# rows can be removed from a return, so match each charge to the original's by account, in order
+		# rows can be removed from a return, so match each charge to the original's by account and description
 		original_charges = {}
 		for tax in get_actual_valuation_charges(original):
-			original_charges.setdefault(tax.account_head, []).append(tax)
+			original_charges.setdefault((tax.account_head, tax.description), []).append(tax)
 
 		returned_qty = self.get_returned_qty_by_original_row()
 		for tax in charges:
-			if same_account := original_charges.get(tax.account_head):
-				share = self.get_returned_share(original, same_account.pop(0), returned_qty)
+			if same_charges := original_charges.get((tax.account_head, tax.description)):
+				share = self.get_returned_share(original, same_charges.pop(0), returned_qty)
 				tax.tax_amount = -flt(share, tax.precision("tax_amount"))
 
 	def is_traced_to_original(self) -> bool:
