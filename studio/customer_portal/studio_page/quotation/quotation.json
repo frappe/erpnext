@@ -426,7 +426,7 @@
                         "alignSelf": "flex-start",
                         "justifyContent": "flex-end",
                         "paddingBottom": "12px",
-                        "paddingTop": "13px"
+                        "paddingTop": "11px"
                        },
                        "blockName": "No. cell",
                        "children": [
@@ -854,7 +854,7 @@
                "componentProps": {
                 "fontSize": "text-base",
                 "tag": "h3",
-                "text": "{{ __('Info') }}"
+                "text": "{{ __('Details') }}"
                }
               },
               {
@@ -931,6 +931,7 @@
                           "color": "var(--ink-gray-8)",
                           "cursor": "pointer",
                           "justifySelf": "start",
+                          "marginBottom": "-1px",
                           "maxWidth": "100%",
                           "minWidth": "0px",
                           "overflow": "hidden",

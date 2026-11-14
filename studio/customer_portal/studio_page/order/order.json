@@ -363,7 +363,7 @@
                         "alignSelf": "flex-start",
                         "justifyContent": "flex-end",
                         "paddingBottom": "12px",
-                        "paddingTop": "13px"
+                        "paddingTop": "11px"
                        },
                        "blockName": "No. cell",
                        "children": [
@@ -823,7 +823,7 @@
                "componentProps": {
                 "fontSize": "text-base",
                 "tag": "h3",
-                "text": "{{ __('Info') }}"
+                "text": "{{ __('Details') }}"
                }
               },
               {
@@ -900,6 +900,7 @@
                           "color": "var(--ink-gray-8)",
                           "cursor": "pointer",
                           "justifySelf": "start",
+                          "marginBottom": "-1px",
                           "maxWidth": "100%",
                           "minWidth": "0px",
                           "whiteSpace": "normal"
@@ -1417,7 +1418,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-11-12 12:00:00.000000",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "order",
  "owner": "Administrator",
