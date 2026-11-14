@@ -1,0 +1,372 @@
+{
+ "block": {
+  "attributes": {
+   "class": "{{ sidebarCollapsed ? 'portal-sidebar-wrap is-collapsed' : 'portal-sidebar-wrap' }}"
+  },
+  "baseStyles": {},
+  "blockName": "Sidebar",
+  "children": [
+   {
+    "baseStyles": {
+     "paddingBottom": "4px",
+     "paddingLeft": "0px",
+     "paddingRight": "0px",
+     "paddingTop": "0px"
+    },
+    "blockName": "Sidebar",
+    "children": [
+     {
+      "blockName": "SidebarHeader",
+      "componentId": "SidebarHeader-b5urrk2yo",
+      "componentName": "SidebarHeader",
+      "componentProps": {
+       "logo": "{{ companyLogo }}",
+       "subtitle": "{{ __('Supplier portal') }}",
+       "title": "{{ companyName }}"
+      }
+     },
+     {
+      "baseStyles": {
+       "display": "flex",
+       "flex": "1",
+       "flexDirection": "column",
+       "gap": "2px",
+       "minHeight": "0px",
+       "overflowY": "auto",
+       "padding": "2px 8px 40px"
+      },
+      "blockName": "container",
+      "children": [
+       {
+        "attributes": {
+         "aria-controls": "portal-notifications",
+         "aria-expanded": "{{ notificationsOpen }}",
+         "id": "portal-notifications-trigger"
+        },
+        "blockName": "Notifications",
+        "componentEvents": {
+         "click": {
+          "action": "Run Script",
+          "script": "toggleNotifications()"
+         }
+        },
+        "componentId": "SidebarItem-59y7f409x",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "icon": "lucide-bell",
+         "label": "{{ __('Notifications') }}",
+         "suffix": "{{ notifications.unreadCount ? String(notifications.unreadCount) : '' }}"
+        }
+       },
+       {
+        "blockName": "SidebarItem",
+        "componentId": "SidebarItem-tcdrdimx4",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "active": "{{ route.path === '/' }}",
+         "icon": "lucide-house",
+         "label": "{{ __('Home') }}",
+         "route": "/"
+        }
+       },
+       {
+        "blockName": "SidebarItem",
+        "componentId": "SidebarItem-sprfqs",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "active": "{{ route.path === '/rfqs' || route.path.startsWith('/rfqs/') }}",
+         "icon": "lucide-inbox",
+         "label": "{{ __('Requests for Quotation') }}",
+         "route": "/rfqs"
+        }
+       },
+       {
+        "blockName": "SidebarItem",
+        "componentId": "SidebarItem-spquotations",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "active": "{{ route.path === '/quotations' || route.path.startsWith('/quotations/') }}",
+         "icon": "lucide-file-text",
+         "label": "{{ __('Quotations') }}",
+         "route": "/quotations"
+        }
+       },
+       {
+        "blockName": "SidebarItem",
+        "componentId": "SidebarItem-sporders",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "active": "{{ route.path === '/purchase-orders' || route.path.startsWith('/purchase-orders/') }}",
+         "icon": "lucide-shopping-cart",
+         "label": "{{ __('Purchase Orders') }}",
+         "route": "/purchase-orders"
+        }
+       },
+       {
+        "blockName": "SidebarItem",
+        "componentId": "SidebarItem-spreceipts",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "active": "{{ route.path === '/receipts' || route.path.startsWith('/receipts/') }}",
+         "icon": "lucide-package-check",
+         "label": "{{ __('Receipts') }}",
+         "route": "/receipts"
+        }
+       },
+       {
+        "blockName": "SidebarItem",
+        "componentId": "SidebarItem-spinvoices",
+        "componentName": "SidebarItem",
+        "componentProps": {
+         "active": "{{ route.path === '/invoices' || route.path.startsWith('/invoices/') }}",
+         "icon": "lucide-receipt-text",
+         "label": "{{ __('Invoices') }}",
+         "route": "/invoices"
+        }
+       }
+      ],
+      "componentId": "container-748b1oaal",
+      "componentName": "container",
+      "originalElement": "div"
+     },
+     {
+      "baseStyles": {
+       "alignItems": "center",
+       "display": "flex",
+       "flexDirection": "row",
+       "flexShrink": 0,
+       "height": "48px",
+       "marginTop": "auto",
+       "padding": "0px 4px"
+      },
+      "blockName": "container",
+      "children": [
+       {
+        "blockName": "Account menu",
+        "componentId": "Dropdown-5wffe96oy",
+        "componentName": "Dropdown",
+        "componentProps": {
+         "align": "start",
+         "options": "{{ userMenuOptions }}",
+         "side": "top"
+        },
+        "componentSlots": {
+         "default": {
+          "parentBlockId": "Dropdown-5wffe96oy",
+          "slotContent": [
+           {
+            "attributes": {
+             "aria-label": "{{ __('Account') }}",
+             "role": "button",
+             "tabindex": "0"
+            },
+            "baseStyles": {
+             "alignItems": "center",
+             "borderRadius": "6px",
+             "cursor": "pointer",
+             "display": "flex",
+             "flexDirection": "row",
+             "height": "40px",
+             "minWidth": "0px",
+             "outline": "none",
+             "padding": "0px 6px",
+             "width": "100%"
+            },
+            "blockName": "div",
+            "children": [
+             {
+              "blockName": "Avatar",
+              "componentId": "Avatar-jdhf6rknx",
+              "componentName": "Avatar",
+              "componentProps": {
+               "label": "{{ user.supplierInitials }}",
+               "shape": "circle",
+               "size": "lg"
+              }
+             },
+             {
+              "baseStyles": {
+               "display": "flex",
+               "flex": "1",
+               "flexDirection": "column",
+               "marginLeft": "8px",
+               "minWidth": "0px"
+              },
+              "blockName": "div",
+              "children": [
+               {
+                "baseStyles": {
+                 "color": "var(--ink-gray-8)",
+                 "overflow": "hidden",
+                 "textOverflow": "ellipsis",
+                 "whiteSpace": "nowrap"
+                },
+                "blockName": "TextBlock",
+                "componentId": "TextBlock-dovp7o9b6",
+                "componentName": "TextBlock",
+                "componentProps": {
+                 "fontSize": "text-base-medium",
+                 "tag": "span",
+                 "text": "{{ user.supplier }}"
+                }
+               }
+              ],
+              "componentId": "div-aa5ycoh34",
+              "componentName": "div",
+              "originalElement": "div"
+             }
+            ],
+            "componentId": "div-ibyoj9s2a",
+            "componentName": "div",
+            "originalElement": "div"
+           }
+          ],
+          "slotId": "Dropdown-5wffe96oy:default",
+          "slotName": "default"
+         }
+        }
+       }
+      ],
+      "componentId": "container-cjshelk0s",
+      "componentName": "container",
+      "originalElement": "div"
+     }
+    ],
+    "componentId": "Sidebar-8nehebzmz",
+    "componentName": "Sidebar",
+    "componentProps": {
+     "collapsed": {
+      "$type": "variable",
+      "name": "sidebarCollapsed"
+     }
+    }
+   },
+   {
+    "attributes": {
+     "class": "portal-sidebar-edge"
+    },
+    "blockName": "Fold edge",
+    "componentEvents": {
+     "click": {
+      "action": "Run Script",
+      "script": "toggleSidebar()"
+     }
+    },
+    "componentId": "div-13l78171j",
+    "componentName": "div",
+    "originalElement": "div"
+   },
+   {
+    "attributes": {
+     "aria-expanded": "{{ !sidebarCollapsed }}",
+     "aria-label": "{{ sidebarCollapsed ? __('Expand sidebar') : __('Collapse sidebar') }}",
+     "class": "portal-sidebar-arrow",
+     "role": "button",
+     "tabindex": "0"
+    },
+    "blockName": "Fold arrow",
+    "children": [
+     {
+      "blockName": "Icon",
+      "componentId": "Icon-ppxbg41wm",
+      "componentName": "Icon",
+      "componentProps": {
+       "icon": "lucide-chevron-left",
+       "size": "xs"
+      }
+     }
+    ],
+    "componentEvents": {
+     "click": {
+      "action": "Run Script",
+      "script": "toggleSidebar()"
+     },
+     "keydown.enter.prevent": {
+      "action": "Run Script",
+      "script": "toggleSidebar()"
+     },
+     "keydown.space.prevent": {
+      "action": "Run Script",
+      "script": "toggleSidebar()"
+     }
+    },
+    "componentId": "div-3gp7qqigg",
+    "componentName": "div",
+    "originalElement": "div"
+   },
+   {
+    "attributes": {
+     "aria-label": "{{ __('Notifications') }}",
+     "id": "portal-notifications",
+     "role": "dialog"
+    },
+    "baseStyles": {
+     "backgroundColor": "var(--surface-base)",
+     "borderRight": "1px solid var(--outline-gray-1)",
+     "bottom": "0px",
+     "boxShadow": "var(--elevation-lg)",
+     "display": "flex",
+     "flexDirection": "column",
+     "left": "100%",
+     "minHeight": "480px",
+     "overflow": "hidden",
+     "position": "absolute",
+     "top": "0px",
+     "width": "min(360px, 100vw)",
+     "zIndex": "1000"
+    },
+    "blockName": "Notifications",
+    "children": [
+     {
+      "blockName": "NotificationPanel",
+      "componentEvents": {
+       "close": {
+        "action": "Run Script",
+        "script": "closeNotifications()"
+       },
+       "load-more": {
+        "action": "Run Script",
+        "script": "loadMoreNotifications()"
+       },
+       "mark-all-as-read": {
+        "action": "Run Script",
+        "script": "markAllNotificationsRead()"
+       },
+       "mark-as-read": {
+        "action": "Run Script",
+        "script": "markNotificationRead(eventArgs[0])"
+       }
+      },
+      "componentId": "NotificationPanel-pd77b9fvd",
+      "componentName": "NotificationPanel",
+      "componentProps": {
+       "hasNextPage": "{{ notifications.hasNextPage }}",
+       "loading": "{{ notifications.loading }}",
+       "notifications": "{{ notifications.notifications }}",
+       "tabs": "{{ notificationTabs }}",
+       "unreadCount": "{{ notifications.unreadCount }}"
+      }
+     }
+    ],
+    "componentId": "div-4yh03xdbu",
+    "componentName": "div",
+    "originalElement": "div",
+    "visibilityCondition": "{{ notificationsOpen }}"
+   }
+  ],
+  "componentId": "div-r5ko8bl0d",
+  "componentName": "div",
+  "originalElement": "div"
+ },
+ "component_id": "supplier_portal_sidebar",
+ "component_name": "Supplier Portal Sidebar",
+ "creation": "2026-10-28 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Studio Component",
+ "idx": 0,
+ "is_disabled": 0,
+ "modified": "2026-11-12 16:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "supplier_portal_sidebar",
+ "owner": "Administrator"
+}

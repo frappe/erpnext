@@ -119,6 +119,12 @@ additional_print_settings = "erpnext.controllers.print_settings.get_print_settin
 
 on_session_creation = "erpnext.portal.utils.create_customer_or_supplier"
 
+# the Studio supplier portal reads these before its first render
+studio_app_boot = {"supplier-portal": "erpnext.portal.supplier_portal.get_portal_boot"}
+
+# suppliers land on the new portal after they log in
+get_website_user_home_page = "erpnext.portal.supplier_portal.get_website_user_home_page"
+
 treeviews = [
 	"Account",
 	"Cost Center",
@@ -414,6 +420,11 @@ doc_events = {
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
 			"erpnext.stock.doctype.company_restriction.company_restriction.validate_transaction_company",
 		],
+	},
+	"Comment": {
+		"before_save": "erpnext.portal.supplier_portal.protect_supplier_comment",
+		"after_insert": "erpnext.portal.supplier_portal.notify_supplier_of_comment",
+		"on_update": "erpnext.portal.supplier_portal.notify_supplier_of_comment",
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
