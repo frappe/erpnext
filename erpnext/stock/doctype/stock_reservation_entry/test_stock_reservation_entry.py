@@ -2791,6 +2791,57 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+		},
+	)
+	def test_fractional_reservations_of_a_batch_are_fully_delivered_and_restored(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"valuation_rate": 100,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRBI-.#####.",
+			}
+		)
+		create_material_receipt({item.name: item}, warehouse, qty=1)
+		sales_order = make_sales_order(item_code=item.name, warehouse=warehouse, qty=0.3, uom="Kg")
+		for qty in (0.1, 0.2):
+			sales_order.create_stock_reservation_entries(
+				items_details=[
+					{
+						"sales_order_item": sales_order.items[0].name,
+						"item_code": item.name,
+						"warehouse": warehouse,
+						"qty_to_reserve": qty,
+					}
+				],
+				notify=False,
+			)
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.submit()
+		sre_filters = {"voucher_no": sales_order.name}
+		self.assertEqual(
+			set(frappe.get_all("Stock Reservation Entry", sre_filters, pluck="status")), {"Delivered"}
+		)
+
+		delivery_note.cancel()
+		self.assertEqual(
+			set(frappe.get_all("Stock Reservation Entry", sre_filters, pluck="status")), {"Reserved"}
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
 			"enable_stock_reservation": 1,
 			"allow_negative_stock": 0,
 			"allow_partial_reservation": 1,
