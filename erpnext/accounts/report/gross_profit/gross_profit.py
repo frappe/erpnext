@@ -581,7 +581,12 @@ class GrossProfitGenerator:
 								row.base_amount = packed_item.base_amount
 
 			# get buying amount
-			if row.is_debit_note:
+			if grouped_by_invoice and row.indent == 0.0:
+				row.buying_amount = buying_amount
+				row.base_amount = base_amount
+				buying_amount = 0
+				base_amount = 0
+			elif row.is_debit_note:
 				# Rate adjustment debit notes have no stock movement, so buying amount is zero
 				if not grouped_by_invoice:
 					row.qty = 0
@@ -597,12 +602,6 @@ class GrossProfitGenerator:
 				)
 			else:
 				row.buying_amount = flt(self.get_buying_amount(row, row.item_code), self.currency_precision)
-
-			if grouped_by_invoice and row.indent == 0.0:
-				row.buying_amount = buying_amount
-				row.base_amount = base_amount
-				buying_amount = 0
-				base_amount = 0
 
 			# get buying rate
 			if flt(row.qty):
