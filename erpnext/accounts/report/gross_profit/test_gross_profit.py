@@ -1385,6 +1385,41 @@ class TestGrossProfit(ERPNextTestSuite):
 			sinv.save().submit()
 			self.assertEqual(self.get_invoice_buying_amount(sinv.name), 260)
 
+	def test_partly_returned_split_bundle_is_valued_at_what_its_returns_left(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return as make_delivery_return
+		from erpnext.stock.doctype.pick_list.test_pick_list import (
+			deliver_bundle_from_two_warehouses_at_two_rates,
+		)
+
+		def return_one_bundle(delivery_note):
+			delivery_return = make_delivery_return(delivery_note.name)
+			delivery_return.items[0].qty = -1
+			delivery_return.submit()
+			return -sum(
+				frappe.get_all(
+					"Stock Ledger Entry",
+					filters={"voucher_no": ["in", [delivery_note.name, delivery_return.name]]},
+					pluck="stock_value_difference",
+				)
+			)
+
+		# billed after the return
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		kept_value = return_one_bundle(delivery_note)
+		sinv = make_sales_invoice(delivery_note.name).submit()
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), kept_value)
+
+		# billed before the return, then credited
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		sinv = make_sales_invoice(delivery_note.name).submit()
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 600)
+
+		kept_value = return_one_bundle(delivery_note)
+		credit_note = make_sales_return(sinv.name)
+		credit_note.items[0].qty = -1
+		credit_note.submit()
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), kept_value)
+
 	def test_bundle_invoiced_before_delivery(self):
 		bundle = self.make_stocked_bundle()
 		sinv = create_sales_invoice(
