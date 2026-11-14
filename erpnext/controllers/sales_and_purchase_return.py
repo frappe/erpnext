@@ -181,6 +181,41 @@ def validate_returned_items(doc):
 
 def validate_returned_bundle_components(doc, valid_items, already_returned_items):
 	"""Hold the components of returned bundles to what is left of each delivered component."""
+	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
+	packed_qty = get_packed_qty_of_returned_bundles(doc, returned_rows)
+	if not packed_qty:
+		return
+
+	# counted as the packed rows will post it
+	packed_qty.update(get_return_packed_qty(doc, packed_qty))
+	for row in returned_rows:
+		for (return_row, component), qty in packed_qty.items():
+			ref = valid_items.get(component)
+			if return_row != (row.name or row.idx) or not ref:
+				continue
+
+			returned = already_returned_items.setdefault(component, frappe._dict(qty=0, stock_qty=0))
+			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
+			returned.stock_qty = flt(returned.stock_qty) + qty
+			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
+				ref.stock_qty, row.precision("stock_qty")
+			):
+				frappe.throw(
+					_(
+						"Row # {0}: Cannot return {1}, only {2} {3} of its component {4} is left to return"
+					).format(
+						row.idx,
+						frappe.bold(row.item_code),
+						flt(remaining, row.precision("stock_qty")),
+						frappe.get_cached_value("Item", component, "stock_uom"),
+						frappe.bold(component),
+					),
+					StockOverReturnError,
+				)
+
+
+def get_packed_qty_of_returned_bundles(doc, returned_rows):
+	"""Component qty of each returned bundle row, by (return row, component), rounded as packing rounds it."""
 	from erpnext.stock.doctype.packed_item.packed_item import (
 		get_bundle_version_for_row,
 		get_component_stock_qty_per_unit,
@@ -190,7 +225,6 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		pop_order_packed_item,
 	)
 
-	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
 	bundle_items = set(
 		frappe.get_all(
 			"Product Bundle",
@@ -199,7 +233,8 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		)
 	)
 	order_packed_items = get_order_packed_items(doc)
-	bundles, components = {}, {}
+	precision = frappe.get_precision("Packed Item", "qty")
+	bundles, components, packed_qty = {}, {}, defaultdict(float)
 	for row in returned_rows:
 		if row.item_code not in bundle_items:
 			continue
@@ -214,35 +249,15 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		bundle_stock_qty = abs(flt(row.stock_qty))
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component in components[bundle]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
-			ref = valid_items.get(component.item_code)
-			if not ref:
-				continue
-
-			returned = already_returned_items.setdefault(
-				component.item_code, frappe._dict(qty=0, stock_qty=0)
-			)
-			remaining = flt(ref.stock_qty) - flt(returned.stock_qty)
 			component_stock_qty = get_component_stock_qty_per_unit(component, None, so_packed_item)
-			returned.stock_qty = flt(returned.stock_qty) + bundle_stock_qty * component_stock_qty
-			if flt(returned.stock_qty, row.precision("stock_qty")) > flt(
-				ref.stock_qty, row.precision("stock_qty")
-			):
-				frappe.throw(
-					_(
-						"Row # {0}: Cannot return {1}, only {2} {3} of its component {4} is left to return"
-					).format(
-						row.idx,
-						frappe.bold(row.item_code),
-						flt(remaining, row.precision("stock_qty")),
-						frappe.get_cached_value("Item", component.item_code, "stock_uom"),
-						frappe.bold(component.item_code),
-					),
-					StockOverReturnError,
-				)
+			packed_qty[(row.name or row.idx, component.item_code)] += flt(
+				abs(flt(row.stock_qty)) * component_stock_qty, precision
+			)
+
+	return packed_qty
 
 
 def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
@@ -391,8 +406,7 @@ def set_return_stock_qty(doc):
 
 def get_return_stock_qty(doc, row, stock_qty, source, returned):
 	"""Stock qty of a return row, or what is left of its source's when the row completes the return."""
-	# POS returns are merged into consolidated invoices that keep their stock qty and bundles
-	if doc.doctype == "POS Invoice" or doc.get("is_consolidated"):
+	if is_merged_pos_return(doc):
 		return stock_qty
 
 	if not flt(row.qty) or row.get("return_qty_from_rejected_warehouse"):
@@ -418,6 +432,95 @@ def get_completing_qty(row, fieldname, qty, remaining_qty, returned_qty, source_
 		return qty
 
 	return -remaining_qty
+
+
+def is_merged_pos_return(doc):
+	"""POS returns are merged into consolidated invoices that keep their stock qty and bundles."""
+	return doc.doctype == "POS Invoice" or doc.get("is_consolidated")
+
+
+def set_return_packed_qty(doc):
+	"""Give the packed rows of the bundle row that completes the return of its source row what is left
+	of the source's packed qty, so that packed qty rounded row by row adds up to what was delivered."""
+	if not (doc.get("return_against") and doc.get("packed_items")) or is_merged_pos_return(doc):
+		return
+
+	packed_items = defaultdict(list)
+	for packed_item in doc.packed_items:
+		packed_items[(packed_item.parent_detail_docname, packed_item.item_code)].append(packed_item)
+
+	packed_qty = {key: sum(abs(flt(d.qty)) for d in rows) for key, rows in packed_items.items()}
+	for key, qty in get_return_packed_qty(doc, packed_qty).items():
+		# a component repeated on the bundle takes the difference on its last row
+		last_row = packed_items[key][-1]
+		last_row.qty = -flt(abs(flt(last_row.qty)) + qty - packed_qty[key], last_row.precision("qty"))
+
+
+def get_return_packed_qty(doc, packed_qty):
+	"""`packed_qty` by (return row, component), with what is left of the source row's packed qty for
+	the components of a bundle row that completes the return of its source row."""
+	valid_items = get_valid_items(doc)
+	returned_items = get_already_returned_items(doc)
+	source_packed_qty = get_source_packed_qty(doc)
+	returned_packed_qty = get_returned_packed_qty_by_source_row(doc)
+	return_packed_qty = {}
+	for row in doc.get("items"):
+		key = get_return_key(doc, row)
+		if key == row.item_code or key not in valid_items:
+			continue
+
+		add_returned_row(doc, key, row, returned_items)
+		precision = row.precision("stock_qty")
+		completes = flt(returned_items[key].stock_qty, precision) == flt(
+			valid_items[key].stock_qty, precision
+		)
+		for (return_row, component), qty in packed_qty.items():
+			source_key = (key[1], component)
+			if return_row != (row.name or row.idx) or source_key not in source_packed_qty:
+				continue
+
+			if completes:
+				qty = source_packed_qty[source_key] - returned_packed_qty[source_key]
+			return_packed_qty[(return_row, component)] = qty
+			returned_packed_qty[source_key] += qty
+
+	return return_packed_qty
+
+
+def get_source_packed_qty(doc):
+	"""Packed qty of the returned document, by (bundle row, component)."""
+	packed_qty = defaultdict(float)
+	for row in frappe.get_all(
+		"Packed Item",
+		filters={"parent": doc.return_against, "parenttype": doc.doctype},
+		fields=["parent_detail_docname", "item_code", "qty"],
+		limit_page_length=0,
+	):
+		packed_qty[(row.parent_detail_docname, row.item_code)] += flt(row.qty)
+	return packed_qty
+
+
+def get_returned_packed_qty_by_source_row(doc):
+	"""Packed qty of submitted returns of the returned document, by (returned bundle row, component)."""
+	parent, child, packed_item = DocType(doc.doctype), DocType(f"{doc.doctype} Item"), DocType("Packed Item")
+	source_row = child["dn_detail" if doc.doctype == "Delivery Note" else "sales_invoice_item"]
+	rows = (
+		frappe.qb.from_(packed_item)
+		.inner_join(child)
+		.on(packed_item.parent_detail_docname == child.name)
+		.inner_join(parent)
+		.on(child.parent == parent.name)
+		.select(source_row.as_("source_row"), packed_item.item_code, Sum(Abs(packed_item.qty)).as_("qty"))
+		.where(
+			(packed_item.parenttype == doc.doctype)
+			& (parent.docstatus == 1)
+			& (parent.is_return == 1)
+			& (parent.return_against == doc.return_against)
+		)
+		.groupby(source_row, packed_item.item_code)
+		.run(as_dict=True)
+	)
+	return defaultdict(float, {(row.source_row, row.item_code): flt(row.qty) for row in rows})
 
 
 def get_valid_items(doc):
