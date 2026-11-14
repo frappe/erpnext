@@ -430,8 +430,9 @@ def filter_batches(batches, doc, item_code, warehouse):
 	precision = frappe.get_precision("Serial and Batch Entry", "qty")
 	for row in doc.get("items"):
 		batch_no = row.get("batch_no")
-		# a later row without a warehouse yet gets the default one
-		if batch_no in batches and row.get("warehouse") in (None, "", warehouse):
+		# a later row without a warehouse yet gets the default one; without set_warehouse it is unknown
+		row_warehouse = row.get("warehouse") or doc.get("set_warehouse")
+		if batch_no in batches and row_warehouse in (None, "", warehouse):
 			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
 			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
 			if batches[batch_no] <= 0:
