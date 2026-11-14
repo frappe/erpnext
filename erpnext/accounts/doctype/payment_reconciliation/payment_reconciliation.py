@@ -582,6 +582,9 @@ class PaymentReconciliation(Document):
 
 		entry_list = []
 		dr_or_cr_notes = []
+		invoice_exchange_map = {}
+		if any(flt(row.difference_amount) for row in self.get("allocation")):
+			invoice_exchange_map = self.get_invoice_exchange_map(self.invoices, self.payments)
 		for row in self.get("allocation"):
 			reconciled_entry = []
 			if row.invoice_number and row.allocated_amount:
@@ -591,6 +594,8 @@ class PaymentReconciliation(Document):
 					reconciled_entry = entry_list
 
 				payment_details = self.get_payment_details(row, dr_or_cr)
+				if flt(row.difference_amount) and row.invoice_number in invoice_exchange_map:
+					payment_details.exchange_rate = invoice_exchange_map[row.invoice_number]
 				reconciled_entry.append(payment_details)
 
 		if entry_list:
