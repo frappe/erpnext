@@ -47,8 +47,9 @@ NOT_APPLICABLE_TAX = "N/A"
 
 # For each transaction, the child-row link field(s) that point to the source
 # document item, mapped to that source item doctype. When "maintain same rate" is
-# on, a mapped row keeps the persisted source pricing (read straight from that row),
-# so an unsaved edit on the target row can never lock in a non-source rate.
+# on, or the user cannot write the rate, a mapped row keeps the persisted source pricing
+# (read straight from that row), so an unsaved edit on the target row can never lock in
+# a non-source rate.
 maintain_same_rate_source_fields = {
 	"Purchase Order": {"supplier_quotation_item": "Supplier Quotation Item"},
 	"Purchase Receipt": {"purchase_order_item": "Purchase Order Item"},
@@ -254,8 +255,12 @@ def get_rate_locked_source_row(ctx: ItemDetailsCtx, doc) -> frappe._dict | None:
 	if isinstance(doc, str):
 		doc = json.loads(doc)
 
-	source_fields = maintain_same_rate_source_fields.get(ctx.parenttype or ctx.doctype)
-	if not source_fields or not doc or ctx.get("is_return") or not maintain_same_rate_enabled(ctx):
+	parenttype = ctx.parenttype or ctx.doctype
+	source_fields = maintain_same_rate_source_fields.get(parenttype)
+	if not source_fields or not doc or ctx.get("is_return"):
+		return None
+
+	if not maintain_same_rate_enabled(ctx) and has_rate_write_access(parenttype):
 		return None
 
 	row = (
@@ -290,6 +295,13 @@ def maintain_same_rate_enabled(ctx: ItemDetailsCtx) -> bool:
 	return bool(
 		cint(frappe.get_cached_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate"))
 	)
+
+
+def has_rate_write_access(parenttype: str) -> bool:
+	"""Frappe resets an item rate above permlevel 0 the user cannot write when the document is saved."""
+	item_meta = frappe.get_meta(frappe.get_meta(parenttype).get_field("items").options)
+	permlevel = item_meta.get_field("rate").permlevel
+	return not permlevel or permlevel in item_meta.get_permlevel_access("write", parenttype)
 
 
 def lock_source_rate(out: frappe._dict, source_row) -> None:
