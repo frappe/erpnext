@@ -21,6 +21,7 @@ from frappe.query_builder.functions import (
 )
 from frappe.utils import nowdate, unique
 from pypika import Order
+from pypika.terms import ExistsCriterion
 
 import erpnext
 from erpnext.accounts.utils import build_qb_match_conditions
@@ -645,7 +646,34 @@ def get_delivery_notes_to_be_received(
 	)
 
 	# mirrors get_pending_component_qty: components still in transit after the bundle's returns
+	ReturnPackedItem = DocType("Packed Item").as_("return_packed_item")
+	ReturnItem = DocType("Delivery Note Item").as_("return_item")
+	linked_returned_qty = (
+		frappe.qb.from_(ReturnPackedItem)
+		.select(IfNull(Sum(-ReturnPackedItem.qty), 0))
+		.where(
+			(ReturnPackedItem.return_against_packed_item == PackedItem.name)
+			& (ReturnPackedItem.docstatus == 1)
+		)
+	)
+	linked_returned_bundle_qty = (
+		frappe.qb.from_(ReturnItem)
+		.select(IfNull(Sum(-ReturnItem.stock_qty), 0))
+		.where(
+			(ReturnItem.dn_detail == BundleItem.name)
+			& (ReturnItem.docstatus == 1)
+			& ExistsCriterion(
+				frappe.qb.from_(ReturnPackedItem)
+				.select(ReturnPackedItem.name)
+				.where(
+					(ReturnPackedItem.parent_detail_docname == ReturnItem.name)
+					& (ReturnPackedItem.return_against_packed_item != "")
+				)
+			)
+		)
+	)
 	bundle_qty = Case().when(BundleItem.stock_qty != 0, BundleItem.stock_qty).else_(BundleItem.qty)
+	kept_share = 1 - (BundleItem.returned_qty - linked_returned_bundle_qty) / bundle_qty
 	pending_pi = (
 		frappe.qb.from_(PackedItem)
 		.join(BundleItem)
@@ -656,7 +684,13 @@ def get_delivery_notes_to_be_received(
 			& (PackedItem.docstatus == 1)
 			& (BundleItem.closed == 0)
 			& (bundle_qty != 0)
-			& (PackedItem.qty * (1 - BundleItem.returned_qty / bundle_qty) > PackedItem.received_qty)
+			& (
+				Round(
+					PackedItem.qty * kept_share - linked_returned_qty - PackedItem.received_qty,
+					frappe.get_precision("Packed Item", "qty"),
+				)
+				> 0
+			)
 		)
 	)
 

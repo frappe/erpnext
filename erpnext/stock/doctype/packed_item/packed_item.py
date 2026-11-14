@@ -80,7 +80,11 @@ def make_packing_list(doc, order_packed_items=None):
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 	if order_packed_items is None:
 		order_packed_items = get_order_packed_items(doc)
-	returned_packed_qty = get_returned_packed_qty(order_packed_items) if doc.get("is_return") else {}
+	returned_packed_qty = (
+		get_returned_packed_qty([row.name for rows in order_packed_items.values() for row in rows])
+		if doc.get("is_return")
+		else {}
+	)
 
 	reset = reset_packing_list(doc)
 
@@ -615,9 +619,8 @@ def allocate_qty(rows, qty, get_available_qty):
 	return locations
 
 
-def get_returned_packed_qty(order_packed_items) -> dict:
+def get_returned_packed_qty(names: list) -> dict:
 	"""Qty returned so far against each of the given packed rows, by row."""
-	names = [row.name for rows in order_packed_items.values() for row in rows]
 	if not names:
 		return {}
 
