@@ -58,11 +58,10 @@ def get_ordered_stock_qty(material_request):
 def get_pending_qty(row, ordered_stock_qty):
 	"""Qty of a row still to order, in its UOM."""
 	stored_qty = row.ordered_qty or row.received_qty
-	if ordered_stock_qty is not None and (row.name in ordered_stock_qty or not stored_qty):
-		pending_qty = flt(row.qty) - flt(ordered_stock_qty.get(row.name)) / flt(row.conversion_factor)
-	else:
-		pending_qty = (flt(row.stock_qty) - flt(stored_qty)) / (flt(row.conversion_factor) or 1)
+	if ordered_stock_qty is None or (row.name not in ordered_stock_qty and stored_qty):
+		return (flt(row.stock_qty) - flt(stored_qty)) / (flt(row.conversion_factor) or 1)
 
+	pending_qty = flt(row.qty) - flt(ordered_stock_qty.get(row.name)) / flt(row.conversion_factor)
 	return flt(pending_qty, row.precision("qty"))
 
 
