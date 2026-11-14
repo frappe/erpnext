@@ -119,14 +119,17 @@ class WorkOrderStockReservation:
 			transferred_qty = self._apply_transferred_qty(name, transferred_qty, row_wise_serial_batch)
 
 	def get_reservations_to_update(self, filters: dict, field: str) -> list[str]:
-		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`."""
+		"""Submitted reservations; on a closed Work Order also the cancelled ones that still hold `field`.
+
+		Serial and batch reservations come first, so a qty one only takes what they did not match.
+		"""
 		filters, or_filters = self.get_holding_filters(filters, field)
 		return frappe.get_all(
 			"Stock Reservation Entry",
 			filters=filters,
 			or_filters=or_filters,
 			pluck="name",
-			order_by="creation",
+			order_by="reservation_based_on desc, creation",
 		)
 
 	def get_holding_filters(self, filters: dict, field: str) -> tuple[dict, dict | None]:
