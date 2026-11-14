@@ -12,6 +12,8 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import cint, flt, get_link_to_form
 
+from erpnext.manufacturing.doctype.blanket_order.blanket_order_pricing import get_effective_base_rate
+
 # the transactions the pricing engine is called for, from transaction.js and the POS
 PRICING_TRANSACTION_DOCTYPES = frozenset(
 	{
@@ -750,7 +752,10 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			item_details.has_pricing_rule_for_rate = True
 		item_details.update({"discount_percentage": 0.0})
 
-	discount_rate = flt(item_details.get("price_list_rate", args.price_list_rate))
+	if item_details.get("has_pricing_rule_for_rate"):
+		discount_rate = flt(item_details.get("price_list_rate", args.get("price_list_rate")))
+	else:
+		discount_rate = get_effective_base_rate(item_details, args)
 	if item_details.get("margin_type") == "Percentage":
 		discount_rate *= 1 + flt(item_details.margin_rate_or_amount) / 100
 	elif item_details.get("margin_type") == "Amount":
@@ -797,11 +802,11 @@ def apply_pricing_rule_margin(pricing_rule, item_details, args):
 		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
 			existing_margin = item_details.margin_rate_or_amount
 			if item_details.margin_type and item_details.margin_type != margin_type:
-				price_list_rate = flt(item_details.get("price_list_rate", args.get("price_list_rate")))
+				base_rate = get_effective_base_rate(item_details, args)
 				if item_details.margin_type == "Percentage":
-					existing_margin *= price_list_rate / 100
+					existing_margin *= base_rate / 100
 				else:
-					margin *= price_list_rate / 100
+					margin *= base_rate / 100
 				margin_type = "Amount"
 			margin += existing_margin
 

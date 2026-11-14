@@ -835,6 +835,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							barcode: item.barcode,
 							serial_no: item.serial_no,
 							batch_no: item.batch_no,
+							against_blanket_order: item.against_blanket_order || Boolean(item.blanket_order),
+							blanket_order: item.blanket_order,
 							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
@@ -2364,6 +2366,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					serial_no: d.serial_no,
 					batch_no: d.batch_no,
 					price_list_rate: d.price_list_rate,
+					against_blanket_order: d.against_blanket_order,
+					blanket_order: d.blanket_order,
+					blanket_order_rate: d.blanket_order_rate,
 					conversion_factor: d.conversion_factor || 1.0,
 					discount_percentage: d.discount_percentage,
 					discount_amount: d.discount_amount,
@@ -2412,7 +2417,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					if (key === "price_list_rate") {
 						const doc = frappe.get_doc(child.doctype, child.name);
 						if (doc) doc.price_list_rate = value; // silent update so rate trigger uses correct value
-						frappe.model.set_value(child.doctype, child.name, "rate", value);
+						if (!doc?.blanket_order_rate) {
+							frappe.model.set_value(child.doctype, child.name, "rate", value);
+						}
 					}
 
 					if (key === "pricing_rules") {

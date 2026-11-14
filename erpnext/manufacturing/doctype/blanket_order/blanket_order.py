@@ -178,7 +178,7 @@ class BlanketOrder(StatusUpdater):
 
 			row.blanket_order_rate = rates[row.item_code]
 			expected_rate = flt(
-				row.blanket_order_rate * (flt(row.conversion_factor) or 1), row.precision("rate")
+				blanket_order_pricing.get_effective_base_rate(row, order_doc), row.precision("rate")
 			)
 			if flt(row.rate, row.precision("rate")) != expected_rate:
 				frappe.msgprint(

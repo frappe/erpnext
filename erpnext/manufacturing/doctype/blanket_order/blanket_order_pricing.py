@@ -7,10 +7,9 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext import get_company_currency
-from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
-from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.get_item_details import get_price_list_rate_for
+
+_ORDER_DOCTYPES = {"Sales Order", "Quotation", "Purchase Order"}
 
 _ORDER_TYPE_CONFIG = {
 	"Selling": {
@@ -34,6 +33,54 @@ _ORDER_TYPE_CONFIG = {
 }
 
 
+def refresh_order_rates(order) -> None:
+	"""Load accessible contract rates once before calculating transaction totals."""
+	if order.doctype not in _ORDER_DOCTYPES:
+		return
+
+	items = order.get("items", [])
+	blanket_orders = {item.blanket_order for item in items if item.get("blanket_order") and item.item_code}
+	item_codes = {item.item_code for item in items if item.get("blanket_order") and item.item_code}
+	rates = {}
+	ignore_permissions = bool(order.flags.ignore_permissions or frappe.flags.ignore_permissions)
+	if blanket_orders and (ignore_permissions or frappe.has_permission("Blanket Order", "select")):
+		allowed_orders = frappe.get_list(
+			"Blanket Order",
+			filters={
+				"name": ("in", sorted(blanket_orders)),
+				"company": order.company,
+				"currency": order.currency or get_company_currency(order.company),
+			},
+			pluck="name",
+			limit=0,
+			ignore_permissions=ignore_permissions,
+		)
+		if allowed_orders:
+			rates = {
+				(row.parent, row.item_code): flt(row.rate)
+				for row in frappe.get_all(
+					"Blanket Order Item",
+					filters={"parent": ("in", allowed_orders), "item_code": ("in", sorted(item_codes))},
+					fields=["parent", "item_code", "rate"],
+				)
+			}
+
+	for item in items:
+		item.blanket_order_rate = rates.get((item.get("blanket_order"), item.item_code), 0.0)
+
+
+def get_effective_base_rate(item, context=None) -> float:
+	"""Return the transaction-UOM base before margins and discounts."""
+	context = context or {}
+	parenttype = item.get("parenttype") or context.get("parenttype") or context.get("doctype")
+	blanket_order = item.get("blanket_order") or context.get("blanket_order")
+	blanket_rate = item.get("blanket_order_rate") or context.get("blanket_order_rate")
+	if parenttype in _ORDER_DOCTYPES and blanket_order and blanket_rate:
+		conversion_factor = item.get("conversion_factor") or context.get("conversion_factor") or 1
+		return flt(blanket_rate) * (flt(conversion_factor) or 1)
+	return flt(item.get("price_list_rate", context.get("price_list_rate")))
+
+
 def get_order_type_config(blanket_order_type):
 	return _ORDER_TYPE_CONFIG[blanket_order_type]
 
@@ -49,6 +96,8 @@ def get_exchange_rate_to_company(doc, currency):
 
 
 def set_price_list(doc, set_default=False, force_exchange_rate=False):
+	from erpnext.accounts.services.taxes import validate_conversion_rate
+
 	config = get_order_type_config(doc.blanket_order_type)
 	fieldname = config["price_list_field"]
 	doc.set(config["opposite_price_list_field"], None)
@@ -100,6 +149,8 @@ def clear_price_list(doc):
 
 
 def get_default_price_list(doc):
+	from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
+
 	config = get_order_type_config(doc.blanket_order_type)
 	party_type = config["party_type"]
 	party = doc.get(config["party_field"])
@@ -112,6 +163,8 @@ def get_default_price_list(doc):
 
 
 def get_price_list_rates(doc, item_name=None):
+	from erpnext.stock.get_item_details import get_price_list_rate_for
+
 	price_list = doc.get(get_order_type_config(doc.blanket_order_type)["price_list_field"])
 	items = [item for item in doc.items if item.item_code and (not item_name or item.name == item_name)]
 	if not items:

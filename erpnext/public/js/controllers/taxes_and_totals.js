@@ -15,7 +15,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	apply_pricing_rule_on_item(item) {
 		let effective_item_rate = item.price_list_rate;
-		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
+		if (
+			["Sales Order", "Quotation", "Purchase Order"].includes(item.parenttype) &&
+			item.blanket_order_rate
+		) {
 			effective_item_rate = flt(item.blanket_order_rate) * (flt(item.conversion_factor) || 1);
 		}
 
