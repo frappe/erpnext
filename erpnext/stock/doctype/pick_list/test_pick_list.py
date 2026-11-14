@@ -1719,6 +1719,49 @@ class TestPickList(ERPNextTestSuite):
 			returned[row.warehouse] = returned.get(row.warehouse, 0) - row.qty
 		self.assertEqual(returned, {row.warehouse: row.qty for row in delivery_note.packed_items})
 
+	def test_split_bundle_return_takes_back_each_row_at_its_delivered_rate(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		sales_return = make_sales_return(deliver_bundle_from_two_warehouses_at_two_rates().name)
+		sales_return.submit()
+
+		rates = frappe.get_all(
+			"Stock Ledger Entry",
+			{"voucher_no": sales_return.name},
+			["warehouse", "incoming_rate"],
+			as_list=True,
+		)
+		self.assertEqual(sorted(rates), [("_Test Warehouse - _TC", 100), ("_Test Warehouse 1 - _TC", 200)])
+
+	def test_repost_keeps_the_value_of_a_split_bundle_return_to_one_warehouse(self):
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		return_warehouse = "_Test Warehouse 2 - _TC"
+		frappe.db.set_value(
+			"Company", "_Test Company", "default_warehouse_for_sales_return", return_warehouse
+		)
+		posting_date = add_days(nowdate(), -5)
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates(posting_date)
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.submit()
+
+		# a backdated receipt into the return warehouse reposts the return
+		make_stock_entry(
+			item=delivery_note.packed_items[0].item_code,
+			to_warehouse=return_warehouse,
+			qty=1,
+			basic_rate=50,
+			posting_date=add_days(posting_date, -1),
+		)
+		repost_entries()
+		values = frappe.get_all(
+			"Stock Ledger Entry", {"voucher_no": sales_return.name}, pluck="stock_value_difference"
+		)
+		self.assertEqual(sum(values), 2 * 100 + 2 * 200)
+
 	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 
