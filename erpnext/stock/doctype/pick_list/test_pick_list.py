@@ -711,6 +711,24 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
 		self.assertEqual(sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor)
 
+	def test_delivery_note_from_pick_list_for_internal_customer(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item, qty=2, target=warehouse, basic_rate=100)
+		customer = create_internal_customer(represents_company="_Test Company")
+		sales_order = make_sales_order(
+			customer=customer, item_code=item, warehouse=warehouse, qty=2, rate=100
+		)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		delivery_note = create_delivery_note(pick_list.name)
+
+		self.assertEqual(delivery_note.docstatus, 0)
+		self.assertRaises(frappe.ValidationError, delivery_note.submit)
+
 	def test_pick_list_grouping_before_print(self):
 		def _compare_dicts(a, b):
 			"compare dicts but ignore missing keys in `a`"
