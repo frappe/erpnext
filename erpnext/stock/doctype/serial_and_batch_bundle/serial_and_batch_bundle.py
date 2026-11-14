@@ -1295,7 +1295,9 @@ class SerialandBatchBundle(Document):
 			return flt(row.get("stock_qty"))
 
 		if qty_field == "rejected_qty":
-			return flt(row.get(qty_field)) * flt(row.get("conversion_factor") or 1)
+			from erpnext.controllers.sales_and_purchase_return import get_rejected_stock_qty
+
+			return get_rejected_stock_qty(row)
 
 		return flt(row.get(qty_field))
 
