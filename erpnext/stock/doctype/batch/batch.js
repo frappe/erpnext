@@ -124,17 +124,18 @@ frappe.ui.form.on("Batch", {
 					// show
 					(r.message || []).forEach(function (d) {
 						if (d.qty != 0) {
+							const warehouse = frappe.utils.escape_html(d.warehouse);
 							$(`<div class='row' style='margin-bottom: 10px;'>
-								<div class='col-sm-3 small' style='padding-top: 3px;'>${d.warehouse}</div>
+								<div class='col-sm-3 small' style='padding-top: 3px;'>${warehouse}</div>
 								<div class='col-sm-3 small text-right' style='padding-top: 3px;'>${d.qty}</div>
 								<div class='col-sm-6'>
 									<button class='btn btn-default btn-xs btn-move' style='margin-right: 7px;'
 										data-qty = "${d.qty}"
-										data-warehouse = "${d.warehouse}">
+										data-warehouse = "${warehouse}">
 										${__("Move")}</button>
 									<button class='btn btn-default btn-xs btn-split'
 										data-qty = "${d.qty}"
-										data-warehouse = "${d.warehouse}">
+										data-warehouse = "${warehouse}">
 										${__("Split")}</button>
 								</div>
 							</div>`).appendTo(rows);
