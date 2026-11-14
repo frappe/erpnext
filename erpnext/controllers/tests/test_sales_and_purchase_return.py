@@ -216,6 +216,42 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 					-get_posted_stock_qty(pr, rejected_warehouse),
 				)
 
+	def test_purchase_receipt_split_rejected_batch_return_by_batch_fields(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+
+		conversion_factor = 0.3356
+		item_code = make_box_item(
+			conversion_factor,
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SRBF-.#####"},
+		)
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=3,
+			rejected_qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		return_pr = make_purchase_return(pr.name)
+		row = return_pr.items[0]
+		row.qty, row.rejected_qty, row.received_qty = -1, -1, -2
+		row.use_serial_batch_fields = 1
+		row.batch_no = get_batch_from_bundle(pr.items[0].rejected_serial_and_batch_bundle)
+		for _ in range(2):
+			return_pr.append("items", dict(row.as_dict(), name=None))
+		return_pr.submit()
+
+		rejected_warehouse = pr.items[0].rejected_warehouse
+		self.assertEqual(
+			get_posted_stock_qty(return_pr, rejected_warehouse),
+			-get_posted_stock_qty(pr, rejected_warehouse),
+		)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_delivery_note_split_return_brings_back_the_delivered_stock_qty(self):
@@ -487,11 +523,12 @@ def get_posted_stock_qty(doc, warehouse=None):
 	return flt(sum(actual_qty), frappe.get_precision("Stock Ledger Entry", "actual_qty"))
 
 
-def make_box_item(conversion_factor):
+def make_box_item(conversion_factor, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
 
 	return make_item(
 		properties={
+			**(properties or {}),
 			"is_stock_item": 1,
 			"stock_uom": "Kg",
 			"uoms": [
