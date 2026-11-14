@@ -29,8 +29,8 @@ class ReturnChargesService:
 		returned_qty = self.get_returned_qty_by_original_row()
 		for tax in charges:
 			if same_charges := original_charges.get((tax.account_head, tax.description)):
-				share = self.get_returned_share(original, same_charges.pop(0), returned_qty)
-				tax.tax_amount = -flt(share, tax.precision("tax_amount"))
+				base_share = self.get_returned_base_share(original, same_charges.pop(0), returned_qty)
+				tax.tax_amount = -flt(base_share / doc.conversion_rate, tax.precision("tax_amount"))
 
 	def is_traced_to_original(self) -> bool:
 		"""Only rows linked to the original row tell which charge the returned stock carried."""
@@ -52,14 +52,15 @@ class ReturnChargesService:
 		return returned_qty
 
 	@staticmethod
-	def get_returned_share(original, original_charge, returned_qty) -> float:
+	def get_returned_base_share(original, original_charge, returned_qty) -> float:
+		"""Part of the charge, in company currency, that the returned stock carried."""
 		items = [row for row in original.get("items") if row.item_code]
 		if original_charge.get("allocate_full_amount_to_stock_items"):
 			stock_items = original.get_stock_items() + original.get_asset_items()
 			items = [row for row in items if row.item_code in stock_items]
 
 		charge_per_item = {}
-		original._spread_charge_over_items(charge_per_item, flt(original_charge.tax_amount), items)
+		original._spread_charge_over_items(charge_per_item, flt(original_charge.base_tax_amount), items)
 
 		bills_rejected = bills_rejected_quantity(original)
 		share = 0.0
