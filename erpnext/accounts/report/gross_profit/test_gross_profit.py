@@ -1420,6 +1420,25 @@ class TestGrossProfit(ERPNextTestSuite):
 		credit_note.submit()
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), kept_value)
 
+	def test_partly_returned_split_bundle_billed_by_two_invoices_costs_what_was_delivered(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return as make_delivery_return
+		from erpnext.stock.doctype.pick_list.test_pick_list import (
+			deliver_bundle_from_two_warehouses_at_two_rates,
+		)
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		first_invoice = make_sales_invoice(delivery_note.name)
+		first_invoice.items[0].qty = 2
+		first_invoice.submit()
+		second_invoice = make_sales_invoice(delivery_note.name).submit()
+
+		delivery_return = make_delivery_return(delivery_note.name)
+		delivery_return.items[0].qty = -1
+		delivery_return.submit()
+		self.assertEqual(
+			sum(self.get_invoice_buying_amount(sinv.name) for sinv in (first_invoice, second_invoice)), 600
+		)
+
 	def test_bundle_invoiced_before_delivery(self):
 		bundle = self.make_stocked_bundle()
 		sinv = create_sales_invoice(
