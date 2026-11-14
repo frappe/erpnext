@@ -1015,6 +1015,26 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(po.items[0].conversion_factor, conversion_factor)
 		self.assertEqual(po.items[0].stock_qty, mr.items[0].stock_qty)
 
+	@change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_received_qty_of_partial_receipts_with_fractional_conversion_factor(self):
+		from erpnext.buying.doctype.purchase_order.mapper import make_purchase_receipt
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 0.3335}])
+		mr = make_material_request(item_code=item.name, qty=2, uom="Box", conversion_factor=0.3335)
+
+		for _ in range(2):
+			po = make_purchase_order(mr.name)
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = 1
+			po.submit()
+			make_purchase_receipt(po.name).submit()
+
+		mr_item = frappe.db.get_value(
+			"Material Request Item", mr.items[0].name, ["received_qty", "stock_qty"]
+		)
+		self.assertEqual(mr_item[0], mr_item[1])
+
 	def test_customer_provided_parts_mr(self):
 		create_item("CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
