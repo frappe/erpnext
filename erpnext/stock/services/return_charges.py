@@ -11,12 +11,13 @@ class ReturnChargesService:
 
 	def __init__(self, doc):
 		self.doc = doc
+		self.detail_field = get_return_against_item_fields(doc.doctype)
 
 	def set_returned_valuation_charges(self) -> None:
 		"""Set each Actual valuation charge to the share the returned stock carried on the original."""
 		doc = self.doc
 		charges = get_actual_valuation_charges(doc)
-		if not (doc.is_return and doc.return_against and charges):
+		if not (doc.is_return and doc.return_against and charges and self.is_traced_to_original()):
 			return
 
 		original = frappe.get_doc(doc.doctype, doc.return_against)
@@ -31,9 +32,12 @@ class ReturnChargesService:
 				share = self.get_returned_share(original, same_account.pop(0), returned_qty)
 				tax.tax_amount = -flt(share, tax.precision("tax_amount"))
 
+	def is_traced_to_original(self) -> bool:
+		"""Only rows linked to the original row tell which charge the returned stock carried."""
+		return all(row.get(self.detail_field) for row in self.doc.get("items"))
+
 	def get_returned_qty_by_original_row(self) -> dict:
 		"""Accepted and rejected stock qty returned, by original row."""
-		detail_field = get_return_against_item_fields(self.doc.doctype)
 		returned_qty = {}
 		for row in self.doc.get("items"):
 			if row.get("return_qty_from_rejected_warehouse"):
@@ -41,7 +45,7 @@ class ReturnChargesService:
 			else:
 				accepted, rejected = -get_stock_qty(row, row.qty), -get_stock_qty(row, row.rejected_qty)
 
-			qty = returned_qty.setdefault(row.get(detail_field), {"accepted": 0.0, "rejected": 0.0})
+			qty = returned_qty.setdefault(row.get(self.detail_field), {"accepted": 0.0, "rejected": 0.0})
 			qty["accepted"] += accepted
 			qty["rejected"] += rejected
 
