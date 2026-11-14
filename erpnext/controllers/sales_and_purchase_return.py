@@ -359,7 +359,6 @@ def add_returned_row(doc, key, row, already_returned_items):
 	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
 	returned.received_stock_qty = flt(returned.received_stock_qty) + abs(flt(row.get("received_stock_qty")))
 	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
-	returned.unrounded_rejected_qty = flt(returned.unrounded_rejected_qty) + rejected_qty
 	returned.rejected_stock_qty = flt(returned.rejected_stock_qty) + rejected_stock_qty
 
 
@@ -453,8 +452,8 @@ def get_rejected_completing_qty(row, fieldname, qty, rejected_qty, source, retur
 		fieldname,
 		qty,
 		flt(source.rejected_stock_qty) - flt(returned.get("rejected_stock_qty")),
-		flt(returned.get("unrounded_rejected_qty")) + abs(flt(rejected_qty)) * flt(row.conversion_factor),
-		source.unrounded_rejected_qty,
+		flt(returned.get("rejected_qty")) + abs(flt(rejected_qty)) * flt(row.conversion_factor),
+		flt(source.rejected_qty) * flt(source.conversion_factor),
 	)
 
 
@@ -622,7 +621,6 @@ def get_ref_item_dict(valid_items, ref_item_row):
 				"received_stock_qty": 0,
 				"rejected_qty": 0,
 				"rejected_stock_qty": 0,
-				"unrounded_rejected_qty": 0,
 				"received_qty": 0,
 				"serial_no": [],
 				"conversion_factor": ref_item_row.get("conversion_factor", 1),
@@ -644,9 +642,6 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		item_dict["received_qty"] += ref_item_row.received_qty
 		item_dict["rejected_qty"] += ref_item_row.rejected_qty
 		item_dict["rejected_stock_qty"] += flt(ref_item_row.get("rejected_stock_qty"))
-		item_dict["unrounded_rejected_qty"] += flt(ref_item_row.rejected_qty) * flt(
-			ref_item_row.get("conversion_factor") or 1
-		)
 
 	if ref_item_row.get("serial_no"):
 		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
@@ -669,13 +664,11 @@ def get_already_returned_items(doc):
 
 	unrounded_stock_qty = Abs(child.qty) * child.conversion_factor
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
-	unrounded_rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
 	if doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
 		rejected_stock_qty = Abs(child.rejected_stock_qty)
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
 		from_rejected_warehouse = child.return_qty_from_rejected_warehouse == 1
-		rejected_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
-		unrounded_rejected_qty += Case().when(from_rejected_warehouse, unrounded_stock_qty).else_(0)
+		rejected_qty += Case().when(from_rejected_warehouse, unrounded_stock_qty).else_(0)
 		if doc.doctype == "Purchase Receipt":
 			rejected_stock_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
 		stock_qty = Case().when(from_rejected_warehouse, 0).else_(stock_qty)
@@ -703,10 +696,7 @@ def get_already_returned_items(doc):
 	if doc.doctype == "Purchase Receipt":
 		query = query.select(Sum(Abs(child.received_stock_qty)).as_("received_stock_qty"))
 	if doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
-		query = query.select(
-			Sum(rejected_stock_qty).as_("rejected_stock_qty"),
-			Sum(unrounded_rejected_qty).as_("unrounded_rejected_qty"),
-		)
+		query = query.select(Sum(rejected_stock_qty).as_("rejected_stock_qty"))
 
 	data = query.run(as_dict=1)
 
@@ -732,7 +722,6 @@ def get_already_returned_items(doc):
 					"received_stock_qty": d.get("received_stock_qty"),
 					"rejected_qty": d.get("rejected_qty"),
 					"rejected_stock_qty": d.get("rejected_stock_qty"),
-					"unrounded_rejected_qty": d.get("unrounded_rejected_qty"),
 				}
 			),
 		)
