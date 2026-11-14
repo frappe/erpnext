@@ -29,29 +29,46 @@ class ReturnChargesService:
 		returned_amounts = self.get_returned_charge_amounts(original)
 		for tax in charges:
 			if same_charges := original_charges.get((tax.account_head, tax.description)):
-				tax.tax_amount = -returned_amounts[same_charges.pop(0).name]
+				returned = returned_amounts.get(same_charges.pop(0).name, 0.0)
+				tax.tax_amount = -returned * get_valuation_sign(tax)
 
 	def get_returned_charge_amounts(self, original) -> dict:
-		"""Part of each Actual valuation charge of the original that the returned stock carried, in the
-		return's currency. The original spreads its charges together, so they share the part of their sum."""
+		"""Signed part of each nonzero Actual valuation charge of the original that the returned stock
+		carried, in the return's currency."""
 		groups = {}
 		for tax in get_actual_valuation_charges(original):
-			groups.setdefault(bool(tax.get("allocate_full_amount_to_stock_items")), []).append(tax)
+			if flt(tax.base_tax_amount):
+				groups.setdefault(bool(tax.get("allocate_full_amount_to_stock_items")), []).append(tax)
 
 		returned_qty = self.get_returned_qty_by_original_row()
 		amounts = {}
 		for to_stock_items, taxes in groups.items():
-			total = sum(flt(tax.base_tax_amount) for tax in taxes)
-			if not total:
-				continue
+			amounts.update(self.split_returned_share(original, taxes, to_stock_items, returned_qty))
 
-			precision = taxes[0].precision("tax_amount")
-			base_share = self.get_returned_base_share(original, total, to_stock_items, returned_qty)
-			share = flt(base_share / self.doc.conversion_rate, precision)
-			for tax in taxes[:-1]:
-				amounts[tax.name] = flt(share * flt(tax.base_tax_amount) / total, precision)
-			amounts[taxes[-1].name] = flt(share - sum(amounts[tax.name] for tax in taxes[:-1]), precision)
+		return amounts
 
+	def split_returned_share(self, original, taxes, to_stock_items, returned_qty) -> dict:
+		"""The original spreads the signed sum of its charges together. Each charge takes its part of the
+		returned share, and the largest takes the rounding remainder, so they add up to that share."""
+		conversion_rate = self.doc.conversion_rate
+		base_amounts = {tax.name: flt(tax.base_tax_amount) * get_valuation_sign(tax) for tax in taxes}
+		unsigned_total = sum(abs(amount) for amount in base_amounts.values())
+		returned_part = (
+			self.get_returned_base_share(original, unsigned_total, to_stock_items, returned_qty)
+			/ unsigned_total
+		)
+		base_share = self.get_returned_base_share(
+			original, sum(base_amounts.values()), to_stock_items, returned_qty
+		)
+
+		precision = taxes[0].precision("tax_amount")
+		largest = max(base_amounts, key=lambda name: abs(base_amounts[name]))
+		amounts = {
+			name: flt(returned_part * amount / conversion_rate, precision)
+			for name, amount in base_amounts.items()
+			if name != largest
+		}
+		amounts[largest] = flt(base_share / conversion_rate - sum(amounts.values()), precision)
 		return amounts
 
 	def is_traced_to_original(self) -> bool:
@@ -100,6 +117,10 @@ class ReturnChargesService:
 				share += charge_per_item.get(row.idx, 0.0) * returned / carried_qty
 
 		return share
+
+
+def get_valuation_sign(tax) -> int:
+	return -1 if tax.get("add_deduct_tax") == "Deduct" else 1
 
 
 def get_actual_valuation_charges(doc) -> list:
