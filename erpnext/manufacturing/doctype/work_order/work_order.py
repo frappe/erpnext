@@ -18,7 +18,7 @@ from frappe.utils import (
 	nowdate,
 )
 
-from erpnext import get_company_currency
+from erpnext import get_company_currency, require_permission
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
@@ -1379,6 +1379,7 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 
 @frappe.whitelist()
 def get_default_warehouse(company: str):
+	require_permission("Company", company, "select")
 	wip, fg, scrap = frappe.get_cached_value(
 		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
 	)
