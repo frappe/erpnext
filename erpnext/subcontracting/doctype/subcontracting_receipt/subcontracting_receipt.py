@@ -534,19 +534,29 @@ class SubcontractingReceipt(SubcontractingController):
 				row.warehouse = original_row.warehouse
 
 	def keep_secondary_row_values(self, sent_rows):
-		"""Keep the accounts, dimensions, serial nos and batches set on a return's secondary rows before the rebuild."""
+		"""Keep the accounts, dimensions, manual rates, serial nos and batches set on a return's secondary rows
+		before the rebuild."""
 		sent_rows = {
 			row.subcontracting_receipt_item: row for row in sent_rows if row.subcontracting_receipt_item
 		}
 		if not sent_rows:
 			return
 
-		accounting_fields = ["expense_account", "cost_center", "project", *get_accounting_dimensions()]
+		kept_fields = [
+			"expense_account",
+			"cost_center",
+			"project",
+			*get_accounting_dimensions(),
+			*(dimension.source_fieldname for dimension in get_inventory_dimensions()),
+		]
 		for row in self.items:
 			if not (row.bom_secondary_item and (sent := sent_rows.get(row.subcontracting_receipt_item))):
 				continue
 
-			fieldnames = accounting_fields
+			fieldnames = kept_fields
+			if row.valuation_type == "Manual":
+				fieldnames = [*fieldnames, "rate"]
+
 			if sent.serial_no or sent.batch_no or sent.serial_and_batch_bundle:
 				fieldnames = [
 					*fieldnames,
