@@ -2836,7 +2836,10 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 
 		delivery_note.cancel()
 		self.assertEqual(
-			set(frappe.get_all("Stock Reservation Entry", sre_filters, pluck="status")), {"Reserved"}
+			frappe.get_all(
+				"Stock Reservation Entry", sre_filters, ["status", "delivered_qty"], distinct=True
+			),
+			[{"status": "Partially Reserved", "delivered_qty": 0}],
 		)
 
 	@ERPNextTestSuite.change_settings(
