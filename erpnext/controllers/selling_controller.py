@@ -1275,7 +1275,7 @@ class SellingController(StockController):
 					if sre_doc.reservation_based_on == "Serial and Batch":
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
-								if entry.serial_no in serial_nos_to_undelivered:
+								if entry.delivered_qty and entry.serial_no in serial_nos_to_undelivered:
 									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
 									entry.db_update()
 									qty_can_be_undelivered += 1
