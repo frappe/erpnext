@@ -2052,6 +2052,51 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{
+			"use_serial_batch_fields": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"allow_to_edit_stock_uom_qty_for_sales": 1,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_packed_item_at_its_rounded_bundle_row_stock_qty(self):
+		conversion_factor = 0.666666667
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRPU-.#####",
+			}
+		).name
+		bundle = make_item(
+			properties={
+				"is_stock_item": 0,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": conversion_factor}],
+			}
+		).name
+		make_product_bundle(bundle, [item], qty=10)
+		# leaves 1 Kg free only if the packed qty is counted from the unrounded bundle stock qty
+		batch_qty = flt(10 * conversion_factor, frappe.get_precision("Packed Item", "qty")) + 1
+		batch = get_batch_from_bundle(
+			make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=batch_qty, basic_rate=100)
+			.items[0]
+			.serial_and_batch_bundle
+		)
+
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": conversion_factor})
+		dn.save()
+		dn.packed_items[0].update({"batch_no": batch, "use_serial_batch_fields": 1})
+		dn.append("items", get_serial_batch_item_row(item, 1))
+		dn.save()
+
+		self.assertNotEqual(dn.items[1].batch_no, batch)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
