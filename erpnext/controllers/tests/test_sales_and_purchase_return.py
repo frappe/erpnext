@@ -396,6 +396,24 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		# 10 Kg of the component for each of the 0.3356 Kg returned
 		self.assertEqual(get_posted_stock_qty(return_dn), 3.36)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_bundle_return_with_and_without_dn_detail_brings_back_the_delivered_components(
+		self,
+	):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		dn = make_box_bundle_delivery_note(
+			conversion_factor=0.3356, qty=3, component_qty=0.4, component_properties={"stock_uom": "Kg"}
+		)
+		return_dn = make_sales_return(dn.name)
+		row = return_dn.items[0]
+		return_dn.append("items", dict(row.as_dict(), name=None, qty=-2))
+		row.qty, row.dn_detail = -1, None
+		return_dn.submit()
+
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
+
 	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
