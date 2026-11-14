@@ -7,6 +7,7 @@
 import frappe
 
 import erpnext
+from erpnext.utilities.query import get_user_permission_conditions_qb
 
 
 @frappe.whitelist()
@@ -47,6 +48,8 @@ def sales_order_query(
 		.where((table.stock_qty > table.production_plan_qty) & (table.docstatus == 1))
 	)
 	query = _apply_sales_order_filters(query, so_table, table, filters, txt)
+	for condition in get_user_permission_conditions_qb("Sales Order", so_table):
+		query = query.where(condition)
 	query = _paginate(query, start, page_len)
 	return query.run()
 
