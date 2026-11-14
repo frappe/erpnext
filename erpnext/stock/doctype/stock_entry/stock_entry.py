@@ -252,8 +252,6 @@ class StockEntry(StockController):
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
-		self.validate_uom_is_integer("uom", "qty")
-		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_returned_qty_within_work_order()
@@ -282,6 +280,8 @@ class StockEntry(StockController):
 		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_finished_good_qty_against_fg_completed_qty()
 		self.validate_difference_account()
 		self.set_job_card_data()
@@ -821,11 +821,15 @@ class StockEntry(StockController):
 			for d in self.items:
 				if d.is_finished_item:
 					if self.process_loss_qty:
-						d.qty = self.fg_completed_qty - self.process_loss_qty
+						d.transfer_qty = flt(
+							self.fg_completed_qty - self.process_loss_qty, d.precision("transfer_qty")
+						)
+						d.qty = flt(d.transfer_qty / flt(d.conversion_factor), d.precision("qty"))
 
-					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+					# Finished Good Quantity is in the stock UOM
+					item_wise_qty.setdefault(d.item_code, []).append(d.transfer_qty)
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item_code, qty_list in item_wise_qty.items():
 			total = flt(sum(qty_list), precision)
 
