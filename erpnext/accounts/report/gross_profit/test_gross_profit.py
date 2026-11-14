@@ -1463,6 +1463,23 @@ class TestGrossProfit(ERPNextTestSuite):
 		)
 		self.assertEqual(self.get_invoice_buying_amount(rebilled_invoice.name), kept_value)
 
+	def test_full_unlinked_credit_note_of_a_partly_returned_split_bundle_costs_nothing(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return as make_delivery_return
+		from erpnext.stock.doctype.pick_list.test_pick_list import (
+			deliver_bundle_from_two_warehouses_at_two_rates,
+		)
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		sinv = make_sales_invoice(delivery_note.name).submit()
+		delivery_return = make_delivery_return(delivery_note.name)
+		delivery_return.items[0].qty = -1
+		delivery_return.submit()
+
+		credit_note = make_sales_return(sinv.name).submit()
+		# a credit note made before the invoice row link existed
+		frappe.db.set_value("Sales Invoice Item", credit_note.items[0].name, "sales_invoice_item", None)
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 0)
+
 	def test_bundle_invoiced_before_delivery(self):
 		bundle = self.make_stocked_bundle()
 		sinv = create_sales_invoice(
