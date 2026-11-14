@@ -1465,6 +1465,29 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 		with self.set_user("Guest"), self.assertRaises(frappe.PermissionError):
 			get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": "_Test Warehouse - _TC"})
 
+	def test_pos_screen_reservation_lookup_requires_pos_invoice_and_warehouse_permission(self):
+		from frappe.permissions import add_user_permission
+
+		serial = self.make_number("Serial No", "POS-Permission-001")
+		serial.db_set("warehouse", "_Test Warehouse - _TC")
+		accounts_user = self.make_role_user("identity-pos-accounts-user@example.com", "Accounts User")
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", accounts_user)
+		projects_user = self.make_role_user("identity-pos-projects-user@example.com", "Projects User")
+
+		def get_reserved(warehouse):
+			return get_pos_reserved_serial_nos({"item_code": self.item.name, "warehouse": warehouse})
+
+		with patch(
+			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_reserved_serial_nos_for_pos",
+			return_value=[serial.name],
+		):
+			with self.set_user(accounts_user):
+				self.assertEqual(get_reserved("_Test Warehouse - _TC"), ["POS-Permission-001"])
+				self.assertRaises(frappe.PermissionError, get_reserved, "_Test Warehouse 1 - _TC")
+
+			with self.set_user(projects_user):
+				self.assertRaises(frappe.PermissionError, get_reserved, "_Test Warehouse - _TC")
+
 	def test_serial_auto_fetch_works_without_master_read_permission(self):
 		serial = self.make_number("Serial No", "Fetch-001")
 		warehouse = "_Test Warehouse - _TC"
