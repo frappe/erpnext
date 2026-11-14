@@ -197,6 +197,7 @@ class TaxWithholdingEntry(Document):
 
 				new_entry = frappe.copy_doc(old_entry)
 				new_entry.update(values_to_update)
+				new_entry.created_by_migration = 0
 				new_entry.flags.skip_docstatus_validation = True
 				new_entry.insert()
 
@@ -334,6 +335,7 @@ class TaxWithholdingEntry(Document):
 				"withholding_doctype": "",
 				"withholding_name": "",
 				"withholding_date": None,
+				"created_by_migration": 0,
 			}
 			new_entry.update(values_to_update)
 			new_entry.flags.skip_docstatus_validation = True
@@ -694,7 +696,7 @@ class TaxWithholdingController:
 
 	def _get_unused_threshold(self, category):
 		"""Calculate unused threshold amount for tax on excess scenarios"""
-		if not category.tax_on_excess_amount:
+		if not category.tax_on_excess_amount or self.doc.ignore_tax_withholding_threshold:
 			return 0
 
 		entry = frappe.qb.DocType(DOCTYPE)
@@ -704,7 +706,8 @@ class TaxWithholdingController:
 			.run()
 		)
 
-		return category.cumulative_threshold - result.get("Settled", 0)
+		# Migrated or overridden entries can exempt more than the threshold
+		return max(0, category.cumulative_threshold - result.get("Settled", 0))
 
 	def _base_threshold_query(self, category):
 		entry = frappe.qb.DocType(DOCTYPE)
