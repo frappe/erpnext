@@ -501,7 +501,10 @@ def check_contact_customer_permission(contact):
 		)
 		.run(pluck=True)
 	)
-	if not any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers):
+	if not (
+		frappe.has_permission("Delivery Trip", "read")
+		and any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers)
+	):
 		frappe.throw(_("Not permitted to view Contact {0}").format(contact), frappe.PermissionError)
 
 
