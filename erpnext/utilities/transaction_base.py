@@ -650,13 +650,14 @@ def delete_events(ref_type, ref_name):
 
 
 def get_whole_number_uoms(uoms):
-	distinct_uoms = tuple(set(uom for uom in uoms if uom))
-	return set(
-		d[0]
-		for d in frappe.db.get_values(
-			"UOM", (("name", "in", distinct_uoms), ("must_be_whole_number", "=", 1)), cache=True
+	distinct_uoms = tuple(sorted(set(uom for uom in uoms if uom)))
+	cache = frappe.db.value_cache["UOM"]
+	cache_key = ("whole_number_uoms", distinct_uoms)
+	if cache_key not in cache:
+		cache[cache_key] = frappe.db.get_values(
+			"UOM", (("name", "in", distinct_uoms), ("must_be_whole_number", "=", 1))
 		)
-	)
+	return {d[0] for d in cache[cache_key]}
 
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
