@@ -297,20 +297,37 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		self.assert_orders_for_parts_add_up(sq.items[0], make_order)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
 	def test_orders_for_parts_of_a_sales_order_add_up_to_its_stock_qty(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		so = make_sales_order_for_fractional_box()
+		self.assert_orders_for_parts_add_up(so.items[0], lambda: make_po_for_sales_order_row(so.items[0]))
 
-		# the order maps the rest as a fraction of a Box, so the UOM must allow it
-		if not frappe.db.exists("UOM", "_Test Fractional Box"):
-			frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Fractional Box"}).insert()
-		item = make_item_with_fractional_box("_Test Fractional Box")
-		so = make_sales_order(item_code=item, qty=3, uom="_Test Fractional Box")
-		selected_items = [{"name": so.items[0].name, "supplier": "_Test Supplier"}]
-		self.assert_orders_for_parts_add_up(
-			so.items[0], lambda: make_po_from_so(so.name, selected_items=selected_items)[0]
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
+	def test_removing_rows_ordered_for_a_sales_order_row_clears_its_ordered_qty(self):
+		so = make_sales_order_for_fractional_box()
+		po = make_po_for_sales_order_row(so.items[0])
+		po.items[0].qty = 1
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None})
+		po.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 		)
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 1.33)
+
+		unlinked_row = po.items[2]
+		trans_item = json.dumps(
+			[{"item_code": unlinked_row.item_code, "qty": 1, "rate": 100, "docname": unlinked_row.name}]
+		)
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 0)
 
 	def assert_orders_for_parts_add_up(self, source_row, make_order):
 		"""Orders of 1 + 1 + 1 Box for a 3 Box source row add up to its stock qty; over-ordering fails."""
@@ -2894,6 +2911,23 @@ def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 
 def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
+
+
+def make_sales_order_for_fractional_box():
+	"""Sales Order for 3 of a 2/3 Kg Box UOM that allows fractions, so orders can map the rest of it."""
+	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+	if not frappe.db.exists("UOM", "_Test Fractional Box"):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Fractional Box"}).insert()
+	item = make_item_with_fractional_box("_Test Fractional Box")
+	return make_sales_order(item_code=item, qty=3, uom="_Test Fractional Box")
+
+
+def make_po_for_sales_order_row(sales_order_row):
+	from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+
+	selected_items = [{"name": sales_order_row.name, "supplier": "_Test Supplier"}]
+	return make_po_from_so(sales_order_row.parent, selected_items=selected_items)[0]
 
 
 def make_item_with_fractional_box(uom="Box"):
