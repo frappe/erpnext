@@ -3098,6 +3098,30 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		sle_filters = {"voucher_no": pr.name, "warehouse": transit_warehouse, "is_cancelled": 0}
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), -1.01)
 
+	def test_internal_transfer_returns_put_back_only_what_the_receipts_took(self):
+		"""Returns of partial receipts put back what each receipt took out of transit, not their own
+		rounded stock qty."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		transit_bin = {"item_code": dn.items[0].item_code, "warehouse": transit_warehouse}
+		delivered_qty = frappe.db.get_value("Bin", transit_bin, "actual_qty")
+
+		receipts = []
+		for _ in range(2):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update(
+				{"warehouse": create_warehouse("_Test Transfer To", company=dn.company), "qty": 3}
+			)
+			pr.submit()
+			receipts.append(pr)
+
+		for pr in receipts:
+			make_return_doc("Purchase Receipt", pr.name).submit()
+
+		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), delivered_qty)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
 	def test_internal_transfer_over_receipt_takes_its_own_stock_qty_out_of_transit(self):
 		"""Over-received stock did not come from the delivery, so it is not capped to what is in transit."""
