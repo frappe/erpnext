@@ -13,9 +13,9 @@ import erpnext
 from erpnext import _refuse, require_permission
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
+	_get_item_tax_map,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
-	get_item_tax_map,
 )
 
 
@@ -437,7 +437,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc) -> None:
 		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group)
 
 	child_item.item_tax_template = item_tax_template
-	child_item.item_tax_rate = get_item_tax_map(
+	child_item.item_tax_rate = _get_item_tax_map(
 		doc=parent_doc,
 		tax_template=child_item.item_tax_template,
 		as_json=True,
