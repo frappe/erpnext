@@ -29,6 +29,7 @@ from frappe.utils import (
 from pypika import functions as fn
 from pypika.terms import ExistsCriterion
 
+from erpnext import get_company_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_items_as_dict,
@@ -2556,6 +2557,8 @@ class WorkOrder(Document):
 	def make_bom(self):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
+		bom.company = self.company
+		bom.currency = get_company_currency(self.company)
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
