@@ -452,6 +452,7 @@ def get_invoice(name: str) -> dict:
 			order_by="posting_date asc, name asc",
 		),
 		"party_total": get_total_in_party_account_currency(doc),
+		"credited": 0 if doc.is_return else _credited(doc.name),
 	}
 
 
@@ -865,12 +866,24 @@ def _payments(invoice: str) -> list[dict]:
 			fields=["name", "posting_date", "mode_of_payment", "reference_no"],
 		)
 	}
-	payments = [
-		{**entries[row.parent], "allocated_amount": row.allocated_amount}
-		for row in allocations
-		if row.parent in entries
-	]
+	# a payment split over the invoice's payment terms has one reference row per term: one payment
+	allocated = {}
+	for row in allocations:
+		if row.parent in entries:
+			allocated[row.parent] = allocated.get(row.parent, 0) + row.allocated_amount
+	payments = [{**entries[name], "allocated_amount": amount} for name, amount in allocated.items()]
 	return sorted(payments, key=lambda payment: (payment["posting_date"], payment["name"]))
+
+
+def _credited(invoice: str) -> float:
+	"""What the credit notes against one invoice took off what the customer owes, a positive amount."""
+	notes = frappe.get_all(
+		"Sales Invoice",
+		# one that keeps its own outstanding leaves this invoice's balance alone
+		filters={"return_against": invoice, "is_return": 1, "docstatus": 1, "update_outstanding_for_self": 0},
+		pluck="name",
+	)
+	return -sum(get_total_in_party_account_currency(frappe.get_doc("Sales Invoice", note)) for note in notes)
 
 
 def _order_lines(shipment) -> list[dict]:

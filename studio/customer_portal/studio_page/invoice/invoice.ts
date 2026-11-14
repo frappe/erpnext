@@ -61,7 +61,11 @@ export default function setup(context) {
 	// what is owed and paid is kept in the party account's currency, which can differ from the invoice's
 	const partyCurrency = computed(() => doc.value.party_account_currency || currency.value)
 	const outstanding = computed(() => Number(doc.value.outstanding_amount ?? 0))
-	const paid = computed(() => Number(doc.value.party_total ?? payableTotal(doc.value)) - outstanding.value)
+	// credit notes that came off what the customer owes: not money they paid
+	const credited = computed(() => Number(doc.value.credited ?? 0))
+	const paid = computed(
+		() => Number(doc.value.party_total ?? payableTotal(doc.value)) - outstanding.value - credited.value,
+	)
 	const overdue = computed(() => invoiceIsOverdue(doc.value))
 
 	// ---------------------------------------------------------------- header
@@ -164,13 +168,16 @@ export default function setup(context) {
 
 	const totals = computed(() => totalRows(doc.value, currency.value))
 
-	/** Below the amount in words, which spells out Total, not what is left to pay.
-	 *  Until a payment comes in, Total is the amount due and the status badge says so. */
+	/** Below the amount in words, which spells out Total, not what is left to pay. Paid in full by
+	 *  payments alone, it would only repeat Total: the notice and the Payments table say it. */
 	const balance = computed(() => {
+		if (outstanding.value <= 0 && credited.value <= 0) return []
 		const rows: any[] = []
-		if (paid.value <= 0) return rows
-
-		rows.push(totalRow(__("Paid"), paid.value, partyCurrency.value))
+		if (paid.value > 0) rows.push(totalRow(__("Paid"), paid.value, partyCurrency.value))
+		if (credited.value > 0) rows.push(totalRow(__("Credit notes"), credited.value, partyCurrency.value))
+		if (!rows.length) return rows
+		// a rule above starts the balance as its own block, so it isn't left hanging under the words
+		rows[0] = { ...rows[0], divider: true }
 		if (outstanding.value > 0) {
 			const due = totalRow(__("Outstanding"), outstanding.value, partyCurrency.value, true)
 			rows.push(overdue.value ? { ...due, color: RED, valueColor: RED } : due)

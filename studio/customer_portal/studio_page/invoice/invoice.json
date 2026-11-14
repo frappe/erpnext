@@ -728,8 +728,9 @@
                       "flexShrink": 0,
                       "fontFeatureSettings": "'tnum'",
                       "fontWeight": "{{ dataItem.weight }}",
+                      "minWidth": "124px",
                       "textAlign": "right",
-                      "width": "110px"
+                      "whiteSpace": "nowrap"
                      },
                      "blockName": "TextBlock",
                      "componentId": "TextBlock-9e8bb8c67a",
@@ -1208,7 +1209,7 @@
               "display": "flex",
               "flexDirection": "column",
               "flexShrink": 0,
-              "gap": "8px",
+              "gap": "12px",
               "width": "100%"
              },
              "blockName": "Payments",
@@ -1755,7 +1756,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-11-14 12:30:00.000000",
+ "modified": "2026-11-14 13:00:00.000000",
  "modified_by": "Administrator",
  "name": "invoice",
  "owner": "Administrator",
