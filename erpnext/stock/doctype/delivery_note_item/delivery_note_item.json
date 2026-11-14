@@ -810,6 +810,7 @@
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1006,7 +1007,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-11-11 09:30:00.000000",
+ "modified": "2026-11-12 07:42:00.221941",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

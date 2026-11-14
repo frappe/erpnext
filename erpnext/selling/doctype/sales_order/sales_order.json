@@ -1526,6 +1526,7 @@
    "label": "Amount Eligible for Commission",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1826,7 +1827,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-12 18:16:58.531757",
+ "modified": "2026-11-12 07:42:00.221941",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
