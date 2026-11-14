@@ -1762,6 +1762,52 @@ class TestPickList(ERPNextTestSuite):
 		)
 		self.assertEqual(sum(values), 2 * 100 + 2 * 200)
 
+	def test_two_return_rows_of_a_split_bundle_take_back_different_delivered_rows(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -2
+		sales_return.append("items", sales_return.items[0].as_dict(no_default_fields=True))
+		sales_return.submit()
+
+		returned = sorted(row.return_against_packed_item for row in sales_return.packed_items if row.qty)
+		self.assertEqual(returned, sorted(row.name for row in delivery_note.packed_items))
+
+	def test_split_bundle_return_takes_back_a_batch_at_each_delivered_row_rate(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PLSBR-.#####",
+			}
+		).name
+		receipt = make_stock_entry(
+			item=component, to_warehouse="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		make_stock_entry(
+			item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=2, basic_rate=200, batch_no=batch_no
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=3, rate=500)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.submit()
+
+		values = frappe.get_all(
+			"Stock Ledger Entry", {"voucher_no": sales_return.name}, pluck="stock_value_difference"
+		)
+		self.assertEqual(sum(values), 1 * 100 + 2 * 200)
+
 	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 
