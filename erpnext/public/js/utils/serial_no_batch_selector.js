@@ -49,6 +49,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		qty = Math.abs(qty);
 		this.qty = qty;
+		this.warehouse = this.get_warehouse();
+		this.keep_initial_rows = this.has_initial_rows();
 		if (qty > 0) {
 			this.dialog.set_value("qty", qty).then(() => {
 				if (this.item.serial_no && !this.item.serial_and_batch_bundle) {
@@ -518,13 +520,23 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	get_auto_data() {
 		let { qty, based_on } = this.dialog.get_values();
 
+<<<<<<< HEAD
 		if (this.bundle && qty === this.qty) {
 			return;
 		}
 
 		if (this.item.serial_no || this.item.batch_no) {
+=======
+		// opening the dialog sets these fields; keep the rows it opens with until one of them changes
+		const is_unchanged =
+			qty === this.qty &&
+			(this.dialog.get_value("warehouse") || this.warehouse) === this.warehouse &&
+			(based_on || this.based_on) === this.based_on;
+		if (this.keep_initial_rows && is_unchanged) {
+>>>>>>> f1c5fba (fix(stock): keep the serial / batch selector from replacing or skipping its rows)
 			return;
 		}
+		this.keep_initial_rows = false;
 
 		if (!based_on) {
 			based_on = this.based_on;
@@ -728,6 +740,15 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		return this.item?.type_of_transaction === "Outward"
 			? this.item.warehouse || this.item.s_warehouse
 			: this.item.warehouse || this.item.t_warehouse;
+	}
+
+	has_initial_rows() {
+		return Boolean(
+			this.bundle ||
+				this.item[this.serial_field] ||
+				this.item.batch_no ||
+				(this.frm.doc.is_return && this.frm.doc.return_against)
+		);
 	}
 
 	render_data() {
