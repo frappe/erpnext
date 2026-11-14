@@ -432,7 +432,9 @@ class SalesInvoice(SellingController):
 
 	def validate_income_account(self):
 		for item in self.get("items"):
-			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
+			validate_account_head(
+				item.idx, item.income_account, self.company, _("Income"), allow_party_account=False
+			)
 
 	def before_save(self):
 		POSService(self).update_paid_amount()
