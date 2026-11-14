@@ -1159,6 +1159,53 @@ class BuyingController(SubcontractingController):
 		return self.is_internal_receipt() and bool(get_stock_qty(row, row.rejected_qty))
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
+		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
+		delivered row left in transit, so partial receipts that round up add up to the delivery."""
+		qty = self.get_received_stock_qty(row, accepted_qty)
+		link_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
+		if not (row.get(link_field) and self.is_internal_receipt() and not self.is_return):
+			return qty
+
+		if self.docstatus == 2:
+			return -flt(self.get_posted_qty(row.name, row.from_warehouse)) or qty
+
+		qty_left = self.get_qty_left_in_transit(row, link_field)
+		return qty if qty_left is None else min(qty, qty_left)
+
+	def get_qty_left_in_transit(self, row, link_field) -> float | None:
+		"""Stock qty the delivered row put in transit that its other receipts have not taken out."""
+		delivered_qty = self.get_posted_qty(row.get(link_field), row.from_warehouse)
+		if not delivered_qty:
+			return None
+
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		receipt_item = frappe.qb.DocType(row.doctype)
+		other_receipt_rows = (
+			frappe.qb.from_(receipt_item)
+			.select(receipt_item.name)
+			.where((receipt_item[link_field] == row.get(link_field)) & (receipt_item.parent != self.name))
+		)
+		taken_qty = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where(
+				(sle.warehouse == row.from_warehouse)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_detail_no.isin(other_receipt_rows)
+			)
+			.run()[0][0]
+		)
+		return flt(delivered_qty + flt(taken_qty), row.precision("stock_qty"))
+
+	def get_posted_qty(self, voucher_detail_no, warehouse):
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_detail_no": voucher_detail_no, "warehouse": warehouse, "is_cancelled": 0},
+			"actual_qty",
+		)
+
+	def get_received_stock_qty(self, row, accepted_qty):
+		"""Accepted stock qty, plus the rejected stock qty when rejected stock leaves the source warehouse too."""
 		if not self.has_rejected_stock(row):
 			return accepted_qty
 
