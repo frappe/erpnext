@@ -2,7 +2,7 @@ import frappe
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
-from erpnext.controllers.buying_controller import rounds_stock_qty
+from erpnext.controllers.buying_controller import is_rounded_request_stock_qty
 
 
 def execute():
@@ -15,7 +15,7 @@ def execute():
 	updates, requests = {}, set()
 	for name, row in rows.items():
 		qty = flt(received_qty[name])
-		if rounds_stock_qty(row):
+		if is_rounded_request_stock_qty(row.stock_qty):
 			qty = flt(qty, precision)
 
 		if qty != flt(row.received_qty):
@@ -45,7 +45,7 @@ def get_received_rows(receipt_doctype):
 		.select(
 			request_item.name,
 			request_item.parent,
-			request_item.stock_uom,
+			request_item.stock_qty,
 			request_item.received_qty,
 			Sum(receipt_item.qty * receipt_item.conversion_factor).as_("qty"),
 		)
@@ -55,7 +55,7 @@ def get_received_rows(receipt_doctype):
 			& (request.per_received < 100)
 			& (receipt.docstatus == 1)
 		)
-		.groupby(request_item.name, request_item.parent, request_item.stock_uom, request_item.received_qty)
+		.groupby(request_item.name, request_item.parent, request_item.stock_qty, request_item.received_qty)
 	)
 	if receipt_doctype == "Purchase Invoice":
 		query = query.where(receipt.update_stock == 1)
