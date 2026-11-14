@@ -417,7 +417,7 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 	batches = get_available_batches(frappe._dict(kwargs, qty=0))
 	if doc:
-		filter_batches(batches, doc, kwargs.item_code)
+		filter_batches(batches, doc, kwargs.item_code, kwargs.warehouse)
 
 	batch_no = next(iter(batches), None)
 	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
@@ -426,15 +426,34 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 	return None
 
 
-def filter_batches(batches, doc, item_code):
+def filter_batches(batches, doc, item_code, warehouse):
 	precision = frappe.get_precision("Serial and Batch Entry", "qty")
-	for row in doc.get("items"):
-		batch_no = row.get("batch_no")
+	for batch_no, stock_qty in get_batch_qty_taken_by_rows(doc, item_code, warehouse):
 		if batch_no in batches:
-			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
 			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
 			if batches[batch_no] <= 0:
 				del batches[batch_no]
+
+
+def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
+	"""(batch_no, stock_qty) the warehouse's rows take by batch_no or, without one, by Serial and Batch Bundle."""
+	rows = [row for row in doc.get("items") if row.get("warehouse") in (None, "", warehouse)]
+	taken = [(row.get("batch_no"), get_row_stock_qty(row, item_code)) for row in rows if row.get("batch_no")]
+
+	bundles = [
+		row.get("serial_and_batch_bundle")
+		for row in rows
+		if not row.get("batch_no") and row.get("serial_and_batch_bundle")
+	]
+	if bundles:
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ["in", bundles], "batch_no": ["is", "set"]},
+			fields=["batch_no", "qty"],
+		)
+		taken.extend((entry.batch_no, abs(entry.qty)) for entry in entries)
+
+	return taken
 
 
 def get_row_stock_qty(row, item_code):
