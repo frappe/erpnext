@@ -30,6 +30,21 @@ class TestBankClearance(ERPNextTestSuite):
 		bank_clearance.get_payment_entries()
 		self.assertEqual(len(bank_clearance.payment_entries), 1)
 
+	def test_bank_clearance_needs_access_to_the_account(self):
+		user = make_user_restricted_to_company("_Test Company 1")
+		bank_clearance = frappe.get_doc("Bank Clearance")
+		bank_clearance.account = "_Test Bank Clearance - _TC"
+		bank_clearance.from_date = add_months(getdate(), -1)
+		bank_clearance.to_date = getdate()
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(frappe.PermissionError, bank_clearance.get_payment_entries)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(bank_clearance.payment_entries, [])
+
 	@if_lending_app_installed
 	def test_bank_clearance_with_loan(self):
 		from lending.loan_management.doctype.loan.test_loan import (
@@ -165,3 +180,18 @@ def make_pos_sales_invoice():
 	si.submit()
 
 	return si
+
+
+def make_user_restricted_to_company(company):
+	user = "test_bank_clearance@example.com"
+	if not frappe.db.exists("User", user):
+		frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": user,
+				"first_name": "Bank Clearance",
+				"roles": [{"role": "Accounts User"}],
+			}
+		).insert()
+	frappe.permissions.add_user_permission("Company", company, user)
+	return user

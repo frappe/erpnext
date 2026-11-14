@@ -3,6 +3,7 @@
 
 import frappe
 
+from erpnext.accounts.doctype.bank_clearance.test_bank_clearance import make_user_restricted_to_company
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -52,6 +53,16 @@ class TestBankClearanceSummary(ERPNextTestSuite):
 		self.assertIsNotNone(row)
 		self.assertEqual(frappe.utils.getdate(row[4]), frappe.utils.getdate("2026-06-05"))
 		self.assertEqual(row[6], 5000)
+
+	def test_report_needs_access_to_the_account(self):
+		make_journal_entry(BANK_ACCOUNT, "Sales - _TC", 5000, submit=True, posting_date="2026-06-01")
+		user = make_user_restricted_to_company("_Test Company 1")
+
+		frappe.set_user(user)
+		try:
+			self.assertRaises(frappe.PermissionError, self.run_report)
+		finally:
+			frappe.set_user("Administrator")
 
 	def test_date_filter_excludes_out_of_range_entries(self):
 		je = make_journal_entry(BANK_ACCOUNT, "Sales - _TC", 3000, submit=True, posting_date="2026-06-10")
