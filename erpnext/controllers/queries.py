@@ -7,7 +7,6 @@ from collections import OrderedDict, defaultdict
 
 import frappe
 from frappe import _, qb
-from frappe.permissions import has_permission
 from frappe.query_builder import Case, Criterion, DocType
 from frappe.query_builder.functions import (
 	Cast_,
@@ -48,13 +47,9 @@ def employee_query(
 ):
 	doctype = "Employee"
 	fields = get_fields(doctype, ["name", "employee_name"])
-	ignore_permissions = False
-
-	if reference_doctype and ignore_user_permissions:
-		ignore_permissions = has_ignored_field(reference_doctype, doctype) and has_permission(
-			doctype,
-			ptype="select" if frappe.only_has_select_perm(doctype) else "read",
-		)
+	ignore_user_permissions = bool(
+		reference_doctype and ignore_user_permissions and has_ignored_field(reference_doctype, doctype)
+	)
 
 	Employee = frappe.qb.DocType("Employee")
 	search_str = f"%{txt}%"
@@ -66,7 +61,8 @@ def employee_query(
 		"Employee",
 		fields=fields,
 		filters=filters,
-		ignore_permissions=ignore_permissions,
+		ignore_permissions=False,
+		ignore_user_permissions=ignore_user_permissions,
 	)
 
 	query = (
