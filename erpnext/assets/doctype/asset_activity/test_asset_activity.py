@@ -13,14 +13,16 @@ from erpnext.assets.doctype.asset_maintenance.test_asset_maintenance import (
 
 
 class TestAssetActivity(FrappeTestCase):
-	def test_deleting_draft_asset_removes_its_activity(self):
-		asset = create_asset()
+	def test_deleting_draft_asset_removes_its_activity_and_schedule(self):
+		asset = create_asset(calculate_depreciation=1, depreciation_start_date="2020-12-31")
 		self.assertTrue(frappe.db.exists("Asset Activity", {"asset": asset.name}))
+		self.assertTrue(frappe.db.exists("Asset Depreciation Schedule", {"asset": asset.name}))
 
 		frappe.delete_doc("Asset", asset.name)
 
 		self.assertFalse(frappe.db.exists("Asset", asset.name))
 		self.assertFalse(frappe.db.exists("Asset Activity", {"asset": asset.name}))
+		self.assertFalse(frappe.db.exists("Asset Depreciation Schedule", {"asset": asset.name}))
 
 		reused = create_asset(do_not_save=True)
 		reused.name = asset.name
