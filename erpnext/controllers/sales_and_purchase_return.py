@@ -486,8 +486,7 @@ def set_return_packed_qty(doc):
 
 def get_return_packed_qty(doc, packed_qty):
 	"""`packed_qty` by (return row, component), with what is left of the source's packed qty for
-	the components of a bundle row that completes the return of its source row, or of its item
-	when it names no source row."""
+	the components of a bundle row that completes the return of its item or its source row."""
 	valid_items = get_valid_items(doc)
 	returned_items = get_already_returned_items(doc)
 	source_packed_qty = get_source_packed_qty(doc)
@@ -501,23 +500,36 @@ def get_return_packed_qty(doc, packed_qty):
 		add_returned_row(doc, key, row, returned_items)
 		if key != row.item_code:
 			add_returned_row(doc, row.item_code, row, returned_items)
-		precision = row.precision("stock_qty")
-		completes = flt(returned_items[key].stock_qty, precision) == flt(
-			valid_items[key].stock_qty, precision
-		)
-		source = row.item_code if key == row.item_code else key[1]
+		row_source = row.item_code if key == row.item_code else key[1]
+		completed = get_completed_source(row, key, valid_items, returned_items)
 		for (return_row, component), qty in packed_qty.items():
-			if return_row != (row.name or row.idx) or (source, component) not in source_packed_qty:
+			if return_row != (row.name or row.idx) or (row_source, component) not in source_packed_qty:
 				continue
 
-			if completes:
-				qty = source_packed_qty[(source, component)] - returned_packed_qty[(source, component)]
+			if completed:
+				qty = source_packed_qty[(completed, component)] - returned_packed_qty[(completed, component)]
 			return_packed_qty[(return_row, component)] = qty
-			returned_packed_qty[(source, component)] += qty
-			if source != row.item_code:
+			returned_packed_qty[(row_source, component)] += qty
+			if row_source != row.item_code:
 				returned_packed_qty[(row.item_code, component)] += qty
 
 	return return_packed_qty
+
+
+def get_completed_source(row, key, valid_items, returned_items):
+	"""The item, or else the source row, whose return the return row completes."""
+	precision = row.precision("stock_qty")
+
+	def is_returned(return_key):
+		return return_key in valid_items and flt(returned_items[return_key].stock_qty, precision) == flt(
+			valid_items[return_key].stock_qty, precision
+		)
+
+	# the item covers all of its rows, with or without dn_detail
+	if is_returned(row.item_code):
+		return row.item_code
+	if key != row.item_code and is_returned(key):
+		return key[1]
 
 
 def get_source_packed_qty(doc):
