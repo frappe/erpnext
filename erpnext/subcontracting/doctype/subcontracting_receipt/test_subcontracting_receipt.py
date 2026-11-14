@@ -4384,6 +4384,33 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 			{item: flt(qty, 2) for item, qty in returned.items()}, {rm_item: -10, other_item: -2}
 		)
 
+	def test_return_rows_of_one_receipt_row_take_back_no_more_than_consumed(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		scr = make_receipt_consuming_transferred_materials(qty=10, rm_items={rm_item: 20})
+		first_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-5, do_not_submit=True)
+		first_return.supplied_items[0].consumed_qty = -5
+		first_return.save()
+		first_return.submit()
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.append("items", scr_return.items[0].as_dict(no_default_fields=True)).qty = -3
+		scr_return.submit()
+
+		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -15)
+
+	def test_partial_returns_take_back_whole_serial_nos(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SCR-RET-SN-.#####"}
+		).name
+		scr = make_receipt_consuming_transferred_materials(qty=2, rm_items={rm_item: 3})
+
+		returns = [make_return_subcontracting_receipt(scr_name=scr.name, qty=-1) for _ in range(2)]
+
+		self.assertEqual(
+			[sum(row.consumed_qty for row in scr_return.supplied_items) for scr_return in returns], [-2, -1]
+		)
+
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
