@@ -545,9 +545,6 @@ def get_basic_details(ctx: ItemDetailsCtx, item, overwrite_warehouse=True) -> It
 	if not item:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
 
-	if item.variant_of and not item.taxes and frappe.db.exists("Item Tax", {"parent": item.variant_of}):
-		item.update_template_tables()
-
 	item_defaults = get_item_defaults(item.name, ctx.company)
 	item_group_defaults = get_item_group_defaults(item.name, ctx.company)
 	brand_defaults = get_brand_defaults(item.name, ctx.company)
