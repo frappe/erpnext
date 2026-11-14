@@ -765,7 +765,10 @@ class BuyingController(SubcontractingController):
 					self.precision("item_tax_amount", item),
 				)
 
-				self.round_floats_in(item, do_not_round_fields=["conversion_factor"])
+				# set_qty_as_per_stock_uom owns the rounding of stock qty
+				self.round_floats_in(
+					item, do_not_round_fields=["conversion_factor", "stock_qty", "received_stock_qty"]
+				)
 				if flt(item.conversion_factor) == 0.0:
 					item.conversion_factor = (
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
