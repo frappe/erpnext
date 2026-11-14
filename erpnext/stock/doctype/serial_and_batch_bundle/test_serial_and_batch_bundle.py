@@ -106,6 +106,31 @@ class TestSerialBatchBundleEntry(ERPNextTestSuite):
 
 
 class TestSerialandBatchBundle(ERPNextTestSuite):
+	def test_return_row_loads_the_returned_voucher_batches(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			get_serial_batch_ledgers,
+		)
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "RTB-.#####",
+			}
+		).name
+		receipt = make_purchase_receipt(item_code=item_code, qty=4, rate=10)
+		batch_no = frappe.db.get_value(
+			"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "batch_no"
+		)
+		return_row = make_return_doc("Purchase Receipt", receipt.name).items[0]
+
+		# a request hands the row over as a plain dict
+		ledgers = get_serial_batch_ledgers(item_code=item_code, child_row=dict(return_row.as_dict()))
+		self.assertEqual([row.get("batch_no") for row in ledgers], [batch_no])
+
 	def test_voucher_no_and_voucher_type_are_indexed(self):
 		if frappe.db.db_type != "mariadb":
 			self.skipTest("MariaDB index names")
