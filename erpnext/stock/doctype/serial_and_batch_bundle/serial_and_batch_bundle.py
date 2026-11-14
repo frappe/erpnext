@@ -2473,7 +2473,7 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 	if child_row and isinstance(child_row, str):
 		child_row = parse_json(child_row)
 
-	if not name and child_row and child_row.get("qty") < 0:
+	if not name and child_row:
 		bundle = get_reference_serial_and_batch_bundle(child_row)
 		if bundle:
 			voucher_no = None
@@ -2503,6 +2503,9 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 
 
 def get_reference_serial_and_batch_bundle(child_row):
+	if flt(child_row.get("rejected_qty" if child_row.get("is_rejected") else "qty")) >= 0:
+		return
+
 	doctype = child_row.get("doctype")
 	field = {
 		"Sales Invoice Item": "sales_invoice_item",
