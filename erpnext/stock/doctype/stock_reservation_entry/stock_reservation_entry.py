@@ -1443,8 +1443,6 @@ class StockReservation:
 			sre.from_voucher_detail_no = item.get("from_voucher_detail_no")
 			sre.from_voucher_type = item.get("from_voucher_type")
 			sre.reservation_based_on = sre.reservation_based_on or "Qty"
-			if item_details.has_batch_no or item_details.has_serial_no:
-				sre.reservation_based_on = "Serial and Batch"
 
 			sre.save()
 
