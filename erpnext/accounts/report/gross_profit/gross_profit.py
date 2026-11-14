@@ -619,7 +619,9 @@ class GrossProfitGenerator:
 					row.buying_rate, row.base_rate = 0.0, 0.0
 
 			if self.is_not_invoice_row(row):
-				self.update_return_invoices(row, sales_invoice_item)
+				self.update_return_invoices(
+					row, sales_invoice_item, row.dn_detail and product_bundles.get(row.item_code)
+				)
 
 			if grouped_by_invoice and row.indent == 1.0:
 				buying_amount += row.buying_amount
@@ -649,7 +651,7 @@ class GrossProfitGenerator:
 		if self.grouped:
 			self.get_average_rate_based_on_group_by()
 
-	def update_return_invoices(self, row, sales_invoice_item):
+	def update_return_invoices(self, row, sales_invoice_item, delivered_bundle=None):
 		returned_item_rows = self.returned_invoices.get(row.parent, {}).get(sales_invoice_item)
 		if not returned_item_rows:
 			return
@@ -673,6 +675,8 @@ class GrossProfitGenerator:
 			buying_amount = self.get_drop_ship_buying_amount(row)
 			if buying_amount is not None:
 				row.buying_amount = flt(buying_amount, self.currency_precision)
+		elif delivered_bundle:
+			row.buying_amount = self.get_buying_amount_from_product_bundle(row, delivered_bundle)
 		else:
 			row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
 
