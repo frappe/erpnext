@@ -1,5 +1,6 @@
 import frappe
 
+from erpnext.stock.doctype.material_request.material_request import update_plan_item_requested_qty
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -10,15 +11,15 @@ def execute():
 		(item_code, uom): get_conversion_factor(item_code, uom)["conversion_factor"]
 		for item_code, uom in {(row.item_code, row.uom) for row in rows}
 	}
-	frappe.db.bulk_update(
-		"Material Request Plan Item",
-		{
-			row.name: {"uom": row.stock_uom}
-			for row in rows
-			if conversion_factors[(row.item_code, row.uom)] != 1
-		},
-		update_modified=False,
-	)
+	updates = {
+		row.name: {"uom": row.stock_uom} for row in rows if conversion_factors[(row.item_code, row.uom)] != 1
+	}
+	frappe.db.bulk_update("Material Request Plan Item", updates, update_modified=False)
+
+	# requested_qty of these rows was counted in the Material Request UOM
+	names = list(updates)
+	for start in range(0, len(names), 500):
+		update_plan_item_requested_qty(names[start : start + 500])
 
 
 def get_plan_rows_in_other_uom_at_conversion_factor_one():
