@@ -86,6 +86,21 @@ class TestProjectsPage(ERPNextTestSuite):
 			self.assertIsNone(validate_and_get_project_user(own.name))
 			self.assertRaises(frappe.PermissionError, validate_and_get_project_user, other.name)
 
+	def test_customer_portal_user_cannot_print_own_customer_project(self):
+		from frappe.www.printview import validate_print_permission
+
+		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
+		frappe.get_doc("User", portal_user).add_roles("Customer")
+		customer = frappe.get_doc("Customer", "_Test Customer")
+		customer.append("portal_users", {"user": portal_user})
+		customer.save()
+		project = make_project({"project_name": f"_Test Portal Print {frappe.generate_hash(length=6)}"})
+		project.db_set("customer", "_Test Customer")
+
+		with self.set_user(portal_user):
+			self.assertIsNone(validate_and_get_project_user(project.name))
+			self.assertRaises(frappe.PermissionError, validate_print_permission, project)
+
 	def test_customer_portal_user_not_in_project_users_cannot_load_timesheets(self):
 		portal_user = self._create_user(f"customer_{frappe.generate_hash(length=6)}@example.com")
 		frappe.get_doc("User", portal_user).add_roles("Customer")
