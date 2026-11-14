@@ -352,3 +352,25 @@ class TestQueries(ERPNextTestSuite):
 			# only one employee should be returned even though ignore_user_permissions is passed as 1
 			result = queries.employee_query(**params)
 			self.assertEqual(len(result), 1)
+
+	def test_employee_query_checks_child_table_filters_when_ignoring_user_permissions(self):
+		employee = frappe.get_doc("Employee", {"first_name": "_Test Employee"})
+		employee.append("external_work_history", {"company_name": "Northwind Traders", "salary": 4242.97})
+		employee.save()
+
+		user = create_user("employee_query_accounts_user@example.com", "Accounts User")
+		params = {
+			"doctype": "Employee",
+			"txt": "",
+			"searchfield": "name",
+			"start": 0,
+			"page_len": 20,
+			"reference_doctype": "Asset",
+			"ignore_user_permissions": 1,
+		}
+
+		with self.set_user(user.name):
+			self.assert_nested_in(employee.name, queries.employee_query(**params, filters=None))
+
+			with self.assertRaises(frappe.PermissionError):
+				queries.employee_query(**params, filters={"external_work_history.salary": 4242.97})
