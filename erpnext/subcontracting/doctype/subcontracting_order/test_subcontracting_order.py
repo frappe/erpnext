@@ -27,6 +27,7 @@ from erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost import 
 )
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import get_batch_from_bundle
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -1468,6 +1469,59 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			sco.reserve_raw_materials,
 			items=[{"name": row.name, "qty_to_reserve": 1}],
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_transfer_shares_batch_qty_across_reservations_of_a_row(self):
+		warehouse = "_Test Warehouse - _TC"
+		rm_item = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SCO-SRE-B-.####"}
+		).name
+		fg_item = make_item(properties={"is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+
+		receipt = make_stock_entry(item_code=rm_item, target=warehouse, qty=2, basic_rate=100)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		service_items = [
+			{
+				"warehouse": warehouse,
+				"item_code": "Subcontracted Service Item 4",
+				"qty": 4,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 4,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+		sco.reserve_stock = 1
+		sco.supplied_items[0].reserve_warehouse = warehouse
+		sco.submit()
+
+		make_stock_entry(
+			item_code=rm_item,
+			target=warehouse,
+			qty=2,
+			basic_rate=100,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+		row = sco.supplied_items[0]
+		sco.reserve_raw_materials(items=[{"name": row.name, "qty_to_reserve": 2, "warehouse": warehouse}])
+
+		se = frappe.get_doc(make_rm_stock_entry(sco.name))
+		se.items[0].qty = 3
+		se.items[0].use_serial_batch_fields = 1
+		se.items[0].batch_no = batch_no
+		se.submit()
+
+		transferred_qty = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": sco.name, "voucher_detail_no": row.name, "warehouse": warehouse},
+			order_by="creation",
+			pluck="transferred_qty",
+		)
+		self.assertEqual(transferred_qty, [2, 1])
 
 	def test_stock_reservation_transfer(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
