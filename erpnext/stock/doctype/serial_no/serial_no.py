@@ -10,6 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, escape_html, getdate, nowdate, safe_json_loads
 
+from erpnext import require_permission
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -253,7 +254,9 @@ def get_pos_reserved_serial_nos(filters: str | dict):
 	)
 
 	filters = frappe._dict(frappe.parse_json(filters))
+	frappe.has_permission("POS Invoice", "read", throw=True)
 	frappe.has_permission("Item", "select", doc=filters.item_code, throw=True)
+	require_permission("Warehouse", filters.warehouse, "select")
 	serial_ids = get_reserved_serial_nos_for_pos(frappe._dict(item_code=filters.item_code))
 	if not serial_ids:
 		return []
