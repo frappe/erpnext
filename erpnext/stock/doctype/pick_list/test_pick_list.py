@@ -1631,6 +1631,219 @@ class TestPickList(ERPNextTestSuite):
 		second_delivery.submit()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_is_delivered_from_each_warehouse_it_is_picked_from(self):
+		pick_list = pick_bundle_from_two_warehouses()
+
+		delivery_note = create_delivery_note(pick_list.name)
+		self.assertEqual(get_packed_locations(delivery_note), get_packed_locations(pick_list, "locations"))
+		delivery_note.submit()
+
+		pick_list.reload()
+		self.assertEqual(pick_list.per_delivered, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_split_bundle_delivery_keeps_edited_serial_nos_on_save(self):
+		pick_list = pick_bundle_from_two_warehouses()
+		picked_serial_nos = [
+			number for row in pick_list.locations for number in get_serial_nos(row.serial_no)
+		]
+		unpicked = frappe.db.get_value(
+			"Serial No",
+			{"item_code": pick_list.locations[0].item_code, "serial_no": ("not in", picked_serial_nos)},
+			["serial_no", "warehouse"],
+			as_dict=True,
+		)
+
+		delivery_note = create_delivery_note(pick_list.name)
+		packed_item = next(row for row in delivery_note.packed_items if row.warehouse == unpicked.warehouse)
+		serial_nos = get_serial_nos(packed_item.serial_no)
+		packed_item.serial_no = "\n".join([*serial_nos[1:], unpicked.serial_no])
+		delivery_note.save()
+
+		self.assertEqual(len(delivery_note.packed_items), 2)
+		self.assertIn(unpicked.serial_no, get_serial_nos(packed_item.serial_no))
+		delivery_note.submit()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_split_bundle_delivery_is_returned_to_each_warehouse(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = create_delivery_note(pick_bundle_from_two_warehouses().name)
+		delivery_note.submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.save()
+		self.assertEqual(
+			[(row.warehouse, -row.qty, row.serial_no) for row in sales_return.packed_items],
+			[(row.warehouse, row.qty, row.serial_no) for row in delivery_note.packed_items],
+		)
+		sales_return.submit()
+
+	def test_repost_keeps_the_rate_of_a_split_bundle_row_in_another_warehouse(self):
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		posting_date = add_days(nowdate(), -5)
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates(posting_date)
+
+		# a backdated receipt reposts only the first warehouse
+		make_stock_entry(
+			item=delivery_note.packed_items[0].item_code,
+			to_warehouse=warehouse,
+			qty=5,
+			basic_rate=150,
+			posting_date=add_days(posting_date, -1),
+		)
+		repost_entries()
+
+		rates = frappe.get_all(
+			"Packed Item", {"parent": delivery_note.name}, ["warehouse", "incoming_rate"], as_list=True
+		)
+		self.assertEqual(sorted(rates), [(warehouse, 150), (other_warehouse, 200)])
+
+	def test_partial_return_of_split_bundle_delivery_fills_each_delivered_row(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		first_return = make_sales_return(delivery_note.name)
+		first_return.items[0].qty = -1
+		first_return.submit()
+		self.assertEqual(sorted(row.qty for row in first_return.packed_items), [-1, 0])
+
+		second_return = make_sales_return(delivery_note.name)
+		second_return.submit()
+		returned = {}
+		for row in first_return.packed_items + second_return.packed_items:
+			returned[row.warehouse] = returned.get(row.warehouse, 0) - row.qty
+		self.assertEqual(returned, {row.warehouse: row.qty for row in delivery_note.packed_items})
+
+	def test_split_bundle_return_takes_back_each_row_at_its_delivered_rate(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		sales_return = make_sales_return(deliver_bundle_from_two_warehouses_at_two_rates().name)
+		sales_return.submit()
+
+		rates = frappe.get_all(
+			"Stock Ledger Entry",
+			{"voucher_no": sales_return.name},
+			["warehouse", "incoming_rate"],
+			as_list=True,
+		)
+		self.assertEqual(sorted(rates), [("_Test Warehouse - _TC", 100), ("_Test Warehouse 1 - _TC", 200)])
+
+	def test_repost_keeps_the_value_of_a_split_bundle_return_to_one_warehouse(self):
+		from frappe.utils import add_days, nowdate
+
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
+		return_warehouse = "_Test Warehouse 2 - _TC"
+		frappe.db.set_value(
+			"Company", "_Test Company", "default_warehouse_for_sales_return", return_warehouse
+		)
+		posting_date = add_days(nowdate(), -5)
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates(posting_date)
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.submit()
+
+		# a backdated receipt into the return warehouse reposts the return
+		make_stock_entry(
+			item=delivery_note.packed_items[0].item_code,
+			to_warehouse=return_warehouse,
+			qty=1,
+			basic_rate=50,
+			posting_date=add_days(posting_date, -1),
+		)
+		repost_entries()
+		values = frappe.get_all(
+			"Stock Ledger Entry", {"voucher_no": sales_return.name}, pluck="stock_value_difference"
+		)
+		self.assertEqual(sum(values), 2 * 100 + 2 * 200)
+
+	def test_two_return_rows_of_a_split_bundle_take_back_different_delivered_rows(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -2
+		sales_return.append("items", sales_return.items[0].as_dict(no_default_fields=True))
+		sales_return.submit()
+
+		returned = sorted(row.return_against_packed_item for row in sales_return.packed_items if row.qty)
+		self.assertEqual(returned, sorted(row.name for row in delivery_note.packed_items))
+
+	def test_split_bundle_return_takes_back_a_batch_at_each_delivered_row_rate(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		component = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PLSBR-.#####",
+			}
+		).name
+		receipt = make_stock_entry(
+			item=component, to_warehouse="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+		make_stock_entry(
+			item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=2, basic_rate=200, batch_no=batch_no
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=3, rate=500)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.submit()
+
+		values = frappe.get_all(
+			"Stock Ledger Entry", {"voucher_no": sales_return.name}, pluck="stock_value_difference"
+		)
+		self.assertEqual(sum(values), 1 * 100 + 2 * 200)
+
+	def test_partial_return_of_repeated_bundle_component_takes_back_each_occurrence(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
+			create_delivery_note as make_delivery_note,
+		)
+
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=8, basic_rate=100)
+		bundle = make_bundle_with_repeated_component(component)
+		delivery_note = make_delivery_note(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=2)
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+		self.assertEqual([row.qty for row in sales_return.packed_items], [-3, -1])
+
+	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=2, basic_rate=100)
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=2, basic_rate=100)
+		bundle = make_bundle_with_repeated_component(component)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=1)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		delivery_note = create_delivery_note(pick_list.name)
+		self.assertEqual(len(delivery_note.packed_items), 3)
+		self.assertEqual(
+			[so_packed_item.name for _, so_packed_item in get_order_packed_item_pairs(delivery_note)],
+			[row.sales_order_packed_item for row in delivery_note.packed_items],
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
 		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
@@ -4250,6 +4463,55 @@ def make_work_order_pick_list_with_reserved_serials():
 	pick_list = create_pick_list_from_wo(work_order.name, None, 2)
 	pick_list.save()
 	return pick_list
+
+
+def pick_bundle_from_two_warehouses():
+	"""Submitted Pick List of 4 bundles whose serialized component no single warehouse has enough of."""
+	component = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBTW-.#####"}
+	).name
+	make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=2, basic_rate=100)
+	make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=3, basic_rate=100)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	return pick_list
+
+
+def deliver_bundle_from_two_warehouses_at_two_rates(posting_date=None):
+	"""Submitted Delivery Note of 4 bundles whose FIFO component is picked 2 at 100 and 2 at 200 from two warehouses."""
+	component = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+	for warehouse, rate in (("_Test Warehouse - _TC", 100), ("_Test Warehouse 1 - _TC", 200)):
+		make_stock_entry(
+			item=component, to_warehouse=warehouse, qty=2, basic_rate=rate, posting_date=posting_date
+		)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	delivery_note = create_delivery_note(pick_list.name)
+	delivery_note.submit()
+	return delivery_note
+
+
+def make_bundle_with_repeated_component(component):
+	"""Product Bundle of 3 and then 1 of ``component``."""
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+	bundle_doc.append("items", {"item_code": component, "qty": 3})
+	bundle_doc.append("items", {"item_code": component, "qty": 1})
+	bundle_doc.insert()
+	bundle_doc.submit()
+	return bundle
+
+
+def get_packed_locations(doc, table="packed_items"):
+	return sorted((row.warehouse, row.qty, row.serial_no) for row in doc.get(table))
 
 
 def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):

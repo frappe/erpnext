@@ -2113,12 +2113,12 @@ class update_entries_after:
 				sle.voucher_type + " Item", sle.voucher_detail_no, "incoming_rate", outgoing_rate
 			)
 		else:
-			# packed item
+			from erpnext.stock.doctype.packed_item.packed_item import get_location_filters
+
+			# packed item; a component packed from several locations has a row per bundle or warehouse
+			filters = {"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code}
 			frappe.db.set_value(
-				"Packed Item",
-				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
-				"incoming_rate",
-				outgoing_rate,
+				"Packed Item", filters | get_location_filters(sle), "incoming_rate", outgoing_rate
 			)
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
