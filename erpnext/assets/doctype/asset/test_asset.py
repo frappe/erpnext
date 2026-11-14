@@ -258,7 +258,7 @@ class TestAsset(AssetSetup):
 				with self.assertRaisesRegex(frappe.ValidationError, "assets of"):
 					remaining_return.insert()
 				remaining_return.items[0].set(fieldname + "_item", None)
-				with self.assertRaisesRegex(frappe.ValidationError, "submitted assets"):
+				with self.assertRaisesRegex(frappe.ValidationError, "must refer to the row it returns"):
 					remaining_return.insert()
 				purchase_return.cancel()
 				self.assertEqual(kept_asset.reload().docstatus, 1)
