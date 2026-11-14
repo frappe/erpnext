@@ -29,7 +29,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_numbers_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse, get_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
@@ -4073,6 +4073,104 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			),
 			-10,
 		)
+
+	def test_return_reverses_only_the_actual_valuation_charge_it_carried(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		rejected_warehouse = get_warehouse(
+			company=company, abbr="TCP1", warehouse_name="_Test Rejected Warehouse"
+		).name
+		pr = make_purchase_receipt(
+			company=company,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=3,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+			rate=100,
+			do_not_submit=True,
+		)
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"description": "Freight",
+				"tax_amount": 30,
+			},
+		)
+		pr.submit()
+
+		# the receipt put the whole charge on the accepted stock
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.submit()
+		self.assertEqual(rejected_return.taxes[0].tax_amount, 0)
+
+		partial_return = make_purchase_return(pr.name)
+		partial_return.items[0].update({"qty": -1, "received_qty": -1})
+		partial_return.submit()
+		self.assertEqual(partial_return.taxes[0].tax_amount, -10)
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{
+					"voucher_no": partial_return.name,
+					"account": "Cost of Goods Sold - TCP1",
+					"is_cancelled": 0,
+				},
+			)
+		)
+
+	def test_return_reverses_the_valuation_charges_its_row_carried_when_there_are_several(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_receipt_with_valuation_charges(
+			{"description": "Freight", "tax_amount": 10}, {"description": "Insurance", "tax_amount": 10}
+		)
+		self.assertEqual(pr.items[2].item_tax_amount, 6.66)
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.items = [pr_return.items[2]]
+		pr_return.submit()
+
+		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-3.33, -3.33])
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{"voucher_no": pr_return.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+			)
+		)
+
+	def test_return_reverses_deducted_and_zero_valuation_charges_its_row_carried(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		for added, deducted, expected in ((10, 1, [-3.33, -0.33, 0]), (9, 9, [-3, -3, 0])):
+			pr = make_receipt_with_valuation_charges(
+				{"description": "Freight", "tax_amount": added},
+				{
+					"description": "Rebate",
+					"tax_amount": deducted,
+					"category": "Valuation and Total",
+					"add_deduct_tax": "Deduct",
+				},
+				{"description": "Handling", "tax_amount": 0},
+			)
+			pr_return = make_purchase_return(pr.name)
+			pr_return.items = [pr_return.items[0]]
+			pr_return.submit()
+
+			self.assertEqual([tax.tax_amount for tax in pr_return.taxes], expected)
+			self.assertFalse(
+				frappe.db.exists(
+					"GL Entry",
+					{"voucher_no": pr_return.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+				)
+			)
 
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
@@ -9562,6 +9660,33 @@ def get_items(**args):
 			"cost_center": args.cost_center or "Main - _TC",
 		},
 	]
+
+
+def make_receipt_with_valuation_charges(*charges):
+	"""Submitted receipt with three stock rows of Qty 1 at Rate 100 and the given Actual valuation charges."""
+	pr = make_purchase_receipt(
+		company="_Test Company with perpetual inventory",
+		warehouse="Stores - TCP1",
+		supplier_warehouse="Work In Progress - TCP1",
+		item_code=make_item(properties={"is_stock_item": 1}).name,
+		qty=1,
+		rate=100,
+		do_not_submit=True,
+	)
+	for _ in range(2):
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		pr.append("items", {**pr.items[0].as_dict(), "name": None, "idx": None, "item_code": item_code})
+	for charge in charges:
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				**charge,
+			},
+		)
+	return pr.submit()
 
 
 def make_receipts_against_order(purchase_order: str, receipts: tuple) -> list:

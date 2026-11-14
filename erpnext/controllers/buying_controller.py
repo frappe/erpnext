@@ -418,6 +418,11 @@ class BuyingController(SubcontractingController):
 
 		self.set_missing_item_details(for_validate)
 
+		if self.doctype == "Purchase Receipt" or self.get("update_stock"):
+			from erpnext.stock.services.return_charges import ReturnChargesService
+
+			ReturnChargesService(self).set_returned_valuation_charges()
+
 		if self.meta.get_field("taxes"):
 			if self.get("taxes_and_charges") and not self.get("taxes") and not for_validate:
 				taxes = _get_taxes_and_charges("Purchase Taxes and Charges Template", self.taxes_and_charges)
