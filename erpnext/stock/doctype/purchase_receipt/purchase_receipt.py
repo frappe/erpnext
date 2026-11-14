@@ -19,7 +19,7 @@ from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting impo
 from erpnext.stock.doctype.purchase_receipt.services.reservation import (
 	PurchaseReceiptStockReservation,
 )
-from erpnext.stock.doctype.purchase_receipt.services.return_charges import ReturnChargesService
+from erpnext.stock.services.return_charges import ReturnChargesService
 from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
