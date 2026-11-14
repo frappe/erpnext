@@ -10,7 +10,12 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
-from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1698,6 +1703,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio = make_subcontracting_inward_order(so.name)
 
 		self.assertEqual(scio.items[0].bom, template_bom.name)
+
+	def test_fg_reference_names_follow_inward_order_read_access(self):
+		from erpnext.controllers.subcontracting_inward_controller import get_fg_reference_names
+
+		so, scio = create_so_scio()
+		args = ("Subcontracting Inward Order Item", "", "name", 0, 20)
+		expected = [[scio.items[0].name, scio.items[0].item_code, scio.items[0].delivery_warehouse]]
+		outside = make_company_fenced_user("scio-fg-outside@example.com", ["Stock User"], OTHER_COMPANY)
+		inside = make_company_fenced_user("scio-fg-inside@example.com", ["Stock User"], "_Test Company")
+
+		with as_user(outside):
+			with self.assertRaises(frappe.PermissionError):
+				get_fg_reference_names(*args, {"parent": scio.name})
+			self.assertEqual(get_fg_reference_names(*args, {"parent": ["like", "%"]}), [])
+
+		with as_user(inside):
+			self.assertEqual(
+				[list(row) for row in get_fg_reference_names(*args, {"parent": scio.name})], expected
+			)
 
 
 def create_delivered_so_scio():
