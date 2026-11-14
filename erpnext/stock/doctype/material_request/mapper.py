@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
-from erpnext.controllers.mapper import get_qty_already_mapped
+from erpnext.controllers.mapper import get_ordered_stock_qty, get_pending_qty, get_qty_already_mapped
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -26,26 +26,22 @@ def set_missing_values(source, target_doc):
 	target_doc.run_method("calculate_taxes_and_totals")
 
 
-def get_source_item_for_qty(item, qty):
-	"""Copy of the source row whose pending quantity is the requested quantity."""
-	source_item = frappe._dict(item.as_dict())
-	source_item.ordered_qty = 0
-	source_item.received_qty = 0
-	source_item.stock_qty = flt(qty) * flt(item.conversion_factor)
-
-	return source_item
-
-
 def validate_request_not_stopped(source_name):
 	if frappe.db.get_value("Material Request", source_name, "status") == "Stopped":
 		frappe.throw(_("Material Request {0} is stopped").format(source_name), frappe.InvalidStatusError)
 
 
-def update_item(obj, target, source_parent):
-	target.conversion_factor = obj.conversion_factor
+def get_ordered_stock_qty_of_request(material_request):
+	return get_ordered_stock_qty("material_request_item", "material_request", material_request)
 
-	qty = obj.ordered_qty or obj.received_qty
-	target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+
+def get_pending_qty_of_row(row, ordered_stock_qty):
+	return get_pending_qty(row, ordered_stock_qty, row.ordered_qty or row.received_qty)
+
+
+def update_item(obj, target, qty):
+	target.conversion_factor = obj.conversion_factor
+	target.qty = qty
 	target.stock_qty = target.qty * target.conversion_factor
 	if getdate(target.schedule_date) < getdate(nowdate()):
 		target.schedule_date = None
@@ -97,6 +93,7 @@ def make_purchase_order(
 	)
 
 	requested_qty = args.get("requested_qty") or {}
+	ordered_stock_qty = get_ordered_stock_qty_of_request(source_name)
 	mapped_qty_by_item = get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
 
 	def postprocess(source, target_doc):
@@ -106,9 +103,8 @@ def make_purchase_order(
 		set_missing_values(source, target_doc)
 
 	def update_requested_item(obj, target, source_parent):
-		if obj.name in requested_qty:
-			obj = get_source_item_for_qty(obj, requested_qty[obj.name])
-		update_item(obj, target, source_parent)
+		qty = requested_qty.get(obj.name) or get_pending_qty_of_row(obj, ordered_stock_qty)
+		update_item(obj, target, flt(qty))
 		if not target.rate and not target.price_list_rate:
 			# unpriced rows fetch the price for the Purchase Order's supplier
 			target.rate = target.price_list_rate = None
@@ -170,10 +166,10 @@ def make_purchase_order(
 @frappe.whitelist()
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	validate_request_not_stopped(source_name)
+	ordered_stock_qty = get_ordered_stock_qty_of_request(source_name)
 
 	def update_item(obj, target, source_parent):
-		qty = obj.ordered_qty or obj.received_qty
-		target.qty = flt(flt(obj.stock_qty) - flt(qty)) / target.conversion_factor
+		target.qty = get_pending_qty_of_row(obj, ordered_stock_qty)
 		target.stock_qty = target.qty * target.conversion_factor
 
 	def select_item(d):
@@ -223,6 +219,7 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 	material_request = frappe.get_doc("Material Request", source_name)
 	material_request.check_permission("read")
 
+	ordered_stock_qty = get_ordered_stock_qty_of_request(source_name)
 	items = []
 	for item in material_request.items:
 		if filtered_children and item.name not in filtered_children:
@@ -237,7 +234,7 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 				"material_request_item": item.name,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
-				"pending_qty": (flt(item.stock_qty) - ordered_qty) / (flt(item.conversion_factor) or 1),
+				"pending_qty": get_pending_qty_of_row(item, ordered_stock_qty),
 				"uom": item.uom,
 				"supplier": get_default_supplier_for_item(item.item_code, material_request.company),
 			}
