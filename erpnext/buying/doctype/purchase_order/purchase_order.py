@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
+<<<<<<< HEAD
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
@@ -22,6 +23,15 @@ from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
+=======
+from erpnext.accounts.party import get_party_account_currency
+from erpnext.buying.doctype.purchase_order.services.drop_ship import DropShipService
+from erpnext.buying.doctype.purchase_order.services.status import StatusService
+from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
+from erpnext.buying.utils import validate_for_items
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
+from erpnext.controllers.taxes_and_totals import remove_margin
+>>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
@@ -184,9 +194,24 @@ class PurchaseOrder(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_ordered",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 				"percent_join_field": "material_request",
+<<<<<<< HEAD
 			}
+=======
+				"global_allowance_field": "over_order_allowance",
+				"global_allowance_doctype": "Buying Settings",
+				"item_allowance_field": "over_order_allowance",
+			},
+			{
+				"source_dt": "Purchase Order Item",
+				"target_dt": "Supplier Quotation Item",
+				"join_field": "supplier_quotation_item",
+				"target_field": "ordered_qty",
+				"target_ref_field": "stock_qty",
+				**get_stock_qty_status_args(),
+			},
+>>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
 		]
 
 	def onload(self):
@@ -636,7 +661,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 			}
 		)
 		self.status_updater.append(
@@ -648,7 +673,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_packed_item",
 				"target_ref_field": "qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 			}
 		)
 
