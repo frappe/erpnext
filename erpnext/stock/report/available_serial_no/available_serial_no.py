@@ -44,6 +44,16 @@ def execute(filters=None):
 	return prepare_serial_batch_report(columns, data, serial_fields=("serial_no", "balance_serial_no"))
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	if column.fieldname == "out_qty" and data.out_qty < 0:
+		value = f"<span style='color:red'>{value}</span>"
+	elif column.fieldname == "in_qty" and data.in_qty > 0:
+		value = f"<span style='color:green'>{value}</span>"
+
+	return value
+
+
 def process_stock_ledger_entries(
 	sl_entries, item_details, opening_row, precision, filters=None, opening_entries=None
 ):
