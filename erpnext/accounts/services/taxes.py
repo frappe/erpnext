@@ -10,7 +10,7 @@ from frappe import _, throw
 from frappe.utils import cint, flt, parse_json
 
 import erpnext
-from erpnext import require_permission
+from erpnext import _refuse, require_permission
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_item_tax_template,
@@ -205,6 +205,10 @@ def validate_tax_master(master_doctype: str, master_name: str | None = None) -> 
 
 @frappe.whitelist()
 def get_tax_rate(account_head: str) -> dict:
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if not frappe.has_permission("Account", ptype, account_head):
+		_refuse()
+
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
