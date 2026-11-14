@@ -25,6 +25,10 @@ def execute():
 		.run(pluck=True)
 	)
 
+	recalculate_billing_status(delivery_notes)
+
+
+def recalculate_billing_status(delivery_notes):
 	for name in delivery_notes:
 		doc = frappe.get_doc("Delivery Note", name)
 		doc.update_billing_percentage(update_modified=False)
