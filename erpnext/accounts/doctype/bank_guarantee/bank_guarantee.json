@@ -91,6 +91,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+   "non_negative": 1,
    "reqd": 1
   },
   {
@@ -102,7 +103,8 @@
   {
    "fieldname": "validity",
    "fieldtype": "Int",
-   "label": "Validity in Days"
+   "label": "Validity in Days",
+   "non_negative": 1
   },
   {
    "fieldname": "end_date",
@@ -195,12 +197,14 @@
   {
    "fieldname": "margin_money",
    "fieldtype": "Currency",
-   "label": "Margin Money"
+   "label": "Margin Money",
+   "non_negative": 1
   },
   {
    "fieldname": "charges",
    "fieldtype": "Currency",
-   "label": "Charges Incurred"
+   "label": "Charges Incurred",
+   "non_negative": 1
   },
   {
    "fieldname": "fixed_deposit_number",
@@ -221,7 +225,7 @@
  "icon": "shield-check",
  "is_submittable": 1,
  "links": [],
- "modified": "2026-05-25 18:12:10.768835",
+ "modified": "2026-10-28 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Guarantee",

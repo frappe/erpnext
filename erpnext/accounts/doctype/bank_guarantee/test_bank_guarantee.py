@@ -67,10 +67,56 @@ class TestBankGuarantee(ERPNextTestSuite):
 		self.assertEqual(details.customer, so.customer)
 		self.assertEqual(flt(details.grand_total), flt(so.grand_total))
 
-	def test_end_date_before_start_date_is_not_validated(self):
-		# SUSPECTED BUG: validate() never checks that end_date >= start_date, so a
-		# guarantee that expires before it starts saves cleanly. Locking the current
-		# (wrong) behaviour so a future fix that adds the check trips this test.
+	def test_end_date_before_start_date_is_refused(self):
 		doc = self.make_bg(start_date="2026-06-30", end_date="2026-06-01")
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be before Start Date", doc.insert)
+
+	def test_end_date_is_computed_from_validity(self):
+		doc = self.make_bg(start_date="2026-03-01")
+		doc.validity = 30
 		doc.insert()
-		self.assertTrue(frappe.db.exists("Bank Guarantee", doc.name))
+		self.assertEqual(str(doc.end_date), "2026-03-30")
+
+	def test_negative_amount_is_refused(self):
+		doc = self.make_bg(amount=-1000)
+		self.assertRaises(frappe.NonNegativeError, doc.insert)
+
+	def test_party_and_project_come_from_the_reference(self):
+		so = make_sales_order()
+		doc = self.make_bg(customer="_Test Customer 1", supplier="_Test Supplier")
+		doc.reference_doctype = "Sales Order"
+		doc.reference_docname = so.name
+		doc.insert()
+
+		self.assertEqual(doc.reference_doctype, "Sales Order")
+		self.assertEqual(doc.customer, so.customer)
+		self.assertFalse(doc.supplier)
+
+	def test_reference_must_be_a_submitted_order_of_the_type(self):
+		doc = self.make_bg()
+		doc.reference_doctype = "User"
+		doc.reference_docname = "Administrator"
+		self.assertRaisesRegex(frappe.ValidationError, "must be a Sales Order", doc.insert)
+
+		draft = make_sales_order(do_not_submit=True)
+		doc = self.make_bg()
+		doc.reference_doctype = "Sales Order"
+		doc.reference_docname = draft.name
+		self.assertRaisesRegex(frappe.ValidationError, "must be submitted", doc.insert)
+
+	def test_reference_of_another_company_is_refused(self):
+		so = make_sales_order()
+		user = "test_bg_company_restriction@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{"doctype": "User", "email": user, "first_name": "BG", "roles": [{"role": "Accounts User"}]}
+			).insert()
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", user)
+
+		doc = self.make_bg()
+		doc.reference_doctype = "Sales Order"
+		doc.reference_docname = so.name
+		with self.set_user(user):
+			self.assertRaisesRegex(
+				frappe.PermissionError, "Not permitted for _Test Company", doc.insert, ignore_permissions=True
+			)
