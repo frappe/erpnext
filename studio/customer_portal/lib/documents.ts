@@ -109,10 +109,12 @@ export function quotationNote(q: any): string {
 	if (!quotationIsOpen(q)) return __("valid till {0}", [formatDate(q.valid_till)])
 	const left = daysUntil(q.valid_till)
 	if (left === null) return __("no validity set")
-	if (left < 0) return __("lapsed {0}", [formatDate(q.valid_till)])
+	// past its date, though the daily job has not marked it yet: the badge already says Expired
+	if (left < 0) return __("expired {0}", [formatDate(q.valid_till)])
+	// a countdown asks for an answer, so an answered one shows only its date
+	if (!quotationIsUrgent(q)) return __("valid till {0}", [formatDate(q.valid_till)])
 	if (left === 0) return __("expires today")
-	if (left <= 7) return daysLeft(left)
-	return __("valid till {0}", [formatDate(q.valid_till)])
+	return daysLeft(left)
 }
 
 // ---------------------------------------------------------------- orders
