@@ -36,6 +36,31 @@ class TestSupplier(ERPNextTestSuite):
 		s_doc.delete()
 		doc.delete()
 
+	def test_supplier_group_details_need_supplier_group_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		supplier_group = frappe.get_doc(
+			{
+				"doctype": "Supplier Group",
+				"supplier_group_name": f"_Test Group Details {frappe.generate_hash(length=6)}",
+				"payment_terms": "_Test Payment Term Template 3",
+				"accounts": [{"company": "_Test Company", "account": "Creditors - _TC"}],
+			}
+		).insert()
+		supplier = frappe.new_doc("Supplier")
+		supplier.supplier_name = "_Test Supplier Group Details"
+		supplier.supplier_group = supplier_group.name
+
+		with as_user(make_fenced_user("_test_sgd_stock@example.com", ["Stock User"])):
+			self.assertRaises(frappe.PermissionError, supplier.get_supplier_group_details)
+
+		with as_user(make_fenced_user("_test_sgd_purchase@example.com", ["Purchase Manager"])):
+			supplier.get_supplier_group_details()
+		self.assertEqual(supplier.payment_terms, "_Test Payment Term Template 3")
+		self.assertEqual(
+			[(row.company, row.account) for row in supplier.accounts], [("_Test Company", "Creditors - _TC")]
+		)
+
 	def test_supplier_default_payment_terms(self):
 		# Payment Term based on Days after invoice date
 		frappe.db.set_value(
