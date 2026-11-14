@@ -519,18 +519,19 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr_return.items[1].qty, -2)
 
-	def test_return_keeps_the_cost_center_set_on_a_secondary_row(self):
+	def test_return_keeps_the_cost_center_and_manual_rate_set_on_a_secondary_row(self):
 		fg_item = "Subcontracted Item SA1"
-		make_bom_with_secondary_item(fg_item)
+		make_bom_with_secondary_item(fg_item, valuation_type="Manual")
 		scr = make_receipt_with_secondary_items(fg_item, 10)
 
 		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
 		with patch.object(frappe, "in_test", False):
 			scr_return.save()
-			scr_return.items[1].cost_center = "_Test Cost Center 2 - _TC"
+			scr_return.items[1].update({"cost_center": "_Test Cost Center 2 - _TC", "rate": 15})
 			scr_return.save()
 
 		self.assertEqual(scr_return.items[1].cost_center, "_Test Cost Center 2 - _TC")
+		self.assertEqual(scr_return.items[1].rate, 15)
 
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
@@ -5634,7 +5635,9 @@ def make_receipt_with_rejected_qty_and_scrap():
 	return scr, scrap_item
 
 
-def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, secondary_properties=None):
+def make_bom_with_secondary_item(
+	fg_item, quantity=1, secondary_qty=0.5, secondary_properties=None, valuation_type="Valuation Rate"
+):
 	"""BOM with one raw material per unit and a scrap item."""
 	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 	secondary_item = make_item(
@@ -5662,7 +5665,7 @@ def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, seconda
 			"secondary_item_type": "Scrap",
 			"qty": secondary_qty,
 			"stock_qty": secondary_qty,
-			"valuation_type": "Valuation Rate",
+			"valuation_type": valuation_type,
 		},
 	)
 	bom.save()
