@@ -47,6 +47,13 @@ class PackedItem(Document):
 		qty: DF.Float
 		rate: DF.Currency
 		received_qty: DF.Float
+<<<<<<< HEAD
+=======
+		requested_qty: DF.Float
+		reserve_stock: DF.Check
+		return_against_packed_item: DF.Data | None
+		sales_order_packed_item: DF.Data | None
+>>>>>>> fcc3a67 (fix(stock): link a return's packed rows to the packed rows they reverse)
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None
 		target_warehouse: DF.Link | None
@@ -115,7 +122,7 @@ def make_packing_list(doc):
 						main_item_row=item_row,
 						packed_items_table=stale_packed_items_table,
 						reset=reset,
-						sales_order_packed_item=get_sales_order_packed_item(doc, so_packed_item),
+						linked_packed_item=get_linked_packed_item(doc, so_packed_item),
 						location=location,
 					)
 					pi_row.product_bundle = bundle_name
@@ -179,7 +186,7 @@ def get_kept_packed_items(doc):
 				item_row,
 				bundle_item,
 				packed_items_table,
-				get_sales_order_packed_item(doc, so_packed_item),
+				get_linked_packed_item(doc, so_packed_item),
 			)
 			if stale_rows:
 				packed_row = stale_rows.pop(0)
@@ -208,8 +215,19 @@ def get_indexed_packed_items_table(doc):
 	consumed in order per parent item and component. This is only safe if the item rows
 	need exactly these rows, e.g. no item row was removed after mapping.
 	"""
+<<<<<<< HEAD
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
+=======
+	cancelled_row_idx = get_cancelled_row_idx(doc)
+	link_field = get_packed_item_link_field(doc)
+	indexed_table = {}
+	for packed_item in doc.get("packed_items"):
+		parent_row = packed_item.parent_detail_docname
+		if doc.is_new() and packed_item.get(link_field):
+			parent_row = packed_item.get(link_field)
+
+>>>>>>> fcc3a67 (fix(stock): link a return's packed rows to the packed rows they reverse)
 		key = (
 			packed_item.parent_item,
 			packed_item.item_code,
@@ -307,7 +325,7 @@ def get_bundle_version_for_row(item_row, doc=None):
 
 
 def add_packed_item_row(
-	doc, packing_item, main_item_row, packed_items_table, reset, sales_order_packed_item=None, location=None
+	doc, packing_item, main_item_row, packed_items_table, reset, linked_packed_item=None, location=None
 ):
 >>>>>>> afff595 (fix(stock): pack a bundle component from each pick list location)
 	"""Add and return packed item row.
@@ -317,8 +335,12 @@ def add_packed_item_row(
 	packed_items_table (dict): Packed Items table before save (indexed)
 	reset (bool): State if table is reset or preserved as is
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 	sales_order_packed_item (str): the Sales Order's packed row this row delivers
+=======
+	linked_packed_item (str): the Sales Order's packed row this row delivers, or the packed row it returns
+>>>>>>> fcc3a67 (fix(stock): link a return's packed rows to the packed rows they reverse)
 	location (dict): Pick List row the packed row is packed from
 >>>>>>> afff595 (fix(stock): pack a bundle component from each pick list location)
 	"""
@@ -337,7 +359,7 @@ def add_packed_item_row(
 		pi_row, exists = stale_rows.pop(0), True
 =======
 	if stale_rows := get_stale_packed_rows(
-		doc, main_item_row, packing_item, packed_items_table, sales_order_packed_item
+		doc, main_item_row, packing_item, packed_items_table, linked_packed_item
 	):
 		pi_row, exists = stale_rows.pop(get_stale_row_idx(stale_rows, location)), True
 >>>>>>> afff595 (fix(stock): pack a bundle component from each pick list location)
@@ -350,24 +372,35 @@ def add_packed_item_row(
 			pi_row.name = None
 		pi_row = doc.append("packed_items", pi_row)
 
+<<<<<<< HEAD
 	return pi_row
 
 
 <<<<<<< HEAD
 =======
 def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, sales_order_packed_item):
+=======
+	pi_row.set(get_packed_item_link_field(doc), linked_packed_item)
+
+	# a component added to a saved order (later save or Update Items) is reserved like a new order's
+	if doc.get("reserve_stock") and (doc.is_new() or not exists):
+		pi_row.reserve_stock = 1
+
+	return pi_row
+
+
+def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, linked_packed_item):
+>>>>>>> fcc3a67 (fix(stock): link a return's packed rows to the packed rows they reverse)
 	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
-	key = get_packed_item_key(
-		doc, main_item_row, packing_item.item_code, packed_items_table, sales_order_packed_item
-	)
+	key = get_packed_item_key(doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item)
 	return packed_items_table.get(key)
 
 
-def get_packed_item_key(doc, main_item_row, item_code, packed_items_table, sales_order_packed_item=None):
-	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
-	# shifts when a row above it is deleted
-	order_key = (main_item_row.item_code, item_code, sales_order_packed_item)
-	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
+def get_packed_item_key(doc, main_item_row, item_code, packed_items_table, linked_packed_item=None):
+	# an unsaved row made from a Sales Order or a return is found by the packed row it links to,
+	# since its idx shifts when a row above it is deleted
+	order_key = (main_item_row.item_code, item_code, linked_packed_item)
+	if doc.is_new() and linked_packed_item and packed_items_table.get(order_key):
 		return order_key
 
 	return (main_item_row.item_code, item_code, main_item_row.idx if doc.is_new() else main_item_row.name)
@@ -461,6 +494,19 @@ def get_order_packed_items(doc) -> dict:
 	)
 
 
+<<<<<<< HEAD
+=======
+def get_linked_packed_item(doc, so_packed_item):
+	"""Name of the Sales Order packed row a row delivers, or of the packed row a return row reverses."""
+	if so_packed_item and doc.doctype != "Sales Order":
+		return so_packed_item.name
+
+
+def get_packed_item_link_field(doc):
+	return "return_against_packed_item" if doc.get("is_return") else "sales_order_packed_item"
+
+
+>>>>>>> fcc3a67 (fix(stock): link a return's packed rows to the packed rows they reverse)
 def get_order_row(doc, item_row):
 	"""Row whose packed rows ``item_row`` keeps the qty of."""
 	if not doc.get("is_return"):
@@ -543,6 +589,7 @@ def get_component_order_rows(doc, parent_item, components, so_packed_items) -> l
 def get_order_packed_item_pairs(doc) -> list[tuple]:
 	"""Pair each packed row of a document made from a Sales Order with the order's packed row it delivers."""
 	order_packed_items = get_order_packed_items(doc)
+	link_field = get_packed_item_link_field(doc)
 	pairs = []
 	for item in doc.get("items"):
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, item), []))
@@ -553,7 +600,7 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 
 			# rows packed from several Pick List locations all deliver the order row they link to
 			if so_packed_item := so_packed_items_by_name.get(
-				packed_item.sales_order_packed_item
+				packed_item.get(link_field)
 			) or pop_order_packed_item(so_packed_items, packed_item.parent_item, packed_item.item_code):
 				pairs.append((packed_item, so_packed_item))
 >>>>>>> afff595 (fix(stock): pack a bundle component from each pick list location)
@@ -611,7 +658,7 @@ def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_pack
 		main_item_row,
 		packing_item.item_code,
 		packed_items_table,
-		get_sales_order_packed_item(doc, so_packed_item),
+		get_linked_packed_item(doc, so_packed_item),
 	)
 	stale_rows = packed_items_table.get(key, [])
 	pl_rows.sort(key=lambda row: not any(is_packed_from(stale_row, row) for stale_row in stale_rows))

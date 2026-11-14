@@ -914,6 +914,16 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				"condition": item_condition,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
+<<<<<<< HEAD
+=======
+			"Packed Item": {
+				"doctype": "Packed Item",
+				"field_map": {
+					"parent_detail_docname": "parent_detail_docname",
+					"name": "return_against_packed_item",
+				},
+			},
+>>>>>>> fcc3a67 (fix(stock): link a return's packed rows to the packed rows they reverse)
 		},
 		target_doc,
 		set_missing_values,
