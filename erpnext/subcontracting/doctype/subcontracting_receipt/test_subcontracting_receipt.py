@@ -4399,6 +4399,18 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -15)
 
+	def test_return_after_one_that_took_back_more_than_its_share_takes_back_nothing(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		scr = make_receipt_consuming_transferred_materials(qty=10, rm_items={rm_item: 5})
+		first_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2, do_not_submit=True)
+		first_return.supplied_items[0].consumed_qty = -2
+		first_return.save()
+		first_return.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
+
+		self.assertFalse(scr_return.supplied_items)
+
 	def test_partial_returns_take_back_whole_serial_nos(self):
 		rm_item = make_item(
 			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SCR-RET-SN-.#####"}
