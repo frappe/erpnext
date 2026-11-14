@@ -7611,47 +7611,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_purchase_expense_account(self):
 		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
 		item = "Test Item with Purchase Expense Account"
-		make_item(item, {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
-
-		expense_account = "_Test Account Purchase Expense - TCP1"
-		expense_contra_account = "_Test Account Purchase Contra Expense - TCP1"
-		if not frappe.db.exists("Account", expense_account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "_Test Account Purchase Expense",
-					"parent_account": "Stock Expenses - TCP1",
-					"company": company,
-					"is_group": 0,
-					"root_type": "Expense",
-				}
-			).insert()
-
-		if not frappe.db.exists("Account", expense_contra_account):
-			frappe.get_doc(
-				{
-					"doctype": "Account",
-					"account_name": "_Test Account Purchase Contra Expense",
-					"parent_account": "Stock Expenses - TCP1",
-					"company": company,
-					"is_group": 0,
-					"root_type": "Expense",
-				}
-			).insert()
-
-		item_doc = frappe.get_doc("Item", item)
-		item_doc.append(
-			"item_defaults",
-			{
-				"company": company,
-				"default_warehouse": "Stores - TCP1",
-				"purchase_expense_account": expense_account,
-				"purchase_expense_contra_account": expense_contra_account,
-			},
+		expense_account, expense_contra_account = set_purchase_expense_accounts(
+			make_item(item, {"is_stock_item": 1})
 		)
-
-		item_doc.save()
 
 		pr = make_purchase_receipt(
 			item_code=item,
@@ -7671,6 +7634,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				self.assertEqual(row.debit, 1000)
 			if row.account == expense_contra_account:
 				self.assertEqual(row.credit, 1000)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_purchase_expense_with_fractional_conversion_factor(self):
+		frappe.db.set_single_value("Accounts Settings", "book_stock_expense_gl_entries", 1)
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "Box", "conversion_factor": 0.3335}],
+		)
+		expense_account, _ = set_purchase_expense_accounts(item)
+
+		pr = make_purchase_receipt(
+			item_code=item.name,
+			qty=1,
+			rate=100,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=0.3335,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+		)
+
+		debit = frappe.db.get_value("GL Entry", {"voucher_no": pr.name, "account": expense_account}, "debit")
+		self.assertEqual(debit, 100)
 
 	def test_repost_gl_entries(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -9459,6 +9445,48 @@ def get_stock_value_by_warehouse(voucher_no):
 			fields=["warehouse", "stock_value_difference"],
 		)
 	}
+
+
+def set_purchase_expense_accounts(item):
+	company = "_Test Company with perpetual inventory"
+	expense_account = "_Test Account Purchase Expense - TCP1"
+	expense_contra_account = "_Test Account Purchase Contra Expense - TCP1"
+	if not frappe.db.exists("Account", expense_account):
+		frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "_Test Account Purchase Expense",
+				"parent_account": "Stock Expenses - TCP1",
+				"company": company,
+				"is_group": 0,
+				"root_type": "Expense",
+			}
+		).insert()
+
+	if not frappe.db.exists("Account", expense_contra_account):
+		frappe.get_doc(
+			{
+				"doctype": "Account",
+				"account_name": "_Test Account Purchase Contra Expense",
+				"parent_account": "Stock Expenses - TCP1",
+				"company": company,
+				"is_group": 0,
+				"root_type": "Expense",
+			}
+		).insert()
+
+	item.append(
+		"item_defaults",
+		{
+			"company": company,
+			"default_warehouse": "Stores - TCP1",
+			"purchase_expense_account": expense_account,
+			"purchase_expense_contra_account": expense_contra_account,
+		},
+	)
+
+	item.save()
+	return expense_account, expense_contra_account
 
 
 def get_gl_entries(voucher_type, voucher_no, skip_cancelled=False, as_dict=True):
