@@ -1,6 +1,8 @@
 import frappe
 from frappe.utils import flt
 
+from erpnext.controllers.buying_controller import get_stock_qty
+
 
 class ReturnChargesService:
 	"""Actual valuation charges of a Purchase Receipt return."""
@@ -28,13 +30,13 @@ class ReturnChargesService:
 				tax.tax_amount = -flt(share, tax.precision("tax_amount"))
 
 	def get_returned_qty_by_receipt_row(self) -> dict:
-		"""Accepted and rejected qty returned, by receipt row."""
+		"""Accepted and rejected stock qty returned, by receipt row."""
 		returned_qty = {}
 		for row in self.doc.get("items"):
 			if row.return_qty_from_rejected_warehouse:
-				accepted, rejected = 0.0, -flt(row.qty)
+				accepted, rejected = 0.0, -get_stock_qty(row, row.qty)
 			else:
-				accepted, rejected = -flt(row.qty), -flt(row.rejected_qty)
+				accepted, rejected = -get_stock_qty(row, row.qty), -get_stock_qty(row, row.rejected_qty)
 
 			qty = returned_qty.setdefault(row.purchase_receipt_item, {"accepted": 0.0, "rejected": 0.0})
 			qty["accepted"] += accepted
@@ -56,7 +58,7 @@ class ReturnChargesService:
 		for row in items:
 			# a row carries its charge on its accepted qty, or on its rejected qty if it accepts nothing
 			carried_by = "accepted" if flt(row.qty) else "rejected"
-			if carried_qty := flt(row.qty) or flt(row.rejected_qty):
+			if carried_qty := get_stock_qty(row, row.qty) or get_stock_qty(row, row.rejected_qty):
 				qty = returned_qty.get(row.name, {}).get(carried_by, 0.0)
 				share += charge_per_item.get(row.idx, 0.0) * qty / carried_qty
 
