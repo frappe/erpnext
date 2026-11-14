@@ -674,6 +674,33 @@ class TestWorkOrder(ERPNextTestSuite):
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
 
+	def test_finished_good_row_in_another_uom_books_no_process_loss(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+		test_stock_entry.make_stock_entry(item_code=rm_item, qty=10, rate=10, target="_Test Warehouse - _TC")
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=10,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Work In Progress - _TC",
+			fg_warehouse="_Test Warehouse 1 - _TC",
+		)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+
+		se = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		fg_row = next(row for row in se.items if row.is_finished_item)
+		fg_row.update({"uom": "Box", "conversion_factor": 10, "qty": 1})
+		se.submit()
+
+		self.assertEqual(se.process_loss_qty, 0)
+		wo.reload()
+		self.assertEqual(wo.produced_qty, 10)
+		self.assertEqual(wo.process_loss_qty, 0)
+
 	def test_skip_transfer_work_order_completed_with_fractional_process_loss(self):
 		# 11.2 + 0.2 == 11.399999999999999 in float, which must still complete 11.4
 		work_order = frappe.new_doc("Work Order")
