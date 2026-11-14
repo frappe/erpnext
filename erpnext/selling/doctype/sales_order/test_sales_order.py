@@ -2238,6 +2238,11 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		po = make_purchase_order(so.name, selected_items=selected_items)[0]
 		self.assertEqual(po.items[0].qty, 1)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		so.reload()
+		self.assertEqual(so.items[0].ordered_qty, so.items[0].stock_qty)
 
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
