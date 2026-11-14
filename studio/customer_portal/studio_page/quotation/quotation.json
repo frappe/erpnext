@@ -977,7 +977,63 @@
                       "tag": "span",
                       "text": "{{ dataItem.value }}"
                      },
-                     "visibilityCondition": "{{ !dataItem.route }}"
+                     "visibilityCondition": "{{ !dataItem.route && !dataItem.copyable }}"
+                    },
+                    {
+                     "baseStyles": {
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Copy value",
+                     "componentId": "Tooltip-c4c230c129",
+                     "componentName": "Tooltip",
+                     "componentProps": {
+                      "text": "{{ dataItem.value }}"
+                     },
+                     "componentSlots": {
+                      "default": {
+                       "parentBlockId": "Tooltip-c4c230c129",
+                       "slotContent": [
+                        {
+                         "attributes": {
+                          "aria-label": "{{ __('Copy {0}', [dataItem.value]) }}",
+                          "role": "button",
+                          "tabindex": "0"
+                         },
+                         "baseStyles": {
+                          "color": "{{ dataItem.color }}",
+                          "cursor": "pointer",
+                          "fontWeight": "{{ dataItem.weight }}",
+                          "minWidth": "0px",
+                          "overflow": "hidden",
+                          "textOverflow": "ellipsis",
+                          "whiteSpace": "nowrap"
+                         },
+                         "blockName": "TextBlock",
+                         "componentEvents": {
+                          "click": {
+                           "action": "Run Script",
+                           "script": "copyValue(dataItem)"
+                          },
+                          "keydown.enter.prevent": {
+                           "action": "Run Script",
+                           "script": "copyValue(dataItem)"
+                          }
+                         },
+                         "componentId": "TextBlock-1fad810108",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ dataItem.value }}"
+                         },
+                         "parentSlotName": "default"
+                        }
+                       ],
+                       "slotId": "Tooltip-c4c230c129:default",
+                       "slotName": "default"
+                      }
+                     },
+                     "visibilityCondition": "{{ !!dataItem.copyable }}"
                     }
                    ],
                    "componentEvents": {
@@ -1571,7 +1627,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-11-14 12:00:00.000000",
+ "modified": "2026-11-14 12:30:00.000000",
  "modified_by": "Administrator",
  "name": "quotation",
  "owner": "Administrator",
