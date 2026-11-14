@@ -83,6 +83,11 @@ class TestAccountingDimension(ERPNextTestSuite):
 		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Sales Team"})
 		self.assertRaises(frappe.ValidationError, dimension.insert)
 
+	def test_dimension_not_allowed_when_disabled(self):
+		frappe.db.set_single_value("Accounts Settings", "enable_accounting_dimensions", 0)
+		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Customer Group"})
+		self.assertRaisesRegex(frappe.ValidationError, "Accounting Dimensions are disabled", dimension.insert)
+
 	def test_single_doctype_not_allowed_as_dimension(self):
 		dimension = frappe.get_doc({"doctype": "Accounting Dimension", "document_type": "Selling Settings"})
 		self.assertRaises(frappe.ValidationError, dimension.insert)
