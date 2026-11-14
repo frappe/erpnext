@@ -306,7 +306,8 @@ class SubcontractingController(StockController):
 		if frappe.get_cached_value("Item", material.item_details["rm_item_code"], "has_serial_no"):
 			total_returned_qty = ceil(total_returned_qty)
 
-		return -flt(total_returned_qty - material.returned_qty, precision)
+		# earlier returns may have taken back more than their share; a return never consumes
+		return -max(flt(total_returned_qty - material.returned_qty, precision), 0)
 
 	def get_returnable_serial_batches(self):
 		"""Serial nos and batches the returned receipt consumed that no return has brought back yet,
