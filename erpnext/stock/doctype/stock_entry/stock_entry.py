@@ -821,11 +821,15 @@ class StockEntry(StockController):
 			for d in self.items:
 				if d.is_finished_item:
 					if self.process_loss_qty:
-						d.qty = self.fg_completed_qty - self.process_loss_qty
+						d.transfer_qty = flt(
+							self.fg_completed_qty - self.process_loss_qty, d.precision("transfer_qty")
+						)
+						d.qty = flt(d.transfer_qty / flt(d.conversion_factor), d.precision("qty"))
 
-					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+					# Finished Good Quantity is in the stock UOM
+					item_wise_qty.setdefault(d.item_code, []).append(d.transfer_qty)
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item_code, qty_list in item_wise_qty.items():
 			total = flt(sum(qty_list), precision)
 
