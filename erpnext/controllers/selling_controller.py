@@ -450,13 +450,26 @@ class SellingController(StockController):
 					"valuation rate",
 				)
 
+	def make_packed_item_bundles(self):
+		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
+		packed_rows = [p for p in self.get_current_packed_rows() if not p.serial_and_batch_bundle]
+		if not packed_rows:
+			return
+
+		picked_serial_nos = self.get_serial_nos_used_in_rows()
+		picked_batches = self.get_batches_used_in_rows()
+		item_rows = {d.name: d for d in self.items}
+		for p in packed_rows:
+			get_serial_and_batch_bundle(
+				p, self, item_rows[p.parent_detail_docname], picked_serial_nos, picked_batches
+			)
+
+		# validate ran before these bundles existed
+		if self.is_batch_check_needed():
+			self.validate_outward_bundle_batches(rows=packed_rows)
+
 	def get_item_list(self):
 		il = []
-		picked_serial_nos = picked_batches = None
-		if any(not p.serial_and_batch_bundle for p in self.get("packed_items")):
-			picked_serial_nos = self.get_serial_nos_used_in_rows()
-			picked_batches = self.get_batches_used_in_rows()
-
 		for d in self.get("items"):
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
@@ -471,10 +484,7 @@ class SellingController(StockController):
 									"serial_no": p.serial_no if self.docstatus == 2 else None,
 									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
-									"serial_and_batch_bundle": p.serial_and_batch_bundle
-									or get_serial_and_batch_bundle(
-										p, self, d, picked_serial_nos, picked_batches
-									),
+									"serial_and_batch_bundle": p.serial_and_batch_bundle,
 									"name": d.name,
 									"project": d.get("project"),
 									"target_warehouse": p.target_warehouse,
@@ -777,6 +787,7 @@ class SellingController(StockController):
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		self.update_reserved_qty()
+		self.make_packed_item_bundles()
 
 		sl_entries = []
 		# Loop over items and packed items table

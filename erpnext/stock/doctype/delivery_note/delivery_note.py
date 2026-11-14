@@ -535,6 +535,8 @@ class DeliveryNote(SellingController):
 		if not self.is_return:
 			self.validate_reserved_stock()
 
+		# reservations read the delivered serial and batch nos from the bundles
+		self.make_packed_item_bundles()
 		self.update_stock_reservation_entries()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
