@@ -2514,9 +2514,8 @@ def get_reference_serial_and_batch_bundle(child_row):
 	}.get(doctype)
 
 	if field:
-		bundle_field = (
-			"rejected_serial_and_batch_bundle" if child_row.get("is_rejected") else "serial_and_batch_bundle"
-		)
+		from_rejected = child_row.get("is_rejected") or child_row.get("return_qty_from_rejected_warehouse")
+		bundle_field = "rejected_serial_and_batch_bundle" if from_rejected else "serial_and_batch_bundle"
 		return frappe.get_cached_value(doctype, child_row.get(field), bundle_field)
 
 
