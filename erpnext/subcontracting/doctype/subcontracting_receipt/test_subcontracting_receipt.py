@@ -3,6 +3,7 @@
 
 
 import copy
+from unittest.mock import patch
 
 import frappe
 from frappe.utils import add_days, cint, flt, nowtime, today
@@ -68,26 +69,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 
 		fg_item = "Subcontracted Item SA1"
-		raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
-		secondary_item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}
-		).name
-
-		bom = make_bom(
-			item=fg_item, raw_materials=[raw_material], rate=100, currency="INR", do_not_submit=True
-		)
-		bom.append(
-			"secondary_items",
-			{
-				"item_code": secondary_item,
-				"secondary_item_type": "Scrap",
-				"qty": 0.5,
-				"stock_qty": 0.5,
-				"valuation_type": "Valuation Rate",
-			},
-		)
-		bom.save()
-		bom.submit()
+		make_bom_with_secondary_item(fg_item)
 
 		service_items = [
 			{
@@ -398,6 +380,97 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertIsNotNone(scr2_return.items[0].bom)
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
+
+	def test_full_return_with_secondary_items_marks_the_receipt_returned(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items()
+		scr_return.save()
+		scr_return.submit()
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_a_receipt_made_before_v16(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_a_receipt_made_before_v16_with_an_item_received_twice(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_an_item_received_as_two_secondary_types(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_a_receipt_made_before_v16_with_its_bom_rows_reordered(self):
+		fg_item = "Subcontracted Item SA1"
+		bom = make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		first, second = bom.secondary_items
+		frappe.db.set_value("BOM Secondary Item", second.name, {"qty": 1, "stock_qty": 1})
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+		# the v16 migration does not keep the order of a BOM's scrap rows
+		frappe.db.set_value("BOM Secondary Item", first.name, "idx", 2)
+		frappe.db.set_value("BOM Secondary Item", second.name, "idx", 1)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_partial_returns_add_up_to_the_received_secondary_qty(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, quantity=3, secondary_qty=2)
+		scr = make_receipt_with_secondary_items(fg_item, 3)
+
+		for _ in range(3):
+			make_partial_return(scr.name, 1)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_return_of_the_rest_after_all_secondary_qty_is_returned(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, quantity=1000, secondary_qty=0.6)
+		scr = make_receipt_with_secondary_items(fg_item, 1000)
+
+		make_partial_return(scr.name, 992)
+		scr_return = make_partial_return(scr.name, 8)
+
+		self.assertEqual(len(scr_return.items), 1)
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
 
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
@@ -5499,6 +5572,86 @@ def make_receipt_with_rejected_qty_and_scrap():
 	scr.submit()
 
 	return scr, scrap_item
+
+
+def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, secondary_item_types=("Scrap",)):
+	"""BOM with one raw material per unit and a secondary item of each type."""
+	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
+
+	bom = make_bom(
+		item=fg_item,
+		raw_materials=[raw_material],
+		rate=100,
+		currency="INR",
+		quantity=quantity,
+		rm_qty=quantity,
+		do_not_submit=True,
+	)
+	for secondary_item_type in secondary_item_types:
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": secondary_item,
+				"secondary_item_type": secondary_item_type,
+				"qty": secondary_qty,
+				"stock_qty": secondary_qty,
+				"valuation_type": "Valuation Rate",
+			},
+		)
+	bom.save()
+	bom.submit()
+	return bom
+
+
+def make_receipt_with_secondary_items(fg_item, qty):
+	"""Submitted receipt for qty of fg_item, with its secondary rows."""
+	set_backflush_based_on("BOM")
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": qty,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": qty,
+		},
+	]
+	sco = get_subcontracting_order(service_items=service_items)
+	rm_items = get_rm_items(sco.supplied_items)
+	itemwise_details = make_stock_in_entry(rm_items=rm_items)
+	make_stock_transfer_entry(
+		sco_no=sco.name,
+		rm_items=rm_items,
+		itemwise_details=copy.deepcopy(itemwise_details),
+	)
+	scr = make_subcontracting_receipt(sco.name)
+	scr.save()
+	scr.get_secondary_items()
+	scr.save()
+	scr.submit()
+	return scr
+
+
+def make_secondary_rows_pre_v16(scr_name):
+	"""Secondary rows received before v16 have no bom_secondary_item."""
+	frappe.db.set_value(
+		"Subcontracting Receipt Item",
+		{"parent": scr_name, "bom_secondary_item": ("is", "set")},
+		"bom_secondary_item",
+		None,
+	)
+
+
+def make_partial_return(scr_name, fg_qty):
+	"""Submitted return of fg_qty of the receipt's finished good, saved as outside tests."""
+	scr_return = make_return_doc("Subcontracting Receipt", scr_name)
+	scr_return.items[0].qty = -fg_qty
+	# outside tests, the first save rebuilds the secondary rows
+	with patch.object(frappe, "in_test", False):
+		scr_return.save()
+	scr_return.submit()
+	return scr_return
 
 
 def make_return_subcontracting_receipt(**args):
