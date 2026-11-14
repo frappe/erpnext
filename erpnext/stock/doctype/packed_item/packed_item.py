@@ -91,12 +91,9 @@ def make_packing_list(doc, order_packed_items=None):
 			item_row.is_product_bundle = 1 if bundle_name else 0
 
 		if bundle_name:
-			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
-			so_packed_items = list(order_packed_items.get(order_row, []))
-			for bundle_item in get_product_bundle_items_by_name(bundle_name):
-				so_packed_item = pop_order_packed_item(
-					so_packed_items, item_row.item_code, bundle_item.item_code
-				)
+			for bundle_item, so_packed_item in get_bundle_components(
+				doc, item_row, bundle_name, order_packed_items
+			):
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
@@ -119,6 +116,50 @@ def make_packing_list(doc, order_packed_items=None):
 
 	if parent_items_price:
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
+
+
+def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
+	"""Components of ``item_row``'s bundle, each with the order's packed row it delivers."""
+	order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
+	so_packed_items = list(order_packed_items.get(order_row, []))
+	for bundle_item in get_product_bundle_items_by_name(bundle_name):
+		yield (
+			bundle_item,
+			pop_order_packed_item(so_packed_items, item_row.item_code, bundle_item.item_code),
+		)
+
+
+def get_kept_packed_items(doc):
+	"""Yield (packed row, bundle row, stock qty per bundle unit) for each packed row of the last
+	build that make_packing_list keeps for the bundle rows as they are now."""
+	packed_items_table = get_indexed_packed_items_table(doc)
+	order_packed_items = get_order_packed_items(doc)
+	# only a bundle row that has packed rows can keep one
+	parent_items = {row.parent_item for row in doc.get("packed_items")}
+	for item_row in doc.get("items"):
+		if item_row.item_code not in parent_items:
+			continue
+
+		if not (bundle_name := get_bundle_version_for_row(item_row, doc)):
+			continue
+
+		for bundle_item, so_packed_item in get_bundle_components(
+			doc, item_row, bundle_name, order_packed_items
+		):
+			stale_rows = get_stale_packed_rows(
+				doc,
+				item_row,
+				bundle_item,
+				packed_items_table,
+				get_sales_order_packed_item(doc, so_packed_item),
+			)
+			if stale_rows:
+				packed_row = stale_rows.pop(0)
+				yield (
+					packed_row,
+					item_row,
+					get_component_stock_qty_per_unit(bundle_item, packed_row.uom, so_packed_item),
+				)
 
 
 def is_product_bundle(item_code: str) -> bool:
@@ -198,8 +239,9 @@ def reset_packing_list(doc):
 	return reset_table
 
 
+@frappe.request_cache
 def get_product_bundle_items_by_name(bundle_name):
-	"Component rows of a specific Product Bundle version."
+	"Component rows of a specific Product Bundle version, which cannot change once submitted."
 	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
 	return (
 		frappe.qb.from_(product_bundle_item)
@@ -257,21 +299,11 @@ def add_packed_item_row(
 	"""
 	exists, pi_row = False, {}
 
-	# check if row already exists in packed items table
-	key = (
-		main_item_row.item_code,
-		packing_item.item_code,
-		main_item_row.idx if doc.is_new() else main_item_row.name,
-	)
-	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
-	# shifts when a row above it is deleted
-	order_key = (main_item_row.item_code, packing_item.item_code, sales_order_packed_item)
-	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
-		key = order_key
-
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
-	if stale_rows := packed_items_table.get(key):
+	if stale_rows := get_stale_packed_rows(
+		doc, main_item_row, packing_item, packed_items_table, sales_order_packed_item
+	):
 		pi_row, exists = stale_rows.pop(0), True
 
 	if not exists:
@@ -289,6 +321,22 @@ def add_packed_item_row(
 		pi_row.reserve_stock = 1
 
 	return pi_row
+
+
+def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, sales_order_packed_item):
+	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
+	key = (
+		main_item_row.item_code,
+		packing_item.item_code,
+		main_item_row.idx if doc.is_new() else main_item_row.name,
+	)
+	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
+	# shifts when a row above it is deleted
+	order_key = (main_item_row.item_code, packing_item.item_code, sales_order_packed_item)
+	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
+		key = order_key
+
+	return packed_items_table.get(key)
 
 
 def get_packed_item_details(item_code, company):
