@@ -271,6 +271,14 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		mr.reload()
 		self.assertEqual(mr.per_ordered, 100)
 
+	def test_pending_qty_from_the_stored_ordered_qty_is_not_rounded(self):
+		"""The rest of a 3 Box (12 Kg) row with 1 Kg ordered is 35 Kg, not 2.92 Box (35.04 Kg)."""
+		from erpnext.stock.doctype.material_request.mapper import get_pending_qty
+
+		row = frappe.new_doc("Material Request Item")
+		row.update({"qty": 3, "stock_qty": 36, "conversion_factor": 12, "ordered_qty": 1})
+		self.assertEqual(get_pending_qty(row, None) * row.conversion_factor, 35)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
 		item = make_item_with_fractional_box()
