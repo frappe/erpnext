@@ -3758,7 +3758,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
-<<<<<<< HEAD
 	def test_purchase_receipt_keeps_purchase_order_currency(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
@@ -3805,9 +3804,9 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(pr.conversion_rate, 80)
 		self.assertEqual(pr.grand_total, 1000)
 		self.assertEqual(pr.base_grand_total, 80000)
-=======
+
 	def test_return_of_rejected_qty_gets_no_secondary_items(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
@@ -3819,14 +3818,10 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_return.save()
 		scr_return.submit()
 
-<<<<<<< HEAD
-		self.assertEqual([item.item_code for item in scr_return.items], [fg_item])
->>>>>>> 9e7e8cb (test: return of rejected qty gets no secondary items)
-=======
 		self.assertEqual([item.item_code for item in scr_return.items], [scr.items[0].item_code])
 
 	def test_rejected_return_moved_to_the_accepted_warehouse_gets_secondary_items(self):
-		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
+		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 			make_subcontract_return_against_rejected_warehouse,
 		)
 
@@ -3840,7 +3835,6 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr_return.submit()
 
 		self.assertIn(scrap_item, [item.item_code for item in scr_return.items])
->>>>>>> a83474f (test: rejected return moved to the accepted warehouse gets secondary items)
 
 	def test_rejected_return_brings_back_raw_materials_at_zero_value(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
