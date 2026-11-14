@@ -6,7 +6,13 @@ from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.get_item_details import get_item_tax_template
+from erpnext.stock.get_item_details import get_item_tax_map, get_item_tax_template
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 COMPANY = "_Test Company"
@@ -268,6 +274,31 @@ class TestItemTaxTemplate(ERPNextTestSuite):
 	def test_group_account_throws(self):
 		doc = self.make_template([("Duties and Taxes - _TC", 7, 0)])
 		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
+
+	def test_item_tax_map_needs_template_permission(self):
+		template = self.make_tax_template(18)
+		kwargs = {"doc": {"company": COMPANY}, "tax_template": template, "as_json": False}
+		expected = {TAX_ACCOUNT: 18}
+		self.assertEqual(get_item_tax_map(**kwargs), expected)
+
+		sales_user = make_fenced_user("_test_itt_sales@example.com", ["Sales User"])
+		other_company_user = make_company_fenced_user(
+			"_test_itt_other_company@example.com", ["Sales User"], "_Test Company 1"
+		)
+		no_role_user = make_fenced_user("_test_itt_no_role@example.com", [])
+
+		for user in (other_company_user, no_role_user):
+			with as_user(user):
+				assert_refused(self, get_item_tax_map, **kwargs)
+
+		with as_user(sales_user):
+			self.assertEqual(get_item_tax_map(**kwargs), expected)
+
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template
+		with as_user(no_role_user):
+			si.calculate_taxes_and_totals()
+		self.assertEqual(frappe.parse_json(si.items[0].item_tax_rate), expected)
 
 	def test_disabled_template_on_transaction_throws(self):
 		template = self.make_template([(TAX_ACCOUNT, 28, 0)])
