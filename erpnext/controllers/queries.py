@@ -1141,26 +1141,24 @@ def warehouse_query(doctype: str, txt: str, searchfield: str, start: int, page_l
 
 	# Base the query on Warehouse so get_query applies its user-permission match conditions;
 	# Bin is left-joined (its filters on the JOIN) so warehouses without a Bin row still match.
-	query = (
-		frappe.qb.get_query("Warehouse", fields=[warehouse_field], ignore_permissions=False)
-		.left_join(bin_dt)
-		.on(join_condition)
-		.select(
-			Concat("Actual Qty", " : ", IfNull(Round(bin_dt.actual_qty, 2), 0)).as_("actual_qty"),
-		)
-		.where(wh[searchfield].like(f"%{txt}%"))
+	query = frappe.qb.get_query("Warehouse", fields=[warehouse_field], ignore_permissions=False).where(
+		wh[searchfield].like(f"%{txt}%")
 	)
+
+	if frappe.has_permission("Bin", "read"):
+		query = (
+			query.left_join(bin_dt)
+			.on(join_condition)
+			.select(
+				Concat("Actual Qty", " : ", IfNull(Round(bin_dt.actual_qty, 2), 0)).as_("actual_qty"),
+			)
+			.orderby(IfNull(bin_dt.actual_qty, 0), order=Order.desc)
+		)
 
 	for condition in get_filter_conditions_qb("Warehouse", filter_dict.get("Warehouse")):
 		query = query.where(condition)
 
-	return (
-		query.orderby(IfNull(bin_dt.actual_qty, 0), order=Order.desc)
-		.orderby(wh[warehouse_field], order=Order.asc)
-		.limit(page_len)
-		.offset(start)
-		.run()
-	)
+	return query.orderby(wh[warehouse_field], order=Order.asc).limit(page_len).offset(start).run()
 
 
 def get_doctype_wise_filters(filters):
