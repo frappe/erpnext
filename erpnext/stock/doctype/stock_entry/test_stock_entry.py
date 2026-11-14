@@ -6136,6 +6136,89 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 		with self.set_user(user):
 			self.assertRaises(frappe.PermissionError, get_sample_retention_warehouse, "_Test Company")
 
+	def test_stock_entry_refuses_work_order_of_other_company(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_transfer_entry
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		fg_item = make_item("_Test Gear Box", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Gear Wheel", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], company="_Test Company 1")
+
+		def new_transfer_entry(work_order):
+			entry = frappe.get_doc(
+				make_transfer_entry(work_order.name, "Material Transfer for Manufacture", 1)
+			)
+			entry.company = "_Test Company"
+			for row in entry.items:
+				row.update(
+					{
+						"s_warehouse": "_Test Warehouse - _TC",
+						"t_warehouse": "_Test Warehouse 1 - _TC",
+						"expense_account": None,
+						"cost_center": None,
+					}
+				)
+			return entry
+
+		own_work_order = make_wo_order_test_record(production_item=fg_item, qty=1)
+		new_transfer_entry(own_work_order).insert()
+
+		other_work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=other_bom.name, company="_Test Company 1", qty=1
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			f"Work Order {other_work_order.name} does not belong to Company _Test Company",
+			new_transfer_entry(other_work_order).insert,
+		)
+
+	def test_stock_entry_refuses_pick_list_row_of_other_pick_list(self):
+		from erpnext.stock.doctype.pick_list.mapper import create_stock_entry as make_entry_from_pick_list
+
+		item = make_item(properties={"is_stock_item": 1}).name
+
+		def new_pick_list(company, warehouse):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=5, basic_rate=100)
+			pick_list = frappe.get_doc(
+				{
+					"doctype": "Pick List",
+					"company": company,
+					"purpose": "Material Transfer",
+					"pick_manually": 1,
+					"locations": [{"item_code": item, "warehouse": warehouse, "qty": 5, "picked_qty": 5}],
+				}
+			).insert()
+			pick_list.submit()
+			return pick_list
+
+		own_pick_list = new_pick_list("_Test Company", "_Test Warehouse - _TC")
+		other_pick_list = new_pick_list("_Test Company 1", "_Test Warehouse 2 - _TC1")
+
+		receipt = frappe.get_doc(make_entry_from_pick_list(own_pick_list.as_dict()))
+		receipt.update({"purpose": "Material Receipt", "stock_entry_type": "Material Receipt"})
+		receipt.items[0].update(
+			{
+				"s_warehouse": None,
+				"t_warehouse": "_Test Warehouse - _TC",
+				"basic_rate": 100,
+				"pick_list_item": other_pick_list.locations[0].name,
+			}
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			f"Pick List Item {other_pick_list.locations[0].name} does not belong to Pick List {own_pick_list.name}",
+			receipt.insert,
+		)
+
+		transfer = frappe.get_doc(make_entry_from_pick_list(own_pick_list.as_dict()))
+		transfer.items[0].t_warehouse = "_Test Warehouse 1 - _TC"
+		transfer.submit()
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", own_pick_list.locations[0].name, "transferred_qty"), 5
+		)
+
 	def test_make_stock_entry_needs_stock_entry_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
