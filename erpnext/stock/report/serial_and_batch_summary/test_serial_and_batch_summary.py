@@ -154,6 +154,27 @@ class TestSerialAndBatchSummary(ERPNextTestSuite):
 
 		self.assertIn("qty", [column.get("fieldname") for column in columns])
 
+	def test_serial_filter_lists_serial_nos_of_permitted_company(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_serial_nos
+		from erpnext.tests.permission_test_utils import as_user, make_company_fenced_user
+
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+		for company, number in (
+			("_Test Company", "Summary-Own-Serial"),
+			("_Test Company 1", "Summary-Other-Serial"),
+		):
+			frappe.get_doc(doctype="Serial No", item_code=item, serial_no=number, company=company).insert()
+
+		def get_numbers():
+			rows = get_serial_nos("Serial No", "Summary-", "name", 0, 10, {"item_code": item})
+			return sorted(row[1] for row in rows)
+
+		self.assertEqual(get_numbers(), ["Summary-Other-Serial", "Summary-Own-Serial"])
+		fenced = make_company_fenced_user("summary-company-user@example.com", ["Stock User"], "_Test Company")
+		with as_user(fenced):
+			self.assertEqual(get_numbers(), ["Summary-Own-Serial"])
+
 	def test_batch_filter_lists_nothing_without_access_to_batches(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.report.serial_and_batch_summary.serial_and_batch_summary import get_batch_nos
