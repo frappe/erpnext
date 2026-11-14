@@ -1283,6 +1283,7 @@ def get_item_details(
 	asset_category: str,
 	net_purchase_amount: float,
 ):
+	frappe.has_permission("Asset Category", "read", asset_category, throw=True)
 	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
