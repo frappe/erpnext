@@ -78,9 +78,11 @@ export default function setup(context) {
 			{
 				label: __("Outstanding"),
 				value: owedText(owing.owed),
-				sub: owing.overdue
-					? owing.overdue === 1 ? __("1 invoice overdue") : __("{0} invoices overdue", [owing.overdue])
-					: owing.count === 1 ? __("across 1 invoice") : __("across {0} invoices", [owing.count ?? 0]),
+				sub: !owing.count
+					? __("none right now")
+					: owing.overdue
+						? owing.overdue === 1 ? __("1 invoice overdue") : __("{0} invoices overdue", [owing.overdue])
+						: owing.count === 1 ? __("across 1 invoice") : __("across {0} invoices", [owing.count]),
 			},
 		]
 	})
