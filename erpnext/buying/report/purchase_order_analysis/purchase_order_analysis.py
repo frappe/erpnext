@@ -40,6 +40,15 @@ def execute(filters=None):
 	return columns, data, None, chart_data
 
 
+def formatter(value, column, data, default_formatter):
+	value = default_formatter(value, column, data)
+	format_fields = ["received_qty", "billed_amount"]
+
+	if column.fieldname in format_fields and data[column.fieldname] > 0:
+		value = f"<span style='color:green'>{value}</span>"
+	return value
+
+
 def validate_filters(filters):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
