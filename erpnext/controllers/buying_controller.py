@@ -1778,3 +1778,12 @@ def get_purchase_expense_account(item_code, company):
 def get_stock_qty(row, qty) -> float:
 	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+
+def get_stock_qty_status_args() -> dict:
+	"""Status updater args that add up rows' stock qty. When rows round their stock qty, add up
+	qty * conversion factor and round the total once instead, so orders in parts add up to their source row."""
+	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
+		return {"source_field": "stock_qty"}
+
+	return {"source_field": "qty * conversion_factor", "round_to_target_precision": True}

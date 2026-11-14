@@ -19,7 +19,7 @@ from erpnext.buying.doctype.purchase_order.services.drop_ship import DropShipSer
 from erpnext.buying.doctype.purchase_order.services.status import StatusService
 from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
 from erpnext.buying.utils import validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
@@ -173,7 +173,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_ordered",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 				"percent_join_field": "material_request",
 				"global_allowance_field": "over_order_allowance",
 				"global_allowance_doctype": "Buying Settings",
@@ -185,7 +185,7 @@ class PurchaseOrder(BuyingController):
 				"join_field": "supplier_quotation_item",
 				"target_field": "ordered_qty",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 			},
 		]
 
@@ -521,7 +521,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 			}
 		)
 		self.status_updater.append(
@@ -533,7 +533,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_packed_item",
 				"target_ref_field": "qty",
-				"source_field": "stock_qty",
+				**get_stock_qty_status_args(),
 			}
 		)
 
