@@ -1,0 +1,1508 @@
+{
+ "allow_guest": 0,
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "row",
+    "flexShrink": 0,
+    "height": "100%",
+    "isolation": "isolate",
+    "overflowX": "hidden",
+    "position": "static",
+    "width": "inherit"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "componentId": "portal_sidebar-cce55e430",
+     "componentName": "portal_sidebar",
+     "componentProps": {},
+     "componentSlots": {},
+     "isStudioComponent": true
+    },
+    {
+     "baseStyles": {
+      "background": "var(--surface-base)",
+      "display": "flex",
+      "flex": "1",
+      "flexDirection": "column",
+      "height": "100%",
+      "minWidth": "0px"
+     },
+     "blockName": "Main",
+     "children": [
+      {
+       "baseStyles": {
+        "background": "var(--surface-base)",
+        "borderColor": "var(--outline-gray-1)",
+        "borderStyle": "solid",
+        "borderWidth": "0px 0px 1px 0px",
+        "display": "flex",
+        "flexDirection": "column",
+        "flexShrink": 0,
+        "justifyContent": "center",
+        "minHeight": "48px",
+        "padding": "0px 20px",
+        "width": "100%"
+       },
+       "blockName": "Page header",
+       "children": [
+        {
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "gap": "8px",
+          "minWidth": "0px",
+          "width": "100%"
+         },
+         "blockName": "Header row",
+         "children": [
+          {
+           "baseStyles": {
+            "minWidth": "0px"
+           },
+           "blockName": "Breadcrumbs",
+           "componentId": "Breadcrumbs-iy3b2z0ei",
+           "componentName": "Breadcrumbs",
+           "componentProps": {
+            "items": "{{ crumbs }}"
+           }
+          },
+          {
+           "baseStyles": {
+            "flexShrink": 0
+           },
+           "blockName": "Badge",
+           "componentId": "Badge-fmigc3mgl",
+           "componentName": "Badge",
+           "componentProps": {
+            "label": "{{ statusLabel }}",
+            "size": "md",
+            "theme": "{{ statusTheme }}",
+            "variant": "subtle"
+           },
+           "visibilityCondition": "{{ loaded && !notFound }}"
+          },
+          {
+           "baseStyles": {
+            "marginLeft": "auto"
+           },
+           "blockName": "Print",
+           "classes": [
+            "portal-below-xl"
+           ],
+           "componentEvents": {
+            "click": {
+             "action": "Run Script",
+             "script": "printDocument()"
+            }
+           },
+           "componentId": "Button-0sauija9d",
+           "componentName": "Button",
+           "componentProps": {
+            "iconLeft": "lucide-printer",
+            "label": "{{ __('Print') }}",
+            "variant": "subtle"
+           },
+           "visibilityCondition": "{{ loaded && !notFound }}"
+          }
+         ],
+         "componentId": "div-9shgs5mbn",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-ef294372k",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "0px 12px"
+       },
+       "originalElement": "div"
+      },
+      {
+       "baseStyles": {
+        "alignItems": "center",
+        "display": "flex",
+        "flex": "1",
+        "flexDirection": "column",
+        "gap": "20px",
+        "minHeight": "0px",
+        "overflowY": "auto",
+        "padding": "0px",
+        "width": "100%"
+       },
+       "blockName": "Content",
+       "children": [
+        {
+         "baseStyles": {
+          "width": "100%"
+         },
+         "blockName": "Page",
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "minWidth": "0px",
+            "width": "100%"
+           },
+           "blockName": "Lead",
+           "children": [
+            {
+             "baseStyles": {
+              "marginBottom": "24px"
+             },
+             "blockName": "Status note",
+             "componentId": "Alert-702ebc3b7f",
+             "componentName": "Alert",
+             "componentProps": {
+              "icon": "{{ noteIcon }}",
+              "theme": "{{ noteTheme }}",
+              "title": "{{ noteTitle }}"
+             },
+             "visibilityCondition": "{{ !!noteTitle }}"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "width": "100%"
+             },
+             "blockName": "Items section",
+             "children": [
+              {
+               "baseStyles": {
+                "alignItems": "baseline",
+                "display": "flex",
+                "flexDirection": "row",
+                "gap": "12px",
+                "justifyContent": "space-between",
+                "marginBottom": "12px",
+                "width": "100%"
+               },
+               "blockName": "Items heading",
+               "children": [
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-gray-8)"
+                 },
+                 "blockName": "Heading",
+                 "componentId": "TextBlock-5a2d915ded",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-lg-semibold",
+                  "tag": "h2",
+                  "text": "{{ itemsTitle }}"
+                 }
+                }
+               ],
+               "componentId": "div-b30e32ba16",
+               "componentName": "div",
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "width": "100%"
+               },
+               "blockName": "Items",
+               "children": [
+                {
+                 "baseStyles": {
+                  "background": "transparent",
+                  "borderRadius": "0px"
+                 },
+                 "blockName": "ListHeader",
+                 "children": [
+                  {
+                   "baseStyles": {
+                    "justifyContent": "flex-end"
+                   },
+                   "blockName": "No. head",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)"
+                     },
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-e4fbdc1361",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "span",
+                      "text": "{{ __('No.') }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListHeaderCell-941bc80f34",
+                   "componentName": "ListHeaderCell"
+                  },
+                  {
+                   "blockName": "ListHeaderCell",
+                   "children": [
+                    {
+                     "baseStyles": {},
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-uoycampvr",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "span",
+                      "text": "{{ __('Item') }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListHeaderCell-ynbgozej6",
+                   "componentName": "ListHeaderCell"
+                  },
+                  {
+                   "baseStyles": {
+                    "justifyContent": "flex-end"
+                   },
+                   "blockName": "ListHeaderCell",
+                   "children": [
+                    {
+                     "baseStyles": {},
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-w0d3obhob",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "span",
+                      "text": "{{ __('Quantity') }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListHeaderCell-474oxo5yg",
+                   "componentName": "ListHeaderCell"
+                  },
+                  {
+                   "baseStyles": {
+                    "justifyContent": "flex-end"
+                   },
+                   "blockName": "ListHeaderCell",
+                   "children": [
+                    {
+                     "baseStyles": {},
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-8844872f89",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "span",
+                      "text": "{{ __('Delivered') }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListHeaderCell-71d95f2df4",
+                   "componentName": "ListHeaderCell"
+                  },
+                  {
+                   "baseStyles": {
+                    "justifyContent": "flex-end"
+                   },
+                   "blockName": "ListHeaderCell",
+                   "children": [
+                    {
+                     "baseStyles": {},
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-6vmf8v6uw",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "span",
+                      "text": "{{ __('Rate') }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListHeaderCell-zhsrswtg7",
+                   "componentName": "ListHeaderCell"
+                  },
+                  {
+                   "baseStyles": {
+                    "justifyContent": "flex-end"
+                   },
+                   "blockName": "ListHeaderCell",
+                   "children": [
+                    {
+                     "baseStyles": {},
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-s4k0wa04e",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-sm",
+                      "tag": "span",
+                      "text": "{{ __('Amount') }}"
+                     }
+                    }
+                   ],
+                   "componentId": "ListHeaderCell-u1doosi9d",
+                   "componentName": "ListHeaderCell"
+                  }
+                 ],
+                 "componentId": "ListHeader-0hbokx5kx",
+                 "componentName": "ListHeader"
+                },
+                {
+                 "blockName": "ListRows",
+                 "componentId": "ListRows-1t0o8sltt",
+                 "componentName": "ListRows",
+                 "componentProps": {
+                  "items": "{{ items }}"
+                 },
+                 "componentSlots": {
+                  "default": {
+                   "parentBlockId": "ListRows-1t0o8sltt",
+                   "slotContent": [
+                    {
+                     "blockName": "ListRow",
+                     "children": [
+                      {
+                       "baseStyles": {
+                        "alignSelf": "flex-start",
+                        "justifyContent": "flex-end",
+                        "paddingBottom": "12px",
+                        "paddingTop": "11px"
+                       },
+                       "blockName": "No. cell",
+                       "children": [
+                        {
+                         "baseStyles": {
+                          "color": "var(--ink-gray-5)",
+                          "fontFeatureSettings": "'tnum'"
+                         },
+                         "blockName": "No.",
+                         "componentId": "TextBlock-b3a8d30c55",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-sm",
+                          "tag": "span",
+                          "text": "{{ item.no }}"
+                         }
+                        }
+                       ],
+                       "componentId": "ListCell-2f6c9888ed",
+                       "componentName": "ListCell"
+                      },
+                      {
+                       "baseStyles": {
+                        "alignItems": "flex-start",
+                        "alignSelf": "flex-start",
+                        "gap": "10px",
+                        "paddingBottom": "12px",
+                        "paddingTop": "11px"
+                       },
+                       "blockName": "ListCell",
+                       "children": [
+                        {
+                         "blockName": "Avatar",
+                         "componentId": "Avatar-5bdeaed5d2",
+                         "componentName": "Avatar",
+                         "componentProps": {
+                          "image": "{{ item.image }}",
+                          "label": "{{ item.name }}",
+                          "shape": "square",
+                          "size": "xl"
+                         },
+                         "componentSlots": {},
+                         "visibilityCondition": "{{ itemImages }}"
+                        },
+                        {
+                         "baseStyles": {
+                          "display": "flex",
+                          "flexDirection": "column",
+                          "gap": "4px",
+                          "minWidth": "0px"
+                         },
+                         "blockName": "Item",
+                         "children": [
+                          {
+                           "baseStyles": {
+                            "color": "var(--ink-gray-8)"
+                           },
+                           "blockName": "TextBlock",
+                           "componentId": "TextBlock-7b13d01866",
+                           "componentName": "TextBlock",
+                           "componentProps": {
+                            "fontSize": "text-base-semibold",
+                            "tag": "span",
+                            "text": "{{ item.name }}"
+                           }
+                          },
+                          {
+                           "attributes": {
+                            "title": "{{ item.description }}"
+                           },
+                           "baseStyles": {
+                            "WebkitBoxOrient": "vertical",
+                            "WebkitLineClamp": "2",
+                            "color": "var(--ink-gray-5)",
+                            "display": "-webkit-box",
+                            "overflow": "hidden",
+                            "whiteSpace": "normal"
+                           },
+                           "blockName": "TextBlock",
+                           "componentId": "TextBlock-48503a2b70",
+                           "componentName": "TextBlock",
+                           "componentProps": {
+                            "fontSize": "text-p-base",
+                            "tag": "span",
+                            "text": "{{ item.description }}"
+                           },
+                           "visibilityCondition": "{{ !!item.description }}"
+                          }
+                         ],
+                         "componentId": "div-bc1bfeb1e9",
+                         "componentName": "div",
+                         "originalElement": "div"
+                        }
+                       ],
+                       "componentId": "ListCell-27f0bf26e2",
+                       "componentName": "ListCell",
+                       "componentProps": {}
+                      },
+                      {
+                       "baseStyles": {
+                        "alignSelf": "flex-start",
+                        "justifyContent": "flex-end",
+                        "paddingBottom": "12px",
+                        "paddingTop": "11px"
+                       },
+                       "blockName": "ListCell",
+                       "children": [
+                        {
+                         "baseStyles": {
+                          "color": "var(--ink-gray-8)",
+                          "fontFeatureSettings": "'tnum'",
+                          "whiteSpace": "nowrap"
+                         },
+                         "blockName": "TextBlock",
+                         "componentId": "TextBlock-uixs49v0z",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ item.qty }}"
+                         },
+                         "componentSlots": {}
+                        }
+                       ],
+                       "componentId": "ListCell-uzvydxl4k",
+                       "componentName": "ListCell",
+                       "componentProps": {},
+                       "componentSlots": {}
+                      },
+                      {
+                       "baseStyles": {
+                        "alignSelf": "flex-start",
+                        "justifyContent": "flex-end",
+                        "paddingBottom": "12px",
+                        "paddingTop": "11px"
+                       },
+                       "blockName": "ListCell",
+                       "children": [
+                        {
+                         "baseStyles": {
+                          "color": "{{ item.deliveredColor }}",
+                          "fontFeatureSettings": "'tnum'",
+                          "whiteSpace": "nowrap"
+                         },
+                         "blockName": "TextBlock",
+                         "componentId": "TextBlock-f6cc2e0bb7",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ item.delivered }}"
+                         },
+                         "componentSlots": {}
+                        }
+                       ],
+                       "componentId": "ListCell-209ab897af",
+                       "componentName": "ListCell",
+                       "componentProps": {},
+                       "componentSlots": {}
+                      },
+                      {
+                       "baseStyles": {
+                        "alignSelf": "flex-start",
+                        "justifyContent": "flex-end",
+                        "paddingBottom": "12px",
+                        "paddingTop": "11px"
+                       },
+                       "blockName": "ListCell",
+                       "children": [
+                        {
+                         "baseStyles": {
+                          "color": "var(--ink-gray-8)",
+                          "fontFeatureSettings": "'tnum'",
+                          "whiteSpace": "nowrap"
+                         },
+                         "blockName": "TextBlock",
+                         "componentId": "TextBlock-kih7j4w58",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ item.rate }}"
+                         },
+                         "componentSlots": {}
+                        }
+                       ],
+                       "componentId": "ListCell-uhoqwse2y",
+                       "componentName": "ListCell",
+                       "componentProps": {},
+                       "componentSlots": {}
+                      },
+                      {
+                       "baseStyles": {
+                        "alignSelf": "flex-start",
+                        "justifyContent": "flex-end",
+                        "paddingBottom": "12px",
+                        "paddingTop": "11px"
+                       },
+                       "blockName": "ListCell",
+                       "children": [
+                        {
+                         "baseStyles": {
+                          "color": "var(--ink-gray-8)",
+                          "fontFeatureSettings": "'tnum'",
+                          "whiteSpace": "nowrap"
+                         },
+                         "blockName": "TextBlock",
+                         "componentId": "TextBlock-5pkp8pa2v",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ item.amount }}"
+                         },
+                         "componentSlots": {}
+                        }
+                       ],
+                       "componentId": "ListCell-c7lui5xhc",
+                       "componentName": "ListCell",
+                       "componentProps": {},
+                       "componentSlots": {}
+                      }
+                     ],
+                     "componentId": "ListRow-m5abhzdmp",
+                     "componentName": "ListRow",
+                     "componentProps": {
+                      "value": "{{ value }}"
+                     },
+                     "componentSlots": {},
+                     "parentSlotName": "default"
+                    }
+                   ],
+                   "slotId": "ListRows-1t0o8sltt:default",
+                   "slotName": "default"
+                  }
+                 }
+                }
+               ],
+               "classes": [
+                "list-gap-3.5"
+               ],
+               "componentId": "List-govmhb5hk",
+               "componentName": "List",
+               "componentProps": {
+                "columns": [
+                 "28px",
+                 "minmax(0, 1fr)",
+                 "66px",
+                 "80px",
+                 "96px",
+                 "110px"
+                ],
+                "rowHeight": "auto"
+               }
+              },
+              {
+               "baseStyles": {
+                "borderTopColor": "var(--outline-gray-1)",
+                "borderTopStyle": "solid",
+                "borderTopWidth": "1px",
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "8px",
+                "padding": "10px 0px 0px",
+                "width": "100%"
+               },
+               "blockName": "Totals",
+               "componentId": "Repeater-6ab1c7ff27",
+               "componentName": "Repeater",
+               "componentProps": {
+                "data": "{{ totals }}",
+                "dataKey": "label"
+               },
+               "componentSlots": {
+                "default": {
+                 "parentBlockId": "Repeater-6ab1c7ff27",
+                 "slotContent": [
+                  {
+                   "baseStyles": {
+                    "alignItems": "baseline",
+                    "borderTopColor": "var(--outline-gray-1)",
+                    "borderTopStyle": "solid",
+                    "borderTopWidth": "{{ dataItem.divider ? '1px' : '0px' }}",
+                    "display": "flex",
+                    "flexDirection": "row",
+                    "marginLeft": "auto",
+                    "marginTop": "{{ dataItem.divider ? '4px' : '0px' }}",
+                    "maxWidth": "100%",
+                    "minWidth": "220px",
+                    "paddingTop": "{{ dataItem.divider ? '10px' : '0px' }}",
+                    "width": "fit-content"
+                   },
+                   "blockName": "Total",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "{{ dataItem.color }}",
+                      "flex": "1",
+                      "fontWeight": "{{ dataItem.weight }}",
+                      "paddingRight": "14px",
+                      "textAlign": "right"
+                     },
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-d21305484b",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ dataItem.label }}"
+                     }
+                    },
+                    {
+                     "baseStyles": {
+                      "color": "{{ dataItem.valueColor || dataItem.color }}",
+                      "flexShrink": 0,
+                      "fontFeatureSettings": "'tnum'",
+                      "fontWeight": "{{ dataItem.weight }}",
+                      "minWidth": "124px",
+                      "textAlign": "right",
+                      "whiteSpace": "nowrap"
+                     },
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-336129d38f",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ dataItem.value }}"
+                     }
+                    }
+                   ],
+                   "componentId": "div-c42468dd5e",
+                   "componentName": "div",
+                   "originalElement": "div",
+                   "parentSlotName": "default"
+                  }
+                 ],
+                 "slotId": "Repeater-6ab1c7ff27:default",
+                 "slotName": "default"
+                }
+               },
+               "visibilityCondition": null
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-5)",
+                "marginTop": "8px",
+                "textAlign": "right",
+                "width": "100%"
+               },
+               "blockName": "Amount in words",
+               "componentId": "TextBlock-9db655addc",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-base",
+                "tag": "p",
+                "text": "{{ amountInWords }}"
+               },
+               "visibilityCondition": "{{ !!amountInWords }}"
+              }
+             ],
+             "componentId": "div-2fbbcfq66",
+             "componentName": "div",
+             "originalElement": "div"
+            }
+           ],
+           "classes": [
+            "portal-doc-lead"
+           ],
+           "componentId": "div-f972b5a77f",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "minWidth": "0px"
+           },
+           "blockName": "Side panel",
+           "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "flexDirection": "row",
+              "gap": "12px",
+              "justifyContent": "space-between",
+              "minWidth": "0px",
+              "width": "100%"
+             },
+             "blockName": "Panel header",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)",
+                "minWidth": "0px",
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "whiteSpace": "nowrap"
+               },
+               "blockName": "Seller",
+               "componentId": "TextBlock-021ede42c1",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "span",
+                "text": "{{ companyName }}"
+               }
+              },
+              {
+               "attributes": {
+                "aria-label": "{{ __('Print') }}"
+               },
+               "blockName": "Panel print",
+               "classes": [
+                "portal-xl-only"
+               ],
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "script": "printDocument()"
+                }
+               },
+               "componentId": "Button-2cdedf8ec7",
+               "componentName": "Button",
+               "componentProps": {
+                "icon": "lucide-printer",
+                "variant": "ghost"
+               }
+              }
+             ],
+             "classes": [
+              "portal-side-section"
+             ],
+             "componentId": "div-b190e4a4db",
+             "componentName": "div",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "12px",
+              "minWidth": "0px",
+              "width": "100%"
+             },
+             "blockName": "Sales info",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)"
+               },
+               "blockName": "TextBlock",
+               "componentId": "TextBlock-f06d6104f8",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-base",
+                "tag": "h3",
+                "text": "{{ __('Details') }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "alignItems": "baseline",
+                "columnGap": "16px",
+                "display": "grid",
+                "gridTemplateColumns": "auto minmax(0, 1fr)",
+                "rowGap": "12px",
+                "width": "100%"
+               },
+               "blockName": "Lines",
+               "componentId": "Repeater-2fd0322809",
+               "componentName": "Repeater",
+               "componentProps": {
+                "data": "{{ salesInfo }}",
+                "dataKey": "key"
+               },
+               "componentSlots": {
+                "default": {
+                 "parentBlockId": "Repeater-2fd0322809",
+                 "slotContent": [
+                  {
+                   "baseStyles": {
+                    "cursor": "{{ dataItem.route ? 'pointer' : 'auto' }}",
+                    "display": "contents"
+                   },
+                   "blockName": "Line",
+                   "children": [
+                    {
+                     "attributes": {
+                      "title": "{{ dataItem.label }}"
+                     },
+                     "baseStyles": {
+                      "color": "var(--ink-gray-6)",
+                      "minWidth": "0px",
+                      "overflow": "hidden",
+                      "textOverflow": "ellipsis",
+                      "whiteSpace": "nowrap"
+                     },
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-82e68230db",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ dataItem.label }}"
+                     }
+                    },
+                    {
+                     "baseStyles": {
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Full number",
+                     "componentId": "Tooltip-7af2841770",
+                     "componentName": "Tooltip",
+                     "componentProps": {
+                      "text": "{{ dataItem.value }}"
+                     },
+                     "componentSlots": {
+                      "default": {
+                       "parentBlockId": "Tooltip-7af2841770",
+                       "slotContent": [
+                        {
+                         "attributes": {
+                          "class": "portal-link",
+                          "role": "link",
+                          "tabindex": "0"
+                         },
+                         "baseStyles": {
+                          "borderBottomColor": "var(--outline-gray-3)",
+                          "borderBottomStyle": "dotted",
+                          "borderBottomWidth": "1px",
+                          "color": "var(--ink-gray-8)",
+                          "cursor": "pointer",
+                          "justifySelf": "start",
+                          "marginBottom": "-1px",
+                          "maxWidth": "100%",
+                          "minWidth": "0px",
+                          "whiteSpace": "normal"
+                         },
+                         "blockName": "Link",
+                         "componentEvents": {
+                          "keydown.enter.prevent": {
+                           "action": "Run Script",
+                           "script": "goTo(dataItem.route)"
+                          }
+                         },
+                         "componentId": "TextBlock-22ff771eeb",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ dataItem.value }}"
+                         },
+                         "parentSlotName": "default"
+                        }
+                       ],
+                       "slotId": "Tooltip-7af2841770:default",
+                       "slotName": "default"
+                      }
+                     },
+                     "visibilityCondition": "{{ !!dataItem.route }}"
+                    },
+                    {
+                     "baseStyles": {
+                      "color": "{{ dataItem.color }}",
+                      "fontWeight": "{{ dataItem.weight }}",
+                      "minWidth": "0px",
+                      "overflowWrap": "anywhere",
+                      "whiteSpace": "normal"
+                     },
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-033421c2e9",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ dataItem.value }}"
+                     },
+                     "visibilityCondition": "{{ !dataItem.route && !dataItem.copyable }}"
+                    },
+                    {
+                     "baseStyles": {
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Copy value",
+                     "componentId": "Tooltip-6bcf5175f4",
+                     "componentName": "Tooltip",
+                     "componentProps": {
+                      "text": "{{ dataItem.value }}"
+                     },
+                     "componentSlots": {
+                      "default": {
+                       "parentBlockId": "Tooltip-6bcf5175f4",
+                       "slotContent": [
+                        {
+                         "attributes": {
+                          "aria-label": "{{ __('Copy {0}', [dataItem.value]) }}",
+                          "role": "button",
+                          "tabindex": "0"
+                         },
+                         "baseStyles": {
+                          "color": "{{ dataItem.color }}",
+                          "cursor": "pointer",
+                          "fontWeight": "{{ dataItem.weight }}",
+                          "minWidth": "0px",
+                          "overflow": "hidden",
+                          "textOverflow": "ellipsis",
+                          "whiteSpace": "nowrap"
+                         },
+                         "blockName": "TextBlock",
+                         "componentEvents": {
+                          "click": {
+                           "action": "Run Script",
+                           "script": "copyValue(dataItem)"
+                          },
+                          "keydown.enter.prevent": {
+                           "action": "Run Script",
+                           "script": "copyValue(dataItem)"
+                          }
+                         },
+                         "componentId": "TextBlock-8fbff5ba96",
+                         "componentName": "TextBlock",
+                         "componentProps": {
+                          "fontSize": "text-base",
+                          "tag": "span",
+                          "text": "{{ dataItem.value }}"
+                         },
+                         "parentSlotName": "default"
+                        }
+                       ],
+                       "slotId": "Tooltip-6bcf5175f4:default",
+                       "slotName": "default"
+                      }
+                     },
+                     "visibilityCondition": "{{ !!dataItem.copyable }}"
+                    }
+                   ],
+                   "componentEvents": {
+                    "click": {
+                     "action": "Run Script",
+                     "script": "goTo(dataItem.route)"
+                    }
+                   },
+                   "componentId": "div-16d666c079",
+                   "componentName": "div",
+                   "originalElement": "div",
+                   "parentSlotName": "default"
+                  }
+                 ],
+                 "slotId": "Repeater-2fd0322809:default",
+                 "slotName": "default"
+                }
+               }
+              }
+             ],
+             "classes": [
+              "portal-side-section"
+             ],
+             "componentId": "div-9871a45512",
+             "componentName": "div",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "12px",
+              "minWidth": "0px",
+              "width": "100%"
+             },
+             "blockName": "Address section",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)"
+               },
+               "blockName": "TextBlock",
+               "componentId": "TextBlock-6dda99f6be",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-base",
+                "tag": "h3",
+                "text": "{{ addressDetails.length > 1 ? __('Addresses') : addressDetails[0]?.label }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "display": "flex",
+                "flexDirection": "column",
+                "gap": "12px",
+                "width": "100%"
+               },
+               "blockName": "Address lines",
+               "componentId": "Repeater-59f8f5c91c",
+               "componentName": "Repeater",
+               "componentProps": {
+                "data": "{{ addressDetails }}",
+                "dataKey": "key"
+               },
+               "componentSlots": {
+                "default": {
+                 "parentBlockId": "Repeater-59f8f5c91c",
+                 "slotContent": [
+                  {
+                   "baseStyles": {
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "gap": "2px",
+                    "minWidth": "0px"
+                   },
+                   "blockName": "Address line",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-5)"
+                     },
+                     "blockName": "Label",
+                     "componentId": "TextBlock-4eecbbd473",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ dataItem.label }}"
+                     },
+                     "visibilityCondition": "{{ addressDetails.length > 1 }}"
+                    },
+                    {
+                     "baseStyles": {
+                      "display": "flex",
+                      "flexDirection": "column",
+                      "gap": "4px",
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Address",
+                     "children": [
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-8)"
+                       },
+                       "blockName": "Name",
+                       "componentId": "TextBlock-faf09002d2",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-base-semibold",
+                        "tag": "span",
+                        "text": "{{ dataItem.name }}"
+                       }
+                      },
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-7)"
+                       },
+                       "blockName": "Postal",
+                       "componentId": "TextBlock-77742d08ef",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-p-base",
+                        "tag": "span",
+                        "text": "{{ dataItem.address }}"
+                       }
+                      }
+                     ],
+                     "componentId": "div-5fe94ab7da",
+                     "componentName": "div",
+                     "originalElement": "div"
+                    }
+                   ],
+                   "componentId": "div-801c36652b",
+                   "componentName": "div",
+                   "originalElement": "div",
+                   "parentSlotName": "default"
+                  }
+                 ],
+                 "slotId": "Repeater-59f8f5c91c:default",
+                 "slotName": "default"
+                }
+               },
+               "visibilityCondition": "{{ addressDetails.length > 0 }}"
+              }
+             ],
+             "classes": [
+              "portal-side-section"
+             ],
+             "componentId": "div-f51dfcf6f6",
+             "componentName": "div",
+             "originalElement": "div",
+             "visibilityCondition": "{{ addressDetails.length > 0 }}"
+            }
+           ],
+           "classes": [
+            "portal-doc-aside"
+           ],
+           "componentId": "div-ed24496b90",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "32px",
+            "minWidth": "0px",
+            "width": "100%"
+           },
+           "blockName": "Rest",
+           "children": [
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "8px",
+              "width": "100%"
+             },
+             "blockName": "Terms",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-5)"
+               },
+               "blockName": "TextBlock",
+               "componentId": "TextBlock-8k6be2ged",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-sm",
+                "tag": "h2",
+                "text": "{{ __('Terms and conditions') }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "borderLeft": "2px solid var(--outline-gray-2)",
+                "color": "var(--ink-gray-7)",
+                "paddingLeft": "12px",
+                "whiteSpace": "pre-line"
+               },
+               "blockName": "Terms text",
+               "componentId": "TextBlock-053uqqhit",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-base",
+                "tag": "p",
+                "text": "{{ termsText }}"
+               }
+              }
+             ],
+             "componentId": "div-14bsuna96",
+             "componentName": "div",
+             "originalElement": "div",
+             "visibilityCondition": "{{ !!termsText }}"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "flexShrink": 0,
+              "gap": "8px",
+              "width": "100%"
+             },
+             "blockName": "Comments",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)"
+               },
+               "blockName": "TextBlock",
+               "componentId": "TextBlock-2bas1g6l3",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "h2",
+                "text": "{{ __('Comments') }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "flexShrink": 0,
+                "width": "100%"
+               },
+               "blockName": "Timeline",
+               "children": [
+                {
+                 "blockName": "ActivityTimeline",
+                 "componentId": "ActivityTimeline-s0xmlc0nm",
+                 "componentName": "ActivityTimeline",
+                 "componentProps": {
+                  "activities": "{{ comments }}"
+                 }
+                }
+               ],
+               "componentId": "div-4trox6qot",
+               "componentName": "div",
+               "originalElement": "div",
+               "visibilityCondition": "{{ comments.length > 0 }}"
+              },
+              {
+               "baseStyles": {
+                "alignItems": "start",
+                "columnGap": "8px",
+                "display": "grid",
+                "gridTemplateColumns": "30px minmax(0, 1fr)",
+                "marginTop": "{{ comments.length ? '-4px' : '8px' }}",
+                "width": "100%"
+               },
+               "blockName": "Composer row",
+               "children": [
+                {
+                 "baseStyles": {
+                  "display": "flex",
+                  "justifyContent": "center",
+                  "paddingTop": "6px"
+                 },
+                 "blockName": "Avatar cell",
+                 "children": [
+                  {
+                   "blockName": "Avatar",
+                   "componentId": "Avatar-cmtorde",
+                   "componentName": "Avatar",
+                   "componentProps": {
+                    "label": "{{ user.initials }}",
+                    "shape": "circle",
+                    "size": "lg"
+                   }
+                  }
+                 ],
+                 "componentId": "div-cmtavorde",
+                 "componentName": "div",
+                 "originalElement": "div"
+                },
+                {
+                 "baseStyles": {
+                  "borderColor": "var(--outline-gray-2)",
+                  "borderRadius": "0.625rem",
+                  "borderStyle": "solid",
+                  "borderWidth": "1px",
+                  "minWidth": "0px",
+                  "overflow": "hidden",
+                  "padding": "0px 4px"
+                 },
+                 "blockName": "CommentComposer",
+                 "componentEvents": {
+                  "submit": {
+                   "action": "Run Script",
+                   "script": "postComment(eventArgs[0])"
+                  }
+                 },
+                 "componentId": "CommentComposer-yawagjh22",
+                 "componentName": "CommentComposer",
+                 "componentProps": {
+                  "placeholder": "{{ __('Add a comment') }}",
+                  "submitLabel": "{{ __('Comment') }}",
+                  "submitting": "{{ posting }}"
+                 }
+                }
+               ],
+               "componentId": "div-cmtroworde",
+               "componentName": "div",
+               "originalElement": "div",
+               "visibilityCondition": "{{ !clearing }}"
+              }
+             ],
+             "componentId": "div-l99bvur2o",
+             "componentName": "div",
+             "originalElement": "div"
+            }
+           ],
+           "classes": [
+            "portal-doc-rest"
+           ],
+           "componentId": "div-ce7489d592",
+           "componentName": "div",
+           "originalElement": "div"
+          }
+         ],
+         "classes": [
+          "portal-doc",
+          "portal-reveal"
+         ],
+         "componentId": "div-juin3509g",
+         "componentName": "div",
+         "originalElement": "div",
+         "visibilityCondition": "{{ loaded && !notFound }}"
+        },
+        {
+         "baseStyles": {},
+         "blockName": "Loading",
+         "componentId": "PortalSkeleton-order",
+         "componentName": "PortalSkeleton",
+         "componentProps": {
+          "columns": [
+           "28px",
+           "minmax(0, 1fr)",
+           "66px",
+           "80px",
+           "96px",
+           "110px"
+          ],
+          "variant": "detail"
+         },
+         "isCustomVueComponent": true,
+         "visibilityCondition": "{{ !loaded && !notFound }}"
+        },
+        {
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "12px",
+          "justifyContent": "center",
+          "padding": "20px",
+          "width": "100%"
+         },
+         "blockName": "Not found",
+         "children": [
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "background": "var(--surface-gray-2)",
+            "borderRadius": "9999px",
+            "display": "flex",
+            "justifyContent": "center",
+            "padding": "12px"
+           },
+           "blockName": "Icon circle",
+           "children": [
+            {
+             "blockName": "Icon",
+             "classes": [
+              "size-6",
+              "text-ink-gray-5"
+             ],
+             "componentId": "span-nford",
+             "componentName": "Icon",
+             "componentProps": {
+              "icon": "lucide-shopping-cart"
+             }
+            }
+           ],
+           "componentId": "div-nficord",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-7)"
+           },
+           "blockName": "TextBlock",
+           "componentId": "TextBlock-nftord",
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-base",
+            "tag": "span",
+            "text": "{{ failure.title }}"
+           }
+          },
+          {
+           "baseStyles": {
+            "color": "var(--ink-gray-5)"
+           },
+           "blockName": "TextBlock",
+           "componentId": "TextBlock-nfcord",
+           "componentName": "TextBlock",
+           "componentProps": {
+            "fontSize": "text-sm",
+            "tag": "span",
+            "text": "{{ failure.text }}"
+           }
+          },
+          {
+           "baseStyles": {
+            "marginTop": "4px"
+           },
+           "blockName": "Back",
+           "componentId": "Button-nford",
+           "componentName": "Button",
+           "componentProps": {
+            "label": "{{ __('Back to orders') }}",
+            "route": "/orders",
+            "variant": "subtle"
+           }
+          }
+         ],
+         "componentId": "div-nford",
+         "componentName": "div",
+         "originalElement": "div",
+         "visibilityCondition": "{{ notFound }}"
+        }
+       ],
+       "componentId": "div-jb4z0yr1y",
+       "componentName": "div",
+       "originalElement": "div"
+      }
+     ],
+     "componentId": "div-rdlv35ya0",
+     "componentName": "div",
+     "originalElement": "div"
+    }
+   ],
+   "componentId": "root",
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-10-07 15:15:09.640270",
+ "docstatus": 0,
+ "doctype": "Studio Page",
+ "frappe_app": "erpnext",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-11-14 12:30:00.000000",
+ "modified_by": "Administrator",
+ "name": "order",
+ "owner": "Administrator",
+ "page_name": "page-9ae23f06",
+ "page_title": "Order",
+ "published": 1,
+ "resources": [
+  {
+   "auto": 1,
+   "fetch_document_using_filters": 0,
+   "limit": 0,
+   "method": "GET",
+   "params": "{\"name\": \"{{ route.params.order }}\"}",
+   "resource_name": "order",
+   "resource_type": "API Resource",
+   "url": "erpnext.portal.customer_portal.get_order"
+  },
+  {
+   "auto": 1,
+   "fetch_document_using_filters": 0,
+   "limit": 0,
+   "method": "GET",
+   "params": "{\"doctype\": \"Sales Order\", \"name\": \"{{ route.params.order }}\"}",
+   "resource_name": "comments",
+   "resource_type": "API Resource",
+   "url": "erpnext.portal.customer_portal.get_portal_comments"
+  }
+ ],
+ "route": "/orders/:order",
+ "studio_app": "customer-portal"
+}

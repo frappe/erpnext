@@ -119,6 +119,9 @@ additional_print_settings = "erpnext.controllers.print_settings.get_print_settin
 
 on_session_creation = "erpnext.portal.utils.create_customer_or_supplier"
 
+# the Studio customer portal reads these before its first render
+studio_app_boot = {"customer-portal": "erpnext.portal.customer_portal.get_portal_boot"}
+
 treeviews = [
 	"Account",
 	"Cost Center",
@@ -414,6 +417,17 @@ doc_events = {
 			"erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.check_for_running_deletion_job",
 			"erpnext.stock.doctype.company_restriction.company_restriction.validate_transaction_company",
 		],
+	},
+	"Quotation": {
+		# before_save covers drafts; a submitted quotation takes the
+		# update-after-submit path instead, which is where the signature is written
+		"before_save": "erpnext.portal.customer_portal.protect_quotation_signature",
+		"before_update_after_submit": "erpnext.portal.customer_portal.protect_quotation_signature",
+	},
+	"Comment": {
+		"before_save": "erpnext.portal.customer_portal.protect_portal_comment",
+		"after_insert": "erpnext.portal.customer_portal.notify_customer_of_comment",
+		"on_update": "erpnext.portal.customer_portal.notify_customer_of_comment",
 	},
 	tuple(period_closing_doctypes): {
 		"validate": "erpnext.accounts.doctype.accounting_period.accounting_period.validate_accounting_period_on_doc_save",
