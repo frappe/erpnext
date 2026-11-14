@@ -365,11 +365,21 @@ def add_returned_row(doc, key, row, already_returned_items):
 def get_returned_stock_qty(doc, row):
 	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
 	stock_qty = flt(row.qty) * flt(row.conversion_factor or 1)
-	if doc.doctype != "Subcontracting Receipt" or frappe.get_single_value(
-		"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"
-	):
-		stock_qty = flt(stock_qty, row.precision("stock_qty"))
-	return stock_qty
+	if doc.doctype == "Subcontracting Receipt":
+		rounded = frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
+	elif doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
+		rounded = True
+	else:
+		rounded = is_sales_stock_return(doc) or frappe.get_single_value(
+			"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
+		)
+	return flt(stock_qty, row.precision("stock_qty")) if rounded else stock_qty
+
+
+def is_sales_stock_return(doc):
+	"""A sales return that posts its own stock: not a credit note, nor a POS return that a
+	consolidated invoice posts."""
+	return not is_merged_pos_return(doc) and (doc.doctype == "Delivery Note" or bool(doc.get("update_stock")))
 
 
 def set_return_stock_qty(doc):
