@@ -5187,6 +5187,39 @@ class TestProductionPlan(ERPNextTestSuite):
 		invoice.cancel()
 		self.assertEqual(self.get_plan_reserved_qty(plan), 4)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 0,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"use_serial_batch_fields": 0,
+		},
+	)
+	def test_work_order_transfers_use_qty_and_batch_reservations_of_a_plan(self):
+		rm_item = make_item(
+			"Batch RM For SR Mixed Hand Off",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BRMSRMH-.#####"},
+		).name
+		plan = self.make_plan_short_of_stock(rm_item)
+		self.receive_for_plan(plan, 6)
+		work_order = submit_work_order_from_plan(plan, 10, "_Test Warehouse - _TC")
+
+		for qty, transferred_qty in (
+			(6, {"Serial and Batch": 6, "Qty": 0}),
+			(4, {"Serial and Batch": 6, "Qty": 4}),
+		):
+			frappe.get_doc(
+				make_se_from_wo(work_order.name, "Material Transfer for Manufacture", qty)
+			).submit()
+			reservations = frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": work_order.name, "warehouse": "_Test Warehouse - _TC", "docstatus": 1},
+				fields=["reservation_based_on", "transferred_qty"],
+				as_list=True,
+			)
+			self.assertEqual(dict(reservations), transferred_qty)
+
 	def get_plan_reserved_qty(self, plan):
 		return sum(
 			frappe.get_all(
