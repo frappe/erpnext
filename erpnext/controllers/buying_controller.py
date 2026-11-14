@@ -1235,7 +1235,7 @@ class BuyingController(SubcontractingController):
 
 		return self.get_returned_source_package(row)
 
-	def get_source_warehouse_package(self, row, package):
+	def get_source_warehouse_package(self, row, package, source_qty):
 		if not (row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
 			return package
 
@@ -1252,6 +1252,7 @@ class BuyingController(SubcontractingController):
 			row.from_warehouse,
 			type_of_transaction="Outward",
 			include_bundle=row.rejected_serial_and_batch_bundle,
+			total_qty=source_qty,
 		)
 
 	def get_package_of_source_warehouse(self, row) -> str | None:
@@ -1313,7 +1314,7 @@ class BuyingController(SubcontractingController):
 							"recalculate_rate": 1,
 							"dependant_sle_voucher_detail_no": d.name,
 							"serial_and_batch_bundle": self.get_source_warehouse_package(
-								d, serial_and_batch_bundle
+								d, serial_and_batch_bundle, source_qty
 							),
 						},
 					)

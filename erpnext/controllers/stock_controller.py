@@ -1354,7 +1354,9 @@ class StockController(AccountsController):
 		qty=0,
 		include_bundle=None,
 		exclude_serial_nos=None,
+		total_qty=0,
 	):
+<<<<<<< HEAD
 		return make_bundle_for_material_transfer(
 			is_new=self.is_new(),
 			docstatus=self.docstatus,
@@ -1367,6 +1369,19 @@ class StockController(AccountsController):
 			qty=qty,
 			include_bundle=include_bundle,
 			exclude_serial_nos=exclude_serial_nos,
+=======
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		return SerialBatchBundleService(self).make_package_for_transfer(
+			serial_and_batch_bundle,
+			warehouse,
+			type_of_transaction,
+			do_not_submit,
+			qty,
+			include_bundle,
+			exclude_serial_nos,
+			total_qty,
+>>>>>>> a9b6c77 (fix(stock): size the in-transit package of a rejected internal receipt to the qty it takes out)
 		)
 
 	def get_sl_entries(self, d, args):
@@ -2946,6 +2961,9 @@ def make_bundle_for_material_transfer(**kwargs):
 	):
 		qty = kwargs.qty
 
+	if kwargs.total_qty and not bundle_doc.has_serial_no:
+		set_entries_total_qty(bundle_doc.entries, kwargs.total_qty)
+
 	for row in bundle_doc.entries:
 		row.is_outward = 0
 		row.qty = abs(qty or row.qty)
@@ -2975,6 +2993,11 @@ def make_bundle_for_material_transfer(**kwargs):
 			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
+
+
+def set_entries_total_qty(entries, total_qty):
+	"""Let the last entry take the difference, so the entries add up to the stock qty the voucher posts."""
+	entries[-1].qty = abs(flt(total_qty)) - sum(abs(flt(row.qty)) for row in entries[:-1])
 
 
 def get_item_wise_inventory_account_map(rows, company):
