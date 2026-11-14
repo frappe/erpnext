@@ -519,6 +519,19 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr_return.items[1].qty, -2)
 
+	def test_return_keeps_the_cost_center_set_on_a_secondary_row(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+			scr_return.items[1].cost_center = "_Test Cost Center 2 - _TC"
+			scr_return.save()
+
+		self.assertEqual(scr_return.items[1].cost_center, "_Test Cost Center 2 - _TC")
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
