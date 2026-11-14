@@ -2473,7 +2473,7 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 	if child_row and isinstance(child_row, str):
 		child_row = parse_json(child_row)
 
-	if not name and child_row and child_row.get("qty") < 0:
+	if not name and child_row:
 		bundle = get_reference_serial_and_batch_bundle(child_row)
 		if bundle:
 			voucher_no = None
@@ -2503,16 +2503,23 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 
 
 def get_reference_serial_and_batch_bundle(child_row):
+	if flt(child_row.get("rejected_qty" if child_row.get("is_rejected") else "qty")) >= 0:
+		return
+
+	doctype = child_row.get("doctype")
 	field = {
 		"Sales Invoice Item": "sales_invoice_item",
 		"Delivery Note Item": "dn_detail",
 		"Purchase Receipt Item": "purchase_receipt_item",
 		"Purchase Invoice Item": "purchase_invoice_item",
 		"POS Invoice Item": "pos_invoice_item",
-	}.get(child_row.doctype)
+		"Subcontracting Receipt Item": "subcontracting_receipt_item",
+	}.get(doctype)
 
 	if field:
-		return frappe.get_cached_value(child_row.doctype, child_row.get(field), "serial_and_batch_bundle")
+		from_rejected = child_row.get("is_rejected") or child_row.get("return_qty_from_rejected_warehouse")
+		bundle_field = "rejected_serial_and_batch_bundle" if from_rejected else "serial_and_batch_bundle"
+		return frappe.get_cached_value(doctype, child_row.get(field), bundle_field)
 
 
 @frappe.whitelist(methods=["POST"])
