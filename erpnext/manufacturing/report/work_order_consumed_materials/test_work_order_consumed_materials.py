@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -172,3 +174,17 @@ class TestWorkOrderConsumedMaterials(ERPNextTestSuite):
 
 		self.assertEqual(len(rows), len(wo.required_items))
 		self.assertEqual(rows[0].status, "Closed")
+
+	def test_company_user_permission_limits_work_orders(self):
+		wo = self.make_manufactured_work_order(qty=1)
+		restricted_user = create_user("wo_consumed_other_company@example.com", "Manufacturing User")
+		add_user_permission("Company", "_Test Company 1", restricted_user.name)
+		permitted_user = create_user("wo_consumed_same_company@example.com", "Manufacturing User")
+		add_user_permission("Company", "_Test Company", permitted_user.name)
+
+		with self.set_user(restricted_user.name):
+			self.assertNotIn(wo.name, {row.get("parent") for row in self.run_report()})
+			self.assertNotIn(wo.name, {row.get("parent") for row in self.run_report(company=None)})
+
+		with self.set_user(permitted_user.name):
+			self.assertIn(wo.name, {row.get("parent") for row in self.run_report()})
