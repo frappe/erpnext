@@ -134,7 +134,12 @@ def get_kept_packed_items(doc):
 	build that make_packing_list keeps for the bundle rows as they are now."""
 	packed_items_table = get_indexed_packed_items_table(doc)
 	order_packed_items = get_order_packed_items(doc)
+	# only a bundle row that has packed rows can keep one
+	parent_items = {row.parent_item for row in doc.get("packed_items")}
 	for item_row in doc.get("items"):
+		if item_row.item_code not in parent_items:
+			continue
+
 		if not (bundle_name := get_bundle_version_for_row(item_row, doc)):
 			continue
 
