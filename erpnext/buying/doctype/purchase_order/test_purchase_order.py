@@ -248,21 +248,16 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
-		item = make_item_with_fractional_box()
-		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
-		po = make_purchase_order(mr.name)
-		po.supplier = "_Test Supplier"
-		po.submit()
-
-		for _ in range(3):
-			pr = make_purchase_receipt(po.name)
-			pr.items[0].qty = pr.items[0].received_qty = 1
-			pr.submit()
-
-		mr.reload()
+		mr = receive_material_request_in_parts()
 		self.assertEqual(
 			mr.items[0].received_qty, flt(mr.items[0].stock_qty, mr.precision("stock_qty", "items"))
 		)
+		self.assertEqual(mr.per_received, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipts_for_parts_of_a_material_request_add_up_to_its_unrounded_stock_qty(self):
+		mr = receive_material_request_in_parts()
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
 		self.assertEqual(mr.per_received, 100)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
@@ -2928,6 +2923,23 @@ def make_po_for_sales_order_row(sales_order_row):
 
 	selected_items = [{"name": sales_order_row.name, "supplier": "_Test Supplier"}]
 	return make_po_from_so(sales_order_row.parent, selected_items=selected_items)[0]
+
+
+def receive_material_request_in_parts():
+	"""Material Request for 3 fractional Boxes, ordered at once and received one Box at a time."""
+	item = make_item_with_fractional_box()
+	mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+	po = make_purchase_order(mr.name)
+	po.supplier = "_Test Supplier"
+	po.submit()
+
+	for _ in range(3):
+		pr = make_purchase_receipt(po.name)
+		pr.items[0].qty = pr.items[0].received_qty = 1
+		pr.submit()
+
+	mr.reload()
+	return mr
 
 
 def make_item_with_fractional_box(uom="Box"):
