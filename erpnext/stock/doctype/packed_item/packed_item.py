@@ -120,6 +120,11 @@ def make_packing_list(doc, order_packed_items=None):
 	if parent_items_price:
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
 
+	if doc.get("is_return"):
+		from erpnext.controllers.sales_and_purchase_return import set_return_packed_qty
+
+		set_return_packed_qty(doc)
+
 
 def is_product_bundle(item_code: str) -> bool:
 	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle

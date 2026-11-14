@@ -18,6 +18,7 @@ from frappe.utils import escape_html, flt, get_link_to_form, getdate
 from erpnext.controllers.sales_and_purchase_return import (
 	available_serial_batch_for_return,
 	filter_serial_batches,
+	get_rejected_stock_qty,
 	make_serial_batch_bundle_for_return,
 	remove_picked_serial_batches,
 )
@@ -600,10 +601,7 @@ class SerialBatchBundleService:
 		if is_rejected:
 			serial_nos = row.get("rejected_serial_no")
 			type_of_transaction = "Inward" if not self.doc.is_return else "Outward"
-			qty = flt(
-				row.get("rejected_qty") * row.get("conversion_factor", 1.0),
-				frappe.get_precision("Serial and Batch Entry", "qty"),
-			)
+			qty = get_rejected_stock_qty(row)
 			warehouse = row.get("rejected_warehouse")
 
 		if (

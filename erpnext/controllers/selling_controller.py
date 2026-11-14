@@ -14,6 +14,7 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
 	is_batch_expired,
+	is_sales_stock_return,
 	set_return_stock_qty,
 )
 from erpnext.controllers.stock_controller import StockController
@@ -429,13 +430,18 @@ class SellingController(StockController):
 		allow_to_edit_stock_qty = frappe.get_single_value(
 			"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
 		)
+		# returned stock items are rounded as the stock ledger posts them, so the row completing
+		# a return can take what is left
+		rounded_items = (
+			self.get_stock_items() if self.get("is_return") and is_sales_stock_return(self) else []
+		)
 
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty"):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
-				if allow_to_edit_stock_qty:
+				if allow_to_edit_stock_qty or d.item_code in rounded_items:
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
 
 		if self.get("is_return"):

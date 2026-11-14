@@ -183,6 +183,123 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 
 		self.assertEqual(get_posted_stock_qty(return_pr), -get_posted_stock_qty(pr))
 
+	def test_purchase_receipt_split_returns_take_out_the_rejected_stock_qty(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		for make_return in (make_purchase_return, make_purchase_return_against_rejected_warehouse):
+			with self.subTest(make_return=make_return.__name__):
+				pr = make_purchase_receipt(
+					item_code=make_box_item(conversion_factor),
+					qty=3,
+					rejected_qty=3,
+					uom="Box",
+					stock_uom="Kg",
+					conversion_factor=conversion_factor,
+				)
+				return_pr = make_return(pr.name)
+				row = return_pr.items[0]
+				row.qty = -1
+				row.rejected_qty = -1 if row.rejected_qty else 0
+				row.received_qty = row.qty + row.rejected_qty
+				for _ in range(2):
+					return_pr.append("items", dict(row.as_dict(), name=None))
+				return_pr.submit()
+
+				rejected_warehouse = pr.items[0].rejected_warehouse
+				self.assertEqual(
+					get_posted_stock_qty(return_pr, rejected_warehouse),
+					-get_posted_stock_qty(pr, rejected_warehouse),
+				)
+
+	def test_purchase_receipt_full_return_with_rejected_qty_on_two_rows(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		pr = make_purchase_receipt(
+			item_code=make_box_item(conversion_factor),
+			qty=3,
+			rejected_qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		return_pr = make_purchase_return(pr.name)
+		row = return_pr.items[0]
+		row.qty, row.rejected_qty, row.received_qty = -2, -1, -3
+		return_pr.append("items", dict(row.as_dict(), name=None, qty=-1, rejected_qty=-2))
+		return_pr.submit()
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "per_returned"), 100)
+
+	def test_purchase_receipt_returns_from_the_rejected_warehouse_in_separate_documents(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		pr = make_purchase_receipt(
+			item_code=make_box_item(conversion_factor),
+			qty=3,
+			rejected_qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		rejected_warehouse = pr.items[0].rejected_warehouse
+		returned_qty = 0
+		for _ in range(3):
+			return_pr = make_purchase_return_against_rejected_warehouse(pr.name)
+			return_pr.items[0].qty = return_pr.items[0].received_qty = -1
+			return_pr.submit()
+			returned_qty += get_posted_stock_qty(return_pr, rejected_warehouse)
+
+		self.assertEqual(flt(returned_qty, 2), -get_posted_stock_qty(pr, rejected_warehouse))
+
+	def test_purchase_receipt_split_rejected_batch_return_by_batch_fields(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_batch_from_bundle,
+		)
+
+		conversion_factor = 0.3356
+		item_code = make_box_item(
+			conversion_factor,
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "SRBF-.#####"},
+		)
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=3,
+			rejected_qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		return_pr = make_purchase_return(pr.name)
+		row = return_pr.items[0]
+		row.qty, row.rejected_qty, row.received_qty = -1, -1, -2
+		row.use_serial_batch_fields = 1
+		row.batch_no = get_batch_from_bundle(pr.items[0].rejected_serial_and_batch_bundle)
+		for _ in range(2):
+			return_pr.append("items", dict(row.as_dict(), name=None))
+		return_pr.submit()
+
+		rejected_warehouse = pr.items[0].rejected_warehouse
+		self.assertEqual(
+			get_posted_stock_qty(return_pr, rejected_warehouse),
+			-get_posted_stock_qty(pr, rejected_warehouse),
+		)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_delivery_note_split_return_brings_back_the_delivered_stock_qty(self):
@@ -193,6 +310,61 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_delivery_note_split_return_of_one_row_brings_back_its_ledger_qty(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
+		for row in return_dn.items:
+			row.dn_detail = return_dn.items[0].dn_detail
+		return_dn.submit()
+
+		dn = frappe.get_doc("Delivery Note", return_dn.return_against)
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_credit_note_without_update_stock_keeps_the_invoiced_stock_qty(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		conversion_factor = 0.3356
+		si = create_sales_invoice(item_code=make_box_item(conversion_factor), do_not_submit=True)
+		si.items[0].uom, si.items[0].conversion_factor = "Box", conversion_factor
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.submit()
+
+		self.assertEqual(credit_note.items[0].stock_qty, -si.items[0].stock_qty)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_delivery_note_full_return_of_repeated_non_stock_rows(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		conversion_factor = 0.3334
+		item_code = make_item(
+			properties={
+				"is_stock_item": 0,
+				"stock_uom": "Kg",
+				"uoms": [
+					{"uom": "Kg", "conversion_factor": 1},
+					{"uom": "Box", "conversion_factor": conversion_factor},
+				],
+			}
+		).name
+		dn = create_delivery_note(item_code=item_code, qty=1, do_not_submit=True)
+		dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
+		for _ in range(2):
+			dn.append("items", dict(dn.items[0].as_dict(), name=None))
+		dn.submit()
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.submit()
+
+		self.assertEqual(return_dn.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
 		return_dn.insert()
@@ -200,24 +372,76 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_delivery_note_bundle_return_counts_components_on_rounded_stock_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		conversion_factor = 0.301
-		_component, bundle = make_bundle_with_component(
-			component_qty=10,
-			bundle_properties={
-				"stock_uom": "Kg",
-				"uoms": [
-					{"uom": "Kg", "conversion_factor": 1},
-					{"uom": "Box", "conversion_factor": conversion_factor},
-				],
-			},
-		)
-		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
-		dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
-		dn.submit()
+		dn = make_box_bundle_delivery_note(conversion_factor=0.301, qty=1)
 
 		make_sales_return(dn.name).insert()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_split_bundle_return_brings_back_the_delivered_components(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		dn = make_box_bundle_delivery_note(
+			conversion_factor=0.3356, qty=3, component_qty=0.4, component_properties={"stock_uom": "Kg"}
+		)
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = -1
+		return_dn.append("items", dict(return_dn.items[0].as_dict(), name=None, qty=-2))
+		return_dn.submit()
+
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_split_bundle_return_without_dn_detail_brings_back_the_delivered_components(
+		self,
+	):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		dn = make_box_bundle_delivery_note(
+			conversion_factor=0.3356, qty=3, component_qty=0.4, component_properties={"stock_uom": "Kg"}
+		)
+		return_dn = make_sales_return(dn.name)
+		row = return_dn.items[0]
+		row.qty, row.dn_detail = -1, None
+		for _ in range(2):
+			return_dn.append("items", dict(row.as_dict(), name=None))
+		return_dn.submit()
+
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_delivery_note_partial_bundle_return_packs_components_on_the_unrounded_stock_qty(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		dn = make_box_bundle_delivery_note(
+			conversion_factor=0.3356, qty=2, component_properties={"stock_uom": "Kg"}
+		)
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = -1
+		return_dn.submit()
+
+		# 10 Kg of the component for each of the 0.3356 Kg returned
+		self.assertEqual(get_posted_stock_qty(return_dn), 3.36)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_bundle_return_with_and_without_dn_detail_brings_back_the_delivered_components(
+		self,
+	):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		dn = make_box_bundle_delivery_note(
+			conversion_factor=0.3356, qty=3, component_qty=0.4, component_properties={"stock_uom": "Kg"}
+		)
+		return_dn = make_sales_return(dn.name)
+		row = return_dn.items[0]
+		return_dn.append("items", dict(row.as_dict(), name=None, qty=-2))
+		row.qty, row.dn_detail = -1, None
+		return_dn.submit()
+
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
 
 	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -433,19 +657,21 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertRaises(StockOverReturnError, return_doc.insert)
 
 
-def get_posted_stock_qty(doc):
-	"""Stock qty the stock ledger moved for `doc`."""
-	actual_qty = frappe.get_all(
-		"Stock Ledger Entry", filters={"voucher_no": doc.name, "is_cancelled": 0}, pluck="actual_qty"
-	)
+def get_posted_stock_qty(doc, warehouse=None):
+	"""Stock qty the stock ledger moved for `doc`, in `warehouse` if given."""
+	filters = {"voucher_no": doc.name, "is_cancelled": 0}
+	if warehouse:
+		filters["warehouse"] = warehouse
+	actual_qty = frappe.get_all("Stock Ledger Entry", filters=filters, pluck="actual_qty")
 	return flt(sum(actual_qty), frappe.get_precision("Stock Ledger Entry", "actual_qty"))
 
 
-def make_box_item(conversion_factor):
+def make_box_item(conversion_factor, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item
 
 	return make_item(
 		properties={
+			**(properties or {}),
 			"is_stock_item": 1,
 			"stock_uom": "Kg",
 			"uoms": [
@@ -484,12 +710,33 @@ def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	return return_dn
 
 
-def make_bundle_with_component(component_qty, bundle_properties=None):
+def make_box_bundle_delivery_note(conversion_factor, qty, component_qty=10, component_properties=None):
+	"""Deliver `qty` Box of a bundle in Kg holding `component_qty` of one component per Kg."""
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+	_component, bundle = make_bundle_with_component(
+		component_qty=component_qty,
+		component_properties=component_properties,
+		bundle_properties={
+			"stock_uom": "Kg",
+			"uoms": [
+				{"uom": "Kg", "conversion_factor": 1},
+				{"uom": "Box", "conversion_factor": conversion_factor},
+			],
+		},
+	)
+	dn = create_delivery_note(item_code=bundle, qty=qty, do_not_submit=True)
+	dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
+	dn.submit()
+	return dn
+
+
+def make_bundle_with_component(component_qty, bundle_properties=None, component_properties=None):
 	from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-	component = make_item(properties={"is_stock_item": 1}).name
+	component = make_item(properties={"is_stock_item": 1, **(component_properties or {})}).name
 	bundle = make_item(properties={"is_stock_item": 0, **(bundle_properties or {})}).name
 	make_product_bundle(bundle, [component], qty=component_qty)
 	make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=20, basic_rate=100)

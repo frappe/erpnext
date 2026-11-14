@@ -786,7 +786,7 @@ class BuyingController(SubcontractingController):
 
 				qty_in_stock_uom = (
 					self.get_valued_stock_qty(item)
-					or get_stock_qty(item, item.rejected_qty)
+					or flt(item.rejected_stock_qty)
 					or flt(item.qty) * flt(item.conversion_factor)
 				)
 
@@ -816,7 +816,7 @@ class BuyingController(SubcontractingController):
 		if not flt(row.get("rejected_qty")) or not bills_rejected_quantity(self):
 			return flt(row.stock_qty)
 
-		return flt(row.stock_qty) + get_stock_qty(row, row.rejected_qty)
+		return flt(row.stock_qty) + flt(row.rejected_stock_qty)
 
 	def get_tax_details(self):
 		tax_accounts = []
@@ -1093,6 +1093,12 @@ class BuyingController(SubcontractingController):
 						d.conversion_factor, d.precision("conversion_factor")
 					)
 
+				if d.meta.get_field("rejected_stock_qty"):
+					# rounded as the stock ledger posts it
+					d.rejected_stock_qty = flt(
+						flt(d.rejected_qty) * flt(d.conversion_factor), d.precision("rejected_stock_qty")
+					)
+
 				# rounded like the received rows, so the row completing a return can take what is left
 				if (
 					allow_to_edit_stock_qty
@@ -1152,9 +1158,7 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
-
-		return flt(accepted_qty + rejected_qty, row.precision("stock_qty"))
+		return flt(accepted_qty + flt(row.rejected_stock_qty), row.precision("stock_qty"))
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
@@ -1354,7 +1358,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": get_stock_qty(d, d.rejected_qty),
+							"actual_qty": flt(d.rejected_stock_qty),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
@@ -1781,8 +1785,3 @@ def get_purchase_expense_account(item_code, company):
 			for field in ("purchase_expense_account", "purchase_expense_contra_account")
 		}
 	)
-
-
-def get_stock_qty(row, qty) -> float:
-	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
-	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
