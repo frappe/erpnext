@@ -6,7 +6,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.selling.doctype.customer.customer import get_credit_limit_settings, get_customer_outstanding
+from erpnext.selling.doctype.customer.customer import (
+	get_credit_limit_settings,
+	get_customer_outstanding_breakup,
+)
 
 
 def execute(filters=None):
@@ -14,43 +17,36 @@ def execute(filters=None):
 		filters = {}
 	# Check if customer id is according to naming series or customer name
 	customer_naming_type = frappe.get_single_value("Selling Settings", "cust_master_name")
-	columns = get_columns(customer_naming_type)
+	columns = get_columns(customer_naming_type, filters.get("show_breakup"))
 
 	data = []
 
 	customer_list = get_details(filters)
 
 	for d in customer_list:
-		row = []
 		credit_limit, bypass_credit_limit_check = get_credit_limit_settings(d.name, filters.get("company"))
-
-		outstanding_amt = get_customer_outstanding(
+		breakup = get_customer_outstanding_breakup(
 			d.name, filters.get("company"), ignore_outstanding_sales_order=bypass_credit_limit_check
 		)
+		outstanding_amt = breakup.gle + breakup.sales_order + breakup.delivery_note
 
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
+		row = [d.name]
 		if customer_naming_type == "Naming Series":
-			row = [
-				d.name,
-				d.customer_name,
-				credit_limit,
-				outstanding_amt,
-				bal,
-				bypass_credit_limit_check,
-				d.is_frozen,
-				d.disabled,
-			]
-		else:
-			row = [
-				d.name,
-				credit_limit,
-				outstanding_amt,
-				bal,
-				bypass_credit_limit_check,
-				d.is_frozen,
-				d.disabled,
-			]
+			row.append(d.customer_name)
+
+		row.append(credit_limit)
+		if filters.get("show_breakup"):
+			row += [breakup.gle, breakup.sales_order, breakup.delivery_note]
+
+		row += [
+			outstanding_amt,
+			bal,
+			bypass_credit_limit_check,
+			d.is_frozen,
+			d.disabled,
+		]
 
 		if credit_limit:
 			data.append(row)
@@ -58,10 +54,20 @@ def execute(filters=None):
 	return columns, data
 
 
-def get_columns(customer_naming_type):
+def get_columns(customer_naming_type, show_breakup=False):
 	columns = [
 		_("Customer") + ":Link/Customer:120",
 		_("Credit Limit") + ":Currency:120",
+	]
+
+	if show_breakup:
+		columns += [
+			_("Outstanding as per GL") + ":Currency:140",
+			_("Pending Sales Orders") + ":Currency:140",
+			_("Pending Delivery Notes") + ":Currency:140",
+		]
+
+	columns += [
 		_("Outstanding Amt") + ":Currency:100",
 		_("Credit Balance") + ":Currency:120",
 		_("Bypass credit check at Sales Order") + ":Check:80",
