@@ -52,7 +52,6 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	set_amount_net_of_returns,
 	update_billed_amount_based_on_po,
 )
-from erpnext.stock.services.return_charges import ReturnChargesService
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -262,10 +261,6 @@ class PurchaseInvoice(BuyingController):
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ""
-
-	def before_validate(self):
-		if self.update_stock:
-			ReturnChargesService(self).set_returned_valuation_charges()
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))

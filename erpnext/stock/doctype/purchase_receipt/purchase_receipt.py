@@ -30,11 +30,14 @@ from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receip
 )
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from erpnext.stock.doctype.purchase_receipt.services.return_charges import ReturnChargesService
 =======
 from erpnext.stock.services.return_charges import ReturnChargesService
 >>>>>>> d8a07e8 (fix(accounts): reverse only the carried valuation charge on a stock-updating debit note)
+=======
+>>>>>>> 87b2e1d (fix(stock): set a return's valuation charge share after its item details are filled)
 from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
 >>>>>>> e12ef8f (fix(stock): reverse only the Actual valuation charge the returned stock carried)
 
@@ -282,8 +285,6 @@ class PurchaseReceipt(BuyingController):
 
 		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
 			_apply_putaway_rule(self.doctype, self.get("items"), self.company)
-
-		ReturnChargesService(self).set_returned_valuation_charges()
 
 	def validate(self):
 		self.validate_posting_time()
