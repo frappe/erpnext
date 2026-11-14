@@ -716,6 +716,7 @@ def get_delivery_notes_to_be_received(
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
 	doctype = "Batch"
+	frappe.has_permission(doctype, "select", throw=True)
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = [field for field in meta.get_search_fields() if field not in ("name", "batch_id")]
 	page_len = 300
@@ -731,7 +732,7 @@ def get_batch_no(doctype: str, txt: str, searchfield: str, start: int, page_len:
 	if not filtered_batches:
 		return []
 	numbers = dict(
-		frappe.get_all(
+		frappe.get_list(
 			"Batch",
 			filters={"name": ("in", [row[0] for row in filtered_batches]), "item": filters.get("item_code")},
 			fields=["name", "batch_id"],
