@@ -2136,18 +2136,44 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		},
 	)
 	def test_delivery_of_one_batch_across_its_reservations(self):
+		entries = self.deliver_one_batch_across_reservations([2, 2], 3)
+		self.assertEqual([d.delivered_qty for d in entries], [2, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"allow_negative_stock": 0,
+		},
+	)
+	def test_delivery_of_a_fractional_batch_qty_across_its_reservations(self):
+		entries = self.deliver_one_batch_across_reservations([0.1, 0.2], 0.3, uom="Kg")
+		self.assertEqual([d.status for d in entries], ["Delivered", "Delivered"])
+
+	def deliver_one_batch_across_reservations(self, reserve_qtys, delivery_qty, uom="Nos"):
 		warehouse = "_Test Warehouse - _TC"
-		item = make_batch_item()
-		create_material_receipt({item.name: item}, warehouse, qty=4)
-		so = make_sales_order(item_code=item.name, qty=4, warehouse=warehouse)
-		for _ in range(2):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"valuation_rate": 100,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SRBI-.#####.",
+				"stock_uom": uom,
+			}
+		)
+		create_material_receipt({item.name: item}, warehouse, qty=sum(reserve_qtys))
+		so = make_sales_order(item_code=item.name, qty=sum(reserve_qtys), warehouse=warehouse, uom=uom)
+		for qty in reserve_qtys:
 			so.create_stock_reservation_entries(
 				items_details=[
 					{
 						"sales_order_item": so.items[0].name,
 						"item_code": item.name,
 						"warehouse": warehouse,
-						"qty_to_reserve": 2,
+						"qty_to_reserve": qty,
 					}
 				]
 			)
@@ -2155,7 +2181,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		dn = make_delivery_note(so.name)
 		dn.items[0].update(
 			{
-				"qty": 3,
+				"qty": delivery_qty,
 				"serial_and_batch_bundle": None,
 				"use_serial_batch_fields": 1,
 				"batch_no": frappe.db.get_value("Batch", {"item": item.name}),
@@ -2163,13 +2189,12 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		)
 		dn.submit()
 
-		delivered_qty = frappe.get_all(
+		return frappe.get_all(
 			"Stock Reservation Entry",
 			filters={"voucher_no": so.name, "docstatus": 1},
 			order_by="creation",
-			pluck="delivered_qty",
+			fields=["delivered_qty", "status"],
 		)
-		self.assertEqual(delivered_qty, [2, 1])
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
