@@ -723,7 +723,11 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
-				if args.get("round_to_target_precision"):
+				round_total = args.get("round_to_target_precision")
+				if callable(round_total):
+					round_total = round_total(d)
+
+				if round_total:
 					args["source_dt_value"] = flt(
 						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
 					)

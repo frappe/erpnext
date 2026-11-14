@@ -1791,10 +1791,13 @@ def get_stock_qty_status_args(round_total=True) -> dict:
 
 def get_received_stock_qty_status_args() -> dict:
 	"""Status updater args that add up receipts' stock qty. A receipt rounds the stock qty of each row whatever the
-	setting, so add up qty * conversion factor, rounded once at the total if the target rounds its stock qty too."""
-	return {
-		"source_field": "qty * conversion_factor",
-		"round_to_target_precision": frappe.get_single_value(
-			"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"
-		),
-	}
+	setting, so add up qty * conversion factor, rounded once at the total where the target rounds its stock qty too."""
+	return {"source_field": "qty * conversion_factor", "round_to_target_precision": rounds_stock_qty}
+
+
+def rounds_stock_qty(row) -> bool:
+	"""Whether set_qty_as_per_stock_uom rounds the stock qty of a purchase row."""
+	return bool(
+		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
+		or get_whole_number_uoms([row.stock_uom])
+	)
