@@ -674,6 +674,54 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"pick_serial_and_batch_based_on": "FIFO",
 		},
 	)
+	def test_reservation_of_a_fractional_stock_qty_delivers_what_the_ledger_posts(self) -> None:
+		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TSRF-.#####",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3333}],
+			}
+		).name
+		make_stock_entry(item_code=item, target=self.warehouse, qty=1, basic_rate=100)
+		so = make_sales_order(item_code=item, warehouse=self.warehouse, qty=1, uom="Box", rate=100)
+		so.create_stock_reservation_entries()
+		so.load_from_db()
+		self.assertFalse(so.has_unreserved_stock())
+
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		dn.save()
+		dn.submit()
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": dn.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(
+			sum(get_batches_from_bundle(dn.items[0].serial_and_batch_bundle).values()), actual_qty
+		)
+		self.assertEqual(self.get_reservation_status(so), "Delivered")
+
+		dn.cancel()
+		self.assertEqual(self.get_reservation_status(so), "Reserved")
+
+	def get_reservation_status(self, so):
+		return _get_stock_reservation_entries_for_voucher(
+			"Sales Order", so.name, so.items[0].name, fields=["status"]
+		)[0].status
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+		},
+	)
 	def test_auto_reserve_serial_and_batch(self) -> None:
 		items_details = create_items()
 		create_material_receipt(items_details, self.warehouse, qty=10)
