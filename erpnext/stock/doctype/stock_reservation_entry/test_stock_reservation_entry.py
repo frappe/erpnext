@@ -2893,7 +2893,7 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		def deliver(serial_no):
 			delivery_note = make_delivery_note(sales_order.name)
 			delivery_note.items[0].qty = 1
-			delivery_note.items[0].serial_no = serial_no
+			delivery_note.items[0].serial_no = frappe.db.get_value("Serial No", serial_no, "serial_no")
 			return delivery_note.submit()
 
 		first_delivery = deliver(reserved_serial_nos[0])
