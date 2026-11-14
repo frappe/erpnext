@@ -633,7 +633,7 @@ def get_returned_packed_qty(order_packed_items) -> dict:
 
 def get_return_qty(doc, item_row, component_rows, returned_packed_qty) -> dict:
 	"""Qty a return row takes back on each packed row of a component delivered as several rows,
-	each up to what is left to return on it."""
+	each up to what is left to return on it; ``returned_packed_qty`` takes what this row takes back."""
 	if not doc.get("is_return"):
 		return {}
 
@@ -653,7 +653,10 @@ def get_return_qty(doc, item_row, component_rows, returned_packed_qty) -> dict:
 			rows, qty, lambda row: flt(row.qty - flt(returned_packed_qty.get(row.name)), precision)
 		)
 		return_qty.update({row.name: 0 for row in rows})
-		return_qty.update({row.name: -flt(row.pack_qty, precision) for row in locations})
+		for row in locations:
+			return_qty[row.name] = -flt(row.pack_qty, precision)
+			# another return row of the same bundle row takes back what is left after this one
+			returned_packed_qty[row.name] = flt(returned_packed_qty.get(row.name)) + row.pack_qty
 
 	return return_qty
 
