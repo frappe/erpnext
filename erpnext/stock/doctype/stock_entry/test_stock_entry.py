@@ -5920,6 +5920,64 @@ class TestStockEntryCoverage(ERPNextTestSuite):
 
 		self.assertEqual(get_warehouse_details({}), {})
 
+	def test_get_warehouse_details_needs_stock_entry_read(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		user = create_user("test_warehouse_details_delivery@example.com", "Delivery User")
+		args = {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, args)
+
+	def test_get_warehouse_details_applies_warehouse_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		user = create_user("test_warehouse_details_stock@example.com", "Stock User")
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", user.name)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", user.name)
+
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+		own_warehouse_args = {**args, "warehouse": "_Test Warehouse - _TC"}
+		expected = get_warehouse_details(own_warehouse_args)
+
+		with self.set_user(user.name):
+			self.assertEqual(get_warehouse_details(own_warehouse_args), expected)
+			self.assertRaises(
+				frappe.PermissionError,
+				get_warehouse_details,
+				{**args, "warehouse": "_Test Warehouse 1 - _TC"},
+			)
+
+	def test_get_warehouse_details_applies_warehouse_user_permission_for_stock_entry(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=10, basic_rate=100)
+		stock_entry_user = create_user("test_warehouse_details_scoped@example.com", "Stock User")
+		material_request_user = create_user("test_warehouse_details_other@example.com", "Stock User")
+		for user, applicable_for in (
+			(stock_entry_user.name, "Stock Entry"),
+			(material_request_user.name, "Material Request"),
+		):
+			add_user_permission("Warehouse", "_Test Warehouse - _TC", user, applicable_for=applicable_for)
+			self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", user)
+
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+		other_warehouse_args = {**args, "warehouse": "_Test Warehouse 1 - _TC"}
+		expected = get_warehouse_details(other_warehouse_args)
+
+		with self.set_user(stock_entry_user.name):
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, other_warehouse_args)
+
+		with self.set_user(material_request_user.name):
+			self.assertEqual(get_warehouse_details(other_warehouse_args), expected)
+
 	# ── get_work_order_details ─────────────────────────────────────────────────
 
 	def test_get_work_order_details_returns_correct_fields(self):
