@@ -4385,27 +4385,38 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 
 	def test_return_rows_of_one_receipt_row_take_back_no_more_than_consumed(self):
-		rm_item = make_item(properties={"is_stock_item": 1}).name
-		scr = make_receipt_consuming_transferred_materials(qty=10, rm_items={rm_item: 20})
-		first_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-5, do_not_submit=True)
-		first_return.supplied_items[0].consumed_qty = -5
-		first_return.save()
-		first_return.submit()
+		scr = make_receipt_with_return_below_its_share()
 
-		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
-		scr_return.items[0].qty = -2
-		scr_return.append("items", scr_return.items[0].as_dict(no_default_fields=True)).qty = -3
+		scr_return = make_return_of_two_rows(scr.name)
 		scr_return.submit()
 
 		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -15)
 
+	def test_return_row_changed_after_save_counts_the_rows_kept(self):
+		scr = make_receipt_with_return_below_its_share()
+		scr_return = make_return_of_two_rows(scr.name)
+		scr_return.save()
+
+		scr_return.items[1].qty = -2
+		scr_return.save()
+
+		self.assertEqual(sum(row.consumed_qty for row in scr_return.supplied_items), -13)
+
+	def test_draft_returns_cannot_together_take_back_more_than_consumed(self):
+		scr = make_receipt_with_return_below_its_share()
+		drafts = [
+			make_return_subcontracting_receipt(scr_name=scr.name, qty=qty, do_not_submit=True)
+			for qty in (-2, -3)
+		]
+
+		drafts[0].submit()
+
+		self.assertRaises(frappe.ValidationError, drafts[1].submit)
+
 	def test_return_after_one_that_took_back_more_than_its_share_takes_back_nothing(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		scr = make_receipt_consuming_transferred_materials(qty=10, rm_items={rm_item: 5})
-		first_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-2, do_not_submit=True)
-		first_return.supplied_items[0].consumed_qty = -2
-		first_return.save()
-		first_return.submit()
+		submit_return_taking_back(scr.name, qty=-2, consumed_qty=-2)
 
 		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
 
@@ -5606,6 +5617,29 @@ def make_receipt_consuming_transferred_materials(qty, rm_items):
 	scr = make_subcontracting_receipt(sco.name)
 	scr.submit()
 	return scr
+
+
+def make_receipt_with_return_below_its_share():
+	"""Receipt of 10 finished goods consuming 20 raw materials, with a return of 5 that took back only 5."""
+	rm_item = make_item(properties={"is_stock_item": 1}).name
+	scr = make_receipt_consuming_transferred_materials(qty=10, rm_items={rm_item: 20})
+	submit_return_taking_back(scr.name, qty=-5, consumed_qty=-5)
+	return scr
+
+
+def submit_return_taking_back(scr_name, qty, consumed_qty):
+	scr_return = make_return_subcontracting_receipt(scr_name=scr_name, qty=qty, do_not_submit=True)
+	scr_return.supplied_items[0].consumed_qty = consumed_qty
+	scr_return.save()
+	scr_return.submit()
+
+
+def make_return_of_two_rows(scr_name):
+	"""Unsaved return of 2 and 3 finished goods, in two rows of the same receipt row."""
+	scr_return = make_return_doc("Subcontracting Receipt", scr_name)
+	scr_return.items[0].qty = -2
+	scr_return.append("items", scr_return.items[0].as_dict(no_default_fields=True)).qty = -3
+	return scr_return
 
 
 def make_return_subcontracting_receipt(**args):
