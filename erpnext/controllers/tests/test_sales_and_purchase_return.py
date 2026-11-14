@@ -320,6 +320,21 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		dn = frappe.get_doc("Delivery Note", return_dn.return_against)
 		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_credit_note_without_update_stock_keeps_the_invoiced_stock_qty(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		conversion_factor = 0.3356
+		si = create_sales_invoice(item_code=make_box_item(conversion_factor), do_not_submit=True)
+		si.items[0].uom, si.items[0].conversion_factor = "Box", conversion_factor
+		si.submit()
+
+		credit_note = make_sales_return(si.name)
+		credit_note.submit()
+
+		self.assertEqual(credit_note.items[0].stock_qty, -si.items[0].stock_qty)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
