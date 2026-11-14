@@ -1478,6 +1478,11 @@ def get_item_uom_query(doctype: str, txt: str, searchfield: str, start: int, pag
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	warehouse = filters.get("warehouse")
+	if not warehouse or not isinstance(warehouse, str):
+		return []
+
+	frappe.has_permission("Warehouse", "read", warehouse, throw=True)
 	table = frappe.qb.DocType(doctype)
 	child_table = frappe.qb.DocType("Dynamic Link")
 
@@ -1487,7 +1492,7 @@ def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, 
 		.on((table.name == child_table.parent) & (child_table.parenttype == doctype))
 		.select(table.name)
 		.where(
-			(child_table.link_name == filters.get("warehouse"))
+			(child_table.link_name == warehouse)
 			& (table.disabled == 0)
 			& (child_table.link_doctype == "Warehouse")
 			& (table.name.like(f"%{txt}%"))
