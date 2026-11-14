@@ -125,12 +125,26 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		self.assertEqual([row.get("batch_no") for row in ledgers], [batch_no])
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 6439616 (test: a return row loads the returned voucher's batches)
 =======
 		rejected = get_serial_batch_ledgers(item_code=item_code, child_row={**return_row, "is_rejected": 1})
 		self.assertEqual(
 			[(row.qty, row.warehouse) for row in rejected], [(2, receipt.items[0].rejected_warehouse)]
 		)
+=======
+		from_rejected_warehouse = make_return_doc(
+			"Purchase Receipt", receipt.name, return_against_rejected_qty=True
+		).items[0]
+		for rejected_row in (
+			{**return_row, "qty": 0, "is_rejected": 1},
+			dict(from_rejected_warehouse.as_dict()),
+		):
+			rejected = get_serial_batch_ledgers(item_code=item_code, child_row=rejected_row)
+			self.assertEqual(
+				[(row.qty, row.warehouse) for row in rejected], [(2, receipt.items[0].rejected_warehouse)]
+			)
+>>>>>>> f110985 (test: a return from the rejected warehouse loads the returned voucher's rejected batches)
 
 >>>>>>> 25ef57e (test: a rejected return row loads the returned voucher's rejected batches)
 	def test_voucher_no_and_voucher_type_are_indexed(self):
