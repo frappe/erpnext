@@ -802,16 +802,19 @@ def get_linked_returned_bundle_qty(bundle_rows: list, returned_packed_items: lis
 
 
 def get_pending_component_qty(packed_item, bundle_row, returns: dict, mapped_stock_qty: float = 0.0) -> float:
+	return flt(
+		get_kept_component_qty(packed_item, bundle_row, returns)
+		- flt(packed_item.get("received_qty"))
+		- flt(mapped_stock_qty),
+		frappe.get_precision("Packed Item", "qty"),
+	)
+
+
+def get_kept_component_qty(packed_item, bundle_row, returns: dict) -> float:
 	"""A linked return takes back its own packed row's qty; an unlinked one a share of every row."""
 	bundle_qty = flt(bundle_row.stock_qty or bundle_row.qty)
 	if not bundle_qty:
 		return 0.0
 
 	kept_share = 1 - flt(returns.unlinked_bundle_qty.get(bundle_row.name)) / bundle_qty
-	return flt(
-		flt(packed_item.qty) * kept_share
-		- flt(returns.packed_qty.get(packed_item.name))
-		- flt(packed_item.get("received_qty"))
-		- flt(mapped_stock_qty),
-		frappe.get_precision("Packed Item", "qty"),
-	)
+	return flt(packed_item.qty) * kept_share - flt(returns.packed_qty.get(packed_item.name))
