@@ -25,7 +25,7 @@ from erpnext.buying.doctype.buying_settings.buying_settings import (
 	is_rejected_material_valued,
 )
 from erpnext.buying.utils import update_last_purchase_rate, validate_duplicate_items, validate_for_items
-from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, set_return_stock_qty
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.setup.utils import get_exchange_rate
@@ -814,9 +814,9 @@ class BuyingController(SubcontractingController):
 		"""Stock qty the net amount of the row was billed for, which is what its valuation spreads
 		over. Each part is rounded as the stock ledger posts it."""
 		if not flt(row.get("rejected_qty")) or not bills_rejected_quantity(self):
-			return get_stock_qty(row, row.qty)
+			return flt(row.stock_qty)
 
-		return get_stock_qty(row, row.qty) + get_stock_qty(row, row.rejected_qty)
+		return flt(row.stock_qty) + get_stock_qty(row, row.rejected_qty)
 
 	def get_tax_details(self):
 		tax_accounts = []
@@ -1093,10 +1093,18 @@ class BuyingController(SubcontractingController):
 						d.conversion_factor, d.precision("conversion_factor")
 					)
 
-				if allow_to_edit_stock_qty or d.get("stock_uom") in whole_number_uoms:
+				# rounded like the received rows, so the row completing a return can take what is left
+				if (
+					allow_to_edit_stock_qty
+					or d.get("stock_uom") in whole_number_uoms
+					or self.get("is_return")
+				):
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
 					if d.get("received_stock_qty") and d.meta.get_field("received_stock_qty"):
 						d.received_stock_qty = flt(d.received_stock_qty, d.precision("received_stock_qty"))
+
+		if self.get("is_return"):
+			set_return_stock_qty(self)
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):
@@ -1235,7 +1243,7 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			pr_qty = get_stock_qty(d, d.qty)
+			pr_qty = flt(d.stock_qty)
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
 			if source_qty and (d.warehouse or not pr_qty):

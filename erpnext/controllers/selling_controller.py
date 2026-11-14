@@ -11,7 +11,11 @@ from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
 from erpnext.accounts.party import render_address
 from erpnext.accounts.services.taxes import _get_taxes_and_charges
-from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, is_batch_expired
+from erpnext.controllers.sales_and_purchase_return import (
+	get_rate_for_return,
+	is_batch_expired,
+	set_return_stock_qty,
+)
 from erpnext.controllers.stock_controller import StockController
 from erpnext.selling.doctype.customer.customer import is_customer_blocked
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
@@ -433,6 +437,9 @@ class SellingController(StockController):
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 				if allow_to_edit_stock_qty:
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
+
+		if self.get("is_return"):
+			set_return_stock_qty(self)
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):
