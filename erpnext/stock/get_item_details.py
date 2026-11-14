@@ -129,8 +129,11 @@ def _get_item_details(
 	for_validate = parse_json(for_validate)
 	overwrite_warehouse = parse_json(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", ctx.item_code)
-	# server code saving a document with ignore_permissions, e.g. the supplier portal
-	if not (isinstance(doc, Document) and doc.flags.ignore_permissions):
+	# the supplier portal saves a Supplier Quotation with ignore_permissions
+	is_portal_quotation = (
+		isinstance(doc, Document) and doc.doctype == "Supplier Quotation" and doc.flags.ignore_permissions
+	)
+	if not is_portal_quotation:
 		item.check_permission()
 	validate_item_details(ctx, item)
 
