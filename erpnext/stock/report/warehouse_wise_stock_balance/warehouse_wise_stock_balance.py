@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Sum
 
+from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies_condition
+
 
 class StockBalanceFilter(TypedDict):
 	company: str | None
@@ -43,10 +45,14 @@ def get_warehouse_wise_balance(filters: StockBalanceFilter) -> list[SLEntry]:
 
 
 def get_warehouses(report_filters: StockBalanceFilter):
+	filters = [{"company": report_filters.company}]
+	if condition := get_allowed_companies_condition(frappe.qb.DocType("Warehouse").company, "Warehouse"):
+		filters.append(condition)
+
 	return frappe.get_all(
 		"Warehouse",
 		fields=["name", "parent_warehouse", "is_group", "disabled"],
-		filters={"company": report_filters.company},
+		filters=filters,
 		order_by="lft",
 	)
 
