@@ -452,10 +452,19 @@ def get_current_packed_items(doc):
 	return [
 		frappe._dict(
 			packed_row.as_dict(),
-			qty=flt(qty_per_unit * get_row_stock_qty(item_row, item_row.item_code), precision),
+			qty=flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision),
 		)
 		for packed_row, item_row, qty_per_unit in get_kept_packed_items(doc)
 	]
+
+
+def get_bundle_row_stock_qty(item_row):
+	"""The stock_qty set_qty_as_per_stock_uom gives a bundle row, which packing scales its components by."""
+	stock_qty = get_row_stock_qty(item_row, item_row.item_code)
+	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+		return flt(stock_qty, item_row.precision("stock_qty"))
+
+	return stock_qty
 
 
 def get_row_stock_qty(row, item_code):
