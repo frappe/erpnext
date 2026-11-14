@@ -400,13 +400,19 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item)
 		scr = make_receipt_with_secondary_items(fg_item, 10)
-		# secondary rows received before v16 have no bom_secondary_item
-		frappe.db.set_value(
-			"Subcontracting Receipt Item",
-			{"parent": scr.name, "bom_secondary_item": ("is", "set")},
-			"bom_secondary_item",
-			None,
-		)
+		make_secondary_rows_pre_v16(scr.name)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_a_receipt_made_before_v16_with_an_item_received_twice(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
 
 		make_partial_return(scr.name, 10)
 
@@ -5608,6 +5614,16 @@ def make_receipt_with_secondary_items(fg_item, qty):
 	scr.save()
 	scr.submit()
 	return scr
+
+
+def make_secondary_rows_pre_v16(scr_name):
+	"""Secondary rows received before v16 have no bom_secondary_item."""
+	frappe.db.set_value(
+		"Subcontracting Receipt Item",
+		{"parent": scr_name, "bom_secondary_item": ("is", "set")},
+		"bom_secondary_item",
+		None,
+	)
 
 
 def make_partial_return(scr_name, fg_qty):
