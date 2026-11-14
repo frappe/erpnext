@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.query_builder.functions import Min, Sum
-from frappe.utils import flt
+from frappe.utils import cint, flt
 from pypika import Order
 
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -20,6 +20,7 @@ class ProductionPlanReport:
 		self.filters = frappe._dict(filters or {})
 		self.raw_materials_dict = {}
 		self.data = []
+		self.precision = cint(frappe.db.get_default("float_precision")) or 3
 
 	def execute_report(self):
 		self.get_open_orders()
@@ -164,7 +165,7 @@ class ProductionPlanReport:
 			)
 			for d in raw_materials:
 				issued_qty = max(flt(d.transferred_qty), flt(d.consumed_qty)) - flt(d.returned_qty)
-				d.required_qty = max(flt(d.required_qty) - issued_qty, 0)
+				d.required_qty = flt(max(flt(d.required_qty) - issued_qty, 0), self.precision)
 			self.warehouses.extend([d.warehouse for d in raw_materials])
 
 		else:
@@ -227,6 +228,8 @@ class ProductionPlanReport:
 			filters={"company": self.filters.company, "parent": ("in", self.item_codes)},
 		):
 			self.item_details[d.parent] = d
+			if d.default_warehouse:
+				self.warehouses.append(d.default_warehouse)
 
 	def get_bin_details(self):
 		if not (self.orders and self.raw_materials_dict):
@@ -309,7 +312,7 @@ class ProductionPlanReport:
 
 		for d in self.raw_materials_dict.get(key):
 			if self.filters.based_on != "Work Order":
-				d.required_qty = d.required_qty_per_unit * data.qty_to_manufacture
+				d.required_qty = flt(d.required_qty_per_unit * data.qty_to_manufacture, self.precision)
 
 			warehouses = self.mrp_warehouses or [data.warehouse]
 			if self.filters.based_on == "Work Order" and d.warehouse:
@@ -347,18 +350,15 @@ class ProductionPlanReport:
 				row.update(bin_data)
 
 			args.allotted_qty = 0
-			if bin_data and bin_data.get("actual_qty") > 0:
-				args.allotted_qty = (
-					bin_data.get("actual_qty")
-					if (args.required_qty > bin_data.get("actual_qty"))
-					else args.required_qty
-				)
-
-				args.remaining_qty -= args.allotted_qty
+			if bin_data and flt(bin_data.get("actual_qty"), self.precision) > 0:
+				args.allotted_qty = flt(min(args.remaining_qty, bin_data.get("actual_qty")), self.precision)
+				args.remaining_qty = flt(args.remaining_qty - args.allotted_qty, self.precision)
 				bin_data["actual_qty"] -= args.allotted_qty
 
+			nothing_allotted = args.remaining_qty == args.required_qty
+			is_last_warehouse = index == len(warehouses) - 1
 			if (
-				self.mrp_warehouses and (args.allotted_qty or index == len(warehouses) - 1)
+				self.mrp_warehouses and (args.allotted_qty or (is_last_warehouse and nothing_allotted))
 			) or not self.mrp_warehouses:
 				if not self.index:
 					row.update(order_data)
