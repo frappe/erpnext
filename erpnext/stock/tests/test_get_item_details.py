@@ -1141,3 +1141,29 @@ class TestGetItemDetail(ERPNextTestSuite):
 		self.assertEqual(
 			{call.args[1].transaction_type for call in get_pricing_rules.call_args_list}, {"selling"}
 		)
+
+	def test_item_tax_info_needs_template_permission(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.get_item_details import get_item_tax_info
+
+		item = make_item(
+			properties={"taxes": [{"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"}]}
+		)
+		kwargs = {
+			"doc": {"company": "_Test Company"},
+			"tax_category": "",
+			"item_codes": [[item.name, "row"]],
+			"item_tax_templates": {"row": "x"},
+		}
+		expected = get_item_tax_info(**kwargs)
+		self.assertEqual(expected["row"]["item_tax_template"], "_Test Account Excise Duty @ 10 - _TC")
+
+		other_company_user = make_fenced_user(
+			"_test_tax_info_other_company@example.com", ["Sales User"], [("Company", "_Test Company 1")]
+		)
+		for user in (other_company_user, make_fenced_user("_test_tax_info_no_role@example.com", [])):
+			with as_user(user):
+				assert_refused(self, get_item_tax_info, **kwargs)
+
+		with as_user(make_fenced_user("_test_tax_info_sales@example.com", ["Sales User"])):
+			self.assertEqual(get_item_tax_info(**kwargs), expected)
