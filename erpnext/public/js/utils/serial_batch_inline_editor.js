@@ -595,6 +595,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		let is_serial = cint(this.item.has_serial_no);
 		let based_on = await erpnext.stock.get_pick_serial_batch_based_on();
+		let stock_precision = erpnext.stock.get_sbie_stock_qty_precision(this.row, this.qty_field);
 
 		let dialog = new frappe.ui.Dialog({
 			title: is_serial ? __("Auto Fetch Serial Nos") : __("Auto Fetch Batch Nos"),
@@ -604,10 +605,14 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 					fieldname: "qty",
 					label: __("Qty to Fetch"),
 					reqd: 1,
+					precision: stock_precision,
 					default:
-						Math.abs(
-							flt(this.row[this.qty_field]) *
-								erpnext.stock.get_sbie_conversion_factor(this.row, this.qty_field)
+						flt(
+							Math.abs(
+								flt(this.row[this.qty_field]) *
+									erpnext.stock.get_sbie_conversion_factor(this.row, this.qty_field)
+							),
+							stock_precision
 						) || null,
 					description: __("Existing entries will be replaced with the fetched entries"),
 				},
@@ -1312,6 +1317,10 @@ erpnext.stock.get_sbie_stock_qty_field = function (row, qty_field) {
 	}
 };
 
+erpnext.stock.get_sbie_stock_qty_precision = function (row, qty_field) {
+	return precision(erpnext.stock.get_sbie_stock_qty_field(row, qty_field) || qty_field, row);
+};
+
 erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
 	return erpnext.stock.get_sbie_stock_qty_field(row, qty_field) ? flt(row.conversion_factor) || 1 : 1;
 };
@@ -1319,10 +1328,7 @@ erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
 // Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
 erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
 	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
-	const stock_precision = precision(
-		erpnext.stock.get_sbie_stock_qty_field(row, qty_field) || qty_field,
-		row
-	);
+	const stock_precision = erpnext.stock.get_sbie_stock_qty_precision(row, qty_field);
 	const row_qty = Math.abs(flt(row[qty_field]));
 
 	// keep a row qty that already matches, as dividing back by a fractional factor can drift
