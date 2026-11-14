@@ -415,7 +415,7 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 def filter_batches(batches, doc, item_code):
 	precision = frappe.get_precision("Serial and Batch Entry", "qty")
-	for row in doc.get("items"):
+	for row in [*doc.get("items"), *(doc.get("packed_items") or [])]:
 		batch_no = row.get("batch_no")
 		if batch_no in batches:
 			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
