@@ -96,6 +96,59 @@ class TaxWithholdingEntry(Document):
 				)
 			)
 
+	def validate_under_withheld_reason(self):
+		"""An edited entry can name a reason only when the reason applies to it."""
+		if self.under_withheld_reason == "Lower Deduction Certificate":
+			self._validate_lower_deduction_certificate()
+		elif self.under_withheld_reason == "Threshold Exemption":
+			self._validate_threshold_exemption()
+
+	def _validate_lower_deduction_certificate(self):
+		if not self.lower_deduction_certificate:
+			frappe.throw(
+				_("Row #{0}: Lower Deduction Certificate is required for reason {1}.").format(
+					self.idx, _(self.under_withheld_reason)
+				)
+			)
+
+		certificate = frappe.db.get_value(
+			"Lower Deduction Certificate",
+			self.lower_deduction_certificate,
+			["supplier", "pan_no", "tax_withholding_category", "company", "rate"],
+			as_dict=True,
+		)
+		if not (
+			certificate
+			and self.party_type == "Supplier"
+			and (self.party == certificate.supplier or (self.tax_id and self.tax_id == certificate.pan_no))
+			and self.tax_withholding_category == certificate.tax_withholding_category
+			and self.company == certificate.company
+		):
+			frappe.throw(
+				_(
+					"Row #{0}: Lower Deduction Certificate {1} is not for this party, Tax Withholding Category and company."
+				).format(self.idx, self.lower_deduction_certificate)
+			)
+
+		precision = self.precision("tax_rate")
+		if flt(self.tax_rate, precision) != flt(certificate.rate, precision):
+			frappe.throw(
+				_("Row #{0}: Tax Rate must be {1}, the rate of Lower Deduction Certificate {2}.").format(
+					self.idx, certificate.rate, self.lower_deduction_certificate
+				)
+			)
+
+	def _validate_threshold_exemption(self):
+		tax_on_excess_amount = frappe.get_cached_value(
+			"Tax Withholding Category", self.tax_withholding_category, "tax_on_excess_amount"
+		)
+		if not tax_on_excess_amount or flt(self.withholding_amount, self.precision("withholding_amount")):
+			frappe.throw(
+				_(
+					"Row #{0}: Threshold Exemption is allowed only with no Withholding Amount, for a Tax Withholding Category with Tax on Excess Amount."
+				).format(self.idx)
+			)
+
 	@property
 	def is_taxable_different(self):
 		return self.taxable_doctype != self.parenttype or self.taxable_name != self.parent
@@ -410,7 +463,13 @@ class TaxWithholdingController:
 			return entries
 
 		# Case 2: Tax on excess amount - handle threshold exemption first
-		if category.unused_threshold:
+		if category.tax_on_excess_amount and category.taxable_amount < 0:
+			# a return gives back the exemption that it used
+			if exemption_entry := self._create_return_threshold_exemption_entry(category):
+				entries.append(exemption_entry)
+			if not flt(category.taxable_amount, self.precision):
+				return entries
+		elif category.unused_threshold:
 			entries.append(self._create_threshold_exemption_entry(category))
 			if category.taxable_amount <= 0:
 				return entries
@@ -455,6 +514,36 @@ class TaxWithholdingController:
 			"taxable_amount": taxable_amount,
 			"under_withheld_reason": "Threshold Exemption",
 		}
+
+	def _create_return_threshold_exemption_entry(self, category):
+		"""Reverse a return at the rate only up to the amount taxed in the period. Book the rest,
+		up to the exemption used, as a negative exemption to give the threshold back."""
+		returned_amount = -category.taxable_amount
+		taxed_amount = max(self._get_taxed_amount(category), 0)
+		exemption_used = max(category.cumulative_threshold - category.unused_threshold, 0)
+		exempt_amount = flt(min(max(returned_amount - taxed_amount, 0), exemption_used), self.precision)
+		if not exempt_amount:
+			return None
+
+		category.taxable_amount += exempt_amount
+
+		return {
+			**self._create_default_entry(category),
+			"taxable_amount": -exempt_amount,
+			"under_withheld_reason": "Threshold Exemption",
+		}
+
+	def _get_taxed_amount(self, category):
+		"""Settled taxable amount of the period that is not a threshold exemption"""
+		entry = frappe.qb.DocType(DOCTYPE)
+		result = frappe._dict(
+			self._base_threshold_query(category)
+			.where(entry.status == "Settled")
+			.where(IfNull(entry.under_withheld_reason, "") != "Threshold Exemption")
+			.run()
+		)
+
+		return flt(result.get("Settled"))
 
 	def _get_open_entries_for_category(self, category):
 		"""Get historical under withheld and over withheld entries for processing"""
@@ -658,10 +747,14 @@ class TaxWithholdingController:
 
 		# Transaction threshold only mode
 		if category.disable_cumulative_threshold:
+			# a return reverses the tax of its invoice when that invoice was taxed
+			if category.taxable_amount < 0 and self._is_return_against_invoice():
+				return self._is_return_against_withheld(category)
+
 			return category.taxable_amount >= category.single_threshold
 
-		# No cumulative threshold set
-		if category.cumulative_threshold == 0:
+		# No threshold set
+		if not (category.cumulative_threshold or self._get_single_threshold(category)):
 			return True
 
 		# Tax on excess amount - always process
@@ -670,6 +763,20 @@ class TaxWithholdingController:
 
 		# Standard cumulative/transaction threshold check
 		return self._check_historical_threshold_status(category)
+
+	def _is_return_against_withheld(self, category) -> bool:
+		entry = frappe.qb.DocType(DOCTYPE)
+		return bool(
+			frappe.qb.from_(entry)
+			.select(entry.name)
+			.where(entry.taxable_doctype == self.doc.doctype)
+			.where(entry.taxable_name == self.doc.return_against)
+			.where(entry.tax_withholding_category == category.name)
+			.where(entry.status == "Settled")
+			.where(entry.docstatus == 1)
+			.limit(1)
+			.run()
+		)
 
 	def _check_historical_threshold_status(self, category):
 		entry = frappe.qb.DocType(DOCTYPE)
@@ -684,13 +791,21 @@ class TaxWithholdingController:
 		if result.get("Settled", 0) > 0:
 			return True
 
-		# Check remaining threshold
-		remaining_threshold = category.cumulative_threshold - result.get("Under Withheld", 0)
+		# Check remaining threshold, a threshold of 0 is not set
+		remaining_threshold = inf
+		if category.cumulative_threshold:
+			remaining_threshold = category.cumulative_threshold - result.get("Under Withheld", 0)
 
-		if not category.disable_transaction_threshold:
-			remaining_threshold = min(remaining_threshold, category.single_threshold)
+		if single_threshold := self._get_single_threshold(category):
+			remaining_threshold = min(remaining_threshold, single_threshold)
 
 		return category.taxable_amount >= remaining_threshold
+
+	def _get_single_threshold(self, category):
+		if category.disable_transaction_threshold:
+			return 0
+
+		return category.single_threshold
 
 	def _get_unused_threshold(self, category):
 		"""Calculate unused threshold amount for tax on excess scenarios"""
@@ -715,7 +830,7 @@ class TaxWithholdingController:
 			.where(entry.tax_withholding_category == category.name)
 			.where(entry.company == self.doc.company)
 			.where(entry.docstatus == 1)
-			.where(entry.taxable_date.between(category.from_date, category.to_date))
+			.where(entry.taxable_date.between(category.threshold_from_date, category.threshold_to_date))
 			.groupby(entry.status)
 		)
 
@@ -743,9 +858,13 @@ class TaxWithholdingController:
 
 		over_withheld_query = base_query.where(entry.status == "Over Withheld")
 
+		# transaction threshold only: an invoice below the threshold is not taxed later
+		if category.disable_cumulative_threshold:
+			return over_withheld_query.run(as_dict=True)
+
 		return (
 			base_query.where(entry.status == "Under Withheld")
-			.where(entry.taxable_date.between(category.from_date, category.to_date))
+			.where(entry.taxable_date.between(category.threshold_from_date, category.threshold_to_date))
 			.union(over_withheld_query)
 			.run(as_dict=True)
 		)
@@ -874,18 +993,10 @@ class TaxWithholdingController:
 
 			total_taxable_amount = category_totals.get(category.name, 0)
 
-			if category.unused_threshold and total_taxable_amount:
-				# Proportionately deduct unused threshold from item's base taxable
-				item_threshold_deduction = (
-					item_base_taxable / total_taxable_amount
-				) * category.unused_threshold
-				item_effective_taxable = max(0, item_base_taxable - item_threshold_deduction)
-			else:
-				item_effective_taxable = item_base_taxable
-
+			# the threshold exemption is shared out in the same proportion as the taxable amount
 			withholding_amount = category_withholding_map.get(category.name, 0)
-			if withholding_amount and category.taxable_amount:
-				item_proportion = item_effective_taxable / category.taxable_amount
+			if withholding_amount and total_taxable_amount:
+				item_proportion = item_base_taxable / total_taxable_amount
 				item_tax_amount = flt(withholding_amount * item_proportion, precision)
 			else:
 				item_tax_amount = 0
@@ -1154,6 +1265,8 @@ class TaxWithholdingController:
 			entry.set_status(entry.status)
 			entry.validate_adjustments()
 			entry.validate_tax_withheld_amount()
+			if self.doc.override_tax_withholding_entries:
+				entry.validate_under_withheld_reason()
 
 	def on_submit(self):
 		for entry in self.doc.tax_withholding_entries:

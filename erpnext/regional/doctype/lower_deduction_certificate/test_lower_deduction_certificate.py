@@ -35,6 +35,46 @@ class TestLowerDeductionCertificate(ERPNextTestSuite):
 		# new period is entirely after the existing one -> no overlap
 		self.assertFalse(self.make_ldc("2026-07-01", "2026-12-31").are_dates_overlapping(existing))
 
+	def test_overlap_with_any_existing_certificate_is_refused(self):
+		frappe.get_doc(
+			{
+				"doctype": "Tax Withholding Category",
+				"name": "_Test LDC Overlap Category",
+				"category_name": "_Test LDC Overlap Category",
+			}
+		).insert(ignore_mandatory=True)
+		supplier = frappe.get_doc(
+			{"doctype": "Supplier", "supplier_name": "_Test LDC Overlap Supplier", "tax_id": "EEEPE1234E"}
+		).insert()
+		fy_name, fy_start, _fy_end = get_fiscal_year(today(), company="_Test Company")
+
+		def certificate(certificate_no, start, end):
+			return frappe.get_doc(
+				{
+					"doctype": "Lower Deduction Certificate",
+					"certificate_no": certificate_no,
+					"company": "_Test Company",
+					"supplier": supplier.name,
+					"tax_withholding_category": "_Test LDC Overlap Category",
+					"fiscal_year": fy_name,
+					"valid_from": add_days(fy_start, start),
+					"valid_upto": add_days(fy_start, end),
+					"rate": 1,
+					"certificate_limit": 100000,
+				}
+			)
+
+		# the overlapped certificate is neither the first nor the last one created
+		certificate("_TEST-LDC-OVERLAP-1", 100, 130).insert()
+		certificate("_TEST-LDC-OVERLAP-2", 0, 60).insert()
+		certificate("_TEST-LDC-OVERLAP-3", 150, 180).insert()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"There is already a valid Lower Deduction Certificate",
+			certificate("_TEST-LDC-OVERLAP-4", 30, 60).insert,
+		)
+
 	def test_valid_upto_cannot_precede_valid_from(self):
 		doc = self.make_ldc(valid_from="2026-06-30", valid_upto="2026-01-01")
 		self.assertRaises(frappe.ValidationError, doc.validate_dates)
