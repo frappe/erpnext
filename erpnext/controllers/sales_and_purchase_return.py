@@ -1813,12 +1813,19 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 
 def get_return_bundle_qty(row, qty_field):
 	"""Rejected qty is in the transaction UOM, a bundle in the stock UOM."""
-	from erpnext.controllers.buying_controller import get_stock_qty
-
 	if qty_field == "rejected_qty":
-		return get_stock_qty(row, row.rejected_qty)
+		return get_rejected_stock_qty(row)
 
 	return row.get(qty_field)
+
+
+def get_rejected_stock_qty(row):
+	"""Rejected qty of a row in the stock UOM, as the stock ledger posts it."""
+	# a Subcontracting Receipt keeps no rejected stock qty and posts it unrounded
+	if not row.meta.get_field("rejected_stock_qty"):
+		return flt(row.rejected_qty) * flt(row.conversion_factor)
+
+	return flt(row.rejected_stock_qty)
 
 
 def get_available_serial_nos(serial_nos, warehouse):
