@@ -1,38 +1,33 @@
 import { BomTree } from "./bom_tree";
 import { open_item_link } from "./link_field";
 import { ModelViewer } from "./model_viewer";
-import { OperationsEditor } from "./operations_editor";
-import { PartsTable } from "./parts_table";
 import { PlacementPanel } from "./placement_panel";
+import { ProcessView } from "./process_view";
 
 export class DesignView {
 	constructor(frm) {
 		this.frm = frm;
 		this.wrapper = $(frm.fields_dict.design_view.wrapper);
-		this.state = { tab: "Operations", bom_node_id: 0, extra_bom_nodes: [] };
 		this.item_images = {};
 		this.active_item_node = null;
 		this.placement_panel = new PlacementPanel(this);
-		this.operations = new OperationsEditor(this);
-		this.parts = new PartsTable(this);
+		this.process = new ProcessView(this);
 		this.tree = new BomTree(this);
 		this.wrapper.on("click", ".design-item-link", (event) =>
 			this.open_item_cell(cint($(event.currentTarget).attr("data-part-node")))
 		);
-		this.wrapper.on(
-			"focus",
-			"input[data-field='quantity'], input[data-field='output_quantity'], input[data-field='time_in_mins']",
-			(event) => setTimeout(() => event.currentTarget.select())
+		this.wrapper.on("focus", "input[data-field='quantity']", (event) =>
+			setTimeout(() => event.currentTarget.select())
 		);
 	}
 
 	refresh() {
 		const doc = this.frm.doc;
-		const has_model = /\.(step|stp)$/i.test(doc.design_file || "");
+		const has_model = !doc.track_semi_finished_goods && /\.(step|stp)$/i.test(doc.design_file || "");
+		const layout_key = `${doc.name}:${doc.design_file}:${doc.track_semi_finished_goods}`;
 
-		if (this.layout_key !== `${doc.name}:${doc.design_file}`) {
-			this.layout_key = `${doc.name}:${doc.design_file}`;
-			this.state = { tab: "Operations", bom_node_id: 0, extra_bom_nodes: [] };
+		if (this.layout_key !== layout_key) {
+			this.layout_key = layout_key;
 			this.make_layout(has_model);
 		}
 
@@ -40,6 +35,7 @@ export class DesignView {
 	}
 
 	make_layout(has_model) {
+		this.process.unmount();
 		this.viewer?.destroy();
 		this.viewer = null;
 		this.geometry = {};
@@ -49,8 +45,8 @@ export class DesignView {
 					display: flex; gap: var(--margin-lg); height: 560px; margin-bottom: var(--margin-md);
 				}
 				.bom-creator-view.without-model { height: auto; }
-				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .frappe-control,
-				.bom-creator-view :is(.design-item-cell, .design-link-cell, .design-uom-cell) .form-group {
+				.bom-creator-view :is(.design-item-cell, .design-uom-cell) .frappe-control,
+				.bom-creator-view :is(.design-item-cell, .design-uom-cell) .form-group {
 					width: 100%; margin: 0;
 				}
 				.bom-creator-view .form-control {
@@ -64,6 +60,13 @@ export class DesignView {
 				.bom-creator-view .awesomplete > [role="listbox"] .small { color: var(--ink-gray-5); }
 				.bom-creator-view :is(.design-item-link, .design-uom-link) { width: 100%; padding: 0 8px; text-align: left; cursor: text; }
 				.bom-creator-view.without-model .design-body { max-height: 560px; }
+				.bom-creator-view.process-view .design-body { flex: none; height: 680px; max-height: none; overflow: hidden;
+					border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+				.bom-creator-view .design-process { height: 100%; }
+				.bom-creator-view .design-process .link-btn {
+					top: 1px; right: 1px; height: calc(100% - 2px); padding: 0 6px;
+					background-color: var(--fg-color); border-radius: 0 7px 7px 0;
+				}
 				.bom-creator-view .design-model {
 					flex: 0 0 34%; position: relative; border: 1px solid var(--border-color);
 					border-radius: var(--radius-md); overflow: hidden; background: var(--subtle-fg);
@@ -76,14 +79,14 @@ export class DesignView {
 					.bom-creator-view .design-body { height: 480px; flex: none; }
 				}
 			</style>
-			<div class="bom-creator-view ${has_model ? "" : "without-model"}">
+			<div class="bom-creator-view ${has_model ? "" : "without-model"} ${
+			this.frm.doc.track_semi_finished_goods ? "process-view" : ""
+		}">
 				<div class="design-model" style="${has_model ? "" : "display:none;"}">
 					<div class="design-model-message text-muted" style="position:absolute;inset:0;display:flex;
 						align-items:center;justify-content:center;pointer-events:none;">${__("Loading 3D model...")}</div>
 				</div>
 				<div class="design-panel">
-					<div class="design-tabs" style="display:flex;align-items:center;gap:var(--margin-sm);
-						min-height:32px;margin-bottom:var(--margin-sm);"></div>
 					<div class="design-body"></div>
 					<div class="design-summary text-muted small" style="display:flex;flex-wrap:wrap;gap:4px 16px;
 						padding-top:var(--margin-sm);"></div>
@@ -115,14 +118,11 @@ export class DesignView {
 		this.load_item_images();
 		this.placement_panel.sync();
 		const produces = Boolean(this.frm.doc.track_semi_finished_goods);
-		this.render_header(produces);
 		const body = this.wrapper.find(".design-body");
-		if (!produces) {
-			this.tree.render(body);
-		} else if (this.state.tab === "Parts") {
-			this.parts.render(body);
+		if (produces) {
+			this.process.render(body);
 		} else {
-			this.operations.render(body);
+			this.tree.render(body);
 		}
 		this.render_summary(produces);
 		if (this.active_item_node !== null) this.open_item_cell(this.active_item_node, { open_list: false });
@@ -181,32 +181,6 @@ export class DesignView {
 			?.scrollIntoView({ block: "nearest" });
 	}
 
-	render_header(produces) {
-		const header = this.wrapper.find(".design-tabs").empty().toggle(produces);
-		if (produces) header.append(this.get_tabs());
-	}
-
-	get_tabs() {
-		const count = (value) => $(frappe.ui.badge.html({ label: String(value), size: "sm" }));
-		return frappe.ui.tab_buttons({
-			type: "underline",
-			label: __("View"),
-			options: [
-				{
-					label: __("Operations"),
-					value: "Operations",
-					suffix: count(this.frm.doc.operations?.length || 0),
-				},
-				{ label: __("Parts"), value: "Parts", suffix: count(this.frm.doc.items?.length || 0) },
-			],
-			value: this.state.tab,
-			on_change: (value) => {
-				this.state.tab = value;
-				this.render();
-			},
-		});
-	}
-
 	render_summary(produces) {
 		const texts = produces ? this.get_operation_summary() : this.get_tree_summary();
 		this.wrapper.find(".design-summary").html(texts.map((text) => `<span>${text}</span>`).join(""));
@@ -215,12 +189,9 @@ export class DesignView {
 	get_operation_summary() {
 		const operations = this.frm.doc.operations || [];
 		const minutes = operations.reduce((total, row) => total + flt(row.time_in_mins), 0);
-		const unused = this.get_unused_parts().length;
 		return [
-			__("{0} operations", [operations.length]),
+			operations.length === 1 ? __("1 stage") : __("{0} stages", [operations.length]),
 			__("{0} minutes", [format_number(minutes, null, 0)]),
-			unused ? __("{0} parts not used", [unused]) : "",
-			__("{0} BOMs will be created", [this.get_bom_node_ids().length]),
 			this.get_cost_summary(),
 		].filter(Boolean);
 	}
@@ -280,60 +251,8 @@ export class DesignView {
 		return part ? part.part_name || part.part_number : __("Missing Part");
 	}
 
-	get_node_item(node_id) {
-		return node_id ? this.get_part(node_id)?.item_code : this.frm.doc.item_code;
-	}
-
-	get_bom_node_ids() {
-		const rows = [...(this.frm.doc.operations || []), ...(this.frm.doc.materials || [])];
-		return [...new Set([0, ...rows.map((row) => cint(row.bom_node_id))])];
-	}
-
-	get_used_node_ids() {
-		const used = new Set(this.get_bom_node_ids());
-		(this.frm.doc.materials || []).forEach((row) => row.part_node_id && used.add(cint(row.part_node_id)));
-		(this.frm.doc.operations || []).forEach(
-			(row) => row.output_node_id && used.add(cint(row.output_node_id))
-		);
-		return used;
-	}
-
-	is_inside_used_part(part, used) {
-		const bom_node_ids = this.get_bom_node_ids();
-		for (
-			let parent = this.get_part(part.parent_node_id);
-			parent;
-			parent = this.get_part(parent.parent_node_id)
-		) {
-			if (used.has(parent.node_id)) return !bom_node_ids.includes(parent.node_id);
-		}
-		return false;
-	}
-
-	get_unused_parts() {
-		const used = this.get_used_node_ids();
-		return (this.frm.doc.items || []).filter(
-			(part) =>
-				!part.is_expandable &&
-				!used.has(part.node_id) &&
-				!this.is_excluded(part) &&
-				!this.is_inside_used_part(part, used)
-		);
-	}
-
-	get_default_quantity(node_id, bom_node_id) {
-		let quantity = 1;
-		let part = this.get_part(node_id);
-		while (part && part.node_id !== bom_node_id) {
-			quantity *= flt(part.qty) || 1;
-			part = this.get_part(part.parent_node_id);
-		}
-		return quantity;
-	}
-
 	highlight_nodes(node_ids) {
 		this.selected_node_ids = new Set(node_ids);
-		this.parts.mark_selected(this.selected_node_ids);
 		this.tree.mark_selected(this.selected_node_ids);
 		const matchers = [...this.selected_node_ids]
 			.map((node_id) => this.get_part(node_id))

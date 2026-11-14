@@ -8,6 +8,7 @@ from frappe import _, bold
 from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom_creator.bom_plan import BOMPlan
+from erpnext.manufacturing.doctype.bom_creator.process_formula import ProcessFormula
 
 
 class OperationPlan(BOMPlan):
@@ -21,6 +22,8 @@ class OperationPlan(BOMPlan):
 		for row in design.materials:
 			self.materials[cint(row.bom_node_id)].append(row)
 
+		self.formula = ProcessFormula(design) if design.track_semi_finished_goods else None
+
 	@property
 	def bom_node_ids(self) -> list[int]:
 		return sorted({0, *self.operations, *self.materials})
@@ -30,10 +33,13 @@ class OperationPlan(BOMPlan):
 
 	@property
 	def produces_item_at_each_operation(self) -> bool:
-		return bool(self.design.track_semi_finished_goods)
+		return bool(self.formula)
 
 	def validate(self):
 		self.set_operation_ids()
+		if self.formula:
+			self.formula.apply()
+
 		for row in self.design.operations:
 			self.validate_operation(row)
 
@@ -119,6 +125,8 @@ class OperationPlan(BOMPlan):
 			problems.extend(self.get_bom_problems(node_id))
 
 		problems.extend(self.get_duplicate_problems())
+		if self.formula:
+			problems.extend(self.formula.get_problems())
 		return problems
 
 	def get_duplicate_problems(self) -> list[str]:
@@ -220,7 +228,33 @@ class OperationPlan(BOMPlan):
 		for row in self.materials[node_id]:
 			bom.append("items", self.get_material_bom_item(row, operations, boms, stock_uoms, quantity))
 
+		if self.formula and not node_id:
+			self.add_process_values(bom, operations, quantity)
+
 		return self.submit_bom(bom)
+
+	def add_process_values(self, bom, operations, quantity: float):
+		bom.update(
+			{
+				"formula_tolerance": self.design.formula_tolerance,
+				"default_source_warehouse": None,
+				"transfer_material_against": "Job Card",
+				"backflush_based_on": "Material Transferred for Manufacture",
+			}
+		)
+		positions = {cint(row.operation_id): index for index, row in enumerate(operations, start=1)}
+		for row in self.formula.get_stage_inputs():
+			bom.append(
+				"items",
+				{
+					"item_code": row.source.output_item,
+					"qty": row.qty * quantity,
+					"source_warehouse": self.formula.get_machine_warehouse(row.source),
+					"operation_row_id": positions[cint(row.stage.operation_id)],
+					"do_not_explode": 1,
+					"include_item_in_manufacturing": 1,
+				},
+			)
 
 	def get_bom_operation(self, row, is_last: bool, boms: dict[str, str], quantity: float) -> dict:
 		operation = {
@@ -228,6 +262,16 @@ class OperationPlan(BOMPlan):
 			"workstation_type": row.workstation_type,
 			"time_in_mins": row.time_in_mins,
 		}
+		if self.formula and not cint(row.bom_node_id):
+			warehouse = self.formula.get_machine_warehouse(row)
+			operation.update(
+				{
+					"workstation": row.workstation,
+					"sequence_id": row.sequence_id,
+					"wip_warehouse": warehouse,
+					"fg_warehouse": None if is_last else warehouse,
+				}
+			)
 		if self.produces_item_at_each_operation:
 			output_item = self.get_output_item(row, is_last)
 			operation.update(
@@ -250,6 +294,13 @@ class OperationPlan(BOMPlan):
 		bom_item = self.get_bom_item(item_code, flt(row.qty) * quantity, uom, boms, part)
 		if row.from_operation_id:
 			bom_item.update({"do_not_explode": 1, "bom_no": ""})
+		if self.formula and not cint(row.bom_node_id):
+			bom_item.update(
+				{
+					"source_warehouse": self.design.raw_material_warehouse,
+					"is_balance_item": row.is_balance_item,
+				}
+			)
 		operation_ids = [cint(operation.operation_id) for operation in operations]
 		if row.operation_id and self.produces_item_at_each_operation:
 			bom_item["operation_row_id"] = operation_ids.index(cint(row.operation_id)) + 1

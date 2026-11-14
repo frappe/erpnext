@@ -5,11 +5,12 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.permissions import add_user_permission
 
-from erpnext.manufacturing.doctype.plant_floor.plant_floor import get_stock_summary
+from erpnext.manufacturing.doctype.bom_creator.test_process_design import make_machine
+from erpnext.manufacturing.doctype.work_order.services.plant_run.actions import PlantRun
+from erpnext.manufacturing.doctype.work_order.test_plant_run import make_ketchup_work_order, minutes_ago
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.page.plant_builder.plant_builder import get_floor, get_floors, set_machine_floor
 from erpnext.manufacturing.page.shop_floor.shop_floor import get_work_orders
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -28,15 +29,6 @@ class TestPlantFloor(ERPNextTestSuite):
 		self.assertEqual(hidden["work_orders"], [])
 		self.assertEqual([row.name for row in visible["work_orders"]], [allowed.name])
 
-	def test_stock_summary_includes_child_item_groups(self):
-		parent = make_item_group("_Test Plant Floor Parent Group", "All Item Groups", is_group=1)
-		child = make_item_group("_Test Plant Floor Child Group", parent)
-		item = make_item("_Test Plant Floor Item", {"is_stock_item": 1, "item_group": child}).name
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=10)
-
-		rows = get_stock_summary("_Test Warehouse - _TC", item_group=parent)
-		self.assertIn(item, [row.item_code for row in rows])
-
 	def test_group_or_other_company_warehouse_refused(self):
 		for warehouse in ("All Warehouses - _TC", "Stores - TCP1"):
 			plant_floor = frappe.get_doc(
@@ -49,15 +41,64 @@ class TestPlantFloor(ERPNextTestSuite):
 			)
 			self.assertRaises(frappe.ValidationError, plant_floor.insert)
 
+	def test_machines_join_and_leave_a_floor(self):
+		work_order = make_ketchup_work_order()
+		floor = make_floor()
 
-def make_item_group(name, parent, is_group=0):
-	if not frappe.db.exists("Item Group", name):
+		set_machine_floor("_Test Mixer", floor)
+		data = get_floor(floor)
+		self.assertEqual([machine.name for machine in data["machines"]], ["_Test Mixer"])
+		self.assertEqual(data["machines"][0].machine_model, "Mixer")
+		self.assertTrue(data["machines"][0].shapes)
+		self.assertIn(work_order.name, [row.name for row in data["work_orders"]])
+		floors = {row.name: row for row in get_floors()}
+		self.assertEqual([machine.name for machine in floors[floor].machines], ["_Test Mixer"])
+
+		set_machine_floor("_Test Mixer")
+		self.assertEqual(get_floor(floor)["machines"], [])
+		self.assertFalse(frappe.db.get_value("Workstation", "_Test Mixer", "plant_floor"))
+
+	def test_floor_shows_the_job_running_on_each_machine(self):
+		work_order = make_ketchup_work_order()
+		floor = make_floor()
+		set_machine_floor("_Test Mixer", floor)
+		with minutes_ago(30):
+			PlantRun(work_order.name).start()
+
+		job = get_floor(floor)["machines"][0].job
+		self.assertEqual((job.work_order, job.operation), (work_order.name, "_Test Mixer Operation"))
+
+	def test_only_floor_writers_move_machines(self):
+		make_machine("Mixer", "Mixer")
+		floor = make_floor()
+		reader = create_user("plant-floor-machine-reader@example.com", "Manufacturing User")
+		with self.set_user(reader.name):
+			self.assertRaises(frappe.PermissionError, set_machine_floor, "_Test Mixer", floor)
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Choose the Plant Floor", set_machine_floor, "_Test Mixer"
+		)
+
+	def test_floor_is_read_only_without_plant_floor_write(self):
+		floor = make_floor()
+		reader = create_user("plant-builder-reader@example.com", "Manufacturing User")
+		with self.set_user(reader.name):
+			self.assertFalse(get_floor(floor)["can_write"])
+
+		writer = create_user("plant-builder-writer@example.com", "Manufacturing Manager")
+		writer.add_roles("Manufacturing User")
+		with self.set_user(writer.name):
+			self.assertTrue(get_floor(floor)["can_write"])
+
+
+def make_floor():
+	if not frappe.db.exists("Plant Floor", "_Test Ketchup Floor"):
 		frappe.get_doc(
 			{
-				"doctype": "Item Group",
-				"item_group_name": name,
-				"parent_item_group": parent,
-				"is_group": is_group,
+				"doctype": "Plant Floor",
+				"floor_name": "_Test Ketchup Floor",
+				"company": "_Test Company",
+				"warehouse": "Stores - _TC",
 			}
 		).insert()
-	return name
+	return "_Test Ketchup Floor"

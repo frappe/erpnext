@@ -273,6 +273,17 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.submit()
 		self.assertEqual(job_card.status, "Completed")
 
+	def test_closing_bom_work_order_keeps_workstation_problem(self):
+		job_card = self.get_first_job_card(self.work_order.name)
+		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00"})
+		job_card.save()
+		job_card.pause_job(end_time="2024-03-01 09:00:00")
+		frappe.db.set_value("Workstation", job_card.workstation, "status", "Problem")
+
+		close_work_order(self.work_order.name, "Closed")
+
+		self.assertEqual(frappe.db.get_value("Workstation", job_card.workstation, "status"), "Problem")
+
 	def test_removing_all_time_logs_clears_actual_dates(self):
 		job_card = self.get_first_job_card(self.work_order.name)
 		job_card.append("time_logs", {"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 09:00:00"})

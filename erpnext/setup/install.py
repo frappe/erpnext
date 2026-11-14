@@ -17,6 +17,7 @@ from frappe.permissions import (
 )
 from frappe.utils import cint
 
+from erpnext.manufacturing.doctype.workstation_type.workstation_type import create_default_workstation_types
 from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
 
 from .default_success_action import get_default_success_action
@@ -41,6 +42,7 @@ def after_install():
 	add_all_roles_to("Administrator")
 	create_default_success_action()
 	create_incoterms()
+	create_default_workstation_types()
 	create_default_role_profiles()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()

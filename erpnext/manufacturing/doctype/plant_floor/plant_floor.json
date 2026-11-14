@@ -10,14 +10,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "workstations_tab",
-  "plant_dashboard",
-  "stock_summary_tab",
-  "stock_summary",
-  "details_tab",
-  "column_break_mvbx",
   "floor_name",
   "company",
+  "column_break_mvbx",
   "warehouse"
  ],
  "fields": [
@@ -28,56 +23,30 @@
    "unique": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "workstations_tab",
-   "fieldtype": "Tab Break",
-   "label": "Workstations"
-  },
-  {
-   "fieldname": "plant_dashboard",
-   "fieldtype": "HTML",
-   "label": "Plant Dashboard"
-  },
-  {
-   "fieldname": "details_tab",
-   "fieldtype": "Tab Break",
-   "label": "Floor"
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_mvbx",
    "fieldtype": "Column Break"
   },
   {
+   "description": "The main store of this floor.",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
    "options": "Warehouse",
-   "set_only_once": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal && doc.warehouse",
-   "fieldname": "stock_summary_tab",
-   "fieldtype": "Tab Break",
-   "label": "Stock Summary"
-  },
-  {
-   "fieldname": "stock_summary",
-   "fieldtype": "HTML",
-   "label": "Stock Summary"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "set_only_once": 1
+   "show_description_on_click": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "layout-grid",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-08-21 23:11:45.858553",
+ "modified": "2026-11-04 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
@@ -97,6 +66,19 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
    "role": "Manufacturing User",
    "select": 1
   }

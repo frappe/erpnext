@@ -418,6 +418,15 @@ class ShopFloor {
 			.removeClass("sf-selected")
 			.filter(`[data-name="${$.escapeSelector(name)}"]`)
 			.addClass("sf-selected");
+		const runs_in_plant_builder = this.buckets[this.active_bucket]?.rows.find(
+			(row) => row.name === name
+		)?.track_semi_finished_goods;
+		const plant_builder =
+			runs_in_plant_builder && frappe.boot.page_info?.["plant-builder"]
+				? `<a class="btn btn-default btn-sm" href="/app/plant-builder/run/${encodeURIComponent(
+						name
+				  )}">${__("Open in Plant Builder")}</a>`
+				: "";
 		// The detail pane reuses the operator rendering for a single work order.
 		this.detail_container.html(`
 			<div class="sf-detail-head">
@@ -428,6 +437,7 @@ class ShopFloor {
 				<a class="btn btn-default btn-sm" href="/app/work-order/${encodeURIComponent(name)}" target="_blank">${__(
 			"Open"
 		)}</a>
+				${plant_builder}
 			</div>
 			<div class="sf-detail-body"></div>
 		`);

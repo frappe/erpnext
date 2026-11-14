@@ -225,6 +225,12 @@ frappe.ui.form.on("Work Order", {
 		}
 		erpnext.work_order.add_start_button(frm);
 
+		if (frm.doc.track_semi_finished_goods && !frm.is_new() && frappe.boot.page_info?.["plant-builder"]) {
+			frm.add_custom_button(__("Open in Plant Builder"), () => {
+				frappe.set_route("plant-builder", "run", frm.doc.name);
+			});
+		}
+
 		if (frm.doc.status == "Completed") {
 			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
 				frm.add_custom_button(
