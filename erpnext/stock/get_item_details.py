@@ -900,6 +900,9 @@ def get_item_tax_info(
 		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
 			continue
 
+		if not isinstance(item_code[0], str):
+			frappe.throw(_("Invalid Item Code"))
+
 		out[item_code[1]] = frappe._dict()
 		item = frappe.get_cached_doc("Item", item_code[0])
 		ctx: frappe._dict = {
