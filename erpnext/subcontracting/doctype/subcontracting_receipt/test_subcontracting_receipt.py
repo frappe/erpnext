@@ -396,6 +396,24 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_full_return_of_a_receipt_made_before_v16(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		# secondary rows received before v16 have no bom_secondary_item
+		frappe.db.set_value(
+			"Subcontracting Receipt Item",
+			{"parent": scr.name, "bom_secondary_item": ("is", "set")},
+			"bom_secondary_item",
+			None,
+		)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
 	def test_partial_returns_add_up_to_the_received_secondary_qty(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item, quantity=3, secondary_qty=2)
