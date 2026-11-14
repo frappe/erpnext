@@ -516,6 +516,7 @@ class SubcontractingReceipt(SubcontractingController):
 					"valuation_type",
 					"returned_qty",
 				],
+				order_by="idx",
 			)
 		}
 
@@ -524,19 +525,20 @@ class SubcontractingReceipt(SubcontractingController):
 		if not original_rows:
 			return
 
-		# rows received before v16 have no bom_secondary_item, so they match by item
-		secondary_rows = {
-			(row.reference_name, row.bom_secondary_item or row.item_code): row.name
-			for row in original_rows.values()
-			if row.secondary_item_type or row.valuation_type
-		}
+		# rows received before v16 have no bom_secondary_item, so they match by item, in BOM order
+		secondary_rows = defaultdict(list)
+		for row in original_rows.values():
+			if row.secondary_item_type or row.valuation_type:
+				secondary_rows[(row.reference_name, row.bom_secondary_item or row.item_code)].append(row.name)
+
 		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
 		for row in self.items:
 			if row.bom_secondary_item:
 				fg_row = returned_fg_rows.get(row.reference_name)
-				row.subcontracting_receipt_item = secondary_rows.get(
-					(fg_row, row.bom_secondary_item)
-				) or secondary_rows.get((fg_row, row.item_code))
+				matches = secondary_rows.get((fg_row, row.bom_secondary_item)) or secondary_rows.get(
+					(fg_row, row.item_code)
+				)
+				row.subcontracting_receipt_item = matches.pop(0) if matches else None
 
 	def set_remaining_secondary_qty(self, original_rows):
 		"""A return of a receipt row's last finished goods takes the secondary qty left on it,
