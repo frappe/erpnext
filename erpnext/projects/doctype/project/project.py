@@ -7,6 +7,7 @@ from graphlib import TopologicalSorter
 import frappe
 from email_reply_parser import EmailReplyParser
 from frappe import _, qb
+from frappe.email.email_body import get_message_id
 from frappe.model.document import Document
 from frappe.query_builder import Case
 from frappe.query_builder.functions import Count, Date, Locate, Lower, Sum, UnixTimestamp
@@ -17,6 +18,7 @@ from frappe.utils import (
 	flt,
 	get_datetime,
 	get_link_to_form,
+	get_string_between,
 	get_time,
 	nowdate,
 	nowtime,
@@ -727,13 +729,46 @@ def send_project_update_email_to_users(project):
 		"Email Account", dict(enable_incoming=1, default_incoming=1), "email_id"
 	)
 
+	for recipient in get_users_email(doc):
+		send_project_update_copy(doc, project_update, recipient, incoming_email_account)
+
+
+def send_project_update_copy(
+	project: Document, project_update: Document, recipient: str, reply_to: str | None
+):
+	"""Send one user their own copy of the update, threaded on a Communication of its own.
+
+	A reply is credited to the user whose copy it answers (see `get_project_update_replies`).
+	A user only gets the Message-ID of their own copy, so they cannot post a status as another user.
+
+	Frappe also accepts a Communication name in `In-Reply-To`, and a timeline shows the names of
+	the Communications linked to it. So the copy is not linked to the Project Update or to any
+	timeline. A reply then reaches the Project Update only through the Email Queue, which Frappe
+	matches by Message-ID.
+	"""
+	communication = frappe.get_doc(
+		{
+			"doctype": "Communication",
+			"communication_type": "Communication",
+			"communication_medium": "Email",
+			"sent_or_received": "Sent",
+			"subject": project.subject,
+			"content": project.message,
+			"recipients": recipient,
+			"message_id": get_string_between("<", get_message_id(), ">"),
+		}
+	).insert(ignore_permissions=True)
+	frappe.db.delete("Communication Link", {"parent": communication.name})
+
 	frappe.sendmail(
-		recipients=get_users_email(doc),
-		message=doc.message,
-		subject=doc.subject,
+		recipients=[recipient],
+		message=project.message,
+		subject=project.subject,
 		reference_doctype=project_update.doctype,
 		reference_name=project_update.name,
-		reply_to=incoming_email_account,
+		reply_to=reply_to,
+		message_id=communication.message_id,
+		communication=communication.name,
 	)
 
 
@@ -750,7 +785,7 @@ def collect_project_status():
 def get_uncollected_replies(project_update):
 	collected = Counter((row.user, row.project_status) for row in project_update.users)
 	new_replies = []
-	for reply in get_project_update_replies(project_update.name):
+	for reply in get_project_update_replies(project_update):
 		key = (reply["user"], reply["project_status"])
 		if collected[key]:
 			collected[key] -= 1
@@ -759,25 +794,38 @@ def get_uncollected_replies(project_update):
 	return new_replies
 
 
-def get_project_update_replies(project_update):
+def get_project_update_replies(project_update: Document) -> list[dict]:
+	"""Return a status row for each reply to a copy of the update sent to a user of the project.
+
+	The sender of an inbound mail is not verified, so a reply is credited to the user whose copy
+	it answers, and its sender is ignored. Any other reply is dropped, except on an update sent
+	before each user got their own copy (see `get_reply_author`).
+	"""
 	replies = frappe.get_all(
 		"Communication",
-		fields=["content", "text_content", "sender"],
+		fields=["in_reply_to", "sender", "content", "text_content"],
 		filters=dict(
 			reference_doctype="Project Update",
-			reference_name=project_update,
+			reference_name=project_update.name,
 			communication_type="Communication",
 			sent_or_received="Received",
 		),
 		order_by="creation asc",
 	)
+	sent_copies = get_sent_copies(project_update.name)
+	project_users = set(
+		frappe.get_all(
+			"Project User", filters={"parent": project_update.project, "parenttype": "Project"}, pluck="user"
+		)
+	)
 
 	users = []
 	for d in replies:
-		user_data = frappe.db.get_value(
-			"User", {"email": d.sender}, ["full_name", "user_image", "name"], as_dict=True
+		author = get_reply_author(d, sent_copies)
+		user_data = author and frappe.db.get_value(
+			"User", {"email": author}, ["full_name", "user_image", "name"], as_dict=True
 		)
-		if not user_data:
+		if not user_data or user_data.name not in project_users:
 			continue
 
 		users.append(
@@ -792,6 +840,41 @@ def get_project_update_replies(project_update):
 			}
 		)
 	return users
+
+
+def get_sent_copies(project_update: str) -> dict[str, str]:
+	"""Map each copy of the update to the email it was sent to, through the Email Queue of each copy."""
+	copies = frappe.get_all(
+		"Email Queue",
+		filters={
+			"reference_doctype": "Project Update",
+			"reference_name": project_update,
+			"communication": ["is", "set"],
+		},
+		pluck="communication",
+	)
+	if not copies:
+		return {}
+	return dict(
+		frappe.get_all(
+			"Communication", filters={"name": ["in", copies]}, fields=["name", "recipients"], as_list=True
+		)
+	)
+
+
+def get_reply_author(reply: dict, sent_copies: dict) -> str | None:
+	"""Return the email of the user to credit for a reply.
+
+	Only a direct reply to a copy counts. A reply to an earlier reply is dropped, because the
+	timeline of the Project Update shows the names of earlier replies.
+
+	An update sent before each user got their own copy has no copies to match, so its replies
+	are credited to their sender. Replies are only collected on the day of the update, so this
+	only applies to updates sent on the day of the upgrade.
+	"""
+	if not sent_copies:
+		return reply.sender
+	return sent_copies.get(reply.in_reply_to)
 
 
 def send_project_status_email_to_users():
