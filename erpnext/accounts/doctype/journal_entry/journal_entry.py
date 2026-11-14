@@ -1758,7 +1758,7 @@ def get_account_details_and_party_type(account, date, company, debit=None, credi
 @frappe.whitelist()
 def get_exchange_rate(
 	posting_date,
-	account=None,
+	account: str | None = None,
 	account_currency=None,
 	company=None,
 	reference_type=None,
