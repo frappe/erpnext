@@ -295,9 +295,7 @@ class SubcontractingController(StockController):
 
 	def get_return_consumed_qty(self, row, material):
 		"""Rounded on the running finished good total, so that all returns add up to what the receipt consumed."""
-		returned_fg_qty = material.returned_fg_qty + abs(
-			flt(row.get("received_qty") or (row.qty + flt(row.get("rejected_qty"))))
-		)
+		returned_fg_qty = material.returned_fg_qty + abs(flt(row.received_qty))
 		share = min(returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
 		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
 		return -flt(flt(material.consumed_qty * share, precision) - material.returned_qty, precision)
@@ -314,7 +312,7 @@ class SubcontractingController(StockController):
 	def get_consumed_serial_batches(self):
 		"""Serial nos and batches the returned receipt consumed, with their rate and the qty no other
 		return has brought back, keyed by (receipt item row, raw material), then (serial no, batch)."""
-		if not (self.doctype == "Subcontracting Receipt" and self.is_return and self.return_against):
+		if not self.is_subcontracting_receipt_return():
 			return {}
 
 		receipt = frappe.qb.DocType("Subcontracting Receipt")
