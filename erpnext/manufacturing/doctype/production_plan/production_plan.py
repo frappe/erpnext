@@ -513,6 +513,11 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
+		if close is not None:
+			self.reload()
+			if self.docstatus != 1:
+				frappe.throw(_("Only a submitted Production Plan can be closed or re-opened"))
+
 		self.check_permission("write")
 
 		if close is None and self.status == "Closed":
