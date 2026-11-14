@@ -3,8 +3,12 @@
 
 import frappe
 from frappe import qb
-from frappe.utils import getdate
+from frappe.utils import cstr, getdate
 
+from erpnext.accounts.doctype.bank_account.bank_account import (
+	get_closing_balance_as_per_statement,
+	set_closing_balance_as_per_statement,
+)
 from erpnext.accounts.doctype.bank_statement_import_log.bank_statement_import_log import (
 	BankStatementImportLog,
 	build_table_transactions,
@@ -712,6 +716,153 @@ class TestBankStatementImportLog(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(doc.detected_header_index, 0)
 		restored = {c.maps_to: c.index for c in doc.column_mapping if c.maps_to != "Do not import"}
 		self.assertEqual(restored.get("Description"), 1)
+
+	# ------------------------------------------------------------------ #
+	# Amounts, dates, closing balance and columns written on import
+	# ------------------------------------------------------------------ #
+
+	def test_amount_parser_reads_markers_brackets_and_separators(self):
+		self.assertEqual(get_float_amount("Rs. 1,000.00 Cr"), 1000.0)
+		self.assertEqual(get_float_amount("50.90 Dr."), 50.9)
+		self.assertEqual(get_float_amount("Rs.500 Cr"), 500.0)
+		self.assertEqual(get_float_amount("(500.00)"), -500.0)
+		self.assertEqual(get_float_amount("300.00-"), -300.0)
+		self.assertEqual(get_float_amount("1.234,56"), 1234.56)
+		self.assertEqual(get_float_amount("1,00,000.50"), 100000.5)
+		self.assertEqual(get_float_amount("12,50"), 12.5)
+		self.assertEqual(get_float_amount(".50"), 0.5)
+
+	def test_signed_amounts_keep_their_side(self):
+		csv_text = 'Date,Narration,Amount\n05/03/2026,Refund,"1.234,56"\n06/03/2026,Rent,(500.00)\n07/03/2026,Fee,300.00-\n'
+		doc = self._create_csv_import_log(csv_text)
+		rows = get_statement_details(doc.name)["final_transactions"]
+		self.assertEqual(
+			[(row["deposit"], row["withdrawal"]) for row in rows], [(1234.56, 0), (0, 500.0), (0, 300.0)]
+		)
+
+	def test_no_balance_column_keeps_the_closing_balance(self):
+		set_closing_balance_as_per_statement(self.bank_account, "2026-03-07", 5000)
+		csv_text = "Date,Narration,Withdrawal,Deposit\n05/03/2026,Salary,,250\n07/03/2026,Rent,50,\n"
+		doc = self._create_csv_import_log(csv_text)
+		# the import runs on the saved log, as the importer screen calls it
+		frappe.get_doc(doc.doctype, doc.name).insert_transactions()
+		self.assertEqual(
+			get_closing_balance_as_per_statement(self.bank_account, "2026-03-07")["balance"], 5000
+		)
+
+	def test_newest_first_statement_closing_balance(self):
+		csv_text = (
+			"Date,Narration,Withdrawal,Deposit,Balance\n"
+			"07/03/2026,Refund,,100,1300\n07/03/2026,Rent,50,,1200\n05/03/2026,Salary,,250,1250\n"
+		)
+		doc = self._create_csv_import_log(csv_text)
+		self.assertEqual(doc.closing_balance, 1300)
+		self.assertEqual(getdate(doc.end_date), getdate("2026-03-07"))
+
+	def test_one_day_statement_closing_balance(self):
+		# all rows on one date: the running balance gives the order
+		newest_first = "07/03/2026,Refund,,100,1300\n07/03/2026,Rent,50,,1200\n"
+		oldest_first = "07/03/2026,Rent,50,,1200\n07/03/2026,Refund,,100,1300\n"
+		for rows in (newest_first, oldest_first):
+			doc = self._create_csv_import_log("Date,Narration,Withdrawal,Deposit,Balance\n" + rows)
+			self.assertEqual(doc.closing_balance, 1300)
+
+	def test_month_first_dates(self):
+		csv_text = (
+			"Date,Narration,Amount\n03/02/2026,A,10\n03/05/2026,B,20\n03/09/2026,C,30\n03/20/2026,D,40\n"
+		)
+		doc = self._create_csv_import_log(csv_text)
+		self.assertEqual(doc.detected_date_format, "%m/%d/%Y")
+		self.assertEqual(
+			(getdate(doc.start_date), getdate(doc.end_date)), (getdate("2026-03-02"), getdate("2026-03-20"))
+		)
+
+	def test_ambiguous_dates_follow_the_system_date_format(self):
+		csv_text = "Date,Narration,Amount\n03/02/2026,A,10\n03/05/2026,B,20\n"
+		with self.change_settings("System Settings", {"date_format": "mm-dd-yyyy"}):
+			doc = self._create_csv_import_log(csv_text)
+		self.assertEqual(doc.detected_date_format, "%m/%d/%Y")
+		doc = self._create_csv_import_log(csv_text)
+		self.assertEqual(doc.detected_date_format, "%d/%m/%Y")
+
+	def test_fee_and_party_columns_are_imported(self):
+		csv_text = (
+			"Date,Narration,Reference,Withdrawal,Deposit,Charges,Counterparty,Counterparty IBAN\n"
+			"05/03/2026,Supplier payment,FEE-1,1000,,25,ACME Ltd,DE89370400440532013000\n"
+		)
+		doc = self._create_csv_import_log(csv_text)
+		maps = {
+			"Charges": "Excluded Fee",
+			"Counterparty": "Party Name/Account Holder",
+			"Counterparty IBAN": "Party IBAN",
+		}
+		mapping = [
+			{"index": c.index, "maps_to": maps.get(c.header_text, c.maps_to), "header_text": c.header_text}
+			for c in doc.column_mapping
+		]
+		update_column_mapping(doc.name, mapping)
+		doc.reload()
+		doc.insert_transactions()
+
+		bank_transaction = frappe.get_doc(
+			"Bank Transaction", {"bank_account": self.bank_account, "reference_number": "FEE-1"}
+		)
+		self.assertEqual(bank_transaction.included_fee, 25)  # the excluded fee is moved into it
+		self.assertEqual(bank_transaction.withdrawal, 1025)
+		self.assertEqual(bank_transaction.bank_party_name, "ACME Ltd")
+		self.assertEqual(bank_transaction.bank_party_iban, "DE89370400440532013000")
+
+	def test_statement_file_must_be_readable(self):
+		file_doc = frappe.get_doc(
+			{
+				"doctype": "File",
+				"file_name": f"private-{frappe.generate_hash(length=8)}.csv",
+				"is_private": 1,
+				"content": "Date,Narration,Amount\n05/03/2026,A,10\n",
+			}
+		).insert(ignore_permissions=True)
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "bsil-other@example.com",
+				"first_name": "Other",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+		user.add_roles("System Manager", "Accounts Manager")
+
+		frappe.set_user(user.name)
+		try:
+			doc = frappe.get_doc(
+				{
+					"doctype": "Bank Statement Import Log",
+					"bank_account": self.bank_account,
+					"file": file_doc.file_url,
+				}
+			)
+			self.assertRaises(frappe.PermissionError, doc.insert)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_reimported_rows_with_a_reference_are_skipped(self):
+		csv_text = "Date,Narration,Reference,Amount\n05/03/2026,Salary,UTR001,250\n06/03/2026,Rent,UTR002,-50\n06/03/2026,Cash,,-10\n"
+		self._create_csv_import_log(csv_text).insert_transactions()
+		self._create_csv_import_log(csv_text).insert_transactions()
+
+		rows = frappe.get_all(
+			"Bank Transaction", {"bank_account": self.bank_account, "docstatus": 1}, pluck="reference_number"
+		)
+		self.assertEqual(sorted(cstr(row) for row in rows), ["", "", "UTR001", "UTR002"])
+
+	def test_header_detection_reads_spaced_and_uk_headers(self):
+		columns = detect_column_mapping(
+			["Date", "Details", "Dr / Cr", "Amount", "Paid In", "Paid Out", "Ref No."]
+		)
+		mapped = {c["header_text"]: c["maps_to"] for c in columns}
+		self.assertEqual(mapped["Dr / Cr"], "Debit/Credit")
+		self.assertEqual(mapped["Paid In"], "Deposit")
+		self.assertEqual(mapped["Paid Out"], "Withdrawal")
+		self.assertEqual(mapped["Ref No."], "Reference")
 
 
 test_hdfc_sample_statement_data = [
