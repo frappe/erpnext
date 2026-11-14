@@ -481,7 +481,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def get_secondary_items(self, recalculate_rate: bool | None = False):
-		self.remove_secondary_items()
+		sent_rows = self.remove_secondary_items()
 
 		original_rows = self.get_returned_receipt_rows()
 		# rejected goods yield no secondary items
@@ -495,6 +495,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.link_returned_secondary_items(original_rows)
 		self.set_remaining_secondary_qty(original_rows)
 		self.remove_returned_secondary_rows_without_qty()
+		self.keep_picked_serial_and_batch(sent_rows)
 
 		if recalculate_rate:
 			self.set_additional_costs()
@@ -617,6 +618,24 @@ class SubcontractingReceipt(SubcontractingController):
 		return flt(original_row.returned_qty - flt(row.received_qty), precision) >= flt(
 			original_row.received_qty - original_row.process_loss_qty, precision
 		)
+
+	def keep_picked_serial_and_batch(self, sent_rows):
+		"""Keep the serial nos and batches picked on a return's secondary rows before the rebuild."""
+		picked_rows = {
+			row.subcontracting_receipt_item: row
+			for row in sent_rows
+			if row.subcontracting_receipt_item
+			and (row.serial_no or row.batch_no or row.serial_and_batch_bundle)
+		}
+		for row in self.items:
+			if row.bom_secondary_item and (picked := picked_rows.get(row.subcontracting_receipt_item)):
+				for fieldname in (
+					"use_serial_batch_fields",
+					"serial_no",
+					"batch_no",
+					"serial_and_batch_bundle",
+				):
+					row.set(fieldname, picked.get(fieldname))
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
@@ -757,11 +776,16 @@ class SubcontractingReceipt(SubcontractingController):
 		return (fg_item_cost * (cost_allocation_per / 100)) / qty if qty else 0.0
 
 	def remove_secondary_items(self):
+		"""Remove the secondary rows and return them."""
+		removed = []
 		for item in list(self.items):
 			if item.secondary_item_type or item.valuation_type:
 				self.remove(item)
+				removed.append(item)
 			else:
 				item.secondary_items_cost_per_qty = 0
+
+		return removed
 
 	@frappe.whitelist()
 	def set_missing_values(self):
