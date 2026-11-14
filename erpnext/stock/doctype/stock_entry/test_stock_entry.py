@@ -1617,8 +1617,30 @@ class TestStockEntry(ERPNextTestSuite):
 			st1 = frappe.copy_doc(self.globalTestRecords["Stock Entry"][0])
 			st1.get("items")[0].t_warehouse = "_Test Warehouse 2 - _TC1"
 			st1.set_stock_entry_type()
-			st1.insert()
-			self.assertRaises(InvalidWarehouseCompany, st1.submit)
+			self.assertRaises(InvalidWarehouseCompany, st1.insert)
+
+	def test_warehouse_of_other_company_is_not_priced(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		item_code = make_item("_Test Steel Rod", {"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=40, basic_rate=123.45)
+
+		def new_material_issue(warehouse):
+			entry = make_stock_entry(
+				item_code=item_code, source=warehouse, qty=1, company="_Test Company", do_not_save=True
+			)
+			entry.items[0].basic_rate = 0
+			return entry
+
+		own_entry = new_material_issue("_Test Warehouse - _TC")
+		own_entry.get_stock_and_rate()
+		self.assertEqual(own_entry.items[0].basic_rate, 123.45)
+		own_entry.insert()
+		self.assertEqual(own_entry.items[0].basic_rate, 123.45)
+
+		other_entry = new_material_issue("_Test Warehouse 2 - _TC1")
+		self.assertRaises(InvalidWarehouseCompany, other_entry.get_stock_and_rate)
+		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
 
 	# permission tests
 	def test_warehouse_user(self):
