@@ -56,8 +56,8 @@ class ReturnChargesService:
 		for row in items:
 			# a row carries its charge on its accepted qty, or on its rejected qty if it accepts nothing
 			carried_by = "accepted" if flt(row.qty) else "rejected"
-			if chargeable_qty := receipt.get_chargeable_qty(row):
+			if carried_qty := flt(row.qty) or flt(row.rejected_qty):
 				qty = returned_qty.get(row.name, {}).get(carried_by, 0.0)
-				share += charge_per_item.get(row.idx, 0.0) * qty / chargeable_qty
+				share += charge_per_item.get(row.idx, 0.0) * qty / carried_qty
 
 		return share
