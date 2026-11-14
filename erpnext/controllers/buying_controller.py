@@ -1158,9 +1158,7 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
-
-		return flt(accepted_qty + rejected_qty, row.precision("stock_qty"))
+		return flt(accepted_qty + flt(row.rejected_stock_qty), row.precision("stock_qty"))
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
