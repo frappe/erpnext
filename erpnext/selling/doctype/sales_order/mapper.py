@@ -14,7 +14,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, flt, nowdate, strip_html
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
-from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.buying.utils import check_on_hold_or_closed_status, get_ordered_qty_in_row_uom
 from erpnext.controllers.item_close import is_bundle_of_closed_row
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -789,8 +789,8 @@ def make_purchase_order(
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = max(flt(source.qty - ordered_qty[source.name], target.precision("qty")), 0)
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, _):
@@ -809,6 +809,7 @@ def make_purchase_order(
 
 	sales_order = frappe.get_doc("Sales Order", source_name)
 	sales_order.check_permission("read")
+	ordered_qty = get_ordered_qty_in_row_uom(sales_order.items, "sales_order_item")
 	items_to_map = {}
 	for item in selected_items:
 		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}

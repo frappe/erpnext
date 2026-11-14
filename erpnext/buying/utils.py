@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, getdate
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
@@ -201,3 +202,18 @@ def get_linked_material_requests(items: str | list):
 			mr_list.extend(result)
 
 	return mr_list
+
+
+def get_ordered_qty_in_row_uom(rows, link_field: str) -> dict:
+	"""Qty of each row on submitted Purchase Orders in the row's UOM, from the orders' unrounded stock qty."""
+	po_item = frappe.qb.DocType("Purchase Order Item")
+	ordered_stock_qty = dict(
+		frappe.qb.from_(po_item)
+		.select(po_item[link_field], Sum(po_item.qty * po_item.conversion_factor))
+		.where((po_item.docstatus == 1) & po_item[link_field].isin([row.name for row in rows]))
+		.groupby(po_item[link_field])
+		.run()
+	)
+	return {
+		row.name: flt(ordered_stock_qty.get(row.name)) / (flt(row.conversion_factor) or 1) for row in rows
+	}
