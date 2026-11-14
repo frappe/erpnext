@@ -10,6 +10,7 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.controllers.sales_and_purchase_return import (
 	get_already_returned_items,
 	get_rate_for_return,
@@ -495,7 +496,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.link_returned_secondary_items(original_rows)
 		self.set_remaining_secondary_qty(original_rows)
 		self.remove_returned_secondary_rows_without_qty()
-		self.keep_picked_serial_and_batch(sent_rows)
+		self.keep_secondary_row_values(sent_rows)
 
 		if recalculate_rate:
 			self.set_additional_costs()
@@ -619,23 +620,31 @@ class SubcontractingReceipt(SubcontractingController):
 			original_row.received_qty - original_row.process_loss_qty, precision
 		)
 
-	def keep_picked_serial_and_batch(self, sent_rows):
-		"""Keep the serial nos and batches picked on a return's secondary rows before the rebuild."""
-		picked_rows = {
-			row.subcontracting_receipt_item: row
-			for row in sent_rows
-			if row.subcontracting_receipt_item
-			and (row.serial_no or row.batch_no or row.serial_and_batch_bundle)
+	def keep_secondary_row_values(self, sent_rows):
+		"""Keep the accounts, dimensions, serial nos and batches set on a return's secondary rows before the rebuild."""
+		sent_rows = {
+			row.subcontracting_receipt_item: row for row in sent_rows if row.subcontracting_receipt_item
 		}
+		if not sent_rows:
+			return
+
+		accounting_fields = ["expense_account", "cost_center", "project", *get_accounting_dimensions()]
 		for row in self.items:
-			if row.bom_secondary_item and (picked := picked_rows.get(row.subcontracting_receipt_item)):
-				for fieldname in (
+			if not (row.bom_secondary_item and (sent := sent_rows.get(row.subcontracting_receipt_item))):
+				continue
+
+			fieldnames = accounting_fields
+			if sent.serial_no or sent.batch_no or sent.serial_and_batch_bundle:
+				fieldnames = [
+					*fieldnames,
 					"use_serial_batch_fields",
 					"serial_no",
 					"batch_no",
 					"serial_and_batch_bundle",
-				):
-					row.set(fieldname, picked.get(fieldname))
+				]
+
+			for fieldname in fieldnames:
+				row.set(fieldname, sent.get(fieldname))
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
