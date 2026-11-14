@@ -28,7 +28,7 @@ from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_s
 	get_amounts_not_reflected_in_system,
 	get_entries,
 )
-from erpnext.accounts.utils import get_account_currency, get_balance_on
+from erpnext.accounts.utils import get_account_currency, get_balance_on, get_currency_precision
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -251,13 +251,19 @@ def create_journal_entry_bts(
 	# if second account is of foreign currency, convert and set debit and credit fields.
 	if second_account_currency != company_default_currency:
 		exc_rate = get_exchange_rate(second_account_currency, company_default_currency, posting_date)
+		credit_in_account_currency = flt(deposit_in_company_currency / exc_rate, get_currency_precision())
+		debit_in_account_currency = flt(withdrawal_in_company_currency / exc_rate, get_currency_precision())
+		if credit_in_account_currency:
+			exc_rate = flt(deposit_in_company_currency / credit_in_account_currency, 9)
+		elif debit_in_account_currency:
+			exc_rate = flt(withdrawal_in_company_currency / debit_in_account_currency, 9)
 		second_account_dict.update(
 			{
 				"exchange_rate": exc_rate,
 				"credit": deposit_in_company_currency,
 				"debit": withdrawal_in_company_currency,
-				"credit_in_account_currency": flt(deposit_in_company_currency / exc_rate) or 0,
-				"debit_in_account_currency": flt(withdrawal_in_company_currency / exc_rate) or 0,
+				"credit_in_account_currency": credit_in_account_currency,
+				"debit_in_account_currency": debit_in_account_currency,
 			}
 		)
 	else:
