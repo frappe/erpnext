@@ -22,6 +22,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	StockReconciliation,
+	get_difference_account,
 	get_items,
 	get_stock_balance_for,
 )
@@ -152,6 +153,44 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(
 			["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100, "_Test UOM"],
 			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"], items[0]["stock_uom"]],
+		)
+
+	def test_difference_account_needs_company_and_reconciliation_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"reco-account-{frappe.scrub(company)}@example.com", "Stock Manager"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+		projects_user = create_user("reco-account-projects@example.com", "Projects User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for user in (projects_user, users["_Test Company 1"]):
+			frappe.set_user(user)
+			self.assertRaises(
+				frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company"
+			)
+
+		frappe.set_user(users["_Test Company"])
+		self.assertEqual(get_difference_account("Opening Stock", "_Test Company"), "Temporary Opening - _TC")
+
+	def test_difference_account_applies_company_permission_for_stock_reconciliation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		user = create_user("reco-account-scoped@example.com", "Stock Manager").name
+		if not frappe.db.exists("User Permission", {"user": user, "allow": "Company"}):
+			add_user_permission("Company", "_Test Company 1", user, applicable_for="Stock Reconciliation")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(user)
+		self.assertRaises(frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company")
+		self.assertEqual(
+			get_difference_account("Opening Stock", "_Test Company 1"), "Temporary Opening - _TC1"
 		)
 
 	def test_stock_reco_for_serialized_item(self):
