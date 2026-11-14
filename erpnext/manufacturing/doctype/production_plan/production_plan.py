@@ -974,6 +974,7 @@ class ProductionPlan(Document):
 					if material_request_type == "Material Transfer"
 					else None,
 					"qty": qty_to_request,
+					"uom": item.uom,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
 					"sales_order": item.sales_order,
