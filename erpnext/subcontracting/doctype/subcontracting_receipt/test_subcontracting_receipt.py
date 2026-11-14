@@ -4349,6 +4349,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"validate_consumed_qty": 1})
 	def test_return_takes_back_the_raw_material_the_receipt_consumed_per_unit(self):
 		rm_item = make_item(properties={"is_stock_item": 1}).name
 		scr = make_receipt_consuming_transferred_materials(qty=2, rm_items={rm_item: 3})
