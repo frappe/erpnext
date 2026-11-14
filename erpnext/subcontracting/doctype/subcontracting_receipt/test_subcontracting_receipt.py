@@ -454,6 +454,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, scr_return.items[0].amount)
 
+	def test_return_values_the_secondary_items_at_the_receipt_rate(self):
+		scr = make_receipt_with_scrap()
+		make_stock_entry(
+			item_code=scr.items[1].item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=30
+		)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -1
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[1].rate, scr.items[1].rate)
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
