@@ -1799,5 +1799,5 @@ def rounds_stock_qty(row) -> bool:
 	"""Whether set_qty_as_per_stock_uom rounds the stock qty of a purchase row."""
 	return bool(
 		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
-		or get_whole_number_uoms([row.stock_uom])
+		or frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")
 	)
