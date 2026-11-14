@@ -1226,6 +1226,7 @@ def transfer_asset(args):
 
 @frappe.whitelist()
 def get_item_details(item_code, asset_category, gross_purchase_amount):
+	frappe.has_permission("Asset Category", "read", asset_category, throw=True)
 	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
