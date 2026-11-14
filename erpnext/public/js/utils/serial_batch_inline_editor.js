@@ -1305,11 +1305,6 @@ erpnext.stock.get_sbie_row = function (frm, cdn) {
 	return {};
 };
 
-// Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
-erpnext.stock.get_sbie_signed_qty = function (doc, qty) {
-	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
-};
-
 // bundle qty is in the stock UOM; qty fields of rows that also have a stock qty are in the row's UOM
 erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
 	const in_row_uom =
@@ -1319,12 +1314,11 @@ erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
 	return in_row_uom ? flt(row.conversion_factor) || 1 : 1;
 };
 
+// Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
 erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
 	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
-	return erpnext.stock.get_sbie_signed_qty(
-		doc,
-		flt(stock_qty / conversion_factor, precision(qty_field, row))
-	);
+	const qty = flt(stock_qty / conversion_factor, precision(qty_field, row));
+	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };
 
 erpnext.stock.get_sbie_pending_map = function (frm) {
