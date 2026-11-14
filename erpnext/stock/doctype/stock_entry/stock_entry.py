@@ -338,8 +338,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
-		self.validate_uom_is_integer("uom", "qty")
-		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_work_order_status_for_return()
@@ -376,6 +374,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_finished_good_qty_against_fg_completed_qty()
 		self.validate_job_card_pending_production()
 		self.validate_difference_account()
@@ -958,12 +958,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		fg_qty = defaultdict(float)
 		for d in self.items:
 			if d.is_finished_item:
-				fg_qty[d.item_code] += flt(d.qty)
+				# Finished Good Quantity is in the stock UOM
+				fg_qty[d.item_code] += flt(d.transfer_qty)
 
 		if not fg_qty:
 			return
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		fg_item = next(iter(fg_qty.keys()))
 		fg_item_qty = flt(fg_qty[fg_item], precision)
 		fg_completed_qty = flt(self.fg_completed_qty, precision)

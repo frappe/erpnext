@@ -559,3 +559,4 @@ erpnext.patches.v16_0.drop_unfolded_item_search_index #2026-11-09
 erpnext.patches.v16_0.round_open_job_card_required_qty
 erpnext.patches.v16_0.restrict_company_address_flag
 erpnext.patches.v16_0.add_accounting_dimensions_to_request_for_quotation_item
+erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion

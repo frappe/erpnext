@@ -1662,6 +1662,122 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (13, "Nos", 1))
 
+	def make_box_item(self):
+		"""A Material Transfer item stocked in Nos and bought in Boxes of 12 Nos."""
+		return make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+
+	def make_plan_row_saved_with_purchase_uom(self, rm_item, qty=13):
+		"""A submitted plan whose row for `qty` Nos of `rm_item` is saved as `qty` Box at conversion factor 1."""
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=qty, currency="INR")
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			warehouse="_Test Warehouse - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.for_warehouse = "Stores - _TC"
+		plan.set("mr_items", get_items_for_material_requests(plan.as_dict()))
+		plan.submit()
+		# rows saved before #60628 kept the stock qty under the purchase UOM
+		frappe.db.set_value(
+			"Material Request Plan Item", plan.mr_items[0].name, {"uom": "Box", "conversion_factor": 1}
+		)
+		return plan
+
+	def make_legacy_request_of_one_box(self, plan):
+		"""A submitted Material Request for 1 Box of the plan row, counted as the updater before #60628 did."""
+		row = plan.mr_items[0]
+		mr = frappe.new_doc("Material Request")
+		mr.update(
+			{
+				"material_request_type": "Material Transfer",
+				"company": plan.company,
+				"schedule_date": nowdate(),
+			}
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": row.item_code,
+				"qty": 1,
+				"uom": "Box",
+				"schedule_date": nowdate(),
+				"warehouse": row.warehouse,
+				"production_plan": plan.name,
+				"material_request_plan_item": row.name,
+			},
+		)
+		mr.submit()
+		# the updater before #60628 counted the Material Request qty: 1 Box
+		frappe.db.set_value("Material Request Plan Item", row.name, "requested_qty", 1)
+		frappe.db.set_value("Production Plan", plan.name, "status", "Submitted")
+
+	def assert_patched_plan_requests_stock_uom(self, plan):
+		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
+
+		execute()
+		plan.make_material_request()
+
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": plan.name},
+			fields=["qty", "uom", "stock_qty"],
+		)
+		self.assertEqual([(row.qty, row.uom, row.stock_qty) for row in requested], [(13, "Nos", 13)])
+
+	def test_patch_sets_stock_uom_on_plan_rows_saved_with_purchase_uom(self):
+		rm_item = self.make_box_item()
+
+		self.assert_patched_plan_requests_stock_uom(self.make_plan_row_saved_with_purchase_uom(rm_item))
+
+	def test_patch_sets_stock_uom_on_plan_rows_of_a_variant_with_the_template_uom(self):
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.insert()
+
+		self.assert_patched_plan_requests_stock_uom(self.make_plan_row_saved_with_purchase_uom(variant.name))
+
+	def test_patch_rebuilds_requested_qty_of_plan_rows_saved_with_purchase_uom(self):
+		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
+
+		plan = self.make_plan_row_saved_with_purchase_uom(self.make_box_item())
+		self.make_legacy_request_of_one_box(plan)
+
+		execute()
+
+		self.assertEqual(
+			frappe.db.get_value("Material Request Plan Item", plan.mr_items[0].name, "requested_qty"), 12
+		)
+
+	def test_patch_marks_a_plan_requested_in_full_as_material_requested(self):
+		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
+
+		plan = self.make_plan_row_saved_with_purchase_uom(self.make_box_item(), qty=12)
+		self.make_legacy_request_of_one_box(plan)
+
+		execute()
+
+		self.assertEqual(frappe.db.get_value("Production Plan", plan.name, "status"), "Material Requested")
+
 	def test_download_raw_materials_shows_uom_of_required_qty(self):
 		rm_item = make_item(
 			"_Test PP Download Box RM",
