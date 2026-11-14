@@ -727,7 +727,7 @@ class TestPickList(ERPNextTestSuite):
 		delivery_note = create_delivery_note(pick_list.name)
 
 		self.assertEqual(delivery_note.docstatus, 0)
-		self.assertRaises(frappe.ValidationError, delivery_note.submit)
+		self.assertRaisesRegex(frappe.ValidationError, "Target Warehouse is mandatory", delivery_note.submit)
 
 	def test_pick_list_grouping_before_print(self):
 		def _compare_dicts(a, b):
