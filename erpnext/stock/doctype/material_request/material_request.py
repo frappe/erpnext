@@ -425,6 +425,10 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
+		self.update_per_ordered(update_modified)
+		self.update_requested_qty_in_work_order()
+
+	def update_per_ordered(self, update_modified=True):
 		self._update_percent_field(
 			{
 				"target_dt": "Material Request Item",
@@ -437,6 +441,13 @@ class MaterialRequest(BuyingController):
 			update_modified,
 		)
 
+<<<<<<< HEAD
+=======
+	def update_requested_qty_in_job_card(self):
+		if self.job_card:
+			frappe.get_doc("Job Card", self.job_card).set_requested_qty()
+
+>>>>>>> 3af55d5 (fix(stock): recalculate the ordered qty of open Material Requests ordered in parts)
 	def validate_work_order_qty(self, row, ordered_qty, mr_qty_allowance):
 		precision = row.precision("ordered_qty")
 		if flt(ordered_qty, precision) <= flt(row.ordered_qty, precision):
