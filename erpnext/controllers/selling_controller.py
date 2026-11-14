@@ -1182,7 +1182,9 @@ class SellingController(StockController):
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
 									qty_can_be_deliver += delivered_qty
-									delivered_batch_qty[entry.batch_no] = available_batch_qty - delivered_qty
+									delivered_batch_qty[entry.batch_no] = flt(
+										available_batch_qty - delivered_qty, entry.precision("qty")
+									)
 					else:
 						# `Delivered Qty` should be less than or equal to `Reserved Qty`.
 						qty_can_be_deliver = min(
@@ -1253,7 +1255,10 @@ class SellingController(StockController):
 									entry.delivered_qty -= undelivered_qty
 									entry.db_update()
 									qty_can_be_undelivered += undelivered_qty
-									batch_qty_to_undelivered[entry.batch_no] -= undelivered_qty
+									batch_qty_to_undelivered[entry.batch_no] = flt(
+										batch_qty_to_undelivered[entry.batch_no] - undelivered_qty,
+										entry.precision("qty"),
+									)
 					else:
 						# `Qty to Undelivered` should be less than or equal to `Delivered Qty`.
 						qty_can_be_undelivered = min(sre_doc.delivered_qty, qty_to_undelivered)
