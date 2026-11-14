@@ -421,7 +421,7 @@ def get_order(name: str) -> dict:
 	return {
 		**_reply(_customer_doc("Sales Order", name), ORDER_FIELDS, ORDER_ITEM_FIELDS),
 		"shipments": _made_against(name, "Delivery Note", "against_sales_order", ["is_return"]),
-		"invoices": _made_against(name, "Sales Invoice", "sales_order", ["is_return", "status"]),
+		"invoices": _made_against(name, "Sales Invoice", "sales_order", ["is_return"]),
 	}
 
 

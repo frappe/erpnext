@@ -25,7 +25,7 @@ import {
 	RED,
 	routeOpener,
 } from "@app/utils"
-import { invoiceStatus, orderIsOverdue, orderStatus, statusText, statusTheme, totalRows } from "@app/lib/documents"
+import { orderIsOverdue, orderStatus, statusText, statusTheme, totalRows } from "@app/lib/documents"
 import { usePortalNotifications } from "@app/composables/useNotifications"
 import { useRefreshOnReturn } from "@app/composables/useRefreshOnReturn"
 import { useCommentPost } from "@app/composables/useCommentPost"
@@ -78,27 +78,34 @@ export default function setup(context) {
 		sourceQuotations.value.forEach((name, i) => {
 			rows.push({
 				key: "quotation:" + name,
-				label: i > 0 ? "" : sourceQuotations.value.length > 1 ? __("From quotations") : __("From quotation"),
+				label: i > 0 ? "" : sourceQuotations.value.length > 1 ? __("Quotations") : __("Quotation"),
 				value: name,
 				color: INK8,
 				weight: "420",
 				route: "/quotations/" + encodeURIComponent(name),
 			})
 		})
-		rows.push(...links(doc.value.shipments, __("Shipment"), __("Shipments"), "/shipments/", (s: any) =>
-			s.is_return ? __("Return") : ""))
-		rows.push(...links(doc.value.invoices, __("Invoice"), __("Invoices"), "/invoices/", (v: any) =>
-			statusText(invoiceStatus(v))))
+		const [shipments, returns] = byReturn(doc.value.shipments)
+		rows.push(...links(shipments, __("Shipment"), __("Shipments"), "/shipments/"))
+		rows.push(...links(returns, __("Return"), __("Returns"), "/shipments/"))
+		const [invoices, creditNotes] = byReturn(doc.value.invoices)
+		rows.push(...links(invoices, __("Invoice"), __("Invoices"), "/invoices/"))
+		rows.push(...links(creditNotes, __("Credit note"), __("Credit notes"), "/invoices/"))
 		rows.push(...contactLines(doc.value))
 		return rows
 	})
 
-	/** The documents made against the order, each a link with its date or state; the label shows once. */
-	function links(documents: any[] = [], one: string, many: string, path: string, detail: (d: any) => string) {
+	/** Returns and credit notes under their own label, so no number needs a word after it. */
+	function byReturn(documents: any[] = []): [any[], any[]] {
+		return [documents.filter((d) => !d.is_return), documents.filter((d) => d.is_return)]
+	}
+
+	/** The documents made against the order, each a link; the label shows once. */
+	function links(documents: any[], one: string, many: string, path: string) {
 		return documents.map((d, i) => ({
 			key: path + d.name,
 			label: i > 0 ? "" : documents.length > 1 ? many : one,
-			value: [d.name, detail(d)].filter(Boolean).join(" · "),
+			value: d.name,
 			color: INK8,
 			weight: "420",
 			route: path + encodeURIComponent(d.name),

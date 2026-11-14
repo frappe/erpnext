@@ -114,7 +114,7 @@ export default function setup(context) {
 		sourceOrders.value.forEach((name, i) => {
 			rows.push({
 				key: "order:" + name,
-				label: i > 0 ? "" : sourceOrders.value.length > 1 ? __("From orders") : __("From order"),
+				label: i > 0 ? "" : sourceOrders.value.length > 1 ? __("Orders") : __("Order"),
 				value: name,
 				color: INK8,
 				weight: "420",
