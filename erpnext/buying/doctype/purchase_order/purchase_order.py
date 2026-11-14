@@ -625,7 +625,11 @@ class PurchaseOrder(BuyingController):
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def update_status_updater(self):
-		self.status_updater.append(
+		self.status_updater.extend(self.get_sales_order_status_updater())
+
+	@staticmethod
+	def get_sales_order_status_updater():
+		return [
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Sales Order Item",
@@ -635,9 +639,7 @@ class PurchaseOrder(BuyingController):
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
 				**get_stock_qty_status_args(),
-			}
-		)
-		self.status_updater.append(
+			},
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Packed Item",
@@ -647,8 +649,8 @@ class PurchaseOrder(BuyingController):
 				"join_field": "sales_order_packed_item",
 				"target_ref_field": "qty",
 				**get_stock_qty_status_args(),
-			}
-		)
+			},
+		]
 
 	def update_status_updater_if_from_pp(self):
 		self.status_updater.append(
@@ -801,11 +803,10 @@ class PurchaseOrder(BuyingController):
 		return result
 
 	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
-		"""
-		Updates ordered_qty in linked SO when item rows are removed using Update Items
-		"""
-		if not self.is_against_so():
+		"""Recalculate the ordered qty of Sales Order rows linked to rows removed through Update Items."""
+		if not removed_items:
 			return
+<<<<<<< HEAD
 		for item in removed_items:
 			prev_ordered_qty = flt(
 				frappe.get_cached_value("Sales Order Item", item.get("sales_order_item"), "ordered_qty")
@@ -814,6 +815,12 @@ class PurchaseOrder(BuyingController):
 			frappe.db.set_value(
 				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
 			)
+=======
+
+		# the removed rows are still in self.items, so their Sales Order rows are recalculated too
+		for args in self.get_sales_order_status_updater():
+			self._update_children({**args, "cond": ""}, update_modified=True)
+>>>>>>> cf91622 (fix(buying): recalculate the Sales Order ordered qty of rows removed through Update Items)
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
