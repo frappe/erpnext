@@ -1242,6 +1242,7 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 			"Stock Reservation Entry", sre_list[0]["name"], "company"
 		)
 
+		round_to_ledger_qty(sb_entries)
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
@@ -1251,6 +1252,22 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		bundle.save()
 
 		return bundle
+
+
+def round_to_ledger_qty(sb_entries: list[dict]) -> None:
+	"""Round the reserved qty to its precision, as the stock ledger posts it, keeping the rounded total."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	total = flt(sum(flt(entry.qty) for entry in sb_entries), precision)
+	for entry in sb_entries:
+		entry.qty = flt(entry.qty, precision)
+
+	sb_entries[-1].qty = flt(sb_entries[-1].qty + total - sum(entry.qty for entry in sb_entries), precision)
+
+
+def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
+	"""``full_qty`` when ``qty`` falls short of it only by rounding."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return full_qty if flt(full_qty - qty, precision) == 0 else qty
 
 
 def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = None) -> float:
