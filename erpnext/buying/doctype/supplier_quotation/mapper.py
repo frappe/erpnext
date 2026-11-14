@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
-from erpnext.buying.utils import get_ordered_qty_in_row_uom
+from erpnext.buying.utils import get_qty_to_order
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
@@ -26,8 +26,7 @@ def make_purchase_order(
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
-	ordered_items = get_ordered_items(source_name)
-	ordered_qty = get_ordered_qty_in_row_uom(supplier_quotation.items, "supplier_quotation_item")
+	qty_to_order = get_qty_to_order(supplier_quotation.items, "supplier_quotation_item")
 
 	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
 
@@ -37,7 +36,7 @@ def make_purchase_order(
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		target.qty = max(flt(obj.qty - ordered_qty[obj.name], target.precision("qty")), 0)
+		target.qty = max(qty_to_order[obj.name], 0)
 		target.stock_qty = target.qty * flt(obj.conversion_factor)
 
 	def select_item(d):
@@ -67,7 +66,7 @@ def make_purchase_order(
 				],
 				"postprocess": update_item,
 				"condition": lambda item: item.name not in mapped_items
-				and (item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0)
+				and (qty_to_order[item.name] > 0 or item.qty == 0)
 				and select_item(item),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
