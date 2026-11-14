@@ -4317,6 +4317,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_supplied_row_skips_serial_nos_held_by_another_row(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SCR-HELD-.####"}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		service_item = {
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 1,
+			"rate": 50,
+			"fg_item": fg_item,
+			"fg_item_qty": 1,
+		}
+		sco = get_subcontracting_order(service_items=[service_item, service_item.copy()])
+		# not transferred against the order, so the receipt picks the serial nos itself
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=4, basic_rate=100)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		self.assertEqual([len(row.serial_no.splitlines()) for row in scr.supplied_items], [2, 2])
+
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
