@@ -17,7 +17,7 @@ function statuses(): Record<string, { theme: string; label: string }> {
 		"Requested changes": { theme: "amber", label: __("Requested changes") },
 		Rejected: { theme: "red", label: __("Rejected") },
 		Revised: { theme: "gray", label: __("Revised") },
-		"Partially Ordered": { theme: "blue", label: __("Partially ordered") },
+		"Partially Ordered": { theme: "blue", label: __("Partially Ordered") },
 		Ordered: { theme: "green", label: __("Ordered") },
 		Expired: { theme: "gray", label: __("Expired") },
 		// Sales Order
@@ -25,15 +25,15 @@ function statuses(): Record<string, { theme: string; label: string }> {
 		"Delivery pending": { theme: "blue", label: __("Delivery pending") },
 		"Billing pending": { theme: "blue", label: __("Billing pending") },
 		"Payment due": { theme: "blue", label: __("Payment due") },
-		"On Hold": { theme: "gray", label: __("On hold") },
+		"On Hold": { theme: "gray", label: __("On Hold") },
 		Completed: { theme: "green", label: __("Completed") },
 		Closed: { theme: "gray", label: __("Closed") },
 		// Sales Invoice
-		"Partly paid": { theme: "amber", label: __("Partly paid") },
+		"Partly paid": { theme: "amber", label: __("Partly Paid") },
 		Overdue: { theme: "red", label: __("Overdue") },
 		Paid: { theme: "green", label: __("Paid") },
 		"Credit note": { theme: "gray", label: __("Credit note") },
-		"Credit Note Issued": { theme: "gray", label: __("Credit note issued") },
+		"Credit Note Issued": { theme: "gray", label: __("Credit Note Issued") },
 		// Delivery Note — our own words, see shipmentStatus() below
 		Dispatched: { theme: "blue", label: __("Dispatched") },
 		Returned: { theme: "gray", label: __("Returned") },
