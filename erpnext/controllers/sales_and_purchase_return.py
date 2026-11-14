@@ -346,8 +346,10 @@ def add_returned_row(doc, key, row, already_returned_items):
 	stock_qty = abs(flt(row.stock_qty))
 	unrounded_stock_qty = abs(flt(row.qty)) * conversion_factor
 	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
+	rejected_stock_qty = abs(flt(row.get("rejected_stock_qty")))
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
 		rejected_qty += unrounded_stock_qty
+		rejected_stock_qty += stock_qty
 		stock_qty = unrounded_stock_qty = 0
 
 	returned = already_returned_items.setdefault(key, frappe._dict())
@@ -357,6 +359,8 @@ def add_returned_row(doc, key, row, already_returned_items):
 	returned.received_qty = flt(returned.received_qty) + abs(flt(row.get("received_qty"))) * conversion_factor
 	returned.received_stock_qty = flt(returned.received_stock_qty) + abs(flt(row.get("received_stock_qty")))
 	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
+	returned.unrounded_rejected_qty = flt(returned.unrounded_rejected_qty) + rejected_qty
+	returned.rejected_stock_qty = flt(returned.rejected_stock_qty) + rejected_stock_qty
 
 
 def get_returned_stock_qty(doc, row):
@@ -384,7 +388,11 @@ def set_return_stock_qty(doc):
 
 		source, returned = valid_items[key], returned_items.get(key) or {}
 		row.stock_qty = get_return_stock_qty(doc, row, flt(row.stock_qty), source, returned)
-		# rejected qty is posted rounded row by row, so only rows returning accepted qty complete
+		if flt(row.get("rejected_qty")) and row.meta.get_field("rejected_stock_qty"):
+			row.rejected_stock_qty = get_rejected_completing_qty(
+				row, "rejected_stock_qty", flt(row.rejected_stock_qty), row.rejected_qty, source, returned
+			)
+		# only rows returning accepted qty alone complete their received stock qty
 		if (
 			doc.doctype == "Purchase Receipt"
 			and not flt(row.rejected_qty)
@@ -406,13 +414,16 @@ def set_return_stock_qty(doc):
 
 def get_return_stock_qty(doc, row, stock_qty, source, returned):
 	"""Stock qty of a return row, or what is left of its source's when the row completes the return."""
-	if is_merged_pos_return(doc):
-		return stock_qty
-
-	if not flt(row.qty) or row.get("return_qty_from_rejected_warehouse"):
+	if is_merged_pos_return(doc) or not flt(row.qty):
 		return stock_qty
 
 	returned = returned or {}
+	if row.get("return_qty_from_rejected_warehouse"):
+		# a Subcontracting Receipt keeps no rejected stock qty to complete
+		if not row.meta.get_field("rejected_stock_qty"):
+			return stock_qty
+		return get_rejected_completing_qty(row, "stock_qty", stock_qty, row.qty, source, returned)
+
 	return get_completing_qty(
 		row,
 		"stock_qty",
@@ -432,6 +443,19 @@ def get_completing_qty(row, fieldname, qty, remaining_qty, returned_qty, source_
 		return qty
 
 	return -remaining_qty
+
+
+def get_rejected_completing_qty(row, fieldname, qty, rejected_qty, source, returned):
+	"""`qty` of a return row taking out `rejected_qty` of rejected stock, or what is left of its
+	source's rejected stock qty when the row completes its return."""
+	return get_completing_qty(
+		row,
+		fieldname,
+		qty,
+		flt(source.rejected_stock_qty) - flt(returned.get("rejected_stock_qty")),
+		flt(returned.get("unrounded_rejected_qty")) + abs(flt(rejected_qty)) * flt(row.conversion_factor),
+		source.unrounded_rejected_qty,
+	)
 
 
 def is_merged_pos_return(doc):
@@ -540,6 +564,9 @@ def get_valid_items(doc):
 	if doc.doctype == "Purchase Receipt":
 		select_fields.append("received_stock_qty")
 
+	if doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
+		select_fields.append("rejected_stock_qty")
+
 	for d in frappe.get_all(
 		f"{doc.doctype} Item",
 		filters={"parent": doc.return_against},
@@ -594,6 +621,8 @@ def get_ref_item_dict(valid_items, ref_item_row):
 				"unrounded_stock_qty": 0,
 				"received_stock_qty": 0,
 				"rejected_qty": 0,
+				"rejected_stock_qty": 0,
+				"unrounded_rejected_qty": 0,
 				"received_qty": 0,
 				"serial_no": [],
 				"conversion_factor": ref_item_row.get("conversion_factor", 1),
@@ -614,6 +643,10 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		item_dict["received_qty"] += ref_item_row.received_qty
 		item_dict["rejected_qty"] += ref_item_row.rejected_qty
+		item_dict["rejected_stock_qty"] += flt(ref_item_row.get("rejected_stock_qty"))
+		item_dict["unrounded_rejected_qty"] += flt(ref_item_row.rejected_qty) * flt(
+			ref_item_row.get("conversion_factor") or 1
+		)
 
 	if ref_item_row.get("serial_no"):
 		item_dict["serial_no"] += get_serial_nos(ref_item_row.serial_no)
@@ -636,9 +669,15 @@ def get_already_returned_items(doc):
 
 	unrounded_stock_qty = Abs(child.qty) * child.conversion_factor
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
+	unrounded_rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
+	if doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
+		rejected_stock_qty = Abs(child.rejected_stock_qty)
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
 		from_rejected_warehouse = child.return_qty_from_rejected_warehouse == 1
 		rejected_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
+		unrounded_rejected_qty += Case().when(from_rejected_warehouse, unrounded_stock_qty).else_(0)
+		if doc.doctype == "Purchase Receipt":
+			rejected_stock_qty += Case().when(from_rejected_warehouse, stock_qty).else_(0)
 		stock_qty = Case().when(from_rejected_warehouse, 0).else_(stock_qty)
 		unrounded_stock_qty = Case().when(from_rejected_warehouse, 0).else_(unrounded_stock_qty)
 
@@ -663,6 +702,11 @@ def get_already_returned_items(doc):
 		)
 	if doc.doctype == "Purchase Receipt":
 		query = query.select(Sum(Abs(child.received_stock_qty)).as_("received_stock_qty"))
+	if doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
+		query = query.select(
+			Sum(rejected_stock_qty).as_("rejected_stock_qty"),
+			Sum(unrounded_rejected_qty).as_("unrounded_rejected_qty"),
+		)
 
 	data = query.run(as_dict=1)
 
@@ -687,6 +731,8 @@ def get_already_returned_items(doc):
 					"received_qty": d.get("received_qty"),
 					"received_stock_qty": d.get("received_stock_qty"),
 					"rejected_qty": d.get("rejected_qty"),
+					"rejected_stock_qty": d.get("rejected_stock_qty"),
+					"unrounded_rejected_qty": d.get("unrounded_rejected_qty"),
 				}
 			),
 		)

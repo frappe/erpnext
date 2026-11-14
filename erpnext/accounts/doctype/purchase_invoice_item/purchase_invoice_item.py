@@ -79,6 +79,7 @@ class PurchaseInvoiceItem(Document):
 		rejected_qty: DF.Float
 		rejected_serial_and_batch_bundle: DF.Link | None
 		rejected_serial_no: DF.Text | None
+		rejected_stock_qty: DF.Float
 		rejected_warehouse: DF.Link | None
 		rm_supp_cost: DF.Currency
 		sales_incoming_rate: DF.Currency
