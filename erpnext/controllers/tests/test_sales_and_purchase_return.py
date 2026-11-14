@@ -336,6 +336,35 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(credit_note.items[0].stock_qty, -si.items[0].stock_qty)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_delivery_note_full_return_of_repeated_non_stock_rows(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		conversion_factor = 0.3334
+		item_code = make_item(
+			properties={
+				"is_stock_item": 0,
+				"stock_uom": "Kg",
+				"uoms": [
+					{"uom": "Kg", "conversion_factor": 1},
+					{"uom": "Box", "conversion_factor": conversion_factor},
+				],
+			}
+		).name
+		dn = create_delivery_note(item_code=item_code, qty=1, do_not_submit=True)
+		dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
+		for _ in range(2):
+			dn.append("items", dict(dn.items[0].as_dict(), name=None))
+		dn.submit()
+
+		return_dn = make_sales_return(dn.name)
+		return_dn.submit()
+
+		self.assertEqual(return_dn.docstatus, 1)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
 		return_dn.insert()
