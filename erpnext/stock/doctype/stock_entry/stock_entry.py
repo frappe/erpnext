@@ -44,6 +44,7 @@ from erpnext.stock.utils import (
 	check_company,
 	check_warehouse_company,
 	get_combine_datetime,
+	validate_warehouse_company,
 )
 
 from .services.disassemble import DisassembleStockEntry
@@ -358,6 +359,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.purpose_cls:
 			self.purpose_cls(self).validate()
 
+		self.validate_warehouses_company()
 		sbb.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_item()
@@ -656,7 +658,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 					title=_("Work Order Mismatch"),
 				)
 
+	def validate_warehouses_company(self):
+		warehouses = {d.s_warehouse for d in self.get("items")} | {d.t_warehouse for d in self.get("items")}
+		for warehouse in warehouses - {None, ""}:
+			validate_warehouse_company(warehouse, self.company)
+
 	def set_actual_qty(self):
+		self.validate_warehouses_company()
 		for d in self.get("items"):
 			d.set_actual_qty(self.posting_date, self.posting_time)
 
