@@ -1223,7 +1223,7 @@ class BuyingController(SubcontractingController):
 			"serial_and_batch_bundle",
 		)
 
-	def get_source_warehouse_reversal_package(self, row, package):
+	def get_source_warehouse_reversal_package(self, row, package, source_qty):
 		if not (self.is_internal_transfer() and self.is_return):
 			return package
 
@@ -1233,7 +1233,7 @@ class BuyingController(SubcontractingController):
 		if not row.get("rejected_serial_and_batch_bundle"):
 			return self.get_package_for_target_warehouse(row, row.from_warehouse, "Inward")
 
-		return self.get_returned_source_package(row)
+		return self.get_returned_source_package(row, source_qty)
 
 	def get_source_warehouse_package(self, row, package, source_qty):
 		if not (row.get("rejected_serial_and_batch_bundle") and self.is_internal_receipt()):
@@ -1269,12 +1269,13 @@ class BuyingController(SubcontractingController):
 			"name",
 		)
 
-	def get_returned_source_package(self, row):
+	def get_returned_source_package(self, row, source_qty):
 		return self.make_package_for_transfer(
 			row.serial_and_batch_bundle,
 			row.from_warehouse,
 			type_of_transaction="Inward",
 			include_bundle=row.rejected_serial_and_batch_bundle,
+			total_qty=source_qty,
 		)
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
@@ -1380,7 +1381,7 @@ class BuyingController(SubcontractingController):
 							"warehouse": d.from_warehouse,
 							"recalculate_rate": 1,
 							"serial_and_batch_bundle": self.get_source_warehouse_reversal_package(
-								d, serial_and_batch_bundle
+								d, serial_and_batch_bundle, source_qty
 							),
 						},
 					)
