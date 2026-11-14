@@ -1808,18 +1808,29 @@ class TestPickList(ERPNextTestSuite):
 		)
 		self.assertEqual(sum(values), 1 * 100 + 2 * 200)
 
+	def test_partial_return_of_repeated_bundle_component_takes_back_each_occurrence(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
+			create_delivery_note as make_delivery_note,
+		)
+
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=8, basic_rate=100)
+		bundle = make_bundle_with_repeated_component(component)
+		delivery_note = make_delivery_note(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=2)
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+		self.assertEqual([row.qty for row in sales_return.packed_items], [-3, -1])
+
 	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 
 		component = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=2, basic_rate=100)
 		make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=2, basic_rate=100)
-		bundle = make_item(properties={"is_stock_item": 0}).name
-		bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
-		bundle_doc.append("items", {"item_code": component, "qty": 3})
-		bundle_doc.append("items", {"item_code": component, "qty": 1})
-		bundle_doc.insert()
-		bundle_doc.submit()
+		bundle = make_bundle_with_repeated_component(component)
 
 		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=1)
 		pick_list = create_pick_list(sales_order.name)
@@ -4455,6 +4466,17 @@ def deliver_bundle_from_two_warehouses_at_two_rates(posting_date=None):
 	delivery_note = create_delivery_note(pick_list.name)
 	delivery_note.submit()
 	return delivery_note
+
+
+def make_bundle_with_repeated_component(component):
+	"""Product Bundle of 3 and then 1 of ``component``."""
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+	bundle_doc.append("items", {"item_code": component, "qty": 3})
+	bundle_doc.append("items", {"item_code": component, "qty": 1})
+	bundle_doc.insert()
+	bundle_doc.submit()
+	return bundle
 
 
 def get_packed_locations(doc, table="packed_items"):
