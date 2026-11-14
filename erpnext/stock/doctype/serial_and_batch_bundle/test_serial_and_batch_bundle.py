@@ -15,6 +15,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	combine_datetime,
 	get_available_batches_qty,
 	get_qty_based_available_batches,
+	get_serial_batch_ledgers,
 	get_serial_nos_based_on_posting_date,
 	get_type_of_transaction,
 	parse_serial_nos,
@@ -109,9 +110,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_return_row_loads_the_returned_voucher_batches(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
-			get_serial_batch_ledgers,
-		)
 
 		item_code = make_item(
 			properties={
@@ -121,15 +119,20 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 				"batch_number_series": "RTB-.#####",
 			}
 		).name
-		receipt = make_purchase_receipt(item_code=item_code, qty=4, rate=10)
+		receipt = make_purchase_receipt(item_code=item_code, qty=4, rejected_qty=2, rate=10)
 		batch_no = frappe.db.get_value(
 			"Serial and Batch Entry", {"parent": receipt.items[0].serial_and_batch_bundle}, "batch_no"
 		)
-		return_row = make_return_doc("Purchase Receipt", receipt.name).items[0]
-
 		# a request hands the row over as a plain dict
-		ledgers = get_serial_batch_ledgers(item_code=item_code, child_row=dict(return_row.as_dict()))
+		return_row = dict(make_return_doc("Purchase Receipt", receipt.name).items[0].as_dict())
+
+		ledgers = get_serial_batch_ledgers(item_code=item_code, child_row=return_row)
 		self.assertEqual([row.get("batch_no") for row in ledgers], [batch_no])
+
+		rejected = get_serial_batch_ledgers(item_code=item_code, child_row={**return_row, "is_rejected": 1})
+		self.assertEqual(
+			[(row.qty, row.warehouse) for row in rejected], [(2, receipt.items[0].rejected_warehouse)]
+		)
 
 	def test_voucher_no_and_voucher_type_are_indexed(self):
 		if frappe.db.db_type != "mariadb":
