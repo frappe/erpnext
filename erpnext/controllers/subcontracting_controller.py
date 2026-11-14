@@ -290,13 +290,16 @@ class SubcontractingController(StockController):
 	def add_returned_raw_materials(self, row):
 		"""Take back the receipt's raw materials in proportion to the finished goods this return sends back."""
 		for material in self.returnable_raw_materials.get(row.subcontracting_receipt_item, {}).values():
-			if qty := self.get_return_consumed_qty(row, material):
+			# counted as returned, so that two rows of one receipt row do not both take back the same qty
+			material.returned_fg_qty += abs(flt(row.received_qty))
+			qty = self.get_return_consumed_qty(material)
+			material.returned_qty -= qty
+			if qty:
 				self.__add_supplied_or_received_item(row, frappe._dict(material.item_details), qty)
 
-	def get_return_consumed_qty(self, row, material):
+	def get_return_consumed_qty(self, material):
 		"""Rounded on the running finished good total, so that all returns add up to what the receipt consumed."""
-		returned_fg_qty = material.returned_fg_qty + abs(flt(row.received_qty))
-		share = min(returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
+		share = min(material.returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
 		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
 		return -flt(flt(material.consumed_qty * share, precision) - material.returned_qty, precision)
 
