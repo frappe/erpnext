@@ -223,8 +223,14 @@ def reset_packing_list(doc):
 	return reset_table
 
 
+<<<<<<< HEAD
 def get_product_bundle_items(item_code):
 	product_bundle = frappe.qb.DocType("Product Bundle")
+=======
+@frappe.request_cache
+def get_product_bundle_items_by_name(bundle_name):
+	"Component rows of a specific Product Bundle version, which cannot change once submitted."
+>>>>>>> 7945a37 (perf(stock): fetch a Product Bundle version's components once per request)
 	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
 
 	query = (
