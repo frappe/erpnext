@@ -1119,6 +1119,20 @@ class TestSubscription(ERPNextTestSuite):
 		# Without a company the item fallback is skipped.
 		self.assertNotIn("cost_center", get_plan_dimensions("_Test Sub Plan No CC"))
 
+	@ERPNextTestSuite.change_settings("Subscription Settings", {"cancel_after_grace": 1})
+	def test_draft_invoice_does_not_make_subscription_past_due(self):
+		with freeze_time("2026-08-01 12:00:00"):
+			subscription = create_subscription(start_date="2026-08-01", submit_invoice=0)
+
+		with freeze_time("2026-08-31 12:00:00"):
+			subscription.process(posting_date="2026-08-31")
+
+		with freeze_time("2026-09-02 12:00:00"):
+			subscription.process(posting_date="2026-09-02")
+
+		self.assertEqual(subscription.get_current_invoice().docstatus, 0)
+		self.assertEqual(subscription.status, "Active")
+
 
 def make_full_credit_note(invoice_name):
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_sales_return
