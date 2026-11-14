@@ -3076,6 +3076,40 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), delivered_qty)
 >>>>>>> d8767df (test: partial internal transfer receipts take only the delivered stock qty out of transit)
 
+	def test_internal_transfer_receipt_after_a_return_takes_what_the_return_put_back(self):
+		"""A return of a partial receipt puts its stock qty back in transit, so the next receipt can
+		take it again."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		to_warehouse = create_warehouse("_Test Transfer To", company=dn.company)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update({"warehouse": to_warehouse, "qty": 3})
+		pr.submit()
+		make_return_doc("Purchase Receipt", pr.name).submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.set_posting_time = 0
+		pr.items[0].update({"warehouse": to_warehouse, "qty": 3})
+		pr.submit()
+
+		sle_filters = {"voucher_no": pr.name, "warehouse": transit_warehouse, "is_cancelled": 0}
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), -1.01)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
+	def test_internal_transfer_over_receipt_takes_its_own_stock_qty_out_of_transit(self):
+		"""Over-received stock did not come from the delivery, so it is not capped to what is in transit."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		dn, _ = make_internal_delivery_of_fractional_boxes()
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update({"warehouse": create_warehouse("_Test Transfer To", company=dn.company), "qty": 7})
+
+		self.assertRaises(NegativeStockError, pr.submit)
+
 	def test_internal_transfer_rejected_qty_for_serial_item(self):
 		"""Rejected serial numbers leave the in-transit warehouse and stay out of the package of
 		accepted material."""
