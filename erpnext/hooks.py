@@ -381,7 +381,6 @@ has_website_permission = {
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
 
