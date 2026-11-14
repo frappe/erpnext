@@ -1310,6 +1310,10 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
+		# a return reverses the rejected stock qty its ledger posts
+		if self.is_return:
+			return flt(accepted_qty + flt(row.rejected_stock_qty), row.precision("stock_qty"))
+
 		return get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty))
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
