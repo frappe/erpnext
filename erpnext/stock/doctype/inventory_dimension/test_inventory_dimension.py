@@ -14,6 +14,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	DoNotChangeError,
 	delete_dimension,
 	get_evaluated_inventory_dimension,
+	get_parent_fields,
 )
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -132,6 +133,20 @@ class TestInventoryDimension(ERPNextTestSuite):
 			self.assertEqual(frappe.session.user, user.name)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_parent_fields_need_inventory_dimension_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		projects_user = create_user("dimension-parent-fields-projects@example.com", "Projects User").name
+		stock_user = create_user("dimension-parent-fields-stock@example.com", "Stock User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(projects_user)
+		self.assertRaises(frappe.PermissionError, get_parent_fields, "Stock Entry Detail", "Warehouse")
+
+		frappe.set_user(stock_user)
+		fields = [field.value for field in get_parent_fields("Stock Entry Detail", "Warehouse")]
+		self.assertIn("from_warehouse", fields)
 
 	def test_inventory_dimension(self):
 		create_warehouse("Shelf Warehouse")
