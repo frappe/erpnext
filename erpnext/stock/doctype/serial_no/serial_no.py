@@ -213,6 +213,7 @@ def auto_fetch_serial_number(
 	as_numbers: bool = False,
 ) -> list[str]:
 	frappe.has_permission("Item", "select", doc=item_code, throw=True)
+	require_permission("Warehouse", warehouse, "select")
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
