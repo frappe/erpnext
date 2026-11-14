@@ -228,6 +228,8 @@ SHIPMENT_FIELDS = (
 	"name",
 	"posting_date",
 	"is_return",
+	# a return names the shipment it sends back
+	"return_against",
 	"company",
 	"customer_name",
 	"customer",

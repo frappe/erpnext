@@ -13,7 +13,6 @@ import {
 	formatMoneyExact as formatMoney,
 	formatQty,
 	INK5,
-	INK6,
 	INK8,
 	line,
 	loadFailure,
@@ -52,10 +51,9 @@ export default function setup(context) {
 	/** The words that differ between a dispatch and a return. */
 	const labels = computed(() =>
 		isReturn.value
-			? { section: __("Return"), date: __("Returned"), value: __("Value returned"), billed: __("Credited"),
-				shipped: __("Returned"), pending: "" }
-			: { section: __("Dispatch"), date: __("Dispatched"), value: __("Goods value"), billed: __("Invoiced"),
-				shipped: __("Shipped"), pending: __("Yet to ship") },
+			? { date: __("Returned"), value: __("Value returned"), billed: __("Credited"), shipped: __("Returned"), pending: "" }
+			: { date: __("Dispatched"), value: __("Goods value"), billed: __("Invoiced"), shipped: __("Shipped"),
+				pending: __("Yet to ship") },
 	)
 
 	const crumbs = computed(() => [
@@ -86,10 +84,21 @@ export default function setup(context) {
 				doc.value.posting_date ? INK8 : INK5),
 			...present(__("PO number"), doc.value.po_no),
 		]
+		const against = doc.value.return_against
+		if (against) {
+			rows.push({
+				key: "against:" + against,
+				label: __("Return of"),
+				value: against,
+				color: INK8,
+				weight: "420",
+				route: "/shipments/" + encodeURIComponent(against),
+			})
+		}
 		sourceOrders.value.forEach((name, i) => {
 			rows.push({
 				key: "order:" + name,
-				label: i > 0 ? "" : sourceOrders.value.length > 1 ? __("For orders") : __("For order"),
+				label: i > 0 ? "" : sourceOrders.value.length > 1 ? __("Orders") : __("Order"),
 				value: name,
 				color: INK8,
 				weight: "420",
@@ -99,7 +108,7 @@ export default function setup(context) {
 		// rounded, as the invoice for it shows the amount
 		rows.push(line(labels.value.value, formatMoney(magnitude(doc.value.rounded_total || doc.value.grand_total), doc.value.currency)))
 		// a credit note is usually made from the invoice, not the return, so the return cannot tell
-		if (!isReturn.value) rows.push(line(labels.value.billed, billedLine.value, INK6))
+		if (!isReturn.value) rows.push(line(labels.value.billed, billedLine.value))
 		rows.push(...contactLines(doc.value))
 		return rows
 	})
@@ -111,15 +120,13 @@ export default function setup(context) {
 		return __("Not yet")
 	})
 
-	const tracking = computed(() => {
-		const rows = [
-			...present(__("Receipt no."), doc.value.lr_no),
-			...present(__("Transporter"), doc.value.transporter_name),
-			...present(__("Vehicle"), doc.value.vehicle_no),
-			...present(__("Driver"), doc.value.driver_name),
-		]
-		return rows.length ? rows : [line("", __("No tracking details yet"), INK5)]
-	})
+	// none yet: the section stays out, as an empty one would only fill the column
+	const tracking = computed(() => [
+		...present(__("Receipt no."), doc.value.lr_no),
+		...present(__("Transporter"), doc.value.transporter_name),
+		...present(__("Vehicle"), doc.value.vehicle_no),
+		...present(__("Driver"), doc.value.driver_name),
+	])
 
 	// where the goods went
 	const addressDetails = computed(() => {
@@ -215,14 +222,14 @@ export default function setup(context) {
 		)
 		// still loading
 		if (!shipped) return ""
-		if (isReturn.value) return __("{0} returned", [shipped])
+		if (isReturn.value) return __("{0} returned.", [shipped])
 		// no order, or one the customer cannot see: nothing to say about what is left
-		if (!pending.value.length) return __("{0} in this shipment", [shipped])
+		if (!pending.value.length) return __("{0} in this shipment.", [shipped])
 		const several = sourceOrders.value.length > 1
 		const left = quantities(pending.value)
-		if (left) return several ? __("{0} still to ship on the orders", [left]) : __("{0} still to ship on the order", [left])
+		if (left) return several ? __("{0} still to ship on the orders.", [left]) : __("{0} still to ship on the order.", [left])
 		// said of the order as it stands now: an earlier, partial shipment shows the same
-		return several ? __("The orders are now shipped in full") : __("The order is now shipped in full")
+		return several ? __("The orders are now shipped in full.") : __("The order is now shipped in full.")
 	})
 
 	// ---------------------------------------------------------------- what happens next
