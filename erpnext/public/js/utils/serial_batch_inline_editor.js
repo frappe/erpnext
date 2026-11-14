@@ -595,6 +595,7 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 
 		let is_serial = cint(this.item.has_serial_no);
 		let based_on = await erpnext.stock.get_pick_serial_batch_based_on();
+		let stock_precision = erpnext.stock.get_sbie_stock_qty_precision(this.row, this.qty_field);
 
 		let dialog = new frappe.ui.Dialog({
 			title: is_serial ? __("Auto Fetch Serial Nos") : __("Auto Fetch Batch Nos"),
@@ -604,7 +605,15 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 					fieldname: "qty",
 					label: __("Qty to Fetch"),
 					reqd: 1,
-					default: Math.abs(flt(this.row[this.qty_field])) || null,
+					precision: stock_precision,
+					default:
+						flt(
+							Math.abs(
+								flt(this.row[this.qty_field]) *
+									erpnext.stock.get_sbie_conversion_factor(this.row, this.qty_field)
+							),
+							stock_precision
+						) || null,
 					description: __("Existing entries will be replaced with the fetched entries"),
 				},
 				{
@@ -972,7 +981,12 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	sync_row_qty() {
 		if (this.frm.doc.docstatus !== 0 || !this.has_pending()) return;
 
-		let expected = erpnext.stock.get_sbie_signed_qty(this.frm.doc, this.get_effective_qty());
+		let expected = erpnext.stock.get_sbie_row_qty(
+			this.frm.doc,
+			this.row,
+			this.qty_field,
+			this.get_effective_qty()
+		);
 		if (flt(this.row[this.qty_field]) !== expected) {
 			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, expected);
 		}
@@ -981,7 +995,12 @@ erpnext.stock.SerialBatchInlineEditor = class SerialBatchInlineEditor {
 	reconcile_row_qty() {
 		if (this.frm.doc.docstatus !== 0 || this.has_pending() || !this.server_total_count) return;
 
-		let qty = erpnext.stock.get_sbie_signed_qty(this.frm.doc, this.server_total_qty);
+		let qty = erpnext.stock.get_sbie_row_qty(
+			this.frm.doc,
+			this.row,
+			this.qty_field,
+			this.server_total_qty
+		);
 		if (flt(this.row[this.qty_field]) !== qty) {
 			frappe.model.set_value(this.cdt, this.cdn, this.qty_field, qty);
 			frappe.show_alert({
@@ -1291,8 +1310,33 @@ erpnext.stock.get_sbie_row = function (frm, cdn) {
 	return {};
 };
 
+// bundle qty is in the stock UOM; qty fields of rows that also have a stock qty are in the row's UOM
+erpnext.stock.get_sbie_stock_qty_field = function (row, qty_field) {
+	if (["qty", "rejected_qty"].includes(qty_field)) {
+		return ["stock_qty", "transfer_qty"].find((field) => frappe.meta.has_field(row.doctype, field));
+	}
+};
+
+erpnext.stock.get_sbie_stock_qty_precision = function (row, qty_field) {
+	return precision(erpnext.stock.get_sbie_stock_qty_field(row, qty_field) || qty_field, row);
+};
+
+erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
+	return erpnext.stock.get_sbie_stock_qty_field(row, qty_field) ? flt(row.conversion_factor) || 1 : 1;
+};
+
 // Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
-erpnext.stock.get_sbie_signed_qty = function (doc, qty) {
+erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
+	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
+	const stock_precision = erpnext.stock.get_sbie_stock_qty_precision(row, qty_field);
+	const row_qty = Math.abs(flt(row[qty_field]));
+
+	// keep a row qty that already matches, as dividing back by a fractional factor can drift
+	const qty =
+		flt(row_qty * conversion_factor, stock_precision) === flt(stock_qty, stock_precision)
+			? row_qty
+			: flt(stock_qty / conversion_factor, precision(qty_field, row));
+
 	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };
 
@@ -1364,7 +1408,7 @@ erpnext.stock.flush_serial_batch_pending = async function (frm) {
 
 		row[bundle_field] = summary.bundle;
 		let qty_field = cint(is_rejected) ? "rejected_qty" : config.qty_field || "qty";
-		row[qty_field] = erpnext.stock.get_sbie_signed_qty(frm.doc, summary.total_qty);
+		row[qty_field] = erpnext.stock.get_sbie_row_qty(frm.doc, row, qty_field, summary.total_qty);
 		if (row.received_qty != null) {
 			row.received_qty = flt(row.qty) + flt(row.rejected_qty);
 		}
