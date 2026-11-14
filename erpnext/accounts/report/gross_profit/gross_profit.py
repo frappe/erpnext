@@ -7,7 +7,7 @@ import frappe
 from frappe import _, qb, scrub
 from frappe.desk.reportview import build_match_conditions
 from frappe.query_builder import Case, Order
-from frappe.query_builder.functions import Coalesce, NullIf, Sum
+from frappe.query_builder.functions import Coalesce, NullIf
 from frappe.utils import cint, flt, formatdate
 from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
@@ -515,6 +515,13 @@ def get_column_names():
 	)
 
 
+def get_average(kept_unit, returned_unit, qty, qty_from_returns):
+	"""Average of ``qty`` units of which ``qty_from_returns`` are at ``returned_unit``, the rest at ``kept_unit``."""
+	if not qty:
+		return returned_unit
+	return ((qty - qty_from_returns) * kept_unit + qty_from_returns * returned_unit) / qty
+
+
 class GrossProfitGenerator:
 	def __init__(self, filters=None):
 		self.sle = {}
@@ -889,41 +896,42 @@ class GrossProfitGenerator:
 		return buying_amount
 
 	def get_billed_component_qty(self, row, packed_item):
-		"""Component qty a row bills of its delivered bundle row, by its share of what all invoices
-		of the bundle row bill; a credit note row by its share of what all credit notes reverse."""
+		"""Component qty a row bills of its delivered bundle row; what credit notes reversed of an
+		invoice row is valued as they reversed it."""
 		delivered_qty = flt(packed_item.qty)
 		bundle_row = self.delivered_bundle_rows.get(row.dn_detail)
 		if not bundle_row or not flt(bundle_row.stock_qty):
 			return delivered_qty
 
-		bundle_qty = flt(bundle_row.stock_qty)
 		if not flt(bundle_row.returned_qty):
-			return delivered_qty * flt(row.qty) / bundle_qty
+			return delivered_qty * flt(row.qty) / flt(bundle_row.stock_qty)
 
-		billed_qty = min(flt(bundle_row.billed_qty) or bundle_qty, bundle_qty)
-		if flt(row.qty) >= 0:
-			return (
-				self.get_component_qty_billed(packed_item, bundle_row, billed_qty) * flt(row.qty) / billed_qty
-			)
+		billed_unit, credited_unit = self.get_component_qty_per_billed_unit(packed_item, bundle_row)
+		if flt(row.qty) < 0:
+			return flt(row.qty) * credited_unit
 
-		credited_qty = min(flt(bundle_row.credited_qty) or -flt(row.qty), billed_qty)
-		credited_component_qty = self.get_component_qty_billed(
-			packed_item, bundle_row, billed_qty
-		) - self.get_component_qty_billed(packed_item, bundle_row, billed_qty - credited_qty)
-		return credited_component_qty * flt(row.qty) / credited_qty
+		credited_qty = min(flt(self.credited_bundle_qty.get(row.invoice_item)), flt(row.qty))
+		return (flt(row.qty) - credited_qty) * billed_unit + credited_qty * credited_unit
 
-	def get_component_qty_billed(self, packed_item, bundle_row, billed_bundle_qty):
-		"""Component qty that billing ``billed_bundle_qty`` of a partly returned bundle row takes:
-		what returns left on the packed row first, then what they took back."""
+	def get_component_qty_per_billed_unit(self, packed_item, bundle_row):
+		"""Component qty per bundle unit the invoices of a partly returned bundle row still bill, and
+		per unit credit notes reversed: billed units take what returns left on the packed row first,
+		credited units what they took back first."""
 		returned_bundle_qty = flt(bundle_row.returned_qty)
 		kept_bundle_qty = flt(bundle_row.stock_qty) - returned_bundle_qty
 		kept_qty = get_kept_component_qty(packed_item, bundle_row, self.bundle_returns)
-		billed_from_returns = max(billed_bundle_qty - kept_bundle_qty, 0)
-		component_qty = (flt(packed_item.qty) - kept_qty) * billed_from_returns / returned_bundle_qty
-		if kept_bundle_qty:
-			component_qty += kept_qty * min(billed_bundle_qty, kept_bundle_qty) / kept_bundle_qty
+		returned_unit = (flt(packed_item.qty) - kept_qty) / returned_bundle_qty
+		kept_unit = kept_qty / kept_bundle_qty if kept_bundle_qty else returned_unit
 
-		return component_qty
+		billed_qty = flt(bundle_row.billed_qty) or flt(bundle_row.stock_qty)
+		credited_qty = flt(bundle_row.credited_qty)
+		net_qty = min(max(billed_qty - credited_qty, 0), flt(bundle_row.stock_qty))
+		net_from_returns = max(net_qty - kept_bundle_qty, 0)
+		credited_from_returns = min(credited_qty, returned_bundle_qty - net_from_returns)
+
+		billed_unit = get_average(kept_unit, returned_unit, net_qty, net_from_returns)
+		credited_unit = get_average(kept_unit, returned_unit, credited_qty, credited_from_returns)
+		return billed_unit, credited_unit
 
 	def calculate_buying_amount_from_sle(self, row, my_sle, parenttype, parent, item_row, item_code):
 		for i, sle in enumerate(my_sle):
@@ -1211,6 +1219,7 @@ class GrossProfitGenerator:
 			SalesInvoiceItem.base_net_rate,
 			SalesInvoiceItem.base_net_amount,
 			SalesInvoiceItem.name.as_("item_row"),
+			SalesInvoiceItem.name.as_("invoice_item"),
 			SalesInvoice.is_return,
 			SalesInvoiceItem.cost_center,
 			SalesInvoiceItem.serial_and_batch_bundle,
@@ -1555,28 +1564,34 @@ class GrossProfitGenerator:
 		self.load_billed_bundle_qty()
 
 	def load_billed_bundle_qty(self):
-		"""Stock qty all invoices billed and credited of each partly returned delivered bundle row."""
+		"""Stock qty all invoices bill and credit notes reverse of each partly returned delivered
+		bundle row, and what credit notes reversed of each invoice row billing one."""
+		self.credited_bundle_qty = {}
 		bundle_rows = [name for name, row in self.delivered_bundle_rows.items() if flt(row.returned_qty)]
 		if not bundle_rows:
 			return
 
 		si = qb.DocType("Sales Invoice")
 		sii = qb.DocType("Sales Invoice Item")
-		billed_rows = (
+		billed_items = (
 			qb.from_(sii)
 			.join(si)
 			.on(si.name == sii.parent)
-			.select(
-				sii.dn_detail,
-				Sum(Case().when(sii.stock_qty > 0, sii.stock_qty).else_(0)).as_("billed_qty"),
-				Sum(Case().when(sii.stock_qty < 0, -sii.stock_qty).else_(0)).as_("credited_qty"),
-			)
+			.select(sii.dn_detail, sii.stock_qty, sii.sales_invoice_item)
 			.where((si.docstatus == 1) & (si.is_debit_note == 0) & sii.dn_detail.isin(bundle_rows))
-			.groupby(sii.dn_detail)
 			.run(as_dict=True)
 		)
-		for billed in billed_rows:
-			self.delivered_bundle_rows[billed.dn_detail].update(billed)
+		for item in billed_items:
+			bundle_row = self.delivered_bundle_rows[item.dn_detail]
+			if flt(item.stock_qty) >= 0:
+				bundle_row.billed_qty = flt(bundle_row.billed_qty) + flt(item.stock_qty)
+				continue
+
+			bundle_row.credited_qty = flt(bundle_row.credited_qty) - flt(item.stock_qty)
+			if item.sales_invoice_item:
+				self.credited_bundle_qty[item.sales_invoice_item] = flt(
+					self.credited_bundle_qty.get(item.sales_invoice_item)
+				) - flt(item.stock_qty)
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")
