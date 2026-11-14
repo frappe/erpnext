@@ -525,7 +525,9 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
-				**get_stock_qty_status_args(),
+				**get_stock_qty_status_args(
+					frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales")
+				),
 			},
 			{
 				"source_dt": "Purchase Order Item",
