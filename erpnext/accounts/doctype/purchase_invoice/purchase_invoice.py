@@ -39,7 +39,7 @@ from erpnext.accounts.utils import (
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
 from erpnext.manufacturing.doctype.production_plan.services.reservation import reserve_received_stock
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import (
@@ -710,9 +710,9 @@ class PurchaseInvoice(BuyingController):
 					"target_parent_dt": "Material Request",
 					"target_parent_field": "per_received",
 					"target_ref_field": "stock_qty",
-					"source_field": "stock_qty",
+					**get_received_stock_qty_status_args(),
 					"second_source_dt": "Purchase Receipt Item",
-					"second_source_field": "stock_qty",
+					"second_source_field": "qty * conversion_factor",
 					"second_join_field": "material_request_item",
 					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
