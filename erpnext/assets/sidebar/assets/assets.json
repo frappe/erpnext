@@ -335,7 +335,7 @@
    "indent": 0,
    "is_default_module": 0,
    "keep_closed": 0,
-   "label": "Settings",
+   "label": "Accounts Settings",
    "link_to": "Accounts Settings",
    "link_type": "DocType",
    "navigate_to_tab": "assets_tab",
@@ -344,7 +344,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-05 00:10:00.000000",
+ "modified": "2026-11-15 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
