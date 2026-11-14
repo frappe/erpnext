@@ -644,10 +644,14 @@ class PurchaseOrder(BuyingController):
 			},
 =======
 				**get_stock_qty_status_args(),
+<<<<<<< HEAD
 			}
 		)
 		self.status_updater.append(
 >>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
+=======
+			},
+>>>>>>> cf91622 (fix(buying): recalculate the Sales Order ordered qty of rows removed through Update Items)
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Packed Item",
@@ -658,12 +662,17 @@ class PurchaseOrder(BuyingController):
 				"target_ref_field": "qty",
 				**get_stock_qty_status_args(),
 <<<<<<< HEAD
+<<<<<<< HEAD
 			},
 		]
 =======
 			}
 		)
 >>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
+=======
+			},
+		]
+>>>>>>> cf91622 (fix(buying): recalculate the Sales Order ordered qty of rows removed through Update Items)
 
 	def update_status_updater_if_from_pp(self):
 		self.status_updater.append(
@@ -823,6 +832,7 @@ class PurchaseOrder(BuyingController):
 		# the removed rows are still in self.items, so their Sales Order rows are recalculated too
 		for args in self.get_sales_order_status_updater():
 			self._update_children({**args, "cond": ""}, update_modified=True)
+<<<<<<< HEAD
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:
@@ -839,6 +849,8 @@ class PurchaseOrder(BuyingController):
 				"Subcontracting Order", {"purchase_order": self.name, "docstatus": 1}, pluck="name"
 			):
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
+=======
+>>>>>>> cf91622 (fix(buying): recalculate the Sales Order ordered qty of rows removed through Update Items)
 
 
 @frappe.request_cache
