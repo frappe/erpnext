@@ -5,7 +5,6 @@ from frappe import _, scrub, throw
 from frappe.model.naming import set_name_by_naming_series
 from frappe.permissions import (
 	add_user_permission,
-	get_doc_permissions,
 	get_user_permissions,
 	remove_user_permission,
 )
@@ -717,14 +716,6 @@ def has_user_permission_for_employee(user_name, employee_name):
 			"for_value": employee_name,
 		}
 	)
-
-
-def has_upload_permission(doc, ptype="read", user=None):
-	if not user:
-		user = frappe.session.user
-	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
-		return True
-	return doc.user_id == user
 
 
 @frappe.whitelist()
