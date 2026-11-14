@@ -1456,28 +1456,13 @@ class TestSalesOrder(ERPNextTestSuite):
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
 	def test_sales_invoice_does_not_show_an_address_the_user_cannot_read(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
 		from erpnext.selling.doctype.customer.test_customer import make_customer
 
-		customer, other_customer = (make_customer(frappe.generate_hash(length=10)) for _ in range(2))
-		allowed, restricted = (
-			frappe.get_doc(
-				{
-					"doctype": "Address",
-					"address_title": title,
-					"address_type": "Shipping",
-					"address_line1": title,
-					"city": "Mumbai",
-					"country": "India",
-					"links": [{"link_doctype": "Customer", "link_name": other_customer}],
-				}
-			)
-			.insert()
-			.name
-			for title in ("Allowed", "Restricted")
-		)
+		allowed, restricted = (make_address(address_title=title).name for title in ("Allowed", "Restricted"))
 		test_user = create_user("test_so_address_perms@example.com", "Sales User", "Accounts User")
 		frappe.permissions.add_user_permission("Address", allowed, test_user.name, applicable_for="Address")
-		so = make_sales_order(customer=customer)
+		so = make_sales_order(customer=make_customer(frappe.generate_hash(length=10)))
 
 		with self.set_user(test_user.name):
 			self.assertTrue(make_sales_invoice(so.name).items)
