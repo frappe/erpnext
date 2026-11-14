@@ -1839,7 +1839,7 @@ class TestDeliveryNote(FrappeTestCase):
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_batch_skips_batch_qty_taken_by_a_packed_item(self):
 		item = make_item(
 			properties={
@@ -1872,7 +1872,7 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[1].batch_no, second_batch)
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{
 			"use_serial_batch_fields": 1,
