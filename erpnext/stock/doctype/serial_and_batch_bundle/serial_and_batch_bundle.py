@@ -2839,8 +2839,13 @@ def get_available_serial_nos(kwargs):
 		else:
 			reserved_voucher_details = get_reserved_voucher_details(kwargs)
 
+		# a delivery takes only its own order row's reservation
+		own_order_rows = set()
+		if any(entry.voucher_no in reserved_voucher_details for entry in reserved_entries):
+			own_order_rows = get_delivery_order_rows(kwargs)[0]
+
 		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
-			kwargs, reserved_entries, reserved_voucher_details
+			kwargs, reserved_entries, reserved_voucher_details, own_order_rows
 		):
 			ignore = set(kwargs.get("ignore_serial_nos") or [])
 			reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
@@ -2851,7 +2856,7 @@ def get_available_serial_nos(kwargs):
 
 		# Check if serial nos are reserved for other vouchers then ignore those serial nos
 		elif ignore_reserved_serial_nos := get_other_doc_reserved_serials(
-			kwargs, reserved_entries, reserved_voucher_details
+			reserved_entries, reserved_voucher_details, own_order_rows
 		):
 			ignore_serial_nos.extend(ignore_reserved_serial_nos)
 
@@ -3204,13 +3209,13 @@ def get_pos_returned_serial_nos(pos_invoices, kwargs):
 	return returned_serial_nos
 
 
-def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_voucher_details):
+def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_voucher_details, own_order_rows):
 	serial_nos = []
 	if not kwargs.get("pick_reserved_items"):
 		return serial_nos
 
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(entry, reserved_voucher_details, own_order_rows):
 			serial_nos.append(entry.serial_no)
 			continue
 
@@ -3229,15 +3234,23 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 	return serial_nos
 
 
-def get_other_doc_reserved_serials(kwargs, reserved_entries, reserved_voucher_details):
+def get_other_doc_reserved_serials(reserved_entries, reserved_voucher_details, own_order_rows):
 	serial_nos = []
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(entry, reserved_voucher_details, own_order_rows):
 			continue
 
 		serial_nos.append(entry.serial_no)
 
 	return serial_nos
+
+
+def is_reserved_for_voucher(entry, reserved_voucher_details, own_order_rows):
+	"""Reserved for the voucher's order, and for its delivered order row when known."""
+	if entry.voucher_no not in reserved_voucher_details:
+		return False
+
+	return not own_order_rows or entry.voucher_detail_no in own_order_rows
 
 
 def get_reserved_serial_nos_for_sre(kwargs) -> list:
@@ -3252,6 +3265,7 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 		.select(
 			sb_entry.serial_no,
 			sre.voucher_no,
+			sre.voucher_detail_no,
 			sre.voucher_type,
 		)
 		.where(
