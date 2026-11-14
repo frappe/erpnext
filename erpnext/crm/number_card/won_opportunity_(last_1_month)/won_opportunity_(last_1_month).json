@@ -4,13 +4,21 @@
  "doctype": "Number Card",
  "document_type": "Opportunity",
  "dynamic_filters_json": "[[\"Opportunity\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+<<<<<<< HEAD
  "filters_json": "[[\"Opportunity\",\"creation\",\"Timespan\",\"last month\",false]]",
+=======
+ "filters_json": "[[\"Opportunity\",\"creation\",\"Timespan\",\"last month\"],[\"Opportunity\",\"status\",\"=\",\"Converted\"]]",
+>>>>>>> 0a06516 (fix(crm): add status filters to Open and Won Opportunity number cards)
  "function": "Count",
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
  "label": "Won Opportunity (Last 1 Month)",
+<<<<<<< HEAD
  "modified": "2020-07-22 16:15:53.088837",
+=======
+ "modified": "2026-10-29 12:00:00.000000",
+>>>>>>> 0a06516 (fix(crm): add status filters to Open and Won Opportunity number cards)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Won Opportunity (Last 1 Month)",
