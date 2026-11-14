@@ -211,24 +211,25 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
 	def test_delivery_note_bundle_return_counts_components_on_rounded_stock_qty(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		conversion_factor = 0.301
-		_component, bundle = make_bundle_with_component(
-			component_qty=10,
-			bundle_properties={
-				"stock_uom": "Kg",
-				"uoms": [
-					{"uom": "Kg", "conversion_factor": 1},
-					{"uom": "Box", "conversion_factor": conversion_factor},
-				],
-			},
-		)
-		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
-		dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
-		dn.submit()
+		dn = make_box_bundle_delivery_note(conversion_factor=0.301, qty=1)
 
 		make_sales_return(dn.name).insert()
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_delivery_note_split_bundle_return_brings_back_the_delivered_components(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		dn = make_box_bundle_delivery_note(
+			conversion_factor=0.3356, qty=3, component_qty=0.4, component_properties={"stock_uom": "Kg"}
+		)
+		return_dn = make_sales_return(dn.name)
+		return_dn.items[0].qty = -1
+		return_dn.append("items", dict(return_dn.items[0].as_dict(), name=None, qty=-2))
+		return_dn.submit()
+
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
 
 	def test_delivery_note_return_of_component_counts_its_packed_qty(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -495,12 +496,33 @@ def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	return return_dn
 
 
-def make_bundle_with_component(component_qty, bundle_properties=None):
+def make_box_bundle_delivery_note(conversion_factor, qty, component_qty=10, component_properties=None):
+	"""Deliver `qty` Box of a bundle in Kg holding `component_qty` of one component per Kg."""
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+	_component, bundle = make_bundle_with_component(
+		component_qty=component_qty,
+		component_properties=component_properties,
+		bundle_properties={
+			"stock_uom": "Kg",
+			"uoms": [
+				{"uom": "Kg", "conversion_factor": 1},
+				{"uom": "Box", "conversion_factor": conversion_factor},
+			],
+		},
+	)
+	dn = create_delivery_note(item_code=bundle, qty=qty, do_not_submit=True)
+	dn.items[0].uom, dn.items[0].conversion_factor = "Box", conversion_factor
+	dn.submit()
+	return dn
+
+
+def make_bundle_with_component(component_qty, bundle_properties=None, component_properties=None):
 	from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-	component = make_item(properties={"is_stock_item": 1}).name
+	component = make_item(properties={"is_stock_item": 1, **(component_properties or {})}).name
 	bundle = make_item(properties={"is_stock_item": 0, **(bundle_properties or {})}).name
 	make_product_bundle(bundle, [component], qty=component_qty)
 	make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=20, basic_rate=100)
