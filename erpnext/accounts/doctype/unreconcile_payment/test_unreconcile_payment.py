@@ -665,3 +665,34 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 			create_unreconcile_doc_for_selection(selection(pe.name))
 		si.reload()
 		self.assertEqual(si.outstanding_amount, 100)
+
+	def test_unreconcile_resets_invoice_total_advance(self):
+		pe = self.create_payment_entry()
+		pe.submit()
+
+		si = self.create_sales_invoice(do_not_submit=True)
+		si.set_advances()
+		si.advances = [x for x in si.advances if x.reference_name == pe.name]
+		self.assertEqual(len(si.advances), 1)
+		si.advances[0].allocated_amount = 100
+		si.save().submit()
+		self.assertEqual(si.total_advance, 100)
+		self.assertEqual(si.outstanding_amount, 0)
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		self.assertEqual([x.reference_name for x in unreconcile.allocations], [si.name])
+		unreconcile.save().submit()
+
+		# the advance row is removed, so the invoice total must follow it
+		si.reload()
+		self.assertEqual(len(si.advances), 0)
+		self.assertEqual(si.total_advance, 0)
+		self.assertEqual(si.outstanding_amount, 100)
