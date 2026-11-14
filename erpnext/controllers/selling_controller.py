@@ -435,7 +435,8 @@ class SellingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
-				if allow_to_edit_stock_qty:
+				# rounded as the stock ledger posts it, so the row completing a return can take what is left
+				if allow_to_edit_stock_qty or self.get("is_return"):
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
 
 		if self.get("is_return"):
