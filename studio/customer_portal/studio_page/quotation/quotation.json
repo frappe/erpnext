@@ -162,12 +162,32 @@
               "variant": "solid"
              },
              "visibilityCondition": "{{ canAct }}"
+            },
+            {
+             "blockName": "Print",
+             "classes": [
+              "portal-below-xl"
+             ],
+             "componentEvents": {
+              "click": {
+               "action": "Run Script",
+               "script": "printDocument()"
+              }
+             },
+             "componentId": "Button-f7d4ccac20",
+             "componentName": "Button",
+             "componentProps": {
+              "iconLeft": "lucide-printer",
+              "label": "{{ __('Print') }}",
+              "variant": "subtle"
+             },
+             "visibilityCondition": "{{ !canAct }}"
             }
            ],
            "componentId": "div-bzre3eihp",
            "componentName": "div",
            "originalElement": "div",
-           "visibilityCondition": "{{ loaded && !notFound && (canAct || moreActions.length > 0) }}"
+           "visibilityCondition": "{{ loaded && !notFound }}"
           }
          ],
          "componentId": "div-8anrxom2o",
@@ -1550,7 +1570,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-11-12 12:00:00.000000",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "name": "quotation",
  "owner": "Administrator",

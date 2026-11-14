@@ -68,7 +68,9 @@ export default function setup(context) {
 	const responseNote = computed(() => {
 		// the date goes with the signed copy, which a rare slow render can still be making
 		if (doc.value.signed) {
-			return doc.value.signed_on ? __("Signed on {0}", [formatDate(doc.value.signed_on)]) : __("Signed")
+			return doc.value.signed_on
+				? __("You accepted and signed this on {0}. Your order comes next.", [formatDate(doc.value.signed_on)])
+				: __("You accepted and signed this. Your order comes next.")
 		}
 		if (answer.value === "Rejected") {
 			return __("You rejected this quotation. Get in touch if you would like a new one.")
@@ -232,7 +234,7 @@ export default function setup(context) {
 		if (sheet.value === "accept") {
 			return __("You are accepting {0} for {1}.", [id, formatMoney(payableTotal(doc.value), currency.value)])
 		}
-		if (sheet.value === "reject") return __("We will let the sales team know you are not going ahead with {0}.", [id])
+		if (sheet.value === "reject") return __("We will let the sales team know you are not going ahead with this quotation.")
 		return ""
 	})
 
@@ -331,11 +333,34 @@ export default function setup(context) {
 			case "Revised":
 				return { title: __("Revised to {0}. This version can no longer be answered.", [q.revised_to]), theme: "gray", icon: "lucide-history" }
 			case "Expired":
-				return { title: __("Expired {0}. It can no longer be answered.", [formatDate(q.valid_till)]), theme: "gray", icon: "lucide-clock" }
+				return { title: expiredNote(formatDate(q.valid_till)), theme: "gray", icon: "lucide-clock" }
+			case "Ordered": {
+				const orders: string[] = q.orders ?? []
+				const title = orders.length === 1
+					? __("This quotation became your order {0}.", [orders[0]])
+					: __("This quotation became your orders.")
+				return { title, theme: "green", icon: "lucide-circle-check" }
+			}
+			case "Partially Ordered":
+				return { title: __("Part of this quotation is ordered."), theme: "blue", icon: "lucide-shopping-cart" }
+			case "Closed":
+				return { title: __("This quotation is closed. It can no longer be answered."), theme: "gray", icon: "lucide-circle-x" }
 			default:
 				return null
 		}
 	})
+	/** Lapsed, but not unanswered: say what the customer already told us, so an accepted one that was
+	 *  never ordered does not read as if they had ignored it. */
+	function expiredNote(on: string): string {
+		if (answer.value === "Accepted") {
+			return __("You accepted this, but it expired on {0} before it was ordered. Get in touch to go ahead.", [on])
+		}
+		if (answer.value === "Rejected") return __("You rejected this quotation. It expired on {0}.", [on])
+		if (answer.value === "Changes Requested") {
+			return __("You asked for changes, but it expired on {0}. Get in touch for a new quotation.", [on])
+		}
+		return __("Expired {0}. It can no longer be answered.", [on])
+	}
 	const noteTitle = computed(() => note.value?.title ?? "")
 	const noteTheme = computed(() => note.value?.theme)
 	const noteIcon = computed(() => note.value?.icon)
@@ -347,7 +372,8 @@ export default function setup(context) {
 	const moreActions = computed(() => [
 		...(canAct.value ? [{ label: __("Request changes"), icon: "lucide-message-square-diff", onClick: () => openSheet("changes") }] : []),
 		...(canAct.value && phone.value ? [{ label: __("Reject"), icon: "lucide-circle-x", onClick: () => openSheet("reject") }] : []),
-		...(wide.value ? [] : [{ label: __("Print"), icon: "lucide-printer", onClick: () => printDocument("Quotation", docId.value) }]),
+		// beside the answers, Print joins them here; on its own it is a plain button in the header
+		...(wide.value || !canAct.value ? [] : [{ label: __("Print"), icon: "lucide-printer", onClick: () => printDocument("Quotation", docId.value) }]),
 	])
 
 	// ---------------------------------------------------------------- comments
