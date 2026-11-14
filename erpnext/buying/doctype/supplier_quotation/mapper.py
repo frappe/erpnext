@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+from erpnext.buying.utils import get_ordered_qty_in_row_uom
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
@@ -18,13 +19,15 @@ from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clea
 def make_purchase_order(
 	source_name: str, target_doc: str | dict | Document | None = None, args: str | dict | None = None
 ):
-	if frappe.get_doc("Supplier Quotation", source_name).get_status()["status"] == "Expired":
+	supplier_quotation = frappe.get_doc("Supplier Quotation", source_name)
+	if supplier_quotation.get_status()["status"] == "Expired":
 		frappe.throw(_("Supplier Quotation {0} has expired.").format(source_name))
 
 	if args is None:
 		args = {}
 	args = frappe.parse_json(args)
 	ordered_items = get_ordered_items(source_name)
+	ordered_qty = get_ordered_qty_in_row_uom(supplier_quotation.items, "supplier_quotation_item")
 
 	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
 
@@ -34,9 +37,8 @@ def make_purchase_order(
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		balance_stock_qty = obj.stock_qty - ordered_items.get(obj.name, 0.0)
-		target.stock_qty = balance_stock_qty if balance_stock_qty > 0 else 0
-		target.qty = flt(target.stock_qty) / flt(obj.conversion_factor)
+		target.qty = max(flt(obj.qty - ordered_qty[obj.name], target.precision("qty")), 0)
+		target.stock_qty = target.qty * flt(obj.conversion_factor)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
