@@ -1255,13 +1255,15 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 
 
 def round_to_ledger_qty(sb_entries: list[dict]) -> None:
-	"""Round the reserved qty to its precision, as the stock ledger posts it, keeping the rounded total."""
-	precision = frappe.get_precision("Serial and Batch Entry", "qty")
-	total = flt(sum(flt(entry.qty) for entry in sb_entries), precision)
-	for entry in sb_entries:
-		entry.qty = flt(entry.qty, precision)
+	"""Round the reserved total as the stock ledger posts it, on the last entry.
 
-	sb_entries[-1].qty = flt(sb_entries[-1].qty + total - sum(entry.qty for entry in sb_entries), precision)
+	The other entries keep their reserved qty, so each reservation still matches what it delivers.
+	"""
+	qty_before_last = sum(flt(entry.qty) for entry in sb_entries[:-1])
+	total = flt(
+		qty_before_last + flt(sb_entries[-1].qty), frappe.get_precision("Serial and Batch Entry", "qty")
+	)
+	sb_entries[-1].qty = total - qty_before_last
 
 
 def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
