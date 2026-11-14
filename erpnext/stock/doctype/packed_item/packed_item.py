@@ -10,6 +10,7 @@ import frappe
 import frappe.defaults
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
@@ -79,6 +80,7 @@ def make_packing_list(doc, order_packed_items=None):
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 	if order_packed_items is None:
 		order_packed_items = get_order_packed_items(doc)
+	returned_packed_qty = get_returned_packed_qty(order_packed_items) if doc.get("is_return") else {}
 
 	reset = reset_packing_list(doc)
 
@@ -94,9 +96,11 @@ def make_packing_list(doc, order_packed_items=None):
 		if bundle_name:
 			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
 			so_packed_items = list(order_packed_items.get(order_row, []))
-			for bundle_item, so_packed_item in get_component_order_rows(
+			component_rows = get_component_order_rows(
 				doc, item_row.item_code, get_product_bundle_items_by_name(bundle_name), so_packed_items
-			):
+			)
+			return_qty = get_return_qty(doc, item_row, component_rows, returned_packed_qty)
+			for bundle_item, so_packed_item in component_rows:
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				# a component picked from several locations gets a packed row per location
 				locations = get_pick_list_locations(
@@ -114,6 +118,8 @@ def make_packing_list(doc, order_packed_items=None):
 					)
 					pi_row.product_bundle = bundle_name
 					update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
+					if so_packed_item and so_packed_item.name in return_qty:
+						pi_row.qty = return_qty[so_packed_item.name]
 					update_packed_item_stock_data(
 						item_row, pi_row, bundle_item, item_data, doc, so_packed_item
 					)
@@ -579,22 +585,70 @@ def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_pack
 
 
 def allocate_picked_qty(pl_rows, qty):
-	"""Pick List rows that pack ``qty``, each up to its undelivered picked qty; the rest goes on the last one."""
+	"""Pick List rows that pack ``qty``, each up to its undelivered picked qty."""
 	precision = frappe.get_precision("Pick List Item", "delivered_qty")
+	return allocate_qty(pl_rows, qty, lambda row: flt(row.picked_qty - row.delivered_qty, precision))
+
+
+def allocate_qty(rows, qty, get_available_qty):
+	"""Rows that take ``qty`` as their ``pack_qty``, each up to its available qty; the rest goes on the last one."""
 	qty_precision = frappe.get_precision("Packed Item", "qty")
 	locations = []
-	for row in pl_rows:
-		row.pack_qty = min(flt(row.picked_qty - row.delivered_qty, precision), qty)
+	for row in rows:
+		row.pack_qty = min(get_available_qty(row), qty)
 		if row.pack_qty > 0:
 			locations.append(row)
 			qty = flt(qty - row.pack_qty, qty_precision)
 
 	if not locations:
-		pl_rows[0].pack_qty = 0
-		locations = pl_rows[:1]
+		rows[0].pack_qty = 0
+		locations = rows[:1]
 
 	locations[-1].pack_qty += qty
 	return locations
+
+
+def get_returned_packed_qty(order_packed_items) -> dict:
+	"""Qty returned so far against each of the given packed rows, by row."""
+	names = [row.name for rows in order_packed_items.values() for row in rows]
+	if not names:
+		return {}
+
+	packed_item = frappe.qb.DocType("Packed Item")
+	return dict(
+		frappe.qb.from_(packed_item)
+		.select(packed_item.return_against_packed_item, Abs(Sum(packed_item.qty)))
+		.where(packed_item.return_against_packed_item.isin(names) & (packed_item.docstatus == 1))
+		.groupby(packed_item.return_against_packed_item)
+		.run()
+	)
+
+
+def get_return_qty(doc, item_row, component_rows, returned_packed_qty) -> dict:
+	"""Qty a return row takes back on each packed row of a component delivered as several rows,
+	each up to what is left to return on it."""
+	if not doc.get("is_return"):
+		return {}
+
+	delivered_rows = {}
+	for component, so_packed_item in component_rows:
+		if so_packed_item:
+			delivered_rows.setdefault(component.item_code, []).append(so_packed_item)
+
+	precision = frappe.get_precision("Packed Item", "qty")
+	return_qty = {}
+	for rows in delivered_rows.values():
+		if len(rows) < 2:
+			continue
+
+		qty = flt(-sum(row.qty_per_unit for row in rows) * flt(item_row.stock_qty), precision)
+		locations = allocate_qty(
+			rows, qty, lambda row: flt(row.qty - flt(returned_packed_qty.get(row.name)), precision)
+		)
+		return_qty.update({row.name: 0 for row in rows})
+		return_qty.update({row.name: -flt(row.pack_qty, precision) for row in locations})
+
+	return return_qty
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, location):
