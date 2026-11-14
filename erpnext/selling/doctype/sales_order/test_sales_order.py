@@ -1474,6 +1474,15 @@ class TestSalesOrder(ERPNextTestSuite):
 				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
 			)
 
+	def test_make_sales_invoice_checks_item_permission_of_target_rows(self):
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		user = create_user("test_so_target_item_perm@example.com", "Sales User", "Accounts User").name
+		frappe.permissions.add_user_permission("Item", "_Test Item", user, applicable_for="Item")
+		target = {"doctype": "Sales Invoice", "items": [{"item_code": "_Test Item 2", "qty": 1}]}
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=target)
+
 	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
 		for workflow_name in frappe.get_all(
 			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
