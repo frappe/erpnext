@@ -13,7 +13,10 @@ from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
@@ -355,6 +358,9 @@ def apply_conditions(query, filters):
 
 	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Stock Entry"):
 		query = query.where(sle.warehouse.isin(warehouses))
+
+	if condition := get_allowed_companies_condition(sle.company, "Stock Ledger Entry"):
+		query = query.where(condition)
 
 	if filters.get("warehouse"):
 		query = apply_warehouse_filter(query, sle, filters)
