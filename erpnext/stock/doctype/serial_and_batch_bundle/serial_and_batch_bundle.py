@@ -2763,6 +2763,13 @@ def get_auto_data_rows(kwargs):
 
 
 def get_auto_data_rows_in_warehouses(kwargs, warehouses):
+	if not warehouses:
+		return []
+
+	if cint(kwargs.has_serial_no) and not kwargs.scio_detail:
+		kwargs.warehouse = kwargs.warehouse or list(warehouses)
+		return [row for row in get_available_serial_nos(kwargs) if row.warehouse in warehouses]
+
 	qty = flt(kwargs.qty)
 	kwargs.qty = 0
 	rows = [row for row in get_auto_data_rows(kwargs) or [] if row.warehouse in warehouses]
@@ -2803,7 +2810,9 @@ def get_available_serial_nos(kwargs):
 	# There might be chances that the serial no not exists in the warehouse during backdated stock transactions
 	if not kwargs.get("ignore_warehouse"):
 		filters["warehouse"] = ("is", "set")
-		if kwargs.warehouse:
+		if isinstance(kwargs.warehouse, list):
+			filters["warehouse"] = ("in", kwargs.warehouse)
+		elif kwargs.warehouse:
 			filters["warehouse"] = kwargs.warehouse
 
 	reserved_entries = [] if kwargs.get("ignore_reserved_stock") else get_reserved_serial_nos_for_sre(kwargs)
@@ -3205,7 +3214,9 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 		.orderby(sb_entry.idx)
 	)
 
-	if kwargs.warehouse:
+	if isinstance(kwargs.warehouse, list):
+		query = query.where(sre.warehouse.isin(kwargs.warehouse))
+	elif kwargs.warehouse:
 		query = query.where(sre.warehouse == kwargs.warehouse)
 
 	if kwargs.ignore_voucher_nos:
