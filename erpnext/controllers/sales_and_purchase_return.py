@@ -953,7 +953,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
 			"Packed Item": {
 				"doctype": "Packed Item",
-				"field_map": {"parent_detail_docname": "parent_detail_docname"},
+				"field_map": {
+					"parent_detail_docname": "parent_detail_docname",
+					"name": "return_against_packed_item",
+				},
 			},
 		},
 		target_doc,
