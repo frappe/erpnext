@@ -260,6 +260,25 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
 		self.assertEqual(mr.per_received, 100)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_receipt_of_a_material_request_in_a_whole_number_uom_completes_it(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3333}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.3333)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+		make_purchase_receipt(po.name).submit()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].received_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_received, 100)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_orders_for_parts_of_a_supplier_quotation_add_up_to_its_stock_qty(self):
 		from erpnext.buying.doctype.supplier_quotation.mapper import (
