@@ -666,7 +666,7 @@ class BuyingController(SubcontractingController):
 			if not details:
 				continue
 
-			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
+			amount = flt(row.valuation_rate * get_stock_qty(row, row.qty), row.precision("base_amount"))
 			if row.landed_cost_voucher_amount:
 				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
 
