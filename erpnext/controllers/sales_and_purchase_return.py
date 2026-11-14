@@ -370,9 +370,9 @@ def get_returned_stock_qty(doc, row):
 	elif doc.doctype in ("Purchase Receipt", "Purchase Invoice"):
 		rounded = True
 	else:
-		rounded = is_sales_stock_return(doc) or frappe.get_single_value(
-			"Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"
-		)
+		rounded = (
+			is_sales_stock_return(doc) and frappe.get_cached_value("Item", row.item_code, "is_stock_item")
+		) or frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales")
 	return flt(stock_qty, row.precision("stock_qty")) if rounded else stock_qty
 
 
