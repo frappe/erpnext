@@ -2,6 +2,8 @@
 # See license.txt
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.permissions import add_user_permission
 
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -63,3 +65,17 @@ class TestWarehouseWiseStockBalance(ERPNextTestSuite):
 
 		self.assertNotIn(empty, [row["name"] for row in self.run_report()])
 		self.assertIn(empty, [row["name"] for row in self.run_report(show_disabled_warehouses=1)])
+
+	def test_company_user_permission_limits_warehouses(self):
+		warehouse = create_warehouse("_Test WWSB Company Permission")
+		make_stock_entry(item_code="_Test Item", to_warehouse=warehouse, qty=10, rate=100)
+		restricted_user = create_user("wwsb_other_company@example.com", "Stock User")
+		add_user_permission("Company", "_Test Company 1", restricted_user.name)
+		permitted_user = create_user("wwsb_same_company@example.com", "Stock User")
+		add_user_permission("Company", "_Test Company", permitted_user.name)
+
+		with self.set_user(restricted_user.name):
+			self.assertEqual(self.run_report(), [])
+
+		with self.set_user(permitted_user.name):
+			self.assertEqual(self.row(self.run_report(), warehouse)["stock_balance"], 1000)
