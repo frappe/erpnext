@@ -767,9 +767,7 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
-
-		return flt(accepted_qty + rejected_qty, row.precision("stock_qty"))
+		return get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty))
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		self.update_ordered_and_reserved_qty()
