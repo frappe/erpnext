@@ -11,8 +11,8 @@ from frappe.utils import cint, cstr, flt, get_link_to_form
 from erpnext import _refuse
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.assets.doctype.asset.depreciation import (
+	_get_disposal_account_and_cost_center,
 	get_depreciation_accounts,
-	get_disposal_account_and_cost_center,
 )
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
@@ -27,7 +27,7 @@ def make_sales_invoice(asset: str, item_code: str, company: str, sell_qty: int, 
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
 	si.currency = frappe.get_cached_value("Company", company, "default_currency")
-	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(company)
+	disposal_account, depreciation_cost_center = _get_disposal_account_and_cost_center(company)
 	si.append(
 		"items",
 		{
