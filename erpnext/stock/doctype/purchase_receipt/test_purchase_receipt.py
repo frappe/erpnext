@@ -1324,6 +1324,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertTrue(get_batch_from_bundle(pr.items[0].serial_and_batch_bundle))
 
+	def test_stock_user_can_save_purchase_receipt(self):
+		from erpnext.tests.permission_test_utils import make_fenced_user
+
+		user = make_fenced_user("pr-stock-user@example.com", ["Stock User"])
+		with self.set_user(user):
+			pr = make_purchase_receipt(do_not_submit=True)
+
+		self.assertTrue(pr.name)
+
 	def test_valuation_spreads_over_the_stock_qty_the_ledger_posts(self):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Lb"}).insert(ignore_if_duplicate=True)
 		item = make_item(
