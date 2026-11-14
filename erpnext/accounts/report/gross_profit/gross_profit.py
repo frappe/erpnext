@@ -683,6 +683,7 @@ class GrossProfitGenerator:
 				row.buying_amount + self.get_buying_amount_from_product_bundle(credit, delivered_bundle),
 				self.currency_precision,
 			)
+			row.buying_rate = flt(row.buying_amount / row.qty, self.float_precision) if row.qty else 0.0
 		else:
 			row.buying_amount = flt(flt(row.qty) * flt(row.buying_rate), self.currency_precision)
 
