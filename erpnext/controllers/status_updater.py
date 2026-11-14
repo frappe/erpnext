@@ -571,9 +571,10 @@ class StatusUpdater(Document):
 		else:
 			role = frappe.get_single_value("Accounts Settings", "role_allowed_to_over_bill")
 
-		overflow_percent = (
-			(item[args["target_field"]] - item[args["target_ref_field"]]) / item[args["target_ref_field"]]
-		) * 100
+		# compared at the field's precision, so unrounded stock qty does not overflow by its rounding
+		precision = frappe.get_precision(args["target_dt"], args["target_field"])
+		overflow = flt(item[args["target_field"]], precision) - flt(item[args["target_ref_field"]], precision)
+		overflow_percent = overflow / item[args["target_ref_field"]] * 100
 
 		if overflow_percent - allowance > 0.01:
 			item["max_allowed"] = flt(item[args["target_ref_field"]] * (100 + allowance) / 100)
