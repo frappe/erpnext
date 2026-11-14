@@ -10,7 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import cint, cstr, escape_html, flt, get_link_to_form
+from frappe.utils import ceil, cint, cstr, escape_html, flt, get_link_to_form
 
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
@@ -301,7 +301,12 @@ class SubcontractingController(StockController):
 		"""Rounded on the running finished good total, so that all returns add up to what the receipt consumed."""
 		share = min(material.returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
 		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
-		return -flt(flt(material.consumed_qty * share, precision) - material.returned_qty, precision)
+		total_returned_qty = flt(material.consumed_qty * share, precision)
+		# a serial no cannot be split
+		if frappe.get_cached_value("Item", material.item_details["rm_item_code"], "has_serial_no"):
+			total_returned_qty = ceil(total_returned_qty)
+
+		return -flt(total_returned_qty - material.returned_qty, precision)
 
 	def get_returnable_serial_batches(self):
 		"""Serial nos and batches the returned receipt consumed that no return has brought back yet,
