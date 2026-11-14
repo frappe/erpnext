@@ -297,6 +297,19 @@ class SubcontractingController(StockController):
 			if qty:
 				self.__add_supplied_or_received_item(row, frappe._dict(material.item_details), qty)
 
+	def count_kept_return_rows(self, rows):
+		"""Count the rows a return keeps from its last save, so that the rows it rebuilds take back only the rest."""
+		for row in rows:
+			for rm_item_code, material in self.returnable_raw_materials.get(
+				row.subcontracting_receipt_item, {}
+			).items():
+				material.returned_fg_qty += abs(flt(row.received_qty))
+				material.returned_qty += sum(
+					abs(flt(supplied_item.consumed_qty))
+					for supplied_item in self.supplied_items
+					if (supplied_item.reference_name, supplied_item.rm_item_code) == (row.name, rm_item_code)
+				)
+
 	def get_return_consumed_qty(self, material):
 		"""Rounded on the running finished good total, so that all returns add up to what the receipt consumed."""
 		share = min(material.returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
@@ -1360,11 +1373,18 @@ class SubcontractingController(StockController):
 		job_card_warehouses = self.get_job_card_source_warehouses()
 
 		has_items = True if self.get(self.raw_material_table) else False
-		for row in self.items:
-			if self.doctype != self.subcontract_data.order_doctype and (
+		kept_rows = [
+			row
+			for row in self.items
+			if self.doctype != self.subcontract_data.order_doctype
+			and (
 				(self.__changed_name and row.name not in self.__changed_name)
 				or (has_items and not self.__changed_name)
-			):
+			)
+		]
+		self.count_kept_return_rows(kept_rows)
+		for row in self.items:
+			if row in kept_rows:
 				continue
 
 			if self.is_subcontracting_receipt_return():
