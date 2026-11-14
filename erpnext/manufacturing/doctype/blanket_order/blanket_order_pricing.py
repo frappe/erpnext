@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext import get_company_currency
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import validate_pricing_parties
 from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
 from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
@@ -191,6 +192,8 @@ def apply_price_list(
 	reset_conversion_rate=False,
 ):
 	doc = frappe.get_doc(frappe.parse_json(doc))
+	doc.check_permission("read")
+	validate_pricing_parties(doc)
 	reset_party_values = cint(reset_party_values)
 	reset_plc_conversion_rate = cint(reset_plc_conversion_rate)
 	reset_conversion_rate = cint(reset_conversion_rate)
