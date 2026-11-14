@@ -54,6 +54,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	cancel_stock_reservation_entries,
 )
+from erpnext.stock.services.return_charges import ReturnChargesService
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -269,6 +270,10 @@ class PurchaseInvoice(BuyingController):
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ""
+
+	def before_validate(self):
+		if self.update_stock:
+			ReturnChargesService(self).set_returned_valuation_charges()
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))

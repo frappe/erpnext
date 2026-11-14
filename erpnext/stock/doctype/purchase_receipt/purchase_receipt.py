@@ -32,8 +32,12 @@ from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receip
 	validate_single_purchase_receipt,
 )
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 from erpnext.stock.doctype.purchase_receipt.services.return_charges import ReturnChargesService
+=======
+from erpnext.stock.services.return_charges import ReturnChargesService
+>>>>>>> d8a07e8 (fix(accounts): reverse only the carried valuation charge on a stock-updating debit note)
 from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
 >>>>>>> e12ef8f (fix(stock): reverse only the Actual valuation charge the returned stock carried)
 
