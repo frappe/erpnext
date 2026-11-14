@@ -534,6 +534,7 @@
    "fieldname": "reversal_of",
    "fieldtype": "Link",
    "label": "Reversal Of",
+   "no_copy": 1,
    "options": "Journal Entry",
    "read_only": 1
   },
@@ -679,7 +680,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-10-28 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
