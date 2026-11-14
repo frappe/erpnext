@@ -1439,6 +1439,30 @@ class TestGrossProfit(ERPNextTestSuite):
 			sum(self.get_invoice_buying_amount(sinv.name) for sinv in (first_invoice, second_invoice)), 600
 		)
 
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 100})
+	def test_partly_returned_split_bundle_billed_again_after_a_full_credit_note(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return as make_delivery_return
+		from erpnext.stock.doctype.pick_list.test_pick_list import (
+			deliver_bundle_from_two_warehouses_at_two_rates,
+		)
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		sinv = make_sales_invoice(delivery_note.name).submit()
+		delivery_return = make_delivery_return(delivery_note.name)
+		delivery_return.items[0].qty = -1
+		delivery_return.submit()
+		make_sales_return(sinv.name).submit()
+
+		rebilled_invoice = make_sales_invoice(delivery_note.name).submit()
+		kept_value = -sum(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": ["in", [delivery_note.name, delivery_return.name]]},
+				pluck="stock_value_difference",
+			)
+		)
+		self.assertEqual(self.get_invoice_buying_amount(rebilled_invoice.name), kept_value)
+
 	def test_bundle_invoiced_before_delivery(self):
 		bundle = self.make_stocked_bundle()
 		sinv = create_sales_invoice(
