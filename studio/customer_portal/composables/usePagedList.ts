@@ -22,7 +22,11 @@ interface ListPage {
 
 /** The empty state's words: none at all, none matching the tab or search, and where they come from.
  *  A function, so the words follow the language once it loads. */
-type EmptyWords = () => { none: string; noMatch: string; caption: string }
+type EmptyWords = () => {
+	none: string; noMatch: string; caption: string
+	// the opening tab empty while other tabs have some: says what the tab is for, as nothing was filtered away
+	opening?: { title: string; caption: string }
+}
 
 /** `tabs` in the order the page shows them; the first is where the page opens. Their names are what
  *  the server filters on, so they are translated only where they are shown. */
@@ -139,7 +143,7 @@ export function usePagedList(kind: string, tabs: string[], emptyWords: EmptyWord
 		},
 	})
 	const filterOptions = computed(() =>
-		tabs.map((name) => ({ label: `${__(name)} ${counts.value[name] ?? 0}`, value: name })),
+		tabs.map((name) => ({ label: `${tabLabel(name)} ${counts.value[name] ?? 0}`, value: name })),
 	)
 
 	// nothing to show is "none at all", "the tab or search is too narrow", or "it did not load"; each
@@ -150,9 +154,11 @@ export function usePagedList(kind: string, tabs: string[], emptyWords: EmptyWord
 		if (loadFailed.value) {
 			return { title: __("We could not load this page"), caption: __("Please check your connection and try again.") }
 		}
-		return noneAtAll.value
-			? { title: words.none, caption: words.caption }
-			: { title: words.noMatch, caption: __("Try a different status, or clear the search.") }
+		if (noneAtAll.value) return { title: words.none, caption: words.caption }
+		const searching = Boolean(query.value.trim())
+		if (!searching && filter.value === tabs[0] && words.opening) return words.opening
+		const caption = searching ? __("Try a different status, or clear the search.") : __("Try a different status.")
+		return { title: words.noMatch, caption }
 	})
 
 	return {
@@ -162,4 +168,24 @@ export function usePagedList(kind: string, tabs: string[], emptyWords: EmptyWord
 		emptyCaption: computed(() => empty.value.caption),
 		loadMore: () => load(true),
 	}
+}
+
+/** A tab's name in the customer's language. Each is a literal `__()` call, which is what puts it in
+ *  the translation files; a name passed in a variable would never reach them. */
+function tabLabel(name: string): string {
+	const labels: Record<string, string> = {
+		Open: __("Open"),
+		All: __("All"),
+		Ordered: __("Ordered"),
+		Expired: __("Expired"),
+		Active: __("Active"),
+		Completed: __("Completed"),
+		Closed: __("Closed"),
+		Dispatched: __("Dispatched"),
+		Returned: __("Returned"),
+		Outstanding: __("Outstanding"),
+		Overdue: __("Overdue"),
+		Paid: __("Paid"),
+	}
+	return labels[name] ?? __(name)
 }

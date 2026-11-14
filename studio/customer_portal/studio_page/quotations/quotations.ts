@@ -23,6 +23,7 @@ export default function setup(context) {
 		none: __("No quotations yet"),
 		noMatch: __("No quotations match"),
 		caption: __("Quotations shared with you will appear here."),
+		opening: { title: __("No open quotations"), caption: __("Quotations waiting for your answer show here.") },
 	}))
 	const { records: quotations } = list
 

@@ -15,6 +15,7 @@ export default function setup(context) {
 		none: __("No orders yet"),
 		noMatch: __("No orders match"),
 		caption: __("Orders confirmed from your quotations will appear here."),
+		opening: { title: __("No active orders"), caption: __("Orders still to be delivered or billed show here.") },
 	}))
 	const { records: orders } = list
 

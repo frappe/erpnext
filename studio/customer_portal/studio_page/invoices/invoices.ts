@@ -15,6 +15,7 @@ export default function setup(context) {
 		none: __("No invoices yet"),
 		noMatch: __("No invoices match"),
 		caption: __("Invoices for your orders will appear here."),
+		opening: { title: __("Nothing outstanding"), caption: __("Invoices you still have to pay show here.") },
 	}))
 	const { records: invoices } = list
 
