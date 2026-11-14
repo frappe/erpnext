@@ -31,6 +31,7 @@ from erpnext.stock.utils import (
 	_get_incoming_rate,
 	get_valuation_method,
 	is_serial_no_wise_valuation_disabled,
+	validate_warehouse_company,
 )
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import get_applicable_bom_items
 
@@ -74,9 +75,24 @@ class SubcontractingController(StockController):
 				if self.doctype != "Subcontracting Inward Order"
 				else "received_items"
 			)
+			self.validate_company_of_warehouses()
 			self.set_valuation_rate_for_rm()
 		else:
 			super().validate()
+
+	def validate_company_of_warehouses(self):
+		warehouses = {
+			self.get(df.fieldname) for df in self.meta.get_link_fields() if df.options == "Warehouse"
+		}
+		for table_field in self.meta.get_table_fields():
+			child_meta = frappe.get_meta(table_field.options)
+			fieldnames = [df.fieldname for df in child_meta.get_link_fields() if df.options == "Warehouse"]
+			for row in self.get(table_field.fieldname):
+				warehouses.update(row.get(fieldname) for fieldname in fieldnames)
+
+		for warehouse in warehouses:
+			if warehouse:
+				validate_warehouse_company(warehouse, self.company)
 
 	def set_valuation_rate_for_rm(self):
 		rate_changed = False
@@ -1436,6 +1452,9 @@ class SubcontractingController(StockController):
 		self.__validate_supplied_or_received_items()
 
 	def create_raw_materials_supplied_or_received(self, raw_material_table="supplied_items"):
+		if self.get("supplier_warehouse"):
+			validate_warehouse_company(self.supplier_warehouse, self.company)
+
 		self.set_materials_for_subcontracted_items(raw_material_table)
 
 		if self.doctype in ["Subcontracting Receipt", "Purchase Receipt", "Purchase Invoice"]:
@@ -1616,6 +1635,9 @@ class SubcontractingController(StockController):
 	@frappe.whitelist()
 	def get_current_stock(self):
 		if self.doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
+			if self.supplier_warehouse and self.get("supplied_items"):
+				validate_warehouse_company(self.supplier_warehouse, self.company)
+
 			for item in self.get("supplied_items"):
 				if self.supplier_warehouse:
 					actual_qty = frappe.db.get_value(
