@@ -498,7 +498,14 @@ class SubcontractingReceipt(SubcontractingController):
 			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against},
-				fields=["name", "reference_name", "bom_secondary_item", "returned_qty"],
+				fields=[
+					"name",
+					"item_code",
+					"reference_name",
+					"secondary_item_type",
+					"valuation_type",
+					"returned_qty",
+				],
 			)
 		}
 
@@ -507,16 +514,17 @@ class SubcontractingReceipt(SubcontractingController):
 		if not original_rows:
 			return
 
+		# by item, as rows received before v16 have no bom_secondary_item
 		secondary_rows = {
-			(row.reference_name, row.bom_secondary_item): row.name
+			(row.reference_name, row.item_code): row.name
 			for row in original_rows.values()
-			if row.bom_secondary_item
+			if row.secondary_item_type or row.valuation_type
 		}
 		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
 		for row in self.items:
 			if row.bom_secondary_item:
 				row.subcontracting_receipt_item = secondary_rows.get(
-					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
+					(returned_fg_rows.get(row.reference_name), row.item_code)
 				)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
