@@ -27,6 +27,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.mapper import (
 	make_purchase_invoice as make_pi_from_pr,
 )
+from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -238,6 +239,119 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		frappe.db.set_value("Item", "_Test Item", "over_delivery_receipt_allowance", 0)
 		frappe.db.set_value("Item", "_Test Item", "over_billing_allowance", 0)
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		item = make_item_with_fractional_box()
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+		self.assert_orders_for_parts_add_up(mr.items[0], lambda: make_purchase_order(mr.name))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		item = make_item_with_fractional_box()
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		for _ in range(3):
+			pr = make_purchase_receipt(po.name)
+			pr.items[0].qty = pr.items[0].received_qty = 1
+			pr.submit()
+
+		mr.reload()
+		self.assertEqual(
+			mr.items[0].received_qty, flt(mr.items[0].stock_qty, mr.precision("stock_qty", "items"))
+		)
+		self.assertEqual(mr.per_received, 100)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_supplier_quotation_add_up_to_its_stock_qty(self):
+		from erpnext.buying.doctype.supplier_quotation.mapper import (
+			make_purchase_order as make_po_from_sq,
+		)
+
+		item = make_item_with_fractional_box()
+		sq = frappe.get_doc(
+			{
+				"doctype": "Supplier Quotation",
+				"supplier": "_Test Supplier",
+				"company": "_Test Company",
+				"items": [
+					{
+						"item_code": item,
+						"qty": 3,
+						"uom": "Box",
+						"rate": 100,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		).insert()
+		sq.submit()
+
+		def make_order():
+			po = make_po_from_sq(sq.name)
+			po.schedule_date = add_days(nowdate(), 1)
+			return po
+
+		self.assert_orders_for_parts_add_up(sq.items[0], make_order)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
+	def test_orders_for_parts_of_a_sales_order_add_up_to_its_stock_qty(self):
+		so = make_sales_order_for_fractional_box()
+		self.assert_orders_for_parts_add_up(so.items[0], lambda: make_po_for_sales_order_row(so.items[0]))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
+	def test_removing_rows_ordered_for_a_sales_order_row_clears_its_ordered_qty(self):
+		so = make_sales_order_for_fractional_box()
+		po = make_po_for_sales_order_row(so.items[0])
+		po.items[0].qty = 1
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None})
+		po.append(
+			"items",
+			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
+		)
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 1.33)
+
+		unlinked_row = po.items[2]
+		trans_item = json.dumps(
+			[{"item_code": unlinked_row.item_code, "qty": 1, "rate": 100, "docname": unlinked_row.name}]
+		)
+		update_child_qty_rate("Purchase Order", trans_item, po.name)
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 0)
+
+	def assert_orders_for_parts_add_up(self, source_row, make_order):
+		"""Orders of 1 + 1 + 1 Box for a 3 Box source row add up to its stock qty; over-ordering fails."""
+		from erpnext.controllers.status_updater import OverAllowanceError
+
+		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
+		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
+
+		def order(qty):
+			po = make_order()
+			po.supplier = "_Test Supplier"
+			po.items[0].qty = qty
+			return po
+
+		order(1).submit()
+		order(1).submit()
+		with assert_raises_with_savepoint(self, OverAllowanceError):
+			order(2).submit()
+		order(1).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(source_row.doctype, source_row.name, "ordered_qty"),
+			flt(source_row.stock_qty, source_row.precision("stock_qty")),
+		)
 
 	def test_over_order_allowance_against_material_request(self) -> None:
 		"""Over Order Allowance in Buying Settings must govern PO qty vs MR qty independently
@@ -2797,3 +2911,31 @@ def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 
 def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
+
+
+def make_sales_order_for_fractional_box():
+	"""Sales Order for 3 of a 2/3 Kg Box UOM that allows fractions, so orders can map the rest of it."""
+	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+	if not frappe.db.exists("UOM", "_Test Fractional Box"):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Fractional Box"}).insert()
+	item = make_item_with_fractional_box("_Test Fractional Box")
+	return make_sales_order(item_code=item, qty=3, uom="_Test Fractional Box")
+
+
+def make_po_for_sales_order_row(sales_order_row):
+	from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+
+	selected_items = [{"name": sales_order_row.name, "supplier": "_Test Supplier"}]
+	return make_po_from_so(sales_order_row.parent, selected_items=selected_items)[0]
+
+
+def make_item_with_fractional_box(uom="Box"):
+	"""Stock item in Kg whose ``uom`` is 2/3 Kg, so the stock qty of ordered ``uom`` is rounded."""
+	return make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"uoms": [{"uom": uom, "conversion_factor": 0.666666667}],
+		}
+	).name
