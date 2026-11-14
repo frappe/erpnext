@@ -261,6 +261,8 @@ LIST_PAGE_LENGTH = LIST_PAGE_LENGTHS[0]
 
 # Sales Order statuses where the order is still running; the pages keep the same list
 ACTIVE_ORDER_STATUSES = ("To Deliver and Bill", "To Deliver", "To Bill", "To Pay", "On Hold")
+# an order on hold is paused, so it cannot be late
+LATE_ORDER_STATUSES = tuple(status for status in ACTIVE_ORDER_STATUSES if status != "On Hold")
 
 # ERPNext marks an invoice overdue once any instalment is late; `due_date` is only the last one's
 OVERDUE_INVOICE_STATUSES = ("Overdue", "Overdue and Discounted")
@@ -303,9 +305,9 @@ LIST_PAGES = {
 			"Closed": [["status", "=", "Closed"]],
 		},
 		"search": ("name", ("Sales Order Item", "item_name"), ("Sales Order Item", "item_code")),
-		# still running, not fully delivered, and past its delivery date
+		# still running (not on hold), not fully delivered, and past its delivery date
 		"urgent": lambda: [
-			["status", "in", ACTIVE_ORDER_STATUSES],
+			["status", "in", LATE_ORDER_STATUSES],
 			["per_delivered", "<", 100],
 			["delivery_date", "<", today()],
 		],
@@ -761,7 +763,7 @@ def _home_summary() -> dict:
 			"late": _aggregate(
 				"Sales Order",
 				{
-					"status": ["in", ACTIVE_ORDER_STATUSES],
+					"status": ["in", LATE_ORDER_STATUSES],
 					"per_delivered": ["<", 100],
 					"delivery_date": ["<", today()],
 				},

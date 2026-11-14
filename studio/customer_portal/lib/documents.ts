@@ -133,15 +133,16 @@ export function orderIsDelivered(o: any): boolean {
 }
 
 /** Only while the order is still running — a closed or completed one has no
- *  deadline left to miss. */
+ *  deadline left to miss, and one on hold is paused. */
 export function orderIsOverdue(o: any): boolean {
-	if (!ACTIVE_ORDER_STATUSES.includes(o.status) || orderIsDelivered(o)) return false
+	if (!ACTIVE_ORDER_STATUSES.includes(o.status) || o.status === "On Hold" || orderIsDelivered(o)) return false
 	const left = daysUntil(o.delivery_date)
 	return left !== null && left < 0
 }
 
 export function orderNote(o: any): string {
-	if (o.status === "Closed") return __("ordered {0}", [formatDate(o.transaction_date)])
+	// nothing to deliver for now, so no date to count down to
+	if (o.status === "Closed" || o.status === "On Hold") return __("ordered {0}", [formatDate(o.transaction_date)])
 	if (o.status === "Completed" || orderIsDelivered(o)) {
 		// the day of the last shipment: the promised date is not when it arrived
 		return o.last_delivery ? __("delivered {0}", [formatDate(o.last_delivery)]) : __("delivered")
