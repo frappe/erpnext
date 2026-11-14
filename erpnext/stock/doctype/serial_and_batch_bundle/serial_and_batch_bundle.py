@@ -2017,45 +2017,70 @@ class SerialandBatchBundle(Document):
 		)
 
 	def get_batchwise_available_qty(self):
-		batchwise_entries = self.get_available_qty_from_sabb()
-		batchwise_entries.extend(self.get_available_qty_from_stock_ledger())
+		posting_datetime = get_datetime(self.posting_datetime) if self.posting_datetime else None
+		available_qty = self.get_batchwise_qty_before(posting_datetime)
 
-		available_qty = frappe._dict({})
+		batchwise_entries = self.get_available_qty_from_sabb(posting_datetime)
+		batchwise_entries.extend(self.get_available_qty_from_stock_ledger(posting_datetime))
 		batchwise_entries = sorted(
 			batchwise_entries,
 			key=lambda x: (get_datetime(x.get("posting_datetime")), get_datetime(x.get("creation"))),
 		)
 
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
-		posting_datetime = get_datetime(self.posting_datetime) if self.posting_datetime else None
 		for row in batchwise_entries:
-			if row.batch_no in available_qty:
-				available_qty[row.batch_no] += flt(row.qty)
-			else:
-				available_qty[row.batch_no] = flt(row.qty)
-
-			if flt(available_qty[row.batch_no], precision) < 0 and (
-				not posting_datetime or get_datetime(row.posting_datetime) >= posting_datetime
-			):
+			available_qty[row.batch_no] = flt(available_qty.get(row.batch_no)) + flt(row.qty)
+			if flt(available_qty[row.batch_no], precision) < 0:
 				self.throw_negative_batch(
 					row.batch_no, available_qty[row.batch_no], precision, row.posting_datetime
 				)
 
 		return available_qty
 
-	def get_available_qty_from_stock_ledger(self):
-		batches = [d.batch_no for d in self.entries if d.batch_no]
+	def get_batchwise_qty_before(self, posting_datetime):
+		available_qty = frappe._dict()
+		if not posting_datetime:
+			return available_qty
 
+		sle_query, sle = self.get_batch_query_from_stock_ledger()
+		sabb_query, child = self.get_batch_query_from_sabb()
+		queries = [
+			sle_query.select(Sum(sle.actual_qty).as_("qty"))
+			.where(sle.posting_datetime < posting_datetime)
+			.groupby(sle.batch_no),
+			sabb_query.select(Sum(child.qty).as_("qty"))
+			.where(child.posting_datetime < posting_datetime)
+			.groupby(child.batch_no),
+		]
+		for query in queries:
+			for row in query.run(as_dict=True):
+				available_qty[row.batch_no] = flt(available_qty.get(row.batch_no)) + flt(row.qty)
+
+		return available_qty
+
+	def get_available_qty_from_stock_ledger(self, posting_datetime=None):
+		query, sle = self.get_batch_query_from_stock_ledger()
+		query = query.select(sle.actual_qty.as_("qty"), sle.posting_datetime, sle.creation)
+		if posting_datetime:
+			query = query.where(sle.posting_datetime >= posting_datetime)
+
+		return query.run(as_dict=True)
+
+	def get_available_qty_from_sabb(self, posting_datetime=None):
+		query, child = self.get_batch_query_from_sabb()
+		query = query.select(child.qty, child.posting_datetime, child.creation)
+		if posting_datetime:
+			query = query.where(child.posting_datetime >= posting_datetime)
+
+		return query.run(as_dict=True)
+
+	def get_batch_query_from_stock_ledger(self):
+		batches = [d.batch_no for d in self.entries if d.batch_no]
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 
 		query = (
 			frappe.qb.from_(sle)
-			.select(
-				sle.batch_no,
-				sle.actual_qty.as_("qty"),
-				sle.posting_datetime,
-				sle.creation,
-			)
+			.select(sle.batch_no)
 			.where(
 				(sle.item_code == self.item_code)
 				& (sle.warehouse == self.warehouse)
@@ -2068,21 +2093,15 @@ class SerialandBatchBundle(Document):
 			.for_update()
 		)
 
-		return query.run(as_dict=True)
+		return query, sle
 
-	def get_available_qty_from_sabb(self):
+	def get_batch_query_from_sabb(self):
 		batches = [d.batch_no for d in self.entries if d.batch_no]
-
 		child = frappe.qb.DocType("Serial and Batch Entry")
 
 		query = (
 			frappe.qb.from_(child)
-			.select(
-				child.batch_no,
-				child.qty,
-				child.posting_datetime,
-				child.creation,
-			)
+			.select(child.batch_no)
 			.where(
 				(child.item_code == self.item_code)
 				& (child.warehouse == self.warehouse)
@@ -2090,12 +2109,12 @@ class SerialandBatchBundle(Document):
 				& (child.batch_no.isin(batches))
 				& (child.docstatus == 1)
 				& (child.type_of_transaction.isin(["Inward", "Outward"]))
+				& (child.voucher_type != "Pick List")
 			)
 			.for_update()
 		)
-		query = query.where(child.voucher_type != "Pick List")
 
-		return query.run(as_dict=True)
+		return query, child
 
 	def validate_voucher_no_docstatus(self):
 		if self.is_cancelled:
