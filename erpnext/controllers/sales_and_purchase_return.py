@@ -692,6 +692,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 		if doctype == "Subcontracting Receipt":
 			doc.set_warehouse = source.set_warehouse
 			doc.supplier_warehouse = source.supplier_warehouse
+			# a scrap row returned in full by an earlier return has nothing left to return
+			for row in list(doc.items):
+				if row.is_scrap_item and not flt(row.qty, row.precision("qty")):
+					doc.remove(row)
 		else:
 			doc.run_method("calculate_taxes_and_totals")
 
