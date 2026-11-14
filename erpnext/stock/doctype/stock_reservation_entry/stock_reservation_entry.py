@@ -908,12 +908,44 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		for field in ("company", "item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])
 
+		round_to_ledger_qty(sb_entries)
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
 		bundle.save()
 
+<<<<<<< HEAD
 		return bundle.name
+=======
+		return bundle
+
+
+def round_to_ledger_qty(sb_entries: list[dict]) -> None:
+	"""Round the reserved qty to its precision, as the stock ledger posts it, keeping the rounded total."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	total = flt(sum(flt(entry.qty) for entry in sb_entries), precision)
+	for entry in sb_entries:
+		entry.qty = flt(entry.qty, precision)
+
+	sb_entries[-1].qty = flt(sb_entries[-1].qty + total - sum(entry.qty for entry in sb_entries), precision)
+
+
+def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
+	"""``full_qty`` when ``qty`` falls short of it only by rounding."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return full_qty if flt(full_qty - qty, precision) == 0 else qty
+
+
+def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = None) -> float:
+	conversion_factor = flt(item.get("conversion_factor")) or 1
+	if conversion_factor == 1 or not frappe.get_cached_value("UOM", item.get("uom"), "must_be_whole_number"):
+		return stock_qty
+
+	if max_qty is not None:
+		stock_qty = min(ceil(flt(flt(stock_qty) / conversion_factor, 6)) * conversion_factor, max_qty)
+
+	return floor(flt(flt(stock_qty) / conversion_factor, 6)) * conversion_factor
+>>>>>>> 232bfb6 (fix(stock): deliver the reserved batch qty the stock ledger posts)
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
