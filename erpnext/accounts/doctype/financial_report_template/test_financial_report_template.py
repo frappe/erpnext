@@ -100,6 +100,16 @@ def whitelisted_get_method(**kwargs):
 	return [42.0]
 
 
+@whitelist_for_tests()
+def whitelisted_default_method(**kwargs):
+	return [42.0]
+
+
+@whitelist_for_tests(methods=["GET"])
+def whitelisted_get_method_without_list(**kwargs):
+	return None
+
+
 class TestCustomAPIValidation(FinancialReportTemplateTestCase):
 	"""Custom API rows must point to whitelisted methods that permit GET"""
 
@@ -107,6 +117,8 @@ class TestCustomAPIValidation(FinancialReportTemplateTestCase):
 	NOT_WHITELISTED = f"{TEST_MODULE}.not_whitelisted_method"
 	WHITELISTED_POST_ONLY = f"{TEST_MODULE}.whitelisted_post_only_method"
 	WHITELISTED_GET = f"{TEST_MODULE}.whitelisted_get_method"
+	WHITELISTED_DEFAULT = f"{TEST_MODULE}.whitelisted_default_method"
+	WHITELISTED_GET_WITHOUT_LIST = f"{TEST_MODULE}.whitelisted_get_method_without_list"
 
 	def create_api_template(self, api_path):
 		template = self.create_test_template_with_rows(
@@ -160,6 +172,24 @@ class TestCustomAPIValidation(FinancialReportTemplateTestCase):
 		processor = RowProcessor(context)
 		row_data = processor._process_api_row(template.rows[0])
 		self.assertEqual(row_data.values, [42.0])
+
+	def test_methods_that_also_accept_writes_are_refused(self):
+		# @frappe.whitelist() without methods also accepts POST, PUT and DELETE
+		self.assertRaises(frappe.PermissionError, get_valid_api_method, self.WHITELISTED_DEFAULT)
+		self.assertRaises(frappe.ValidationError, self.create_api_template(self.WHITELISTED_DEFAULT).insert)
+
+	def test_engine_ignores_result_that_is_not_one_value_per_period(self):
+		from erpnext.accounts.doctype.financial_report_template.financial_report_engine import (
+			ReportContext,
+			RowProcessor,
+		)
+
+		periods = [{"key": "p1"}, {"key": "p2"}]
+		for api_path in (self.WHITELISTED_GET_WITHOUT_LIST, self.WHITELISTED_GET):
+			template = self.create_api_template(api_path)
+			context = ReportContext(template=template, filters={}, period_list=periods)
+			row_data = RowProcessor(context)._process_api_row(template.rows[0])
+			self.assertEqual(row_data.values, [0.0, 0.0])
 
 	def test_validation_keeps_message_log_clean(self):
 		validator = FormulaValidator(frappe._dict(rows=[]))
