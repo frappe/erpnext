@@ -506,6 +506,19 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr_return.items[1].warehouse, "_Test Warehouse 1 - _TC")
 
+	def test_return_secondary_rows_follow_a_finished_good_qty_lowered_after_the_first_save(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+			scr_return.items[0].qty = -4
+			scr_return.save()
+
+		self.assertEqual(scr_return.items[1].qty, -2)
+
 	def test_return_values_the_finished_good_at_the_returned_receipt_rate(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
 		fg_item = make_item(
