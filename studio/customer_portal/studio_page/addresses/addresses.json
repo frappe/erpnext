@@ -394,7 +394,7 @@
                       },
                       {
                        "baseStyles": {
-                        "color": "var(--ink-gray-4)"
+                        "color": "var(--ink-gray-5)"
                        },
                        "blockName": "None",
                        "componentId": "TextBlock-nopref01",
@@ -402,7 +402,7 @@
                        "componentProps": {
                         "fontSize": "text-base",
                         "tag": "span",
-                        "text": "\u2014"
+                        "text": "—"
                        },
                        "visibilityCondition": "{{ !item.is_primary_address && !item.is_shipping_address }}"
                       }
@@ -919,7 +919,7 @@
  "frappe_app": "erpnext",
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-15 12:01:48.634825",
+ "modified": "2026-11-14 15:00:00.000000",
  "modified_by": "Administrator",
  "name": "addresses",
  "owner": "Administrator",
