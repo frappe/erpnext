@@ -6,6 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold, throw
+from frappe.query_builder import Order
 from frappe.query_builder.functions import Min, Sum
 from frappe.utils import cint, escape_html, flt, get_link_to_form, nowtime
 
@@ -492,6 +493,7 @@ class SellingController(StockController):
 
 	def make_packed_item_bundles(self):
 		"""Make the missing bundles of packed rows. Only from submit on, once their qty is final."""
+		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
 
 		service = SerialBatchBundleService(self)
@@ -501,6 +503,21 @@ class SellingController(StockController):
 
 		picked_serial_nos = service.get_serial_nos_used_in_rows()
 		picked_batches = service.get_batches_used_in_rows()
+
+		# a POS Invoice does not deliver reservations, so it keeps picking around them
+		if self.doctype != "POS Invoice":
+			# a component reserves against the order's packed row it delivers
+			for packed_item, so_packed_item in get_order_packed_item_pairs(self):
+				packed_item.so_detail = so_packed_item.name
+
+			reserved_batches = self.get_open_reserved_batches()
+			self.remove_reserved_qty_held_by_rows(
+				picked_batches, reserved_batches, service.get_current_packed_rows()
+			)
+			# like an item row, a reserved component is picked when its reservation is delivered
+			reserved_rows = self.get_packed_items_with_open_reservation(reserved_batches)
+			packed_rows = [p for p in packed_rows if p not in reserved_rows]
+
 		item_rows = {d.name: d for d in self.items}
 		for p in packed_rows:
 			get_serial_and_batch_bundle(
@@ -510,6 +527,61 @@ class SellingController(StockController):
 		# validate ran before these bundles existed
 		if service.is_batch_check_needed():
 			service.validate_outward_bundle_batches(rows=packed_rows)
+
+	def get_open_reserved_batches(self) -> dict:
+		"""Undelivered Serial and Batch reservations of this document's order rows, by (order row, batch no, warehouse)."""
+		order_rows = {
+			row.so_detail for row in self.get("items") + self.get("packed_items") if row.get("so_detail")
+		}
+		if not order_rows:
+			return {}
+
+		sre = frappe.qb.DocType("Stock Reservation Entry")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+		reserved = (
+			frappe.qb.from_(sre)
+			.inner_join(entry)
+			.on(entry.parent == sre.name)
+			.select(
+				sre.voucher_detail_no, entry.batch_no, sre.warehouse, Sum(entry.qty - entry.delivered_qty)
+			)
+			.where(
+				(sre.docstatus == 1)
+				& (sre.voucher_type == "Sales Order")
+				& (sre.voucher_detail_no.isin(list(order_rows)))
+				& (sre.reservation_based_on == "Serial and Batch")
+				& (sre.delivered_qty < sre.reserved_qty)
+			)
+			.groupby(sre.voucher_detail_no, entry.batch_no, sre.warehouse)
+		).run()
+		return {(order_row, batch_no, warehouse): qty for order_row, batch_no, warehouse, qty in reserved}
+
+	def remove_reserved_qty_held_by_rows(self, picked_batches, reserved_batches, packed_rows):
+		"""Batch qty a row holds for its own reservation is already counted as reserved, so it is not also picked."""
+		holders = {
+			row.serial_and_batch_bundle: row.so_detail
+			for row in self.get("items") + packed_rows
+			if row.serial_and_batch_bundle and row.get("so_detail")
+		}
+		if not holders or not reserved_batches:
+			return
+
+		reserved = dict(reserved_batches)
+		for entry in frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ("in", list(holders)), "batch_no": ("is", "set")},
+			fields=["parent", "batch_no", "warehouse", "qty"],
+		):
+			key = (holders[entry.parent], entry.batch_no, entry.warehouse)
+			held_reserved_qty = min(-entry.qty, reserved.get(key, 0))
+			if held_reserved_qty > 0 and (entry.batch_no, entry.warehouse) in picked_batches:
+				reserved[key] -= held_reserved_qty
+				picked_batches[(entry.batch_no, entry.warehouse)].qty += held_reserved_qty
+
+	def get_packed_items_with_open_reservation(self, reserved_batches) -> list:
+		"""Packed rows whose order packed row has an open Serial and Batch reservation in their warehouse."""
+		reserved = {(order_row, warehouse) for order_row, _, warehouse in reserved_batches}
+		return [p for p in self.get("packed_items") if (p.get("so_detail"), p.warehouse) in reserved]
 
 	def get_item_list(self):
 		il = []
@@ -1108,6 +1180,44 @@ class SellingController(StockController):
 					title=_("Not Allowed"),
 				)
 
+	def make_reserved_serial_and_batch_bundle(self, item, items_by_name, picked):
+		"""Auto-pick the row's serial / batch nos before its reservation is updated, not at stock ledger time."""
+		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
+
+		if not picked:
+			service = SerialBatchBundleService(self)
+			picked.serial_nos = service.get_serial_nos_used_in_rows()
+			picked.batches = service.get_batches_used_in_rows()
+
+		if get_serial_and_batch_bundle(
+			item,
+			self,
+			items_by_name.get(item.get("parent_detail_docname")),
+			picked.serial_nos,
+			picked.batches,
+		):
+			# the stock ledger only syncs the rate of bundles it makes itself
+			self.set_row_incoming_rate(item)
+
+	def set_row_incoming_rate(self, item):
+		incoming_rate = _get_incoming_rate(
+			{
+				"item_code": item.item_code,
+				"warehouse": item.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"qty": -1 * flt(item.get("stock_qty") or item.qty),
+				"serial_and_batch_bundle": item.serial_and_batch_bundle,
+				"company": self.company,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"voucher_detail_no": item.name,
+				"allow_zero_valuation": item.get("allow_zero_valuation_rate"),
+			},
+			raise_error_if_no_rate=False,
+		)
+		item.db_set("incoming_rate", flt(incoming_rate, item.precision("incoming_rate")))
+
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
@@ -1128,7 +1238,12 @@ class SellingController(StockController):
 			packed_item.so_detail = so_packed_item.name
 			items.append(packed_item)
 
+		# rows that already hold a bundle (e.g. components picked at save) deliver their reservation
+		# before other rows auto-pick, so a batch is not counted both as picked and as reserved
+		items.sort(key=lambda item: not item.get("serial_and_batch_bundle"))
+
 		if self._action == "submit":
+			picked = frappe._dict()
 			for item in items:
 				# Skip if `Sales Order` or `Sales Order Item` reference is not set.
 				if not item.get(so_field) or not item.so_detail:
@@ -1146,6 +1261,9 @@ class SellingController(StockController):
 						& (table.warehouse == item.warehouse)
 						& (table.delivered_qty < table.reserved_qty)
 					)
+					# Serial and Batch reservations match the row's serial / batch nos exactly, so they go
+					# before Qty ones; this keeps submit and cancel independent of the order of rows
+					.orderby(table.reservation_based_on, order=Order.desc)
 					.orderby(table.creation)
 				)
 				sre_list = query.run(pluck="name")
@@ -1163,6 +1281,9 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
+						if not item.get("serial_and_batch_bundle"):
+							self.make_reserved_serial_and_batch_bundle(item, items_by_name, picked)
+
 						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
 						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
 						# present so this never crashes on a missing bundle.
@@ -1222,7 +1343,7 @@ class SellingController(StockController):
 						"warehouse": item.warehouse,
 						"status": ["in", ["Partially Delivered", "Delivered", "Partially Used", "Closed"]],
 					},
-					order_by="creation",
+					order_by="reservation_based_on desc, creation",
 				)
 
 				# Skip if no Stock Reservation Entries.
@@ -1383,12 +1504,14 @@ def get_serial_and_batch_bundle(
 			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": delivery_note_child.name if delivery_note_child else child.name,
 			"posting_datetime": get_combine_datetime(parent.posting_date, parent.posting_time),
-			"qty": child.qty,
+			"qty": child.get("stock_qty") or child.qty,
 			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
 			"ignore_serial_nos": picked_serial_nos[child.item_code] if picked_serial_nos else None,
 			"already_picked_batches": picked_batches,
+			# a delivery takes only its own order row's reservation
+			"against_sales_order_item": child.get("so_detail"),
 		}
 	)
 
