@@ -381,6 +381,28 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		parsed_link = urlparse(rfq.get_link())
 		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
 
+	def test_email_preview_keeps_formatting_and_drops_event_handlers(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[
+				{
+					"supplier": "_Test Supplier",
+					"supplier_name": "_Test Supplier",
+					"email_id": "rfq-preview-supplier@example.com",
+				}
+			],
+			do_not_submit=True,
+		)
+		rfq.use_html = 1
+		rfq.mfs_html = '<p>Dear {{ supplier_name }}</p><b onclick="return false">Steel Sheet</b>'
+		rfq.save()
+
+		supplier = rfq.suppliers[0]
+		preview = rfq.get_supplier_email_preview(supplier.supplier)
+
+		self.assertIn(f"<p>Dear {supplier.supplier_name}</p>", preview["message"])
+		self.assertIn("<b>Steel Sheet</b>", preview["message"])
+		self.assertNotIn("onclick", preview["message"])
+
 	def test_get_pdf(self):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
