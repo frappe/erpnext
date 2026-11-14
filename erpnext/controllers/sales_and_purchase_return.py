@@ -347,13 +347,8 @@ def add_returned_row(doc, key, row, already_returned_items):
 def get_returned_stock_qty(doc, row):
 	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
 	stock_qty = flt(row.qty) * flt(row.conversion_factor or 1)
-	setting = (
-		"allow_to_edit_stock_uom_qty_for_sales"
-		if doc.doctype in ("Delivery Note", "Sales Invoice", "POS Invoice")
-		else "allow_to_edit_stock_uom_qty_for_purchase"
-	)
-	if doc.doctype in ("Purchase Receipt", "Purchase Invoice") or frappe.get_single_value(
-		"Stock Settings", setting
+	if doc.doctype != "Subcontracting Receipt" or frappe.get_single_value(
+		"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"
 	):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
 	return stock_qty
@@ -453,7 +448,9 @@ def get_valid_items(doc):
 
 		valid_items = get_ref_item_dict(valid_items, d)
 		if doc.doctype == "Delivery Note":
-			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
+			# the item's total is what its rows posted, each rounded by the stock ledger
+			stock_qty = flt(d.stock_qty, frappe.get_precision("Delivery Note Item", "stock_qty"))
+			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None, stock_qty=stock_qty))
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.get_all(
