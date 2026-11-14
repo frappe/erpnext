@@ -919,19 +919,42 @@ class BuyingController(SubcontractingController):
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 =======
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
-		delivered row left in transit, so partial receipts that round up add up to the delivery. A row with
-		a package is not capped, as its package holds the qty, and nor is one with nothing left to take."""
+		delivered row left in transit, so partial receipts that round up add up to the delivery, and its
+		return puts back no more than the receipt took. A cap of nothing left falls back to the row's qty."""
 		qty = self.get_received_stock_qty(row, accepted_qty)
-		is_delivered_row = row.get("delivery_note_item") and self.is_internal_receipt() and not self.is_return
-		has_package = row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle")
-		if not is_delivered_row or has_package:
+		if not self.is_capped_in_transit(row):
 			return qty
 
 		if self.docstatus == 2:
 			return -flt(self.get_posted_qty(row.name, row.from_warehouse)) or qty
 
+		if self.is_return:
+			qty_left = self.get_qty_left_to_return(row)
+			return max(qty, -qty_left) if flt(qty_left) > 0 else qty
+
 		qty_left = self.get_qty_left_in_transit(row)
 		return min(qty, qty_left) if flt(qty_left) > 0 else qty
+
+	def is_capped_in_transit(self, row) -> bool:
+		"""Whether the row moves the stock of a delivered row through transit. A row with a package is not
+		capped, as its package holds the qty."""
+		if not self.is_internal_receipt():
+			return False
+
+		if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
+			return False
+
+		return bool(row.get("purchase_receipt_item") if self.is_return else row.get("delivery_note_item"))
+
+	def get_qty_left_to_return(self, row) -> float:
+		"""Stock qty the returned receipt row took out of transit that its other returns have not put back."""
+		other_returns = frappe.get_all(
+			"Purchase Receipt Item",
+			filters={"purchase_receipt_item": row.purchase_receipt_item, "parent": ("!=", self.name)},
+			pluck="name",
+		)
+		taken_qty = self.get_transit_qty(row, [row.purchase_receipt_item, *other_returns])
+		return -flt(taken_qty, row.precision("stock_qty"))
 
 	def get_qty_left_in_transit(self, row) -> float | None:
 		"""Stock qty the delivered row put in transit that its other receipts, net of their returns, have not
@@ -978,18 +1001,22 @@ class BuyingController(SubcontractingController):
 		if not rows:
 			return 0.0, 0.0
 
+		return sum(flt(d.qty) for d in rows), self.get_transit_qty(row, [d.name for d in rows])
+
+	def get_transit_qty(self, row, voucher_detail_nos) -> float:
+		"""Stock qty the entries of the given rows moved in the source warehouse of the row."""
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		taken_qty = (
+		qty = (
 			frappe.qb.from_(sle)
 			.select(Sum(sle.actual_qty))
 			.where(
 				(sle.warehouse == row.from_warehouse)
 				& (sle.is_cancelled == 0)
-				& sle.voucher_detail_no.isin([d.name for d in rows])
+				& sle.voucher_detail_no.isin(voucher_detail_nos)
 			)
 			.run()[0][0]
 		)
-		return sum(flt(d.qty) for d in rows), flt(taken_qty)
+		return flt(qty)
 
 	def get_posted_qty(self, voucher_detail_no, warehouse):
 		return frappe.db.get_value(
