@@ -216,6 +216,28 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 					-get_posted_stock_qty(pr, rejected_warehouse),
 				)
 
+	def test_purchase_receipt_full_return_with_rejected_qty_on_two_rows(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		pr = make_purchase_receipt(
+			item_code=make_box_item(conversion_factor),
+			qty=3,
+			rejected_qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		return_pr = make_purchase_return(pr.name)
+		row = return_pr.items[0]
+		row.qty, row.rejected_qty, row.received_qty = -2, -1, -3
+		return_pr.append("items", dict(row.as_dict(), name=None, qty=-1, rejected_qty=-2))
+		return_pr.submit()
+
+		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "per_returned"), 100)
+
 	def test_purchase_receipt_returns_from_the_rejected_warehouse_in_separate_documents(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import (
 			make_purchase_return_against_rejected_warehouse,
