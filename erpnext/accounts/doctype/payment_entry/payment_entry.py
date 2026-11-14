@@ -1875,7 +1875,13 @@ class PaymentEntry(AccountsController):
 		precision = self.precision("paid_amount")
 		total_positive_outstanding_including_order = 0
 		total_negative_outstanding = 0
-		paid_amount -= sum(flt(d.amount, precision) for d in self.deductions)
+		deductions = sum(flt(d.amount) for d in self.deductions if not d.is_exchange_gain_loss)
+		if deductions:
+			# Deductions are in company currency; references use the party account currency.
+			paid_amount += (
+				deductions / self.get_exchange_rate() * (1 if self.payment_type == "Receive" else -1)
+			)
+		paid_amount = flt(paid_amount, precision)
 
 		for ref in self.references:
 			reference_outstanding_amount = flt(ref.outstanding_amount)
