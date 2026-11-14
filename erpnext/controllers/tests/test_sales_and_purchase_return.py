@@ -216,6 +216,32 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 					-get_posted_stock_qty(pr, rejected_warehouse),
 				)
 
+	def test_purchase_receipt_returns_from_the_rejected_warehouse_in_separate_documents(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		conversion_factor = 0.3356
+		pr = make_purchase_receipt(
+			item_code=make_box_item(conversion_factor),
+			qty=3,
+			rejected_qty=3,
+			uom="Box",
+			stock_uom="Kg",
+			conversion_factor=conversion_factor,
+		)
+
+		rejected_warehouse = pr.items[0].rejected_warehouse
+		returned_qty = 0
+		for _ in range(3):
+			return_pr = make_purchase_return_against_rejected_warehouse(pr.name)
+			return_pr.items[0].qty = return_pr.items[0].received_qty = -1
+			return_pr.submit()
+			returned_qty += get_posted_stock_qty(return_pr, rejected_warehouse)
+
+		self.assertEqual(flt(returned_qty, 2), -get_posted_stock_qty(pr, rejected_warehouse))
+
 	def test_purchase_receipt_split_rejected_batch_return_by_batch_fields(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
