@@ -1486,7 +1486,14 @@ class update_entries_after:
 
 		if (
 			not self.args.get("sle_id")
-			or (sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle)
+			or (
+				sle.serial_and_batch_bundle
+				and (
+					sle.auto_created_serial_and_batch_bundle
+					# sales rows get their bundles before the ledger
+					or sle.voucher_type in ("Delivery Note", "Sales Invoice")
+				)
+			)
 			or self.is_outward_internal_transfer_leg(sle)
 		):
 			self.update_outgoing_rate_on_transaction(sle)
@@ -2114,12 +2121,12 @@ class update_entries_after:
 			)
 		else:
 			# packed item
-			frappe.db.set_value(
-				"Packed Item",
-				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
-				"incoming_rate",
-				outgoing_rate,
-			)
+			filters = {"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code}
+			if sle.serial_and_batch_bundle:
+				# a component can be packed more than once under one row
+				filters["serial_and_batch_bundle"] = sle.serial_and_batch_bundle
+
+			frappe.db.set_value("Packed Item", filters, "incoming_rate", outgoing_rate)
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
