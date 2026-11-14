@@ -1281,6 +1281,45 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertEqual((row.get("quantity"), row.get("uom"), row.get("conversion_factor")), (13, "Nos", 1))
 
+	def test_patch_sets_stock_uom_on_plan_rows_saved_with_purchase_uom(self):
+		from erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion import execute
+
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"default_material_request_type": "Material Transfer",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=1,
+			warehouse="_Test Warehouse - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.for_warehouse = "Stores - _TC"
+		plan.set("mr_items", get_items_for_material_requests(plan.as_dict()))
+		plan.submit()
+		# rows saved before #60628 kept the stock qty under the purchase UOM
+		frappe.db.set_value(
+			"Material Request Plan Item", plan.mr_items[0].name, {"uom": "Box", "conversion_factor": 1}
+		)
+
+		execute()
+		plan.make_material_request()
+
+		requested = frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": plan.name},
+			fields=["qty", "uom", "stock_qty"],
+		)
+		self.assertEqual([(row.qty, row.uom, row.stock_qty) for row in requested], [(13, "Nos", 13)])
+
 	def test_download_raw_materials_shows_uom_of_required_qty(self):
 		rm_item = make_item(
 			"_Test PP Download Box RM",
