@@ -204,8 +204,8 @@ def get_linked_material_requests(items: str | list):
 	return mr_list
 
 
-def get_ordered_qty_in_row_uom(rows, link_field: str) -> dict:
-	"""Qty of each row on submitted Purchase Orders in the row's UOM, from the orders' unrounded stock qty."""
+def get_qty_to_order(rows, link_field: str) -> dict:
+	"""Qty of each row left to order, in its UOM, from the unrounded stock qty of submitted Purchase Orders."""
 	po_item = frappe.qb.DocType("Purchase Order Item")
 	ordered_stock_qty = dict(
 		frappe.qb.from_(po_item)
@@ -215,5 +215,8 @@ def get_ordered_qty_in_row_uom(rows, link_field: str) -> dict:
 		.run()
 	)
 	return {
-		row.name: flt(ordered_stock_qty.get(row.name)) / (flt(row.conversion_factor) or 1) for row in rows
+		row.name: flt(
+			row.qty - flt(ordered_stock_qty.get(row.name)) / row.conversion_factor, row.precision("qty")
+		)
+		for row in rows
 	}
