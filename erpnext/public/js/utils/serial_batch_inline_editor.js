@@ -1306,25 +1306,30 @@ erpnext.stock.get_sbie_row = function (frm, cdn) {
 };
 
 // bundle qty is in the stock UOM; qty fields of rows that also have a stock qty are in the row's UOM
-erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
-	const in_row_uom =
-		["qty", "rejected_qty"].includes(qty_field) &&
-		["stock_qty", "transfer_qty"].some((field) => frappe.meta.has_field(row.doctype, field));
+erpnext.stock.get_sbie_stock_qty_field = function (row, qty_field) {
+	if (["qty", "rejected_qty"].includes(qty_field)) {
+		return ["stock_qty", "transfer_qty"].find((field) => frappe.meta.has_field(row.doctype, field));
+	}
+};
 
-	return in_row_uom ? flt(row.conversion_factor) || 1 : 1;
+erpnext.stock.get_sbie_conversion_factor = function (row, qty_field) {
+	return erpnext.stock.get_sbie_stock_qty_field(row, qty_field) ? flt(row.conversion_factor) || 1 : 1;
 };
 
 // Bundle totals are positive; return rows store negative qty, except Stock Entry rows.
 erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
 	const conversion_factor = erpnext.stock.get_sbie_conversion_factor(row, qty_field);
-	const qty_precision = precision(qty_field, row);
+	const stock_precision = precision(
+		erpnext.stock.get_sbie_stock_qty_field(row, qty_field) || qty_field,
+		row
+	);
 	const row_qty = Math.abs(flt(row[qty_field]));
 
 	// keep a row qty that already matches, as dividing back by a fractional factor can drift
 	const qty =
-		flt(row_qty * conversion_factor, qty_precision) === flt(stock_qty, qty_precision)
+		flt(row_qty * conversion_factor, stock_precision) === flt(stock_qty, stock_precision)
 			? row_qty
-			: flt(stock_qty / conversion_factor, qty_precision);
+			: flt(stock_qty / conversion_factor, precision(qty_field, row));
 
 	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };
