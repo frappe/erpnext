@@ -925,9 +925,13 @@ erpnext.work_order = {
 
 				if (!frm.doc.skip_transfer) {
 					if (flt(doc.material_transferred_for_manufacturing) > 0) {
-						if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
-							frm.has_finish_btn = true;
-
+						const remaining_qty = flt(
+							flt(doc.material_transferred_for_manufacturing) -
+								flt(doc.produced_qty) -
+								flt(doc.process_loss_qty),
+							precision("qty")
+						);
+						if (remaining_qty > 0) {
 							let finish_btn = frm.add_custom_button(__("Finish"), function () {
 								erpnext.work_order.make_se(frm, "Manufacture");
 							});
