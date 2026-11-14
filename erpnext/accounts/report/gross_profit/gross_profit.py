@@ -910,7 +910,11 @@ class GrossProfitGenerator:
 		if flt(row.qty) < 0:
 			return flt(row.qty) * credited_unit
 
-		credited_qty = min(flt(self.credited_bundle_qty.get(row.invoice_item)), flt(row.qty))
+		# a credit note without the invoice row link is found by its invoice and bundle row
+		credited_qty = flt(self.credited_bundle_qty.get(row.invoice_item)) + flt(
+			self.credited_bundle_qty.get((row.parent, row.dn_detail))
+		)
+		credited_qty = min(credited_qty, flt(row.qty))
 		return (flt(row.qty) - credited_qty) * billed_unit + credited_qty * credited_unit
 
 	def get_component_qty_per_billed_unit(self, packed_item, bundle_row):
@@ -1577,7 +1581,7 @@ class GrossProfitGenerator:
 			qb.from_(sii)
 			.join(si)
 			.on(si.name == sii.parent)
-			.select(sii.dn_detail, sii.stock_qty, sii.sales_invoice_item)
+			.select(sii.dn_detail, sii.stock_qty, sii.sales_invoice_item, si.return_against)
 			.where((si.docstatus == 1) & (si.is_debit_note == 0) & sii.dn_detail.isin(bundle_rows))
 			.run(as_dict=True)
 		)
@@ -1588,10 +1592,10 @@ class GrossProfitGenerator:
 				continue
 
 			bundle_row.credited_qty = flt(bundle_row.credited_qty) - flt(item.stock_qty)
-			if item.sales_invoice_item:
-				self.credited_bundle_qty[item.sales_invoice_item] = flt(
-					self.credited_bundle_qty.get(item.sales_invoice_item)
-				) - flt(item.stock_qty)
+			invoice_row = item.sales_invoice_item or (item.return_against, item.dn_detail)
+			self.credited_bundle_qty[invoice_row] = flt(self.credited_bundle_qty.get(invoice_row)) - flt(
+				item.stock_qty
+			)
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")
