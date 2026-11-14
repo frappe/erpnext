@@ -619,6 +619,7 @@ class SerialandBatchBundle(Document):
 		bundle_data = frappe.get_all(
 			"Serial and Batch Bundle",
 			fields=[
+				"name",
 				"`tabSerial and Batch Entry`.`serial_no`",
 				"`tabSerial and Batch Entry`.`batch_no`",
 				"`tabSerial and Batch Entry`.`incoming_rate`",
@@ -626,6 +627,9 @@ class SerialandBatchBundle(Document):
 			filters=filters,
 			order_by="`tabSerial and Batch Bundle`.`creation`, `tabSerial and Batch Entry`.`idx`",
 		)
+		if delivered_bundle := self.get_delivered_packed_item_bundle():
+			# the delivered packed row's own rate wins for a batch other packed rows delivered too
+			bundle_data.sort(key=lambda row: row.name == delivered_bundle)
 
 		if not bundle_data:
 			bundle_data = self.get_legacy_valuation_rate_for_return_entry(
@@ -684,6 +688,31 @@ class SerialandBatchBundle(Document):
 				valuation_details["batches"][row.batch_no] = row.incoming_rate
 
 		return valuation_details
+
+	def get_delivered_packed_item_bundle(self):
+		"""Bundle of the delivered packed row that the return's packed row of this bundle reverses."""
+		if self.voucher_type not in ("Delivery Note", "Sales Invoice"):
+			return
+
+		returned = frappe.qb.DocType("Packed Item")
+		delivered = frappe.qb.DocType("Packed Item").as_("delivered")
+		bundles = (
+			frappe.qb.from_(returned)
+			.join(delivered)
+			.on(delivered.name == returned.return_against_packed_item)
+			.select(delivered.serial_and_batch_bundle)
+			# a packed row's bundle points to the packed row, or to its bundle row once posted
+			.where(
+				(returned.name == self.voucher_detail_no)
+				| (
+					(returned.parent_detail_docname == self.voucher_detail_no)
+					& (returned.serial_and_batch_bundle == self.name)
+				)
+			)
+			.limit(1)
+			.run()
+		)
+		return bundles[0][0] if bundles else None
 
 	def get_return_against_packed_item(self, field):
 		"""Resolve the original DN/SI Item when a return bundle's voucher_detail_no is the Packed Item."""

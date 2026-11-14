@@ -5662,6 +5662,74 @@ class TestDeliveryNote(ERPNextTestSuite):
 			[row.qty for row in make_inter_company_purchase_receipt(delivery_note.name).items], [6]
 		)
 
+	def test_inter_company_receipt_receives_each_split_component_row_net_of_its_returns(self):
+		from erpnext.controllers.queries import get_delivery_notes_to_be_received
+		from erpnext.controllers.status_updater import OverAllowanceError
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.pick_list.mapper import create_delivery_from_so
+		from erpnext.stock.doctype.pick_list.test_pick_list import create_pick_list
+
+		company = "_Test Company with perpetual inventory"
+		transit_warehouse = "Work In Progress - TCP1"
+		component = make_item(properties={"is_stock_item": 1}).name
+		for warehouse in ("Stores - TCP1", "Finished Goods - TCP1"):
+			make_stock_entry(item_code=component, target=warehouse, qty=2, basic_rate=100, company=company)
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle_item, [component])
+
+		sales_order = make_sales_order(
+			item_code=bundle_item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			warehouse="Stores - TCP1",
+			qty=4,
+			rate=100,
+			do_not_save=True,
+		)
+		sales_order.items[0].target_warehouse = transit_warehouse
+		sales_order.insert()
+		sales_order.submit()
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		delivery_note = create_delivery_from_so(pick_list, {sales_order.name}, "Delivery Note")
+		delivery_note.items[0].update(
+			{
+				"target_warehouse": transit_warehouse,
+				"cost_center": "Main - TCP1",
+				"expense_account": "Cost of Goods Sold - TCP1",
+			}
+		)
+		delivery_note.insert()
+		delivery_note.submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -1
+		sales_return.insert()
+		sales_return.submit()
+		returned_row = next(row.return_against_packed_item for row in sales_return.packed_items if row.qty)
+
+		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		self.assertEqual(
+			sorted((row.delivery_note_packed_item == returned_row, row.qty) for row in receipt.items),
+			[(False, 2), (True, 1)],
+		)
+
+		over_receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		for row in over_receipt.items:
+			row.update({"warehouse": "Stores - TCP1", "qty": 2})
+		self.assertRaises(OverAllowanceError, over_receipt.submit)
+
+		for row in receipt.items:
+			row.warehouse = "Stores - TCP1"
+		receipt.submit()
+		self.assertFalse(
+			get_delivery_notes_to_be_received(
+				"Delivery Note", delivery_note.name, "name", 0, 20, {"company": company}
+			)
+		)
+
 	def test_internal_return_keeps_target_warehouse(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return

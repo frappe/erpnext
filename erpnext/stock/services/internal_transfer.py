@@ -149,19 +149,24 @@ class StockInternalTransferService:
 		return item_wise_transfer_qty
 
 	def add_component_transfer_qty(self, item_wise_transfer_qty, delivery_note, bundle_rows):
-		"""Components of a bundle row travel on their own, net of the share of the bundle returned."""
-		from erpnext.stock.doctype.delivery_note.mapper import get_pending_component_qty
+		"""Components of a bundle row travel on their own, net of what was returned of them."""
+		from erpnext.stock.doctype.delivery_note.mapper import (
+			get_component_returns,
+			get_pending_component_qty,
+		)
 
-		bundle_rows = {row.name: row for row in bundle_rows}
-		for packed in frappe.get_all(
+		packed_items = frappe.get_all(
 			"Packed Item",
 			filters={"parent": delivery_note, "parenttype": "Delivery Note"},
 			fields=["name", "item_code", "qty", "parent_detail_docname"],
-		):
+		)
+		bundle_rows = {row.name: row for row in bundle_rows}
+		returns = get_component_returns(bundle_rows, packed_items)
+		for packed in packed_items:
 			if bundle_row := bundle_rows.get(packed.parent_detail_docname):
 				item_wise_transfer_qty.pop((bundle_row.name, bundle_row.item_code), None)
 				item_wise_transfer_qty[(packed.name, packed.item_code)] += get_pending_component_qty(
-					packed, bundle_row
+					packed, bundle_row, returns
 				)
 
 	def get_item_wise_inter_received_qty(self):
