@@ -235,6 +235,23 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 			assert_refused(self, get_batch_qty, "_Test Batch", "_Test Warehouse - _TC", item_code)
 
+	def test_service_end_date_needs_item_code_as_text(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.get_item_details import calculate_service_end_date
+
+		item = make_item(properties={"is_stock_item": 0, "enable_deferred_revenue": 1, "no_of_months": 12})
+		ctx = {"doctype": "Sales Invoice", "company": "_Test Company", "service_start_date": "2026-01-15"}
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Invalid Item Code",
+			calculate_service_end_date,
+			dict(ctx, item_code={"item_name": ["=", item.item_name]}),
+		)
+		details = calculate_service_end_date(dict(ctx, item_code=item.name))
+		self.assertEqual(str(details["service_end_date"]), "2027-01-15")
+		self.assertEqual(details["enable_deferred_revenue"], 1)
+
 	# making this test in get_item_details test file as feat/fix is present in that method
 	def test_fetch_price_from_list_rate_on_doc_save(self):
 		# create item
