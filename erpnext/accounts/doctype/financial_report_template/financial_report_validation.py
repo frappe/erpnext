@@ -15,6 +15,7 @@ from frappe import _, is_whitelisted
 from frappe.database.operator_map import OPERATOR_MAP
 from frappe.utils import escape_html
 from frappe.utils.safe_exec import WHITELISTED_SAFE_EVAL_GLOBALS
+from xlsxwriter.color import Color
 
 FORMULA_FUNCTIONS = {
 	"abs": abs,
@@ -35,6 +36,16 @@ ALLOWED_FUNCTIONS = frozenset(FORMULA_FUNCTIONS) | frozenset(
 
 # These nodes are not supported by Frappe's safe_eval, so they are not allowed in formulas.
 UNSUPPORTED_NODES = (ast.NamedExpr, ast.Lambda)
+
+
+def is_valid_color(color: str) -> bool:
+	"""Hex code (#RGB or #RRGGBB) or a color name that both the report and its Excel export accept."""
+	try:
+		Color(color)
+	except ValueError:
+		return False
+
+	return not color.startswith("#") or len(color) in (4, 7)
 
 
 def get_valid_api_method(api_path: str):
@@ -164,6 +175,7 @@ class TemplateStructureValidator(Validator):
 
 		result.merge(self._validate_reference_codes(template))
 		result.merge(self._validate_required_fields(template))
+		result.merge(self._validate_colors(template))
 
 		return result
 
@@ -235,6 +247,22 @@ class TemplateStructureValidator(Validator):
 							row_idx=row.idx,
 						)
 					)
+
+		return result
+
+	def _validate_colors(self, template) -> ValidationResult:
+		result = ValidationResult()
+
+		for row in template.rows:
+			if row.color and not is_valid_color(row.color.strip()):
+				result.add_error(
+					ValidationIssue(
+						message=_(
+							"Invalid color: '{0}'. Use a hex code such as #1F2937 or a color name such as red."
+						).format(row.color),
+						row_idx=row.idx,
+					)
+				)
 
 		return result
 
