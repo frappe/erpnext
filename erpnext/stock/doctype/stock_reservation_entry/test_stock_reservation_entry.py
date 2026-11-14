@@ -672,6 +672,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
 		},
 	)
 	def test_reservation_of_a_fractional_stock_qty_delivers_what_the_ledger_posts(self) -> None:
