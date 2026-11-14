@@ -325,12 +325,16 @@ class SerialBatchBundleService:
 	def get_batches_used_in_rows(self):
 		"""Batch qty the rows already take, by (batch_no, warehouse)."""
 		entries, bundles = [], []
+		# the row's bundle takes the qty rounded to this precision
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		for row in self.doc.get("items") + self.get_current_packed_rows():
 			if row.get("serial_and_batch_bundle"):
 				bundles.append(row.serial_and_batch_bundle)
 			elif row.get("batch_no"):
 				qty = row.qty if row.doctype == "Packed Item" else row.stock_qty
-				entries.append(frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty)))
+				entries.append(
+					frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty, precision))
+				)
 
 		if bundles:
 			entries += frappe.get_all(
