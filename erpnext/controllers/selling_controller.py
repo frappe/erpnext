@@ -1155,6 +1155,8 @@ class SellingController(StockController):
 					continue
 
 				qty_to_deliver = item.get("stock_qty") or item.qty
+				# read once, so each reservation takes only what the earlier ones left
+				delivered_serial_nos, delivered_batch_qty = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -1163,13 +1165,6 @@ class SellingController(StockController):
 
 					qty_can_be_deliver = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
-						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
-						# present so this never crashes on a missing bundle.
-						(
-							delivered_serial_nos,
-							delivered_batch_qty,
-						) = get_delivered_serial_batch_for_reservation(item)
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in delivered_serial_nos:
@@ -1230,6 +1225,10 @@ class SellingController(StockController):
 					continue
 
 				qty_to_undelivered = item.get("stock_qty") or item.qty
+				(
+					serial_nos_to_undelivered,
+					batch_qty_to_undelivered,
+				) = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break
@@ -1238,9 +1237,7 @@ class SellingController(StockController):
 
 					qty_can_be_undelivered = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in serial_nos_to_undelivered:
 									entry.delivered_qty = 0  # Qty will always be 0 or 1 for Serial No.
@@ -1248,7 +1245,6 @@ class SellingController(StockController):
 									qty_can_be_undelivered += 1
 									serial_nos_to_undelivered.remove(entry.serial_no)
 						else:
-							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty_to_undelivered:
 									undelivered_qty = min(
