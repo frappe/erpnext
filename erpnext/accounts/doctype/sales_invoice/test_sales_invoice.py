@@ -6651,6 +6651,25 @@ class TestSalesInvoice(ERPNextTestSuite):
 		si.update_stock = 1
 		self.assertRaises(frappe.ValidationError, si.save)
 
+	def test_party_account_not_allowed_as_income_or_tax_account(self):
+		"""Receivable/Payable accounts are rejected on save for item income and tax rows."""
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].income_account = "Creditors - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "is a Payable account", si.save)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "Debtors - _TC",
+				"description": "Test Tax",
+				"rate": 10,
+				"cost_center": "Main - _TC",
+			},
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is a Receivable account", si.save)
+
 
 def make_item_for_si(item_code, properties=None):
 	from erpnext.stock.doctype.item.test_item import make_item

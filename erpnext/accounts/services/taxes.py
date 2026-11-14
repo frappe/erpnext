@@ -124,6 +124,7 @@ class TaxService:
 		doc = self.doc
 		for d in doc.get("taxes"):
 			if d.account_head:
+				validate_account_is_not_party_account(d.idx, d.account_head, _("Taxes and Charges"))
 				tax_account_company = frappe.get_cached_value("Account", d.account_head, "company")
 				if tax_account_company != doc.company:
 					frappe.throw(
@@ -308,8 +309,21 @@ def validate_taxes_and_charges(tax) -> None:
 		tax.rate = None
 
 
-def validate_account_head(idx: int, account: str, company: str, context: str | None = None) -> None:
-	"""Throw a ValidationError if the account belongs to a different company or is a group account."""
+def validate_account_head(
+	idx: int,
+	account: str,
+	company: str,
+	context: str | None = None,
+	allow_party_account: bool = True,
+) -> None:
+	"""Throw a ValidationError if the account belongs to a different company or is a group account.
+
+	Pass allow_party_account=False for rows that never carry a party (income, expense, tax),
+	so a Receivable/Payable account is rejected on save instead of failing in the GL on submit.
+	"""
+	if not allow_party_account:
+		validate_account_is_not_party_account(idx, account, context)
+
 	if company != frappe.get_cached_value("Account", account, "company"):
 		frappe.throw(
 			_("Row {0}: The {3} Account {1} does not belong to the company {2}").format(
@@ -323,6 +337,19 @@ def validate_account_head(idx: int, account: str, company: str, context: str | N
 			_(
 				"You selected the account group {1} as {2} Account in row {0}. Please select a single account."
 			).format(idx, frappe.bold(account), context or ""),
+			title=_("Invalid Account"),
+		)
+
+
+def validate_account_is_not_party_account(idx: int, account: str, context: str | None = None) -> None:
+	"""Receivable/Payable accounts need a Customer/Supplier on every GL row, which income,
+	expense and tax rows never have, so submitting would always fail."""
+	account_type = frappe.get_cached_value("Account", account, "account_type")
+	if account_type in ("Receivable", "Payable"):
+		frappe.throw(
+			_(
+				"Row {0}: {1} is a {2} account and cannot be used as {3} Account. Please select a different account."
+			).format(idx, frappe.bold(account), _(account_type), context or ""),
 			title=_("Invalid Account"),
 		)
 
