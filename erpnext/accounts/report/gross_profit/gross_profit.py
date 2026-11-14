@@ -17,6 +17,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimension_filter_values,
 )
 from erpnext.accounts.report.utils import validate_date_range
+from erpnext.stock.doctype.delivery_note.mapper import get_component_returns, get_kept_component_qty
 from erpnext.stock.utils import _get_incoming_rate
 
 
@@ -526,6 +527,7 @@ class GrossProfitGenerator:
 
 		self.load_product_bundle()
 		self.load_bundle_deliveries()
+		self.load_bundle_returns()
 		if filters.group_by == "Invoice":
 			self.group_items_by_invoice()
 
@@ -847,13 +849,12 @@ class GrossProfitGenerator:
 
 	def get_buying_amount_from_product_bundle(self, row, product_bundle):
 		buying_amount = 0.0
-		billed_share = self.get_billed_share_of_bundle(row)
 		for packed_item in product_bundle:
 			if packed_item.get("parent_detail_docname") == row.item_row:
 				packed_item_row = row.copy()
 				packed_item_row.warehouse = packed_item.warehouse
 				packed_item_row.delivered_warehouse = None
-				packed_item_row.qty = packed_item.total_qty * -1 * billed_share
+				packed_item_row.qty = self.get_billed_component_qty(row, packed_item)
 				packed_item_row.serial_and_batch_bundle = packed_item.serial_and_batch_bundle
 				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
 
@@ -876,13 +877,32 @@ class GrossProfitGenerator:
 
 		return buying_amount
 
-	def get_billed_share_of_bundle(self, row):
-		"""Share of the delivered bundle qty billed by this invoice row; packed item qty is the delivered qty."""
-		if not row.dn_detail:
-			return 1
+	def get_billed_component_qty(self, row, packed_item):
+		"""Component qty a row bills of its delivered bundle row. A row bills what returns left on
+		the packed row first, a credit note reverses what they took back first."""
+		delivered_qty = flt(packed_item.qty)
+		bundle_row = self.delivered_bundle_rows.get(row.dn_detail)
+		if not bundle_row or not flt(bundle_row.stock_qty):
+			return delivered_qty
 
-		delivered_qty = flt(frappe.db.get_value("Delivery Note Item", row.dn_detail, "stock_qty"))
-		return flt(row.qty) / delivered_qty if delivered_qty else 1
+		billed_bundle_qty = flt(row.qty)
+		returned_bundle_qty = flt(bundle_row.returned_qty)
+		if not returned_bundle_qty:
+			return delivered_qty * billed_bundle_qty / flt(bundle_row.stock_qty)
+
+		kept_qty = get_kept_component_qty(packed_item, bundle_row, self.bundle_returns)
+		kept_bundle_qty = flt(bundle_row.stock_qty) - returned_bundle_qty
+		billed_from_returns = (
+			max(billed_bundle_qty - kept_bundle_qty, 0)
+			if billed_bundle_qty > 0
+			else max(billed_bundle_qty, -returned_bundle_qty)
+		)
+		billed_from_kept = billed_bundle_qty - billed_from_returns
+		billed_qty = (delivered_qty - kept_qty) * billed_from_returns / returned_bundle_qty
+		if billed_from_kept and kept_bundle_qty:
+			billed_qty += kept_qty * billed_from_kept / kept_bundle_qty
+
+		return billed_qty
 
 	def calculate_buying_amount_from_sle(self, row, my_sle, parenttype, parent, item_row, item_code):
 		for i, sle in enumerate(my_sle):
@@ -1442,9 +1462,11 @@ class GrossProfitGenerator:
 			.select(
 				pki.parenttype,
 				pki.parent,
+				pki.name,
 				pki.parent_item,
 				pki.item_code,
 				pki.warehouse,
+				pki.qty,
 				(-1 * pki.qty).as_("total_qty"),
 				pki.rate,
 				(pki.rate * pki.qty).as_("base_amount"),
@@ -1484,6 +1506,31 @@ class GrossProfitGenerator:
 				self.bundle_deliveries.setdefault(delivered_row.si_detail, []).append(
 					(delivered_row, packed_items)
 				)
+
+	def load_bundle_returns(self):
+		"""Delivered bundle rows the invoice rows bill, and what returns took back of them."""
+		bundle_rows = {row.dn_detail for row in self.si_list if row.dn_detail}
+		bundle_rows.update(row.name for rows in self.bundle_deliveries.values() for row, _packed in rows)
+		packed_items = [
+			packed_item
+			for bundles in self.product_bundles.get("Delivery Note", {}).values()
+			for packed_items in bundles.values()
+			for packed_item in packed_items
+			if packed_item.parent_detail_docname in bundle_rows
+		]
+		self.delivered_bundle_rows = (
+			{
+				row.name: row
+				for row in frappe.get_all(
+					"Delivery Note Item",
+					filters={"name": ["in", list({row.parent_detail_docname for row in packed_items})]},
+					fields=["name", "stock_qty", "returned_qty"],
+				)
+			}
+			if packed_items
+			else {}
+		)
+		self.bundle_returns = get_component_returns(self.delivered_bundle_rows, packed_items)
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.get_all("Item", filters={"is_stock_item": 0}, pluck="name")
