@@ -1455,6 +1455,39 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 200.34669)
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
+	def test_sales_invoice_does_not_show_an_address_the_user_cannot_read(self):
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		customer, other_customer = (make_customer(frappe.generate_hash(length=10)) for _ in range(2))
+		allowed, restricted = (
+			frappe.get_doc(
+				{
+					"doctype": "Address",
+					"address_title": title,
+					"address_type": "Shipping",
+					"address_line1": title,
+					"city": "Mumbai",
+					"country": "India",
+					"links": [{"link_doctype": "Customer", "link_name": other_customer}],
+				}
+			)
+			.insert()
+			.name
+			for title in ("Allowed", "Restricted")
+		)
+		test_user = create_user("test_so_address_perms@example.com", "Sales User", "Accounts User")
+		frappe.permissions.add_user_permission("Address", allowed, test_user.name, applicable_for="Address")
+		so = make_sales_order(customer=customer)
+
+		with self.set_user(test_user.name):
+			self.assertTrue(make_sales_invoice(so.name).items)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_sales_invoice,
+				so.name,
+				target_doc={"doctype": "Sales Invoice", "shipping_address_name": restricted},
+			)
+
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 
