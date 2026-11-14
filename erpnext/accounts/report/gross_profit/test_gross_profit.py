@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
@@ -1402,6 +1404,144 @@ class TestGrossProfit(ERPNextTestSuite):
 		make_delivery_note(sinv.name).submit()
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 390)
+
+	def test_bundle_so_to_si_and_so_to_dn(self):
+		"""Gross Profit should resolve bundle component costs when SI and DN both come from a SO."""
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		bundle = self.make_stocked_bundle()
+		so = make_sales_order(
+			customer=self.customer,
+			company=self.company,
+			warehouse=self.warehouse,
+			item=bundle,
+			qty=2,
+			rate=500,
+		)
+
+		# Create SI from SO (no direct DN link, update_stock disabled)
+		sinv = make_sales_invoice(so.name).submit()
+
+		# Create DN from SO (no direct SI link)
+		make_delivery_note(so.name).submit()
+
+		# Bundle components are valued at 100 and 30 each, qty=2 => (100+30)*2 = 260
+		with patch.object(frappe.db, "get_value", wraps=frappe.db.get_value) as get_value:
+			self.assertEqual(self.get_invoice_buying_amount(sinv.name), 260)
+
+		quantity_lookups = [
+			call
+			for call in get_value.call_args_list
+			if call.args[:1] == ("Delivery Note Item",) and call.args[2:3] == ("stock_qty",)
+		]
+		self.assertFalse(quantity_lookups, "Bundle delivery quantities are already loaded")
+
+	def test_bundle_so_partial_billing(self):
+		"""Two partial invoices of 2 bundles each from a 4-bundle delivery should report 260 each, not 520."""
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		bundle = self.make_stocked_bundle()
+		so = make_sales_order(
+			customer=self.customer,
+			company=self.company,
+			warehouse=self.warehouse,
+			item=bundle,
+			qty=4,
+			rate=500,
+		)
+
+		# Deliver all 4 bundles: (100 + 30) * 4 = 520 total cost
+		make_delivery_note(so.name).submit()
+
+		# Invoice 1: 2 bundles
+		sinv1 = make_sales_invoice(so.name)
+		sinv1.items[0].qty = 2
+		sinv1.save().submit()
+
+		# Invoice 2: 2 bundles
+		sinv2 = make_sales_invoice(so.name)
+		sinv2.items[0].qty = 2
+		sinv2.save().submit()
+
+		# Each invoice should report 260 (520 * 2 / 4)
+		self.assertEqual(self.get_invoice_buying_amount(sinv1.name), 260)
+		self.assertEqual(self.get_invoice_buying_amount(sinv2.name), 260)
+
+	def test_bundle_so_standalone_credit_note(self):
+		"""A 1-bundle standalone credit note against an SO should report negative cost (-130)."""
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		bundle = self.make_stocked_bundle()
+		so = make_sales_order(
+			customer=self.customer,
+			company=self.company,
+			warehouse=self.warehouse,
+			item=bundle,
+			qty=4,
+			rate=500,
+		)
+		make_delivery_note(so.name).submit()
+
+		# Create standalone credit note for 1 bundle linked to the SO
+		cr_note = self.create_sales_invoice(
+			qty=-1, rate=500, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		cr_note.is_return = 1
+		cr_note.items[0].item_code = bundle
+		cr_note.items[0].sales_order = so.name
+		cr_note.items[0].so_detail = so.items[0].name
+		cr_note.save().submit()
+
+		filters = dict(
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			sales_invoice=cr_note.name,
+			include_returned_invoices=1,
+		)
+		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		self.assertEqual(data[-1].buying_amount, -130)
+
+	def test_bundle_so_with_fully_returned_delivery_credit_note(self):
+		"""When a delivery is fully returned and a credit note is created against the SO,
+		buying amount should report negative component cost (-520), not 0."""
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return as make_dn_return
+
+		bundle = self.make_stocked_bundle()
+		so = make_sales_order(
+			customer=self.customer,
+			company=self.company,
+			warehouse=self.warehouse,
+			item=bundle,
+			qty=4,
+			rate=500,
+		)
+		dnote = make_delivery_note(so.name).submit()
+		make_dn_return(dnote.name).submit()
+
+		cr_note = self.create_sales_invoice(
+			qty=-4, rate=500, posting_date=nowdate(), do_not_save=True, do_not_submit=True
+		)
+		cr_note.is_return = 1
+		cr_note.items[0].item_code = bundle
+		cr_note.items[0].sales_order = so.name
+		cr_note.items[0].so_detail = so.items[0].name
+		cr_note.save().submit()
+
+		filters = dict(
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			sales_invoice=cr_note.name,
+			include_returned_invoices=1,
+		)
+		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		self.assertEqual(data[-1].buying_amount, -520)
 
 	def test_sales_order_delivered_in_parts_uses_qty_weighted_rate(self):
 		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
