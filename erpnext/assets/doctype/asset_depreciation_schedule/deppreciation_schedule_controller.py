@@ -384,14 +384,24 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			if is_last_day_of_the_month(getdate(self.asset_doc.available_for_use_date)):
 				from_date = get_last_day(from_date)
 
-		self.depreciation_amount, days, months = self._get_pro_rata_amt(
-			from_date,
-			self.disposal_date,
-			original_schedule_date=self.schedule_date,
+		remaining_depreciation = self.pending_depreciation_amount - flt(
+			self.fb_row.expected_value_after_useful_life
 		)
+		if self.has_pro_rata and row_idx == self.final_number_of_depreciations - 1:
+			self.set_depreciation_amount_for_last_row(row_idx)
+			total_days = date_diff(self.schedule_date, from_date) + 1
+			days = min(date_diff(self.disposal_date, from_date) + 1, total_days)
+			self.depreciation_amount = remaining_depreciation * days / total_days
+		else:
+			self.depreciation_amount, days, months = self._get_pro_rata_amt(
+				from_date,
+				self.disposal_date,
+				original_schedule_date=self.schedule_date,
+			)
 
 		self.depreciation_amount = flt(
-			self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")
+			min(self.depreciation_amount, remaining_depreciation),
+			self.asset_doc.precision("net_purchase_amount"),
 		)
 		if self.depreciation_amount > 0:
 			self.schedule_date = self.disposal_date
