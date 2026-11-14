@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe import qb
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.utils import add_days, add_to_date, cint, flt, format_date, getdate, nowdate, today
 
@@ -5720,6 +5721,76 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(1, len(advances))
 		self.assertEqual(advances[0].reference_name, pe.name)
 
+	def test_set_advances_needs_read_permission_on_advance_vouchers(self):
+		payment_entry = create_customer_advance()
+		journal_entry = frappe.copy_doc(self.globalTestRecords["Journal Entry"][0])
+		journal_entry.accounts[0].is_advance = "Yes"
+		journal_entry.insert()
+		journal_entry.submit()
+
+		with self.set_user(create_user("advance-sales-user@example.com", "Sales User").name):
+			self.assertRaises(frappe.PermissionError, make_unsaved_invoice("POS Invoice").set_advances)
+
+		with self.set_user(create_user("advance-accounts-user@example.com", "Accounts User").name):
+			invoice = make_unsaved_invoice("Sales Invoice")
+			invoice.set_advances()
+
+		advances = {row.reference_name for row in invoice.advances}
+		self.assertTrue({payment_entry.name, journal_entry.name}.issubset(advances))
+
+	def test_advances_come_only_from_the_invoice_company(self):
+		user = create_user("advance-company-user@example.com", "Accounts User").name
+		frappe.permissions.add_user_permission("Company", "_Test Company", user)
+
+		with self.set_user(user):
+			for debit_to in ("Debtors - TCP1", ["Debtors - _TC", "Debtors - TCP1"]):
+				invoice = make_unsaved_invoice("Sales Invoice", debit_to=debit_to)
+				self.assertRaisesRegex(
+					frappe.ValidationError, "does not belong to company", invoice.set_advances
+				)
+
+			invoice = create_sales_invoice(do_not_save=True)
+			invoice.debit_to = "Debtors - TCP1"
+			invoice.allocate_advances_automatically = 1
+			self.assertRaisesRegex(frappe.ValidationError, "does not belong to company", invoice.insert)
+
+	def test_automatic_advance_allocation_on_save_needs_no_voucher_read(self):
+		payment_entry = create_customer_advance()
+		role = "_Test Advance Invoice Clerk"
+		frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert(
+			ignore_if_duplicate=True
+		)
+		frappe.permissions.add_permission("Sales Invoice", role)
+		for ptype in ("write", "create"):
+			frappe.permissions.update_permission_property("Sales Invoice", role, 0, ptype, 1)
+		self.addCleanup(frappe.clear_cache, doctype="Sales Invoice")
+		user = create_user("advance-invoice-clerk@example.com", "Sales User", role).name
+
+		with self.set_user(user):
+			self.assertFalse(frappe.has_permission("Payment Entry", "read"))
+			invoice = create_sales_invoice(do_not_save=True)
+			invoice.allocate_advances_automatically = 1
+			invoice.insert()
+
+		self.assertIn(payment_entry.name, [row.reference_name for row in invoice.advances])
+
+	@ERPNextTestSuite.change_settings("System Settings", {"apply_strict_user_permissions": 1})
+	def test_mapped_invoice_skips_advances_for_user_without_voucher_read(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_sales_invoice as make_invoice_from_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		payment_entry = create_customer_advance()
+		sales_order = make_sales_order()
+		target = {"doctype": "Sales Invoice", "allocate_advances_automatically": 1}
+
+		with self.set_user(create_user("advance-sales-user@example.com", "Sales User").name):
+			invoice = make_invoice_from_order(sales_order.name, target_doc=dict(target))
+		self.assertFalse(invoice.advances)
+
+		with self.set_user(create_user("advance-accounts-user@example.com", "Accounts User").name):
+			invoice = make_invoice_from_order(sales_order.name, target_doc=dict(target))
+		self.assertIn(payment_entry.name, [row.reference_name for row in invoice.advances])
+
 	def test_taxes_merging_from_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -7011,3 +7082,32 @@ def make_recurring_invoice(reference, from_date, to_date):
 	auto_repeat = frappe._dict(frequency="Monthly")
 	new_invoice.run_method("on_recurring", reference_doc=reference, auto_repeat_doc=auto_repeat)
 	return new_invoice.insert()
+
+
+def create_customer_advance():
+	from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+	return create_payment_entry(
+		company="_Test Company",
+		payment_type="Receive",
+		party_type="Customer",
+		party="_Test Customer",
+		paid_from="Debtors - _TC",
+		paid_to="Cash - _TC",
+		paid_amount=500,
+		save=True,
+		submit=True,
+	)
+
+
+def make_unsaved_invoice(doctype, **fields):
+	"""Build an invoice the way a client sends it to `run_doc_method`. `set_advances` allocates against `grand_total`."""
+	return frappe.get_doc(
+		{
+			"doctype": doctype,
+			"company": "_Test Company",
+			"customer": "_Test Customer",
+			"grand_total": 0,
+			**fields,
+		}
+	)
