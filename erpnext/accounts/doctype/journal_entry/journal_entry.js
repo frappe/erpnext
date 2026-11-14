@@ -631,6 +631,9 @@ Object.assign(erpnext.journal_entry, {
 	},
 
 	set_debit_credit_in_company_currency(frm, cdt, cdn) {
+		// Exchange gain/loss journals adjust base and account currency amounts independently.
+		if (frm.doc.voucher_type === "Exchange Gain Or Loss" && frm.doc.multi_currency) return;
+
 		const row = frappe.get_doc(cdt, cdn);
 		frappe.model.set_value(
 			cdt,
