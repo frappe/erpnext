@@ -423,6 +423,10 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 
 def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	rules = []
+	# strip float noise only: Float and Currency columns hold 9 decimals, so no stored value is cut
+	precision = 9
+	qty = flt(qty, precision)
+	rate = flt(rate, precision)
 
 	for rule in pricing_rules:
 		status = False
@@ -431,8 +435,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 		if rule.get("uom"):
 			conversion_factor = get_conversion_factor(rule.item_code, rule.uom).get("conversion_factor", 1)
 
-		if flt(qty) >= (flt(rule.min_qty) * conversion_factor) and (
-			flt(qty) <= (rule.max_qty * conversion_factor) if rule.max_qty else True
+		if qty >= flt(flt(rule.min_qty) * conversion_factor, precision) and (
+			qty <= flt(rule.max_qty * conversion_factor, precision) if rule.max_qty else True
 		):
 			status = True
 
@@ -441,8 +445,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 			conversion_factor = 1.0
 
 		if status and (
-			flt(rate) >= (flt(rule.min_amt) * conversion_factor)
-			and (flt(rate) <= (rule.max_amt * conversion_factor) if rule.max_amt else True)
+			rate >= flt(flt(rule.min_amt) * conversion_factor, precision)
+			and (rate <= flt(rule.max_amt * conversion_factor, precision) if rule.max_amt else True)
 		):
 			status = True
 		else:
