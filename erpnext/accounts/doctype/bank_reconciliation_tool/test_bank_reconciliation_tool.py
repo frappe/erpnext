@@ -2,6 +2,7 @@
 # See license.txt
 
 
+import json
 from unittest.mock import patch
 
 import frappe
@@ -744,6 +745,51 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 			clear_clearing_date(invoice.doctype, invoice.name)
 		self.assertEqual(invoice.reload().payments[0].clearance_date, getdate(today()))
 		self.assertEqual(transaction.reload().allocated_amount, 100)
+
+	def test_clearance_date_changes_are_versioned(self):
+		def last_version(doc):
+			return json.loads(
+				frappe.get_last_doc(
+					"Version", filters={"ref_doctype": doc.doctype, "docname": doc.name}
+				).data
+			)
+
+		payment = create_payment_entry(
+			company=self.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=100,
+		)
+		payment.reference_date = payment.posting_date
+		payment.save().submit()
+
+		update_clearance_date(payment.doctype, payment.name, self.bank, today())
+		self.assertEqual(last_version(payment)["changed"][0][0], "clearance_date")
+		self.assertTrue(last_version(payment)["changed"][0][2])
+
+		clear_clearing_date(payment.doctype, payment.name)
+		self.assertEqual(last_version(payment)["changed"][0][0], "clearance_date")
+		self.assertFalse(last_version(payment)["changed"][0][2])
+
+		mode_of_payment = frappe.get_doc(
+			{
+				"doctype": "Mode of Payment",
+				"mode_of_payment": "Versioned Clearance",
+				"type": "Bank",
+				"accounts": [{"company": self.company, "default_account": self.bank}],
+			}
+		).insert()
+		invoice = create_sales_invoice(is_pos=1, qty=1, rate=100, do_not_save=1)
+		invoice.set("payments", [{"mode_of_payment": mode_of_payment.name, "amount": 100}])
+		invoice.insert().submit()
+
+		update_clearance_date(invoice.doctype, invoice.name, self.bank, today())
+		row_changed = last_version(invoice)["row_changed"]
+		self.assertEqual(row_changed[0][0], "payments")
+		self.assertEqual(row_changed[0][3][0][0], "clearance_date")
 
 	def test_unchanged_restricted_vouchers_do_not_block_clearance(self):
 		payments = [

@@ -149,13 +149,8 @@ class BankClearance(Document):
 					"clearance_date",
 				)
 				if d.clearance_date or old_clearance_date:
-					frappe.db.set_value(
-						"Sales Invoice Payment",
-						{"parent": d.payment_entry, "account": self.get("account"), "amount": ["!=", 0]},
-						"clearance_date",
-						d.clearance_date,
-					)
-					sales_invoice = frappe.get_lazy_doc("Sales Invoice", d.payment_entry)
+					sales_invoice = frappe.get_doc("Sales Invoice", d.payment_entry)
+					set_clearance_date(sales_invoice, d.clearance_date, self.account)
 					sales_invoice.add_comment(
 						"Comment",
 						_("Clearance date changed from {0} to {1} via Bank Clearance Tool").format(
@@ -164,12 +159,11 @@ class BankClearance(Document):
 					)
 
 			else:
-				payment_entry = frappe.get_lazy_doc(d.payment_document, d.payment_entry)
+				payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
 				old_clearance_date = payment_entry.clearance_date
 
 				if d.clearance_date or old_clearance_date:
-					# using db_set to trigger notification
-					payment_entry.db_set("clearance_date", d.clearance_date)
+					set_clearance_date(payment_entry, d.clearance_date)
 
 					payment_entry.add_comment(
 						"Comment",
@@ -180,6 +174,20 @@ class BankClearance(Document):
 
 		self.get_payment_entries()
 		msgprint(_("Clearance Date updated"))
+
+
+def set_clearance_date(voucher, clearance_date, account=None):
+	"""Set clearance date on a submitted voucher and record the change in its version history."""
+	voucher.load_doc_before_save()
+
+	if voucher.doctype == "Sales Invoice":
+		for row in voucher.payments:
+			if row.amount and (not account or row.account == account):
+				row.db_set("clearance_date", clearance_date)
+	else:
+		voucher.db_set("clearance_date", clearance_date)
+
+	voucher.save_version()
 
 
 def validate_clearance_date(voucher, clearance_date, account, row_idx=None, cheque_date=None):
