@@ -391,12 +391,7 @@ def set_return_stock_qty(doc):
 			row.rejected_stock_qty = get_rejected_completing_qty(
 				row, "rejected_stock_qty", flt(row.rejected_stock_qty), row.rejected_qty, source, returned
 			)
-		# only rows returning accepted qty alone complete their received stock qty
-		if (
-			doc.doctype == "Purchase Receipt"
-			and not flt(row.rejected_qty)
-			and not row.return_qty_from_rejected_warehouse
-		):
+		if doc.doctype == "Purchase Receipt":
 			row.received_stock_qty = get_completing_qty(
 				row,
 				"received_stock_qty",
