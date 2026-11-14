@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from functools import partial
 from unittest.mock import patch
 
 import frappe
@@ -333,6 +334,30 @@ class TestInventoryDimension(ERPNextTestSuite):
 				self.assertEqual(
 					get_evaluated_inventory_dimension(row, frappe._dict(actual_qty=qty)), expected
 				)
+
+	def test_dimension_condition_reads_field_values_only(self):
+		stock_entry = make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=7, basic_rate=100, do_not_submit=True
+		)
+		row = stock_entry.items[0]
+		dimension = frappe._dict(
+			name="Pallet",
+			condition="parent.purpose == 'Material Receipt' and doc.qty == 7 and doc.doctype == 'Stock Entry Detail'",
+			type_of_transaction="Both",
+		)
+		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
+		with patch(f"{module}.get_document_wise_inventory_dimensions", return_value=[dimension]):
+			evaluate = partial(
+				get_evaluated_inventory_dimension, row, frappe._dict(actual_qty=7), stock_entry
+			)
+			self.assertEqual(evaluate(), [dimension])
+
+			dimension.condition = "parent.db_set('remarks', 'Changed by condition') or True"
+			self.assertRaises(TypeError, evaluate)
+
+		self.assertNotEqual(
+			frappe.db.get_value("Stock Entry", stock_entry.name, "remarks"), "Changed by condition"
+		)
 
 	def test_check_mandatory_depends_on_dimensions(self):
 		doc = create_inventory_dimension(
