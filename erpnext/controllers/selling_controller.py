@@ -14,6 +14,7 @@ from erpnext.accounts.services.taxes import _get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
 	is_batch_expired,
+	is_sales_stock_return,
 	set_return_stock_qty,
 )
 from erpnext.controllers.stock_controller import StockController
@@ -436,7 +437,7 @@ class SellingController(StockController):
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 				# rounded as the stock ledger posts it, so the row completing a return can take what is left
-				if allow_to_edit_stock_qty or self.get("is_return"):
+				if allow_to_edit_stock_qty or (self.get("is_return") and is_sales_stock_return(self)):
 					d.stock_qty = flt(d.stock_qty, d.precision("stock_qty"))
 
 		if self.get("is_return"):
