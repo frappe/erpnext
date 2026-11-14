@@ -1183,6 +1183,42 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			gle_filters={"account": "Cost of Goods Sold - TCP1"},
 		)
 
+	def test_debit_note_reverses_only_the_valuation_charge_it_carried(self):
+		pi = make_purchase_invoice(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			update_stock=1,
+			qty=3,
+			rate=100,
+			do_not_save=True,
+		)
+		pi.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"cost_center": "Main - TCP1",
+				"description": "Freight",
+				"tax_amount": 30,
+			},
+		)
+		pi.insert().submit()
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.items[0].update({"qty": -1, "received_qty": -1})
+		return_pi.submit()
+
+		self.assertEqual(return_pi.taxes[0].tax_amount, -10)
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{"voucher_no": return_pi.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+			)
+		)
+
 	def test_multi_currency_gle(self):
 		pi = make_purchase_invoice(
 			supplier="_Test Supplier USD",
