@@ -512,6 +512,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.serial_no,
 			sle.project,
 			sle.creation,
+			sle.name.as_("stock_ledger_entry"),
 		)
 		.where((sle.docstatus < 2) & (sle.is_cancelled == 0) & (sle.posting_datetime[from_date:to_date]))
 		.orderby(sle.posting_datetime)
