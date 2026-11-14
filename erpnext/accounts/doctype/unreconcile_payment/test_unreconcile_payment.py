@@ -2,9 +2,11 @@
 # See license.txt
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import today
 
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -181,6 +183,249 @@ class TestUnreconcilePayment(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual(len(pe2.references), 1)
 		self.assertEqual(pe1.unallocated_amount, 0)
 		self.assertEqual(pe2.unallocated_amount, 50)
+
+	def test_cancel_payment_after_unreconciling_credit_note(self):
+		invoice = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			qty=2,
+			rate=100,
+			price_list_rate=100,
+		)
+		credit_note = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			qty=-1,
+			rate=100,
+			price_list_rate=100,
+			is_return=1,
+			return_against=invoice.name,
+		)
+
+		pe = self.create_payment_entry()
+		pe.paid_amount = pe.received_amount = 100
+		pe.append(
+			"references",
+			{
+				"reference_doctype": invoice.doctype,
+				"reference_name": invoice.name,
+				"allocated_amount": 200,
+			},
+		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": credit_note.doctype,
+				"reference_name": credit_note.name,
+				"allocated_amount": -100,
+			},
+		)
+		pe.save().submit()
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		for allocation in unreconcile.allocations:
+			if allocation.reference_name != credit_note.name:
+				unreconcile.remove(allocation)
+		unreconcile.save().submit()
+
+		pe.reload()
+		self.assertEqual(pe.unallocated_amount, 0)
+		pe.cancel()
+		invoice.reload()
+		credit_note.reload()
+
+		self.assertFalse(
+			frappe.db.exists(
+				"Payment Ledger Entry",
+				{"voucher_type": pe.doctype, "voucher_no": pe.name, "delinked": 0},
+			)
+		)
+		self.assertEqual(invoice.outstanding_amount, 200)
+		self.assertEqual(credit_note.outstanding_amount, -100)
+
+	def test_cancel_payment_after_unreconciling_debit_note(self):
+		invoice = make_purchase_invoice(
+			item=self.item,
+			company=self.company,
+			supplier=self.supplier,
+			credit_to="Creditors - _TC",
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			qty=2,
+			rate=100,
+			price_list_rate=100,
+		)
+		debit_note = make_purchase_invoice(
+			item=self.item,
+			company=self.company,
+			supplier=self.supplier,
+			credit_to="Creditors - _TC",
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			qty=-1,
+			rate=100,
+			price_list_rate=100,
+			is_return=1,
+			return_against=invoice.name,
+		)
+
+		pe = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			paid_from=self.cash,
+			paid_to="Creditors - _TC",
+			paid_amount=100,
+			save=True,
+		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": invoice.doctype,
+				"reference_name": invoice.name,
+				"allocated_amount": 200,
+			},
+		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": debit_note.doctype,
+				"reference_name": debit_note.name,
+				"allocated_amount": -100,
+			},
+		)
+		pe.save().submit()
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		for allocation in unreconcile.allocations:
+			if allocation.reference_name != debit_note.name:
+				unreconcile.remove(allocation)
+		unreconcile.save().submit()
+
+		pe.reload()
+		self.assertEqual(pe.unallocated_amount, 0)
+		pe.cancel()
+		invoice.reload()
+		debit_note.reload()
+
+		self.assertFalse(
+			frappe.db.exists(
+				"Payment Ledger Entry",
+				{"voucher_type": pe.doctype, "voucher_no": pe.name, "delinked": 0},
+			)
+		)
+		self.assertEqual(invoice.outstanding_amount, 200)
+		self.assertEqual(debit_note.outstanding_amount, -100)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"enable_immutable_ledger": 1})
+	def test_cancel_payment_after_unreconciling_credit_note_with_immutable_ledger(self):
+		invoice = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			qty=2,
+			rate=100,
+			price_list_rate=100,
+		)
+		credit_note = create_sales_invoice(
+			item=self.item,
+			company=self.company,
+			customer=self.customer,
+			debit_to=self.debit_to,
+			posting_date=today(),
+			parent_cost_center=self.cost_center,
+			cost_center=self.cost_center,
+			qty=-1,
+			rate=100,
+			price_list_rate=100,
+			is_return=1,
+			return_against=invoice.name,
+		)
+
+		pe = self.create_payment_entry()
+		pe.paid_amount = pe.received_amount = 100
+		pe.append(
+			"references",
+			{
+				"reference_doctype": invoice.doctype,
+				"reference_name": invoice.name,
+				"allocated_amount": 200,
+			},
+		)
+		pe.append(
+			"references",
+			{
+				"reference_doctype": credit_note.doctype,
+				"reference_name": credit_note.name,
+				"allocated_amount": -100,
+			},
+		)
+		pe.save().submit()
+
+		unreconcile = frappe.get_doc(
+			{
+				"doctype": "Unreconcile Payment",
+				"company": self.company,
+				"voucher_type": pe.doctype,
+				"voucher_no": pe.name,
+			}
+		)
+		unreconcile.add_references()
+		for allocation in unreconcile.allocations:
+			if allocation.reference_name != credit_note.name:
+				unreconcile.remove(allocation)
+		unreconcile.save().submit()
+		pe.reload().cancel()
+
+		ple = frappe.qb.DocType("Payment Ledger Entry")
+		account_totals = (
+			frappe.qb.from_(ple)
+			.select(ple.account, Sum(ple.amount).as_("amount"))
+			.where((ple.voucher_type == pe.doctype) & (ple.voucher_no == pe.name) & (ple.delinked == 0))
+			.groupby(ple.account)
+			.run(as_dict=True)
+		)
+		for total in account_totals:
+			self.assertEqual(total.amount, 0)
+		self.assertFalse(
+			frappe.db.exists(
+				"Payment Ledger Entry",
+				{"voucher_type": pe.doctype, "voucher_no": pe.name, "delinked": 1},
+			)
+		)
 
 	def test_03_unreconciliation_on_multi_currency_invoice(self):
 		self.create_customer("_Test MC Customer USD", "USD")
