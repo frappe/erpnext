@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.query_builder import Criterion, DocType, Order
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, get_datetime
 from frappe.utils.nestedset import get_root_of
 
@@ -65,21 +66,8 @@ def search_by_term(search_term, warehouse, price_list, pos_profile, item_code=No
 	item_stock_qty = item_stock_qty // item.get("conversion_factor", 1)
 	item.update({"actual_qty": item_stock_qty})
 
-	price_filters = {
-		"price_list": price_list,
-		"item_code": item_code,
-	}
-
-	if batch_no:
-		price_filters["batch_no"] = ["in", [batch_no, ""]]
-
-	if serial_no:
-		price_filters["uom"] = item_doc.stock_uom
-
-	price = frappe.get_list(
-		doctype="Item Price",
-		filters=price_filters,
-		fields=["uom", "currency", "price_list_rate", "batch_no"],
+	price = get_valid_item_prices(
+		price_list, item_code, batch_no=batch_no, uom=item_doc.stock_uom if serial_no else None
 	)
 
 	def __sort(p):
@@ -115,6 +103,43 @@ def search_by_term(search_term, warehouse, price_list, pos_profile, item_code=No
 		)
 
 	return {"items": [item], "barcode_scan": True}
+
+
+def get_valid_item_prices(price_list, item_code, batch_no=None, uom=None):
+	"""Selling prices of the Item valid today and not tied to a customer, latest valid_from first.
+
+	A batch-specific price is included only for the given `batch_no`."""
+	ItemPrice = DocType("Item Price")
+	current_date = frappe.utils.today()
+
+	batch_condition = IfNull(ItemPrice.batch_no, "") == ""
+	if batch_no:
+		batch_condition |= ItemPrice.batch_no == batch_no
+
+	query = (
+		frappe.qb.from_(ItemPrice)
+		.select(
+			ItemPrice.price_list_rate,
+			ItemPrice.currency,
+			ItemPrice.uom,
+			ItemPrice.batch_no,
+			ItemPrice.valid_from,
+			ItemPrice.valid_upto,
+		)
+		.where(ItemPrice.price_list == price_list)
+		.where(ItemPrice.item_code == item_code)
+		.where(ItemPrice.selling == 1)
+		.where(IfNull(ItemPrice.customer, "") == "")
+		.where(batch_condition)
+		.where((ItemPrice.valid_from <= current_date) | (ItemPrice.valid_from.isnull()))
+		.where((ItemPrice.valid_upto >= current_date) | (ItemPrice.valid_upto.isnull()))
+		.orderby(ItemPrice.valid_from.isnull(), order=Order.asc)
+		.orderby(ItemPrice.valid_from, order=Order.desc)
+	)
+	if uom:
+		query = query.where(ItemPrice.uom == uom)
+
+	return query.run(as_dict=True)
 
 
 def filter_result_items(result, pos_profile):
@@ -283,30 +308,10 @@ def get_items(
 	if not items_data:
 		return result
 
-	current_date = frappe.utils.today()
-
 	for item in items_data:
 		item.actual_qty, _, is_negative_stock_allowed = get_stock_availability(item.item_code, warehouse)
 
-		ItemPrice = DocType("Item Price")
-		item_prices = (
-			frappe.qb.from_(ItemPrice)
-			.select(
-				ItemPrice.price_list_rate,
-				ItemPrice.currency,
-				ItemPrice.uom,
-				ItemPrice.batch_no,
-				ItemPrice.valid_from,
-				ItemPrice.valid_upto,
-			)
-			.where(ItemPrice.price_list == price_list)
-			.where(ItemPrice.item_code == item.item_code)
-			.where(ItemPrice.selling == 1)
-			.where((ItemPrice.valid_from <= current_date) | (ItemPrice.valid_from.isnull()))
-			.where((ItemPrice.valid_upto >= current_date) | (ItemPrice.valid_upto.isnull()))
-			.orderby(ItemPrice.valid_from.isnull(), order=Order.asc)
-			.orderby(ItemPrice.valid_from, order=Order.desc)
-		).run(as_dict=True)
+		item_prices = get_valid_item_prices(price_list, item.item_code)
 
 		stock_uom_price = next((d for d in item_prices if d.get("uom") == item.stock_uom), {})
 		item_uom = item.stock_uom
@@ -336,7 +341,6 @@ def get_items(
 				"price_list_rate": item_uom_price.get("price_list_rate"),
 				"currency": item_uom_price.get("currency"),
 				"uom": item_uom,
-				"batch_no": item_uom_price.get("batch_no"),
 			}
 		)
 
@@ -485,7 +489,7 @@ def create_opening_voucher(pos_profile: str, company: str, balance_details: str 
 @frappe.whitelist()
 def get_past_order_list(search_term: str, status: str, limit: int = 20):
 	fields = ["name", "grand_total", "currency", "customer", "customer_name", "posting_time", "posting_date"]
-	invoice_list = []
+	invoice_list = pos_invoice_list = sales_invoice_list = []
 
 	if search_term and status:
 		pos_invoices_by_customer = frappe.db.get_list(
@@ -709,6 +713,7 @@ def get_invoice_filters(doctype, status, name=None):
 				filters["docstatus"] = 1
 				if status == "Paid":
 					filters["is_return"] = 0
+					filters["outstanding_amount"] = ["<=", 0]
 				if status == "Return":
 					filters["is_return"] = 1
 
