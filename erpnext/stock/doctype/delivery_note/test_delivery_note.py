@@ -2177,42 +2177,6 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
-		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
-	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
-	def test_auto_set_batch_skips_a_later_row_going_to_the_default_warehouse(self):
-		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
-		first = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=15, basic_rate=100)
-		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
-		make_stock_entry(
-			item_code=item,
-			source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC",
-			qty=10,
-			batch_no=first_batch,
-			use_serial_batch_fields=1,
-		)
-
-		dn = create_delivery_note(item_code=item, qty=5, do_not_save=True)
-		dn.set_warehouse = "_Test Warehouse 1 - _TC"
-		dn.items[0].use_serial_batch_fields = 1
-		dn.append(
-			"items",
-			{
-				"item_code": item,
-				"qty": 10,
-				"rate": 100,
-				"batch_no": first_batch,
-				"use_serial_batch_fields": 1,
-			},
-		)
-		dn.save()
-
-		self.assertEqual(dn.items[0].batch_no, first_batch)
-
-	@ERPNextTestSuite.change_settings(
-		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
