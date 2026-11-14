@@ -605,8 +605,13 @@ class SerialandBatchBundle(Document):
 			["Serial and Batch Entry", "docstatus", "=", 1],
 			["Serial and Batch Bundle", "is_cancelled", "=", 0],
 			["Serial and Batch Bundle", "item_code", "=", self.item_code],
-			["Serial and Batch Bundle", "voucher_detail_no", "=", return_against_voucher_detail_no],
 		]
+		if delivered_bundle := self.get_delivered_packed_item_bundle():
+			filters.append(["Serial and Batch Bundle", "name", "=", delivered_bundle])
+		else:
+			filters.append(
+				["Serial and Batch Bundle", "voucher_detail_no", "=", return_against_voucher_detail_no]
+			)
 
 		# Added to handle rejected warehouse case
 		return_warehouse = None
@@ -684,6 +689,22 @@ class SerialandBatchBundle(Document):
 				valuation_details["batches"][row.batch_no] = row.incoming_rate
 
 		return valuation_details
+
+	def get_delivered_packed_item_bundle(self):
+		"""Bundle of the delivered packed row that the return's packed row of this bundle reverses."""
+		if self.voucher_type not in ("Delivery Note", "Sales Invoice"):
+			return
+
+		# a packed row's bundle points to the packed row, or to its bundle row once posted
+		delivered_row = frappe.db.get_value(
+			"Packed Item", self.voucher_detail_no, "return_against_packed_item"
+		) or frappe.db.get_value(
+			"Packed Item",
+			{"parent_detail_docname": self.voucher_detail_no, "serial_and_batch_bundle": self.name},
+			"return_against_packed_item",
+		)
+		if delivered_row:
+			return frappe.db.get_value("Packed Item", delivered_row, "serial_and_batch_bundle")
 
 	def get_return_against_packed_item(self, field):
 		"""Resolve the original DN/SI Item when a return bundle's voucher_detail_no is the Packed Item."""
