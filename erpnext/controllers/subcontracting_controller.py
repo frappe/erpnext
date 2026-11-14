@@ -3,7 +3,7 @@
 
 import copy
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 import frappe
 from frappe import _
@@ -1234,9 +1234,150 @@ class SubcontractingController(StockController):
 		)
 		return {(d.parent, d.item_code): d.source_warehouse for d in rows}
 
+	def get_earlier_receipts_bom_consumption(self):
+		"""Received stock qty and consumed qty by (order row, BOM, BOM row) of the other submitted receipts."""
+		if self.doctype != "Subcontracting Receipt" or self.is_return:
+			return None
+
+		earlier = frappe._dict(received_qty=defaultdict(float), consumed_qty=defaultdict(float))
+		order_items = [
+			row.subcontracting_order_item for row in self.items if row.get("subcontracting_order_item")
+		]
+		if not order_items:
+			return earlier
+
+		receipt_items = {
+			row.name: row
+			for row in frappe.get_all(
+				"Subcontracting Receipt Item",
+				filters={
+					"docstatus": 1,
+					"parent": ("!=", self.name),
+					"subcontracting_order_item": ("in", order_items),
+				},
+				fields=[
+					"name",
+					"subcontracting_order_item",
+					"item_code",
+					"bom",
+					"include_exploded_items",
+					"received_qty",
+					"qty",
+					"rejected_qty",
+					"conversion_factor",
+				],
+			)
+		}
+		if not receipt_items:
+			return earlier
+
+		consumed_qty = defaultdict(float)
+		bom_rows = {}
+		for row in frappe.get_all(
+			"Subcontracting Receipt Supplied Item",
+			filters={"docstatus": 1, "reference_name": ("in", list(receipt_items))},
+			fields=["reference_name", "bom_detail_no", "rm_item_code", "consumed_qty"],
+		):
+			bom_detail_no = row.bom_detail_no
+			if not bom_detail_no and self.backflush_based_on != "BOM":
+				# rows backflushed on transferred material keep no BOM row; BOM backflush leaves them out
+				bom_detail_no = self.get_bom_rows_by_raw_material(
+					receipt_items[row.reference_name], bom_rows
+				).get(row.rm_item_code)
+			if bom_detail_no:
+				consumed_qty[(row.reference_name, bom_detail_no)] += row.consumed_qty
+
+		for (receipt_item, bom_detail_no), qty in consumed_qty.items():
+			row = receipt_items[receipt_item]
+			key = (row.subcontracting_order_item, row.bom, bom_detail_no)
+			earlier.received_qty[key] += get_received_stock_qty(row)
+			earlier.consumed_qty[key] += qty
+
+		return earlier
+
+	def get_bom_rows_by_raw_material(self, row, cache):
+		"""BOM row of each raw material that a receipt row's BOM uses only once."""
+		key = (row.item_code, row.bom, row.include_exploded_items)
+		if key not in cache:
+			materials = self._get_materials_from_bom(*key)
+			repeated_rows = get_repeated_raw_material_rows(materials)
+			cache[key] = {
+				d.rm_item_code: d.bom_detail_no for d in materials if d.bom_detail_no not in repeated_rows
+			}
+
+		return cache[key]
+
+	def get_bom_qty(self, row, bom_item, earlier_receipts):
+		"""BOM qty a row consumes; a receipt row takes the order row's requirement so far, less what was consumed for it."""
+		order_item = row.get("subcontracting_order_item")
+		if earlier_receipts is None or not order_item:
+			return flt(bom_item.qty_consumed_per_unit) * get_received_stock_qty(row)
+
+		earlier_rows = [
+			d
+			for d in self.items
+			if d.idx < row.idx and d.get("subcontracting_order_item") == order_item and d.bom == row.bom
+		]
+		earlier_names = {d.name for d in earlier_rows}
+		received_qty = sum(get_received_stock_qty(d) for d in [*earlier_rows, row])
+		consumed_qty = sum(
+			flt(d.consumed_qty)
+			for d in self.get(self.raw_material_table)
+			if d.reference_name in earlier_names and d.bom_detail_no == bom_item.bom_detail_no
+		)
+		return self.get_cumulative_bom_qty(row, bom_item, received_qty, earlier_receipts) - consumed_qty
+
+	def update_kept_supplied_items_qty(self, row, earlier_receipts):
+		"""Supplied rows kept for their serial / batch nos take the change in BOM qty that other receipts
+		caused since they were made; a BOM row split over batches takes it from its last row back."""
+		materials = self._get_materials_from_bom(row.item_code, row.bom, row.get("include_exploded_items"))
+		repeated_bom_rows = get_repeated_bom_rows(materials)
+		for bom_item in materials:
+			supplied_rows = [
+				d
+				for d in self.get(self.raw_material_table)
+				if d.reference_name == row.name and d.bom_detail_no == bom_item.bom_detail_no
+			]
+			if not supplied_rows or bom_item.bom_detail_no in repeated_bom_rows:
+				continue
+
+			precision = supplied_rows[0].precision("required_qty")
+			kept_required_qty = get_kept_bom_row_required_qty(supplied_rows, precision)
+			if kept_required_qty is None:
+				continue
+
+			required_qty = flt(self.get_bom_qty(row, bom_item, earlier_receipts), precision)
+			difference = flt(required_qty - kept_required_qty, precision)
+			if not difference:
+				continue
+
+			for supplied_row in reversed(supplied_rows):
+				change = max(difference, -flt(supplied_row.consumed_qty))
+				supplied_row.consumed_qty = flt(
+					supplied_row.consumed_qty + change, supplied_row.precision("consumed_qty")
+				)
+				difference = flt(difference - change, precision)
+			for supplied_row in supplied_rows:
+				supplied_row.required_qty = required_qty
+
+	def get_cumulative_bom_qty(self, row, bom_item, received_qty, earlier_receipts):
+		"""BOM qty of all that a row's order row received on its BOM with ``received_qty``, less what earlier
+		receipts consumed (never below zero), so rounding per receipt does not add up."""
+		precision = frappe.get_precision(self.subcontract_data.receipt_supplied_items_field, "consumed_qty")
+		key = (row.subcontracting_order_item, row.bom, bom_item.bom_detail_no)
+		total_received_qty = earlier_receipts.received_qty[key] + received_qty
+		return max(
+			flt(flt(bom_item.qty_consumed_per_unit) * total_received_qty, precision)
+			- earlier_receipts.consumed_qty[key],
+			0,
+		)
+
 	def __set_supplied_or_received_items(self):
 		self.bom_items = {}
 		job_card_warehouses = self.get_job_card_source_warehouses()
+		earlier_receipts = (
+			self.get_earlier_receipts_bom_consumption() if self.backflush_based_on == "BOM" else None
+		)
 
 		has_items = True if self.get(self.raw_material_table) else False
 		for row in self.items:
@@ -1244,18 +1385,22 @@ class SubcontractingController(StockController):
 				(self.__changed_name and row.name not in self.__changed_name)
 				or (has_items and not self.__changed_name)
 			):
+				if earlier_receipts is not None:
+					self.update_kept_supplied_items_qty(row, earlier_receipts)
 				continue
 
 			if self.doctype == self.subcontract_data.order_doctype or (
 				self.backflush_based_on == "BOM" or self.is_return
 			):
-				for bom_item in self._get_materials_from_bom(
+				materials = self._get_materials_from_bom(
 					row.item_code, row.bom, row.get("include_exploded_items")
-				):
-					qty = (
-						flt(bom_item.qty_consumed_per_unit)
-						* flt(row.get("received_qty") or (row.qty + (row.get("rejected_qty") or 0)))
-						* row.conversion_factor
+				)
+				repeated_bom_rows = get_repeated_bom_rows(materials)
+				for bom_item in materials:
+					qty = self.get_bom_qty(
+						row,
+						bom_item,
+						None if bom_item.bom_detail_no in repeated_bom_rows else earlier_receipts,
 					)
 					bom_item.main_item_code = row.item_code
 					self.__update_reserve_warehouse(bom_item, row, job_card_warehouses)
@@ -1655,6 +1800,33 @@ class SubcontractingController(StockController):
 					)
 
 				mr_obj.update_requested_qty(mr_item_rows)
+
+
+def get_kept_bom_row_required_qty(supplied_rows, precision):
+	"""Required qty of a BOM row as its supplied rows carry it: split over transferred batches, each row
+	carries its batch's share; otherwise all carry the whole, covering what they consume. None if neither."""
+	consumed_qty = flt(sum(flt(d.consumed_qty) for d in supplied_rows), precision)
+	if all(flt(d.required_qty, precision) == flt(d.consumed_qty, precision) for d in supplied_rows):
+		return consumed_qty
+
+	required_qty = {flt(d.required_qty, precision) for d in supplied_rows}
+	if len(required_qty) == 1 and (qty := required_qty.pop()) >= consumed_qty:
+		return qty
+
+
+def get_repeated_bom_rows(materials):
+	"""BOM rows a repeated phantom BOM brings in more than once; their earlier consumption cannot be told apart."""
+	return {name for name, count in Counter(d.bom_detail_no for d in materials).items() if count > 1}
+
+
+def get_repeated_raw_material_rows(materials):
+	"""BOM rows of raw materials that the BOM uses on more than one row."""
+	counts = Counter(d.rm_item_code for d in materials)
+	return {d.bom_detail_no for d in materials if counts[d.rm_item_code] > 1}
+
+
+def get_received_stock_qty(row):
+	return flt(row.get("received_qty") or (row.qty + (row.get("rejected_qty") or 0))) * row.conversion_factor
 
 
 def get_item_details(items):
