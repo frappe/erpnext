@@ -65,3 +65,28 @@ class TestCashierClosing(ERPNextTestSuite):
 		doc.save()
 		self.assertEqual(doc.outstanding_amount, 0)
 		self.assertEqual(doc.net_amount, 500)
+
+	def test_outstanding_counts_only_submitted_invoices(self):
+		date = "2026-06-16"
+		submitted = create_sales_invoice(rate=1000, qty=1, posting_date=date, do_not_submit=True)
+		submitted.posting_time = "10:30:00"
+		submitted.submit()
+
+		draft = create_sales_invoice(rate=5000, qty=1, posting_date=date, do_not_submit=True)
+		draft.posting_time = "10:30:00"
+		draft.save()
+
+		cancelled = create_sales_invoice(rate=7000, qty=1, posting_date=date, do_not_submit=True)
+		cancelled.posting_time = "10:30:00"
+		cancelled.submit()
+		cancelled.cancel()
+
+		doc = self.make_closing(payments=[1000], date=date)
+		doc.save()
+		self.assertEqual(doc.outstanding_amount, 1000)
+		self.assertEqual(doc.net_amount, 2000)
+
+	def test_times_without_leading_zero_are_compared_as_times(self):
+		doc = self.make_closing(from_time="9:00:00", time="10:00:00")
+		doc.save()
+		self.assertTrue(doc.name)

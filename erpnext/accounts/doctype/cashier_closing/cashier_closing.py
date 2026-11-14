@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import flt
+from frappe.utils import flt, get_time
 
 
 class CashierClosing(Document):
@@ -49,7 +49,8 @@ class CashierClosing(Document):
 			frappe.qb.from_(si)
 			.select(Sum(si.outstanding_amount))
 			.where(
-				(si.posting_date == self.date)
+				(si.docstatus == 1)
+				& (si.posting_date == self.date)
 				& (si.posting_time >= self.from_time)
 				& (si.posting_time <= self.time)
 				& (si.owner == self.user)
@@ -68,5 +69,5 @@ class CashierClosing(Document):
 		)
 
 	def validate_time(self):
-		if self.from_time >= self.time:
+		if get_time(self.from_time) >= get_time(self.time):
 			frappe.throw(_("From Time Should Be Less Than To Time"))
