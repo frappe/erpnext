@@ -1787,3 +1787,14 @@ def get_stock_qty_status_args(round_total=True) -> dict:
 		return {"source_field": "stock_qty"}
 
 	return {"source_field": "qty * conversion_factor", "round_to_target_precision": round_total}
+
+
+def get_received_stock_qty_status_args() -> dict:
+	"""Status updater args that add up receipts' stock qty. A receipt rounds the stock qty of each row whatever the
+	setting, so add up qty * conversion factor, rounded once at the total if the target rounds its stock qty too."""
+	return {
+		"source_field": "qty * conversion_factor",
+		"round_to_target_precision": frappe.get_single_value(
+			"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"
+		),
+	}
