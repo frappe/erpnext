@@ -3842,7 +3842,7 @@ class TestProductionPlan(ERPNextTestSuite):
 					self.assertEqual([row["quantity"] for row in items], [117, *purchase_qty])
 					self.assertEqual(items[0]["from_warehouse"], source_warehouse)
 					self.assertEqual([row["warehouse"] for row in items], [pln.for_warehouse] * 3)
-					self.assertEqual([row["required_bom_qty"] for row in items], [250, 250, 1000])
+					self.assertEqual([row["required_bom_qty"] for row in items], [117, 133, 1000])
 					self.assertEqual(
 						[row["sales_order"] for row in items],
 						[pln.po_items[0].sales_order] * 2 + [pln.po_items[1].sales_order],
