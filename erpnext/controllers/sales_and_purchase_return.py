@@ -485,51 +485,58 @@ def set_return_packed_qty(doc):
 
 
 def get_return_packed_qty(doc, packed_qty):
-	"""`packed_qty` by (return row, component), with what is left of the source row's packed qty for
-	the components of a bundle row that completes the return of its source row."""
+	"""`packed_qty` by (return row, component), with what is left of the source's packed qty for
+	the components of a bundle row that completes the return of its source row, or of its item
+	when it names no source row."""
 	valid_items = get_valid_items(doc)
 	returned_items = get_already_returned_items(doc)
 	source_packed_qty = get_source_packed_qty(doc)
-	returned_packed_qty = get_returned_packed_qty_by_source_row(doc)
+	returned_packed_qty = get_returned_packed_qty_by_source(doc)
 	return_packed_qty = {}
 	for row in doc.get("items"):
 		key = get_return_key(doc, row)
-		if key == row.item_code or key not in valid_items:
+		if key not in valid_items:
 			continue
 
 		add_returned_row(doc, key, row, returned_items)
+		if key != row.item_code:
+			add_returned_row(doc, row.item_code, row, returned_items)
 		precision = row.precision("stock_qty")
 		completes = flt(returned_items[key].stock_qty, precision) == flt(
 			valid_items[key].stock_qty, precision
 		)
+		source = row.item_code if key == row.item_code else key[1]
 		for (return_row, component), qty in packed_qty.items():
-			source_key = (key[1], component)
-			if return_row != (row.name or row.idx) or source_key not in source_packed_qty:
+			if return_row != (row.name or row.idx) or (source, component) not in source_packed_qty:
 				continue
 
 			if completes:
-				qty = source_packed_qty[source_key] - returned_packed_qty[source_key]
+				qty = source_packed_qty[(source, component)] - returned_packed_qty[(source, component)]
 			return_packed_qty[(return_row, component)] = qty
-			returned_packed_qty[source_key] += qty
+			returned_packed_qty[(source, component)] += qty
+			if source != row.item_code:
+				returned_packed_qty[(row.item_code, component)] += qty
 
 	return return_packed_qty
 
 
 def get_source_packed_qty(doc):
-	"""Packed qty of the returned document, by (bundle row, component)."""
+	"""Packed qty of the returned document, by (bundle row, component) and (bundle item, component)."""
 	packed_qty = defaultdict(float)
 	for row in frappe.get_all(
 		"Packed Item",
 		filters={"parent": doc.return_against, "parenttype": doc.doctype},
-		fields=["parent_detail_docname", "item_code", "qty"],
+		fields=["parent_detail_docname", "parent_item", "item_code", "qty"],
 		limit_page_length=0,
 	):
 		packed_qty[(row.parent_detail_docname, row.item_code)] += flt(row.qty)
+		packed_qty[(row.parent_item, row.item_code)] += flt(row.qty)
 	return packed_qty
 
 
-def get_returned_packed_qty_by_source_row(doc):
-	"""Packed qty of submitted returns of the returned document, by (returned bundle row, component)."""
+def get_returned_packed_qty_by_source(doc):
+	"""Packed qty of submitted returns of the returned document, by (returned bundle row, component)
+	and (bundle item, component)."""
 	parent, child, packed_item = DocType(doc.doctype), DocType(f"{doc.doctype} Item"), DocType("Packed Item")
 	source_row = child["dn_detail" if doc.doctype == "Delivery Note" else "sales_invoice_item"]
 	rows = (
@@ -538,17 +545,26 @@ def get_returned_packed_qty_by_source_row(doc):
 		.on(packed_item.parent_detail_docname == child.name)
 		.inner_join(parent)
 		.on(child.parent == parent.name)
-		.select(source_row.as_("source_row"), packed_item.item_code, Sum(Abs(packed_item.qty)).as_("qty"))
+		.select(
+			source_row.as_("source_row"),
+			packed_item.parent_item,
+			packed_item.item_code,
+			Sum(Abs(packed_item.qty)).as_("qty"),
+		)
 		.where(
 			(packed_item.parenttype == doc.doctype)
 			& (parent.docstatus == 1)
 			& (parent.is_return == 1)
 			& (parent.return_against == doc.return_against)
 		)
-		.groupby(source_row, packed_item.item_code)
+		.groupby(source_row, packed_item.parent_item, packed_item.item_code)
 		.run(as_dict=True)
 	)
-	return defaultdict(float, {(row.source_row, row.item_code): flt(row.qty) for row in rows})
+	returned_qty = defaultdict(float)
+	for row in rows:
+		returned_qty[(row.source_row, row.item_code)] += flt(row.qty)
+		returned_qty[(row.parent_item, row.item_code)] += flt(row.qty)
+	return returned_qty
 
 
 def get_valid_items(doc):
