@@ -2842,7 +2842,7 @@ def get_available_serial_nos(kwargs):
 		# a delivery takes only its own order row's reservation
 		own_order_rows = set()
 		if any(entry.voucher_no in reserved_voucher_details for entry in reserved_entries):
-			own_order_rows = get_delivery_order_rows(kwargs)[0]
+			own_order_rows = get_own_order_rows(kwargs)
 
 		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
 			kwargs, reserved_entries, reserved_voucher_details, own_order_rows
@@ -3690,6 +3690,27 @@ def get_delivery_order_rows(kwargs) -> tuple[set, set]:
 		own_rows.add(own)
 
 	return own_rows, delivered | {p.name for p in packed_rows}
+
+
+def get_own_order_rows(kwargs) -> set:
+	"""Sales Order row, with its packed rows, of the delivered row."""
+	own = kwargs.so_detail
+	if (
+		not own
+		and kwargs.sabb_voucher_type in ("Delivery Note", "Sales Invoice")
+		and kwargs.sabb_voucher_detail_no
+	):
+		own = frappe.db.get_value(
+			f"{kwargs.sabb_voucher_type} Item", kwargs.sabb_voucher_detail_no, "so_detail"
+		)
+
+	if not own:
+		return set()
+
+	packed_rows = frappe.get_all(
+		"Packed Item", filters={"parenttype": "Sales Order", "parent_detail_docname": own}, pluck="name"
+	)
+	return {own, *packed_rows}
 
 
 def get_outstanding_reservations(kwargs, order_rows) -> list:
