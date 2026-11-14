@@ -1850,6 +1850,7 @@ def get_stock_qty(row, qty) -> float:
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 
+<<<<<<< HEAD
 def get_stock_qty_status_args(round_total=True) -> dict:
 	"""Status updater args that add up rows' stock qty. When rows round their stock qty, add up qty * conversion
 	factor instead, rounded once at the total if the target rounds its stock qty too, so parts add up to it."""
@@ -1857,3 +1858,12 @@ def get_stock_qty_status_args(round_total=True) -> dict:
 		return {"source_field": "stock_qty"}
 
 	return {"source_field": "qty * conversion_factor", "round_to_target_precision": round_total}
+=======
+def get_stock_qty_status_args() -> dict:
+	"""Status updater args that add up rows' stock qty. When rows round their stock qty, add up
+	qty * conversion factor and round the total once instead, so orders in parts add up to their source row."""
+	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
+		return {"source_field": "stock_qty"}
+
+	return {"source_field": "qty * conversion_factor", "round_to_target_precision": True}
+>>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)

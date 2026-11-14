@@ -18,7 +18,10 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
+<<<<<<< HEAD
 from erpnext.controllers.mapper import get_qty_already_mapped
+=======
+>>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
 from erpnext.controllers.taxes_and_totals import remove_margin
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -634,10 +637,17 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
+<<<<<<< HEAD
 				**get_stock_qty_status_args(
 					frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales")
 				),
 			},
+=======
+				**get_stock_qty_status_args(),
+			}
+		)
+		self.status_updater.append(
+>>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
 			{
 				"source_dt": "Purchase Order Item",
 				"target_dt": "Packed Item",
@@ -647,8 +657,13 @@ class PurchaseOrder(BuyingController):
 				"join_field": "sales_order_packed_item",
 				"target_ref_field": "qty",
 				**get_stock_qty_status_args(),
+<<<<<<< HEAD
 			},
 		]
+=======
+			}
+		)
+>>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
 
 	def update_status_updater_if_from_pp(self):
 		self.status_updater.append(
