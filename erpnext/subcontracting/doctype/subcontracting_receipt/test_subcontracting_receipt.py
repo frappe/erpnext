@@ -431,6 +431,23 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_full_return_of_a_receipt_made_before_v16_with_its_bom_rows_reordered(self):
+		fg_item = "Subcontracted Item SA1"
+		bom = make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		first, second = bom.secondary_items
+		frappe.db.set_value("BOM Secondary Item", second.name, {"qty": 1, "stock_qty": 1})
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+		# the v16 migration does not keep the order of a BOM's scrap rows
+		frappe.db.set_value("BOM Secondary Item", first.name, "idx", 2)
+		frappe.db.set_value("BOM Secondary Item", second.name, "idx", 1)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
 	def test_partial_returns_add_up_to_the_received_secondary_qty(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item, quantity=3, secondary_qty=2)
