@@ -2833,24 +2833,28 @@ def get_available_serial_nos(kwargs):
 	ignore_serial_nos = []
 	if reserved_entries:
 		if kwargs.get("sabb_voucher_type") in ("Delivery Note", "Sales Invoice") and kwargs.get(
-			"against_sales_order"
+			"sales_order_item"
 		):
-			reserved_voucher_details = [kwargs.get("against_sales_order")]
+			reserved_voucher_details = [kwargs.get("sales_order_item")]
 		else:
 			reserved_voucher_details = get_reserved_voucher_details(kwargs)
 
-		# Check if serial nos are reserved for the current voucher then fetch only those serial nos
+		# Check if serial nos are reserved for the current voucher then fetch those serial nos first
 		if reserved_serial_nos := get_reserved_serial_nos_for_voucher(
 			kwargs, reserved_entries, reserved_voucher_details
 		):
-			ignore = set(kwargs.get("ignore_serial_nos") or [])
-			reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
-			if not reserved_serial_nos or not set_batch_filter(filters, kwargs):
-				return []
+			picked = get_reserved_serial_nos_in_stock(filters, fields, order_by, kwargs, reserved_serial_nos)
+			pending_qty = cint(kwargs.qty) - len(picked)
+			if pending_qty <= 0:
+				return picked
 
-			filters["name"] = ("in", reserved_serial_nos)
-
-			return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+			# the rest of the qty comes from unreserved stock
+			skip_serial_nos = [*(kwargs.get("ignore_serial_nos") or []), *reserved_serial_nos]
+			return picked + get_available_serial_nos(
+				frappe._dict(
+					kwargs, qty=pending_qty, ignore_serial_nos=skip_serial_nos, pick_reserved_items=False
+				)
+			)
 
 		# Check if serial nos are reserved for other vouchers then ignore those serial nos
 		elif ignore_reserved_serial_nos := get_other_doc_reserved_serials(
@@ -2893,6 +2897,18 @@ def get_available_serial_nos(kwargs):
 		return []
 
 	return get_serial_nos_based_on_filters(filters, fields, order_by, kwargs)
+
+
+def get_reserved_serial_nos_in_stock(filters, fields, order_by, kwargs, reserved_serial_nos) -> list:
+	"""Reserved serial nos available in the asked warehouse and batches."""
+	ignore = set(kwargs.get("ignore_serial_nos") or [])
+	reserved_serial_nos = [sn for sn in reserved_serial_nos if sn not in ignore]
+	if not reserved_serial_nos or not set_batch_filter(filters, kwargs):
+		return []
+
+	return get_serial_nos_based_on_filters(
+		{**filters, "name": ("in", reserved_serial_nos)}, fields, order_by, kwargs
+	)
 
 
 def set_batch_filter(filters, kwargs):
@@ -3054,8 +3070,8 @@ def get_reserved_voucher_details(kwargs):
 	reserved_voucher_details = []
 
 	field_mapper = {
-		"Delivery Note": [["Delivery Note Item", "against_sales_order"]],
-		"Sales Invoice": [["Sales Invoice Item", "sales_order"]],
+		"Delivery Note": [["Delivery Note Item", "so_detail"]],
+		"Sales Invoice": [["Sales Invoice Item", "so_detail"]],
 		"Stock Entry": [["Stock Entry", "work_order"], ["Stock Entry", "subcontracting_inward_order"]],
 		"Work Order": [["Work Order", "production_plan"], ["Work Order", "subcontracting_inward_order"]],
 		"Pick List": [["Pick List", "work_order"]],
@@ -3093,6 +3109,22 @@ def get_reserved_voucher_details(kwargs):
 				row[0],
 				pluck=row[1],
 				filters=voucher_based_filters,
+			)
+		)
+
+	if kwargs.get("sabb_voucher_type") in ("Delivery Note", "Sales Invoice") and any(
+		reserved_voucher_details
+	):
+		# bundle components are reserved against the Sales Order's packed item rows
+		reserved_voucher_details.extend(
+			frappe.get_all(
+				"Packed Item",
+				filters={
+					"parenttype": "Sales Order",
+					"parent_detail_docname": ("in", reserved_voucher_details),
+					"item_code": kwargs.get("item_code"),
+				},
+				pluck="name",
 			)
 		)
 
@@ -3192,7 +3224,7 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 		return serial_nos
 
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(entry, reserved_voucher_details):
 			serial_nos.append(entry.serial_no)
 			continue
 
@@ -3214,12 +3246,17 @@ def get_reserved_serial_nos_for_voucher(kwargs, reserved_entries, reserved_vouch
 def get_other_doc_reserved_serials(kwargs, reserved_entries, reserved_voucher_details):
 	serial_nos = []
 	for entry in reserved_entries:
-		if entry.voucher_no in reserved_voucher_details:
+		if is_reserved_for_voucher(entry, reserved_voucher_details):
 			continue
 
 		serial_nos.append(entry.serial_no)
 
 	return serial_nos
+
+
+def is_reserved_for_voucher(entry, reserved_voucher_details) -> bool:
+	"""Sales vouchers match the reserved Sales Order row, other vouchers the reserved voucher."""
+	return entry.voucher_no in reserved_voucher_details or entry.voucher_detail_no in reserved_voucher_details
 
 
 def get_reserved_serial_nos_for_sre(kwargs) -> list:
@@ -3235,6 +3272,7 @@ def get_reserved_serial_nos_for_sre(kwargs) -> list:
 			sb_entry.serial_no,
 			sre.voucher_no,
 			sre.voucher_type,
+			sre.voucher_detail_no,
 		)
 		.where(
 			(sre.docstatus == 1)

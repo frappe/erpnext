@@ -1061,6 +1061,96 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			get_sre_reserved_qty_details_for_voucher("Sales Order", so.name), {so.packed_items[0].name: 4}
 		)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_delivery_note_fills_partial_reservation_with_unreserved_serial_nos(self) -> None:
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=2)
+		so = make_sales_order(item_code=item.name, warehouse=self.warehouse, qty=5, rate=100)
+		so.create_stock_reservation_entries()
+		create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=8)
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		delivered = get_bundle_serial_nos(dn.items[0])
+		self.assertEqual(len(delivered), 5)
+		self.assertTrue(set(get_reserved_serial_nos(so)) <= set(delivered))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_delivery_note_picks_serial_nos_reserved_for_each_sales_order_row(self) -> None:
+		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		create_material_receipt(items={item.name: item}, warehouse=self.warehouse, qty=4)
+		so = make_sales_order(
+			item_code=item.name, warehouse=self.warehouse, qty=2, rate=100, do_not_submit=True
+		)
+		so.append(
+			"items",
+			{
+				"item_code": item.name,
+				"qty": 2,
+				"rate": 100,
+				"warehouse": self.warehouse,
+				"delivery_date": so.delivery_date,
+			},
+		)
+		so.submit()
+
+		# reserve the second row first, so its serial nos come first in stock
+		for row in reversed(so.items):
+			so.create_stock_reservation_entries(
+				items_details=[
+					{
+						"sales_order_item": row.name,
+						"item_code": item.name,
+						"warehouse": self.warehouse,
+						"qty_to_reserve": 2,
+					}
+				]
+			)
+			so.reload()
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		for row in dn.items:
+			self.assertEqual(get_bundle_serial_nos(row), get_reserved_serial_nos(so, row.so_detail))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1, "allow_negative_stock": 0},
+	)
+	def test_delivery_note_picks_serial_nos_reserved_for_bundle_component(self) -> None:
+		component = make_item(properties={"is_stock_item": 1, "has_serial_no": 1})
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		frappe.get_doc(
+			{
+				"doctype": "Product Bundle",
+				"new_item_code": bundle,
+				"items": [{"item_code": component.name, "qty": 2}],
+			}
+		).insert().submit()
+		create_material_receipt(items={component.name: component}, warehouse=self.warehouse, qty=4)
+		so = make_sales_order(item_code=bundle, qty=2, warehouse=self.warehouse, do_not_submit=True)
+		so.reserve_stock = 1
+		so.packed_items[0].reserve_stock = 1
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(
+			get_bundle_serial_nos(dn.packed_items[0]), get_reserved_serial_nos(so, so.packed_items[0].name)
+		)
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_delivery_consumes_bundle_component_reservation_from_other_warehouse(self) -> None:
 		from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
@@ -1522,6 +1612,21 @@ def get_reserved_batch_nos(sales_order: str) -> set:
 	).run(pluck=True)
 
 	return set(batch_nos)
+
+
+def get_bundle_serial_nos(row) -> list:
+	return sorted(
+		frappe.get_all("Serial and Batch Entry", {"parent": row.serial_and_batch_bundle}, pluck="serial_no")
+	)
+
+
+def get_reserved_serial_nos(so, so_detail=None) -> list:
+	filters = {"voucher_no": so.name, "docstatus": 1}
+	if so_detail:
+		filters["voucher_detail_no"] = so_detail
+
+	sre = frappe.get_all("Stock Reservation Entry", filters, pluck="name")
+	return sorted(frappe.get_all("Serial and Batch Entry", {"parent": ["in", sre]}, pluck="serial_no"))
 
 
 def create_material_receipt(
