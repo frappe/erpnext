@@ -218,7 +218,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 						credit_amount = item.base_net_amount
 						if doc.is_internal_supplier and item.valuation_rate:
-							credit_amount = flt(item.valuation_rate * item.stock_qty)
+							credit_amount = flt(item.valuation_rate * get_stock_qty(item, item.qty))
 
 						rejected_amount = self.make_rejected_warehouse_gl_entry(
 							gl_entries, item, voucher_wise_stock_value, inventory_account_map
