@@ -15,7 +15,7 @@ frappe.ui.form.on("Blanket Order", {
 			if (doc.closed) {
 				return "gray";
 			}
-			return flt(doc.ordered_qty) >= flt(doc.qty) ? "green" : "orange";
+			return flt(doc.ordered_qty) >= flt(doc.stock_qty) ? "green" : "orange";
 		});
 
 		frm.custom_make_buttons = {
@@ -162,11 +162,25 @@ frappe.ui.form.on("Blanket Order", {
 });
 
 frappe.ui.form.on("Blanket Order Item", {
-	item_code: apply_item_pricing,
+	item_code: function (frm, cdt, cdn) {
+		locals[cdt][cdn].uom = "";
+		locals[cdt][cdn].conversion_factor = 0;
+		return apply_item_pricing(frm, cdt, cdn);
+	},
 
-	qty: apply_item_pricing,
+	uom: apply_item_pricing,
+
+	qty: function (frm, cdt, cdn) {
+		calculate_stock_qty(cdt, cdn);
+		return apply_item_pricing(frm, cdt, cdn);
+	},
+
+	conversion_factor: function (frm, cdt, cdn) {
+		return calculate_stock_qty(cdt, cdn);
+	},
 
 	rate: function (frm, cdt, cdn) {
+		calculate_stock_uom_rate(cdt, cdn);
 		return set_base_rate(frm, frappe.get_doc(cdt, cdn));
 	},
 });
@@ -208,43 +222,34 @@ const blanket_order_pricing = {
 			return;
 		}
 
-		if (frm.__applying_blanket_order_price_list) {
-			frm.__pending_blanket_order_price_list = { item_name, options };
+		let response = await frappe.call({
+			method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.apply_price_list",
+			args: {
+				doc: frm.doc,
+				item_name,
+				reset_party_values: options.reset_party_values,
+				reset_conversion_rate: options.reset_conversion_rate,
+				reset_plc_conversion_rate: options.reset_plc_conversion_rate,
+			},
+		});
+		if (!response.message) {
 			return;
 		}
 
-		frm.__applying_blanket_order_price_list = true;
-		let pending;
-		try {
-			let response = await frappe.call({
-				method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.apply_price_list",
-				args: {
-					doc: frm.doc,
-					item_name,
-					reset_party_values: options.reset_party_values,
-					reset_conversion_rate: options.reset_conversion_rate,
-					reset_plc_conversion_rate: options.reset_plc_conversion_rate,
-				},
-			});
-			if (response.message) {
-				await frm.set_value(response.message.parent);
-				for (const values of response.message.children) {
-					let { name, ...fields } = values;
-					let item = (frm.doc.items || []).find((row) => row.name === name);
-					if (item) {
-						await frappe.model.set_value(item.doctype, item.name, fields);
-					}
-				}
-				this.update_labels(frm);
+		Object.assign(frm.doc, response.message.parent);
+		for (const fieldname of Object.keys(response.message.parent)) {
+			frm.refresh_field(fieldname);
+		}
+
+		for (const values of response.message.children) {
+			let { name, ...fields } = values;
+			let item = (frm.doc.items || []).find((row) => row.name === name);
+			if (item) {
+				Object.assign(item, fields);
 			}
-		} finally {
-			frm.__applying_blanket_order_price_list = false;
-			pending = frm.__pending_blanket_order_price_list;
-			frm.__pending_blanket_order_price_list = null;
 		}
-		if (pending) {
-			return this.apply(frm, pending.item_name, pending.options);
-		}
+		frm.refresh_field("items");
+		this.update_labels(frm);
 	},
 };
 
@@ -266,16 +271,16 @@ function add_blanket_order_status_buttons(frm) {
 
 function get_blanket_order_item_close_config() {
 	return {
-		is_closable: (item) => !item.closed && flt(item.ordered_qty) < flt(item.qty),
+		is_closable: (item) => !item.closed && flt(item.ordered_qty) < flt(item.stock_qty),
 		help: __(
 			"Closed rows can no longer be ordered. They are skipped when creating an order from this Blanket Order."
 		),
 		summarise: (item) => ({
 			item_code: item.item_code,
 			item_name: item.item_name,
-			qty: item.qty,
+			qty: item.stock_qty,
 			ordered_qty: item.ordered_qty || 0,
-			pending_qty: Math.max(flt(item.qty) - flt(item.ordered_qty), 0),
+			pending_qty: Math.max(flt(item.stock_qty) - flt(item.ordered_qty), 0),
 			stock_uom: item.stock_uom,
 		}),
 		columns: [
@@ -314,4 +319,22 @@ function set_base_rate(frm, item) {
 	frappe.model.round_floats_in(item, ["rate"]);
 	let base_rate = flt(flt(item.rate) * flt(frm.doc.conversion_rate), precision("base_rate", item));
 	return frappe.model.set_value(item.doctype, item.name, "base_rate", base_rate);
+}
+
+function calculate_stock_qty(cdt, cdn) {
+	const row = locals[cdt][cdn];
+	const conversion_factor = flt(row.conversion_factor) || 1;
+	return frappe.model
+		.set_value(cdt, cdn, "stock_qty", flt(row.qty) * conversion_factor)
+		.then(() => calculate_stock_uom_rate(cdt, cdn));
+}
+
+function calculate_stock_uom_rate(cdt, cdn) {
+	const row = locals[cdt][cdn];
+	const conversion_factor = flt(row.conversion_factor) || 1;
+	const stock_uom_rate = row.rate ? flt(row.rate) / conversion_factor : 0;
+	if (flt(row.stock_uom_rate) === flt(stock_uom_rate)) {
+		return;
+	}
+	return frappe.model.set_value(cdt, cdn, "stock_uom_rate", stock_uom_rate);
 }

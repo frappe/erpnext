@@ -17,6 +17,7 @@ class BlanketOrderItem(Document):
 		base_price_list_rate: DF.Currency
 		base_rate: DF.Currency
 		closed: DF.Check
+		conversion_factor: DF.Float
 		item_code: DF.Link
 		item_name: DF.Data | None
 		ordered_qty: DF.Float
@@ -27,8 +28,11 @@ class BlanketOrderItem(Document):
 		price_list_rate: DF.Currency
 		qty: DF.Float
 		rate: DF.Currency
+		stock_qty: DF.Float
 		stock_uom: DF.Link | None
+		stock_uom_rate: DF.Currency
 		terms_and_conditions: DF.Text | None
+		uom: DF.Link
 	# end: auto-generated types
 
 	pass

@@ -16,6 +16,7 @@ from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_conversion_factor
 
 FULFILLED_QTY_FIELD = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}
 
@@ -66,6 +67,7 @@ class BlanketOrder(StatusUpdater):
 	# end: auto-generated types
 
 	def before_validate(self):
+		self.set_item_uom()
 		if not self.blanket_order_type:
 			return
 
@@ -86,6 +88,7 @@ class BlanketOrder(StatusUpdater):
 		self.validate_item_qty()
 		self.set_party_item_code()
 		self.set_base_rates()
+		self.set_stock_qty()
 		clear_closed_rows_on_amend(self)
 
 	def before_update_after_submit(self):
@@ -105,7 +108,7 @@ class BlanketOrder(StatusUpdater):
 		self.notify_update()
 
 	def is_item_closable(self, item) -> bool:
-		return flt(item.ordered_qty) < flt(item.qty)
+		return flt(item.ordered_qty) < flt(item.stock_qty)
 
 	def validate_can_be_ordered(self, order_date) -> None:
 		self.validate_is_open()
@@ -122,9 +125,10 @@ class BlanketOrder(StatusUpdater):
 			if item.item_code not in item_data:
 				continue
 
-			precision = item.precision("qty")
-			allowed_qty = flt(item.qty + (item.qty * allowance / 100) - item.ordered_qty, precision)
-			if item.qty and allowed_qty < flt(item_data[item.item_code], precision):
+			precision = item.precision("stock_qty")
+			stock_qty = flt(item.stock_qty)
+			allowed_qty = flt(stock_qty + (stock_qty * allowance / 100) - item.ordered_qty, precision)
+			if stock_qty and allowed_qty < flt(item_data[item.item_code], precision):
 				frappe.throw(
 					_("Item {0} cannot be ordered more than {1} against Blanket Order {2}.").format(
 						item.item_code, allowed_qty, self.name
@@ -171,12 +175,13 @@ class BlanketOrder(StatusUpdater):
 			)
 
 	def set_order_rates(self, order_doc) -> None:
-		rates = {row.item_code: flt(row.rate) for row in self.items}
+		# Blanket Order Item.rate is per its UOM. Orders compare against the stock UOM rate.
+		stock_uom_rates = {row.item_code: flt(row.stock_uom_rate) for row in self.items}
 		for row in order_doc.get("items"):
-			if row.blanket_order != self.name or row.item_code not in rates:
+			if row.blanket_order != self.name or row.item_code not in stock_uom_rates:
 				continue
 
-			row.blanket_order_rate = rates[row.item_code]
+			row.blanket_order_rate = stock_uom_rates[row.item_code]
 			expected_rate = flt(
 				row.blanket_order_rate * (flt(row.conversion_factor) or 1), row.precision("rate")
 			)
@@ -329,6 +334,41 @@ class BlanketOrder(StatusUpdater):
 			if flt(d.qty) <= 0:
 				frappe.throw(_("Row {0}: Quantity must be greater than zero.").format(d.idx))
 
+	def set_item_uom(self, use_transaction_uom: bool = False):
+		for row in self.items:
+			if not row.item_code:
+				continue
+
+			item = frappe.get_cached_value(
+				"Item",
+				row.item_code,
+				["stock_uom", "sales_uom", "purchase_uom"],
+				as_dict=True,
+			)
+			if not item:
+				continue
+
+			row.stock_uom = item.stock_uom
+			if not row.uom:
+				transaction_uom = (
+					item.sales_uom if self.blanket_order_type == "Selling" else item.purchase_uom
+				)
+				row.uom = (transaction_uom or item.stock_uom) if use_transaction_uom else item.stock_uom
+
+			row.conversion_factor = get_conversion_factor(
+				row.item_code, row.uom, throw_if_missing=True
+			).conversion_factor
+
+	def set_stock_qty(self):
+		for row in self.items:
+			if not row.item_code:
+				continue
+
+			conversion_factor = flt(row.conversion_factor) or 1
+			row.conversion_factor = conversion_factor
+			row.stock_qty = flt(row.qty) * conversion_factor
+			row.stock_uom_rate = flt(row.rate) / conversion_factor
+
 	def set_base_rates(self):
 		blanket_order_pricing.set_base_rates(self)
 
@@ -374,13 +414,17 @@ def make_order(source_name: str):
 			target_doc.party_name = source_doc.customer
 
 	def update_item(source, target, source_parent):
-		target_qty = source.get("qty") - source.get("ordered_qty")
+		conversion_factor = flt(source.conversion_factor) or 1
+		remaining_stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target_qty = remaining_stock_qty / conversion_factor
 		target.qty = target_qty if flt(target_qty) >= 0 else 0
+		target.uom = source.uom
+		target.stock_uom = source.stock_uom
+		target.conversion_factor = conversion_factor
 		item = get_item_defaults(target.item_code, source_parent.company)
 		if item:
 			target.item_name = item.get("item_name")
 			target.description = item.get("description")
-			target.uom = item.get("stock_uom")
 			target.against_blanket_order = 1
 
 	target_doc = get_mapped_doc(
@@ -400,7 +444,7 @@ def make_order(source_name: str):
 				},
 				"postprocess": update_item,
 				"condition": lambda item: not item.closed
-				and (not flt(item.qty) or (flt(item.qty) - flt(item.ordered_qty)) > 0),
+				and (not flt(item.stock_qty) or (flt(item.stock_qty) - flt(item.ordered_qty)) > 0),
 			},
 		},
 	)

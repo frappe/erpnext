@@ -10,7 +10,7 @@ from erpnext import get_company_currency
 from erpnext.accounts.party import get_default_price_list as get_party_default_price_list
 from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.get_item_details import get_price_list_rate_for
+from erpnext.stock.get_item_details import get_conversion_factor, get_price_list_rate_for
 
 _ORDER_TYPE_CONFIG = {
 	"Selling": {
@@ -139,12 +139,16 @@ def get_price_list_rates(doc, item_name=None):
 	rates = []
 	for item in items:
 		stock_uom = stock_uoms.get(item.item_code)
+		uom = item.uom or stock_uom
+		conversion_factor = flt(item.conversion_factor) or 1
+		if uom and stock_uom and uom != stock_uom and not flt(item.conversion_factor):
+			conversion_factor = get_conversion_factor(item.item_code, uom).get("conversion_factor") or 1
 		ctx.update(
 			{
 				"qty": flt(item.qty) or 1,
-				"uom": stock_uom,
+				"uom": uom,
 				"stock_uom": stock_uom,
-				"conversion_factor": 1,
+				"conversion_factor": conversion_factor,
 			}
 		)
 		price_list_rate = get_price_list_rate_for(ctx, item.item_code)
@@ -214,6 +218,26 @@ def apply_price_list(
 		set_default=reset_party_values,
 		force_exchange_rate=reset_party_values or reset_plc_conversion_rate,
 	)
+	doc.set_item_uom(use_transaction_uom=True)
+
+	children = get_price_list_rates(doc, item_name)
+	items_by_name = {item.name: item for item in doc.items}
+	for child in children:
+		item = items_by_name.get(child["name"])
+		if not item:
+			continue
+
+		conversion_factor = flt(item.conversion_factor) or 1
+		rate = child.get("rate", item.rate)
+		child.update(
+			{
+				"uom": item.uom,
+				"stock_uom": item.stock_uom,
+				"conversion_factor": conversion_factor,
+				"stock_qty": flt(item.qty) * conversion_factor,
+				"stock_uom_rate": flt(rate) / conversion_factor,
+			}
+		)
 
 	return {
 		"parent": {
@@ -224,5 +248,5 @@ def apply_price_list(
 			"price_list_currency": doc.price_list_currency,
 			"plc_conversion_rate": doc.plc_conversion_rate,
 		},
-		"children": get_price_list_rates(doc, item_name),
+		"children": children,
 	}

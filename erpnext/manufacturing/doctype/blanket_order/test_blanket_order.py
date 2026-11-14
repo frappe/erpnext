@@ -918,6 +918,78 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertFalse(details)
 
+	def test_blanket_order_uom_for_sales_order(self):
+		item = make_uom_item("_Test Blanket Order UOM Item")
+		bo = make_blanket_order(
+			blanket_order_type="Selling",
+			item_code=item,
+			quantity=10,
+			uom="Box",
+		)
+		self.assertEqual(bo.items[0].stock_qty, 20)
+		self.assertEqual(bo.items[0].conversion_factor, 2)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		so.items[0].warehouse = "_Test Warehouse - _TC"
+		self.assertEqual(so.items[0].uom, "Box")
+		self.assertEqual(so.items[0].qty, 10)
+		self.assertEqual(so.items[0].conversion_factor, 2)
+		so.items[0].qty = 5
+		so.submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 10)
+
+	def test_blanket_order_uom_for_purchase_order(self):
+		item = make_uom_item("_Test Blanket Order PO UOM Item")
+		bo = make_blanket_order(
+			blanket_order_type="Purchasing",
+			item_code=item,
+			quantity=10,
+			uom="Box",
+		)
+		self.assertEqual(bo.items[0].stock_qty, 20)
+
+		frappe.flags.args.doctype = "Purchase Order"
+		po = make_order(bo.name)
+		po.currency = get_company_currency(po.company)
+		po.schedule_date = today()
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		self.assertEqual(po.items[0].uom, "Box")
+		self.assertEqual(po.items[0].conversion_factor, 2)
+		po.items[0].qty = 5
+		po.submit()
+
+		bo.reload()
+		self.assertEqual(bo.items[0].ordered_qty, 10)
+
+	def test_blanket_order_rate_follows_stock_uom_when_uom_differs(self):
+		item = make_uom_item("_Test Blanket Order Rate UOM Item", conversion_factor=12)
+		bo = make_blanket_order(
+			blanket_order_type="Selling",
+			item_code=item,
+			quantity=10,
+			rate=1200,
+			uom="Box",
+		)
+		self.assertEqual(bo.items[0].stock_qty, 120)
+		self.assertEqual(bo.items[0].stock_uom_rate, 100)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		so.items[0].update(
+			{"qty": 12, "uom": "Nos", "conversion_factor": 1, "warehouse": "_Test Warehouse - _TC"}
+		)
+		so.insert()
+		so.process_item_selection(item_idx=1)
+		self.assertEqual(so.items[0].blanket_order_rate, 100)
+		self.assertEqual(so.items[0].rate, 100)
+
 
 def make_blanket_order(**args):
 	args = frappe._dict(args)
@@ -929,18 +1001,32 @@ def make_blanket_order(**args):
 		customer=args.customer,
 		supplier=args.supplier,
 	)
-	bo.append(
-		"items",
-		{
-			"item_code": args.item_code or "_Test Item",
-			"qty": args.quantity or 1000,
-			"rate": args.rate or 100,
-		},
-	)
+	item_row = {
+		"item_code": args.item_code or "_Test Item",
+		"qty": args.quantity or 1000,
+		"rate": args.rate or 100,
+	}
+	if args.uom:
+		item_row["uom"] = args.uom
 
+	bo.append("items", item_row)
 	bo.insert()
 	bo.submit()
 	return bo
+
+
+def make_uom_item(item_code, conversion_factor=2):
+	if not frappe.db.exists("UOM", "Box"):
+		frappe.get_doc({"doctype": "UOM", "uom_name": "Box"}).insert(ignore_permissions=True)
+
+	return make_item(
+		item_code,
+		{
+			"is_stock_item": 1,
+			"stock_uom": "Nos",
+			"uoms": [{"uom": "Box", "conversion_factor": conversion_factor}],
+		},
+	).name
 
 
 def receive_purchase_order(po, qty):

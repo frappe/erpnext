@@ -2088,7 +2088,7 @@ def _get_blanket_order_details(ctx: ItemDetailsCtx):
 		query = (
 			frappe.qb.from_(bo)
 			.from_(bo_item)
-			.select(bo_item.rate.as_("blanket_order_rate"), bo.name.as_("blanket_order"))
+			.select(bo_item.stock_uom_rate.as_("blanket_order_rate"), bo.name.as_("blanket_order"))
 			.where(
 				(bo.company == ctx.company)
 				& (bo_item.item_code == ctx.item_code)
@@ -2096,7 +2096,7 @@ def _get_blanket_order_details(ctx: ItemDetailsCtx):
 				& (bo.status != "Closed")
 				& (bo_item.closed == 0)
 				& (bo.name == bo_item.parent)
-				& (bo_item.ordered_qty < bo_item.qty * (1 + allowance / 100))
+				& (bo_item.ordered_qty < bo_item.stock_qty * (1 + allowance / 100))
 			)
 			.orderby(bo.to_date)
 			.orderby(bo.name)
