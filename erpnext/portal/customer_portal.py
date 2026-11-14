@@ -930,7 +930,10 @@ def _item_names(parenttype: str, parents: list[str]) -> dict[str, list[str]]:
 		fields=["parent", "item_name"],
 		order_by="idx",
 	):
-		names.setdefault(row.parent, []).append(row.item_name)
+		listed = names.setdefault(row.parent, [])
+		# an item split over two lines (from two orders, say) is still one item
+		if row.item_name not in listed:
+			listed.append(row.item_name)
 	return names
 
 
