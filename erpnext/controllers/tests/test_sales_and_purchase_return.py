@@ -193,6 +193,17 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 0})
+	def test_delivery_note_split_return_of_one_row_brings_back_its_ledger_qty(self):
+		return_dn = make_split_return_of_box_item(conversion_factor=0.3356, delivery_rows=1)
+		for row in return_dn.items:
+			row.dn_detail = return_dn.items[0].dn_detail
+		return_dn.submit()
+
+		dn = frappe.get_doc("Delivery Note", return_dn.return_against)
+		self.assertEqual(get_posted_stock_qty(return_dn), -get_posted_stock_qty(dn))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_delivery_note_full_return_when_earlier_rows_round_up(self):
 		return_dn = make_split_return_of_box_item(conversion_factor=0.338, delivery_rows=3)
 		return_dn.insert()
