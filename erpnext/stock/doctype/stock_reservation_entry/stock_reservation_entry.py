@@ -1811,6 +1811,7 @@ class StockReservation:
 		elif to_doctype == "Subcontracting Order":
 			query = query.select(
 				child_doctype.stock_reserved_qty,
+				child_doctype.required_qty,
 				child_doctype.required_qty.as_("qty"),
 				child_doctype.reserve_warehouse.as_("source_warehouse"),
 			)
