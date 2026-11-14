@@ -610,8 +610,10 @@ def get_valid_items(doc):
 
 		valid_items = get_ref_item_dict(valid_items, d)
 		if doc.doctype == "Delivery Note":
-			# the item's total is what its rows posted, each rounded by the stock ledger
-			stock_qty = flt(d.stock_qty, frappe.get_precision("Delivery Note Item", "stock_qty"))
+			# a stock item's total is what its rows posted, each rounded by the stock ledger
+			stock_qty = d.stock_qty
+			if frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+				stock_qty = flt(stock_qty, frappe.get_precision("Delivery Note Item", "stock_qty"))
 			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None, stock_qty=stock_qty))
 
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
