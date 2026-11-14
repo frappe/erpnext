@@ -319,6 +319,13 @@ def get_stale_row_idx(stale_rows, location=None):
 	return next((idx for idx, row in enumerate(stale_rows) if is_packed_from(row, location)), 0)
 
 
+def get_location_filters(row) -> dict:
+	"""Filters that tell apart a component's packed rows of one bundle row, or their ledger entries."""
+	if row.serial_and_batch_bundle:
+		return {"serial_and_batch_bundle": row.serial_and_batch_bundle}
+	return {"warehouse": row.warehouse}
+
+
 def is_packed_from(pi_row, location):
 	"""Whether a packed row holds serial nos of the Pick List row ``location``, or its warehouse and batch."""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
