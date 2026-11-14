@@ -365,7 +365,7 @@ def create_payment_entry_bts(
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
-		fieldname=["name", "unallocated_amount", "deposit", "bank_account", "currency"],
+		fieldname=["name", "unallocated_amount", "deposit", "bank_account"],
 		as_dict=True,
 	)[0]
 
@@ -375,13 +375,7 @@ def create_payment_entry_bts(
 	company = frappe.get_cached_value("Account", bank_account, "company")
 	party_account = get_party_account(party_type, party, company)
 
-	bank_currency = bank_transaction.currency
-	party_currency = frappe.get_cached_value("Account", party_account, "account_currency")
-
-	exc_rate = get_exchange_rate(bank_currency, party_currency, posting_date)
-
 	amt_in_bank_acc_currency = bank_transaction.unallocated_amount
-	amount_in_party_currency = bank_transaction.unallocated_amount * exc_rate
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
@@ -393,13 +387,12 @@ def create_payment_entry_bts(
 	pe.posting_date = posting_date
 	pe.paid_from = party_account if payment_type == "Receive" else bank_account
 	pe.paid_to = party_account if payment_type == "Pay" else bank_account
-	pe.paid_from_account_currency = party_currency if payment_type == "Receive" else bank_currency
-	pe.paid_to_account_currency = party_currency if payment_type == "Pay" else bank_currency
-	pe.paid_amount = amount_in_party_currency if payment_type == "Receive" else amt_in_bank_acc_currency
-	pe.received_amount = amount_in_party_currency if payment_type == "Pay" else amt_in_bank_acc_currency
+	pe.paid_amount = amt_in_bank_acc_currency if payment_type == "Pay" else 0
+	pe.received_amount = amt_in_bank_acc_currency if payment_type == "Receive" else 0
 	pe.mode_of_payment = mode_of_payment
 	pe.project = project
 	pe.cost_center = cost_center
+	set_multi_currency_amounts(pe)
 
 	if company_bank_account:
 		pe.bank_account = company_bank_account
