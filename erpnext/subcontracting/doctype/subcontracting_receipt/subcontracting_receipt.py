@@ -11,7 +11,11 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.controllers.subcontracting_controller import (
+	SubcontractingController,
+	get_received_stock_qty,
+	get_repeated_bom_rows,
+)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -912,23 +916,43 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def get_rm_wise_required_qty(self):
-		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped."""
-		rm_dict = {}
+		"""BOM required qty per raw material over all rows; rows whose BOM allows alternative items are skipped.
+		An order row needs the BOM qty of all it received so far, less what earlier receipts consumed."""
+		earlier_receipts = self.get_earlier_receipts_bom_consumption()
+		rm_dict, order_rows = {}, {}
 
 		for row in self.items:
 			if frappe.db.get_value("BOM", row.bom, "allow_alternative_item"):
 				continue
 
-			for bom_item in self._get_materials_from_bom(
+			order_item = row.get("subcontracting_order_item")
+			materials = self._get_materials_from_bom(
 				row.item_code, row.bom, row.get("include_exploded_items")
-			):
+			)
+			repeated_bom_rows = get_repeated_bom_rows(materials)
+			for bom_item in materials:
 				required = rm_dict.setdefault(
 					bom_item.rm_item_code, frappe._dict(qty=0.0, stock_uom=bom_item.stock_uom)
 				)
-				required.qty += flt(
-					bom_item.qty_consumed_per_unit * self.get_qty_for_costing(row) * row.conversion_factor,
-					row.precision("qty"),
+				if earlier_receipts is None or not order_item or bom_item.bom_detail_no in repeated_bom_rows:
+					required.qty += flt(
+						bom_item.qty_consumed_per_unit
+						* self.get_qty_for_costing(row)
+						* row.conversion_factor,
+						row.precision("qty"),
+					)
+					continue
+
+				order_row = order_rows.setdefault(
+					(order_item, row.bom, bom_item.bom_detail_no),
+					frappe._dict(row=row, bom_item=bom_item, received_qty=0.0),
 				)
+				order_row.received_qty += get_received_stock_qty(row)
+
+		for order_row in order_rows.values():
+			rm_dict[order_row.bom_item.rm_item_code].qty += self.get_cumulative_bom_qty(
+				order_row.row, order_row.bom_item, order_row.received_qty, earlier_receipts
+			)
 
 		return rm_dict
 
