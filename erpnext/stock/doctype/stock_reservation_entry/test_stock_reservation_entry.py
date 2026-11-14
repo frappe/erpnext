@@ -709,6 +709,52 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		dn.cancel()
 		self.assertEqual(self.get_reservation_status(so), "Reserved")
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+		},
+	)
+	def test_bundle_component_reserved_in_fractional_batch_qty_delivers_every_reservation(self) -> None:
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item(
+			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TSRB-.#####"}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component])
+		for _i in range(3):
+			make_stock_entry(item_code=component, target=self.warehouse, qty=0.34, basic_rate=100)
+
+		so = make_sales_order(item_code=bundle, warehouse=self.warehouse, qty=1)
+		# one batch each; the packed row's delivery makes one bundle for all three
+		for qty in (0.336, 0.336, 0.328):
+			so.create_stock_reservation_entries(
+				items_details=[
+					{
+						"sales_order_item": so.packed_items[0].name,
+						"item_code": component,
+						"warehouse": self.warehouse,
+						"qty_to_reserve": qty,
+					}
+				],
+				notify=False,
+			)
+
+		make_delivery_note(so.name, kwargs={"for_reserved_stock": 1}).submit()
+
+		self.assertEqual(
+			frappe.get_all(
+				"Stock Reservation Entry", {"voucher_no": so.name, "docstatus": 1}, pluck="status"
+			),
+			["Delivered"] * 3,
+		)
+
 	def get_reservation_status(self, so):
 		return _get_stock_reservation_entries_for_voucher(
 			"Sales Order", so.name, so.items[0].name, fields=["status"]
