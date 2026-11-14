@@ -310,6 +310,26 @@ class SubcontractingController(StockController):
 					if (supplied_item.reference_name, supplied_item.rm_item_code) == (row.name, rm_item_code)
 				)
 
+	def validate_returned_raw_materials(self):
+		"""Returns together take back no more of a raw material than the returned receipt consumed."""
+		materials = self.get_returnable_raw_materials()
+		receipt_rows = {row.name: row.subcontracting_receipt_item for row in self.items}
+		returned_qty = defaultdict(float)
+		for row in self.supplied_items:
+			returned_qty[(receipt_rows.get(row.reference_name), row.rm_item_code)] += abs(
+				flt(row.consumed_qty)
+			)
+
+		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
+		for (receipt_row, rm_item_code), qty in returned_qty.items():
+			material = materials.get(receipt_row, {}).get(rm_item_code)
+			if material and flt(material.returned_qty + qty - material.consumed_qty, precision) > 0:
+				frappe.throw(
+					_(
+						"Returns of {0} would take back more of raw material {1} than it consumed. Use Reset Raw Materials Table to pick the raw materials again."
+					).format(get_link_to_form(self.doctype, self.return_against), frappe.bold(rm_item_code))
+				)
+
 	def get_return_consumed_qty(self, material):
 		"""Rounded on the running finished good total, so that all returns add up to what the receipt consumed."""
 		share = min(material.returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
