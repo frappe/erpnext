@@ -33,3 +33,13 @@ class TestBuyingSettings(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
 	def test_rejected_material_of_subcontracting_receipt_is_not_valued(self):
 		self.assertFalse(is_rejected_material_valued("Subcontracting Receipt"))
+
+	def test_unchanged_save_keeps_site_cache(self):
+		settings = frappe.get_single("Buying Settings")
+		settings.supplier_group = None
+		settings.save()
+
+		frappe.cache.set_value("buying_settings_probe", 1)
+		settings.save()
+
+		self.assertEqual(frappe.cache.get_value("buying_settings_probe"), 1)

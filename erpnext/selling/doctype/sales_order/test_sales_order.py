@@ -1455,6 +1455,24 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 200.34669)
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
+	def test_sales_invoice_does_not_show_an_address_the_user_cannot_read(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		allowed, restricted = (make_address(address_title=title).name for title in ("Allowed", "Restricted"))
+		test_user = create_user("test_so_address_perms@example.com", "Sales User", "Accounts User")
+		frappe.permissions.add_user_permission("Address", allowed, test_user.name, applicable_for="Address")
+		so = make_sales_order(customer=make_customer(frappe.generate_hash(length=10)))
+
+		with self.set_user(test_user.name):
+			self.assertTrue(make_sales_invoice(so.name).items)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_sales_invoice,
+				so.name,
+				target_doc={"doctype": "Sales Invoice", "shipping_address_name": restricted},
+			)
+
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 
@@ -1473,6 +1491,15 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertRaises(
 				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
 			)
+
+	def test_make_sales_invoice_checks_item_permission_of_target_rows(self):
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		user = create_user("test_so_target_item_perm@example.com", "Sales User", "Accounts User").name
+		frappe.permissions.add_user_permission("Item", "_Test Item", user, applicable_for="Item")
+		target = {"doctype": "Sales Invoice", "items": [{"item_code": "_Test Item 2", "qty": 1}]}
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=target)
 
 	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
 		for workflow_name in frappe.get_all(
