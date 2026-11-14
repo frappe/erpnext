@@ -637,10 +637,11 @@ def get_return_qty(doc, item_row, component_rows, returned_packed_qty) -> dict:
 	if not doc.get("is_return"):
 		return {}
 
+	# rows split from one component share it; a component repeated on the bundle is its own
 	delivered_rows = {}
 	for component, so_packed_item in component_rows:
 		if so_packed_item:
-			delivered_rows.setdefault(component.item_code, []).append(so_packed_item)
+			delivered_rows.setdefault(id(component), []).append(so_packed_item)
 
 	precision = frappe.get_precision("Packed Item", "qty")
 	return_qty = {}
