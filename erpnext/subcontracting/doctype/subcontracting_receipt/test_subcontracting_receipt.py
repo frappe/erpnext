@@ -3,6 +3,11 @@
 
 
 import copy
+<<<<<<< HEAD
+=======
+from collections import defaultdict
+from unittest.mock import patch
+>>>>>>> 8a2bc17 (test: Subcontract Returns take back the raw materials the receipt consumed)
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -3781,6 +3786,69 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
 
+<<<<<<< HEAD
+=======
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_supplied_row_skips_serial_nos_held_by_another_row(self):
+		set_backflush_based_on("BOM")
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SCR-HELD-.####"}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		service_item = {
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 1,
+			"rate": 50,
+			"fg_item": fg_item,
+			"fg_item_qty": 1,
+		}
+		sco = get_subcontracting_order(service_items=[service_item, service_item.copy()])
+		# not transferred against the order, so the receipt picks the serial nos itself
+		make_stock_entry(item_code=rm_item, target=sco.supplier_warehouse, qty=4, basic_rate=100)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+
+		self.assertEqual([len(row.serial_no.splitlines()) for row in scr.supplied_items], [2, 2])
+
+	def test_return_takes_back_the_raw_material_the_receipt_consumed_per_unit(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		scr = make_receipt_consuming_transferred_materials(qty=2, rm_items={rm_item: 3})
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
+
+		stock_adjustment = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_no": scr_return.name,
+				"account": frappe.get_cached_value("Company", scr.company, "stock_adjustment_account"),
+				"is_cancelled": 0,
+			},
+		)
+		self.assertEqual(scr_return.supplied_items[0].consumed_qty, -1.5)
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+		self.assertFalse(stock_adjustment)
+
+	def test_partial_returns_take_back_all_consumed_raw_materials(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		# transferred for the order but not in its BOM
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		scr = make_receipt_consuming_transferred_materials(qty=3, rm_items={rm_item: 10, other_item: 2})
+
+		returned = defaultdict(float)
+		for _ in range(3):
+			scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
+			for row in scr_return.supplied_items:
+				returned[row.rm_item_code] += row.consumed_qty
+
+		self.assertEqual(
+			{item: flt(qty, 2) for item, qty in returned.items()}, {rm_item: -10, other_item: -2}
+		)
+
+>>>>>>> 8a2bc17 (test: Subcontract Returns take back the raw materials the receipt consumed)
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -4601,6 +4669,52 @@ def make_receipt_with_scrap_item():
 	return scr
 
 
+<<<<<<< HEAD
+=======
+def make_receipt_consuming_transferred_materials(qty, rm_items):
+	"""Submitted receipt for qty of a finished good whose BOM needs 1 of the first raw material per unit,
+	consuming the qty of each raw material transferred for its order."""
+	set_backflush_based_on("Material Transferred for Subcontract")
+	company = "_Test Company with perpetual inventory"
+	fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+	make_bom(item=fg_item, raw_materials=[next(iter(rm_items))], company=company, currency="INR", rate=100)
+	sco = get_subcontracting_order(
+		company=company,
+		warehouse="Stores - TCP1",
+		supplier_warehouse="Work In Progress - TCP1",
+		service_items=[
+			{
+				"warehouse": "Stores - TCP1",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": qty,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": qty,
+			}
+		],
+	)
+	bom_row = get_rm_items(sco.supplied_items)[0]
+	transfer_rows = [{**bom_row, "item_code": item, "qty": item_qty} for item, item_qty in rm_items.items()]
+	make_stock_transfer_entry(
+		sco_no=sco.name, rm_items=transfer_rows, itemwise_details=make_stock_in_entry(rm_items=transfer_rows)
+	)
+	scr = make_subcontracting_receipt(sco.name)
+	scr.submit()
+	return scr
+
+
+def make_partial_return(scr_name, fg_qty):
+	"""Submitted return of fg_qty of the receipt's finished good, saved as outside tests."""
+	scr_return = make_return_doc("Subcontracting Receipt", scr_name)
+	scr_return.items[0].qty = -fg_qty
+	# outside tests, the first save rebuilds the secondary rows
+	with patch.object(frappe, "in_test", False):
+		scr_return.save()
+	scr_return.submit()
+	return scr_return
+
+
+>>>>>>> 8a2bc17 (test: Subcontract Returns take back the raw materials the receipt consumed)
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
 	return_doc = make_return_doc("Subcontracting Receipt", args.scr_name)
