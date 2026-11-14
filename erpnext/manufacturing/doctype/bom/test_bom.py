@@ -1545,6 +1545,43 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("BOM", bom.name, "quantity"), 1)
 		self.assertEqual(frappe.db.get_value("BOM Item", {"parent": bom.name}, "qty"), 1)
 
+	def test_get_routing_checks_routing_read_permission(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import create_routing
+
+		routing = create_routing(
+			routing_name="_Test BOM Routing Read",
+			operations=[
+				{"operation": "_Test Operation 1", "workstation": "_Test Workstation 1", "time_in_mins": 45}
+			],
+		)
+
+		def new_bom_with_routing():
+			bom = frappe.new_doc("BOM")
+			bom.update(
+				{
+					"item": "_Test FG Item",
+					"company": "_Test Company",
+					"quantity": 1,
+					"currency": "INR",
+					"conversion_rate": 1,
+					"with_operations": 1,
+					"routing": routing.name,
+				}
+			)
+			return bom
+
+		bom = new_bom_with_routing()
+		with self.set_user(make_user_with_roles("bom-routing-stock-user@example.com", "Stock User")):
+			self.assertRaises(frappe.PermissionError, bom.get_routing)
+		self.assertFalse(bom.operations)
+
+		bom = new_bom_with_routing()
+		with self.set_user(make_user_with_roles("bom-routing-maker@example.com", "Manufacturing User")):
+			bom.get_routing()
+		self.assertEqual(
+			[(row.operation, row.time_in_mins) for row in bom.operations], [("_Test Operation 1", 45)]
+		)
+
 	def test_update_cost_without_save_writes_nothing(self):
 		import json
 
