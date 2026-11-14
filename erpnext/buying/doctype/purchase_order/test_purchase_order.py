@@ -242,21 +242,66 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_orders_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
+		item = make_item_with_fractional_box()
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
+		self.assert_orders_for_parts_add_up(mr.items[0], lambda: make_purchase_order(mr.name))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_supplier_quotation_add_up_to_its_stock_qty(self):
+		from erpnext.buying.doctype.supplier_quotation.mapper import (
+			make_purchase_order as make_po_from_sq,
+		)
+
+		item = make_item_with_fractional_box()
+		sq = frappe.get_doc(
+			{
+				"doctype": "Supplier Quotation",
+				"supplier": "_Test Supplier",
+				"company": "_Test Company",
+				"items": [
+					{
+						"item_code": item,
+						"qty": 3,
+						"uom": "Box",
+						"rate": 100,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
+			}
+		).insert()
+		sq.submit()
+
+		def make_order():
+			po = make_po_from_sq(sq.name)
+			po.schedule_date = add_days(nowdate(), 1)
+			return po
+
+		self.assert_orders_for_parts_add_up(sq.items[0], make_order)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_orders_for_parts_of_a_sales_order_add_up_to_its_stock_qty(self):
+		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		# the order maps the rest as a fraction of a Box, so the UOM must allow it
+		if not frappe.db.exists("UOM", "_Test Fractional Box"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Fractional Box"}).insert()
+		item = make_item_with_fractional_box("_Test Fractional Box")
+		so = make_sales_order(item_code=item, qty=3, uom="_Test Fractional Box")
+		selected_items = [{"name": so.items[0].name, "supplier": "_Test Supplier"}]
+		self.assert_orders_for_parts_add_up(
+			so.items[0], lambda: make_po_from_so(so.name, selected_items=selected_items)[0]
+		)
+
+	def assert_orders_for_parts_add_up(self, source_row, make_order):
+		"""Orders of 1 + 1 + 1 Box for a 3 Box source row add up to its stock qty; over-ordering fails."""
 		from erpnext.controllers.status_updater import OverAllowanceError
 
 		frappe.db.set_single_value("Buying Settings", "over_order_allowance", 0)
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "Kg",
-				"uoms": [{"uom": "Box", "conversion_factor": 0.666666667}],
-			}
-		).name
-		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.666666667)
 
 		def order(qty):
-			po = make_purchase_order(mr.name)
+			po = make_order()
 			po.supplier = "_Test Supplier"
 			po.items[0].qty = qty
 			return po
@@ -268,8 +313,8 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		order(1).submit()
 
 		self.assertEqual(
-			frappe.db.get_value("Material Request Item", mr.items[0].name, "ordered_qty"),
-			mr.items[0].stock_qty,
+			frappe.db.get_value(source_row.doctype, source_row.name, "ordered_qty"),
+			flt(source_row.stock_qty, source_row.precision("stock_qty")),
 		)
 
 	def test_over_order_allowance_against_material_request(self) -> None:
@@ -2830,3 +2875,14 @@ def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 
 def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
+
+
+def make_item_with_fractional_box(uom="Box"):
+	"""Stock item in Kg whose ``uom`` is 2/3 Kg, so the stock qty of ordered ``uom`` is rounded."""
+	return make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"uoms": [{"uom": uom, "conversion_factor": 0.666666667}],
+		}
+	).name
