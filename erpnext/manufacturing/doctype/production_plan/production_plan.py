@@ -165,8 +165,7 @@ class ProductionPlan(Document):
 		self.validate_sales_orders()
 		self.validate_material_request_type()
 		self.validate_raw_material_group_warehouse()
-		if self.for_warehouse:
-			validate_warehouse_company(self.for_warehouse, self.company)
+		self.validate_warehouse_belongs_to_company()
 		clear_reserve_stock_if_disabled(self)
 		self.enable_auto_reserve_stock()
 
@@ -187,6 +186,17 @@ class ProductionPlan(Document):
 				_("The items of the plan changed, so its schedule was cleared. Use Schedule Items again."),
 				alert=True,
 			)
+
+	def validate_warehouse_belongs_to_company(self):
+		warehouses = {self.for_warehouse, self.sub_assembly_warehouse}
+		warehouses.update(row.warehouse for row in self.po_items)
+		warehouses.update(row.fg_warehouse for row in self.sub_assembly_items)
+		for row in self.mr_items:
+			warehouses.update((row.warehouse, row.from_warehouse))
+
+		for warehouse in warehouses:
+			if warehouse:
+				validate_warehouse_company(warehouse, self.company)
 
 	def validate_raw_material_group_warehouse(self):
 		if not self.raw_material_group_warehouse:
