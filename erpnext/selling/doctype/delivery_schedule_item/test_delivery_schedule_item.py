@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
@@ -80,3 +81,65 @@ class TestDeliveryScheduleItem(IntegrationTestCase):
 		)
 		self.assertEqual(len(schedules), 1)
 		self.assertEqual(schedules[0].qty, 10)
+
+	def test_schedule_of_another_order_is_not_taken_over(self):
+		other_so = make_sales_order(qty=10, do_not_submit=True)
+		DeliveryScheduleService(other_so).create_delivery_schedule(
+			other_so.items[0], [{"delivery_date": today(), "qty": 10}]
+		)
+		other_schedule = frappe.get_all(
+			"Delivery Schedule Item", {"sales_order": other_so.name}, pluck="name"
+		)
+
+		so = make_sales_order(qty=10, do_not_submit=True)
+		row = so.items[0]
+		DeliveryScheduleService(so).create_delivery_schedule(
+			row, [{"name": other_schedule[0], "delivery_date": today(), "qty": 4}]
+		)
+
+		self.assertEqual(
+			frappe.db.get_value("Delivery Schedule Item", other_schedule[0], ["sales_order", "qty"]),
+			(other_so.name, 10),
+		)
+		self.assertEqual(self._scheduled_qty(so, row.name), [4])
+
+		with self.assertRaises(frappe.ValidationError):
+			DeliveryScheduleService(so).create_delivery_schedule(
+				other_so.items[0], [{"delivery_date": today(), "qty": 1}]
+			)
+
+	def test_schedule_takes_item_details_from_the_order_row(self):
+		so = make_sales_order(qty=10, do_not_submit=True)
+		row = so.items[0]
+		request_row = row.as_dict()
+		request_row.update({"item_code": "_Test Item 2", "conversion_factor": 5, "warehouse": None})
+
+		DeliveryScheduleService(so).create_delivery_schedule(
+			request_row, [{"delivery_date": today(), "qty": 4}]
+		)
+
+		schedule = frappe.get_all(
+			"Delivery Schedule Item",
+			{"sales_order": so.name},
+			["item_code", "warehouse", "conversion_factor", "stock_qty"],
+		)
+		self.assertEqual(len(schedule), 1)
+		self.assertEqual(schedule[0].item_code, row.item_code)
+		self.assertEqual(schedule[0].warehouse, row.warehouse)
+		self.assertEqual(schedule[0].conversion_factor, row.conversion_factor)
+		self.assertEqual(schedule[0].stock_qty, 4 * row.conversion_factor)
+
+	def test_schedule_needs_write_access_to_the_order(self):
+		so = make_sales_order(qty=10, do_not_submit=True)
+		row = so.items[0]
+		create_user("delivery-schedule-reader@example.com", "Stock User")
+
+		frappe.set_user("delivery-schedule-reader@example.com")
+		try:
+			self.assertTrue(so.has_permission("read"))
+			with self.assertRaises(frappe.PermissionError):
+				so.create_delivery_schedule(row.as_dict(), [{"delivery_date": None, "qty": 10}])
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertFalse(frappe.db.exists("Delivery Schedule Item", {"sales_order": so.name}))
