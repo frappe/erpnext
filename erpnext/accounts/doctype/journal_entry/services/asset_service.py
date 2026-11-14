@@ -35,6 +35,62 @@ class AssetService:
 				if frappe.get_cached_value("Account", d.account, "root_type") != "Expense":
 					frappe.throw(_("Account {0} should be of type Expense").format(d.account))
 
+	def validate_depreciated_assets(self) -> None:
+		"""A Depreciation Entry can only depreciate a submitted, not disposed asset of the
+		same company, by no more than its value after depreciation."""
+		if self.doc.voucher_type != "Depreciation Entry":
+			return
+
+		depreciation = {}
+		for d in self.doc.get("accounts"):
+			if (
+				d.reference_type == "Asset"
+				and d.reference_name
+				and frappe.get_cached_value("Account", d.account, "root_type") == "Expense"
+				and d.debit
+			):
+				depreciation.setdefault(d.reference_name, []).append(d)
+
+		for asset_name, rows in depreciation.items():
+			asset = frappe.get_doc("Asset", asset_name)
+			if asset.docstatus != 1:
+				frappe.throw(_("Row {0}: Asset {1} is not submitted").format(rows[0].idx, asset_name))
+			if asset.company != self.doc.company:
+				frappe.throw(
+					_("Row {0}: Asset {1} does not belong to Company {2}").format(
+						rows[0].idx, asset_name, self.doc.company
+					)
+				)
+			if asset.status in ("Sold", "Scrapped", "Capitalized"):
+				frappe.throw(
+					_("Row {0}: Asset {1} cannot be depreciated, it is already {2}").format(
+						rows[0].idx, asset_name, _(asset.status)
+					)
+				)
+
+			precision = rows[0].precision("debit")
+			value_after_depreciation = flt(self.get_value_after_depreciation(asset), precision)
+			total = flt(sum(flt(d.debit) for d in rows), precision)
+			if total > value_after_depreciation:
+				frappe.throw(
+					_(
+						"Row {0}: Depreciation {1} for Asset {2} cannot be greater than its value after depreciation {3}"
+					).format(rows[0].idx, total, asset_name, value_after_depreciation)
+				)
+
+	def get_value_after_depreciation(self, asset) -> float:
+		"""Value after depreciation of the finance book this entry depreciates."""
+		if not (asset.calculate_depreciation and asset.get("finance_books")):
+			return asset.value_after_depreciation
+
+		fb_idx = 1
+		if self.doc.finance_book:
+			for fb_row in asset.get("finance_books"):
+				if fb_row.finance_book == self.doc.finance_book:
+					fb_idx = fb_row.idx
+					break
+		return asset.get("finance_books")[fb_idx - 1].value_after_depreciation
+
 	def has_asset_adjustment_entry(self) -> None:
 		"""Block cancellation while a submitted Asset Value Adjustment links to this entry."""
 		if self.doc.flags.get("via_asset_value_adjustment"):
