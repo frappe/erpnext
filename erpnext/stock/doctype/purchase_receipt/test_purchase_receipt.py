@@ -7857,33 +7857,17 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	def test_returned_internal_pr_can_be_received_again(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		company = "_Test Company with perpetual inventory"
 		item = make_item("_Test Item For Internal PR Return", {"is_stock_item": 1}).name
-		make_purchase_receipt(item_code=item, company=company, warehouse="Stores - TCP1", qty=6, rate=100)
-		dn = create_delivery_note(
-			item_code=item,
-			company=company,
-			customer="_Test Internal Customer 2",
-			cost_center="Main - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			qty=6,
-			rate=100,
-			warehouse="Stores - TCP1",
-			target_warehouse="Work In Progress - TCP1",
-		)
+		dn = make_internal_delivery_note(item)
 
-		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.items[0].warehouse = "Stores - TCP1"
+		pr = make_internal_purchase_receipt(dn.name)
 		pr.submit()
 		pr_return = make_return_doc("Purchase Receipt", pr.name)
 		pr_return.submit()
 
-		pr = make_inter_company_purchase_receipt(dn.name)
+		pr = make_internal_purchase_receipt(dn.name)
 		self.assertEqual(pr.items[0].qty, 6)
-		pr.items[0].warehouse = "Stores - TCP1"
 		pr.update({"set_posting_time": 1, "posting_time": pr_return.posting_time})
 		pr.submit()
 		self.assertEqual(frappe.db.get_value("Delivery Note Item", dn.items[0].name, "received_qty"), 6)
@@ -10099,6 +10083,37 @@ def create_asset_category_for_pr_test():
 		}
 	).insert()
 	return asset_category
+
+
+def make_internal_delivery_note(item_code, qty=6):
+	"""Delivery Note of `qty` units from Stores - TCP1 to an internal customer of the same company."""
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+	company = "_Test Company with perpetual inventory"
+	receipt = make_purchase_receipt(
+		item_code=item_code, company=company, warehouse="Stores - TCP1", qty=qty, rate=100
+	)
+	bundle = receipt.items[0].serial_and_batch_bundle
+	return create_delivery_note(
+		item_code=item_code,
+		company=company,
+		customer="_Test Internal Customer 2",
+		cost_center="Main - TCP1",
+		expense_account="Cost of Goods Sold - TCP1",
+		qty=qty,
+		rate=100,
+		warehouse="Stores - TCP1",
+		target_warehouse="Work In Progress - TCP1",
+		batch_no=get_batch_from_bundle(bundle) if bundle else None,
+	)
+
+
+def make_internal_purchase_receipt(delivery_note):
+	from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+
+	pr = make_inter_company_purchase_receipt(delivery_note)
+	pr.items[0].warehouse = "Stores - TCP1"
+	return pr
 
 
 def get_sl_entries(voucher_type, voucher_no):
