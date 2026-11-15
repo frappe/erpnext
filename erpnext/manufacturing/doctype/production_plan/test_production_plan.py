@@ -1827,6 +1827,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		header, row = download_raw_material_rows(plan, warehouses=[{"warehouse": "Finished Goods - _TC"}])[:2]
 
 		self.assertEqual((flt(row[header.index("Required Qty")]), row[header.index("UOM")]), (50, "Nos"))
+		self.assertEqual(flt(row[header.index("Required Qty as per BOM")]), 50)
 
 	def test_transfer_is_taken_off_the_shortage_before_rounding_to_purchase_uom(self):
 		rm_item = make_item(
@@ -3473,6 +3474,34 @@ class TestProductionPlan(ERPNextTestSuite):
 		after_cancel = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 		self.assertEqual(after_cancel, before_qty)
 
+	def test_reserved_qty_for_production_plan_with_split_raw_material(self):
+		from erpnext.stock.utils import get_or_make_bin
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=10, source_warehouse="_Test Warehouse - _TC")
+		make_stock_entry(item_code=rm_item, qty=6, rate=100, target="_Test Warehouse 1 - _TC")
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			for_warehouse="_Test Warehouse - _TC",
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=1,
+			do_not_save=1,
+		)
+		items = get_items_for_material_requests(
+			pln.as_dict(), warehouses=[{"warehouse": "_Test Warehouse 1 - _TC"}]
+		)
+		self.assertEqual([row["material_request_type"] for row in items], ["Material Transfer", "Purchase"])
+		self.assertEqual([row["required_bom_qty"] for row in items], [6, 4])
+
+		pln.extend("mr_items", items)
+		pln.insert()
+		pln.submit()
+
+		bin_name = get_or_make_bin(rm_item, "_Test Warehouse - _TC")
+		self.assertEqual(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"), 10)
+
 	def test_from_warehouse_for_purchase_material_request(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.utils import get_or_make_bin
@@ -3783,7 +3812,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual([row["quantity"] for row in items], [117, 133, 1000])
 		self.assertEqual(items[0]["from_warehouse"], source_warehouse)
 		self.assertEqual([row["warehouse"] for row in items], [pln.for_warehouse] * 3)
-		self.assertEqual([row["required_bom_qty"] for row in items], [250, 250, 1000])
+		self.assertEqual([row["required_bom_qty"] for row in items], [117, 133, 1000])
 		self.assertEqual(
 			[row["sales_order"] for row in items],
 			[pln.po_items[0].sales_order] * 2 + [pln.po_items[1].sales_order],
