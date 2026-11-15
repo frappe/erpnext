@@ -52,6 +52,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	set_amount_net_of_returns,
 	update_billed_amount_based_on_po,
 )
+from erpnext.stock.services.internal_transfer import StockInternalTransferService
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -1944,6 +1945,9 @@ class PurchaseInvoice(BuyingController):
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
+		if self.is_return and self.is_internal_supplier:
+			# cancelling a return gives its qty back to the invoice it returned
+			StockInternalTransferService(self).validate_internal_transfer_qty()
 
 		super().on_cancel()
 
