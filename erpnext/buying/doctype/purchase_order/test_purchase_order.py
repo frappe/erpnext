@@ -618,13 +618,13 @@ class TestPurchaseOrder(FrappeTestCase):
 =======
 	def test_last_purchase_details_carry_discount_amount(self):
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
-		make_fully_discounted_purchase_order(item)
+		make_discounted_purchase_order(item)
 
 		details = get_last_purchase_details(item)
 
 		self.assertEqual(details.price_list_rate, 39)
-		self.assertEqual(details.discount_amount, 39)
-		self.assertEqual(details.rate, 0)
+		self.assertEqual(details.discount_amount, 9)
+		self.assertEqual(details.rate, 30)
 
 	def test_last_purchase_discount_amount_leaves_out_its_margin(self):
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
@@ -634,30 +634,30 @@ class TestPurchaseOrder(FrappeTestCase):
 				"price_list_rate": 39,
 				"margin_type": "Amount",
 				"margin_rate_or_amount": 10,
-				"discount_amount": 49,
-				"rate": 0,
+				"discount_amount": 19,
+				"rate": 30,
 			}
 		)
 		po.submit()
 
-		self.assertEqual(get_last_purchase_details(item).discount_amount, 39)
+		self.assertEqual(get_last_purchase_details(item).discount_amount, 9)
 
 	def test_update_rate_as_per_last_purchase_carries_discount_amount(self):
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
-		make_fully_discounted_purchase_order(item)
+		make_discounted_purchase_order(item)
 
 		po = create_purchase_order(item_code=item, rate=50, do_not_save=True)
 		po.get_last_purchase_rate()
 		po.save()
 
-		self.assertEqual(po.items[0].discount_amount, 39)
-		self.assertEqual(po.items[0].rate, 0)
+		self.assertEqual(po.items[0].discount_amount, 9)
+		self.assertEqual(po.items[0].rate, 30)
 
 	def test_rate_pricing_rule_drops_last_purchase_discount_amount(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 
 		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
-		make_fully_discounted_purchase_order(item)
+		make_discounted_purchase_order(item)
 		make_item_price(item, "Standard Buying", 0)
 		make_pricing_rule(item_code=item, buying=1, rate_or_discount="Rate", rate=50)
 
@@ -2542,9 +2542,10 @@ def get_purchase_order_item_details(item_code):
 	return get_item_details(ctx, frappe.new_doc("Purchase Order"))
 
 
-def make_fully_discounted_purchase_order(item_code):
+def make_discounted_purchase_order(item_code):
+	# v15 refills a rate of 0 from the price list rate, so the last purchase keeps a rate above 0
 	po = create_purchase_order(item_code=item_code, do_not_save=True)
-	po.items[0].update({"price_list_rate": 39, "discount_amount": 39, "rate": 0})
+	po.items[0].update({"price_list_rate": 39, "discount_amount": 9, "rate": 30})
 	po.submit()
 
 
