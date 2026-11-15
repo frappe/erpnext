@@ -177,11 +177,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 		this.toggle_get_items();
 
 		this.set_default_print_format();
-		if (
-			doc.docstatus == 1 &&
-			!doc.inter_company_invoice_reference &&
-			frappe.model.can_create("Purchase Invoice")
-		) {
+		if (doc.docstatus == 1 && frappe.model.can_create("Purchase Invoice")) {
 			let internal = me.frm.doc.is_internal_customer;
 			if (internal) {
 				let button_label =
