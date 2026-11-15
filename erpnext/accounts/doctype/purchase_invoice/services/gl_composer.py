@@ -649,7 +649,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			return None
 
 		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
-		return -flt(stock_value) if stock_value else None
+		return None if stock_value is None else -flt(stock_value)
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
@@ -715,7 +715,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		elif (
 			doc.update_stock
-			and voucher_wise_stock_value.get((item.name, item.warehouse))
+			and (transit_stock_value is not None or voucher_wise_stock_value.get((item.name, item.warehouse)))
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
