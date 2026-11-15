@@ -3258,7 +3258,6 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	For inter company transfer, incoming rate is the average of the outgoing rate
 	"""
 	rate = 0.0
-	lcv_rate = 0.0
 
 	field = "delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
 
@@ -3285,23 +3284,28 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
-	# spread the row's lcv amount over all the stock it received, accepted and rejected
+	return flt(rate) + get_landed_cost_rate(sle.voucher_type, sle.voucher_detail_no)
+
+
+def get_landed_cost_rate(voucher_type: str, voucher_detail_no: str) -> float:
+	"""Landed cost of a receipt row per stock unit it received, accepted and rejected."""
+	child_doctype = f"{voucher_type} Item"
 	row = frappe.db.get_value(
 		child_doctype,
-		sle.voucher_detail_no,
+		voucher_detail_no,
 		["landed_cost_voucher_amount", "qty", "rejected_qty", "conversion_factor"],
 		as_dict=True,
 	)
 
-	if flt(row.landed_cost_voucher_amount):
-		precision = frappe.get_precision(child_doctype, "stock_qty")
-		received_stock_qty = abs(
-			flt(row.qty * row.conversion_factor, precision)
-			+ flt(row.rejected_qty * row.conversion_factor, precision)
-		)
-		lcv_rate = flt(row.landed_cost_voucher_amount / received_stock_qty)
+	if not flt(row.landed_cost_voucher_amount):
+		return 0.0
 
-	return rate + lcv_rate
+	precision = frappe.get_precision(child_doctype, "stock_qty")
+	received_stock_qty = abs(
+		flt(row.qty * row.conversion_factor, precision)
+		+ flt(row.rejected_qty * row.conversion_factor, precision)
+	)
+	return flt(row.landed_cost_voucher_amount / received_stock_qty)
 
 
 def is_internal_transfer(sle):
