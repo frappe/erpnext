@@ -3410,6 +3410,76 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(received_qty, -delivered_qty)
 
+	def test_internal_transfer_rejected_batch_takes_the_delivered_stock_qty_out_of_transit(self):
+		"""The in-transit package of a batch item holds the stock qty the receipt, and its return, move
+		in or out of transit, also when the accepted and rejected qty round up on their own."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BT-RFB-.####",
+			},
+			uoms=[{"uom": "Box", "conversion_factor": 0.3356}],
+		).name
+
+		receipt = make_purchase_receipt(
+			item_code=item, company=company, warehouse=from_warehouse, qty=10, rate=100, uom="Kg"
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=6,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": create_warehouse("_Test Transfer To", company=company),
+				"qty": 3,
+				"rejected_qty": 3,
+				"received_qty": 6,
+				"rejected_warehouse": create_warehouse("_Test Transfer Rejected", company=company),
+			}
+		)
+		pr.submit()
+		purchase_return = make_purchase_return(pr.name)
+		purchase_return.submit()
+
+		for voucher_no in (pr.name, purchase_return.name):
+			transit_entry = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": voucher_no, "warehouse": transit_warehouse, "is_cancelled": 0},
+				["actual_qty", "serial_and_batch_bundle"],
+				as_dict=True,
+			)
+			self.assertEqual(
+				frappe.db.get_value(
+					"Serial and Batch Bundle", transit_entry.serial_and_batch_bundle, "total_qty"
+				),
+				transit_entry.actual_qty,
+			)
+
 	def test_internal_transfer_rejected_qty_for_serial_item(self):
 		"""Rejected serial numbers leave the in-transit warehouse and stay out of the package of
 		accepted material."""
