@@ -89,6 +89,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				serial_number: serial_no,
 				batch_no,
 				qty: 1,
+				from_item_row: true,
 			}));
 			table.grid.refresh();
 			this.dialog.set_value("enter_manually", 0);
@@ -591,7 +592,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						table.df.data = [
 							...r.message,
 							...table.df.data.filter(
-								(row) => row.serial_number || row.batch_number || row.from_csv
+								(row) =>
+									(row.serial_number || row.batch_number || row.from_csv) &&
+									!row.from_item_row
 							),
 						];
 						table.grid.refresh();
