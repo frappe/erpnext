@@ -590,7 +590,7 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Datetime",
 				label: __("End Time"),
 				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
+				default: frappe.datetime.system_datetime(),
 			});
 		}
 
@@ -942,11 +942,11 @@ frappe.ui.form.on("Job Card", {
 							reqd: 1,
 							filters: { status: "Active" },
 						},
-						(d) => frm.events.start_timer(frm, frappe.datetime.now_datetime(), d.employees),
+						(d) => frm.events.start_timer(frm, frappe.datetime.system_datetime(), d.employees),
 						__("Assign Job to Employee")
 					);
 				} else {
-					frm.events.start_timer(frm, frappe.datetime.now_datetime(), frm.doc.employee);
+					frm.events.start_timer(frm, frappe.datetime.system_datetime(), frm.doc.employee);
 				}
 			});
 		}
@@ -956,7 +956,7 @@ frappe.ui.form.on("Job Card", {
 				frm.call({
 					method: "resume_job",
 					doc: frm.doc,
-					args: { start_time: frappe.datetime.now_datetime() },
+					args: { start_time: frappe.datetime.system_datetime() },
 					callback() {
 						frm.reload_doc();
 					},
@@ -969,7 +969,7 @@ frappe.ui.form.on("Job Card", {
 				frm.call({
 					method: "pause_job",
 					doc: frm.doc,
-					args: { end_time: frappe.datetime.now_datetime() },
+					args: { end_time: frappe.datetime.system_datetime() },
 					callback() {
 						frm.reload_doc();
 					},
@@ -1025,7 +1025,7 @@ frappe.ui.form.on("Job Card", {
 					current_time += get_seconds_diff(d.to_time, d.from_time);
 				}
 			} else {
-				current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+				current_time += get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
 			}
 		});
 
