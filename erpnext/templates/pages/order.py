@@ -6,8 +6,10 @@ from frappe import _
 from frappe.sessions import get_csrf_token
 
 from erpnext.accounts.doctype.payment_request.payment_request import (
+	PORTAL_PAYABLE_DOCTYPES,
 	get_amount,
 )
+from erpnext.controllers.website_list_for_contact import has_website_permission
 
 
 def get_context(context):
@@ -71,10 +73,12 @@ def get_attachments(dt, dn):
 def get_payment_details(doc):
 	if (
 		"payments" not in frappe.get_installed_apps()
-		or doc.doctype not in ("Sales Order", "Sales Invoice")
+		or doc.doctype not in PORTAL_PAYABLE_DOCTYPES
 		or doc.docstatus != 1
-		or not frappe.has_permission("Payment Request", "create")
-		or not doc.has_permission("read")
+		or not (
+			has_website_permission(doc, "read", frappe.session.user)
+			or (frappe.has_permission("Payment Request", "create") and doc.has_permission("read"))
+		)
 	):
 		return False, 0
 
