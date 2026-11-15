@@ -724,25 +724,27 @@ class SubcontractingReceipt(SubcontractingController):
 		# percentage rows reprice from the basis net of them
 		secondary_items_cost_map = {}
 		percentage_rows = []
+		is_return = self.is_return and self.return_against
 		for item in self.get("items") or []:
 			if not (item.secondary_item_type or item.valuation_type):
 				continue
 
+			if is_return:
+				# the stock ledger returns the secondary item at its receipt rate
+				item.rate = get_rate_for_return(
+					self.doctype, self.name, item.item_code, self.return_against, item_row=item
+				)
+			elif item.valuation_type == "Valuation Rate":
+				# Recomputed every time: a rate fetched against another warehouse
+				# must not stick to the row when the warehouse changes.
+				item.rate = self.get_secondary_item_valuation_rate(item)
+
 			if item.valuation_type in ("Valuation Rate", "Manual"):
-				if self.is_return and self.return_against:
-					# the stock ledger returns the secondary item at its receipt rate
-					item.rate = get_rate_for_return(
-						self.doctype, self.name, item.item_code, self.return_against, item_row=item
-					)
-				elif item.valuation_type == "Valuation Rate":
-					# Recomputed every time: a rate fetched against another warehouse
-					# must not stick to the row when the warehouse changes.
-					item.rate = self.get_secondary_item_valuation_rate(item)
 				item.amount = flt(item.qty) * flt(item.rate)
 				secondary_items_cost_map[item.reference_name] = (
 					secondary_items_cost_map.get(item.reference_name, 0) + item.amount
 				)
-			else:
+			elif not is_return:
 				percentage_rows.append(item)
 
 		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
