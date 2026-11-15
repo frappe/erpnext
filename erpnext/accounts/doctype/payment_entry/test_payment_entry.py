@@ -2345,6 +2345,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_negative_outstanding_invoice_currency_multicurrency(self):
 		"""
 		A foreign-currency invoice whose party account is in company currency should report its
