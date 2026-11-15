@@ -3,15 +3,17 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
+from erpnext.controllers.buying_controller import is_rounded_request_stock_qty
+
 
 def execute():
-	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
-		return
-
 	precision = frappe.get_precision("Material Request Item", "ordered_qty")
 	updates, requests = {}, {}
 	for row in get_ordered_rows_of_open_requests():
-		ordered_qty = flt(row.qty, precision)
+		ordered_qty = flt(row.qty)
+		if is_rounded_request_stock_qty(row.stock_qty):
+			ordered_qty = flt(ordered_qty, precision)
+
 		if ordered_qty != flt(row.ordered_qty):
 			updates[row.name] = {"ordered_qty": ordered_qty}
 			requests.setdefault(row.parent, []).append(row.name)
@@ -47,9 +49,10 @@ def get_ordered_rows_of_open_requests():
 		.select(
 			request_item.name,
 			request_item.parent,
+			request_item.stock_qty,
 			request_item.ordered_qty,
 			Sum(ordered_qty).as_("qty"),
 		)
 		.where((request.docstatus == 1) & (request.status != "Stopped") & (order.docstatus == 1))
-		.groupby(request_item.name, request_item.parent, request_item.ordered_qty)
+		.groupby(request_item.name, request_item.parent, request_item.stock_qty, request_item.ordered_qty)
 	).run(as_dict=True)

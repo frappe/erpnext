@@ -1946,10 +1946,10 @@ def get_stock_qty_status_args(round_total=True) -> dict:
 	return {"source_field": "qty * conversion_factor", "round_to_target_precision": round_total}
 
 
-def get_received_stock_qty_status_args() -> dict:
-	"""Status updater args that add up receipts' stock qty. A receipt rounds the stock qty of each row whatever the
-	setting, so add up qty * conversion factor, rounded once at the total where the Material Request row has a
-	rounded stock qty, so parts add up to it."""
+def get_material_request_stock_qty_status_args() -> dict:
+	"""Status updater args that add up the stock qty of orders or receipts of a Material Request row. Their rows round
+	stock qty by the setting at their own save, so add up qty * conversion factor, rounded once at the total where the
+	Material Request row has a rounded stock qty, so parts add up to it."""
 	return {
 		"source_field": "qty * conversion_factor",
 		"round_to_target_precision": has_rounded_request_stock_qty,
