@@ -238,9 +238,30 @@ class calculate_taxes_and_totals:
 				"conversion_factor",
 			]
 
+<<<<<<< HEAD
 			for item in self.doc.items:
 				self.doc.round_floats_in(item, do_not_round_fields=do_not_round_fields)
 				item._mapped_discount_inclusive_amount = 0
+=======
+			item.net_rate = item.rate
+			# A return row that moves nothing adjusts the rate. A fully rejected row moves its
+			# rejected qty, so it bills what the original invoice billed.
+			if (
+				not (flt(item.qty) or flt(item.get("rejected_qty")))
+				and self.doc.get("is_return")
+				and self.doc.get("doctype") != "Purchase Receipt"
+			):
+				item.amount = flt(-1 * item.rate, item.precision("amount"))
+			elif not item.qty and self.doc.get("is_debit_note"):
+				item.amount = flt(item.rate, item.precision("amount"))
+			else:
+				item.amount = flt(item.rate * self.get_billed_qty(item), item.precision("amount"))
+			item.net_amount = item.amount
+			self._set_in_company_currency(
+				item, ["price_list_rate", "rate_with_margin", "rate", "net_rate", "amount", "net_amount"]
+			)
+			item.item_tax_amount = 0.0
+>>>>>>> 7c1feb4 (fix(accounts): bill the original qty on a return of a fully rejected invoice row)
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
