@@ -1330,6 +1330,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		header, row = download_raw_material_rows(plan, warehouses=[{"warehouse": "Finished Goods - _TC"}])[:2]
 
 		self.assertEqual((flt(row[header.index("Required Qty")]), row[header.index("UOM")]), (50, "Nos"))
+		self.assertEqual(flt(row[header.index("Required Qty as per BOM")]), 50)
 
 	def test_transfer_is_taken_off_the_shortage_before_rounding_to_purchase_uom(self):
 		rm_item = make_item(
