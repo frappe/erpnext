@@ -1,7 +1,7 @@
+import json
+import os
 import sys
 from urllib.parse import urlparse
-
-import requests
 
 WEBSITE_REPOS = [
 	"erpnext_com",
@@ -40,12 +40,7 @@ def contains_documentation_link(body: str) -> bool:
 	return any(is_documentation_link(word) for line in body.splitlines() for word in line.split())
 
 
-def check_pull_request(number: str) -> "tuple[int, str]":
-	response = requests.get(f"https://api.github.com/repos/frappe/erpnext/pulls/{number}")
-	if not response.ok:
-		return 1, "Pull Request Not Found! ⚠️"
-
-	payload = response.json()
+def check_pull_request(payload: dict) -> "tuple[int, str]":
 	title = (payload.get("title") or "").lower().strip()
 	head_sha = (payload.get("head") or {}).get("sha")
 	body = (payload.get("body") or "").lower()
@@ -60,6 +55,9 @@ def check_pull_request(number: str) -> "tuple[int, str]":
 
 
 if __name__ == "__main__":
-	exit_code, message = check_pull_request(sys.argv[1])
+	with open(os.environ["GITHUB_EVENT_PATH"]) as event_file:
+		pull_request = json.load(event_file)["pull_request"]
+
+	exit_code, message = check_pull_request(pull_request)
 	print(message)
 	sys.exit(exit_code)
