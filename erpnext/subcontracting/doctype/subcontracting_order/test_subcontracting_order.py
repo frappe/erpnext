@@ -1323,6 +1323,50 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			reservation = frappe.get_doc("Stock Reservation Entry", name)
 			self.assertLessEqual(reservation.transferred_qty, reservation.reserved_qty)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_transfer_keeps_the_supplier_warehouse_reservation_of_an_earlier_transfer(self):
+		sco = make_reserving_order_with_new_items("Split Reserve")
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 2
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_in_entry(rm_items=rm_items)
+
+		first_transfer = make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		reservation = frappe.get_value(
+			"Stock Reservation Entry",
+			{"voucher_no": sco.name, "docstatus": 1, "from_voucher_no": first_transfer.name},
+			["reserved_qty", "transferred_qty", "status"],
+			as_dict=True,
+		)
+		self.assertEqual(reservation.reserved_qty, 2)
+		self.assertEqual(reservation.transferred_qty, 0)
+		self.assertEqual(reservation.status, "Reserved")
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_transfer_from_another_warehouse_uses_the_order_reservation(self):
+		sco = make_reserving_order_with_new_items("Other Source")
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		rm_items[0]["warehouse"] = "_Test Warehouse 2 - _TC"
+		make_stock_in_entry(rm_items=rm_items)
+
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		reservation = frappe.get_value(
+			"Stock Reservation Entry",
+			{"voucher_no": sco.name, "docstatus": 1, "warehouse": "_Test Warehouse - _TC"},
+			["transferred_qty", "status"],
+			as_dict=True,
+		)
+		self.assertEqual(reservation.transferred_qty, 4)
+		self.assertEqual(reservation.status, "Closed")
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
@@ -1458,6 +1502,30 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value("Subcontracting Receipt Item", scr.items[0].name, "service_cost_per_qty"),
 			500 * 80,
 		)
+
+
+def make_reserving_order_with_new_items(suffix):
+	"""Draft order for 4 of a new subcontracted item using 1 new raw material each, with Reserve Stock on."""
+	service_item = make_item(f"Subcontracted Service Item {suffix}", {"is_stock_item": 0}).name
+	fg_item = make_item(
+		f"Subcontracted FG Item {suffix}", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+	).name
+	rm_item = make_item(f"Subcontracted RM Item {suffix}", {"is_stock_item": 1}).name
+	make_bom(item=fg_item, raw_materials=[rm_item], rate=100, currency="INR")
+
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": service_item,
+			"qty": 4,
+			"rate": 100,
+			"fg_item": fg_item,
+			"fg_item_qty": 4,
+		}
+	]
+	sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
+	sco.reserve_stock = 1
+	return sco
 
 
 def set_alternative_item(item_code, alternative_item_code):
