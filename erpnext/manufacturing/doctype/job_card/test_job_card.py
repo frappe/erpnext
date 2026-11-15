@@ -981,6 +981,8 @@ class TestJobCard(FrappeTestCase):
 				"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
 			)
 		)
+		first.for_quantity = 8
+		first.save()
 		make_job_card(
 			work_order.name,
 			[
@@ -994,7 +996,6 @@ class TestJobCard(FrappeTestCase):
 			],
 		)
 		extra = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
-		first.for_quantity = 8
 
 		for index, (job_card, completed_qty) in enumerate(((first, 8), (extra, 2), (second, 8))):
 			job_card.append(
