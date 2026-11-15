@@ -1807,7 +1807,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item = frappe.get_doc(cdt, cdn);
 		if (!this.is_a_mapped_document(item)) {
 			// item.pricing_rules = ''
-			frappe.run_serially([
+			return frappe.run_serially([
 				() => this.remove_pricing_rule_for_item(item),
 				() => this.conversion_factor(doc, cdt, cdn, true),
 				() => this.apply_price_list(item, true), //reapply price list before applying pricing rule

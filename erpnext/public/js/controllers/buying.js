@@ -224,7 +224,7 @@ erpnext.buying = {
 				) {
 					this.calculate_received_qty(doc, cdt, cdn);
 				}
-				super.qty(doc, cdt, cdn);
+				return super.qty(doc, cdt, cdn);
 			}
 
 			rejected_qty(doc, cdt, cdn) {

@@ -475,7 +475,7 @@ erpnext.sales_common = {
 			}
 
 			qty(doc, cdt, cdn) {
-				super.qty(doc, cdt, cdn);
+				return super.qty(doc, cdt, cdn);
 			}
 
 			pick_serial_and_batch(doc, cdt, cdn) {
