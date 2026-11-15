@@ -398,7 +398,9 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 		)
 		po.submit()
-		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 1.33)
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 1.333333334
+		)
 
 		unlinked_row = po.items[2]
 		trans_item = json.dumps(
