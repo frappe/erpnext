@@ -3799,11 +3799,11 @@ class TestDeliveryNote(FrappeTestCase):
 				for d in bundle_data:
 					self.assertEqual(d.incoming_rate, serial_no_valuation[d.serial_no])
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_serial_no_skips_serial_nos_taken_by_a_packed_item(self):
 		item, bundle, serial_nos = make_bundle_of_a_serial_item("TRPS-.#####")
 
@@ -3823,13 +3823,13 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
 
-	@ERPNextTestSuite.change_settings(
+	@change_settings(
 		"Stock Settings",
 		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
-	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_set_serial_no_skips_serial_nos_taken_by_a_packed_item_of_a_new_mapped_dn(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
 		item, bundle, serial_nos = make_bundle_of_a_serial_item("TRMP-.#####")
 		so = make_sales_order(item_code=bundle, qty=2, warehouse="_Test Warehouse - _TC")
@@ -5127,7 +5127,7 @@ def make_bundle_of_a_serial_item(serial_no_series):
 	bundle = make_item(properties={"is_stock_item": 0}).name
 	make_product_bundle(bundle, [item])
 	se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
-	return item, bundle, get_serial_numbers_from_bundle(se.items[0].serial_and_batch_bundle)
+	return item, bundle, get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
 
 
 def create_delivery_note(**args):
