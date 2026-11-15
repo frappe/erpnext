@@ -898,8 +898,23 @@ def get_materials_from_other_locations(
 		# Convert qty to stock UOM
 		required_qty = required_qty * item.get("conversion_factor")
 
+	first_row = len(new_mr_items)
 	required_qty = _transfer_from_locations(item, locations, new_mr_items, required_qty)
 	_add_remaining_purchase_request(item, new_mr_items, required_qty, consider_minimum_order_qty)
+	_split_required_bom_qty(item, new_mr_items[first_row:])
+
+
+def _split_required_bom_qty(item, rows):
+	"""Share the item's BOM qty across the rows it is split into, so it is reserved once."""
+	if not rows:
+		return
+
+	precision = frappe.get_precision("Material Request Plan Item", "required_bom_qty")
+	remaining_qty = flt(item.get("required_bom_qty"))
+	for row in rows[:-1]:
+		row["required_bom_qty"] = flt(min(flt(row.get("quantity")), remaining_qty), precision)
+		remaining_qty -= row["required_bom_qty"]
+	rows[-1]["required_bom_qty"] = flt(remaining_qty, precision)
 
 
 def _transfer_from_locations(item, locations, new_mr_items, required_qty):
@@ -993,6 +1008,7 @@ def _build_download_rows(doc, items, item_list):
 			merged = duplicate_item_wh_list[key]
 			merged.quantity += _stock_quantity(d) / merged.conversion_factor
 			merged.row[12] = flt(merged.quantity, precision)
+			merged.row[5] = flt(flt(merged.row[5]) + flt(d.get("required_bom_qty")), precision)
 			continue
 
 		rm_data = _raw_material_row(d)
