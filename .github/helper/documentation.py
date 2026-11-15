@@ -1,13 +1,9 @@
 import json
 import os
 import sys
-import requests
 from urllib.parse import urlparse
 
-<<<<<<< HEAD
 
-=======
->>>>>>> a282aa4 (fix(ci): read the pull request from the event payload in the docs checker)
 WEBSITE_REPOS = [
 	"erpnext_com",
 	"frappe_io",
