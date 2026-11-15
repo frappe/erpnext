@@ -71,50 +71,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					frappe.model.set_value(this.item.doctype, this.item.name, "batch_no", "");
 				}
 
-<<<<<<< HEAD
 				this.dialog.fields_dict.entries.grid.refresh();
 			});
-=======
-		this.dialog.show();
-		this.$scan_btn = this.dialog.$wrapper.find(".link-btn");
-		this.$scan_btn.css("display", "inline");
-	}
-
-	async set_initial_entries(qty) {
-		if (this.bundle) return;
-
-		const serial_nos = (this.item[this.serial_field] || "")
-			.split(/[\n,]+/)
-			.map((number) => number.trim())
-			.filter(Boolean);
-		const batch_no = this.item.batch_no;
-		let batch_number;
-		if (batch_no) {
-			const numbers = await frappe.xcall(
-				"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_numbers",
-				{ item_code: this.item.item_code, doctype: "Batch", names: [batch_no] }
-			);
-			batch_number = numbers[batch_no];
-			if (!batch_number) {
-				frappe.throw(__("Please select a valid Batch No for this Item in the transaction row"));
-			}
-			frappe.utils.add_link_title("Batch", batch_no, batch_number);
-		}
-
-		if (serial_nos.length) {
-			const table = this.dialog.fields_dict.entries;
-			table.df.data = serial_nos.map((serial_no) => ({
-				serial_number: serial_no,
-				batch_no,
-				qty: 1,
-				from_item_row: true,
-			}));
-			table.grid.refresh();
-			this.dialog.set_value("enter_manually", 0);
-			this.dialog.refresh_dependency();
-		} else if (batch_no) {
-			this.set_data([{ batch_no, qty }]);
->>>>>>> d4fdcfd (fix(stock): replace the serial nos from the row when the selector fetches again)
 		}
 	}
 
@@ -573,20 +531,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	get_auto_data() {
 		let { qty, based_on } = this.dialog.get_values();
 
-<<<<<<< HEAD
-		if (this.bundle && qty === this.qty) {
-			return;
-		}
-
-		if (this.item.serial_no || this.item.batch_no) {
-=======
 		// opening the dialog sets these fields; keep the rows it opens with until one of them changes
 		const is_unchanged =
 			qty === this.qty &&
 			(this.dialog.get_value("warehouse") || this.warehouse) === this.warehouse &&
 			(based_on || this.based_on) === this.based_on;
 		if (this.keep_initial_rows && is_unchanged) {
->>>>>>> f1c5fba (fix(stock): keep the serial / batch selector from replacing or skipping its rows)
 			return;
 		}
 		this.keep_initial_rows = false;
@@ -616,22 +566,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				},
 				callback: (r) => {
 					if (r.message) {
-<<<<<<< HEAD
 						this.dialog.fields_dict.entries.df.data = r.message;
 						this.dialog.fields_dict.entries.grid.refresh();
-=======
-						await erpnext.utils.load_serial_batch_titles(this.item.item_code, r.message);
-						const table = this.dialog.fields_dict.entries;
-						table.df.data = [
-							...r.message,
-							...table.df.data.filter(
-								(row) =>
-									(row.serial_number || row.batch_number || row.from_csv) &&
-									!row.from_item_row
-							),
-						];
-						table.grid.refresh();
->>>>>>> d4fdcfd (fix(stock): replace the serial nos from the row when the selector fetches again)
 					}
 				},
 			});
@@ -813,7 +749,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	has_initial_rows() {
 		return Boolean(
 			this.bundle ||
-				this.item[this.serial_field] ||
+				this.item.serial_no ||
 				this.item.batch_no ||
 				(this.frm.doc.is_return && this.frm.doc.return_against)
 		);

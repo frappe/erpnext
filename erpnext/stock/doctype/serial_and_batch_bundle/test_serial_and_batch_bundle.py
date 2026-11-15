@@ -15,10 +15,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_batches_qty,
 	get_available_serial_nos,
 	get_qty_based_available_batches,
-<<<<<<< HEAD
 	get_reserved_serial_nos_for_pos,
-=======
->>>>>>> 25ef57e (test: a rejected return row loads the returned voucher's rejected batches)
 	get_serial_batch_ledgers,
 	get_serial_nos_based_on_posting_date,
 	get_type_of_transaction,
