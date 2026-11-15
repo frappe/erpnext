@@ -989,6 +989,7 @@ class TestJobCard(FrappeTestCase):
 				{
 					"name": first.operation_id,
 					"operation": first.operation,
+					"workstation": first.workstation,
 					"sequence_id": first.sequence_id,
 					"qty": 2,
 					"pending_qty": 2,
