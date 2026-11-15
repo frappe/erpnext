@@ -1202,7 +1202,8 @@ class PurchaseReceipt(BuyingController):
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
-	"""0 when the row posts nothing to the warehouse, e.g. a rejected qty that rounds to 0 in the stock UOM."""
+	"""Stock value the row moved in the warehouse, 0 when it posts nothing there. A row can have
+	two entries in the in-transit warehouse, when its rejected material stays there."""
 	return flt(
 		frappe.db.get_value(
 			"Stock Ledger Entry",
@@ -1213,7 +1214,7 @@ def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 				"warehouse": warehouse,
 				"is_cancelled": 0,
 			},
-			"stock_value_difference",
+			[{"SUM": "stock_value_difference"}],
 		)
 	)
 
