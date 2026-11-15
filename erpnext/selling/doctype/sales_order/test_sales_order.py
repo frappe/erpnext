@@ -1304,7 +1304,7 @@ class TestSalesOrder(ERPNextTestSuite):
 				frappe.PermissionError,
 				make_sales_invoice,
 				so.name,
-				target_doc={"doctype": "Sales Invoice", "shipping_address_name": restricted},
+				target_doc=json.dumps({"doctype": "Sales Invoice", "shipping_address_name": restricted}),
 			)
 
 	def test_update_child_perm(self):
