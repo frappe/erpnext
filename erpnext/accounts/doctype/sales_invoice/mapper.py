@@ -580,10 +580,15 @@ def get_pd_details(doctype, sd_detail_map, sd_detail_field):
 	accepted_warehouse_map = {}
 	parent_child_map = {}
 
+	filters = {sd_detail_field: ("in", list(sd_detail_map.values()))}
+	if doctype == "Purchase Receipt Item":
+		# a return row carries the delivery note row of the receipt it returns
+		filters["purchase_receipt_item"] = ("is", "not set")
+
 	pd_item_details = frappe.get_all(
 		doctype,
 		fields=[sd_detail_field, "name", "warehouse", "parent"],
-		filters={sd_detail_field: ("in", list(sd_detail_map.values()))},
+		filters=filters,
 	)
 
 	for d in pd_item_details:
