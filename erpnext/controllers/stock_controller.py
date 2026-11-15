@@ -1376,6 +1376,10 @@ class StockController(AccountsController):
 			total_qty=total_qty,
 		)
 
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty of a row in the stock UOM."""
+		return flt(row.rejected_qty) * flt(row.get("conversion_factor") or 1)
+
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
 			{
