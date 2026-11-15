@@ -185,14 +185,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 						? "Internal Purchase Invoice"
 						: "Inter Company Purchase Invoice";
 
-				me.frm.add_custom_button(
-					__(button_label),
-					function () {
-						me.make_inter_company_invoice();
-					},
-					__("Create")
-				);
-
 				frappe.call({
 					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
 					args: {
@@ -213,9 +205,15 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 									precision("stock_qty", item)
 								) > 0
 						);
-						if (is_made_from_purchase_invoice || !has_pending_qty) {
-							me.frm.remove_custom_button(__(button_label), __("Create"));
-						}
+						if (is_made_from_purchase_invoice || !has_pending_qty) return;
+
+						me.frm.add_custom_button(
+							__(button_label),
+							function () {
+								me.make_inter_company_invoice();
+							},
+							__("Create")
+						);
 					},
 				});
 			}
