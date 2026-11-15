@@ -360,6 +360,17 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(sq.items[0].ordered_qty, sq.items[0].stock_qty)
 		self.assertEqual(sq.status, "Ordered")
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_order_for_part_of_a_supplier_quotation_with_unrounded_stock_qty_keeps_its_ordered_qty(self):
+		sq = make_supplier_quotation_for_boxes(make_item_with_fractional_box(conversion_factor=0.003))
+		po = make_po_for_supplier_quotation(sq)
+		po.items[0].qty = 2
+		po.submit()
+
+		sq.reload()
+		self.assertEqual(sq.items[0].ordered_qty, 0.006)
+		self.assertEqual(sq.status, "Partially Ordered")
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"allow_to_edit_stock_uom_qty_for_purchase": 0, "allow_to_edit_stock_uom_qty_for_sales": 1},
