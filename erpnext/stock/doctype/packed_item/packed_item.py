@@ -10,7 +10,7 @@ from collections import Counter
 import frappe
 import frappe.defaults
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
 
@@ -348,7 +348,6 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
-	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	filters = {
@@ -388,9 +387,22 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 	pi_row.warehouse = pl_row.warehouse
 	pi_row.batch_no = pl_row.batch_no
-	# keep the serial nos picked on the packed row for a partial delivery
-	if not pi_row.serial_no:
-		pi_row.serial_no = get_pending_serial_nos(pl_row, get_serial_nos_in_stock([pl_row]))
+	pi_row.serial_no = get_packed_serial_nos(pi_row, pl_row)
+
+
+def get_packed_serial_nos(pi_row, pl_row):
+	"""Serial nos kept on the packed row, topped up from the pick list row, up to the packed qty."""
+	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos, get_serial_nos_in_stock
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	serial_nos = get_serial_nos(pi_row.serial_no)
+	qty = cint(pi_row.qty)
+	if len(serial_nos) < qty and pl_row.serial_no:
+		kept = {number.lower() for number in serial_nos}
+		pending = get_serial_nos(get_pending_serial_nos(pl_row, get_serial_nos_in_stock([pl_row])))
+		serial_nos += [number for number in pending if number.lower() not in kept]
+
+	return "\n".join(serial_nos[:qty])
 
 
 def update_packed_item_price_data(pi_row, item_data, doc):
