@@ -775,7 +775,10 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		delivered_qty = _get_stock_reservation_entries_for_voucher(
 			"Sales Order", so.name, so.items[0].name, fields=["delivered_qty"]
 		)[0].delivered_qty
-		self.assertEqual(delivered_qty, first_dn.items[0].stock_qty)
+		first_dn_posted_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": first_dn.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(delivered_qty, abs(first_dn_posted_qty))
 
 	def make_fractionally_reserved_sales_order(self):
 		"""Reserve 1 Box of a batched item where 1 Box = 0.3333 Kg."""
