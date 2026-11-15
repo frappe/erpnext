@@ -1186,25 +1186,19 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					if (
 						doc.docstatus === 1 &&
-						!doc.inter_company_order_reference &&
+						doc.is_internal_customer &&
 						frappe.model.can_create("Purchase Order")
 					) {
-						let me = this;
-						let internal = me.frm.doc.is_internal_customer;
-						if (internal) {
-							let button_label =
-								me.frm.doc.company === me.frm.doc.represents_company
-									? __("Internal Purchase Order")
-									: __("Inter Company Purchase Order");
+						let button_label =
+							doc.company === doc.represents_company
+								? __("Internal Purchase Order")
+								: __("Inter Company Purchase Order");
 
-							me.frm.add_custom_button(
-								button_label,
-								function () {
-									me.make_inter_company_order();
-								},
-								__("Create")
-							);
-						}
+						this.add_inter_company_order_button(
+							button_label,
+							"Purchase Order",
+							"sales_order_item"
+						);
 					}
 				}
 				// payment request
