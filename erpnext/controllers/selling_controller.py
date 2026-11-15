@@ -1103,16 +1103,13 @@ class SellingController(StockController):
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
-<<<<<<< HEAD
-		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
-			return
-=======
-		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_qty_to_undeliver,
 			get_qty_up_to_rounding,
 		)
->>>>>>> 232bfb6 (fix(stock): deliver the reserved batch qty the stock ledger posts)
+
+		if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
+			return
 
 		# Don't update Delivered Qty on Return.
 		if self.is_return:
@@ -1164,17 +1161,10 @@ class SellingController(StockController):
 						else:
 							delivered_batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-<<<<<<< HEAD
 								if entry.batch_no in delivered_batch_qty:
-									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), delivered_batch_qty[entry.batch_no]
-=======
-								available_batch_qty = delivered_batch_qty.get(entry.batch_no, 0)
-								if available_batch_qty > 0:
 									pending_qty = entry.qty - entry.delivered_qty
 									delivered_qty = get_qty_up_to_rounding(
-										min(pending_qty, available_batch_qty), pending_qty
->>>>>>> 232bfb6 (fix(stock): deliver the reserved batch qty the stock ledger posts)
+										min(pending_qty, delivered_batch_qty[entry.batch_no]), pending_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
