@@ -1,39 +1,11 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-# import frappe
-import unittest
+import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-<<<<<<< HEAD
-class TestBuyingSettings(unittest.TestCase):
-	pass
-=======
-class TestBuyingSettings(ERPNextTestSuite):
-	def test_unrelated_change_does_not_update_supplier_metadata(self):
-		settings = frappe.get_single("Buying Settings")
-		settings.allow_multiple_items = not settings.allow_multiple_items
-
-		with patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series:
-			settings.save()
-
-		set_by_naming_series.assert_not_called()
-
-	def test_supplier_metadata_updates_when_related_settings_change(self):
-		settings = frappe.get_single("Buying Settings")
-		settings.supp_master_name = (
-			"Supplier Name" if settings.supp_master_name == "Naming Series" else "Naming Series"
-		)
-
-		with patch("erpnext.utilities.naming.set_by_naming_series") as set_by_naming_series:
-			settings.save()
-
-		set_by_naming_series.assert_called_once()
-
-	@ERPNextTestSuite.change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 1})
-	def test_rejected_material_of_subcontracting_receipt_is_not_valued(self):
-		self.assertFalse(is_rejected_material_valued("Subcontracting Receipt"))
-
+class TestBuyingSettings(FrappeTestCase):
 	def test_unchanged_save_keeps_site_cache(self):
 		settings = frappe.get_single("Buying Settings")
 		settings.supplier_group = None
@@ -43,4 +15,3 @@ class TestBuyingSettings(ERPNextTestSuite):
 		settings.save()
 
 		self.assertEqual(frappe.cache.get_value("buying_settings_probe"), 1)
->>>>>>> 2c95a6b (test: keep the site cache on an unchanged Selling or Buying Settings save)

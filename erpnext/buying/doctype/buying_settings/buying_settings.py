@@ -6,14 +6,6 @@
 
 import frappe
 from frappe.model.document import Document
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-from frappe.utils import cstr, flt
->>>>>>> d6b758f (fix(selling): stop Selling and Buying Settings save from clearing the whole site cache)
-=======
-from frappe.utils import flt
->>>>>>> 2abe9c4 (fix(selling): keep boolean Selling and Buying Settings defaults as 1 or 0)
 
 
 class BuyingSettings(Document):
