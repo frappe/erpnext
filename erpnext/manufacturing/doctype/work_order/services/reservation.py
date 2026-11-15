@@ -155,7 +155,7 @@ class WorkOrderStockReservation:
 			self._apply_reservation_transfer(doc, qty_to_update, row_wise_serial_batch)
 
 		# a serial and batch reservation keeps only what it matched
-		return flt(transferred_qty) - flt(doc.transferred_qty)
+		return flt(transferred_qty - doc.transferred_qty, doc.precision("transferred_qty"))
 
 	@staticmethod
 	def _split_transferred_qty(doc, transferred_qty):
@@ -210,7 +210,7 @@ class WorkOrderStockReservation:
 			doc.update_reserved_qty_in_voucher()
 
 		# a serial and batch reservation keeps only what it matched
-		return consumed_qty - flt(doc.consumed_qty)
+		return flt(consumed_qty - doc.consumed_qty, doc.precision("consumed_qty"))
 
 	def validate_reserved_qty(self):
 		sre_details = get_sre_details(self.doc.name)
