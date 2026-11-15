@@ -282,10 +282,10 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(
 				_(
-					"{0} is not allocated. Use Write Off Difference Amount, add a row under Deductions or Loss, or change the amounts until the Difference Amount is zero."
+					"Difference Amount is {0}. Use Write Off Difference Amount, add a row under Deductions or Loss, or change the amounts until it is zero."
 				).format(
 					fmt_money(
-						abs(self.difference_amount),
+						self.difference_amount,
 						currency=frappe.get_cached_value("Company", self.company, "default_currency"),
 					)
 				),
