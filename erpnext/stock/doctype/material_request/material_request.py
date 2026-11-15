@@ -524,6 +524,10 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
+		self.update_per_ordered(update_modified)
+		self.update_requested_qty_in_work_order()
+
+	def update_per_ordered(self, update_modified=True):
 		self._update_percent_field(
 			{
 				"target_dt": "Material Request Item",
@@ -535,8 +539,6 @@ class MaterialRequest(BuyingController):
 			},
 			update_modified,
 		)
-
-		self.update_requested_qty_in_work_order()
 
 	def update_requested_qty_in_work_order(self):
 		"""Refresh both counters: stop and cancel also flip pick list coverage."""
