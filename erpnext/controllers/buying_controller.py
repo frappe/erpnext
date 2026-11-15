@@ -1957,7 +1957,8 @@ def get_material_request_stock_qty_status_args() -> dict:
 
 
 def has_rounded_request_stock_qty(row) -> bool:
-	"""Whether the Material Request row of a receipt row has a rounded stock qty, as the setting was when it was saved."""
+	"""Whether the Material Request row of an order or receipt row has a rounded stock qty, as the setting was when
+	it was saved."""
 	stock_qty = frappe.db.get_value("Material Request Item", row.material_request_item, "stock_qty")
 	return is_rounded_request_stock_qty(stock_qty)
 
