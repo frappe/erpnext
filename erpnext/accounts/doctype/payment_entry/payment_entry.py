@@ -47,6 +47,7 @@ from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
 	get_advance_payment_doctypes,
+	get_balance_on,
 	get_outstanding_invoices,
 	get_reconciliation_effect_date,
 	sync_payment_schedule_outstanding,
@@ -263,10 +264,33 @@ class PaymentEntry(AccountsController):
 
 	def before_save(self):
 		self.set_matched_unset_payment_requests_to_response()
+		self.show_removed_references_alert()
+
+	def show_removed_references_alert(self):
+		removed = self.flags.removed_unallocated_references
+		if not removed:
+			return
+
+		message = (
+			_("Removed 1 row with nothing allocated from Payment References.")
+			if removed == 1
+			else _("Removed {0} rows with nothing allocated from Payment References.").format(removed)
+		)
+		frappe.msgprint(message, alert=True)
 
 	def on_submit(self):
 		if self.difference_amount:
-			frappe.throw(_("Difference Amount must be zero"))
+			frappe.throw(
+				_(
+					"{0} is not allocated. Use Write Off Difference Amount, add a row under Deductions or Loss, or change the amounts until the Difference Amount is zero."
+				).format(
+					fmt_money(
+						abs(self.difference_amount),
+						currency=frappe.get_cached_value("Company", self.company, "default_currency"),
+					)
+				),
+				title=_("Amounts Don't Match"),
+			)
 		PaymentTaxWithholding(self).on_submit()
 		self.update_payment_requests()
 		self.update_payment_schedule()
@@ -1425,7 +1449,9 @@ class PaymentEntry(AccountsController):
 	# Paid amount is auto allocated in the reference document by default.
 	# Clear the reference document which doesn't have allocated amount on validate so that form can be loaded fast
 	def clear_unallocated_reference_document_rows(self):
-		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
+		allocated_rows = self.get("references", {"allocated_amount": ["not in", [0, None, ""]]})
+		self.flags.removed_unallocated_references = len(self.get("references")) - len(allocated_rows)
+		self.set("references", allocated_rows)
 		# A new document has no rows yet; the delete would only take gap locks that deadlock concurrent inserts.
 		if not self.is_new():
 			frappe.db.delete("Payment Entry Reference", {"parent": self.name, "allocated_amount": 0})
@@ -2717,9 +2743,11 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 	_party_name = frappe.get_meta(party_type).get_title_field()
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 
+	party_balance = None
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
 		bank_account = get_default_company_bank_account(company, party_type, party, ignore_permissions=False)
+		party_balance = get_balance_on(date=date, party_type=party_type, party=party, company=company)
 
 	return {
 		"party_account": party_account,
@@ -2727,6 +2755,7 @@ def get_party_details(company: str, party_type: str, party: str, date: str, cost
 		"party_account_currency": account_currency,
 		"party_bank_account": party_bank_account,
 		"bank_account": bank_account,
+		"party_balance": party_balance,
 	}
 
 

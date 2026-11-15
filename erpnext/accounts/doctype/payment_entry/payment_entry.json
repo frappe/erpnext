@@ -10,39 +10,34 @@
  "enable_upload_first_workflow": 1,
  "engine": "InnoDB",
  "field_order": [
+  "payment_tab",
   "type_of_payment",
-  "naming_series",
   "payment_type",
   "payment_order_status",
   "column_break_5",
   "posting_date",
+  "column_break_type",
   "company",
-  "mode_of_payment",
-  "bank_account",
   "party_section",
   "party_type",
-  "party",
-  "party_name",
   "book_advance_payments_in_separate_party_account",
   "reconcile_on_advance_payment_date",
-  "apply_tds",
-  "tax_withholding_category",
   "column_break_11",
-  "party_bank_account",
+  "party",
+  "column_break_party",
   "contact_person",
   "contact_email",
-  "payment_accounts_section",
-  "paid_from",
-  "paid_from_account_type",
-  "paid_from_account_currency",
-  "paid_from_bank_account",
+  "payment_method_section",
+  "mode_of_payment",
+  "column_break_payment_method",
+  "bank_account",
+  "column_break_party_bank",
+  "party_bank_account",
+  "reference_section",
   "reference_no",
-  "column_break_18",
-  "paid_to",
-  "paid_to_account_type",
-  "paid_to_account_currency",
-  "paid_to_bank_account",
+  "column_break_reference",
   "reference_date",
+  "column_break_clearance",
   "clearance_date",
   "payment_amounts_section",
   "paid_amount",
@@ -56,6 +51,17 @@
   "target_exchange_rate",
   "base_received_amount",
   "base_received_amount_after_tax",
+  "column_break_amount",
+  "payment_accounts_section",
+  "paid_from",
+  "paid_from_account_type",
+  "paid_from_account_currency",
+  "paid_from_bank_account",
+  "column_break_18",
+  "paid_to",
+  "paid_to_account_type",
+  "paid_to_account_currency",
+  "paid_to_bank_account",
   "section_break_14",
   "get_outstanding_invoices",
   "get_outstanding_orders",
@@ -66,8 +72,20 @@
   "base_total_allocated_amount",
   "column_break_36",
   "unallocated_amount",
+  "column_break_allocation",
   "difference_amount",
   "write_off_difference_amount",
+  "deductions_or_loss_section",
+  "deductions",
+  "taxes_tab",
+  "tax_withholding_section",
+  "apply_tds",
+  "tax_withholding_category",
+  "section_tax_withholding_entry",
+  "tax_withholding_group",
+  "ignore_tax_withholding_threshold",
+  "override_tax_withholding_entries",
+  "tax_withholding_entries",
   "taxes_and_charges_section",
   "purchase_taxes_and_charges_template",
   "sales_taxes_and_charges_template",
@@ -76,40 +94,39 @@
   "base_total_taxes_and_charges",
   "column_break_61",
   "total_taxes_and_charges",
-  "deductions_or_loss_section",
-  "deductions",
-  "section_tax_withholding_entry",
-  "tax_withholding_group",
-  "ignore_tax_withholding_threshold",
-  "override_tax_withholding_entries",
-  "tax_withholding_entries",
+  "more_info_tab",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
   "cost_center",
-  "section_break_12",
-  "status",
+  "remarks_section",
   "custom_remarks",
   "remarks",
-  "base_in_words",
-  "is_opening",
-  "title",
-  "column_break_16",
+  "print_settings_section",
   "letter_head",
+  "column_break_print",
   "print_heading",
+  "section_break_12",
+  "naming_series",
+  "party_name",
+  "status",
+  "title",
+  "is_opening",
+  "base_in_words",
+  "column_break_16",
   "bank",
   "bank_account_no",
   "payment_order",
   "in_words",
   "amended_from",
   "auto_repeat_section",
-  "auto_repeat"
+  "auto_repeat",
+  "connections_tab"
  ],
  "fields": [
   {
    "fieldname": "type_of_payment",
-   "fieldtype": "Section Break",
-   "label": "Type of Payment"
+   "fieldtype": "Section Break"
   },
   {
    "bold": 1,
@@ -176,7 +193,7 @@
    "label": "Payment From / To"
   },
   {
-   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type) && doc.docstatus==0",
+   "depends_on": "eval:in_list([\"Receive\", \"Pay\"], doc.payment_type)",
    "fieldname": "party_type",
    "fieldtype": "Link",
    "in_import_template": 1,
@@ -224,9 +241,11 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:!doc.paid_from || !doc.paid_to || doc.payment_type == \"Internal Transfer\"",
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
-   "label": "Accounts and Transaction Details"
+   "label": "Accounting Details"
   },
   {
    "bold": 1,
@@ -292,13 +311,13 @@
   {
    "depends_on": "eval:(doc.paid_to && doc.paid_from)",
    "fieldname": "payment_amounts_section",
-   "fieldtype": "Section Break",
-   "label": "Amount"
+   "fieldtype": "Section Break"
   },
   {
    "bold": 1,
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Paid Amount",
    "options": "paid_from_account_currency",
    "reqd": 1
@@ -364,9 +383,10 @@
    "options": "Payment Entry Reference"
   },
   {
+   "depends_on": "eval:doc.paid_from && doc.paid_to",
    "fieldname": "section_break_34",
    "fieldtype": "Section Break",
-   "label": "Writeoff"
+   "label": "Summary"
   },
   {
    "bold": 1,
@@ -391,6 +411,7 @@
   },
   {
    "depends_on": "eval:(doc.paid_amount && doc.received_amount && doc.references)",
+   "description": "Not matched to any invoice or order. It stays on the party's account as an advance.",
    "fieldname": "unallocated_amount",
    "fieldtype": "Currency",
    "label": "Unallocated Amount",
@@ -399,6 +420,7 @@
   {
    "bold": 1,
    "depends_on": "eval:(doc.paid_amount && doc.received_amount)",
+   "description": "Must be zero to submit. Use Write Off Difference Amount, or add a row under Deductions or Loss.",
    "fieldname": "difference_amount",
    "fieldtype": "Currency",
    "label": "Difference Amount (Company Currency)",
@@ -429,6 +451,7 @@
   {
    "bold": 1,
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
+   "description": "Cheque number, UTR or bank transaction ID",
    "fieldname": "reference_no",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -458,10 +481,9 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to && doc.paid_amount && doc.received_amount)",
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
-   "label": "More Information"
+   "label": "Other Details"
   },
   {
    "allow_on_submit": 1,
@@ -581,6 +603,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "\nDraft\nSubmitted\nCancelled",
@@ -588,6 +611,7 @@
   },
   {
    "default": "0",
+   "description": "Tick to write your own remarks. Otherwise they are generated when you save.",
    "fieldname": "custom_remarks",
    "fieldtype": "Check",
    "label": "Custom Remarks"
@@ -601,6 +625,8 @@
    "options": "Tax Withholding Category"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:(doc.taxes && doc.taxes.length) || doc.sales_taxes_and_charges_template || doc.purchase_taxes_and_charges_template",
    "fieldname": "taxes_and_charges_section",
    "fieldtype": "Section Break",
    "hide_border": 1,
@@ -693,6 +719,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.taxes && doc.taxes.length",
    "fieldname": "section_break_60",
    "fieldtype": "Section Break"
   },
@@ -700,16 +727,20 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "get_outstanding_invoices",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Outstanding Invoices"
   },
   {
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "get_outstanding_orders",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Outstanding Orders"
   },
   {
    "default": "0",
+   "depends_on": "book_advance_payments_in_separate_party_account",
+   "description": "Ticked when the Company books advances in a separate account and this payment is an advance",
    "fetch_from": "company.book_advance_payments_in_separate_party_account",
    "fieldname": "book_advance_payments_in_separate_party_account",
    "fieldtype": "Check",
@@ -804,6 +835,89 @@
    "label": "Payment Term Discounts Calculated",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "payment_method_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Payment Details"
+  },
+  {
+   "fieldname": "column_break_payment_method",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "column_break_type",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_party",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_allocation",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxes_tab",
+   "fieldtype": "Tab Break",
+   "label": "Taxes"
+  },
+  {
+   "fieldname": "tax_withholding_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Withholding"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "print_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
+  },
+  {
+   "fieldname": "column_break_print",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_reference",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_party_bank",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_clearance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_amount",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
@@ -812,6 +926,7 @@
  "link_display_mode": "Search",
  "links": [
   {
+   "group": "Banking",
    "is_child_table": 1,
    "link_doctype": "Bank Transaction Payments",
    "link_fieldname": "payment_entry",
@@ -819,7 +934,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-15 00:15:39.543329",
+ "modified": "2026-11-16 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
