@@ -4517,15 +4517,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	def test_internal_transfer_package_holds_the_rounded_stock_qty(self):
 		"""The accepted package of an internal receipt with a UOM holds the stock qty its ledger entry posts."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
-		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Transfer Rejected", company=company)
-
 		item_doc = make_item(
 			"_Test Batch Item For Rounded Transfer Package",
 			{
@@ -4536,39 +4527,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"uoms": [{"uom": "Box", "conversion_factor": 0.3356}],
 			},
 		)
-		receipt = make_purchase_receipt(
-			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
-		)
-
-		dn = create_delivery_note(
-			item_code=item_doc.name,
-			company=company,
-			customer="_Test Internal Customer 2",
-			cost_center="Main - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			qty=6,
-			rate=100,
-			warehouse=from_warehouse,
-			target_warehouse=transit_warehouse,
-			do_not_submit=True,
-		)
-		dn.items[0].uom = "Box"
-		dn.items[0].conversion_factor = 0.3356
-		dn.items[0].use_serial_batch_fields = 1
-		dn.items[0].batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-		dn.submit()
-
-		pr = make_inter_company_purchase_receipt(dn.name)
-		pr.items[0].warehouse = to_warehouse
-		pr.items[0].qty = 4
-		pr.items[0].rejected_qty = 2
-		pr.items[0].received_qty = 6
-		pr.items[0].rejected_warehouse = rejected_warehouse
+		pr, warehouses, *_ = self.make_transfer_receipt(item_doc, 4, 2)
+		pr.items[0].uom = "Box"
+		pr.items[0].conversion_factor = 0.3356
 		pr.submit()
 
 		sle = frappe.db.get_value(
 			"Stock Ledger Entry",
-			{"voucher_no": pr.name, "warehouse": to_warehouse, "is_cancelled": 0},
+			{"voucher_no": pr.name, "warehouse": warehouses.accepted, "is_cancelled": 0},
 			["actual_qty", "serial_and_batch_bundle"],
 			as_dict=True,
 		)
