@@ -151,8 +151,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				filters={"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0},
 			)
 			for d in stock_ledger_entries:
-				voucher_wise_stock_value.setdefault(
-					(d.voucher_detail_no, d.warehouse), d.stock_value_difference
+				key = (d.voucher_detail_no, d.warehouse)
+				voucher_wise_stock_value[key] = flt(voucher_wise_stock_value.get(key)) + flt(
+					d.stock_value_difference
 				)
 
 		valuation_tax_accounts = [
@@ -616,7 +617,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		transfers_rejected_material = doc.is_internal_transfer()
 
 		rejected_amount = flt(
-			voucher_wise_stock_value.get((item.name, item.rejected_warehouse)),
+			self.get_rejected_stock_value(item, voucher_wise_stock_value),
 			item.precision("base_net_amount"),
 		)
 		if not rejected_amount:
@@ -643,15 +644,16 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		return rejected_amount if transfers_rejected_material else 0.0
 
+	def get_rejected_stock_value(self, item, voucher_wise_stock_value) -> float:
+		"""Stock value the invoice moved into the rejected warehouse, nil when it stays in transit."""
+		if item.from_warehouse and item.rejected_warehouse == item.from_warehouse:
+			return 0.0
+
+		return flt(voucher_wise_stock_value.get((item.name, item.rejected_warehouse)))
+
 	def get_transit_stock_value(self, item, voucher_wise_stock_value) -> float | None:
-		"""Stock value an internal transfer took out of the in-transit warehouse, negative for a return.
-
-		None when the rejected material stays in transit, as its stock value cannot be told apart then.
-		"""
+		"""Stock value an internal transfer took out of the in-transit warehouse, negative for a return."""
 		if not (item.from_warehouse and self.doc.is_internal_transfer()):
-			return None
-
-		if item.rejected_warehouse == item.from_warehouse:
 			return None
 
 		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
@@ -670,7 +672,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		if transit_stock_value is not None:
 			# The accepted and rejected warehouses together take what left transit, plus the landed
 			# cost; round each part as it is posted so the entries balance.
-			rejected_stock_value = voucher_wise_stock_value.get((item.name, item.rejected_warehouse))
+			rejected_stock_value = self.get_rejected_stock_value(item, voucher_wise_stock_value)
 			warehouse_debit_amount = flt(
 				flt(transit_stock_value, net_amt_precision)
 				- flt(rejected_stock_value, net_amt_precision)
@@ -698,7 +700,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			# The rejected warehouse carries the rest of what the invoice paid for, and is booked
 			# by its own entry, so it is not a variance.
 			returned_stock_value = warehouse_debit_amount + flt(
-				voucher_wise_stock_value.get((item.name, item.rejected_warehouse)), net_amt_precision
+				self.get_rejected_stock_value(item, voucher_wise_stock_value), net_amt_precision
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
