@@ -3116,6 +3116,19 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		sle_filters = {"voucher_no": pi.name, "warehouse": transit_warehouse, "is_cancelled": 0}
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), -1)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
+	def test_internal_transfer_invoice_after_a_billing_only_return_is_not_capped_to_transit(self):
+		"""A return that does not update stock puts nothing back in transit, so the next invoice cannot
+		over-receive against it."""
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		si, _ = make_internal_sales_invoice_of_fractional_boxes()
+		returned = make_return_doc("Purchase Invoice", make_internal_stock_invoice(si, qty=3).name)
+		returned.update_stock = 0
+		returned.submit()
+
+		self.assertRaises(NegativeStockError, make_internal_stock_invoice, si, qty=6)
+
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
 		with, and the entries say the same as the stock."""
