@@ -1444,6 +1444,30 @@ class TestPickList(FrappeTestCase):
 		sales_return.submit()
 		self.assertEqual([row.qty for row in sales_return.packed_items], [-3, -1])
 
+	def test_partial_return_of_repeated_component_split_across_warehouses(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=4, basic_rate=100)
+		make_stock_entry(item=component, to_warehouse="_Test Warehouse 1 - _TC", qty=4, basic_rate=100)
+		bundle = make_bundle_with_repeated_component(component)
+
+		sales_order = make_sales_order(item_code=bundle, warehouse="_Test Warehouse - _TC", qty=2)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.submit()
+
+		sales_return = make_sales_return(delivery_note.name)
+		sales_return.items[0].qty = -1
+		sales_return.submit()
+
+		order_rows = {row.name: row.sales_order_packed_item for row in delivery_note.packed_items}
+		returned_qty = {row.name: 0 for row in sales_order.packed_items}
+		for row in sales_return.packed_items:
+			returned_qty[order_rows[row.return_against_packed_item]] += row.qty
+		self.assertEqual(list(returned_qty.values()), [-3, -1])
+
 	def test_split_rows_of_repeated_component_pair_with_their_order_row(self):
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
 
