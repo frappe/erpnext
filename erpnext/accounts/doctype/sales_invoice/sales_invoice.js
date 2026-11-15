@@ -201,6 +201,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					callback: function (r) {
 						if (r.exc) return;
 						const received_items = r.message || {};
+						// A Sales Invoice made from a Purchase Invoice links it without item references.
+						const is_made_from_purchase_invoice =
+							doc.inter_company_invoice_reference && $.isEmptyObject(received_items);
 						const has_pending_qty = me.frm.doc.items.some(
 							(item) =>
 								flt(
@@ -208,7 +211,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 									precision("stock_qty", item)
 								) > 0
 						);
-						if (!has_pending_qty) {
+						if (is_made_from_purchase_invoice || !has_pending_qty) {
 							me.frm.remove_custom_button(__(button_label), __("Create"));
 						}
 					},
