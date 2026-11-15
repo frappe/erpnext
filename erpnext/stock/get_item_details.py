@@ -387,16 +387,9 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	if out.has_batch_no and batch_no:
 		kwargs["batches"] = [batch_no]
 
-<<<<<<< HEAD
-	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
-	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
-=======
 	kwargs["ignore_serial_nos"] = [*(kwargs.get("ignore_serial_nos") or []), *get_used_serial_nos(doc)]
 	serial_nos = get_serial_nos_for_outward(kwargs)
-	out["serial_no"] = "\n".join(
-		SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
-	)
->>>>>>> 1179059 (fix(stock): skip serial nos held by item and packed rows when auto-setting a row's serial no)
+	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
 
 def has_incorrect_serial_nos(ctx, out):
@@ -461,32 +454,16 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 
 
 def get_used_serial_nos(doc, table=None):
-	"""Serial No records held by the rows of ``table``, or of the items and packed items."""
+	"""Serial nos held by the rows of ``table``, or of the items and packed items."""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-<<<<<<< HEAD
-	if not table:
-		table = "items"
-=======
 	rows = doc.get(table) if table else [*doc.get("items"), *(doc.get("packed_items") or [])]
-	numbers_by_item = defaultdict(list)
+	used = set()
 	for row in rows:
-		item_code = row.get("item_code") or row.get("rm_item_code")
-		if item_code and row.get("serial_no"):
-			numbers_by_item[item_code].extend(get_serial_nos(row.get("serial_no")))
->>>>>>> 1179059 (fix(stock): skip serial nos held by item and packed rows when auto-setting a row's serial no)
-
-	for row in doc.get(table):
 		if row.get("serial_no"):
-			for serial_no in get_serial_nos(row.get("serial_no")):
-				if serial_no in serial_nos:
-					serial_nos.remove(serial_no)
+			used.update(get_serial_nos(row.get("serial_no")))
 
-<<<<<<< HEAD
-	return serial_nos
-=======
 	return used
->>>>>>> 1179059 (fix(stock): skip serial nos held by item and packed rows when auto-setting a row's serial no)
 
 
 def update_bin_details(ctx: ItemDetailsCtx, out: ItemDetails, doc):
