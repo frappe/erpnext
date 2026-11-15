@@ -7895,6 +7895,24 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			("Stores - TCP1", "Outward"),
 		)
 
+	def test_internal_pi_links_receipt_not_its_return(self):
+		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+
+		item = make_item("_Test Item For Internal PI After PR Return", {"is_stock_item": 1}).name
+		dn = make_internal_delivery_note(item)
+		pr = make_internal_purchase_receipt(dn.name)
+		pr.submit()
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].qty = -2
+		pr_return.submit()
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+		pi = make_inter_company_purchase_invoice(si.name)
+		self.assertEqual(pi.items[0].pr_detail, pr.items[0].name)
+
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
