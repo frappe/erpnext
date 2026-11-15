@@ -644,8 +644,8 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		return rejected_amount if transfers_rejected_material else 0.0
 
 	def get_transit_stock_value(self, item, voucher_wise_stock_value) -> float | None:
-		"""Stock value an internal transfer took out of the in-transit warehouse."""
-		if self.doc.is_return or not (item.from_warehouse and self.doc.is_internal_transfer()):
+		"""Stock value an internal transfer took out of the in-transit warehouse, negative for a return."""
+		if not (item.from_warehouse and self.doc.is_internal_transfer()):
 			return None
 
 		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
@@ -669,7 +669,12 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				rejected_stock_value, net_amt_precision
 			)
 
-		if doc.is_return and doc.update_stock and (doc.is_internal_supplier or not doc.return_against):
+		if (
+			transit_stock_value is None
+			and doc.is_return
+			and doc.update_stock
+			and (doc.is_internal_supplier or not doc.return_against)
+		):
 			net_rate = item.base_net_amount
 			if item.sales_incoming_rate:
 				# Material of a transfer goes back at the rate it came in with, the rejected
