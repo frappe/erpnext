@@ -175,7 +175,10 @@ class TestPurchaseOrder(FrappeTestCase):
 			{"item_code": "_Test Item", "qty": 1, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 		)
 		po.submit()
-		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), 1.33)
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"),
+			flt(2 * 0.666666667, so.items[0].precision("ordered_qty")),
+		)
 
 		unlinked_row = po.items[2]
 		trans_item = json.dumps(
