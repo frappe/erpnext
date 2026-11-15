@@ -51,7 +51,8 @@ class BuyingSettings(Document):
 
 	def validate(self):
 		for key in ["supplier_group", "supp_master_name", "maintain_same_rate", "buying_price_list"]:
-			frappe.db.set_default(key, self.get(key, ""))
+			value = self.get(key)
+			frappe.db.set_default(key, "" if value is None else value)
 
 		self.update_supplier_naming_settings()
 
