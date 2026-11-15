@@ -668,11 +668,13 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		transit_stock_value = self.get_transit_stock_value(item, voucher_wise_stock_value)
 		if transit_stock_value is not None:
-			# The accepted and rejected warehouses together take what left transit; round each
-			# part as it is posted so the entries balance.
+			# The accepted and rejected warehouses together take what left transit, plus the landed
+			# cost; round each part as it is posted so the entries balance.
 			rejected_stock_value = voucher_wise_stock_value.get((item.name, item.rejected_warehouse))
 			warehouse_debit_amount = flt(
-				flt(transit_stock_value, net_amt_precision) - flt(rejected_stock_value, net_amt_precision),
+				flt(transit_stock_value, net_amt_precision)
+				- flt(rejected_stock_value, net_amt_precision)
+				+ flt(item.landed_cost_voucher_amount),
 				net_amt_precision,
 			)
 
