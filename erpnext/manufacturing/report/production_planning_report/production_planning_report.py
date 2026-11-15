@@ -59,6 +59,8 @@ class ProductionPlanReport:
 			if order_by == "Planned Start Date":
 				query = query.orderby(parent.planned_start_date, order=Order.asc)
 
+			query = query.orderby(parent.name)
+
 			if self.filters.docnames:
 				query = query.where(parent.name.isin(self.filters.docnames))
 
@@ -112,6 +114,8 @@ class ProductionPlanReport:
 
 				if order_by == "Required Date":
 					query = query.orderby(child.schedule_date, order=Order.asc)
+
+			query = query.orderby(child.parent).orderby(child.idx)
 
 		query = query.where(parent.docstatus == 1)
 
