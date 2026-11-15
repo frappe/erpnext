@@ -1269,6 +1269,12 @@ def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
 	return full_qty if flt(full_qty - qty, precision) == 0 else qty
 
 
+def get_qty_to_undeliver(delivered_qty: float, qty: float) -> float:
+	"""Undeliver ``qty`` and leave the delivered qty as the stock ledger posts it, with no rounding residue."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return delivered_qty - flt(delivered_qty - min(delivered_qty, qty), precision)
+
+
 def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = None) -> float:
 	conversion_factor = flt(item.get("conversion_factor")) or 1
 	if conversion_factor == 1 or not frappe.get_cached_value("UOM", item.get("uom"), "must_be_whole_number"):
