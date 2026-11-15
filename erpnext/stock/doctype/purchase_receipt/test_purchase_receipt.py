@@ -4038,6 +4038,34 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], 1000)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], -1000)
 
+	def test_internal_transfer_package_holds_the_rounded_stock_qty(self):
+		"""The accepted package of an internal receipt with a UOM holds the stock qty its ledger entry posts."""
+		item_doc = make_item(
+			"_Test Batch Item For Rounded Transfer Package",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BT-BIFRTP-.####",
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3356}],
+			},
+		)
+		pr, warehouses, *_ = self.make_transfer_receipt("Rounded Package", item_doc, 4, 2)
+		pr.items[0].uom = "Box"
+		pr.items[0].conversion_factor = 0.3356
+		pr.submit()
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": pr.name, "warehouse": warehouses.accepted, "is_cancelled": 0},
+			["actual_qty", "serial_and_batch_bundle"],
+			as_dict=True,
+		)
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", sle.serial_and_batch_bundle, "total_qty"),
+			sle.actual_qty,
+		)
+
 	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note

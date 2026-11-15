@@ -243,7 +243,7 @@ class BuyingController(SubcontractingController):
 				row.from_warehouse,
 				type_of_transaction="Outward",
 				do_not_submit=True,
-				qty=flt(row.stock_qty),
+				qty=get_stock_qty(row, row.qty),
 			)
 
 		if not flt(row.stock_qty):
@@ -254,7 +254,7 @@ class BuyingController(SubcontractingController):
 			row.warehouse,
 			type_of_transaction="Inward",
 			do_not_submit=True,
-			qty=flt(row.stock_qty),
+			qty=get_stock_qty(row, row.qty),
 			exclude_serial_nos=self.get_rejected_serial_nos(row),
 		)
 
@@ -279,14 +279,12 @@ class BuyingController(SubcontractingController):
 		if row.get("rejected_serial_and_batch_bundle") or not row.rejected_warehouse:
 			return
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
-
 		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
 			package,
 			row.rejected_warehouse,
 			type_of_transaction="Inward",
 			do_not_submit=True,
-			qty=rejected_qty,
+			qty=get_stock_qty(row, row.rejected_qty),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
 		)
 
