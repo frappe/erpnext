@@ -697,6 +697,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			me.frm.doc.name
 		);
 
+		// a return keeps the taxes of the document it is made against
+		if (this.frm.doc.is_return && this.frm.doc.return_against) return;
+
 		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			return;
 		}
