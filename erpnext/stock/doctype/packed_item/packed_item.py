@@ -435,10 +435,6 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 
 
 def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item=None):
-<<<<<<< HEAD
-	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos
-=======
->>>>>>> bd33860 (fix(stock): top up picked serial nos when a bundle qty is raised again)
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	filters = {
@@ -482,7 +478,7 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, so_packed_item
 
 def get_packed_serial_nos(main_item_row, pi_row, pl_row):
 	"""Serial nos kept on the packed row, topped up from the pick list row, up to the packed qty."""
-	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
+	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	serial_nos = get_serial_nos(pi_row.serial_no)
