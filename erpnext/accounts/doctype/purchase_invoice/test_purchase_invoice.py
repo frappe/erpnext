@@ -3104,6 +3104,18 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		)
 		self.assertEqual(total_qty, 1)
 
+	def test_internal_transfer_partial_invoices_take_only_the_delivered_stock_qty_out_of_transit(self):
+		"""Partial stock updating invoices whose stock qty rounds up take no more out of the in-transit
+		warehouse than the internal sales invoice put there."""
+		si, transit_warehouse = make_internal_sales_invoice_of_fractional_boxes()
+		make_internal_stock_invoice(si, qty=3)
+		pi = make_internal_stock_invoice(si, qty=3)
+
+		transit_bin = {"item_code": si.items[0].item_code, "warehouse": transit_warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), 0)
+		sle_filters = {"voucher_no": pi.name, "warehouse": transit_warehouse, "is_cancelled": 0}
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), -1)
+
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
 		with, and the entries say the same as the stock."""
@@ -4591,12 +4603,19 @@ def make_fully_rejected_stock_invoice():
 def make_internal_transfer_invoice():
 	"""A stock updating internal transfer invoice of 6 Box (0.3356 Kg each, 100 per Kg), received
 	from an in-transit warehouse."""
-	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+	si, _ = make_internal_sales_invoice_of_fractional_boxes()
+	return make_internal_stock_invoice(si, qty=6)
+
+
+def make_internal_sales_invoice_of_fractional_boxes():
+	"""Internal stock updating Sales Invoice of 6 Box at 0.3356 Kg into an in-transit warehouse, so its stock
+	qty (2.01 Kg) is less than the rounded stock qty of two halves (1.01 Kg each)."""
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
 	from_warehouse = create_warehouse("_Test Invoice Transfer From", company=company)
+	transit_warehouse = create_warehouse("_Test Invoice Transfer Transit", company=company)
 	item = make_item(
 		properties={"is_stock_item": 1, "stock_uom": "Kg"},
 		uoms=[{"uom": "Box", "conversion_factor": 0.3356}],
@@ -4618,20 +4637,26 @@ def make_internal_transfer_invoice():
 		income_account="Sales - TCP1",
 		do_not_save=1,
 	)
-	si.items[0].update(
-		{
-			"uom": "Box",
-			"conversion_factor": 0.3356,
-			"target_warehouse": create_warehouse("_Test Invoice Transfer Transit", company=company),
-		}
-	)
+	si.items[0].update({"uom": "Box", "conversion_factor": 0.3356, "target_warehouse": transit_warehouse})
 	si.insert()
 	si.submit()
+	return si, transit_warehouse
+
+
+def make_internal_stock_invoice(si, qty):
+	"""Submitted stock updating Purchase Invoice of qty Box against the internal Sales Invoice."""
+	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	pi = make_inter_company_purchase_invoice(si.name)
 	pi.update_stock = 1
-	pi.items[0].warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
-	pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+	pi.items[0].update(
+		{
+			"qty": qty,
+			"warehouse": create_warehouse("_Test Invoice Transfer To", company=si.company),
+			"expense_account": "Cost of Goods Sold - TCP1",
+		}
+	)
 	pi.submit()
 	return pi
 
