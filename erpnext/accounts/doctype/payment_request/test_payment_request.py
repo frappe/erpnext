@@ -73,6 +73,7 @@ class TestPaymentRequest(FrappeTestCase):
 			(f"{payment_request}.PaymentRequest.send_email", None),
 			(f"{payment_request}.PaymentRequest.get_payment_url", PAYMENT_URL),
 			(f"{payment_request}._get_payment_gateway_controller", None),
+			("frappe.db.commit", None),
 		):
 			mock = patch(target, return_value=value)
 			mock.start()
