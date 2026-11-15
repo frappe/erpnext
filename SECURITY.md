@@ -4,6 +4,8 @@ The Frappe team and community take security issues in ERPNext seriously. To repo
 
 Before you report, please read our [security policy](https://frappe.io/security). It covers scope, what to include in a report, disclosure, CVE assignment and credits.
 
+## Supported Versions
+
 We provide security fixes for the following versions of ERPNext:
 
 | Version | Supported          |
