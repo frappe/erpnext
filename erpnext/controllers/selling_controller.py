@@ -1164,6 +1164,10 @@ class SellingController(StockController):
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_qty_to_undeliver,
+			get_qty_up_to_rounding,
+		)
 
 		# Don't update Delivered Qty on Return.
 		if self.is_return:
@@ -1233,8 +1237,9 @@ class SellingController(StockController):
 							for entry in sre_doc.sb_entries:
 								available_batch_qty = delivered_batch_qty.get(entry.batch_no, 0)
 								if available_batch_qty > 0:
-									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), available_batch_qty
+									pending_qty = entry.qty - entry.delivered_qty
+									delivered_qty = get_qty_up_to_rounding(
+										min(pending_qty, available_batch_qty), pending_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
@@ -1302,8 +1307,8 @@ class SellingController(StockController):
 						else:
 							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in batch_qty_to_undelivered:
-									undelivered_qty = min(
+								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
+									undelivered_qty = get_qty_to_undeliver(
 										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
 									)
 									entry.delivered_qty -= undelivered_qty
