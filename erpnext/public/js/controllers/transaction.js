@@ -3459,7 +3459,7 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 				update_values[warehouse_field] = r.warehouse;
 			}
 
-			frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+			return frappe.model.set_value(item_row.doctype, item_row.name, update_values);
 		}
 	});
 };

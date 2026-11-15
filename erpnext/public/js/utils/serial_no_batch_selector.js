@@ -745,9 +745,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			.then((r) => {
 				frappe.run_serially([
 					() => this.clear_transaction_fields(),
-					() => {
-						this.callback && this.callback(r.message);
-					},
+					() => this.callback?.(r.message),
 					() => this.frm.save(),
 					() => this.dialog.hide(),
 				]);

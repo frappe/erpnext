@@ -477,7 +477,7 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 							update_values["warehouse"] = r.warehouse;
 						}
 
-						frappe.model.set_value(item.doctype, item.name, update_values);
+						return frappe.model.set_value(item.doctype, item.name, update_values);
 					}
 				});
 			}
@@ -512,7 +512,7 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 							update_values["rejected_warehouse"] = r.warehouse;
 						}
 
-						frappe.model.set_value(item.doctype, item.name, update_values);
+						return frappe.model.set_value(item.doctype, item.name, update_values);
 					}
 				});
 			}
@@ -552,7 +552,7 @@ frappe.ui.form.on("Subcontracting Receipt Supplied Item", {
 								qty / flt(item.conversion_factor || 1, precision("conversion_factor", item)),
 						};
 
-						frappe.model.set_value(item.doctype, item.name, update_values);
+						return frappe.model.set_value(item.doctype, item.name, update_values);
 					}
 				});
 			}
