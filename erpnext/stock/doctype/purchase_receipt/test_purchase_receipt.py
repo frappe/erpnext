@@ -7593,17 +7593,52 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	def test_internal_pr_qty_change_in_another_uom(self):
 		"""Changing the qty of a draft internal receipt resizes its package in stock UOM."""
+<<<<<<< HEAD
+=======
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		company = "_Test Company with perpetual inventory"
+>>>>>>> e3a62d9 (test: resize a draft internal receipt's package in another UOM)
 		item = make_item(
 			"_Test Box Batch Item For Qty Change",
 			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BOXQ-.####"},
 		)
 		make_uom_conversion_factor("Box", "Nos", 12)
 
+<<<<<<< HEAD
 		pr, *_ = self.make_transfer_receipt("Qty Change", item, 24, 0)
 		pr.items[0].update({"uom": "Box", "conversion_factor": 12, "qty": 2, "received_qty": 2})
 		pr.save()
 
 		pr.items[0].update({"qty": 1, "received_qty": 1})
+=======
+		make_purchase_receipt(
+			item_code=item.name, company=company, warehouse="Stores - TCP1", qty=24, rate=100
+		)
+		dn = create_delivery_note(
+			item_code=item.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=24,
+			rate=100,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Stores - TCP1"
+		pr.items[0].uom = "Box"
+		pr.items[0].conversion_factor = 12
+		pr.items[0].qty = 2
+		pr.items[0].received_qty = 2
+		pr.save()
+
+		pr.items[0].qty = 1
+		pr.items[0].received_qty = 1
+>>>>>>> e3a62d9 (test: resize a draft internal receipt's package in another UOM)
 		pr.save()
 
 		total_qty = frappe.db.get_value(
@@ -7611,6 +7646,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(abs(total_qty), 12)
 
+<<<<<<< HEAD
 	def test_internal_pr_uom_change_resizes_package(self):
 		"""Changing only the UOM of a draft internal receipt resizes its package."""
 		item = make_item(
@@ -7631,6 +7667,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(abs(total_qty), 2)
 
+=======
+>>>>>>> e3a62d9 (test: resize a draft internal receipt's package in another UOM)
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
