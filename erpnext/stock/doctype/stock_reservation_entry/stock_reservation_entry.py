@@ -908,12 +908,37 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		for field in ("company", "item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])
 
+		round_to_ledger_qty(sb_entries)
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
 		bundle.save()
 
 		return bundle.name
+
+
+def round_to_ledger_qty(sb_entries: list[dict]) -> None:
+	"""Round the reserved total as the stock ledger posts it, on the last entry.
+
+	The other entries keep their reserved qty, so each reservation still matches what it delivers.
+	"""
+	qty_before_last = sum(flt(entry.qty) for entry in sb_entries[:-1])
+	total = flt(
+		qty_before_last + flt(sb_entries[-1].qty), frappe.get_precision("Serial and Batch Entry", "qty")
+	)
+	sb_entries[-1].qty = total - qty_before_last
+
+
+def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
+	"""``full_qty`` when ``qty`` falls short of it only by rounding."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return full_qty if flt(full_qty - qty, precision) == 0 else qty
+
+
+def get_qty_to_undeliver(delivered_qty: float, qty: float) -> float:
+	"""Undeliver ``qty`` and leave the delivered qty as the stock ledger posts it, with no rounding residue."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return delivered_qty - flt(delivered_qty - min(delivered_qty, qty), precision)
 
 
 def has_reserved_stock(voucher_type: str, voucher_no: str, voucher_detail_no: str | None = None) -> bool:
