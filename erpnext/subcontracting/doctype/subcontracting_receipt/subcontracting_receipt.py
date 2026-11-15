@@ -11,9 +11,17 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import cint, comma_and, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
+<<<<<<< HEAD
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return, validate_return
+=======
+from erpnext.controllers.sales_and_purchase_return import (
+	get_already_returned_items,
+	get_rate_for_return,
+	validate_return,
+)
+>>>>>>> 7e75d6a (fix(subcontracting): let the last return of a receipt row take the secondary qty left on it)
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -485,6 +493,7 @@ class SubcontractingReceipt(SubcontractingController):
 				self.add_secondary_items_of_fg_row(item, -flt(returned_qty))
 
 		self.link_returned_secondary_items(original_rows)
+		self.set_remaining_secondary_qty(original_rows)
 
 		if recalculate_rate:
 			self.set_additional_costs()
@@ -500,7 +509,14 @@ class SubcontractingReceipt(SubcontractingController):
 			for row in frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against},
-				fields=["name", "reference_name", "bom_secondary_item", "returned_qty"],
+				fields=[
+					"name",
+					"qty",
+					"received_qty",
+					"reference_name",
+					"bom_secondary_item",
+					"returned_qty",
+				],
 			)
 		}
 
@@ -520,6 +536,39 @@ class SubcontractingReceipt(SubcontractingController):
 				row.subcontracting_receipt_item = secondary_rows.get(
 					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
 				)
+
+	def set_remaining_secondary_qty(self, original_rows):
+		"""A return of a receipt row's last finished goods takes the secondary qty left on it,
+		so rounding leaves nothing behind."""
+		last_fg_rows = [
+			row.name for row in self.items if self.returns_last_finished_goods(row, original_rows)
+		]
+		if not last_fg_rows:
+			return
+
+		already_returned = get_already_returned_items(self)
+		for row in self.items:
+			if not (row.subcontracting_receipt_item and row.reference_name in last_fg_rows):
+				continue
+
+			original_row = original_rows[row.subcontracting_receipt_item]
+			returned = already_returned.get((row.item_code, row.subcontracting_receipt_item), {})
+			row.received_qty = flt(
+				flt(returned.get("received_qty")) - original_row.received_qty, row.precision("received_qty")
+			)
+			row.qty = flt(flt(returned.get("qty")) - original_row.qty, row.precision("qty"))
+			row.process_loss_qty = flt(row.received_qty - row.qty, row.precision("process_loss_qty"))
+
+	@staticmethod
+	def returns_last_finished_goods(row, original_rows):
+		original_row = original_rows.get(row.subcontracting_receipt_item)
+		if not (row.bom and original_row):
+			return False
+
+		precision = row.precision("received_qty")
+		return flt(original_row.returned_qty - flt(row.received_qty), precision) >= flt(
+			original_row.received_qty, precision
+		)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
