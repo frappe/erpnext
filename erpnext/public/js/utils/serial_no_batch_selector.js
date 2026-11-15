@@ -50,6 +50,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 		qty = Math.abs(qty);
 		this.qty = qty;
+		this.warehouse = this.get_warehouse();
+		this.keep_initial_rows = this.has_initial_rows();
 		if (qty > 0) {
 			await this.dialog.set_value("qty", qty);
 		}
@@ -87,6 +89,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				serial_number: serial_no,
 				batch_no,
 				qty: 1,
+				from_item_row: true,
 			}));
 			table.grid.refresh();
 			this.dialog.set_value("enter_manually", 0);
@@ -549,14 +552,15 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	get_auto_data() {
 		let { qty, based_on } = this.dialog.get_values();
 
-		const has_entries =
-			this.item.serial_and_batch_bundle ||
-			this.item.rejected_serial_and_batch_bundle ||
-			this.item[this.serial_field] ||
-			this.item.batch_no;
-		if (has_entries && this.qty && qty === this.qty) {
+		// opening the dialog sets these fields; keep the rows it opens with until one of them changes
+		const is_unchanged =
+			qty === this.qty &&
+			(this.dialog.get_value("warehouse") || this.warehouse) === this.warehouse &&
+			(based_on || this.based_on) === this.based_on;
+		if (this.keep_initial_rows && is_unchanged) {
 			return;
 		}
+		this.keep_initial_rows = false;
 
 		if (!based_on) {
 			based_on = this.based_on;
@@ -588,7 +592,9 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						table.df.data = [
 							...r.message,
 							...table.df.data.filter(
-								(row) => row.serial_number || row.batch_number || row.from_csv
+								(row) =>
+									(row.serial_number || row.batch_number || row.from_csv) &&
+									!row.from_item_row
 							),
 						];
 						table.grid.refresh();
@@ -783,6 +789,15 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		return this.item?.type_of_transaction === "Outward"
 			? this.item.warehouse || this.item.s_warehouse
 			: this.item.warehouse || this.item.t_warehouse;
+	}
+
+	has_initial_rows() {
+		return Boolean(
+			this.bundle ||
+				this.item[this.serial_field] ||
+				this.item.batch_no ||
+				(this.frm.doc.is_return && this.frm.doc.return_against)
+		);
 	}
 
 	render_data() {
