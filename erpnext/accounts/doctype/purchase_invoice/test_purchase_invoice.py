@@ -3126,10 +3126,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
 
 	def test_internal_transfer_invoice_credits_transit_with_its_stock_value(self):
-		"""A stock updating internal transfer invoice in a non-stock UOM credits the in-transit
-		account with the stock value that left the in-transit warehouse."""
+		"""A stock updating internal transfer invoice in a non-stock UOM, and its return, book the
+		in-transit account with the stock value that moved through the in-transit warehouse."""
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.item.test_item import make_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			get_gl_entries,
@@ -3170,22 +3171,26 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		pi.items[0].warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
 		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
 		pi.submit()
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.update_stock = 1
+		returned.submit()
 
-		transit_stock_value = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_no": pi.name, "warehouse": transit_warehouse, "is_cancelled": 0},
-			"stock_value_difference",
-		)
-		booked_value = {}
-		for entry in get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True):
-			booked_value.setdefault(entry.account, 0)
-			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
+		for invoice in (pi, returned):
+			transit_stock_value = frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": invoice.name, "warehouse": transit_warehouse, "is_cancelled": 0},
+				"stock_value_difference",
+			)
+			booked_value = {}
+			for entry in get_gl_entries("Purchase Invoice", invoice.name, skip_cancelled=True):
+				booked_value.setdefault(entry.account, 0)
+				booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
 
-		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
-		self.assertEqual(
-			flt(booked_value[get_inventory_account(company, transit_warehouse)], 2),
-			flt(transit_stock_value, 2),
-		)
+			self.assertEqual(flt(sum(booked_value.values()), 2), 0)
+			self.assertEqual(
+				flt(booked_value[get_inventory_account(company, transit_warehouse)], 2),
+				flt(transit_stock_value, 2),
+			)
 
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
