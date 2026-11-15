@@ -534,6 +534,7 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 			packed_item.qty,
 			packed_item.product_bundle,
 			packed_item.picked_qty,
+			packed_item.sales_order_packed_item,
 			order_item.stock_qty.as_("order_stock_qty"),
 		)
 		.where((packed_item.parenttype == doctype) & packed_item.parent_detail_docname.isin(list(order_rows)))
@@ -559,20 +560,26 @@ def pop_order_packed_item(so_packed_items, parent_item, item_code):
 def get_component_order_rows(doc, parent_item, components, so_packed_items) -> list[tuple]:
 	"""Each component of a bundle row with the order's packed row it packs.
 
-	A return also packs every other returned row, e.g. of a component delivered from several warehouses."""
-	rows = [
-		(component, pop_order_packed_item(so_packed_items, parent_item, component.item_code))
-		for component in components
-	]
-	if doc.get("is_return"):
-		components_by_code = {component.item_code: component for component in components}
-		rows.extend(
-			(components_by_code[row.item_code], row)
-			for row in so_packed_items
-			if row.parent_item == parent_item and row.item_code in components_by_code
-		)
+	A return packs every delivered row of a component, e.g. one per warehouse it was delivered from."""
+	if not doc.get("is_return"):
+		return [
+			(component, pop_order_packed_item(so_packed_items, parent_item, component.item_code))
+			for component in components
+		]
 
-	return rows
+	# rows delivered from several warehouses share the Sales Order packed row of their occurrence
+	delivered_rows = {}
+	for row in so_packed_items:
+		delivered_rows.setdefault(row.sales_order_packed_item or row.name, []).append(row)
+
+	first_rows = [rows[0] for rows in delivered_rows.values()]
+	component_rows = []
+	for component in components:
+		first_row = pop_order_packed_item(first_rows, parent_item, component.item_code)
+		rows = delivered_rows[first_row.sales_order_packed_item or first_row.name] if first_row else [None]
+		component_rows.extend((component, row) for row in rows)
+
+	return component_rows
 
 
 def get_order_packed_item_pairs(doc) -> list[tuple]:
