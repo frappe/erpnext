@@ -3285,11 +3285,21 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
-	# add lcv amount in incoming_rate
-	lcv_amount = frappe.db.get_value(child_doctype, sle.voucher_detail_no, "landed_cost_voucher_amount")
+	# spread the row's lcv amount over all the stock it received, accepted and rejected
+	row = frappe.db.get_value(
+		child_doctype,
+		sle.voucher_detail_no,
+		["landed_cost_voucher_amount", "qty", "rejected_qty", "conversion_factor"],
+		as_dict=True,
+	)
 
-	if lcv_amount:
-		lcv_rate = flt(lcv_amount / abs(sle.actual_qty))
+	if flt(row.landed_cost_voucher_amount):
+		precision = frappe.get_precision(child_doctype, "stock_qty")
+		received_stock_qty = abs(
+			flt(row.qty * row.conversion_factor, precision)
+			+ flt(row.rejected_qty * row.conversion_factor, precision)
+		)
+		lcv_rate = flt(row.landed_cost_voucher_amount / (received_stock_qty or abs(sle.actual_qty)))
 
 	return rate + lcv_rate
 
