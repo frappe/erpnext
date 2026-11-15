@@ -237,14 +237,12 @@ class BuyingController(SubcontractingController):
 		if row.get("rejected_serial_and_batch_bundle") or not row.rejected_warehouse:
 			return
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
-
 		row.rejected_serial_and_batch_bundle = self.make_package_for_transfer(
 			package,
 			row.rejected_warehouse,
 			type_of_transaction="Inward",
 			do_not_submit=True,
-			qty=rejected_qty,
+			qty=self.get_rejected_stock_qty(row),
 			exclude_serial_nos=self.get_accepted_serial_nos(row),
 		)
 
@@ -1012,9 +1010,18 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
 			return accepted_qty
 
-		rejected_qty = flt(flt(row.rejected_qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+		return get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty))
 
-		return flt(accepted_qty + rejected_qty, row.precision("stock_qty"))
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty in the stock UOM. An internal receipt takes it out of the stock qty it
+		receives, so the accepted and rejected parts add up to what leaves the in-transit warehouse."""
+		if not self.is_internal_receipt():
+			return get_stock_qty(row, row.rejected_qty)
+
+		return flt(
+			get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty)) - get_stock_qty(row, row.qty),
+			row.precision("stock_qty"),
+		)
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
@@ -1212,7 +1219,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": get_stock_qty(d, d.rejected_qty),
+							"actual_qty": self.get_rejected_stock_qty(d),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
