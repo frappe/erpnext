@@ -947,14 +947,33 @@ class BuyingController(SubcontractingController):
 		return bool(row.get("purchase_receipt_item") if self.is_return else row.get("delivery_note_item"))
 
 	def get_qty_left_to_return(self, row) -> float:
-		"""Stock qty the returned receipt row took out of transit that its other returns have not put back."""
-		other_returns = frappe.get_all(
-			"Purchase Receipt Item",
-			filters={"purchase_receipt_item": row.purchase_receipt_item, "parent": ("!=", self.name)},
-			pluck="name",
+		"""Stock qty the returned receipt row took out of transit that its other returns have not put back.
+		Only the receipt's entry out of transit and the returns' entries into it count, as rejected stock
+		can stay in transit."""
+		receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+		other_returns = (
+			frappe.qb.from_(receipt_item)
+			.select(receipt_item.name)
+			.where(
+				(receipt_item.purchase_receipt_item == row.purchase_receipt_item)
+				& (receipt_item.parent != self.name)
+			)
 		)
-		taken_qty = self.get_transit_qty(row, [row.purchase_receipt_item, *other_returns])
-		return -flt(taken_qty, row.precision("stock_qty"))
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		moved_qty = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where(
+				(sle.warehouse == row.from_warehouse)
+				& (sle.is_cancelled == 0)
+				& (
+					((sle.voucher_detail_no == row.purchase_receipt_item) & (sle.actual_qty < 0))
+					| (sle.voucher_detail_no.isin(other_returns) & (sle.actual_qty > 0))
+				)
+			)
+			.run()[0][0]
+		)
+		return -flt(moved_qty, row.precision("stock_qty"))
 
 	def get_qty_left_in_transit(self, row) -> float | None:
 		"""Stock qty the delivered row put in transit that its other receipts, net of their returns, have not
@@ -1001,22 +1020,18 @@ class BuyingController(SubcontractingController):
 		if not rows:
 			return 0.0, 0.0
 
-		return sum(flt(d.qty) for d in rows), self.get_transit_qty(row, [d.name for d in rows])
-
-	def get_transit_qty(self, row, voucher_detail_nos) -> float:
-		"""Stock qty the entries of the given rows moved in the source warehouse of the row."""
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		qty = (
+		taken_qty = (
 			frappe.qb.from_(sle)
 			.select(Sum(sle.actual_qty))
 			.where(
 				(sle.warehouse == row.from_warehouse)
 				& (sle.is_cancelled == 0)
-				& sle.voucher_detail_no.isin(voucher_detail_nos)
+				& sle.voucher_detail_no.isin([d.name for d in rows])
 			)
 			.run()[0][0]
 		)
-		return flt(qty)
+		return sum(flt(d.qty) for d in rows), flt(taken_qty)
 
 	def get_posted_qty(self, voucher_detail_no, warehouse):
 		return frappe.db.get_value(
