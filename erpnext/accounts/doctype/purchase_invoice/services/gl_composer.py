@@ -10,7 +10,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.services.base_gl_composer import BaseGLComposer
 from erpnext.accounts.services.taxes import TaxService
 from erpnext.accounts.utils import get_account_currency
-from erpnext.controllers.buying_controller import get_stock_qty
+from erpnext.controllers.buying_controller import get_stock_qty, get_transit_amount
 
 
 class PurchaseInvoiceGLComposer(BaseGLComposer):
@@ -656,7 +656,7 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			if item.sales_incoming_rate:
 				# Material of a transfer goes back at the rate it came in with, the rejected
 				# material along with the accepted.
-				net_rate = (flt(item.qty) + flt(item.rejected_qty)) * item.sales_incoming_rate
+				net_rate = get_transit_amount(item, item.qty) + get_transit_amount(item, item.rejected_qty)
 
 			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 			warehouse_debit_amount = flt(
