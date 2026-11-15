@@ -103,26 +103,17 @@ def _get_item_details(
 	        "set_warehouse": ""
 	}
 	"""
-<<<<<<< HEAD
-=======
-	_preprocess_ctx(ctx)
-	for_validate = parse_json(for_validate)
-	overwrite_warehouse = parse_json(overwrite_warehouse)
-	item = frappe.get_cached_doc("Item", ctx.item_code)
+
+	args = process_args(args)
+	for_validate = process_string_args(for_validate)
+	overwrite_warehouse = process_string_args(overwrite_warehouse)
+	item = frappe.get_cached_doc("Item", args.item_code)
 	# the supplier portal saves a Supplier Quotation with ignore_permissions
 	is_portal_quotation = (
 		isinstance(doc, Document) and doc.doctype == "Supplier Quotation" and doc.flags.ignore_permissions
 	)
 	if not is_portal_quotation:
 		item.check_permission()
-	validate_item_details(ctx, item)
->>>>>>> d0b83b3 (fix(stock): skip the Item permission check for a document saved with ignore_permissions)
-
-	args = process_args(args)
-	for_validate = process_string_args(for_validate)
-	overwrite_warehouse = process_string_args(overwrite_warehouse)
-	item = frappe.get_cached_doc("Item", args.item_code)
-	item.check_permission()
 	validate_item_details(args, item)
 
 	if isinstance(doc, str):
