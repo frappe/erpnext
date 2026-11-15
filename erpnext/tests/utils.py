@@ -3378,6 +3378,8 @@ class ERPNextTestSuite(unittest.TestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.local.request_cache.clear()
+		# values cached from rolled-back rows, e.g. a party's GL currency
+		frappe.local.cache.clear()
 		if hasattr(frappe.local, "future_sle"):
 			frappe.local.future_sle.clear()
 
