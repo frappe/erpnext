@@ -76,12 +76,7 @@ class StockInternalTransferService:
 		if self.doc.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
 			return
 
-		inter_company_reference = (
-			self.doc.get("inter_company_invoice_reference")
-			if self.doc.doctype == "Purchase Invoice"
-			else self.doc.get("inter_company_reference")
-		)
-
+		inter_company_reference = self.get_inter_company_reference()
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty(inter_company_reference)
 		if not item_wise_transfer_qty:
 			return
@@ -115,6 +110,17 @@ class StockInternalTransferService:
 					),
 					OverAllowanceError,
 				)
+
+	def get_inter_company_reference(self):
+		if self.doc.doctype == "Purchase Receipt":
+			return self.doc.get("inter_company_reference")
+
+		if self.doc.get("is_return"):
+			return frappe.db.get_value(
+				"Purchase Invoice", self.doc.return_against, "inter_company_invoice_reference"
+			)
+
+		return self.doc.get("inter_company_invoice_reference")
 
 	def get_item_wise_inter_transfer_qty(self, inter_company_reference):
 		parent_doctype = {
@@ -185,8 +191,10 @@ class StockInternalTransferService:
 			fields,
 		)
 
+		# a cancelled document no longer counts
+		own_items = self.doc.items if self.doc.docstatus == 1 else []
 		item_wise_received_qty = defaultdict(float)
-		for row in [*other_items, *self.doc.items]:
+		for row in [*other_items, *own_items]:
 			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
 			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
 
