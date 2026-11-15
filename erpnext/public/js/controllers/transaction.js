@@ -911,6 +911,36 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.trigger('set_default_internal_warehouse');
 	}
 
+	add_inter_company_order_button(label, target_doctype, reference_fieldname) {
+		frappe.call({
+			method: "erpnext.accounts.doctype.sales_invoice.mapper.get_received_items",
+			args: {
+				reference_name: this.frm.doc.name,
+				doctype: target_doctype,
+				reference_fieldname: reference_fieldname,
+			},
+			callback: (r) => {
+				if (r.exc) return;
+				const received_items = r.message || {};
+				// An order made from its counterpart links it without item references.
+				const is_made_from_counterpart =
+					this.frm.doc.inter_company_order_reference && $.isEmptyObject(received_items);
+				const has_pending_qty = this.frm.doc.items.some(
+					(item) =>
+						!item.closed &&
+						flt(item.stock_qty - flt(received_items[item.name]), precision("stock_qty", item)) > 0
+				);
+				if (is_made_from_counterpart || !has_pending_qty) return;
+
+				this.frm.add_custom_button(
+					label,
+					() => this.make_inter_company_order(this.frm),
+					__("Create")
+				);
+			},
+		});
+	}
+
 	set_default_internal_warehouse() {
 		let me = this;
 		if ((this.frm.doc.doctype === 'Sales Invoice' && me.frm.doc.update_stock)
