@@ -3672,10 +3672,8 @@ class TestWorkOrder(ERPNextTestSuite):
 			stock_entry.submit()
 
 		disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
-		rm_row = next(
-			row for row in disassembly.get_items_from_manufacture_stock_entry() if row.item_code == rm_item
-		)
-		self.assertEqual(flt(rm_row.basic_rate), 110)
+		rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+		self.assertEqual(rm_row.basic_rate, 110)
 
 	def test_disassemby_order(self):
 		fg_item = "Test Disassembly Item"
