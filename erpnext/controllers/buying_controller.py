@@ -179,7 +179,8 @@ class BuyingController(SubcontractingController):
 						(
 							old_item
 							for old_item in self.get_doc_before_save().items
-							if old_item.name == item.name and old_item.qty != item.qty
+							if old_item.name == item.name
+							and get_stock_qty(old_item, old_item.qty) != get_stock_qty(item, item.qty)
 						),
 						None,
 					)
