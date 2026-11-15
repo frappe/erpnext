@@ -7872,6 +7872,29 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.submit()
 		self.assertEqual(frappe.db.get_value("Delivery Note Item", dn.items[0].name, "received_qty"), 6)
 
+	def test_internal_pr_return_of_batch_item(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = make_item(
+			"_Test Batch Item For Internal PR Return",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBIPR-.####",
+			},
+		).name
+		pr = make_internal_purchase_receipt(make_internal_delivery_note(item).name)
+		pr.submit()
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.submit()
+		bundle = pr_return.items[0].serial_and_batch_bundle
+		self.assertEqual(
+			frappe.db.get_value("Serial and Batch Bundle", bundle, ["warehouse", "type_of_transaction"]),
+			("Stores - TCP1", "Outward"),
+		)
+
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
