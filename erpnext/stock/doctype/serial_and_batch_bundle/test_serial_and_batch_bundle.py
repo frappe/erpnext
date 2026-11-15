@@ -27,81 +27,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.permission_test_utils import as_user, assert_refused, insert_test_record, make_fenced_user
 
 
-<<<<<<< HEAD
 class TestSerialandBatchBundle(FrappeTestCase):
-=======
-class TestSerialBatchBundleEntry(ERPNextTestSuite):
-	def make_bundle(self, has_batch_no=0):
-		item = make_item(properties={"is_stock_item": 1, "has_serial_no": 1, "has_batch_no": has_batch_no})
-		return frappe.get_doc(
-			doctype="Serial and Batch Bundle",
-			item_code=item.name,
-			has_serial_no=1,
-			has_batch_no=has_batch_no,
-			company="_Test Company",
-			warehouse="_Test Warehouse - _TC",
-			voucher_type="Purchase Receipt",
-			type_of_transaction="Inward",
-			posting_datetime=combine_datetime(today(), nowtime()),
-		)
-
-	def test_manual_serials_resolve_by_item_and_save(self):
-		bundles = [self.make_bundle(), self.make_bundle()]
-		for bundle in bundles:
-			name = bundle.add_serial_batch({"serial_nos": "Form-Serial"})
-			self.assertEqual(name, bundle.name)
-			bundle.reload()
-			serial = frappe.get_doc("Serial No", bundle.entries[0].serial_no)
-			self.assertEqual((serial.item_code, serial.serial_no), (bundle.item_code, "Form-Serial"))
-			self.assertEqual(serial.company, bundle.company)
-		self.assertNotEqual(bundles[0].entries[0].serial_no, bundles[1].entries[0].serial_no)
-		name = bundles[0].name
-		self.assertEqual(bundles[0].add_serial_batch({"serial_nos": "Replacement-Serial"}), name)
-		bundles[0].reload()
-		self.assertEqual(len(bundles[0].entries), 1)
-		self.assertEqual(
-			frappe.db.get_value("Serial No", bundles[0].entries[0].serial_no, "serial_no"),
-			"Replacement-Serial",
-		)
-
-	def test_csv_pairs_are_saved_together(self):
-		bundle = self.make_bundle(has_batch_no=1)
-		serials = [{"serial_no": "Form-Serial", "batch_no": "Form-Batch", "qty": 1}]
-		batches = [{"batch_no": "Form-Batch", "qty": 1}]
-		with patch(
-			"erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.read_serial_batch_csv",
-			return_value=(serials, batches),
-		):
-			bundle.add_serial_batch({"csv_file": "/private/files/serials.csv"})
-		bundle.reload()
-		self.assertEqual(len(bundle.entries), 1)
-		entry = bundle.entries[0]
-		serial = frappe.get_doc("Serial No", entry.serial_no)
-		batch = frappe.get_doc("Batch", entry.batch_no)
-		self.assertEqual((serial.serial_no, batch.batch_id), ("Form-Serial", "Form-Batch"))
-		self.assertEqual(serial.batch_no, batch.name)
-		self.assertEqual(bundle.total_qty, 1)
-
-	def test_outward_bundle_cannot_create_serials(self):
-		bundle = self.make_bundle()
-		bundle.type_of_transaction = "Outward"
-		with self.assertRaisesRegex(frappe.ValidationError, "does not exist for Item"):
-			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
-		)
-
-	def test_submitted_bundle_rejects_number_entry(self):
-		bundle = self.make_bundle()
-		bundle.docstatus = 1
-		with self.assertRaisesRegex(frappe.ValidationError, "draft bundle"):
-			bundle.add_serial_batch({"serial_nos": "Missing-Serial"})
-		self.assertFalse(
-			frappe.db.exists("Serial No", {"item_code": bundle.item_code, "serial_no": "Missing-Serial"})
-		)
-
-
-class TestSerialandBatchBundle(ERPNextTestSuite):
 	def test_return_row_loads_the_returned_voucher_batches(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -124,15 +50,6 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 		ledgers = get_serial_batch_ledgers(item_code=item_code, child_row=return_row)
 		self.assertEqual([row.get("batch_no") for row in ledgers], [batch_no])
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 6439616 (test: a return row loads the returned voucher's batches)
-=======
-		rejected = get_serial_batch_ledgers(item_code=item_code, child_row={**return_row, "is_rejected": 1})
-		self.assertEqual(
-			[(row.qty, row.warehouse) for row in rejected], [(2, receipt.items[0].rejected_warehouse)]
-		)
-=======
 		from_rejected_warehouse = make_return_doc(
 			"Purchase Receipt", receipt.name, return_against_rejected_qty=True
 		).items[0]
@@ -144,9 +61,7 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 			self.assertEqual(
 				[(row.qty, row.warehouse) for row in rejected], [(2, receipt.items[0].rejected_warehouse)]
 			)
->>>>>>> f110985 (test: a return from the rejected warehouse loads the returned voucher's rejected batches)
 
->>>>>>> 25ef57e (test: a rejected return row loads the returned voucher's rejected batches)
 	def test_voucher_no_and_voucher_type_are_indexed(self):
 		self.assertTrue(frappe.db.has_index("tabSerial and Batch Bundle", "voucher_no_voucher_type_index"))
 		self.assertFalse(
