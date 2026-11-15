@@ -213,7 +213,7 @@ class BuyingController(SubcontractingController):
 				row.from_warehouse,
 				type_of_transaction="Outward",
 				do_not_submit=True,
-				qty=flt(row.stock_qty),
+				qty=get_stock_qty(row, row.qty),
 			)
 
 		if not flt(row.stock_qty):
@@ -224,7 +224,7 @@ class BuyingController(SubcontractingController):
 			row.warehouse,
 			type_of_transaction="Inward",
 			do_not_submit=True,
-			qty=flt(row.stock_qty),
+			qty=get_stock_qty(row, row.qty),
 			exclude_serial_nos=self.get_rejected_serial_nos(row),
 		)
 
