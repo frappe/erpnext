@@ -345,35 +345,32 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_orders_for_parts_of_a_supplier_quotation_add_up_to_its_stock_qty(self):
-		from erpnext.buying.doctype.supplier_quotation.mapper import (
-			make_purchase_order as make_po_from_sq,
+		sq = make_supplier_quotation_for_boxes(make_item_with_fractional_box())
+		self.assert_orders_for_parts_add_up(sq.items[0], lambda: make_po_for_supplier_quotation(sq))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_order_completes_a_supplier_quotation_made_before_the_setting_is_turned_off(self):
+		sq = make_supplier_quotation_for_boxes(make_item_with_fractional_box(conversion_factor=0.3333))
+		frappe.db.set_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase", 0)
+		po = make_po_for_supplier_quotation(sq)
+		po.supplier = "_Test Supplier"
+		po.submit()
+
+		sq.reload()
+		self.assertEqual(sq.items[0].ordered_qty, sq.items[0].stock_qty)
+		self.assertEqual(sq.status, "Ordered")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"allow_to_edit_stock_uom_qty_for_purchase": 0, "allow_to_edit_stock_uom_qty_for_sales": 1},
+	)
+	def test_order_completes_a_sales_order_that_rounds_its_stock_qty(self):
+		so = make_sales_order_for_fractional_box(conversion_factor=0.3333)
+		make_po_for_sales_order_row(so.items[0]).submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), so.items[0].stock_qty
 		)
-
-		item = make_item_with_fractional_box()
-		sq = frappe.get_doc(
-			{
-				"doctype": "Supplier Quotation",
-				"supplier": "_Test Supplier",
-				"company": "_Test Company",
-				"items": [
-					{
-						"item_code": item,
-						"qty": 3,
-						"uom": "Box",
-						"rate": 100,
-						"warehouse": "_Test Warehouse - _TC",
-					}
-				],
-			}
-		).insert()
-		sq.submit()
-
-		def make_order():
-			po = make_po_from_sq(sq.name)
-			po.schedule_date = add_days(nowdate(), 1)
-			return po
-
-		self.assert_orders_for_parts_add_up(sq.items[0], make_order)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -3181,14 +3178,37 @@ def get_requested_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC")
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
 
 
-def make_sales_order_for_fractional_box():
+def make_sales_order_for_fractional_box(conversion_factor=0.666666667):
 	"""Sales Order for 3 of a 2/3 Kg Box UOM that allows fractions, so orders can map the rest of it."""
 	from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 	if not frappe.db.exists("UOM", "_Test Fractional Box"):
 		frappe.get_doc({"doctype": "UOM", "uom_name": "_Test Fractional Box"}).insert()
-	item = make_item_with_fractional_box("_Test Fractional Box")
+	item = make_item_with_fractional_box("_Test Fractional Box", conversion_factor)
 	return make_sales_order(item_code=item, qty=3, uom="_Test Fractional Box")
+
+
+def make_supplier_quotation_for_boxes(item):
+	sq = frappe.get_doc(
+		{
+			"doctype": "Supplier Quotation",
+			"supplier": "_Test Supplier",
+			"company": "_Test Company",
+			"items": [
+				{"item_code": item, "qty": 3, "uom": "Box", "rate": 100, "warehouse": "_Test Warehouse - _TC"}
+			],
+		}
+	).insert()
+	sq.submit()
+	return sq
+
+
+def make_po_for_supplier_quotation(supplier_quotation):
+	from erpnext.buying.doctype.supplier_quotation.mapper import make_purchase_order as make_po_from_sq
+
+	po = make_po_from_sq(supplier_quotation.name)
+	po.schedule_date = add_days(nowdate(), 1)
+	return po
 
 
 def make_po_for_sales_order_row(sales_order_row):
@@ -3268,12 +3288,12 @@ def order_material_request_after_setting_change(allow_to_edit_stock_uom_qty):
 	return mr
 
 
-def make_item_with_fractional_box(uom="Box"):
+def make_item_with_fractional_box(uom="Box", conversion_factor=0.666666667):
 	"""Stock item in Kg whose ``uom`` is 2/3 Kg, so the stock qty of ordered ``uom`` is rounded."""
 	return make_item(
 		properties={
 			"is_stock_item": 1,
 			"stock_uom": "Kg",
-			"uoms": [{"uom": uom, "conversion_factor": 0.666666667}],
+			"uoms": [{"uom": uom, "conversion_factor": conversion_factor}],
 		}
 	).name
