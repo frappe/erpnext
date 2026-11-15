@@ -218,6 +218,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		so = make_sales_order_for_fractional_box()
 		self.assert_orders_for_parts_add_up(so.items[0], lambda: make_po_for_sales_order_row(so.items[0]))
 
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
