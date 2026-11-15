@@ -1308,6 +1308,28 @@ class SerialandBatchBundle(Document):
 		consumed = receipt.get_consumed_serial_batches().get((receipt_item, row.rm_item_code), {})
 		return {key: identity.rate for key, identity in consumed.items()}
 
+<<<<<<< HEAD
+=======
+	def get_transit_rate(self, row) -> float:
+		"""What one stock unit of the material was worth on its way into the in-transit warehouse."""
+		if not (row and row.get("sales_incoming_rate")):
+			if not (self.voucher_detail_no and self.voucher_no):
+				return 0.0
+
+			row = (
+				frappe.db.get_value(
+					self.child_table,
+					self.voucher_detail_no,
+					["sales_incoming_rate", "conversion_factor"],
+					as_dict=True,
+				)
+				or {}
+			)
+
+		# sales_incoming_rate is per purchase UOM, but the entries of the bundle hold stock UOM qty
+		return flt(row.get("sales_incoming_rate")) / (flt(row.get("conversion_factor")) or 1.0)
+
+>>>>>>> fdfa399 (fix(stock): value rejected transit batch material per stock UOM)
 	def get_qty_field(self, row, qty_field=None) -> str:
 		if not qty_field:
 			qty_field = "qty"
