@@ -1177,10 +1177,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_delivery.packed_items[0].serial_no), picked_serial_nos[2:])
 		second_delivery.submit()
 
-<<<<<<< HEAD
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-=======
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_lowered_bundle_qty_keeps_as_many_picked_serial_nos(self):
 		pick_list = make_serialized_bundle_pick_list()
 		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
@@ -1192,10 +1189,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(delivery.packed_items[0].serial_no), picked_serial_nos[:1])
 		delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-<<<<<<< HEAD
->>>>>>> 1bc9959 (test: lowered bundle qty keeps as many picked serial nos)
-=======
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_raised_bundle_qty_tops_up_picked_serial_nos(self):
 		pick_list = make_serialized_bundle_pick_list()
 		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
@@ -1209,8 +1203,7 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(delivery.packed_items[0].serial_no), picked_serial_nos)
 		delivery.submit()
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
->>>>>>> 6f0cd69 (test: raised bundle qty tops up picked serial nos)
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_bundle_delivery_takes_the_component_warehouse_not_delivered_yet(self):
 		pick_list, _first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
 
