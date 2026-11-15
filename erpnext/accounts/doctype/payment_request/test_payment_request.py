@@ -6,8 +6,9 @@ import unittest
 from unittest.mock import patch
 
 import frappe
+from frappe.handler import execute_cmd
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import cint, nowdate
+from frappe.utils import cint, nowdate, set_request
 
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
@@ -25,6 +26,8 @@ from erpnext.setup.utils import get_exchange_rate
 
 test_dependencies = ["Currency Exchange", "Journal Entry", "Contact", "Address"]
 
+
+PAYMENT_URL = "https://example.com/payment"
 
 payment_gateway = {"doctype": "Payment Gateway", "gateway": "_Test Gateway"}
 
@@ -63,6 +66,90 @@ class TestPaymentRequest(FrappeTestCase):
 				"name",
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
+
+	def test_portal_customer_payment_permissions(self):
+		payment_request = "erpnext.accounts.doctype.payment_request.payment_request"
+		for target, value in (
+			(f"{payment_request}.PaymentRequest.send_email", None),
+			(f"{payment_request}.PaymentRequest.get_payment_url", PAYMENT_URL),
+			(f"{payment_request}._get_payment_gateway_controller", None),
+		):
+			mock = patch(target, return_value=value)
+			mock.start()
+			self.addCleanup(mock.stop)
+
+		order = make_sales_order()
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "payment-portal-customer@example.com",
+				"first_name": "Portal Customer",
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+				"roles": [{"role": "Customer"}],
+			}
+		).insert()
+		customer = frappe.get_doc("Customer", order.customer)
+		customer.append("portal_users", {"user": user.name})
+		customer.save()
+		cmd = "erpnext.accounts.doctype.payment_request.payment_request.make_payment_request"
+		self.addCleanup(setattr, frappe.local, "request", None)
+		self.addCleanup(setattr, frappe.local, "response", frappe._dict())
+
+		with self.set_user(user.name):
+			self.assertFalse(frappe.has_permission("Payment Request", "create"))
+			self.assertFalse(order.has_permission("read"))
+			for method in ("GET", "POST"):
+				set_request(method=method, path=f"/api/method/{cmd}")
+				frappe.local.form_dict = frappe._dict(
+					dt="Sales Order",
+					dn=order.name,
+					submit_doc="1",
+					order_type="Shopping Cart",
+					grand_total=1,
+					recipient_id="another-customer@example.com",
+					party="_Test Customer 1",
+					payment_gateway_account="_Test Gateway - USD - _TC",
+					ref_doc={"doctype": "Sales Order", "name": "other-order"},
+				)
+				if method == "GET":
+					self.assertRaises(frappe.PermissionError, execute_cmd, cmd)
+				else:
+					execute_cmd(cmd)
+
+		self.assertEqual(frappe.local.response.get("type"), "redirect")
+		self.assertEqual(frappe.local.response.get("location"), PAYMENT_URL)
+		request = frappe.get_doc("Payment Request", {"reference_name": order.name})
+		self.assertEqual(request.docstatus, 1)
+		self.assertEqual(request.grand_total, order.grand_total)
+		self.assertEqual(request.party, order.customer)
+		self.assertEqual(request.email_to, order.owner)
+		self.assertEqual(request.currency, order.currency)
+		self.assertNotEqual(request.payment_gateway_account, "_Test Gateway - USD - _TC")
+
+		cancelled_order = make_sales_order()
+		cancelled_order.cancel()
+		for payer, reference in (
+			(user.name, make_sales_order(customer="_Test Customer 1")),
+			(user.name, make_sales_order(do_not_submit=True)),
+			(user.name, cancelled_order),
+			(user.name, create_purchase_order()),
+			("Guest", order),
+		):
+			with self.subTest(payer=payer, reference=reference.name), self.set_user(payer):
+				self.assertRaises(
+					frappe.PermissionError,
+					make_payment_request,
+					dt=reference.doctype,
+					dn=reference.name,
+					order_type="Shopping Cart",
+					submit_doc=1,
+				)
+
+		with self.set_user(user.name):
+			self.assertRaises(frappe.PermissionError, make_payment_request, dt=order.doctype, dn=order.name)
+		request.cancel()
+		order.reload().cancel()
 
 	@change_settings("Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1})
 	def test_payment_request_linkings(self):
