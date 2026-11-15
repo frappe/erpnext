@@ -3299,7 +3299,7 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			flt(row.qty * row.conversion_factor, precision)
 			+ flt(row.rejected_qty * row.conversion_factor, precision)
 		)
-		lcv_rate = flt(row.landed_cost_voucher_amount / (received_stock_qty or abs(sle.actual_qty)))
+		lcv_rate = flt(row.landed_cost_voucher_amount / received_stock_qty)
 
 	return rate + lcv_rate
 
