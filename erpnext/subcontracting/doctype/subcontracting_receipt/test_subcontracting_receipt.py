@@ -414,6 +414,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_return_after_a_cancelled_return_takes_the_secondary_qty_left(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, quantity=3, secondary_qty=2)
+		scr = make_receipt_with_secondary_items(fg_item, 3)
+
+		# returns of 0.67, 0.66 and 0.67, the middle one cancelled
+		returns = [make_partial_return(scr.name, 1) for _ in range(3)]
+		returns[1].cancel()
+		scr_return = make_partial_return(scr.name, 1)
+
+		secondary_row = next(row for row in scr_return.items if row.bom_secondary_item)
+		self.assertEqual(secondary_row.qty, -0.66)
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+
 	def test_return_of_the_rest_after_all_secondary_qty_is_returned(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item, quantity=1000, secondary_qty=0.6)
