@@ -617,7 +617,7 @@ class TestPurchaseOrder(FrappeTestCase):
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
 =======
 	def test_last_purchase_details_carry_discount_amount(self):
-		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		item = make_item(properties={"is_stock_item": 1}).name
 		make_discounted_purchase_order(item)
 
 		details = get_last_purchase_details(item)
@@ -627,7 +627,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(details.rate, 30)
 
 	def test_last_purchase_discount_amount_leaves_out_its_margin(self):
-		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		item = make_item(properties={"is_stock_item": 1}).name
 		po = create_purchase_order(item_code=item, do_not_save=True)
 		po.items[0].update(
 			{
@@ -643,7 +643,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(get_last_purchase_details(item).discount_amount, 9)
 
 	def test_update_rate_as_per_last_purchase_carries_discount_amount(self):
-		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		item = make_item(properties={"is_stock_item": 1}).name
 		make_discounted_purchase_order(item)
 
 		po = create_purchase_order(item_code=item, rate=50, do_not_save=True)
@@ -656,7 +656,7 @@ class TestPurchaseOrder(FrappeTestCase):
 	def test_rate_pricing_rule_drops_last_purchase_discount_amount(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 
-		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		item = make_item(properties={"is_stock_item": 1}).name
 		make_discounted_purchase_order(item)
 		make_item_price(item, "Standard Buying", 0)
 		make_pricing_rule(item_code=item, buying=1, rate_or_discount="Rate", rate=50)
