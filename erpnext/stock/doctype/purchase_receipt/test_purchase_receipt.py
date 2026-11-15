@@ -4613,6 +4613,41 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			sle.actual_qty,
 		)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_rejected_qty_adds_up_to_transit_qty(self):
+		"""The accepted and rejected stock qty of an internal receipt add up to what leaves transit."""
+		item_doc = make_item(
+			"_Test Batch Item For Split Transfer Qty",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BT-BIFSTQ-.####",
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3356}],
+			},
+		)
+		pr, warehouses, *_ = self.make_transfer_receipt(item_doc, 3, 3)
+		pr.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		pr.submit()
+
+		sle_qty = frappe._dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+				as_list=True,
+			)
+		)
+		self.assertEqual(sle_qty[warehouses.transit], -2.01)
+		self.assertEqual(sle_qty[warehouses.accepted], 1.01)
+		self.assertEqual(sle_qty[warehouses.rejected], 1.0)
+		self.assertEqual(
+			frappe.db.get_value(
+				"Serial and Batch Bundle", pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+			1.0,
+		)
+
 	def make_transfer_receipt(self, item_doc, qty, rejected):
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
