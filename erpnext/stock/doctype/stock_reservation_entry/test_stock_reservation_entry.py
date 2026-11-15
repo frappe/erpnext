@@ -712,7 +712,12 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 
 		component = make_item(
-			properties={"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TSRB-.#####"}
+			properties={
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TSRB-.#####",
+			}
 		).name
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		make_product_bundle(bundle, [component])
@@ -756,6 +761,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	def test_cancelling_the_delivery_that_closed_a_fractional_reservation_reserves_its_qty_again(
 		self,
 	) -> None:
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
 		so = self.make_fractionally_reserved_sales_order()
 
 		first_dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
