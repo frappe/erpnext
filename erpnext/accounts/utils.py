@@ -1341,7 +1341,8 @@ def get_held_invoices(party_type, party):
 	if party_type == "Supplier":
 		held_invoices = frappe.get_all(
 			"Purchase Invoice",
-			filters={"on_hold": 1, "release_date": [">", nowdate()]},
+			filters={"on_hold": 1, "supplier": party},
+			or_filters=[["release_date", ">", nowdate()], ["release_date", "is", "not set"]],
 			pluck="name",
 		)
 		held_invoices = set(held_invoices)

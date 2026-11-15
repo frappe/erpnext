@@ -2,12 +2,16 @@
 # See license.txt
 
 
+from itertools import product
+
 import frappe
 from frappe import qb
 from frappe.desk.notifications import get_open_count
 from frappe.utils import add_days, flt, nowdate
+from freezegun import freeze_time
 
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import get_linked_payments
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
@@ -23,6 +27,9 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
+)
+from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
+	execute as bank_reconciliation_statement,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.doctype.employee.test_employee import make_employee
@@ -2086,6 +2093,115 @@ class TestPaymentEntry(ERPNextTestSuite):
 		# 1180 incl 18% => 1000 base + 180 tax
 		self.assertEqual(flt(payment_entry.total_taxes_and_charges, 2), 180.0)
 		self.assertEqual(flt(payment_entry.unallocated_amount, 2), 1000.0)
+
+	def test_payment_amounts_after_tax_use_bank_currency(self):
+		for payment_type, (bank_currency, exchange_rate), tax_type in product(
+			("Receive", "Pay"), (("INR", 1), ("USD", 80)), ("Add", "Deduct", "Inclusive", "None")
+		):
+			with self.subTest(payment_type=payment_type, currency=bank_currency, tax_type=tax_type):
+				bank = "_Test Bank USD - _TC" if bank_currency == "USD" else "_Test Bank - _TC"
+				is_receipt = payment_type == "Receive"
+				payment = create_payment_entry(
+					payment_type=payment_type,
+					party_type="Customer" if is_receipt else "Supplier",
+					party="_Test Customer" if is_receipt else "_Test Supplier",
+					paid_from="Debtors - _TC" if is_receipt else bank,
+					paid_to=bank if is_receipt else "Creditors - _TC",
+					paid_amount=8000 if is_receipt else 8000 / exchange_rate,
+				)
+				payment.source_exchange_rate = 1 if is_receipt else exchange_rate
+				payment.target_exchange_rate = exchange_rate if is_receipt else 1
+				payment.received_amount = 8000 / exchange_rate if is_receipt else 8000
+				if tax_type != "None":
+					payment.append(
+						"taxes",
+						{
+							"account_head": "_Test Account Service Tax - _TC",
+							"charge_type": "On Paid Amount",
+							"rate": 10,
+							"add_deduct_tax": "Deduct" if tax_type == "Deduct" else "Add",
+							"included_in_paid_amount": tax_type == "Inclusive",
+							"description": "Service Tax",
+						},
+					)
+				payment.submit()
+				base_amount = {"Add": 8800, "Deduct": 7200}.get(tax_type, 8000)
+				amount_field = "received_amount_after_tax" if is_receipt else "paid_amount_after_tax"
+				self.assertEqual(payment.get(amount_field), base_amount / exchange_rate)
+				self.assertEqual(payment.get("base_" + amount_field), base_amount)
+				entries = frappe.get_all(
+					"GL Entry",
+					filters={"voucher_no": payment.name, "account": bank, "is_cancelled": 0},
+					fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+				)
+				self.assertEqual(abs(sum(row.debit - row.credit for row in entries)), base_amount)
+				self.assertEqual(
+					abs(
+						sum(row.debit_in_account_currency - row.credit_in_account_currency for row in entries)
+					),
+					base_amount / exchange_rate,
+				)
+				transaction = (
+					frappe.get_doc(
+						{
+							"doctype": "Bank Transaction",
+							"date": nowdate(),
+							"bank_account": make_bank_account(
+								f"_Test Payment Tax Bank {bank_currency}", payment.company, bank
+							),
+							"currency": bank_currency,
+							"deposit" if is_receipt else "withdrawal": base_amount / exchange_rate,
+						}
+					)
+					.insert()
+					.submit()
+				)
+				matches = get_linked_payments(
+					transaction.name, ["payment_entry", "exact_match"], nowdate(), nowdate()
+				)
+				self.assertIn(payment.name, [row.name for row in matches])
+				report = bank_reconciliation_statement(
+					frappe._dict(company=payment.company, account=bank, report_date=nowdate())
+				)[1]
+				row = next(row for row in report if row.get("payment_entry") == payment.name)
+				self.assertEqual(row.debit if is_receipt else row.credit, base_amount / exchange_rate)
+				transaction.cancel()
+				payment.cancel()
+
+	def test_purchase_invoice_hold_release_dates(self):
+		for release_date, blocked in (
+			(None, True),
+			(add_days(nowdate(), 1), True),
+			(nowdate(), False),
+			(add_days(nowdate(), -1), False),
+		):
+			with freeze_time(add_days(nowdate(), -2)):
+				invoice = make_purchase_invoice()
+				payment = get_payment_entry(invoice.doctype, invoice.name, bank_account="_Test Cash - _TC")
+				invoice.block_invoice(release_date=release_date)
+			with self.subTest(release_date=release_date, operation="listing"):
+				outstanding = get_outstanding_reference_documents(
+					{
+						"company": invoice.company,
+						"party_type": "Supplier",
+						"party": invoice.supplier,
+						"party_account": invoice.credit_to,
+						"vouchers": [frappe._dict(voucher_type=invoice.doctype, voucher_no=invoice.name)],
+					}
+				)
+				self.assertEqual(bool(outstanding), not blocked)
+			with self.subTest(release_date=release_date, operation="payment"):
+				payment.posting_date = nowdate()
+				if blocked:
+					with self.assertRaisesRegex(frappe.ValidationError, "is on hold"):
+						payment.insert()
+				else:
+					payment.submit()
+					self.assertEqual(invoice.reload().outstanding_amount, 0)
+					payment.cancel()
+					self.assertEqual(invoice.reload().outstanding_amount, invoice.grand_total)
+			invoice.unblock_invoice()
+			invoice.cancel()
 
 	def test_payment_entry_against_onhold_purchase_invoice(self):
 		pi = make_purchase_invoice()
