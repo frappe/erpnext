@@ -759,8 +759,12 @@ class BuyingController(SubcontractingController):
 					)
 
 				net_rate = item.base_net_amount
-				if item.sales_incoming_rate:  # for internal transfer
-					net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
+				if item.sales_incoming_rate:  # for internal transfer, valued as the stock ledger moves it
+					net_rate = (
+						get_stock_qty(item, self.get_internal_transfer_qty(item))
+						* item.sales_incoming_rate
+						/ item.conversion_factor
+					)
 
 				if (
 					not net_rate
