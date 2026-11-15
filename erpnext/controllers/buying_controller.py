@@ -228,7 +228,7 @@ class BuyingController(SubcontractingController):
 
 		self.set_missing_item_details(for_validate)
 
-		if self.doctype == "Purchase Receipt" or self.get("update_stock"):
+		if self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock):
 			from erpnext.stock.services.return_charges import ReturnChargesService
 
 			ReturnChargesService(self).set_returned_valuation_charges()
