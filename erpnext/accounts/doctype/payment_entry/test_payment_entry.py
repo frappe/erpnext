@@ -3,6 +3,7 @@
 
 
 from itertools import product
+from unittest.mock import patch
 
 import frappe
 from frappe import qb
@@ -2628,6 +2629,74 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[2].voucher_no, si2.name)
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
+
+	def _make_old_and_new_invoices(self, customer_name):
+		customer = create_customer(customer_name, "INR")
+		old_si = create_sales_invoice(
+			qty=1, rate=300, customer=customer, posting_date=add_days(nowdate(), -60)
+		)
+		new_si = create_sales_invoice(qty=1, rate=100, customer=customer)
+		args = {
+			"posting_date": nowdate(),
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"payment_type": "Receive",
+			"party": customer,
+			"party_account": "Debtors - _TC",
+			"get_outstanding_invoices": True,
+		}
+		return old_si, new_si, args
+
+	def test_outstanding_invoices_reports_invoices_outside_date_filter(self):
+		old_si, new_si, args = self._make_old_and_new_invoices("_Test Customer Skipped By Date")
+		args.update({"from_posting_date": add_days(nowdate(), -30), "to_posting_date": nowdate()})
+
+		with patch("frappe.msgprint") as msgprint:
+			references = get_outstanding_reference_documents(args)
+
+		self.assertEqual([r.voucher_no for r in references], [new_si.name])
+		msgprint.assert_called_once()
+		message = msgprint.call_args.args[0]
+		self.assertIn("1 more outstanding invoice(s)", message)
+		self.assertIn("300.00", message)
+
+	def test_outstanding_invoices_limit_fetches_oldest_first_and_reports_the_rest(self):
+		old_si, new_si, args = self._make_old_and_new_invoices("_Test Customer Skipped By Limit")
+		args["limit"] = 1
+
+		with patch("frappe.msgprint") as msgprint:
+			references = get_outstanding_reference_documents(args)
+
+		self.assertEqual([r.voucher_no for r in references], [old_si.name])
+		msgprint.assert_called_once()
+		message = msgprint.call_args.args[0]
+		self.assertIn("Fetched the 1 oldest outstanding invoices", message)
+		self.assertIn("100.00", message)
+
+	def test_outstanding_invoices_no_match_reports_invoices_that_exist(self):
+		old_si, new_si, args = self._make_old_and_new_invoices("_Test Customer None In Filter")
+		args.update(
+			{"from_posting_date": add_days(nowdate(), 10), "to_posting_date": add_days(nowdate(), 20)}
+		)
+
+		with patch("frappe.msgprint") as msgprint:
+			references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(references, [])
+		msgprint.assert_called_once()
+		message = msgprint.call_args.args[0]
+		self.assertIn("No outstanding invoices match the filters", message)
+		self.assertIn("2 other outstanding invoice(s)", message)
+		self.assertIn("400.00", message)
+
+	def test_outstanding_invoices_without_filters_shows_no_message(self):
+		old_si, new_si, args = self._make_old_and_new_invoices("_Test Customer No Filters")
+
+		with patch("frappe.msgprint") as msgprint:
+			references = get_outstanding_reference_documents(args)
+
+		self.assertEqual({r.voucher_no for r in references}, {old_si.name, new_si.name})
+		msgprint.assert_not_called()
 
 	@ERPNextTestSuite.change_settings(
 		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}

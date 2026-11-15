@@ -895,17 +895,11 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	get_outstanding_invoices_or_orders: function (frm, get_outstanding_invoices, get_orders_to_be_billed) {
-		const today = frappe.datetime.get_today();
 		let fields = [
 			{ fieldtype: "Section Break", label: __("Posting Date") },
-			{
-				fieldtype: "Date",
-				label: __("From Date"),
-				fieldname: "from_posting_date",
-				default: frappe.datetime.add_days(today, -30),
-			},
+			{ fieldtype: "Date", label: __("From Date"), fieldname: "from_posting_date" },
 			{ fieldtype: "Column Break" },
-			{ fieldtype: "Date", label: __("To Date"), fieldname: "to_posting_date", default: today },
+			{ fieldtype: "Date", label: __("To Date"), fieldname: "to_posting_date" },
 			{ fieldtype: "Section Break", label: __("Due Date") },
 			{ fieldtype: "Date", label: __("From Date"), fieldname: "from_due_date" },
 			{ fieldtype: "Column Break" },
@@ -948,6 +942,27 @@ frappe.ui.form.on("Payment Entry", {
 			},
 		]);
 
+		if (get_outstanding_invoices) {
+			fields = fields.concat([
+				{ fieldtype: "Column Break" },
+				{
+					fieldtype: "Int",
+					label: __("Maximum Invoices to Fetch"),
+					fieldname: "limit",
+					default: 100,
+					non_negative: 1,
+					description: __("Oldest invoices are fetched first. Set 0 to fetch all."),
+				},
+			]);
+		}
+
+		const last_filters = frm.__last_outstanding_filters || {};
+		fields.forEach((field) => {
+			if (field.fieldname && field.fieldname in last_filters) {
+				field.default = last_filters[field.fieldname];
+			}
+		});
+
 		let btn_text = "";
 
 		if (get_outstanding_invoices) {
@@ -961,6 +976,7 @@ frappe.ui.form.on("Payment Entry", {
 			function (filters) {
 				frappe.flags.allocate_payment_amount = true;
 				frm.events.validate_filters_data(frm, filters);
+				frm.__last_outstanding_filters = { ...filters };
 				frm.doc.cost_center = filters.cost_center;
 				frm.events.get_outstanding_documents(
 					frm,
@@ -983,26 +999,14 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	validate_filters_data: function (frm, filters) {
-		const fields = {
-			"Posting Date": ["from_posting_date", "to_posting_date"],
-			"Due Date": ["from_posting_date", "to_posting_date"],
-			"Advance Amount": ["from_posting_date", "to_posting_date"],
+		const ranges = {
+			[__("Posting Date")]: ["from_posting_date", "to_posting_date"],
+			[__("Due Date")]: ["from_due_date", "to_due_date"],
 		};
 
-		for (let key in fields) {
-			let from_field = fields[key][0];
-			let to_field = fields[key][1];
-
-			if (filters[from_field] && !filters[to_field]) {
-				frappe.throw(__("Error: {0} is a mandatory field", [to_field.replace(/_/g, " ")]));
-			} else if (filters[from_field] && filters[from_field] > filters[to_field]) {
-				frappe.throw(
-					__("{0}: {1} must be less than {2}", [
-						key,
-						from_field.replace(/_/g, " "),
-						to_field.replace(/_/g, " "),
-					])
-				);
+		for (let [label, [from_field, to_field]] of Object.entries(ranges)) {
+			if (filters[from_field] && filters[to_field] && filters[from_field] > filters[to_field]) {
+				frappe.throw(__("{0}: From Date must be on or before To Date", [label]));
 			}
 		}
 	},

@@ -2321,7 +2321,13 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 		if party_account == advance_account:
 			party_account = accounts[0]
 
+	skipped_invoices = []
+	fetched_invoice_count = 0
+	limit = cint(args.get("limit")) or None
+
 	if args.get("get_outstanding_invoices"):
+		unfiltered_common_filter = list(common_filter)
+
 		outstanding_invoices = get_outstanding_invoices(
 			args.get("party_type"),
 			args.get("party"),
@@ -2332,7 +2338,21 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 			max_outstanding=args.get("outstanding_amt_less_than"),
 			accounting_dimensions=accounting_dimensions_filter,
 			vouchers=args.get("vouchers") or None,
+			limit=limit,
 		)
+		fetched_invoice_count = len(outstanding_invoices)
+
+		is_narrowed = (
+			posting_and_due_date
+			or accounting_dimensions_filter
+			or flt(args.get("outstanding_amt_greater_than"))
+			or flt(args.get("outstanding_amt_less_than"))
+			or limit
+		)
+		if is_narrowed and not args.get("vouchers") and not validate:
+			skipped_invoices = get_invoices_skipped_by_filters(
+				args, party_account, unfiltered_common_filter, outstanding_invoices
+			)
 
 		outstanding_invoices = split_refdocs_based_on_payment_terms(outstanding_invoices, args.get("company"))
 
@@ -2380,7 +2400,11 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 
 	data = negative_outstanding_invoices + outstanding_invoices + orders_to_be_billed
 
-	if not data:
+	if skipped_invoices:
+		show_skipped_invoices_message(
+			args, skipped_invoices, party_account_currency, fetched_count=fetched_invoice_count, limit=limit
+		)
+	elif not data:
 		if args.get("get_outstanding_invoices") and args.get("get_orders_to_be_billed"):
 			ref_document_type = "invoices or orders"
 		elif args.get("get_outstanding_invoices"):
@@ -2398,6 +2422,37 @@ def get_outstanding_reference_documents(args: str | dict, validate: bool = False
 			)
 
 	return data
+
+
+def get_invoices_skipped_by_filters(args, party_account, common_filter, fetched_invoices) -> list:
+	all_invoices = get_outstanding_invoices(
+		args.get("party_type"),
+		args.get("party"),
+		[party_account],
+		common_filter=common_filter,
+	)
+	fetched = {(d.voucher_type, d.voucher_no) for d in fetched_invoices}
+	return [d for d in all_invoices if (d.voucher_type, d.voucher_no) not in fetched]
+
+
+def show_skipped_invoices_message(args, skipped_invoices, currency, fetched_count, limit=None):
+	count = len(skipped_invoices)
+	amount = fmt_money(sum(flt(d.outstanding_amount) for d in skipped_invoices), currency=currency)
+
+	if not fetched_count:
+		message = _(
+			"No outstanding invoices match the filters, but {0} has {1} other outstanding invoice(s) worth {2}. Change the filters to fetch them."
+		).format(frappe.bold(args.get("party")), count, amount)
+	elif limit and fetched_count >= limit:
+		message = _(
+			"Fetched the {0} oldest outstanding invoices. {1} more worth {2} were not fetched. Change the filters or the limit to fetch them."
+		).format(limit, count, amount)
+	else:
+		message = _(
+			"{0} more outstanding invoice(s) worth {1} were not fetched because of the filters."
+		).format(count, amount)
+
+	frappe.msgprint(message, title=_("Some Invoices Not Fetched"), indicator="orange")
 
 
 def split_refdocs_based_on_payment_terms(refdocs, company) -> list:
