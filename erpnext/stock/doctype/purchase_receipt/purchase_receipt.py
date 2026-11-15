@@ -15,23 +15,15 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-<<<<<<< HEAD
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes
-from erpnext.controllers.buying_controller import BuyingController
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
-=======
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
-from erpnext.controllers.item_close import validate_parent_reopen
-from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
-from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
-	ProvisionalAccountingService,
->>>>>>> 2b67e4f (fix(stock): add up a Material Request's received qty from qty × conversion factor)
 )
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	validate_single_purchase_receipt,
