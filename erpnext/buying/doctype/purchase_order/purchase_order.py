@@ -19,10 +19,7 @@ from erpnext.buying.doctype.purchase_order.services.drop_ship import DropShipSer
 from erpnext.buying.doctype.purchase_order.services.status import StatusService
 from erpnext.buying.doctype.purchase_order.services.subcontracting import SubcontractingService
 from erpnext.buying.utils import validate_for_items
-from erpnext.controllers.buying_controller import (
-	BuyingController,
-	get_stock_qty_status_args,
-)
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
 from erpnext.controllers.taxes_and_totals import remove_margin
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
