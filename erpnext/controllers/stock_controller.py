@@ -1356,7 +1356,6 @@ class StockController(AccountsController):
 		exclude_serial_nos=None,
 		total_qty=0,
 	):
-<<<<<<< HEAD
 		return make_bundle_for_material_transfer(
 			is_new=self.is_new(),
 			docstatus=self.docstatus,
@@ -1369,19 +1368,7 @@ class StockController(AccountsController):
 			qty=qty,
 			include_bundle=include_bundle,
 			exclude_serial_nos=exclude_serial_nos,
-=======
-		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
-
-		return SerialBatchBundleService(self).make_package_for_transfer(
-			serial_and_batch_bundle,
-			warehouse,
-			type_of_transaction,
-			do_not_submit,
-			qty,
-			include_bundle,
-			exclude_serial_nos,
-			total_qty,
->>>>>>> a9b6c77 (fix(stock): size the in-transit package of a rejected internal receipt to the qty it takes out)
+			total_qty=total_qty,
 		)
 
 	def get_sl_entries(self, d, args):
