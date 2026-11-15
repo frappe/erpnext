@@ -3649,6 +3649,34 @@ class TestWorkOrder(ERPNextTestSuite):
 			"BOM",
 		)
 
+	def test_disassembly_from_work_order_uses_weighted_rate(self):
+		source_warehouse = "Stores - _TC"
+		fg_item = make_item("Test Disassembly Weighted Rate FG", {"is_stock_item": 1}).name
+		rm_item = make_item(
+			"Test Disassembly Weighted Rate RM", {"is_stock_item": 1, "valuation_method": "FIFO"}
+		).name
+		for rate in (100, 120):
+			test_stock_entry.make_stock_entry(
+				item_code=rm_item, target=source_warehouse, qty=1, basic_rate=rate
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=2, source_warehouse=source_warehouse, skip_transfer=1
+		)
+		for _ in range(2):
+			stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+			for row in stock_entry.items:
+				if row.item_code == rm_item:
+					row.s_warehouse = source_warehouse
+			stock_entry.submit()
+
+		disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+		rm_row = next(
+			row for row in disassembly.get_items_from_manufacture_stock_entry() if row.item_code == rm_item
+		)
+		self.assertEqual(flt(rm_row.basic_rate), 110)
+
 	def test_disassemby_order(self):
 		fg_item = "Test Disassembly Item"
 		source_warehouse = "Stores - _TC"
