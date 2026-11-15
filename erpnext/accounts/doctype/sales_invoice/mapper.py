@@ -461,24 +461,28 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 
 
 def get_inter_company_items(doctype, filters, reference_fieldname, fields):
-	"""Items of the submitted documents matching `filters`, and of their returns for Purchase Invoices.
-	A return row links only the invoice row it returns, so it gets that row's `reference_fieldname`."""
+	"""Items of the submitted documents matching `filters`, and of their returns for Purchase Invoices
+	and Purchase Receipts. A return row without `reference_fieldname` gets that of the row it returns."""
 	parents = frappe.get_all(doctype, filters={**filters, "docstatus": 1}, pluck="name")
 	if not parents:
 		return []
 
 	fields = ["name", reference_fieldname, *fields]
-	if doctype == "Purchase Invoice":
+	return_item_field = {
+		"Purchase Invoice": "purchase_invoice_item",
+		"Purchase Receipt": "purchase_receipt_item",
+	}.get(doctype)
+	if return_item_field:
 		parents += frappe.get_all(
 			doctype, filters={"return_against": ("in", parents), "docstatus": 1}, pluck="name"
 		)
-		fields.append("purchase_invoice_item")
+		fields.append(return_item_field)
 
 	items = frappe.get_all(doctype + " Item", filters={"parent": ("in", parents)}, fields=fields)
 	reference_by_row = {item.name: item.get(reference_fieldname) for item in items}
 	for item in items:
 		item[reference_fieldname] = reference_by_row[item.name] or reference_by_row.get(
-			item.get("purchase_invoice_item")
+			item.get(return_item_field)
 		)
 
 	return items
