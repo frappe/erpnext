@@ -1934,7 +1934,7 @@ erpnext.work_order.run_once_per_job_card = function (list, job_card, run) {
 };
 
 erpnext.work_order.run_job_card_timer_action = function (list, row, action) {
-	const now = frappe.datetime.now_datetime();
+	const now = frappe.datetime.system_datetime();
 	if (action === "complete") {
 		return frappe.set_route("Form", "Job Card", row.name);
 	}
@@ -1979,7 +1979,7 @@ erpnext.work_order.stop_job_card_ticker = function (list) {
 erpnext.work_order.start_job_card = function (list, row) {
 	const start = (employees) =>
 		erpnext.work_order.update_job_card(list, row.name, "start_timer", {
-			start_time: frappe.datetime.now_datetime(),
+			start_time: frappe.datetime.system_datetime(),
 			employees,
 		});
 
