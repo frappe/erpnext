@@ -1261,7 +1261,7 @@ class BuyingController(SubcontractingController):
 				& (receipt_item.parent != self.name)
 			)
 		)
-		rows = (
+		query = (
 			frappe.qb.from_(receipt_item)
 			.select(
 				receipt_item.name,
@@ -1274,8 +1274,17 @@ class BuyingController(SubcontractingController):
 					| receipt_item[self.returned_row_field].isin(other_receipt_rows)
 				)
 			)
-			.run(as_dict=True)
 		)
+		if self.doctype == "Purchase Invoice":
+			# An invoice that does not update stock moves nothing through transit.
+			invoice = frappe.qb.DocType("Purchase Invoice")
+			query = (
+				query.inner_join(invoice)
+				.on(invoice.name == receipt_item.parent)
+				.where(invoice.update_stock == 1)
+			)
+
+		rows = query.run(as_dict=True)
 		if not rows:
 			return 0.0, 0.0
 
