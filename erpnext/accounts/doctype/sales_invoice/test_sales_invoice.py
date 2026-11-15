@@ -4103,6 +4103,38 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
 
+	def test_internal_pi_qty_is_checked_in_stock_uom(self):
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(
+			item_code="_Test Item", target="Stores - TCP1", company=company, qty=10, basic_rate=100
+		)
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			debit_to="Debtors - TCP1",
+			warehouse="Stores - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			currency="INR",
+			qty=10,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.update_stock = 1
+		si.items[0].target_warehouse = "Work In Progress - TCP1"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		extra_pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(
+			{"uom": "_Test UOM 1", "conversion_factor": 10, "qty": 1, "warehouse": "Finished Goods - TCP1"}
+		)
+		pi.submit()
+
+		extra_pi.items[0].update({"qty": 9, "warehouse": "Finished Goods - TCP1"})
+		self.assertRaises(OverAllowanceError, extra_pi.submit)
+
 	def test_cancelling_one_partial_inter_company_pi_keeps_sales_invoice_linked_to_the_other(self):
 		si = create_sales_invoice(
 			company="Wind Power LLC",
