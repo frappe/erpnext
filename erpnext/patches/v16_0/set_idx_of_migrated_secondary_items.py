@@ -8,7 +8,7 @@ SCRAP_TABLES = (
 	(
 		"Subcontracting Inward Order Scrap Item",
 		"Subcontracting Inward Order Secondary Item",
-		("item_code", "fg_item_code", "reference_name"),
+		("item_code", "fg_item_code", "warehouse", "reference_name"),
 	),
 )
 
