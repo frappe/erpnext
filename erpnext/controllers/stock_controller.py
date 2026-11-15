@@ -2287,6 +2287,9 @@ class StockController(AccountsController):
 			)
 			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
 				query = query.where(table.voucher_detail_no == item.get(reference_field))
+				# supplier warehouse reservations are used by the receipt, not the transfer
+				if warehouse_field := data_map[purpose or self.doctype].get("exclude_warehouse_field"):
+					query = query.where(table.warehouse != item.get(warehouse_field))
 			else:
 				query = query.where(
 					(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
@@ -2308,6 +2311,7 @@ class StockController(AccountsController):
 					"voucher_type": "Subcontracting Order",
 					"voucher_no": self.get("subcontracting_order"),
 					"voucher_detail_no_field": "sco_rm_detail",
+					"exclude_warehouse_field": "t_warehouse",
 					"field": "transferred_qty",
 				},
 				"Subcontracting Receipt": {
