@@ -3092,6 +3092,24 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 		self.assert_warehouse_accounts_match_stock(pi)
 
+	def test_landed_cost_on_an_internal_transfer_invoice_with_rejected_qty(self):
+		"""Landed cost on an internal transfer invoice is capitalized once, over its accepted and
+		rejected stock."""
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		pi = make_internal_transfer_invoice(rejected_qty=2)
+		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=50)
+
+		stock_value_added = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pi.name, "is_cancelled": 0},
+			fields=[{"SUM": "stock_value_difference", "as": "total"}],
+		)[0].total
+		self.assertEqual(flt(stock_value_added, 2), 50)
+		self.assert_warehouse_accounts_match_stock(pi)
+
 	def assert_warehouse_accounts_match_stock(self, invoice):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 
@@ -4693,9 +4711,9 @@ def make_fully_rejected_stock_invoice():
 	return pi
 
 
-def make_internal_transfer_invoice():
+def make_internal_transfer_invoice(rejected_qty=0):
 	"""A stock updating internal transfer invoice of 6 Box (0.3356 Kg each, 100 per Kg), received
-	from an in-transit warehouse."""
+	from an in-transit warehouse, `rejected_qty` of them into a rejected warehouse."""
 	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -4737,6 +4755,15 @@ def make_internal_transfer_invoice():
 	pi.update_stock = 1
 	pi.items[0].warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
 	pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+	if rejected_qty:
+		pi.items[0].update(
+			{
+				"qty": 6 - rejected_qty,
+				"rejected_qty": rejected_qty,
+				"received_qty": 6,
+				"rejected_warehouse": create_warehouse("_Test Invoice Transfer Rejected", company=company),
+			}
+		)
 	pi.submit()
 	return pi
 
