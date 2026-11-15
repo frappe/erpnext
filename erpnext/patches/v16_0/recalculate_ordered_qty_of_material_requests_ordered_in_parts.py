@@ -3,17 +3,14 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
-from erpnext.controllers.buying_controller import is_rounded_request_stock_qty
+from erpnext.controllers.status_updater import match_target_qty
 
 
 def execute():
 	precision = frappe.get_precision("Material Request Item", "ordered_qty")
 	updates, requests = {}, {}
 	for row in get_ordered_rows_of_open_requests():
-		ordered_qty = flt(row.qty)
-		if is_rounded_request_stock_qty(row.stock_qty):
-			ordered_qty = flt(ordered_qty, precision)
-
+		ordered_qty = match_target_qty(row.qty, row.stock_qty, precision)
 		if ordered_qty != flt(row.ordered_qty):
 			updates[row.name] = {"ordered_qty": ordered_qty}
 			requests.setdefault(row.parent, []).append(row.name)
