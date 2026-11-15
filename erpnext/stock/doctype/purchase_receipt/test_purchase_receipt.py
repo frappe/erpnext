@@ -3984,10 +3984,6 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], 1000)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], -1000)
 
-<<<<<<< HEAD
-	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-=======
 	def test_internal_transfer_package_holds_the_rounded_stock_qty(self):
 		"""The accepted package of an internal receipt with a UOM holds the stock qty its ledger entry posts."""
 		item_doc = make_item(
@@ -4000,7 +3996,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"uoms": [{"uom": "Box", "conversion_factor": 0.3356}],
 			},
 		)
-		pr, warehouses, *_ = self.make_transfer_receipt(item_doc, 4, 2)
+		pr, warehouses, *_ = self.make_transfer_receipt("Rounded Package", item_doc, 4, 2)
 		pr.items[0].uom = "Box"
 		pr.items[0].conversion_factor = 0.3356
 		pr.submit()
@@ -4016,9 +4012,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			sle.actual_qty,
 		)
 
-	def make_transfer_receipt(self, item_doc, qty, rejected):
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
->>>>>>> 23df9f0 (test: internal receipt package holds the rounded stock qty)
+	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
