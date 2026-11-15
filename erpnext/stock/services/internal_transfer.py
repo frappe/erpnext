@@ -27,15 +27,16 @@ class StockInternalTransferService:
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
-
-				if (
-					self.doc.get("is_internal_supplier")
-					and self.doc.docstatus == 1
-					and not self.doc.get("is_return")
-				):
-					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
+
+			# inter-company documents too, not only same-company transfers
+			if (
+				self.doc.get("is_internal_supplier")
+				and self.doc.docstatus == 1
+				and not self.doc.get("is_return")
+			):
+				self.validate_internal_transfer_qty()
 
 	def validate_internal_transfer_warehouse(self):
 		for row in self.doc.items:
