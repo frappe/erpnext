@@ -492,6 +492,25 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr_return.items[1].rate, 15)
 		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
 
+	def test_return_values_percentage_secondary_items_at_the_receipt_rate(self):
+		scr = make_receipt_with_scrap(co_product_allocation=10)
+
+		# the secondary rows keep the full receipt qty
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.items[0].qty = -1
+		scr_return.submit()
+
+		co_product = scr_return.items[2]
+		self.assertEqual(co_product.rate, scr.items[2].rate)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": co_product.item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, co_product.amount)
+
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
@@ -5515,8 +5534,8 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	return scr
 
 
-def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None):
-	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate."""
+def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None):
+	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate, and an optional co-product."""
 	set_backflush_based_on("BOM")
 	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 	secondary_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
@@ -5532,6 +5551,18 @@ def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None):
 			"valuation_type": valuation_type,
 		},
 	)
+	if co_product_allocation:
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": make_item(properties={"is_stock_item": 1}).name,
+				"secondary_item_type": "Co-Product",
+				"qty": 1,
+				"stock_qty": 1,
+				"valuation_type": "% of Component Cost",
+				"cost_allocation_per": co_product_allocation,
+			},
+		)
 	bom.save()
 	bom.submit()
 	service_items = [
