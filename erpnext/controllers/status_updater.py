@@ -723,6 +723,11 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
+				if args.get("round_to_target_precision"):
+					args["source_dt_value"] = flt(
+						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
+					)
+
 				target_value = args["source_dt_value"]
 				if args.get("target_conversion_factor"):
 					target_value = f"{target_value} / {args['target_conversion_factor']}"
