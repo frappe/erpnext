@@ -17,12 +17,8 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 )
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import validate_for_items
-<<<<<<< HEAD
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.controllers.mapper import get_qty_already_mapped
-=======
 from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
->>>>>>> 0e77c8d (fix(buying): add up a Purchase Order's ordered qty from qty × conversion factor)
+from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.taxes_and_totals import remove_margin
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
@@ -808,21 +804,10 @@ class PurchaseOrder(BuyingController):
 		"""Recalculate the ordered qty of Sales Order rows linked to rows removed through Update Items."""
 		if not removed_items:
 			return
-<<<<<<< HEAD
-		for item in removed_items:
-			prev_ordered_qty = flt(
-				frappe.get_cached_value("Sales Order Item", item.get("sales_order_item"), "ordered_qty")
-			)
-
-			frappe.db.set_value(
-				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
-			)
-=======
 
 		# the removed rows are still in self.items, so their Sales Order rows are recalculated too
 		for args in self.get_sales_order_status_updater():
 			self._update_children({**args, "cond": ""}, update_modified=True)
->>>>>>> cf91622 (fix(buying): recalculate the Sales Order ordered qty of rows removed through Update Items)
 
 	def auto_create_subcontracting_order(self):
 		if self.is_subcontracted and not self.is_old_subcontracting_flow:

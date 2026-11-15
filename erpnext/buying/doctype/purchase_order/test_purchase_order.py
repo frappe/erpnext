@@ -28,7 +28,6 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_pi_from_pr,
 )
-from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -180,7 +179,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_orders_for_parts_of_a_supplier_quotation_add_up_to_its_stock_qty(self):
-		from erpnext.buying.doctype.supplier_quotation.mapper import (
+		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import (
 			make_purchase_order as make_po_from_sq,
 		)
 
@@ -258,8 +257,9 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		order(1).submit()
 		order(1).submit()
-		with assert_raises_with_savepoint(self, OverAllowanceError):
-			order(2).submit()
+		frappe.db.savepoint("over_order")
+		self.assertRaises(OverAllowanceError, order(2).submit)
+		frappe.db.rollback(save_point="over_order")
 		order(1).submit()
 
 		self.assertEqual(
@@ -2858,7 +2858,7 @@ def make_sales_order_for_fractional_box():
 
 
 def make_po_for_sales_order_row(sales_order_row):
-	from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+	from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order as make_po_from_so
 
 	selected_items = [{"name": sales_order_row.name, "supplier": "_Test Supplier"}]
 	return make_po_from_so(sales_order_row.parent, selected_items=selected_items)[0]

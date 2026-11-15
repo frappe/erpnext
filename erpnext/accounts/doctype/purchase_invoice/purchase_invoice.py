@@ -39,15 +39,14 @@ from erpnext.accounts.utils import (
 	update_voucher_outstanding,
 )
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
-<<<<<<< HEAD
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_stock_qty,
+	get_stock_qty_status_args,
+)
 from erpnext.controllers.mapper import get_qty_already_mapped
-=======
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
-from erpnext.manufacturing.doctype.production_plan.services.reservation import reserve_received_stock
->>>>>>> 2b67e4f (fix(stock): add up a Material Request's received qty from qty × conversion factor)
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	get_billed_amount_against_po,

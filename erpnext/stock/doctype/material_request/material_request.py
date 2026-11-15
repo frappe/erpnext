@@ -540,9 +540,6 @@ class MaterialRequest(BuyingController):
 			update_modified,
 		)
 
-<<<<<<< HEAD
-		self.update_requested_qty_in_work_order()
-
 	def update_requested_qty_in_work_order(self):
 		"""Refresh both counters: stop and cancel also flip pick list coverage."""
 		if not self.work_order or self.material_request_type != "Material Transfer":
@@ -552,8 +549,6 @@ class MaterialRequest(BuyingController):
 		work_order.update_requested_qty_for_required_items()
 		work_order.update_picked_qty_for_required_items()
 
-=======
->>>>>>> 3af55d5 (fix(stock): recalculate the ordered qty of open Material Requests ordered in parts)
 	def update_requested_qty_in_job_card(self):
 		if self.job_card:
 			frappe.get_doc("Job Card", self.job_card).set_requested_qty()
