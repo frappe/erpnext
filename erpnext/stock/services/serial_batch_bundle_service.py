@@ -765,6 +765,7 @@ class SerialBatchBundleService:
 		qty=0,
 		include_bundle=None,
 		exclude_serial_nos=None,
+		total_qty=0,
 	):
 		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
 
@@ -780,6 +781,7 @@ class SerialBatchBundleService:
 			qty=qty,
 			include_bundle=include_bundle,
 			exclude_serial_nos=exclude_serial_nos,
+			total_qty=total_qty,
 		)
 
 	def validate_reserved_batches(self):
