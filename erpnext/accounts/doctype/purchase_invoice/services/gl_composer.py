@@ -665,8 +665,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			# The accepted and rejected warehouses together take what left transit; round each
 			# part as it is posted so the entries balance.
 			rejected_stock_value = voucher_wise_stock_value.get((item.name, item.rejected_warehouse))
-			warehouse_debit_amount = flt(transit_stock_value, net_amt_precision) - flt(
-				rejected_stock_value, net_amt_precision
+			warehouse_debit_amount = flt(
+				flt(transit_stock_value, net_amt_precision) - flt(rejected_stock_value, net_amt_precision),
+				net_amt_precision,
 			)
 
 		if (
