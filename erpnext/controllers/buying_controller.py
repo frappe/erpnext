@@ -1205,7 +1205,7 @@ class BuyingController(SubcontractingController):
 			return qty
 
 		if self.docstatus == 2:
-			return -flt(self.get_posted_qty(row.name, row.from_warehouse)) or qty
+			return -flt(self.get_posted_qty(row.name, row.from_warehouse, outward=not self.is_return)) or qty
 
 		if self.is_return:
 			qty_left = self.get_qty_left_to_return(row)
@@ -1257,7 +1257,7 @@ class BuyingController(SubcontractingController):
 	def get_qty_left_in_transit(self, row) -> float | None:
 		"""Stock qty the delivered row put in transit that its other receipts, net of their returns, have not
 		taken out. None if the receipts take more than was delivered: only rounding is capped."""
-		delivered_qty = self.get_posted_qty(row.delivery_note_item, row.from_warehouse)
+		delivered_qty = self.get_posted_qty(row.delivery_note_item, row.from_warehouse, outward=False)
 		if not delivered_qty:
 			return None
 
@@ -1312,10 +1312,17 @@ class BuyingController(SubcontractingController):
 		)
 		return sum(flt(d.qty) for d in rows), flt(taken_qty)
 
-	def get_posted_qty(self, voucher_detail_no, warehouse):
+	def get_posted_qty(self, voucher_detail_no, warehouse, outward):
+		"""Qty of the row's entry out of or into the warehouse; a row can have both when rejected stock
+		stays in transit."""
 		return frappe.db.get_value(
 			"Stock Ledger Entry",
-			{"voucher_detail_no": voucher_detail_no, "warehouse": warehouse, "is_cancelled": 0},
+			{
+				"voucher_detail_no": voucher_detail_no,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0) if outward else (">", 0),
+			},
 			"actual_qty",
 		)
 
