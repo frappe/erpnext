@@ -2123,18 +2123,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
 
-<<<<<<< HEAD
-	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
-	def test_internal_transfer_pr_with_every_unit_rejected(self):
-		"""A receipt that rejects the whole transfer still empties the in-transit warehouse."""
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-=======
 	def test_internal_transfer_rejected_qty_takes_the_delivered_stock_qty_out_of_transit(self):
 		"""Accepted and rejected qty that round up on their own still take only the delivered stock
 		qty out of the in-transit warehouse."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
+		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
 		from_warehouse = create_warehouse("_Test Transfer From", company=company)
 		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
@@ -2182,11 +2177,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertEqual(received_qty, -delivered_qty)
 
-	def test_internal_transfer_rejected_qty_for_serial_item(self):
-		"""Rejected serial numbers leave the in-transit warehouse and stay out of the package of
-		accepted material."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
->>>>>>> 2b63f16 (test: take the delivered stock qty out of transit when accepted and rejected qty round up)
+	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
+	def test_internal_transfer_pr_with_every_unit_rejected(self):
+		"""A receipt that rejects the whole transfer still empties the in-transit warehouse."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
