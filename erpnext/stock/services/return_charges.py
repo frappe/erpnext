@@ -1,7 +1,6 @@
 import frappe
 from frappe.utils import flt
 
-from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 from erpnext.controllers.buying_controller import get_stock_qty
 from erpnext.controllers.sales_and_purchase_return import get_return_against_item_fields
 
@@ -26,10 +25,10 @@ class ReturnChargesService:
 		for tax in get_actual_valuation_charges(original):
 			original_charges.setdefault((tax.account_head, tax.description), []).append(tax)
 
-		returned_qty = self.get_returned_qty_by_original_row()
+		returned_share = self.get_returned_share(original)
 		for tax in charges:
 			if same_charges := original_charges.get((tax.account_head, tax.description)):
-				base_share = self.get_returned_base_share(original, same_charges.pop(0), returned_qty)
+				base_share = flt(same_charges.pop(0).base_tax_amount) * returned_share
 				tax.tax_amount = -flt(base_share / doc.conversion_rate, tax.precision("tax_amount"))
 
 	def is_traced_to_original(self) -> bool:
@@ -51,33 +50,44 @@ class ReturnChargesService:
 
 		return returned_qty
 
-	@staticmethod
-	def get_returned_base_share(original, original_charge, returned_qty) -> float:
-		"""Part of the charge, in company currency, that the returned stock carried."""
-		items = [row for row in original.get("items") if row.item_code]
-		if original_charge.get("allocate_full_amount_to_stock_items"):
-			stock_items = original.get_stock_items() + original.get_asset_items()
-			items = [row for row in items if row.item_code in stock_items]
-
-		charge_per_item = {}
-		original._spread_charge_over_items(charge_per_item, flt(original_charge.base_tax_amount), items)
-
-		bills_rejected = bills_rejected_quantity(original)
+	def get_returned_share(self, original) -> float:
+		"""Part of a valuation charge of the original that the returned stock carried."""
+		returned_qty = self.get_returned_qty_by_original_row()
 		share = 0.0
-		for row in items:
-			# a row carries its charge on the stock its net amount paid for, or on its rejected qty if it accepts nothing
+		for row, proportion in get_charge_proportions(original):
+			# a row carries its charge on its accepted qty, or on its rejected qty if it accepts nothing
 			qty = returned_qty.get(row.name, {"accepted": 0.0, "rejected": 0.0})
 			if flt(row.qty):
-				carried_qty = original.get_valued_stock_qty(row)
-				returned = qty["accepted"] + (qty["rejected"] if bills_rejected else 0.0)
+				carried_qty, returned = get_stock_qty(row, row.qty), qty["accepted"]
 			else:
-				carried_qty = get_stock_qty(row, row.rejected_qty)
-				returned = qty["rejected"]
+				carried_qty, returned = get_stock_qty(row, row.rejected_qty), qty["rejected"]
 
 			if carried_qty:
-				share += charge_per_item.get(row.idx, 0.0) * returned / carried_qty
+				share += proportion * returned / carried_qty
 
 		return share
+
+
+def get_charge_proportions(doc) -> list:
+	"""Part of a valuation charge each stock row takes, as update_valuation_rate spreads it."""
+	stock_items = doc.get_stock_items() + doc.get_asset_items()
+	items = [row for row in doc.get("items") if row.item_code in stock_items]
+
+	total_qty = sum(flt(row.qty) for row in items)
+	if total_qty:
+		total_amount = sum(flt(row.base_net_amount) for row in items)
+		return [
+			(row, flt(row.base_net_amount) / total_amount if total_amount else flt(row.qty) / total_qty)
+			for row in items
+		]
+
+	total_rejected_qty = sum(flt(row.get("rejected_qty")) for row in items)
+	if total_rejected_qty and frappe.db.get_single_value(
+		"Buying Settings", "set_valuation_rate_for_rejected_materials"
+	):
+		return [(row, flt(row.get("rejected_qty")) / total_rejected_qty) for row in items]
+
+	return []
 
 
 def get_actual_valuation_charges(doc) -> list:

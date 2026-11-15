@@ -28,18 +28,6 @@ from erpnext.stock.serial_batch_bundle import (
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	validate_single_purchase_receipt,
 )
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-from erpnext.stock.doctype.purchase_receipt.services.return_charges import ReturnChargesService
-=======
-from erpnext.stock.services.return_charges import ReturnChargesService
->>>>>>> d8a07e8 (fix(accounts): reverse only the carried valuation charge on a stock-updating debit note)
-=======
->>>>>>> 87b2e1d (fix(stock): set a return's valuation charge share after its item details are filled)
-from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import validate_single_purchase_receipt
->>>>>>> e12ef8f (fix(stock): reverse only the Actual valuation charge the returned stock carried)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
