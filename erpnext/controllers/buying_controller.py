@@ -1191,19 +1191,29 @@ class BuyingController(SubcontractingController):
 		if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
 			return False
 
-		return bool(row.get("purchase_receipt_item") if self.is_return else row.get("delivery_note_item"))
+		return bool(row.get(self.returned_row_field) if self.is_return else row.get(self.delivered_row_field))
+
+	@property
+	def delivered_row_field(self) -> str:
+		"""Field of a row that links the internal delivery row it receives."""
+		return "delivery_note_item" if self.doctype == "Purchase Receipt" else "sales_invoice_item"
+
+	@property
+	def returned_row_field(self) -> str:
+		"""Field of a return row that links the receipt row it returns."""
+		return "purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
 
 	def get_qty_left_to_return(self, row) -> float:
 		"""Stock qty the returned receipt row took out of transit that its other returns have not put back.
 		Only the receipt's entry out of transit and the returns' entries into it count, as rejected stock
 		can stay in transit."""
-		receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+		receipt_item = frappe.qb.DocType(row.doctype)
+		returned_row = row.get(self.returned_row_field)
 		other_returns = (
 			frappe.qb.from_(receipt_item)
 			.select(receipt_item.name)
 			.where(
-				(receipt_item.purchase_receipt_item == row.purchase_receipt_item)
-				& (receipt_item.parent != self.name)
+				(receipt_item[self.returned_row_field] == returned_row) & (receipt_item.parent != self.name)
 			)
 		)
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -1214,7 +1224,7 @@ class BuyingController(SubcontractingController):
 				(sle.warehouse == row.from_warehouse)
 				& (sle.is_cancelled == 0)
 				& (
-					((sle.voucher_detail_no == row.purchase_receipt_item) & (sle.actual_qty < 0))
+					((sle.voucher_detail_no == returned_row) & (sle.actual_qty < 0))
 					| (sle.voucher_detail_no.isin(other_returns) & (sle.actual_qty > 0))
 				)
 			)
@@ -1225,7 +1235,9 @@ class BuyingController(SubcontractingController):
 	def get_qty_left_in_transit(self, row) -> float | None:
 		"""Stock qty the delivered row put in transit that its other receipts, net of their returns, have not
 		taken out. None if the receipts take more than was delivered: only rounding is capped."""
-		delivered_qty = self.get_posted_qty(row.delivery_note_item, row.from_warehouse, outward=False)
+		delivered_qty = self.get_posted_qty(
+			row.get(self.delivered_row_field), row.from_warehouse, outward=False
+		)
 		if not delivered_qty:
 			return None
 
@@ -1240,12 +1252,12 @@ class BuyingController(SubcontractingController):
 	def get_other_receipts_of_delivered_row(self, row) -> tuple[float, float]:
 		"""Unrounded stock qty the other receipts of the delivered row and their returns received, and the
 		stock qty their entries took out of transit."""
-		receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+		receipt_item = frappe.qb.DocType(row.doctype)
 		other_receipt_rows = (
 			frappe.qb.from_(receipt_item)
 			.select(receipt_item.name)
 			.where(
-				(receipt_item.delivery_note_item == row.delivery_note_item)
+				(receipt_item[self.delivered_row_field] == row.get(self.delivered_row_field))
 				& (receipt_item.parent != self.name)
 			)
 		)
@@ -1259,7 +1271,7 @@ class BuyingController(SubcontractingController):
 				(receipt_item.docstatus == 1)
 				& (
 					receipt_item.name.isin(other_receipt_rows)
-					| receipt_item.purchase_receipt_item.isin(other_receipt_rows)
+					| receipt_item[self.returned_row_field].isin(other_receipt_rows)
 				)
 			)
 			.run(as_dict=True)
