@@ -450,19 +450,7 @@ class TestStockReservationEntry(ERPNextTestSuite):
 	def test_reservation_of_a_fractional_stock_qty_delivers_what_the_ledger_posts(self) -> None:
 		from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "Kg",
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TSRF-.#####",
-				"uoms": [{"uom": "Box", "conversion_factor": 0.3333}],
-			}
-		).name
-		make_stock_entry(item_code=item, target=self.warehouse, qty=1, basic_rate=100)
-		so = make_sales_order(item_code=item, warehouse=self.warehouse, qty=1, uom="Box", rate=100)
-		so.create_stock_reservation_entries()
+		so = self.make_fractionally_reserved_sales_order()
 		so.load_from_db()
 		self.assertFalse(so.has_unreserved_stock())
 
@@ -526,6 +514,51 @@ class TestStockReservationEntry(ERPNextTestSuite):
 			),
 			["Delivered"] * 3,
 		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_cancelling_the_delivery_that_closed_a_fractional_reservation_reserves_its_qty_again(
+		self,
+	) -> None:
+		so = self.make_fractionally_reserved_sales_order()
+
+		first_dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		first_dn.items[0].qty = 0.3
+		first_dn.submit()
+		last_dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": 1})
+		last_dn.submit()
+		self.assertEqual(self.get_reservation_status(so), "Delivered")
+
+		last_dn.cancel()
+		delivered_qty = _get_stock_reservation_entries_for_voucher(
+			"Sales Order", so.name, so.items[0].name, fields=["delivered_qty"]
+		)[0].delivered_qty
+		self.assertEqual(delivered_qty, first_dn.items[0].stock_qty)
+
+	def make_fractionally_reserved_sales_order(self):
+		"""Reserve 1 Box of a batched item where 1 Box = 0.3333 Kg."""
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TSRF-.#####",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3333}],
+			}
+		).name
+		make_stock_entry(item_code=item, target=self.warehouse, qty=1, basic_rate=100)
+		so = make_sales_order(item_code=item, warehouse=self.warehouse, qty=1, uom="Box", rate=100)
+		so.create_stock_reservation_entries()
+		return so
 
 	def get_reservation_status(self, so):
 		return _get_stock_reservation_entries_for_voucher(
