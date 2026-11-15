@@ -2496,7 +2496,7 @@ def make_po_for_sales_order_row(sales_order_row):
 	from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order as make_po_from_so
 
 	selected_items = [{"name": sales_order_row.name, "supplier": "_Test Supplier"}]
-	return make_po_from_so(sales_order_row.parent, selected_items=selected_items)[0]
+	return make_po_from_so(sales_order_row.parent, selected_items=selected_items)
 
 
 def make_item_with_fractional_box(uom="Box"):
