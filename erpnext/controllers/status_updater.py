@@ -723,11 +723,6 @@ class StatusUpdater(Document):
 				if args["second_source_condition"]:
 					args["source_dt_value"] += flt(args["second_source_condition"])
 
-				if args.get("round_to_target_precision"):
-					args["source_dt_value"] = flt(
-						args["source_dt_value"], frappe.get_precision(args["target_dt"], args["target_field"])
-					)
-
 				if args.get("match_target_ref_qty"):
 					args["source_dt_value"] = get_total_matching_target_ref_qty(args)
 

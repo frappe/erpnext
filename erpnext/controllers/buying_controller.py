@@ -1937,17 +1937,8 @@ def get_transit_amount(row, qty) -> float:
 	return get_stock_qty(row, qty) * flt(row.sales_incoming_rate) / flt(row.conversion_factor)
 
 
-def get_stock_qty_status_args(round_total=True) -> dict:
-	"""Status updater args that add up rows' stock qty. When rows round their stock qty, add up qty * conversion
-	factor instead, rounded once at the total if the target rounds its stock qty too, so parts add up to it."""
-	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
-		return {"source_field": "stock_qty"}
-
-	return {"source_field": "qty * conversion_factor", "round_to_target_precision": round_total}
-
-
-def get_material_request_stock_qty_status_args() -> dict:
-	"""Status updater args that add up the stock qty of orders or receipts of a Material Request row. Their rows round
-	stock qty by the setting at their own save, so add up qty * conversion factor, and take the Material Request row's
-	stock qty once they add up to it within rounding."""
+def get_stock_qty_status_args() -> dict:
+	"""Status updater args that add up the stock qty of rows made from a source row. They round stock qty by the stock
+	UOM qty settings at their own save, so add up qty * conversion factor, and take the source row's stock qty once
+	they add up to it within rounding."""
 	return {"source_field": "qty * conversion_factor", "match_target_ref_qty": True}

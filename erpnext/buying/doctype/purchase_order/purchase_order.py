@@ -21,7 +21,6 @@ from erpnext.buying.doctype.purchase_order.services.subcontracting import Subcon
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import (
 	BuyingController,
-	get_material_request_stock_qty_status_args,
 	get_stock_qty_status_args,
 )
 from erpnext.controllers.taxes_and_totals import remove_margin
@@ -178,7 +177,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_ordered",
 				"target_ref_field": "stock_qty",
-				**get_material_request_stock_qty_status_args(),
+				**get_stock_qty_status_args(),
 				"percent_join_field": "material_request",
 				"global_allowance_field": "over_order_allowance",
 				"global_allowance_doctype": "Buying Settings",
@@ -537,9 +536,7 @@ class PurchaseOrder(BuyingController):
 				"target_parent_field": "",
 				"join_field": "sales_order_item",
 				"target_ref_field": "stock_qty",
-				**get_stock_qty_status_args(
-					frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales")
-				),
+				**get_stock_qty_status_args(),
 			},
 			{
 				"source_dt": "Purchase Order Item",
