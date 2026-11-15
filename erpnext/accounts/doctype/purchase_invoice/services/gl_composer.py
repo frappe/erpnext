@@ -216,14 +216,15 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							)
 						)
 
-						credit_amount = item.base_net_amount
-						if doc.is_internal_supplier and item.valuation_rate:
-							credit_amount = flt(item.valuation_rate * item.stock_qty)
-
 						rejected_amount = self.make_rejected_warehouse_gl_entry(
 							gl_entries, item, voucher_wise_stock_value, inventory_account_map
 						)
-						credit_amount += rejected_amount
+						credit_amount = self.get_transit_stock_value(item, voucher_wise_stock_value)
+						if credit_amount is None:
+							credit_amount = item.base_net_amount
+							if doc.is_internal_supplier and item.valuation_rate:
+								credit_amount = flt(item.valuation_rate * item.stock_qty)
+							credit_amount += rejected_amount
 
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
@@ -642,6 +643,14 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 
 		return rejected_amount if transfers_rejected_material else 0.0
 
+	def get_transit_stock_value(self, item, voucher_wise_stock_value) -> float | None:
+		"""Stock value an internal transfer took out of the in-transit warehouse."""
+		if self.doc.is_return or not (item.from_warehouse and self.doc.is_internal_transfer()):
+			return None
+
+		stock_value = voucher_wise_stock_value.get((item.name, item.from_warehouse))
+		return -flt(stock_value) if stock_value else None
+
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
 		net_amt_precision = item.precision("base_net_amount")
@@ -650,6 +659,15 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			flt(item.valuation_rate) * get_stock_qty(item, item.qty),
 			net_amt_precision,
 		)
+
+		transit_stock_value = self.get_transit_stock_value(item, voucher_wise_stock_value)
+		if transit_stock_value is not None:
+			# The accepted and rejected warehouses together take what left transit; round each
+			# part as it is posted so the entries balance.
+			rejected_stock_value = voucher_wise_stock_value.get((item.name, item.rejected_warehouse))
+			warehouse_debit_amount = flt(transit_stock_value, net_amt_precision) - flt(
+				rejected_stock_value, net_amt_precision
+			)
 
 		if doc.is_return and doc.update_stock and (doc.is_internal_supplier or not doc.return_against):
 			net_rate = item.base_net_amount
