@@ -30,7 +30,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse, get_warehouse
 from erpnext.stock.get_item_details import get_conversion_factor
 
 
@@ -566,6 +566,59 @@ class TestPurchaseReceipt(FrappeTestCase):
 		return_pr.cancel()
 		pr.load_from_db()
 		pr.cancel()
+
+	def test_return_reverses_only_the_actual_valuation_charge_it_carried(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		rejected_warehouse = get_warehouse(
+			company=company, abbr="TCP1", warehouse_name="_Test Rejected Warehouse"
+		).name
+		pr = make_purchase_receipt(
+			company=company,
+			item_code=make_item().name,
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=3,
+			rejected_qty=2,
+			rejected_warehouse=rejected_warehouse,
+			rate=100,
+			do_not_submit=True,
+		)
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"description": "Freight",
+				"tax_amount": 30,
+			},
+		)
+		pr.submit()
+
+		# the receipt put the whole charge on the accepted stock
+		rejected_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_return.submit()
+		self.assertEqual(rejected_return.taxes[0].tax_amount, 0)
+
+		partial_return = make_purchase_return(pr.name)
+		partial_return.items[0].update({"qty": -1, "received_qty": -1})
+		partial_return.submit()
+		self.assertEqual(partial_return.taxes[0].tax_amount, -10)
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{
+					"voucher_no": partial_return.name,
+					"account": "Cost of Goods Sold - TCP1",
+					"is_cancelled": 0,
+				},
+			)
+		)
 
 	def test_purchase_return_for_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
