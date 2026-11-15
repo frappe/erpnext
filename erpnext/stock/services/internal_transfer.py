@@ -86,7 +86,7 @@ class StockInternalTransferService:
 		if not item_wise_transfer_qty:
 			return
 
-		item_wise_received_qty = self.get_item_wise_inter_received_qty()
+		item_wise_received_qty = self.get_item_wise_inter_received_qty(inter_company_reference)
 		precision = frappe.get_precision(self.doc.doctype + " Item", "qty")
 
 		over_receipt_allowance = frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
@@ -168,51 +168,26 @@ class StockInternalTransferService:
 					packed, bundle_row
 				)
 
-	def get_item_wise_inter_received_qty(self):
-		child_doctype = self.doc.doctype + " Item"
-
-		parent_tab = frappe.qb.DocType(self.doc.doctype)
-		child_tab = frappe.qb.DocType(child_doctype)
-
-		query = (
-			frappe.qb.from_(self.doc.doctype)
-			.inner_join(child_tab)
-			.on(child_tab.parent == parent_tab.name)
-			.select(
-				child_tab.item_code,
-				child_tab.qty,
-			)
-			.where(parent_tab.docstatus == 1)
-		)
+	def get_item_wise_inter_received_qty(self, inter_company_reference):
+		from erpnext.accounts.doctype.sales_invoice.mapper import get_inter_company_items
 
 		if self.doc.doctype == "Purchase Invoice":
-			query = query.select(
-				child_tab.sales_invoice_item.as_("name"),
-			)
-
-			query = query.where(
-				parent_tab.inter_company_invoice_reference == self.doc.inter_company_invoice_reference
-			)
+			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
+			fields = ["item_code", "qty"]
 		else:
-			query = query.select(
-				child_tab.delivery_note_item.as_("name"),
-				child_tab.delivery_note_packed_item,
-			)
+			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
+			fields = ["item_code", "qty", "delivery_note_packed_item"]
 
-			query = query.where(parent_tab.inter_company_reference == self.doc.inter_company_reference)
-
-		query = query.where(parent_tab.name != self.doc.name)
-		item_wise_received_qty = defaultdict(float)
-		for row in query.run(as_dict=True):
-			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
-				row.qty
-			)
-
-		reference_field = (
-			"sales_invoice_item" if self.doc.doctype == "Purchase Invoice" else "delivery_note_item"
+		other_items = get_inter_company_items(
+			self.doc.doctype,
+			{reference_field: inter_company_reference, "name": ("!=", self.doc.name)},
+			item_reference_field,
+			fields,
 		)
-		for row in self.doc.items:
-			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+
+		item_wise_received_qty = defaultdict(float)
+		for row in [*other_items, *self.doc.items]:
+			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
 			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
 
 		return item_wise_received_qty
