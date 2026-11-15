@@ -579,6 +579,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		).name
 		pr = make_purchase_receipt(
 			company=company,
+			item_code=make_item().name,
 			warehouse="Stores - TCP1",
 			supplier_warehouse="Work In Progress - TCP1",
 			qty=3,
