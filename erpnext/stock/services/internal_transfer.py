@@ -28,7 +28,11 @@ class StockInternalTransferService:
 				self.validate_multi_currency()
 				self.validate_packed_items()
 
-				if self.doc.get("is_internal_supplier") and self.doc.docstatus == 1:
+				if (
+					self.doc.get("is_internal_supplier")
+					and self.doc.docstatus == 1
+					and not self.doc.get("is_return")
+				):
 					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
