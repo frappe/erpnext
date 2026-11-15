@@ -3781,8 +3781,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.reload()
 		self.assertTrue(scr.items[0].serial_and_batch_bundle)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
-	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	@change_settings("Buying Settings", {"allow_multiple_items": 1})
 	def test_supplied_row_skips_serial_nos_held_by_another_row(self):
 		set_backflush_based_on("BOM")
 		rm_item = make_item(
