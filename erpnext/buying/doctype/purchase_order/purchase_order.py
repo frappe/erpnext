@@ -18,11 +18,8 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
-<<<<<<< HEAD
 from erpnext.controllers.mapper import get_qty_already_mapped
-=======
 from erpnext.controllers.taxes_and_totals import remove_margin
->>>>>>> f324335 (fix(buying): clear the row's margin when updating it to the last purchase rate)
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
