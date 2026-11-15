@@ -598,51 +598,51 @@ def get_party_account_currency(party_type, party, company):
 
 
 def get_party_gle_currency(party_type, party, company):
-	def generator():
-		gl = qb.DocType("GL Entry")
-		existing_gle_currency = (
-			qb.from_(gl)
-			.select(gl.account_currency)
-			.where(
-				(gl.docstatus == 1)
-				& (gl.company == company)
-				& (gl.party_type == party_type)
-				& (gl.party == party)
-				& (gl.is_cancelled == 0)
-			)
-			.limit(1)
-			.run()
-		)
-
-		return existing_gle_currency[0][0] if existing_gle_currency else None
-
 	return frappe.local_cache(
-		"party_gle_currency", (party_type, party, company), generator, regenerate_if_none=True
+		"party_gle_currency",
+		(party_type, party, company),
+		lambda: get_party_gle_value(party_type, party, company, "account_currency"),
+		regenerate_if_none=True,
 	)
 
 
 def get_party_gle_account(party_type, party, company):
-	def generator():
-		gl = qb.DocType("GL Entry")
-		existing_gle_account = (
-			qb.from_(gl)
-			.select(gl.account)
+	return frappe.local_cache(
+		"party_gle_account",
+		(party_type, party, company),
+		lambda: get_party_gle_value(party_type, party, company, "account"),
+		regenerate_if_none=True,
+	)
+
+
+def get_party_gle_value(party_type, party, company, fieldname):
+	gl = qb.DocType("GL Entry")
+	query = (
+		qb.from_(gl)
+		.select(gl[fieldname])
+		.where(
+			(gl.docstatus == 1)
+			& (gl.company == company)
+			& (gl.party_type == party_type)
+			& (gl.party == party)
+			& (gl.is_cancelled == 0)
+		)
+		.limit(1)
+	)
+	if party_type in ("Customer", "Supplier"):
+		account = qb.DocType("Account")
+		# Separate advances use the same account type but the opposite balance sheet root.
+		query = (
+			query.inner_join(account)
+			.on(gl.account == account.name)
 			.where(
-				(gl.docstatus == 1)
-				& (gl.company == company)
-				& (gl.party_type == party_type)
-				& (gl.party == party)
-				& (gl.is_cancelled == 0)
+				(account.account_type == erpnext.get_party_account_type(party_type))
+				& (account.root_type == ("Asset" if party_type == "Customer" else "Liability"))
 			)
-			.limit(1)
-			.run()
 		)
 
-		return existing_gle_account[0][0] if existing_gle_account else None
-
-	return frappe.local_cache(
-		"party_gle_account", (party_type, party, company), generator, regenerate_if_none=True
-	)
+	result = query.run()
+	return result[0][0] if result else None
 
 
 def validate_party_gle_currency(party_type, party, company, party_account_currency=None):
