@@ -187,7 +187,9 @@ class InternalTransferService:
 
 	def _validate_line_items(self, ref_dt: str, ref_dn_field: str, ref_link_field: str) -> None:
 		action, role_allowed_to_override = frappe.get_cached_value(
-			"Accounts Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
+			"Accounts Settings",
+			"Accounts Settings",
+			["maintain_same_rate_action", "role_to_override_stop_action"],
 		)
 
 		reference_names = [d.get(ref_link_field) for d in self.doc.get("items") if d.get(ref_link_field)]

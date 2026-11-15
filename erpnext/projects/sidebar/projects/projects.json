@@ -289,7 +289,7 @@
    "indent": 0,
    "is_default_module": 0,
    "keep_closed": 0,
-   "label": "Settings",
+   "label": "Projects Settings",
    "link_to": "Projects Settings",
    "link_type": "DocType",
    "open_in_new_tab": 0,
@@ -297,7 +297,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-10-04 23:30:00.000000",
+ "modified": "2026-11-15 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",

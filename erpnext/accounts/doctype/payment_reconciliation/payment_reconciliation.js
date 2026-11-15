@@ -22,14 +22,17 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 		});
 
 		this.frm.set_query("receivable_payable_account", () => {
-			return {
-				filters: {
-					company: this.frm.doc.company,
-					is_group: 0,
-					account_type: frappe.boot.party_account_types[this.frm.doc.party_type],
-					root_type: this.frm.doc.party_type == "Customer" ? "Asset" : "Liability",
-				},
+			const filters = {
+				company: this.frm.doc.company,
+				is_group: 0,
+				account_type: frappe.boot.party_account_types[this.frm.doc.party_type],
+				root_type: this.frm.doc.party_type == "Customer" ? "Asset" : "Liability",
 			};
+			if (this.frm.doc.party_type === "Employee") {
+				filters.account_type = ["in", ["Receivable", "Payable"]];
+				filters.root_type = ["in", ["Asset", "Liability"]];
+			}
+			return { filters };
 		});
 
 		this.frm.set_query("default_advance_account", () => {

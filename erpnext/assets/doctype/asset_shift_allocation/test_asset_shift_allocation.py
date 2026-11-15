@@ -111,6 +111,19 @@ class TestAssetShiftAllocation(ERPNextTestSuite):
 		post_depreciation_entries(date="2023-01-31")
 		self.assertRaisesRegex(frappe.ValidationError, "depreciation has been posted", allocation.cancel)
 
+	def test_cancel_of_allocation_without_recorded_schedule_keeps_schedule(self):
+		asset = create_shift_based_asset()
+		allocation = make_shift_allocation(asset.name, {0: "Triple"})
+		allocation.submit()
+		allocated_schedule = get_active_schedule(asset.name)
+		# allocations submitted before the replaced schedule was recorded
+		allocation.db_set("previous_depreciation_schedule", None)
+
+		allocation.reload()
+		allocation.cancel()
+		self.assertEqual(allocation.docstatus, 2)
+		self.assertEqual(get_active_schedule(asset.name), allocated_schedule)
+
 	def test_cancel_in_reverse_order_restores_each_previous_schedule(self):
 		asset = create_shift_based_asset()
 		original_schedule = get_active_schedule(asset.name)

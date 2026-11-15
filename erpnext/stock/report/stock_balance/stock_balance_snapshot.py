@@ -1,6 +1,7 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from functools import cached_property
 from itertools import batched
 from operator import itemgetter
 
@@ -16,6 +17,7 @@ from erpnext.stock.report.stock_balance.stock_balance import (
 	StockBalanceReport,
 	filter_items_with_no_transactions,
 )
+from erpnext.stock.valuation_adjustment import AdjustmentNetting
 
 ITEM_COLUMNS = {
 	"name": pa.string(),
@@ -182,7 +184,8 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		self.prepare_stock_reco_voucher_wise_count()
 
 		changes = [*self.run_sql(REPLAY_ROWS_SQL), *self.run_sql(self.get_segments_sql())]
-		for change in sorted(changes, key=itemgetter("row_no")):
+		self.adjustment_netting = AdjustmentNetting()
+		for change in self.adjustment_netting.net(sorted(changes, key=itemgetter("row_no"))):
 			self.apply_change(change)
 
 		self.item_warehouse_map = filter_items_with_no_transactions(
@@ -197,9 +200,11 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 		the remaining columns of the live query in a second table."""
 		conditions, params = self.get_conditions()
 		self.register_items(conditions, params)
-		grouped = ", ".join(f'sle."{field}"' for field in self.get_grouped_dimensions())
+		grouped = ", ".join(self.dimension_columns[field] for field in self.get_grouped_dimensions())
 		sql = LEDGER_SQL.format(
-			dimensions="".join(f', sle."{field}"' for field in self.inventory_dimensions),
+			dimensions="".join(
+				f', {column} AS "{field}"' for field, column in self.dimension_columns.items()
+			),
 			dimension_key=f"list_filter([{grouped}], value -> coalesce(value, '') <> '')"
 			if grouped
 			else "NULL",
@@ -254,12 +259,21 @@ class StockBalanceSnapshotReport(StockBalanceReport):
 			conditions.append("list_contains($warehouses::VARCHAR[], sle.warehouse)")
 			params["warehouses"] = warehouses
 
-		for index, field in enumerate(self.inventory_dimensions):
+		for index, (field, column) in enumerate(self.dimension_columns.items()):
 			if values := self.filters.get(field):
-				conditions.append(f'list_contains($dimension_{index}::VARCHAR[], sle."{field}")')
+				conditions.append(f"list_contains($dimension_{index}::VARCHAR[], {column})")
 				params[f"dimension_{index}"] = list(values)
 
 		return " AND ".join(conditions), params
+
+	@cached_property
+	def dimension_columns(self):
+		"""The ledger column of each inventory dimension, or NULL for one added after the sync."""
+		synced = set(self.conn.table("tabStock Ledger Entry").columns)
+		return {
+			field: f'sle."{field}"' if field in synced else "NULL::VARCHAR"
+			for field in self.inventory_dimensions
+		}
 
 	def get_warehouses(self):
 		"""Warehouses the live warehouse filters allow, or None when no warehouse filter is set."""

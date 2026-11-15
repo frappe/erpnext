@@ -2343,6 +2343,37 @@ class TestStockAgeing(ERPNextTestSuite):
 	def test_permission_for_another_doctype_does_not_limit_item_rows(self):
 		self.assertEqual(self.get_available_qty_for_restricted_user(applicable_for="Purchase Order"), [9])
 
+	def get_available_qty_for_company_user(self, company):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.report.stock_ageing.stock_ageing import execute
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, to_warehouse="Stores - _TC", qty=6, rate=100)
+		user = create_user(f"stock-ageing-{frappe.scrub(company)}@example.com", "Stock User")
+		add_user_permission("Company", company, user.name)
+
+		with self.set_user(user.name):
+			data = execute(
+				frappe._dict(
+					company="_Test Company",
+					to_date=frappe.utils.today(),
+					range="30, 60, 90",
+					item_code=item_code,
+				)
+			)[1]
+
+		return [row[5] for row in data if row[0] == item_code]
+
+	def test_company_user_permission_limits_item_rows(self):
+		self.assertEqual(self.get_available_qty_for_company_user("_Test Company 1"), [])
+
+	def test_permitted_company_user_sees_item_rows(self):
+		self.assertEqual(self.get_available_qty_for_company_user("_Test Company"), [6])
+
 	def test_age_ranges_default_and_are_sorted(self):
 		from erpnext.stock.report.stock_ageing.stock_ageing import get_age_ranges
 

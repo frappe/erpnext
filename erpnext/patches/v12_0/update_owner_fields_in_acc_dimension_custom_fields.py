@@ -15,6 +15,7 @@ def execute():
 	doclist = get_doctypes_with_dimensions()
 
 	for dimension in accounting_dimensions:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 		frappe.db.sql(
 			"""
 			UPDATE `tabCustom Field`

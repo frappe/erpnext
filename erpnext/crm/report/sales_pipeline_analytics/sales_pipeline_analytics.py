@@ -12,10 +12,13 @@ from frappe.query_builder.custom import Month, Quarter, Year
 from frappe.utils import cint, flt, getdate
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.setup.utils import get_exchange_rate
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return SalesPipelineAnalytics(filters).run()
 
 

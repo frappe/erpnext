@@ -1,0 +1,103 @@
+{
+ "actions": [],
+ "creation": "2026-10-24 15:02:51.497413",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "operation_id",
+  "bom_node_id",
+  "operation",
+  "workstation_type",
+  "time_in_mins",
+  "column_break_output",
+  "output_node_id",
+  "output_item",
+  "output_quantity"
+ ],
+ "fields": [
+  {
+   "fieldname": "operation_id",
+   "fieldtype": "Int",
+   "label": "Operation ID",
+   "read_only": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "default": "0",
+   "description": "Node of the design part. 0 means the finished good.",
+   "fieldname": "bom_node_id",
+   "fieldtype": "Int",
+   "label": "BOM Node",
+   "allow_on_submit": 1,
+   "show_description_on_click": 1
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "columns": 3,
+   "label": "Operation",
+   "options": "Operation",
+   "reqd": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Workstation Type",
+   "options": "Workstation Type",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "columns": 1,
+   "label": "Operation Time (Minutes)",
+   "non_negative": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "column_break_output",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "output_node_id",
+   "fieldtype": "Int",
+   "label": "Output Node",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "output_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "columns": 2,
+   "label": "Output Item",
+   "options": "Item",
+   "allow_on_submit": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "output_quantity",
+   "fieldtype": "Float",
+   "label": "Output Quantity",
+   "non_negative": 1,
+   "allow_on_submit": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2026-10-24 15:28:43.659518",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Creator Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -3,9 +3,10 @@
 
 
 import frappe
-from frappe.utils import add_days, flt, now_datetime, nowdate
+from frappe.utils import add_days, flt, getdate, now_datetime, nowdate
 
 import erpnext
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.delivery_note.mapper import make_delivery_trip
 from erpnext.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
@@ -85,6 +86,53 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		self.assertEqual(len(route_list), 2)
 		self.assertEqual(len(route_list[0]), 2)  # [home_address, locked_stop]
 		self.assertEqual(len(route_list[1]), 3)  # [locked_stop, second_stop, home_address]
+
+	def test_unfit_driver_cannot_submit(self):
+		for status, expiry_date in (("Left", None), ("Suspended", None), ("Active", add_days(nowdate(), -1))):
+			with self.subTest(status=status, expiry_date=expiry_date):
+				frappe.db.set_value(
+					"Driver", self.delivery_trip.driver, {"status": status, "expiry_date": expiry_date}
+				)
+				with self.assertRaises(frappe.ValidationError):
+					self.delivery_trip.submit()
+				self.delivery_trip.reload()
+
+	def test_license_valid_on_departure_date_can_submit(self):
+		frappe.db.set_value(
+			"Driver", self.delivery_trip.driver, "expiry_date", getdate(self.delivery_trip.departure_time)
+		)
+		self.delivery_trip.submit()
+		self.assertEqual(self.delivery_trip.docstatus, 1)
+
+	def test_driver_email_respects_employee_access(self):
+		user = f"driver-{frappe.generate_hash(length=10)}@example.com"
+		employee = make_employee(user, company="_Test Company")
+		frappe.db.set_value(
+			"Employee",
+			employee,
+			{"personal_email": "private@example.com", "prefered_email": "private@example.com"},
+		)
+		driver = self.delivery_trip.driver
+		frappe.db.set_value("Driver", driver, {"employee": employee, "user": user})
+
+		reader = f"delivery-{frappe.generate_hash(length=10)}@example.com"
+		frappe.get_doc(
+			{"doctype": "User", "email": reader, "first_name": "Delivery", "send_welcome_email": 0}
+		).insert().add_roles("Delivery User")
+		with self.set_user(reader):
+			self.assertFalse(frappe.has_permission("Employee", "read", doc=employee))
+			self.assertEqual(get_driver_email(driver), {"email": user})
+
+		frappe.db.set_value("Driver", driver, "user", None)
+		with self.set_user(reader):
+			self.assertEqual(get_driver_email(driver), {"email": None})
+
+		frappe.db.set_value("Employee", employee, "prefered_email", None)
+		self.assertEqual(get_driver_email(driver), {"email": user})  # company e-mail
+		frappe.db.set_value(
+			"Employee", employee, {"company_email": None, "prefered_email": "private@example.com"}
+		)
+		self.assertEqual(get_driver_email(driver), {"email": "private@example.com"})
 
 	def test_delivery_trip_status_draft(self):
 		self.assertEqual(self.delivery_trip.status, "Draft")
@@ -328,6 +376,16 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		trip.insert()
 		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), trip.name)
 
+	def test_contact_display_needs_delivery_trip_access(self):
+		contact = get_contact_and_address("_Test Customer").contact_person.parent
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(self.make_delivery_user("Projects User"))
+		self.assertRaises(frappe.PermissionError, get_contact_display, contact)
+
+		frappe.set_user(self.make_delivery_user("Delivery User"))
+		self.assertIn("<b>", get_contact_display(contact))
+
 	def process_route_with_locks(self, locks):
 		from unittest.mock import patch
 
@@ -356,6 +414,27 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 	def test_route_with_locks_adds_up_the_total_distance(self):
 		self.assertEqual(self.process_route_with_locks([1, 0]).total_distance, 3000)
+
+	def get_route_error(self, error):
+		from unittest.mock import patch
+
+		frappe.db.set_single_value("Google Settings", "api_key", "AIzaTestRouteKey")
+		with patch("googlemaps.Client.directions", side_effect=error):
+			with self.assertRaises(frappe.ValidationError) as context:
+				self.delivery_trip.process_route(optimize=False)
+		return str(context.exception)
+
+	def test_route_transport_error_hides_the_google_maps_key(self):
+		import googlemaps
+
+		error = googlemaps.exceptions.TransportError(Exception("/directions/json?key=AIzaTestRouteKey"))
+		self.assertNotIn("AIzaTestRouteKey", self.get_route_error(error))
+
+	def test_route_api_error_shows_the_google_maps_status(self):
+		import googlemaps
+
+		error = googlemaps.exceptions.ApiError("NOT_FOUND", "Address not found")
+		self.assertEqual(self.get_route_error(error), "NOT_FOUND (Address not found)")
 
 	def test_dispatch_mail_renders_the_html_template(self):
 		from unittest.mock import patch
@@ -422,6 +501,7 @@ def create_driver():
 			{
 				"doctype": "Driver",
 				"full_name": "Newton Scmander",
+				"status": "Active",
 				"cell_number": "98343424242",
 				"license_number": "B809",
 			}

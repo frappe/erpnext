@@ -7,6 +7,9 @@ from frappe.utils import flt, getdate, now_datetime, nowdate
 
 import erpnext
 from erpnext.accounts.doctype.account.account import get_root_company
+from erpnext.accounts.report.consolidated_financial_statement.consolidated_financial_statement import (
+	get_subsidiary_companies,
+)
 from erpnext.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
@@ -52,6 +55,7 @@ def validate_companies(filters):
 	if not filters.company:
 		return
 
+	filters.company = expand_group_companies(filters.company)
 	root_company = get_root_company(filters.company[0])
 	root_company = root_company[0] if root_company else filters.company[0]
 
@@ -73,6 +77,17 @@ def validate_companies(filters):
 			)
 
 	sort_companies(filters)
+
+
+def expand_group_companies(selected_companies: list[str]) -> list[str]:
+	"""Selected companies, a group company standing for the companies under it."""
+	companies = []
+	for selected in selected_companies:
+		for company in get_subsidiary_companies(selected):
+			if company not in companies:
+				companies.append(company)
+
+	return companies
 
 
 def sort_companies(filters):

@@ -157,3 +157,39 @@ class TestWarrantyClaim(ERPNextTestSuite):
 		claim.amc_expiry_date = "2026-12-31"
 		claim.save()
 		self.assertEqual(claim.warranty_amc_status, "Under AMC")
+
+	def test_warns_when_serial_no_is_not_delivered_to_the_claim_customer(self):
+		serial_no = frappe.get_doc(
+			{
+				"doctype": "Serial No",
+				"serial_no": frappe.generate_hash(length=10),
+				"item_code": "_Test Serialized Item",
+				"company": "_Test Company",
+			}
+		).insert(ignore_permissions=True)
+		frappe.db.set_value("Serial No", serial_no.name, "warehouse", "_Test Warehouse - _TC")
+
+		claim = self.make_warranty_claim()
+		claim.item_code = "_Test Serialized Item"
+		claim.serial_no = serial_no.name
+		self.assertIn("still in stock", self.get_warning_on_save(claim))
+
+		frappe.db.set_value(
+			"Serial No",
+			serial_no.name,
+			{"warehouse": None, "customer": "_Test Customer 1", "status": "Delivered"},
+		)
+		self.assertIsNone(self.get_warning_on_save(claim), "warning must not repeat on an unchanged save")
+
+		claim.customer = "_Test Customer 2"
+		self.assertIn("_Test Customer 1", self.get_warning_on_save(claim))
+
+		claim.customer = "_Test Customer 1"
+		self.assertIsNone(self.get_warning_on_save(claim))
+
+	def get_warning_on_save(self, claim) -> str | None:
+		frappe.clear_messages()
+		claim.save()
+		return next(
+			(log.message for log in frappe.local.message_log if log.get("indicator") == "orange"), None
+		)

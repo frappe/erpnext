@@ -87,6 +87,26 @@ class POSSettings(Document):
 				title=_("Invoice Document Type Selection Error"),
 			)
 
+		if self.invoice_type == "Sales Invoice":
+			self.validate_unconsolidated_pos_invoices()
+
+	def validate_unconsolidated_pos_invoices(self):
+		unconsolidated_pos_invoices = frappe.get_all(
+			"POS Invoice",
+			filters={"docstatus": 1, "consolidated_invoice": ["is", "not set"]},
+			pluck="name",
+			limit=10,
+		)
+		if unconsolidated_pos_invoices:
+			frappe.throw(
+				_(
+					"{0} cannot be changed to Sales Invoice while POS Invoices {1} are not consolidated. Consolidate them with a POS Closing Entry or a POS Invoice Merge Log first."
+				).format(
+					frappe.bold(_("Invoice Type")), ", ".join(map(frappe.bold, unconsolidated_pos_invoices))
+				),
+				title=_("Invoice Document Type Selection Error"),
+			)
+
 	def validate_duplicate_invoice_fields(self):
 		invoice_fields = [field.fieldname for field in self.invoice_fields]
 		duplicate_invoice_fields = {key for key, value in Counter(invoice_fields).items() if value > 1}

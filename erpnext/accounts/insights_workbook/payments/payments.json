@@ -35,6 +35,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "billed",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Invoiced"
@@ -45,6 +46,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "collected",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Received"
@@ -91,6 +93,7 @@
      {
       "aggregation": "sum",
       "column_name": "collected",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "collected",
@@ -125,6 +128,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "due_soon_a_month_ago",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Due a Month Ago"
@@ -140,6 +144,7 @@
      {
       "aggregation": "sum",
       "column_name": "due_soon",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Due in the Next 30 Days",
@@ -171,6 +176,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "overdue_a_month_ago",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Overdue a Month Ago"
@@ -187,6 +193,7 @@
      {
       "aggregation": "sum",
       "column_name": "overdue",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Overdue",
@@ -268,6 +275,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "outstanding_a_month_ago",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "A Month Ago"
@@ -284,6 +292,7 @@
      {
       "aggregation": "sum",
       "column_name": "outstanding",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Receivables",
@@ -364,6 +373,7 @@
      {
       "aggregation": "sum",
       "column_name": "overdue",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Overdue"
@@ -371,6 +381,7 @@
      {
       "aggregation": "sum",
       "column_name": "outstanding",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Outstanding"
@@ -595,7 +606,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:09:41.453155",
+ "modified": "2026-10-24 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "payments",
@@ -610,30 +621,11 @@
    "operations": [
     {
      "table": {
-      "data_source": "Site DB",
-      "table_name": "tabPayment Ledger Entry",
-      "type": "table"
+      "query_name": "payments-bucket-spine",
+      "type": "query",
+      "workbook": "payments"
      },
      "type": "source"
-    },
-    {
-     "column_names": [
-      "name"
-     ],
-     "type": "select"
-    },
-    {
-     "limit": 5,
-     "type": "limit"
-    },
-    {
-     "data_type": "Integer",
-     "expression": {
-      "expression": "ibis.row_number()",
-      "type": "expression"
-     },
-     "new_name": "row_index",
-     "type": "mutate"
     },
     {
      "data_type": "Integer",
@@ -834,6 +826,24 @@
    ],
    "sort_order": 12,
    "title": "Billed Invoices",
+   "use_live_connection": 1,
+   "workbook": "payments"
+  },
+  "payments-bucket-spine": {
+   "folder": null,
+   "is_builder_query": 0,
+   "is_native_query": 1,
+   "is_script_query": 0,
+   "name": "payments-bucket-spine",
+   "operations": [
+    {
+     "data_source": "Site DB",
+     "raw_sql": "SELECT 0 AS row_index\nUNION ALL SELECT 1\nUNION ALL SELECT 2\nUNION ALL SELECT 3\nUNION ALL SELECT 4",
+     "type": "sql"
+    }
+   ],
+   "sort_order": 14,
+   "title": "Bucket Spine",
    "use_live_connection": 1,
    "workbook": "payments"
   },

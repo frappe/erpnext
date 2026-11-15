@@ -422,6 +422,55 @@ class TestBlanketOrder(ERPNextTestSuite):
 		update_purchase_order_row_qty(po, row, 5)
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", row.name, "qty"), 5)
 
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_counts_the_qty_of_deleted_rows(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=80)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 20})
+		po.submit()
+
+		update_purchase_order_row_qty(po, po.items[0], 100)
+
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 100)
+		self.assertFalse(frappe.db.exists("Purchase Order Item", po.items[1].name))
+
+	def test_update_items_refreshes_blanket_order_of_removed_row(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=10)
+		second_item = make_item("_Test Blanket Order Second Item", {"is_stock_item": 1}).name
+		po.append(
+			"items",
+			{
+				"item_code": second_item,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": today(),
+			},
+		)
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 10)
+
+		# Keep only the row without a blanket order
+		update_purchase_order_row_qty(po, po.items[1], 5)
+
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", {"parent": bo.name}, "ordered_qty"), 0)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_does_not_count_a_closed_row_as_deleted(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=80)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 20})
+		po.submit()
+		update_closed_status("Purchase Order", po.name, [po.items[1].name], 1)
+
+		self.assertRaises(frappe.ValidationError, update_purchase_order_row_qty, po, po.items[0], 120)
+		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "qty"), 80)
+
 	def test_update_items_cannot_raise_qty_past_blanket_order(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
 		po = make_purchase_order_against(bo, qty=50)
@@ -709,6 +758,23 @@ class TestBlanketOrder(ERPNextTestSuite):
 		pricing = apply_price_list(blanket_order.as_dict())
 
 		self.assertEqual(pricing["children"], [])
+
+	def test_applying_price_list_needs_blanket_order_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		blanket_order, _price_list = make_priced_blanket_order(price_list_rate=4321.5)
+		expected = apply_price_list(blanket_order.as_dict())
+		self.assertEqual(expected["children"][0]["price_list_rate"], 4321.5)
+
+		for user, roles in (
+			("_test_bo_no_role@example.com", []),
+			("_test_bo_sales@example.com", ["Sales User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				self.assertRaises(frappe.PermissionError, apply_price_list, blanket_order.as_dict())
+
+		with as_user(make_fenced_user("_test_bo_manager@example.com", ["System Manager", "Sales User"])):
+			self.assertEqual(apply_price_list(blanket_order.as_dict()), expected)
 
 	def test_price_list_rate_is_fetched_on_item_selection(self):
 		company = "_Test Company"

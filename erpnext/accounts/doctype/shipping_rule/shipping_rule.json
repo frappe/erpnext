@@ -91,6 +91,7 @@
   },
   {
    "default": "Fixed",
+   "description": "With a discount on Grand Total, Net Total is taken before the discount.",
    "fieldname": "calculate_based_on",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -150,7 +151,7 @@
  "icon": "truck",
  "idx": 1,
  "links": [],
- "modified": "2026-08-21 23:11:49.532098",
+ "modified": "2026-11-03 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shipping Rule",

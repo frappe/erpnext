@@ -9,8 +9,7 @@ from urllib.parse import parse_qs, urlparse
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint
-from frappe.utils.data import get_system_timezone
+from frappe.utils import cint, get_datetime, now_datetime, time_diff_in_hours
 from pyyoutube import Api
 
 YOUTUBE_DOMAINS = ("youtube.com", "youtu.be", "youtube-nocookie.com")
@@ -73,33 +72,34 @@ def is_tracking_enabled():
 	return frappe.db.get_single_value("Video Settings", "enable_youtube_tracking")
 
 
-def get_frequency(value):
-	# Return numeric value from frequency field, return 1 as fallback default value: 1 hour
-	if value != "Daily":
-		return cint(value[:2].strip())
-	elif value:
-		return 24
-	return 1
-
-
 def update_youtube_data():
-	from zoneinfo import ZoneInfo
-
-	# Called every 30 minutes via hooks
-	video_settings = frappe.get_cached_doc("Video Settings")
-	if not video_settings.enable_youtube_tracking:
+	"""Runs hourly via hooks; updates the statistics once the chosen frequency has passed."""
+	video_settings = frappe.get_single("Video Settings")
+	if not video_settings.enable_youtube_tracking or not is_update_due(video_settings):
 		return
 
-	frequency = get_frequency(video_settings.frequency)
-	time = datetime.now()
-	timezone = ZoneInfo(get_system_timezone())
-	site_time = time.astimezone(timezone)
+	batch_update_youtube_data()
+	frappe.db.set_single_value("Video Settings", "last_youtube_update", now_datetime())
 
-	if frequency == 30:
-		batch_update_youtube_data()
-	elif site_time.hour % frequency == 0 and site_time.minute < 15:
-		# make sure it runs within the first 15 mins of the hour
-		batch_update_youtube_data()
+
+def is_update_due(video_settings: Document) -> bool:
+	if not video_settings.last_youtube_update:
+		return True
+
+	# compare hourly slots so that a job starting a few minutes late still runs
+	hours_since_update = time_diff_in_hours(
+		start_of_hour(now_datetime()), start_of_hour(get_datetime(video_settings.last_youtube_update))
+	)
+	return hours_since_update >= get_frequency_in_hours(video_settings.frequency)
+
+
+def get_frequency_in_hours(frequency: str | None) -> int:
+	# the removed "30 mins" option falls back to hourly
+	return {"6 hrs": 6, "Daily": 24}.get(frequency, 1)
+
+
+def start_of_hour(value: datetime) -> datetime:
+	return value.replace(minute=0, second=0, microsecond=0)
 
 
 def get_formatted_ids(video_list):

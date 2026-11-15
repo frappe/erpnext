@@ -98,6 +98,7 @@ def execute():
 				)
 
 		if to_insert_data:
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats table or column names and %s placeholders
 			frappe.db.sql(
 				"""
 				INSERT INTO `tabItem Default`

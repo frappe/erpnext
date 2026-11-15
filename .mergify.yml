@@ -3,13 +3,16 @@ shared:
     - base~=^(develop|version-15-hotfix|version-16-hotfix)$
     - label!=dont-merge
     - check-success=linters
-    - check-success=Check Commit Titles
   suite_checks: &suite_checks
-    - check-success=Patch Test
-    - check-success=Python Unit Tests (1)
-    - check-success=Python Unit Tests (2)
-    - check-success=Python Unit Tests (3)
-    - check-success=Python Unit Tests (4)
+    - or:
+        - and:
+            - check-success=Patch Test
+            - check-success=Python Unit Tests (1)
+            - check-success=Python Unit Tests (2)
+            - check-success=Python Unit Tests (3)
+            - check-success=Python Unit Tests (4)
+        # Only the translation template changed: the test workflows skip it via paths-ignore
+        - -files~=^(?!erpnext/locale/main\.pot$)
 
 commands_restrictions:
   queue:
@@ -32,6 +35,7 @@ pull_request_rules:
               - author!=ankush
               - author!=deepeshgarg007
               - author!=frappe-pr-bot
+              - author!=frappe-release-bot[bot]
               - author!=mergify[bot]
           - or:
               - base=version-13
@@ -89,13 +93,7 @@ queue_rules:
     merge_method: merge
     queue_conditions: *pr_checks
     merge_conditions: *suite_checks
-  - name: alone
-    batch_size: 1
-    merge_method: merge
-    queue_conditions: *pr_checks
-    merge_conditions: *suite_checks
 
 merge_queue:
   max_parallel_checks: 2
-  queue_controls_comment: false
   skip_intermediate_results: true

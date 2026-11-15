@@ -18,6 +18,7 @@
      {
       "aggregation": "sum",
       "column_name": "accumulated_depreciation",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Accumulated Depreciation",
@@ -62,6 +63,7 @@
      {
       "aggregation": "sum",
       "column_name": "net_purchase_amount",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Additions This Year",
@@ -117,6 +119,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "amount",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Depreciation"
@@ -180,6 +183,7 @@
       "comparison": {
        "label": "vs last FY",
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(posting_date.between(date_sub(fiscal_year_start(date_sub(month_start(today()), 1, 'day')), 1, 'year'), date_sub(date_sub(month_start(today()), 1, 'day'), 1, 'year')), amount)",
@@ -197,6 +201,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum_if(posting_date.between(fiscal_year_start(date_sub(month_start(today()), 1, 'day')), date_sub(month_start(today()), 1, 'day')), amount)",
@@ -240,6 +245,7 @@
      {
       "aggregation": "sum",
       "column_name": "net_purchase_amount",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Disposals This Year",
@@ -312,6 +318,7 @@
      {
       "aggregation": "sum",
       "column_name": "total_asset_cost",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Total Asset Cost"
@@ -319,6 +326,7 @@
      {
       "aggregation": "sum",
       "column_name": "net_book_value",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "measure_name": "Asset Value"
@@ -350,6 +358,7 @@
      {
       "aggregation": "sum",
       "column_name": "net_book_value",
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "format": "currency",
       "id": "Net Book Value",
@@ -400,6 +409,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "total_asset_cost",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Total Asset Cost"
@@ -410,6 +420,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "net_book_value",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Asset Value"
@@ -652,7 +663,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-09-28 12:09:41.702007",
+ "modified": "2026-10-24 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "assets",

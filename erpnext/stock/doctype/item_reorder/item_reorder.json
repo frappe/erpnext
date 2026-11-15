@@ -39,14 +39,16 @@
    "fieldname": "warehouse_reorder_level",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Re-order Level"
+   "label": "Re-order Level",
+   "non_negative": 1
   },
   {
    "columns": 2,
    "fieldname": "warehouse_reorder_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Re-order Qty"
+   "label": "Re-order Qty",
+   "non_negative": 1
   },
   {
    "columns": 2,
@@ -62,7 +64,7 @@
  "in_create": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-07-28 15:54:36.089238",
+ "modified": "2026-11-02 12:45:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Reorder",

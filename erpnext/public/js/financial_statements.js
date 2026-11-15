@@ -147,7 +147,9 @@ erpnext.financial_statements = {
 			};
 
 			column.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(glData) + ")";
+				"erpnext.financial_statements.open_general_ledger(" +
+				erpnext.financial_statements.to_onclick_arg(glData) +
+				")";
 
 			value = default_formatter(value, row, column, data);
 		}
@@ -250,7 +252,7 @@ erpnext.financial_statements = {
 	},
 
 	_format_standard_report: function (value, row, column, data, default_formatter, filter) {
-		if (data && column.fieldname == erpnext.financial_statements.name_field) {
+		if (data && column.fieldname == frappe.query_report.report_settings.name_field) {
 			value = data.section_name || data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {
@@ -261,7 +263,9 @@ erpnext.financial_statements = {
 
 			if (data.account || data.accounts) {
 				column.link_onclick =
-					"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+					"erpnext.financial_statements.open_general_ledger(" +
+					erpnext.financial_statements.to_onclick_arg(data) +
+					")";
 			}
 			column.is_tree = true;
 		}
@@ -283,6 +287,10 @@ erpnext.financial_statements = {
 		}
 
 		return value;
+	},
+	// `link_onclick` is placed in an HTML attribute, so keep `&` out of it
+	to_onclick_arg: function (data) {
+		return JSON.stringify(data).replace(/&/g, "\\u0026");
 	},
 	open_general_ledger: function (data) {
 		if (!data.account && !data.accounts) return;

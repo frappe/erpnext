@@ -183,14 +183,7 @@ def trend(supplier, company, from_date, to_date, accounts):
 	points = []
 	cursor = getdate(from_date).replace(day=1)
 	while cursor <= getdate(to_date):
-		points.append(
-			{
-				"label": cursor.strftime("%b"),
-				"title": cursor.strftime("%b %Y"),
-				"purchased": billed.get(cursor, 0.0),
-				"paid": paid.get(cursor, 0.0),
-			}
-		)
+		points.append({"month": cursor, "purchased": billed.get(cursor, 0.0), "paid": paid.get(cursor, 0.0)})
 		cursor = add_months(cursor, 1)
 
 	return {

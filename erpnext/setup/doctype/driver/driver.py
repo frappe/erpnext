@@ -2,7 +2,9 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate
 
 
 class Driver(Document):
@@ -33,5 +35,17 @@ class Driver(Document):
 	# end: auto-generated types
 
 	def validate(self):
-		if self.employee:
-			self.user = frappe.get_value("Employee", self.employee, "user_id")
+		if self.issuing_date and self.expiry_date and getdate(self.expiry_date) < getdate(self.issuing_date):
+			frappe.throw(_("The licence expiry date cannot precede its issuing date."))
+
+		employee_user = frappe.get_value("Employee", self.employee, "user_id") if self.employee else None
+		if employee_user:
+			self.user = employee_user
+		elif (
+			(previous := self.get_doc_before_save())
+			and previous.employee
+			and self.has_value_changed("employee")
+			and not self.has_value_changed("user")
+			and self.user == frappe.get_value("Employee", previous.employee, "user_id")
+		):
+			self.user = None

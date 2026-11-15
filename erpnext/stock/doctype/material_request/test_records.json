@@ -45,7 +45,7 @@
     "parentfield": "items",
     "qty": 5,
     "schedule_date": "2013-02-19",
-    "uom": "_Test UOM 1",
+    "uom": "_Test UOM",
     "warehouse": "_Test Warehouse - _TC"
    }
   ],

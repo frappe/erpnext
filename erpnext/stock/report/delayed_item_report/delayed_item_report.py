@@ -7,8 +7,12 @@ from frappe import _
 from frappe.utils import date_diff
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None, consolidated=False):
+	validate_date_range(filters)
+
 	data, columns = DelayedItemReport(filters).run()
 
 	return data, columns

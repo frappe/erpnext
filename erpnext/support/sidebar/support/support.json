@@ -185,7 +185,7 @@
    "indent": 0,
    "is_default_module": 0,
    "keep_closed": 0,
-   "label": "Settings",
+   "label": "Support Settings",
    "link_to": "Support Settings",
    "link_type": "DocType",
    "open_in_new_tab": 0,
@@ -193,7 +193,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 00:00:00.000000",
+ "modified": "2026-11-15 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",

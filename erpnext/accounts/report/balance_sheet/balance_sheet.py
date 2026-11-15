@@ -27,6 +27,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_keys_for_total,
 	prepare_data,
 )
+from erpnext.accounts.report.utils import has_gl_entry_restrictions
 
 
 def execute(filters=None):
@@ -306,6 +307,9 @@ def get_chart_data(filters, chart_columns, asset, liability, equity, currency):
 
 
 def execute_snapshot_report(filters):
+	if filters.report_template or has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if not (conn := get_latest_sync("GL Entry")):
@@ -323,7 +327,13 @@ def execute_snapshot_report(filters):
 	equity = _get_data_duckdb(conn, filters, "Equity", "Credit", period_list)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(
-		asset, liability, equity, period_list, filters.company, currency
+		asset,
+		liability,
+		equity,
+		period_list,
+		filters.company,
+		currency,
+		accumulated_values=filters.accumulated_values,
 	)
 	message, opening_balance = check_opening_balance(asset, liability, equity)
 
@@ -340,7 +350,11 @@ def execute_snapshot_report(filters):
 		data.append(total_credit)
 
 	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, company=filters.company
+		filters.periodicity,
+		period_list,
+		filters.accumulated_values,
+		company=filters.company,
+		selected_view=filters.get("selected_view"),
 	)
 	chart = get_chart_data(filters, period_list, asset, liability, equity, currency)
 	report_summary, primitive_summary = get_report_summary(

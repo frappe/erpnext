@@ -21,6 +21,13 @@ UTM_DOCTYPES = [
 	"Delivery Note",
 ]
 
+COMMISSION_SECTIONS = {
+	"Sales Invoice": ("commission_section", "sales_team_section"),
+	"Sales Order": ("sales_team_section_break", "section_break1"),
+	"Delivery Note": ("sales_team_section_break", "section_break1"),
+	"POS Invoice": ("sales_team_section_break", "section_break2"),
+}
+
 
 class SellingSettings(Document):
 	# begin: auto-generated types
@@ -83,7 +90,8 @@ class SellingSettings(Document):
 			"editable_price_list_rate",
 			"selling_price_list",
 		]:
-			frappe.db.set_default(key, self.get(key, ""))
+			value = self.get(key)
+			frappe.db.set_default(key, "" if value is None else value)
 
 		self.update_customer_naming_settings()
 
@@ -134,7 +142,7 @@ class SellingSettings(Document):
 		_hide_tax_id = cint(self.hide_tax_id)
 
 		# Make property setters to hide tax_id fields
-		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note"):
+		for doctype in ("Sales Order", "Sales Invoice", "Delivery Note", "POS Invoice"):
 			make_property_setter(
 				doctype, "tax_id", "hidden", _hide_tax_id, "Check", validate_fields_for_doctype=False
 			)
@@ -220,16 +228,12 @@ class SellingSettings(Document):
 
 def toggle_tracking_sales_commissions_section(hide):
 	from erpnext.accounts.doctype.accounts_settings.accounts_settings import (
-		SELLING_DOCTYPES,
 		create_property_setter_for_hiding_field,
 	)
 
-	for doctype in SELLING_DOCTYPES:
-		meta = frappe.get_meta(doctype)
-		if meta.has_field("commission_section"):
-			create_property_setter_for_hiding_field(doctype, "commission_section", hide)
-		if meta.has_field("sales_team_section"):
-			create_property_setter_for_hiding_field(doctype, "sales_team_section", hide)
+	for doctype, sections in COMMISSION_SECTIONS.items():
+		for section in sections:
+			create_property_setter_for_hiding_field(doctype, section, hide)
 
 
 def toggle_utm_analytics_section(hide):

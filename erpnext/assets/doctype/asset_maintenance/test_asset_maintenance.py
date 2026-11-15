@@ -279,6 +279,7 @@ class TestAssetMaintenance(ERPNextTestSuite):
 		)
 
 		task.next_due_date = add_days(nowdate(), 20)
+		frappe.db.value_cache.clear()
 		asset_maintenance.save()
 		self.assertEqual(task.maintenance_status, "Planned")
 		self.assertEqual(

@@ -6,6 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe.utils import cint, flt, get_datetime, get_time
 
+from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
 from erpnext.manufacturing.scheduling.models import Interval, Resource, ResourceCalendar, Task
 
 
@@ -143,6 +144,7 @@ def get_job_card_coverage(production_plans):
 		fields=[
 			"name",
 			"qty",
+			"track_semi_finished_goods",
 			"production_plan",
 			"production_plan_item",
 			"production_plan_sub_assembly_item",
@@ -158,10 +160,13 @@ def get_required_operation_qty(work_orders):
 	by_name = {row.name: row for row in work_orders}
 	required = defaultdict(float)
 	for operation_row in frappe.get_all(
-		"Work Order Operation", filters={"parent": ("in", list(by_name))}, fields=["parent", "operation"]
+		"Work Order Operation",
+		filters={"parent": ("in", list(by_name))},
+		fields=["parent", "operation", "output_qty"],
 	):
 		work_order = by_name[operation_row.parent]
-		add_operation_qty(required, work_order, operation_row.operation, flt(work_order.qty))
+		qty = get_operation_qty(work_order, operation_row)
+		add_operation_qty(required, work_order, operation_row.operation, qty)
 
 	return required
 

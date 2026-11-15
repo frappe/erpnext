@@ -92,8 +92,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 			}).addClass("btn-primary");
 		}
 
-		frm.trigger("show_update_valuation_field");
-
 		if (frm.doc.status !== "Completed") {
 			frm.trigger("show_reposting_progress");
 		}
@@ -101,13 +99,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 		if (frm.doc.status === "Queued" && frm.doc.docstatus === 1) {
 			frm.trigger("execute_reposting");
 		}
-	},
-
-	show_update_valuation_field(frm) {
-		frm.toggle_display(
-			"recalculate_valuation_rate",
-			["Purchase Receipt", "Purchase Invoice", "Stock Entry"].includes(frm.doc.voucher_type)
-		);
 	},
 
 	execute_reposting(frm) {
@@ -129,7 +120,7 @@ frappe.ui.form.on("Repost Item Valuation", {
 		let progress = 0.0;
 		let total_count = frm.doc.items_to_be_repost ? JSON.parse(frm.doc.items_to_be_repost).length : 0;
 
-		if (total_count > 1) {
+		if (total_count > 1 && frm.doc.based_on !== "Item and Warehouse") {
 			progress = flt((cint(frm.doc.current_index) / total_count) * 100, 2) || 0.5;
 			title = __("Reposting for Item-Wh Completed {0}%", [progress]);
 
@@ -172,7 +163,6 @@ frappe.ui.form.on("Repost Item Valuation", {
 
 	voucher_type: function (frm) {
 		frm.trigger("set_company_on_transaction");
-		frm.trigger("show_update_valuation_field");
 	},
 
 	voucher_no: function (frm) {

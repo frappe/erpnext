@@ -203,6 +203,37 @@ class TestStockAnalyticsReport(ERPNextTestSuite):
 		cols, row = self.get_quantity_for_restricted_user(applicable_for="Purchase Order")
 		self.compare_analytics_row(row, cols, [12])
 
+	def get_quantity_for_company_user(self, company):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		make_stock_entry(
+			item=self.item, to_warehouse="Stores - _TC", qty=10, posting_date=datetime.date(2026, 8, 5)
+		)
+		user = create_user(f"stock-analytics-{frappe.scrub(company)}@example.com", "Stock User")
+		add_user_permission("Company", company, user.name)
+		filters = _dict(
+			range="Monthly",
+			from_date=datetime.date(2026, 8, 1),
+			to_date=datetime.date(2026, 8, 28),
+			value_quantity="Quantity",
+			company="_Test Company",
+			item_code=self.item,
+		)
+
+		with self.set_user(user.name):
+			cols, data = stock_analytics(filters)
+
+		return cols, frappe._dict(data[0])
+
+	def test_company_user_permission_limits_rows(self):
+		cols, row = self.get_quantity_for_company_user("_Test Company 1")
+		self.compare_analytics_row(row, cols, [0])
+
+	def test_permitted_company_user_sees_rows(self):
+		cols, row = self.get_quantity_for_company_user("_Test Company")
+		self.compare_analytics_row(row, cols, [10])
+
 	def test_period_ranges_reach_the_to_date(self):
 		filters = _dict(range="Weekly", from_date="2026-03-30", to_date="2027-03-31")
 

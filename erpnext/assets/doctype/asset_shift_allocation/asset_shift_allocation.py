@@ -58,7 +58,9 @@ class AssetShiftAllocation(Document):
 		self.create_new_asset_depr_schedule()
 
 	def on_cancel(self):
-		self.restore_previous_depr_schedule()
+		# allocations submitted before the replaced schedule was recorded keep the schedule as it is
+		if self.previous_depreciation_schedule:
+			self.restore_previous_depr_schedule()
 
 	def set_booked_journal_entries(self):
 		"""Take booked entries from the active schedule, as depreciation may be posted after the allocation was saved."""
@@ -278,11 +280,6 @@ class AssetShiftAllocation(Document):
 				_(
 					"Cannot cancel since the asset's depreciation schedule has changed or depreciation has been posted after this allocation was submitted"
 				)
-			)
-
-		if not self.previous_depreciation_schedule:
-			frappe.throw(
-				_("Cannot cancel since the depreciation schedule replaced by this allocation is not known")
 			)
 
 

@@ -680,7 +680,8 @@ class AccountsController(TransactionBase):
 				item.service_end_date = add_days(to_date, 1)
 
 	def before_print(self, settings=None):
-		self.set_missing_terms()
+		if self.docstatus.is_draft():
+			self.set_missing_terms_for_display()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -705,15 +706,42 @@ class AccountsController(TransactionBase):
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
 
-	def set_missing_terms(self):
+	def set_missing_terms(self, raise_exception=True):
 		if not self.get("tc_name") or self.get("terms"):
 			return
+
+		from jinja2 import TemplateError
 
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
 			get_terms_and_conditions,
 		)
 
-		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		try:
+			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		except (TemplateError, TypeError) as e:
+			# TypeError: a helper called with arguments the terms sandbox does not take
+			message = _("Terms and Conditions {0} could not be rendered: {1}").format(
+				frappe.bold(self.tc_name), e
+			)
+			if raise_exception:
+				frappe.throw(message)
+			# loading or printing a draft must not fail on a template it cannot render
+			frappe.msgprint(message, indicator="orange", alert=True)
+
+	def set_missing_terms_for_display(self):
+		"""Render missing terms to show or print, leaving them empty if they cannot be rendered."""
+		message_count = len(frappe.message_log)
+		try:
+			self.set_missing_terms(raise_exception=False)
+		except frappe.PermissionError:
+			# a check on the template's last editor fails without logging a message
+			del frappe.message_log[message_count:]
+			frappe.msgprint(
+				_("Terms and Conditions {0} could not be rendered due to missing permissions.").format(
+					bold(self.tc_name)
+				),
+				alert=True,
+			)
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -902,6 +930,7 @@ class AccountsController(TransactionBase):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			self.pricing_rules = []
+			removed_pricing_rules = set()
 
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -927,6 +956,11 @@ class AccountsController(TransactionBase):
 						ctx.is_subcontracted = self.is_subcontracted
 
 					ret = _get_item_details(ctx, self, for_validate=for_validate, overwrite_warehouse=False)
+					if ret.get("pricing_rule_removed"):
+						removed_pricing_rules.update(
+							set(get_applied_pricing_rules(ctx.get("pricing_rules")))
+							- set(get_applied_pricing_rules(ret.get("pricing_rules")))
+						)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -967,6 +1001,7 @@ class AccountsController(TransactionBase):
 								and value is not None
 								and fieldname
 								in [
+									"price_list_rate",
 									"discount_percentage",
 									"discount_amount",
 									"rate",
@@ -1017,6 +1052,19 @@ class AccountsController(TransactionBase):
 						or item.get("conversion_factor")
 						or 1
 					)
+
+			if removed_pricing_rules:
+				# Keep free items when the same rule still applies to another row.
+				removed_pricing_rules.difference_update(row.pricing_rule for row in self.pricing_rules)
+				for item in self.items[:]:
+					if (
+						item.get("is_free_item")
+						and item.get("pricing_rules") in removed_pricing_rules
+						and not frappe.get_cached_value(
+							"Pricing Rule", item.pricing_rules, "dont_enforce_free_item_qty"
+						)
+					):
+						self.remove(item)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -2003,7 +2051,6 @@ def get_missing_company_details(doctype: str, docname: str):
 	)
 
 	required_fields = [
-		company_details.get("company_logo"),
 		company_details.get("phone_no"),
 		company_details.get("email"),
 	]
@@ -2039,7 +2086,7 @@ def get_missing_company_details(doctype: str, docname: str):
 	required_fields.append(company_address)
 	required_fields.append(address_line)
 
-	if all(required_fields):
+	if all(required_fields) and not needs_optional_company_details(company, company_details):
 		return False
 	return {
 		"company_logo": company_details.get("company_logo"),
@@ -2051,6 +2098,19 @@ def get_missing_company_details(doctype: str, docname: str):
 		"company_address": company_address,
 		"name": docname,
 	}
+
+
+def needs_optional_company_details(company, company_details):
+	from frappe.model.utils.user_settings import get_user_settings
+
+	if company_details.get("company_logo") and company_details.get("website"):
+		return False
+
+	if not frappe.has_permission("Company", "write", doc=company, throw=False):
+		return False
+
+	skipped = frappe.parse_json(get_user_settings("Company")).get("skipped_print_details") or []
+	return company not in skipped
 
 
 @frappe.whitelist(methods=["POST"])

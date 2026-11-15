@@ -1264,11 +1264,16 @@ class SubcontractingInwardController:
 def get_fg_reference_names(
 	doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict
 ):
+	parent = filters.get("parent")
+	if not parent or not isinstance(parent, str):
+		return []
+
+	frappe.has_permission("Subcontracting Inward Order", "read", parent, throw=True)
 	return frappe.get_all(
 		"Subcontracting Inward Order Item",
 		limit_start=start,
 		limit_page_length=page_len,
-		filters={"parent": filters.get("parent"), "docstatus": 1},
+		filters={"parent": parent, "docstatus": 1},
 		or_filters=[
 			["name", "like", f"%{txt}%"],
 			["item_code", "like", f"%{txt}%"],

@@ -62,6 +62,7 @@ def import_account_categories(template_path: str):
 	if not os.path.exists(categories_file):
 		return
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-security-file-traversal -- path is inside the app
 	with open(categories_file) as f:
 		categories = json.load(f, object_hook=frappe._dict)
 

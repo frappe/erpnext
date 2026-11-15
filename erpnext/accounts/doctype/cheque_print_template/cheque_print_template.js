@@ -23,10 +23,12 @@ frappe.ui.form.on("Cheque Print Template", {
 					height: {{ cheque_height }}cm;\
 					background-repeat: no-repeat;\
 					background-size: cover;">\
+					{% if is_account_payable %}\
 					<span style="top: {{ acc_pay_dist_from_top_edge }}cm;\
 						left: {{ acc_pay_dist_from_left_edge }}cm;\
 						border-bottom: solid 1px;border-top:solid 1px;\
-						position: absolute;"> {{ message_to_show || __("Account Pay Only") }} </span>\
+						position: absolute;"> {{ frappe.utils.escape_html(message_to_show || __("Account Pay Only")) }} </span>\
+					{% endif %}\
 					<span style="top: {{ date_dist_from_top_edge }}cm;\
 						left: {{ date_dist_from_left_edge }}cm;\
 						position: absolute;"> {{ frappe.datetime.obj_to_user() }} </span>\
@@ -64,18 +66,32 @@ frappe.ui.form.on("Cheque Print Template", {
 });
 
 erpnext.cheque_print.view_cheque_print = function (frm) {
-	frappe.call({
-		method: "erpnext.accounts.doctype.cheque_print_template.cheque_print_template.create_or_update_cheque_print_format",
-		args: {
-			template_name: frm.doc.name,
-		},
-		callback: function (r) {
-			if (!r.exe && !frm.doc.has_print_format) {
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route("Form", r.message.doctype, r.message.name);
-			} else {
-				frappe.msgprint(__("Print settings updated in respective print format"));
+	if (frm.is_dirty()) {
+		frappe.throw(__("Please save the document before creating or updating the Print Format."));
+	}
+
+	frappe.dom.freeze();
+	frm.page.wrapper.prop("inert", true);
+
+	return frappe
+		.call({
+			method: "erpnext.accounts.doctype.cheque_print_template.cheque_print_template.create_or_update_cheque_print_format",
+			args: {
+				template_name: frm.doc.name,
+			},
+		})
+		.then((r) => {
+			if (!frm.doc.has_print_format) {
+				frappe.model.sync(r.message);
+				return frappe.set_route("Form", r.message.doctype, r.message.name);
 			}
-		},
-	});
+
+			return frm.reload_doc().then(() => {
+				frappe.msgprint(__("Print settings updated in respective print format"));
+			});
+		})
+		.always(() => {
+			frm.page.wrapper.prop("inert", false);
+			frappe.dom.unfreeze();
+		});
 };

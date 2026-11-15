@@ -4,10 +4,14 @@ from frappe.desk.query_report import get_filtered_data
 from frappe.model.docstatus import DocStatus
 from frappe.utils import add_days, getdate
 
+from erpnext.accounts.report.utils import validate_date_range
+
 VALUE_FIELDNAMES = ("hours", "billing_hours", "billing_amount")
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	group_fieldname = filters.pop("group_by", None)
 
 	filters = frappe._dict(filters or {})

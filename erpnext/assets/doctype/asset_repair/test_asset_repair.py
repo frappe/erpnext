@@ -37,6 +37,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
+from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -72,6 +73,17 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair = frappe.new_doc("Asset Repair")
 		asset_repair.update({"company": "_Test Company", "asset": asset.name, "asset_name": asset.asset_name})
 		self.assertRaises(frappe.ValidationError, asset_repair.save)
+
+	def test_capitalized_asset_cannot_be_repaired(self):
+		asset = create_asset(submit=1)
+		# Set as on consumption by an Asset Capitalization; a repair would reset it via set_status()
+		asset.db_set("status", "Capitalized")
+
+		asset_repair = frappe.new_doc("Asset Repair")
+		asset_repair.update({"company": asset.company, "asset": asset.name, "failure_date": nowdate()})
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot be repaired"):
+			asset_repair.save()
+		self.assertEqual(asset.db_get("status"), "Capitalized")
 
 	def test_update_status(self):
 		asset = create_asset(submit=1)
@@ -364,6 +376,71 @@ class TestAssetRepair(ERPNextTestSuite):
 		)
 
 		self.assertRaises(frappe.ValidationError, asset_repair2.save)
+
+	def test_repair_cost_uses_exact_remaining_available_amount(self):
+		"""Test that repair cost can use the exact remaining amount from Purchase Invoice with fractional values."""
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		asset = create_asset(item_code="Macbook Pro", submit=1)
+		pi = make_purchase_invoice(
+			company=asset.company,
+			item="_Test Non Stock Item",
+			expense_account="Administrative Expenses - _TC",
+			cost_center="Main - _TC",
+			qty=1,
+			rate=1000.30,
+		)
+
+		asset_repair1 = frappe.new_doc("Asset Repair")
+		asset_repair1.update(
+			{
+				"asset": asset.name,
+				"asset_name": asset.item_name,
+				"failure_date": nowdate(),
+				"description": "First Repair",
+				"company": asset.company,
+				"capitalize_repair_cost": 1,
+				"repair_status": "Completed",
+				"completion_date": nowdate(),
+			}
+		)
+		asset_repair1.append(
+			"invoices",
+			{
+				"purchase_invoice": pi.name,
+				"expense_account": "Administrative Expenses - _TC",
+				"repair_cost": 250.10,
+			},
+		)
+		asset_repair1.submit()
+
+		asset_repair2 = frappe.new_doc("Asset Repair")
+		asset_repair2.update(
+			{
+				"asset": asset.name,
+				"asset_name": asset.item_name,
+				"failure_date": nowdate(),
+				"description": "Second Repair",
+				"company": asset.company,
+				"capitalize_repair_cost": 1,
+			}
+		)
+		# 1000.30 - 250.10 produces 750.1999999999999 in binary float representation
+		asset_repair2.append(
+			"invoices",
+			{
+				"purchase_invoice": pi.name,
+				"expense_account": "Administrative Expenses - _TC",
+				"repair_cost": 750.20,
+			},
+		)
+
+		asset_repair2.repair_status = "Completed"
+		asset_repair2.completion_date = nowdate()
+		asset_repair2.submit()
+		self.assertEqual(
+			asset_repair_module.get_unallocated_repair_cost(pi.name, "Administrative Expenses - _TC"), 0
+		)
 
 	def test_gl_entries_with_perpetual_inventory(self):
 		company = "_Test Company with perpetual inventory"
@@ -667,6 +744,83 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair.repair_status = "Completed"
 
 		self.assertRaises(frappe.ValidationError, asset_repair.save)
+
+	def test_repair_roles_use_invoices_and_capitalize_spares(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		purchase_invoice = make_purchase_invoice(
+			item="_Test Non Stock Item", expense_account="Administrative Expenses - _TC", rate=100
+		).name
+		make_stock_entry(item_code="_Test Stock Item", target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		repairs = {}
+		for role in ("Manufacturing Manager", "Quality Manager", "Accounts User"):
+			with self.subTest(role=role):
+				asset = create_asset(calculate_depreciation=1, submit=1)
+				user = make_fenced_user(f"repair-{frappe.scrub(role)}@example.com", [role])
+				with as_user(user):
+					asset_repair = make_capitalized_repair(asset, purchase_invoice)
+					asset_repair.submit()
+
+				self.assertEqual(asset.db_get("additional_asset_cost"), asset_repair.total_repair_cost)
+				self.assertTrue(
+					frappe.db.exists("Stock Entry", {"asset_repair": asset_repair.name, "docstatus": 1})
+				)
+				repairs[role] = (user, asset_repair)
+
+		for role in ("Manufacturing Manager", "Quality Manager"):
+			user, asset_repair = repairs[role]
+			with self.subTest(role=role), as_user(user):
+				asset_repair.cancel()
+			self.assertEqual(frappe.db.get_value("Asset", asset_repair.asset, "additional_asset_cost"), 0)
+
+		asset = create_asset(calculate_depreciation=1, submit=1)
+		with as_user(make_fenced_user("repair-manufacturing-user@example.com", ["Manufacturing User"])):
+			asset_repair = make_capitalized_repair(asset, purchase_invoice)
+			self.assertRaises(frappe.PermissionError, asset_repair.submit)
+
+		with as_user(make_fenced_user("repair-sales-user@example.com", ["Sales User"])):
+			self.assertRaises(
+				frappe.PermissionError,
+				asset_repair_module.get_unallocated_repair_cost,
+				purchase_invoice,
+				"Administrative Expenses - _TC",
+			)
+
+
+def make_capitalized_repair(asset, purchase_invoice: str):
+	asset_repair = frappe.new_doc("Asset Repair")
+	asset_repair.update(
+		{
+			"asset": asset.name,
+			"company": asset.company,
+			"failure_date": nowdate(),
+			"completion_date": now_datetime(),
+			"repair_status": "Completed",
+			"capitalize_repair_cost": 1,
+			"cost_center": "Main - _TC",
+			"description": "Test Description",
+		}
+	)
+	asset_repair.append(
+		"invoices",
+		{
+			"purchase_invoice": purchase_invoice,
+			"expense_account": "Administrative Expenses - _TC",
+			"repair_cost": 50,
+		},
+	)
+	asset_repair.append(
+		"stock_items",
+		{
+			"item_code": "_Test Stock Item",
+			"warehouse": "_Test Warehouse - _TC",
+			"valuation_rate": 100,
+			"consumed_quantity": 1,
+		},
+	)
+	return asset_repair.insert()
 
 
 def num_of_depreciations(asset):

@@ -24,6 +24,24 @@ class TestHolidayList(ERPNextTestSuite):
 		fetched_holiday_list = frappe.get_value("Holiday List", holiday_list.name)
 		self.assertEqual(holiday_list.name, fetched_holiday_list)
 
+	def test_duplicate_date_on_saved_list_with_string_date(self):
+		holiday_list = make_holiday_list(
+			"test_duplicate_holiday_date",
+			from_date="2031-01-01",
+			to_date="2031-12-31",
+			holiday_dates=[{"holiday_date": "2031-03-03", "description": "Original"}],
+		)
+		holiday_list = frappe.get_doc("Holiday List", holiday_list.name)
+		self.assertEqual(holiday_list.holidays[0].holiday_date, date(2031, 3, 3))
+		holiday_list.append("holidays", {"holiday_date": "2031-03-03", "description": "Duplicate"})
+
+		with self.assertRaises(frappe.ValidationError):
+			holiday_list.save()
+
+		self.assertEqual(
+			frappe.db.count("Holiday", {"parent": holiday_list.name, "holiday_date": "2031-03-03"}), 1
+		)
+
 	def test_weekly_off(self):
 		holiday_list = frappe.new_doc("Holiday List")
 		holiday_list.from_date = "2023-01-01"

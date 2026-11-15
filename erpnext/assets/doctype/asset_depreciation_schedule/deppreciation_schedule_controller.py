@@ -40,7 +40,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		self.schedules_before_clearing = rows
 		gap_idx = next((idx for idx, row in enumerate(rows) if not row.journal_entry), None)
 
-		self.first_non_depreciated_row_idx = gap_idx or 0
+		self.first_non_depreciated_row_idx = len(rows) if gap_idx is None else gap_idx
 		self.depreciation_schedule = list(rows) if gap_idx is None else rows[:gap_idx]
 		self.booked_rows_after_gap = (
 			[] if gap_idx is None else [row for row in rows[gap_idx:] if row.journal_entry]
@@ -353,7 +353,7 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		)
 
 		if not self.current_fiscal_year_end_date:
-			self.current_fiscal_year_end_date = get_fiscal_year(self.fb_row.depreciation_start_date)[2]
+			self.current_fiscal_year_end_date = self.get_fiscal_year(self.fb_row.depreciation_start_date)[1]
 			self.fiscal_year_changed = True
 		elif getdate(schedule_date) > getdate(self.current_fiscal_year_end_date):
 			self.current_fiscal_year_end_date = add_years(self.current_fiscal_year_end_date, 1)
@@ -384,14 +384,24 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 			if is_last_day_of_the_month(getdate(self.asset_doc.available_for_use_date)):
 				from_date = get_last_day(from_date)
 
-		self.depreciation_amount, days, months = self._get_pro_rata_amt(
-			from_date,
-			self.disposal_date,
-			original_schedule_date=self.schedule_date,
+		remaining_depreciation = self.pending_depreciation_amount - flt(
+			self.fb_row.expected_value_after_useful_life
 		)
+		if self.has_pro_rata and row_idx == self.final_number_of_depreciations - 1:
+			self.set_depreciation_amount_for_last_row(row_idx)
+			total_days = date_diff(self.schedule_date, from_date) + 1
+			days = min(date_diff(self.disposal_date, from_date) + 1, total_days)
+			self.depreciation_amount = remaining_depreciation * days / total_days
+		else:
+			self.depreciation_amount, days, months = self._get_pro_rata_amt(
+				from_date,
+				self.disposal_date,
+				original_schedule_date=self.schedule_date,
+			)
 
 		self.depreciation_amount = flt(
-			self.depreciation_amount, self.asset_doc.precision("net_purchase_amount")
+			min(self.depreciation_amount, remaining_depreciation),
+			self.asset_doc.precision("net_purchase_amount"),
 		)
 		if self.depreciation_amount > 0:
 			self.schedule_date = self.disposal_date
@@ -517,12 +527,12 @@ class DepreciationScheduleController(StraightLineMethod, WDVMethod):
 		return date_diff(fy_end_date, fy_start_date) + 1
 
 	def get_fiscal_year(self, date):
-		fy = get_fiscal_year(date, as_dict=True, raise_on_missing=False)
+		fy = get_fiscal_year(date, company=self.asset_doc.company, as_dict=True, raise_on_missing=False)
 		if fy:
 			fy_start_date = fy.year_start_date
 			fy_end_date = fy.year_end_date
 		else:
-			current_fy = get_fiscal_year(nowdate(), as_dict=True)
+			current_fy = get_fiscal_year(nowdate(), company=self.asset_doc.company, as_dict=True)
 			# get fiscal year start date of the year in which the schedule date falls
 			months = month_diff(date, current_fy.year_start_date)
 			if months % 12:

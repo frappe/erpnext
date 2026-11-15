@@ -10,6 +10,7 @@ from frappe.utils.data import DateTimeLikeObject
 
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.crm.doctype.utils import get_phone_number_key, get_phone_number_like_pattern
 from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
 from erpnext.selling.doctype.customer.mapper import parse_full_name
 
@@ -385,24 +386,22 @@ def get_lead_details(
 	return out
 
 
-def get_lead_with_phone_number(number):
-	if not number:
-		return
+def get_leads_with_phone_number(number: str | None) -> list[str]:
+	"""Return all leads with a phone, WhatsApp or mobile number matching the given number."""
+	if not (key := get_phone_number_key(number)):
+		return []
 
+	phone_fields = ["phone", "whatsapp_no", "mobile_no"]
+	pattern = get_phone_number_like_pattern(key)
 	leads = frappe.get_all(
 		"Lead",
-		or_filters={
-			"phone": ["like", f"%{number}"],
-			"whatsapp_no": ["like", f"%{number}"],
-			"mobile_no": ["like", f"%{number}"],
-		},
-		limit=1,
-		order_by="creation DESC",
+		or_filters={field: ["like", pattern] for field in phone_fields},
+		fields=["name", *phone_fields],
+		order_by="creation desc",
 	)
-
-	lead = leads[0].name if leads else None
-
-	return lead
+	return [
+		lead.name for lead in leads if any(get_phone_number_key(lead[field]) == key for field in phone_fields)
+	]
 
 
 @frappe.whitelist(methods=["POST"])

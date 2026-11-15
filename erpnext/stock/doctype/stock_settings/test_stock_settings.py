@@ -221,6 +221,24 @@ class TestStockSettings(ERPNextTestSuite):
 			"Stock Manager",
 		)
 
+	def test_boot_cache_cleared_when_boot_setting_changes(self):
+		frappe.cache.hset("bootinfo", frappe.session.user, {"cached": 1})
+		settings = frappe.get_doc("Stock Settings")
+		settings.use_inline_serial_batch_editor = 0 if settings.use_inline_serial_batch_editor else 1
+		settings.save()
+
+		self.assertIsNone(frappe.cache.hget("bootinfo", frappe.session.user))
+
+	def test_unchanged_save_keeps_site_cache(self):
+		settings = frappe.get_doc("Stock Settings")
+		settings.item_group = None
+		settings.save()
+
+		frappe.cache.set_value("stock_settings_probe", 1)
+		settings.save()
+
+		self.assertEqual(frappe.cache.get_value("stock_settings_probe"), 1)
+
 	def test_hiding_barcode_field_keeps_item_barcodes(self):
 		settings = frappe.get_doc("Stock Settings")
 		settings.show_barcode_field = 1
@@ -251,3 +269,10 @@ class TestStockSettings(ERPNextTestSuite):
 		stock_entry.items[0].update({"uom": "Tonne", "conversion_factor": 1000})
 
 		self.assertRaises(frappe.ValidationError, stock_entry.insert)
+
+	def test_boolean_check_value_is_stored_as_1(self):
+		settings = frappe.get_single("Stock Settings")
+		settings.use_serial_batch_fields = True
+		settings.save()
+
+		self.assertEqual(frappe.db.get_default("use_serial_batch_fields"), "1")

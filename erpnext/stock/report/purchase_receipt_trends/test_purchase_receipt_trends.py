@@ -8,6 +8,7 @@ from erpnext.stock.report.purchase_receipt_trends.purchase_receipt_trends import
 from erpnext.tests.utils import ERPNextTestSuite
 
 ITEM = "_Test Item"
+OTHER_ITEM = "_Test Item 2"
 ITEM_GROUP = "_Test Item Group"
 SUPPLIER = "_Test Supplier"
 
@@ -130,3 +131,15 @@ class TestPurchaseReceiptTrends(ERPNextTestSuite):
 		after = self.values({"Item": ITEM}, cols, based_on="Supplier", group_by="Item")
 		self.assertEqual(after["Total(Qty)"] - before["Total(Qty)"], 10)
 		self.assertEqual(after["Total(Amt)"] - before["Total(Amt)"], 1000)
+
+	def test_item_filter_restricts_rows(self):
+		make_purchase_receipt(
+			item_code=ITEM, qty=10, rate=100, company="_Test Company", posting_date="2026-06-01"
+		)
+		make_purchase_receipt(
+			item_code=OTHER_ITEM, qty=4, rate=100, company="_Test Company", posting_date="2026-06-01"
+		)
+		columns, data = self.run_report_full(item_code=[ITEM])
+		items = {row[self.labels(columns).index("Item")] for row in data}
+		self.assertIn(ITEM, items)
+		self.assertNotIn(OTHER_ITEM, items)

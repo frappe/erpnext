@@ -36,16 +36,16 @@ frappe.listview_settings["Task"] = {
 	gantt_custom_popup_html: function (ganttobj, task) {
 		let html = `
 			<a class="mb-2 inline-block cursor-pointer"
-				href="/app/task/${ganttobj.id}">
-				${ganttobj.name}
+				href="${frappe.utils.get_form_link("Task", ganttobj.id)}">
+				${frappe.utils.escape_html(ganttobj.name)}
 			</a>
 		`;
 
 		if (task.project) {
 			html += `<p class="mb-1">${__("Project")}:
 				<a class="inline-block"
-					href="/app/project/${task.project}">
-					${task.project}
+					href="${frappe.utils.get_form_link("Project", task.project)}">
+					${frappe.utils.escape_html(task.project)}
 				</a>
 			</p>`;
 		}
@@ -59,7 +59,7 @@ frappe.listview_settings["Task"] = {
 			const assignment_wrapper = `
 				<span>Assigned to:</span>
 				<span>
-					${assign_list.map((user) => frappe.user_info(user).fullname).join(", ")}
+					${assign_list.map((user) => frappe.utils.escape_html(frappe.user_info(user).fullname)).join(", ")}
 				</span>
 			`;
 			html += assignment_wrapper;

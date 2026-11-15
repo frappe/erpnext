@@ -13,14 +13,16 @@ from pypika.terms import Bracket, ExistsCriterion, LiteralValue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_condition,
+	get_dimension_filter_values,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.utils import _get_incoming_rate
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	if not filters:
 		filters = frappe._dict()
 	filters.currency = frappe.get_cached_value("Company", filters.company, "default_currency")
@@ -579,7 +581,12 @@ class GrossProfitGenerator:
 								row.base_amount = packed_item.base_amount
 
 			# get buying amount
-			if row.is_debit_note:
+			if grouped_by_invoice and row.indent == 0.0:
+				row.buying_amount = buying_amount
+				row.base_amount = base_amount
+				buying_amount = 0
+				base_amount = 0
+			elif row.is_debit_note:
 				# Rate adjustment debit notes have no stock movement, so buying amount is zero
 				if not grouped_by_invoice:
 					row.qty = 0
@@ -595,12 +602,6 @@ class GrossProfitGenerator:
 				)
 			else:
 				row.buying_amount = flt(self.get_buying_amount(row, row.item_code), self.currency_precision)
-
-			if grouped_by_invoice and row.indent == 0.0:
-				row.buying_amount = buying_amount
-				row.base_amount = base_amount
-				buying_amount = 0
-				base_amount = 0
 
 			# get buying rate
 			if flt(row.qty):
@@ -1216,19 +1217,26 @@ class GrossProfitGenerator:
 			query = query.where(SalesInvoice.posting_date <= self.filters.to_date)
 
 		if self.filters.item_group:
-			query = query.where(get_item_group_condition(self.filters.item_group, Item))
+			query = query.where(
+				get_dimension_filter_condition(Item.item_group, self.filters.item_group, "Item Group")
+			)
 
 		if self.filters.sales_person:
-			query = query.where(
-				ExistsCriterion(
-					frappe.qb.from_(SalesTeam)
-					.select(1)
-					.where(
-						(SalesTeam.parent == SalesInvoice.name)
-						& (SalesTeam.sales_person == self.filters.sales_person)
+			sales_team = (
+				frappe.qb.from_(SalesTeam)
+				.select(1)
+				.where((SalesTeam.parent == SalesInvoice.name) & (SalesTeam.parenttype == "Sales Invoice"))
+			)
+			condition = ExistsCriterion(
+				sales_team.where(
+					get_dimension_filter_condition(
+						SalesTeam.sales_person, self.filters.sales_person, "Sales Person"
 					)
 				)
 			)
+			if get_dimension_filter_values(self.filters.sales_person)[1]:
+				condition |= ~ExistsCriterion(sales_team)
+			query = query.where(condition)
 
 		if self.filters.sales_invoice:
 			query = query.where(SalesInvoice.name == self.filters.sales_invoice)
@@ -1237,28 +1245,34 @@ class GrossProfitGenerator:
 			query = query.where(SalesInvoiceItem.item_code == self.filters.item_code)
 
 		if self.filters.cost_center:
-			self.filters.cost_center = frappe.parse_json(self.filters.get("cost_center"))
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.cost_center)
-			query = query.where(SalesInvoiceItem.cost_center.isin(self.filters.cost_center))
+			query = query.where(
+				get_dimension_filter_condition(
+					SalesInvoiceItem.cost_center, self.filters.cost_center, "Cost Center"
+				)
+			)
 
 		if self.filters.project:
-			self.filters.project = frappe.parse_json(self.filters.get("project"))
-			query = query.where(SalesInvoiceItem.project.isin(self.filters.project))
+			query = query.where(
+				get_dimension_filter_condition(SalesInvoiceItem.project, self.filters.project, "Project")
+			)
 
 		for dim in get_accounting_dimensions(as_list=False) or []:
-			if self.filters.get(dim.fieldname):
-				if frappe.get_cached_value("DocType", dim.document_type, "is_tree"):
-					self.filters[dim.fieldname] = get_dimension_with_children(
-						dim.document_type, self.filters.get(dim.fieldname)
+			dimension_filter = self.filters.get(f"accounting_dimension_{dim.fieldname}")
+			if dimension_filter is None and dim.fieldname != "sales_invoice":
+				dimension_filter = self.filters.get(dim.fieldname)
+			if dimension_filter:
+				query = query.where(
+					get_dimension_filter_condition(
+						SalesInvoiceItem[dim.fieldname],
+						dimension_filter,
+						dim.document_type,
 					)
-				query = query.where(SalesInvoiceItem[dim.fieldname].isin(self.filters[dim.fieldname]))
+				)
 
 		if self.filters.warehouse:
-			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
-			WH = frappe.qb.DocType("Warehouse")
 			query = query.where(
-				SalesInvoiceItem.warehouse.isin(
-					frappe.qb.from_(WH).select(WH.name).where((WH.lft >= lft) & (WH.rgt <= rgt))
+				get_dimension_filter_condition(
+					SalesInvoiceItem.warehouse, self.filters.warehouse, "Warehouse"
 				)
 			)
 

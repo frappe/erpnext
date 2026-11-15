@@ -6,6 +6,10 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+	get_subcontracted_received_qty,
+)
+
 
 def execute(filters=None):
 	return get_column(filters), get_data(filters)
@@ -132,6 +136,7 @@ def get_purchase_orders(filters):
 		.on(po_item.parent == purchase_order.name)
 		.select(
 			po_item.parent.as_("document_name"),
+			po_item.name.as_("po_detail"),
 			po_item.qty.as_("order_qty"),
 			po_item.received_qty,
 			po_item.item_code.as_("po_item_code"),
@@ -145,13 +150,14 @@ def get_purchase_orders(filters):
 		.run(as_dict=True)
 	)
 
-	return [get_purchase_order_row(row) for row in purchase_orders]
+	subcontracted_qty = get_subcontracted_received_qty(
+		[row.po_detail for row in purchase_orders if row.fg_item]
+	)
+	return [get_purchase_order_row(row, subcontracted_qty) for row in purchase_orders]
 
 
-def get_purchase_order_row(row):
-	produced_qty = flt(row.received_qty)
-	if row.fg_item:
-		produced_qty = flt(row.received_qty) / (flt(row.order_qty) / flt(row.fg_item_qty) or 1)
+def get_purchase_order_row(row, subcontracted_qty):
+	produced_qty = flt(subcontracted_qty.get(row.po_detail)) if row.fg_item else flt(row.received_qty)
 
 	item_code = row.fg_item or row.po_item_code
 	return frappe._dict(

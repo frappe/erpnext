@@ -42,6 +42,7 @@ def create_prospect_against_crm_deal():
 
 
 def create_contacts(contacts, organization=None, link_doctype=None, link_docname=None):
+	check_link_permission(link_doctype, link_docname)
 	for c in contacts:
 		c = frappe._dict(c)
 		existing_contact = contact_exists(c.email, c.mobile_no)
@@ -65,13 +66,14 @@ def create_contacts(contacts, organization=None, link_doctype=None, link_docname
 
 		link_doc(contact, link_doctype, link_docname)
 
-		contact.save(ignore_permissions=True)
+		contact.save(ignore_permissions=not is_crm_installed())
 
 
 def create_address(doctype, docname, address):
 	if not address:
 		return
 	address = frappe.parse_json(address)
+	check_link_permission(doctype, docname)
 	frappe.db.savepoint("crm_create_address")
 	try:
 		_address = frappe.db.exists("Address", address.get("name"))
@@ -97,11 +99,17 @@ def create_address(doctype, docname, address):
 		else:
 			address = frappe.get_doc("Address", _address)
 			link_doc(address, doctype, docname)
-			address.save(ignore_permissions=True)
+			address.save(ignore_permissions=not is_crm_installed())
 			return address.name
 	except Exception:
 		frappe.db.rollback(save_point="crm_create_address")
 		frappe.log_error(frappe.get_traceback(), f"Error while creating address for {docname}")
+
+
+def check_link_permission(link_doctype, link_docname):
+	# the allowed users check is skipped when CRM runs on this site, so the caller's own access applies
+	if link_docname and is_crm_installed():
+		frappe.has_permission(link_doctype, "write", doc=link_docname, throw=True)
 
 
 def link_doc(doc, link_doctype, link_docname):
@@ -161,6 +169,8 @@ def create_customer(customer_data: dict | None = None):
 		frappe.db.rollback()
 		frappe.log_error(frappe.get_traceback(), "Error while creating customer against Frappe CRM Deal")
 		return
+
+	check_link_permission("Customer", customer_name)
 
 	# Link contacts/address under a savepoint so a failure here does NOT discard the Customer just
 	# created (a full rollback would; MariaDB kept it pre-migration). Linking is best-effort.

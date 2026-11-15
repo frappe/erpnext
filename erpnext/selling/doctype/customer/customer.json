@@ -68,6 +68,10 @@
   "column_break_21",
   "tax_withholding_group",
   "tax_withholding_category",
+  "items_tab",
+  "frequently_bought_html",
+  "party_specific_items_section",
+  "party_specific_items_html",
   "settings_tab",
   "company_restrictions_section",
   "restrict_to_companies",
@@ -345,16 +349,17 @@
    "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Primary Address and Contact"
   },
   {
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "customer_primary_contact",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Contact",
    "no_copy": 1,
-   "options": "Contact"
+   "options": "Contact",
+   "show_on_timeline": 1
   },
   {
    "fetch_from": "customer_primary_contact.mobile_no",
@@ -384,9 +389,11 @@
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Address",
    "no_copy": 1,
-   "options": "Address"
+   "options": "Address",
+   "show_on_timeline": 1
   },
   {
    "fieldname": "primary_address",
@@ -772,6 +779,26 @@
   {
    "fieldname": "section_break_ario",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "frequently_bought_html",
+   "fieldtype": "HTML",
+   "label": "Frequently Bought HTML"
+  },
+  {
+   "fieldname": "party_specific_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_specific_items_html",
+   "fieldtype": "HTML",
+   "label": "Party Specific Items HTML"
   }
  ],
  "icon": "user-round",
@@ -785,7 +812,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2026-10-08 12:41:25.000000",
+ "modified": "2026-10-22 18:00:00.000000",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

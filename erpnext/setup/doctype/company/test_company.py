@@ -316,8 +316,8 @@ class TestCompany(ERPNextTestSuite):
 	def test_disable_sdbnb_with_outstanding_delivery_note_fails(self):
 		company = get_test_company()
 
-		item_code = create_stock_item_with_inventory()
-		create_outstanding_delivery_note(item_code)
+		item_code = create_stock_item_with_inventory(company)
+		create_outstanding_delivery_note(item_code, company)
 
 		company.enable_stock_delivered_but_not_billed = 0
 
@@ -327,18 +327,213 @@ class TestCompany(ERPNextTestSuite):
 	def test_cannot_change_sdbnb_account_with_outstanding_delivery_note(self):
 		company = get_test_company()
 
-		item_code = create_stock_item_with_inventory()
-		create_outstanding_delivery_note(item_code)
+		item_code = create_stock_item_with_inventory(company)
+		create_outstanding_delivery_note(item_code, company)
 
 		new_account = create_account(
 			account_name="Stock Delivered But Not Billed - New",
 			account_type="Stock Delivered But Not Billed",
-			parent_account="Stock Assets - _TSDBNB",
+			parent_account=frappe.db.get_value(
+				"Account", company.stock_delivered_but_not_billed, "parent_account"
+			),
 			company=company.name,
 		)
 
 		company.stock_delivered_but_not_billed = new_account
 
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_invalid_default_accounts_and_cost_centers(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		original_inventory = company.default_inventory_account
+		company.default_inventory_account = frappe.db.get_value(
+			"Account", {"company": company.name, "root_type": "Expense", "is_group": 0}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_inventory_account = original_inventory
+		company.default_operating_cost_account = frappe.db.get_value(
+			"Account", {"company": company.name, "root_type": "Asset", "is_group": 0}
+		)
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_operating_cost_account = None
+		company.cost_center = frappe.db.get_value("Cost Center", {"company": company.name, "is_group": 1})
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_cannot_disable_perpetual_inventory_with_stock(self):
+		company = get_test_company()
+		create_stock_item_with_inventory(company)
+		company.enable_perpetual_inventory = 0
+		with self.assertRaisesRegex(frappe.ValidationError, "Cannot disable perpetual inventory"):
+			company.save()
+
+	def test_company_deletion_clears_item_reorder_rows(self):
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Reorder Cleanup Test",
+				"abbr": "RCT",
+				"country": "Nepal",
+				"default_currency": "INR",
+			}
+		).insert()
+		item = make_item("Reorder Cleanup Item")
+		item.append(
+			"reorder_levels",
+			{
+				"warehouse": company.default_warehouse,
+				"warehouse_reorder_level": 10,
+				"warehouse_reorder_qty": 10,
+				"material_request_type": "Purchase",
+			},
+		)
+		item.save()
+		frappe.delete_doc("Company", company.name)
+		self.assertFalse(frappe.db.exists("Item Reorder", {"warehouse": company.default_warehouse}))
+
+	def test_cannot_delete_company_with_bom(self):
+		company = get_test_company()
+		exists = frappe.db.exists
+		with patch(
+			"frappe.db.exists",
+			side_effect=lambda doctype, *args, **kwargs: (
+				"BOM-1" if doctype == "BOM" else exists(doctype, *args, **kwargs)
+			),
+		):
+			with self.assertRaisesRegex(frappe.ValidationError, "BOM"):
+				company.on_trash()
+
+	def test_exchange_accounts_can_be_cleared(self):
+		from erpnext.accounts.services.exchange_gain_loss import get_exchange_gain_loss_account
+
+		company = get_test_company()
+		company.exchange_gain_loss_account = company.default_expense_account
+		company.exchange_gain_account = None
+		company.exchange_loss_account = None
+		company.save()
+		company.reload()
+		self.assertFalse(company.exchange_gain_account)
+		self.assertFalse(company.exchange_loss_account)
+		self.assertEqual(get_exchange_gain_loss_account(company.name, True), company.default_expense_account)
+		self.assertEqual(get_exchange_gain_loss_account(company.name, False), company.default_expense_account)
+
+	def test_tax_setup_requires_manager_role(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		with patch("frappe.only_for", side_effect=frappe.PermissionError):
+			with patch("erpnext.setup.doctype.company.company.setup_taxes_and_charges") as setup:
+				with self.assertRaises(frappe.PermissionError):
+					company.create_default_tax_template()
+				setup.assert_not_called()
+
+	def test_currency_change_checks_ledger_entries(self):
+		company = get_test_company()
+		create_stock_item_with_inventory(company)
+		self.assertTrue(company.check_if_transactions_exist())
+		company.default_currency = "USD"
+		with self.assertRaisesRegex(frappe.ValidationError, "existing transactions"):
+			company.save()
+
+	def test_currency_change_without_transactions_updates_chart(self):
+		company = frappe.get_doc(
+			{
+				"doctype": "Company",
+				"company_name": "Currency Change Test",
+				"abbr": "CCT",
+				"country": "Nepal",
+				"default_currency": "INR",
+			}
+		).insert()
+		from erpnext.accounts.doctype.account.account import get_account_currency
+
+		self.assertTrue(company.default_cash_account)
+		self.assertEqual(get_account_currency(company.default_cash_account), "INR")
+		company.default_currency = "USD"
+		company.save()
+		self.assertEqual(
+			frappe.db.get_value("Account", company.default_cash_account, "account_currency"), "USD"
+		)
+		self.assertEqual(get_account_currency(company.default_cash_account), "USD")
+
+	def test_provisional_field_stays_visible_if_another_company_uses_it(self):
+		company = get_test_company()
+		with (
+			patch("erpnext.setup.doctype.company.company.make_property_setter") as setter,
+			patch("frappe.db.exists", return_value="Other Company"),
+		):
+			company.enable_provisional_accounting_for_non_stock_items = 0
+			company.validate_provisional_account_for_non_stock_items()
+			self.assertFalse(setter.call_args.args[3])
+
+		with (
+			patch("erpnext.setup.doctype.company.company.make_property_setter") as setter,
+			patch("frappe.db.exists", return_value=None),
+		):
+			company.set_provisional_expense_visibility(False)
+			self.assertTrue(setter.call_args.args[3])
+
+	def test_opening_invoice_does_not_count_as_monthly_sales(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.setup.doctype.company.company import (
+			update_company_current_month_sales,
+			update_company_monthly_sales,
+		)
+
+		invoice = create_sales_invoice()
+		update_company_current_month_sales(invoice.company)
+		update_company_monthly_sales(invoice.company)
+		before = frappe.db.get_value(
+			"Company", invoice.company, ["total_monthly_sales", "sales_monthly_history"], as_dict=True
+		)
+		opening_invoice = create_sales_invoice(do_not_save=True)
+		opening_invoice.is_opening = "Yes"
+		opening_invoice.items[0].income_account = "Temporary Opening - _TC"
+		opening_invoice.insert().submit()
+		update_company_current_month_sales(invoice.company)
+		update_company_monthly_sales(invoice.company)
+		after = frappe.db.get_value(
+			"Company", invoice.company, ["total_monthly_sales", "sales_monthly_history"], as_dict=True
+		)
+		self.assertGreaterEqual(before.total_monthly_sales, invoice.base_grand_total)
+		self.assertEqual(before.total_monthly_sales, after.total_monthly_sales)
+		self.assertEqual(json.loads(before.sales_monthly_history), json.loads(after.sales_monthly_history))
+
+	def test_invalid_default_warehouses(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.default_in_transit_warehouse = company.default_warehouse
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+		company.default_in_transit_warehouse = None
+		disabled_warehouse = frappe.db.get_value(
+			"Warehouse",
+			{"company": company.name, "is_group": 0, "name": ["!=", company.default_warehouse]},
+		)
+		frappe.db.set_value("Warehouse", disabled_warehouse, "disabled", 1)
+		company.default_warehouse = disabled_warehouse
+		with self.assertRaises(frappe.ValidationError):
+			company.save()
+
+	def test_existing_invalid_defaults_do_not_block_unrelated_saves(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		expense_accounts = frappe.get_all(
+			"Account",
+			filters={"company": company.name, "root_type": "Expense", "is_group": 0},
+			pluck="name",
+			limit=2,
+		)
+		frappe.db.set_value("Company", company.name, "unrealized_profit_loss_account", expense_accounts[0])
+		frappe.db.set_value("Warehouse", company.default_warehouse, "disabled", 1)
+
+		company.reload()
+		company.monthly_sales_target = 100
+		company.save()
+
+		company.unrealized_profit_loss_account = expense_accounts[1]
 		with self.assertRaises(frappe.ValidationError):
 			company.save()
 
@@ -414,14 +609,12 @@ def create_test_lead_in_company(company):
 
 
 def get_test_company():
-	if frappe.db.exists("Company", "_Test SDBNB Company"):
-		return frappe.get_doc("Company", "_Test SDBNB Company")
-
+	abbr = random_string(6)
 	return frappe.get_doc(
 		{
 			"doctype": "Company",
-			"company_name": "_Test SDBNB Company",
-			"abbr": "_TSDBNB",
+			"company_name": f"_Test SDBNB Company {abbr}",
+			"abbr": abbr,
 			"country": "India",
 			"default_currency": "INR",
 			"enable_perpetual_inventory": 1,
@@ -430,7 +623,7 @@ def get_test_company():
 	).insert()
 
 
-def create_stock_item_with_inventory():
+def create_stock_item_with_inventory(company):
 	item_code = make_item(
 		"SDBNB Test Item",
 		properties={"is_stock_item": 1},
@@ -438,22 +631,23 @@ def create_stock_item_with_inventory():
 
 	make_stock_entry(
 		item_code=item_code,
-		target="Stores - _TSDBNB",
+		target=f"Stores - {company.abbr}",
 		qty=10,
 		basic_rate=100,
-		company="_Test SDBNB Company",
+		company=company.name,
+		expense_account=company.stock_adjustment_account,
 	)
 
 	return item_code
 
 
-def create_outstanding_delivery_note(item_code):
+def create_outstanding_delivery_note(item_code, company):
 	return create_delivery_note(
 		item_code=item_code,
 		qty=5,
 		rate=150,
-		company="_Test SDBNB Company",
-		warehouse="Stores - _TSDBNB",
-		cost_center="Main - _TSDBNB",
-		expense_account="Stock Delivered But Not Billed - _TSDBNB",
+		company=company.name,
+		warehouse=f"Stores - {company.abbr}",
+		cost_center=company.cost_center,
+		expense_account=company.stock_delivered_but_not_billed,
 	)

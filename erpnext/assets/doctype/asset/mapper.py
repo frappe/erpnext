@@ -11,8 +11,8 @@ from frappe.utils import cint, cstr, flt, get_link_to_form
 from erpnext import _refuse
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.assets.doctype.asset.depreciation import (
+	_get_disposal_account_and_cost_center,
 	get_depreciation_accounts,
-	get_disposal_account_and_cost_center,
 )
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
@@ -27,7 +27,7 @@ def make_sales_invoice(asset: str, item_code: str, company: str, sell_qty: int, 
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
 	si.currency = frappe.get_cached_value("Company", company, "default_currency")
-	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(company)
+	disposal_account, depreciation_cost_center = _get_disposal_account_and_cost_center(company)
 	si.append(
 		"items",
 		{
@@ -244,19 +244,21 @@ def process_asset_split(existing_asset, split_qty, splitted_asset=None, is_new_a
 
 def set_split_asset_values(asset_doc, scaling_factor, split_qty, existing_asset, is_new_asset):
 	asset_doc.net_purchase_amount = existing_asset.net_purchase_amount * scaling_factor
-	asset_doc.purchase_amount = existing_asset.net_purchase_amount * scaling_factor
+	asset_doc.purchase_amount = asset_doc.net_purchase_amount
 	asset_doc.additional_asset_cost = existing_asset.additional_asset_cost * scaling_factor
 	asset_doc.total_asset_cost = asset_doc.net_purchase_amount + asset_doc.additional_asset_cost
 	asset_doc.opening_accumulated_depreciation = (
 		existing_asset.opening_accumulated_depreciation * scaling_factor
 	)
 	asset_doc.value_after_depreciation = existing_asset.value_after_depreciation * scaling_factor
+	asset_doc.value_adjustment_amount = flt(existing_asset.value_adjustment_amount) * scaling_factor
 	asset_doc.asset_quantity = split_qty
 	asset_doc.split_from = existing_asset.name if is_new_asset else None
 
 	for row in asset_doc.get("finance_books"):
 		row.value_after_depreciation = row.value_after_depreciation * scaling_factor
 		row.expected_value_after_useful_life = row.expected_value_after_useful_life * scaling_factor
+		row.value_adjustment_amount = flt(row.value_adjustment_amount) * scaling_factor
 
 	if not is_new_asset:
 		asset_doc.flags.ignore_validate_update_after_submit = True

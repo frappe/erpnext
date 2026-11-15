@@ -28,7 +28,7 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 4,
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
@@ -62,7 +62,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
+   "columns": 4,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -110,7 +110,7 @@
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-10-29 16:24:43.021230",
+ "modified": "2026-10-30 18:18:07.872317",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Payment",

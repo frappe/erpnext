@@ -153,9 +153,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					);
 				}
 
-				const payment_is_overdue = doc.payment_schedule
-					.map((row) => Date.parse(row.due_date) < Date.now())
-					.reduce((prev, current) => prev || current, false);
+				const payment_is_overdue =
+					doc.payment_schedule.some((row) => Date.parse(row.due_date) < Date.now()) ||
+					(doc.is_opening === "Yes" && Date.parse(doc.due_date) < Date.now());
 
 				if (payment_is_overdue && frappe.model.can_create("Dunning")) {
 					this.frm.add_custom_button(__("Dunning"), this.make_dunning.bind(this), __("Create"));
@@ -423,7 +423,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 					],
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Lost"],
+						status: ["not in", ["Lost", "Expired"]],
 						company: me.frm.doc.company,
 					},
 					allow_child_item_selection: true,

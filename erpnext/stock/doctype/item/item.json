@@ -131,7 +131,6 @@
   "is_sub_contracted_item",
   "default_bom",
   "column_break_74",
-  "production_capacity",
   "total_projected_qty",
   "section_break_xili",
   "default_manufacturer_part_no",
@@ -272,7 +271,8 @@
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "in_import_template": 1,
-   "label": "Valuation Rate"
+   "label": "Valuation Rate",
+   "non_negative": 1
   },
   {
    "bold": 1,
@@ -754,7 +754,8 @@
    "depends_on": "enable_deferred_revenue",
    "fieldname": "no_of_months",
    "fieldtype": "Int",
-   "label": "No of Months (Revenue)"
+   "label": "No of Months (Revenue)",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -767,7 +768,8 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "no_of_months_exp",
    "fieldtype": "Int",
-   "label": "No of Months (Expense)"
+   "label": "No of Months (Expense)",
+   "non_negative": 1
   },
   {
    "depends_on": "eval:!doc.is_fixed_asset",
@@ -980,11 +982,6 @@
    "label": "Deferred Accounting"
   },
   {
-   "fieldname": "production_capacity",
-   "fieldtype": "Int",
-   "label": "Production Capacity"
-  },
-  {
    "fieldname": "section_break_znra",
    "fieldtype": "Section Break"
   },
@@ -1142,7 +1139,7 @@
  "image_field": "image",
  "links": [],
  "make_attachments_public": 1,
- "modified": "2026-09-16 12:00:00.000000",
+ "modified": "2026-11-05 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

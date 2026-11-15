@@ -36,6 +36,7 @@ def after_install():
 	create_print_setting_custom_fields()
 	create_marketing_campaign_custom_fields()
 	create_address_and_contact_custom_fields()
+	setup_company_address_permissions()
 	create_custom_company_links()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
@@ -45,11 +46,11 @@ def after_install():
 	add_standard_navbar_items()
 	add_app_name()
 	update_roles()
-	grant_address_read_to_accounts_manager()
 	make_default_operations()
 	update_pegged_currencies()
 	set_default_print_formats()
 	toggle_hidden_fields()
+	# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- after_install
 	frappe.db.commit()
 
 
@@ -237,6 +238,7 @@ def create_address_and_contact_custom_fields():
 					"fieldtype": "Check",
 					"default": "0",
 					"insert_after": "linked_with",
+					"permlevel": 1,
 				},
 			],
 			"Contact": [
@@ -249,6 +251,15 @@ def create_address_and_contact_custom_fields():
 			],
 		}
 	)
+
+
+def setup_company_address_permissions():
+	"""Only Accounts Manager and System Manager may mark an address as the company's own (permlevel 1)."""
+	grant_address_read_to_accounts_manager()
+
+	for role in ("System Manager", "Accounts Manager"):
+		add_permission("Address", role, 1)
+		update_permission_property("Address", role, 1, "write", 1)
 
 
 def create_default_success_action():
@@ -456,12 +467,20 @@ def toggle_hidden_fields():
 		toggle_sales_discount_section,
 		toggle_subscription_sections,
 	)
+	from erpnext.selling.doctype.selling_settings.selling_settings import (
+		toggle_tracking_sales_commissions_section,
+		toggle_utm_analytics_section,
+	)
 
 	acc_settings = frappe.get_doc("Accounts Settings")
 	toggle_accounting_dimension_sections(not acc_settings.enable_accounting_dimensions)
 	toggle_sales_discount_section(not acc_settings.enable_discounts_and_margin)
 	toggle_subscription_sections(not acc_settings.enable_subscription)
 	toggle_loyalty_point_program_section(not acc_settings.enable_loyalty_point_program)
+
+	selling_settings = frappe.get_doc("Selling Settings")
+	toggle_tracking_sales_commissions_section(not selling_settings.enable_tracking_sales_commissions)
+	toggle_utm_analytics_section(not selling_settings.enable_utm)
 
 
 DEFAULT_ROLE_PROFILES = {

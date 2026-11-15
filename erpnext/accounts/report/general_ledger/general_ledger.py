@@ -10,11 +10,16 @@ from frappe.utils import cstr, getdate
 from erpnext import get_company_currency, get_default_company
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimension_with_children,
+	get_dimension_filter_sql_condition,
+	get_dimension_filter_values,
 )
-from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.report.utils import (
+	convert_to_presentation_currency,
+	get_currency,
+	has_gl_entry_restrictions,
+	validate_date_range,
+)
+from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 
 DEBIT_CREDIT_DICT = {
 	"debit": 0.0,
@@ -58,7 +63,7 @@ def validate_filters(filters, account_details):
 	if not filters.get("company"):
 		frappe.throw(_("{0} is mandatory").format(_("Company")))
 
-	if not filters.get("from_date") and not filters.get("to_date"):
+	if not filters.get("from_date") or not filters.get("to_date"):
 		frappe.throw(
 			_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date")))
 		)
@@ -82,8 +87,7 @@ def validate_filters(filters, account_details):
 	if filters.get("voucher_no") and filters.get("categorize_by") in ["Categorize by Voucher"]:
 		frappe.throw(_("Can not filter based on Voucher No, if grouped by Voucher"))
 
-	if filters.from_date > filters.to_date:
-		frappe.throw(_("From Date must be before To Date"))
+	validate_date_range(filters)
 
 	if filters.get("project"):
 		filters.project = frappe.parse_json(filters.get("project"))
@@ -198,6 +202,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			"debit_in_transaction_currency, credit_in_transaction_currency, transaction_currency,"
 		)
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- filters use placeholders; fields come from config
 	gl_entries = frappe.db.sql(
 		f"""
 		select
@@ -220,10 +225,19 @@ def get_gl_entries(filters, accounting_dimensions):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
-	else:
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
+
+
+def convert_gl_entries_currency(gl_entries, currency_map, filters):
+	if not filters.get("presentation_currency"):
 		return gl_entries
+
+	return convert_to_presentation_currency(
+		gl_entries,
+		currency_map,
+		filters,
+		use_account_currency=not filters.get("convert_at_reporting_date_rate"),
+	)
 
 
 def get_conditions(filters):
@@ -237,8 +251,7 @@ def get_conditions(filters):
 			conditions.append("account in %(account)s")
 
 	if filters.get("cost_center"):
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		conditions.append("cost_center in %(cost_center)s")
+		append_named_dimension_condition(conditions, filters, "cost_center", "Cost Center")
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
@@ -312,7 +325,7 @@ def get_conditions(filters):
 		conditions.append("posting_date <=%(to_date)s")
 
 	if filters.get("project"):
-		conditions.append("project in %(project)s")
+		append_named_dimension_condition(conditions, filters, "project", "Project")
 
 	if filters.get("include_default_book_entries"):
 		if filters.get("finance_book"):
@@ -347,15 +360,27 @@ def get_conditions(filters):
 			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
 			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, filters.get(dimension.fieldname)
-						)
-						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
-					else:
-						conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
+					append_named_dimension_condition(
+						conditions, filters, dimension.fieldname, dimension.document_type
+					)
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def append_named_dimension_condition(conditions, filters, fieldname, dimension_doctype):
+	values, include_blank = get_dimension_filter_values(filters[fieldname], dimension_doctype)
+	parts = []
+
+	if values:
+		parameter = f"_selected_{fieldname}"
+		filters[parameter] = values
+		parts.append(f"{fieldname} in %({parameter})s")
+
+	if include_blank:
+		parts.append(f"({fieldname} is null or {fieldname} = '')")
+
+	if parts:
+		conditions.append(f"({' or '.join(parts)})")
 
 
 def get_party_name_map():
@@ -562,8 +587,21 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	show_opening_entries = filters.get("show_opening_entries")
 
+	# P&L accounts reset every fiscal year, so their entries before the year start don't count in opening
+	pl_accounts, year_start_date = set(), None
+	if fiscal_year := get_fiscal_year(from_date, company=filters.company, raise_on_missing=False):
+		year_start_date = getdate(fiscal_year[1])
+		pl_accounts = set(
+			frappe.get_all(
+				"Account", {"company": filters.company, "report_type": "Profit and Loss"}, pluck="name"
+			)
+		)
+
 	totals = get_totals_dict()
 	for gle in gl_entries:
+		if year_start_date and gle.posting_date < year_start_date and gle.account in pl_accounts:
+			continue
+
 		group_by_value = get_group_by_value(gle, group_by)
 		gle.voucher_subtype = _(gle.voucher_subtype)
 		gle.remarks = _(gle.remarks)
@@ -840,6 +878,9 @@ def get_columns(filters):
 
 
 def execute_snapshot_report(filters):
+	if has_gl_entry_restrictions():
+		return execute(filters)
+
 	from frappe.database.duckdb.database import get_latest_sync
 
 	if conn := get_latest_sync("GL Entry"):
@@ -978,9 +1019,7 @@ def get_gl_entries_duckdb(filters, accounting_dimensions, conn):
 		if gl_entry.party_type and gl_entry.party:
 			gl_entry.party_name = party_name_map.get(gl_entry.party_type, {}).get(gl_entry.party)
 
-	if filters.get("presentation_currency"):
-		return convert_to_presentation_currency(gl_entries, currency_map, filters)
-	return gl_entries
+	return convert_gl_entries_currency(gl_entries, currency_map, filters)
 
 
 def _build_gl_conditions_duckdb(filters):
@@ -996,9 +1035,9 @@ def _build_gl_conditions_duckdb(filters):
 			params.extend(filters.account)
 
 	if filters.get("cost_center"):
-		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		conditions.append(f"cost_center IN ({', '.join(['?'] * len(filters.cost_center))})")
-		params.extend(filters.cost_center)
+		append_positional_dimension_condition(
+			conditions, params, "cost_center", filters.cost_center, "Cost Center"
+		)
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no = ?")
@@ -1077,8 +1116,7 @@ def _build_gl_conditions_duckdb(filters):
 	params.append(filters.to_date)
 
 	if filters.get("project"):
-		conditions.append(f"project IN ({', '.join(['?'] * len(filters.project))})")
-		params.extend(filters.project)
+		append_positional_dimension_condition(conditions, params, "project", filters.project, "Project")
 
 	company_fb = filters.get("company_fb") or frappe.get_cached_value(
 		"Company", filters.company, "default_finance_book"
@@ -1109,16 +1147,19 @@ def _build_gl_conditions_duckdb(filters):
 		for dimension in accounting_dimensions_list:
 			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
-					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
-						filters[dimension.fieldname] = get_dimension_with_children(
-							dimension.document_type, filters.get(dimension.fieldname)
-						)
-					vals = (
-						filters[dimension.fieldname]
-						if isinstance(filters[dimension.fieldname], list)
-						else [filters[dimension.fieldname]]
+					append_positional_dimension_condition(
+						conditions,
+						params,
+						dimension.fieldname,
+						filters[dimension.fieldname],
+						dimension.document_type,
 					)
-					conditions.append(f"{dimension.fieldname} IN ({', '.join(['?'] * len(vals))})")
-					params.extend(vals)
 
 	return conditions, params
+
+
+def append_positional_dimension_condition(conditions, params, fieldname, selected_values, dimension_doctype):
+	condition, values = get_dimension_filter_sql_condition(fieldname, selected_values, dimension_doctype)
+	if condition:
+		conditions.append(condition)
+		params.extend(values)

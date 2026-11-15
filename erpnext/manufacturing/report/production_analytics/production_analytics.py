@@ -6,6 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import get_datetime, getdate, today
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.stock.report.stock_analytics.stock_analytics import (
 	get_period,
 	get_period_columns,
@@ -16,6 +17,8 @@ WORK_ORDER_STATUS_LIST = ["Not Started", "Overdue", "Pending", "Completed", "Clo
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	period_columns = get_period_columns(filters)
 	columns = get_columns(period_columns)
 	data, chart = get_data(filters, period_columns)

@@ -19,13 +19,12 @@ frappe.query_reports["Incorrect Balance Qty After Transaction"] = {
 		},
 		{
 			label: __("Warehouse"),
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			fieldname: "warehouse",
 			options: "Warehouse",
-			get_query: function () {
-				return {
-					filters: { company: frappe.query_report.get_filter_value("company") },
-				};
+			get_data: function (txt) {
+				let company = frappe.query_report.get_filter_value("company");
+				return erpnext.utils.get_link_options("Warehouse", txt, company ? { company } : {});
 			},
 		},
 	],

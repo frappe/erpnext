@@ -14,7 +14,7 @@ from erpnext.accounts.party import (
 )
 from erpnext.accounts.utils import get_account_currency
 from erpnext.exceptions import InvalidCurrency
-from erpnext.selling.doctype.party_specific_item.party_specific_item import get_restricted_items_condition
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 
 
 class PartyValidator:
@@ -61,26 +61,30 @@ class PartyValidator:
 
 	def validate_party_specific_items(self) -> None:
 		party_type, party = self.get_party()
-		if self.doc.get("quotation_to") == "Customer":
+		if self.doc.doctype == "Opportunity":
+			if self.doc.opportunity_from != "Customer":
+				return
+			party = self.doc.party_name
+		elif self.doc.get("quotation_to") == "Customer":
 			party = self.doc.party_name
 		if not party:
 			return
 
-		restricted_items_condition = get_restricted_items_condition(party_type, party)
-		rows = self.get_rows_for_item_restrictions() if restricted_items_condition is not None else []
+		allowed_items_condition = get_allowed_items_condition(party_type, party)
+		rows = self.get_rows_for_item_restrictions() if allowed_items_condition is not None else []
 		if not rows:
 			return
 
 		item = frappe.qb.DocType("Item")
-		restricted_items = (
+		allowed_items = (
 			frappe.qb.from_(item)
 			.select(item.name)
 			.where(item.name.isin(list({row.item_code for row in rows})))
-			.where(restricted_items_condition)
+			.where(allowed_items_condition)
 			.run(pluck=True)
 		)
 		for row in rows:
-			if row.item_code in restricted_items:
+			if row.item_code not in allowed_items:
 				frappe.throw(
 					_("Row {0}: Item {1} is not allowed for {2} {3}.").format(
 						row.idx, frappe.bold(row.item_code), _(party_type), frappe.bold(party)

@@ -240,28 +240,30 @@ class TestFixedAssetRegister(AssetSetup):
 		group_row = self.run_report(group_by="Asset Category", status="Disposed")[0]
 		self.assertEqual(group_row["asset_value"], 0)
 
-	def test_asset_with_only_named_finance_books_needs_its_book_selected(self):
+	def test_asset_with_only_named_finance_books_is_valued_on_its_first_book(self):
 		# the listing must not depend on whether other assets have a blank finance book
 		frappe.db.delete("Asset Finance Book", {"finance_book": ("is", "not set")})
 		asset = create_asset(item_code="Macbook Pro", available_for_use_date="2019-12-31", do_not_save=1)
 		asset.calculate_depreciation = 1
-		for finance_book in ("Test Finance Book 1", "Test Finance Book 2"):
+		# the second book depreciates 20,000 a year, so the books give different amounts
+		for finance_book, depreciations in (("Test Finance Book 1", 4), ("Test Finance Book 2", 5)):
 			asset.append(
 				"finance_books",
 				{
 					"finance_book": finance_book,
 					"depreciation_method": "Straight Line",
 					"frequency_of_depreciation": 12,
-					"total_number_of_depreciations": 4,
+					"total_number_of_depreciations": depreciations,
 					"depreciation_start_date": "2020-12-31",
 				},
 			)
 		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
-		self.assertNotIn(asset.name, {row["asset_id"] for row in self.run_report()})
-		row = self.report_row(asset.name, finance_book="Test Finance Book 1")
-		self.assertEqual(row["depreciated_amount"], 25000)
+		# with no book chosen, only the first book's depreciation counts
+		self.assertEqual(self.report_row(asset.name)["depreciated_amount"], 25000)
+		row = self.report_row(asset.name, finance_book="Test Finance Book 2")
+		self.assertEqual(row["depreciated_amount"], 20000)
 
 	def test_reversed_depreciation_is_not_counted(self):
 		asset = create_asset(

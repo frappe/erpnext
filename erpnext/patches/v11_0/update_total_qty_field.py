@@ -23,6 +23,7 @@ def execute():
 	]
 
 	for doctype in doctypes:
+		# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- values are escaped; formats doctype names
 		total_qty = frappe.db.sql(
 			f"""
 			SELECT
@@ -53,6 +54,7 @@ def execute():
 			for d in batch_transactions:
 				values.append(f"({frappe.db.escape(d.parent)}, {d.qty})")
 			conditions = ",".join(values)
+			# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- values are escaped; formats doctype names
 			frappe.db.sql(
 				f"""
 				INSERT INTO `tab{doctype}` (name, total_qty) VALUES {conditions}

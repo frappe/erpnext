@@ -42,8 +42,8 @@ class LoyaltyProgram(Document):
 		self.validate_lowest_tier()
 
 	def validate_lowest_tier(self):
-		tiers = sorted(self.collection_rules, key=lambda x: x.min_spent)
-		if tiers and tiers[0].min_spent != 0:
+		tiers = sorted(self.collection_rules, key=lambda x: flt(x.min_spent))
+		if tiers and flt(tiers[0].min_spent) != 0:
 			frappe.throw(
 				_(
 					"The lowest tier must have a minimum spent amount of 0. Customers need to be part of a tier as soon as they are enrolled in the program."
@@ -193,6 +193,9 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 		frappe.throw(_("The Loyalty Program isn't valid for the selected company"))
 
 	if loyalty_program and points_to_redeem:
+		if points_to_redeem < 0:
+			frappe.throw(_("Loyalty Points to redeem must be greater than 0."))
+
 		loyalty_program_details = get_loyalty_program_details_with_points(
 			ref_doc.customer, loyalty_program, posting_date, ref_doc.company
 		)
@@ -206,8 +209,7 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 		if loyalty_amount > total_amount:
 			frappe.throw(_("You can't redeem Loyalty Points having more value than the Total Amount."))
 
-		if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
-			ref_doc.loyalty_amount = loyalty_amount
+		ref_doc.loyalty_amount = loyalty_amount
 		if not ref_doc.loyalty_points and ref_doc.loyalty_points != points_to_redeem:
 			ref_doc.loyalty_points = points_to_redeem
 

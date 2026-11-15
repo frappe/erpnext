@@ -31,6 +31,9 @@ class StatusService:
 		doc = self.doc
 		self.check_modified_date()
 
+		if status == "Closed":
+			self._validate_no_reserved_stock()
+
 		if status != "Closed" and doc.status == "Closed":
 			validate_parent_reopen(doc)
 			validate_reopen_against_blanket_order(doc)
@@ -45,6 +48,17 @@ class StatusService:
 		doc.notify_update()
 		clear_doctype_notifications(doc)
 		doc.update_blanket_order()
+
+	def _validate_no_reserved_stock(self) -> None:
+		"""Closing must not strand reserved stock; the user unreserves it deliberately (like row close)."""
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import has_reserved_stock
+
+		if has_reserved_stock(self.doc.doctype, self.doc.name):
+			frappe.throw(
+				_("Sales Order {0} has reserved stock. Unreserve it before closing.").format(
+					frappe.bold(self.doc.name)
+				)
+			)
 
 	def recalculate_after_item_close(self) -> None:
 		"""Refresh progress after row flags changed.
@@ -66,6 +80,7 @@ class StatusService:
 				"target_parent_field": "per_delivered",
 				"target_ref_field": "qty",
 				"target_field": "delivered_qty",
+				"exclude_field": "skip_delivery",
 				"status_field": "delivery_status",
 				"keyword": "Delivered",
 				"name": self.doc.name,
@@ -99,13 +114,13 @@ class StatusService:
 		doc = self.doc
 		tot_qty, delivered_qty = 0.0, 0.0
 
-		for item in doc.items:
-			if item.skip_delivery:
-				continue
-
+		deliverable_items = [item for item in doc.items if not item.skip_delivery]
+		for item in deliverable_items:
 			if item.delivered_by_supplier:
 				item.db_set("delivered_qty", self.get_drop_ship_delivered_qty(item), update_modified=False)
 
+		# Refresh closed rows too, but exclude them from progress while open rows remain.
+		for item in [item for item in deliverable_items if not item.closed] or deliverable_items:
 			delivered_qty += min(item.delivered_qty, item.qty)
 			tot_qty += item.qty
 

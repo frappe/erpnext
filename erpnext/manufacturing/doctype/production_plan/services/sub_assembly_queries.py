@@ -10,14 +10,16 @@ from frappe.utils.caching import request_cache
 
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	_get_bin_details,
 	aggregate_bin_details,
-	get_bin_details,
+	get_planned_process_loss_percentage,
+	get_qty_before_process_loss,
 	get_uom_conversion_factor,
+	round_up_to_whole_unit,
 )
 
 
 def get_sub_assembly_items(
-	sub_assembly_items,
 	bin_details,
 	bom_no,
 	bom_data,
@@ -26,6 +28,7 @@ def get_sub_assembly_items(
 	warehouse=None,
 	indent=0,
 	skip_available_sub_assembly_item=False,
+	consider_process_loss=False,
 ):
 	precision = frappe.get_precision("Production Plan Sub Assembly Item", "qty")
 	parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
@@ -39,7 +42,6 @@ def get_sub_assembly_items(
 			parent_item_code,
 			bom_no,
 			bom_data,
-			sub_assembly_items,
 			bin_details,
 			to_produce_qty,
 			company,
@@ -47,10 +49,10 @@ def get_sub_assembly_items(
 			indent,
 			precision,
 			skip_available_sub_assembly_item,
+			consider_process_loss,
 		)
 		if d.value:
 			get_sub_assembly_items(
-				sub_assembly_items,
 				bin_details,
 				d.value,
 				bom_data,
@@ -59,6 +61,7 @@ def get_sub_assembly_items(
 				warehouse,
 				indent=indent + 1,
 				skip_available_sub_assembly_item=skip_available_sub_assembly_item,
+				consider_process_loss=consider_process_loss,
 			)
 
 
@@ -67,7 +70,6 @@ def _add_sub_assembly_child(
 	parent_item_code,
 	bom_no,
 	bom_data,
-	sub_assembly_items,
 	bin_details,
 	to_produce_qty,
 	company,
@@ -75,33 +77,37 @@ def _add_sub_assembly_child(
 	indent,
 	precision,
 	skip_available,
+	consider_process_loss,
 ):
 	required_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 	stock_qty = _resolve_available_sub_assembly(
-		d, required_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
+		d, required_qty, bin_details, company, warehouse, skip_available
 	)
 	if not d.is_phantom_item:
+		d.process_loss_percentage = (
+			get_planned_process_loss_percentage(d.value) if consider_process_loss else 0
+		)
+		stock_qty = round_up_to_whole_unit(stock_qty, d.stock_uom)
 		bom_data.append(
 			_sub_assembly_row(
 				d, parent_item_code, bom_no, bin_details, stock_qty, required_qty, indent, precision
 			)
 		)
+		stock_qty = get_qty_before_process_loss(stock_qty, d.process_loss_percentage, d.stock_uom)
 	return stock_qty
 
 
-def _resolve_available_sub_assembly(
-	d, stock_qty, sub_assembly_items, bin_details, company, warehouse, skip_available
-):
+def _resolve_available_sub_assembly(d, stock_qty, bin_details, company, warehouse, skip_available):
 	if warehouse and d.item_code not in bin_details:
-		bins = get_bin_details(d, company, for_warehouse=warehouse)
+		bins = _get_bin_details(d, company, for_warehouse=warehouse)
 		bin_details[d.item_code] = frappe._dict(aggregate_bin_details(bins))
 
-	if skip_available and d.item_code not in sub_assembly_items:
-		return _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details)
+	if skip_available:
+		return _consume_projected_qty(d, stock_qty, bin_details)
 	return stock_qty
 
 
-def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
+def _consume_projected_qty(d, stock_qty, bin_details):
 	bin_dict = bin_details[d.item_code]
 	available_qty = bin_dict.get("available_qty", bin_dict.projected_qty)
 	if available_qty <= 0:
@@ -112,7 +118,6 @@ def _consume_projected_qty(d, stock_qty, sub_assembly_items, bin_details):
 		return 0
 
 	bin_dict.available_qty = 0
-	sub_assembly_items.append(d.item_code)
 	return stock_qty - available_qty
 
 
@@ -133,6 +138,7 @@ def _sub_assembly_row(d, parent_item_code, bom_no, bin_details, stock_qty, requi
 			"indent": indent,
 			"stock_qty": flt(stock_qty, precision),
 			"required_qty": flt(required_qty, precision),
+			"process_loss_percentage": d.process_loss_percentage,
 			"projected_qty": bin_dict.get("projected_qty", 0),
 			"main_bom": bom_no,
 		}
@@ -303,3 +309,34 @@ def _merge_sub_assembly_rm(item, item_details):
 		details.qty += item.get("qty")
 	else:
 		item_details.setdefault(key, item)
+
+
+def get_subcontracted_received_qty(po_details):
+	"""Accepted finished good qty from Subcontracting Receipts, by Purchase Order Item."""
+	if not po_details:
+		return {}
+
+	scr_item = frappe.qb.DocType("Subcontracting Receipt Item")
+	sco_item = frappe.qb.DocType("Subcontracting Order Item")
+	# return rows don't carry purchase_order_item, so link via the subcontracting order item
+	return_against = frappe.qb.DocType("Subcontracting Receipt Item").as_("return_against")
+
+	return frappe._dict(
+		frappe.qb.from_(scr_item)
+		.inner_join(sco_item)
+		.on(scr_item.subcontracting_order_item == sco_item.name)
+		.left_join(return_against)
+		.on(scr_item.subcontracting_receipt_item == return_against.name)
+		.select(sco_item.purchase_order_item, Sum(scr_item.qty))
+		.where(
+			(scr_item.docstatus == 1)
+			& sco_item.purchase_order_item.isin(po_details)
+			# skip returns of rejected qty, they come out of the rejected warehouse
+			& (
+				return_against.name.isnull()
+				| (scr_item.warehouse != IfNull(return_against.rejected_warehouse, ""))
+			)
+		)
+		.groupby(sco_item.purchase_order_item)
+		.run()
+	)

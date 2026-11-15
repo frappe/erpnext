@@ -28,6 +28,7 @@ class ProductionPlanItem(Document):
 		pending_qty: DF.Float
 		planned_qty: DF.Float
 		planned_start_date: DF.Datetime
+		process_loss_percentage: DF.Percent
 		produced_qty: DF.Float
 		product_bundle_item: DF.Link | None
 		sales_order: DF.Link | None

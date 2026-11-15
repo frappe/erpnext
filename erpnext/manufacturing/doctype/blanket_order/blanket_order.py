@@ -14,6 +14,7 @@ from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.controllers.item_close import clear_closed_rows_on_amend, validate_parent_reopen
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
 
 FULFILLED_QTY_FIELD = {"Sales Order": "delivered_qty", "Purchase Order": "received_qty"}
@@ -73,6 +74,9 @@ class BlanketOrder(StatusUpdater):
 		blanket_order_pricing.set_price_list(self)
 
 	def validate(self):
+		validate_terms_and_conditions(
+			self.get("tc_name"), "selling" if self.blanket_order_type == "Selling" else "buying"
+		)
 		if not self.blanket_order_type:
 			return
 

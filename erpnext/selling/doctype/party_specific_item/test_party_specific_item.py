@@ -47,6 +47,32 @@ def create_item(item_code, item_group="Products"):
 
 
 class TestPartySpecificItem(ERPNextTestSuite):
+	def test_template_item_rule_covers_variant(self):
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			"_Test Party Specific Template",
+			{"has_variants": 1, "attributes": [{"attribute": "Test Size"}]},
+		)
+		variant = create_variant(template.name, {"Test Size": "Small"}).insert()
+		other_item = create_item("_Test Party Specific Other Item").name
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value=template.name,
+		)
+
+		self.assertIn(variant.name, search_items(variant.name, {"customer": "_Test Customer"}))
+		self.assertNotIn(other_item, search_items(other_item, {"customer": "_Test Customer"}))
+		self.assertIn(variant.name, search_items(variant.name, {"customer": "_Test Customer 2"}))
+		make_sales_order(customer="_Test Customer", item_code=variant.name, do_not_submit=True)
+		make_sales_order(customer="_Test Customer 2", item_code=variant.name, do_not_submit=True)
+		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+			make_sales_order(customer="_Test Customer", item_code=other_item, do_not_submit=True)
+
 	def test_item_query_for_customer(self):
 		customer = "_Test Customer With Template"
 		item = "_Test Item"
@@ -110,25 +136,42 @@ class TestPartySpecificItem(ERPNextTestSuite):
 	def test_party_group(self):
 		customer = "_Test Customer With Template"
 		item = "_Test Item"
-		frappe.set_value("Customer", customer, "customer_group", "Government")
+		# a rule on a parent group must also cover a customer sitting in its sub-group
+		parent_group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Party Specific Parent Group",
+				"parent_customer_group": "All Customer Groups",
+				"is_group": 1,
+			}
+		).insert()
+		sub_group = frappe.get_doc(
+			{
+				"doctype": "Customer Group",
+				"customer_group_name": "_Test Party Specific Sub Group",
+				"parent_customer_group": parent_group.name,
+			}
+		).insert()
+		frappe.set_value("Customer", customer, "customer_group", sub_group.name)
 
+		other_item = create_item("_Test Party Specific Group Other Item").name
 		create_party_specific_item(
 			party_type="Customer Group",
-			party="Government",
+			party=parent_group.name,
 			restrict_based_on="Item",
 			based_on_value=item,
 		)
-		filters = {"is_sales_item": 1, "customer": customer}
-		items = item_query(
-			doctype="Item", txt="", searchfield="name", start=0, page_len=20, filters=filters, as_dict=False
-		)
-		self.assertIn(item, flatten(items))
+		self.assertIn(item, search_items(item, {"customer": customer}))
+		# the ancestor rule must actually restrict the customer, not just allow its item
+		self.assertNotIn(other_item, search_items(other_item, {"customer": customer}))
 
-	def test_rules_on_different_bases_share_an_item(self):
+	def test_party_sees_only_items_from_its_rules(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
-		item = create_item("_Test Party Specific Brand Item").name
-		frappe.db.set_value("Item", item, "brand", "_Test Brand")
+		brand_item = create_item("_Test Party Specific Brand Item").name
+		frappe.db.set_value("Item", brand_item, "brand", "_Test Brand")
+		listed_item = create_item("_Test Party Specific Listed Item").name
+		other_item = create_item("_Test Party Specific Other Item").name
 		create_party_specific_item(
 			party_type="Customer",
 			party="_Test Customer",
@@ -136,20 +179,21 @@ class TestPartySpecificItem(ERPNextTestSuite):
 			based_on_value="_Test Brand",
 		)
 		create_party_specific_item(
-			party_type="Customer", party="_Test Customer 1", restrict_based_on="Item", based_on_value=item
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value=listed_item,
 		)
 
-		for customer, allowed in (
-			("_Test Customer", True),
-			("_Test Customer 1", True),
-			("_Test Customer 2", False),
-		):
-			with self.subTest(customer=customer):
-				self.assertEqual(item in search_items(item, {"customer": customer}), allowed)
+		for item, allowed in ((brand_item, True), (listed_item, True), (other_item, False)):
+			with self.subTest(item=item):
+				self.assertEqual(item in search_items(item, {"customer": "_Test Customer"}), allowed)
+				self.assertIn(item, search_items(item, {"customer": "_Test Customer 2"}))
 
-		make_sales_order(customer="_Test Customer 1", item_code=item, do_not_submit=True)
+		make_sales_order(customer="_Test Customer", item_code=listed_item, do_not_submit=True)
+		make_sales_order(customer="_Test Customer 2", item_code=other_item, do_not_submit=True)
 		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
-			make_sales_order(customer="_Test Customer 2", item_code=item, do_not_submit=True)
+			make_sales_order(customer="_Test Customer", item_code=other_item, do_not_submit=True)
 
 	def test_item_group_rule_covers_sub_groups(self):
 		parent_group = frappe.get_doc(
@@ -168,6 +212,7 @@ class TestPartySpecificItem(ERPNextTestSuite):
 			}
 		).insert()
 		item = create_item("_Test Party Specific Sub Group Item", sub_group.name).name
+		other_item = create_item("_Test Party Specific Other Item").name
 		create_party_specific_item(
 			party_type="Customer",
 			party="_Test Customer",
@@ -175,18 +220,20 @@ class TestPartySpecificItem(ERPNextTestSuite):
 			based_on_value=parent_group.name,
 		)
 
-		for customer, allowed in (("_Test Customer", True), ("_Test Customer 2", False)):
-			with self.subTest(customer=customer):
-				self.assertEqual(item in search_items(item, {"customer": customer}), allowed)
+		for item_code, allowed in ((item, True), (other_item, False)):
+			with self.subTest(item=item_code):
+				self.assertEqual(
+					item_code in search_items(item_code, {"customer": "_Test Customer"}), allowed
+				)
 
 	def test_customer_change_revalidates_items_on_save_and_submit(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		create_party_specific_item(
 			party_type="Customer",
-			party="_Test Customer",
+			party="_Test Customer 2",
 			restrict_based_on="Item",
-			based_on_value="_Test Item",
+			based_on_value=create_item("_Test Party Specific Other Item").name,
 		)
 		order = make_sales_order(do_not_submit=True)
 		for action in ("save", "submit"):
@@ -204,9 +251,9 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		other_supplier = create_supplier("_Test Party Specific Other Supplier")
 		create_party_specific_item(
 			party_type="Supplier",
-			party="_Test Supplier",
+			party=other_supplier.name,
 			restrict_based_on="Item",
-			based_on_value="_Test Item",
+			based_on_value=create_item("_Test Party Specific Other Item").name,
 		)
 		order = create_purchase_order(do_not_submit=True)
 		for action in ("save", "submit"):
@@ -225,9 +272,9 @@ class TestPartySpecificItem(ERPNextTestSuite):
 
 		create_party_specific_item(
 			party_type="Customer",
-			party="_Test Customer",
+			party="_Test Customer 2",
 			restrict_based_on="Item",
-			based_on_value="_Test Item",
+			based_on_value=create_item("_Test Party Specific Other Item").name,
 		)
 		user = create_user("party-specific-sales@example.com", "Sales User")
 		with self.set_user(user.name):
@@ -242,25 +289,22 @@ class TestPartySpecificItem(ERPNextTestSuite):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-		extra_item = "_Test Party Specific Extra Return Item"
-		create_item(extra_item)
-		other_supplier = create_supplier("_Test Party Specific Return Supplier")
-		for party_type, party, make_invoice in (
-			("Customer", "_Test Customer 2", create_sales_invoice),
-			("Supplier", other_supplier.name, make_purchase_invoice),
+		allowed_item = create_item("_Test Party Specific Other Item").name
+		for party_type, make_invoice in (
+			("Customer", create_sales_invoice),
+			("Supplier", make_purchase_invoice),
 		):
 			with self.subTest(party_type=party_type):
 				invoice = make_invoice(qty=1)
 				create_party_specific_item(
-					party_type=party_type, party=party, restrict_based_on="Item", based_on_value="_Test Item"
-				)
-				create_party_specific_item(
-					party_type=party_type, party=party, restrict_based_on="Item", based_on_value=extra_item
+					party_type=party_type,
+					party=invoice.get(frappe.scrub(party_type)),
+					restrict_based_on="Item",
+					based_on_value=allowed_item,
 				)
 				note = make_return_doc(invoice.doctype, invoice.name)
 				extra_row = note.append("items", note.items[0].as_dict())
 				extra_row.name = None
-				extra_row.item_code = extra_item
 				extra_row.set(frappe.scrub(invoice.doctype) + "_item", None)
 				with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for"):
 					note.insert()
@@ -271,6 +315,21 @@ class TestPartySpecificItem(ERPNextTestSuite):
 				standalone_note.return_against = None
 				with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for"):
 					standalone_note.insert()
+
+	def test_opportunity_enforces_party_rules(self):
+		from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+
+		allowed_item = create_item("_Test Party Specific Opportunity Allowed Item").name
+		other_item = create_item("_Test Party Specific Opportunity Other Item").name
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value=allowed_item,
+		)
+		make_opportunity(with_items=True, customer="_Test Customer", item_code=allowed_item)
+		with self.assertRaisesRegex(frappe.ValidationError, "is not allowed for Customer"):
+			make_opportunity(with_items=True, customer="_Test Customer", item_code=other_item)
 
 
 def search_items(txt, filters):

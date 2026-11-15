@@ -4,7 +4,9 @@ from unittest import mock
 
 import frappe
 from frappe.utils import cint, flt
+from frappe.utils.password import remove_encrypted_password
 
+from erpnext.patches.v16_0 import encrypt_currency_exchange_access_key
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -89,7 +91,7 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		cache = frappe.cache()
 		for date in test_exchange_values.keys():
 			key = "currency_exchange_rate_{}:{}:{}".format(date, "USD", "INR")
-			cache.delete(key)
+			cache.delete_value(key)
 
 	def test_exchange_rate(self, mock_get):
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
@@ -148,6 +150,50 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		settings.service_provider = "frankfurter.dev"
 		settings.save()
 
+	def use_exchangerate_host(self, access_key):
+		settings = frappe.get_single("Currency Exchange Settings")
+		settings.service_provider = "exchangerate.host"
+		settings.access_key = access_key
+		settings.save()
+		self.addCleanup(self.use_frankfurter)
+
+	def use_frankfurter(self):
+		settings = frappe.get_single("Currency Exchange Settings")
+		settings.service_provider = "frankfurter.dev"
+		settings.save()
+
+	def test_exchangerate_host_access_key_is_sent_but_not_stored(self, mock_get):
+		self.use_exchangerate_host("12345667890")
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+
+		settings = frappe.get_single("Currency Exchange Settings")
+		self.assertEqual(settings.access_key, "*" * 11)
+		self.assertNotIn("access_key", [row.key for row in settings.req_params])
+
+		self.clear_cache()
+		self.assertEqual(flt(get_exchange_rate("USD", "INR", "2015-12-15", "for_selling"), 3), 66.999)
+		self.assertEqual(mock_get.call_args.kwargs["params"]["access_key"], "12345667890")
+
+	def test_patch_moves_a_plain_text_access_key_to_the_password_store(self, mock_get):
+		doctype = "Currency Exchange Settings"
+		self.use_exchangerate_host("12345667890")
+		# store the settings as they were before the access key became a password
+		remove_encrypted_password(doctype, doctype, "access_key")
+		frappe.db.set_single_value(doctype, "access_key", "12345667890")
+		frappe.db.set_single_value(
+			doctype, "url", "https://api.exchangerate.host/convert?access_key=12345667890&amount=1"
+		)
+		settings = frappe.get_single(doctype)
+		settings.append("req_params", {"key": "access_key", "value": "12345667890"}).db_insert()
+
+		encrypt_currency_exchange_access_key.execute()
+
+		settings = frappe.get_single(doctype)
+		self.assertEqual(settings.access_key, "*" * 11)
+		self.assertEqual(settings.get_password("access_key"), "12345667890")
+		self.assertNotIn("access_key", [row.key for row in settings.req_params])
+		self.assertEqual(settings.url, "https://api.exchangerate.host/convert?amount=1")
+
 	def test_exchange_rate_strict(self, mock_get):
 		# strict currency settings
 		frappe.db.set_single_value("Accounts Settings", "allow_stale", 0)
@@ -180,3 +226,102 @@ class TestCurrencyExchange(ERPNextTestSuite):
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_buying")
 		self.assertNotEqual(exchange_rate, 65)
 		self.assertEqual(flt(exchange_rate, 3), 62.9)
+
+	def test_side_specific_record_wins_on_same_date(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		for for_buying, for_selling, rate in ((1, 1, 100), (0, 1, 101), (1, 0, 99)):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date="2031-03-10",
+				from_currency="GBP",
+				to_currency="INR",
+				exchange_rate=rate,
+				for_buying=for_buying,
+				for_selling=for_selling,
+			).insert()
+
+		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-10", "for_selling"), 101)
+		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-10", "for_buying"), 99)
+		self.assertEqual(get_exchange_rate("GBP", "INR", "2031-03-11", "for_selling"), 101)
+
+	def test_fields_in_name_cannot_change(self, mock_get):
+		doc = frappe.get_doc(
+			doctype="Currency Exchange",
+			date="2031-03-01",
+			from_currency="CHF",
+			to_currency="INR",
+			exchange_rate=70,
+			for_selling=1,
+		).insert()
+
+		doc.exchange_rate = 71
+		doc.save()
+
+		doc.date = "2031-03-10"
+		self.assertRaises(frappe.CannotChangeConstantError, doc.save)
+
+		doc.reload()
+		doc.for_buying = 0
+		self.assertRaises(frappe.CannotChangeConstantError, doc.save)
+
+	def test_reverse_record_is_used_when_no_direct_record(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		self.disable_provider()
+		frappe.get_doc(
+			doctype="Currency Exchange",
+			date="2031-03-10",
+			from_currency="EUR",
+			to_currency="INR",
+			exchange_rate=82,
+			for_buying=1,
+			for_selling=0,
+		).insert()
+
+		self.assertAlmostEqual(get_exchange_rate("INR", "EUR", "2031-03-10"), 1 / 82)
+
+	def test_reverse_record_flips_buying_selling_side(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		self.disable_provider()
+		for from_currency, for_buying, for_selling, rate, args in (
+			("GBP", 0, 1, 82, "for_buying"),
+			("EUR", 1, 0, 90, "for_selling"),
+		):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date="2031-03-10",
+				from_currency=from_currency,
+				to_currency="INR",
+				exchange_rate=rate,
+				for_buying=for_buying,
+				for_selling=for_selling,
+			).insert()
+
+			self.assertAlmostEqual(get_exchange_rate("INR", from_currency, "2031-03-10", args), 1 / rate)
+
+	def test_direct_record_wins_over_reverse_record(self, mock_get):
+		frappe.db.set_single_value("Accounts Settings", "allow_stale", 1)
+		self.disable_provider()
+		for from_currency, to_currency, rate, date in (
+			("USD", "INR", 82, "2031-03-10"),
+			("INR", "USD", 0.0125, "2031-03-09"),
+		):
+			frappe.get_doc(
+				doctype="Currency Exchange",
+				date=date,
+				from_currency=from_currency,
+				to_currency=to_currency,
+				exchange_rate=rate,
+				for_buying=1,
+				for_selling=0,
+			).insert()
+
+		self.assertEqual(get_exchange_rate("INR", "USD", "2031-03-10"), 0.0125)
+
+	def test_no_record_in_either_direction(self, mock_get):
+		self.disable_provider()
+		self.assertEqual(get_exchange_rate("CHF", "JPY", "2031-03-10"), 0.0)
+
+	def disable_provider(self):
+		previous = frappe.db.get_single_value("Currency Exchange Settings", "disabled")
+		self.addCleanup(frappe.db.set_single_value, "Currency Exchange Settings", "disabled", previous)
+		frappe.db.set_single_value("Currency Exchange Settings", "disabled", 1)

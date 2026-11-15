@@ -2,6 +2,11 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Email Digest", {
+	setup: function (frm) {
+		frm.set_query("recipients", () => ({
+			filters: { enabled: 1, user_type: "System User" },
+		}));
+	},
 	refresh: function (frm) {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__("View Now"), function () {
