@@ -1013,12 +1013,8 @@ class SubcontractingController(StockController):
 				self.set_batch_for_supplied_items()
 
 	def set_batch_for_supplied_items(self):
-<<<<<<< HEAD
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
-		from erpnext.stock.get_item_details import get_filtered_serial_nos
-=======
 		from erpnext.stock.get_item_details import get_used_serial_nos
->>>>>>> 5f37eea (fix(subcontracting): skip serial nos held by other supplied rows before capping the fetch)
 
 		if self.is_return:
 			return
@@ -1049,14 +1045,7 @@ class SubcontractingController(StockController):
 				serial_nos = get_available_serial_nos(kwargs)
 				if serial_nos:
 					serial_nos = [sn.get("serial_no") for sn in serial_nos]
-<<<<<<< HEAD
-					serial_nos = get_filtered_serial_nos(serial_nos, self, "supplied_items")
 					row.serial_no = "\n".join(serial_nos)
-=======
-					row.serial_no = "\n".join(
-						SerialBatchIdentity("Serial No").get_numbers(row.rm_item_code, serial_nos)
-					)
->>>>>>> 5f37eea (fix(subcontracting): skip serial nos held by other supplied rows before capping the fetch)
 
 			elif (
 				item_details.has_batch_no

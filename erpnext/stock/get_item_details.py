@@ -389,13 +389,7 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 
 	kwargs["ignore_serial_nos"] = [*(kwargs.get("ignore_serial_nos") or []), *get_used_serial_nos(doc)]
 	serial_nos = get_serial_nos_for_outward(kwargs)
-<<<<<<< HEAD
 	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
-=======
-	out["serial_no"] = "\n".join(
-		SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
-	)
->>>>>>> 1179059 (fix(stock): skip serial nos held by item and packed rows when auto-setting a row's serial no)
 
 
 def has_incorrect_serial_nos(ctx, out):
@@ -480,28 +474,6 @@ def get_uom_conversion_factor(item_code, uom):
 def get_filtered_serial_nos(serial_nos, doc, table=None):
 	used = get_used_serial_nos(doc, table)
 	return [serial_no for serial_no in serial_nos if serial_no not in used]
-<<<<<<< HEAD
-=======
-
-
-def get_used_serial_nos(doc, table=None):
-	"""Serial No records held by the rows of ``table``, or of the items and packed items."""
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-	rows = doc.get(table) if table else [*doc.get("items"), *(doc.get("packed_items") or [])]
-	numbers_by_item = defaultdict(list)
-	for row in rows:
-		item_code = row.get("item_code") or row.get("rm_item_code")
-		if item_code and row.get("serial_no"):
-			numbers_by_item[item_code].extend(get_serial_nos(row.get("serial_no")))
-
-	used = set()
-	for item_code, numbers in numbers_by_item.items():
-		records = SerialBatchIdentity("Serial No").get_records(item_code, numbers, ["name"])
-		used.update(record.name for record in records)
-
-	return used
->>>>>>> 1179059 (fix(stock): skip serial nos held by item and packed rows when auto-setting a row's serial no)
 
 
 def get_used_serial_nos(doc, table=None):
