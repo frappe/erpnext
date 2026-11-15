@@ -1258,7 +1258,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		target = {"doctype": "Sales Invoice", "items": [{"item_code": "_Test Item 2", "qty": 1}]}
 
 		with self.set_user(user):
-			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=target)
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=json.dumps(target))
 
 	def test_update_child_cannot_remove_item_linked_by_draft_purchase_order(self):
 		so = make_sales_order(
