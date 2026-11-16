@@ -128,6 +128,8 @@ class StockEntrySABB(BaseStockEntry):
 					serial_nos_list, batch_nos_list = self.get_serial_nos_and_batches_from_sres(
 						row.scio_detail, only_pending=self.doc.purpose != "Subcontracting Return"
 					)
+					serial_nos_list = serial_nos_list[: cint(row.transfer_qty)]
+					batch_nos_list = self.get_batches_for_qty(batch_nos_list, row.transfer_qty)
 
 					if len(batch_nos_list) > 1:
 						row.use_serial_batch_fields = 0
@@ -143,6 +145,17 @@ class StockEntrySABB(BaseStockEntry):
 					serial_nos[row.name], batch_nos[row.name] = serial_nos_list, batch_nos_list
 
 		return serial_nos, batch_nos
+
+	def get_batches_for_qty(self, batches, qty):
+		"""Take batches in order until they cover qty."""
+		picked = frappe._dict()
+		for batch_no, batch_qty in batches.items():
+			if qty <= 0:
+				break
+			picked[batch_no] = min(batch_qty, qty)
+			qty -= picked[batch_no]
+
+		return picked
 
 	def get_available_reserved_materials(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
