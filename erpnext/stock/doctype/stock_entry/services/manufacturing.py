@@ -1378,12 +1378,14 @@ def _check_bom_component_qty(doc, bom_items):
 	"""Validate that stock entry items match BOM quantities."""
 	precision = frappe.get_precision("Stock Entry Detail", "qty")
 	for row in bom_items:
-		row.qty = row.qty * doc.fg_completed_qty
+		# Get Items rounds a whole number qty up, and the rows can be in another UOM
+		row.qty = ceil_qty_if_uom_has_whole_number(row.qty * doc.fg_completed_qty, row.stock_uom)
 		matched_items = [
 			item for item in doc.items if item.s_warehouse and get_original_item(item) == row.item_code
 		]
 		if matched_items:
-			if flt(row.qty, precision) != flt(sum(flt(item.qty) for item in matched_items), precision):
+			stock_qty = sum(flt(item.qty) * flt(item.conversion_factor or 1) for item in matched_items)
+			if flt(row.qty, precision) != flt(stock_qty, precision):
 				frappe.throw(
 					_(
 						"For the item {0}, the consumed quantity should be {1} according to the BOM {2}."
