@@ -1267,9 +1267,9 @@ class BuyingController(SubcontractingController):
 			row.precision("stock_qty"),
 		)
 
-	def get_rejected_warehouse_return_stock_qty(self, row, qty_field) -> float:
+	def get_rejected_warehouse_return_stock_qty(self, row) -> float:
 		if not self.is_internal_receipt():
-			return super().get_rejected_warehouse_return_stock_qty(row, qty_field)
+			return super().get_rejected_warehouse_return_stock_qty(row)
 
 		return self.get_accepted_stock_qty(row)
 

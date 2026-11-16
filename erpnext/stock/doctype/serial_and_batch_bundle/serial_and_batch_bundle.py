@@ -1315,6 +1315,9 @@ class SerialandBatchBundle(Document):
 
 	def get_row_qty(self, parent, row, qty_field) -> float:
 		"""What the row holds in the units a package counts in."""
+		if row.get("return_qty_from_rejected_warehouse"):
+			return parent.get_rejected_warehouse_return_stock_qty(row)
+
 		if qty_field == "qty" and row.get("stock_qty"):
 			return flt(row.get("stock_qty"))
 

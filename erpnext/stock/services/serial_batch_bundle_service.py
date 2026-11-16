@@ -603,6 +603,9 @@ class SerialBatchBundleService:
 		if hasattr(row, "stock_qty"):
 			qty = row.stock_qty
 
+		if row.get("return_qty_from_rejected_warehouse"):
+			qty = self.doc.get_rejected_warehouse_return_stock_qty(row)
+
 		if self.doc.doctype == "Stock Entry":
 			qty = row.transfer_qty
 			warehouse = row.s_warehouse or row.t_warehouse
