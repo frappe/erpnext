@@ -267,7 +267,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and self.is_rejected_material_valued():
+			if self.has_booked_rejected_material(item):
 				rejected_item_cost = get_stock_value_difference(doc.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
@@ -366,7 +366,7 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 				doc.update_assets(d, d.valuation_rate)
 
 			# a non-stock item puts no rejected qty in stock
-			if d.rejected_qty and d.item_code in stock_items and self.is_rejected_material_valued():
+			if d.item_code in stock_items and self.has_booked_rejected_material(d):
 				stock_asset_rbnb = (
 					doc.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -397,6 +397,14 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 		return bool(
 			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
+
+	def has_booked_rejected_material(self, item) -> bool:
+		"""Rejected material gets its own stock entry when it is valued and leaves the in-transit
+		warehouse. Rejected material that stays in transit did not move."""
+		if not (flt(item.rejected_qty) and self.is_rejected_material_valued()):
+			return False
+
+		return not (item.from_warehouse and item.rejected_warehouse == item.from_warehouse)
 
 	def get_divisional_loss_account(self, item, stock_asset_rbnb):
 		"""Account that absorbs the difference between the document value and the value actually
