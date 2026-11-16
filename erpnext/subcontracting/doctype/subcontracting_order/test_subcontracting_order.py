@@ -1316,6 +1316,32 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			self.assertEqual(row.docstatus, 1 if row.transferred_qty else 2)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_used_reservation_is_kept_on_unreserve_and_close(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.reserve_stock = 1
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		receipt = make_subcontracting_receipt(sco.name)
+		receipt.items[0].qty = 5
+		receipt.submit()
+
+		consumed = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": sco.name, "docstatus": 1, "consumed_qty": (">", 0)},
+			pluck="name",
+		)
+		self.assertTrue(consumed)
+		sre = frappe.get_doc("Stock Reservation Entry", consumed[0])
+		self.assertRaisesRegex(frappe.ValidationError, "Close the Subcontracting Order", sre.cancel)
+
+		update_subcontracting_order_status(sco.name, "Closed")
+		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", consumed[0], "docstatus"), 1)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_releases_unused_balance_of_partly_transferred_reservation(self):
 		sco = get_subcontracting_order(do_not_submit=1)
 		sco.reserve_stock = 1
