@@ -150,12 +150,14 @@ class SubcontractingInwardOrder(SubcontractingController):
 			self.db_set("status", status, update_modified=update_modified)
 
 	def update_subcontracted_quantity_in_so(self):
-		for service_item in self.service_items:
-			doc = frappe.get_doc("Sales Order Item", service_item.sales_order_item)
+		"""Sales Order rows keep subcontracted qty in stock UOM."""
+		for item in self.items:
+			doc = frappe.get_doc("Sales Order Item", item.sales_order_item)
+			stock_qty = item.qty * item.subcontracting_conversion_factor
 			doc.subcontracted_qty = (
-				(doc.subcontracted_qty + service_item.qty)
+				(doc.subcontracted_qty + stock_qty)
 				if self._action == "submit"
-				else (doc.subcontracted_qty - service_item.qty)
+				else (doc.subcontracted_qty - stock_qty)
 			)
 			doc.save()
 
@@ -201,11 +203,24 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if service_item.sales_order_item in sales_order_items
 		]
 
+		conversion_factors = dict(
+			frappe.get_all(
+				"Sales Order Item",
+				filters={"name": ["in", sales_order_items]},
+				fields=["name", "conversion_factor"],
+				as_list=True,
+			)
+		)
 		for service_item in self.service_items:
 			item = next(item for item in self.items if item.sales_order_item == service_item.sales_order_item)
-			service_item.qty = item.qty * item.subcontracting_conversion_factor
+			service_item.qty = flt(
+				item.qty
+				* item.subcontracting_conversion_factor
+				/ conversion_factors[service_item.sales_order_item],
+				service_item.precision("qty"),
+			)
 			service_item.fg_item_qty = item.qty
-			service_item.amount = service_item.qty * service_item.rate
+			service_item.amount = flt(service_item.qty * service_item.rate, service_item.precision("amount"))
 
 	def populate_items_table(self):
 		items = []
@@ -225,7 +240,8 @@ class SubcontractingInwardOrder(SubcontractingController):
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Sales Order Item", "qty")
 				)
-				si.amount = available_qty * si.rate
+				si.qty = flt(available_qty / so_item.conversion_factor, si.precision("qty"))
+				si.amount = flt(si.qty * si.rate, si.precision("amount"))
 
 				items.append(
 					{
