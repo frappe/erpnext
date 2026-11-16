@@ -76,6 +76,17 @@ class TestQueries(unittest.TestCase):
 		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
 			query(filters={"item_code": item.name})
 
+	def test_item_manufacturer_query_needs_a_single_item_code(self):
+		self.addCleanup(frappe.db.rollback)
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		for filters in ({}, {"item_code": None}, {"item_code": ""}, {"item_code": ["like", "%"]}):
+			for user in (purchase_user.name, website_manager.name):
+				with self.subTest(filters=filters, user=user), as_user(user):
+					self.assertEqual(query(filters=filters), [])
+
 	def test_item_query_with_percent_in_permitted_item_group(self):
 		if not frappe.db.exists("Item Group", "_Test 100% Item Group"):
 			frappe.get_doc(
