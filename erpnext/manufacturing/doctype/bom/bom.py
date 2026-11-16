@@ -1570,6 +1570,24 @@ def get_valuation_rate(data):
 	2) If no value, get last valuation rate from SLE
 	3) If no value, get valuation rate from Item
 	"""
+<<<<<<< HEAD
+=======
+	item_code, company = data.get("item_code"), data.get("company")
+
+	valuation_rate = _get_avg_valuation_rate_from_bins(item_code, company, data)
+
+	# None: no Bin, e.g. a source warehouse that never held the item
+	if flt(valuation_rate) <= 0:
+		valuation_rate = _get_last_valuation_rate_from_sle(item_code)
+
+	if not valuation_rate:
+		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
+
+	return flt(valuation_rate)
+
+
+def _get_avg_valuation_rate_from_bins(item_code, company, data):
+>>>>>>> ff5f2d6 (fix(manufacturing): cost a BOM row at the last valuation rate when its source warehouse has no Bin)
 	from pypika import Case
 
 	item_code, company = data.get("item_code"), data.get("company")
