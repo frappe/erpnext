@@ -149,14 +149,18 @@ class StockReservationEntry(Document):
 
 	def before_cancel(self) -> None:
 		self.validate_reserved_entries()
-		self.validate_work_order_usage()
+		self.validate_order_usage()
 
-	def validate_work_order_usage(self) -> None:
-		"""Stock a Work Order has transferred or consumed is released by closing the Work Order, not by cancelling its reservation."""
-		if self.voucher_type != "Work Order" or not (flt(self.transferred_qty) or flt(self.consumed_qty)):
+	def validate_order_usage(self) -> None:
+		"""Stock an order has transferred or consumed is released by closing the order, not by cancelling its reservation."""
+		if self.voucher_type not in ("Work Order", "Subcontracting Order") or not (
+			flt(self.transferred_qty) or flt(self.consumed_qty)
+		):
 			return
 
-		if frappe.db.get_value("Work Order", self.voucher_no, "status") in ("Closed", "Cancelled"):
+		status = frappe.db.get_value(self.voucher_type, self.voucher_no, "status")
+		# a closed Subcontracting Order keeps its used reservations and can be re-opened
+		if status == "Cancelled" or (status == "Closed" and self.voucher_type == "Work Order"):
 			return
 
 		if (
@@ -167,8 +171,8 @@ class StockReservationEntry(Document):
 
 		frappe.throw(
 			_(
-				"Stock Reservation Entry {0} is already used by Work Order {1}. Close the Work Order to release the unused stock."
-			).format(frappe.bold(self.name), frappe.bold(self.voucher_no))
+				"Stock Reservation Entry {0} is already used by {1} {2}. Close the {1} to release the unused stock."
+			).format(frappe.bold(self.name), _(self.voucher_type), frappe.bold(self.voucher_no))
 		)
 
 	def validate_reserved_entries(self):

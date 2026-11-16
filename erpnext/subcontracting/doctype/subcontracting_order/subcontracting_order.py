@@ -564,9 +564,9 @@ class SubcontractingOrder(SubcontractingController):
 	def release_stock_reservations(self):
 		sre_list = []
 		for sre in get_stock_reservation_entries_for_voucher(
-			self.doctype, self.name, fields=["name", "transferred_qty"], ignore_status=True
+			self.doctype, self.name, fields=["name", "transferred_qty", "consumed_qty"], ignore_status=True
 		):
-			if flt(sre.transferred_qty):
+			if flt(sre.transferred_qty) or flt(sre.consumed_qty):
 				self.release_unused_reserved_qty(sre.name)
 			else:
 				sre_list.append(sre.name)
