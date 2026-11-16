@@ -594,7 +594,9 @@ class SubcontractingReceipt(SubcontractingController):
 			original_row.received_qty, precision
 		)
 
-	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
+	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map) -> dict:
+		"""Price the % rows; returns the % allocated to them, by finished good row."""
+		allocated_per = defaultdict(float)
 		allocation_map = {}
 		names = [row.bom_secondary_item for row in percentage_rows if row.bom_secondary_item]
 		if names:
@@ -612,6 +614,7 @@ class SubcontractingReceipt(SubcontractingController):
 			qty = flt(item.received_qty) - flt(item.process_loss_qty)
 			fg_row = fg_rows.get(item.reference_name)
 			if qty and fg_row and item.bom_secondary_item in allocation_map:
+				allocated_per[fg_row.name] += flt(allocation_map[item.bom_secondary_item])
 				item.rate = self.get_percentage_secondary_rate(
 					fg_row,
 					flt(allocation_map[item.bom_secondary_item]),
@@ -619,6 +622,8 @@ class SubcontractingReceipt(SubcontractingController):
 					secondary_items_cost_map.get(item.reference_name, 0),
 				)
 			item.amount = qty * flt(item.rate)
+
+		return allocated_per
 
 	def get_secondary_item_valuation_rate(self, item):
 		"""Valuation at the row's warehouse; keeps the stored rate when none is found."""
@@ -880,7 +885,7 @@ class SubcontractingReceipt(SubcontractingController):
 			elif not is_return:
 				percentage_rows.append(item)
 
-		self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
+		allocated_per = self.calculate_percentage_secondary_rows(percentage_rows, secondary_items_cost_map)
 
 		rejected_return_rows = self.get_rejected_return_rows()
 		received_qty_ratios = self.get_received_qty_ratios_for_return(rejected_return_rows)
@@ -936,7 +941,13 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 				else:
 					amount = flt(item.received_qty) * flt(item.rate)
-				item.amount = amount * (frappe.get_value("BOM", item.bom, "cost_allocation_per") / 100)
+				# a return gives back the finished good at its receipt share
+				cost_allocation_per = (
+					frappe.get_value("BOM", item.bom, "cost_allocation_per")
+					if is_return
+					else 100 - allocated_per[item.name]
+				)
+				item.amount = amount * cost_allocation_per / 100
 				item.rate = item.amount / (item.qty or item.rejected_qty)
 			else:
 				item.qty = flt(item.received_qty) - flt(item.process_loss_qty)
