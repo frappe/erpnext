@@ -9,7 +9,7 @@ from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion, Tuple
 from frappe.query_builder.functions import Count, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now_datetime
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -102,11 +102,6 @@ def stock_entry_row_requires_inspection(purpose, row):
 
 
 BIN_LOCK_RETRIES = 4
-BUNDLE_FIELDS = (
-	"serial_and_batch_bundle",
-	"rejected_serial_and_batch_bundle",
-	"current_serial_and_batch_bundle",
-)
 STOCK_ITEM_TABLES = ("items", "packed_items", "supplied_items", "stock_items")
 STOCK_WAREHOUSE_FIELDS = (
 	"warehouse",
@@ -2213,18 +2208,17 @@ class StockController(AccountsController):
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
-	def before_submit(self):
-		if self.has_stock_update:
+	def run_before_save_methods(self):
+		if self._action in ("submit", "cancel") and self.has_stock_update:
 			self.lock_bins()
-			self.refresh_posting_time()
 
-	def before_cancel(self):
-		super().before_cancel()
-		if self.has_stock_update:
-			self.lock_bins()
+		super().run_before_save_methods()
 
 	@property
 	def has_stock_update(self):
+		if self.doctype == "POS Invoice":
+			return False
+
 		return not self.meta.has_field("update_stock") or bool(self.update_stock)
 
 	def lock_bins(self):
@@ -2259,32 +2253,6 @@ class StockController(AccountsController):
 						item_warehouses.add((item_code, row.get(fieldname)))
 
 		return item_warehouses
-
-	def refresh_posting_time(self):
-		if not self.meta.has_field("set_posting_time") or self.set_posting_time:
-			return
-
-		now = now_datetime()
-		if getdate(now) != getdate(self.posting_date):
-			return
-
-		self.posting_time = now.strftime("%H:%M:%S.%f")
-		bundles = [
-			row.get(fieldname)
-			for table_name in STOCK_ITEM_TABLES
-			for row in self.get(table_name) or []
-			for fieldname in BUNDLE_FIELDS
-			if row.get(fieldname)
-		]
-		if not bundles:
-			return
-
-		posting_datetime = combine_datetime(self.posting_date, self.posting_time)
-		for doctype, fieldname in (("Serial and Batch Bundle", "name"), ("Serial and Batch Entry", "parent")):
-			table = frappe.qb.DocType(doctype)
-			frappe.qb.update(table).set(table.posting_datetime, posting_datetime).where(
-				table[fieldname].isin(bundles)
-			).run()
 
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		args = frappe._dict(

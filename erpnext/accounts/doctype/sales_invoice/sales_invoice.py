@@ -518,7 +518,6 @@ class SalesInvoice(SellingController):
 		self.set_account_for_mode_of_payment()
 
 	def before_submit(self):
-		super().before_submit()
 		self.add_remarks()
 		if cint(self.is_created_using_pos):
 			self.validate_mandatory_pos_fields()
