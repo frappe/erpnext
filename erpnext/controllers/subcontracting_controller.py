@@ -10,11 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
-<<<<<<< HEAD
-from frappe.utils import cint, cstr, flt, get_link_to_form
-=======
-from frappe.utils import ceil, cint, cstr, escape_html, flt, get_link_to_form
->>>>>>> c61d6cd (fix(subcontracting): take back whole serial nos on a partial Subcontract Return)
+from frappe.utils import ceil, cint, cstr, flt, get_link_to_form
 
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
