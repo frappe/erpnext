@@ -690,9 +690,10 @@ class BuyingController(SubcontractingController):
 			if not details:
 				continue
 
-			amount = flt(row.valuation_rate * row.stock_qty, row.precision("base_amount"))
-			if row.landed_cost_voucher_amount:
-				amount -= flt(row.landed_cost_voucher_amount, row.precision("base_amount"))
+			amount = flt(
+				row.valuation_rate * row.stock_qty - self.get_valued_landed_cost(row, row.stock_qty),
+				row.precision("base_amount"),
+			)
 
 			if not amount:
 				# GL Entry rejects a row with neither a debit nor a credit.
