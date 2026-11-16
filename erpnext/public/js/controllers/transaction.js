@@ -1513,16 +1513,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.payment_terms_template();
 		} else if (doc.payment_schedule) {
 			const me = this;
+			const document_date = doc.posting_date || doc.transaction_date;
 			doc.payment_schedule.forEach(function (term) {
 				if (term.payment_term) {
 					me.payment_term(doc, term.doctype, term.name);
-				} else {
-					frappe.model.set_value(
-						term.doctype,
-						term.name,
-						"due_date",
-						doc.posting_date || doc.transaction_date
-					);
+				} else if (!term.due_date || frappe.datetime.get_diff(term.due_date, document_date) < 0) {
+					// keep a manual due date unless the new date has passed it
+					frappe.model.set_value(term.doctype, term.name, "due_date", document_date);
 				}
 			});
 		}
