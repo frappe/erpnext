@@ -3299,10 +3299,43 @@ class TestPurchaseReceipt(FrappeTestCase):
 			-1.0,
 		)
 
-	def make_split_transfer_receipt(self):
-		"""Internal receipt of a batch item that splits 3 Box accepted and 3 Box rejected, whose stock
-		qty rounds unevenly."""
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_separate_rejected_returns_take_back_the_rejected_stock_qty(self):
+		"""Rejected returns made apart from the accepted one take back no more than the rejected stock qty
+		their receipt put in, and put it back in transit."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
 		item_doc = make_item(
+			"_Test Item For Separate Rejected Return",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		)
+		pr, warehouses, _batch_no = self.make_split_transfer_receipt(item_doc)
+
+		rejected_return = make_return_doc("Purchase Receipt", pr.name)
+		rejected_return.items[0].update({"qty": 0, "rejected_qty": -1, "received_qty": -1})
+		rejected_return.submit()
+		rejected_warehouse_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		rejected_warehouse_return.submit()
+
+		returned_qty = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"voucher_no": ("in", [rejected_return.name, rejected_warehouse_return.name]),
+				"is_cancelled": 0,
+			},
+			fields=["warehouse", "sum(actual_qty) as qty"],
+			group_by="warehouse",
+			as_list=True,
+		)
+		self.assertEqual(dict(returned_qty), {warehouses.rejected: -1.0, warehouses.transit: 1.0})
+
+	def make_split_transfer_receipt(self, item_doc=None):
+		"""Internal receipt that splits 3 Box accepted and 3 Box rejected, whose stock qty rounds
+		unevenly, of a batch item by default."""
+		item_doc = item_doc or make_item(
 			"_Test Batch Item For Split Transfer Qty",
 			{
 				"has_batch_no": 1,
