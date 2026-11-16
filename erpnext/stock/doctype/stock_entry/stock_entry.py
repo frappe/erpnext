@@ -328,6 +328,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			)
 
 	def validate(self):
+		self.validate_reference_companies()
+		self.validate_row_reference_parents()
 		self.pro_doc = frappe._dict()
 		if self.work_order:
 			self.pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -410,6 +412,67 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.validate_subcontract_order()
 		self.validate_raw_materials_exists()
 		super().validate_subcontracting_inward()
+
+	def validate_reference_companies(self):
+		for doctype, names in self.get_referenced_documents().items():
+			if other_company_document := frappe.get_all(
+				doctype,
+				filters={"name": ("in", list(names)), "company": ("!=", self.company)},
+				pluck="name",
+				limit=1,
+			):
+				frappe.throw(
+					_("{0} {1} does not belong to Company {2}").format(
+						_(doctype), other_company_document[0], self.company
+					)
+				)
+
+	def validate_row_reference_parents(self):
+		for row_field, child_doctype, parent_field in (
+			("pick_list_item", "Pick List Item", "pick_list"),
+			("job_card_item", "Job Card Item", "job_card"),
+		):
+			names = {row.get(row_field) for row in self.items if row.get(row_field)}
+			parent = self.get(parent_field) or ""
+			if names and (
+				other_parent_row := frappe.get_all(
+					child_doctype,
+					filters={"name": ("in", list(names)), "parent": ("!=", parent)},
+					pluck="name",
+					limit=1,
+				)
+			):
+				frappe.throw(
+					_("{0} {1} does not belong to {2} {3}").format(
+						_(child_doctype),
+						other_parent_row[0],
+						_(self.meta.get_label(parent_field)),
+						parent,
+					)
+				)
+
+	def get_referenced_documents(self):
+		references = defaultdict(set)
+		for fieldname in (
+			"work_order",
+			"job_card",
+			"pick_list",
+			"purchase_order",
+			"subcontracting_order",
+			"subcontracting_inward_order",
+			"outgoing_stock_entry",
+			"source_stock_entry",
+		):
+			if name := self.get(fieldname):
+				references[self.meta.get_options(fieldname)].add(name)
+
+		for row in self.get("items"):
+			if row.material_request:
+				references["Material Request"].add(row.material_request)
+			if row.against_stock_entry:
+				references["Stock Entry"].add(row.against_stock_entry)
+
+		return references
 
 	def validate_finished_good_serial_batch_for_work_order(self):
 		if not (
