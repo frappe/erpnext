@@ -73,13 +73,21 @@ class BaseManufactureStockEntry(BaseStockEntry):
 			if row.s_warehouse:
 				raw_materials.append(row.item_code)
 
-		if not raw_materials:
+		if not raw_materials and not self.is_raw_material_fully_consumed():
 			frappe.throw(
 				_(
 					"At least one raw material item must be present in the stock entry for the type {0}"
 				).format(bold(self.doc.purpose)),
 				title=_("Raw Materials Missing"),
 			)
+
+	def is_raw_material_fully_consumed(self):
+		"""Earlier entries of the Work Order may have consumed all of a whole-number raw material."""
+		required_items = self.wo_doc.required_items if self.wo_doc else []
+		precision = frappe.get_precision("Work Order Item", "consumed_qty")
+		return bool(required_items) and all(
+			flt(row.consumed_qty, precision) >= flt(row.required_qty, precision) for row in required_items
+		)
 
 	def get_item_dict(self, row):
 		item_args = {}
