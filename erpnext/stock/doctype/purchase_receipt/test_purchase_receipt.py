@@ -627,6 +627,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertRaises(StockOverReturnError, return_pr.save)
 
+	def test_no_rejected_warehouse_return_after_all_rejected_qty_is_returned(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import (
+			make_purchase_return,
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		for make_first_return in (make_purchase_return_against_rejected_warehouse, make_purchase_return):
+			pr = make_purchase_receipt(qty=8, rejected_qty=2)
+			self.assertTrue(pr.has_rejected_qty_to_return())
+
+			make_first_return(pr.name).submit()
+
+			self.assertFalse(pr.has_rejected_qty_to_return())
+			self.assertRaises(
+				frappe.ValidationError, make_purchase_return_against_rejected_warehouse, pr.name
+			)
+
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"bill_for_rejected_quantity_in_purchase_invoice": 1}
 	)
