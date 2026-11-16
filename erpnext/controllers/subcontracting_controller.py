@@ -1853,6 +1853,10 @@ def make_rm_stock_entry(
 
 				target_doc.set_stock_entry_type()
 
+<<<<<<< HEAD
+=======
+				pending_qty = get_pending_qty_by_material(rm_items)
+>>>>>>> af04ced (fix(subcontracting): map only the raw material qty still pending across the order to Material to Supplier)
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1860,6 +1864,19 @@ def make_rm_stock_entry(
 							or rm_item.get("item_code") == fg_item_code
 						):
 							rm_item_code = rm_item.get("rm_item_code")
+<<<<<<< HEAD
+=======
+							qty = rm_item.get("qty")
+							if not qty:
+								row_pending_qty = flt(rm_item.get("required_qty")) - flt(
+									rm_item.get("total_supplied_qty")
+								)
+								qty = max(min(row_pending_qty, pending_qty[rm_item_code]), 0)
+								pending_qty[rm_item_code] -= qty
+
+							if qty <= 0:
+								continue
+>>>>>>> af04ced (fix(subcontracting): map only the raw material qty still pending across the order to Material to Supplier)
 
 							items_dict = {
 								rm_item_code: {
@@ -1921,6 +1938,17 @@ def make_rm_stock_entry(
 				return stock_entry.as_dict()
 		else:
 			frappe.throw(_("No Items selected for transfer."))
+
+
+def get_pending_qty_by_material(rm_items):
+	"""Qty of each raw material still to be sent, counted across the rows that share it."""
+	pending_qty = defaultdict(float)
+	for rm_item in rm_items:
+		pending_qty[rm_item.get("rm_item_code")] += flt(rm_item.get("required_qty")) - flt(
+			rm_item.get("total_supplied_qty")
+		)
+
+	return pending_qty
 
 
 def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_detail", batch_no=None):
