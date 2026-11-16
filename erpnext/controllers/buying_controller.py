@@ -1287,8 +1287,7 @@ class BuyingController(SubcontractingController):
 		for sle in sl_entries:
 			# an entry that now rounds to 0 is one into the warehouse, as a return reverses its posted qty itself
 			key = (sle.voucher_detail_no, sle.warehouse, flt(sle.actual_qty) >= 0)
-			if key in posted_qty:
-				sle.actual_qty = posted_qty[key]
+			sle.actual_qty = posted_qty.get(key, 0)
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
