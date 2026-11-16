@@ -10194,6 +10194,93 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
+<<<<<<< HEAD
+=======
+	def test_return_of_receipt_from_invoice_at_another_rate_reverses_exchange_difference(self):
+		self.assert_return_reverses_exchange_difference()
+
+	def test_return_in_another_uom_reverses_exchange_difference(self):
+		self.assert_return_reverses_exchange_difference(
+			{"uom": "Box", "conversion_factor": 3, "qty": -1, "received_qty": -1, "rate": 30.99}
+		)
+
+	def assert_return_reverses_exchange_difference(self, return_row=None):
+		"""Full return of a receipt made at 83.11 from a USD invoice at 85.37 reverses its 70.04."""
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = self.make_receipt_from_usd_invoice(83.11)
+		pr_return = make_purchase_return(pr.name)
+		if return_row:
+			item = frappe.get_doc("Item", pr.items[0].item_code)
+			item.append(
+				"uoms", {"uom": return_row["uom"], "conversion_factor": return_row["conversion_factor"]}
+			)
+			item.save()
+			pr_return.items[0].update(return_row)
+		pr_return.submit()
+
+		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
+		reversed_amount = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pr_return.name, "account": gain_loss_account, "is_cancelled": 0},
+			"credit",
+		)
+		self.assertEqual(reversed_amount, 70.04)
+
+	def test_landed_cost_on_internal_receipt_stays_out_of_transit(self):
+		"""The transit leg of an internal receipt gives back what the delivery put in transit; the
+		landed cost goes only to the stock received."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		transit_warehouse = "Goods In Transit - TCP1"
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item_code, qty=6, rate=100, to_warehouse="Stores - TCP1", company=company)
+		for _ in range(2):
+			dn = create_delivery_note(
+				item_code=item_code,
+				company=company,
+				customer="_Test Internal Customer 2",
+				cost_center="Main - TCP1",
+				expense_account="Cost of Goods Sold - TCP1",
+				qty=3,
+				rate=100,
+				warehouse="Stores - TCP1",
+				target_warehouse=transit_warehouse,
+			)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		make_landed_cost_voucher(
+			company=company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=30,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - TCP1",
+		)
+
+		bin_value = {
+			warehouse: frappe.db.get_value(
+				"Bin", {"item_code": item_code, "warehouse": warehouse}, "stock_value"
+			)
+			for warehouse in (transit_warehouse, "Finished Goods - TCP1")
+		}
+		self.assertEqual(bin_value, {transit_warehouse: 300, "Finished Goods - TCP1": 330})
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{"voucher_no": pr.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+			)
+		)
+
+>>>>>>> c5e0ba7 (test: landed cost on an internal receipt stays out of transit)
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
