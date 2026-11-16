@@ -7781,6 +7781,24 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, make_fg_conversion_entry, wo_order.name, alt_item, 0)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
+	def test_fg_conversion_and_disassembly_share_produced_qty(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import (
+			get_fg_conversion_details,
+			make_fg_conversion_entry,
+		)
+
+		wo_order, alt_item, _ = prepare_data_for_fg_conversion_test()
+		frappe.get_doc(make_stock_entry(wo_order.name, "Disassemble", 6)).submit()
+		self.assertEqual(get_fg_conversion_details(wo_order.name)["available_qty"], 4)
+
+		excess_entry = frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 5))
+		self.assertRaises(frappe.ValidationError, excess_entry.insert)
+		frappe.get_doc(make_fg_conversion_entry(wo_order.name, alt_item, 4)).submit()
+
+		disassembly = frappe.get_doc(make_stock_entry(wo_order.name, "Disassemble", 1))
+		self.assertRaises(frappe.ValidationError, disassembly.submit)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"allow_alternative_finished_goods": 1})
 	def test_last_fraction_of_produced_qty_can_be_converted(self):
 		from erpnext.manufacturing.doctype.work_order.mapper import make_fg_conversion_entry
 
