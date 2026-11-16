@@ -1089,6 +1089,7 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 
 	# and on the parent record itself, so that User Permissions still apply
 	frappe.has_permission(parenttype, doc=parent, throw=True)
+	check_linked_filter_permissions(doctype, filters)
 
 	table = frappe.qb.DocType(doctype)
 	query = (
@@ -1108,6 +1109,18 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 		)
 
 	return query.run(as_dict=False)
+
+
+def check_linked_filter_permissions(doctype: str, filters: dict) -> None:
+	for fieldname in filters:
+		if not isinstance(fieldname, str) or "." not in fieldname:
+			continue
+
+		link_field = frappe.get_meta(doctype).get_field(fieldname.split(".", 1)[0])
+		if not link_field or link_field.fieldtype != "Link":
+			frappe.throw(_("Invalid filter: {0}").format(fieldname), frappe.PermissionError)
+
+		frappe.has_permission(link_field.options, "read", throw=True)
 
 
 @frappe.whitelist()
