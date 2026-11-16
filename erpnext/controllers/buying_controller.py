@@ -1858,13 +1858,15 @@ def get_stock_qty(row, qty) -> float:
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 
-def get_posted_stock_qty_by_row(row_names, warehouse) -> dict:
-	"""Stock qty each row's entries moved in the warehouse."""
+def get_posted_stock_qty_by_row(row_names, warehouses) -> dict:
+	"""Stock qty each row's entries moved in the warehouses."""
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	return dict(
 		frappe.qb.from_(sle)
 		.select(sle.voucher_detail_no, Sum(sle.actual_qty))
-		.where((sle.warehouse == warehouse) & (sle.is_cancelled == 0) & sle.voucher_detail_no.isin(row_names))
+		.where(
+			sle.warehouse.isin(warehouses) & (sle.is_cancelled == 0) & sle.voucher_detail_no.isin(row_names)
+		)
 		.groupby(sle.voucher_detail_no)
 		.run()
 	)

@@ -317,7 +317,8 @@ class StockController(AccountsController):
 
 	def get_row_left_to_return(self, row, warehouse) -> frappe._dict:
 		"""Unrounded and posted stock qty the returned original row moved in the warehouse that its other
-		returns have not moved back."""
+		returns have not moved back. A delivery counts every warehouse its rows used, as a return can put
+		its stock back in another one."""
 		from erpnext.controllers.buying_controller import get_posted_stock_qty_by_row
 
 		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
@@ -343,13 +344,14 @@ class StockController(AccountsController):
 			)
 			.run(as_dict=True)
 		)
-		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouse)
+		warehouses = [warehouse] if self.is_stock_receipt() else list({d.warehouse for d in rows})
+		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouses)
 		for d in rows:
 			if d.name not in posted_qty:
 				continue  # moved no stock, like a return without Update Stock
-			if d.warehouse == warehouse:
+			if d.warehouse in warehouses:
 				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
-			if d.get("rejected_warehouse") == warehouse:
+			if d.get("rejected_warehouse") in warehouses:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
 
 		left.stock_qty = flt(sum(posted_qty.values()) * self.get_stock_qty_sign(), row.precision("stock_qty"))
