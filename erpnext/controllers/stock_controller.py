@@ -551,7 +551,7 @@ class StockController(AccountsController):
 		available_dict = available_serial_batch_for_return(field, child_doctype, reference_ids)
 
 		for row in self.get(table_name):
-			if row.get("return_qty_from_rejected_warehouse"):
+			if row.get("return_qty_from_rejected_warehouse") or not row.get("qty"):
 				continue
 
 			value = row.get(field)
@@ -620,7 +620,9 @@ class StockController(AccountsController):
 			needs_bundle = (
 				self.needs_rejected_bundle(row)
 				if qty_field == "rejected_qty"
-				else not row.get("return_qty_from_rejected_warehouse") and not row.get(bundle_field)
+				else row.get("qty")
+				and not row.get("return_qty_from_rejected_warehouse")
+				and not row.get(bundle_field)
 			)
 			if row.get(field) and needs_bundle and not row.get("use_serial_batch_fields"):
 				reference_ids.append(row.get(field))
