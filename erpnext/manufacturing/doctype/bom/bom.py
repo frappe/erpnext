@@ -347,6 +347,12 @@ class BOM(WebsiteGenerator):
 	@frappe.whitelist()
 	def get_routing(self):
 		if self.routing:
+			frappe.has_permission("Routing", "read", self.routing, throw=True)
+
+		self.set_operations_from_routing()
+
+	def set_operations_from_routing(self):
+		if self.routing:
 			self.set("operations", [])
 			fields = [
 				"sequence_id",
@@ -1083,7 +1089,7 @@ class BOM(WebsiteGenerator):
 	def set_routing_operations(self):
 		self.validate_routing()
 		if self.routing and self.with_operations and not self.operations:
-			self.get_routing()
+			self.set_operations_from_routing()
 
 	def validate_routing(self):
 		if not self.routing or not self.has_value_changed("routing"):
