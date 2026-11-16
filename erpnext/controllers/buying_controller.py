@@ -982,9 +982,6 @@ class BuyingController(SubcontractingController):
 			)
 			.run(as_dict=True)
 		)
-		if not rows:
-			return left
-
 		for d in rows:
 			if d.warehouse == warehouse:
 				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
