@@ -402,6 +402,58 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr.per_returned, 100)
 		self.assertEqual(scr.status, "Return Issued")
 
+	def test_full_return_of_a_receipt_made_before_v16(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_a_receipt_made_before_v16_with_an_item_received_twice(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_an_item_received_as_two_secondary_types(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_full_return_of_a_receipt_made_before_v16_with_its_bom_rows_reordered(self):
+		fg_item = "Subcontracted Item SA1"
+		bom = make_bom_with_secondary_item(fg_item, secondary_item_types=("Scrap", "Co-Product"))
+		first, second = bom.secondary_items
+		frappe.db.set_value("BOM Secondary Item", second.name, {"qty": 1, "stock_qty": 1})
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+		make_secondary_rows_pre_v16(scr.name)
+		# the v16 migration does not keep the order of a BOM's scrap rows
+		frappe.db.set_value("BOM Secondary Item", first.name, "idx", 2)
+		frappe.db.set_value("BOM Secondary Item", second.name, "idx", 1)
+
+		make_partial_return(scr.name, 10)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
 	def test_partial_returns_add_up_to_the_received_secondary_qty(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item, quantity=3, secondary_qty=2)
@@ -5428,8 +5480,8 @@ def make_receipt_with_rejected_qty_and_scrap():
 	return scr, scrap_item
 
 
-def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5):
-	"""BOM with one raw material per unit and a scrap item."""
+def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5, secondary_item_types=("Scrap",)):
+	"""BOM with one raw material per unit and a secondary item of each type."""
 	raw_material = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
 	secondary_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Nos", "valuation_rate": 10}).name
 
@@ -5442,16 +5494,17 @@ def make_bom_with_secondary_item(fg_item, quantity=1, secondary_qty=0.5):
 		rm_qty=quantity,
 		do_not_submit=True,
 	)
-	bom.append(
-		"secondary_items",
-		{
-			"item_code": secondary_item,
-			"secondary_item_type": "Scrap",
-			"qty": secondary_qty,
-			"stock_qty": secondary_qty,
-			"valuation_type": "Valuation Rate",
-		},
-	)
+	for secondary_item_type in secondary_item_types:
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": secondary_item,
+				"secondary_item_type": secondary_item_type,
+				"qty": secondary_qty,
+				"stock_qty": secondary_qty,
+				"valuation_type": "Valuation Rate",
+			},
+		)
 	bom.save()
 	bom.submit()
 	return bom
@@ -5484,6 +5537,16 @@ def make_receipt_with_secondary_items(fg_item, qty):
 	scr.save()
 	scr.submit()
 	return scr
+
+
+def make_secondary_rows_pre_v16(scr_name):
+	"""Secondary rows received before v16 have no bom_secondary_item."""
+	frappe.db.set_value(
+		"Subcontracting Receipt Item",
+		{"parent": scr_name, "bom_secondary_item": ("is", "set")},
+		"bom_secondary_item",
+		None,
+	)
 
 
 def make_partial_return(scr_name, fg_qty):
