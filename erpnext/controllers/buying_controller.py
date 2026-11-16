@@ -1230,6 +1230,18 @@ class BuyingController(SubcontractingController):
 		"""An internal receipt row whose rejected qty doesn't round to 0 in the stock UOM."""
 		return self.is_internal_receipt() and bool(get_stock_qty(row, row.rejected_qty))
 
+<<<<<<< HEAD
+=======
+	def get_accepted_stock_qty(self, row) -> float:
+		"""Accepted qty in the stock UOM. A return takes back no more than its receipt row put in the
+		warehouse, less the row's other returns, so returns of parts add up to it. A row with a package
+		is not capped, as its package holds the qty."""
+		if not self.is_return or row.get("serial_and_batch_bundle"):
+			return get_stock_qty(row, row.qty)
+
+		return self.get_return_stock_qty(row, row.qty, row.warehouse)
+
+>>>>>>> 7fb097c (refactor(stock): share the return stock qty cap with deliveries)
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
 		delivered row left in transit, so partial receipts that round up add up to the delivery, and its
