@@ -10,7 +10,11 @@ from frappe.utils import cint, flt, getdate, now, nowdate
 
 import erpnext
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
-from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_returned_stock_qty_status_args,
+)
 from erpnext.controllers.item_close import validate_parent_reopen
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
@@ -255,7 +259,7 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Purchase Receipt",
 				"target_parent_field": "per_returned",
 				"target_ref_field": "received_stock_qty",
-				"source_field": "-1 * received_stock_qty",
+				**get_returned_stock_qty_status_args(),
 				"percent_join_field_parent": "return_against",
 			},
 		]

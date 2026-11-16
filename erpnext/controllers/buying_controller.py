@@ -1827,3 +1827,20 @@ def rounds_stock_qty(row) -> bool:
 		frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase")
 		or frappe.get_cached_value("UOM", row.stock_uom, "must_be_whole_number")
 	)
+
+
+def get_returned_stock_qty_status_args() -> dict:
+	"""Status updater args that add up the received stock qty of a receipt's returns. Add up qty * conversion
+	factor, rounded once at the total where the receipt row rounds its received stock qty, so parts add up to it."""
+	return {
+		"source_field": "-1 * received_qty * conversion_factor",
+		"round_to_target_precision": rounds_received_stock_qty,
+	}
+
+
+def rounds_received_stock_qty(row) -> bool:
+	"""Whether a receipt row stores its received stock qty rounded: a stock or asset row rounds it when valued."""
+	is_stock_item, is_fixed_asset = frappe.get_cached_value(
+		"Item", row.item_code, ["is_stock_item", "is_fixed_asset"]
+	)
+	return bool(is_stock_item or is_fixed_asset or rounds_stock_qty(row))
