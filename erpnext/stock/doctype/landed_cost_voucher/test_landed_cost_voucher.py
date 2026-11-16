@@ -292,6 +292,35 @@ class TestLandedCostVoucher(FrappeTestCase):
 		lcv.get_items_from_purchase_receipts()
 		self.assertEqual([item.item_code for item in lcv.items], ["_Test Item"])
 
+	def test_stock_manager_gets_items_from_purchase_invoice(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		invoice = make_purchase_invoice(qty=2, rate=100, update_stock=1)
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.append(
+			"purchase_receipts",
+			{"receipt_document_type": "Purchase Invoice", "receipt_document": invoice.name},
+		)
+
+		stock_manager = create_user("lcv-invoice-stock-manager@example.com", "Stock Manager", "Stock User")
+		other_company_user = create_user(
+			"lcv-invoice-other-company@example.com", "Stock Manager", "Stock User"
+		)
+		if not frappe.db.exists("User Permission", {"user": other_company_user.name, "allow": "Company"}):
+			add_user_permission("Company", "_Test Company 1", other_company_user.name)
+		stock_user = create_user("lcv-invoice-stock-user@example.com", "Stock User")
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		for user in (other_company_user, stock_user):
+			frappe.set_user(user.name)
+			self.assertRaises(frappe.PermissionError, lcv.get_items_from_purchase_receipts)
+
+		frappe.set_user(stock_manager.name)
+		lcv.get_items_from_purchase_receipts()
+		self.assertEqual([(item.item_code, item.qty) for item in lcv.items], [("_Test Item", 2)])
+
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
 
