@@ -60,7 +60,7 @@ def get_unrounded_ordered_qty(row, ordered_stock_qty):
 	if ordered_stock_qty is None or (row.received_qty and not row.ordered_qty):
 		return None
 
-	return ordered_stock_qty.get(row.name) if row.ordered_qty else 0
+	return ordered_stock_qty.get(row.name, None if row.ordered_qty else 0)
 
 
 def get_pending_qty(row, ordered_stock_qty, precision):
