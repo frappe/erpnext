@@ -2060,6 +2060,27 @@ class TestBOM(ERPNextTestSuite):
 				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
 			)
 
+	def test_valuation_rate_from_source_warehouse_without_bin(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 0}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, qty=10, rate=50, target="_Test Warehouse - _TC")
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [{"item_code": rm_item, "qty": 1, "source_warehouse": "_Test Warehouse 1 - _TC"}],
+			}
+		).insert()
+
+		# the source warehouse has no Bin, so the last valuation rate is used
+		self.assertEqual(bom.items[0].rate, 50)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
