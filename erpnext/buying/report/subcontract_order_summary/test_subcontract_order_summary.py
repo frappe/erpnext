@@ -64,3 +64,46 @@ class TestSubcontractOrderSummary(FrappeTestCase):
 
 		self.assertIn(permitted.name, orders)
 		self.assertNotIn(other.name, orders)
+<<<<<<< HEAD
+=======
+
+	def test_out_of_range_date_excludes_order(self):
+		sco = get_subcontracting_order()
+
+		data = self.run_report(name=sco.name, from_date="2019-01-01", to_date="2019-01-31")
+		self.assertEqual(data, [])
+
+	def test_every_raw_material_row_has_its_order(self):
+		sco = make_subcontracting_order()
+
+		rows = self.run_report(name=sco.name)
+		self.assertGreater(len(rows), 1)
+		self.assertEqual({row.get("order_id") for row in rows}, {sco.name})
+
+	def test_order_row_without_supplied_materials_is_listed(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		raw_material = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[raw_material], currency="INR", do_not_submit=True)
+		bom.items[0].sourced_by_supplier = 1
+		bom.save()
+		bom.submit()
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 5,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+
+		rows = [row for row in self.run_report(name=sco.name) if row.get("item_code") == fg_item]
+		self.assertEqual(len(rows), 1)
+		self.assertEqual(rows[0]["qty"], 5)
+		self.assertEqual(rows[0]["received_qty"], 0)
+>>>>>>> d5697ab (test: Subcontract Order Summary lists a row whose materials are all sourced by the job worker)
