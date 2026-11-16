@@ -2282,10 +2282,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 			d.warehouse: d.actual_qty
 			for d in frappe.get_all(
 				"Stock Ledger Entry",
-				filters={"voucher_no": ("in", [dn.name, pr.name]), "is_cancelled": 0},
+				filters={"voucher_no": pr.name, "is_cancelled": 0},
 				fields=["warehouse", "actual_qty"],
 			)
-			if d.warehouse != transit_warehouse or d.actual_qty < 0
 		}
 		delivered_qty = frappe.db.get_value(
 			"Stock Ledger Entry", {"voucher_no": dn.name, "warehouse": transit_warehouse}, "actual_qty"
