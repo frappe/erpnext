@@ -1,3 +1,10 @@
+{%
+	/* Show the description as plain text. A space after each line break or block end keeps
+	paragraphs and list items apart. No backslashes: the bundler drops them from templates. */
+	const task_text = (html) => frappe.utils.escape_html(
+		frappe.utils.html2text(cstr(html).replace(/<br *[/]?>|<[/](p|div|li|h[1-6])>/gi, "$& "))
+	);
+%}
 <div class="open-activities">
 	<div class="new-btn pb-3">
 		<span>
@@ -31,7 +38,7 @@
 									</svg>
 								</span>
 								<a href="/app/todo/{{ frappe.utils.escape_html(tasks[i].name) }}" title="{{ __('Open Task') }}">
-									{%= tasks[i].description %}
+									{%= task_text(tasks[i].description) %}
 								</a>
 							</div>
 							<div class="checkbox">
@@ -47,7 +54,7 @@
 						{% if(tasks[i].allocated_to) { %}
 							<div class="text-muted  ml-1">
 								{{ __("Allocated To:") }}
-								{%= tasks[i].allocated_to %}
+								{%= frappe.utils.escape_html(tasks[i].allocated_to) %}
 							</div>
 						{% } %}
 						</div>
@@ -90,7 +97,7 @@
 				<div class="pl-2 mb-2 mt-2">
 					<div class="label-area font-md">
 						<a href="/app/todo/{{ frappe.utils.escape_html(t.name) }}" title="{{ __('Open Task') }}">
-							{%= t.description %}
+							{%= task_text(t.description) %}
 						</a>
 					</div>
 				</div>
