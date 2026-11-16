@@ -1182,6 +1182,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	add_inter_company_order_button(label, target_doctype, reference_fieldname) {
+		if (!frappe.model.can_create(target_doctype)) return;
+
 		frappe.call({
 			method: "erpnext.accounts.doctype.sales_invoice.mapper.get_received_items",
 			args: {

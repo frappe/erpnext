@@ -1192,11 +1192,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						this.frm.add_custom_button(__("Project"), () => this.make_project(), __("Create"));
 					}
 
-					if (
-						doc.docstatus === 1 &&
-						doc.is_internal_customer &&
-						frappe.model.can_create("Purchase Order")
-					) {
+					if (doc.docstatus === 1 && doc.is_internal_customer) {
 						let button_label =
 							doc.company === doc.represents_company
 								? __("Internal Purchase Order")
