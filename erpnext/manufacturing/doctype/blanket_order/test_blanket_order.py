@@ -869,13 +869,14 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(pricing["parent"]["conversion_rate"], 95.47)
 		expected_rate = flt(
 			100 / pricing["parent"]["conversion_rate"],
-			blanket_order.items[0].precision("rate"),
+			blanket_order.items[0].precision("price_list_rate"),
 		)
 		expected_base_rate = flt(
 			expected_rate * pricing["parent"]["conversion_rate"],
-			blanket_order.items[0].precision("base_rate"),
+			blanket_order.items[0].precision("base_price_list_rate"),
 		)
-		self.assertEqual(pricing["children"][0]["base_rate"], expected_base_rate)
+		self.assertEqual(pricing["children"][0]["base_price_list_rate"], expected_base_rate)
+		self.assertNotIn("rate", pricing["children"][0])
 
 	def test_blanket_order_lookup_skips_fully_ordered_order(self):
 		item = make_item("_Test Blanket Order Lookup Item", {"is_stock_item": 1}).name
