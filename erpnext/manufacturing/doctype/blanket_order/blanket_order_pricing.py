@@ -112,7 +112,8 @@ def get_default_price_list(doc):
 	return frappe.db.get_single_value(config["settings_doctype"], config["price_list_field"])
 
 
-def get_price_list_rates(doc, item_name=None):
+def get_price_list_rates(doc, item_name=None, reset_rate=False):
+	"""Refresh price list rates; keep a typed Rate unless `reset_rate` or it is empty."""
 	price_list = doc.get(get_order_type_config(doc.blanket_order_type)["price_list_field"])
 	items = [item for item in doc.items if item.item_code and (not item_name or item.name == item_name)]
 	if not items:
@@ -155,15 +156,12 @@ def get_price_list_rates(doc, item_name=None):
 			price_list_rate, base_price_list_rate = get_rate_and_base_amount(
 				doc, item, "price_list_rate", rate
 			)
-			rate, base_rate = get_rate_and_base_amount(doc, item, "rate", rate)
 			rate_details.update(
-				{
-					"price_list_rate": price_list_rate,
-					"base_price_list_rate": base_price_list_rate,
-					"rate": rate,
-					"base_rate": base_rate,
-				}
+				{"price_list_rate": price_list_rate, "base_price_list_rate": base_price_list_rate}
 			)
+			if reset_rate or not flt(item.rate):
+				rate, base_rate = get_rate_and_base_amount(doc, item, "rate", rate)
+				rate_details.update({"rate": rate, "base_rate": base_rate})
 		rates.append(rate_details)
 
 	return rates
@@ -190,6 +188,7 @@ def apply_price_list(
 	reset_party_values=False,
 	reset_plc_conversion_rate=False,
 	reset_conversion_rate=False,
+	reset_rate=False,
 ):
 	doc = frappe.get_doc(frappe.parse_json(doc))
 	doc.check_permission("read")
@@ -227,5 +226,5 @@ def apply_price_list(
 			"price_list_currency": doc.price_list_currency,
 			"plc_conversion_rate": doc.plc_conversion_rate,
 		},
-		"children": get_price_list_rates(doc, item_name),
+		"children": get_price_list_rates(doc, item_name, reset_party_values or cint(reset_rate)),
 	}
