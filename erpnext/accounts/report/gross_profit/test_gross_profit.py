@@ -1038,12 +1038,7 @@ class TestGrossProfit(FrappeTestCase):
 	@change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_legacy_return_prefers_item_without_linked_return(self):
 		sales_invoice = self.create_sales_invoice(qty=2, rate=100, do_not_submit=True)
-<<<<<<< HEAD
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
-		second_item.idx = None
-=======
 		second_item = self.append_copy_of_first_item(sales_invoice)
->>>>>>> 597769e (test(gross profit): give copied invoice rows their own idx)
 		second_item.rate = 200
 		sales_invoice.submit()
 
@@ -1217,19 +1212,10 @@ class TestGrossProfit(FrappeTestCase):
 			basic_rate=33.33333,
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
-<<<<<<< HEAD
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
-		second_item.idx = None
-		second_item.item_code = unreturned_item.name
-		second_item.item_name = unreturned_item.name
-		second_item.qty = 30000
-		sales_invoice.append("items", second_item)
-=======
 		second_item = self.append_copy_of_first_item(sales_invoice)
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
->>>>>>> 597769e (test(gross profit): give copied invoice rows their own idx)
 		sales_invoice.submit()
 
 		sales_return = make_sales_return(sales_invoice.name)
