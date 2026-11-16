@@ -1201,7 +1201,7 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 
 	table = frappe.qb.DocType(doctype)
 	query = (
-		frappe.get_query(table, filters=filters)
+		frappe.get_query(table, filters=filters, ignore_permissions=False, parent_doctype=parenttype)
 		.select(
 			Concat("#", table.idx, ", ", table.item_code),
 		)
