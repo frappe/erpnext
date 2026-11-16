@@ -27,7 +27,10 @@ from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import Warehouse
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
-from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_transaction
+from erpnext.accounts.doctype.sales_invoice.mapper import (
+	get_received_items,
+	make_inter_company_transaction,
+)
 from erpnext.accounts.doctype.sales_invoice.services.fixed_assets import FixedAssetService
 from erpnext.accounts.doctype.sales_invoice.services.gl_composer import SalesInvoiceGLComposer
 from erpnext.accounts.doctype.sales_invoice.services.pos import (
@@ -4137,6 +4140,9 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 		self.assertRaises(OverAllowanceError, make_pi(qty=2, rejected_qty=1).submit)
 		make_pi(qty=1, rejected_qty=1).submit()
+		self.assertEqual(
+			get_received_items(si.name, "Purchase Invoice", "sales_invoice_item"), {si.items[0].name: 2}
+		)
 
 	def test_returned_internal_pi_cannot_be_cancelled_once_invoiced_again(self):
 		company = "_Test Company with perpetual inventory"
