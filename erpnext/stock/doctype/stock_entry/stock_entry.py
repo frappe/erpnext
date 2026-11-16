@@ -1470,36 +1470,87 @@ class StockEntry(StockController, SubcontractingInwardController):
 			or pro_doc.subcontracting_inward_order
 		)
 
+	@property
+	def is_reserved_components_return(self) -> bool:
+		"""A Return of Components against a Subcontracting Order that reserves stock."""
+		return bool(
+			self.is_return
+			and self.purpose == "Material Transfer"
+			and self.subcontracting_order
+			and frappe.get_value("Subcontracting Order", self.subcontracting_order, "reserve_stock")
+		)
+
 	def reserve_stock_for_subcontracting(self):
 		if self.purpose == "Send to Subcontractor" and frappe.get_value(
 			"Subcontracting Order", self.subcontracting_order, "reserve_stock"
 		):
-			items = {}
-			for item in self.items:
-				if item.sco_rm_detail in items:
-					items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
-					items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
-				else:
-					items[item.sco_rm_detail] = frappe._dict(
-						{
-							"name": item.sco_rm_detail,
-							"qty_to_reserve": item.transfer_qty,
-							"warehouse": item.t_warehouse,
-							"reference_voucher_detail_no": item.name,
-							"serial_and_batch_bundles": [item.serial_and_batch_bundle],
-						}
-					)
+			items = self.get_subcontracting_reservation_items()
+		elif self.is_reserved_components_return:
+			items = self.get_returned_components_to_reserve()
+		else:
+			return
 
+		# no items would reserve every supplied item of the order
+		if items:
 			frappe.get_doc("Subcontracting Order", self.subcontracting_order).make_raw_material_reservations(
-				items=items.values(), stock_entry=self.name
+				items=items, stock_entry=self.name
 			)
+
+	def get_subcontracting_reservation_items(self) -> list:
+		"""Qty and bundles of the entry per Subcontracting Order supplied item, to reserve in its target warehouse."""
+		items = {}
+		for item in self.items:
+			if not item.sco_rm_detail:
+				continue
+
+			if item.sco_rm_detail in items:
+				items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
+				items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
+			else:
+				items[item.sco_rm_detail] = frappe._dict(
+					{
+						"name": item.sco_rm_detail,
+						"qty_to_reserve": item.transfer_qty,
+						"warehouse": item.t_warehouse,
+						"reference_voucher_detail_no": item.name,
+						"serial_and_batch_bundles": [item.serial_and_batch_bundle],
+					}
+				)
+
+		return list(items.values())
+
+	def get_returned_components_to_reserve(self) -> list:
+		"""Returned components, up to what the order's reservations do not hold yet; the rest is released."""
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_held_qty_for_voucher_detail_nos,
+		)
+
+		items = self.get_subcontracting_reservation_items()
+		if not items:
+			return []
+
+		held_qty = get_sre_held_qty_for_voucher_detail_nos([item.name for item in items])
+		required_qty = dict(
+			frappe.get_all(
+				"Subcontracting Order Supplied Item",
+				filters={"name": ("in", [item.name for item in items])},
+				fields=["name", "required_qty"],
+				as_list=True,
+			)
+		)
+		precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+		for item in items:
+			needed_qty = flt(required_qty[item.name]) - held_qty.get(item.name, 0)
+			item.qty_to_reserve = flt(min(item.qty_to_reserve, needed_qty), precision)
+
+		return [item for item in items if item.qty_to_reserve > 0]
 
 	def cancel_stock_reservation_entries_for_subcontracting(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)
 
-		if self.purpose == "Send to Subcontractor":
+		if self.purpose == "Send to Subcontractor" or self.is_reserved_components_return:
 			cancel_stock_reservation_entries(
 				from_voucher_type="Stock Entry", from_voucher_no=self.name, notify=False
 			)

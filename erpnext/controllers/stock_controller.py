@@ -523,6 +523,9 @@ class StockController(AccountsController):
 				# supplier warehouse reservations are used by the receipt, not the transfer
 				if warehouse_field := data_map[purpose or self.doctype].get("exclude_warehouse_field"):
 					query = query.where(table.warehouse != item.get(warehouse_field))
+				# a return takes back from the supplier warehouse reservations
+				if warehouse_field := data_map[purpose or self.doctype].get("warehouse_field"):
+					query = query.where(table.warehouse == item.get(warehouse_field))
 			else:
 				query = query.where(
 					(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
@@ -547,6 +550,14 @@ class StockController(AccountsController):
 					"exclude_warehouse_field": "t_warehouse",
 					"field": "transferred_qty",
 				},
+				"Return of Components": {
+					"table_name": "items",
+					"voucher_type": "Subcontracting Order",
+					"voucher_no": self.get("subcontracting_order"),
+					"voucher_detail_no_field": "sco_rm_detail",
+					"warehouse_field": "s_warehouse",
+					"field": "transferred_qty",
+				},
 				"Subcontracting Receipt": {
 					"table_name": "supplied_items",
 					"voucher_type": "Subcontracting Order",
@@ -554,9 +565,10 @@ class StockController(AccountsController):
 				},
 			}
 
-		purpose = self.get("purpose")
+		is_components_return = self.doctype == "Stock Entry" and self.is_reserved_components_return
+		purpose = "Return of Components" if is_components_return else self.get("purpose")
 		if (
-			purpose == "Subcontracting Delivery"
+			purpose in ("Subcontracting Delivery", "Return of Components")
 			or (
 				purpose == "Send to Subcontractor"
 				and frappe.get_value("Subcontracting Order", self.subcontracting_order, "reserve_stock")
@@ -623,7 +635,12 @@ class StockController(AccountsController):
 									batch_qty[entry.batch_no] -= delivered_qty
 					else:
 						working_qty = min(
-							(sre_doc.reserved_qty - sre_doc.get(field))
+							(
+								sre_doc.reserved_qty
+								- sre_doc.delivered_qty
+								- sre_doc.transferred_qty
+								- sre_doc.consumed_qty
+							)
 							if self._action == "submit"
 							else sre_doc.get(field),
 							qty,
