@@ -20,6 +20,7 @@ from erpnext.stock.doctype.packed_item.packed_item import (
 )
 from erpnext.stock.get_item_details import (
 	_get_bin_details,
+	_get_item_details,
 	get_conversion_factor,
 	get_default_bom,
 	get_item_warehouse_,
@@ -135,10 +136,18 @@ class ChildItemUpdater:
 
 				child_item.qty = flt(d.get("qty"))
 				child_item.description = d.get("description")
+				# a request without uom keeps the row's uom, so it is not a uom change
+				uom_changed = bool(d.get("uom")) and d.get("uom") != child_item.uom
+				if not new_child_flag and (uom_changed or not change_state.conversion_factor_unchanged):
+					# margin and discount are derived from price_list_rate, so it must be the
+					# price of the new UOM, not the one the row was submitted with
+					self._refresh_price_list_rate_for_new_uom(child_item, d)
+
 				update_child_item_rate_and_discount(
 					self.parent_doctype, child_item, d, self.allow_zero_qty, rate_unchanged=rate_unchanged
 				)
 				update_child_item_uom_and_weight(child_item, d)
+				update_child_item_stock_uom_rate(child_item)
 
 				if d.get("delivery_date") and self.parent_doctype == "Sales Order":
 					child_item.delivery_date = d.get("delivery_date")
@@ -409,6 +418,76 @@ class ChildItemUpdater:
 			return current_factor
 
 		return flt(get_conversion_factor(child_item.item_code, uom).get("conversion_factor")) or 1
+
+	def _refresh_price_list_rate_for_new_uom(self, child_item, new_data: dict) -> None:
+		"""Set the row's price list rate to the price of its new UOM.
+
+		Looked up here with the same logic the dialog uses (Item Price, UOM pricing, price
+		list currency and pricing rules), never taken from the request, so a stale or
+		hand-crafted price_list_rate cannot skew the discount and margin.
+		"""
+		parent = self.parent
+		uom = new_data.get("uom") or child_item.uom
+		conversion_factor = flt(new_data.get("conversion_factor")) or None
+		qty = flt(new_data.get("qty")) or 1
+		details = _get_item_details(
+			frappe._dict(
+				item_code=child_item.item_code,
+				uom=uom,
+				conversion_factor=conversion_factor,
+				qty=qty,
+				coupon_code=parent.get("coupon_code"),
+				customer=parent.get("customer") or parent.get("party_name"),
+				quotation_to=parent.get("quotation_to"),
+				supplier=parent.get("supplier"),
+				company=parent.company,
+				currency=parent.currency,
+				conversion_rate=parent.conversion_rate,
+				price_list=parent.get("selling_price_list") or parent.get("buying_price_list"),
+				price_list_currency=parent.get("price_list_currency"),
+				plc_conversion_rate=parent.get("plc_conversion_rate"),
+				is_internal_customer=parent.get("is_internal_customer"),
+				is_internal_supplier=parent.get("is_internal_supplier"),
+				is_subcontracted=parent.get("is_subcontracted"),
+				ignore_pricing_rule=parent.get("ignore_pricing_rule"),
+				order_type=parent.get("order_type"),
+				tax_category=parent.get("tax_category"),
+				set_warehouse=parent.get("set_warehouse"),
+				warehouse=child_item.get("warehouse"),
+				doctype=parent.doctype,
+				name=parent.name,
+				child_doctype=child_item.doctype,
+			),
+			doc=self._get_pricing_doc(child_item, uom, conversion_factor or 1, qty),
+		)
+
+		child_item.price_list_rate = flt(details.price_list_rate)
+		if not child_item.price_list_rate:
+			# no price for the new UOM: the previous UOM's margin and discount no longer apply
+			child_item.update(
+				{
+					"margin_type": "",
+					"margin_rate_or_amount": 0,
+					"rate_with_margin": 0,
+					"discount_percentage": 0,
+					"discount_amount": 0,
+				}
+			)
+
+	def _get_pricing_doc(self, child_item, uom: str, conversion_factor: float, qty: float) -> dict:
+		"""The parent with the priced row's new qty, so qty-based pricing rules see the new stock qty."""
+		doc = self.parent.as_dict()
+		for row in doc.get(self.child_docname) or []:
+			if row.name == child_item.name:
+				row.update(
+					{
+						"qty": qty,
+						"uom": uom,
+						"conversion_factor": conversion_factor,
+						"stock_qty": qty * conversion_factor,
+					}
+				)
+		return doc
 
 	def _track_blanket_order_change(self, child_item, new_data: dict) -> None:
 		if not child_item.get("blanket_order"):
@@ -939,6 +1018,13 @@ def update_child_item_rate_and_discount(
 		child_item.rate_with_margin = child_item.price_list_rate
 		child_item.discount_percentage = 0
 		child_item.discount_amount = flt(child_item.rate_with_margin) - flt(child_item.rate)
+
+
+def update_child_item_stock_uom_rate(child_item) -> None:
+	# gross profit is computed from stock_uom_rate * stock_qty, so it has to follow
+	# rate and conversion factor changes
+	if child_item.meta.has_field("stock_uom_rate"):
+		child_item.stock_uom_rate = flt(child_item.rate) / (flt(child_item.conversion_factor) or 1)
 
 
 def update_child_item_uom_and_weight(child_item, new_data) -> None:
