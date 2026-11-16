@@ -1051,11 +1051,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		sales_return = make_sales_return(sales_invoice.name)
 		sales_return.set(
 			"items",
-			[
-				item
-				for item in sales_return.items
-				if item.sales_invoice_item == sales_invoice.items[0].name
-			],
+			[item for item in sales_return.items if item.sales_invoice_item == sales_invoice.items[0].name],
 		)
 		self.assertEqual(len(sales_return.items), 1)
 		sales_return.items[0].qty = -1
