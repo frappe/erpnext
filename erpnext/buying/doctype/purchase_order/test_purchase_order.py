@@ -307,6 +307,31 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(make_purchase_order(mr.name).items[0].qty, 9)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_cancelling_the_order_and_receipt_of_a_material_request_below_precision_clears_them(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.001}],
+			}
+		).name
+		mr = make_material_request(item_code=item, qty=3, uom="Box", conversion_factor=0.001)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.submit()
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+
+		pr.cancel()
+		po.reload()
+		po.cancel()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].ordered_qty, 0)
+		self.assertEqual(mr.items[0].received_qty, 0)
+		self.assertEqual(make_purchase_order(mr.name).items[0].qty, 3)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
 	def test_receipt_of_a_material_request_in_a_whole_number_uom_completes_it(self):
 		item = make_item(
 			properties={
