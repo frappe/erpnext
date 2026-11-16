@@ -569,6 +569,15 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr_return.items[1].rate, 15)
 		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
 
+	def test_finished_good_takes_the_share_of_a_co_product_not_received(self):
+		scr = make_receipt_with_scrap(co_product_allocation=20, do_not_submit=True)
+		scr.items = [row for row in scr.items if row.secondary_item_type != "Co-Product"]
+		scr.save()
+
+		fg, scrap = scr.items
+		consumed = sum(row.amount for row in scr.supplied_items)
+		self.assertEqual(fg.amount, consumed + 200 - scrap.amount)
+
 	def test_return_values_percentage_secondary_items_at_the_receipt_rate(self):
 		scr = make_receipt_with_scrap(co_product_allocation=10)
 
@@ -6052,7 +6061,9 @@ def make_service_receipt(service_item, fg_item, qty, rate, fg_item_qty):
 	return scr
 
 
-def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None):
+def make_receipt_with_scrap(
+	valuation_type="Valuation Rate", scrap_rate=None, co_product_allocation=None, do_not_submit=False
+):
 	"""Receipt of 2 finished goods, with 2 scrap valued at 10 unless given a rate, and an optional co-product."""
 	set_backflush_based_on("BOM")
 	rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
@@ -6105,5 +6116,6 @@ def make_receipt_with_scrap(valuation_type="Valuation Rate", scrap_rate=None, co
 	if scrap_rate:
 		scr.items[1].rate = scrap_rate
 	scr.save()
-	scr.submit()
+	if not do_not_submit:
+		scr.submit()
 	return scr
