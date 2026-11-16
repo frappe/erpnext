@@ -1562,6 +1562,20 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
 	)
+	def test_unreserved_qty_skips_the_reservation_of_transferred_stock(self):
+		sco = make_reserving_order_with_new_items("Unreserved After Transfer", qty=10)
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 6
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		sco.reload()
+		self.assertEqual(sco.get_unreserved_qty(), {sco.supplied_items[0].name: 4})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
 	def test_transfer_shares_batch_qty_across_reservations_of_a_row(self):
 		warehouse = "_Test Warehouse - _TC"
 		rm_item = make_item(
