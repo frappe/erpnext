@@ -103,6 +103,51 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 
+	def test_mps_demand_uses_up_the_forecast_of_its_period(self):
+		item = make_item(properties={"is_stock_item": 1}).name
+		start_date = add_days(today(), 1)
+		forecast = frappe.get_doc(
+			{
+				"doctype": "Sales Forecast",
+				"company": COMPANY,
+				"parent_warehouse": "All Warehouses - _TC",
+				"from_date": start_date,
+				"frequency": "Monthly",
+				"demand_number": 1,
+				"selected_items": [{"item_code": item}],
+			}
+		)
+		forecast.generate_manual_demand()
+		forecast.items[0].demand_qty = 100
+		forecast.insert()
+		forecast.submit()
+
+		mps = frappe.get_doc(
+			{
+				"doctype": "Master Production Schedule",
+				"company": COMPANY,
+				"posting_date": today(),
+				"from_date": today(),
+				"to_date": add_days(start_date, 40),
+				"parent_warehouse": "All Warehouses - _TC",
+				"sales_forecast": forecast.name,
+				"items": [
+					{
+						"item_code": item,
+						"warehouse": WAREHOUSE,
+						"delivery_date": add_days(start_date, 14),
+						"planned_qty": 50,
+						"uom": frappe.get_cached_value("Item", item, "stock_uom"),
+					}
+				],
+			}
+		)
+		mps.insert()
+
+		rows = get_mrp_row_list(mps)
+
+		self.assertAlmostEqual(sum(row.demand_qty for row in rows if row.item_code == item), 100)
+
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
 			delivery_dates = ["2026-08-15", "2027-08-15"]
