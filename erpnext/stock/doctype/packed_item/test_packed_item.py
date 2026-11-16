@@ -635,3 +635,27 @@ class TestPackedItem(ERPNextTestSuite):
 		for d in expected_returns:
 			d.qty /= 2
 		self.assertReturns(expected_returns, dn_ret.packed_items)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
+	def test_bundle_rate_from_components_is_per_row_uom(self):
+		"""The bundle row's rate is per its own UOM, so a Box of 12 bundles costs 12 components."""
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		bundle = make_item(
+			properties={
+				"is_stock_item": 0,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+			}
+		).name
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_product_bundle(bundle, [component], 1)
+
+		so = make_sales_order(item_code=bundle, qty=1, do_not_save=True)
+		so.items[0].update({"uom": "Box", "conversion_factor": 12})
+		so.save()
+		so.packed_items[0].rate = 10
+		so.save()
+
+		self.assertEqual(so.items[0].rate, 120)
+		self.assertEqual(so.items[0].amount, 120)
