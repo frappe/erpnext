@@ -6324,6 +6324,34 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, transfer.save)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_backflush_takes_serial_nos_for_the_rounded_qty(self):
+		rm_item = make_item(
+			"_Test Fraction Serial RM",
+			{"is_stock_item": 1, "stock_uom": "Nos", "has_serial_no": 1, "serial_no_series": "TFSRM-.####"},
+		).name
+		fg_item = make_item("_Test Fraction Serial FG", {"is_stock_item": 1, "stock_uom": "Nos"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=5, quantity=3)
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+		)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=3,
+			source_warehouse="_Test Warehouse - _TC",
+			stock_uom="Nos",
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 3)).submit()
+
+		manufacture = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		row = next(row for row in manufacture.items if row.item_code == rm_item)
+		self.assertEqual(row.qty, 2)
+		self.assertEqual(len(get_serial_nos(row.serial_no)), 2)
+		manufacture.submit()
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
