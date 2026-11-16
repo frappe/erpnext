@@ -10,6 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
 
+from erpnext import require_permission
 from erpnext.controllers.stock_controller import StockController
 
 
@@ -205,6 +206,7 @@ def auto_fetch_serial_number(
 	for_doctype: str | None = None,
 	exclude_sr_nos=None,
 ) -> list[str]:
+	require_permission("Warehouse", warehouse, "select")
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
 
 	if exclude_sr_nos is None:
