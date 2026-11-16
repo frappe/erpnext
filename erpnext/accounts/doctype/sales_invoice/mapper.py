@@ -182,7 +182,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		source_document_warehouse_field = "target_warehouse"
 		target_document_warehouse_field = "from_warehouse"
 		received_items = get_received_items(source_name, target_doctype, target_detail_field)
-		validate_not_made_from_counterpart(source_doc, target_doctype, received_items)
 	else:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
@@ -193,6 +192,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			if doctype == "Purchase Order"
 			else {}
 		)
+
+	if doctype != "Purchase Invoice":
+		validate_not_made_from_counterpart(source_doc, target_doctype, received_items)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
