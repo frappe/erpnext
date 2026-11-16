@@ -1429,11 +1429,17 @@ class StockController(AccountsController):
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
-
-				if self.get("is_internal_supplier") and self.docstatus == 1 and not self.get("is_return"):
-					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
+
+			# the status updater checks an inter-company Purchase Receipt against its Delivery Note
+			if (
+				self.get("is_internal_supplier")
+				and self.docstatus == 1
+				and not self.get("is_return")
+				and (self.doctype == "Purchase Invoice" or self.is_internal_transfer())
+			):
+				self.validate_internal_transfer_qty()
 
 	def validate_internal_transfer_warehouse(self):
 		for row in self.items:
