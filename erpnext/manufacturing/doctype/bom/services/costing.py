@@ -9,7 +9,7 @@ delegating stubs so external callers (bom_update_log, etc.) keep working.
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cstr, flt
 
 
 class BOMCostingService:
@@ -223,7 +223,10 @@ class BOMCostingService:
 		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
 			return
 
-		if (previous[0].workstation, previous[0].workstation_type) != (row.workstation, row.workstation_type):
+		if any(
+			cstr(previous[0].get(field)) != cstr(row.get(field))
+			for field in ("workstation", "workstation_type")
+		):
 			row.hour_rate = 0
 		elif flt(before.conversion_rate) != flt(self.doc.conversion_rate):
 			# keeps the rate in company currency, also a manual one
