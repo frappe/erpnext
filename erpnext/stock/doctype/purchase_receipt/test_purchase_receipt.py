@@ -3260,19 +3260,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 	@change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_rejected_qty_adds_up_to_transit_qty(self):
 		"""The accepted and rejected stock qty of an internal receipt add up to what leaves transit."""
-		item_doc = make_item(
-			"_Test Batch Item For Split Transfer Qty",
-			{
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "BT-BIFSTQ-.####",
-				"stock_uom": "Kg",
-				"uoms": [{"uom": "Box", "conversion_factor": 0.3356}],
-			},
-		)
-		pr, warehouses, *_ = self.make_transfer_receipt("Split", item_doc, 3, 3)
-		pr.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
-		pr.submit()
+		pr, warehouses, _batch_no = self.make_split_transfer_receipt()
 
 		sle_qty = frappe._dict(
 			frappe.get_all(
@@ -3291,6 +3279,43 @@ class TestPurchaseReceipt(FrappeTestCase):
 			),
 			1.0,
 		)
+
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_return_by_batch_field_takes_back_the_rejected_stock_qty(self):
+		"""A return made from the batch field takes back the rejected stock qty its receipt put in."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr, warehouses, batch_no = self.make_split_transfer_receipt()
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].update({"use_serial_batch_fields": 1, "batch_no": batch_no})
+		pr_return.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry",
+				{"voucher_no": pr_return.name, "warehouse": warehouses.rejected, "is_cancelled": 0},
+				"actual_qty",
+			),
+			-1.0,
+		)
+
+	def make_split_transfer_receipt(self):
+		"""Internal receipt of a batch item that splits 3 Box accepted and 3 Box rejected, whose stock
+		qty rounds unevenly."""
+		item_doc = make_item(
+			"_Test Batch Item For Split Transfer Qty",
+			{
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BT-BIFSTQ-.####",
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Box", "conversion_factor": 0.3356}],
+			},
+		)
+		pr, warehouses, _company, batch_no = self.make_transfer_receipt("Split", item_doc, 3, 3)
+		pr.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		pr.submit()
+		return pr, warehouses, batch_no
 
 	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
