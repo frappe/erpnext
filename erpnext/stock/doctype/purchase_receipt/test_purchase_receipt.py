@@ -3390,34 +3390,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		"""Material rejected back into the in-transit warehouse stays there, so the receipt and its
 		return book transit with the net stock value that moved through it."""
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
-		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
-		item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "Kg"},
-			uoms=[{"uom": "Box", "conversion_factor": 0.3356}],
-		).name
-
-		make_purchase_receipt(
-			item_code=item, company=company, warehouse=from_warehouse, qty=10, rate=100, uom="Kg"
-		)
-
-		dn = create_delivery_note(
-			item_code=item,
-			company=company,
-			customer="_Test Internal Customer 2",
-			cost_center="Main - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			qty=6,
-			warehouse=from_warehouse,
-			target_warehouse=transit_warehouse,
-			do_not_submit=True,
-		)
-		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
-		dn.submit()
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		company = dn.company
 
 		pr = make_inter_company_purchase_receipt(dn.name)
 		pr.items[0].update(
