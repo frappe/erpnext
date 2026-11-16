@@ -4743,17 +4743,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		rejected_warehouse_return = make_purchase_return_against_rejected_warehouse(pr.name)
 		rejected_warehouse_return.submit()
 
-		returned_qty = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={
-				"voucher_no": ("in", [rejected_return.name, rejected_warehouse_return.name]),
-				"is_cancelled": 0,
-			},
-			fields=["warehouse", {"SUM": "actual_qty", "as": "qty"}],
-			group_by="warehouse",
-			as_list=True,
+		self.assertEqual(
+			get_net_qty_by_warehouse([rejected_return.name, rejected_warehouse_return.name]),
+			{warehouses.rejected: -1.0, warehouses.transit: 1.0},
 		)
-		self.assertEqual(dict(returned_qty), {warehouses.rejected: -1.0, warehouses.transit: 1.0})
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_full_rejected_returns_take_back_all_the_rejected_stock_qty(self):
@@ -4811,15 +4804,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), 1.01)
 
 		pr.cancel()
-		net_qty = frappe.get_all(
-			"Stock Ledger Entry",
-			filters={"voucher_no": pr.name},
-			fields=["warehouse", {"SUM": "actual_qty", "as": "qty"}],
-			group_by="warehouse",
-			as_list=True,
-		)
-		for warehouse, qty in net_qty:
-			self.assertEqual(flt(qty, 2), 0, warehouse)
+		for warehouse, qty in get_net_qty_by_warehouse([pr.name], is_cancelled=1).items():
+			self.assertEqual(qty, 0, warehouse)
 
 	def make_split_transfer_receipt(self, item_doc=None, conversion_factor=0.3356):
 		"""Internal receipt that splits 3 Box accepted and 3 Box rejected, whose stock qty rounds
@@ -10066,6 +10052,19 @@ def get_sl_entries(voucher_type, voucher_no):
 		fields=["actual_qty", "warehouse", "stock_value_difference"],
 		order_by="posting_time desc",
 	)
+
+
+def get_net_qty_by_warehouse(voucher_nos, is_cancelled=0):
+	"""Stock qty the vouchers moved, net per warehouse."""
+	return {
+		d.warehouse: flt(d.qty, 2)
+		for d in frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": ("in", voucher_nos), "is_cancelled": is_cancelled},
+			fields=["warehouse", {"SUM": "actual_qty", "as": "qty"}],
+			group_by="warehouse",
+		)
+	}
 
 
 def get_stock_value_by_warehouse(voucher_no):
