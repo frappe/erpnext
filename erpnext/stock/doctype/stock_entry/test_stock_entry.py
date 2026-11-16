@@ -5880,6 +5880,68 @@ class TestStockEntry(ERPNextTestSuite):
 		with self.set_user(material_request_user.name):
 			self.assertEqual(get_warehouse_details(other_warehouse_args), expected)
 
+	def test_get_warehouse_details_needs_item_select(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_permission
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		role = "_Test Stock Entry Reader"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 0}).insert()
+		add_permission("Stock Entry", role)
+		self.addCleanup(frappe.clear_cache, doctype="Stock Entry")
+		user = create_user("test_warehouse_details_reader@example.com", role).name
+		args = {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}
+
+		with self.set_user(user):
+			self.assertTrue(frappe.has_permission("Stock Entry", "read"))
+			self.assertFalse(frappe.has_permission("Item", "select"))
+			self.assertRaises(frappe.PermissionError, get_warehouse_details, args)
+
+	def test_get_warehouse_details_combines_warehouse_user_permissions_for_stock_entry(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=10, basic_rate=100)
+		user = create_user("test_warehouse_details_combined@example.com", "Stock User").name
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", user)
+		add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", user, applicable_for="Stock Entry")
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", user)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse 1 - _TC", user)
+
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+		stock_entry_warehouse_args = {**args, "warehouse": "_Test Warehouse 1 - _TC"}
+		expected = get_warehouse_details(stock_entry_warehouse_args)
+
+		with self.set_user(user):
+			self.assertEqual(get_warehouse_details(stock_entry_warehouse_args), expected)
+			self.assertRaises(
+				frappe.PermissionError, get_warehouse_details, {**args, "warehouse": "Stores - _TC"}
+			)
+
+	def test_get_warehouse_details_applies_company_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.stock.doctype.stock_entry.stock_entry import get_warehouse_details
+
+		user = create_user("test_warehouse_details_company@example.com", "Stock User").name
+		add_user_permission("Company", "_Test Company", user)
+		self.addCleanup(remove_user_permission, "Company", "_Test Company", user)
+		args = {"item_code": "_Test Item", "posting_date": today(), "posting_time": nowtime()}
+
+		with self.set_user(user):
+			self.assertEqual(
+				set(get_warehouse_details({**args, "warehouse": "_Test Warehouse - _TC"})),
+				{"actual_qty", "basic_rate"},
+			)
+			self.assertRaises(
+				frappe.PermissionError,
+				get_warehouse_details,
+				{**args, "warehouse": "_Test Warehouse 2 - _TC1"},
+			)
+
 
 def make_serialized_item(self, **args):
 	args = frappe._dict(args)
