@@ -1310,11 +1310,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2026-10-13 12:12:32.911258",
-=======
  "modified": "2026-11-16 04:16:51.560603",
->>>>>>> 3941f74 (fix(selling): don't copy the inter company reference to a duplicate)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
