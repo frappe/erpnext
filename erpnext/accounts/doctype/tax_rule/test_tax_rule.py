@@ -95,6 +95,27 @@ class TestTaxRule(ERPNextTestSuite):
 			purchase_template,
 		)
 
+	def test_set_taxes_reads_the_supplier_group_when_not_sent(self):
+		from erpnext.accounts.party import set_taxes
+
+		supplier_group = frappe.get_doc(
+			{
+				"doctype": "Supplier Group",
+				"supplier_group_name": "_Test Tax Rule Supplier Group",
+				"parent_supplier_group": "All Supplier Groups",
+			}
+		).insert()
+		make_tax_rule(
+			supplier_group=supplier_group.name,
+			tax_type="Purchase",
+			purchase_tax_template="_Test Purchase Taxes and Charges Template - _TC",
+			priority=1,
+			save=1,
+		)
+
+		# "_Test Supplier" is in "_Test Supplier Group", not in the rule's group
+		self.assertIsNone(set_taxes("_Test Supplier", "Supplier", nowdate(), "_Test Company"))
+
 	def test_use_for_shopping_cart_filter(self):
 		city = "Test Cart City"
 		# higher priority ensures this rule wins when use_for_shopping_cart is not filtered
