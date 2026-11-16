@@ -223,17 +223,15 @@ class BOMCostingService:
 		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
 			return
 
+		old_rate, new_rate = flt(before.conversion_rate), flt(self.doc.conversion_rate)
 		if any(
 			cstr(previous[0].get(field)) != cstr(row.get(field))
 			for field in ("workstation", "workstation_type")
 		):
 			row.hour_rate = 0
-		elif flt(self.doc.conversion_rate) and flt(before.conversion_rate) != flt(self.doc.conversion_rate):
+		elif old_rate and new_rate and old_rate != new_rate:
 			# keeps the rate in company currency, also a manual one
-			row.hour_rate = flt(
-				flt(row.hour_rate) * flt(before.conversion_rate) / flt(self.doc.conversion_rate),
-				row.precision("hour_rate"),
-			)
+			row.hour_rate = flt(flt(row.hour_rate) * old_rate / new_rate, row.precision("hour_rate"))
 
 	def _set_row_hour_rate(self, row):
 		hour_rate = 0
