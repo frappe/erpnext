@@ -3075,6 +3075,35 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				flt(stock_entry.stock_value_difference, 2),
 			)
 
+	def test_internal_transfer_invoice_resizes_package_without_package_permission(self):
+		"""A user who may not write packages can still change the rejected qty of a draft transfer
+		invoice."""
+		item = make_item(
+			"_Test Batch Item For Invoice Package Resize",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIIPR-.####"},
+		)
+		user = "test_pi_package_resize@example.com"
+		if not frappe.db.exists("User", user):
+			frappe.get_doc(
+				{
+					"doctype": "User",
+					"email": user,
+					"first_name": "Test PI Package Resize",
+					"roles": [{"role": "Accounts User"}],
+				}
+			).insert(ignore_permissions=True)
+
+		pi, _ = self.make_transfer_invoice("Package Resize", item, 1, 2)
+		with self.set_user(user):
+			pi.insert()
+			pi.items[0].update({"rejected_qty": 1, "received_qty": 2})
+			pi.save()
+
+		total_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", pi.items[0].rejected_serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(total_qty, 1)
+
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
 		with, and the entries say the same as the stock."""
