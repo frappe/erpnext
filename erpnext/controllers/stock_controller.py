@@ -6,7 +6,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Tuple
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
@@ -729,8 +729,7 @@ class StockController(AccountsController):
 				(receipt.docstatus == 1)
 				& (receipt.is_return == 0)
 				& (receipt.supplier_warehouse == self.supplier_warehouse)
-				& supplied.subcontracting_order.isin(list({order for order, _item_code in keys}))
-				& supplied.rm_item_code.isin(list({item_code for _order, item_code in keys}))
+				& Tuple(supplied.subcontracting_order, supplied.rm_item_code).isin(keys)
 			)
 		).run(as_dict=True)
 
