@@ -769,8 +769,11 @@ def validate_no_ordered_packed_item(rows, parent) -> None:
 	for row in rows:
 		if purchase_order := ordered_rows.get(row.name):
 			frappe.throw(
-				_("Row #{0}: Cannot delete item {1} which is already ordered on Purchase Order {2}.").format(
-					row.idx, row.item_code, get_link_to_form("Purchase Order", purchase_order)
+				_("Row #{0}: Cannot delete item {1} which is already ordered on {2} {3}.").format(
+					row.idx,
+					row.item_code,
+					_("Purchase Order"),
+					get_link_to_form("Purchase Order", purchase_order),
 				)
 			)
 
