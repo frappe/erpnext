@@ -175,12 +175,8 @@ class SubcontractingReceipt(SubcontractingController):
 		self.validate_return_supplier_warehouse()
 
 		if self.get("_action") == "submit":
-<<<<<<< HEAD
-			self.validate_scrap_items()
-=======
 			self.validate_returned_raw_materials()
-			self.validate_secondary_items()
->>>>>>> b354d3f (fix(subcontracting): stop a Subcontract Return from taking back more raw material than the receipt consumed)
+			self.validate_scrap_items()
 			self.validate_accepted_warehouse()
 			self.validate_rejected_warehouse()
 

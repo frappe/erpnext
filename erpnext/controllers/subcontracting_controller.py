@@ -9,11 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Coalesce, Sum
-<<<<<<< HEAD
-from frappe.utils import cint, cstr, flt, get_link_to_form
-=======
-from frappe.utils import ceil, cint, cstr, escape_html, flt, get_link_to_form
->>>>>>> c61d6cd (fix(subcontracting): take back whole serial nos on a partial Subcontract Return)
+from frappe.utils import ceil, cint, cstr, flt, get_link_to_form
 
 from erpnext.controllers.sales_and_purchase_return import (
 	get_rate_for_return,
@@ -201,11 +197,12 @@ class SubcontractingController(StockController):
 		if not self.is_subcontracting_receipt_return():
 			return {}
 
+		# a receipt consumes raw materials for its accepted qty only
 		received_qty = dict(
 			frappe.get_all(
 				"Subcontracting Receipt Item",
 				filters={"parent": self.return_against},
-				fields=["name", "received_qty"],
+				fields=["name", "qty"],
 				as_list=True,
 			)
 		)
@@ -256,7 +253,7 @@ class SubcontractingController(StockController):
 			frappe.qb.from_(item)
 			.join(receipt)
 			.on(receipt.name == item.parent)
-			.select(item.subcontracting_receipt_item, Sum(item.received_qty))
+			.select(item.subcontracting_receipt_item, Sum(item.qty))
 			.where(submitted_return)
 			.groupby(item.subcontracting_receipt_item)
 		).run()
@@ -279,11 +276,11 @@ class SubcontractingController(StockController):
 		"""Take back the receipt's raw materials in proportion to the finished goods this return sends back."""
 		for material in self.returnable_raw_materials.get(row.subcontracting_receipt_item, {}).values():
 			# counted as returned, so that two rows of one receipt row do not both take back the same qty
-			material.returned_fg_qty += abs(flt(row.received_qty))
+			material.returned_fg_qty += abs(flt(row.qty))
 			qty = self.get_return_consumed_qty(material)
 			material.returned_qty -= qty
 			if qty:
-				self.__add_supplied_or_received_item(row, frappe._dict(material.item_details), qty)
+				self.__add_supplied_item(row, frappe._dict(material.item_details), qty)
 
 	def count_kept_return_rows(self, rows):
 		"""Count the rows a return keeps from its last save, so that the rows it rebuilds take back only the rest."""
@@ -291,7 +288,7 @@ class SubcontractingController(StockController):
 			for rm_item_code, material in self.returnable_raw_materials.get(
 				row.subcontracting_receipt_item, {}
 			).items():
-				material.returned_fg_qty += abs(flt(row.received_qty))
+				material.returned_fg_qty += abs(flt(row.qty))
 				material.returned_qty += sum(
 					abs(flt(supplied_item.consumed_qty))
 					for supplied_item in self.supplied_items
@@ -1271,33 +1268,21 @@ class SubcontractingController(StockController):
 	def __set_supplied_items(self):
 		self.bom_items = {}
 
-<<<<<<< HEAD
 		has_supplied_items = True if self.get(self.raw_material_table) else False
-		# a receipt consumes no raw materials for its rejected qty, so their return brings none back
-		rejected_return_rows = self.get_rejected_return_rows()
-		for row in self.items:
-			if row.name in rejected_return_rows:
-				continue
-
-			if self.doctype != self.subcontract_data.order_doctype and (
-				(self.__changed_name and row.name not in self.__changed_name)
-				or (has_supplied_items and not self.__changed_name)
-			):
-=======
-		has_items = True if self.get(self.raw_material_table) else False
 		kept_rows = [
 			row
 			for row in self.items
 			if self.doctype != self.subcontract_data.order_doctype
 			and (
 				(self.__changed_name and row.name not in self.__changed_name)
-				or (has_items and not self.__changed_name)
+				or (has_supplied_items and not self.__changed_name)
 			)
 		]
 		self.count_kept_return_rows(kept_rows)
+		# a receipt consumes no raw materials for its rejected qty, so their return brings none back
+		rejected_return_rows = self.get_rejected_return_rows()
 		for row in self.items:
-			if row in kept_rows:
->>>>>>> 78b03f5 (fix(subcontracting): count the rows a return keeps when it rebuilds the others)
+			if row in kept_rows or row.name in rejected_return_rows:
 				continue
 
 			if self.is_subcontracting_receipt_return():
