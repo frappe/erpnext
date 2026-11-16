@@ -749,8 +749,8 @@ def get_accounting_entries(
 			query = query.select(gl_entry.posting_date, gl_entry.is_opening, gl_entry.fiscal_year)
 		query = query.where(gl_entry.is_cancelled == 0)
 		query = query.where(gl_entry.posting_date <= to_date)
-		# FORCE INDEX is MySQL-only; postgres has no index hints (its planner uses the index anyway)
-		if frappe.db.db_type != "postgres":
+		# FORCE INDEX is MariaDB-only; postgres and sqlite have no index hints (their planners use the index anyway)
+		if frappe.db.db_type == "mariadb":
 			query = query.force_index("posting_date_company_index")
 
 		if ignore_opening_entries and not ignore_is_opening:
