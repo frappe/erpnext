@@ -1355,13 +1355,15 @@ erpnext.stock.get_sbie_row_qty = function (doc, row, qty_field, stock_qty) {
 	const row_qty = Math.abs(flt(row[qty_field]));
 
 	// keep a row qty that already matches, as dividing back by a fractional factor can drift
-	const qty =
-		erpnext.stock.get_sbie_stock_qty(doc, row, qty_field, row_qty) === flt(stock_qty, stock_precision)
-			? row_qty
-			: flt(
+	let qty = row_qty;
+	if (erpnext.stock.get_sbie_stock_qty(doc, row, qty_field, row_qty) !== flt(stock_qty, stock_precision)) {
+		qty = flt(stock_qty, stock_precision)
+			? flt(
 					(flt(stock_qty) + offset_stock_qty) / conversion_factor - offset_qty,
 					precision(qty_field, row)
-			  );
+			  )
+			: 0;
+	}
 
 	return doc.is_return && doc.doctype !== "Stock Entry" && qty ? -Math.abs(qty) : qty;
 };
