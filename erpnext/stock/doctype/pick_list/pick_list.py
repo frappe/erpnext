@@ -2223,7 +2223,10 @@ def get_rejected_warehouses():
 
 
 def check_pick_list_company(company: str | None) -> None:
-	if not isinstance(company, str) or not company:
+	if company is not None and not isinstance(company, str):
+		frappe.throw(_("Company must be text"), frappe.ValidationError)
+
+	if not company:
 		return
 
 	from frappe.core.doctype.user_permission.user_permission import get_user_permissions

@@ -3607,6 +3607,14 @@ class TestPickList(FrappeTestCase):
 		result = get_pick_list_query("Pick List", "", "name", 0, 20, filters)
 		self.assertIn(pick_list.name, [row["name"] for row in result])
 
+	def test_pick_list_query_refuses_a_company_that_is_not_text(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
+
+		filters = {"company": 123, "customer": "_Test Customer"}
+		self.assertRaises(
+			frappe.ValidationError, get_pick_list_query, "Pick List", "", "name", 0, 20, filters
+		)
+
 
 def make_serialized_bundle_pick_list():
 	"""Pick 4 bundles of 1 serialized component each."""
