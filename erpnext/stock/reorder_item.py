@@ -161,6 +161,14 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 		.select(
 			item_table.name,
 			item_table.variant_of,
+			item_table.stock_uom,
+			item_table.purchase_uom,
+			item_table.description,
+			item_table.item_name,
+			item_table.item_group,
+			item_table.brand,
+			item_table.has_variants,
+			item_table.lead_time_days,
 		)
 		.where(
 			(item_table.disabled == 0)
@@ -173,7 +181,10 @@ def get_reorder_levels_for_variants(itemwise_reorder):
 	variants_item = query.run(as_dict=True)
 	for row in variants_item:
 		if not itemwise_reorder.get(row.name) and itemwise_reorder.get(row.variant_of):
-			itemwise_reorder.setdefault(row.name, []).extend(itemwise_reorder.get(row.variant_of, []))
+			# the template's levels with the variant's own item details
+			itemwise_reorder[row.name] = [
+				frappe._dict(level, **row) for level in itemwise_reorder.get(row.variant_of)
+			]
 
 	return itemwise_reorder
 
