@@ -194,6 +194,19 @@ class TestEmployee(ERPNextTestSuite):
 		old.status = "Active"
 		self.assertRaises(frappe.DuplicateEntryError, old.save)
 
+	def test_inactive_employee_cannot_link_user_of_active_employee(self):
+		user = "employee-active-owner@example.com"
+		make_employee(user, company="_Test Company")
+		other = frappe.get_doc(
+			"Employee", make_employee("employee-left-other@example.com", company="_Test Company")
+		)
+		other.status = "Left"
+		other.relieving_date = "2020-01-01"
+		other.save()
+
+		other.user_id = user
+		self.assertRaises(frappe.DuplicateEntryError, other.save)
+
 	def test_user_has_employee(self):
 		employee = make_employee("test_emp_user_creation@company.com", company="_Test Company")
 		employee_doc = frappe.get_doc("Employee", employee)

@@ -168,7 +168,8 @@ class Employee(NestedSet):
 			return
 
 		self.validate_for_enabled_user_id()
-		if self.status == "Active":
+		# An old Left record keeps its link to the rehire's User, but no new link may be made.
+		if self.status == "Active" or self.has_value_changed("user_id"):
 			self.validate_duplicate_user_id()
 		if any(
 			self.has_value_changed(field) for field in ("user_id", "status", "create_user_permission")
