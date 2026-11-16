@@ -915,9 +915,12 @@ class BOM(WebsiteGenerator):
 
 		if self.price_list_currency == self.company_currency():
 			self.plc_conversion_rate = 1
-		else:
-			# validate_currency allows only the company or the BOM currency
+		elif self.price_list_currency == self.currency:
 			self.plc_conversion_rate = self.conversion_rate
+		else:
+			self.plc_conversion_rate = get_exchange_rate(
+				self.price_list_currency, self.company_currency(), args="for_buying"
+			)
 
 	def validate_materials(self):
 		"""Validate raw material entries"""
