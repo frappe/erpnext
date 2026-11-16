@@ -45,6 +45,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
+from erpnext.utilities.query import get_user_permission_conditions_qb
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -2876,6 +2877,9 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 
 	if txt:
 		query = query.where(table.parent.like(f"%{txt}%"))
+
+	for condition in get_user_permission_conditions_qb("Sales Order", so_table):
+		query = query.where(condition)
 
 	if page_len:
 		query = query.limit(page_len)
