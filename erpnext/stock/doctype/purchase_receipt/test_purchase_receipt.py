@@ -4316,6 +4316,44 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_returns_of_parts_of_a_receipt_reverse_its_whole_actual_valuation_charge(self):
+		"""Returns of parts of a row reverse the charge on the stock they take back, so they add up to the
+		charge the row carried."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item_for_returns_of_parts(0.3356)
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			item_code=item,
+			qty=6,
+			uom="Box",
+			conversion_factor=0.3356,
+			rate=100,
+			do_not_submit=True,
+		)
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation",
+				"charge_type": "Actual",
+				"account_head": "Expenses Included In Valuation - TCP1",
+				"description": "Freight",
+				"tax_amount": 100,
+			},
+		)
+		pr.submit()
+
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		first_return.items[0].update({"qty": -3, "received_qty": -3})
+		first_return.submit()
+		last_return = make_return_doc("Purchase Receipt", pr.name)
+		last_return.submit()
+
+		self.assertEqual(first_return.taxes[0].tax_amount + last_return.taxes[0].tax_amount, -100)
+
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
