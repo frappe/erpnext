@@ -1202,16 +1202,19 @@ class PurchaseReceipt(BuyingController):
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
-	return frappe.db.get_value(
-		"Stock Ledger Entry",
-		{
-			"voucher_type": "Purchase Receipt",
-			"voucher_no": voucher_no,
-			"voucher_detail_no": voucher_detail_no,
-			"warehouse": warehouse,
-			"is_cancelled": 0,
-		},
-		"stock_value_difference",
+	"""0 when the row posts nothing to the warehouse, e.g. a rejected qty that rounds to 0 in the stock UOM."""
+	return flt(
+		frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": voucher_no,
+				"voucher_detail_no": voucher_detail_no,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+			},
+			"stock_value_difference",
+		)
 	)
 
 
