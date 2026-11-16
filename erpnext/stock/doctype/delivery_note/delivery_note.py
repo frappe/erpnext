@@ -389,7 +389,6 @@ class DeliveryNote(SellingController):
 		if (
 			cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[
