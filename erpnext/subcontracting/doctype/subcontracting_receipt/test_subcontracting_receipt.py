@@ -588,6 +588,32 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(stock_value_difference, co_product.amount)
 
+	def test_partial_receipts_take_the_order_additional_costs_once(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.append(
+			"additional_costs",
+			{"expense_account": "Cost of Goods Sold - _TC", "description": "Freight", "amount": 1000},
+		)
+		sco.submit()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
+
 	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
 		set_backflush_based_on("BOM")
 		sco = get_subcontracting_order()
