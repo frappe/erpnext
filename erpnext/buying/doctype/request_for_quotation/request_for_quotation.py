@@ -421,10 +421,11 @@ class RequestforQuotation(BuyingController):
 				supplier.quote_status = quote_status
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def send_supplier_emails(rfq_name):
 	check_portal_enabled("Request for Quotation")
 	rfq = frappe.get_doc("Request for Quotation", rfq_name)
+	rfq.check_permission("write")
 	if rfq.docstatus == 1:
 		rfq.send_to_supplier()
 
