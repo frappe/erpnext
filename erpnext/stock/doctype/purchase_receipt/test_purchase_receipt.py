@@ -2297,6 +2297,25 @@ class TestPurchaseReceipt(FrappeTestCase):
 					rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
 					self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 0)
 
+	def test_internal_transfer_pr_rejected_return_in_another_uom_takes_back_only_its_qty(self):
+		"""A partial return of the rejected qty in another UOM takes back only its own stock qty."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item_doc = make_item(
+			"Test Rejected Return In Another UOM Internal Transfer Item",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 10}]},
+		)
+		pr, warehouses, _dn = self.make_rounded_internal_receipt(item_doc, 10)
+
+		rejected_return = make_return_doc("Purchase Receipt", pr.name)
+		rejected_return.items[0].update(
+			{"uom": "Kg", "conversion_factor": 1, "qty": 0, "rejected_qty": -2, "received_qty": -2}
+		)
+		rejected_return.submit()
+
+		rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
+		self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 8)
+
 	@change_settings("System Settings", {"float_precision": 2})
 	def test_internal_transfer_pr_cancel_reverses_its_posted_stock_qty(self):
 		"""Cancelling an internal receipt posted with an older split reverses what it posted."""
