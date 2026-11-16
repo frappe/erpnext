@@ -202,8 +202,7 @@ class BOMCostingService:
 		self.doc.base_operating_cost = total * self.doc.conversion_rate
 
 	def update_rate_and_time(self, row, update_hour_rate=False, save=True):
-		if self.has_stale_hour_rate(row):
-			row.hour_rate = 0
+		self.update_stale_hour_rate(row)
 
 		if not row.hour_rate or update_hour_rate:
 			self._set_row_hour_rate(row)
@@ -217,18 +216,21 @@ class BOMCostingService:
 		if update_hour_rate and save:
 			row.db_update()
 
-	def has_stale_hour_rate(self, row):
+	def update_stale_hour_rate(self, row):
 		"""Workstation or conversion rate changed but the hour rate did not, e.g. through the API."""
 		before = self.doc.get_doc_before_save()
 		previous = before and before.get("operations", {"name": row.name})
 		if not previous or flt(previous[0].hour_rate) != flt(row.hour_rate):
-			return False
+			return
 
-		return (previous[0].workstation, previous[0].workstation_type, flt(before.conversion_rate)) != (
-			row.workstation,
-			row.workstation_type,
-			flt(self.doc.conversion_rate),
-		)
+		if (previous[0].workstation, previous[0].workstation_type) != (row.workstation, row.workstation_type):
+			row.hour_rate = 0
+		elif flt(before.conversion_rate) != flt(self.doc.conversion_rate):
+			# keeps the rate in company currency, also a manual one
+			row.hour_rate = flt(
+				flt(row.hour_rate) * flt(before.conversion_rate) / flt(self.doc.conversion_rate),
+				row.precision("hour_rate"),
+			)
 
 	def _set_row_hour_rate(self, row):
 		hour_rate = 0
