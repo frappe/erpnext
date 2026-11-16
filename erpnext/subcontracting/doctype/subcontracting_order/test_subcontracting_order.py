@@ -1145,6 +1145,29 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)
 		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).has_unreserved_stock())
 
+	def test_return_cannot_take_back_more_than_the_order_has_at_the_supplier(self):
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		row = next(
+			row
+			for row in ste.items
+			if not any(frappe.get_cached_value("Item", row.item_code, ["has_serial_no", "has_batch_no"]))
+		)
+		row.qty += 1
+
+		self.assertRaisesRegex(frappe.ValidationError, "can be returned against", ste.save)
+
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
 			{
