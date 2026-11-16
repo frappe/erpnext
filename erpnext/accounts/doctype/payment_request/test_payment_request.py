@@ -1876,6 +1876,35 @@ class TestPaymentRequest(ERPNextTestSuite):
 			submit_doc=1,
 		)
 
+	def test_payment_request_of_another_invoice_is_rejected(self):
+		si_a = create_sales_invoice(qty=1, rate=1000)
+		si_b = create_sales_invoice(customer="_Test Customer 1", qty=1, rate=1000)
+		pr_b = make_payment_request(
+			dt="Sales Invoice", dn=si_b.name, mute_email=1, submit_doc=1, return_doc=1
+		)
+
+		pe = get_payment_entry("Sales Invoice", si_a.name)
+		pe.references[0].payment_request = pr_b.name
+		self.assertRaisesRegex(frappe.ValidationError, "does not belong to", pe.insert)
+
+		pr_b.reload()
+		self.assertEqual(pr_b.status, "Requested")
+		self.assertEqual(pr_b.outstanding_amount, 1000)
+
+	def test_order_payment_request_allowed_on_reconciled_invoice_row(self):
+		so = make_sales_order()
+		pr = make_payment_request(dt="Sales Order", dn=so.name, mute_email=1, submit_doc=1, return_doc=1)
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name)
+		row = pe.references[0]
+		row.payment_request = pr.name
+		row.advance_voucher_type = "Sales Order"
+		row.advance_voucher_no = so.name
+		pe.validate_payment_request_reference()
+
 
 def make_shopping_cart_order(customer, rate=1000):
 	so = make_sales_order(customer=customer, qty=1, rate=rate, do_not_save=True)
