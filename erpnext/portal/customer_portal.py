@@ -44,6 +44,9 @@ def _portal_customers() -> list[str]:
 @request_cache
 def _customers_of(user: str) -> list[str]:
 	# `user` is only the cache key: a test or a job can switch users within one request
+	# taking the role away closes the portal, as it closed the old one, even while the user is listed
+	if "Customer" not in frappe.get_roles():
+		return []
 	return get_parents_for_user("Customer")
 
 
