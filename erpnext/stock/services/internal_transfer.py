@@ -30,11 +30,12 @@ class StockInternalTransferService:
 			else:
 				self.validate_internal_transfer_warehouse()
 
-			# inter-company documents too, not only same-company transfers
+			# the status updater checks an inter-company Purchase Receipt against its Delivery Note
 			if (
 				self.doc.get("is_internal_supplier")
 				and self.doc.docstatus == 1
 				and not self.doc.get("is_return")
+				and (self.doc.doctype == "Purchase Invoice" or self.doc.is_internal_transfer())
 			):
 				self.validate_internal_transfer_qty()
 
