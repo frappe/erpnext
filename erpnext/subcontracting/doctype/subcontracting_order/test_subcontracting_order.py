@@ -1043,38 +1043,10 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		set_backflush_based_on("BOM")
 
 	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
-		make_subcontracted_item(
-			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
-		)
-		service_items = [
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 7",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item SA7",
-				"fg_item_qty": 10,
-			},
-			{
-				"warehouse": "_Test Warehouse - _TC",
-				"item_code": "Subcontracted Service Item 8",
-				"qty": 10,
-				"rate": 100,
-				"fg_item": "Subcontracted Item Shared RM",
-				"fg_item_qty": 10,
-			},
-		]
-		sco = get_subcontracting_order(service_items=service_items)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
-		)
+		sco = make_order_sharing_a_raw_material()
 
 		def transfer_20_for(fg_item):
-			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
-			ste.items = [row for row in ste.items if row.subcontracted_item == fg_item]
-			ste.items[0].qty = 20
-			ste.save()
-			ste.submit()
+			transfer_shared_raw_material(sco, fg_item, 20)
 
 		both_rows = frappe.get_doc(make_rm_stock_entry(sco.name))
 		for row in both_rows.items:
@@ -1088,6 +1060,35 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		transfer_20_for("Subcontracted Item SA7")
 		self.assertRaises(frappe.ValidationError, transfer_20_for, "Subcontracted Item Shared RM")
+
+	def test_material_to_supplier_maps_a_shared_raw_material_only_once(self):
+		sco = make_order_sharing_a_raw_material()
+		transfer_shared_raw_material(sco, "Subcontracted Item SA7", 20)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		self.assertFalse([row for row in ste.items if row.item_code == "Subcontracted SRM Item 1"])
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 10})
+	def test_material_to_supplier_skips_fully_sent_materials(self):
+		make_subcontracted_item(item_code="Subcontracted Item Two RM")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Two RM",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		rm_items[-1]["qty"] -= 2
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		self.assertEqual([(row.item_code, row.qty) for row in ste.items], [(rm_items[-1]["item_code"], 2)])
 
 	def test_get_materials_from_supplier(self):
 		# Create SCO
@@ -1779,6 +1780,47 @@ def make_reserving_order_with_new_items(suffix, qty=4, rm_properties=None):
 	sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
 	sco.reserve_stock = 1
 	return sco
+
+
+def make_order_sharing_a_raw_material():
+	"""Order whose two finished goods both use Subcontracted SRM Item 1, with 40 of it in stock."""
+	make_subcontracted_item(
+		item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+	)
+	service_items = [
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 7",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA7",
+			"fg_item_qty": 10,
+		},
+		{
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 8",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item Shared RM",
+			"fg_item_qty": 10,
+		},
+	]
+	sco = get_subcontracting_order(service_items=service_items)
+	make_stock_entry(
+		target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+	)
+	return sco
+
+
+def transfer_shared_raw_material(sco, fg_item, qty):
+	row = next(
+		row
+		for row in sco.supplied_items
+		if row.main_item_code == fg_item and row.rm_item_code == "Subcontracted SRM Item 1"
+	)
+	ste = frappe.get_doc(make_rm_stock_entry(sco.name, [{**row.as_dict(), "qty": qty}]))
+	ste.save()
+	ste.submit()
 
 
 def set_alternative_item(item_code, alternative_item_code):
