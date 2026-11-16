@@ -4577,7 +4577,7 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Buying Settings", {"validate_consumed_qty": 1})
 	def test_return_takes_back_the_raw_material_the_receipt_consumed_per_unit(self):
-		rm_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		scr = make_receipt_consuming_transferred_materials(qty=2, rm_items={rm_item: 3})
 
 		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-1)
@@ -4648,17 +4648,20 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertFalse(scr_return.supplied_items)
 
-	def test_partial_returns_take_back_whole_serial_nos(self):
-		rm_item = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SCR-RET-SN-.#####"}
-		).name
-		scr = make_receipt_consuming_transferred_materials(qty=2, rm_items={rm_item: 3})
+	def test_partial_returns_take_back_whole_units(self):
+		for properties in (
+			{"has_serial_no": 1, "serial_no_series": "SCR-RET-SN-.#####"},
+			{"stock_uom": "_Test UOM"},
+		):
+			rm_item = make_item(properties={"is_stock_item": 1, **properties}).name
+			scr = make_receipt_consuming_transferred_materials(qty=2, rm_items={rm_item: 3})
 
-		returns = [make_return_subcontracting_receipt(scr_name=scr.name, qty=-1) for _ in range(2)]
+			returns = [make_return_subcontracting_receipt(scr_name=scr.name, qty=-1) for _ in range(2)]
 
-		self.assertEqual(
-			[sum(row.consumed_qty for row in scr_return.supplied_items) for scr_return in returns], [-2, -1]
-		)
+			self.assertEqual(
+				[sum(row.consumed_qty for row in scr_return.supplied_items) for scr_return in returns],
+				[-2, -1],
+			)
 
 	def test_use_serial_batch_fields_for_subcontracting_receipt_with_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
