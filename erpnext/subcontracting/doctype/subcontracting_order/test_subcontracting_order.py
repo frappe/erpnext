@@ -709,6 +709,33 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 
 		self.assertEqual(own_transfer.docstatus, 1)
 
+	def test_consumed_alternative_item_counts_on_its_original_row(self):
+		sco = make_reserving_order_with_new_items("Alt Consumed")
+		frappe.db.set_value("BOM", sco.items[0].bom, "allow_alternative_item", 1)
+		sco.reserve_stock = 0
+		sco.submit()
+		original = sco.supplied_items[0]
+		alternative = make_item("Subcontracted RM Item Alt Consumed Alternative", {"is_stock_item": 1}).name
+		set_alternative_item(original.rm_item_code, alternative)
+		make_stock_entry(
+			item_code=alternative,
+			target=original.reserve_warehouse,
+			qty=original.required_qty,
+			basic_rate=120,
+		)
+
+		transfer = make_supplied_item_transfer(sco, original)
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": original.rm_item_code, "allow_alternative_item": 1}
+		)
+		transfer.insert()
+		transfer.submit()
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(original.doctype, original.name, "consumed_qty"), original.required_qty
+		)
+
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
