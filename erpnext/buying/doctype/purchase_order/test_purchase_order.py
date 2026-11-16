@@ -1848,83 +1848,20 @@ class TestPurchaseOrder(FrappeTestCase):
 			frappe.ValidationError, "fully ordered", make_inter_company_sales_order, po.name
 		)
 
-<<<<<<< HEAD
-=======
-	def test_second_partial_internal_order_links_to_its_own_source(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
-		po = make_internal_purchase_order()
-		so = make_sales_order(
-			company=po.company,
-			customer="_Test Internal Customer 2",
-			warehouse="_Test Transfer From - TCP1",
-			selling_price_list=po.buying_price_list,
-			qty=2,
-			rate=1,
-		)
-
-		for source, make_order in (
-			(po, make_inter_company_sales_order),
-			(so, make_inter_company_purchase_order),
-		):
-			for _ in range(2):
-				order = make_order(source.name)
-				order.items[0].qty = 1
-				order.items[0].delivery_date = order.items[0].schedule_date = today()
-				order.submit()
-				self.assertEqual(order.inter_company_order_reference, source.name)
-
-	def test_cancelling_one_partial_internal_order_keeps_source_linked_to_the_other(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
-		po = make_internal_purchase_order()
-		so = make_sales_order(
-			company=po.company,
-			customer="_Test Internal Customer 2",
-			warehouse="_Test Transfer From - TCP1",
-			selling_price_list=po.buying_price_list,
-			qty=2,
-			rate=1,
-		)
-
-		for source, make_order in (
-			(po, make_inter_company_sales_order),
-			(so, make_inter_company_purchase_order),
-		):
-			orders = []
-			for _ in range(2):
-				order = make_order(source.name)
-				order.items[0].qty = 1
-				order.items[0].delivery_date = order.items[0].schedule_date = today()
-				order.submit()
-				orders.append(order)
-
-			orders[0].cancel()
-			self.assertEqual(source.get_db_value("inter_company_order_reference"), orders[1].name)
-
-			order = make_order(source.name)
-			order.items[0].delivery_date = order.items[0].schedule_date = today()
-			order.submit()
-			order.cancel()
-			self.assertEqual(source.get_db_value("inter_company_order_reference"), orders[1].name)
-
-			orders[1].cancel()
-			self.assertFalse(source.get_db_value("inter_company_order_reference"))
-
 	def test_no_internal_sales_order_from_purchase_order_made_from_one(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
+		prepare_data_for_internal_transfer()
 		so = make_sales_order(
 			company="_Test Company with perpetual inventory",
 			customer="_Test Internal Customer 2",
-			warehouse="_Test Transfer From - TCP1",
+			warehouse="_Test Internal Warehouse New 1 - TCP1",
 			qty=2,
 			rate=1,
 		)
 		po = make_inter_company_purchase_order(so.name)
+		set_missing_warehouse(po)
 		po.items[0].schedule_date = today()
 		po.submit()
 
@@ -1933,21 +1870,31 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 
 	def test_no_internal_purchase_order_from_sales_order_made_from_drop_ship_po(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
-		from erpnext.selling.doctype.sales_order.mapper import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_purchase_order_for_default_supplier as make_po_from_so,
+		)
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
+		prepare_data_for_internal_transfer()
 		customer_so = make_sales_order(
-			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", qty=2, rate=1
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			qty=2,
+			rate=1,
+			do_not_submit=True,
 		)
+		customer_so.items[0].supplier = "_Test Internal Supplier 2"
+		customer_so.submit()
 		po = make_po_from_so(
 			customer_so.name,
 			selected_items=[{"name": customer_so.items[0].name, "supplier": "_Test Internal Supplier 2"}],
 		)[0]
-		po.items[0].from_warehouse = "_Test Transfer From - TCP1"
+		po.items[0].from_warehouse = "_Test Internal Warehouse New 1 - TCP1"
 		po.submit()
 
 		so = make_inter_company_sales_order(po.name)
+		set_missing_warehouse(so)
 		so.items[0].delivery_date = today()
 		so.submit()
 
@@ -1955,57 +1902,6 @@ class TestPurchaseOrder(FrappeTestCase):
 			frappe.ValidationError, "was created from", make_inter_company_purchase_order, so.name
 		)
 
-	def test_repeat_internal_order_converts_ordered_qty_to_source_uom(self):
-		from erpnext.selling.doctype.sales_order.mapper import make_inter_company_purchase_order
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-
-		po = make_internal_purchase_order(do_not_submit=True)
-		po.items[0].qty = 20
-		po.submit()
-		so = make_sales_order(
-			company=po.company,
-			customer="_Test Internal Customer 2",
-			warehouse="_Test Transfer From - TCP1",
-			selling_price_list=po.buying_price_list,
-			qty=20,
-			rate=1,
-		)
-
-		for source, make_order in (
-			(po, make_inter_company_sales_order),
-			(so, make_inter_company_purchase_order),
-		):
-			order = make_order(source.name)
-			order.items[0].update({"qty": 1, "uom": "_Test UOM 1", "conversion_factor": 10})
-			order.items[0].delivery_date = order.items[0].schedule_date = today()
-			order.submit()
-
-			order = make_order(source.name)
-			self.assertEqual(order.items[0].qty, 10)
-			order.items[0].delivery_date = order.items[0].schedule_date = today()
-			order.submit()
-
-			self.assertRaisesRegex(frappe.ValidationError, "fully ordered", make_order, source.name)
-
-	def test_received_items_reads_only_the_order_link_column(self):
-		from frappe.core.doctype.user_permission.test_user_permission import create_user
-
-		from erpnext.accounts.doctype.sales_invoice.mapper import get_received_items
-
-		po = make_internal_purchase_order()
-		so = make_inter_company_sales_order(po.name)
-		so.items[0].delivery_date = today()
-		so.submit()
-
-		with self.set_user(create_user("received_items_buyer@example.com", "Purchase User").name):
-			self.assertEqual(
-				get_received_items(po.name, "Sales Order", "purchase_order_item"), {po.items[0].name: 2}
-			)
-			self.assertRaises(
-				frappe.PermissionError, get_received_items, po.name, "Sales Order", "gross_profit"
-			)
-
->>>>>>> 5af124d (test: no internal order back from an order made from one)
 	def test_update_status_accepts_only_hold_close_and_reopen_on_submitted_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
