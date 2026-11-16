@@ -1170,7 +1170,7 @@ class BuyingController(SubcontractingController):
 			return get_stock_qty(row, row.rejected_qty)
 
 		if self.is_return:
-			return self.get_rejected_return_stock_qty(row, row.rejected_qty, row.rejected_warehouse)
+			return self.get_return_stock_qty(row, row.rejected_qty, row.rejected_warehouse)
 
 		return flt(
 			get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty)) - get_stock_qty(row, row.qty),
@@ -1181,7 +1181,7 @@ class BuyingController(SubcontractingController):
 		"""Accepted qty in the stock UOM. An internal receipt's return from the rejected warehouse takes
 		back no more than the receipt put there."""
 		if row.get("return_qty_from_rejected_warehouse") and self.is_internal_receipt():
-			return self.get_rejected_return_stock_qty(row, row.qty, row.warehouse)
+			return self.get_return_stock_qty(row, row.qty, row.warehouse)
 
 		return get_stock_qty(row, row.qty)
 
@@ -1191,50 +1191,77 @@ class BuyingController(SubcontractingController):
 
 		return self.get_accepted_stock_qty(row)
 
-	def get_rejected_return_stock_qty(self, row, qty, warehouse) -> float:
-		"""Stock qty a return of an internal receipt takes back from its rejected warehouse: no more than
-		the receipt put there, less its other returns. A cap of nothing left falls back to the row's qty."""
+	def get_return_stock_qty(self, row, qty, warehouse) -> float:
+		"""Stock qty a return row takes back from the warehouse: no more than its receipt row put there,
+		less the row's other returns, and all that is left once it returns the rest of the row's qty."""
 		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
-			return flt(self.get_posted_rejected_return_qty(row, warehouse)) or stock_qty
+			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
 
-		qty_left = self.get_rejected_qty_left_to_return(row, warehouse)
-		return max(stock_qty, -qty_left) if flt(qty_left) > 0 else stock_qty
+		left = self.get_receipt_row_left_to_return(row, warehouse)
+		if flt(left.stock_qty) <= 0:
+			return stock_qty
 
-	def get_rejected_qty_left_to_return(self, row, warehouse) -> float:
-		"""Stock qty the returned receipt row put in the rejected warehouse that its other returns have not
+		if flt(left.qty + flt(qty), row.precision("qty")) <= 0:
+			return -left.stock_qty
+
+		return max(stock_qty, -left.stock_qty)
+
+	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict:
+		"""Qty and stock qty the returned receipt row put in the warehouse that its other returns have not
 		taken back."""
+		left = frappe._dict(qty=0.0, stock_qty=0.0)
 		reference_field = (
 			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
 		)
 		receipt_row = row.get(reference_field)
 		if not receipt_row:
-			return 0.0
+			return left
 
 		receipt_item = frappe.qb.DocType(row.doctype)
-		receipt_and_other_returns = (
+		rows = (
 			frappe.qb.from_(receipt_item)
-			.select(receipt_item.name)
-			.where(
-				(receipt_item.name == receipt_row)
-				| ((receipt_item[reference_field] == receipt_row) & (receipt_item.parent != self.name))
+			.select(
+				receipt_item.name,
+				receipt_item.qty,
+				receipt_item.rejected_qty,
+				receipt_item.warehouse,
+				receipt_item.rejected_warehouse,
 			)
+			.where(
+				(receipt_item.docstatus == 1)
+				& (
+					(receipt_item.name == receipt_row)
+					| ((receipt_item[reference_field] == receipt_row) & (receipt_item.parent != self.name))
+				)
+			)
+			.run(as_dict=True)
 		)
+		if not rows:
+			return left
+
+		for d in rows:
+			if d.warehouse == warehouse:
+				left.qty += flt(d.qty)
+			if d.rejected_warehouse == warehouse:
+				left.qty += flt(d.rejected_qty)
+
 		sle = frappe.qb.DocType("Stock Ledger Entry")
-		qty_left = (
+		stock_qty = (
 			frappe.qb.from_(sle)
 			.select(Sum(sle.actual_qty))
 			.where(
 				(sle.warehouse == warehouse)
 				& (sle.is_cancelled == 0)
-				& sle.voucher_detail_no.isin(receipt_and_other_returns)
+				& sle.voucher_detail_no.isin([d.name for d in rows])
 			)
 			.run()[0][0]
 		)
-		return flt(qty_left, row.precision("stock_qty"))
+		left.stock_qty = flt(stock_qty, row.precision("stock_qty"))
+		return left
 
-	def get_posted_rejected_return_qty(self, row, warehouse):
-		"""Qty the return row's entry took out of the rejected warehouse."""
+	def get_posted_return_qty(self, row, warehouse):
+		"""Qty the return row's entry took out of the warehouse."""
 		return frappe.db.get_value(
 			"Stock Ledger Entry",
 			{
