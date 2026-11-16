@@ -15,7 +15,7 @@ entries.
 
 import frappe
 from frappe import _
-from frappe.utils import flt, formatdate
+from frappe.utils import cint, flt, formatdate
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -246,6 +246,68 @@ class BaseGLComposer:
 
 	def get_gl_dict(self, args: dict, account_currency: str | None = None, item=None) -> dict:
 		return get_gl_dict(self.doc, args, account_currency, item)
+
+	def book_stock_expense_enabled(self):
+		if not hasattr(self, "_book_stock_expense_enabled"):
+			self._book_stock_expense_enabled = cint(
+				frappe.db.get_single_value("Accounts Settings", "book_stock_expense_gl_entries")
+			)
+
+		return self._book_stock_expense_enabled
+
+	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
+		# A service item holds no stock value, so there is nothing to book against it - and it must
+		# not make the expense accounts mandatory either. A zero pair would be rejected by GL Entry
+		# anyway, which needs a debit or a credit on every row.
+		if not amount or not frappe.get_cached_value("Item", item_code, "is_stock_item"):
+			return
+
+		doc = self.doc
+		fields = ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account")
+		from erpnext.stock.services.base_stock_gl_composer import get_expenses_added_to_stock_accounts
+
+		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
+
+		for field in fields:
+			if not details.get(field):
+				frappe.throw(
+					_("Please set {0} in Company {1} or in the Item Defaults of Item {2}").format(
+						frappe.bold(_(frappe.unscrub(field))), doc.company, item_code
+					)
+				)
+
+		cost_center = item_row.get("cost_center") or frappe.get_cached_value(
+			"Company", doc.company, "cost_center"
+		)
+		remarks = _("Expenses Added To Stock for Item {0}").format(item_code)
+		common_args = {
+			"cost_center": cost_center,
+			"project": item_row.get("project") or doc.get("project"),
+			"remarks": remarks,
+		}
+
+		gl_list.append(
+			self.get_gl_dict(
+				{
+					"account": details.expenses_added_to_stock_account,
+					"against": details.expenses_added_to_stock_contra_account,
+					"debit": amount,
+					**common_args,
+				},
+				item=item_row,
+			)
+		)
+		gl_list.append(
+			self.get_gl_dict(
+				{
+					"account": details.expenses_added_to_stock_contra_account,
+					"against": details.expenses_added_to_stock_account,
+					"debit": -1 * amount,
+					**common_args,
+				},
+				item=item_row,
+			)
+		)
 
 	def add_gl_entry(
 		self,

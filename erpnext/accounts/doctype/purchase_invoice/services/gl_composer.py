@@ -316,6 +316,15 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 							gl_dict.update(get_custom_dimension_overrides(entry))
 							gl_entries.append(gl_dict)
 
+					# the landed cost is left out of the purchase expense pair, so it is booked here
+					if self.book_stock_expense_enabled() and not item.is_fixed_asset:
+						self.append_expenses_added_to_stock_pair(
+							gl_entries,
+							item.item_code,
+							flt(item.landed_cost_voucher_amount, item.precision("base_net_amount")),
+							item,
+						)
+
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
 						supplier_wh_dict = doc.get_inventory_account_dict(
