@@ -65,6 +65,17 @@ class TestSubcontractingBOM(FrappeTestCase):
 		subcontracting_bom.is_active = 0
 		subcontracting_bom.save()
 
+	def test_bom_of_active_subcontracting_bom_cannot_be_deactivated(self):
+		variant, _ = make_subcontracted_variant()
+		service_item = make_item("Subcontracted Template Service Item", {"is_stock_item": 0})
+		bom = make_bom(item=variant.name, raw_materials=["Subcontracted Template RM Item"])
+		create_subcontracting_bom(
+			finished_good=variant.name, finished_good_bom=bom.name, service_item=service_item.name
+		)
+
+		bom.is_active = 0
+		self.assertRaises(frappe.ValidationError, bom.save)
+
 	def test_quantities_must_be_greater_than_zero(self):
 		finished_good = make_item(
 			"Subcontracted BOM Check Item", {"is_stock_item": 1, "is_sub_contracted_item": 1}
