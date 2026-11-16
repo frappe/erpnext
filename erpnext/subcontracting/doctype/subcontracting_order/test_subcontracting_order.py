@@ -27,7 +27,10 @@ from erpnext.patches.v16_0.recalculate_subcontracting_order_service_cost import 
 )
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import get_batch_from_bundle
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_numbers_from_bundle,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.utils import InvalidWarehouseCompany, get_bin
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -1144,6 +1147,37 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Partial Material Transferred"
 		)
 		self.assertTrue(frappe.get_doc("Subcontracting Order", sco.name).has_unreserved_stock())
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_receipt_skips_a_serial_no_returned_by_the_supplier(self):
+		sco = make_reserving_order_with_new_items(
+			"Serial Return", qty=3, rm_properties={"has_serial_no": 1, "serial_no_series": "SCOSR-.####"}
+		)
+		sco.reserve_stock = 0
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		serial_nos = copy.deepcopy(itemwise_details[rm_items[0]["item_code"]].serial_no)
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+		frappe.flags.args = frappe._dict(
+			subcontract_order=sco.name,
+			rm_details=[d.name for d in sco.supplied_items],
+			order_doctype=sco.doctype,
+		)
+		ste = get_materials_from_supplier(sco.name)
+		ste.items[0].update({"qty": 1, "serial_no": serial_nos[0]})
+		ste.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = scr.items[0].received_qty = 2
+		scr.submit()
+
+		consumed = get_serial_numbers_from_bundle(scr.supplied_items[0].serial_and_batch_bundle)
+		self.assertEqual(consumed, sorted(serial_nos[1:]))
 
 	def test_ordered_qty_for_subcontracting_order(self):
 		service_items = [
