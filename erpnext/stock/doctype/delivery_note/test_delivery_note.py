@@ -486,23 +486,38 @@ class TestDeliveryNote(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_returns_of_parts_of_a_delivery_add_up_to_its_stock_qty(self):
 		"""Returns of parts of a row whose stock qty rounds unevenly can return all of it."""
+		dn = self.return_delivery_in_parts()
+
+		dn.reload()
+		self.assertEqual(dn.items[0].returned_qty, dn.items[0].stock_qty)
+		self.assertEqual(dn.per_returned, 100)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_returns_of_parts_of_a_delivery_put_back_only_its_stock_qty(self):
+		"""Returns of parts of a row put back the stock it took out, whether the parts round up or down."""
+		for conversion_factor in (0.3356, 0.3344):
+			dn = self.return_delivery_in_parts(conversion_factor)
+			stock_bin = {"item_code": dn.items[0].item_code, "warehouse": dn.items[0].warehouse}
+			self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 10)
+
+	def return_delivery_in_parts(self, conversion_factor=0.3356):
+		"""Delivery of 6 Box out of 10 Kg in stock, returned as two parts of 3 Box, whose stock qty rounds
+		unevenly: at 0.3356 Kg the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down
+		(1.00 Kg each of 2.01 Kg)."""
 		item = make_item(
-			"_Test Item For Returns Of Parts",
-			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+			f"_Test Item For Returns Of Parts {conversion_factor}",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
 		).name
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		dn = create_delivery_note(item_code=item, qty=6, rate=100, do_not_submit=True)
-		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.items[0].update({"uom": "Box", "conversion_factor": conversion_factor})
 		dn.submit()
 
 		first_return = make_sales_return(dn.name)
 		first_return.items[0].qty = -3
 		first_return.submit()
 		make_sales_return(dn.name).submit()
-
-		dn.reload()
-		self.assertEqual(dn.items[0].returned_qty, dn.items[0].stock_qty)
-		self.assertEqual(dn.per_returned, 100)
+		return dn
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
