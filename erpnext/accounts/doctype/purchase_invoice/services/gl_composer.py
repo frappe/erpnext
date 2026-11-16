@@ -702,23 +702,8 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 
 			if flt(stock_amount, net_amt_precision) != flt(returned_stock_value, net_amt_precision):
-				cost_of_goods_sold_account = self.get_stock_variance_account(item)
-				stock_adjustment_amt = stock_amount - returned_stock_value
-
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": cost_of_goods_sold_account,
-							"against": item.expense_account,
-							"debit": stock_adjustment_amt,
-							"debit_in_transaction_currency": stock_adjustment_amt / doc.conversion_rate,
-							"remarks": doc.get("remarks") or _("Stock Adjustment"),
-							"cost_center": item.cost_center,
-							"project": item.project or doc.project,
-						},
-						account_currency,
-						item=item,
-					)
+				self.make_stock_variance_entry(
+					gl_entries, item, stock_amount - returned_stock_value, account_currency
 				)
 
 		elif (
@@ -727,29 +712,32 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
-			cost_of_goods_sold_account = self.get_stock_variance_account(item)
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
-			stock_adjustment_amt = warehouse_debit_amount - stock_amount
-
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": cost_of_goods_sold_account,
-						"against": item.expense_account,
-						"debit": stock_adjustment_amt,
-						"debit_in_transaction_currency": stock_adjustment_amt / doc.conversion_rate,
-						"remarks": doc.get("remarks") or _("Stock Adjustment"),
-						"cost_center": item.cost_center,
-						"project": item.project or doc.project,
-					},
-					account_currency,
-					item=item,
-				)
+			self.make_stock_variance_entry(
+				gl_entries, item, warehouse_debit_amount - stock_amount, account_currency
 			)
-
 			warehouse_debit_amount = stock_amount
 
 		return warehouse_debit_amount
+
+	def make_stock_variance_entry(self, gl_entries, item, amount, account_currency):
+		"""Book the difference between what the invoice paid for and the stock value it moved."""
+		doc = self.doc
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": self.get_stock_variance_account(item),
+					"against": item.expense_account,
+					"debit": amount,
+					"debit_in_transaction_currency": amount / doc.conversion_rate,
+					"remarks": doc.get("remarks") or _("Stock Adjustment"),
+					"cost_center": item.cost_center,
+					"project": item.project or doc.project,
+				},
+				account_currency,
+				item=item,
+			)
+		)
 
 	def make_tax_gl_entries(self, gl_entries):
 		doc = self.doc
