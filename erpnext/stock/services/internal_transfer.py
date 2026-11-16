@@ -87,7 +87,7 @@ class StockInternalTransferService:
 			return
 
 		item_wise_received_qty = self.get_item_wise_inter_received_qty()
-		precision = frappe.get_precision(self.doc.doctype + " Item", "qty")
+		precision = frappe.get_precision(self.doc.doctype + " Item", "stock_qty")
 
 		over_receipt_allowance = frappe.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
 
@@ -134,18 +134,19 @@ class StockInternalTransferService:
 			.select(
 				child_tab.name,
 				child_tab.item_code,
-				child_tab.qty,
+				child_tab.stock_qty,
 			)
 			.where((parent_tab.name == inter_company_reference) & (parent_tab.docstatus == 1))
 		)
 		if parent_doctype == "Delivery Note":
-			query = query.select(child_tab.returned_qty, child_tab.stock_qty, child_tab.conversion_factor)
+			query = query.select(child_tab.returned_qty)
 
 		data = query.run(as_dict=True)
 		item_wise_transfer_qty = defaultdict(float)
 		for row in data:
-			returned_qty = flt(row.get("returned_qty")) / (flt(row.get("conversion_factor")) or 1)
-			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty) - returned_qty
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.stock_qty) - flt(
+				row.get("returned_qty")
+			)
 
 		if parent_doctype == "Delivery Note":
 			self.add_component_transfer_qty(item_wise_transfer_qty, inter_company_reference, data)
@@ -180,7 +181,7 @@ class StockInternalTransferService:
 			.on(child_tab.parent == parent_tab.name)
 			.select(
 				child_tab.item_code,
-				child_tab.qty,
+				child_tab.stock_qty,
 			)
 			.where(parent_tab.docstatus == 1)
 		)
@@ -205,7 +206,7 @@ class StockInternalTransferService:
 		item_wise_received_qty = defaultdict(float)
 		for row in query.run(as_dict=True):
 			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
-				row.qty
+				row.stock_qty
 			)
 
 		reference_field = (
@@ -213,6 +214,7 @@ class StockInternalTransferService:
 		)
 		for row in self.doc.items:
 			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
-			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
+			# stock_qty is set after this check runs in validate
+			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty) * flt(row.conversion_factor)
 
 		return item_wise_received_qty
