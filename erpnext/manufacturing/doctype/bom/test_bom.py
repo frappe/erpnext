@@ -2123,6 +2123,23 @@ class TestBOM(ERPNextTestSuite):
 		)[rm_item]
 		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
 
+	def test_currency_change_fetches_conversion_rate(self):
+		set_inr_exchange_rate("EUR", 90)
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "USD",
+				"conversion_rate": 80,
+				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+			}
+		).insert()
+
+		bom.currency = "EUR"
+		bom.save()
+		self.assertEqual(bom.conversion_rate, 90)
+
 
 def make_stage_items():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
@@ -2339,20 +2356,24 @@ def make_usd_buying_price_list(exchange_rate):
 			}
 		).insert()
 
+	set_inr_exchange_rate("USD", exchange_rate)
+	return price_list
+
+
+def set_inr_exchange_rate(currency, exchange_rate):
 	today = frappe.utils.nowdate()
-	frappe.db.delete("Currency Exchange", {"date": today, "from_currency": "USD", "to_currency": "INR"})
+	frappe.db.delete("Currency Exchange", {"date": today, "from_currency": currency, "to_currency": "INR"})
 	frappe.get_doc(
 		{
 			"doctype": "Currency Exchange",
 			"date": today,
-			"from_currency": "USD",
+			"from_currency": currency,
 			"to_currency": "INR",
 			"exchange_rate": exchange_rate,
 			"for_buying": 1,
 			"for_selling": 1,
 		}
 	).insert()
-	return price_list
 
 
 def make_usd_bom(item, items, **values):
