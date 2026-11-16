@@ -4759,6 +4759,61 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(scrap_row.basic_amount), 250.0)
 		self.assertEqual(flt(fg_row.basic_amount), 750.0)
 
+	def test_repack_co_product_shares_the_cost_left_after_a_manual_finished_good(self):
+		"""A manual finished good takes its value first; the BOM percentages split what is left."""
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		co_product = make_item(properties={"is_stock_item": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=20, basic_rate=100)
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": rm_item, "qty": 10})
+		bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 2,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		bom.submit()
+
+		entry = frappe.new_doc("Stock Entry")
+		entry.purpose = entry.stock_entry_type = "Repack"
+		entry.update(
+			{
+				"company": "_Test Company",
+				"from_bom": 1,
+				"bom_no": bom.name,
+				"fg_completed_qty": 2,
+				"from_warehouse": warehouse,
+				"to_warehouse": warehouse,
+			}
+		)
+		entry.get_items()
+		next(d for d in entry.items if d.is_finished_item).qty = 1
+		entry.append(
+			"items",
+			{
+				"item_code": fg_item,
+				"qty": 1,
+				"t_warehouse": warehouse,
+				"is_finished_item": 1,
+				"set_basic_rate_manually": 1,
+				"basic_rate": 300,
+			},
+		)
+		entry.insert()
+
+		amounts = {(d.item_code, d.set_basic_rate_manually): d.basic_amount for d in entry.items}
+		self.assertEqual(amounts[(co_product, 0)], 340)
+		self.assertEqual(amounts[(fg_item, 0)], 1360)
+		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
+
 		self.assertEqual(flt(se.total_incoming_value), 1000.0)
 		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
 		self.assertEqual(flt(se.value_difference), 0.0)
