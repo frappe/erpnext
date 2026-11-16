@@ -144,16 +144,19 @@ def make_purchase_order(
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		return get_ordered_qty(d) < d.stock_qty and child_filter
+		return has_pending_qty(d) and child_filter
 
-	def get_ordered_qty(d):
-		"""Stock qty ordered for a row, rows already in ``target_doc`` included."""
+	def has_pending_qty(d):
+		"""Whether a row has stock qty left to order, rows already in ``target_doc`` included."""
 		ordered_qty = d.ordered_qty or d.received_qty
 		mapped_qty = flt(mapped_qty_by_item.get(d.name))
 		if ordered_stock_qty is None:
-			return ordered_qty + mapped_qty
+			return ordered_qty + mapped_qty < d.stock_qty
 
-		return flt(flt(ordered_stock_qty.get(d.name, ordered_qty)) + mapped_qty, d.precision("stock_qty"))
+		# a row saved before purchase rows rounded their stock qty keeps it unrounded
+		precision = d.precision("stock_qty")
+		ordered_qty = flt(ordered_stock_qty.get(d.name, ordered_qty)) + mapped_qty
+		return flt(ordered_qty, precision) < flt(d.stock_qty, precision)
 
 	def generate_field_map():
 		field_map = [
