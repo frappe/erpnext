@@ -111,6 +111,8 @@ class SalesOrderSourcingService:
 		return frappe._dict(
 			{
 				"parent": row.sales_order,
+				"name": row.sales_order_item,
+				"parent_item": row.product_bundle_item,
 				"item_code": row.item_code,
 				"warehouse": row.warehouse,
 				"qty": row.pending_qty,
