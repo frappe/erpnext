@@ -4137,13 +4137,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			sle.actual_qty,
 		)
 
-<<<<<<< HEAD
-	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
+	def make_transfer_receipt(self, tag, item_doc, qty, rejected, uom=None, conversion_factor=None):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-=======
-	def make_transfer_receipt(self, item_doc, qty, rejected, uom=None, conversion_factor=None):
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
->>>>>>> 7a9ec3b (test: internal receipt with a rejected stock qty that rounds to 0)
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
@@ -4200,7 +4195,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 					{"stock_uom": "Kg", "uoms": [{"uom": "Gram", "conversion_factor": 0.001}], **properties},
 				)
 				pr, warehouses, *_ = self.make_transfer_receipt(
-					item_doc, 999, 1, uom="Gram", conversion_factor=0.001
+					f"Zero Rejected {tag}", item_doc, 999, 1, uom="Gram", conversion_factor=0.001
 				)
 				pr.submit()
 
