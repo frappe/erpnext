@@ -1554,6 +1554,37 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)
 		self.assertEqual([tuple(reservation) for reservation in reservations], [(6, 6), (4, 0)])
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
+	)
+	def test_transfer_cancel_keeps_earlier_unreserved_qty_off_a_later_reservation(self):
+		sco = make_reserving_order_with_new_items("Later Reservation", qty=10)
+		row = sco.supplied_items[0]
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 6
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+
+		make_stock_entry(item_code=row.rm_item_code, qty=2, to_warehouse=row.reserve_warehouse, rate=100)
+		rm_items[0]["qty"] = 8
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		make_stock_entry(item_code=row.rm_item_code, qty=2, to_warehouse=row.reserve_warehouse, rate=100)
+		sco.reserve_raw_materials(
+			items=[{"name": row.name, "qty_to_reserve": 2, "warehouse": row.reserve_warehouse}]
+		)
+		rm_items[0]["qty"] = 2
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={}).cancel()
+
+		reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_no": sco.name, "docstatus": 1, "warehouse": row.reserve_warehouse},
+			fields=["reserved_qty", "transferred_qty"],
+			order_by="creation",
+			as_list=True,
+		)
+		self.assertEqual([tuple(reservation) for reservation in reservations], [(6, 6), (2, 0)])
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
