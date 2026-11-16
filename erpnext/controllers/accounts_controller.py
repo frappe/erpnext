@@ -1036,7 +1036,7 @@ class AccountsController(TransactionBase):
 						)
 
 					if ret.get("pricing_rules"):
-						self.apply_pricing_rule_on_items(item, ret)
+						self.apply_pricing_rule_on_items(item, ret, ctx.get("pricing_rules"))
 						self.set_pricing_rule_details(item, ret)
 				else:
 					# Transactions line item without item code
@@ -1069,9 +1069,8 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
 
-	def apply_pricing_rule_on_items(self, item, pricing_rule_args):
+	def apply_pricing_rule_on_items(self, item, pricing_rule_args, previous_pricing_rules=None):
 		if not pricing_rule_args.get("validate_applied_rule", 0):
-			# if user changed the discount percentage then set user's discount percentage ?
 			if pricing_rule_args.get("price_or_product_discount") == "Price":
 				item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
 				if pricing_rule_args.get("apply_rule_on_other_items"):
@@ -1079,25 +1078,13 @@ class AccountsController(TransactionBase):
 					if other_items and item.item_code not in other_items:
 						return
 
-				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
-				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
-				if (
-					pricing_rule_args.get("has_pricing_rule_for_rate")
-					or pricing_rule_args.get("pricing_rule_for") == "Rate"
+				# rules only set the starting rate, so a rate typed on the row stays until they change
+				if item.get("rate") and set(get_applied_pricing_rules(previous_pricing_rules)) == set(
+					get_applied_pricing_rules(item.pricing_rules)
 				):
-					item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
+					return
 
-				if item.get("price_list_rate"):
-					item.rate = flt(
-						item.price_list_rate * (1.0 - (flt(item.discount_percentage) / 100.0)),
-						item.precision("rate"),
-					)
-
-					if item.get("discount_amount"):
-						item.rate = item.price_list_rate - item.discount_amount
-
-				if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
-					item.rate = pricing_rule_args.get("rate")
+				self.set_pricing_rule_rate(item, pricing_rule_args)
 
 			elif pricing_rule_args.get("free_item_data"):
 				apply_pricing_rule_for_free_items(self, pricing_rule_args.get("free_item_data"))
@@ -1114,6 +1101,31 @@ class AccountsController(TransactionBase):
 								item.idx, frappe.bold(title), frappe.bold(item.item_code)
 							)
 						)
+
+	def set_pricing_rule_rate(self, item, pricing_rule_args):
+		"""Set the rate, discount and margin the applied pricing rules give the row."""
+		from erpnext.controllers.taxes_and_totals import get_rate_with_margin
+
+		for field in ("discount_percentage", "discount_amount", "margin_type", "margin_rate_or_amount"):
+			item.set(field, pricing_rule_args.get(field))
+
+		if (
+			pricing_rule_args.get("has_pricing_rule_for_rate")
+			or pricing_rule_args.get("pricing_rule_for") == "Rate"
+		):
+			item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
+
+		if item.get("price_list_rate"):
+			rate_with_margin = get_rate_with_margin(item)
+			item.rate = flt(
+				rate_with_margin * (1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate")
+			)
+
+			if item.get("discount_amount"):
+				item.rate = flt(rate_with_margin - item.discount_amount, item.precision("rate"))
+
+		if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
+			item.rate = pricing_rule_args.get("rate")
 
 	def set_pricing_rule_details(self, item_row, args):
 		pricing_rules = get_applied_pricing_rules(args.get("pricing_rules"))

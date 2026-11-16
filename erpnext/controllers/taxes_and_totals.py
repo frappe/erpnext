@@ -233,8 +233,8 @@ class calculate_taxes_and_totals:
 
 		calculated_rate = flt(item.rate_with_margin - item.discount_amount, item.precision("rate"))
 
-		# if rate is 0 or pricing rules are applicable, calculated rate is preferred
-		if has_pricing_rules or not item.rate:
+		# a typed rate is preferred, even over a pricing rule; the rule only sets the starting rate
+		if not item.rate:
 			item.rate = calculated_rate
 			return
 
