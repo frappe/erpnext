@@ -86,3 +86,63 @@ class TestWebsiteListForContact(ERPNextTestSuite):
 		self.assertNotIn("party_name", row)
 		self.assertEqual(row["grand_total"], quotation.grand_total)
 		self.assertTrue(any(quotation.name in html for html in rendered["result"]))
+
+	def make_drop_ship_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		purchase_order = create_purchase_order(do_not_save=1)
+		purchase_order.customer = "_Test Customer"
+		purchase_order.insert()
+		purchase_order.submit()
+		return purchase_order
+
+	def make_portal_user(self, email, role, party_doctype, party):
+		from erpnext.tests.permission_test_utils import make_fenced_user
+
+		user = make_fenced_user(email, [role])
+		party_doc = frappe.get_doc(party_doctype, party)
+		party_doc.append("portal_users", {"user": user})
+		party_doc.save()
+		return user
+
+	def test_customer_portal_user_cannot_open_drop_ship_purchase_order(self):
+		from erpnext.tests.permission_test_utils import as_user
+
+		purchase_order = self.make_drop_ship_purchase_order()
+		user = self.make_portal_user(
+			"_test_drop_ship_customer@example.com", "Customer", "Customer", "_Test Customer"
+		)
+
+		with as_user(user):
+			self.assertFalse(frappe.has_website_permission(purchase_order))
+
+	def test_customer_portal_list_leaves_out_drop_ship_purchase_order(self):
+		from frappe.www.list import get_list_data
+
+		from erpnext.tests.permission_test_utils import as_user
+
+		purchase_order = self.make_drop_ship_purchase_order()
+		user = self.make_portal_user(
+			"_test_drop_ship_customer@example.com", "Customer", "Customer", "_Test Customer"
+		)
+
+		with as_user(user):
+			rows = get_list_data(doctype="Purchase Order")
+
+		self.assertNotIn(purchase_order.name, [row.name for row in rows])
+
+	def test_supplier_portal_user_still_sees_drop_ship_purchase_order(self):
+		from frappe.www.list import get_list_data
+
+		from erpnext.tests.permission_test_utils import as_user
+
+		purchase_order = self.make_drop_ship_purchase_order()
+		user = self.make_portal_user(
+			"_test_drop_ship_supplier@example.com", "Supplier", "Supplier", "_Test Supplier"
+		)
+
+		with as_user(user):
+			self.assertTrue(frappe.has_website_permission(purchase_order))
+			rows = get_list_data(doctype="Purchase Order")
+
+		self.assertIn(purchase_order.name, [row.name for row in rows])
