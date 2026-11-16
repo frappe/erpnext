@@ -863,7 +863,7 @@ def get_item_tax_template(args, item=None, out=None):
 		args = json.loads(args)
 
 	if not item:
-		if not args.get("item_code"):
+		if not args.get("item_code") or not isinstance(args.get("item_code"), str):
 			frappe.throw(_("Item/Item Code required to get Item Tax Template."))
 		else:
 			item = frappe.get_cached_doc("Item", args.get("item_code"))
