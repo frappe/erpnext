@@ -1350,6 +1350,46 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.raw_material_cost, 110)
 		assert_exploded_row(55, 110)
 
+<<<<<<< HEAD
+=======
+	def test_clearing_process_loss_percentage_clears_process_loss_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(
+			item=sub_item,
+			raw_materials=[rm_item],
+			quantity=10,
+			rm_qty=10,
+			process_loss_percentage=10,
+			do_not_submit=True,
+		)
+		self.assertEqual(bom.process_loss_qty, 1)
+
+		bom.process_loss_percentage = 0
+		bom.save()
+		self.assertEqual(bom.process_loss_qty, 0)
+
+	def test_price_list_in_bom_currency_uses_bom_conversion_rate(self):
+		price_list = make_usd_buying_price_list(83)
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": rm_item, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		bom = make_usd_bom(
+			make_item(properties={"is_stock_item": 1}).name,
+			[{"item_code": rm_item, "qty": 1}],
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+		)
+
+		# the BOM's own conversion rate (80) applies, not the exchange rate (83)
+		self.assertEqual(bom.plc_conversion_rate, 80)
+		self.assertEqual(bom.items[0].rate, 10)
+
+>>>>>>> efe720d (test: USD BOM costs a USD list price at the list price)
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
