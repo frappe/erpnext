@@ -922,8 +922,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				reference_fieldname: reference_fieldname,
 			},
 			callback: (r) => {
-				if (r.exc) return;
-				const received_items = r.message || {};
+				const received_items = r.message;
 				// An order made from its counterpart links it without item references.
 				const is_made_from_counterpart =
 					this.frm.doc.inter_company_order_reference && $.isEmptyObject(received_items);
