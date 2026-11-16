@@ -54,6 +54,41 @@ class TestQueries(unittest.TestCase):
 		query(txt="", filters={"supplier": None})
 		query(txt="", filters={"supplier": ""})
 
+	def test_item_manufacturer_query_requires_item_read_permission(self):
+		self.addCleanup(frappe.db.rollback)
+		item = make_item("Steel Sheet With Manufacturer", {"is_stock_item": 1})
+		if not frappe.db.exists("Manufacturer", "Northwind Steel"):
+			frappe.get_doc({"doctype": "Manufacturer", "short_name": "Northwind Steel"}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Item Manufacturer",
+				"item_code": item.name,
+				"manufacturer": "Northwind Steel",
+				"manufacturer_part_no": "NS-4242",
+			}
+		).insert()
+
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		with as_user(purchase_user.name):
+			self.assertEqual(query(filters={"item_code": item.name}), (("Northwind Steel", "NS-4242"),))
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"item_code": item.name})
+
+	def test_item_manufacturer_query_needs_a_single_item_code(self):
+		self.addCleanup(frappe.db.rollback)
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		for filters in ({}, {"item_code": None}, {"item_code": ""}, {"item_code": ["like", "%"]}):
+			for user in (purchase_user.name, website_manager.name):
+				with self.subTest(filters=filters, user=user), as_user(user):
+					self.assertEqual(query(filters=filters), [])
+
 	def test_item_query_with_percent_in_permitted_item_group(self):
 		if not frappe.db.exists("Item Group", "_Test 100% Item Group"):
 			frappe.get_doc(
