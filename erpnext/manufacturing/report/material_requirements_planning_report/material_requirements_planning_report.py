@@ -523,8 +523,8 @@ class MaterialRequirementsPlanningReport:
 			if not row.sales_forecast_qty:
 				row.sales_forecast_qty = 0
 
-			row.demand_qty = max(flt(row.planned_qty), flt(row.sales_forecast_qty))
-			row.planned_qty = max(flt(row.planned_qty), flt(row.sales_forecast_qty))
+			row.demand_qty = flt(row.planned_qty) + flt(row.sales_forecast_qty)
+			row.planned_qty = row.demand_qty
 			if row.get("is_adhoc"):
 				row.planned_qty += row.adhoc_qty
 
@@ -1247,12 +1247,28 @@ class MaterialRequirementsPlanningReport:
 			query = query.where(doctype.item_code == self.filters.item_code)
 
 		sales_data = query.run(as_dict=True)
+		self.consume_forecast(sales_data)
 
 		return [
 			row
 			for row in convert_to_daily_bucket_data(sales_data)
 			if self.is_in_date_range(row.delivery_date)
 		]
+
+	def consume_forecast(self, forecast_rows):
+		"""Let the MPS demand of a forecast period use up that period's forecast."""
+		demand_by_item = {}
+		for row in self.mps_data:
+			demand = [getdate(row.delivery_date), flt(row.planned_qty)]
+			demand_by_item.setdefault(row.item_code, []).append(demand)
+
+		for row in forecast_rows:
+			start_date, end_date = get_forecast_period(row)
+			for demand in demand_by_item.get(row.item_code, []):
+				if start_date <= demand[0] < end_date:
+					consumed_qty = min(flt(row.qty), demand[1])
+					row.qty = flt(row.qty) - consumed_qty
+					demand[1] -= consumed_qty
 
 
 def get_stock_reserved_for_work_orders(items, warehouses=None):
