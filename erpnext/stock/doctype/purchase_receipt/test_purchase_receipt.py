@@ -466,6 +466,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		stock_bin = {"item_code": pr.items[0].item_code, "warehouse": pr.items[0].warehouse}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 0)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_rejected_returns_of_parts_of_a_receipt_take_back_only_its_rejected_stock_qty(self):
+		"""Rejected returns of parts of a row take back the rejected stock it put in, whether the parts round
+		up or down."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		for conversion_factor in (0.3356, 0.3344):
+			item = make_item(
+				f"_Test Item For Rejected Returns Of Parts {conversion_factor}",
+				{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
+			).name
+			pr = make_purchase_receipt(
+				item_code=item,
+				qty=1,
+				rejected_qty=6,
+				uom="Box",
+				conversion_factor=conversion_factor,
+				rate=100,
+			)
+			first_return = make_return_doc("Purchase Receipt", pr.name)
+			first_return.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+			first_return.submit()
+			make_return_doc("Purchase Receipt", pr.name).submit()
+
+			rejected_bin = {"item_code": item, "warehouse": pr.items[0].rejected_warehouse}
+			self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 0)
+
 	def return_receipt_in_parts(self, conversion_factor=0.3356):
 		"""Receipt of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""
