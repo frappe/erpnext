@@ -514,6 +514,11 @@ class TestDeliveryNote(ERPNextTestSuite):
 		self.assertEqual(dn.items[0].returned_qty, dn.items[0].stock_qty)
 		self.assertEqual(dn.per_returned, 100)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_returns_of_parts_of_a_delivery_add_up_to_its_rounded_stock_qty(self):
+		"""Same as above when each row rounds its stock qty."""
+		self.test_returns_of_parts_of_a_delivery_add_up_to_its_stock_qty()
+
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
