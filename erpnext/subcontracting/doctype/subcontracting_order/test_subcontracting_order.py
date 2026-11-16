@@ -1631,6 +1631,39 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertEqual(reservation.transferred_qty, 2)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_return_of_components_reserves_the_returned_qty_again(self):
+		sco = make_reserving_order_with_new_items("Return Reserved", qty=10)
+		row = sco.supplied_items[0]
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		warehouses = [row.reserve_warehouse, sco.supplier_warehouse]
+
+		return_entry = make_return_of_components(sco, qty=4)
+		self.assertEqual(get_reserved_stock(row.rm_item_code, warehouses), [4, 6])
+
+		return_entry.cancel()
+		self.assertEqual(get_reserved_stock(row.rm_item_code, warehouses), [0, 10])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 50})
+	def test_return_of_components_releases_the_qty_the_order_does_not_need(self):
+		sco = make_reserving_order_with_new_items("Return Surplus", qty=10)
+		row = sco.supplied_items[0]
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 12
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		make_return_of_components(sco, qty=4)
+
+		self.assertEqual(
+			get_reserved_stock(row.rm_item_code, [row.reserve_warehouse, sco.supplier_warehouse]), [2, 8]
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
 			{
@@ -1916,6 +1949,23 @@ def make_reserving_order_with_new_items(suffix, qty=4, rm_properties=None):
 	sco = get_subcontracting_order(service_items=service_items, do_not_submit=1)
 	sco.reserve_stock = 1
 	return sco
+
+
+def make_return_of_components(sco, qty):
+	frappe.flags.args = frappe._dict(
+		subcontract_order=sco.name, rm_details=[d.name for d in sco.supplied_items], order_doctype=sco.doctype
+	)
+	return_entry = get_materials_from_supplier(sco.name)
+	return_entry.items[0].qty = qty
+	return_entry.submit()
+	return return_entry
+
+
+def get_reserved_stock(item_code, warehouses):
+	return [
+		frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "reserved_stock")
+		for warehouse in warehouses
+	]
 
 
 def set_alternative_item(item_code, alternative_item_code):
