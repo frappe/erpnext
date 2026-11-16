@@ -3437,7 +3437,6 @@ class StockEntry(StockController, SubcontractingInwardController):
 					"docstatus": 1,
 				},
 				pluck="name",
-				limit_page_length=2,
 			)
 			for name in manufacture_entries:
 				erpnext.require_permission("Stock Entry", name)
@@ -3623,6 +3622,8 @@ class StockEntry(StockController, SubcontractingInwardController):
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
 		self.set_work_order_details()
+		if self.bom_no:
+			erpnext.require_permission("BOM", self.bom_no)
 		backflush_based_on = frappe.db.get_single_value(
 			"Manufacturing Settings", "backflush_raw_materials_based_on"
 		)

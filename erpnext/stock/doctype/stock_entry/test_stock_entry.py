@@ -5975,6 +5975,101 @@ class TestStockEntry(ERPNextTestSuite):
 		with self.set_user(restricted_user.name):
 			self.assertRaises(frappe.PermissionError, finished_good_rate)
 
+	def test_disassemble_get_items_checks_every_manufacture_entry(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.manufacturing.doctype.work_order.work_order import (
+			make_stock_entry as make_wo_stock_entry,
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		fg_item = make_item("_Test Thrice Disassembled Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Thrice Disassembled Steel Sheet", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3, source_warehouse=warehouse)
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=9, basic_rate=7.33)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=3, skip_transfer=1, source_warehouse=warehouse
+		)
+		entries = []
+		for _i in range(3):
+			entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 1)).insert()
+			entry.submit()
+			entries.append(entry.name)
+
+		user = create_user("test_disassemble_every_source_perm@example.com", "Manufacturing User").name
+		for name in entries[1:]:
+			add_user_permission("Stock Entry", name, user)
+			self.addCleanup(remove_user_permission, "Stock Entry", name, user)
+
+		def disassembly_items():
+			entry = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"purpose": "Disassemble",
+					"company": "_Test Company",
+					"work_order": work_order.name,
+					"fg_completed_qty": 1,
+				}
+			)
+			entry.get_items()
+			return entry
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, disassembly_items)
+
+		add_user_permission("Stock Entry", entries[0], user)
+		self.addCleanup(remove_user_permission, "Stock Entry", entries[0], user)
+		with self.set_user(user):
+			entry = disassembly_items()
+		self.assertEqual(sorted(d.item_code for d in entry.items), sorted([fg_item, rm_item]))
+
+	def test_get_items_checks_bom_of_work_order(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+
+		fg_item = make_item("_Test Backflushed Steel Frame", {"is_stock_item": 1}).name
+		rm_item = make_item("_Test Backflushed Steel Sheet", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=3)
+		other_bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=1)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=7,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+
+		def manufacture_raw_materials():
+			entry = frappe.get_doc(
+				{
+					"doctype": "Stock Entry",
+					"purpose": "Manufacture",
+					"company": "_Test Company",
+					"work_order": work_order.name,
+					"fg_completed_qty": 7,
+					"posting_date": today(),
+					"posting_time": nowtime(),
+				}
+			)
+			entry.get_items()
+			return [(d.item_code, d.qty) for d in entry.items if d.s_warehouse]
+
+		allowed_user = create_user("test_get_items_bom_allowed@example.com", "Manufacturing User").name
+		restricted_user = create_user("test_get_items_bom_restricted@example.com", "Manufacturing User").name
+		for user, bom_name in ((allowed_user, bom.name), (restricted_user, other_bom.name)):
+			add_user_permission("BOM", bom_name, user, applicable_for="BOM")
+			self.addCleanup(remove_user_permission, "BOM", bom_name, user)
+
+		with self.set_user(allowed_user):
+			self.assertEqual(manufacture_raw_materials(), [(rm_item, 21)])
+
+		with self.set_user(restricted_user):
+			self.assertRaises(frappe.PermissionError, manufacture_raw_materials)
+
 	def test_make_stock_entry_needs_stock_entry_permission(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 
