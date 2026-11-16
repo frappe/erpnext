@@ -361,6 +361,74 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertRaises(InvalidWarehouseCompany, scr.get_current_stock)
 		self.assertRaises(InvalidWarehouseCompany, scr.reset_raw_materials)
 
+<<<<<<< HEAD
+=======
+	def test_subcontracting_receipt_applies_bom_process_loss(self):
+		sco = get_subcontracting_order()
+		frappe.db.set_value("BOM", sco.items[0].bom, "process_loss_percentage", 10)
+
+		scr = make_subcontracting_receipt(sco.name)
+
+		# 10% of the ordered 10 qty is lost in processing
+		self.assertEqual(scr.items[0].received_qty, 10)
+		self.assertEqual(scr.items[0].process_loss_qty, 1)
+		self.assertEqual(scr.items[0].qty, 9)
+
+	def test_partial_receipts_map_bom_process_loss_in_whole_units(self):
+		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+			get_mapped_subcontracting_receipt,
+		)
+
+		sco = get_subcontracting_order()
+		frappe.db.set_value("BOM", sco.items[0].bom, "process_loss_percentage", 10)
+		frappe.db.set_value("UOM", sco.items[0].stock_uom, "must_be_whole_number", 1)
+
+		losses = []
+		for _ in range(2):
+			scr = get_mapped_subcontracting_receipt(sco.name, items=[{"name": sco.items[0].name, "qty": 5}])
+			row = scr.items[0]
+			self.assertEqual(row.qty + row.process_loss_qty, 5)
+			self.assertEqual(row.process_loss_qty, int(row.process_loss_qty))
+			losses.append(row.process_loss_qty)
+			# as if this receipt was submitted
+			sco.items[0].db_set("received_qty", flt(sco.items[0].received_qty) + 5)
+
+		# together the receipts lose the BOM's 10% of 10
+		self.assertEqual(sum(losses), 1)
+
+	def test_service_cost_is_matched_by_purchase_order_item(self):
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 200,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		expected = {item.purchase_order_item: item.service_cost_per_qty for item in sco.items}
+
+		# The two finished goods have distinct service costs, so a position-based pairing would swap them
+		self.assertEqual(len(set(expected.values())), 2)
+
+		# Service costs must follow purchase_order_item, not list position
+		sco.service_items.reverse()
+		sco.calculate_service_costs()
+
+		for item in sco.items:
+			self.assertEqual(item.service_cost_per_qty, expected[item.purchase_order_item])
+
+>>>>>>> 1f8c28d (test: partial receipts map BOM process loss in whole units)
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
 		service_items = [
