@@ -16,7 +16,6 @@ from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
-from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
@@ -805,12 +804,8 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("company"):
 		condition.append(acc.company.eq(filters.get("company")))
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
 	return (
-		qb.from_(acc)
-		.select(acc.name)
+		frappe.qb.get_query(dt, fields=["name"], ignore_permissions=False)
 		.where(Criterion.all(condition))
 		.orderby(acc.idx, order=Order.desc)
 		.orderby(acc.name)
@@ -903,10 +898,11 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("company"):
 		condition.append(acc.company.eq(filters.get("company")))
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
-	return qb.from_(acc).select(acc.name).where(Criterion.all(condition)).run()
+	return (
+		frappe.qb.get_query(dt, fields=["name"], ignore_permissions=False)
+		.where(Criterion.all(condition))
+		.run()
+	)
 
 
 @frappe.whitelist()
