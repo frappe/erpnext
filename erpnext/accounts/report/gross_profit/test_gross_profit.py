@@ -1045,12 +1045,7 @@ class TestGrossProfit(ERPNextTestSuite):
 			basic_rate=33.33333,
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
-<<<<<<< HEAD
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
-		second_item.idx = None
-=======
 		second_item = self.append_copy_of_first_item(sales_invoice)
->>>>>>> 597769e (test(gross profit): give copied invoice rows their own idx)
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
