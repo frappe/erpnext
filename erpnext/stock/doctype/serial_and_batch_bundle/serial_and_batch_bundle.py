@@ -999,7 +999,13 @@ class SerialandBatchBundle(Document):
 				)
 
 	def set_serial_and_batch_values(self, parent, row, qty_field=None):
+<<<<<<< HEAD
 		values_to_set = {}
+=======
+		self.validate_not_linked_to_another_draft(parent, row)
+
+		values_to_set = {"is_cancelled": 0}
+>>>>>>> 2fda0bb (fix(stock): a draft can't take over the serial and batch bundle of another draft)
 		if not self.voucher_no or self.voucher_no != row.parent:
 			values_to_set["voucher_no"] = row.parent
 
@@ -1046,6 +1052,28 @@ class SerialandBatchBundle(Document):
 
 		self.calculate_qty_and_amount(save=True)
 		self.validate_quantity(row, qty_field=qty_field)
+
+	def validate_not_linked_to_another_draft(self, parent, row):
+		"""A draft voucher can't take over the bundle of another draft voucher."""
+		if not (self.voucher_type and self.voucher_no):
+			return
+
+		if self.voucher_type == parent.doctype and self.voucher_no == row.parent:
+			return
+
+		if frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") != 0:
+			return
+
+		frappe.throw(
+			_(
+				"Row #{0}: Serial and Batch Bundle {1} belongs to {2} {3}. Select or create another bundle."
+			).format(
+				row.idx,
+				bold(self.name),
+				self.voucher_type,
+				get_link_to_form(self.voucher_type, self.voucher_no),
+			)
+		)
 
 	def validate_voucher_no(self):
 		if not (self.voucher_type and self.voucher_no):
