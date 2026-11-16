@@ -143,6 +143,24 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			["Closed", "Closed"],
 		)
 
+	def test_purchase_order_row_on_an_open_subcontracting_order_cannot_be_closed(self):
+		from erpnext.controllers.item_close import update_closed_status
+
+		sco = get_subcontracting_order()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Close it before closing the row",
+			update_closed_status,
+			"Purchase Order",
+			sco.purchase_order,
+			[sco.items[0].purchase_order_item],
+			1,
+		)
+
+		update_subcontracting_order_status(sco.name, "Closed")
+		update_closed_status("Purchase Order", sco.purchase_order, [sco.items[0].purchase_order_item], 1)
+
 	def test_holding_purchase_order_keeps_a_closed_subcontracting_order_closed(self):
 		sco = get_subcontracting_order(do_not_save=1)
 		sco.items[0].qty = 4
