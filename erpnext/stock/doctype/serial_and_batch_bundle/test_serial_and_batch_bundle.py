@@ -2547,6 +2547,38 @@ class TestSerialandBatchBundle(ERPNextTestSuite):
 
 		self.assertRaises(frappe.ValidationError, bundle.submit)
 
+	def test_draft_cannot_take_over_bundle_of_another_draft(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(
+			"Test Bundle Takeover Batch Item", properties={"is_stock_item": 1, "has_batch_no": 1}
+		).name
+
+		receipts = []
+		for batch_id in ("TEST-TAKEOVER-A", "TEST-TAKEOVER-B"):
+			batch_no = frappe.get_doc(doctype="Batch", item=item_code, batch_id=batch_id).insert().name
+			receipt = make_purchase_receipt(item_code=item_code, qty=2, do_not_save=True)
+			receipt.items[0].use_serial_batch_fields = 0
+			receipt.insert()
+			receipt.items[0].serial_and_batch_bundle = make_serial_batch_bundle(
+				{
+					"item_code": item_code,
+					"warehouse": receipt.items[0].warehouse,
+					"voucher_type": "Purchase Receipt",
+					"voucher_no": receipt.name,
+					"qty": 2,
+					"rate": 100,
+					"batches": frappe._dict({batch_no: 2}),
+					"do_not_submit": True,
+				}
+			).name
+			receipt.save()
+			receipts.append(receipt)
+
+		first, second = receipts
+		second.items[0].serial_and_batch_bundle = first.items[0].serial_and_batch_bundle
+		self.assertRaisesRegex(frappe.ValidationError, "belongs to Purchase Receipt", second.save)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
