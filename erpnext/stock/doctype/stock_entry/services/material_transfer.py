@@ -5,7 +5,7 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
-from .manufacturing import _check_bom_component_qty, get_bom_items
+from .manufacturing import _check_bom_component_qty, get_bom_items, get_running_total_qty
 from .stock_entry_base import BaseStockEntry
 
 
@@ -468,8 +468,17 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		return transfer_limit_qty >= to_transfer_qty
 
 	def _calculate_item_transfer_qty(self, item_details, allow_overproduction, max_qty):
-		pending_to_issue = flt(item_details.required_qty) - flt(item_details.transferred_qty)
-		desire_to_transfer = flt(self.doc.fg_completed_qty) * flt(item_details.required_qty) / max_qty
+		# both from the rounded running total, so the parts of a split transfer add up to the rounded qty
+		qty_per_unit = flt(item_details.required_qty) / max_qty
+		pending_to_issue = flt(
+			get_running_total_qty(qty_per_unit, 0, max_qty) - flt(item_details.transferred_qty),
+			frappe.get_precision("Stock Entry Detail", "transfer_qty"),
+		)
+		desire_to_transfer = get_running_total_qty(
+			qty_per_unit,
+			flt(self.wo_doc.material_transferred_for_manufacturing),
+			flt(self.doc.fg_completed_qty),
+		)
 		can_transfer = (
 			desire_to_transfer <= pending_to_issue
 			or (desire_to_transfer > 0 and self.backflush_based_on == "Material Transferred for Manufacture")
