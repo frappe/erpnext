@@ -3308,6 +3308,30 @@ class TestStockEntry(ERPNextTestSuite):
 			sorted([["Stock In Hand - TCP1", 100.0, 0.0], ["Miscellaneous Expenses - TCP1", 0.0, 100.0]]),
 		)
 
+	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
+		receipt = make_stock_entry(company="_Test Company", purpose="Material Receipt", do_not_save=True)
+		receipt.items = []
+		for _ in range(3):
+			item_code = make_item(properties={"is_stock_item": 1}).name
+			receipt.append(
+				"items", stock_entry_row(item_code, 1, t_warehouse="_Test Warehouse - _TC", basic_rate=100)
+			)
+
+		expense_account = frappe.get_value("Company", "_Test Company", "default_expense_account")
+		receipt.append(
+			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
+		)
+		receipt.insert()
+		receipt.submit()
+
+		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
+		cost_credit = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": receipt.name, "account": expense_account, "is_cancelled": 0},
+			pluck="credit",
+		)
+		self.assertEqual(flt(sum(cost_credit), 2), 100)
+
 	def test_conversion_factor_change(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		repack_entry = frappe.copy_doc(self.globalTestRecords["Stock Entry"][3])
