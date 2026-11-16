@@ -66,6 +66,7 @@ class TestItemGroup(ERPNextTestSuite):
 		self.assertRaises(NestedSetRecursionError, group_b.save)
 
 		# cleanup
+		group_b.reload()
 		group_b.parent_item_group = "All Item Groups"
 		group_b.save()
 
