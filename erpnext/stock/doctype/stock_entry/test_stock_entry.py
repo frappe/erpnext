@@ -4759,6 +4759,10 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(flt(scrap_row.basic_amount), 250.0)
 		self.assertEqual(flt(fg_row.basic_amount), 750.0)
 
+		self.assertEqual(flt(se.total_incoming_value), 1000.0)
+		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
+		self.assertEqual(flt(se.value_difference), 0.0)
+
 	def test_repack_co_product_shares_the_cost_left_after_a_manual_finished_good(self):
 		"""A manual finished good takes its value first; the BOM percentages split what is left."""
 		rm_item = make_item(properties={"is_stock_item": 1}).name
@@ -4813,10 +4817,6 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertEqual(amounts[(co_product, 0)], 340)
 		self.assertEqual(amounts[(fg_item, 0)], 1360)
 		self.assertEqual(entry.total_incoming_value, entry.total_outgoing_value)
-
-		self.assertEqual(flt(se.total_incoming_value), 1000.0)
-		self.assertEqual(flt(se.total_outgoing_value), 1000.0)
-		self.assertEqual(flt(se.value_difference), 0.0)
 
 	def test_secondary_item_with_zero_cost_allocation_carries_no_value(self):
 		"""A BOM that allocates 0% to a secondary item gives the finished good everything."""
