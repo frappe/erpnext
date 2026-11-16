@@ -1410,45 +1410,33 @@ def convert_to_daily_bucket_data(data):
 	bucketed_data = []
 
 	for row in data:
-		if row.frequency == "Monthly":
-			# Convert monthly data to daily buckets
-			start_date = get_first_day(row.delivery_date)
-			no_of_days = days_diff(add_months(start_date, 1), start_date)
-
-			for i in range(no_of_days):  # Assuming 30 days in a month
-				bucketed_data.append(
-					frappe._dict(
-						{
-							"frequency": "Daily",
-							"item_code": row.item_code,
-							"delivery_date": add_days(start_date, i),
-							"sales_forecast": row.sales_forecast,
-							"stock_uom": row.stock_uom,
-							"parent_warehouse": row.parent_warehouse,
-							"qty": row.qty / no_of_days,  # Assuming equal distribution across days
-						}
-					)
+		start_date, end_date = get_forecast_period(row)
+		no_of_days = days_diff(end_date, start_date)
+		for i in range(no_of_days):
+			bucketed_data.append(
+				frappe._dict(
+					{
+						"frequency": "Daily",
+						"item_code": row.item_code,
+						"delivery_date": add_days(start_date, i),
+						"sales_forecast": row.sales_forecast,
+						"stock_uom": row.stock_uom,
+						"parent_warehouse": row.parent_warehouse,
+						"qty": row.qty / no_of_days,
+					}
 				)
-
-		elif row.frequency == "Weekly":
-			# Convert weekly data to daily buckets
-			start_date = getdate(row.delivery_date)
-			for i in range(7):
-				bucketed_data.append(
-					frappe._dict(
-						{
-							"frequency": "Daily",
-							"item_code": row.item_code,
-							"delivery_date": add_days(start_date, i),
-							"sales_forecast": row.sales_forecast,
-							"stock_uom": row.stock_uom,
-							"parent_warehouse": row.parent_warehouse,
-							"qty": row.qty / 7,  # Assuming equal distribution across days
-						}
-					)
-				)
+			)
 
 	return bucketed_data
+
+
+def get_forecast_period(row):
+	"""Return the start date of a forecast row and the day after its period ends."""
+	start_date = getdate(row.delivery_date)
+	if row.frequency == "Monthly":
+		return start_date, add_months(start_date, 1)
+
+	return start_date, add_days(start_date, 7)
 
 
 @frappe.request_cache
