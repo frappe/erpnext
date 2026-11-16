@@ -954,7 +954,7 @@ class BuyingController(SubcontractingController):
 		the receipt put there, less its other returns, and all of it when the return takes back all the
 		rejected qty left. A cap of nothing left falls back to the row's qty."""
 		stock_qty = get_stock_qty(row, qty)
-		if not stock_qty:
+		if not flt(qty):
 			return stock_qty
 
 		stock_left = self.get_rejected_qty_left_to_return(row, warehouse)
