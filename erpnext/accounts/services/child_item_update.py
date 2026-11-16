@@ -758,6 +758,7 @@ def validate_no_ordered_packed_item(rows, parent) -> None:
 		frappe.get_all(
 			"Purchase Order Item",
 			filters={
+				"sales_order": parent.name,
 				"sales_order_packed_item": ["in", list(row_by_packed_item)],
 				"docstatus": ["<", 2],
 			},
