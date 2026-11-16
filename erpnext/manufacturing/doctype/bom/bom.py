@@ -1557,6 +1557,86 @@ class BOM(WebsiteGenerator):
 			for d in self.get("secondary_items")
 		)
 
+<<<<<<< HEAD
+=======
+	def validate_bom_currency(self, item):
+		return BOMCostingService(self).validate_bom_currency(item)
+
+	def get_rm_rate(self, arg, notify=True):
+		return BOMCostingService(self).get_rm_rate(arg, notify)
+
+	@frappe.whitelist()
+	def update_cost(
+		self,
+		update_parent: bool = True,
+		from_child_bom: bool = False,
+		update_hour_rate: bool = True,
+		save: bool = True,
+	):
+		if cint(save) and not self.is_new():
+			self.load_from_db()
+			self.check_permission("write")
+
+		return BOMCostingService(self).update_cost(
+			update_parent=cint(update_parent) and cint(save),
+			from_child_bom=from_child_bom,
+			update_hour_rate=update_hour_rate,
+			save=cint(save),
+		)
+
+	def update_parent_cost(self):
+		return BOMCostingService(self).update_parent_cost()
+
+	def get_bom_unitcost(self, bom_no):
+		return BOMCostingService(self).get_bom_unitcost(bom_no)
+
+	def calculate_cost(self, save_updates=False, update_hour_rate=False):
+		return BOMCostingService(self).calculate_cost(save_updates, update_hour_rate)
+
+	def calculate_op_cost(self, update_hour_rate=False):
+		return BOMCostingService(self).calculate_op_cost(update_hour_rate)
+
+	def update_rate_and_time(self, row, update_hour_rate=False):
+		return BOMCostingService(self).update_rate_and_time(row, update_hour_rate)
+
+	def calculate_rm_cost(self, save=False):
+		return BOMCostingService(self).calculate_rm_cost(save)
+
+	def calculate_secondary_items_costs(self, save=False):
+		return BOMCostingService(self).calculate_secondary_items_costs(save)
+
+	def calculate_exploded_cost(self):
+		return BOMCostingService(self).calculate_exploded_cost()
+
+	def update_exploded_items(self, save=True):
+		return BOMExplodedItemsService(self).update_exploded_items(save)
+
+	def get_exploded_items(self):
+		return BOMExplodedItemsService(self).get_exploded_items()
+
+	def add_to_cur_exploded_items(self, args):
+		return BOMExplodedItemsService(self).add_to_cur_exploded_items(args)
+
+	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
+		return BOMExplodedItemsService(self).get_child_exploded_items(bom_no, stock_qty, operation)
+
+	def add_exploded_items(self, save=True):
+		return BOMExplodedItemsService(self).add_exploded_items(save)
+
+
+def _get_bom_children(bom_no):
+	children = frappe.cache().hget("bom_children", bom_no)
+	if children is None:
+		bom_item = frappe.qb.DocType("BOM Item")
+		children = (
+			frappe.qb.from_(bom_item)
+			.select(bom_item.bom_no)
+			.where((bom_item.parent == bom_no) & (bom_item.bom_no != "") & (bom_item.parenttype == "BOM"))
+		).run(pluck=True)
+		frappe.cache().hset("bom_children", bom_no, children)
+	return children
+
+>>>>>>> 23f518b (fix(manufacturing): merge an exploded item used at two rates at the weighted rate)
 
 def get_bom_item_rate(args, bom_doc):
 	if bom_doc.rm_cost_as_per == "Valuation Rate":
