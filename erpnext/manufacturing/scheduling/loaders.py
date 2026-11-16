@@ -134,7 +134,8 @@ def filter_covered_schedule_rows(rows):
 def is_operation_covered(row, required, carried):
 	key = (row.production_plan, row.plan_row, row.operation)
 	needed = required.get(key)
-	return bool(needed) and flt(carried.get(key)) >= flt(needed)
+	precision = frappe.get_precision("Work Order Operation", "completed_qty")
+	return bool(needed) and flt(carried.get(key), precision) >= flt(needed, precision)
 
 
 def get_job_card_coverage(production_plans):
@@ -167,15 +168,11 @@ def get_required_operation_qty(work_orders):
 	for operation_row in operations:
 		by_name[operation_row.parent].setdefault("operations", []).append(operation_row)
 
-	precision = frappe.get_precision("Work Order Operation", "completed_qty")
 	required = defaultdict(float)
 	for operation_row in operations:
 		work_order = by_name[operation_row.parent]
-		qty = flt(
-			get_operation_qty(work_order, operation_row)
-			- get_upstream_process_loss(work_order, operation_row),
-			precision,
-		)
+		upstream_loss = get_upstream_process_loss(work_order, operation_row)
+		qty = get_operation_qty(work_order, operation_row) - upstream_loss
 		add_operation_qty(required, work_order, operation_row.operation, qty)
 
 	return required
