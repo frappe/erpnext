@@ -3368,6 +3368,36 @@ class TestPurchaseReceipt(FrappeTestCase):
 			)
 			self.assertEqual(sle_qty, {warehouses.rejected: -1.01, warehouses.transit: 1.01})
 
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_cancel_reverses_its_posted_stock_qty(self):
+		"""Cancelling an internal receipt posted with an older split reverses what it posted."""
+		from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+
+		item_doc = make_item(
+			"_Test Item For Cancel Of Old Split",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		)
+		with patch.object(
+			BuyingController,
+			"get_rejected_stock_qty",
+			lambda self, row: get_stock_qty(row, row.rejected_qty),
+		):
+			pr, warehouses, _batch_no = self.make_split_transfer_receipt(item_doc)
+
+		sle_filters = {"voucher_no": pr.name, "warehouse": warehouses.rejected}
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), 1.01)
+
+		pr.cancel()
+		net_qty = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr.name},
+			fields=["warehouse", "sum(actual_qty) as qty"],
+			group_by="warehouse",
+			as_list=True,
+		)
+		for warehouse, qty in net_qty:
+			self.assertEqual(flt(qty, 2), 0, warehouse)
+
 	def make_split_transfer_receipt(self, item_doc=None, conversion_factor=0.3356):
 		"""Internal receipt that splits 3 Box accepted and 3 Box rejected, whose stock qty rounds
 		unevenly, of a batch item by default."""
