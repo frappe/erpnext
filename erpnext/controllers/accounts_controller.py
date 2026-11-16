@@ -880,6 +880,9 @@ class AccountsController(TransactionBase):
 					self.currency, self.company_currency, transaction_date, args
 				)
 
+			if self.price_list_currency == self.currency and self.conversion_rate:
+				self.plc_conversion_rate = self.conversion_rate
+
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.refresh_exchange_rates()
 
