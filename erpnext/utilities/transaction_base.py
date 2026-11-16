@@ -161,7 +161,7 @@ class TransactionBase(StatusUpdater):
 		return prev_doc_detail_map
 
 	def validate_rate_with_reference_doc(self, ref_details):
-		if self.get("is_internal_supplier"):
+		if self.is_internal_transfer():
 			return
 
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]

@@ -873,7 +873,6 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
