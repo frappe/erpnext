@@ -309,7 +309,7 @@ frappe.ui.form.on("BOM", {
 	},
 
 	default_target_warehouse(frm) {
-		if (frm.doc.default_source_warehouse) {
+		if (frm.doc.default_target_warehouse) {
 			frm.doc.operations.forEach((d) => {
 				frappe.model.set_value(d.doctype, d.name, "fg_warehouse", frm.doc.default_target_warehouse);
 			});
