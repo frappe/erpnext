@@ -1210,6 +1210,9 @@ class BOM(WebsiteGenerator):
 			d.description = frappe.db.get_value("Operation", d.operation, "description")
 		if not d.batch_size or d.batch_size <= 0:
 			d.batch_size = 1
+		# a batch based operation takes its time per batch, as in the Work Order
+		if frappe.get_cached_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+			d.set_cost_based_on_bom_qty = 1
 
 		if not d.workstation and not d.workstation_type:
 			frappe.throw(

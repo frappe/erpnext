@@ -482,7 +482,8 @@ class OperationsService:
 
 
 def _operation_time_per_unit(d, qty, units, exploded, batch_size_flags):
-	if batch_size_flags.get(d.operation) and flt(d.batch_size):
+	is_per_batch = batch_size_flags.get(d.operation) or d.set_cost_based_on_bom_qty
+	if is_per_batch and flt(d.batch_size):
 		return d.time_in_mins * flt(units) / flt(d.batch_size)
 	return d.time_in_mins * flt(qty) if exploded else d.time_in_mins / flt(qty)
 
