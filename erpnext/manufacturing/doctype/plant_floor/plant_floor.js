@@ -7,19 +7,24 @@ frappe.ui.form.on("Plant Floor", {
 	},
 
 	add_workstation(frm) {
-		frm.add_custom_button(__("Create Workstation"), () => {
-			var doc = frappe.model.get_new_doc("Workstation");
-			doc.plant_floor = frm.doc.name;
-			doc.status = "Off";
-			frappe.ui.form.make_quick_entry(
-				"Workstation",
-				() => {
-					frm.trigger("prepare_workstation_dashboard");
-				},
-				null,
-				doc
-			);
-		}).addClass("btn-primary");
+		frm.add_custom_button(
+			__("Create Workstation"),
+			() => {
+				var doc = frappe.model.get_new_doc("Workstation");
+				doc.plant_floor = frm.doc.name;
+				doc.status = "Off";
+				frappe.ui.form.make_quick_entry(
+					"Workstation",
+					() => {
+						frm.trigger("prepare_workstation_dashboard");
+					},
+					null,
+					doc
+				);
+			},
+			null,
+			"primary"
+		);
 	},
 
 	setup_queries(frm) {

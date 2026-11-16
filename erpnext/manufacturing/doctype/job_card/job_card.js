@@ -624,12 +624,17 @@ frappe.ui.form.on("Job Card", {
 
 	make_subcontracting_po(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
-			frm.add_custom_button(__("Make Subcontracting PO"), () => {
-				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.job_card.mapper.make_subcontracting_po",
-					frm: frm,
-				});
-			}).addClass("btn-primary");
+			frm.add_custom_button(
+				__("Make Subcontracting PO"),
+				() => {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.manufacturing.doctype.job_card.mapper.make_subcontracting_po",
+						frm: frm,
+					});
+				},
+				null,
+				"primary"
+			);
 		}
 	},
 
