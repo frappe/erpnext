@@ -22,8 +22,22 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_serial_nos_based_on_posting_date,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+<<<<<<< HEAD
 from erpnext.stock.serial_batch_bundle import set_entry_header_values
 from erpnext.stock.utils import _get_incoming_rate, _get_stock_balance
+=======
+from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import StockReconciliationItem
+from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.serial_batch_identity import SerialBatchIdentity
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	_get_stock_balance,
+	check_company,
+	check_warehouse_company,
+	get_valuation_method,
+)
+from erpnext.stock.valuation_adjustment import ADJUSTMENT_ENTRY, AdjustmentEntry
+>>>>>>> 3fd6aee (fix(stock): convert a buying Item Price to the stock UOM for a reconciliation rate)
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -701,13 +715,19 @@ class StockReconciliation(StockController):
 				)[1]
 				if not row.valuation_rate:
 					# try if there is a buying price list in default currency
-					buying_rate = frappe.db.get_value(
+					buying_price = frappe.db.get_value(
 						"Item Price",
 						{"item_code": row.item_code, "buying": 1, "currency": default_currency},
-						"price_list_rate",
+						["price_list_rate", "uom"],
+						as_dict=True,
 					)
-					if buying_rate:
-						row.valuation_rate = buying_rate
+					if buying_price and buying_price.price_list_rate:
+						# the price is per its own UOM, the valuation rate per stock UOM
+						conversion_factor = get_conversion_factor(row.item_code, buying_price.uom)
+						row.valuation_rate = flt(
+							buying_price.price_list_rate / conversion_factor["conversion_factor"],
+							row.precision("valuation_rate"),
+						)
 
 					else:
 						# get valuation rate from Item
