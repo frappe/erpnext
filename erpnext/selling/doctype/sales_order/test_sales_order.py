@@ -1240,7 +1240,76 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		test_user = create_user("test_so_child_perms@example.com", "Accounts User")
 		frappe.set_user(test_user.name)
 
+<<<<<<< HEAD
 		# update qty
+=======
+			# add new item
+			trans_item = json.dumps([{"item_code": "_Test Item", "rate": 100, "qty": 2}])
+			self.assertRaises(
+				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
+			)
+
+	def test_make_sales_invoice_checks_item_permission_of_target_rows(self):
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		user = create_user("test_so_target_item_perm@example.com", "Sales User", "Accounts User").name
+		frappe.permissions.add_user_permission("Item", "_Test Item", user, applicable_for="Item")
+		target = {"doctype": "Sales Invoice", "items": [{"item_code": "_Test Item 2", "qty": 1}]}
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=target)
+
+	def test_update_child_cannot_remove_item_linked_by_draft_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 5, "rate": 1000},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
+			]
+		)
+		po = create_purchase_order(item_code="_Test Item", qty=5, do_not_save=1)
+		po.items[0].update({"sales_order": so.name, "sales_order_item": so.items[0].name})
+		po.insert()
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 2, "rate": 500, "docname": kept_row.name}]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Purchase Order",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_item,
+			so.name,
+		)
+
+	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
+		for workflow_name in frappe.get_all(
+			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
+		):
+			workflow = frappe.get_doc("Workflow", workflow_name)
+			workflow.is_active = 0
+			workflow.save()
+
+		role = "_Test Sales Order Item Editor"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
+
+		frappe.permissions.add_permission("Sales Order", role, 0)
+		for right, value in {
+			"read": 1,
+			"write": 1,
+			"create": 1,
+			"submit": 1,
+			"cancel": 0,
+			"delete": 0,
+		}.items():
+			frappe.permissions.update_permission_property("Sales Order", role, 0, right, value)
+		frappe.clear_cache()
+
+		so = make_sales_order(**{"item_list": [{"item_code": "_Test Item", "qty": 5, "rate": 1000}]})
+>>>>>>> d6a0779 (test: sales order row linked by a draft purchase order cannot be deleted)
 		trans_item = json.dumps(
 			[{"item_code": "_Test Item", "rate": 200, "qty": 7, "docname": so.items[0].name}]
 		)
