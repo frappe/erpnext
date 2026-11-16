@@ -273,7 +273,7 @@ class TestDeliveryNote(ERPNextTestSuite):
 		dn = frappe.get_doc(make_note_from_order(so.name))
 		dn.items[0].rate = 150
 
-		self.assertRaises(frappe.ValidationError, dn.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Rate must be same as Sales Order", dn.insert)
 
 	def test_over_billing_against_dn(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
