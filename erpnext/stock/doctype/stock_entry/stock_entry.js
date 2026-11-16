@@ -866,7 +866,9 @@ frappe.ui.form.on("Stock Entry", {
 		const item = locals[cdt][cdn];
 		item.transfer_qty = flt(item.qty) * flt(item.conversion_factor);
 
-		if (item.set_basic_rate_manually) {
+		// on a receipt the user gives the rate, as the server keeps it
+		const has_receipt_rate = frm.doc.purpose == "Material Receipt" && flt(item.basic_rate);
+		if (item.set_basic_rate_manually || has_receipt_rate) {
 			frm.events.calculate_basic_amount(frm, item);
 			return;
 		}
