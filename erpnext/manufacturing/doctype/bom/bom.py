@@ -1627,7 +1627,13 @@ def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 
 	if cint(opts.fetch_exploded):
 		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
-	return _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods)
+	rate_col = t.bom_item.base_rate
+	if opts.fetch_qty_in_stock_uom:
+		rate_col = rate_col / IfNull(t.bom_item.conversion_factor, 1)
+
+	return _add_normal_item_columns(
+		query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods
+	)
 
 
 def _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition):
@@ -1672,16 +1678,14 @@ def _add_secondary_item_columns(query, t, stock_item_condition):
 	return query, [t.bom_item.item_code, t.bom_item.secondary_item_type]
 
 
-def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_semi_finished_goods):
+def _add_normal_item_columns(query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods):
 	# Grouped also by bom_no/is_phantom_item: the pair MUST come from the same BOM Item row --
 	# _add_bom_item_to_dict recurses into bom_no when is_phantom_item is set, so independent Max()
 	# per column could pair one line's phantom flag with another line's bom_no and explode the
 	# wrong sub-BOM (same fix as sub_assembly_queries). The remaining non-grouped columns are
 	# constant per grouped item_code (+operation/operation_row_id) -> Max() keeps the GROUP BY
 	# valid on postgres while returning the value MySQL picked arbitrarily.
-	# NOTE: base_rate is aliased "rate" below and is what callers receive; bom_item.rate was selected
-	# under the same alias and silently shadowed (last value wins in the dict), so it is dropped here
-	# -- output is unchanged.
+	# rate_col is base_rate, per stock UOM when the qty is in stock UOM.
 	query = query.select(
 		Max(t.bom_item.description).as_("description"),
 		Max(t.bom_item.source_warehouse).as_("source_warehouse"),
@@ -1692,7 +1696,7 @@ def _add_normal_item_columns(query, t, amount_col, stock_item_condition, track_s
 		Max(t.bom_item.uom).as_("uom"),
 		Max(t.bom_item.conversion_factor).as_("conversion_factor"),
 		amount_col,
-		Max(t.bom_item.base_rate).as_("rate"),
+		Max(rate_col).as_("rate"),
 		Max(t.bom_item.operation_row_id).as_("operation_row_id"),
 		t.bom_item.is_phantom_item,
 		t.bom_item.bom_no,
