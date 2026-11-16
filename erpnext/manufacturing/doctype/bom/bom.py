@@ -1387,16 +1387,16 @@ def get_valuation_rate(data):
 	1) Get average valuation rate from the scoping warehouse if one is passed
 	   (source warehouse for raw materials, default target warehouse for secondary
 	   items), else from all warehouses
-	2) If no value, get last valuation rate from SLE
+	2) If no value, get last valuation rate from the company's SLE
 	3) If no value, get valuation rate from Item
 	"""
 	item_code, company = data.get("item_code"), data.get("company")
 
 	valuation_rate = _get_avg_valuation_rate_from_bins(item_code, company, data)
 
-	if (valuation_rate is not None) and valuation_rate <= 0:
-		# Explicit null value check. If None, Bins don't exist, neither does SLE
-		valuation_rate = _get_last_valuation_rate_from_sle(item_code)
+	# None: no Bin, e.g. a source warehouse that never held the item
+	if flt(valuation_rate) <= 0:
+		valuation_rate = _get_last_valuation_rate_from_sle(item_code, company)
 
 	if not valuation_rate:
 		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
@@ -1435,12 +1435,17 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 	return item_valuation.run(as_dict=True)[0].get("valuation_rate")
 
 
-def _get_last_valuation_rate_from_sle(item_code):
+def _get_last_valuation_rate_from_sle(item_code, company):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	last_val_rate = (
 		frappe.qb.from_(sle)
 		.select(sle.valuation_rate)
-		.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
+		.where(
+			(sle.item_code == item_code)
+			& (sle.company == company)
+			& (sle.valuation_rate > 0)
+			& (sle.is_cancelled == 0)
+		)
 		.orderby(sle.posting_datetime, order=frappe.qb.desc)
 		.orderby(sle.creation, order=frappe.qb.desc)
 		.limit(1)
