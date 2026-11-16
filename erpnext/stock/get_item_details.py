@@ -1203,7 +1203,13 @@ def get_price_list_rate(args, item_doc, out=None):
 		):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
+<<<<<<< HEAD
 			out.update(get_last_purchase_details(item_doc.name, args.name, args.conversion_rate))
+=======
+			out.update(
+				get_last_purchase_details(item_doc.name, ctx.name, ctx.conversion_rate, ctx.conversion_factor)
+			)
+>>>>>>> 1a81351 (fix(buying): convert the last purchase rate fallback to the row UOM)
 
 	return out
 
