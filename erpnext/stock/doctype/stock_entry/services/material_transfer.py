@@ -243,6 +243,27 @@ class MaterialTransferStockEntry(BaseMaterialTransferStockEntry):
 	def validate(self):
 		self.validate_warehouse()
 		self.validate_same_source_target_warehouse()
+		self.validate_returned_qty_within_subcontracting_order()
+
+	def validate_returned_qty_within_subcontracting_order(self):
+		"""A Return of Components takes back at most what the order still has at the supplier."""
+		if not (self.doc.is_return and self.doc.get("subcontracting_order")):
+			return
+
+		from .subcontracting import SendToSubcontractorStockEntry
+
+		order = frappe.get_doc("Subcontracting Order", self.doc.subcontracting_order)
+		qty_at_supplier = order.get_raw_material_qty_at_supplier()
+		returned_qty = defaultdict(float)
+		for row in self.doc.items:
+			returned_qty[row.item_code] += SendToSubcontractorStockEntry(self.doc).get_stock_qty(row)
+			precision = row.precision("transfer_qty")
+			if flt(returned_qty[row.item_code], precision) > flt(qty_at_supplier[row.item_code], precision):
+				frappe.throw(
+					_(
+						"Row #{0}: Only {1} of Item {2} can be returned against Subcontracting Order {3}"
+					).format(row.idx, qty_at_supplier[row.item_code], row.item_code, order.name)
+				)
 
 	def on_submit(self):
 		self.update_transferred_qty()
