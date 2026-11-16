@@ -140,6 +140,17 @@ class TestVideo(FrappeTestCase):
 		):
 			self.assertRaises(frappe.ValidationError, make_video, "Test Bad Link", url, provider="Vimeo")
 
+	def test_non_youtube_video_without_url_asks_for_it(self):
+		self.assertRaises(frappe.MandatoryError, make_video, "Test No URL", None, provider="Vimeo")
+
+	def test_video_id_always_follows_the_url(self):
+		with self.set_user(make_desk_user()):
+			video = make_video("Test Edited ID", "https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+			video.youtube_video_id = 'abc" x="1'
+			video.save()
+
+			self.assertEqual(video.youtube_video_id, "dQw4w9WgXcQ")
+
 	def test_batch_update_needs_video_settings_permission(self):
 		user = frappe.get_doc(
 			{
