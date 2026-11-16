@@ -94,6 +94,7 @@ def get_reserved_qty(item_code, warehouse):
 	dont_reserve_on_return = frappe.get_cached_value(
 		"Selling Settings", "Selling Settings", "dont_reserve_sales_order_qty_on_sales_return"
 	)
+<<<<<<< HEAD
 	reserved_qty = frappe.db.sql(
 		f"""
 		select
@@ -145,6 +146,48 @@ def get_reserved_qty(item_code, warehouse):
 			so_item_qty >= so_item_delivered_qty
 	""",
 		(item_code, warehouse, item_code, warehouse),
+=======
+	so = frappe.qb.DocType("Sales Order")
+	so_item = frappe.qb.DocType("Sales Order Item")
+	packed_item = frappe.qb.DocType("Packed Item")
+
+	open_so = (so.docstatus == 1) & so.status.notin(["On Hold", "Closed"])
+	not_delivered_by_supplier = so_item.delivered_by_supplier.isnull() | (so_item.delivered_by_supplier == 0)
+	not_closed = so_item.closed.isnull() | (so_item.closed == 0)
+
+	# Keep the reserved-qty rollup in the DB (one aggregate per branch) instead of streaming
+	# every open packed-item / SO-item row into Python. `qty <> 0` mirrors the original
+	# `where so_item_qty >= so_item_delivered_qty` *and* guards the divide-by-`qty` below
+	# (MariaDB returned NULL for x/0, postgres raises), so qty=0 rows -- which contributed
+	# nothing anyway -- are excluded on both databases.
+	reservable = (so_item.qty != 0) & (so_item.qty >= so_item.delivered_qty)
+	if dont_reserve_on_return:
+		# delivered_qty is net of returns, so a replacement delivery takes this below 0
+		net_reserved = so_item.qty - so_item.delivered_qty - so_item.returned_qty
+		net_reserved = Case().when(net_reserved > 0, net_reserved).else_(0)
+	else:
+		net_reserved = so_item.qty - so_item.delivered_qty
+
+	# Bundled (packed) items reserving stock against an open Sales Order
+	packed_qty = (
+		frappe.qb.from_(packed_item)
+		.inner_join(so)
+		.on(so.name == packed_item.parent)
+		.inner_join(so_item)
+		.on(so_item.name == packed_item.parent_detail_docname)
+		.select(Sum(packed_item.qty * net_reserved / so_item.qty))
+		.where(
+			(packed_item.item_code == item_code)
+			& (packed_item.warehouse == warehouse)
+			& (packed_item.parenttype == "Sales Order")
+			& (packed_item.item_code != packed_item.parent_item)
+			& not_delivered_by_supplier
+			& not_closed
+			& open_so
+			& reservable
+		)
+		.run()
+>>>>>>> 01d0614 (fix(selling): reserve nothing for a row delivered again after a return)
 	)
 
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
