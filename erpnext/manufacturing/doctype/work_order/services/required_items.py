@@ -190,7 +190,6 @@ class RequiredItemsService:
 		if self.doc.skip_transfer:
 			return
 
-		transferred_items = self._material_transfer_qty_by_item(is_return=0)
 		row_wise_serial_batch = frappe._dict({})
 		if self.doc.reserve_stock:
 			row_wise_serial_batch = get_row_wise_serial_batch(self.doc.name)
@@ -206,7 +205,7 @@ class RequiredItemsService:
 					row, transferred_qty, row_wise_serial_batch
 				)
 
-		self.recompute_material_transferred_for_manufacturing(transferred_items)
+		self.recompute_material_transferred_for_manufacturing()
 
 	def refresh_material_transferred_for_manufacturing(self):
 		"""Recompute material_transferred_for_manufacturing only, without touching per-row
@@ -215,26 +214,30 @@ class RequiredItemsService:
 		"""
 		if self.doc.skip_transfer:
 			return
-		transferred_items = self._material_transfer_qty_by_item(is_return=0)
-		self.recompute_material_transferred_for_manufacturing(transferred_items)
+		self.recompute_material_transferred_for_manufacturing()
 
-	def recompute_material_transferred_for_manufacturing(self, transferred_items):
-		"""Set material_transferred_for_manufacturing based on actual item-level transfers, not fg_completed_qty."""
+	def recompute_material_transferred_for_manufacturing(self):
+		"""Set material_transferred_for_manufacturing to the For Quantity of the direct transfers
+		plus the share covered by the item transfers made without one."""
 		# Job Card transfers use the minimum completed quantity across operations.
 		if self.doc.operations and self.doc.transfer_material_against == "Job Card":
 			return
 
-		# When fg_completed_qty > 0 (direct stock entries, excess transfer), preserve the
-		# SUM(fg_completed_qty) approach so excess-transfer tracking works correctly.
-		sum_fg_completed_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
+		# SUM(fg_completed_qty) keeps excess-transfer tracking of direct entries correct.
+		direct_qty = StatusService(self.doc).get_transferred_or_manufactured_qty(
 			"Material Transfer for Manufacture", "material_transferred_for_manufacturing"
 		)
-		if sum_fg_completed_qty:
-			self.doc.db_set("material_transferred_for_manufacturing", sum_fg_completed_qty)
-			return
+		item_transfer_qty = self._qty_covered_by_item_transfers()
+		material_transferred = direct_qty + min(item_transfer_qty, max(flt(self.doc.qty) - direct_qty, 0))
+		self.doc.db_set(
+			"material_transferred_for_manufacturing",
+			flt(material_transferred, self.doc.precision("material_transferred_for_manufacturing")),
+		)
 
-		# Pick list flow sets fg_completed_qty=0; use min-fraction of actual item transfers
-		# so partial availability does not prematurely mark the work order as fully transferred.
+	def _qty_covered_by_item_transfers(self):
+		"""Pick list and material request transfers set fg_completed_qty=0; use the min-fraction of
+		their item transfers so partial availability does not mark the order as fully transferred."""
+		transferred_items = self._material_transfer_qty_by_item(is_return=0, without_for_quantity=True)
 		required_by_item = {}
 		for row in self.doc.required_items:
 			if not row.include_item_in_manufacturing or flt(row.required_qty) <= 0:
@@ -242,15 +245,13 @@ class RequiredItemsService:
 			required_by_item[row.item_code] = required_by_item.get(row.item_code, 0.0) + flt(row.required_qty)
 
 		if not required_by_item:
-			return
+			return 0
 
 		min_fraction = min(
 			flt(transferred_items.get(item_code) or 0) / required_qty
 			for item_code, required_qty in required_by_item.items()
 		)
-		min_fraction = min(min_fraction, 1.0)
-		material_transferred = min_fraction * flt(self.doc.qty)
-		self.doc.db_set("material_transferred_for_manufacturing", material_transferred)
+		return min(min_fraction, 1.0) * flt(self.doc.qty)
 
 	def update_returned_qty(self):
 		returned_by_row = distribute_over_rows(
@@ -353,7 +354,7 @@ class RequiredItemsService:
 		)
 		return frappe._dict({d.item_code: flt(d.qty) for d in query.run(as_dict=1)})
 
-	def _material_transfer_qty_by_item(self, is_return):
+	def _material_transfer_qty_by_item(self, is_return, without_for_quantity=False):
 		ste = frappe.qb.DocType("Stock Entry")
 		ste_child = frappe.qb.DocType("Stock Entry Detail")
 		job_card = frappe.qb.DocType("Job Card")
@@ -378,6 +379,8 @@ class RequiredItemsService:
 			.where(fn.Coalesce(job_card.is_corrective_job_card, 0) == 0)
 			.groupby(ste_child.item_code, ste_child.original_item)
 		)
+		if without_for_quantity:
+			query = query.where(fn.Coalesce(ste.fg_completed_qty, 0) == 0)
 		qty_by_item = frappe._dict()
 		for d in query.run(as_dict=1) or []:
 			key = d.original_item or d.item_code
