@@ -1353,7 +1353,7 @@ def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) ->
 	ip = frappe.qb.DocType("Item Price")
 	query = (
 		frappe.qb.from_(ip)
-		.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit)
+		.select(ip.name, ip.price_list_rate, ip.uom, ip.packing_unit, ip.customer, ip.supplier)
 		.where(
 			(ip.item_code == item_code)
 			& (ip.price_list == args.get("price_list"))
@@ -1440,7 +1440,20 @@ def get_price_list_rate_for(args, item_code):
 	}
 
 	item_price_data = 0
+<<<<<<< HEAD
 	price_list_rate = get_item_price(item_price_args, item_code)
+=======
+	price_list_rate = get_item_price(pctx, item_code, limit=None)
+	has_party = pctx.customer or pctx.supplier
+	if has_party and ctx.get("uom") != ctx.get("stock_uom") and not is_party_price(price_list_rate):
+		# a party's own price in the stock UOM comes before a general price in the row UOM
+		party_price_list_rate = get_item_price(
+			frappe._dict(pctx, uom=ctx.get("stock_uom")), item_code, limit=None
+		)
+		if is_party_price(party_price_list_rate):
+			price_list_rate = party_price_list_rate
+
+>>>>>>> 4b287d6 (fix(stock): prefer a party's price in the stock UOM over a general price in the row UOM)
 	if price_list_rate:
 		if desired_qty := args.get("qty"):
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
@@ -1466,6 +1479,10 @@ def get_price_list_rate_for(args, item_code):
 			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0][1]
+
+
+def is_party_price(item_prices):
+	return bool(item_prices) and bool(item_prices[0].customer or item_prices[0].supplier)
 
 
 def get_prices_fitting_packing_unit(item_prices, desired_qty):
