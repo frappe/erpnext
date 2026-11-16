@@ -265,7 +265,11 @@ class BuyingController(SubcontractingController):
 		A receipt of an internal transfer builds no package for it on its own, so rejected material
 		of a tracked item would have nothing to say where it came from.
 		"""
-		if not self.has_rejected_stock(row) or self.is_return:
+		if not self.is_internal_receipt() or self.is_return:
+			return
+
+		if not self.has_rejected_stock(row):
+			self.remove_rejected_package(row)
 			return
 
 		if row.get("rejected_serial_and_batch_bundle"):
@@ -285,6 +289,21 @@ class BuyingController(SubcontractingController):
 		)
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
+
+	def remove_rejected_package(self, row) -> None:
+		"""Drop the draft rejected package of a row that no longer rejects anything."""
+		package = row.get("rejected_serial_and_batch_bundle")
+		if not package:
+			return
+
+		details = frappe.db.get_value(
+			"Serial and Batch Bundle", package, ["docstatus", "voucher_detail_no"], as_dict=True
+		)
+		if not details or details.docstatus != 0 or details.voucher_detail_no != row.name:
+			return
+
+		row.rejected_serial_and_batch_bundle = None
+		frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def resize_package(self, row, bundle_field, qty_field) -> None:
 		"""Resize the batch package of a saved draft row whose stock qty changed."""
