@@ -239,6 +239,9 @@ def get_pos_reserved_serial_nos(filters):
 	if isinstance(filters, str):
 		filters = json.loads(filters)
 
+	frappe.has_permission("POS Invoice", "read", throw=True)
+	require_permission("Warehouse", filters.get("warehouse"), "select")
+
 	POSInvoice = frappe.qb.DocType("POS Invoice")
 	POSInvoiceItem = frappe.qb.DocType("POS Invoice Item")
 	query = (
