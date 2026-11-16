@@ -9,8 +9,10 @@ from functools import cached_property
 
 import frappe
 from frappe import _, bold
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import (
@@ -5728,9 +5730,10 @@ def get_warehouse_details(args):
 
 	args = frappe._dict(args)
 
-	# Restored explicitly: inherited from get_incoming_rate until it was split into a guarded wrapper
-	# and the unguarded _get_incoming_rate this now calls. `select` -- desk roles hold no Item read.
 	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Stock Entry", "read", throw=True)
+	if args.warehouse:
+		check_stock_entry_warehouse_permission(args.warehouse)
 
 	ret = {}
 	if args.warehouse and args.item_code:
@@ -5745,6 +5748,15 @@ def get_warehouse_details(args):
 			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret
+
+
+def check_stock_entry_warehouse_permission(warehouse: str) -> None:
+	user_permissions = get_user_permissions()
+	company = frappe.get_cached_value("Warehouse", warehouse, "company")
+	for doctype, name in (("Warehouse", warehouse), ("Company", company)):
+		allowed_docs = get_allowed_docs_for_doctype(user_permissions.get(doctype, []), "Stock Entry")
+		if allowed_docs and name not in allowed_docs:
+			frappe.throw(_("Not permitted for {0}").format(name), frappe.PermissionError)
 
 
 @frappe.whitelist()
