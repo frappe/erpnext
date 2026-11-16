@@ -2884,6 +2884,50 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(received_qty, -delivered_qty)
 
+	def test_internal_transfer_that_rejects_material_into_transit(self):
+		"""Material rejected back into the in-transit warehouse stays there, so the receipt and its
+		return book transit with the net stock value that moved through it."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		company = dn.company
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": create_warehouse("_Test Transfer To", company=company),
+				"qty": 4,
+				"rejected_qty": 2,
+				"received_qty": 6,
+				"rejected_warehouse": transit_warehouse,
+			}
+		)
+		pr.submit()
+		purchase_return = make_purchase_return(pr.name)
+		purchase_return.submit()
+
+		for voucher in (pr, purchase_return):
+			booked_value = {}
+			for entry in get_gl_entries("Purchase Receipt", voucher.name, skip_cancelled=True):
+				booked_value.setdefault(entry.account, 0)
+				booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+			stock_value = {}
+			for entry in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": voucher.name, "is_cancelled": 0},
+				fields=["warehouse", "stock_value_difference"],
+			):
+				account = get_inventory_account(company, entry.warehouse)
+				stock_value.setdefault(account, 0)
+				stock_value[account] += flt(entry.stock_value_difference)
+
+			self.assertEqual(
+				{account: flt(value, 2) for account, value in booked_value.items()},
+				{account: flt(value, 2) for account, value in stock_value.items()},
+			)
+
 	def test_internal_transfer_rejected_batch_takes_the_delivered_stock_qty_out_of_transit(self):
 		"""The in-transit package of a batch item holds the stock qty the receipt, and its return, move
 		in or out of transit, also when the accepted and rejected qty round up on their own."""

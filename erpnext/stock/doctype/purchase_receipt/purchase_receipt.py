@@ -529,6 +529,14 @@ class PurchaseReceipt(BuyingController):
 			frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 		)
 
+	def has_booked_rejected_material(self, item) -> bool:
+		"""Rejected material gets its own stock entry when it is valued and leaves the in-transit
+		warehouse. Rejected material that stays in transit did not move."""
+		if not (flt(item.rejected_qty) and self.is_rejected_material_valued()):
+			return False
+
+		return not (item.from_warehouse and item.rejected_warehouse == item.from_warehouse)
+
 	def make_item_gl_entries(self, gl_entries, inventory_account_map=None):
 		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
 			get_purchase_document_details,
@@ -761,7 +769,7 @@ class PurchaseReceipt(BuyingController):
 				valuation_amount_as_per_doc - flt(stock_value_diff), item.precision("base_net_amount")
 			)
 
-			if item.get("rejected_qty") and self.is_rejected_material_valued():
+			if self.has_booked_rejected_material(item):
 				rejected_item_cost = get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
 				divisional_loss -= rejected_item_cost
 
@@ -874,7 +882,7 @@ class PurchaseReceipt(BuyingController):
 				self.update_assets(d, d.valuation_rate)
 
 			# a non-stock item puts no rejected qty in stock
-			if d.rejected_qty and d.item_code in stock_items and self.is_rejected_material_valued():
+			if d.item_code in stock_items and self.has_booked_rejected_material(d):
 				stock_asset_rbnb = (
 					self.get_company_default("asset_received_but_not_billed")
 					if d.is_fixed_asset
@@ -1202,7 +1210,8 @@ class PurchaseReceipt(BuyingController):
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
-	"""0 when the row posts nothing to the warehouse, e.g. a rejected qty that rounds to 0 in the stock UOM."""
+	"""Stock value the row moved in the warehouse, 0 when it posts nothing there. A row can have
+	two entries in the in-transit warehouse, when its rejected material stays there."""
 	return flt(
 		frappe.db.get_value(
 			"Stock Ledger Entry",
@@ -1213,7 +1222,7 @@ def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 				"warehouse": warehouse,
 				"is_cancelled": 0,
 			},
-			"stock_value_difference",
+			[{"SUM": "stock_value_difference"}],
 		)
 	)
 
