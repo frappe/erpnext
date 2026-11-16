@@ -586,12 +586,26 @@ frappe.ui.form.on("Job Card", {
 
 	make_subcontracting_po(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
+<<<<<<< HEAD
 			frm.add_custom_button(__("Make Subcontracting PO"), () => {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
 					frm: frm,
 				});
 			}).addClass("btn-primary");
+=======
+			frm.add_custom_button(
+				__("Make Subcontracting PO"),
+				() => {
+					frappe.model.open_mapped_doc({
+						method: "erpnext.manufacturing.doctype.job_card.mapper.make_subcontracting_po",
+						frm: frm,
+					});
+				},
+				null,
+				"primary"
+			);
+>>>>>>> 39d299b (fix: keep custom primary buttons readable on hover)
 		}
 	},
 

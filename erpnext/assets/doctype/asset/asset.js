@@ -188,9 +188,14 @@ frappe.ui.form.on("Asset", {
 					__("Actions")
 				);
 			} else if (frm.doc.status == "Scrapped") {
-				frm.add_custom_button(__("Restore Asset"), function () {
-					erpnext.asset.restore_asset(frm);
-				}).addClass("btn-primary");
+				frm.add_custom_button(
+					__("Restore Asset"),
+					function () {
+						erpnext.asset.restore_asset(frm);
+					},
+					null,
+					"primary"
+				);
 			}
 
 			if (await frm.events.should_show_accounting_ledger(frm)) {
