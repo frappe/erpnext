@@ -1429,7 +1429,7 @@ class StockController(AccountsController):
 				self.validate_multi_currency()
 				self.validate_packed_items()
 
-				if self.get("is_internal_supplier") and self.docstatus == 1:
+				if self.get("is_internal_supplier") and self.docstatus == 1 and not self.get("is_return"):
 					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
@@ -1471,11 +1471,7 @@ class StockController(AccountsController):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
 			return
 
-		self.__inter_company_reference = (
-			self.get("inter_company_invoice_reference")
-			if self.doctype == "Purchase Invoice"
-			else self.get("inter_company_reference")
-		)
+		self.__inter_company_reference = self.get_inter_company_reference()
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
 		if not item_wise_transfer_qty:
@@ -1512,6 +1508,17 @@ class StockController(AccountsController):
 					),
 					OverAllowanceError,
 				)
+
+	def get_inter_company_reference(self):
+		if self.doctype == "Purchase Receipt":
+			return self.get("inter_company_reference")
+
+		if self.get("is_return"):
+			return frappe.db.get_value(
+				"Purchase Invoice", self.return_against, "inter_company_invoice_reference"
+			)
+
+		return self.get("inter_company_invoice_reference")
 
 	def get_item_wise_inter_transfer_qty(self):
 		parent_doctype = {
@@ -1565,48 +1572,27 @@ class StockController(AccountsController):
 				)
 
 	def get_item_wise_inter_received_qty(self):
-		child_doctype = self.doctype + " Item"
-
-		parent_tab = frappe.qb.DocType(self.doctype)
-		child_tab = frappe.qb.DocType(child_doctype)
-
-		query = (
-			frappe.qb.from_(self.doctype)
-			.inner_join(child_tab)
-			.on(child_tab.parent == parent_tab.name)
-			.select(
-				child_tab.item_code,
-				child_tab.qty,
-			)
-			.where(parent_tab.docstatus == 1)
-		)
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_inter_company_items
 
 		if self.doctype == "Purchase Invoice":
-			query = query.select(
-				child_tab.sales_invoice_item.as_("name"),
-			)
-
-			query = query.where(
-				parent_tab.inter_company_invoice_reference == self.inter_company_invoice_reference
-			)
+			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
+			fields = ["item_code", "qty"]
 		else:
-			query = query.select(
-				child_tab.delivery_note_item.as_("name"),
-				child_tab.delivery_note_packed_item,
-			)
+			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
+			fields = ["item_code", "qty", "delivery_note_packed_item"]
 
-			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
+		other_items = get_inter_company_items(
+			self.doctype,
+			{reference_field: self.__inter_company_reference, "name": ("!=", self.name)},
+			item_reference_field,
+			fields,
+		)
 
-		query = query.where(parent_tab.name != self.name)
+		# a cancelled document no longer counts
+		own_items = self.items if self.docstatus == 1 else []
 		item_wise_received_qty = defaultdict(float)
-		for row in query.run(as_dict=True):
-			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
-				row.qty
-			)
-
-		reference_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
-		for row in self.items:
-			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+		for row in [*other_items, *own_items]:
+			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
 			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
 
 		return item_wise_received_qty
