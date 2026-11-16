@@ -4598,6 +4598,15 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
 	)
 	def test_partial_manufactures_consume_the_rounded_transfer(self):
+		self.assert_rounded_entries_empty_wip(transfers=[3], manufactures=[2, 1])
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_transfers_add_up_to_the_rounded_manufactures(self):
+		self.assert_rounded_entries_empty_wip(transfers=[1, 1, 1], manufactures=[2, 1])
+
+	def assert_rounded_entries_empty_wip(self, transfers, manufactures):
 		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
 		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2.1825)
@@ -4606,12 +4615,12 @@ class TestWorkOrder(ERPNextTestSuite):
 			production_item=fg_item, bom_no=bom.name, qty=3, source_warehouse="Stores - _TC", stock_uom="Kg"
 		)
 
-		for purpose, qty in (
-			("Material Transfer for Manufacture", 3),
-			("Manufacture", 2),
-			("Manufacture", 1),
-		):
-			frappe.get_doc(make_stock_entry(work_order.name, purpose, qty)).submit()
+		for qty in transfers:
+			frappe.get_doc(
+				make_stock_entry(work_order.name, "Material Transfer for Manufacture", qty)
+			).submit()
+		for qty in manufactures:
+			frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", qty)).submit()
 
 		self.assertEqual(
 			flt(
