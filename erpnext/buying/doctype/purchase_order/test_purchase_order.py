@@ -287,24 +287,17 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
 	def test_order_and_receipt_for_part_of_a_material_request_keep_their_unrounded_stock_qty(self):
-		item = make_item(
-			properties={
-				"is_stock_item": 1,
-				"stock_uom": "Kg",
-				"uoms": [{"uom": "Box", "conversion_factor": 0.123}],
-			}
-		).name
-		mr = make_material_request(item_code=item, qty=10, uom="Box", conversion_factor=0.123)
-		po = make_purchase_order(mr.name)
-		po.supplier = "_Test Supplier"
-		po.items[0].qty = 1
-		po.submit()
-		make_purchase_receipt(po.name).submit()
-
-		mr.reload()
+		mr = order_and_receive_part_of_material_request(conversion_factor=0.123, qty=10, ordered_qty=1)
 		self.assertEqual(mr.items[0].ordered_qty, 0.123)
 		self.assertEqual(mr.items[0].received_qty, 0.123)
 		self.assertEqual(make_purchase_order(mr.name).items[0].qty, 9)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
+	def test_order_and_receipt_for_part_of_a_material_request_within_rounding_keep_their_stock_qty(self):
+		mr = order_and_receive_part_of_material_request(conversion_factor=0.001, qty=10, ordered_qty=6)
+		self.assertEqual(mr.items[0].ordered_qty, 0.006)
+		self.assertEqual(mr.items[0].received_qty, 0.006)
+		self.assertEqual(make_purchase_order(mr.name).items[0].qty, 4)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 0})
 	def test_cancelling_the_order_and_receipt_of_a_material_request_below_precision_clears_them(self):
@@ -3117,6 +3110,26 @@ def receive_material_request_after_setting_change(allow_to_edit_stock_uom_qty):
 	frappe.db.set_single_value(
 		"Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase", allow_to_edit_stock_uom_qty
 	)
+	make_purchase_receipt(po.name).submit()
+
+	mr.reload()
+	return mr
+
+
+def order_and_receive_part_of_material_request(conversion_factor, qty, ordered_qty):
+	"""Material Request for ``qty`` Boxes of ``conversion_factor`` Kg, ordered and received for ``ordered_qty``."""
+	item = make_item(
+		properties={
+			"is_stock_item": 1,
+			"stock_uom": "Kg",
+			"uoms": [{"uom": "Box", "conversion_factor": conversion_factor}],
+		}
+	).name
+	mr = make_material_request(item_code=item, qty=qty, uom="Box", conversion_factor=conversion_factor)
+	po = make_purchase_order(mr.name)
+	po.supplier = "_Test Supplier"
+	po.items[0].qty = ordered_qty
+	po.submit()
 	make_purchase_receipt(po.name).submit()
 
 	mr.reload()
