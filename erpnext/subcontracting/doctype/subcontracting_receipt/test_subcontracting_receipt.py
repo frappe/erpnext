@@ -536,6 +536,19 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertTrue(secondary_row.expense_account)
 		self.assertTrue(secondary_row.cost_center)
 
+	def test_return_inserted_as_submitted_keeps_the_cost_center_set_on_a_secondary_row(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[1].cost_center = "_Test Cost Center 2 - _TC"
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		self.assertEqual(scr_return.items[1].cost_center, "_Test Cost Center 2 - _TC")
+
 	def test_rejected_return_leaves_out_secondary_items(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
 			make_subcontract_return_against_rejected_warehouse,
