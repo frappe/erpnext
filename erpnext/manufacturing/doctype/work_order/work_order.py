@@ -42,6 +42,54 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
+<<<<<<< HEAD
+=======
+
+# Backward-compatible re-exports: these functions were moved to mapper.py.
+# Importing them here preserves existing whitelist dotted-paths
+# (e.g. ...work_order.work_order.make_work_order) and external imports.
+from erpnext.manufacturing.doctype.work_order.mapper import (
+	add_variant_item,
+	check_if_scrap_warehouse_mandatory,
+	create_job_card,
+	create_pick_list,
+	get_item_details,
+	get_operation_details,
+	get_operation_qty,
+	get_operation_target_qty,
+	get_serial_nos_for_job_card,
+	get_serial_nos_for_work_order,
+	get_template_rm_item,
+	get_upstream_process_loss,
+	get_work_order_operation_data,
+	make_job_card,
+	make_material_request,
+	make_stock_entry,
+	make_stock_return_entry,
+	make_work_order,
+	split_qty_based_on_batch_size,
+	validate_operation_data,
+)
+from erpnext.manufacturing.doctype.work_order.services.operations import (
+	OperationsService,
+)
+from erpnext.manufacturing.doctype.work_order.services.required_items import (
+	RequiredItemsService,
+)
+from erpnext.manufacturing.doctype.work_order.services.reservation import (
+	WorkOrderStockReservation,
+	cancel_stock_reservation_entries,
+	get_consumed_qty,
+	get_reserved_qty_for_production,
+	get_row_wise_serial_batch,
+	get_sre_details,
+	make_stock_reservation_entries,
+	release_unused_inward_reservations,
+)
+from erpnext.manufacturing.doctype.work_order.services.status import (
+	StatusService,
+)
+>>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
@@ -2748,6 +2796,7 @@ class WorkOrder(Document):
 		items = frappe._dict()
 		voucher_detail_no = {d.item_code: d.name for d in self.required_items}
 
+<<<<<<< HEAD
 		for row in stock_entry.items:
 			if row.item_code not in items:
 				items[row.item_code] = frappe._dict(
@@ -2768,6 +2817,14 @@ class WorkOrder(Document):
 				items[row.item_code]["stock_qty"] += row.transfer_qty
 				if row.serial_and_batch_bundle:
 					items[row.item_code]["serial_and_batch_bundles"].append(row.serial_and_batch_bundle)
+=======
+	def update_required_items(self):
+		RequiredItemsService(self).update_required_items()
+		if self.status == "Completed" and self.subcontracting_inward_order:
+			release_unused_inward_reservations(work_order=self.name)
+
+		self.update_subcontracting_inward_order_received_items()
+>>>>>>> a60ed0a (fix(subcontracting): return extra customer material held by a Work Order)
 
 		return items
 
@@ -3273,9 +3330,17 @@ def get_consumed_qty(work_order, item_code):
 
 
 def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty."""
+	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed or completed order the qty it used or still holds, any other its required qty or the qty it used if more."""
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
+	used_qty = (
+		Case()
+		.when(
+			work_order_item.transferred_qty > work_order_item.consumed_qty,
+			work_order_item.transferred_qty - work_order_item.returned_qty,
+		)
+		.else_(work_order_item.consumed_qty - work_order_item.returned_qty)
+	)
 	return dict(
 		frappe.qb.from_(work_order_item)
 		.join(work_order)
@@ -3285,13 +3350,9 @@ def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) 
 			Sum(
 				Case()
 				.when(
-					(work_order.status == "Closed")
-					& (work_order_item.transferred_qty > work_order_item.consumed_qty),
-					work_order_item.transferred_qty - work_order_item.returned_qty,
-				)
-				.when(
-					work_order.status == "Closed",
-					work_order_item.consumed_qty - work_order_item.returned_qty,
+					work_order.status.isin(["Closed", "Completed"])
+					| (used_qty > work_order_item.required_qty),
+					used_qty,
 				)
 				.else_(work_order_item.required_qty)
 			),
