@@ -17,6 +17,7 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+<<<<<<< HEAD
 from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
 from erpnext.controllers.mapper import get_qty_already_mapped
@@ -27,6 +28,17 @@ from erpnext.stock.serial_batch_bundle import (
 	SerialBatchCreation,
 	get_batches_from_bundle,
 	get_serial_nos_from_bundle,
+=======
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_returned_stock_qty_status_args,
+)
+from erpnext.controllers.item_close import validate_parent_reopen
+from erpnext.stock.doctype.purchase_receipt.services.billing_status import BillingStatusService
+from erpnext.stock.doctype.purchase_receipt.services.provisional_accounting import (
+	ProvisionalAccountingService,
+>>>>>>> fe983ad (fix(stock): round a receipt's returned qty once at the total)
 )
 from erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt import (
 	validate_single_purchase_receipt,
@@ -266,7 +278,7 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Purchase Receipt",
 				"target_parent_field": "per_returned",
 				"target_ref_field": "received_stock_qty",
-				"source_field": "-1 * received_stock_qty",
+				**get_returned_stock_qty_status_args(),
 				"percent_join_field_parent": "return_against",
 			},
 		]
