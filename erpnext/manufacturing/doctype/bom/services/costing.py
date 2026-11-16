@@ -228,7 +228,7 @@ class BOMCostingService:
 			for field in ("workstation", "workstation_type")
 		):
 			row.hour_rate = 0
-		elif flt(before.conversion_rate) != flt(self.doc.conversion_rate):
+		elif flt(self.doc.conversion_rate) and flt(before.conversion_rate) != flt(self.doc.conversion_rate):
 			# keeps the rate in company currency, also a manual one
 			row.hour_rate = flt(
 				flt(row.hour_rate) * flt(before.conversion_rate) / flt(self.doc.conversion_rate),
