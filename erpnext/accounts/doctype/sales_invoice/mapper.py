@@ -305,10 +305,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 
 def validate_not_made_from_counterpart(source_doc, target_doctype, received_items):
-	"""A document made from its counterpart links it, but the counterpart rows link no rows back."""
+	"""A document made from its counterpart links it, but the counterpart rows link none of its rows back."""
 	reference_field = get_inter_company_counterpart(source_doc.doctype)[1]
 	reference = source_doc.get(reference_field)
-	if reference and not received_items:
+	if reference and not any(row.name in received_items for row in source_doc.items):
 		frappe.throw(
 			_("Cannot create Intercompany {0}. {1} {2} was created from {0} {3}.").format(
 				target_doctype,
