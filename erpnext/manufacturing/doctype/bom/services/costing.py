@@ -240,9 +240,7 @@ class BOMCostingService:
 			hour_rate = flt(frappe.get_cached_value("Workstation Type", row.workstation_type, "hour_rate"))
 
 		if hour_rate:
-			row.hour_rate = (
-				hour_rate / flt(self.doc.conversion_rate) if self.doc.conversion_rate else hour_rate
-			)
+			row.hour_rate = flt(hour_rate / (flt(self.doc.conversion_rate) or 1), row.precision("hour_rate"))
 
 	def _set_row_operating_costs(self, row):
 		row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
