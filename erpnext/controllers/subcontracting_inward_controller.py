@@ -224,7 +224,7 @@ class SubcontractingInwardController:
 				for wo_item in work_order_items
 			}
 		)
-		item_codes = []
+		qty_by_item = defaultdict(float)
 		for item in self.items:
 			if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item"):
 				continue
@@ -236,18 +236,10 @@ class SubcontractingInwardController:
 						get_link_to_form("Warehouse", customer_warehouse),
 					)
 				)
-			elif item.item_code in item_codes:
-				frappe.throw(
-					_(
-						"Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
-					).format(
-						item.idx,
-						get_link_to_form("Item", item.item_code),
-					)
-				)
 			else:
 				if wo_item := wo_item_dict.get(item.item_code):
-					if wo_item.transferred_qty + item.transfer_qty > max(
+					qty_by_item[item.item_code] += item.transfer_qty
+					if wo_item.transferred_qty + qty_by_item[item.item_code] > max(
 						wo_item.required_qty, wo_item.stock_reserved_qty
 					):
 						frappe.throw(
@@ -259,8 +251,6 @@ class SubcontractingInwardController:
 								get_link_to_form("Work Order", self.work_order),
 							)
 						)
-					else:
-						item_codes.append(item.item_code)
 				else:
 					frappe.throw(
 						_("Row #{0}: Customer Provided Item {1} is not a part of Work Order {2}").format(
@@ -402,23 +392,17 @@ class SubcontractingInwardController:
 		throw messages are supplied as callbacks. `extra_check` runs an extra per-item
 		validation (the source-warehouse check on the skip-transfer path).
 		"""
-		seen = []
+		qty_by_item = defaultdict(float)
 		for item in items:
 			record = lookup.get(item.item_code)
 			if not record:
 				on_missing(item)
-			elif record.consumed_qty + item.transfer_qty > record.available_qty:
+
+			qty_by_item[item.item_code] += item.transfer_qty
+			if record.consumed_qty + qty_by_item[item.item_code] > record.available_qty:
 				on_overconsumption(item)
-			else:
-				if extra_check:
-					extra_check(item)
-				if item.item_code in seen:
-					frappe.throw(
-						_(
-							"Row #{0}: Customer Provided Item {1} cannot be added multiple times in the Subcontracting Inward process."
-						).format(item.idx, get_link_to_form("Item", item.item_code))
-					)
-				seen.append(item.item_code)
+			elif extra_check:
+				extra_check(item)
 
 	def set_allow_zero_valuation_rate(self):
 		if self.subcontracting_inward_order:
@@ -917,17 +901,16 @@ class SubcontractingInwardController:
 		if not items:
 			return
 
-		item_code_wh = frappe._dict(
-			{
-				(
-					item.item_code,
-					customer_warehouse
-					if frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
-					else item.s_warehouse,
-				): item.transfer_qty if self._action == "submit" else -item.transfer_qty
-				for item in items
-			}
-		)
+		item_code_wh = defaultdict(float)
+		for item in items:
+			warehouse = (
+				customer_warehouse
+				if frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
+				else item.s_warehouse
+			)
+			item_code_wh[(item.item_code, warehouse)] += (
+				item.transfer_qty if self._action == "submit" else -item.transfer_qty
+			)
 		item_codes, warehouses = zip(*list(item_code_wh.keys()), strict=True)
 
 		table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
@@ -993,13 +976,13 @@ class SubcontractingInwardController:
 				)
 				+ 1
 			)
-			for extra_item in [
-				item
-				for item in items
-				if not frappe.get_cached_value("Item", item.item_code, "is_customer_provided_item")
-				and (item.item_code, item.s_warehouse)
-				not in [(d.rm_item_code, d.warehouse) for d in data if not d.is_customer_provided_item]
-			]:
+			existing_rows = [(d.rm_item_code, d.warehouse) for d in data if not d.is_customer_provided_item]
+			for (item_code, warehouse), qty in item_code_wh.items():
+				if (item_code, warehouse) in existing_rows or frappe.get_cached_value(
+					"Item", item_code, "is_customer_provided_item"
+				):
+					continue
+
 				doc = frappe.new_doc(
 					"Subcontracting Inward Order Received Item",
 					parent=self.subcontracting_inward_order,
@@ -1007,14 +990,14 @@ class SubcontractingInwardController:
 					parentfield="received_items",
 					idx=next_received_idx,
 					main_item_code=main_item_code,
-					rm_item_code=extra_item.item_code,
-					stock_uom=extra_item.stock_uom,
+					rm_item_code=item_code,
+					stock_uom=frappe.get_cached_value("Item", item_code, "stock_uom"),
 					reference_name=frappe.get_cached_value(
 						"Work Order", self.work_order, "subcontracting_inward_order_item"
 					),
 					required_qty=0,
-					consumed_qty=extra_item.transfer_qty,
-					warehouse=extra_item.s_warehouse,
+					consumed_qty=qty,
+					warehouse=warehouse,
 					is_additional_item=True,
 				)
 				doc.flags.skip_docstatus_validation = True
