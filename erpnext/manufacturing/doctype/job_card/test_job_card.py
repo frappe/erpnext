@@ -1137,15 +1137,13 @@ class TestJobCard(FrappeTestCase):
 			if job_card is first:
 				job_card.submit()
 
-		self.assertEqual(second.process_loss_qty, 5)
-		self.assertRaises(OperationSequenceError, second.submit)
-
-		second.reload()
-		second.for_quantity = 95
 		second.time_logs[0].completed_qty = 90
 		second.save()
+		self.assertEqual(second.process_loss_qty, 10)
+
+		# 5 of it was already lost by the first operation
 		second.submit()
-		self.assertEqual(second.process_loss_qty, 5)
+		self.assertEqual((second.for_quantity, second.process_loss_qty), (95, 5))
 
 		# A later card without loss can't use the qty already lost.
 		make_job_card(
