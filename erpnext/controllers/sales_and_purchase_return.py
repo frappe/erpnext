@@ -1497,6 +1497,9 @@ def get_return_bundle_qty(parent_doc, row, qty_field):
 	if qty_field == "rejected_qty":
 		return parent_doc.get_rejected_stock_qty(row)
 
+	if row.get("return_qty_from_rejected_warehouse"):
+		return parent_doc.get_rejected_warehouse_return_stock_qty(row, qty_field)
+
 	return row.get(qty_field)
 
 
