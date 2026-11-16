@@ -373,6 +373,8 @@ function update_formula_description(frm, data_source) {
 			<div ${container_style}>
 				<h5 ${title_style}>Custom API Setup</h5>
 				<p ${text_style}>Path to your custom whitelisted method that returns financial data. It must permit GET requests.</p>
+				<p ${text_style}>Add the exact path to the <code>financial_report_template_methods</code> hook in your app's <code>hooks.py</code>. Other methods are rejected.</p>
+				<p ${note_style}><strong>Note:</strong> The method runs as the user who runs the report. It must check that user's permissions and must not change data. Permitting GET does not make a method read-only.</p>
 
 				<h6 ${subtitle_style}>Format:</h6>
 				<ul ${list_style}>

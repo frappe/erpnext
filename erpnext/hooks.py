@@ -798,3 +798,11 @@ data_import_providers = {
 # Expose method source code through the API discovery endpoints. Safe for open
 # source apps and helps API clients understand what a method does.
 expose_discovery_source = True
+
+# Financial Report Template
+# -------------------------
+# Methods that "Custom API" rows of a Financial Report Template can call, as exact dotted paths.
+# A method must also be whitelisted and permit GET. It runs as the user who runs the report,
+# so it must check that user's permissions and must not change data.
+# financial_report_template_methods = ["my_app.financial_reports.get_kpi_data"]
+financial_report_template_methods = []
