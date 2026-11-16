@@ -4803,10 +4803,10 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_cancel_reverses_its_posted_stock_qty(self):
 		"""Cancelling an internal receipt posted with an older split reverses what it posted, also when
-		its rejected stock qty now rounds to 0."""
+		its rejected stock qty now rounds to 0 or no longer does."""
 		from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
 
-		for conversion_factor, posted_rejected_qty in ((0.3356, 1.01), (0.002, 0.01)):
+		for conversion_factor, posted_rejected_qty in ((0.3356, 1.01), (0.002, 0.01), (0.0016, None)):
 			with self.subTest(conversion_factor=conversion_factor):
 				item_doc = make_item(
 					f"_Test Item For Cancel Of Old Split {conversion_factor}",
