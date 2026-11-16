@@ -343,7 +343,9 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if reference_qty or flt(current_stock_qty):
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif flt(returned_qty, field_precision) >= reference_qty and returns_nothing:
+			elif (
+				flt(returned_qty, field_precision) >= flt(reference_qty, field_precision) and returns_nothing
+			):
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
