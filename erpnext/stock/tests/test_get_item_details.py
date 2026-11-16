@@ -766,9 +766,50 @@ class TestGetItemDetail(ERPNextTestSuite):
 		item_a, batch_a = batched_item()
 		item_b, batch_b = batched_item()
 
+<<<<<<< HEAD
 		# one PO with both items at different rates
 		po = create_purchase_order(item_code=item_a, qty=5, rate=28, do_not_save=True)
 		po.append(
+=======
+	@ERPNextTestSuite.change_settings("Buying Settings", {"maintain_same_rate": 1})
+	def test_rate_lock_for_inter_company_supplier(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.stock.get_item_details import get_rate_locked_source_row
+
+		supplier = create_internal_supplier("_Test Sister Supplier", "_Test Company 1", "_Test Company")
+		po = create_purchase_order(supplier=supplier, rate=90)
+		ctx = frappe._dict(
+			doctype="Purchase Receipt", is_internal_supplier=1, purchase_order_item=po.items[0].name
+		)
+		pr_doc = {
+			"doctype": "Purchase Receipt",
+			"company": po.company,
+			"represents_company": "_Test Company 1",
+		}
+
+		self.assertEqual(get_rate_locked_source_row(ctx.copy(), pr_doc).rate, 90)
+
+		pr_doc["represents_company"] = po.company
+		self.assertIsNone(get_rate_locked_source_row(ctx.copy(), pr_doc))
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"maintain_same_sales_rate": 1})
+	def test_delivery_note_to_sales_invoice_keeps_item_rates(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		first_item, first_batches = self.make_batched_item_with_stock([1])
+		second_item, second_batches = self.make_batched_item_with_stock([1])
+		dn = create_delivery_note(
+			item_code=first_item,
+			qty=1,
+			rate=100,
+			batch_no=first_batches[0],
+			use_serial_batch_fields=1,
+			do_not_save=True,
+		)
+		dn.append(
+>>>>>>> 8d16194 (test: rate lock for inter company supplier)
 			"items",
 			{
 				"item_code": item_b,
