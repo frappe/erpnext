@@ -4137,7 +4137,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			sle.actual_qty,
 		)
 
-	def make_transfer_receipt(self, tag, item_doc, qty, rejected):
+	def make_transfer_receipt(self, tag, item_doc, qty, rejected, uom=None, conversion_factor=None):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -4166,7 +4166,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			warehouse=wh.source,
 			target_warehouse=wh.transit,
 			batch_no=batch_no,
+			use_serial_batch_fields=bool(uom),
+			do_not_submit=bool(uom),
 		)
+		if uom:
+			dn.items[0].update({"uom": uom, "conversion_factor": conversion_factor})
+			dn.submit()
+
 		pr = make_inter_company_purchase_receipt(dn.name)
 		pr.items[0].warehouse = wh.accepted
 		pr.items[0].qty = qty
@@ -4174,6 +4180,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.items[0].received_qty = qty + rejected
 		pr.items[0].rejected_warehouse = wh.rejected
 		return pr, wh, company, batch_no
+
+	def test_internal_pr_with_rejected_stock_qty_rounding_to_zero(self):
+		"""A rejected qty that rounds to 0 in the stock UOM posts no rejected stock, and can be returned."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		for tag, properties in (
+			("Plain", {}),
+			("Batch", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIRZ-.####"}),
+		):
+			with self.subTest(tag):
+				item_doc = make_item(
+					f"_Test {tag} Item For Zero Rejected Stock Qty",
+					{"stock_uom": "Kg", "uoms": [{"uom": "Gram", "conversion_factor": 0.001}], **properties},
+				)
+				pr, warehouses, *_ = self.make_transfer_receipt(
+					f"Zero Rejected {tag}", item_doc, 999, 1, uom="Gram", conversion_factor=0.001
+				)
+				pr.submit()
+
+				self.assertFalse(pr.items[0].rejected_serial_and_batch_bundle)
+				self.assertFalse(
+					frappe.db.exists(
+						"Stock Ledger Entry", {"voucher_no": pr.name, "warehouse": warehouses.rejected}
+					)
+				)
+
+				make_return_doc("Purchase Receipt", pr.name).submit()
 
 	def test_removing_the_rejection_moves_the_package_back(self):
 		"""A row that no longer rejects anything carries the package of the in-transit warehouse
