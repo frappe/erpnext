@@ -359,6 +359,7 @@ def apply_price_list(
 	reset_party_values: bool = False,
 	reset_plc_conversion_rate: bool = False,
 	reset_conversion_rate: bool = False,
+	reset_rate: bool = False,
 ):
 	return blanket_order_pricing.apply_price_list(
 		doc=doc,
@@ -366,6 +367,7 @@ def apply_price_list(
 		reset_party_values=reset_party_values,
 		reset_plc_conversion_rate=reset_plc_conversion_rate,
 		reset_conversion_rate=reset_conversion_rate,
+		reset_rate=reset_rate,
 	)
 
 
