@@ -3004,7 +3004,6 @@ class StockEntry(StockController):
 			SED.description,
 			SED.stock_uom,
 			SED.uom,
-			SED.basic_rate,
 			SED.conversion_factor,
 			SED.is_finished_item,
 			SED.is_scrap_item,
@@ -3018,14 +3017,20 @@ class StockEntry(StockController):
 
 		if self.source_stock_entry:
 			return (
-				query.select(SED.name, SED.qty, SED.transfer_qty, *common_fields)
+				query.select(SED.name, SED.qty, SED.transfer_qty, SED.basic_rate, *common_fields)
 				.where(SE.name == self.source_stock_entry)
 				.orderby(SED.idx)
 				.run(as_dict=True)
 			)
 
 		return (
-			query.select(Sum(SED.qty).as_("qty"), Sum(SED.transfer_qty).as_("transfer_qty"), *common_fields)
+			query.select(
+				Sum(SED.qty).as_("qty"),
+				Sum(SED.transfer_qty).as_("transfer_qty"),
+				# basic_rate is per stock UOM, so weight it by transfer_qty
+				(Sum(SED.basic_rate * SED.transfer_qty) / NullIf(Sum(SED.transfer_qty), 0)).as_("basic_rate"),
+				*common_fields,
+			)
 			.where(SE.purpose == "Manufacture")
 			.where(SE.work_order == self.work_order)
 			.groupby(SED.item_code)
