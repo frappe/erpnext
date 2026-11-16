@@ -59,12 +59,12 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.submit()
 		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
 		manufacture.submit()
+		reservation = {"from_voucher_no": manufacture.name, "docstatus": 1}
+		self.assertTrue(frappe.db.exists("Stock Reservation Entry", reservation))
 
 		manufacture.cancel()
 
-		self.assertFalse(
-			frappe.db.exists("Stock Reservation Entry", {"from_voucher_no": manufacture.name, "docstatus": 1})
-		)
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
 
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
