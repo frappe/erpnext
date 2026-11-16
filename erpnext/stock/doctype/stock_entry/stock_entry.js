@@ -1101,6 +1101,19 @@ frappe.ui.form.on("Landed Cost Taxes and Charges", {
 		frm.events.set_base_amount(frm, cdt, cdn);
 	},
 
+	base_amount: function (frm) {
+		// child handlers run on every parent form, the total is only on Stock Entry
+		if (frm.doctype === "Stock Entry") {
+			frm.events.calculate_total_additional_costs(frm);
+		}
+	},
+
+	additional_costs_remove: function (frm) {
+		if (frm.doctype === "Stock Entry") {
+			frm.events.calculate_total_additional_costs(frm);
+		}
+	},
+
 	expense_account: function (frm, cdt, cdn) {
 		frm.events.set_account_currency(frm, cdt, cdn);
 	},
