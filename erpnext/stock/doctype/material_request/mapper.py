@@ -120,7 +120,12 @@ def make_purchase_order(
 
 	requested_qty = args.get("requested_qty") or {}
 	ordered_stock_qty = get_ordered_stock_qty(source_name)
-	mapped_qty_by_item = get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
+	# rows rounding their stock qty are added up as their order adds them up on submit
+	mapped_qty_by_item = (
+		get_qty_already_mapped(target_doc, "material_request_item", "stock_qty")
+		if ordered_stock_qty is None
+		else get_qty_already_mapped(target_doc, "material_request_item", "qty", "conversion_factor")
+	)
 
 	def postprocess(source, target_doc):
 		target_doc.is_subcontracted = is_subcontracted
@@ -139,9 +144,16 @@ def make_purchase_order(
 		filtered_items = args.get("filtered_children", [])
 		child_filter = d.name in filtered_items if filtered_items else True
 
-		qty = (d.ordered_qty or d.received_qty) + flt(mapped_qty_by_item.get(d.name, 0))
+		return get_ordered_qty(d) < d.stock_qty and child_filter
 
-		return qty < d.stock_qty and child_filter
+	def get_ordered_qty(d):
+		"""Stock qty ordered for a row, rows already in ``target_doc`` included."""
+		ordered_qty = d.ordered_qty or d.received_qty
+		mapped_qty = flt(mapped_qty_by_item.get(d.name))
+		if ordered_stock_qty is None:
+			return ordered_qty + mapped_qty
+
+		return flt(flt(ordered_stock_qty.get(d.name, ordered_qty)) + mapped_qty, d.precision("stock_qty"))
 
 	def generate_field_map():
 		field_map = [
