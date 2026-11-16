@@ -3793,6 +3793,21 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		sr.reload()
 		self.assertEqual(sr.items[0].rejected_qty, 2)  # Should remain the same
 
+	def test_no_rejected_warehouse_return_after_all_rejected_qty_is_returned(self):
+		scr, _scrap_item = make_receipt_with_rejected_qty_and_scrap()
+		self.assertTrue(scr.has_rejected_qty_to_return())
+
+		make_return_doc("Subcontracting Receipt", scr.name, return_against_rejected_qty=True).submit()
+
+		self.assertFalse(scr.has_rejected_qty_to_return())
+		self.assertRaises(
+			frappe.ValidationError,
+			make_return_doc,
+			"Subcontracting Receipt",
+			scr.name,
+			return_against_rejected_qty=True,
+		)
+
 	def test_return_of_rejected_qty_gets_no_secondary_items(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
 			make_subcontract_return_against_rejected_warehouse,
