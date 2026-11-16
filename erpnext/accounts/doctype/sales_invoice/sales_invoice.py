@@ -335,7 +335,7 @@ class SalesInvoice(SellingController):
 			self.set_onload("apply_tds", tax_withholding_category or tax_withholding_group)
 
 	def validate(self):
-		# Only the POS Invoice Merge Log may mark an invoice as consolidated.
+		# Only POS consolidation may mark an invoice as consolidated.
 		if not self.flags.is_consolidated:
 			self.is_consolidated = 0
 
