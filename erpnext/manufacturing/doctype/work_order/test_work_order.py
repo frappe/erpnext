@@ -6324,6 +6324,22 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertRaises(frappe.ValidationError, transfer.save)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_excess_transfer_check_follows_the_bom_backflush(self):
+		rm_item = make_item("_Test Excess Transfer BOM Backflush RM", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test Excess Transfer BOM Backflush FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], backflush_based_on="BOM")
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="_Test Warehouse - _TC"
+		)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=100)
+
+		transfer = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 0))
+		transfer.items[0].qty = 15
+		self.assertRaises(frappe.ValidationError, transfer.save)
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "allow_negative_stock": 0},
 	)
