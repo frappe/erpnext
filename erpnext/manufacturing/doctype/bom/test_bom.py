@@ -2103,6 +2103,26 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
 
+	def test_get_items_rate_in_stock_uom(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_box_item("_Test BOM Box Rate RM")
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
+		bom.insert()
+		bom.submit()
+		self.assertEqual(bom.items[0].base_rate, 120)
+
+		in_stock_uom = get_bom_items_as_dict(bom.name, "_Test Company", fetch_exploded=0)[rm_item]
+		self.assertEqual((in_stock_uom.qty, in_stock_uom.rate), (12, 10))
+
+		in_row_uom = get_bom_items_as_dict(
+			bom.name, "_Test Company", fetch_exploded=0, fetch_qty_in_stock_uom=False
+		)[rm_item]
+		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
+
 
 def make_stage_items():
 	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
