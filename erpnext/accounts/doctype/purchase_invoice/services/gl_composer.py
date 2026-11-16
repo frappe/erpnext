@@ -641,6 +641,17 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 			)
 		)
 
+		if doc.is_return and doc.return_against and not doc.is_internal_supplier:
+			# The stock goes back at the invoice's rate, the debit note bills it at its own.
+			billed_amount = flt(
+				item.valuation_rate * get_stock_qty(item, item.rejected_qty),
+				item.precision("base_net_amount"),
+			)
+			if billed_amount != rejected_amount:
+				self.make_stock_variance_entry(
+					gl_entries, item, billed_amount - rejected_amount, rejected_account["account_currency"]
+				)
+
 		return rejected_amount if transfers_rejected_material else 0.0
 
 	def get_transit_stock_value(self, item, voucher_wise_stock_value) -> float | None:
