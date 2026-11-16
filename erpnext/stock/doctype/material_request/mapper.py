@@ -208,14 +208,15 @@ def make_purchase_order(
 def make_request_for_quotation(source_name: str, target_doc: str | dict | Document | None = None):
 	validate_request_not_stopped(source_name)
 	ordered_stock_qty = get_ordered_stock_qty(source_name)
+	precision = frappe.get_precision("Request for Quotation Item", "qty")
 
 	def update_item(obj, target, source_parent):
-		target.qty = get_pending_qty(obj, ordered_stock_qty, target.precision("qty"))
+		target.qty = get_pending_qty(obj, ordered_stock_qty, precision)
 		target.stock_qty = target.qty * target.conversion_factor
 
 	def select_item(d):
 		qty = d.ordered_qty or d.received_qty
-		return qty < d.stock_qty
+		return qty < d.stock_qty and get_pending_qty(d, ordered_stock_qty, precision) > 0
 
 	doclist = get_mapped_doc(
 		"Material Request",
@@ -271,12 +272,16 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 		if ordered_qty >= flt(item.stock_qty):
 			continue
 
+		pending_qty = get_pending_qty(item, ordered_stock_qty, precision)
+		if pending_qty <= 0:
+			continue
+
 		items.append(
 			{
 				"material_request_item": item.name,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
-				"pending_qty": get_pending_qty(item, ordered_stock_qty, precision),
+				"pending_qty": pending_qty,
 				"uom": item.uom,
 				"supplier": get_default_supplier_for_item(item.item_code, material_request.company),
 			}
