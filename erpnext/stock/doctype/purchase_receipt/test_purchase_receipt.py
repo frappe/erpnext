@@ -4414,6 +4414,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		for warehouse, qty in get_net_qty_by_warehouse([pr.name], is_cancelled=1).items():
 			self.assertEqual(qty, 0, warehouse)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_rejected_only_return_of_a_batch(self):
+		"""A return of only the rejected batch puts its rejected stock qty back in transit."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		pr, warehouses, _batch_no = self.make_split_transfer_receipt()
+		rejected_return = make_return_doc("Purchase Receipt", pr.name)
+		rejected_return.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+		rejected_return.submit()
+
+		self.assertEqual(
+			get_net_qty_by_warehouse([rejected_return.name]),
+			{warehouses.rejected: -1.0, warehouses.transit: 1.0},
+		)
+
 	def make_split_transfer_receipt(self, item_doc=None, conversion_factor=0.3356):
 		"""Internal receipt that splits 3 Box accepted and 3 Box rejected, whose stock qty rounds
 		unevenly, of a batch item by default."""
