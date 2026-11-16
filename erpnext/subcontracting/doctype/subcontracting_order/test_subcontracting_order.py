@@ -885,6 +885,69 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		set_backflush_based_on("BOM")
 
+<<<<<<< HEAD
+=======
+	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
+		make_subcontracted_item(
+			item_code="Subcontracted Item Shared RM", raw_materials=["Subcontracted SRM Item 1"]
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Shared RM",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		make_stock_entry(
+			target="_Test Warehouse - _TC", item_code="Subcontracted SRM Item 1", qty=40, basic_rate=100
+		)
+
+		def transfer_20_for(fg_item):
+			ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+			ste.items = [row for row in ste.items if row.subcontracted_item == fg_item]
+			ste.items[0].qty = 20
+			ste.save()
+			ste.submit()
+
+		both_rows = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in both_rows.items:
+			row.qty = 20
+		self.assertRaises(frappe.ValidationError, both_rows.save)
+
+		stock_uom_row = frappe.get_doc(make_rm_stock_entry(sco.name))
+		stock_uom_row.items = stock_uom_row.items[:1]
+		stock_uom_row.items[0].update({"qty": 100, "conversion_factor": 0.1})
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be transferred more than", stock_uom_row.save)
+
+		transfer_20_for("Subcontracted Item SA7")
+		self.assertRaises(frappe.ValidationError, transfer_20_for, "Subcontracted Item Shared RM")
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_refuses_a_subcontracted_item_not_on_the_order(self):
+		sco = get_subcontracting_order()
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in ste.items:
+			row.subcontracted_item = "Subcontracted Item SA1"
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.insert)
+
+>>>>>>> b417b17 (test: Material to Supplier refuses a Subcontracted Item not on the order)
 	def test_get_materials_from_supplier(self):
 		# Create SCO
 		sco = get_subcontracting_order()
