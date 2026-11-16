@@ -482,3 +482,4 @@ erpnext.patches.v15_0.mirror_hr_user_task_project_select
 erpnext.patches.v16_0.recalculate_bins_for_production_plan_items
 erpnext.patches.v16_0.packed_item_inv_dimen
 erpnext.patches.v16_0.set_stock_uom_on_plan_rows_without_conversion
+erpnext.patches.v16_0.recalculate_ordered_qty_of_material_requests_ordered_in_parts
