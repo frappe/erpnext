@@ -512,6 +512,20 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		self.assertEqual(po.get("items")[0].qty, 0)
 		self.assertEqual(po.get("items")[0].item_code, sq.get("items")[0].item_code)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
+	def test_map_purchase_order_qty_in_quoted_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"stock_uom": "Kg"}, uoms=[{"uom": "Box", "conversion_factor": 0.333333333}]
+		)
+		sq = frappe.copy_doc(self.globalTestRecords["Supplier Quotation"][0])
+		sq.items[0].update({"item_code": item.name, "qty": 1, "uom": "Box", "conversion_factor": 0.333333333})
+		sq.submit()
+
+		po = make_purchase_order(sq.name)
+		self.assertEqual(po.items[0].qty, 1)
+
 	def test_quotation_drops_terms_not_applicable_to_selling(self):
 		quotation = self.make_quotation_with_terms(selling=0)
 		quotation.insert()
