@@ -993,6 +993,11 @@ class BuyingController(SubcontractingController):
 		)
 
 	def get_returned_source_package(self, row):
+		if not row.serial_and_batch_bundle:
+			return self.make_package_for_transfer(
+				row.rejected_serial_and_batch_bundle, row.from_warehouse, type_of_transaction="Inward"
+			)
+
 		return self.make_package_for_transfer(
 			row.serial_and_batch_bundle,
 			row.from_warehouse,
