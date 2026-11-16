@@ -1620,7 +1620,7 @@ class TestPickList(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_split_bundle_delivery_is_returned_to_each_warehouse(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		delivery_note = create_delivery_note(pick_bundle_from_two_warehouses().name)
 		delivery_note.submit()
@@ -1658,7 +1658,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(sorted(rates), [(warehouse, 150), (other_warehouse, 200)])
 
 	def test_partial_return_of_split_bundle_delivery_fills_each_delivered_row(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
 		first_return = make_sales_return(delivery_note.name)
@@ -1674,7 +1674,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(returned, {row.warehouse: row.qty for row in delivery_note.packed_items})
 
 	def test_split_bundle_return_takes_back_each_row_at_its_delivered_rate(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		sales_return = make_sales_return(deliver_bundle_from_two_warehouses_at_two_rates().name)
 		sales_return.submit()
@@ -1690,7 +1690,7 @@ class TestPickList(ERPNextTestSuite):
 	def test_repost_keeps_the_value_of_a_split_bundle_return_to_one_warehouse(self):
 		from frappe.utils import add_days, nowdate
 
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
 
 		return_warehouse = "_Test Warehouse 2 - _TC"
@@ -1718,7 +1718,7 @@ class TestPickList(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_two_return_rows_of_a_split_bundle_take_back_different_delivered_rows(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
 		sales_return = make_sales_return(delivery_note.name)
@@ -1730,7 +1730,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(returned, sorted(row.name for row in delivery_note.packed_items))
 
 	def test_split_bundle_return_takes_back_a_batch_at_each_delivered_row_rate(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		component = make_item(
 			properties={
@@ -1764,7 +1764,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(sum(values), 1 * 100 + 2 * 200)
 
 	def test_partial_return_of_repeated_bundle_component_takes_back_each_occurrence(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
 			create_delivery_note as make_delivery_note,
 		)
@@ -1780,7 +1780,7 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual([row.qty for row in sales_return.packed_items], [-3, -1])
 
 	def test_partial_return_of_repeated_component_split_across_warehouses(self):
-		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		component = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=component, to_warehouse="_Test Warehouse - _TC", qty=4, basic_rate=100)
@@ -4464,7 +4464,6 @@ def make_bundle_with_repeated_component(component):
 	bundle_doc.append("items", {"item_code": component, "qty": 3})
 	bundle_doc.append("items", {"item_code": component, "qty": 1})
 	bundle_doc.insert()
-	bundle_doc.submit()
 	return bundle
 
 

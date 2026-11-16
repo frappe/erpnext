@@ -5,15 +5,20 @@
 
 
 import json
+from collections import Counter
 
 import frappe
 import frappe.defaults
-from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import (
+	ItemDetailsCtx,
+	get_conversion_factor,
+	get_item_details,
+	get_price_list_rate,
+)
 
 
 class PackedItem(Document):
@@ -60,7 +65,16 @@ class PackedItem(Document):
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def set_actual_and_projected_qty(self):
+		"Set actual and projected qty based on warehouse and item_code"
+		_bin = frappe.db.get_value(
+			"Bin",
+			{"item_code": self.item_code, "warehouse": self.warehouse},
+			["actual_qty", "projected_qty"],
+			as_dict=True,
+		)
+		self.actual_qty = _bin.actual_qty if _bin else 0
+		self.projected_qty = _bin.projected_qty if _bin else 0
 
 
 def make_packing_list(doc, order_packed_items=None):
@@ -85,16 +99,12 @@ def make_packing_list(doc, order_packed_items=None):
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
-		# Pack from the version chosen on the row (default: the item's active version)
-		# and record it so the document keeps a reference to the exact version used.
-		bundle_name = get_bundle_version_for_row(item_row, doc)
-		if item_row.meta.has_field("product_bundle"):
-			item_row.product_bundle = bundle_name
-		if item_row.meta.has_field("is_product_bundle"):
-			item_row.is_product_bundle = 1 if bundle_name else 0
-
-		if bundle_name:
-			component_rows = get_bundle_components(doc, item_row, bundle_name, order_packed_items)
+		if is_product_bundle(item_row.item_code):
+			order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
+			so_packed_items = list(order_packed_items.get(order_row, []))
+			component_rows = get_component_order_rows(
+				doc, item_row.item_code, get_product_bundle_items(item_row.item_code), so_packed_items
+			)
 			return_qty = get_return_qty(doc, item_row, component_rows, returned_packed_qty)
 			for bundle_item, so_packed_item in component_rows:
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
@@ -112,7 +122,6 @@ def make_packing_list(doc, order_packed_items=None):
 						linked_packed_item=get_linked_packed_item(doc, so_packed_item),
 						location=location,
 					)
-					pi_row.product_bundle = bundle_name
 					update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
 					if so_packed_item and so_packed_item.name in return_qty:
 						pi_row.qty = return_qty[so_packed_item.name]
@@ -134,52 +143,8 @@ def make_packing_list(doc, order_packed_items=None):
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
 
 
-def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
-	"""Components of ``item_row``'s bundle, each with the order's packed row it delivers."""
-	order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
-	so_packed_items = list(order_packed_items.get(order_row, []))
-	return get_component_order_rows(
-		doc, item_row.item_code, get_product_bundle_items_by_name(bundle_name), so_packed_items
-	)
-
-
-def get_kept_packed_items(doc):
-	"""Yield (packed row, bundle row, stock qty per bundle unit) for each packed row of the last
-	build that make_packing_list keeps for the bundle rows as they are now."""
-	packed_items_table = get_indexed_packed_items_table(doc)
-	order_packed_items = get_order_packed_items(doc)
-	# only a bundle row that has packed rows can keep one
-	parent_items = {row.parent_item for row in doc.get("packed_items")}
-	for item_row in doc.get("items"):
-		if item_row.item_code not in parent_items:
-			continue
-
-		if not (bundle_name := get_bundle_version_for_row(item_row, doc)):
-			continue
-
-		for bundle_item, so_packed_item in get_bundle_components(
-			doc, item_row, bundle_name, order_packed_items
-		):
-			stale_rows = get_stale_packed_rows(
-				doc,
-				item_row,
-				bundle_item,
-				packed_items_table,
-				get_linked_packed_item(doc, so_packed_item),
-			)
-			if stale_rows:
-				packed_row = stale_rows.pop(0)
-				yield (
-					packed_row,
-					item_row,
-					get_component_stock_qty_per_unit(bundle_item, packed_row.uom, so_packed_item),
-				)
-
-
 def is_product_bundle(item_code: str) -> bool:
-	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-	return bool(get_active_product_bundle(item_code))
+	return bool(frappe.db.exists("Product Bundle", {"new_item_code": item_code, "disabled": 0}))
 
 
 def get_indexed_packed_items_table(doc):
@@ -190,39 +155,34 @@ def get_indexed_packed_items_table(doc):
 	Use: to quickly retrieve/check if row existed in table instead of looping n times.
 	A component repeated on a bundle shares one key, so rows are kept as a list and
 	consumed per occurrence rather than collapsed onto a single row.
+
+	A new doc (e.g. mapped) has no link to its item rows yet, so its packed rows are
+	consumed in order per parent item and component. This is only safe if the item rows
+	need exactly these rows, e.g. no item row was removed after mapping. Rows made from a
+	Sales Order are matched by that order's packed row instead.
 	"""
-	cancelled_row_idx = get_cancelled_row_idx(doc)
 	link_field = get_packed_item_link_field(doc)
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
-		parent_row = packed_item.parent_detail_docname
+		parent_row = None if doc.is_new() else packed_item.parent_detail_docname
 		if doc.is_new() and packed_item.get(link_field):
 			parent_row = packed_item.get(link_field)
 
-		key = (
-			packed_item.parent_item,
-			packed_item.item_code,
-			cancelled_row_idx.get(parent_row, parent_row),
-		)
+		key = (packed_item.parent_item, packed_item.item_code, parent_row)
 
 		indexed_table.setdefault(key, []).append(packed_item)
 
-	return indexed_table
-
-
-def get_cancelled_row_idx(doc):
-	"""Row idx by row name of the cancelled document, which an amendment's copied packed rows point to."""
-	if not (doc.is_new() and doc.get("amended_from")):
-		return {}
-
-	return dict(
-		frappe.get_all(
-			doc.meta.get_field("items").options,
-			filters={"parenttype": doc.doctype, "parent": doc.amended_from},
-			fields=["name", "idx"],
-			as_list=True,
+	if doc.is_new():
+		needed_counts = Counter(
+			(item_row.item_code, bundle_item.item_code, None)
+			for item_row in doc.get("items")
+			for bundle_item in get_product_bundle_items(item_row.item_code)
 		)
-	)
+		indexed_table = {
+			key: rows for key, rows in indexed_table.items() if key[2] or len(rows) == needed_counts[key]
+		}
+
+	return indexed_table
 
 
 def reset_packing_list(doc):
@@ -235,13 +195,8 @@ def reset_packing_list(doc):
 		# 1. items were deleted
 		# 2. if bundle item replaced by another item (same no. of items but different items)
 		# we maintain list to track recurring item rows as well
-		# include product_bundle so picking a different version re-packs the components
-		items_before_save = [
-			(item.name, item.item_code, item.get("product_bundle")) for item in doc_before_save.get("items")
-		]
-		items_after_save = [
-			(item.name, item.item_code, item.get("product_bundle")) for item in doc.get("items")
-		]
+		items_before_save = [(item.name, item.item_code) for item in doc_before_save.get("items")]
+		items_after_save = [(item.name, item.item_code) for item in doc.get("items")]
 		reset_table = items_before_save != items_after_save
 	else:
 		# reset: if via Update Items OR
@@ -254,51 +209,24 @@ def reset_packing_list(doc):
 	return reset_table
 
 
-@frappe.request_cache
-def get_product_bundle_items_by_name(bundle_name):
-	"Component rows of a specific Product Bundle version, which cannot change once submitted."
+def get_product_bundle_items(item_code):
+	product_bundle = frappe.qb.DocType("Product Bundle")
 	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
-	return (
+
+	query = (
 		frappe.qb.from_(product_bundle_item)
+		.join(product_bundle)
+		.on(product_bundle_item.parent == product_bundle.name)
 		.select(
 			product_bundle_item.item_code,
 			product_bundle_item.qty,
 			product_bundle_item.uom,
 			product_bundle_item.description,
 		)
-		.where(product_bundle_item.parent == bundle_name)
+		.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
 		.orderby(product_bundle_item.idx)
-	).run(as_dict=True)
-
-
-def get_bundle_version_for_row(item_row, doc=None):
-	"""Product Bundle version to pack ``item_row`` from.
-
-	Honours a version explicitly chosen on the row (validated to be a submitted
-	bundle of that item); otherwise falls back to the item's active version. A stale
-	choice (e.g. left over after changing the item) self-heals back to the active
-	one, but a disabled choice blocks the transaction instead of silently switching
-	versions behind the user's back. A return reuses the exact version of the document
-	it reverses, so a since-disabled version must not block it.
-	"""
-	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-	chosen = item_row.get("product_bundle") if item_row.meta.has_field("product_bundle") else None
-	if chosen:
-		bundle = frappe.db.get_value(
-			"Product Bundle", chosen, ["new_item_code", "docstatus", "disabled"], as_dict=True
-		)
-		if bundle and bundle.new_item_code == item_row.item_code and bundle.docstatus == 1:
-			if bundle.disabled and not (doc and doc.get("is_return")):
-				frappe.throw(
-					_("Row #{0}: Product Bundle {1} is disabled and cannot be used in transactions.").format(
-						item_row.idx, frappe.bold(chosen)
-					),
-					title=_("Disabled Product Bundle"),
-				)
-			return chosen
-
-	return get_active_product_bundle(item_row.item_code)
+	)
+	return query.run(as_dict=True)
 
 
 def add_packed_item_row(
@@ -315,11 +243,12 @@ def add_packed_item_row(
 	"""
 	exists, pi_row = False, {}
 
+	key = get_packed_item_key(
+		doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item
+	)
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
-	if stale_rows := get_stale_packed_rows(
-		doc, main_item_row, packing_item, packed_items_table, linked_packed_item
-	):
+	if stale_rows := packed_items_table.get(key):
 		pi_row, exists = stale_rows.pop(get_stale_row_idx(stale_rows, location)), True
 
 	if not exists:
@@ -339,22 +268,14 @@ def add_packed_item_row(
 	return pi_row
 
 
-def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, linked_packed_item):
-	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
-	key = get_packed_item_key(
-		doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item
-	)
-	return packed_items_table.get(key)
-
-
 def get_packed_item_key(doc, main_item_row, item_code, packed_items_table, linked_packed_item=None):
 	# an unsaved row made from a Sales Order or a return is found by the packed row it links to,
-	# since its idx shifts when a row above it is deleted
+	# so it keeps its own packed row when a row above it is deleted
 	order_key = (main_item_row.item_code, item_code, linked_packed_item)
 	if doc.is_new() and linked_packed_item and packed_items_table.get(order_key):
 		return order_key
 
-	return (main_item_row.item_code, item_code, main_item_row.idx if doc.is_new() else main_item_row.name)
+	return (main_item_row.item_code, item_code, None if doc.is_new() else main_item_row.name)
 
 
 def get_stale_row_idx(stale_rows, location=None):
@@ -534,7 +455,6 @@ def get_packed_items_of_order_rows(order_rows, doctype="Sales Order") -> dict:
 			packed_item.warehouse,
 			packed_item.reserve_stock,
 			packed_item.qty,
-			packed_item.product_bundle,
 			packed_item.picked_qty,
 			packed_item.sales_order_packed_item,
 			order_item.stock_qty.as_("order_stock_qty"),
@@ -623,8 +543,7 @@ def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_pack
 		"Pick List Item",
 		filters,
 		["name", "item_code", "warehouse", "batch_no", "serial_no", "picked_qty", "delivered_qty"],
-		# name tiebreaker: split pick-list rows can tie on qty -> pick the same warehouse/batch/serial on both engines
-		order_by="qty desc, name asc",
+		order_by="qty desc",
 	)
 	if not pl_rows:
 		return []
@@ -727,7 +646,7 @@ def update_packed_item_with_pick_list_info(main_item_row, pi_row, location):
 
 def get_packed_serial_nos(main_item_row, pi_row, pl_row):
 	"""Serial nos kept on the packed row, topped up from the pick list row, up to the packed qty."""
-	from erpnext.stock.doctype.pick_list.mapper import get_pending_serial_nos
+	from erpnext.stock.doctype.pick_list.pick_list import get_pending_serial_nos
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	serial_nos = get_serial_nos(pi_row.serial_no)
@@ -758,7 +677,7 @@ def update_packed_item_price_data(pi_row, item_data, doc):
 		return
 
 	item_doc = frappe.get_cached_doc("Item", pi_row.item_code)
-	ctx = frappe._dict(pi_row.as_dict().copy())
+	ctx = ItemDetailsCtx(pi_row.as_dict().copy())
 	ctx.update(
 		{
 			"company": doc.get("company"),
@@ -823,32 +742,10 @@ def on_doctype_update():
 
 
 @frappe.whitelist()
-def get_items_from_product_bundle(row: str | dict):
-	"""Item details for each component of a Product Bundle.
+def get_items_from_product_bundle(row):
+	row, items = ItemDetailsCtx(json.loads(row)), []
 
-	``row.product_bundle`` selects a specific version by document name (the buying
-	dialog passes this); ``row.item_code`` is the legacy contract, resolving the
-	parent item's active version.
-	"""
-	from erpnext.selling.doctype.product_bundle.product_bundle import get_active_product_bundle
-
-	row, items = frappe._dict(frappe.parse_json(row)), []
-
-	if bundle_name := row.get("product_bundle"):
-		frappe.has_permission("Product Bundle", "read", bundle_name, throw=True)
-		bundle = frappe.db.get_value("Product Bundle", bundle_name, ["docstatus", "disabled"], as_dict=True)
-		if not bundle or bundle.docstatus != 1:
-			frappe.throw(_("Product Bundle {0} is not submitted").format(frappe.bold(bundle_name)))
-		if bundle.disabled:
-			frappe.throw(
-				_("Product Bundle {0} is disabled and cannot be used in transactions.").format(
-					frappe.bold(bundle_name)
-				)
-			)
-	elif bundle_name := get_active_product_bundle(row.get("item_code")):
-		frappe.has_permission("Product Bundle", "read", bundle_name, throw=True)
-
-	bundled_items = get_product_bundle_items_by_name(bundle_name) if bundle_name else []
+	bundled_items = get_product_bundle_items(row["item_code"])
 	for item in bundled_items:
 		row.update(
 			{
