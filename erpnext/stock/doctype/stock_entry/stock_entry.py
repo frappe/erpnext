@@ -2878,7 +2878,6 @@ class StockEntry(StockController):
 					"docstatus": 1,
 				},
 				pluck="name",
-				limit_page_length=2,
 			)
 			for name in manufacture_entries:
 				erpnext.require_permission("Stock Entry", name)
@@ -3054,6 +3053,8 @@ class StockEntry(StockController):
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
 		self.set_work_order_details()
+		if self.bom_no:
+			erpnext.require_permission("BOM", self.bom_no)
 		self.flags.backflush_based_on = frappe.db.get_single_value(
 			"Manufacturing Settings", "backflush_raw_materials_based_on"
 		)
