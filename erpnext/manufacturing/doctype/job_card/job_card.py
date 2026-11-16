@@ -172,10 +172,19 @@ class JobCard(Document):
 		if self.is_corrective_job_card or not (self.operation_id and self.work_order):
 			return
 
+<<<<<<< HEAD
 		wo_qty = flt(frappe.get_cached_value("Work Order", self.work_order, "qty"))
 
 		completed_qty = flt(frappe.db.get_value("Work Order Operation", self.operation_id, "completed_qty"))
 
+=======
+		precision = self.precision("for_quantity")
+		if flt(self.get_total_job_card_qty(), precision) > flt(self.get_allowed_wo_qty(), precision):
+			self.throw_extra_qty_error()
+
+	def get_allowed_wo_qty(self):
+		wo_qty = self.get_work_order_qty_details().operation_qty
+>>>>>>> 12c81a9 (fix(manufacturing): do not subtract completed qty when checking total Job Card qty)
 		over_production_percentage = flt(
 			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
