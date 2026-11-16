@@ -1688,9 +1688,7 @@ def validate_conversion_rate(ctx: frappe._dict, meta):
 	)
 
 	if ctx.price_list:
-		if not ctx.plc_conversion_rate and ctx.price_list_currency == frappe.db.get_value(
-			"Price List", ctx.price_list, "currency", cache=True
-		):
+		if not ctx.plc_conversion_rate and ctx.price_list_currency == company_currency:
 			ctx.plc_conversion_rate = 1.0
 
 		# validate price list currency conversion rate
@@ -2055,7 +2053,8 @@ def get_price_list_currency_and_exchange_rate(ctx: frappe._dict):
 		{
 			"price_list_currency": price_list_currency,
 			"price_list_uom_dependant": price_list_uom_dependant,
-			"plc_conversion_rate": plc_conversion_rate or 1,
+			# 0 when no exchange rate is found, so that validate_conversion_rate asks for it
+			"plc_conversion_rate": flt(plc_conversion_rate),
 		}
 	)
 
