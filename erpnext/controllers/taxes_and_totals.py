@@ -23,8 +23,8 @@ from erpnext.controllers.accounts_controller import (
 )
 from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
+	_get_item_tax_map,
 	_get_item_tax_template,
-	get_item_tax_map,
 	get_item_tax_template,
 )
 from erpnext.utilities.regional import temporary_flag
@@ -204,7 +204,7 @@ class calculate_taxes_and_totals:
 
 	def update_item_tax_map(self):
 		for item in self.doc.items:
-			item.item_tax_rate = get_item_tax_map(
+			item.item_tax_rate = _get_item_tax_map(
 				company=self.doc.get("company"),
 				item_tax_template=item.item_tax_template,
 				as_json=True,
