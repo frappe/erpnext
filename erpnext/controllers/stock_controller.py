@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe import _, bold
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Tuple
 from frappe.query_builder.functions import Count
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
@@ -38,6 +38,18 @@ from erpnext.stock.doctype.purchase_receipt.services.billing_status import is_bi
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.services.internal_transfer import StockInternalTransferService
 from erpnext.stock.stock_ledger import get_items_to_be_repost, get_next_stock_reco
+
+BIN_LOCK_RETRIES = 4
+STOCK_ITEM_TABLES = ("items", "packed_items", "supplied_items", "stock_items")
+STOCK_WAREHOUSE_FIELDS = (
+	"warehouse",
+	"s_warehouse",
+	"t_warehouse",
+	"rejected_warehouse",
+	"target_warehouse",
+	"from_warehouse",
+	"set_warehouse",
+)
 
 
 class StockController(AccountsController):
@@ -445,6 +457,52 @@ class StockController(AccountsController):
 		]:
 			for d in self.get("items"):
 				d.stock_uom_rate = d.rate / (d.conversion_factor or 1)
+
+	def before_submit(self):
+		if self.has_stock_update:
+			self.lock_bins()
+
+	def before_cancel(self):
+		super().before_cancel()
+		if self.has_stock_update:
+			self.lock_bins()
+
+	@property
+	def has_stock_update(self):
+		return not self.meta.has_field("update_stock") or bool(self.update_stock)
+
+	def lock_bins(self):
+		item_warehouses = self.get_item_warehouses()
+		if not item_warehouses:
+			return
+
+		bin = frappe.qb.DocType("Bin")
+		query = (
+			frappe.qb.from_(bin)
+			.select(bin.name)
+			.where(Tuple(bin.item_code, bin.warehouse).isin(sorted(item_warehouses)))
+			.orderby(bin.name)
+			.for_update()
+		)
+
+		for _attempt in range(BIN_LOCK_RETRIES):
+			try:
+				return query.run()
+			except frappe.QueryTimeoutError:
+				continue
+
+		return query.run()
+
+	def get_item_warehouses(self):
+		item_warehouses = set()
+		for table_name in STOCK_ITEM_TABLES:
+			for row in self.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.get("item_code")
+				for fieldname in STOCK_WAREHOUSE_FIELDS:
+					if item_code and row.get(fieldname):
+						item_warehouses.add((item_code, row.get(fieldname)))
+
+		return item_warehouses
 
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		from erpnext.stock.services.stock_ledger_service import StockLedgerService

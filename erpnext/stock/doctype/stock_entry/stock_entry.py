@@ -482,6 +482,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		return references
 
 	def before_submit(self):
+		super().before_submit()
 		if self.purpose_cls and hasattr(self.purpose_cls, "before_submit"):
 			self.purpose_cls(self).before_submit()
 
