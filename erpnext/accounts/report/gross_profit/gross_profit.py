@@ -1567,8 +1567,8 @@ class GrossProfitGenerator:
 		self.load_billed_bundle_qty()
 
 	def load_billed_bundle_qty(self):
-		"""Stock qty all invoices bill and credit notes reverse of each partly returned delivered
-		bundle row, and what credit notes reversed of each invoice row billing one."""
+		"""Stock qty all invoices up to the report's end bill and credit notes reverse of each partly
+		returned delivered bundle row, and what credit notes reversed of each invoice row billing one."""
 		self.credited_bundle_qty = {}
 		bundle_rows = [name for name, row in self.delivered_bundle_rows.items() if flt(row.returned_qty)]
 		if not bundle_rows:
@@ -1581,7 +1581,12 @@ class GrossProfitGenerator:
 			.join(si)
 			.on(si.name == sii.parent)
 			.select(sii.dn_detail, sii.stock_qty, sii.sales_invoice_item, si.return_against)
-			.where((si.docstatus == 1) & (si.is_debit_note == 0) & sii.dn_detail.isin(bundle_rows))
+			.where(
+				(si.docstatus == 1)
+				& (si.is_debit_note == 0)
+				& (si.posting_date <= self.filters.to_date)
+				& sii.dn_detail.isin(bundle_rows)
+			)
 			.run(as_dict=True)
 		)
 		for item in billed_items:
