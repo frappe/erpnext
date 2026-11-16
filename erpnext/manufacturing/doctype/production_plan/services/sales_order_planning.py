@@ -9,7 +9,10 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, now_datetime
 from pypika.terms import ExistsCriterion
 
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_sales_orders
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_item_or_template_bom_condition,
+	get_sales_orders,
+)
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 
 
@@ -157,7 +160,7 @@ class SalesOrderSourcingService:
 	def _so_items(self, so_list):
 		bom = frappe.qb.DocType("BOM")
 		so_item = frappe.qb.DocType("Sales Order Item")
-		items_subquery = frappe.qb.from_(bom).select(bom.name).where(bom.is_active == 1)
+		bom_item_condition = get_item_or_template_bom_condition(bom, so_item)
 		items_query = (
 			frappe.qb.from_(so_item)
 			.select(*_so_item_columns(so_item))
@@ -166,10 +169,11 @@ class SalesOrderSourcingService:
 		)
 		if self.doc.item_code and frappe.db.exists("Item", self.doc.item_code):
 			items_query = items_query.where(so_item.item_code == self.doc.item_code)
-			items_subquery = items_subquery.where(
-				self.get_bom_item_condition() or bom.item == so_item.item_code
-			)
+			bom_item_condition = self.get_bom_item_condition() or bom.item == so_item.item_code
 
+		items_subquery = (
+			frappe.qb.from_(bom).select(bom.name).where((bom.is_active == 1) & bom_item_condition)
+		)
 		items = items_query.where(ExistsCriterion(items_subquery)).run(as_dict=True)
 		_set_so_item_pending_qty(items)
 		return items
