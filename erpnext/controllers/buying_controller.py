@@ -1172,10 +1172,10 @@ class BuyingController(SubcontractingController):
 		less the row's other returns, and all that is left once it returns the rest of the row's qty."""
 		stock_qty = get_stock_qty(row, qty)
 		if self.docstatus == 2:
-			return flt(self.get_posted_return_qty(row, warehouse)) or stock_qty
+			return flt(self.get_posted_return_qty(row, warehouse))
 
 		left = self.get_receipt_row_left_to_return(row, warehouse)
-		if flt(left.stock_qty) <= 0:
+		if not left:
 			return stock_qty
 
 		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
@@ -1184,16 +1184,15 @@ class BuyingController(SubcontractingController):
 
 		return max(stock_qty, -left.stock_qty)
 
-	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict:
+	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict | None:
 		"""Unrounded and posted stock qty the returned receipt row put in the warehouse that its other
-		returns have not taken back."""
-		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
+		returns have not taken back, or None if the receipt row put nothing there."""
 		reference_field = (
 			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
 		)
 		receipt_row = row.get(reference_field)
 		if not receipt_row:
-			return left
+			return None
 
 		receipt_item = frappe.qb.DocType(row.doctype)
 		rows = (
@@ -1216,6 +1215,10 @@ class BuyingController(SubcontractingController):
 			.run(as_dict=True)
 		)
 		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouse)
+		if receipt_row not in posted_qty:
+			return None
+
+		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
 		for d in rows:
 			if d.name not in posted_qty:
 				continue  # moved no stock, like a debit note without Update Stock
@@ -1224,7 +1227,8 @@ class BuyingController(SubcontractingController):
 			if d.rejected_warehouse == warehouse:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
 
-		left.stock_qty = flt(sum(posted_qty.values()), row.precision("stock_qty"))
+		# returns made before the cap could take back more than the row put in
+		left.stock_qty = max(flt(sum(posted_qty.values()), row.precision("stock_qty")), 0)
 		return left
 
 	def get_posted_return_qty(self, row, warehouse):
