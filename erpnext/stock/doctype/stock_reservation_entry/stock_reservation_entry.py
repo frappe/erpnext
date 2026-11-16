@@ -159,7 +159,9 @@ class StockReservationEntry(Document):
 		):
 			return
 
-		if frappe.db.get_value(self.voucher_type, self.voucher_no, "status") in ("Closed", "Cancelled"):
+		status = frappe.db.get_value(self.voucher_type, self.voucher_no, "status")
+		# a closed Subcontracting Order keeps its used reservations and can be re-opened
+		if status == "Cancelled" or (status == "Closed" and self.voucher_type == "Work Order"):
 			return
 
 		if (
