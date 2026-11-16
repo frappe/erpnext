@@ -5913,8 +5913,10 @@ class TestDeliveryNote(ERPNextTestSuite):
 		{"over_delivery_receipt_allowance": 0, "role_allowed_to_over_deliver_receive": "System Manager"},
 	)
 	def test_inter_company_receipt_over_receipt_by_allowed_role(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_parties
 		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
 
+		create_internal_parties()
 		make_stock_entry(
 			item_code="_Test Item", target="Stores - WP", company="Wind Power LLC", qty=10, basic_rate=100
 		)
