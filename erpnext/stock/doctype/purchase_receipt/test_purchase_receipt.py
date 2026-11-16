@@ -2232,30 +2232,38 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_internal_transfer_pr_rejected_qty_adds_up_to_the_delivered_stock_qty(self):
 		"""Accepted and rejected stock qty of an internal transfer add up to what left for transit,
-		even when each part rounds up on its own in the stock UOM."""
-		item_doc = make_item(
-			"Test Rounded Rejected Internal Transfer Item",
-			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 1.00555}]},
-		)
-		pr, warehouses, dn = self.make_rounded_internal_receipt(item_doc)
+		even when each part rounds up on its own in the stock UOM, also for a batch item."""
+		for tag, properties in (
+			("Plain", {}),
+			("Batch", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-RRIT-.####"}),
+		):
+			with self.subTest(tag):
+				item_doc = make_item(
+					f"Test Rounded Rejected Internal Transfer {tag} Item",
+					{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 1.00555}], **properties},
+				)
+				pr, warehouses, dn = self.make_rounded_internal_receipt(item_doc)
 
-		stock_qty = {
-			d.warehouse: d.actual_qty
-			for d in frappe.get_all(
-				"Stock Ledger Entry",
-				filters={"voucher_no": pr.name, "is_cancelled": 0},
-				fields=["warehouse", "actual_qty"],
-			)
-		}
-		delivered_qty = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": dn.name, "warehouse": warehouses.transit}, "actual_qty"
-		)
-		precision = pr.items[0].precision("stock_qty")
+				stock_qty = {
+					d.warehouse: d.actual_qty
+					for d in frappe.get_all(
+						"Stock Ledger Entry",
+						filters={"voucher_no": pr.name, "is_cancelled": 0},
+						fields=["warehouse", "actual_qty"],
+					)
+				}
+				delivered_qty = frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_no": dn.name, "warehouse": warehouses.transit},
+					"actual_qty",
+				)
+				precision = pr.items[0].precision("stock_qty")
 
-		self.assertEqual(stock_qty[warehouses.transit], -delivered_qty)
-		self.assertEqual(
-			flt(stock_qty[warehouses.accepted] + stock_qty[warehouses.rejected], precision), delivered_qty
-		)
+				self.assertEqual(stock_qty[warehouses.transit], -delivered_qty)
+				self.assertEqual(
+					flt(stock_qty[warehouses.accepted] + stock_qty[warehouses.rejected], precision),
+					delivered_qty,
+				)
 
 	def make_rounded_internal_receipt(self, item_doc, conversion_factor=1.00555, qty=1, rejected_qty=1):
 		"""Submitted internal receipt of a delivery in Box, split into accepted and rejected qty whose stock
