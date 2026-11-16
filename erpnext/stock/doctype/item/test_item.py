@@ -80,14 +80,35 @@ def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass", legacy=
 		if not frappe.db.exists("UOM", uom):
 			frappe.get_doc(doctype="UOM", uom_name=uom, category=category).insert()
 
-	conversion_factor = frappe.get_doc(
-		doctype="UOM Conversion Factor",
-		category=category,
-		from_uom=from_uom,
-		to_uom=to_uom,
-		value=value,
+	if legacy:
+		return frappe.get_doc(
+			doctype="UOM Conversion Factor",
+			category=category,
+			from_uom=from_uom,
+			to_uom=to_uom,
+			value=value,
+		).db_insert()
+
+	# only one conversion may exist between two UOMs, and an earlier test of the class may have made it
+	conversion = frappe.qb.DocType("UOM Conversion Factor")
+	existing = (
+		frappe.qb.from_(conversion)
+		.select(conversion.name)
+		.where(conversion.category == category)
+		.where(
+			((conversion.from_uom == from_uom) & (conversion.to_uom == to_uom))
+			| ((conversion.from_uom == to_uom) & (conversion.to_uom == from_uom))
+		)
+		.limit(1)
+		.run(pluck=True)
 	)
-	return conversion_factor.db_insert() if legacy else conversion_factor.insert()
+	doc = (
+		frappe.get_doc("UOM Conversion Factor", existing[0])
+		if existing
+		else frappe.new_doc("UOM Conversion Factor")
+	)
+	doc.update({"category": category, "from_uom": from_uom, "to_uom": to_uom, "value": value})
+	return doc.save()
 
 
 class TestItem(FrappeTestCase):
