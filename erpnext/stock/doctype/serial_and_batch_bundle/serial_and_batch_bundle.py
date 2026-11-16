@@ -999,13 +999,9 @@ class SerialandBatchBundle(Document):
 				)
 
 	def set_serial_and_batch_values(self, parent, row, qty_field=None):
-<<<<<<< HEAD
-		values_to_set = {}
-=======
 		self.validate_not_linked_to_another_draft(parent, row)
 
-		values_to_set = {"is_cancelled": 0}
->>>>>>> 2fda0bb (fix(stock): a draft can't take over the serial and batch bundle of another draft)
+		values_to_set = {}
 		if not self.voucher_no or self.voucher_no != row.parent:
 			values_to_set["voucher_no"] = row.parent
 
