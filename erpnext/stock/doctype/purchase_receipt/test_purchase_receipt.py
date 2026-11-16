@@ -2297,6 +2297,35 @@ class TestPurchaseReceipt(FrappeTestCase):
 					rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
 					self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 0)
 
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_transfer_pr_cancel_reverses_its_posted_stock_qty(self):
+		"""Cancelling an internal receipt posted with an older split reverses what it posted."""
+		from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+
+		item_doc = make_item(
+			"Test Cancel Of Old Split Internal Transfer Item",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 1.00444}]},
+		)
+		with patch.object(
+			BuyingController,
+			"get_rejected_stock_qty",
+			lambda self, row: get_stock_qty(row, row.rejected_qty),
+		):
+			pr, warehouses, _dn = self.make_rounded_internal_receipt(item_doc, 1.00444)
+
+		sle_filters = {"voucher_no": pr.name, "warehouse": warehouses.rejected}
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), 1.0)
+
+		pr.cancel()
+		net_qty = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": pr.name},
+			fields=["warehouse", "sum(actual_qty) as qty"],
+			group_by="warehouse",
+		)
+		for d in net_qty:
+			self.assertEqual(flt(d.qty, 2), 0, d.warehouse)
+
 	def make_rounded_internal_receipt(self, item_doc, conversion_factor=1.00555, qty=1, rejected_qty=1):
 		"""Submitted internal receipt of a delivery in Box, split into accepted and rejected qty whose stock
 		qty rounds unevenly."""
