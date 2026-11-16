@@ -288,7 +288,7 @@ class StockController(AccountsController):
 
 	def get_rejected_stock_qty(self, row) -> float:
 		"""Rejected qty of a row in the stock UOM."""
-		return flt(row.rejected_qty) * flt(row.get("conversion_factor") or 1)
+		return flt(row.get("rejected_qty")) * flt(row.get("conversion_factor") or 1)
 
 	def get_rejected_warehouse_return_stock_qty(self, row, qty_field) -> float:
 		"""Qty a package of a return row takes back from the rejected warehouse in its qty."""
