@@ -1116,6 +1116,31 @@ class SerialandBatchBundle(Document):
 				_("The {0} # {1} should be submitted first.").format(self.voucher_type, self.voucher_no)
 			)
 
+	def get_future_reconciliation_entries(self, future_entries):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		bundles = (
+			frappe.qb.from_(sle)
+			.select(sle.serial_and_batch_bundle)
+			.where(
+				(sle.item_code == self.item_code)
+				& (sle.warehouse == self.warehouse)
+				& (sle.posting_datetime > self.posting_datetime)
+				& (sle.voucher_type == "Stock Reconciliation")
+				& (sle.is_cancelled == 0)
+				& (sle.serial_and_batch_bundle.isnotnull())
+			)
+			.run(pluck=True)
+		)
+		if not bundles:
+			return []
+
+		child = frappe.qb.DocType("Serial and Batch Entry")
+		return future_entries.where(
+			(child.parent.isin(bundles))
+			& (child.warehouse == self.warehouse)
+			& (child.voucher_type == "Stock Reconciliation")
+		).run(as_dict=True)
+
 	def check_future_entries_exists(self, is_cancelled=False):
 		from erpnext.stock.valuation_adjustment import is_adjustment_voucher
 
@@ -1172,20 +1197,17 @@ class SerialandBatchBundle(Document):
 			future_entries = future_entries.where(child.voucher_type == "Stock Reconciliation")
 
 		if serial_nos:
-			future_entries = future_entries.where(
-				(child.serial_no.isin(serial_nos))
-				| ((child.warehouse == self.warehouse) & (child.voucher_type == "Stock Reconciliation"))
-			)
+			future_reconciliation_entries = self.get_future_reconciliation_entries(future_entries)
+			future_entries = future_entries.where(child.serial_no.isin(serial_nos)).run(as_dict=True)
+			future_entries.extend(future_reconciliation_entries)
 		elif self.has_serial_no:
-			future_entries = future_entries.where(
-				(child.warehouse == self.warehouse) & (child.voucher_type == "Stock Reconciliation")
-			)
+			future_entries = self.get_future_reconciliation_entries(future_entries)
 		elif batches:
 			future_entries = future_entries.where(
 				(child.batch_no.isin(batches)) & (child.warehouse == self.warehouse)
-			)
-
-		future_entries = future_entries.run(as_dict=True)
+			).run(as_dict=True)
+		else:
+			future_entries = future_entries.run(as_dict=True)
 
 		if future_entries:
 			if self.has_serial_no:
@@ -2041,22 +2063,19 @@ class SerialandBatchBundle(Document):
 		)
 
 	def get_batchwise_available_qty(self):
-		batchwise_entries = self.get_available_qty_from_sabb()
-		batchwise_entries.extend(self.get_available_qty_from_stock_ledger())
+		posting_datetime = get_datetime(self.posting_datetime) if self.posting_datetime else None
+		available_qty = self.get_batchwise_qty_before(posting_datetime)
+		batchwise_entries = self.get_available_qty_from_sabb(posting_datetime)
+		batchwise_entries.extend(self.get_available_qty_from_stock_ledger(posting_datetime))
 
-		available_qty = frappe._dict({})
 		batchwise_entries = sorted(
 			batchwise_entries,
 			key=lambda x: (get_datetime(x.get("posting_datetime")), get_datetime(x.get("creation"))),
 		)
 
 		precision = frappe.get_precision("Serial and Batch Entry", "qty")
-		posting_datetime = get_datetime(self.posting_datetime) if self.posting_datetime else None
 		for row in batchwise_entries:
-			if row.batch_no in available_qty:
-				available_qty[row.batch_no] += flt(row.qty)
-			else:
-				available_qty[row.batch_no] = flt(row.qty)
+			available_qty[row.batch_no] = available_qty.get(row.batch_no, 0) + flt(row.qty)
 
 			if flt(available_qty[row.batch_no], precision) < 0 and (
 				not posting_datetime or get_datetime(row.posting_datetime) >= posting_datetime
@@ -2067,59 +2086,87 @@ class SerialandBatchBundle(Document):
 
 		return available_qty
 
-	def get_available_qty_from_stock_ledger(self):
-		batches = [d.batch_no for d in self.entries if d.batch_no]
-
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-
-		query = (
-			frappe.qb.from_(sle)
-			.select(
-				sle.batch_no,
-				sle.actual_qty.as_("qty"),
-				sle.posting_datetime,
-				sle.creation,
-			)
-			.where(
-				(sle.item_code == self.item_code)
-				& (sle.warehouse == self.warehouse)
-				& (sle.is_cancelled == 0)
-				& (sle.batch_no.isin(batches))
-				& (sle.docstatus == 1)
-				& (sle.serial_and_batch_bundle.isnull())
-				& (sle.batch_no.isnotnull())
-			)
-			.for_update()
-		)
-
-		return query.run(as_dict=True)
-
-	def get_available_qty_from_sabb(self):
-		batches = [d.batch_no for d in self.entries if d.batch_no]
+	def get_batchwise_qty_before(self, posting_datetime):
+		available_qty = frappe._dict()
+		if not posting_datetime:
+			return available_qty
 
 		child = frappe.qb.DocType("Serial and Batch Entry")
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		queries = [
+			self.get_sabb_batch_query(for_update=frappe.db.db_type == "mariadb")
+			.select(child.batch_no, Sum(child.qty).as_("qty"))
+			.where(child.posting_datetime < posting_datetime)
+			.groupby(child.batch_no),
+			self.get_stock_ledger_batch_query(for_update=frappe.db.db_type == "mariadb")
+			.select(sle.batch_no, Sum(sle.actual_qty).as_("qty"))
+			.where(sle.posting_datetime < posting_datetime)
+			.groupby(sle.batch_no),
+		]
 
-		query = (
-			frappe.qb.from_(child)
-			.select(
-				child.batch_no,
-				child.qty,
-				child.posting_datetime,
-				child.creation,
-			)
-			.where(
-				(child.item_code == self.item_code)
-				& (child.warehouse == self.warehouse)
-				& (child.is_cancelled == 0)
-				& (child.batch_no.isin(batches))
-				& (child.docstatus == 1)
-				& (child.type_of_transaction.isin(["Inward", "Outward"]))
-			)
-			.for_update()
+		for query in queries:
+			for row in query.run(as_dict=True):
+				available_qty[row.batch_no] = available_qty.get(row.batch_no, 0) + flt(row.qty)
+
+		return available_qty
+
+	def get_available_qty_from_stock_ledger(self, posting_datetime=None):
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		query = self.get_stock_ledger_batch_query().select(
+			sle.batch_no,
+			sle.actual_qty.as_("qty"),
+			sle.posting_datetime,
+			sle.creation,
 		)
-		query = query.where(child.voucher_type != "Pick List")
+		if posting_datetime:
+			query = query.where(sle.posting_datetime >= posting_datetime)
 
 		return query.run(as_dict=True)
+
+	def get_stock_ledger_batch_query(self, for_update=True):
+		batches = [d.batch_no for d in self.entries if d.batch_no]
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+
+		query = frappe.qb.from_(sle).where(
+			(sle.item_code == self.item_code)
+			& (sle.warehouse == self.warehouse)
+			& (sle.is_cancelled == 0)
+			& (sle.batch_no.isin(batches))
+			& (sle.docstatus == 1)
+			& (sle.serial_and_batch_bundle.isnull())
+			& (sle.batch_no.isnotnull())
+		)
+
+		return query.for_update() if for_update else query
+
+	def get_available_qty_from_sabb(self, posting_datetime=None):
+		child = frappe.qb.DocType("Serial and Batch Entry")
+		query = self.get_sabb_batch_query().select(
+			child.batch_no,
+			child.qty,
+			child.posting_datetime,
+			child.creation,
+		)
+		if posting_datetime:
+			query = query.where(child.posting_datetime >= posting_datetime)
+
+		return query.run(as_dict=True)
+
+	def get_sabb_batch_query(self, for_update=True):
+		batches = [d.batch_no for d in self.entries if d.batch_no]
+		child = frappe.qb.DocType("Serial and Batch Entry")
+
+		query = frappe.qb.from_(child).where(
+			(child.item_code == self.item_code)
+			& (child.warehouse == self.warehouse)
+			& (child.is_cancelled == 0)
+			& (child.batch_no.isin(batches))
+			& (child.docstatus == 1)
+			& (child.type_of_transaction.isin(["Inward", "Outward"]))
+			& (child.voucher_type != "Pick List")
+		)
+
+		return query.for_update() if for_update else query
 
 	def validate_voucher_no_docstatus(self):
 		if self.is_cancelled:
