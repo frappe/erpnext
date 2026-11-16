@@ -2427,6 +2427,7 @@ def make_stock_return_entry(work_order):
 		return
 
 	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.company = wo_doc.company
 	stock_entry.from_bom = 1
 	stock_entry.is_return = 1
 	stock_entry.work_order = work_order
