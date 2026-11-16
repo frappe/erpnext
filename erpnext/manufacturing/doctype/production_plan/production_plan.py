@@ -34,7 +34,56 @@ import erpnext
 from erpnext.deprecation_dumpster import deprecated
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
+<<<<<<< HEAD
 from erpnext.manufacturing.doctype.production_plan.work_order_quantities import (
+=======
+
+# Backward-compatible re-exports (moved to mapper.py / services/).
+from erpnext.manufacturing.doctype.production_plan.mapper import (
+	get_so_details,
+	sales_order_query,
+)
+from erpnext.manufacturing.doctype.production_plan.services.material_request import (
+	MaterialRequestService,
+	download_raw_materials,
+	get_exploded_items,
+	get_item_data,
+	get_items_for_material_requests,
+	get_material_request_items,
+	get_materials_from_other_locations,
+	get_raw_materials_of_sub_assembly_items,
+	get_sales_orders,
+	get_subitems,
+	get_uom_conversion_factor,
+	get_warehouse_list,
+	set_default_warehouses,
+)
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_bin_details,
+	get_plan_process_loss_percentage,
+	get_reserved_qty_from_stock,
+)
+from erpnext.manufacturing.doctype.production_plan.services.reservation import (
+	ProductionPlanStockReservation,
+	cancel_stock_reservation_entries,
+	get_reserved_qty_for_production_plan,
+	get_reserved_qty_for_sub_assembly,
+	make_stock_reservation_entries,
+	reserve_stock_for_production_plan,
+)
+from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
+	SalesOrderSourcingService,
+	get_planned_bundle_component_qty,
+	get_planned_bundle_qty,
+)
+from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
+	SubAssemblyService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.work_order_planning import (
+	WorkOrderCreationService,
+)
+from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
+>>>>>>> af96315 (fix(manufacturing): track the planned qty of product bundle components on Sales Orders)
 	ProductionPlanWorkOrderQuantities,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -687,6 +736,7 @@ class ProductionPlan(Document):
 
 	def before_submit(self):
 		self.validate_sales_order_planned_qty()
+		self.validate_bundle_component_planned_qty()
 
 	def validate_sales_order_planned_qty(self):
 		planned_qty = self.get_so_item_planned_qty()
@@ -710,14 +760,41 @@ class ProductionPlan(Document):
 				precision,
 			)
 			if qty > unplanned_qty:
-				frappe.throw(
-					_(
-						"Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan."
-					).format(
-						qty, row.stock_uom, frappe.bold(row.item_code), sales_order, max(unplanned_qty, 0)
-					),
-					title=_("Sales Order Qty Exceeded"),
-				)
+				throw_sales_order_qty_exceeded(qty, row.stock_uom, row.item_code, sales_order, unplanned_qty)
+
+	def validate_bundle_component_planned_qty(self):
+		planned_qty = {}
+		for row in self.po_items:
+			if row.sales_order_item and row.product_bundle_item:
+				key = (row.sales_order, row.sales_order_item, row.item_code)
+				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+		if not planned_qty:
+			return
+
+		so_items = list({key[1] for key in planned_qty})
+		already_planned = get_planned_bundle_component_qty(so_items)
+		packed_qty = {
+			(row.parent_detail_docname, row.item_code): row
+			for row in frappe.get_all(
+				"Packed Item",
+				filters={"parenttype": "Sales Order", "parent_detail_docname": ("in", so_items)},
+				fields=["parent_detail_docname", "item_code", "uom", {"SUM": "qty", "as": "qty"}],
+				group_by="parent_detail_docname, item_code, uom",
+			)
+		}
+		allowance = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+		)
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+
+		for (sales_order, so_item, item_code), qty in planned_qty.items():
+			packed = packed_qty.get((so_item, item_code)) or frappe._dict()
+			unplanned_qty = flt(
+				flt(packed.qty) * (1 + allowance / 100) - already_planned.get((so_item, item_code), 0),
+				precision,
+			)
+			if flt(qty, precision) > unplanned_qty:
+				throw_sales_order_qty_exceeded(qty, packed.uom, item_code, sales_order, unplanned_qty)
 
 	@staticmethod
 	def get_so_items_to_validate(so_items):
@@ -841,11 +918,13 @@ class ProductionPlan(Document):
 				"sales_order": ("in", sales_orders),
 				"docstatus": 1,
 				"sales_order_item": ("is", "set"),
+				"product_bundle_item": ("is", "not set"),
 			},
 			group_by="sales_order, sales_order_item",
 		)
 
 		data += get_planned_qty_of_references(sales_orders)
+		data += get_planned_bundle_qty(sales_orders)
 
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
@@ -1505,6 +1584,15 @@ def get_mr_item_planned_qty_query(mr_item):
 		frappe.qb.from_(plan_item)
 		.select(Sum(plan_item.planned_qty))
 		.where((plan_item.material_request_item == mr_item.name) & (plan_item.docstatus == 1))
+	)
+
+
+def throw_sales_order_qty_exceeded(qty, uom, item_code, sales_order, unplanned_qty):
+	frappe.throw(
+		_("Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan.").format(
+			qty, uom, frappe.bold(item_code), sales_order, max(unplanned_qty, 0)
+		),
+		title=_("Sales Order Qty Exceeded"),
 	)
 
 
