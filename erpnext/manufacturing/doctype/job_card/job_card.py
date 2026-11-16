@@ -1304,19 +1304,14 @@ class JobCard(Document):
 		return flt(submitted.completed_qty) + flt(submitted.process_loss_qty) + flt(self.total_completed_qty)
 
 	def validate_input_from_previous_operations(self):
-<<<<<<< HEAD
-		"""Completed qty and process loss together can't exceed what the previous operation completed."""
-		if self.is_corrective_job_card or not self.sequence_id:
-=======
 		"""Completed qty and process loss together can't exceed what the previous operation completed.
 		Once the previous operation is done, its loss is taken off this card's loss and For Quantity."""
-		if self.is_corrective_job_card or self.track_semi_finished_goods or not self.sequence_id:
->>>>>>> b68a4ee (fix(manufacturing): drop upstream loss from a job card's loss instead of refusing it)
+		if self.is_corrective_job_card or not self.sequence_id:
 			return
 
 		previous_operations = frappe.get_all(
 			"Work Order Operation",
-			fields=["operation", "completed_qty"],
+			fields=["operation", "status", "completed_qty"],
 			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ("<", self.sequence_id)},
 		)
 		if not previous_operations:

@@ -1169,10 +1169,6 @@ class TestJobCard(FrappeTestCase):
 		)
 		self.assertRaises(OperationSequenceError, extra.submit)
 
-<<<<<<< HEAD
-	def test_upstream_cancel_counts_process_loss_of_later_operation(self):
-		work_order = self.make_two_operation_work_order(qty=10)
-=======
 	def test_job_card_keeps_qty_still_to_come_from_previous_operation(self):
 		work_order = self.make_two_operation_work_order(qty=10)
 		first, second = (
@@ -1190,7 +1186,7 @@ class TestJobCard(FrappeTestCase):
 					"completed_qty": completed_qty,
 				},
 			)
-		first.pending_qty = 5
+		first.for_quantity = 5
 		first.save()
 		first.submit()
 
@@ -1199,9 +1195,8 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(second.process_loss_qty, 6)
 		self.assertRaises(OperationSequenceError, second.submit)
 
-	def test_max_completable_qty_excludes_process_loss_of_operation(self):
-		work_order = self.make_two_operation_work_order(qty=100)
->>>>>>> 79ee0fb (test: job card keeps the qty a previous operation still has to make)
+	def test_upstream_cancel_counts_process_loss_of_later_operation(self):
+		work_order = self.make_two_operation_work_order(qty=10)
 		first, second = (
 			frappe.get_doc("Job Card", name)
 			for name in frappe.get_all(
