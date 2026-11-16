@@ -315,15 +315,16 @@ frappe.ui.form.on("Item", {
 		erpnext.item.render_item_prices(frm);
 
 		frm.add_custom_button(__("Duplicate"), function () {
-			var new_item = frappe.model.copy_doc(frm.doc);
-			// Duplicate item could have different name, causing "copy paste" error.
-			if (new_item.item_name === new_item.item_code) {
-				new_item.item_name = null;
-			}
-			if (new_item.item_code === new_item.description || new_item.item_code === new_item.description) {
-				new_item.description = null;
-			}
-			frappe.set_route("Form", "Item", new_item.name);
+			// frm.copy_doc skips link triggers, so stock_uom does not clear the copied UOMs
+			frm.copy_doc((new_item) => {
+				// Duplicate item could have different name, causing "copy paste" error.
+				if (new_item.item_name === new_item.item_code) {
+					new_item.item_name = null;
+				}
+				if (new_item.item_code === new_item.description) {
+					new_item.description = null;
+				}
+			});
 		});
 
 		const stock_exists = frm.doc.__onload && frm.doc.__onload.stock_exists ? 1 : 0;
@@ -1647,7 +1648,7 @@ frappe.tour["Item"] = [
 	},
 	{
 		fieldname: "include_item_in_manufacturing",
-		title: "Include Item in Manufacturing",
+		title: __("Include Item in Manufacturing"),
 		description: __(
 			"This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked."
 		),

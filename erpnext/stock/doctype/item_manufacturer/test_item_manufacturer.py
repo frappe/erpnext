@@ -87,3 +87,20 @@ class TestItemManufacturer(ERPNextTestSuite):
 			frappe.set_user("Administrator")
 
 		self.assertEqual(self.get_item_default(), (None, None))
+
+	def test_part_no_needs_item_read_permission(self):
+		from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
+		from erpnext.tests.permission_test_utils import as_user, assert_refused, make_fenced_user
+
+		self.make_row("_Test IM Maker 1", "P-1")
+		self.assertEqual(get_item_manufacturer_part_no(self.item_code, "_Test IM Maker 1"), "P-1")
+
+		for user, roles in (
+			("_test_im_no_role@example.com", []),
+			("_test_im_desk@example.com", ["Desk User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				assert_refused(self, get_item_manufacturer_part_no, self.item_code, "_Test IM Maker 1")
+
+		with as_user(make_fenced_user("_test_im_purchase@example.com", ["Purchase User"])):
+			self.assertEqual(get_item_manufacturer_part_no(self.item_code, "_Test IM Maker 1"), "P-1")

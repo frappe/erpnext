@@ -114,4 +114,8 @@ frappe.query_reports["Gross Profit"] = {
 	},
 };
 
+frappe.query_reports["Gross Profit"].dimension_filter_aliases = {
+	sales_invoice: "accounting_dimension_sales_invoice",
+};
+
 erpnext.utils.add_dimensions("Gross Profit", 15);

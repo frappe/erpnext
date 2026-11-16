@@ -6,6 +6,7 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Min, NullIf, Sum
 from frappe.utils import cint, flt
 
+import erpnext
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
@@ -254,15 +255,7 @@ class DisassembleStockEntry(BaseStockEntry):
 
 		# Auto-set source_stock_entry if WO has exactly one manufacture entry
 		if not self.doc.get("source_stock_entry") and self.doc.work_order:
-			manufacture_entries = frappe.get_all(
-				"Stock Entry",
-				filters={
-					"work_order": self.doc.work_order,
-					"purpose": "Manufacture",
-					"docstatus": 1,
-				},
-				pluck="name",
-			)
+			manufacture_entries = self.get_manufacture_entries()
 			if len(manufacture_entries) == 1:
 				self.doc.source_stock_entry = manufacture_entries[0]
 
@@ -273,6 +266,16 @@ class DisassembleStockEntry(BaseStockEntry):
 			return self._add_items_for_disassembly_from_work_order()
 
 		return self._add_items_for_disassembly_from_bom()
+
+	def get_manufacture_entries(self) -> list[str]:
+		manufacture_entries = frappe.get_all(
+			"Stock Entry",
+			filters={"work_order": self.doc.work_order, "purpose": "Manufacture", "docstatus": 1},
+			pluck="name",
+		)
+		for name in manufacture_entries:
+			erpnext.require_permission("Stock Entry", name)
+		return manufacture_entries
 
 	def _add_items_for_disassembly_from_stock_entry(self):
 		source_fg_qty = self.get_source_fg_qty()
@@ -635,8 +638,8 @@ class DisassembleStockEntry(BaseStockEntry):
 	def _set_serial_batch_for_disassembly_from_available_materials(self):
 		available_materials = get_available_materials(self.doc.work_order, self.doc)
 		for row in self.doc.items:
-			warehouse = row.s_warehouse or row.t_warehouse
-			materials = available_materials.get((row.item_code, warehouse))
+			key = row.item_code if row.t_warehouse else (row.item_code, row.s_warehouse)
+			materials = available_materials.get(key)
 			if materials:
 				self._apply_available_material_bundle(row, materials)
 
@@ -646,13 +649,16 @@ class DisassembleStockEntry(BaseStockEntry):
 		self._set_serial_batch_bundle_for_disassembly_row(row, serial_nos, batches)
 
 	def _collect_available_batches(self, batch_details, transfer_qty):
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		batches, qty = defaultdict(float), transfer_qty
 		for batch_no, batch_qty in batch_details.items():
 			if qty <= 0:
 				break
-			batch_qty = abs(batch_qty)
+			batch_qty = flt(batch_qty, precision)
+			if batch_qty <= 0:
+				continue
 			if batch_qty <= qty:
-				batches[batch_no], qty = batch_qty, qty - batch_qty
+				batches[batch_no], qty = batch_qty, flt(qty - batch_qty, precision)
 			else:
 				batches[batch_no], qty = qty, 0
 		return batches
@@ -714,10 +720,23 @@ def sort_serial_nos_by_number(available_materials):
 
 def _get_material_key(row, stock_entry_doc):
 	if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-		return (row.item_code, row.s_warehouse or row.warehouse)
+		return _get_disassembly_material_key(row)
 	if row.purpose != "Material Transfer for Manufacture":
 		return (row.item_code, row.s_warehouse)
 	return (row.item_code, row.warehouse)
+
+
+def _get_disassembly_material_key(row):
+	"""Components can return to a warehouse other than the one they were consumed from, so they
+	match by item. Finished and secondary items match by the warehouse they are in."""
+	if row.purpose == "Manufacture":
+		is_component = bool(row.s_warehouse)
+	else:
+		is_component = not row.s_warehouse
+
+	if is_component:
+		return row.item_code
+	return (row.item_code, row.s_warehouse or row.warehouse)
 
 
 def _update_material_qty(item_data, row, stock_entry_doc):
@@ -736,7 +755,7 @@ def _add_inward_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] += row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] += abs(qty)
 	_extend_serial_nos_from_row(item_data, row)
 
 
@@ -751,7 +770,7 @@ def _deduct_consumed_material_qty(item_data, row):
 		item_data.batch_details[row.batch_no] -= row.qty
 	elif row.batch_nos:
 		for batch_no, qty in row.batch_nos.items():
-			item_data.batch_details[batch_no] += qty
+			item_data.batch_details[batch_no] -= abs(qty)
 	_remove_serial_nos_from_available(item_data, row)
 
 

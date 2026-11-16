@@ -7,8 +7,12 @@ from frappe import _
 from frappe.query_builder import Field
 from frappe.query_builder.functions import Avg, Date, Floor, UnixTimestamp
 
+from erpnext.accounts.report.utils import validate_date_range
+
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	columns = [
 		{"fieldname": "creation_date", "label": _("Date"), "fieldtype": "Date", "width": 300},
 		{

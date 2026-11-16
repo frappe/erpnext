@@ -601,7 +601,8 @@ def value_at_standard_cost(stock: ItemWarehouseStock, entry, details: "Valuation
 	carried_value_before = stock.carried_value
 	rate = details.get_standard_rate(entry.posting_date)
 
-	if details.is_reconciled_balance(entry):
+	# a bundle leg moves stock, as in StockLedger.process_standard_cost
+	if details.is_reconciled_balance(entry) and not entry.serial_and_batch_bundle:
 		qty, _rate = details.get_reconciled_balance(entry)
 	else:
 		qty = stock.pool.qty + flt(entry.actual_qty)

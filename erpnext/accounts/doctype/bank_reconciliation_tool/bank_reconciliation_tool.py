@@ -130,6 +130,14 @@ def get_account_balance(bank_account: str, till_date: str | date, company: str):
 	return flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 
 
+@frappe.whitelist()
+def get_account_opening_balance(bank_account: str, till_date: str | date):
+	# returns the GL balance of the bank account till the specified date, cleared or not
+	frappe.has_permission("Bank Account", "read", bank_account, throw=True)
+	account = frappe.db.get_value("Bank Account", bank_account, "account")
+	return get_balance_on(account, till_date)
+
+
 @frappe.whitelist(methods=["POST"])
 def update_bank_transaction(
 	bank_transaction_name: str, reference_number: str, party_type: str | None = None, party: str | None = None
@@ -351,7 +359,7 @@ def create_payment_entry_bts(
 	bank_transaction = frappe.db.get_values(
 		"Bank Transaction",
 		bank_transaction_name,
-		fieldname=["name", "unallocated_amount", "deposit", "bank_account", "currency"],
+		fieldname=["name", "unallocated_amount", "deposit", "bank_account"],
 		as_dict=True,
 	)[0]
 
@@ -361,13 +369,7 @@ def create_payment_entry_bts(
 	company = frappe.get_cached_value("Account", bank_account, "company")
 	party_account = get_party_account(party_type, party, company)
 
-	bank_currency = bank_transaction.currency
-	party_currency = frappe.get_cached_value("Account", party_account, "account_currency")
-
-	exc_rate = get_exchange_rate(bank_currency, party_currency, posting_date)
-
 	amt_in_bank_acc_currency = bank_transaction.unallocated_amount
-	amount_in_party_currency = bank_transaction.unallocated_amount * exc_rate
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
@@ -379,13 +381,12 @@ def create_payment_entry_bts(
 	pe.posting_date = posting_date
 	pe.paid_from = party_account if payment_type == "Receive" else bank_account
 	pe.paid_to = party_account if payment_type == "Pay" else bank_account
-	pe.paid_from_account_currency = party_currency if payment_type == "Receive" else bank_currency
-	pe.paid_to_account_currency = party_currency if payment_type == "Pay" else bank_currency
-	pe.paid_amount = amount_in_party_currency if payment_type == "Receive" else amt_in_bank_acc_currency
-	pe.received_amount = amount_in_party_currency if payment_type == "Pay" else amt_in_bank_acc_currency
+	pe.paid_amount = amt_in_bank_acc_currency if payment_type == "Pay" else 0
+	pe.received_amount = amt_in_bank_acc_currency if payment_type == "Receive" else 0
 	pe.mode_of_payment = mode_of_payment
 	pe.project = project
 	pe.cost_center = cost_center
+	set_multi_currency_amounts(pe)
 
 	if company_bank_account:
 		pe.bank_account = company_bank_account
@@ -1096,7 +1097,7 @@ def search_for_transfer_transaction(transaction_id: str | int):
 	return None
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def auto_reconcile_vouchers(
 	bank_account: str,
 	from_date: str | date | None = None,

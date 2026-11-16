@@ -46,6 +46,14 @@ frappe.ui.form.on("Master Production Schedule", {
 				},
 			};
 		});
+
+		frm.set_query("bom_no", "items", (doc, cdt, cdn) => {
+			const row = locals[cdt][cdn];
+			return {
+				query: "erpnext.controllers.queries.bom",
+				filters: { item: row.item_code },
+			};
+		});
 	},
 
 	get_actual_demand(frm) {

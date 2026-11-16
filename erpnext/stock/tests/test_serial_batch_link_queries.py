@@ -1,5 +1,6 @@
 import frappe
 from frappe.desk.search import build_for_autosuggest
+from frappe.permissions import add_user_permission
 from frappe.utils import add_days, nowdate
 
 from erpnext.controllers.queries import get_batch_no, get_batch_numbers, get_empty_batches
@@ -92,6 +93,28 @@ class TestSerialBatchLinkQueries(ERPNextTestSuite):
 			with self.subTest(role=role), self.set_user(self.make_user(role)):
 				rows = get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
 				self.assertEqual(rows[0][:3], (batch.name, "Link-Batch", 2))
+
+	def test_batch_link_search_requires_batch_permission(self):
+		batch = self.make_number("Batch", "Link-Batch")
+		self.make_ledger(batch_no=batch.name, actual_qty=2)
+		filters = {"item_code": self.item.name, "warehouse": self.warehouse}
+		with self.set_user(self.make_user("Website Manager")), self.assertRaises(frappe.PermissionError):
+			get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+
+	def test_batch_link_search_applies_batch_user_permissions(self):
+		allowed = self.make_number("Batch", "Link-Batch-Allowed")
+		other = self.make_number("Batch", "Link-Batch-Other")
+		self.make_ledger(batch_no=allowed.name, actual_qty=2)
+		self.make_ledger(batch_no=other.name, actual_qty=3)
+		filters = {"item_code": self.item.name, "warehouse": self.warehouse}
+		user = self.make_user("Stock User")
+		with self.set_user(user):
+			rows = get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+			self.assertCountEqual([row[0] for row in rows], [allowed.name, other.name])
+		add_user_permission("Batch", allowed.name, user, ignore_permissions=True)
+		with self.set_user(user):
+			rows = get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+			self.assertEqual([row[:3] for row in rows], [(allowed.name, "Link-Batch-Allowed", 2)])
 
 	def test_report_links_include_all_selected_vouchers_and_preserve_item_scope(self):
 		serials = [self.make_number("Serial No", f"Link-Serial-{i}") for i in (1, 2)]

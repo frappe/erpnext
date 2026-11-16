@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import datetime
 import json
 from collections import defaultdict
 from typing import Any
@@ -27,7 +28,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
-from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
+from erpnext.stock.doctype.item_manufacturer.item_manufacturer import _get_item_manufacturer_part_no
 from erpnext.stock.doctype.price_list.price_list import get_price_list_details
 from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 
@@ -128,7 +129,12 @@ def _get_item_details(
 	for_validate = parse_json(for_validate)
 	overwrite_warehouse = parse_json(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", ctx.item_code)
-	item.check_permission()
+	# the supplier portal saves a Supplier Quotation with ignore_permissions
+	is_portal_quotation = (
+		isinstance(doc, Document) and doc.doctype == "Supplier Quotation" and doc.flags.ignore_permissions
+	)
+	if not is_portal_quotation:
+		item.check_permission()
 	validate_item_details(ctx, item)
 
 	doc = frappe.parse_json(doc)
@@ -142,7 +148,7 @@ def _get_item_details(
 	out: frappe._dict = get_basic_details(ctx, item, overwrite_warehouse)
 
 	get_item_tax_template(ctx, item, out)
-	out.item_tax_rate = get_item_tax_map(
+	out.item_tax_rate = _get_item_tax_map(
 		doc=doc or ctx,
 		tax_template=out.item_tax_template or ctx.item_tax_template,
 		as_json=True,
@@ -191,6 +197,9 @@ def _get_item_details(
 	for key, value in out.items():
 		if ctx.get(key) is None:
 			ctx[key] = value
+
+	if not ctx.price_list_rate:
+		ctx.price_list_rate = out.price_list_rate
 
 	if not source_row:
 		out.update(get_pricing_rule_for_item(ctx, doc=doc, for_validate=for_validate))
@@ -335,6 +344,7 @@ def update_stock(ctx, out, doc=None):
 		if doc and isinstance(doc, dict):
 			doc = frappe._dict(doc)
 
+		out.stock_qty = flt(out.stock_qty, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty"))
 		kwargs = frappe._dict(
 			{
 				"item_code": ctx.item_code,
@@ -350,6 +360,8 @@ def update_stock(ctx, out, doc=None):
 
 		if ctx.get("doctype") == "Delivery Note":
 			kwargs["against_sales_order"] = ctx.get("against_sales_order")
+		elif ctx.get("doctype") == "Sales Invoice":
+			kwargs["against_sales_order"] = ctx.get("sales_order")
 
 		if ctx.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = ctx.get("ignore_serial_nos")
@@ -386,7 +398,8 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	if out.has_batch_no and batch_no:
 		kwargs["batches"] = [batch_no]
 
-	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
+	kwargs["ignore_serial_nos"] = [*(kwargs.get("ignore_serial_nos") or []), *get_used_serial_nos(doc)]
+	serial_nos = get_serial_nos_for_outward(kwargs)
 	out["serial_no"] = "\n".join(
 		SerialBatchIdentity("Serial No").get_numbers(ctx.item_code, serial_nos[: cint(out.stock_qty)])
 	)
@@ -410,28 +423,79 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 	batches = get_available_batches(frappe._dict(kwargs, qty=0))
 	if doc:
-		filter_batches(batches, doc)
+		filter_batches(batches, doc, kwargs.item_code, kwargs.warehouse)
 
 	batch_no = next(iter(batches), None)
-	if batch_no and flt(batches[batch_no]) >= flt(qty):
+	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
 		return batch_no
 
 	return None
 
 
-def filter_batches(batches, doc):
-	for row in doc.get("items"):
-		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= flt(row.get("stock_qty"))
-			if batches[row.get("batch_no")] <= 0:
-				del batches[row.get("batch_no")]
+def filter_batches(batches, doc, item_code, warehouse):
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	for batch_no, stock_qty in get_batch_qty_taken_by_rows(doc, item_code, warehouse):
+		if batch_no in batches:
+			batches[batch_no] = flt(batches[batch_no] - flt(stock_qty, precision), precision)
+			if batches[batch_no] <= 0:
+				del batches[batch_no]
+
+
+def get_batch_qty_taken_by_rows(doc, item_code, warehouse):
+	"""(batch_no, stock_qty) the warehouse's rows take by batch_no or, without one, by Serial and Batch Bundle."""
+	# a later row without a warehouse yet may get this one from set_warehouse, item or POS defaults
+	rows = [
+		row
+		for row in [*doc.get("items"), *(doc.get("packed_items") or [])]
+		if row.get("warehouse") in (None, "", warehouse)
+	]
+	taken = [(row.get("batch_no"), get_row_stock_qty(row, item_code)) for row in rows if row.get("batch_no")]
+
+	bundles = [
+		row.get("serial_and_batch_bundle")
+		for row in rows
+		if not row.get("batch_no") and row.get("serial_and_batch_bundle")
+	]
+	if bundles:
+		entries = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": ["in", bundles], "batch_no": ["is", "set"]},
+			fields=["batch_no", "qty"],
+		)
+		taken.extend((entry.batch_no, abs(entry.qty)) for entry in entries)
+
+	return taken
+
+
+def get_row_stock_qty(row, item_code):
+	"""A row's stock_qty and conversion_factor can be missing or stale until validate resets them."""
+	item = frappe.get_cached_value("Item", item_code, ["stock_uom", "sales_uom"], as_dict=True)
+	# a row without uom gets the Default Sales UOM in get_basic_details
+	uom = row.get("uom") or item.sales_uom or item.stock_uom
+	if uom == item.stock_uom:
+		return flt(row.get("qty"))
+
+	conversion_factor = row.get("conversion_factor") or get_uom_conversion_factor(item_code, uom)
+	return flt(row.get("qty")) * flt(conversion_factor)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom)["conversion_factor"]
 
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
+	used = get_used_serial_nos(doc, table)
+	return [serial_no for serial_no in serial_nos if serial_no not in used]
+
+
+def get_used_serial_nos(doc, table=None):
+	"""Serial No records held by the rows of ``table``, or of the items and packed items."""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+	rows = doc.get(table) if table else [*doc.get("items"), *(doc.get("packed_items") or [])]
 	numbers_by_item = defaultdict(list)
-	for row in doc.get(table or "items"):
+	for row in rows:
 		item_code = row.get("item_code") or row.get("rm_item_code")
 		if item_code and row.get("serial_no"):
 			numbers_by_item[item_code].extend(get_serial_nos(row.get("serial_no")))
@@ -441,7 +505,7 @@ def get_filtered_serial_nos(serial_nos, doc, table=None):
 		records = SerialBatchIdentity("Serial No").get_records(item_code, numbers, ["name"])
 		used.update(record.name for record in records)
 
-	return [serial_no for serial_no in serial_nos if serial_no not in used]
+	return used
 
 
 def update_bin_details(ctx: frappe._dict, out: frappe._dict, doc):
@@ -545,9 +609,6 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 
 	if not item:
 		item = frappe.get_cached_doc("Item", ctx.item_code)
-
-	if item.variant_of and not item.taxes and frappe.db.exists("Item Tax", {"parent": item.variant_of}):
-		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, ctx.company)
 	item_group_defaults = get_item_group_defaults(item.name, ctx.company)
@@ -697,12 +758,14 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 	if item.stock_uom == ctx.uom:
 		out.conversion_factor = 1.0
 	else:
-		out.conversion_factor = ctx.conversion_factor or get_conversion_factor(item.name, ctx.uom).get(
-			"conversion_factor"
-		)
+		out.conversion_factor = ctx.conversion_factor or get_conversion_factor(
+			item.name, ctx.uom, throw_if_missing=True
+		).get("conversion_factor")
 
 	ctx.conversion_factor = out.conversion_factor
-	out.stock_qty = out.qty * out.conversion_factor
+	out.stock_qty = flt(
+		out.qty * out.conversion_factor, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty")
+	)
 	ctx.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
@@ -740,7 +803,7 @@ def get_basic_details(ctx: frappe._dict, item, overwrite_warehouse=True) -> frap
 		out[fieldname] = item.get(fieldname)
 
 	if ctx.manufacturer:
-		part_no = get_item_manufacturer_part_no(ctx.item_code, ctx.manufacturer)
+		part_no = _get_item_manufacturer_part_no(ctx.item_code, ctx.manufacturer)
 		if part_no:
 			out.manufacturer_part_no = part_no
 		else:
@@ -876,6 +939,9 @@ def get_item_tax_info(
 		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
 			continue
 
+		if not isinstance(item_code[0], str):
+			frappe.throw(_("Invalid Item Code"))
+
 		out[item_code[1]] = frappe._dict()
 		item = frappe.get_cached_doc("Item", item_code[0])
 		ctx: frappe._dict = {
@@ -888,11 +954,14 @@ def get_item_tax_info(
 			ctx.update({"item_tax_template": item_tax_templates.get(item_code[1])})
 
 		get_item_tax_template(ctx, item, out[item_code[1]])
-		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
+		out[item_code[1]]["item_tax_rate"] = _get_item_tax_map(
 			doc=doc,
 			tax_template=out[item_code[1]].get("item_tax_template"),
 			as_json=True,
 		)
+
+	for item_tax_template in {row.item_tax_template for row in out.values() if row.item_tax_template}:
+		erpnext.require_permission("Item Tax Template", item_tax_template, "select")
 
 	return out
 
@@ -918,7 +987,7 @@ def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out
 	        }
 	"""
 	if not item:
-		if not ctx.get("item_code"):
+		if not ctx.get("item_code") or not isinstance(ctx.item_code, str):
 			frappe.throw(_("Item/Item Code required to get Item Tax Template."))
 		else:
 			item = frappe.get_cached_doc("Item", ctx.item_code)
@@ -937,14 +1006,13 @@ def get_item_tax_template(ctx: ItemDetailsCtx, item: Document | None = None, out
 
 
 def _get_item_tax_template_from_item_group(ctx, item_group, out=None):
-	from frappe.utils.nestedset import get_ancestors_of
-
-	ancestors = get_ancestors_of("Item Group", item_group)
-	for group in [item_group, *ancestors]:
-		group_doc = frappe.get_cached_doc("Item Group", group)
+	"""Return the first tax template found walking up from `item_group` to the root."""
+	while item_group:
+		group_doc = frappe.get_cached_doc("Item Group", item_group)
 		item_tax_template = _get_item_tax_template(ctx, group_doc.taxes, out)
 		if item_tax_template:
 			return item_tax_template
+		item_group = group_doc.parent_item_group
 	return None
 
 
@@ -968,55 +1036,61 @@ def _get_item_tax_template(
 	"""
 	if out is None:
 		out = frappe._dict()
-	taxes_with_validity = []
-	taxes_with_no_validity = []
+	taxes = get_latest_item_taxes(get_applicable_item_taxes(ctx, taxes))
+	category_templates = [
+		tax.item_tax_template for tax in taxes if cstr(tax.tax_category) == cstr(ctx.get("tax_category"))
+	]
 
+	if for_validate:
+		return category_templates
+
+	# do not change if already a valid template
+	if ctx.get("item_tax_template") in (category_templates or {t.item_tax_template for t in taxes}):
+		out.item_tax_template = ctx.get("item_tax_template")
+		return ctx.get("item_tax_template")
+
+	if category_templates:
+		out.item_tax_template = category_templates[0]
+		return category_templates[0]
+	return None
+
+
+def get_applicable_item_taxes(ctx, taxes) -> list:
+	validation_date = getdate(ctx.get("bill_date") or ctx.get("posting_date") or ctx.get("transaction_date"))
+	applicable_taxes = []
 	for tax in taxes:
 		disabled, tax_company = frappe.get_cached_value(
 			"Item Tax Template", tax.item_tax_template, ["disabled", "company"]
 		)
-		if not disabled and tax_company == ctx["company"]:
-			if tax.valid_from or tax.maximum_net_rate:
-				# In purchase Invoice first preference will be given to supplier invoice date
-				# if supplier date is not present then posting date
-				validation_date = (
-					ctx.get("bill_date") or ctx.get("posting_date") or ctx.get("transaction_date")
-				)
+		if (
+			not disabled
+			and tax_company == ctx["company"]
+			and get_item_tax_valid_from(tax) <= validation_date
+			and is_within_valid_range(ctx, tax)
+		):
+			applicable_taxes.append(tax)
 
-				if getdate(tax.valid_from) <= getdate(validation_date) and is_within_valid_range(ctx, tax):
-					taxes_with_validity.append(tax)
-			else:
-				taxes_with_no_validity.append(tax)
+	return applicable_taxes
 
-	if taxes_with_validity:
-		taxes = sorted(taxes_with_validity, key=lambda i: i.valid_from or tax.maximum_net_rate, reverse=True)
-	else:
-		taxes = taxes_with_no_validity
 
-	if for_validate:
-		return [
-			tax.item_tax_template
-			for tax in taxes
-			if (
-				cstr(tax.tax_category) == cstr(ctx.get("tax_category"))
-				and (tax.item_tax_template not in taxes)
-			)
-		]
+def get_latest_item_taxes(taxes) -> list:
+	latest_priority = {}
+	latest_taxes = []
+	for tax in sorted(taxes, key=get_item_tax_priority, reverse=True):
+		priority = get_item_tax_priority(tax)
+		key = (tax.get("parenttype"), tax.get("parent"), cstr(tax.tax_category))
+		if latest_priority.setdefault(key, priority) == priority:
+			latest_taxes.append(tax)
 
-	# all templates have validity and no template is valid
-	if not taxes_with_validity and (not taxes_with_no_validity):
-		return None
+	return latest_taxes
 
-	# do not change if already a valid template
-	if ctx.get("item_tax_template") in {t.item_tax_template for t in taxes}:
-		out.item_tax_template = ctx.get("item_tax_template")
-		return ctx.get("item_tax_template")
 
-	for tax in taxes:
-		if cstr(tax.tax_category) == cstr(ctx.get("tax_category")):
-			out.item_tax_template = tax.item_tax_template
-			return tax.item_tax_template
-	return None
+def get_item_tax_priority(tax) -> tuple:
+	return get_item_tax_valid_from(tax), flt(tax.maximum_net_rate) > 0
+
+
+def get_item_tax_valid_from(tax) -> datetime.date:
+	return getdate(tax.valid_from) if tax.valid_from else datetime.date.min
 
 
 @erpnext.normalize_ctx_input(ItemDetailsCtx)
@@ -1039,6 +1113,13 @@ def is_within_valid_range(ctx: ItemDetailsCtx, tax) -> bool:
 
 @frappe.whitelist()
 def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = None, as_json: bool = True):
+	if tax_template:
+		erpnext.require_permission("Item Tax Template", tax_template, "select")
+
+	return _get_item_tax_map(doc=doc, tax_template=tax_template, as_json=as_json)
+
+
+def _get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = None, as_json: bool = True):
 	doc = parse_json(doc)
 	item_tax_map = {}
 	for t in (t for t in (doc.get("taxes") or []) if not t.get("set_by_item_tax_template")):
@@ -1061,6 +1142,8 @@ def get_item_tax_map(*, doc: str | dict | Document, tax_template: str | None = N
 def calculate_service_end_date(ctx: ItemDetailsCtx, item: Document | None = None):
 	_preprocess_ctx(ctx)
 	if not item:
+		if not isinstance(ctx.item_code, str):
+			frappe.throw(_("Invalid Item Code"))
 		item = frappe.get_cached_doc("Item", ctx.item_code)
 
 	doctype = ctx.parenttype or ctx.doctype
@@ -1502,7 +1585,10 @@ def get_price_list_rate_for(ctx: ItemDetailsCtx, item_code: str):
 		if desired_qty := ctx.get("qty"):
 			item_price_data = get_prices_fitting_packing_unit(price_list_rate, desired_qty)
 	else:
-		general_price_list_rate = get_item_price(pctx, item_code, ignore_party=ctx.get("ignore_party"))
+		# Without ignore_party this repeats the query above, which found nothing
+		general_price_list_rate = ctx.get("ignore_party") and get_item_price(
+			pctx, item_code, ignore_party=True
+		)
 
 		if not general_price_list_rate and ctx.get("uom") != ctx.get("stock_uom"):
 			pctx.uom = ctx.get("stock_uom")
@@ -1709,8 +1795,10 @@ def get_pos_profile(company: str, pos_profile: str | None = None, user: str | No
 
 
 @frappe.whitelist()
-def get_conversion_factor(item_code: str | None, uom: str):
-	item = frappe.get_cached_value("Item", item_code, ["variant_of", "stock_uom"], as_dict=True)
+def get_conversion_factor(item_code: str | None, uom: str, throw_if_missing: bool = False):
+	item = frappe.get_cached_value(
+		"Item", item_code, ["variant_of", "stock_uom", "is_stock_item"], as_dict=True
+	)
 	if not item_code or not item or uom == item.stock_uom:
 		return {"conversion_factor": 1.0}
 
@@ -1735,6 +1823,9 @@ def get_conversion_factor(item_code: str | None, uom: str):
 		conversion_factor = get_uom_conv_factor(uom, item.stock_uom)
 	else:
 		conversion_factor = conversion_factor[0]
+
+	if throw_if_missing and not conversion_factor and item.is_stock_item:
+		throw(_("UOM {0} has no conversion factor in Item {1}.").format(uom, item_code))
 
 	return {"conversion_factor": conversion_factor or 1.0}
 
@@ -1863,6 +1954,9 @@ def _apply_price_list(ctx: ItemDetailsCtx, as_doc: bool = False, doc: Document |
 		for item in item_list:
 			ctx_copy = frappe._dict(ctx.copy())
 			ctx_copy.update(item)
+			# a row must not replace the transaction type the context was normalised to,
+			# the Pricing Rule query uses it as a column name
+			ctx_copy.transaction_type = ctx.transaction_type
 			item_details = apply_price_list_on_item(ctx_copy, doc=doc)
 			children.append(item_details)
 
@@ -1906,9 +2000,9 @@ def get_price_list_currency_and_exchange_rate(ctx: frappe._dict):
 	if not ctx.price_list:
 		return {}
 
-	if ctx.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"]:
+	if ctx.doctype in sales_doctypes:
 		ctx.update({"exchange_rate": "for_selling"})
-	elif ctx.doctype in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"]:
+	elif ctx.doctype in purchase_doctypes:
 		ctx.update({"exchange_rate": "for_buying"})
 
 	price_list_details = get_price_list_details(ctx.price_list)

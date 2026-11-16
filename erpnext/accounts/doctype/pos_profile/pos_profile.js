@@ -7,7 +7,7 @@ frappe.ui.form.on("POS Profile", {
 		});
 
 		frm.set_query("tc_name", function () {
-			return { filters: { selling: 1 } };
+			return { filters: { selling: 1, disabled: 0 } };
 		});
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function () {

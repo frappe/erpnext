@@ -275,6 +275,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
+   "read_only_depends_on": "eval:doc.is_return",
    "width": "50px"
   },
   {
@@ -679,7 +680,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-07-28 13:04:52.771908",
+ "modified": "2026-11-09 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

@@ -667,6 +667,28 @@ class TestQualityInspection(ERPNextTestSuite):
 		finally:
 			frappe.set_user("Administrator")
 
+	def test_item_query_for_stock_entry_respects_permissions(self):
+		from erpnext.stock.doctype.quality_inspection.quality_inspection import item_query
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		stock_entry = make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
+		)
+		args = ("Item", "", "name", 0, 20)
+		filters = {"reference_doctype": "Stock Entry", "reference_name": stock_entry.name}
+		stock_user = make_fenced_user("qi-stock-entry-reader@example.com", ["Stock User"])
+		other_user = make_fenced_user("qi-stock-entry-other@example.com", ["Website Manager"])
+
+		with as_user(stock_user):
+			self.assertEqual([row[0] for row in item_query(*args, filters)], ["_Test Item"])
+
+		with as_user(other_user):
+			for reference_name in (stock_entry.name, "_Test Missing Stock Entry"):
+				self.assertRaises(
+					frappe.PermissionError, item_query, *args, {**filters, "reference_name": reference_name}
+				)
+			self.assertEqual(item_query(*args, {**filters, "reference_name": {"name": stock_entry.name}}), [])
+
 	def test_qi_updates_job_card_reference(self):
 		"""Submitting a QI with reference_type 'Job Card' writes its name onto the
 		Job Card's quality_inspection field (the Job Card branch of

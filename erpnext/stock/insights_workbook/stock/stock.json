@@ -26,6 +26,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(delivered_value)",
@@ -254,6 +255,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "received_value",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Received"
@@ -264,6 +266,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "delivered_value",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Delivered"
@@ -306,6 +309,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(received_value)",
@@ -342,6 +346,7 @@
       "comparison": {
        "label": "vs a month ago",
        "measure": {
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "expression": {
          "expression": "sum_if(posting_date <= date_sub(today(), 1, 'month'), stock_value_difference)",
@@ -359,6 +364,7 @@
     ],
     "number_columns": [
      {
+      "currency_column": "Company:company:default_currency",
       "data_type": "Decimal",
       "expression": {
        "expression": "sum(stock_value_difference)",
@@ -466,6 +472,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "value",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Stock Value"
@@ -516,6 +523,7 @@
        "measure": {
         "aggregation": "sum",
         "column_name": "value",
+        "currency_column": "Company:company:default_currency",
         "data_type": "Decimal",
         "format": "currency",
         "measure_name": "Stock Value"
@@ -810,7 +818,7 @@
  "folders": [],
  "idx": 0,
  "is_standard": 1,
- "modified": "2026-10-24 19:45:00.000000",
+ "modified": "2026-10-24 21:30:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "stock",
@@ -1572,6 +1580,11 @@
        "data_type": "Date",
        "dimension_name": "period",
        "granularity": "month"
+      },
+      {
+       "column_name": "company",
+       "data_type": "String",
+       "dimension_name": "company"
       }
      ],
      "measures": [

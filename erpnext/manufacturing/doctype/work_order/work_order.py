@@ -18,8 +18,9 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext import get_company_currency, require_permission
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
 from erpnext.manufacturing.doctype.production_plan.services.work_order_quantities import (
 	ProductionPlanWorkOrderQuantities,
 )
@@ -35,9 +36,11 @@ from erpnext.manufacturing.doctype.work_order.mapper import (
 	get_item_details,
 	get_operation_details,
 	get_operation_qty,
+	get_operation_target_qty,
 	get_serial_nos_for_job_card,
 	get_serial_nos_for_work_order,
 	get_template_rm_item,
+	get_upstream_process_loss,
 	get_work_order_operation_data,
 	make_job_card,
 	make_material_request,
@@ -209,6 +212,10 @@ class WorkOrder(Document):
 			self.set_onload("has_alternative_finished_goods", self.has_alternative_finished_goods())
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
+			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
+		)
+		self.set_onload("upstream_process_loss", get_upstream_process_loss(self))
+		self.set_onload(
 			"enable_stock_reservation",
 			frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"),
 		)
@@ -259,14 +266,15 @@ class WorkOrder(Document):
 					"secondary_items.secondary_item_type",
 					"secondary_items.qty",
 					"secondary_items.uom",
-					"secondary_items.cost as amount",
+					"secondary_items.base_cost as amount",
 					"quantity as bom_qty",
 				],
 			).run(as_dict=True)
 			secondary_items = [item for item in secondary_items if item.item_code]
+			precision = frappe.get_precision("Work Order Additional Item", "amount")
 			for item in secondary_items:
 				item["qty"] = (item.qty / item.bom_qty) * self.qty
-				item["amount"] = flt(item.amount) * item.qty
+				item["amount"] = flt(flt(item.amount) * self.qty / item.bom_qty, precision)
 			return secondary_items
 
 	@property
@@ -301,7 +309,10 @@ class WorkOrder(Document):
 		operation_details = frappe._dict(operation_details)
 
 		for d in self.operations:
-			job_card_qty = get_operation_qty(self, d) - flt(operation_details.get(d.name))
+			job_card_qty = flt(
+				get_operation_target_qty(self, d) - flt(operation_details.get(d.name)),
+				d.precision("completed_qty"),
+			)
 			if job_card_qty > 0:
 				return True
 
@@ -313,7 +324,7 @@ class WorkOrder(Document):
 	def validate(self):
 		self.validate_production_item()
 		if self.bom_no:
-			validate_bom_no(self.production_item, self.bom_no)
+			validate_production_bom(self.production_item, self.bom_no)
 
 		if not self.subcontracting_inward_order:
 			self.validate_sales_order()
@@ -322,13 +333,14 @@ class WorkOrder(Document):
 		self.set_operation_warehouses()
 		self.validate_warehouse_belongs_to_company()
 		self.check_wip_warehouse_skip()
+		self.reset_use_multi_level_bom()
 		self.calculate_operating_cost()
 		self.validate_qty()
 		self.validate_transfer_against()
 		self.validate_operations()
 		self.status = self.get_status()
 		self.validate_workstation_type()
-		self.reset_use_multi_level_bom()
+		WorkOrderStockReservation(self).clear_reserve_stock_if_disabled()
 		WorkOrderStockReservation(self).set_reserve_stock()
 		WorkOrderStockReservation(self).validate_fg_warehouse_for_reservation()
 		self.validate_dates()
@@ -342,7 +354,10 @@ class WorkOrder(Document):
 			"Manufacturing Settings", "allow_editing_of_items_and_quantities_in_work_order"
 		):
 			self.set_required_items(reset_only_qty=len(self.get("required_items")))
+		else:
+			self.set_rate_for_edited_items()
 
+		self.set_required_item_amounts()
 		WorkOrderStockReservation(self).enable_auto_reserve_stock()
 		self.validate_operations_sequence()
 		self.validate_subcontracting_inward_order()
@@ -674,12 +689,7 @@ class WorkOrder(Document):
 
 	def on_submit(self):
 		self.validate_warehouse()
-		if self.production_plan and frappe.db.exists(
-			"Production Plan Item Reference", {"parent": self.production_plan}
-		):
-			self.update_work_order_qty_in_combined_so()
-		else:
-			self.update_work_order_qty_in_so()
+		self.update_work_order_qty_in_sales_orders()
 
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_production()
@@ -698,12 +708,7 @@ class WorkOrder(Document):
 		self.on_close_or_cancel()
 
 	def on_close_or_cancel(self):
-		if self.production_plan and frappe.db.exists(
-			"Production Plan Item Reference", {"parent": self.production_plan}
-		):
-			self.update_work_order_qty_in_combined_so()
-		else:
-			self.update_work_order_qty_in_so()
+		self.update_work_order_qty_in_sales_orders()
 
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -870,16 +875,8 @@ class WorkOrder(Document):
 		if not self.batch_size:
 			self.batch_size = self.qty
 
-		batch_auto_creation = frappe.get_cached_value("Item", self.production_item, "create_new_batch")
-		if not batch_auto_creation:
-			frappe.msgprint(
-				_("Batch not created for item {0} since it does not have a batch series.").format(
-					frappe.bold(self.production_item)
-				),
-				alert=True,
-				indicator="orange",
-			)
-			return
+		if not frappe.get_cached_value("Item", self.production_item, "create_new_batch"):
+			self.throw_missing_item_setting("create_new_batch")
 
 		while total_qty > 0:
 			qty = self.batch_size
@@ -910,12 +907,19 @@ class WorkOrder(Document):
 
 		batch_capacity = self.get_batch_capacity() if self.has_batch_no else []
 
-		serial_nos = []
-		if item_details.serial_no_series:
-			serial_nos = get_available_serial_nos(
-				item_details.serial_no_series, qty or self.qty, self.production_item
-			)
+		if not item_details.serial_no_series:
+			self.throw_missing_item_setting("serial_no_series")
 
+		serial_no_values = frappe._dict(
+			company=self.company,
+			item_code=self.production_item,
+			item_name=item_details.item_name,
+			description=item_details.description,
+			work_order=self.name,
+		)
+		serial_nos = get_available_serial_nos(
+			item_details.serial_no_series, qty or self.qty, self.production_item, serial_no_values
+		)
 		if not serial_nos:
 			return
 
@@ -974,6 +978,22 @@ class WorkOrder(Document):
 				).format(frappe.bold(self.production_item)),
 			)
 			raise
+
+	def throw_missing_item_setting(self, fieldname):
+		frappe.throw(
+			_("Set {0} in Item {1} or disable {2} in {3}").format(
+				frappe.bold(_(frappe.get_meta("Item").get_label(fieldname))),
+				get_link_to_form("Item", self.production_item),
+				frappe.bold(
+					_(
+						frappe.get_meta("Manufacturing Settings").get_label(
+							"make_serial_no_batch_from_work_order"
+						)
+					)
+				),
+				get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
+			)
+		)
 
 	def validate_cancel(self):
 		if self.status == "Stopped":
@@ -1057,6 +1077,8 @@ class WorkOrder(Document):
 	def make_bom(self):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
+		bom.company = self.company
+		bom.currency = get_company_currency(self.company)
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
@@ -1203,6 +1225,12 @@ class WorkOrder(Document):
 	def set_required_items(self, reset_only_qty=False, reset_source_warehouse=False):
 		return RequiredItemsService(self).set_required_items(reset_only_qty, reset_source_warehouse)
 
+	def set_rate_for_edited_items(self):
+		return RequiredItemsService(self).set_rate_for_edited_items()
+
+	def set_required_item_amounts(self):
+		return RequiredItemsService(self).set_required_item_amounts()
+
 	def update_transferred_qty_for_required_items(self):
 		return RequiredItemsService(self).update_transferred_qty_for_required_items()
 
@@ -1253,6 +1281,9 @@ class WorkOrder(Document):
 
 	def update_ordered_qty(self):
 		return StatusService(self).update_ordered_qty()
+
+	def update_work_order_qty_in_sales_orders(self):
+		return StatusService(self).update_work_order_qty_in_sales_orders()
 
 	def update_work_order_qty_in_so(self):
 		return StatusService(self).update_work_order_qty_in_so()
@@ -1348,6 +1379,7 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 
 @frappe.whitelist()
 def get_default_warehouse(company: str):
+	require_permission("Company", company, "select")
 	wip, fg, scrap = frappe.get_cached_value(
 		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
 	)

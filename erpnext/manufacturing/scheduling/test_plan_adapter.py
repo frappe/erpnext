@@ -701,7 +701,7 @@ class TestPlanAdapter(ERPNextTestSuite):
 					{
 						"doctype": "Supplier",
 						"supplier_name": supplier,
-						"supplier_group": "All Supplier Groups",
+						"supplier_group": "Services",
 					}
 				).insert()
 

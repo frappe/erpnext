@@ -8,6 +8,25 @@ from frappe.utils import add_months, nowdate
 from erpnext.tests.utils import ERPNextTestSuite
 
 
+def make_internal_delivery_note():
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+	company = "_Test Company with perpetual inventory"
+	pr = make_purchase_receipt(warehouse="Stores - TCP1", company=company)
+	return create_delivery_note(
+		item_code=pr.items[0].item_code,
+		company=company,
+		customer="_Test Internal Customer 2",
+		cost_center="Main - TCP1",
+		expense_account="Cost of Goods Sold - TCP1",
+		qty=5,
+		rate=500,
+		warehouse="Stores - TCP1",
+		target_warehouse="Work In Progress - TCP1",
+	)
+
+
 class TestMapper(ERPNextTestSuite):
 	def setUp(self):
 		self.load_test_records("Sales Order")
@@ -118,6 +137,11 @@ class TestMapper(ERPNextTestSuite):
 				"Purchase Invoice -> Purchase Receipt",
 				lambda: make_purchase_invoice(),
 				"erpnext.accounts.doctype.purchase_invoice.mapper.make_purchase_receipt",
+			),
+			(
+				"Delivery Note -> Purchase Receipt",
+				make_internal_delivery_note,
+				"erpnext.stock.doctype.delivery_note.mapper.make_inter_company_purchase_receipt",
 			),
 		]
 

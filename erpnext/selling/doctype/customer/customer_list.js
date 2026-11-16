@@ -9,7 +9,7 @@ frappe.listview_settings["Customer"] = {
 		"release_date",
 	],
 	get_indicator: function (doc) {
-		const is_hold_active = !doc.release_date || doc.release_date >= frappe.datetime.get_today();
+		const is_hold_active = !doc.release_date || doc.release_date > frappe.datetime.get_today();
 		if (!cint(doc.disabled) && cint(doc.on_hold) && is_hold_active) {
 			return [__("On Hold"), "red", "on_hold,=,1"];
 		}

@@ -7,9 +7,12 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 import erpnext
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters: dict | None = None):
+	validate_date_range(filters)
+
 	columns = get_columns()
 	data = get_data(filters)
 

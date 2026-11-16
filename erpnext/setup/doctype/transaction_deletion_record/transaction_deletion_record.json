@@ -90,7 +90,7 @@
    "default": "Pending",
    "fieldname": "delete_bin_data_status",
    "fieldtype": "Select",
-   "label": "Delete Bins",
+   "label": "Rebuild Bins",
    "no_copy": 1,
    "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
@@ -99,7 +99,7 @@
    "default": "Pending",
    "fieldname": "delete_leads_and_addresses_status",
    "fieldtype": "Select",
-   "label": "Delete Leads and Addresses",
+   "label": "Delete Leads, Addresses and Contacts",
    "no_copy": 1,
    "options": "Pending\nCompleted\nSkipped",
    "read_only": 1
@@ -173,7 +173,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-09-02 20:32:19.679290",
+ "modified": "2026-11-05 10:00:01.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",

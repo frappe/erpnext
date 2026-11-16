@@ -19,6 +19,7 @@ def execute():
 			base_costing_amount = costing_amount"""
 	)
 
+	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- formats the default currency code
 	frappe.db.sql(
 		f"""UPDATE `tabTimesheet`
 			SET currency = '{base_currency}',

@@ -97,6 +97,33 @@ class TestItemWiseConsumption(ERPNextTestSuite):
 
 		self.assertEqual(row[4:8], [1, 100, 2, 200])
 
+	def test_stock_reconciliation_is_not_consumption(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item = make_item(properties={"has_batch_no": 1}).name
+		batch_no = frappe.get_doc(doctype="Batch", item=item, batch_id=f"{item}-01").insert().name
+		make_stock_entry(
+			item_code=item, to_warehouse=WH, qty=10, rate=10, batch_no=batch_no, posting_date="2026-06-01"
+		)
+		# a batch row is posted as an outgoing leg for the old qty followed by the new qty
+		reco = create_stock_reconciliation(
+			item_code=item, warehouse=WH, qty=12, rate=10, batch_no=batch_no, posting_date="2026-06-02"
+		)
+		self.assertTrue(
+			frappe.db.exists(
+				"Stock Ledger Entry", {"voucher_no": reco.name, "actual_qty": -10, "is_cancelled": 0}
+			)
+		)
+		make_stock_entry(
+			item_code=item, from_warehouse=WH, qty=2, batch_no=batch_no, posting_date="2026-06-03"
+		)
+
+		row = next(r for r in self.run_report() if r[0] == item)
+
+		self.assertEqual(row[4:6], [2, 20])  # only the issue is consumption
+
 	def test_items_never_purchased_are_listed(self):
 		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item_code=item, to_warehouse=WH, qty=5, rate=100, posting_date="2026-06-01")

@@ -177,7 +177,10 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 		)
 
 		for item in doc.get("items"):
-			if flt(item.base_net_amount) or (doc.get("update_stock") and item.valuation_rate):
+			if flt(item.base_net_amount) or (
+				doc.get("update_stock")
+				and (item.valuation_rate or voucher_wise_stock_value.get((item.name, item.warehouse)))
+			):
 				if item.item_code:
 					frappe.get_cached_value("Item", item.item_code, "asset_category")
 
@@ -642,10 +645,9 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		doc = self.doc
 		net_amt_precision = item.precision("base_net_amount")
-		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
 		warehouse_debit_amount = flt(
-			flt(item.valuation_rate, val_rate_db_precision) * get_stock_qty(item, item.qty),
+			flt(item.valuation_rate) * get_stock_qty(item, item.qty),
 			net_amt_precision,
 		)
 
@@ -973,17 +975,24 @@ class PurchaseInvoiceGLComposer(BaseGLComposer):
 				else:
 					round_off_account = round_off_for_opening
 
+			round_off_account_currency = get_account_currency(round_off_account)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
 						"against": doc.supplier,
-						"debit_in_account_currency": doc.rounding_adjustment,
+						"debit_in_transaction_currency": flt(
+							doc.rounding_adjustment, doc.precision("rounding_adjustment")
+						),
+						"debit_in_account_currency": doc.base_rounding_adjustment
+						if round_off_account_currency == doc.company_currency
+						else doc.rounding_adjustment,
 						"debit": doc.base_rounding_adjustment,
 						"cost_center": round_off_cost_center
 						if doc.use_company_roundoff_cost_center
 						else (doc.cost_center or round_off_cost_center),
 					},
+					round_off_account_currency,
 					item=doc,
 				)
 			)

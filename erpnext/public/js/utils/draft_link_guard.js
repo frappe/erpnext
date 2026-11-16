@@ -35,9 +35,13 @@ erpnext.utils.confirm_if_drafts_exist = async function (source_doc, target_docty
 };
 
 if (frappe.model.add_mapped_doc_guard) {
-	frappe.model.add_mapped_doc_guard((mapped_doc, opts) =>
-		erpnext.utils.confirm_if_drafts_exist(opts.frm && opts.frm.doc, mapped_doc.doctype)
-	);
+	frappe.model.add_mapped_doc_guard((mapped_doc, opts) => {
+		// a mapper that saved the target already created the draft, so ask before calling it instead
+		if (mapped_doc.name && !mapped_doc.__islocal) {
+			return true;
+		}
+		return erpnext.utils.confirm_if_drafts_exist(opts.frm && opts.frm.doc, mapped_doc.doctype);
+	});
 }
 
 function get_draft_warning(source_doc, target_doctype, drafts) {

@@ -210,7 +210,7 @@ frappe.ui.form.on("Dunning", {
 		}
 	},
 	posting_date: function (frm) {
-		frm.trigger("calculate_overdue_days");
+		return frm.trigger("calculate_overdue_days");
 	},
 	rate_of_interest: function (frm) {
 		frm.trigger("calculate_interest");
@@ -231,6 +231,7 @@ frappe.ui.form.on("Dunning", {
 				frappe.model.set_value(row.doctype, row.name, "overdue_days", overdue_days);
 			}
 		});
+		return frm.trigger("calculate_interest");
 	},
 	calculate_interest: function (frm) {
 		frm.doc.overdue_payments.forEach((row) => {

@@ -372,6 +372,23 @@ class TestBOMStockAnalysis(ERPNextTestSuite):
 		self.assertEqual(items[material]["available_qty"], fmt_qty(100))
 		self.assertEqual(footer["description"], 100)
 
+	def test_selected_warehouse_of_another_company_is_not_counted(self):
+		rm = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		bom = make_bom(item=fg, raw_materials=[rm], rm_qty=1)
+
+		own = create_warehouse("_Test BOM Stock Analysis Own")
+		other = create_warehouse("_Test BOM Stock Analysis Other", company="_Test Company 1")
+		create_stock_reconciliation(item_code=rm, warehouse=own, qty=4, rate=10)
+		create_stock_reconciliation(
+			item_code=rm, warehouse=other, qty=500, rate=10, company="_Test Company 1"
+		)
+
+		filters = {"bom": bom.name, "company": "_Test Company", "warehouse": [own, other]}
+		rows = [row for row in get_bom_data(filters) if row.item_code == rm]
+		self.assertEqual(flt(rows[0].actual_qty), 4.0)
+		self.assertEqual(flt(get_producible_fg_items(filters)[0].available_qty), 4.0)
+
 
 def run_report(bom, warehouse, exploded, qty_to_make):
 	"""Component rows keyed by item code, plus the footer row."""

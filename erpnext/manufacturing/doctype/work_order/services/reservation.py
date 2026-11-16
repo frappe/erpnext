@@ -20,7 +20,11 @@ from frappe.utils import cint, flt, parse_json
 from pypika import functions as fn
 from pypika.terms import ExistsCriterion
 
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import StockReservation
+from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
+from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	StockReservation,
+	clear_reserve_stock_if_disabled,
+)
 
 _SCIO_FIELDS = [
 	"item_code",
@@ -81,6 +85,11 @@ class WorkOrderStockReservation:
 			),
 			title=_("Target Warehouse Reservation Error"),
 		)
+
+	def clear_reserve_stock_if_disabled(self):
+		"""Subcontracting Inward Work Orders always reserve the customer's materials."""
+		if not self.doc.subcontracting_inward_order:
+			clear_reserve_stock_if_disabled(self.doc)
 
 	def set_reserve_stock(self):
 		for row in self.doc.required_items:
@@ -604,9 +613,7 @@ def reserve_stock_for_work_order(
 
 def _reserve_or_transfer(sre, doc, is_transfer):
 	if doc.production_plan and is_transfer:
-		sre.transfer_reservation_entries_to(
-			doc.production_plan, from_doctype="Production Plan", to_doctype="Work Order"
-		)
+		hand_off_reserved_stock(doc.production_plan, "Work Order", sre.items)
 	elif doc.subcontracting_inward_order and is_transfer:
 		doc.set_qty_change()
 		sre.transfer_reservation_entries_to(

@@ -50,7 +50,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			title: __("Email Receipt"),
 			fields: [
 				{ fieldname: "email_id", fieldtype: "Data", options: "Email", label: "Email ID", reqd: 1 },
-				{ fieldname: "content", fieldtype: "Small Text", label: "Message (if any)" },
+				{ fieldname: "content", fieldtype: "Small Text", label: __("Message (if any)") },
 			],
 			primary_action: () => {
 				this.send_email();
@@ -61,7 +61,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		const print_dialog = new frappe.ui.Dialog({
 			title: __("Print Receipt"),
-			fields: [{ fieldname: "print", fieldtype: "Data", label: "Print Preview" }],
+			fields: [{ fieldname: "print", fieldtype: "Data", label: __("Print Preview") }],
 			primary_action: () => {
 				this.print_receipt();
 			},

@@ -8,9 +8,12 @@ from frappe.utils import flt, formatdate, get_link_to_form
 
 from erpnext import get_region
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_details_query
+from erpnext.accounts.report.utils import validate_date_range
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	return VATAuditReport(filters).run()
 
 

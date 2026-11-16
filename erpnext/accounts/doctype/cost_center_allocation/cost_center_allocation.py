@@ -1,10 +1,12 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from decimal import Decimal
+
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, flt, format_date, getdate
+from frappe.utils import add_days, flt, format_date, get_link_to_form, getdate
 
 
 class MainCostCenterCantBeChild(frappe.ValidationError):
@@ -24,6 +26,10 @@ class WrongPercentageAllocation(frappe.ValidationError):
 
 
 class InvalidDateError(frappe.ValidationError):
+	pass
+
+
+class DuplicateCostCenterAllocation(frappe.ValidationError):
 	pass
 
 
@@ -52,15 +58,30 @@ class CostCenterAllocation(Document):
 		self._skip_from_date_validation = False
 
 	def validate(self):
+		self.validate_allocation_percentages()
 		self.validate_total_allocation_percentage()
 		if not self._skip_from_date_validation:
 			self.validate_from_date_based_on_existing_gle()
+		self.validate_duplicate_allocation()
 		self.validate_backdated_allocation()
+		self.validate_cost_centers()
 		self.validate_main_cost_center()
 		self.validate_child_cost_centers()
 
+	def validate_allocation_percentages(self):
+		for row in self.get("allocation_percentages", []):
+			if flt(row.percentage) <= 0:
+				frappe.throw(
+					_("Row #{0}: Percentage (%) for Cost Center {1} must be greater than 0").format(
+						row.idx, frappe.bold(row.cost_center)
+					),
+					WrongPercentageAllocation,
+				)
+
 	def validate_total_allocation_percentage(self):
-		total_percentage = sum([flt(d.percentage) for d in self.get("allocation_percentages", [])])
+		total_percentage = sum(
+			Decimal(str(flt(d.percentage))) for d in self.get("allocation_percentages", [])
+		)
 
 		if total_percentage != 100:
 			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
@@ -84,6 +105,26 @@ class CostCenterAllocation(Document):
 					).format(last_gle_date, self.main_cost_center),
 					InvalidDateError,
 				)
+
+	def validate_duplicate_allocation(self):
+		duplicate_allocation = frappe.db.get_value(
+			"Cost Center Allocation",
+			{
+				"main_cost_center": self.main_cost_center,
+				"valid_from": self.valid_from,
+				"name": ("!=", self.name),
+				"docstatus": 1,
+			},
+		)
+		if duplicate_allocation:
+			frappe.throw(
+				_("Cost Center Allocation {0} for {1} is already valid from {2}").format(
+					get_link_to_form("Cost Center Allocation", duplicate_allocation),
+					frappe.bold(self.main_cost_center),
+					frappe.bold(format_date(self.valid_from)),
+				),
+				DuplicateCostCenterAllocation,
+			)
 
 	def validate_backdated_allocation(self):
 		# Check if there are any future existing allocation records against the main cost center
@@ -115,6 +156,33 @@ class CostCenterAllocation(Document):
 				indicator="orange",
 				alert=1,
 			)
+
+	def validate_cost_centers(self):
+		cost_centers = [self.main_cost_center, *[d.cost_center for d in self.allocation_percentages]]
+		for cost_center in frappe.get_all(
+			"Cost Center",
+			filters={"name": ("in", cost_centers)},
+			fields=["name", "company", "is_group", "disabled"],
+		):
+			if error := self.get_cost_center_error(cost_center):
+				exception = (
+					InvalidMainCostCenter
+					if cost_center.name == self.main_cost_center
+					else InvalidChildCostCenter
+				)
+				frappe.throw(error, exception)
+
+	def get_cost_center_error(self, cost_center):
+		if cost_center.company != self.company:
+			return _("Cost Center {0} does not belong to Company {1}").format(
+				frappe.bold(cost_center.name), frappe.bold(self.company)
+			)
+		if cost_center.is_group:
+			return _("Cost Center {0} is a group cost center and cannot be used in an allocation").format(
+				frappe.bold(cost_center.name)
+			)
+		if cost_center.disabled:
+			return _("Cost Center {0} is disabled").format(frappe.bold(cost_center.name))
 
 	def validate_main_cost_center(self):
 		# Main cost center itself cannot be entered in child table

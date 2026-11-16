@@ -57,9 +57,11 @@ class ConsolidatedReceivablePayable(ReceivablePayableReport):
 		self.data = []
 		for rows in self.get_grouped_rows(group_by).values():
 			self.data.extend(rows)
-			if subtotal_of and len(row_currencies(rows)) <= 1:
+			if not subtotal_of:
+				continue
+			if len(row_currencies(rows)) <= 1:
 				self.data.append(subtotal_of(rows))
-				self.data.append({})  # blank separator, like the engine's own grouping
+			self.data.append({})  # blank separator, like the engine's own grouping
 
 	def get_grouped_rows(self, group_by):
 		"""Rows of every company, regrouped so those sharing `group_by` sit together."""

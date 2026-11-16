@@ -11,8 +11,12 @@ from frappe.utils import get_datetime, get_first_day_of_week, get_quarter_start,
 from frappe.utils import get_first_day as get_first_day_of_month
 from frappe.utils.nestedset import get_descendants_of
 
+from erpnext.accounts.report.utils import validate_date_range
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_masters_condition
+from erpnext.stock.doctype.company_restriction.company_restriction import (
+	get_allowed_companies_condition,
+	get_allowed_masters_condition,
+)
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 
@@ -20,6 +24,8 @@ OPENING_KEY = "_opening"
 
 
 def execute(filters=None):
+	validate_date_range(filters)
+
 	is_reposting_item_valuation_in_progress()
 	filters = frappe._dict(filters or {})
 	period_columns = get_period_columns(filters)
@@ -342,7 +348,7 @@ def apply_conditions(query, filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if to_date := filters.get("to_date"):
-		to_date = get_datetime(str(to_date) + " 23:59:59")
+		to_date = get_datetime(str(to_date) + " 23:59:59.999999")
 		query = query.where(sle.posting_datetime <= to_date)
 	else:
 		frappe.throw(_("'To Date' is required"))
@@ -352,6 +358,9 @@ def apply_conditions(query, filters):
 
 	if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Stock Entry"):
 		query = query.where(sle.warehouse.isin(warehouses))
+
+	if condition := get_allowed_companies_condition(sle.company, "Stock Ledger Entry"):
+		query = query.where(condition)
 
 	if filters.get("warehouse"):
 		query = apply_warehouse_filter(query, sle, filters)

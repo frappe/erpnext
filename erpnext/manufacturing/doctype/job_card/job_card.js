@@ -439,7 +439,10 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	complete_job_card(frm) {
-		let pending_qty = frm.doc.for_quantity - frm.doc.total_completed_qty;
+		let pending_qty = flt(
+			frm.doc.for_quantity - frm.doc.total_completed_qty - frm.doc.process_loss_qty,
+			precision("for_quantity", frm.doc)
+		);
 		if (frm.doc.pending_qty > 0) {
 			pending_qty = frm.doc.pending_qty;
 		}
@@ -563,9 +566,13 @@ frappe.ui.form.on("Job Card", {
 				fieldname: "sub_operation",
 				options: "Operation",
 				get_query() {
-					const non_completed = frm.doc.sub_operations.filter((d) => d.status === "Pending");
+					const target_qty = flt(
+						frm.doc.for_quantity - frm.doc.process_loss_qty,
+						precision("for_quantity", frm.doc)
+					);
+					const pending = frm.doc.sub_operations.filter((d) => flt(d.completed_qty) < target_qty);
 					return {
-						filters: { name: ["in", non_completed.map((d) => d.sub_operation)] },
+						filters: { name: ["in", pending.map((d) => d.sub_operation)] },
 					};
 				},
 				reqd: 1,
@@ -583,7 +590,7 @@ frappe.ui.form.on("Job Card", {
 				fieldtype: "Datetime",
 				label: __("End Time"),
 				fieldname: "end_time",
-				default: frappe.datetime.now_datetime(),
+				default: frappe.datetime.system_datetime(),
 			});
 		}
 
@@ -800,7 +807,11 @@ frappe.ui.form.on("Job Card", {
 		const { time_logs, status } = doc;
 
 		// ── Determine which action buttons to show ────────────────────────
-		const has_remaining_qty = doc.for_quantity + doc.process_loss_qty > doc.total_completed_qty;
+		const accounted_qty = flt(
+			doc.total_completed_qty + doc.process_loss_qty,
+			precision("for_quantity", doc)
+		);
+		const has_remaining_qty = doc.for_quantity > accounted_qty;
 		const pending_transfer =
 			has_items && doc.items.some((row) => flt(row.transferred_qty) < flt(row.required_qty));
 		const materials_ready = doc.skip_material_transfer || doc.is_corrective_job_card || !pending_transfer;
@@ -931,11 +942,11 @@ frappe.ui.form.on("Job Card", {
 							reqd: 1,
 							filters: { status: "Active" },
 						},
-						(d) => frm.events.start_timer(frm, frappe.datetime.now_datetime(), d.employees),
+						(d) => frm.events.start_timer(frm, frappe.datetime.system_datetime(), d.employees),
 						__("Assign Job to Employee")
 					);
 				} else {
-					frm.events.start_timer(frm, frappe.datetime.now_datetime(), frm.doc.employee);
+					frm.events.start_timer(frm, frappe.datetime.system_datetime(), frm.doc.employee);
 				}
 			});
 		}
@@ -945,7 +956,7 @@ frappe.ui.form.on("Job Card", {
 				frm.call({
 					method: "resume_job",
 					doc: frm.doc,
-					args: { start_time: frappe.datetime.now_datetime() },
+					args: { start_time: frappe.datetime.system_datetime() },
 					callback() {
 						frm.reload_doc();
 					},
@@ -958,7 +969,7 @@ frappe.ui.form.on("Job Card", {
 				frm.call({
 					method: "pause_job",
 					doc: frm.doc,
-					args: { end_time: frappe.datetime.now_datetime() },
+					args: { end_time: frappe.datetime.system_datetime() },
 					callback() {
 						frm.reload_doc();
 					},
@@ -1014,7 +1025,7 @@ frappe.ui.form.on("Job Card", {
 					current_time += get_seconds_diff(d.to_time, d.from_time);
 				}
 			} else {
-				current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+				current_time += get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
 			}
 		});
 

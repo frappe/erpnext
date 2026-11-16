@@ -7,7 +7,15 @@ from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as 
 from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
+	make_subcontracted_variant,
+)
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -1686,6 +1694,34 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.skip_transfer = 1
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.submit()
+
+	def test_variant_without_bom_uses_template_bom(self):
+		variant, template_bom = make_subcontracted_variant()
+		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": variant.name, "fg_item_qty": 5}]
+
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+
+		self.assertEqual(scio.items[0].bom, template_bom.name)
+
+	def test_fg_reference_names_follow_inward_order_read_access(self):
+		from erpnext.controllers.subcontracting_inward_controller import get_fg_reference_names
+
+		so, scio = create_so_scio()
+		args = ("Subcontracting Inward Order Item", "", "name", 0, 20)
+		expected = [[scio.items[0].name, scio.items[0].item_code, scio.items[0].delivery_warehouse]]
+		outside = make_company_fenced_user("scio-fg-outside@example.com", ["Stock User"], OTHER_COMPANY)
+		inside = make_company_fenced_user("scio-fg-inside@example.com", ["Stock User"], "_Test Company")
+
+		with as_user(outside):
+			with self.assertRaises(frappe.PermissionError):
+				get_fg_reference_names(*args, {"parent": scio.name})
+			self.assertEqual(get_fg_reference_names(*args, {"parent": ["like", "%"]}), [])
+
+		with as_user(inside):
+			self.assertEqual(
+				[list(row) for row in get_fg_reference_names(*args, {"parent": scio.name})], expected
+			)
 
 
 def create_delivered_so_scio():

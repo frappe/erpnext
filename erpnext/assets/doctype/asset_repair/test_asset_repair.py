@@ -74,6 +74,17 @@ class TestAssetRepair(ERPNextTestSuite):
 		asset_repair.update({"company": "_Test Company", "asset": asset.name, "asset_name": asset.asset_name})
 		self.assertRaises(frappe.ValidationError, asset_repair.save)
 
+	def test_capitalized_asset_cannot_be_repaired(self):
+		asset = create_asset(submit=1)
+		# Set as on consumption by an Asset Capitalization; a repair would reset it via set_status()
+		asset.db_set("status", "Capitalized")
+
+		asset_repair = frappe.new_doc("Asset Repair")
+		asset_repair.update({"company": asset.company, "asset": asset.name, "failure_date": nowdate()})
+		with self.assertRaisesRegex(frappe.ValidationError, "cannot be repaired"):
+			asset_repair.save()
+		self.assertEqual(asset.db_get("status"), "Capitalized")
+
 	def test_update_status(self):
 		asset = create_asset(submit=1)
 		initial_status = asset.status

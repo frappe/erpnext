@@ -90,7 +90,8 @@ class SellingSettings(Document):
 			"editable_price_list_rate",
 			"selling_price_list",
 		]:
-			frappe.db.set_default(key, self.get(key, ""))
+			value = self.get(key)
+			frappe.db.set_default(key, "" if value is None else value)
 
 		self.update_customer_naming_settings()
 

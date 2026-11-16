@@ -78,12 +78,6 @@ doctype_js = {
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
-	"Project": [
-		"public/js/project_overview.js",
-		"public/js/project_overview_progress.js",
-		"public/js/project_overview_attention.js",
-		"public/js/project_overview_breakdown.js",
-	],
 }
 doctype_list_js = {
 	"Code List": [
@@ -364,6 +358,7 @@ sounds = [
 has_upload_permission = {"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"}
 
 permission_query_conditions = {
+	"Employee": "erpnext.setup.doctype.employee.employee.get_permission_query_conditions",
 	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.get_permission_query_conditions",
 	"Contract": "erpnext.crm.doctype.contract.contract.get_permission_query_conditions",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.get_permission_query_conditions",
@@ -375,6 +370,8 @@ permission_query_conditions = {
 }
 
 has_permission = {
+	"Employee": "erpnext.setup.doctype.employee.employee.has_permission",
+	"Asset Activity": "erpnext.assets.doctype.asset_activity.asset_activity.has_permission",
 	"Contract": "erpnext.crm.doctype.contract.contract.has_permission",
 	"Item": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
 	"Customer": "erpnext.stock.doctype.company_restriction.company_restriction.has_permission",
@@ -395,7 +392,6 @@ has_website_permission = {
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
 
@@ -809,3 +805,7 @@ data_import_providers = {
 	"Customer": "erpnext.utilities.party_import_provider.PartyImportProvider",
 	"Supplier": "erpnext.utilities.party_import_provider.PartyImportProvider",
 }
+
+# Expose method source code through the API discovery endpoints. Safe for open
+# source apps and helps API clients understand what a method does.
+expose_discovery_source = True

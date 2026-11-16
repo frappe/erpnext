@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_to_date, cint, formatdate, getdate
@@ -151,6 +151,22 @@ class SalesForecast(Document):
 def create_mps(source_name: str, target_doc: str | dict | Document | None = None):
 	def postprocess(source, doc):
 		doc.naming_series = "MPS.YY.-.######"
+
+		for item_code in dict.fromkeys(d.item_code for d in source.items):
+			doc.append("select_items", {"item_code": item_code})
+
+		# Items hold actual demand only; the MRP report applies the forecast.
+		doc.set_to_date()
+		doc.get_actual_demand()
+
+		if not doc.items:
+			frappe.msgprint(
+				_(
+					"No open Sales Orders found for this Sales Forecast's items. Use {0} to see the forecasted demand."
+				).format(bold(_("View MRP"))),
+				alert=True,
+				indicator="blue",
+			)
 
 	doc = get_mapped_doc(
 		"Sales Forecast",

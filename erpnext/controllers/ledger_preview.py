@@ -13,6 +13,7 @@ referenced from client JS).
 """
 
 import frappe
+from frappe.model.utils.mask import mask_dict_results
 
 from erpnext import get_company_currency
 
@@ -50,9 +51,12 @@ def get_accounting_ledger_preview(doc, filters):
 
 		doc.make_gl_entries()
 		columns = get_gl_columns(filters)
-		gl_entries = get_gl_entries_for_preview(doc.doctype, doc.name, fields)
+		masked_fields = frappe.get_meta("GL Entry").get_masked_fields()
+		gl_entries = mask_dict_results(
+			get_gl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields
+		)
 
-		gl_columns = get_columns(columns, fields, get_company_currency(filters.company))
+		gl_columns = get_columns(columns, fields, get_company_currency(filters.company), masked_fields)
 		gl_data = get_data(fields, gl_entries)
 	finally:
 		frappe.db.rollback(save_point="ledger_preview")
@@ -98,9 +102,14 @@ def get_stock_ledger_preview(doc, filters):
 			doc.update_stock_ledger()
 
 			columns = get_sl_columns(filters)
-			sl_entries = get_sl_entries_for_preview(doc.doctype, doc.name, fields)
+			masked_fields = frappe.get_meta("Stock Ledger Entry").get_masked_fields()
+			sl_entries = mask_dict_results(
+				get_sl_entries_for_preview(doc.doctype, doc.name, fields), masked_fields
+			)
 
-			sl_columns = get_columns(columns, columns_fields, get_company_currency(filters.company))
+			sl_columns = get_columns(
+				columns, columns_fields, get_company_currency(filters.company), masked_fields
+			)
 			sl_data = get_data(columns_fields, sl_entries)
 		finally:
 			frappe.db.rollback(save_point="ledger_preview")
@@ -132,22 +141,33 @@ def get_gl_entries_for_preview(doctype, docname, fields):
 
 
 def make_serial_and_batch_bundles_for_preview(doc):
-	table_names = ("items", "supplied_items") if doc.doctype == "Subcontracting Receipt" else ("items",)
+	table_names = (
+		("items", "supplied_items") if doc.doctype == "Subcontracting Receipt" else ("items", "packed_items")
+	)
 	for table_name in table_names:
+		if not doc.get(table_name):
+			continue
+
+		# a return takes back the serial / batch nos of the original voucher, as on submit
+		if table_name != "supplied_items":
+			doc.make_bundle_for_sales_purchase_return(table_name)
 		doc.make_bundle_using_old_serial_batch_fields(table_name)
 
 
-def get_columns(raw_columns, fields, currency):
+def get_columns(raw_columns, fields, currency, masked_fields):
+	masked_fieldnames = {df.fieldname for df in masked_fields}
 	columns = []
 	for source_column in raw_columns:
-		if source_column.get("hidden") or source_column.get("fieldname") not in fields:
+		fieldname = source_column.get("fieldname")
+		if source_column.get("hidden") or fieldname not in fields:
 			continue
 
 		column = {
 			"name": source_column.get("label"),
 			"editable": False,
 			"width": 110,
-			"fieldtype": source_column.get("fieldtype"),
+			# masked values are placeholder text, not numbers
+			"fieldtype": "Data" if fieldname in masked_fieldnames else source_column.get("fieldtype"),
 		}
 		if column["fieldtype"] == "Currency":
 			column["options"] = currency

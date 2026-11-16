@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 	get_dimension_filter_map,
+	get_dimension_label,
 )
 from erpnext.accounts.doctype.gl_entry.gl_entry import (
 	validate_balance_type,
@@ -95,10 +96,11 @@ class PaymentLedgerEntry(Document):
 			account = key[1]
 
 			if self.account == account:
+				dimension_label = get_dimension_label(self.meta, dimension)
 				if value["is_mandatory"] and not self.get(dimension):
 					frappe.throw(
 						_("{0} is mandatory for account {1}").format(
-							frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)
+							frappe.bold(dimension_label), frappe.bold(self.account)
 						),
 						MandatoryAccountDimensionError,
 					)
@@ -108,7 +110,7 @@ class PaymentLedgerEntry(Document):
 						frappe.throw(
 							_("Invalid value {0} for {1} against account {2}").format(
 								frappe.bold(self.get(dimension)),
-								frappe.bold(frappe.unscrub(dimension)),
+								frappe.bold(dimension_label),
 								frappe.bold(self.account),
 							),
 							InvalidAccountDimensionError,
@@ -118,7 +120,7 @@ class PaymentLedgerEntry(Document):
 						frappe.throw(
 							_("Invalid value {0} for {1} against account {2}").format(
 								frappe.bold(self.get(dimension)),
-								frappe.bold(frappe.unscrub(dimension)),
+								frappe.bold(dimension_label),
 								frappe.bold(self.account),
 							),
 							InvalidAccountDimensionError,

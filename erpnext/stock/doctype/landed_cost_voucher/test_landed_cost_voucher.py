@@ -137,6 +137,25 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 		)
 		self.assertTrue(any(r[0] == pi.name for r in rows))
 
+	def test_vendor_invoice_search_applies_company_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_vendor_invoices
+
+		vendor_invoice = make_purchase_invoice(item_code="_Test Non Stock Item", qty=1, rate=100).name
+		filters = {"company": "_Test Company", "name": vendor_invoice}
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for company, expected in (("_Test Company 1", []), ("_Test Company", [vendor_invoice])):
+			user = create_user(f"lcv-vendor-{frappe.scrub(company)}@example.com", "Purchase User")
+			if not frappe.db.exists("User Permission", {"user": user.name, "allow": "Company"}):
+				add_user_permission("Company", company, user.name)
+			frappe.set_user(user.name)
+			rows = get_vendor_invoices("Purchase Invoice", "", "name", 0, 20, filters)
+			self.assertEqual([row[0] for row in rows], expected)
+			frappe.set_user("Administrator")
+
 	def make_claiming_voucher(self, receipt, vendor_invoice, amount):
 		lcv = make_landed_cost_voucher(
 			receipt_document_type=receipt.doctype,
@@ -332,6 +351,35 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, lcv.get_vendor_invoice_amount, vendor_invoice)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_get_items_needs_receipt_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		receipt = make_purchase_receipt(qty=2, rate=100)
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = "_Test Company"
+		lcv.append("purchase_receipts", {"receipt_document_type": "Sales Invoice", "receipt_document": "X"})
+		self.assertRaises(frappe.ValidationError, lcv.get_items_from_purchase_receipts)
+
+		lcv.purchase_receipts[0].update(
+			{"receipt_document_type": "Purchase Receipt", "receipt_document": receipt.name}
+		)
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"lcv-items-{frappe.scrub(company)}@example.com", "Stock Manager"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+
+		self.addCleanup(frappe.set_user, "Administrator")
+		frappe.set_user(users["_Test Company 1"])
+		self.assertRaises(frappe.PermissionError, lcv.get_items_from_purchase_receipts)
+
+		frappe.set_user(users["_Test Company"])
+		lcv.get_items_from_purchase_receipts()
+		self.assertEqual([item.item_code for item in lcv.items], ["_Test Item"])
 
 	def test_landed_cost_voucher(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
@@ -1688,6 +1736,19 @@ class TestLandedCostVoucher(ERPNextTestSuite):
 			)
 
 			self.assertFalse(gl_entries)
+
+	def test_lcv_rejects_material_transfer_stock_entry(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		transfer = make_stock_entry(
+			item_code="_Test Item", source="_Test Warehouse - _TC", target="_Test Warehouse 1 - _TC", qty=1
+		)
+
+		lcv = make_landed_cost_voucher(
+			receipt_document_type="Stock Entry", receipt_document=transfer.name, do_not_save=True
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "Manufacture or Repack", lcv.insert)
 
 	@patch.dict(frappe.flags, {"dont_execute_stock_reposts": True})
 	def test_landed_cost_voucher_does_not_change_qty_across_stock_reco(self):

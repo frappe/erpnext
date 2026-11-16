@@ -382,8 +382,11 @@ class DeliveryTrip(Document):
 
 		try:
 			directions = maps_client.directions(**directions_data)
-		except Exception as e:
-			frappe.throw(_(str(e)))
+		except googlemaps.exceptions.ApiError as e:
+			frappe.throw(str(e))
+		except Exception:
+			frappe.log_error(_("Google Maps directions request failed"))
+			frappe.throw(_("Could not get directions from Google Maps. Please check the Error Log."))
 
 		return directions[0] if directions else False
 
@@ -501,7 +504,10 @@ def check_contact_customer_permission(contact):
 		)
 		.run(pluck=True)
 	)
-	if not any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers):
+	if not (
+		frappe.has_permission("Delivery Trip", "read")
+		and any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers)
+	):
 		frappe.throw(_("Not permitted to view Contact {0}").format(contact), frappe.PermissionError)
 
 

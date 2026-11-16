@@ -109,7 +109,10 @@ class MaintenanceVisit(TransactionBase):
 
 	def validate_schedule_customer(self):
 		schedule = frappe.db.get_value(
-			"Maintenance Schedule", self.maintenance_schedule, ["customer", "docstatus"], as_dict=True
+			"Maintenance Schedule",
+			self.maintenance_schedule,
+			["customer", "company", "docstatus"],
+			as_dict=True,
 		)
 		if not schedule or schedule.docstatus != 1:
 			frappe.throw(_("Select a submitted Maintenance Schedule for the scheduled visits"))
@@ -117,6 +120,35 @@ class MaintenanceVisit(TransactionBase):
 			frappe.throw(
 				_("Customer {0} does not match the customer of Maintenance Schedule {1}").format(
 					frappe.bold(self.customer), frappe.bold(self.maintenance_schedule)
+				)
+			)
+		if schedule.company != self.company:
+			frappe.throw(
+				_("Company {0} does not match the company of Maintenance Schedule {1}").format(
+					frappe.bold(self.company), frappe.bold(self.maintenance_schedule)
+				)
+			)
+
+	def validate_warranty_claims(self):
+		claims = {
+			purpose.prevdoc_docname
+			for purpose in self.purposes
+			if purpose.prevdoc_doctype == "Warranty Claim" and purpose.prevdoc_docname
+		}
+		if not claims:
+			return
+
+		matching_claims = frappe.get_all(
+			"Warranty Claim",
+			filters={"name": ("in", list(claims)), "customer": self.customer, "company": self.company},
+			pluck="name",
+		)
+		if other_claims := claims - set(matching_claims):
+			frappe.throw(
+				_("Warranty Claims {0} do not belong to Customer {1} and Company {2}").format(
+					escape_html(", ".join(sorted(other_claims))),
+					frappe.bold(self.customer),
+					frappe.bold(self.company),
 				)
 			)
 
@@ -147,6 +179,7 @@ class MaintenanceVisit(TransactionBase):
 	def validate(self):
 		self.validate_serial_no()
 		self.validate_schedule_details()
+		self.validate_warranty_claims()
 		self.validate_maintenance_date()
 		self.validate_purpose_table()
 

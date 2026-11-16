@@ -980,14 +980,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 			() => {
 				// check if batch serial selector is disabled or not
-				if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
-					return frappe.db
-						.get_single_value("Stock Settings", "disable_serial_no_and_batch_selector")
-						.then((value) => {
-							if (value) {
-								frappe.flags.hide_serial_batch_dialog = true;
-							}
-						});
+				if (show_batch_dialog && frappe.boot.sysdefaults.disable_serial_no_and_batch_selector) {
+					frappe.flags.hide_serial_batch_dialog = true;
+				}
 			},
 			() => {
 				if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {
@@ -1517,13 +1512,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		// before this trigger updates the tracker for the next one.
 		let previous_currency = this._doc_currency;
 		this._doc_currency = this.frm.doc.currency;
-		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
+		// A mapped document keeps its source's rate, unless its currency is changed
 		if (
 			this.frm.doc.currency &&
 			this.frm.doc.currency !== company_currency &&
 			(!this.frm.doc.__onload?.load_after_mapping ||
 				inter_company_reference ||
-				this.frm.doc.use_transaction_date_exchange_rate)
+				this.frm.doc.use_transaction_date_exchange_rate ||
+				previous_currency !== this.frm.doc.currency)
 		) {
 			this.get_exchange_rate(
 				transaction_date,
@@ -1599,7 +1595,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					doc: this.frm.doc,
 					method: "apply_shipping_rule",
 					callback: function (r) {
-						me._calculate_taxes_and_totals();
+						me.calculate_discounted_totals();
 					},
 				})
 				.fail(() => this.frm.set_value("shipping_rule", ""));

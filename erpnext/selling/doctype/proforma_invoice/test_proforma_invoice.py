@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe.permissions import add_permission
 from frappe.utils import flt
 
 from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
@@ -201,6 +202,20 @@ class TestProformaInvoice(ERPNextTestSuite):
 			[(sales_order.items[0].name, 4)],
 		)
 
+	def test_sales_order_onload_carries_proforma_settings(self):
+		"""Sales Users cannot read Selling Settings, so the form gets them through onload."""
+		frappe.db.set_single_value("Selling Settings", "default_proforma_print_format", "Standard")
+		sales_order = make_sales_order(qty=10)
+
+		sales_order.run_method("onload")
+		self.assertTrue(sales_order.get_onload().enable_proforma_invoice)
+		self.assertEqual(sales_order.get_onload().default_proforma_print_format, "Standard")
+
+		frappe.db.set_single_value("Selling Settings", "enable_proforma_invoice", 0)
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+		sales_order.run_method("onload")
+		self.assertFalse(sales_order.get_onload().get("enable_proforma_invoice"))
+
 	def test_cannot_email_cancelled_proforma(self):
 		sales_order = make_sales_order(qty=10)
 		proforma = self.create_proforma(sales_order, [(sales_order.items[0].name, 4)])
@@ -318,6 +333,43 @@ class TestProformaInvoice(ERPNextTestSuite):
 		self.assertEqual(item.item_code, so_item.item_code)
 		self.assertEqual(flt(item.rate), flt(so_item.rate))
 		self.assertEqual(flt(item.amount), 4 * flt(so_item.rate))
+
+	def test_requires_read_permission_on_sales_order(self):
+		sales_order = make_sales_order(qty=10)
+		role = "_Test Proforma Creator"
+		frappe.get_doc({"doctype": "Role", "role_name": role}).insert(ignore_if_duplicate=True)
+		add_permission("Proforma Invoice", role, ptype="create")
+		user = frappe.get_doc(
+			{"doctype": "User", "email": "proforma-creator@example.com", "first_name": "Proforma"}
+		).insert(ignore_if_duplicate=True)
+		user.add_roles(role)
+
+		frappe.set_user(user.name)
+		try:
+			self.assertRaises(
+				frappe.PermissionError,
+				self.make_draft_proforma,
+				sales_order,
+				so_detail=sales_order.items[0].name,
+				qty=1,
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_duplicate_sales_order_line_is_rejected(self):
+		sales_order = make_sales_order(qty=10)
+		so_detail = sales_order.items[0].name
+		proforma = frappe.new_doc(
+			"Proforma Invoice",
+			sales_order=sales_order.name,
+			based_on="Amount",
+			items=[
+				{"so_detail": so_detail, "qty": 1, "amount": 100},
+				{"so_detail": so_detail, "qty": 2, "amount": 200},
+			],
+		)
+
+		self.assertRaisesRegex(frappe.ValidationError, "already in row #1", proforma.insert)
 
 	def test_amended_proforma_is_rejected(self):
 		proforma = frappe.get_doc({"doctype": "Proforma Invoice", "amended_from": "PRO-TEST-0001"})

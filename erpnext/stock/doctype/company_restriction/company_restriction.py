@@ -17,6 +17,7 @@ COMPANY_RESTRICTION_EXEMPT_DOCTYPES = frozenset(
 	{
 		"Asset",
 		"Bank Transaction",
+		"Communication",
 		"Exchange Rate Revaluation",
 		"Landed Cost Voucher",
 		"POS Closing Entry",

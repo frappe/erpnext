@@ -628,6 +628,34 @@ class TestAppointment(ERPNextTestSuite):
 		first.save()
 		self.assertTrue(all(status == "Open" for status in get_todo_statuses(first.name)))
 
+	def test_patch_shares_appointments_assigned_before_owner_only_access(self):
+		from frappe.desk.form.assign_to import add as add_assignment
+
+		from erpnext.patches.v16_0.share_assigned_appointments_with_agents import execute
+
+		agent_email = "appointment_employee_agent@example.com"
+		if not frappe.db.exists("User", agent_email):
+			frappe.get_doc({"doctype": "User", "email": agent_email, "first_name": "Employee Agent"}).insert(
+				ignore_permissions=True
+			)
+		frappe.get_doc("User", agent_email).add_roles("Employee")
+
+		appointment = create_test_appointment(customer_email="assigned_before@example.com")
+		# assigned while Employee could read every appointment, so it was not shared
+		add_assignment({"doctype": "Appointment", "name": appointment.name, "assign_to": [agent_email]})
+		frappe.db.delete("DocShare", {"share_doctype": "Appointment", "share_name": appointment.name})
+		# a closed ToDo drops the agent from _assign, but the agent still needs the appointment
+		todo = frappe.get_last_doc(
+			"ToDo", {"reference_type": "Appointment", "reference_name": appointment.name}
+		)
+		todo.status = "Closed"
+		todo.save(ignore_permissions=True)
+		self.assertNotIn(agent_email, frappe.db.get_value("Appointment", appointment.name, "_assign") or "")
+		self.assertFalse(frappe.has_permission("Appointment", doc=appointment.name, user=agent_email))
+
+		execute()
+		self.assertTrue(frappe.has_permission("Appointment", doc=appointment.name, user=agent_email))
+
 	def test_busy_agent_is_not_assigned_again(self):
 		from frappe.desk.form.assign_to import add as add_assignment
 		from frappe.desk.form.assign_to import clear as clear_assignments

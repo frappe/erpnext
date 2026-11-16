@@ -7,7 +7,7 @@ from erpnext.patches.v16_0 import (
 	mirror_select_perms_to_custom_docperm,
 	remove_all_role_from_payment_terms_template,
 )
-from erpnext.setup.install import grant_address_read_to_accounts_manager
+from erpnext.setup.install import setup_company_address_permissions
 from erpnext.tests.permission_test_utils import insert_test_record
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -73,8 +73,8 @@ class TestPermissionPatches(ERPNextTestSuite):
 			"DocPerm", filters={"parent": "Address", "permlevel": 0}, fields=["role", "read", "if_owner"]
 		):
 			shipped[(rule.role, rule.if_owner)] = rule.read
-		grant_address_read_to_accounts_manager()
-		grant_address_read_to_accounts_manager()
+		setup_company_address_permissions()
+		setup_company_address_permissions()
 		accounts_manager = frappe.get_all(
 			"Custom DocPerm",
 			filters={"parent": "Address", "role": "Accounts Manager", "permlevel": 0},

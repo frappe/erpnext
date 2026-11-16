@@ -17,6 +17,8 @@ from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool 
 	create_journal_entry_bts,
 	create_payment_entry_and_reconcile,
 	create_payment_entry_bts,
+	get_account_balance,
+	get_account_opening_balance,
 	get_auto_reconcile_message,
 	get_bank_transactions,
 	get_linked_payments,
@@ -289,6 +291,32 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual([m["name"] for m in exact_matches], [payment.name])
 		self.assertEqual(exact_matches[0]["paid_amount"], 1250)
 
+	def test_opening_balance_includes_uncleared_entries(self):
+		def opening():
+			return get_account_opening_balance(self.bank_account, today())
+
+		def cleared():
+			return get_account_balance(self.bank_account, today(), self.company)
+
+		opening_before, cleared_before = opening(), cleared()
+
+		# customer pays 12,700 in, a 240 bank charge goes out, neither is cleared yet
+		create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party=self.customer,
+			paid_from=self.debit_to,
+			paid_to=self.bank,
+			paid_amount=12700,
+			save=1,
+			submit=1,
+		)
+		create_payment_entry(paid_from=self.bank, paid_amount=240, save=1, submit=1)
+
+		# the opening balance is the ledger balance, while the cleared balance ignores uncleared entries
+		self.assertEqual(opening() - opening_before, 12460)
+		self.assertEqual(cleared() - cleared_before, 0)
+
 	def test_auto_reconcile_message_for_no_matches(self):
 		message, indicator = get_auto_reconcile_message([], [])
 		self.assertEqual(indicator, "blue")
@@ -344,6 +372,41 @@ class TestBankReconciliationTool(ERPNextTestSuite, AccountsTestMixin):
 		self.assertEqual((pe.source_exchange_rate, pe.target_exchange_rate), (3.0, 1.0))
 		self.assertEqual((pe.received_amount, pe.paid_amount), (100, 33.33))  # bank side kept, 100/3
 		self.assertEqual(pe.difference_amount, 0)
+
+	def test_payment_entry_bts_rounds_the_party_amount(self):
+		self.enable_multi_currency_setup()
+		txn = self.make_multi_currency_txn(deposit=1000)
+
+		def exchange_rate(from_currency, to_currency, posting_date=None):
+			return 83 if (from_currency, to_currency) == ("USD", "INR") else 1 / 83
+
+		with patch(RATE_METHOD, side_effect=exchange_rate):
+			create_payment_entry_bts(
+				txn.name,
+				party_type="Customer",
+				party=self.customer,
+				posting_date=today(),
+				reference_number="TEST-FX-RECEIVE",
+				reference_date=today(),
+			)
+
+		payment_name = frappe.get_value(
+			"Bank Transaction Payments",
+			{"parent": txn.name, "payment_document": "Payment Entry"},
+			"payment_entry",
+		)
+		pe = frappe.get_doc("Payment Entry", payment_name)
+		self.assertEqual((pe.paid_amount, pe.received_amount), (12.05, 1000))
+		self.assertTrue(pe.deductions[0].is_exchange_gain_loss)
+		self.assertEqual(pe.deductions[0].amount, 0.15)
+
+		entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=["account", "debit", "credit"],
+		)
+		self.assertTrue(any(row.account == "Exchange Gain/Loss - _TC" for row in entries))
+		self.assertFalse(any(row.account == "Round Off - _TC" for row in entries))
 
 	def test_multi_currency_bulk_pay_converts_and_balances(self):
 		# the bulk path builds the Payment Entry itself, so it must convert too

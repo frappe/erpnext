@@ -76,6 +76,8 @@ class BankClearance(Document):
 		if not self.account:
 			frappe.throw(_("Account is mandatory to get payment entries"))
 
+		frappe.get_doc("Account", self.account).check_permission("read")
+
 		entries = []
 
 		# get entries from all the apps
@@ -97,7 +99,6 @@ class BankClearance(Document):
 	@frappe.whitelist()
 	def update_clearance_date(self):
 		self.check_permission("write")
-		frappe.get_doc("Account", self.account).check_permission("read")
 		available_entries = {
 			(entry.payment_document, entry.payment_entry): entry for entry in self.get_entries_for_account()
 		}

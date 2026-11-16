@@ -11,6 +11,7 @@ from frappe.query_builder.functions import Sum
 from frappe.tests import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.party import get_party_details
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_due_date, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
@@ -404,6 +405,20 @@ class TestSalesOrder(ERPNextTestSuite):
 		deliver(second_row).submit()
 		self.assertFalse(has_over_deliverable_rows())
 		self.assertEqual(get_mapped_rows(), [])
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_over_delivery_of_bundle_is_blocked(self):
+		# a bundle parent is non-stock, but its components move real stock, so it must obey the limit
+		component = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=50, rate=100)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+
+		so = make_sales_order(item_code=bundle, qty=2, warehouse="_Test Warehouse - _TC")
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 5
+		self.assertRaises(frappe.ValidationError, dn.submit)
 
 	def test_over_delivery_keeps_whole_number_uom_qty(self):
 		item = make_item(
@@ -1378,7 +1393,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			)
 
 	def test_update_items_allows_existing_unconfigured_uom(self):
-		legacy_item, item = make_item(), make_item()
+		legacy_item = make_item(uoms=[{"uom": "Box", "conversion_factor": 2}])
+		item = make_item()
 		so = make_sales_order(
 			item_list=[
 				{
@@ -1391,6 +1407,9 @@ class TestSalesOrder(ERPNextTestSuite):
 				{"item_code": item.name, "qty": 2, "rate": 100, "warehouse": "_Test Warehouse - _TC"},
 			]
 		)
+		legacy_item.reload()
+		legacy_item.uoms = [row for row in legacy_item.uoms if row.uom != "Box"]
+		legacy_item.save()
 		trans_items = json.dumps(
 			[
 				{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": 100, "uom": row.uom}
@@ -1402,6 +1421,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			update_child_qty_rate("Sales Order", trans_items, so.name)
 
 		so.reload()
+		self.assertEqual(so.items[0].uom, "Box")
+		self.assertEqual(so.items[0].conversion_factor, 2)
 		self.assertEqual(so.items[1].qty, 5)
 
 	def test_update_child_preserves_conversion_factor_precision(self):
@@ -1434,6 +1455,24 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.items[0].rate, 200.34669)
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
+	def test_sales_invoice_does_not_show_an_address_the_user_cannot_read(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		allowed, restricted = (make_address(address_title=title).name for title in ("Allowed", "Restricted"))
+		test_user = create_user("test_so_address_perms@example.com", "Sales User", "Accounts User")
+		frappe.permissions.add_user_permission("Address", allowed, test_user.name, applicable_for="Address")
+		so = make_sales_order(customer=make_customer(frappe.generate_hash(length=10)))
+
+		with self.set_user(test_user.name):
+			self.assertTrue(make_sales_invoice(so.name).items)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_sales_invoice,
+				so.name,
+				target_doc={"doctype": "Sales Invoice", "shipping_address_name": restricted},
+			)
+
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 
@@ -1452,6 +1491,15 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertRaises(
 				frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name
 			)
+
+	def test_make_sales_invoice_checks_item_permission_of_target_rows(self):
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		user = create_user("test_so_target_item_perm@example.com", "Sales User", "Accounts User").name
+		frappe.permissions.add_user_permission("Item", "_Test Item", user, applicable_for="Item")
+		target = {"doctype": "Sales Invoice", "items": [{"item_code": "_Test Item 2", "qty": 1}]}
+
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=target)
 
 	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
 		for workflow_name in frappe.get_all(
@@ -2551,6 +2599,13 @@ class TestSalesOrder(ERPNextTestSuite):
 			}
 		)
 
+		# a closed row is not offered for work orders
+		from erpnext.controllers.item_close import update_closed_status
+
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 1)
+		self.assertNotIn(so.items[1].name, [i["sales_order_item"] for i in get_work_order_items(so.name)])
+		update_closed_status("Sales Order", so.name, [so.items[1].name], 0)
+
 		# Raise Work Orders
 		po_items = []
 		so_item_name = {}
@@ -2577,6 +2632,16 @@ class TestSalesOrder(ERPNextTestSuite):
 				.where((wo.sales_order == so.name) & (wo.sales_order_item == item))
 			).run()
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
+
+	def test_update_status_endpoint_rejects_invalid_status(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+
+		so = make_sales_order()
+		# only Draft / On Hold / Closed are allowed, and only on a submitted order
+		self.assertRaises(frappe.ValidationError, update_status, "Cancelled", so.name)
+
+		draft = make_sales_order(do_not_submit=1)
+		self.assertRaises(frappe.ValidationError, update_status, "Closed", draft.name)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_make_work_order_for_duplicate_product_bundle_rows(self):
@@ -2632,6 +2697,48 @@ class TestSalesOrder(ERPNextTestSuite):
 				getdate(work_order.expected_delivery_date),
 				getdate(expected_delivery_dates[work_order.sales_order_item]),
 			)
+
+	def test_update_child_keeps_paid_payment_term_outstanding(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_terms_template,
+			get_payment_entry,
+		)
+
+		create_payment_terms_template()
+		for invoice_portion in (100, 0):
+			with self.subTest(invoice_portion=invoice_portion):
+				so = make_sales_order(qty=1, rate=1000, do_not_save=True)
+				so.payment_terms_template = "Test Receivable Template"
+				so.set("payment_schedule", [])
+				so.append(
+					"payment_schedule",
+					{
+						"payment_term": "Basic Amount Receivable",
+						"due_date": so.delivery_date,
+						"invoice_portion": invoice_portion,
+						"payment_amount": 1000,
+					},
+				)
+				so.insert()
+				so.submit()
+
+				pe = get_payment_entry("Sales Order", so.name, party_amount=400)
+				pe.reference_no = "1"
+				pe.reference_date = nowdate()
+				pe.references[0].allocated_amount = 400
+				pe.insert()
+				pe.submit()
+
+				item = so.items[0]
+				trans_item = json.dumps(
+					[{"item_code": item.item_code, "qty": 1, "rate": 1000, "docname": item.name}]
+				)
+				update_child_qty_rate("Sales Order", trans_item, so.name)
+
+				term = frappe.get_doc("Sales Order", so.name).payment_schedule[0]
+				self.assertEqual(term.paid_amount, 400)
+				self.assertEqual(term.outstanding, 600)
+				self.assertEqual(term.base_outstanding, 600)
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
@@ -2814,6 +2921,33 @@ class TestSalesOrder(ERPNextTestSuite):
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_request_for_raw_materials_keeps_planned_uom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test SO Fraction Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+			},
+		).name
+		fg_item = make_item("_Test SO Fraction Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+
+		so = make_sales_order(item_list=[{"item_code": fg_item, "qty": 1, "rate": 1000}])
+		so.submit()
+		mr_dict = frappe._dict(
+			items=get_work_order_items(so.name, 1), include_exploded_items=0, ignore_existing_ordered_qty=1
+		)
+		mr = make_raw_material_request(mr_dict, so.company, so.name)
+
+		self.assertEqual((mr.items[0].qty, mr.items[0].uom, mr.items[0].stock_qty), (13, "Nos", 13))
+
 	def test_so_optional_blanket_order(self):
 		"""
 		Expected result: Blanket order Ordered Quantity should only be affected on Sales Order with against_blanket_order = 1.
@@ -2917,12 +3051,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		create_payment_terms_template()
 		so.payment_terms_template = "Test Receivable Template"
 		so.submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.insert()
@@ -2933,7 +3067,7 @@ class TestSalesOrder(ERPNextTestSuite):
 	def test_zero_amount_sales_order_billing_status(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.items[0].rate = so.items[0].price_list_rate = 0
 		so.save()
 		so.submit()
@@ -2941,7 +3075,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.net_total, 0)
 		self.assertEqual(so.billing_status, "Not Billed")
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.price_list = "_Test Price List"
 		si.items[0].rate = 0
 		si.items[0].price_list_rate = 0
@@ -2965,7 +3099,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		"""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
-		so = make_sales_order(uom="Nos", do_not_save=1)
+		so = make_sales_order(uom="_Test UOM", do_not_save=1)
 		so.save()
 		so.submit()
 
@@ -2976,7 +3110,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		dn1.taxes.clear()
 		dn1.save().submit()
 
-		si = create_sales_invoice(qty=10, do_not_save=1)
+		si = create_sales_invoice(qty=10, uom="_Test UOM", do_not_save=1)
 		si.items[0].sales_order = so.name
 		si.items[0].so_detail = so.items[0].name
 		si.items[0].delivery_note = dn1.name
@@ -3000,7 +3134,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(so.per_billed, 100)
 		self.assertEqual(so.per_delivered, 50)
 
-		cr_note = create_sales_invoice(is_return=1, qty=-1, do_not_submit=True)
+		cr_note = create_sales_invoice(is_return=1, qty=-1, uom="_Test UOM", do_not_submit=True)
 		cr_note.items[0].qty = -5
 		cr_note.items[0].sales_order = so.name
 		cr_note.items[0].so_detail = so.items[0].name
@@ -3353,7 +3487,7 @@ class TestSalesOrder(ERPNextTestSuite):
 		pr = make_payment_request(
 			dt=so.doctype,
 			dn=so.name,
-			order_type="Shopping Cart",
+			make_sales_invoice=True,
 			submit_doc=True,
 			return_doc=True,
 			mute_email=True,
@@ -3369,11 +3503,9 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		pe.cancel()
 		pr.reload()
-		self.assertEqual(pr.status, "Paid")  # TODO: this might be a bug
+		self.assertEqual(pr.status, "Requested")
 		so.reload()  # reload
-		# regardless, since the references have already "handed-over" to SI,
-		# the SO keeps its historical state at the time of hand over
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
 
 		pr.cancel()
 		self.assertEqual(
@@ -3403,6 +3535,183 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(
 			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
 		)  # here: reset
+
+	@patch(
+		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		return_value=None,
+	)
+	def test_invoice_cancellation_retains_advance_payment_request(self, mocked_get_payment_url):
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
+		company = frappe.get_doc("Company", "_Test Company")
+		company.book_advance_payments_in_separate_party_account = 0
+		company.save()
+		so = make_sales_order(qty=1, rate=100)
+		pr = make_payment_request(
+			dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True, mute_email=True
+		)
+		pe = pr.set_as_paid()
+		si = make_sales_invoice(so.name)
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+		pe.reload()
+		self.assertTrue(
+			any(r.reference_name == si.name and r.payment_request == pr.name for r in pe.references)
+		)
+		payment_gl = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+			order_by="account, name",
+		)
+		self.assertTrue(payment_gl)
+		payment_ledger_amount = sum(
+			r.amount
+			for r in frappe.get_all(
+				"Payment Ledger Entry",
+				filters={
+					"voucher_type": "Payment Entry",
+					"voucher_no": pe.name,
+					"docstatus": 1,
+					"delinked": 0,
+				},
+				fields=["amount"],
+			)
+		)
+		self.assertNotEqual(payment_ledger_amount, 0)
+		advance_ledger_before = frappe.get_all(
+			"Advance Payment Ledger Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "docstatus": 1},
+			fields=["against_voucher_type", "against_voucher_no", "amount", "base_amount", "delinked"],
+		)
+		self.assertEqual(len(advance_ledger_before), 1)
+		self.assertEqual(advance_ledger_before[0].amount, -100)
+		self.assertEqual(advance_ledger_before[0].against_voucher_no, so.name)
+
+		si.cancel()
+		pr.reload()
+		pe.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount, pe.docstatus), ("Paid", 0, 1))
+		self.assertEqual(
+			frappe.get_all(
+				"GL Entry",
+				filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "is_cancelled": 0},
+				fields=["account", "debit", "credit"],
+				order_by="account, name",
+			),
+			payment_gl,
+		)
+		self.assertEqual(
+			sum(
+				r.amount
+				for r in frappe.get_all(
+					"Payment Ledger Entry",
+					filters={
+						"voucher_type": "Payment Entry",
+						"voucher_no": pe.name,
+						"docstatus": 1,
+						"delinked": 0,
+					},
+					fields=["amount"],
+				)
+			),
+			payment_ledger_amount,
+		)
+		advance_ledger_after = frappe.get_all(
+			"Advance Payment Ledger Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name, "docstatus": 1},
+			fields=["against_voucher_type", "against_voucher_no", "amount", "base_amount", "delinked"],
+		)
+		self.assertEqual(advance_ledger_after, advance_ledger_before)
+		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == so.name), 100)
+		self.assertTrue(
+			all(
+				r.total_amount and r.outstanding_amount and r.account
+				for r in pe.references
+				if r.reference_name == so.name
+			)
+		)
+		with self.assertRaises(frappe.ValidationError):
+			pr.create_payment_entry()
+		replacement_invoice = make_sales_invoice(so.name)
+		replacement_invoice.allocate_advances_automatically = 1
+		replacement_invoice.save()
+		replacement_invoice.submit()
+		pr.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Paid", 0))
+		replacement_invoice.cancel()
+
+		pe.reload()
+		pe.cancel()
+		pr.reload()
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Requested", 100))
+		gl_by_account = {}
+		for row in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+			fields=["account", "debit", "credit"],
+		):
+			gl_by_account[row.account] = gl_by_account.get(row.account, 0) + row.debit - row.credit
+		self.assertTrue(gl_by_account)
+		self.assertTrue(all(amount == 0 for amount in gl_by_account.values()))
+		self.assertEqual(
+			sum(
+				r.amount
+				for r in frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+					fields=["amount"],
+				)
+			),
+			0,
+		)
+		self.assertFalse(
+			frappe.get_all(
+				"Advance Payment Ledger Entry",
+				filters={
+					"voucher_type": "Payment Entry",
+					"voucher_no": pe.name,
+					"docstatus": 1,
+					"delinked": 0,
+				},
+				limit=1,
+			)
+		)
+		self.assertEqual(
+			sum(
+				r.amount
+				for r in frappe.get_all(
+					"Advance Payment Ledger Entry",
+					filters={"voucher_type": "Payment Entry", "voucher_no": pe.name},
+					fields=["amount"],
+				)
+			),
+			0,
+		)
+
+	@patch(
+		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		return_value=None,
+	)
+	def test_partial_invoice_cancellation_restores_order_advance(self, mocked_get_payment_url):
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
+		so = make_sales_order(qty=2, rate=50)
+		pr = make_payment_request(
+			dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True, mute_email=True
+		)
+		pe = pr.set_as_paid()
+		si = make_sales_invoice(so.name)
+		si.items[0].qty = 1
+		si.allocate_advances_automatically = 1
+		si.save()
+		si.submit()
+		pe.reload()
+		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == si.name), 50)
+		si.cancel()
+		pe.reload()
+		pr.reload()
+		self.assertEqual(sum(r.allocated_amount for r in pe.references if r.reference_name == so.name), 100)
+		self.assertEqual((pr.status, pr.outstanding_amount), ("Paid", 0))
 
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
@@ -4088,6 +4397,12 @@ class TestSalesOrder(ERPNextTestSuite):
 		commission, so each sales person's allocated_amount is a share of
 		amount_eligible_for_commission rather than net_total.
 		"""
+		previous_rates = {
+			name: frappe.db.get_value("Sales Person", name, "commission_rate")
+			for name in ("_Test Sales Person 1", "_Test Sales Person 2")
+		}
+		frappe.db.set_value("Sales Person", "_Test Sales Person 1", "commission_rate", 10)
+		frappe.db.set_value("Sales Person", "_Test Sales Person 2", "commission_rate", 0)
 		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
 		frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 0)
 		try:
@@ -4123,6 +4438,8 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertEqual(second.allocated_amount, 400)
 			self.assertEqual(second.incentives, 0)
 		finally:
+			for name, rate in previous_rates.items():
+				frappe.db.set_value("Sales Person", name, "commission_rate", rate)
 			# grant_commission defaults to 1 for both items; restore
 			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
 			frappe.db.set_value("Item", "_Test FG Item", "grant_commission", 1)
@@ -4159,6 +4476,23 @@ class TestSalesOrder(ERPNextTestSuite):
 			self.assertRaises(frappe.ValidationError, so.save)
 		finally:
 			frappe.db.set_value("Sales Person", "_Test Sales Person 2", "enabled", 1)
+
+	def test_sales_team_disabled_sales_person_blocks_downstream(self):
+		sales_person = "_Test Sales Person 2"
+
+		so = make_sales_order(do_not_save=True)
+		so.append("sales_team", {"sales_person": sales_person, "allocated_percentage": 100})
+		so.submit()
+
+		frappe.db.set_value("Sales Person", sales_person, "enabled", 0)
+		try:
+			with self.subTest("delivery note against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_delivery_note, so.name)
+
+			with self.subTest("sales invoice against the order is rejected"):
+				self.assertRaisesRegex(frappe.ValidationError, "is disabled", make_sales_invoice, so.name)
+		finally:
+			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
 
 	def test_sales_partner_commission(self):
 		"""Sales Partner commission: total_commission = amount_eligible_for_commission * rate / 100."""

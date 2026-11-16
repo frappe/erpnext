@@ -73,18 +73,19 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
-def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass"):
+def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass", legacy=False):
 	for uom in (from_uom, to_uom):
 		if not frappe.db.exists("UOM", uom):
 			frappe.get_doc(doctype="UOM", uom_name=uom, category=category).insert()
 
-	return frappe.get_doc(
+	conversion_factor = frappe.get_doc(
 		doctype="UOM Conversion Factor",
 		category=category,
 		from_uom=from_uom,
 		to_uom=to_uom,
 		value=value,
-	).insert()
+	)
+	return conversion_factor.db_insert() if legacy else conversion_factor.insert()
 
 
 class TestItem(ERPNextTestSuite):
@@ -318,29 +319,70 @@ class TestItem(ERPNextTestSuite):
 			)
 
 		data = expected_item_tax_template[-2]
+		sales_order_ctx = {
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "INR",
+			"doctype": "Sales Order",
+			"conversion_rate": 1,
+			"price_list_currency": "INR",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"conversion_factor": 1,
+			"price_list_uom_dependant": 1,
+			"ignore_pricing_rule": 1,
+		}
 		details = get_item_details(
-			frappe._dict(
-				{
-					"item_code": data["item_code"],
-					"tax_category": data["tax_category"],
-					"company": "_Test Company",
-					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
-					"doctype": "Sales Order",
-					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
-					"plc_conversion_rate": 1,
-					"order_type": "Sales",
-					"customer": "_Test Customer",
-					"conversion_factor": 1,
-					"price_list_uom_dependant": 1,
-					"ignore_pricing_rule": 1,
-				}
-			)
+			frappe._dict(sales_order_ctx, item_code=data["item_code"], tax_category=data["tax_category"])
 		)
 
 		self.assertEqual(details.item_tax_template, data["item_tax_template"])
 		self.assertEqual(json.loads(details.item_tax_rate), expected_item_tax_map[details.item_tax_template])
+
+		# template is taxed @ 20, its item group @ 10, so the result shows which one a variant uses
+		template = make_item(
+			"_Test Variant Item With Item Tax Template",
+			{
+				"item_group": "_Test Item Group Tax Parent",
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"taxes": [{"item_tax_template": "_Test Account Excise Duty @ 20 - _TC"}],
+			},
+		)
+		variant = create_variant(template.name, {"Test Size": "Large"})
+		# Item Variant Settings may copy the template's taxes; clear them as an admin would
+		variant.taxes = []
+		variant.insert()
+
+		# a variant without taxes falls back to its item group, not its template, on every path
+		self.assertEqual(
+			get_item_tax_template(
+				frappe._dict(item_code=variant.name, tax_category="", company="_Test Company")
+			),
+			"_Test Account Excise Duty @ 10 - _TC",
+		)
+		details = get_item_details(frappe._dict(sales_order_ctx, item_code=variant.name, tax_category=""))
+		self.assertEqual(details.item_tax_template, "_Test Account Excise Duty @ 10 - _TC")
+		self.assertEqual(frappe.get_cached_doc("Item", variant.name).taxes, [])
+
+	def test_item_follows_item_group_tax_changes(self):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": f"_Test Tax Group {frappe.generate_hash(length=6)}",
+				"parent_item_group": "All Item Groups",
+				"taxes": [{"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"}],
+			}
+		).insert()
+		item = make_item(properties={"item_group": item_group.name})
+		self.assertFalse(item.taxes)
+
+		item_group.taxes[0].item_tax_template = "_Test Account Excise Duty @ 12 - _TC"
+		item_group.save()
+
+		ctx = frappe._dict(item_code=item.name, tax_category="", company="_Test Company")
+		self.assertEqual(get_item_tax_template(ctx), "_Test Account Excise Duty @ 12 - _TC")
 
 	def test_item_defaults(self):
 		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
@@ -374,10 +416,10 @@ class TestItem(ERPNextTestSuite):
 					"item_code": "Test Item With Defaults",
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Sales Invoice",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"customer": "_Test Customer",
 				}
@@ -399,10 +441,10 @@ class TestItem(ERPNextTestSuite):
 					"item_code": "Test Item With Defaults",
 					"company": "_Test Company",
 					"price_list": "_Test Price List",
-					"currency": "_Test Currency",
+					"currency": "INR",
 					"doctype": "Purchase Invoice",
 					"conversion_rate": 1,
-					"price_list_currency": "_Test Currency",
+					"price_list_currency": "INR",
 					"plc_conversion_rate": 1,
 					"supplier": "_Test Supplier",
 				}
@@ -848,6 +890,87 @@ class TestItem(ERPNextTestSuite):
 		)
 		self.assertEqual(price, 10)
 
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
+	def test_standard_rate_price_in_another_currency_is_rounded(self):
+		from frappe.utils import add_days, today
+
+		if not frappe.db.exists("Currency", "TPR"):
+			frappe.get_doc({"doctype": "Currency", "currency_name": "TPR", "enabled": 1}).insert()
+
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test Selling TPR Standard Rate List",
+				"selling": 1,
+				"currency": "TPR",
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": add_days(today(), -1),
+				"from_currency": "TPR",
+				"to_currency": "INR",
+				"exchange_rate": 1.1,
+				"for_selling": 1,
+			}
+		).insert()
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 100,
+				"item_defaults": [{"company": "_Test Company", "default_price_list": price_list.name}],
+			}
+		).name
+		price = frappe.db.get_value(
+			"Item Price", {"item_code": item, "price_list": price_list.name}, "price_list_rate"
+		)
+		self.assertEqual(price, 90.91)
+
+	@ERPNextTestSuite.change_settings("Global Defaults", {"default_company": "_Test Company"})
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_stale": 1})
+	@ERPNextTestSuite.change_settings(
+		"System Settings", {"currency_precision": "", "use_number_format_from_currency": 1}
+	)
+	def test_standard_rate_price_is_rounded_to_its_currency_precision(self):
+		if not frappe.db.exists("Currency", "TPT"):
+			frappe.get_doc(
+				{"doctype": "Currency", "currency_name": "TPT", "enabled": 1, "number_format": "#,###.###"}
+			).insert()
+
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test Selling TPT Standard Rate List",
+				"selling": 1,
+				"currency": "TPT",
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": add_days(today(), -1),
+				"from_currency": "TPT",
+				"to_currency": "INR",
+				"exchange_rate": 1.1,
+				"for_selling": 1,
+			}
+		).insert()
+
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"standard_rate": 100,
+				"item_defaults": [{"company": "_Test Company", "default_price_list": price_list.name}],
+			}
+		).name
+		price = frappe.db.get_value(
+			"Item Price", {"item_code": item, "price_list": price_list.name}, "price_list_rate"
+		)
+		self.assertEqual(price, 90.909)
+
 	def test_maintain_stock_cannot_be_turned_on_after_an_invoice(self):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
@@ -1009,6 +1132,18 @@ class TestItem(ERPNextTestSuite):
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
+	def test_disabled_uom_cannot_be_used_by_item(self):
+		disabled_uom = frappe.get_doc(
+			{"doctype": "UOM", "uom_name": frappe.generate_hash(length=12), "enabled": 0}
+		).insert()
+
+		self.assertRaises(frappe.ValidationError, make_item, properties={"stock_uom": disabled_uom.name})
+		self.assertRaises(
+			frappe.ValidationError,
+			make_item,
+			uoms=[{"uom": disabled_uom.name, "conversion_factor": 2}],
+		)
+
 	def test_item_uom_conversion_factor_overrides_global_factor(self):
 		custom_factor = 10.76
 		global_factor = get_uom_conv_factor("Square Meter", "Square Foot")
@@ -1054,20 +1189,24 @@ class TestItem(ERPNextTestSuite):
 		self.assertAlmostEqual(factor, 453.592, 3)
 
 	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 6)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 20)
+		from_uom = "_Test Duplicate UOM Factor From"
+		to_uom = "_Test Duplicate UOM Factor To"
+		make_uom_conversion_factor(from_uom, "Kg", 3, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 25, legacy=True)
+		make_uom_conversion_factor(from_uom, "Kg", 6, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 20, legacy=True)
 
-		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+		factor = get_uom_conv_factor(from_uom, to_uom)
 
 		self.assertEqual(factor, 0.12)
 
 	def test_uom_conv_intermediate_with_shared_target_ignores_zero_divisor(self):
-		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
-		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 0)
+		from_uom = "_Test Zero UOM Factor From"
+		to_uom = "_Test Zero UOM Factor To"
+		make_uom_conversion_factor(from_uom, "Kg", 3, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 0, legacy=True)
 
-		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+		factor = get_uom_conv_factor(from_uom, to_uom)
 
 		self.assertIsNone(factor)
 

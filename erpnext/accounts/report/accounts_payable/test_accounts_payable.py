@@ -1,6 +1,9 @@
 import frappe
 from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	BLANK_ACCOUNTING_DIMENSION,
+)
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.report.accounts_payable.accounts_payable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
@@ -8,11 +11,80 @@ from erpnext.tests.utils import ERPNextTestSuite
 
 
 class TestAccountsPayable(ERPNextTestSuite, AccountsTestMixin):
+	def test_blank_and_multiple_payment_terms_filters(self):
+		invoice = self.create_purchase_invoice()
+		filters = frappe._dict(
+			company=invoice.company,
+			party=[self.supplier],
+			report_date=today(),
+			range="30, 60, 90, 120",
+			ageing_based_on="Posting Date",
+		)
+		for party_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+			frappe.db.set_value("Supplier", self.supplier, "payment_terms", party_terms)
+			for invoice_terms in (None, "", "_Test Payment Term Template", "_Test Other Payment Terms"):
+				frappe.db.set_value(invoice.doctype, invoice.name, "payment_terms_template", invoice_terms)
+				for selected, matching_terms in (
+					([], (None, "", "_Test Payment Term Template", "_Test Other Payment Terms")),
+					([BLANK_ACCOUNTING_DIMENSION], (None, "")),
+					(["_Test Payment Term Template"], ("_Test Payment Term Template",)),
+					(
+						["_Test Payment Term Template", "_Test Other Payment Terms"],
+						("_Test Payment Term Template", "_Test Other Payment Terms"),
+					),
+					(
+						[BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"],
+						(None, "", "_Test Payment Term Template"),
+					),
+					("_Test Payment Term Template", ("_Test Payment Term Template",)),
+					(
+						frappe.as_json([BLANK_ACCOUNTING_DIMENSION, "_Test Payment Term Template"]),
+						(None, "", "_Test Payment Term Template"),
+					),
+				):
+					with self.subTest(
+						party_terms=party_terms, invoice_terms=invoice_terms, selected=selected
+					):
+						filters.payment_terms_template = selected
+						rows = execute(filters)[1]
+						vouchers = {row.get("voucher_no") for row in rows}
+						self.assertEqual(
+							invoice.name in vouchers,
+							party_terms in matching_terms or invoice_terms in matching_terms,
+						)
+
 	def setUp(self):
 		self.company = "_Test Company"
 		self.item = "_Test Item"
 		self.supplier = "_Test Supplier 2"
 		self.creditors_usd = "_Test Payable USD - _TC"
+
+	def test_blank_supplier_group_filter(self):
+		invoice = self.create_purchase_invoice()
+		group = frappe.db.get_value("Supplier", self.supplier, "supplier_group")
+		parent_group = frappe.db.get_value("Supplier Group", group, "parent_supplier_group")
+		filters = frappe._dict(
+			company=self.company,
+			party=[self.supplier],
+			report_date=today(),
+			range="30, 60, 90, 120",
+		)
+		for party_group in (None, "", group):
+			frappe.db.set_value("Supplier", self.supplier, "supplier_group", party_group)
+			for groups, expected in (
+				([BLANK_ACCOUNTING_DIMENSION], int(not party_group)),
+				([parent_group], int(bool(party_group))),
+				([BLANK_ACCOUNTING_DIMENSION, parent_group], 1),
+			):
+				with self.subTest(party_group=party_group, groups=groups):
+					filters.supplier_group = groups
+					rows = execute(filters)[1]
+					self.assertEqual(len(rows), expected)
+					if rows:
+						self.assertEqual(rows[0].outstanding, invoice.grand_total)
+
+		filters.supplier_group = [BLANK_ACCOUNTING_DIMENSION, "_Test Missing Supplier Group"]
+		self.assertRaises(frappe.ValidationError, execute, filters)
 
 	def test_accounts_payable_for_foreign_currency_supplier(self):
 		pi = self.create_purchase_invoice(do_not_submit=True)

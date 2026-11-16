@@ -4,23 +4,19 @@
 frappe.ui.form.on("Sales Order", {
 	refresh(frm) {
 		erpnext.proforma.toggle_tab(frm, false);
-		if (frm.doc.docstatus === 0) return;
+		if (frm.doc.docstatus === 0 || !frm.doc.__onload?.enable_proforma_invoice) return;
 
-		frappe.db.get_single_value("Selling Settings", "enable_proforma_invoice").then((enabled) => {
-			if (!enabled) return;
-
-			if (frm.doc.docstatus === 1) {
-				// Defer so the button lands after the standard Create options, not before them.
-				setTimeout(() => {
-					frm.add_custom_button(
-						__("Proforma Invoice"),
-						() => erpnext.proforma.open_dialog(frm),
-						__("Create")
-					);
-				}, 0);
-			}
-			erpnext.proforma.render_list(frm);
-		});
+		if (frm.doc.docstatus === 1) {
+			// Defer so the button lands after the standard Create options, not before them.
+			setTimeout(() => {
+				frm.add_custom_button(
+					__("Proforma Invoice"),
+					() => erpnext.proforma.open_dialog(frm),
+					__("Create")
+				);
+			}, 0);
+		}
+		erpnext.proforma.render_list(frm);
 	},
 });
 
@@ -50,11 +46,12 @@ Object.assign(erpnext.proforma, {
 	show_dialog(frm, so_items) {
 		frappe.model.with_doctype("Proforma Invoice", () => {
 			const series = frappe.meta.get_docfield("Proforma Invoice", "naming_series");
-			frappe.db
-				.get_single_value("Selling Settings", "default_proforma_print_format")
-				.then((default_print_format) => {
-					this.build_dialog(frm, so_items, series ? series.options : "", default_print_format);
-				});
+			this.build_dialog(
+				frm,
+				so_items,
+				series ? series.options : "",
+				frm.doc.__onload?.default_proforma_print_format
+			);
 		});
 	},
 

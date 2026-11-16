@@ -9,8 +9,13 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import flt, get_link_to_form, getdate
 
+from erpnext.accounts.doctype.dunning.dunning import (
+	get_invoice_outstanding,
+	get_payment_schedule_outstanding,
+)
 from erpnext.accounts.doctype.sales_invoice.services.inter_company import get_inter_company_counterpart
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, _get_party_details
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import clear_inapplicable_terms
 
 
 @frappe.whitelist()
@@ -203,6 +208,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			_apply_purchase_party_details(target_doc, source_doc, details)
 		else:
 			_apply_sales_party_details(target_doc, source_doc, details)
+		clear_inapplicable_terms(target_doc)
 
 	def get_pending_qty(row):
 		received_stock_qty = received_items.get(row.name, 0.0)
@@ -230,6 +236,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 		if (source.get("serial_no") or source.get("batch_no")) and not source.get("serial_and_batch_bundle"):
 			target.use_serial_batch_fields = 1
+
+		clear_item_tax_template_of_other_company(target, details.get("company"))
 
 	item_field_map = {
 		"doctype": target_doctype + " Item",
@@ -293,6 +301,14 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
+
+
+def clear_item_tax_template_of_other_company(item, company):
+	if (
+		item.get("item_tax_template")
+		and frappe.get_cached_value("Item Tax Template", item.item_tax_template, "company") != company
+	):
+		item.item_tax_template = None
 
 
 def _get_linked_address(address, link_doctype, link_name):
@@ -595,8 +611,6 @@ def create_dunning(
 	args: str | dict | bool | None = None,
 	ignore_permissions: bool = False,
 ):
-	from erpnext.accounts.doctype.dunning.dunning import get_payment_schedule_outstanding
-
 	if isinstance(args, bool):
 		ignore_permissions = args
 		args = None
@@ -614,27 +628,29 @@ def create_dunning(
 			target.cost_center = dunning_type.cost_center
 			target.language = source.language
 
-		# update outstanding from doc
-		if source.payment_schedule and len(source.payment_schedule) == 1:
-			for row in target.overdue_payments:
-				if row.payment_schedule == source.payment_schedule[0].name:
-					# outstanding_amount is in the party account currency, but the Overdue Payment
-					# row is in the invoice's transaction currency. When they differ, use the
-					# payment schedule's own outstanding — it is kept in transaction currency and
-					# updated as payments are allocated, so it stays correct even when the invoice
-					# and its payments post at different exchange rates (#56006).
-					if source.party_account_currency and source.party_account_currency != source.currency:
-						row.outstanding = source.payment_schedule[0].outstanding
-					else:
-						row.outstanding = source.get("outstanding_amount")
-
-		if len(source.payment_schedule) > 1 and source.party_account_currency == source.currency:
+		if source.payment_schedule:
 			outstanding = get_payment_schedule_outstanding(source, source.payment_schedule)
 			for row in target.overdue_payments[:]:
-				if row.sales_invoice == source.name:
+				if row.sales_invoice == source.name and row.payment_schedule in outstanding:
 					row.outstanding = outstanding[row.payment_schedule]
 					if flt(row.outstanding, row.precision("outstanding")) <= 0:
 						target.remove(row)
+
+		if (
+			source.is_opening == "Yes"
+			and not source.payment_schedule
+			and source.due_date
+			and getdate(source.due_date) < getdate(target.posting_date)
+			and flt(source.outstanding_amount) > 0
+		):
+			target.append(
+				"overdue_payments",
+				{
+					"sales_invoice": source.name,
+					"due_date": source.due_date,
+					"outstanding": get_invoice_outstanding(source),
+				},
+			)
 
 		if not target.overdue_payments:
 			frappe.throw(_("There are no overdue payments to include in this Dunning."))

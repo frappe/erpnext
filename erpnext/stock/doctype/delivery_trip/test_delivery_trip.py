@@ -376,6 +376,16 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		trip.insert()
 		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), trip.name)
 
+	def test_contact_display_needs_delivery_trip_access(self):
+		contact = get_contact_and_address("_Test Customer").contact_person.parent
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(self.make_delivery_user("Projects User"))
+		self.assertRaises(frappe.PermissionError, get_contact_display, contact)
+
+		frappe.set_user(self.make_delivery_user("Delivery User"))
+		self.assertIn("<b>", get_contact_display(contact))
+
 	def process_route_with_locks(self, locks):
 		from unittest.mock import patch
 
@@ -404,6 +414,27 @@ class TestDeliveryTrip(ERPNextTestSuite):
 
 	def test_route_with_locks_adds_up_the_total_distance(self):
 		self.assertEqual(self.process_route_with_locks([1, 0]).total_distance, 3000)
+
+	def get_route_error(self, error):
+		from unittest.mock import patch
+
+		frappe.db.set_single_value("Google Settings", "api_key", "AIzaTestRouteKey")
+		with patch("googlemaps.Client.directions", side_effect=error):
+			with self.assertRaises(frappe.ValidationError) as context:
+				self.delivery_trip.process_route(optimize=False)
+		return str(context.exception)
+
+	def test_route_transport_error_hides_the_google_maps_key(self):
+		import googlemaps
+
+		error = googlemaps.exceptions.TransportError(Exception("/directions/json?key=AIzaTestRouteKey"))
+		self.assertNotIn("AIzaTestRouteKey", self.get_route_error(error))
+
+	def test_route_api_error_shows_the_google_maps_status(self):
+		import googlemaps
+
+		error = googlemaps.exceptions.ApiError("NOT_FOUND", "Address not found")
+		self.assertEqual(self.get_route_error(error), "NOT_FOUND (Address not found)")
 
 	def test_dispatch_mail_renders_the_html_template(self):
 		from unittest.mock import patch
