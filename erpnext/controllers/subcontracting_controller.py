@@ -1614,20 +1614,59 @@ class SubcontractingController(StockController):
 	def __update_consumed_qty_in_subcontract_order(self, itemwise_consumed_qty):
 		fields = ["main_item_code", "rm_item_code", "parent", "supplied_qty", "name"]
 		filters = {"docstatus": 1, "parent": ("in", self.subcontract_orders)}
-
-		for row in frappe.get_all(
+		rows = frappe.get_all(
 			self.subcontract_data.order_supplied_items_field, fields=fields, filters=filters, order_by="idx"
-		):
+		)
+
+		for row in rows:
 			key = (row.rm_item_code, row.main_item_code, row.parent)
-			consumed_qty = itemwise_consumed_qty.get(key, 0)
+			row.consumed_qty = min(itemwise_consumed_qty.get(key, 0), row.supplied_qty)
+			itemwise_consumed_qty[key] -= row.consumed_qty
 
-			if row.supplied_qty < consumed_qty:
-				consumed_qty = row.supplied_qty
+		# alternative items sent on a row count for it once their own rows are filled
+		alternatives = self.get_alternatives_sent_for_original_items()
+		for row in rows:
+			for alternative in alternatives.get((row.rm_item_code, row.main_item_code, row.parent), []):
+				key = (alternative, row.main_item_code, row.parent)
+				qty = min(itemwise_consumed_qty.get(key, 0), row.supplied_qty - row.consumed_qty)
+				row.consumed_qty += qty
+				itemwise_consumed_qty[key] -= qty
 
-			itemwise_consumed_qty[key] -= consumed_qty
+		precision = frappe.get_precision(self.subcontract_data.order_supplied_items_field, "consumed_qty")
+		for row in rows:
 			frappe.db.set_value(
-				self.subcontract_data.order_supplied_items_field, row.name, "consumed_qty", consumed_qty
+				self.subcontract_data.order_supplied_items_field,
+				row.name,
+				"consumed_qty",
+				flt(row.consumed_qty, precision),
 			)
+
+	def get_alternatives_sent_for_original_items(self):
+		"""Alternative items sent for the orders, by the BOM raw material they stand in for."""
+		se = frappe.qb.DocType("Stock Entry")
+		se_detail = frappe.qb.DocType("Stock Entry Detail")
+		order_field = self.subcontract_data.order_field
+		rows = (
+			frappe.qb.from_(se)
+			.inner_join(se_detail)
+			.on(se.name == se_detail.parent)
+			.select(
+				se_detail.original_item, se_detail.subcontracted_item, se[order_field], se_detail.item_code
+			)
+			.distinct()
+			.where(
+				(se.docstatus == 1)
+				& (se.purpose == "Send to Subcontractor")
+				& se[order_field].isin(self.subcontract_orders)
+				& (Coalesce(se_detail.original_item, "") != "")
+			)
+		).run()
+
+		alternatives = defaultdict(list)
+		for original_item, main_item_code, order, item_code in rows:
+			alternatives[(original_item, main_item_code, order)].append(item_code)
+
+		return alternatives
 
 	def set_consumed_qty_in_subcontract_order(self):
 		# Update consumed qty back in the subcontract order
