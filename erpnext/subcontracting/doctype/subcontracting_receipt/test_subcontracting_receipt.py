@@ -591,6 +591,15 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(scr_return.items[1].rate, 15)
 		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
 
+	def test_finished_good_takes_the_share_of_a_co_product_not_received(self):
+		scr = make_receipt_with_scrap(co_product_allocation=20, do_not_submit=True)
+		scr.items = [row for row in scr.items if row.secondary_item_type != "Co-Product"]
+		scr.save()
+
+		fg, scrap = scr.items
+		consumed = sum(row.amount for row in scr.supplied_items)
+		self.assertEqual(fg.amount, consumed + 200 - scrap.amount)
+
 	def test_return_values_percentage_secondary_items_at_the_receipt_rate(self):
 		scr = make_receipt_with_scrap(co_product_allocation=10)
 
