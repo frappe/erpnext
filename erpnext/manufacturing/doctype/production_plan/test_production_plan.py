@@ -34,6 +34,13 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 from erpnext.stock.utils import InvalidWarehouseCompany
 from erpnext.tests.utils import ERPNextTestSuite
 
+MIXED_RESERVATION_SETTINGS = {
+	"enable_stock_reservation": 1,
+	"auto_reserve_serial_and_batch": 0,
+	"auto_create_serial_and_batch_bundle_for_outward": 1,
+	"use_serial_batch_fields": 0,
+}
+
 
 class TestProductionPlan(ERPNextTestSuite):
 	def setUp(self):
@@ -5302,6 +5309,90 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		reserved_entries = StockReservation(plan).get_reserved_entries("Production Plan", plan.name)
 		return sum({row.name: row.reserved_qty for row in reserved_entries}.values())
+
+	@ERPNextTestSuite.change_settings("Stock Settings", MIXED_RESERVATION_SETTINGS)
+	def test_work_order_transfers_use_qty_and_batch_reservations_of_a_plan(self):
+		work_order = self.make_work_order_with_mixed_reservations("Batch RM For SR Mixed Hand Off")
+
+		for qty, transferred_qty in (
+			(6, {"Serial and Batch": 6, "Qty": 0}),
+			(4, {"Serial and Batch": 6, "Qty": 4}),
+		):
+			self.transfer_for_manufacture(work_order, qty)
+			self.assertEqual(self.get_transferred_qty_by_mode(work_order), transferred_qty)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", MIXED_RESERVATION_SETTINGS)
+	def test_transfer_of_a_batch_outside_the_batch_reservation_uses_the_qty_reservation(self):
+		work_order = self.make_work_order_with_mixed_reservations("Batch RM For SR Qty Batch Transfer")
+		first_batch = frappe.db.get_value(
+			"Batch", {"item": work_order.required_items[0].item_code}, "name", order_by="creation asc"
+		)
+
+		self.transfer_for_manufacture(work_order, 4, first_batch)
+		self.assertEqual(self.get_transferred_qty_by_mode(work_order), {"Serial and Batch": 0, "Qty": 4})
+
+	def make_work_order_with_mixed_reservations(self, rm_item):
+		make_item(
+			rm_item, {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BRMSRMH-.#####"}
+		)
+		plan = self.make_plan_short_of_stock(rm_item)
+		self.receive_for_plan(plan, 6)
+		return submit_work_order_from_plan(plan, 10, "_Test Warehouse - _TC")
+
+	def make_plan_short_of_stock(self, rm_item):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		parent_bom = create_nested_bom({f"FG For {rm_item}": {rm_item: {}}}, prefix="")
+		warehouse = "_Test Warehouse - _TC"
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=4, basic_rate=100)
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			warehouse=warehouse,
+			for_warehouse=warehouse,
+			reserve_stock=1,
+		)
+		plan.set("mr_items", [])
+		for d in get_items_for_material_requests(plan.as_dict()):
+			plan.append("mr_items", d)
+		plan.save()
+		plan.submit()
+
+		plan.submit_material_request = 1
+		plan.make_material_request()
+		return plan
+
+	def receive_for_plan(self, plan, qty):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+
+		mr_name = frappe.db.get_value("Material Request", {"production_plan": plan.name})
+		po = make_purchase_order(mr_name)
+		po.supplier = "_Test Supplier"
+		po.items[0].qty = qty
+		po.submit()
+		make_purchase_receipt(po.name).submit()
+
+	def transfer_for_manufacture(self, work_order, qty, batch_no=None):
+		stock_entry = frappe.get_doc(
+			make_se_from_wo(work_order.name, "Material Transfer for Manufacture", qty)
+		)
+		if batch_no:
+			stock_entry.items[0].update({"batch_no": batch_no, "use_serial_batch_fields": 1})
+		stock_entry.submit()
+
+	def get_transferred_qty_by_mode(self, work_order):
+		return dict(
+			frappe.get_all(
+				"Stock Reservation Entry",
+				filters={"voucher_no": work_order.name, "warehouse": "_Test Warehouse - _TC", "docstatus": 1},
+				fields=["reservation_based_on", "transferred_qty"],
+				as_list=True,
+			)
+		)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_hand_off_releases_the_plan_row(self):
