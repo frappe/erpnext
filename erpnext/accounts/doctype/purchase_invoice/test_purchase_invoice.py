@@ -3260,8 +3260,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 
 	def test_return_of_an_internal_transfer_invoice_in_another_uom(self):
 		"""A return takes back the stock value the invoice moved, when the stock qty is rounded."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
 
 		company = "_Test Company with perpetual inventory"
 		item = make_item(
