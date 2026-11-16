@@ -1389,7 +1389,15 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(bom.plc_conversion_rate, 80)
 		self.assertEqual(bom.items[0].rate, 10)
 
+<<<<<<< HEAD
 >>>>>>> efe720d (test: USD BOM costs a USD list price at the list price)
+=======
+		# a row fetched on a form still holding the exchange rate
+		bom.plc_conversion_rate = 83
+		detail = bom.get_bom_material_detail({"item_code": rm_item, "qty": 1, "fetch_rate": True})
+		self.assertEqual(detail["rate"], 10)
+
+>>>>>>> fd02856 (test: a fetched USD row on a USD BOM uses the BOM conversion rate)
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
