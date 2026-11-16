@@ -2116,7 +2116,9 @@ class TestBOM(ERPNextTestSuite):
 			operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": batch_based_operation})
 			operation.save()
 
-			bom = make_batch_operation_bom(operation.name, workstation, cost_based_on_bom_qty)
+			bom = make_batch_operation_bom(
+				operation.name, workstation, set_cost_based_on_bom_qty=cost_based_on_bom_qty
+			)
 			work_order = make_wo_order_test_record(
 				production_item=bom.item, bom_no=bom.name, qty=10, stock_uom="Nos", do_not_save=True
 			)
@@ -2203,8 +2205,21 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.operating_cost, 10)
 		self.assertTrue(bom.operations[0].set_cost_based_on_bom_qty)
 
+	def test_fixed_time_operation_is_not_costed_per_batch(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 
-def make_batch_operation_bom(operation, workstation, set_cost_based_on_bom_qty=0):
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		operation = make_operation(operation="_Test BOM Batch Op Fixed Time", workstation=workstation)
+		operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+		operation.save()
+
+		bom = make_batch_operation_bom(operation.name, workstation, fixed_time=1, set_cost_based_on_bom_qty=1)
+		self.assertEqual(bom.operating_cost, 100)
+		self.assertFalse(bom.operations[0].set_cost_based_on_bom_qty)
+
+
+def make_batch_operation_bom(operation, workstation, **row_values):
 	bom = frappe.get_doc(
 		{
 			"doctype": "BOM",
@@ -2219,7 +2234,7 @@ def make_batch_operation_bom(operation, workstation, set_cost_based_on_bom_qty=0
 					"workstation": workstation,
 					"time_in_mins": 60,
 					"batch_size": 10,
-					"set_cost_based_on_bom_qty": set_cost_based_on_bom_qty,
+					**row_values,
 				}
 			],
 		}
