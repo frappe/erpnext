@@ -5879,38 +5879,42 @@ class TestStockEntry(ERPNextTestSuite):
 		entry.insert()
 		return entry
 
-	def test_submit_refreshes_posting_time_after_locking_bins(self):
+	def test_submit_locks_bins_before_validate(self):
 		from unittest.mock import patch
 
 		from frappe.utils import get_datetime
 
+		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+
 		item_code = make_item(
 			properties={
 				"is_stock_item": 1,
-				"has_serial_no": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
 				"batch_number_series": "PTRB-.#####",
-				"serial_no_series": "PTRS-.#####",
 			}
 		).name
 		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
-		bundle = receipt.items[0].serial_and_batch_bundle
 		transfer = make_stock_entry(
 			item_code=item_code,
 			source="_Test Warehouse - _TC",
 			target="_Test Warehouse 1 - _TC",
 			qty=1,
-			batch_no=get_batch_from_bundle(bundle),
-			serial_no=get_serial_nos_from_bundle(bundle)[:1],
+			batch_no=get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
 			do_not_submit=True,
 		)
 
+		calls = []
+		lock_bins, validate = StockEntry.lock_bins, StockEntry.validate
 		lock_time = get_datetime(f"{transfer.posting_date} 23:59:59.123456")
-		with patch("erpnext.controllers.stock_controller.now_datetime", return_value=lock_time):
+		with (
+			patch.object(StockEntry, "lock_bins", lambda doc: calls.append("lock_bins") or lock_bins(doc)),
+			patch.object(StockEntry, "validate", lambda doc: calls.append("validate") or validate(doc)),
+			patch("erpnext.utilities.transaction_base.now_datetime", return_value=lock_time),
+		):
 			transfer.submit()
 
-		self.assertEqual(get_time(transfer.posting_time), lock_time.time())
+		self.assertEqual(calls, ["lock_bins", "validate"])
 		sles = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"voucher_no": transfer.name},
