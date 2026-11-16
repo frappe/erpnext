@@ -962,7 +962,7 @@ class BuyingController(SubcontractingController):
 			return stock_qty
 
 		precision = row.precision("rejected_qty")
-		if flt(abs(flt(qty)), precision) >= flt(self.get_rejected_uom_qty_left_to_return(row), precision):
+		if flt(abs(flt(qty)), precision) >= self.get_rejected_uom_qty_left_to_return(row):
 			return -stock_left
 
 		return max(stock_qty, -stock_left)
@@ -1001,10 +1001,11 @@ class BuyingController(SubcontractingController):
 		return flt(qty_left, row.precision("stock_qty"))
 
 	def get_rejected_uom_qty_left_to_return(self, row) -> float:
-		"""Rejected qty of the returned receipt row, in its UOM, that its other returns have not taken back."""
+		"""Rejected qty of the returned receipt row that its other returns have not taken back, in the UOM
+		of the return row."""
 		reference_field = self.get_receipt_reference_field()
 		receipt_row = row.get(reference_field)
-		fields = ["qty", "rejected_qty"]
+		fields = ["qty", "rejected_qty", "conversion_factor"]
 		if row.doctype == "Purchase Receipt Item":
 			fields.append("return_qty_from_rejected_warehouse")
 
@@ -1014,10 +1015,12 @@ class BuyingController(SubcontractingController):
 			or_filters={"name": receipt_row, reference_field: receipt_row},
 			fields=fields,
 		)
-		return sum(
-			flt(d.rejected_qty) + (flt(d.qty) if d.get("return_qty_from_rejected_warehouse") else 0)
+		stock_qty = sum(
+			(flt(d.rejected_qty) + (flt(d.qty) if d.get("return_qty_from_rejected_warehouse") else 0))
+			* flt(d.conversion_factor)
 			for d in rows
 		)
+		return flt(stock_qty / flt(row.conversion_factor or 1), row.precision("rejected_qty"))
 
 	def set_posted_qty_for_cancel(self, sl_entries) -> None:
 		"""An internal receipt reverses the stock qty its entries posted, which a later change to how it
