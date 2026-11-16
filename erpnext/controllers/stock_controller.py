@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Count, Sum
+from frappe.query_builder.functions import Count, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
@@ -2410,27 +2410,40 @@ class StockController(AccountsController):
 					qty -= working_qty
 
 	def rebuild_subcontracting_transfers(self, sre_lists: dict[str, list[str]]):
+		"""Replay the remaining transfers oldest first, each on the reservations made before it, as on submit."""
 		transfers = self.get_subcontracting_transfers(list(sre_lists))
 		for sco_rm_detail, sre_list in sre_lists.items():
-			transfer = transfers.get(sco_rm_detail) or new_reservation_transfer()
-			for sre in sre_list:
-				sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
-				if sre_doc.reservation_based_on == "Serial and Batch":
-					transferred_qty = match_transferred_serial_batch(sre_doc, transfer)
-				else:
-					transferred_qty = min(sre_doc.reserved_qty, transfer.qty)
+			sre_docs = [frappe.get_doc("Stock Reservation Entry", sre) for sre in sre_list]
+			for sre_doc in sre_docs:
+				sre_doc.transferred_qty = 0
+				for entry in sre_doc.sb_entries:
+					entry.delivered_qty = 0
 
-				transfer.qty -= transferred_qty
-				sre_doc.transferred_qty = flt(transferred_qty, sre_doc.precision("transferred_qty"))
+			for transfer in transfers.get(sco_rm_detail, []):
+				for sre_doc in sre_docs:
+					if sre_doc.creation < transfer.submitted_at:
+						add_transfer_to_reservation(sre_doc, transfer)
+
+			for sre_doc in sre_docs:
+				for entry in sre_doc.sb_entries:
+					entry.db_update()
 				sre_doc.db_update()
 				sre_doc.update_reserved_qty_in_voucher()
 				sre_doc.update_status()
 				sre_doc.update_reserved_stock_in_bin()
 
-	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict:
+	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict[str, list]:
+		"""Remaining transfers of each supplied row, oldest first, timed by their first stock ledger entry."""
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
+		ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		submitted_at = (
+			frappe.qb.from_(ledger_entry)
+			.select(Min(ledger_entry.creation))
+			.where(ledger_entry.voucher_detail_no == detail.name)
+			.as_("submitted_at")
+		)
 		rows = (
 			frappe.qb.from_(detail)
 			.join(stock_entry)
@@ -2441,6 +2454,7 @@ class StockController(AccountsController):
 				detail.name,
 				detail.sco_rm_detail,
 				detail.transfer_qty,
+				submitted_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
 				bundle_entry.qty,
@@ -2451,20 +2465,21 @@ class StockController(AccountsController):
 				& (stock_entry.subcontracting_order == self.subcontracting_order)
 				& detail.sco_rm_detail.isin(sco_rm_details)
 			)
+			.orderby(submitted_at)
 		).run(as_dict=True)
 
-		transfers, counted_rows = {}, set()
+		transfers = defaultdict(dict)
 		for row in rows:
-			transfer = transfers.setdefault(row.sco_rm_detail, new_reservation_transfer())
-			if row.name not in counted_rows:
-				counted_rows.add(row.name)
-				transfer.qty += flt(row.transfer_qty)
+			transfer = transfers[row.sco_rm_detail].get(row.name)
+			if not transfer:
+				transfer = transfers[row.sco_rm_detail][row.name] = new_reservation_transfer()
+				transfer.qty, transfer.submitted_at = flt(row.transfer_qty), row.submitted_at
 			if row.serial_no:
 				transfer.serial_nos.add(row.serial_no)
 			if row.batch_no:
 				transfer.batch_qty[row.batch_no] += abs(flt(row.qty))
 
-		return transfers
+		return {row: list(row_transfers.values()) for row, row_transfers in transfers.items()}
 
 	def check_for_on_hold_or_closed_status(
 		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
@@ -3038,23 +3053,27 @@ def new_reservation_transfer():
 	return frappe._dict(qty=0, serial_nos=set(), batch_qty=defaultdict(float))
 
 
-def match_transferred_serial_batch(sre_doc, transfer) -> float:
-	matched_qty = 0
-	for entry in sre_doc.sb_entries:
-		if sre_doc.has_serial_no:
-			delivered_qty = 1 if entry.serial_no in transfer.serial_nos else 0
-			transfer.serial_nos.discard(entry.serial_no)
-		else:
-			delivered_qty = min(entry.qty, transfer.batch_qty[entry.batch_no])
-			transfer.batch_qty[entry.batch_no] -= delivered_qty
+def add_transfer_to_reservation(sre_doc, transfer) -> None:
+	"""Count on `sre_doc` the part of `transfer` it has room for, and take it off `transfer`."""
+	if sre_doc.reservation_based_on != "Serial and Batch":
+		qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.transferred_qty), transfer.qty)
+	else:
+		qty = 0
+		for entry in sre_doc.sb_entries:
+			if sre_doc.has_serial_no:
+				entry_qty = 0
+				if not flt(entry.delivered_qty) and entry.serial_no in transfer.serial_nos:
+					entry_qty = 1
+					transfer.serial_nos.discard(entry.serial_no)
+			else:
+				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), transfer.batch_qty[entry.batch_no])
+				transfer.batch_qty[entry.batch_no] -= entry_qty
 
-		delivered_qty = flt(delivered_qty, entry.precision("delivered_qty"))
-		if flt(entry.delivered_qty) != delivered_qty:
-			entry.delivered_qty = delivered_qty
-			entry.db_update()
-		matched_qty += delivered_qty
+			entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
+			qty += entry_qty
 
-	return matched_qty
+	transfer.qty -= qty
+	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
 
 
 def set_entries_total_qty(entries, total_qty):
