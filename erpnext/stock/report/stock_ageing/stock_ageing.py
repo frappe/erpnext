@@ -1147,6 +1147,11 @@ class FIFOSlots:
 		if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
 			sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
+		if companies := get_allowed_docs_for_doctype(
+			get_user_permissions().get("Company", []), "Stock Ledger Entry"
+		):
+			sle_query = sle_query.where(sle.company.isin(companies))
+
 		if self.filters.get("warehouse"):
 			sle_query = self._get_warehouse_conditions(sle, sle_query)
 		elif self.filters.get("warehouse_type"):
