@@ -1041,6 +1041,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
+		second_item.idx = None
 		sales_invoice.append("items", second_item)
 		sales_invoice.submit()
 
