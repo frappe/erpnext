@@ -1330,7 +1330,9 @@ class JobCard(Document):
 			return
 
 		if previous.status == "Completed" and excess_qty <= flt(self.process_loss_qty, precision):
-			self.process_loss_qty = flt(self.process_loss_qty - excess_qty, precision)
+			self.process_loss_qty = flt(
+				self.process_loss_qty - excess_qty, self.precision("process_loss_qty")
+			)
 			self.for_quantity = flt(self.for_quantity - excess_qty, self.precision("for_quantity"))
 			return
 
