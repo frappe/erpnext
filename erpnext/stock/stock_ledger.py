@@ -3277,6 +3277,10 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 			"incoming_rate",
 		)
 
+	# the landed cost is added to the stock received, not to what leaves transit
+	if sle.actual_qty < 0:
+		return rate
+
 	# add lcv amount in incoming_rate
 	lcv_amount = frappe.db.get_value(
 		f"{sle.voucher_type} Item", sle.voucher_detail_no, "landed_cost_voucher_amount"
