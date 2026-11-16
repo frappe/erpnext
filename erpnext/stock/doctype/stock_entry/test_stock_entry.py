@@ -3309,20 +3309,26 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 	def test_additional_cost_split_over_equal_rows_adds_up_to_the_cost(self):
-		receipt = make_stock_entry(company="_Test Company", purpose="Material Receipt", do_not_save=True)
+		receipt = make_stock_entry(
+			company="_Test Company with perpetual inventory", purpose="Material Receipt", do_not_save=True
+		)
 		receipt.items = []
 		for _ in range(3):
 			item_code = make_item(properties={"is_stock_item": 1}).name
 			receipt.append(
-				"items", stock_entry_row(item_code, 1, t_warehouse="_Test Warehouse - _TC", basic_rate=100)
+				"items",
+				stock_entry_row(
+					item_code, 1, t_warehouse="Stores - TCP1", cost_center="Main - TCP1", basic_rate=100
+				),
 			)
 
-		expense_account = frappe.get_value("Company", "_Test Company", "default_expense_account")
+		expense_account = "Miscellaneous Expenses - TCP1"
 		receipt.append(
 			"additional_costs", {"expense_account": expense_account, "description": "Freight", "amount": 100}
 		)
 		receipt.insert()
 		receipt.submit()
+		receipt.reload()
 
 		self.assertEqual(flt(sum(d.additional_cost for d in receipt.items), 2), 100)
 		cost_credit = frappe.get_all(
