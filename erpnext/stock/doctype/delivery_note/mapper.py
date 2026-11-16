@@ -11,7 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Abs, Sum
-from frappe.utils import flt
+from frappe.utils import flt, get_link_to_form
 
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_due_date
 from erpnext.accounts.services.taxes import _get_taxes_and_charges
@@ -501,6 +501,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	source_doc = frappe.get_doc(doctype, source_name)
 
 	validate_inter_company_transaction(source_doc, doctype)
+	if doctype == "Purchase Receipt":
+		validate_no_counterpart_delivery_note(source_doc.name)
+
 	details = get_inter_company_details(source_doc, doctype)
 	accepted_returns = get_accepted_returned_qty(source_doc) if doctype == "Purchase Receipt" else {}
 
@@ -698,6 +701,18 @@ def get_received_stock_qty_already_mapped(target_doc, ref_field: str) -> dict:
 			qty_map[ref] = qty_map.get(ref, 0) + received_qty * (flt(row.get("conversion_factor")) or 1)
 
 	return qty_map
+
+
+def validate_no_counterpart_delivery_note(purchase_receipt: str):
+	"""Delivery Note rows link no Purchase Receipt rows, so its header link marks the receipt as delivered."""
+	if delivery_note := frappe.db.get_value(
+		"Delivery Note", {"inter_company_reference": purchase_receipt, "docstatus": 1, "is_return": 0}
+	):
+		frappe.throw(
+			_("Purchase Receipt {0} already has Delivery Note {1}.").format(
+				purchase_receipt, get_link_to_form("Delivery Note", delivery_note)
+			)
+		)
 
 
 def get_accepted_returned_qty(receipt) -> dict:
