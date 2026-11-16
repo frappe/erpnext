@@ -813,6 +813,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.update_work_order()
 		self.update_disassembled_order()
 		self.cancel_stock_reservation_entries_for_inward()
+		self.cancel_stock_reservation_entries_for_subcontracting()
 		self.update_stock_ledger()
 
 		self.ignore_linked_doctypes = (
@@ -3264,6 +3265,16 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 			frappe.get_doc("Subcontracting Order", self.subcontracting_order).make_raw_material_reservations(
 				items=items.values(), stock_entry=self.name
+			)
+
+	def cancel_stock_reservation_entries_for_subcontracting(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			cancel_stock_reservation_entries,
+		)
+
+		if self.purpose == "Send to Subcontractor":
+			cancel_stock_reservation_entries(
+				from_voucher_type="Stock Entry", from_voucher_no=self.name, notify=False
 			)
 
 	def cancel_stock_reserve_for_wip_and_fg(self):
