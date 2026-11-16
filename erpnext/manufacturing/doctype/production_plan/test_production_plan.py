@@ -1904,6 +1904,29 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual(flt(warehouse_row[header.index("Available Qty In Hand")]), 7)
 		self.assertEqual(flt(warehouse_row[header.index("Planned Qty")]), 4)
 
+	def test_download_without_for_warehouse_counts_transfer_stock_once(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		# no default warehouse, so availability is checked across all warehouses
+		frappe.db.delete("Item Default", {"parent": rm_item})
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2, currency="INR")
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=7, rate=100)
+		make_stock_entry(item_code=rm_item, target="Work In Progress - _TC", qty=5, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		header, item_row = download_raw_material_rows(
+			plan, warehouses=[{"warehouse": "Work In Progress - _TC"}]
+		)[:2]
+
+		# 7 in Stores is available: 5 transferred from Work In Progress and 8 bought
+		self.assertEqual(flt(item_row[header.index("Required Qty")]), 13)
+
 	def test_requested_sub_assembly_components_are_not_requested(self):
 		for item in (
 			"_Test PP Bought SA RM",
