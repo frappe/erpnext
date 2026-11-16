@@ -1427,6 +1427,37 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		self.assertFalse([row for row in rm_return.items if row.item_code == "Basic RM"])
 
+	def test_return_extra_serial_and_batch_customer_material_held_by_work_order(self):
+		for rm_item in ("RM with Batch", "RM with Serial", "RM with Serial and Batch"):
+			with self.subTest(rm_item=rm_item):
+				scio, wo = make_work_order_with_extra_material(rm_item)
+				rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+				self.assertEqual([(row.item_code, row.qty) for row in rm_return.items], [(rm_item, 2)])
+				rm_return.submit()
+
+				self.assertEqual(
+					frappe.db.get_value(
+						"Work Order Item", {"parent": wo.name, "item_code": rm_item}, "stock_reserved_qty"
+					),
+					5,
+				)
+				frappe.new_doc("Stock Entry").update(
+					make_stock_entry_from_wo(wo.name, "Manufacture", 5)
+				).submit()
+
+	def test_return_serial_and_batch_customer_material_left_over_by_completed_work_order(self):
+		for rm_item in ("RM with Batch", "RM with Serial", "RM with Serial and Batch"):
+			with self.subTest(rm_item=rm_item):
+				scio, wo = make_work_order_with_extra_material(rm_item)
+				frappe.new_doc("Stock Entry").update(
+					make_stock_entry_from_wo(wo.name, "Manufacture", 5)
+				).submit()
+
+				scio.reload()
+				rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+				self.assertEqual([(row.item_code, row.qty) for row in rm_return.items], [(rm_item, 2)])
+				rm_return.submit()
+
 	def test_cancelled_manufacture_of_closed_work_order_keeps_the_rest_consumed(self):
 		from erpnext.manufacturing.doctype.work_order.services.reservation import (
 			make_stock_reservation_entries,
@@ -1993,11 +2024,11 @@ def receive_customer_material(scio, rm_item, qty, rate):
 	return rm_in
 
 
-def make_work_order_with_extra_material():
-	"""Receive 7 Basic RM for an order that needs 5 and make one Work Order for all of it."""
+def make_work_order_with_extra_material(rm_item="Basic RM"):
+	"""Receive 7 of `rm_item` for an order that needs 5 and make one Work Order for all of it."""
 	so, scio = create_so_scio()
 	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-	next(row for row in rm_in.items if row.item_code == "Basic RM").qty = 7
+	next(row for row in rm_in.items if row.item_code == rm_item).qty = 7
 	rm_in.submit()
 	scio.reload()
 	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
