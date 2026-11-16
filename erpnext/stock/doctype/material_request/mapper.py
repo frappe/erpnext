@@ -55,13 +55,22 @@ def get_ordered_stock_qty(material_request):
 	)
 
 
+def get_unrounded_ordered_qty(row, ordered_stock_qty):
+	"""Stock qty ordered for a row before rounding, or None when its stored ordered or received qty applies."""
+	if ordered_stock_qty is None or (row.received_qty and not row.ordered_qty):
+		return None
+
+	return ordered_stock_qty.get(row.name) if row.ordered_qty else 0
+
+
 def get_pending_qty(row, ordered_stock_qty, precision):
 	"""Qty of a row still to order, in its UOM, rounded to the ``precision`` of the qty it is mapped to."""
-	stored_qty = row.ordered_qty or row.received_qty
-	if ordered_stock_qty is None or (row.name not in ordered_stock_qty and stored_qty):
+	ordered_qty = get_unrounded_ordered_qty(row, ordered_stock_qty)
+	if ordered_qty is None:
+		stored_qty = row.ordered_qty or row.received_qty
 		return (flt(row.stock_qty) - flt(stored_qty)) / (flt(row.conversion_factor) or 1)
 
-	pending_qty = flt(row.qty) - flt(ordered_stock_qty.get(row.name)) / flt(row.conversion_factor)
+	pending_qty = flt(row.qty) - flt(ordered_qty) / flt(row.conversion_factor)
 	return flt(pending_qty, precision)
 
 
@@ -148,14 +157,15 @@ def make_purchase_order(
 
 	def has_pending_qty(d):
 		"""Whether a row has stock qty left to order, rows already in ``target_doc`` included."""
-		ordered_qty = d.ordered_qty or d.received_qty
+		stored_qty = d.ordered_qty or d.received_qty
 		mapped_qty = flt(mapped_qty_by_item.get(d.name))
 		if ordered_stock_qty is None:
-			return ordered_qty + mapped_qty < d.stock_qty
+			return stored_qty + mapped_qty < d.stock_qty
 
+		ordered_qty = get_unrounded_ordered_qty(d, ordered_stock_qty)
+		ordered_qty = flt(stored_qty if ordered_qty is None else ordered_qty) + mapped_qty
 		# a row saved before purchase rows rounded their stock qty keeps it unrounded
 		precision = d.precision("stock_qty")
-		ordered_qty = flt(ordered_stock_qty.get(d.name, ordered_qty)) + mapped_qty
 		return flt(ordered_qty, precision) < flt(d.stock_qty, precision)
 
 	def generate_field_map():
