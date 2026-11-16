@@ -1580,7 +1580,7 @@ class TestJobCard(ERPNextTestSuite):
 		job_card.process_loss_qty = 10
 		job_card.save()
 		job_card.submit()
-		frappe.db.set_value("Job Card", second, "total_time_in_mins", 30)
+		frappe.delete_doc("Job Card", second)
 
 		block = self.make_second_operation_schedule_block(work_order)
 		self.assertEqual(filter_covered_schedule_rows([block]), [])
