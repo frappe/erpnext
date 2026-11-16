@@ -529,7 +529,7 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.production_plan:
 					fg_item = next(i for i in self.items if i.name == item.reference_name)
 					if production_plan_sub_assembly_item := fg_item.production_plan_sub_assembly_item:
-						from_voucher_detail_no, reserved_qty = frappe.get_value(
+						plan_item = frappe.get_value(
 							"Material Request Plan Item",
 							{
 								"parent": self.production_plan,
@@ -539,14 +539,15 @@ class SubcontractingOrder(SubcontractingController):
 								"docstatus": 1,
 							},
 							["name", "stock_reserved_qty"],
+							as_dict=True,
 						)
-						if flt(item.stock_reserved_qty) < reserved_qty:
+						if plan_item and flt(item.stock_reserved_qty) < flt(plan_item.stock_reserved_qty):
 							is_transfer = True
 							data.update(
 								{
 									"from_voucher_no": self.production_plan,
 									"from_voucher_type": "Production Plan",
-									"from_voucher_detail_no": from_voucher_detail_no,
+									"from_voucher_detail_no": plan_item.name,
 								}
 							)
 
