@@ -122,7 +122,7 @@ frappe.ui.form.on("Blanket Order", {
 	supplier: reset_party_pricing,
 
 	currency: function (frm) {
-		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true });
+		return blanket_order_pricing.apply(frm, null, { reset_conversion_rate: true, reset_rate: true });
 	},
 
 	from_date: function (frm) {
@@ -147,7 +147,9 @@ frappe.ui.form.on("Blanket Order", {
 });
 
 frappe.ui.form.on("Blanket Order Item", {
-	item_code: apply_item_pricing,
+	item_code: function (frm, cdt, cdn) {
+		return blanket_order_pricing.apply(frm, cdn, { reset_rate: true });
+	},
 
 	qty: apply_item_pricing,
 
@@ -209,6 +211,7 @@ const blanket_order_pricing = {
 					reset_party_values: options.reset_party_values,
 					reset_conversion_rate: options.reset_conversion_rate,
 					reset_plc_conversion_rate: options.reset_plc_conversion_rate,
+					reset_rate: options.reset_rate,
 				},
 			});
 			if (response.message) {
@@ -238,7 +241,7 @@ function reset_party_pricing(frm) {
 }
 
 function reset_price_list_exchange_rate(frm) {
-	return blanket_order_pricing.apply(frm, null, { reset_plc_conversion_rate: true });
+	return blanket_order_pricing.apply(frm, null, { reset_plc_conversion_rate: true, reset_rate: true });
 }
 
 function apply_item_pricing(frm, cdt, cdn) {
