@@ -853,6 +853,11 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 			company, out[item_code[1]].get("item_tax_template"), as_json=True
 		)
 
+	for item_tax_template in {
+		row.get("item_tax_template") for row in out.values() if row.get("item_tax_template")
+	}:
+		erpnext.require_permission("Item Tax Template", item_tax_template, "select")
+
 	return out
 
 
