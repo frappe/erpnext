@@ -952,14 +952,17 @@ class BuyingController(SubcontractingController):
 	def get_rejected_return_stock_qty(self, row, qty, warehouse) -> float:
 		"""Stock qty a return of an internal receipt takes back from its rejected warehouse: no more than
 		the receipt put there, less its other returns, and all of it when the return takes back all the
-		rejected qty left. A cap of nothing left falls back to the row's qty."""
+		rejected qty left. Without what the receipt put there, it takes back the row's qty."""
 		stock_qty = get_stock_qty(row, qty)
 		if not flt(qty):
 			return stock_qty
 
 		stock_left = self.get_rejected_qty_left_to_return(row, warehouse)
-		if flt(stock_left) <= 0:
+		if stock_left is None:
 			return stock_qty
+
+		if stock_left <= 0:
+			return 0.0
 
 		precision = row.precision("rejected_qty")
 		if flt(abs(flt(qty)), precision) >= self.get_rejected_uom_qty_left_to_return(row):
@@ -970,13 +973,13 @@ class BuyingController(SubcontractingController):
 	def get_receipt_reference_field(self) -> str:
 		return "purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
 
-	def get_rejected_qty_left_to_return(self, row, warehouse) -> float:
+	def get_rejected_qty_left_to_return(self, row, warehouse) -> float | None:
 		"""Stock qty the returned receipt row put in the rejected warehouse that its other returns have not
-		taken back."""
+		taken back, or None when they posted nothing there."""
 		reference_field = self.get_receipt_reference_field()
 		receipt_row = row.get(reference_field)
 		if not receipt_row:
-			return 0.0
+			return None
 
 		receipt_item = frappe.qb.DocType(row.doctype)
 		receipt_and_other_returns = (
@@ -998,7 +1001,7 @@ class BuyingController(SubcontractingController):
 			)
 			.run()[0][0]
 		)
-		return flt(qty_left, row.precision("stock_qty"))
+		return None if qty_left is None else flt(qty_left, row.precision("stock_qty"))
 
 	def get_rejected_uom_qty_left_to_return(self, row) -> float:
 		"""Rejected qty of the returned receipt row that its other returns have not taken back, in the UOM
