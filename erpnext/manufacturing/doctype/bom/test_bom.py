@@ -2007,6 +2007,109 @@ class TestBOM(ERPNextTestSuite):
 				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
 			)
 
+<<<<<<< HEAD
+=======
+	def test_valuation_rate_from_source_warehouse_without_bin(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 0}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, qty=10, rate=50, target="_Test Warehouse - _TC")
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [{"item_code": rm_item, "qty": 1, "source_warehouse": "_Test Warehouse 1 - _TC"}],
+			}
+		).insert()
+
+		# the source warehouse has no Bin, so the last valuation rate is used
+		self.assertEqual(bom.items[0].rate, 50)
+
+	def test_valuation_rate_ignores_stock_of_other_company(self):
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=rm_item, qty=10, rate=70, target="Stores - _TC1", company="_Test Company 1"
+		)
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Valuation Rate",
+				"items": [{"item_code": rm_item, "qty": 1}],
+			}
+		).insert()
+
+		self.assertEqual(bom.items[0].rate, 5)
+
+	def test_exploded_item_used_at_two_rates_merges_at_weighted_rate(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=rm_item, qty=100, rate=10, target="_Test Warehouse - _TC")
+		make_stock_entry(item_code=rm_item, qty=10, rate=50, target="_Test Warehouse 1 - _TC")
+		sub_bom = make_bom(item=sub_item, raw_materials=[rm_item], currency="INR", do_not_save=True)
+		sub_bom.items[0].source_warehouse = "_Test Warehouse - _TC"
+		sub_bom.insert()
+		sub_bom.submit()
+
+		bom = make_bom(
+			item=make_item(properties={"is_stock_item": 1}).name,
+			raw_materials=[rm_item],
+			currency="INR",
+			do_not_save=True,
+		)
+		bom.items[0].source_warehouse = "_Test Warehouse 1 - _TC"
+		bom.append("items", {"item_code": sub_item, "qty": 1, "bom_no": sub_bom.name})
+		bom.insert()
+		bom.submit()
+		self.assertEqual(bom.raw_material_cost, 60)
+
+		def assert_exploded_row(rate, amount):
+			row = bom.exploded_items[0]
+			self.assertEqual(
+				(len(bom.exploded_items), row.stock_qty, row.rate, row.amount), (1, 2, rate, amount)
+			)
+
+		assert_exploded_row(30, 60)
+		make_stock_entry(item_code=rm_item, qty=10, rate=150, target="_Test Warehouse 1 - _TC")
+		bom.update_cost()
+		bom.reload()
+		self.assertEqual(bom.raw_material_cost, 110)
+		assert_exploded_row(55, 110)
+
+	def test_clearing_process_loss_percentage_clears_process_loss_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(
+			item=sub_item,
+			raw_materials=[rm_item],
+			quantity=10,
+			rm_qty=10,
+			process_loss_percentage=10,
+			do_not_submit=True,
+		)
+		self.assertEqual(bom.process_loss_qty, 1)
+
+		bom.process_loss_percentage = 0
+		bom.save()
+		self.assertEqual(bom.process_loss_qty, 0)
+
+>>>>>>> 1849785 (test: clearing BOM process loss percentage clears its qty)
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
