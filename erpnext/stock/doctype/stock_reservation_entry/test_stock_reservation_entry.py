@@ -669,6 +669,31 @@ class TestStockReservationEntry(FrappeTestCase):
 		{
 			"allow_negative_stock": 0,
 			"enable_stock_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"pick_serial_and_batch_based_on": "FIFO",
+			"use_serial_batch_fields": 0,
+		},
+	)
+	def test_reservation_summed_with_float_noise_across_batches_is_reserved(self) -> None:
+		item = make_item(
+			properties={
+				"stock_uom": "Kg",
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TSRN-.#####",
+			}
+		).name
+		for qty in (0.01, 0.01, 0.02, 1):
+			make_stock_entry(item_code=item, target=self.warehouse, qty=qty, basic_rate=100)
+		so = make_sales_order(item_code=item, warehouse=self.warehouse, qty=0.3, rate=100)
+		so.create_stock_reservation_entries()
+		self.assertEqual(self.get_reservation_status(so), "Reserved")
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
 			"allow_partial_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
