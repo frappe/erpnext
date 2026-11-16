@@ -901,9 +901,9 @@ class SellingController(StockController):
 		return sle
 
 	def get_source_warehouse_ledger_qty(self, item_row) -> float:
-		"""Stock qty an item row moves in its warehouse. A return takes back no more than its delivered
-		row took out, less the row's other returns. A row with a package, a packed item and an internal
-		transfer keep their own qty."""
+		"""Stock qty an item row moves in its warehouse. A return puts back no more than its delivered
+		row took out, less the row's other returns to any warehouse. A row with a package, a packed item
+		and an internal transfer keep their own qty."""
 		row = item_row.item_row
 		if (
 			not self.is_return
