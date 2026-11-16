@@ -1,6 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import json
+from contextlib import contextmanager
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import flt, nowdate
 
@@ -14,6 +18,7 @@ from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_ce
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.tests.assertions import assert_raises_with_savepoint
 from erpnext.tests.utils import ERPNextTestSuite
@@ -755,6 +760,144 @@ class TestBudget(ERPNextTestSuite):
 		with self.assertRaises(frappe.ValidationError):
 			new_budget.insert()
 
+	def test_concurrent_purchase_orders_respect_stop_budget(self):
+		for snapshot_isolation in (False, True):
+			with self.subTest(snapshot_isolation=snapshot_isolation):
+				cost_center = make_budget_for_new_cost_center(
+					f"_Test Budget Race PO {int(snapshot_isolation)}"
+				)
+				first, second = (make_draft_purchase_order(cost_center, 700) for _ in range(2))
+				self.addCleanup(delete_committed, first, second, get_budget(cost_center))
+				self.assert_stale_submit_rejected(first, second, snapshot_isolation)
+
+	def test_concurrent_purchase_orders_respect_stop_budget_legacy_controller(self):
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", True)
+		self.addCleanup(reset_legacy_budget_controller)
+		cost_center = make_budget_for_new_cost_center("_Test Budget Race PO Legacy")
+		first, second = (make_draft_purchase_order(cost_center, 700) for _ in range(2))
+		self.addCleanup(delete_committed, first, second, get_budget(cost_center))
+		self.assert_stale_submit_rejected(first, second)
+
+	def test_concurrent_journal_entries_respect_stop_budget(self):
+		cost_center = make_budget_for_new_cost_center("_Test Budget Race GL")
+		first, second = (
+			make_journal_entry(
+				"_Test Account Cost for Goods Sold - _TC", "_Test Bank - _TC", 700, cost_center, nowdate()
+			)
+			for _ in range(2)
+		)
+		self.addCleanup(delete_committed, first, second, get_budget(cost_center))
+		self.assert_stale_submit_rejected(first, second)
+
+	def assert_stale_submit_rejected(self, first, second, snapshot_isolation=False):
+		"""Submit `second` from a transaction whose snapshot predates the commit of `first`."""
+		frappe.db.commit()  # nosemgrep
+		primary_connection = frappe.local.db
+		frappe.connect()
+		secondary_connection = frappe.local.db
+		try:
+			set_snapshot_isolation(snapshot_isolation)
+			# Establish the second request's snapshot before the first request submits.
+			frappe.get_doc(second.doctype, second.name)
+			frappe.local.db = primary_connection
+			frappe.get_doc(first.doctype, first.name).submit()
+			frappe.db.commit()  # nosemgrep
+
+			frappe.local.db = secondary_connection
+			with self.assertRaises((BudgetError, frappe.QueryDeadlockError)):
+				frappe.get_doc(second.doctype, second.name).submit()
+			frappe.db.rollback()
+			# The retry sees the committed spend and stops on the budget.
+			with self.assertRaises(BudgetError):
+				frappe.get_doc(second.doctype, second.name).submit()
+		finally:
+			secondary_connection.rollback()
+			secondary_connection.close()
+			frappe.local.db = primary_connection
+
+	def test_warn_only_budget_is_not_claimed(self):
+		cost_center = make_budget_for_new_cost_center("_Test Budget Warn Only")
+		budget = get_budget(cost_center)
+		frappe.db.set_value(
+			"Budget",
+			budget.name,
+			{
+				"action_if_annual_budget_exceeded": "Warn",
+				"action_if_annual_budget_exceeded_on_po": "Warn",
+				"action_if_annual_budget_exceeded_on_mr": "Warn",
+			},
+		)
+
+		with capture_budget_locks() as locks:
+			make_purchase_commitment("Purchase Order", "_Test Budget Warn Only Item", cost_center, 600)
+
+		self.assertEqual(locks, [])
+		self.assertEqual(frappe.db.get_value("Budget", budget.name, "commitment_version"), 0)
+
+	def test_budgets_are_claimed_in_name_order(self):
+		cost_centers = [
+			make_budget_for_new_cost_center(f"_Test Budget Lock Order {suffix}") for suffix in ("A", "B")
+		]
+		budgets = sorted(get_budget(cost_center).name for cost_center in cost_centers)
+		po = make_draft_purchase_order(cost_centers[1], 100)
+		po.append("items", {**po.items[0].as_dict(no_default_fields=True), "cost_center": cost_centers[0]})
+		po.save()
+
+		with capture_budget_locks() as locks:
+			po.submit()
+
+		self.assertEqual(len(locks), 1)
+		query, values = locks[0]
+		self.assertIn("ORDER BY `name` FOR UPDATE", query)
+		self.assertEqual(sorted(values.values()), budgets)
+		for budget in budgets:
+			self.assertEqual(frappe.db.get_value("Budget", budget, "commitment_version"), 1)
+
+	def test_budget_is_claimed_again_in_same_transaction(self):
+		# The legacy controller checks the budget once per item.
+		frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", True)
+		cost_center = make_budget_for_new_cost_center("_Test Budget Reclaim")
+		po = make_draft_purchase_order(cost_center, 100)
+		po.append("items", po.items[0].as_dict(no_default_fields=True))
+		po.save()
+
+		po.submit()
+
+		self.assertEqual(frappe.db.get_value("Budget", get_budget(cost_center).name, "commitment_version"), 2)
+
+	def test_budget_claim_does_not_change_modified_or_version(self):
+		cost_center = make_budget_for_new_cost_center("_Test Budget Claim History")
+		budget = get_budget(cost_center)
+		before = frappe.db.get_value("Budget", budget.name, ["modified", "modified_by"], as_dict=True)
+		versions = frappe.db.count("Version", {"ref_doctype": "Budget", "docname": budget.name})
+
+		make_purchase_commitment("Purchase Order", "_Test Budget Claim History Item", cost_center, 100)
+
+		after = frappe.db.get_value(
+			"Budget", budget.name, ["modified", "modified_by", "commitment_version"], as_dict=True
+		)
+		self.assertEqual((after.modified, after.modified_by), (before.modified, before.modified_by))
+		self.assertEqual(after.commitment_version, 1)
+		self.assertEqual(
+			frappe.db.count("Version", {"ref_doctype": "Budget", "docname": budget.name}), versions
+		)
+
+	def test_material_request_and_update_items_claim_budget(self):
+		cost_center = make_budget_for_new_cost_center("_Test Budget Claim Entry Points")
+		budget = get_budget(cost_center)
+
+		make_purchase_commitment("Material Request", "_Test Budget Claim MR Item", cost_center, 100)
+		self.assertEqual(frappe.db.get_value("Budget", budget.name, "commitment_version"), 1)
+
+		po = make_purchase_commitment("Purchase Order", "_Test Budget Claim PO Item", cost_center, 100)
+		row = po.items[0]
+		update_child_qty_rate(
+			"Purchase Order",
+			json.dumps([{"item_code": row.item_code, "qty": 1, "rate": 200, "docname": row.name}]),
+			po.name,
+		)
+		self.assertEqual(frappe.db.get_value("Budget", budget.name, "commitment_version"), 3)
+
 
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
 	if budget_against_field == "project":
@@ -945,3 +1088,57 @@ def make_budget(**args):
 		budget.submit()
 
 	return budget
+
+
+def get_budget(cost_center):
+	return frappe.get_last_doc("Budget", {"cost_center": cost_center, "docstatus": 1})
+
+
+def make_draft_purchase_order(cost_center, rate):
+	make_item("_Test Budget Race Item", {"is_stock_item": 0, "stock_uom": "Nos"})
+	po = create_purchase_order(item_code="_Test Budget Race Item", qty=1, rate=rate, do_not_save=True)
+	po.items[0].update(
+		{"cost_center": cost_center, "expense_account": "_Test Account Cost for Goods Sold - _TC"}
+	)
+	po.set_missing_values()
+	return po.insert()
+
+
+def set_snapshot_isolation(enabled):
+	# With snapshot isolation on, MariaDB rejects a stale locking read by itself.
+	# Turn it off to check the budget version, as on MariaDB before 11.6.2.
+	if frappe.db.db_type == "mariadb" and frappe.db.sql("show variables like 'innodb_snapshot_isolation'"):
+		frappe.db.sql(f"set session innodb_snapshot_isolation = {int(enabled)}")
+
+
+@contextmanager
+def capture_budget_locks():
+	"""Collect the locking Budget queries and their values run inside the block."""
+	queries = []
+	sql = frappe.local.db.sql
+
+	def record(query, *args, **kwargs):
+		if "`tabBudget`" in str(query) and "FOR UPDATE" in str(query).upper():
+			queries.append((str(query), args[0] if args else kwargs.get("values")))
+		return sql(query, *args, **kwargs)
+
+	with patch.object(frappe.local.db, "sql", side_effect=record):
+		yield queries
+
+
+def delete_committed(*docs):
+	"""Remove documents that a race test committed, since the test rollback cannot."""
+	frappe.db.rollback()
+	for doc in docs:
+		if not frappe.db.exists(doc.doctype, doc.name):
+			continue
+		doc = frappe.get_doc(doc.doctype, doc.name)
+		if doc.docstatus == 1:
+			doc.cancel()
+		frappe.delete_doc(doc.doctype, doc.name, force=True)
+	frappe.db.commit()  # nosemgrep
+
+
+def reset_legacy_budget_controller():
+	frappe.db.set_single_value("Accounts Settings", "use_legacy_budget_controller", False)
+	frappe.db.commit()  # nosemgrep

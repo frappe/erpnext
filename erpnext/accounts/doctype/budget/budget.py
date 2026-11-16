@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Coalesce, Sum
-from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate
+from frappe.utils import add_months, cint, flt, fmt_money, get_last_day, getdate
 from frappe.utils.data import get_first_day
 from pypika.terms import ExistsCriterion
 
@@ -23,6 +23,22 @@ class BudgetError(frappe.ValidationError):
 
 class DuplicateBudgetError(frappe.ValidationError):
 	pass
+
+
+class BudgetCheckConflictError(frappe.QueryDeadlockError):
+	"""A concurrent transaction changed committed spend on the budget. Retry the transaction."""
+
+
+STOP_ACTION_FIELDS = (
+	"action_if_annual_budget_exceeded",
+	"action_if_accumulated_monthly_budget_exceeded",
+	"action_if_annual_budget_exceeded_on_mr",
+	"action_if_accumulated_monthly_budget_exceeded_on_mr",
+	"action_if_annual_budget_exceeded_on_po",
+	"action_if_accumulated_monthly_budget_exceeded_on_po",
+	"action_if_annual_exceeded_on_cumulative_expense",
+	"action_if_accumulated_monthly_exceeded_on_cumulative_expense",
+)
 
 
 class Budget(Document):
@@ -56,6 +72,7 @@ class Budget(Document):
 		budget_distribution_total: DF.Currency
 		budget_end_date: DF.Date | None
 		budget_start_date: DF.Date | None
+		commitment_version: DF.Int
 		company: DF.Link
 		cost_center: DF.Link | None
 		distribute_equally: DF.Check
@@ -470,6 +487,7 @@ def validate_expense_against_budget(params, expense_amount=0):
 					b.action_if_accumulated_monthly_budget_exceeded_on_mr,
 					b.action_if_annual_budget_exceeded_on_po,
 					b.action_if_accumulated_monthly_budget_exceeded_on_po,
+					b.commitment_version,
 				)
 				.where(b.company == params.company)
 				.where(b.docstatus == 1)
@@ -498,6 +516,7 @@ def validate_expense_against_budget(params, expense_amount=0):
 
 
 def validate_budget_records(params, budget_records, expense_amount):
+	claim_budgets(budget_records)
 	for budget in budget_records:
 		if flt(budget.budget_amount):
 			yearly_action, monthly_action = get_actions(params, budget)
@@ -535,6 +554,52 @@ def validate_budget_records(params, budget_records, expense_amount):
 					budget.budget_against,
 					expense_amount,
 				)
+
+
+def claim_budgets(budget_rows: list) -> None:
+	"""Make Stop checks on these budgets run one at a time until commit.
+
+	The rows come from a plain read, so their `commitment_version` is the transaction snapshot.
+	The spend queries that follow also read that snapshot, and a row lock alone does not refresh it.
+	A locking read returns the latest committed version. If it differs from the snapshot, another
+	check committed spend that this transaction cannot see, so the transaction must retry.
+	"""
+	snapshot = {row.name: cint(row.commitment_version) for row in budget_rows if has_stop_action(row)}
+	if not snapshot:
+		return
+
+	# One query in name order, so two documents on the same budgets cannot deadlock.
+	names = sorted(snapshot)
+	budget = frappe.qb.DocType("Budget")
+	locked = dict(
+		frappe.qb.from_(budget)
+		.select(budget.name, budget.commitment_version)
+		.where(budget.name.isin(names))
+		.orderby(budget.name)
+		.for_update()
+		.run()
+	)
+	if any(locked.get(name) != version for name, version in snapshot.items()):
+		raise BudgetCheckConflictError(
+			_("Another transaction changed the committed amount of Budget {0}. Please try again.").format(
+				", ".join(names)
+			)
+		)
+
+	# Update with the query builder, so that `modified` and the Version history do not change.
+	(
+		frappe.qb.update(budget)
+		.set(budget.commitment_version, budget.commitment_version + 1)
+		.where(budget.name.isin(names))
+		.run()
+	)
+	for row in budget_rows:
+		if row.name in snapshot:
+			row.commitment_version = snapshot[row.name] + 1
+
+
+def has_stop_action(budget) -> bool:
+	return any(budget.get(field) == "Stop" for field in STOP_ACTION_FIELDS)
 
 
 def compare_expense_with_budget(params, budget_amount, action_for, action, budget_against, amount=0):

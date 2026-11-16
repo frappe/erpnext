@@ -6,7 +6,11 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, fmt_money
 
-from erpnext.accounts.doctype.budget.budget import BudgetError, get_accumulated_monthly_budget
+from erpnext.accounts.doctype.budget.budget import (
+	BudgetError,
+	claim_budgets,
+	get_accumulated_monthly_budget,
+)
 from erpnext.accounts.utils import get_fiscal_year
 
 
@@ -37,6 +41,9 @@ class BudgetValidation:
 
 	def validate(self):
 		self.build_validation_map()
+		# The spend queries are plain reads of this transaction's snapshot. The claim makes sure
+		# that no other check on these budgets committed after the snapshot, and blocks new ones.
+		claim_budgets([v.budget_doc for v in self.to_validate.values()])
 		self.validate_for_overbooking()
 
 	def build_validation_map(self):
@@ -188,6 +195,7 @@ class BudgetValidation:
 				bud.applicable_on_cumulative_expense,
 				bud.action_if_annual_exceeded_on_cumulative_expense,
 				bud.action_if_accumulated_monthly_exceeded_on_cumulative_expense,
+				bud.commitment_version,
 			)
 			.where(
 				(bud.docstatus == 1)
