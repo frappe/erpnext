@@ -3864,7 +3864,13 @@ class TestSalesInvoice(ERPNextTestSuite):
 		)
 		si.submit()
 
-		self.assertRaises(frappe.ValidationError, make_inter_company_transaction, "Sales Invoice", si.name)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"was created from",
+			make_inter_company_transaction,
+			"Sales Invoice",
+			si.name,
+		)
 
 	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
 		frappe.get_doc(
