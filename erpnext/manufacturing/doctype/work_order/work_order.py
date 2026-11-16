@@ -2931,19 +2931,23 @@ class WorkOrder(Document):
 		return frappe._dict(vocher_detail_no)
 
 	def cancel_reserved_qty_for_wip_and_fg(self, ste_doc):
-		for row in ste_doc.items:
-			sre_list = frappe.get_all(
-				"Stock Reservation Entry",
-				filters={
-					"from_voucher_no": ste_doc.name,
-					"from_voucher_detail_no": row.name,
-					"docstatus": 1,
-				},
-				pluck="name",
-			)
+		sre_list = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"from_voucher_no": ste_doc.name,
+				"from_voucher_detail_no": ("in", [row.name for row in ste_doc.items]),
+				"docstatus": 1,
+			},
+			pluck="name",
+		)
+		for name in sre_list:
+			sre_doc = frappe.get_doc("Stock Reservation Entry", name)
+			sre_doc.flags.ignore_permissions = True
+			sre_doc.cancel()
 
-			if sre_list:
-				unreserve_stock_for_work_order(self, sre_list)
+		if sre_list:
+			self.reload()
+			self.db_set("status", self.get_status())
 
 	def release_reserved_qty_for_subcontract_transfer(self):
 		"""Free this Work Order's own reservation for items sent to a subcontractor.
