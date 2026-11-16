@@ -977,6 +977,12 @@ def protect_quotation_signature(doc, method: str | None = None) -> None:
 
 	Both fields are read-only in Desk, but the REST API does not stop a Sales User from setting
 	them, which would skip the portal's checks (a PNG signature, a quotation still open)."""
+	if doc.is_new():
+		# Desk's Amend copies no_copy fields too: a new quotation has no answer yet
+		doc.set(PORTAL_SIGNATURE_FIELD, None)
+		doc.portal_response = None
+		return
+
 	before = doc.get_doc_before_save()
 	previous = before.get(PORTAL_SIGNATURE_FIELD) if before else None
 	if previous and previous != doc.get(PORTAL_SIGNATURE_FIELD):
