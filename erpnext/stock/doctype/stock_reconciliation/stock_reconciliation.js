@@ -191,11 +191,15 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_valuation_rate_and_qty_for_all_items: function (frm) {
 		frm.doc.items.forEach((row) => {
-			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name);
+			// a row the user counted keeps its count; one still at the book values follows the book
+			const is_counted =
+				flt(row.qty) != flt(row.current_qty) ||
+				flt(row.valuation_rate) != flt(row.current_valuation_rate);
+			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name, is_counted);
 		});
 	},
 
-	set_valuation_rate_and_qty: function (frm, cdt, cdn) {
+	set_valuation_rate_and_qty: function (frm, cdt, cdn, keep_counted_values = false) {
 		var d = frappe.model.get_doc(cdt, cdn);
 
 		if (d.item_code && d.warehouse) {
@@ -212,14 +216,17 @@ frappe.ui.form.on("Stock Reconciliation", {
 				},
 				callback: function (r) {
 					const row = frappe.model.get_doc(cdt, cdn);
-					if (!frm.doc.scan_mode) {
-						frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
+					if (!keep_counted_values) {
+						if (!frm.doc.scan_mode) {
+							frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
+						}
+						frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
 					}
-					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_qty", r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", row.qty * row.valuation_rate);
+					frm.events.set_amount_quantity(frm, cdt, cdn);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
 					frappe.model.set_value(
 						cdt,
@@ -228,7 +235,11 @@ frappe.ui.form.on("Stock Reconciliation", {
 						r.message.use_serial_batch_fields
 					);
 
-					if (frm.doc.purpose == "Stock Reconciliation" && !frm.doc.scan_mode) {
+					if (
+						frm.doc.purpose == "Stock Reconciliation" &&
+						!frm.doc.scan_mode &&
+						!keep_counted_values
+					) {
 						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);
 					}
 				},
