@@ -249,8 +249,12 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
+<<<<<<< HEAD
 		bundle_stock_qty = get_returned_stock_qty(row)
 >>>>>>> 9306cec (fix(stock): add up returned stock qty from qty × conversion factor and round only the total)
+=======
+		bundle_stock_qty = get_packed_stock_qty(row)
+>>>>>>> 2b06011 (fix(stock): return bundle components at the rounded stock qty packing uses)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component, so_packed_item in get_component_order_rows(
 			doc, row.item_code, components[row.item_code], so_packed_items
@@ -395,6 +399,14 @@ def get_returned_stock_qty(row):
 	its stock qty on its own."""
 	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 >>>>>>> 9306cec (fix(stock): add up returned stock qty from qty × conversion factor and round only the total)
+
+
+def get_packed_stock_qty(row):
+	"""Stock qty of a returned bundle row as packing reads it, rounded when the row rounds its stock qty."""
+	stock_qty = get_returned_stock_qty(row)
+	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+		stock_qty = flt(stock_qty, row.precision("stock_qty"))
+	return stock_qty
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
