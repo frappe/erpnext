@@ -185,6 +185,31 @@ class SendToSubcontractorStockEntry(BaseStockEntry):
 
 	def on_cancel(self):
 		self.update_subcontract_order_supplied_items()
+		self.validate_consumed_qty_is_still_supplied()
+
+	def validate_consumed_qty_is_still_supplied(self):
+		"""Receipts of the order must not have consumed the material this cancelled entry supplied."""
+		rm_detail_field = self.doc.subcontract_data.rm_detail_field
+		order_rows = frappe.get_all(
+			self.doc.subcontract_data.order_supplied_items_field,
+			filters={"name": ["in", [row.get(rm_detail_field) for row in self.doc.items]]},
+			fields=["idx", "rm_item_code", "total_supplied_qty", "consumed_qty"],
+		)
+		precision = frappe.get_precision(self.doc.subcontract_data.order_supplied_items_field, "consumed_qty")
+		for row in order_rows:
+			if flt(row.consumed_qty, precision) > flt(row.total_supplied_qty, precision):
+				frappe.throw(
+					_(
+						"Cannot cancel: receipts of {0} {1} already consumed {2} of Item {3} (row {4}), more than the {5} it would still have supplied."
+					).format(
+						self.doc.subcontract_data.order_doctype,
+						self.doc.get(self.doc.subcontract_data.order_field),
+						row.consumed_qty,
+						row.rm_item_code,
+						row.idx,
+						row.total_supplied_qty,
+					)
+				)
 
 	def update_subcontract_order_supplied_items(self):
 		if not self.doc.get(self.doc.subcontract_data.order_field):
