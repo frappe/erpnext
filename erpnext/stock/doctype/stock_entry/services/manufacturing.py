@@ -790,12 +790,25 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			return
 
 		for material in self.available_materials.values():
-			# a material is only covered by the entries that consumed it
-			pending_qty = transferred_qty - sum(material.consumed_for.values())
-			if flt(min(pending_qty_to_mfg, pending_qty) - fg_completed_qty, precision) <= 0:
+			pending_qty, covered_qty = self.get_material_pending_qty(
+				material, transferred_qty, pending_qty_to_mfg
+			)
+			if flt(covered_qty - fg_completed_qty, precision) <= 0:
 				# an entry for all that is pending consumes what is left
 				pending_qty = fg_completed_qty
 			self._append_transfer_based_rm(material, pending_qty)
+
+	def get_material_pending_qty(self, material, transferred_qty, pending_qty_to_mfg):
+		"""Qty the material left in WIP is for, and the part of it that is ready to manufacture."""
+		# a material is only covered by the entries that consumed it
+		consumed_qty = sum(material.consumed_for.values())
+		if self.wo_doc.transfer_material_against == "Job Card":
+			# the Work Order's transferred qty follows the completed operations, not the moved material
+			pending_qty = sum(material.transferred_for.values()) - consumed_qty
+			return pending_qty, pending_qty
+
+		pending_qty = transferred_qty - consumed_qty
+		return pending_qty, min(pending_qty_to_mfg, pending_qty)
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -929,7 +942,7 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.select(stock_entry_detail.star)
+			.select(stock_entry_detail.star, stock_entry.fg_completed_qty.as_("transfer_fg_qty"))
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (stock_entry.purpose == "Material Transfer for Manufacture")
@@ -954,9 +967,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 					serial_nos=[],
 					batches=defaultdict(float),
 					consumed_for={},
+					transferred_for={},
 				)
 
 			self.available_materials[key].qty += flt(row.transfer_qty)
+			self.available_materials[key].transferred_for[row.parent] = flt(row.transfer_fg_qty)
 
 			if row.serial_and_batch_bundle:
 				material = self.available_materials[key]
