@@ -34,6 +34,8 @@ $.extend(erpnext.stock_reservation, {
 		}[frm.doc.doctype];
 
 		if (frm.doc.doctype === "Production Plan") {
+			// plan rows hold both the required and the reserved qty in stock UOM
+			params["qty_in_stock_uom"] = true;
 			if (table_name === "sub_assembly_items") {
 				params["item_code_field"] = "production_item";
 				params["warehouse_field"] = "fg_warehouse";
@@ -164,12 +166,13 @@ $.extend(erpnext.stock_reservation, {
 		let warehouse_field = parms.warehouse_field || "warehouse";
 
 		frm.doc[parms.table_name].forEach((item) => {
+			let conversion_factor = parms.qty_in_stock_uom ? 1 : flt(item.conversion_factor || 1);
 			let unreserved_qty =
 				(flt(item[qty_field]) -
 					(item.stock_reserved_qty
 						? flt(item.stock_reserved_qty)
-						: flt(item[dispatch_qty_field]) * flt(item.conversion_factor || 1))) /
-				flt(item.conversion_factor || 1);
+						: flt(item[dispatch_qty_field]) * conversion_factor)) /
+				conversion_factor;
 
 			if (unreserved_qty > 0) {
 				let args = {
