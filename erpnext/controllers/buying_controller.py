@@ -258,7 +258,7 @@ class BuyingController(SubcontractingController):
 			return
 
 		if not self.has_rejected_stock(row):
-			self.remove_rejected_package(row)
+			self.remove_package(row, "rejected_serial_and_batch_bundle")
 			return
 
 		if row.get("rejected_serial_and_batch_bundle"):
@@ -279,16 +279,16 @@ class BuyingController(SubcontractingController):
 
 		frappe.db.set_value("Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, "is_rejected", 1)
 
-	def remove_rejected_package(self, row) -> None:
-		"""Drop the draft rejected package of a row that no longer rejects anything."""
-		package = row.get("rejected_serial_and_batch_bundle")
+	def remove_package(self, row, bundle_field) -> None:
+		"""Drop the draft package of a row that no longer moves that material."""
+		package = row.get(bundle_field)
 		if not package:
 			return
 
 		if frappe.db.get_value("Serial and Batch Bundle", package, "voucher_detail_no") != row.name:
 			return
 
-		row.rejected_serial_and_batch_bundle = None
+		row.set(bundle_field, None)
 		frappe.delete_doc("Serial and Batch Bundle", package, force=True, ignore_permissions=True)
 
 	def resize_package(self, row, bundle_field, qty_field) -> None:
@@ -299,6 +299,10 @@ class BuyingController(SubcontractingController):
 		qty = get_stock_qty(row, row.get(qty_field))
 		old_row = next((d for d in self.get_doc_before_save().items if d.name == row.name), None)
 		if not old_row or get_stock_qty(old_row, old_row.get(qty_field)) == qty:
+			return
+
+		if not qty:
+			self.remove_package(row, bundle_field)
 			return
 
 		package = frappe.get_doc("Serial and Batch Bundle", row.get(bundle_field))
