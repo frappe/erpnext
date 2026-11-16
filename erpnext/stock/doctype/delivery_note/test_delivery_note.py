@@ -519,6 +519,26 @@ class TestDeliveryNote(ERPNextTestSuite):
 		"""Same as above when each row rounds its stock qty."""
 		self.test_returns_of_parts_of_a_delivery_add_up_to_its_stock_qty()
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_sales": 1})
+	def test_return_of_a_bundle_whose_stock_qty_rounds(self):
+		"""A bundle row whose stock qty rounds returns its components at the qty they were packed at."""
+		bundle = make_item(
+			"_Test Bundle For Rounded Returns",
+			{"is_stock_item": 0, "stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		).name
+		component = make_item("_Test Component For Rounded Returns", {"stock_uom": "Nos"}).name
+		make_product_bundle(bundle, [component], qty=100)
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=300, basic_rate=10)
+		dn = create_delivery_note(item_code=bundle, qty=6, rate=100, do_not_submit=True)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		dn.submit()
+
+		make_sales_return(dn.name).submit()
+
+		dn.reload()
+		self.assertEqual(dn.per_returned, 100)
+
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 
