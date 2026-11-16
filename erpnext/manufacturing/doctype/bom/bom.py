@@ -1517,6 +1517,7 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+<<<<<<< HEAD
 				if not d.workstation and not d.workstation_type:
 					frappe.throw(
 						_(
@@ -1529,6 +1530,29 @@ class BOM(WebsiteGenerator):
 							d.idx, d.operation
 						)
 					)
+=======
+	def _validate_operation_row(self, d):
+		if not d.description:
+			d.description = frappe.db.get_value("Operation", d.operation, "description")
+		if not d.batch_size or d.batch_size <= 0:
+			d.batch_size = 1
+		# a batch based operation takes its time per batch, as in the Work Order
+		if frappe.get_cached_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+			d.set_cost_based_on_bom_qty = 1
+
+		if not d.workstation and not d.workstation_type:
+			frappe.throw(
+				_("Row {0}: Workstation or Workstation Type is mandatory for an operation {1}").format(
+					d.idx, d.operation
+				)
+			)
+		if not d.time_in_mins or d.time_in_mins <= 0:
+			frappe.throw(
+				_("Row {0}: Operation time should be greater than 0 for operation {1}").format(
+					d.idx, d.operation
+				)
+			)
+>>>>>>> e71b395 (fix(manufacturing): cost and plan a batch operation per batch in both BOM and Work Order)
 
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""
