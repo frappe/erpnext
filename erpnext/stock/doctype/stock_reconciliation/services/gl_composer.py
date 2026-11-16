@@ -26,6 +26,10 @@ class StockReconciliationGLComposer(BaseStockGLComposer):
 			msgprint(_("Please enter Cost Center"), raise_exception=1)
 		return super().compose(inventory_account_map, doc.expense_account, doc.cost_center)
 
+	def book_stock_expense_enabled(self):
+		# opening stock was not bought in this period, so it adds no expense to stock
+		return self.doc.purpose != "Opening Stock" and super().book_stock_expense_enabled()
+
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
 		is_opening = "Yes" if self.doc.purpose == "Opening Stock" else "No"
 		return [
