@@ -187,3 +187,26 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			},
 		)
 		self.assertFalse(booked)
+
+	def test_landed_cost_voucher_books_pair_on_purchase_invoice_with_update_stock(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		pi = make_purchase_invoice(
+			company=COMPANY,
+			warehouse=WAREHOUSE,
+			item_code=self.item,
+			qty=10,
+			rate=100,
+			update_stock=1,
+			expense_account="Stock Received But Not Billed - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		create_landed_cost_voucher("Purchase Invoice", pi.name, COMPANY, charges=200)
+
+		_balances, debits, credits = self.get_gl_balances("Purchase Invoice", pi.name)
+		self.assertEqual(debits[self.eats_account], 200)
+		self.assertEqual(credits[self.eats_contra_account], 200)
