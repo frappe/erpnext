@@ -85,8 +85,9 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			{
 				label: labels[1],
 				value: this.money0(overdue.value),
-				delta: this.delta_opts(overdue, __("since last month")),
-				caption: flt(overdue.value) ? null : __("Nothing overdue"),
+				caption: overdue.count
+					? [COUNT.bills(overdue.count), COUNT.days_late(overdue.oldest_days)].join(" · ")
+					: __("Nothing overdue"),
 				onclick: () => this.open_ledger(),
 			},
 			this.advances_card(labels[2], advances, outstanding.unpaid_count),
