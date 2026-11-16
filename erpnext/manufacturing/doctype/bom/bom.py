@@ -1323,9 +1323,10 @@ def _add_bom_item_columns(query, t, bom, opts, track_semi_finished_goods):
 
 	if cint(opts.fetch_exploded):
 		return _add_exploded_item_columns(query, t, bom, amount_col, stock_item_condition)
+
 	rate_col = t.bom_item.base_rate
 	if opts.fetch_qty_in_stock_uom:
-		rate_col = rate_col / IfNull(t.bom_item.conversion_factor, 1)
+		rate_col = rate_col / IfNull(NullIf(t.bom_item.conversion_factor, 0), 1)
 
 	return _add_normal_item_columns(
 		query, t, amount_col, rate_col, stock_item_condition, track_semi_finished_goods
