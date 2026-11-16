@@ -593,7 +593,95 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(po.items[0].last_purchase_rate, 120)
 
+<<<<<<< HEAD
 	@change_settings("Buying Settings", {"allow_multiple_items": 0})
+=======
+	def test_last_purchase_details_carry_discount_amount(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+
+		details = get_last_purchase_details(item)
+
+		self.assertEqual(details.price_list_rate, 39)
+		self.assertEqual(details.discount_amount, 39)
+		self.assertEqual(details.rate, 0)
+
+	def test_last_purchase_discount_amount_leaves_out_its_margin(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].update(
+			{
+				"price_list_rate": 39,
+				"margin_type": "Amount",
+				"margin_rate_or_amount": 10,
+				"discount_amount": 49,
+				"rate": 0,
+			}
+		)
+		po.submit()
+
+		self.assertEqual(get_last_purchase_details(item).discount_amount, 39)
+
+	def test_last_purchase_rate_from_a_newer_purchase_invoice(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = make_item("_Test Last Purchase Rate From Invoice", {"is_stock_item": 1}).name
+		create_purchase_order(
+			item_code=item,
+			rate=100,
+			transaction_date=add_days(nowdate(), -10),
+			schedule_date=add_days(nowdate(), 1),
+		)
+		for days, rate in ((-1, 150), (-5, 120)):
+			invoice = make_purchase_invoice(
+				item_code=item, rate=rate, posting_date=add_days(nowdate(), days), do_not_save=True
+			)
+			invoice.set_posting_time = 1
+			invoice.submit()
+
+		self.assertEqual(frappe.db.get_value("Item", item, "last_purchase_rate"), 150)
+
+	def test_update_rate_as_per_last_purchase_carries_discount_amount(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+
+		po = create_purchase_order(item_code=item, rate=50, do_not_save=True)
+		po.get_last_purchase_rate()
+		po.save()
+
+		self.assertEqual(po.items[0].discount_amount, 39)
+		self.assertEqual(po.items[0].rate, 0)
+
+	def test_update_rate_as_per_last_purchase_clears_the_row_margin(self):
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+
+		po = create_purchase_order(item_code=item, do_not_save=True)
+		po.items[0].update({"price_list_rate": 39, "rate": 50})
+		po.save()
+		self.assertEqual(po.items[0].margin_rate_or_amount, 11)
+
+		po.get_last_purchase_rate()
+		po.save()
+
+		self.assertFalse(po.items[0].margin_rate_or_amount)
+		self.assertEqual(po.items[0].rate, 0)
+
+	def test_rate_pricing_rule_drops_last_purchase_discount_amount(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = make_item("_Test Last Purchase Discount Amount", {"is_stock_item": 1}).name
+		make_fully_discounted_purchase_order(item)
+		make_item_price(item, "Standard Buying", 0)
+		make_pricing_rule(item_code=item, buying=1, rate_or_discount="Rate", rate=50)
+
+		details = get_purchase_order_item_details(item)
+
+		self.assertEqual(details.price_list_rate, 50)
+		self.assertEqual(details.discount_amount, 0)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 0})
+>>>>>>> 791dd88 (test: last purchase rate from a newer Purchase Invoice)
 	def test_same_item_from_different_material_requests(self):
 		po = make_purchase_order(make_material_request(qty=5).name)
 		po = make_purchase_order(make_material_request(qty=5).name, target_doc=po)
