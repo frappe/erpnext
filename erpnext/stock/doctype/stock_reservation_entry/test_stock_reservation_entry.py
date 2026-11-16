@@ -708,7 +708,6 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		},
 	)
 	def test_reservation_of_a_fractional_stock_qty_across_batches_reserves_the_full_qty(self) -> None:
-		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 1)
 		so = self.make_fractionally_reserved_sales_order(batch_qtys=(0.2, 0.2))
 		self.assertEqual(self.get_reservation_status(so), "Reserved")
 
