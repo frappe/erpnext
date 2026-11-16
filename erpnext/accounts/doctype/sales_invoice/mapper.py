@@ -449,13 +449,22 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 	if reference_fieldname != item_reference_field:
 		frappe.throw(_("Invalid field {0}").format(reference_fieldname), frappe.PermissionError)
 
+	# rejected qty is received too
+	fields = (
+		["stock_qty", "rejected_qty", "conversion_factor"] if doctype == "Purchase Invoice" else ["stock_qty"]
+	)
+
 	received_items_map = {}
 	for item in get_inter_company_items(
-		doctype, {reference_field: reference_name}, reference_fieldname, ["stock_qty"]
+		doctype, {reference_field: reference_name}, reference_fieldname, fields
 	):
 		key = item.get(reference_fieldname)
 		if key:
-			received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
+			received_items_map[key] = (
+				received_items_map.get(key, 0.0)
+				+ flt(item.stock_qty)
+				+ flt(item.get("rejected_qty")) * flt(item.get("conversion_factor"))
+			)
 
 	return received_items_map
 
