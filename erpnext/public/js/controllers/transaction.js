@@ -929,7 +929,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				const has_pending_qty = this.frm.doc.items.some(
 					(item) =>
 						!item.closed &&
-						flt(item.stock_qty - flt(received_items[item.name]), precision("stock_qty", item)) > 0
+						flt(
+							(item.stock_qty - flt(received_items[item.name])) / item.conversion_factor,
+							precision("qty", item)
+						) > 0
 				);
 				if (is_made_from_counterpart || !has_pending_qty) return;
 
