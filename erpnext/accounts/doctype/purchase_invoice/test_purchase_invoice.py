@@ -3258,6 +3258,63 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(booked[get_inventory_account(company, transit_warehouse)], 1000)
 		self.assertEqual(booked[get_inventory_account(company, rejected_warehouse)], -1000)
 
+	def test_return_of_an_internal_transfer_invoice_in_another_uom(self):
+		"""A return takes back the stock value the invoice moved, when the stock qty is rounded."""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			prepare_data_for_internal_transfer,
+		)
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		item = make_item(
+			"_Test Kg Item For Returned Transfer",
+			{
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Kg", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 0.3356}],
+			},
+		).name
+		make_purchase_receipt(
+			item_code=item, company=company, warehouse="Stores - TCP1", qty=20, rate=100, uom="Kg"
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item,
+			qty=4,
+			rate=100,
+			warehouse="Stores - TCP1",
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].update(
+			{"uom": "Box", "conversion_factor": 0.3356, "target_warehouse": "Work In Progress - TCP1"}
+		)
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi.submit()
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.update_stock = 1
+		returned.submit()
+
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{"voucher_no": returned.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+			)
+		)
+
 	def test_stock_updating_invoice_rejects_every_unit_of_a_row(self):
 		"""A row of a stock updating invoice may be rejected in full."""
 		from erpnext.stock.doctype.item.test_item import make_item

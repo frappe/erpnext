@@ -45,6 +45,7 @@ from erpnext.controllers.buying_controller import (
 	BuyingController,
 	get_stock_qty,
 	get_stock_qty_status_args,
+	get_transit_amount,
 )
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.projects.doctype.project.project import update_purchase_cost
@@ -1622,7 +1623,7 @@ class PurchaseInvoice(BuyingController):
 			if item.sales_incoming_rate:
 				# Material of a transfer goes back at the rate it came in with, the rejected
 				# material along with the accepted.
-				net_rate = (flt(item.qty) + flt(item.rejected_qty)) * item.sales_incoming_rate
+				net_rate = get_transit_amount(item, item.qty) + get_transit_amount(item, item.rejected_qty)
 
 			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 			warehouse_debit_amount = flt(
