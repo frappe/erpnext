@@ -383,6 +383,21 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			frappe.db.get_value("Sales Order Item", so.items[0].name, "ordered_qty"), so.items[0].stock_qty
 		)
 
+	def test_order_in_another_uom_completes_a_packed_item_with_rounded_qty(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		component = make_item_with_fractional_box(conversion_factor=0.3333)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=0.3333)
+		so = make_sales_order(item_code=bundle, qty=1)
+		po = make_po_for_sales_order_row(so.items[0])
+		po.items[0].update({"uom": "Box", "conversion_factor": 0.3333, "qty": 1})
+		po.submit()
+
+		packed_item = so.packed_items[0]
+		self.assertEqual(frappe.db.get_value("Packed Item", packed_item.name, "ordered_qty"), packed_item.qty)
+
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
 		{"allow_to_edit_stock_uom_qty_for_purchase": 1, "allow_to_edit_stock_uom_qty_for_sales": 1},
