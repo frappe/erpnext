@@ -760,7 +760,7 @@ class BuyingController(SubcontractingController):
 
 				net_rate = item.base_net_amount
 				if item.sales_incoming_rate:  # for internal transfer
-					net_rate = self.get_internal_transfer_qty(item) * item.sales_incoming_rate
+					net_rate = get_transit_amount(item, self.get_internal_transfer_qty(item))
 
 				if (
 					not net_rate
@@ -1848,6 +1848,11 @@ def get_purchase_expense_account(item_code, company):
 def get_stock_qty(row, qty) -> float:
 	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+
+def get_transit_amount(row, qty) -> float:
+	"""Value of qty of an internal transfer row at its transit rate, as the stock ledger moves it."""
+	return get_stock_qty(row, qty) * flt(row.sales_incoming_rate) / flt(row.conversion_factor)
 
 
 def get_stock_qty_status_args(round_total=True) -> dict:
