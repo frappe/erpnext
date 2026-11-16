@@ -2554,13 +2554,13 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		so.items[0].delivery_date = today()
 		so.submit()
 
-		for doc, qty in ((so, 5), (po, 1)):
+		for doc, qty, error in ((so, 5, "already ordered in full"), (po, 1, "cannot be less than the qty")):
 			row = doc.items[0]
 			trans_item = json.dumps(
 				[{"docname": row.name, "item_code": row.item_code, "qty": qty, "rate": row.rate}]
 			)
-			self.assertRaises(
-				frappe.ValidationError, update_child_qty_rate, doc.doctype, trans_item, doc.name
+			self.assertRaisesRegex(
+				frappe.ValidationError, error, update_child_qty_rate, doc.doctype, trans_item, doc.name
 			)
 
 	def test_internal_sales_order_drops_buying_only_terms(self):
