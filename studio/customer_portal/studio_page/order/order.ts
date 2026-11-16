@@ -165,6 +165,8 @@ export default function setup(context) {
 		if (o.status === "On Hold") return { title: __("This order is on hold."), theme: "amber", icon: "lucide-circle-pause" }
 		if (o.status === "Closed") return { title: __("This order is closed."), theme: "gray", icon: "lucide-circle-x" }
 		const left = (o.items ?? [])
+			// a service the order skips delivery for, or a closed line, is never shipped
+			.filter((row: any) => !row.skip_delivery && !row.closed)
 			.map((row: any) => ({ row, left: Number(row.qty) - Number(row.delivered_qty ?? 0) }))
 			.filter(({ left }) => left > 0)
 		if (!left.length) {

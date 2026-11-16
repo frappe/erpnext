@@ -161,8 +161,9 @@ ORDER_FIELDS = (
 	"shipping_address",
 )
 
-# the quotation each line came from, for the order page's "From quotation" link
-ORDER_ITEM_FIELDS = (*ITEM_FIELDS, "prevdoc_docname", "delivered_qty")
+# the quotation each line came from, for the order page's Quotation link
+# a line for a service the order skips delivery for, or a closed line, is never shipped
+ORDER_ITEM_FIELDS = (*ITEM_FIELDS, "prevdoc_docname", "delivered_qty", "skip_delivery", "closed")
 
 INVOICE_LIST_FIELDS = (
 	"name",
@@ -253,7 +254,15 @@ SHIPMENT_FIELDS = (
 )
 
 # a shipment page shows quantities, not prices, and links each line to its order
-SHIPMENT_ITEM_FIELDS = ("item_code", "item_name", "description", "qty", "uom", "against_sales_order")
+SHIPMENT_ITEM_FIELDS = (
+	"item_code",
+	"item_name",
+	"description",
+	"qty",
+	"uom",
+	"against_sales_order",
+	"so_detail",
+)
 
 # the page sizes a customer can pick under a list; the first is the default
 LIST_PAGE_LENGTHS = (20, 50, 100)
@@ -904,7 +913,7 @@ def _order_lines(shipment) -> list[dict]:
 	return frappe.get_all(
 		"Sales Order Item",
 		filters={"parenttype": "Sales Order", "parent": ["in", visible]},
-		fields=["parent as sales_order", "item_code", "qty", "delivered_qty"],
+		fields=["name", "qty", "delivered_qty", "skip_delivery", "closed"],
 	)
 
 

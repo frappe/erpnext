@@ -136,14 +136,16 @@ export default function setup(context) {
 	})
 
 	// ---------------------------------------------------------------- items
+	/** The order lines by row: each shipment row names the one it delivers (`so_detail`), so the same
+	 *  item on two lines, in two units say, is never added up. */
 	const orderLines = computed(() => {
-		const map: Record<string, Record<string, { qty: number; delivered: number }>> = {}
+		const map: Record<string, { qty: number; left: number }> = {}
 		for (const row of doc.value.order_lines ?? []) {
-			if (!row?.sales_order || !row?.item_code) continue
-			const order = (map[row.sales_order] ||= {})
-			const line = (order[row.item_code] ||= { qty: 0, delivered: 0 })
-			line.qty += Number(row.qty ?? 0)
-			line.delivered += Number(row.delivered_qty ?? 0)
+			if (!row?.name) continue
+			// a service the order skips delivery for, or a closed line, has nothing still to ship
+			const shipsNoMore = row.skip_delivery || row.closed
+			const qty = Number(row.qty ?? 0)
+			map[row.name] = { qty, left: shipsNoMore ? 0 : Math.max(0, qty - Number(row.delivered_qty ?? 0)) }
 		}
 		return map
 	})
@@ -169,8 +171,8 @@ export default function setup(context) {
 					pending: "",
 				}
 			}
-			const line = orderLines.value[row.against_sales_order]?.[row.item_code]
-			const pending = line ? Math.max(0, line.qty - line.delivered) : null
+			const line = orderLines.value[row.so_detail]
+			const pending = line ? line.left : null
 			return {
 				name: row.item_name || row.item_code,
 				description: itemDescription(row),
@@ -197,11 +199,10 @@ export default function setup(context) {
 		const seen = new Set<string>()
 		const left: [number, string][] = []
 		for (const row of doc.value.items ?? []) {
-			const key = row.against_sales_order + ":" + row.item_code
-			const line = orderLines.value[row.against_sales_order]?.[row.item_code]
-			if (!line || seen.has(key)) continue
-			seen.add(key)
-			left.push([Math.max(0, line.qty - line.delivered), row.uom])
+			const line = orderLines.value[row.so_detail]
+			if (!line || seen.has(row.so_detail)) continue
+			seen.add(row.so_detail)
+			left.push([line.left, row.uom])
 		}
 		return left
 	})
