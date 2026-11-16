@@ -562,6 +562,37 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			purchase_order.name,
 		)
 
+	def test_update_child_uom_refreshes_price_list_rate_from_buying_price_list(self):
+		item = make_item(
+			properties={"stock_uom": "Nos", "is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		for uom, price in (("Nos", 50), ("Box", 450)):
+			frappe.get_doc(
+				doctype="Item Price",
+				item_code=item,
+				price_list="Standard Buying",
+				supplier="_Test Supplier",
+				uom=uom,
+				price_list_rate=price,
+			).insert()
+
+		purchase_order = create_purchase_order(item_code=item, qty=5, rate=50, do_not_save=True)
+		purchase_order.buying_price_list = "Standard Buying"
+		purchase_order.items[0].uom = "Nos"
+		purchase_order.save()
+		purchase_order.submit()
+
+		row = purchase_order.items[0]
+		trans_items = [{"item_code": item, "rate": 400, "qty": 5, "uom": "Box", "docname": row.name}]
+		update_child_qty_rate("Purchase Order", json.dumps(trans_items), purchase_order.name)
+
+		row.reload()
+		self.assertEqual(row.conversion_factor, 10)
+		self.assertEqual(row.price_list_rate, 450)
+		self.assertEqual(row.discount_amount, 50)
+		self.assertEqual(row.stock_uom_rate, 40)
+
 	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4

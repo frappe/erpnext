@@ -1437,6 +1437,231 @@ class TestSalesOrder(ERPNextTestSuite):
 
 		self.assertEqual(row.conversion_factor, conversion_factor)
 
+	def test_update_child_uom_refreshes_price_list_rate_and_gross_profit(self):
+		item = make_item(
+			properties={"stock_uom": "Nos", "is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		for uom, price in (("Nos", 100), ("Box", 900)):
+			frappe.get_doc(
+				doctype="Item Price",
+				item_code=item,
+				price_list="Standard Selling",
+				uom=uom,
+				price_list_rate=price,
+			).insert()
+
+		so = make_sales_order(
+			item_code=item,
+			qty=5,
+			uom="Nos",
+			rate=100,
+			price_list_rate=100,
+			selling_price_list="Standard Selling",
+		)
+		row = so.items[0]
+
+		# the rate is left at the Nos price, the Box price list rate must still be used
+		trans_item = [{"item_code": item, "qty": 5, "uom": "Box", "rate": 100, "docname": row.name}]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(row.conversion_factor, 10)
+		self.assertEqual(row.price_list_rate, 900)
+		self.assertEqual(row.discount_amount, 800)
+		self.assertEqual(row.stock_uom_rate, 10)
+		self.assertEqual(row.gross_profit, (10 - flt(row.valuation_rate)) * 50)
+
+		trans_item[0]["rate"] = 900
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(row.discount_amount, 0)
+		self.assertEqual(row.stock_uom_rate, 90)
+		self.assertEqual(row.gross_profit, (90 - flt(row.valuation_rate)) * 50)
+
+	def test_update_child_uom_ignores_requested_price_list_rate(self):
+		# only Box is priced: the new UOM has no price at all
+		item = make_item(
+			properties={"stock_uom": "Nos", "is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}, {"uom": "_Test UOM 1", "conversion_factor": 20}],
+		).name
+		frappe.get_doc(
+			doctype="Item Price",
+			item_code=item,
+			price_list="Standard Selling",
+			uom="Box",
+			price_list_rate=900,
+		).insert()
+
+		so = make_sales_order(
+			item_code=item,
+			qty=5,
+			uom="Box",
+			price_list_rate=900,
+			discount_percentage=10,
+			selling_price_list="Standard Selling",
+		)
+		row = so.items[0]
+		self.assertEqual(row.discount_amount, 90)
+
+		# a stale Box price sent by the client must not become the new UOM's price
+		trans_item = [
+			{
+				"item_code": item,
+				"qty": 5,
+				"uom": "_Test UOM 1",
+				"rate": 810,
+				"price_list_rate": 900,
+				"docname": row.name,
+			}
+		]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(row.conversion_factor, 20)
+		self.assertEqual(row.price_list_rate, 0)
+		self.assertEqual(row.discount_percentage, 0)
+		self.assertEqual(row.discount_amount, 0)
+		self.assertEqual(row.margin_rate_or_amount, 0)
+		self.assertEqual(row.rate, 810)
+		self.assertEqual(row.stock_uom_rate, 40.5)
+
+	def test_update_child_uom_converts_price_list_currency(self):
+		price_list = "_Test Price List Rest of the World"  # USD
+		item = make_item(
+			properties={"stock_uom": "Nos", "is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		for uom, price in (("Nos", 2), ("Box", 15)):
+			frappe.get_doc(
+				doctype="Item Price", item_code=item, price_list=price_list, uom=uom, price_list_rate=price
+			).insert()
+
+		so = make_sales_order(item_code=item, qty=5, uom="Nos", rate=100, selling_price_list=price_list)
+		self.assertEqual(so.currency, "INR")
+		self.assertNotEqual(flt(so.plc_conversion_rate), 1)
+		row = so.items[0]
+
+		trans_item = [{"item_code": item, "qty": 5, "uom": "Box", "rate": 1000, "docname": row.name}]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(
+			row.price_list_rate,
+			flt(15 * so.plc_conversion_rate / so.conversion_rate, row.precision("price_list_rate")),
+		)
+
+	def test_update_child_without_uom_keeps_price_list_rate(self):
+		item = make_item(properties={"stock_uom": "Nos", "is_stock_item": 0}).name
+		item_price = frappe.get_doc(
+			doctype="Item Price",
+			item_code=item,
+			price_list="Standard Selling",
+			uom="Nos",
+			price_list_rate=100,
+		).insert()
+
+		so = make_sales_order(
+			item_code=item, qty=5, rate=100, price_list_rate=100, selling_price_list="Standard Selling"
+		)
+		row = so.items[0]
+		item_price.price_list_rate = 200
+		item_price.save()
+
+		# api callers may leave out uom on a qty-only change
+		trans_item = [{"item_code": item, "qty": 6, "rate": 100, "docname": row.name}]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(row.qty, 6)
+		self.assertEqual(row.price_list_rate, 100)
+		self.assertEqual(row.discount_amount, 0)
+
+	def test_update_child_uom_applies_rule_on_new_stock_qty(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = make_item(
+			properties={"stock_uom": "Nos", "is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		for uom, price in (("Nos", 100), ("Box", 900)):
+			frappe.get_doc(
+				doctype="Item Price",
+				item_code=item,
+				price_list="Standard Selling",
+				uom=uom,
+				price_list_rate=price,
+			).insert()
+		rule = make_pricing_rule(
+			title="_Test UOM Mixed Rule",
+			selling=1,
+			item_code=item,
+			rate_or_discount="Rate",
+			rate=50,
+			min_qty=10,
+		)
+		rule.mixed_conditions = 1
+		rule.save()
+
+		# 9 Nos misses the rule; 1 Box is 10 Nos and meets it
+		so = make_sales_order(
+			item_code=item, qty=9, rate=100, price_list_rate=100, selling_price_list="Standard Selling"
+		)
+		row = so.items[0]
+		self.assertEqual(row.price_list_rate, 100)
+
+		trans_item = [{"item_code": item, "qty": 1, "uom": "Box", "rate": 500, "docname": row.name}]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(row.stock_qty, 10)
+		self.assertEqual(row.price_list_rate, 500)
+		self.assertEqual(row.discount_amount, 0)
+
+	def test_update_child_uom_applies_coupon_rule(self):
+		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
+
+		item = make_item(
+			properties={"stock_uom": "Nos", "is_stock_item": 0},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		for uom, price in (("Nos", 100), ("Box", 900)):
+			frappe.get_doc(
+				doctype="Item Price",
+				item_code=item,
+				price_list="Standard Selling",
+				uom=uom,
+				price_list_rate=price,
+			).insert()
+		rule = make_pricing_rule(
+			title="_Test UOM Coupon Rule", selling=1, item_code=item, rate_or_discount="Rate", rate=80
+		)
+		rule.coupon_code_based = 1
+		rule.save()
+		coupon = frappe.get_doc(
+			{
+				"doctype": "Coupon Code",
+				"coupon_name": "_Test UOM Coupon",
+				"coupon_code": "UOMCOUPON",
+				"pricing_rule": rule.name,
+			}
+		).insert()
+
+		so = make_sales_order(item_code=item, qty=5, selling_price_list="Standard Selling", do_not_save=True)
+		so.coupon_code = coupon.name
+		so.save()
+		so.submit()
+		row = so.items[0]
+		self.assertEqual(row.price_list_rate, 80)
+
+		trans_item = [{"item_code": item, "qty": 5, "uom": "Box", "rate": 800, "docname": row.name}]
+		update_child_qty_rate("Sales Order", json.dumps(trans_item), so.name)
+
+		row.reload()
+		self.assertEqual(row.price_list_rate, 800)
+		self.assertEqual(row.discount_amount, 0)
+
 	def test_update_child_with_precision(self):
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 		from frappe.model.meta import get_field_precision
