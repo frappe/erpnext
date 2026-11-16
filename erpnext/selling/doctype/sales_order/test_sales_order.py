@@ -4260,6 +4260,23 @@ class TestSalesOrder(ERPNextTestSuite):
 		self.assertEqual(si2.items[0].qty, 20)
 
 	@change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_selling_price_validation_for_product_bundle(self):
+		bundle = make_item("_Test Bundle For Selling Price Validation", {"is_stock_item": 0}).name
+		component = make_item(
+			"_Test Component For Selling Price Validation",
+			{
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "_Test Warehouse - _TC"}],
+			},
+		).name
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		make_product_bundle(bundle, [component])
+
+		self.assertRaises(
+			frappe.ValidationError, make_sales_order, item_code=bundle, qty=1, rate=1, do_not_submit=True
+		)
+
+	@change_settings("Selling Settings", {"validate_selling_price": 1})
 	def test_selling_price_validation_for_manufactured_item(self):
 		"""
 		Unit test to check the selling price validation for manufactured item, without last purchae rate in Item master.
