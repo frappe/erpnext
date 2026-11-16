@@ -486,15 +486,27 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		stock_bin = {"item_code": pr.items[0].item_code, "warehouse": pr.items[0].warehouse}
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 0)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_return_in_another_uom_takes_back_only_its_stock_qty(self):
+		"""A return of part of a row in another UOM than the row is not the return of its rest."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item_for_returns_of_parts(0.3356)
+		pr = make_purchase_receipt(item_code=item, qty=2.01, rate=100)
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].update({"qty": -3, "received_qty": -3, "uom": "Box", "conversion_factor": 0.3356})
+		pr_return.submit()
+
+		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 1.0)
+
 	def return_receipt_in_parts(self, conversion_factor=0.3356):
 		"""Receipt of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
-		item = make_item(
-			"_Test Item For Returns Of Parts",
-			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
-		).name
+		item = self.make_item_for_returns_of_parts(conversion_factor)
 		pr = make_purchase_receipt(
 			item_code=item, qty=6, uom="Box", conversion_factor=conversion_factor, rate=100
 		)
@@ -505,6 +517,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		last_return = make_return_doc("Purchase Receipt", pr.name)
 		last_return.submit()
 		return pr, last_return
+
+	def make_item_for_returns_of_parts(self, conversion_factor):
+		"""Item kept in Kg and bought in Box."""
+		return make_item(
+			"_Test Item For Returns Of Parts",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
+		).name
 
 	def test_purchase_return_partial(self):
 		pr = make_purchase_receipt(
