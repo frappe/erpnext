@@ -2931,23 +2931,59 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		return_pi.submit()
 		self.assertEqual(return_pi.docstatus, 1)
 
-	def test_internal_transfer_invoice_with_rejected_batch_qty(self):
-		"""Batch material rejected on a stock updating internal transfer invoice gets its own package."""
+	def make_transfer_invoice(self, tag, item_doc, qty, rejected):
+		"""Unsaved stock updating invoice of an internal transfer, received from an in-transit warehouse."""
 		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			get_gl_entries,
-			make_purchase_receipt,
-		)
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		company = "_Test Company with perpetual inventory"
+		wh = frappe._dict(
+			source=create_warehouse(f"_Test {tag} Transfer From", company=company),
+			transit=create_warehouse(f"_Test {tag} Transfer Transit", company=company),
+			accepted=create_warehouse(f"_Test {tag} Transfer To", company=company),
+			rejected=create_warehouse(f"_Test {tag} Transfer Rejected", company=company),
+		)
 
-		from_warehouse = create_warehouse("_Test Batch Invoice Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Batch Invoice Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Batch Invoice Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Batch Invoice Transfer Rejected", company=company)
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=wh.source, qty=qty + rejected, rate=100
+		)
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			item_code=item_doc.name,
+			qty=qty + rejected,
+			rate=100,
+			warehouse=wh.source,
+			update_stock=1,
+			cost_center="Main - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			do_not_save=1,
+		)
+		si.items[0].target_warehouse = wh.transit
+		si.insert()
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		pi.update_stock = 1
+		pi.items[0].update(
+			{
+				"warehouse": wh.accepted,
+				"qty": qty,
+				"rejected_qty": rejected,
+				"received_qty": qty + rejected,
+				"rejected_warehouse": wh.rejected,
+				"expense_account": "Cost of Goods Sold - TCP1",
+			}
+		)
+		return pi, wh
+
+	def test_internal_transfer_invoice_with_rejected_batch_qty(self):
+		"""Batch material rejected on a stock updating internal transfer invoice gets its own package."""
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 
 		item = make_item(
 			"Test Invoice Internal Transfer Batch Item",
@@ -2959,35 +2995,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			},
 		)
 
-		make_purchase_receipt(
-			item_code=item.name, company=company, warehouse=from_warehouse, qty=10, rate=100
-		)
-
-		si = create_sales_invoice(
-			company=company,
-			customer="_Test Internal Customer 2",
-			item_code=item.name,
-			qty=10,
-			rate=100,
-			warehouse=from_warehouse,
-			update_stock=1,
-			cost_center="Main - TCP1",
-			debit_to="Debtors - TCP1",
-			income_account="Sales - TCP1",
-			do_not_save=1,
-		)
-		si.items[0].target_warehouse = transit_warehouse
-		si.insert()
-		si.submit()
-
-		pi = make_inter_company_purchase_invoice(si.name)
-		pi.update_stock = 1
-		pi.items[0].warehouse = to_warehouse
-		pi.items[0].qty = 7
-		pi.items[0].rejected_qty = 3
-		pi.items[0].received_qty = 10
-		pi.items[0].rejected_warehouse = rejected_warehouse
-		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi, wh = self.make_transfer_invoice("Batch Invoice", item, 7, 3)
+		company = pi.company
+		transit_warehouse, to_warehouse, rejected_warehouse = wh.transit, wh.accepted, wh.rejected
 		pi.submit()
 
 		row = pi.items[0]
@@ -3068,53 +3078,11 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
 		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
 		with, and the entries say the same as the stock."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.item.test_item import create_item
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
-			make_purchase_receipt,
-		)
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
-		company = "_Test Company with perpetual inventory"
-
-		from_warehouse = create_warehouse("_Test Returned Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Returned Transfer Transit", company=company)
-		to_warehouse = create_warehouse("_Test Returned Transfer To", company=company)
-		rejected_warehouse = create_warehouse("_Test Returned Transfer Rejected", company=company)
-
 		item_doc = create_item("Test Returned Fully Rejected Transfer Item")
 
-		make_purchase_receipt(
-			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=10, rate=100
-		)
-
-		si = create_sales_invoice(
-			company=company,
-			customer="_Test Internal Customer 2",
-			item_code=item_doc.name,
-			qty=10,
-			rate=100,
-			warehouse=from_warehouse,
-			update_stock=1,
-			cost_center="Main - TCP1",
-			debit_to="Debtors - TCP1",
-			income_account="Sales - TCP1",
-			do_not_save=1,
-		)
-		si.items[0].target_warehouse = transit_warehouse
-		si.insert()
-		si.submit()
-
-		pi = make_inter_company_purchase_invoice(si.name)
-		pi.update_stock = 1
-		pi.items[0].warehouse = to_warehouse
-		pi.items[0].qty = 0
-		pi.items[0].rejected_qty = 10
-		pi.items[0].received_qty = 10
-		pi.items[0].rejected_warehouse = rejected_warehouse
-		pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
+		pi, wh = self.make_transfer_invoice("Returned", item_doc, 0, 10)
+		company = pi.company
+		transit_warehouse, to_warehouse, rejected_warehouse = wh.transit, wh.accepted, wh.rejected
 		pi.submit()
 
 		sl_entries = frappe.get_all(
