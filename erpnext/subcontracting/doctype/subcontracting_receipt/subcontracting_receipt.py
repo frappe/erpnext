@@ -21,6 +21,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_default_cost_center, get_default_expense_account
 from erpnext.stock.stock_ledger import get_valuation_rate
 
@@ -621,7 +622,8 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 	def keep_secondary_row_values(self, sent_rows):
-		"""Keep the accounts, dimensions, serial nos and batches set on a return's secondary rows before the rebuild."""
+		"""Keep the accounts and dimensions set on a return's secondary rows before the rebuild,
+		and their serial nos and batches when they fit the rebuilt qty."""
 		sent_rows = {
 			row.subcontracting_receipt_item: row for row in sent_rows if row.subcontracting_receipt_item
 		}
@@ -634,7 +636,7 @@ class SubcontractingReceipt(SubcontractingController):
 				continue
 
 			fieldnames = accounting_fields
-			if sent.serial_no or sent.batch_no or sent.serial_and_batch_bundle:
+			if self.has_picks_for_qty(sent, row.qty):
 				fieldnames = [
 					*fieldnames,
 					"use_serial_batch_fields",
@@ -645,6 +647,14 @@ class SubcontractingReceipt(SubcontractingController):
 
 			for fieldname in fieldnames:
 				row.set(fieldname, sent.get(fieldname))
+
+	@staticmethod
+	def has_picks_for_qty(row, qty):
+		"""Whether the serial nos and batches on a row fit qty: a mapped return row has all the serial nos left to return."""
+		if row.serial_no:
+			return len(get_serial_nos(row.serial_no)) == flt(abs(qty), row.precision("qty"))
+
+		return bool(row.batch_no or row.serial_and_batch_bundle)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
