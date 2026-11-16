@@ -157,7 +157,9 @@ class StatusService:
 
 		status = (
 			"In Process"
-			if flt(self.doc.material_transferred_for_manufacturing) > 0 or self._has_transferred_material()
+			if flt(self.doc.material_transferred_for_manufacturing) > 0
+			or self._has_transferred_material()
+			or self._has_consumed_material()
 			else "Not Started"
 		)
 		precision = frappe.get_precision("Work Order", "produced_qty")
@@ -194,6 +196,19 @@ class StatusService:
 			)
 		).run()[0][0]
 		return flt(qty) > 0
+
+	def _has_consumed_material(self):
+		"""True if a submitted Material Consumption entry exists, e.g. on a skip-transfer order."""
+		return bool(
+			frappe.db.exists(
+				"Stock Entry",
+				{
+					"work_order": self.doc.name,
+					"docstatus": 1,
+					"purpose": "Material Consumption for Manufacture",
+				},
+			)
+		)
 
 	def _is_partial_skip_transfer(self):
 		if not (self.doc.skip_transfer and self.doc.produced_qty):
