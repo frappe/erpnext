@@ -3110,21 +3110,6 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(moved_value[to_warehouse]), 700)
 		self.assertEqual(flt(moved_value[rejected_warehouse]), 300)
 
-<<<<<<< HEAD
-	def test_internal_transfer_invoice_with_every_unit_rejected(self):
-		"""An invoice may reject a whole row, and the in-transit warehouse is emptied all the same."""
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
-=======
-		booked_value = {}
-		for entry in get_gl_entries("Purchase Invoice", pi.name, skip_cancelled=True):
-			booked_value.setdefault(entry.account, 0)
-			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
-
-		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
-		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], -1000)
-		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
-		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
-
 	def test_internal_transfer_invoice_credits_transit_with_its_stock_value(self):
 		"""A stock updating internal transfer invoice in a non-stock UOM, and its return, book the
 		in-transit account with the stock value that moved through the in-transit warehouse."""
@@ -3166,11 +3151,9 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 				flt(stock_entry.stock_value_difference, 2),
 			)
 
-	def test_return_of_an_internal_transfer_invoice_that_rejected_everything(self):
-		"""Material rejected in full goes back to the in-transit warehouse at the rate it came in
-		with, and the entries say the same as the stock."""
-		from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
->>>>>>> f2977df (test: internal transfer invoice credits transit with its stock value)
+	def test_internal_transfer_invoice_with_every_unit_rejected(self):
+		"""An invoice may reject a whole row, and the in-transit warehouse is emptied all the same."""
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.stock.doctype.item.test_item import create_item
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
@@ -4629,8 +4612,9 @@ def make_fully_rejected_stock_invoice():
 def make_internal_transfer_invoice():
 	"""A stock updating internal transfer invoice of 6 Box (0.3356 Kg each, 100 per Kg), received
 	from an in-transit warehouse."""
-	from erpnext.accounts.doctype.sales_invoice.mapper import make_inter_company_purchase_invoice
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+	from erpnext.stock.doctype.item.test_item import make_item
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	company = "_Test Company with perpetual inventory"
