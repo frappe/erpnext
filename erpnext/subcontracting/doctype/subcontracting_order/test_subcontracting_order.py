@@ -889,6 +889,103 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		set_backflush_based_on("BOM")
 
+<<<<<<< HEAD
+=======
+	def test_transfer_limit_counts_rows_sharing_a_raw_material(self):
+		sco = get_subcontracting_order_sharing_a_raw_material()
+
+		def transfer_20_for(fg_item):
+			transfer_shared_raw_material(sco, fg_item, 20)
+
+		both_rows = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in both_rows.items:
+			row.qty = 20
+		self.assertRaises(frappe.ValidationError, both_rows.save)
+
+		stock_uom_row = frappe.get_doc(make_rm_stock_entry(sco.name))
+		stock_uom_row.items = stock_uom_row.items[:1]
+		stock_uom_row.items[0].update({"qty": 100, "conversion_factor": 0.1})
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be transferred more than", stock_uom_row.save)
+
+		transfer_20_for("Subcontracted Item SA7")
+		self.assertRaises(frappe.ValidationError, transfer_20_for, "Subcontracted Item Shared RM")
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_refuses_a_subcontracted_item_not_on_the_order(self):
+		sco = get_subcontracting_order()
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		for row in ste.items:
+			row.subcontracted_item = "Subcontracted Item SA1"
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not a finished good", ste.insert)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_relinks_a_row_moved_to_another_finished_good(self):
+		sco = get_subcontracting_order_sharing_a_raw_material()
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items = [row for row in ste.items if row.subcontracted_item == "Subcontracted Item SA7"]
+		ste.items[0].subcontracted_item = "Subcontracted Item Shared RM"
+		ste.insert()
+		ste.submit()
+
+		sco.reload()
+		supplied_qty = {row.main_item_code: row.supplied_qty for row in sco.supplied_items}
+		self.assertEqual(supplied_qty, {"Subcontracted Item SA7": 0, "Subcontracted Item Shared RM": 10})
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{"backflush_raw_materials_of_subcontract_based_on": "Material Transferred for Subcontract"},
+	)
+	def test_transfer_accepts_a_finished_good_without_supplied_items(self):
+		fg_item = make_item("Subcontracted Item Supplier Sourced", {"is_sub_contracted_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=["Subcontracted SRM Item 1"], do_not_submit=True)
+		bom.items[0].sourced_by_supplier = 1
+		bom.submit()
+
+		sco = get_subcontracting_order_with_sa7_and(fg_item, "Subcontracted Service Item 9")
+		make_stock_in_entry(rm_items=get_rm_items(sco.supplied_items))
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		ste.items[0].subcontracted_item = fg_item
+
+		ste.insert()
+
+	def test_material_to_supplier_maps_a_shared_raw_material_only_once(self):
+		sco = get_subcontracting_order_sharing_a_raw_material()
+		transfer_shared_raw_material(sco, "Subcontracted Item SA7", 20)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		self.assertFalse([row for row in ste.items if row.item_code == "Subcontracted SRM Item 1"])
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"over_transfer_allowance": 10})
+	def test_material_to_supplier_skips_fully_sent_materials(self):
+		make_subcontracted_item(item_code="Subcontracted Item Two RM")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 8",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item Two RM",
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		rm_items[-1]["qty"] -= 2
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details=itemwise_details)
+
+		ste = frappe.get_doc(make_rm_stock_entry(sco.name))
+		self.assertEqual([(row.item_code, row.qty) for row in ste.items], [(rm_items[-1]["item_code"], 2)])
+
+>>>>>>> 45bea29 (test: Material to Supplier skips fully sent and shared raw materials)
 	def test_get_materials_from_supplier(self):
 		# Create SCO
 		sco = get_subcontracting_order()
@@ -1584,6 +1681,17 @@ def make_order_sent_to_supplier(suffix, rm_properties):
 
 def get_return_of_components(sco):
 	return get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+
+
+def transfer_shared_raw_material(sco, fg_item, qty):
+	row = next(
+		row
+		for row in sco.supplied_items
+		if row.main_item_code == fg_item and row.rm_item_code == "Subcontracted SRM Item 1"
+	)
+	ste = frappe.get_doc(make_rm_stock_entry(sco.name, [{**row.as_dict(), "qty": qty}]))
+	ste.save()
+	ste.submit()
 
 
 def set_alternative_item(item_code, alternative_item_code):
