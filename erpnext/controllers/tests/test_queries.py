@@ -5,9 +5,11 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.core.doctype.user_permission.user_permission import add_user_permissions
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.permissions import add_user_permission
 
 from erpnext.controllers import queries
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.permission_test_utils import as_user, make_fenced_user
 
 
@@ -122,6 +124,41 @@ class TestQueries(unittest.TestCase):
 
 		self.assert_nested_in(open_dn.name, result)
 		self.assertNotIn(returned_dn.name, [row[0] for row in result])
+
+	def make_batches_in_stock(self, *batch_ids):
+		self.addCleanup(frappe.db.rollback)
+		item = make_item("_Test Batch Link Query Item", {"is_stock_item": 1, "has_batch_no": 1})
+		batches = []
+		for qty, batch_id in enumerate(batch_ids, start=2):
+			batch = frappe.get_doc({"doctype": "Batch", "batch_id": batch_id, "item": item.name}).insert()
+			make_stock_entry(
+				item_code=item.name,
+				target="_Test Warehouse - _TC",
+				qty=qty,
+				basic_rate=100,
+				batch_no=batch.name,
+			)
+			batches.append(batch.name)
+		return item.name, batches
+
+	def test_batch_link_search_requires_batch_permission(self):
+		item_code, _batches = self.make_batches_in_stock("Link-Batch")
+		filters = {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}
+		website_manager = make_fenced_user("batch_query_website_manager@example.com", ["Website Manager"])
+		with as_user(website_manager), self.assertRaises(frappe.PermissionError):
+			queries.get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+
+	def test_batch_link_search_applies_batch_user_permissions(self):
+		item_code, (allowed, other) = self.make_batches_in_stock("Link-Batch-Allowed", "Link-Batch-Other")
+		filters = {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}
+		user = make_fenced_user("batch_query_stock_user@example.com", ["Stock User"])
+		with as_user(user):
+			rows = queries.get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+			self.assertCountEqual([row[0] for row in rows], [allowed, other])
+		add_user_permission("Batch", allowed, user, ignore_permissions=True)
+		with as_user(user):
+			rows = queries.get_batch_no("Batch", "link-batch", "name", 0, 20, filters)
+			self.assertEqual([row[:2] for row in rows], [(allowed, 2)])
 
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)

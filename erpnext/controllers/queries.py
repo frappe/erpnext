@@ -409,6 +409,7 @@ def get_delivery_notes_to_be_billed(
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Batch"
+	frappe.has_permission(doctype, "select", throw=True)
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
 	page_len = 300
@@ -421,7 +422,17 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("is_inward"):
 		filtered_batches.extend(get_empty_batches(filters, start, page_len, filtered_batches, txt))
 
-	return filtered_batches
+	if not filtered_batches:
+		return []
+
+	permitted_batches = set(
+		frappe.get_list(
+			"Batch",
+			filters={"name": ("in", [row[0] for row in filtered_batches]), "item": filters.get("item_code")},
+			pluck="name",
+		)
+	)
+	return [row for row in filtered_batches if row[0] in permitted_batches]
 
 
 def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None):
