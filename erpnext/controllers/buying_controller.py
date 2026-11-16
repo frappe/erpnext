@@ -1451,6 +1451,22 @@ class BuyingController(SubcontractingController):
 
 		return self.get_accepted_stock_qty(row)
 
+	def set_posted_qty_for_cancel(self, sl_entries) -> None:
+		"""An internal receipt reverses the stock qty its entries posted, which a later change to how it
+		splits the stock qty must not alter."""
+		posted_qty = {
+			(sle.voucher_detail_no, sle.warehouse, sle.actual_qty > 0): sle.actual_qty
+			for sle in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_type": self.doctype, "voucher_no": self.name, "is_cancelled": 0},
+				fields=["voucher_detail_no", "warehouse", "actual_qty"],
+			)
+		}
+		for sle in sl_entries:
+			key = (sle.voucher_detail_no, sle.warehouse, flt(sle.actual_qty) > 0)
+			if key in posted_qty:
+				sle.actual_qty = posted_qty[key]
+
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
 		when the row rejects material."""
@@ -1664,6 +1680,9 @@ class BuyingController(SubcontractingController):
 
 		if self.get("is_old_subcontracting_flow"):
 			self.make_sl_entries_for_supplier_warehouse(sl_entries)
+
+		if self.docstatus == 2 and self.is_internal_receipt():
+			self.set_posted_qty_for_cancel(sl_entries)
 
 		self.make_sl_entries(
 			sl_entries,
