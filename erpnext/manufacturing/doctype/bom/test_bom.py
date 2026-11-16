@@ -2116,30 +2116,9 @@ class TestBOM(ERPNextTestSuite):
 			operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": batch_based_operation})
 			operation.save()
 
-			fg_item = make_item(properties={"is_stock_item": 1}).name
-			bom = frappe.get_doc(
-				{
-					"doctype": "BOM",
-					"item": fg_item,
-					"company": "_Test Company",
-					"currency": "INR",
-					"with_operations": 1,
-					"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
-					"operations": [
-						{
-							"operation": operation.name,
-							"workstation": workstation,
-							"time_in_mins": 60,
-							"batch_size": 10,
-							"set_cost_based_on_bom_qty": cost_based_on_bom_qty,
-						}
-					],
-				}
-			).insert()
-			bom.submit()
-
+			bom = make_batch_operation_bom(operation.name, workstation, cost_based_on_bom_qty)
 			work_order = make_wo_order_test_record(
-				production_item=fg_item, bom_no=bom.name, qty=10, stock_uom="Nos", do_not_save=True
+				production_item=bom.item, bom_no=bom.name, qty=10, stock_uom="Nos", do_not_save=True
 			)
 			work_order.insert()
 			self.assertEqual(bom.operating_cost * 10, 100)
@@ -2207,6 +2186,46 @@ class TestBOM(ERPNextTestSuite):
 			bom.name, "_Test Company", fetch_exploded=0, fetch_qty_in_stock_uom=False
 		)[rm_item]
 		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
+
+	def test_update_cost_costs_batch_operation_per_batch(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = make_workstation(workstation_name="_Test BOM Batch WS", hour_rate_rent=100).name
+		operation = make_operation(operation="_Test BOM Batch Op Update Cost", workstation=workstation)
+		bom = make_batch_operation_bom(operation.name, workstation)
+		self.assertEqual(bom.operating_cost, 100)
+
+		operation.update({"batch_size": 10, "create_job_card_based_on_batch_size": 1})
+		operation.save()
+		bom.update_cost()
+		bom.reload()
+		self.assertEqual(bom.operating_cost, 10)
+		self.assertTrue(bom.operations[0].set_cost_based_on_bom_qty)
+
+
+def make_batch_operation_bom(operation, workstation, set_cost_based_on_bom_qty=0):
+	bom = frappe.get_doc(
+		{
+			"doctype": "BOM",
+			"item": make_item(properties={"is_stock_item": 1}).name,
+			"company": "_Test Company",
+			"currency": "INR",
+			"with_operations": 1,
+			"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+			"operations": [
+				{
+					"operation": operation,
+					"workstation": workstation,
+					"time_in_mins": 60,
+					"batch_size": 10,
+					"set_cost_based_on_bom_qty": set_cost_based_on_bom_qty,
+				}
+			],
+		}
+	).insert()
+	bom.submit()
+	return bom
 
 
 def make_stage_items():
