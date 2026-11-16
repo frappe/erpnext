@@ -1339,7 +1339,9 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		self.assertRaisesRegex(frappe.ValidationError, "Close the Subcontracting Order", sre.cancel)
 
 		update_subcontracting_order_status(sco.name, "Closed")
-		self.assertEqual(frappe.db.get_value("Stock Reservation Entry", consumed[0], "docstatus"), 1)
+		sre = frappe.get_doc("Stock Reservation Entry", consumed[0])
+		self.assertEqual(sre.docstatus, 1)
+		self.assertRaisesRegex(frappe.ValidationError, "is already used by", sre.cancel)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_closing_releases_unused_balance_of_partly_transferred_reservation(self):
