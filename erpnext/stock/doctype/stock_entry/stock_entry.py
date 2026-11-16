@@ -880,7 +880,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 				if self.is_sub_assembly_secondary_item(d):
 					allocation_basis = self.get_sub_assembly_component_cost(d)
 				else:
-					allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+					# the same basis the finished good splits: manual finished goods take their value first
+					allocation_basis = (
+						secondary_items_cost_basis
+						- self.get_costed_out_items_cost()
+						- self.get_manually_rated_finished_items()[1]
+					)
 				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 				has_derived_rate = True
 
