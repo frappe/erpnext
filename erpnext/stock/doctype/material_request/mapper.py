@@ -34,8 +34,12 @@ def validate_request_not_stopped(source_name):
 
 def get_ordered_stock_qty(material_request):
 	"""{row name: stock qty} on submitted Purchase Orders, from their rows' unrounded qty * conversion factor.
-	None unless purchase rows round their stock qty, as the stored ordered qty then falls a fraction short."""
+	None unless purchase rows round their stock qty, as the stored ordered qty then falls a fraction short.
+	A subcontracting request is ordered by finished good qty, so it keeps its stored ordered qty."""
 	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
+		return None
+
+	if frappe.db.get_value("Material Request", material_request, "material_request_type") == "Subcontracting":
 		return None
 
 	order = frappe.qb.DocType("Purchase Order")
