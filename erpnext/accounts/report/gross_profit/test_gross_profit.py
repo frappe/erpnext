@@ -1259,11 +1259,16 @@ class TestGrossProfit(FrappeTestCase):
 			invoices.append(sinv.submit())
 
 		filters = dict(company=self.company, from_date=earlier_date, to_date=nowdate(), item_code=item.name)
-		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		with patch.object(
+			gross_profit, "_get_incoming_rate", wraps=gross_profit._get_incoming_rate
+		) as rate_lookup:
+			_, data = execute(frappe._dict(filters, group_by="Invoice"))
 		buying_amounts = {row.sales_invoice: row.buying_amount for row in data if row.indent == 0}
 
 		self.assertEqual(buying_amounts[invoices[0].name], 200)
 		self.assertEqual(buying_amounts[invoices[1].name], 400)
+		self.assertTrue(rate_lookup.call_args_list)
+		self.assertTrue(all(call.args[0].get("item_code") for call in rate_lookup.call_args_list))
 
 	def test_fifo_rate_cache_accounts_for_quantity(self):
 		item = create_item("_Test Gross Profit FIFO Qty Item")
@@ -1403,39 +1408,6 @@ class TestGrossProfit(FrappeTestCase):
 		self.assertEqual(data[0][0], project.name)
 		self.assertEqual(data[-1][1], 500)
 
-<<<<<<< HEAD
-=======
-	def test_undelivered_invoices_use_valuation_rate_of_their_date(self):
-		item = create_item("_Test Gross Profit Moving Average Item")
-		item.db_set("valuation_method", "Moving Average")
-		earlier_date = add_days(nowdate(), -8)
-
-		invoices = []
-		for posting_date, rate in ((earlier_date, 100), (nowdate(), 300)):
-			make_stock_entry(
-				company=self.company,
-				item_code=item.name,
-				target=self.warehouse,
-				qty=2,
-				basic_rate=rate,
-				posting_date=posting_date,
-			)
-			sinv = self.create_sales_invoice(qty=2, rate=500, posting_date=posting_date, do_not_save=True)
-			sinv.items[0].item_code = item.name
-			invoices.append(sinv.submit())
-
-		filters = dict(company=self.company, from_date=earlier_date, to_date=nowdate(), item_code=item.name)
-		with patch.object(
-			gross_profit, "_get_incoming_rate", wraps=gross_profit._get_incoming_rate
-		) as rate_lookup:
-			_, data = execute(frappe._dict(filters, group_by="Invoice"))
-		buying_amounts = {row.sales_invoice: row.buying_amount for row in data if row.indent == 0}
-
-		self.assertEqual(buying_amounts[invoices[0].name], 200)
-		self.assertEqual(buying_amounts[invoices[1].name], 400)
-		self.assertTrue(rate_lookup.call_args_list)
-		self.assertTrue(all(call.args[0].get("item_code") for call in rate_lookup.call_args_list))
-
 	def test_invoice_warehouse_changed_after_mapping_from_delivery_note(self):
 		item = create_item("_Test Gross Profit Warehouse Item").name
 		for warehouse in (self.warehouse, self.finished_warehouse):
@@ -1464,7 +1436,6 @@ class TestGrossProfit(FrappeTestCase):
 
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 90)
 
->>>>>>> 1eb8482 (fix(gross-profit): skip valuation lookup for invoice headers)
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
 		components = []
