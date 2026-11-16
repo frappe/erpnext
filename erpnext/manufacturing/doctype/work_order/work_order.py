@@ -2276,17 +2276,19 @@ class WorkOrder(Document):
 			"voucher_detail_no": row.name,
 			"warehouse": row.source_warehouse,
 		}
+		# serial and batch reservations first, so a qty one only takes what they did not match
 		names = frappe.get_all(
 			"Stock Reservation Entry",
 			filters={**filters, "status": ("not in", ["Closed", "Cancelled", "Completed"])},
 			pluck="name",
+			order_by="reservation_based_on desc, creation",
 		)
 		if self.status == "Closed":
 			names += frappe.get_all(
 				"Stock Reservation Entry",
 				filters={**filters, "docstatus": 2, "transferred_qty": (">", 0)},
 				pluck="name",
-				order_by="creation",
+				order_by="reservation_based_on desc, creation",
 			)
 
 		if names:
@@ -2297,27 +2299,30 @@ class WorkOrder(Document):
 					continue
 
 				qty_to_update = min(flt(transferred_qty), flt(doc.reserved_qty - doc.consumed_qty))
-				transferred_qty = flt(transferred_qty) - qty_to_update
-
 				if qty_to_update < 0:
+					transferred_qty = flt(transferred_qty) - qty_to_update
 					continue
 
 				if doc.docstatus == 2:
 					doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
 					doc.release_reversed_usage("transferred_qty", row_wise_serial_batch)
-					continue
+				else:
+					if (
+						doc.has_batch_no or doc.has_serial_no
+					) and doc.reservation_based_on == "Serial and Batch":
+						doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+						qty_to_update = doc.matched_serial_batch_qty
 
-				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
-					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
-					qty_to_update = doc.matched_serial_batch_qty
+					doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
+					if doc.transferred_qty >= doc.reserved_qty:
+						doc.db_set("status", "Closed", update_modified=False)
 
-				doc.db_set("transferred_qty", flt(qty_to_update), update_modified=False)
-				if doc.transferred_qty >= doc.reserved_qty:
-					doc.db_set("status", "Closed", update_modified=False)
+					doc.update_status()
+					doc.update_reserved_stock_in_bin()
+					doc.update_reserved_qty_in_voucher()
 
-				doc.update_status()
-				doc.update_reserved_stock_in_bin()
-				doc.update_reserved_qty_in_voucher()
+				# a serial and batch reservation keeps only what it matched
+				transferred_qty = flt(transferred_qty - doc.transferred_qty, doc.precision("transferred_qty"))
 
 	def update_returned_qty(self):
 		returned_by_row = distribute_over_rows(
@@ -2517,7 +2522,7 @@ class WorkOrder(Document):
 			filters=filters,
 			or_filters=or_filters,
 			pluck="name",
-			order_by="creation",
+			order_by="reservation_based_on desc, creation",
 		):
 			for name in names:
 				if consumed_qty < 0:
@@ -2528,19 +2533,22 @@ class WorkOrder(Document):
 				qty_to_update = consumed_qty if consumed_qty < reserved_qty else reserved_qty
 				if qty_to_update >= 0:
 					doc.db_set("consumed_qty", flt(qty_to_update), update_modified=False)
-					consumed_qty -= qty_to_update
 
 				if doc.docstatus == 2:
 					doc.release_reversed_usage("consumed_qty", row_wise_serial_batch)
-					continue
+				else:
+					if (
+						doc.has_batch_no or doc.has_serial_no
+					) and doc.reservation_based_on == "Serial and Batch":
+						doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
+						doc.db_set("consumed_qty", doc.matched_serial_batch_qty, update_modified=False)
 
-				if (doc.has_batch_no or doc.has_serial_no) and doc.reservation_based_on == "Serial and Batch":
-					doc.consume_serial_batch_for_material_transfer(row_wise_serial_batch)
-					doc.db_set("consumed_qty", doc.matched_serial_batch_qty, update_modified=False)
+					doc.update_status()
+					doc.update_reserved_stock_in_bin()
+					doc.update_reserved_qty_in_voucher()
 
-				doc.update_status()
-				doc.update_reserved_stock_in_bin()
-				doc.update_reserved_qty_in_voucher()
+				# a serial and batch reservation keeps only what it matched
+				consumed_qty = flt(consumed_qty - doc.consumed_qty, doc.precision("consumed_qty"))
 
 	def validate_reserved_qty(self):
 		sre_details = get_sre_details(self.name)

@@ -7,7 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Order
 from frappe.query_builder.functions import Count, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
@@ -2282,6 +2282,8 @@ class StockController(AccountsController):
 						)
 					)
 				)
+				# serial and batch reservations first, so a qty one only takes what they did not match
+				.orderby(table.reservation_based_on, order=Order.desc)
 				.orderby(table.creation)
 			)
 			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
