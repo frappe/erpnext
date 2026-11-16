@@ -716,28 +716,29 @@ def validate_no_issued_proforma(rows) -> None:
 			)
 
 
-def validate_no_inter_company_sales_order(rows, parent) -> None:
-	"""Raise if a Purchase Order row being deleted is linked by an inter-company Sales Order row."""
+def validate_no_linked_order(rows, parent, linked_doctype) -> None:
+	"""Raise if a row being deleted is linked by a draft or submitted `linked_doctype` row."""
 	if not rows:
 		return
 
-	sales_orders = dict(
+	link_field = frappe.scrub(parent.doctype)
+	linked_orders = dict(
 		frappe.get_all(
-			"Sales Order Item",
+			f"{linked_doctype} Item",
 			filters={
-				"purchase_order": parent.name,
-				"purchase_order_item": ["in", [row.name for row in rows]],
+				link_field: parent.name,
+				f"{link_field}_item": ["in", [row.name for row in rows]],
 				"docstatus": ["<", 2],
 			},
-			fields=["purchase_order_item", "parent"],
+			fields=[f"{link_field}_item", "parent"],
 			as_list=True,
 		)
 	)
 	for row in rows:
-		if sales_order := sales_orders.get(row.name):
+		if linked_order := linked_orders.get(row.name):
 			frappe.throw(
-				_("Row #{0}: Cannot delete item {1} which is already ordered on Sales Order {2}.").format(
-					row.idx, row.item_code, get_link_to_form("Sales Order", sales_order)
+				_("Row #{0}: Cannot delete item {1} which is already ordered on {2} {3}.").format(
+					row.idx, row.item_code, _(linked_doctype), get_link_to_form(linked_doctype, linked_order)
 				)
 			)
 
@@ -758,32 +759,6 @@ def validate_no_kept_reservation(rows, parent) -> None:
 			)
 
 
-def validate_no_purchase_order(rows, parent) -> None:
-	"""Raise if a Sales Order row being deleted is linked by a draft or submitted Purchase Order row."""
-	if not rows:
-		return
-
-	purchase_orders = dict(
-		frappe.get_all(
-			"Purchase Order Item",
-			filters={
-				"sales_order": parent.name,
-				"sales_order_item": ["in", [row.name for row in rows]],
-				"docstatus": ["<", 2],
-			},
-			fields=["sales_order_item", "parent"],
-			as_list=True,
-		)
-	)
-	for row in rows:
-		if purchase_order := purchase_orders.get(row.name):
-			frappe.throw(
-				_("Row #{0}: Cannot delete item {1} which is already ordered on Purchase Order {2}.").format(
-					row.idx, row.item_code, get_link_to_form("Purchase Order", purchase_order)
-				)
-			)
-
-
 def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	"""Delete child rows not present in data; return True if any were removed."""
 	updated_item_names = [d.get("docname") for d in data]
@@ -796,9 +771,9 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 	if parent.doctype == "Sales Order":
 		validate_no_issued_proforma(deleted_children)
 		validate_no_kept_reservation(deleted_children, parent)
-		validate_no_purchase_order(deleted_children, parent)
+		validate_no_linked_order(deleted_children, parent, "Purchase Order")
 	elif parent.doctype == "Purchase Order":
-		validate_no_inter_company_sales_order(deleted_children, parent)
+		validate_no_linked_order(deleted_children, parent, "Sales Order")
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
