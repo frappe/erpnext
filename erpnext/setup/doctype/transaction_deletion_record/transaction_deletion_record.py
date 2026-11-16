@@ -672,6 +672,8 @@ def get_doctypes_to_be_ignored():
 		"Asset Maintenance Team",
 		"Authorization Rule",
 		"Dunning Type",
+		"Email Account",
+		"Communication",
 		"Email Digest",
 		"Journal Entry Template",
 		"Loyalty Program",
