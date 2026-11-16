@@ -1111,18 +1111,6 @@ frappe.ui.form.on("Stock Entry", {
 		if (frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(frm, frm.doc.purpose);
 	},
 
-	purchase_order: (frm) => {
-		if (frm.doc.purchase_order) {
-			frm.set_value("subcontracting_order", "");
-			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.stock_entry.services.subcontracting.get_items_from_subcontract_order",
-				source_name: frm.doc.purchase_order,
-				target: frm,
-				freeze: true,
-			});
-		}
-	},
-
 	subcontracting_order: (frm) => {
 		if (frm.doc.subcontracting_order) {
 			frm.set_value("purchase_order", "");
