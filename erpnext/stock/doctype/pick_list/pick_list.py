@@ -2404,7 +2404,10 @@ def get_rejected_warehouses():
 
 
 def check_pick_list_company(company: str | None) -> None:
-	if not isinstance(company, str) or not company:
+	if company is not None and not isinstance(company, str):
+		frappe.throw(_("Company must be text"), frappe.ValidationError)
+
+	if not company:
 		return
 
 	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
