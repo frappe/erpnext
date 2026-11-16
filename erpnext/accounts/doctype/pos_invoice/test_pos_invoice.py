@@ -1036,9 +1036,10 @@ class TestPOSInvoice(POSInvoiceTestMixin):
 		pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
 		pos_inv.items[0].rate = 300
 		pos_inv.save()
-		self.assertEqual(pos_inv.items[0].discount_percentage, 10)
-		# rate shouldn't change
-		self.assertEqual(pos_inv.items[0].rate, 405)
+		# a typed rate wins over the rule, which only set the starting rate
+		self.assertEqual(pos_inv.items[0].discount_percentage, 0)
+		self.assertEqual(pos_inv.items[0].discount_amount, 150)
+		self.assertEqual(pos_inv.items[0].rate, 300)
 
 		pos_inv.ignore_pricing_rule = 1
 		pos_inv.save()
