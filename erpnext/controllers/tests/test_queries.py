@@ -97,6 +97,30 @@ class TestQueries(unittest.TestCase):
 
 		self.assertGreaterEqual(len(query(filters={"company": "_Test Company"})), 1)
 
+	def test_warehouse_address_query_requires_warehouse_read_permission(self):
+		self.addCleanup(frappe.db.rollback)
+		address = frappe.get_doc(
+			{
+				"doctype": "Address",
+				"address_title": "Riverside Depot",
+				"address_type": "Shipping",
+				"address_line1": "12 River Road",
+				"city": "Pune",
+				"country": "India",
+				"links": [{"link_doctype": "Warehouse", "link_name": "Stores - _TC"}],
+			}
+		).insert()
+
+		query = add_default_params(queries.get_warehouse_address, "Address")
+		stock_user = create_user("warehouse_address_stock_user@example.com", "Stock User")
+		website_manager = create_user("warehouse_address_website_manager@example.com", "Website Manager")
+
+		with as_user(stock_user.name):
+			self.assertEqual(query(filters={"warehouse": "Stores - _TC"}), [[address.name]])
+
+		with as_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"warehouse": "Stores - _TC"})
+
 	def test_warehouse_query(self):
 		query = add_default_params(queries.warehouse_query, "Account")
 
