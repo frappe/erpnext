@@ -419,7 +419,7 @@ class TestRequestforQuotation(ERPNextTestSuite):
 	def test_get_link(self):
 		rfq = make_request_for_quotation()
 		parsed_link = urlparse(rfq.get_link())
-		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
+		self.assertEqual(parsed_link.path, f"/supplier-portal/rfqs/{rfq.name}")
 
 	def test_email_preview_keeps_formatting_and_drops_event_handlers(self):
 		rfq = make_request_for_quotation(

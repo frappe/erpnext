@@ -1,0 +1,599 @@
+{
+ "allow_guest": 0,
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "row",
+    "flexShrink": 0,
+    "height": "100%",
+    "isolation": "isolate",
+    "overflowX": "hidden",
+    "position": "static",
+    "width": "inherit"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "children": [],
+     "classes": [
+      "portal-no-print"
+     ],
+     "componentId": "supplier_portal_sidebar-nm9u0g52w",
+     "componentName": "supplier_portal_sidebar",
+     "componentProps": {},
+     "componentSlots": {},
+     "isStudioComponent": true
+    },
+    {
+     "baseStyles": {
+      "background": "var(--surface-base)",
+      "display": "flex",
+      "flex": "1",
+      "flexDirection": "column",
+      "height": "100%",
+      "minWidth": "0px"
+     },
+     "blockName": "Main",
+     "children": [
+      {
+       "baseStyles": {
+        "background": "var(--surface-base)",
+        "borderColor": "var(--outline-gray-1)",
+        "borderStyle": "solid",
+        "borderWidth": "0px 0px 1px 0px",
+        "display": "flex",
+        "flexDirection": "column",
+        "flexShrink": 0,
+        "justifyContent": "center",
+        "minHeight": "48px",
+        "padding": "0px 20px",
+        "width": "100%"
+       },
+       "blockName": "Page header",
+       "children": [
+        {
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "width": "100%"
+         },
+         "blockName": "Header row",
+         "children": [
+          {
+           "baseStyles": {
+            "minWidth": "0px"
+           },
+           "blockName": "Breadcrumbs",
+           "children": [],
+           "componentId": "Breadcrumbs-0i5vd8cfu",
+           "componentName": "Breadcrumbs",
+           "componentProps": {
+            "items": "{{ [{ label: __('My account'), route: '/account' }] }}"
+           }
+          }
+         ],
+         "componentId": "div-cbs44bn3d",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-bkieugxgu",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "0px 12px"
+       },
+       "originalElement": "div"
+      },
+      {
+       "baseStyles": {
+        "alignItems": "center",
+        "display": "flex",
+        "flex": "1",
+        "flexDirection": "column",
+        "gap": "20px",
+        "minHeight": "0px",
+        "overflowY": "auto",
+        "padding": "20px 20px 80px",
+        "width": "100%"
+       },
+       "blockName": "Content",
+       "children": [
+        {
+         "baseStyles": {
+          "display": "flex",
+          "flexDirection": "column",
+          "gap": "24px",
+          "maxWidth": "900px",
+          "width": "100%"
+         },
+         "blockName": "Page",
+         "children": [
+          {
+           "baseStyles": {
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "40px",
+            "maxWidth": "720px",
+            "width": "100%"
+           },
+           "blockName": "Account form",
+           "children": [
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "16px",
+              "width": "100%"
+             },
+             "blockName": "Profile",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)"
+               },
+               "blockName": "Profile heading",
+               "componentId": "TextBlock-303c68a4bc",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "h2",
+                "text": "{{ __('Profile') }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "display": "grid",
+                "gap": "16px",
+                "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                "width": "100%"
+               },
+               "blockName": "Names",
+               "children": [
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "First name",
+                 "componentId": "FormControl-20972231b9",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "label": "{{ __('First name') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "firstName"
+                  },
+                  "required": true,
+                  "type": "text"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Last name",
+                 "componentId": "FormControl-67b718eef6",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "label": "{{ __('Last name') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "lastName"
+                  },
+                  "type": "text"
+                 }
+                }
+               ],
+               "componentId": "div-c23e635a98",
+               "componentName": "div",
+               "mobileStyles": {
+                "gridTemplateColumns": "1fr"
+               },
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "display": "grid",
+                "gap": "16px",
+                "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                "width": "100%"
+               },
+               "blockName": "Login",
+               "children": [
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Email",
+                 "componentId": "FormControl-45b581fb49",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "description": "{{ __('Your login. Ask the buyer to change it.') }}",
+                  "disabled": true,
+                  "label": "{{ __('Email') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "email"
+                  },
+                  "type": "text"
+                 }
+                }
+               ],
+               "componentId": "div-d6b39e2d32",
+               "componentName": "div",
+               "mobileStyles": {
+                "gridTemplateColumns": "1fr"
+               },
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "display": "grid",
+                "gap": "16px",
+                "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                "width": "100%"
+               },
+               "blockName": "Contact",
+               "children": [
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Phone",
+                 "componentId": "FormControl-c58af05cd4",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "label": "{{ __('Phone') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "phone"
+                  },
+                  "type": "text"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Mobile",
+                 "componentId": "FormControl-0d72617336",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "label": "{{ __('Mobile') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "mobile"
+                  },
+                  "type": "text"
+                 }
+                }
+               ],
+               "componentId": "div-dc2cf671dc",
+               "componentName": "div",
+               "mobileStyles": {
+                "gridTemplateColumns": "1fr"
+               },
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "alignItems": "center",
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "12px"
+               },
+               "blockName": "Profile actions",
+               "children": [
+                {
+                 "blockName": "Save profile",
+                 "componentEvents": {
+                  "click": {
+                   "action": "Run Script",
+                   "script": "saveProfile()"
+                  }
+                 },
+                 "componentId": "Button-def6767219",
+                 "componentName": "Button",
+                 "componentProps": {
+                  "disabled": "{{ !profileChanged }}",
+                  "label": "{{ __('Save') }}",
+                  "loading": "{{ savingProfile }}",
+                  "variant": "solid"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-red-7)"
+                 },
+                 "blockName": "Profile error",
+                 "componentId": "TextBlock-c1296f5ebe",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-p-sm",
+                  "tag": "p",
+                  "text": "{{ profileError }}"
+                 },
+                 "visibilityCondition": "{{ !!profileError }}"
+                }
+               ],
+               "componentId": "div-63adafabbe",
+               "componentName": "div",
+               "originalElement": "div"
+              }
+             ],
+             "componentId": "div-3b4e1e7d9d",
+             "componentName": "div",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "display": "flex",
+              "flexDirection": "column",
+              "gap": "16px",
+              "width": "100%"
+             },
+             "blockName": "Password",
+             "children": [
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-8)"
+               },
+               "blockName": "Password heading",
+               "componentId": "TextBlock-0aea08e511",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-lg-semibold",
+                "tag": "h2",
+                "text": "{{ __('Password') }}"
+               }
+              },
+              {
+               "baseStyles": {
+                "display": "grid",
+                "gap": "16px",
+                "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                "width": "100%"
+               },
+               "blockName": "Current",
+               "children": [
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Current password",
+                 "componentId": "FormControl-eb0f9b0eeb",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "autocomplete": "current-password",
+                  "label": "{{ __('Current password') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "currentPassword"
+                  },
+                  "type": "password"
+                 }
+                }
+               ],
+               "componentId": "div-a4bef0fb32",
+               "componentName": "div",
+               "mobileStyles": {
+                "gridTemplateColumns": "1fr"
+               },
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "display": "grid",
+                "gap": "16px",
+                "gridTemplateColumns": "repeat(2, minmax(0, 1fr))",
+                "width": "100%"
+               },
+               "blockName": "New",
+               "children": [
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "New password",
+                 "componentId": "FormControl-1a035efdb8",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "autocomplete": "new-password",
+                  "label": "{{ __('New password') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "newPassword"
+                  },
+                  "type": "password"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "width": "100%"
+                 },
+                 "blockName": "Confirm password",
+                 "componentId": "FormControl-cc7b731d2e",
+                 "componentName": "FormControl",
+                 "componentProps": {
+                  "autocomplete": "new-password",
+                  "label": "{{ __('Confirm new password') }}",
+                  "modelValue": {
+                   "$type": "variable",
+                   "name": "confirmPassword"
+                  },
+                  "type": "password"
+                 }
+                }
+               ],
+               "componentId": "div-507c459716",
+               "componentName": "div",
+               "mobileStyles": {
+                "gridTemplateColumns": "1fr"
+               },
+               "originalElement": "div"
+              },
+              {
+               "baseStyles": {
+                "width": "100%"
+               },
+               "blockName": "Sign out elsewhere",
+               "componentId": "FormControl-6c8dfd64fd",
+               "componentName": "FormControl",
+               "componentProps": {
+                "label": "{{ __('Sign out of other devices') }}",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "signOutElsewhere"
+                },
+                "type": "checkbox"
+               }
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-red-7)"
+               },
+               "blockName": "Password hint",
+               "componentId": "TextBlock-c1b149c8be",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-p-sm",
+                "tag": "p",
+                "text": "{{ passwordHint }}"
+               },
+               "visibilityCondition": "{{ !!passwordHint }}"
+              },
+              {
+               "baseStyles": {
+                "alignItems": "center",
+                "display": "flex",
+                "flexWrap": "wrap",
+                "gap": "12px"
+               },
+               "blockName": "Password actions",
+               "children": [
+                {
+                 "blockName": "Change password",
+                 "componentEvents": {
+                  "click": {
+                   "action": "Run Script",
+                   "script": "changePassword()"
+                  }
+                 },
+                 "componentId": "Button-149f051663",
+                 "componentName": "Button",
+                 "componentProps": {
+                  "disabled": "{{ !canChangePassword }}",
+                  "label": "{{ __('Change password') }}",
+                  "loading": "{{ changingPassword }}",
+                  "variant": "solid"
+                 }
+                },
+                {
+                 "baseStyles": {
+                  "color": "var(--ink-red-7)"
+                 },
+                 "blockName": "Password error",
+                 "componentId": "TextBlock-5c67f22e88",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-p-sm",
+                  "tag": "p",
+                  "text": "{{ passwordError }}"
+                 },
+                 "visibilityCondition": "{{ !!passwordError }}"
+                }
+               ],
+               "componentId": "div-47f7849352",
+               "componentName": "div",
+               "originalElement": "div"
+              }
+             ],
+             "componentId": "div-cad1ab7686",
+             "componentName": "div",
+             "originalElement": "div"
+            }
+           ],
+           "classes": [
+            "portal-no-print"
+           ],
+           "componentId": "div-f7471b0bdb",
+           "componentName": "div",
+           "originalElement": "div",
+           "visibilityCondition": "{{ loaded }}"
+          },
+          {
+           "blockName": "Loading",
+           "children": [],
+           "componentId": "PortalSkeleton-account",
+           "componentName": "PortalSkeleton",
+           "componentProps": {
+            "columns": [
+             "minmax(0, 1fr)",
+             "8rem",
+             "9rem",
+             "11rem",
+             "4rem"
+            ],
+            "count": 3,
+            "variant": "list"
+           },
+           "isCustomVueComponent": true,
+           "visibilityCondition": "{{ !loaded && !loadFailed }}"
+          }
+         ],
+         "componentId": "div-2ph5cn879",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-ey9gjgbee",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "20px 12px 80px"
+       },
+       "originalElement": "div"
+      }
+     ],
+     "classes": [
+      "portal-print-page"
+     ],
+     "componentId": "div-qdf6vmr1s",
+     "componentName": "div",
+     "originalElement": "div"
+    }
+   ],
+   "componentId": "root",
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-10-28 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Studio Page",
+ "frappe_app": "erpnext",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-11-13 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "account",
+ "owner": "Administrator",
+ "page_name": "page-43f673f4",
+ "page_title": "My account",
+ "published": 1,
+ "resources": [
+  {
+   "auto": 1,
+   "fetch_document_using_filters": 0,
+   "limit": 0,
+   "method": "GET",
+   "params": "{}",
+   "resource_name": "account",
+   "resource_type": "API Resource",
+   "url": "erpnext.portal.portal_account.get_account"
+  }
+ ],
+ "route": "/account",
+ "studio_app": "supplier-portal"
+}

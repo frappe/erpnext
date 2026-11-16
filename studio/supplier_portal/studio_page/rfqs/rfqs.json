@@ -1,0 +1,703 @@
+{
+ "allow_guest": 0,
+ "blocks": [
+  {
+   "baseStyles": {
+    "display": "flex",
+    "flexDirection": "row",
+    "flexShrink": 0,
+    "height": "100%",
+    "isolation": "isolate",
+    "overflowX": "hidden",
+    "position": "static",
+    "width": "inherit"
+   },
+   "blockName": "body",
+   "children": [
+    {
+     "classes": [
+      "portal-no-print"
+     ],
+     "componentId": "supplier_portal_sidebar-0cf98fdd6",
+     "componentName": "supplier_portal_sidebar",
+     "componentProps": {},
+     "componentSlots": {},
+     "isStudioComponent": true
+    },
+    {
+     "baseStyles": {
+      "background": "var(--surface-base)",
+      "display": "flex",
+      "flex": "1",
+      "flexDirection": "column",
+      "height": "100%",
+      "minWidth": "0px"
+     },
+     "blockName": "Main",
+     "children": [
+      {
+       "baseStyles": {
+        "background": "var(--surface-base)",
+        "borderColor": "var(--outline-gray-1)",
+        "borderStyle": "solid",
+        "borderWidth": "0px 0px 1px 0px",
+        "display": "flex",
+        "flexDirection": "column",
+        "flexShrink": 0,
+        "justifyContent": "center",
+        "minHeight": "48px",
+        "padding": "0px 20px",
+        "width": "100%"
+       },
+       "blockName": "Page header",
+       "children": [
+        {
+         "baseStyles": {
+          "alignItems": "center",
+          "display": "flex",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "width": "100%"
+         },
+         "blockName": "Header row",
+         "children": [
+          {
+           "baseStyles": {
+            "minWidth": "0px"
+           },
+           "blockName": "Breadcrumbs",
+           "componentId": "Breadcrumbs-c7665y5dw",
+           "componentName": "Breadcrumbs",
+           "componentProps": {
+            "items": "{{ [{ label: __('Requests for Quotation'), route: '/rfqs' }] }}"
+           }
+          }
+         ],
+         "componentId": "div-7e6qrtono",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-i2341gzqz",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "0px 12px"
+       },
+       "originalElement": "div"
+      },
+      {
+       "baseStyles": {
+        "alignItems": "center",
+        "display": "flex",
+        "flex": "1",
+        "flexDirection": "column",
+        "gap": "20px",
+        "minHeight": "0px",
+        "overflowY": "hidden",
+        "padding": "20px 20px 0px",
+        "width": "100%"
+       },
+       "blockName": "Content",
+       "children": [
+        {
+         "baseStyles": {
+          "display": "flex",
+          "flex": "1",
+          "flexDirection": "column",
+          "gap": "16px",
+          "maxWidth": "900px",
+          "minHeight": "0px",
+          "width": "100%"
+         },
+         "blockName": "Page",
+         "children": [
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "display": "flex",
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": "12px",
+            "justifyContent": "space-between",
+            "width": "100%"
+           },
+           "blockName": "Toolbar",
+           "children": [
+            {
+             "blockName": "Status filter",
+             "componentId": "TabButtons-grkmwvy1n",
+             "componentName": "TabButtons",
+             "componentProps": {
+              "modelValue": {
+               "$type": "variable",
+               "name": "filter"
+              },
+              "options": "{{ filterOptions }}",
+              "size": "sm",
+              "variant": "subtle"
+             }
+            },
+            {
+             "baseStyles": {
+              "flex": "0 1 240px",
+              "maxWidth": "100%",
+              "minWidth": "180px"
+             },
+             "blockName": "Search",
+             "children": [
+              {
+               "baseStyles": {
+                "width": "100%"
+               },
+               "blockName": "TextInput",
+               "componentId": "TextInput-kkuzmkuno",
+               "componentName": "TextInput",
+               "componentProps": {
+                "aria-label": "{{ __('Search RFQs') }}",
+                "modelValue": {
+                 "$type": "variable",
+                 "name": "query"
+                },
+                "placeholder": "{{ __('Search RFQs') }}",
+                "type": "text"
+               },
+               "componentSlots": {
+                "prefix": {
+                 "parentBlockId": "TextInput-kkuzmkuno",
+                 "slotContent": [
+                  {
+                   "blockName": "Icon",
+                   "classes": [
+                    "size-4",
+                    "text-ink-gray-5"
+                   ],
+                   "componentId": "span-vcxk8jxt1",
+                   "componentName": "Icon",
+                   "componentProps": {
+                    "icon": "lucide-search"
+                   },
+                   "parentSlotName": "prefix"
+                  }
+                 ],
+                 "slotId": "TextInput-kkuzmkuno:prefix",
+                 "slotName": "prefix"
+                }
+               }
+              }
+             ],
+             "componentId": "div-phoy9dw41",
+             "componentName": "div",
+             "originalElement": "div"
+            }
+           ],
+           "componentId": "div-anhi593he",
+           "componentName": "div",
+           "originalElement": "div"
+          },
+          {
+           "baseStyles": {
+            "flex": "0 1 auto",
+            "minHeight": "0px",
+            "overflowY": "auto"
+           },
+           "blockName": "List",
+           "children": [
+            {
+             "baseStyles": {
+              "background": "var(--surface-base)",
+              "position": "sticky",
+              "top": "0px",
+              "zIndex": "1"
+             },
+             "blockName": "ListHeader",
+             "children": [
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-7j2lrkfwj",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Document') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-p17mn70zv",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-kn6x0qgk6",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Details') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-gwqs1g0pl",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-vst0l23ol",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Status') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-l3ecbzxgg",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              },
+              {
+               "baseStyles": {
+                "justifyContent": "flex-end"
+               },
+               "blockName": "ListHeaderCell",
+               "children": [
+                {
+                 "blockName": "TextBlock",
+                 "componentId": "TextBlock-17gvu0o0l",
+                 "componentName": "TextBlock",
+                 "componentProps": {
+                  "fontSize": "text-sm",
+                  "tag": "span",
+                  "text": "{{ __('Requested') }}"
+                 },
+                 "componentSlots": {}
+                }
+               ],
+               "componentId": "ListHeaderCell-x9owvhec3",
+               "componentName": "ListHeaderCell",
+               "componentProps": {},
+               "componentSlots": {}
+              }
+             ],
+             "componentId": "ListHeader-gsd4lqn3d",
+             "componentName": "ListHeader",
+             "componentProps": {},
+             "componentSlots": {}
+            },
+            {
+             "blockName": "ListRows",
+             "componentId": "ListRows-690dq159m",
+             "componentName": "ListRows",
+             "componentProps": {
+              "items": "{{ rows }}"
+             },
+             "componentSlots": {
+              "default": {
+               "parentBlockId": "ListRows-690dq159m",
+               "slotContent": [
+                {
+                 "blockName": "ListRow",
+                 "children": [
+                  {
+                   "blockName": "ListCell",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "display": "flex",
+                      "flexDirection": "column",
+                      "gap": "6px",
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Document",
+                     "children": [
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-8)",
+                        "fontFeatureSettings": "'tnum'"
+                       },
+                       "blockName": "TextBlock",
+                       "componentId": "TextBlock-i1vmeexa0",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-base-medium",
+                        "tag": "span",
+                        "text": "{{ item.id }}"
+                       },
+                       "componentSlots": {}
+                      },
+                      {
+                       "baseStyles": {
+                        "color": "var(--ink-gray-5)",
+                        "minWidth": "0px",
+                        "overflow": "hidden",
+                        "textOverflow": "ellipsis",
+                        "whiteSpace": "nowrap"
+                       },
+                       "blockName": "Items",
+                       "componentId": "TextBlock-5oxml39cn",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-sm",
+                        "tag": "span",
+                        "text": "{{ item.items }}"
+                       },
+                       "componentSlots": {},
+                       "visibilityCondition": "{{ !!item.items }}"
+                      }
+                     ],
+                     "componentId": "div-j7t4usc0m",
+                     "componentName": "div",
+                     "componentProps": {},
+                     "componentSlots": {},
+                     "originalElement": "div"
+                    }
+                   ],
+                   "componentId": "ListCell-9pe8zgx9n",
+                   "componentName": "ListCell",
+                   "componentProps": {},
+                   "componentSlots": {}
+                  },
+                  {
+                   "blockName": "ListCell",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "display": "flex",
+                      "flexDirection": "column",
+                      "gap": "6px",
+                      "minWidth": "0px"
+                     },
+                     "blockName": "Details",
+                     "children": [
+                      {
+                       "baseStyles": {
+                        "color": "{{ item.urgent ? 'var(--ink-red-5)' : 'var(--ink-gray-5)' }}",
+                        "fontFeatureSettings": "'tnum'"
+                       },
+                       "blockName": "TextBlock",
+                       "componentId": "TextBlock-297lsvwya",
+                       "componentName": "TextBlock",
+                       "componentProps": {
+                        "fontSize": "text-sm",
+                        "tag": "span",
+                        "text": "{{ item.note }}"
+                       },
+                       "componentSlots": {}
+                      }
+                     ],
+                     "componentId": "div-tkh4gvc3p",
+                     "componentName": "div",
+                     "componentProps": {},
+                     "componentSlots": {},
+                     "originalElement": "div"
+                    }
+                   ],
+                   "componentId": "ListCell-c7pboxwu2",
+                   "componentName": "ListCell",
+                   "componentProps": {},
+                   "componentSlots": {}
+                  },
+                  {
+                   "blockName": "ListCell",
+                   "children": [
+                    {
+                     "blockName": "Badge",
+                     "componentId": "Badge-9p0hgzp1m",
+                     "componentName": "Badge",
+                     "componentProps": {
+                      "label": "{{ item.status }}",
+                      "size": "sm",
+                      "theme": "{{ item.theme }}",
+                      "variant": "subtle"
+                     },
+                     "componentSlots": {}
+                    }
+                   ],
+                   "componentId": "ListCell-fxs94iskx",
+                   "componentName": "ListCell",
+                   "componentProps": {},
+                   "componentSlots": {}
+                  },
+                  {
+                   "baseStyles": {
+                    "justifyContent": "flex-end"
+                   },
+                   "blockName": "ListCell",
+                   "children": [
+                    {
+                     "baseStyles": {
+                      "color": "var(--ink-gray-7)",
+                      "fontFeatureSettings": "'tnum'"
+                     },
+                     "blockName": "TextBlock",
+                     "componentId": "TextBlock-ebqp5bsg2",
+                     "componentName": "TextBlock",
+                     "componentProps": {
+                      "fontSize": "text-base",
+                      "tag": "span",
+                      "text": "{{ item.requested }}"
+                     },
+                     "componentSlots": {}
+                    }
+                   ],
+                   "componentId": "ListCell-gbqdh3zg5",
+                   "componentName": "ListCell",
+                   "componentProps": {},
+                   "componentSlots": {}
+                  }
+                 ],
+                 "componentId": "ListRow-hse54ew0b",
+                 "componentName": "ListRow",
+                 "componentProps": {
+                  "route": "{{ item.route }}",
+                  "value": "{{ value }}"
+                 },
+                 "componentSlots": {},
+                 "parentSlotName": "default"
+                }
+               ],
+               "slotId": "ListRows-690dq159m:default",
+               "slotName": "default"
+              }
+             }
+            }
+           ],
+           "classes": [
+            "-mx-3",
+            "list-row-px-3"
+           ],
+           "componentId": "List-h1q9tolby",
+           "componentName": "List",
+           "componentProps": {
+            "columns": [
+             "minmax(0, 1fr)",
+             "13rem",
+             "7.5rem",
+             "8rem"
+            ],
+            "rowHeight": 60
+           },
+           "componentSlots": {}
+          },
+          {
+           "blockName": "Loading",
+           "componentId": "PortalSkeleton-quotations",
+           "componentName": "PortalSkeleton",
+           "componentProps": {
+            "columns": [
+             "minmax(0, 1fr)",
+             "13rem",
+             "7.5rem",
+             "8rem"
+            ],
+            "count": "{{ skeletonRows }}",
+            "variant": "list"
+           },
+           "isCustomVueComponent": true,
+           "visibilityCondition": "{{ loading && !loaded }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "display": "flex",
+            "justifyContent": "space-between",
+            "padding": "0px 0px 16px"
+           },
+           "blockName": "List footer",
+           "children": [
+            {
+             "blockName": "Page size",
+             "componentId": "TabButtons-pgqts",
+             "componentName": "TabButtons",
+             "componentProps": {
+              "modelValue": {
+               "$type": "variable",
+               "name": "pageSize"
+              },
+              "options": "{{ pageLengthOptions }}",
+              "size": "sm",
+              "variant": "subtle"
+             }
+            },
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "display": "flex",
+              "gap": "12px"
+             },
+             "blockName": "More",
+             "children": [
+              {
+               "blockName": "Load more",
+               "componentEvents": {
+                "click": {
+                 "action": "Run Script",
+                 "script": "loadMore()"
+                }
+               },
+               "componentId": "Button-pgqts",
+               "componentName": "Button",
+               "componentProps": {
+                "label": "{{ __('Load more') }}",
+                "loading": "{{ loading }}",
+                "variant": "subtle"
+               },
+               "visibilityCondition": "{{ hasMore }}"
+              },
+              {
+               "baseStyles": {
+                "color": "var(--ink-gray-5)",
+                "fontFeatureSettings": "'tnum'"
+               },
+               "blockName": "Shown",
+               "componentId": "TextBlock-pgqts",
+               "componentName": "TextBlock",
+               "componentProps": {
+                "fontSize": "text-sm",
+                "tag": "span",
+                "text": "{{ shownText }}"
+               }
+              }
+             ],
+             "componentId": "div-pgrqts",
+             "componentName": "div",
+             "originalElement": "div"
+            }
+           ],
+           "componentId": "div-pgqts",
+           "componentName": "div",
+           "originalElement": "div",
+           "visibilityCondition": "{{ paged }}"
+          },
+          {
+           "baseStyles": {
+            "alignItems": "center",
+            "display": "flex",
+            "flexDirection": "column",
+            "gap": "12px",
+            "justifyContent": "center",
+            "padding": "64px 0px",
+            "width": "100%"
+           },
+           "blockName": "Empty state",
+           "children": [
+            {
+             "baseStyles": {
+              "alignItems": "center",
+              "background": "var(--surface-gray-2)",
+              "borderRadius": "9999px",
+              "display": "flex",
+              "justifyContent": "center",
+              "padding": "12px"
+             },
+             "blockName": "Icon circle",
+             "children": [
+              {
+               "blockName": "Icon",
+               "classes": [
+                "size-6",
+                "text-ink-gray-5"
+               ],
+               "componentId": "span-x1voifhlw",
+               "componentName": "Icon",
+               "componentProps": {
+                "icon": "lucide-inbox"
+               }
+              }
+             ],
+             "componentId": "div-jo86crkwg",
+             "componentName": "div",
+             "originalElement": "div"
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-7)"
+             },
+             "blockName": "TextBlock",
+             "componentId": "TextBlock-sxkltnwjl",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-base",
+              "tag": "span",
+              "text": "{{ emptyTitle }}"
+             }
+            },
+            {
+             "baseStyles": {
+              "color": "var(--ink-gray-5)"
+             },
+             "blockName": "TextBlock",
+             "componentId": "TextBlock-zxh2uhjct",
+             "componentName": "TextBlock",
+             "componentProps": {
+              "fontSize": "text-sm",
+              "tag": "span",
+              "text": "{{ emptyCaption }}"
+             }
+            }
+           ],
+           "componentId": "div-42hsltltr",
+           "componentName": "div",
+           "originalElement": "div",
+           "visibilityCondition": "{{ (loaded || loadFailed) && rows.length === 0 }}"
+          }
+         ],
+         "componentId": "div-vay18092u",
+         "componentName": "div",
+         "originalElement": "div"
+        }
+       ],
+       "componentId": "div-qv75rz77u",
+       "componentName": "div",
+       "mobileStyles": {
+        "padding": "20px 12px 0px"
+       },
+       "originalElement": "div"
+      }
+     ],
+     "classes": [
+      "portal-print-page"
+     ],
+     "componentId": "div-uwf61shhc",
+     "componentName": "div",
+     "originalElement": "div"
+    }
+   ],
+   "componentId": "root",
+   "componentName": "div",
+   "originalElement": "body"
+  }
+ ],
+ "creation": "2026-10-26 12:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Studio Page",
+ "frappe_app": "erpnext",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2026-11-13 12:00:00.000000",
+ "modified_by": "Administrator",
+ "name": "rfqs",
+ "owner": "Administrator",
+ "page_name": "page-042db671",
+ "page_title": "Requests for Quotation",
+ "published": 1,
+ "resources": [],
+ "route": "/rfqs",
+ "studio_app": "supplier-portal"
+}
