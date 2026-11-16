@@ -203,7 +203,7 @@ class Supplier(TransactionBase):
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
-		doc = frappe.get_doc("Supplier Group", self.supplier_group)
+		doc = frappe.get_doc("Supplier Group", self.supplier_group, check_permission="read")
 		self.payment_terms = ""
 		self.accounts = []
 
