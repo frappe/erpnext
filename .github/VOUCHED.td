@@ -16,6 +16,7 @@ akhtarmohsin
 Copilot
 dependabot[bot]
 ervishnucs
+g-sowani
 gajjug004
 Hemil-Sangani
 Jatin3128
@@ -30,6 +31,7 @@ nikkothari22
 nishkagosalia
 raghavisruia
 rtdany10
+ruchiigadgil
 SandraFrappe
 sarathibalamurugan
 Shllokkk
