@@ -861,6 +861,10 @@ def set_taxes(
 	if customer_group:
 		args["customer_group"] = customer_group
 
+	# purchase forms without a Supplier Group field cannot send it
+	if party_type == "Supplier" and not supplier_group:
+		supplier_group = frappe.get_cached_value("Supplier", party, "supplier_group")
+
 	if supplier_group:
 		args["supplier_group"] = supplier_group
 
