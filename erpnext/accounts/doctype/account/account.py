@@ -681,7 +681,9 @@ def merge_account(old: str, new: str):
 	validate_balance_after_merge(old_account, new_account)
 
 	if old_account.is_group and old in get_ancestors_of("Account", new):
-		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
+		moved_account = frappe.get_doc("Account", new)
+		moved_account.parent_account = frappe.get_cached_value("Account", old, "parent_account")
+		moved_account.save()
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
 
