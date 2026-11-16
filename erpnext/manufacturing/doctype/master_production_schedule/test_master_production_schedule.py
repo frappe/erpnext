@@ -169,6 +169,28 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual(mps.items[0].cumulative_lead_time, 24)
 
+	def test_purchased_item_lead_time_uses_supplier_and_item_lead_times(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		rm_a = make_item("_Test MPS Supplier Lead RM A", {"is_stock_item": 1, "lead_time_days": 4}).name
+		rm_b = make_item("_Test MPS Supplier Lead RM B", {"is_stock_item": 1, "lead_time_days": 9}).name
+		fg_item = make_item("_Test MPS Supplier Lead FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_a, rm_b])
+		make_lead_time(
+			rm_a,
+			supplier_lead_times=[
+				{"supplier": "_Test Supplier", "purchase_time": 20, "buffer_time": 1, "is_default": 1}
+			],
+		)
+
+		order = make_sales_order(item_code=fg_item, qty=1)
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+
+		self.assertEqual(mps.items[0].cumulative_lead_time, 21)
+		self.assertEqual(mps.get_cumulative_lead_time(rm_b, None, 1), 9)
+
 	def test_row_uom_needs_a_conversion_factor(self):
 		self.assertRaises(frappe.ValidationError, make_mps, items=[make_mps_row(uom="Box")])
 		make_mps(items=[make_mps_row(uom="_Test UOM 1")])
