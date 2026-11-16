@@ -2318,6 +2318,50 @@ class TestPurchaseOrder(ERPNextTestSuite):
 			frappe.ValidationError, "fully ordered", make_inter_company_sales_order, po.name
 		)
 
+	def test_no_internal_sales_order_from_purchase_order_made_from_one(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		prepare_data_for_internal_transfer()
+		so = make_sales_order(
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			warehouse="_Test Internal Warehouse New 1 - TCP1",
+			qty=2,
+			rate=1,
+		)
+		po = make_inter_company_purchase_order(so.name)
+		po.items[0].schedule_date = today()
+		po.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "was created from", make_inter_company_sales_order, po.name
+		)
+
+	def test_no_internal_purchase_order_from_sales_order_made_from_drop_ship_po(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order as make_po_from_so
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		prepare_data_for_internal_transfer()
+		customer_so = make_sales_order(
+			company="_Test Company with perpetual inventory", warehouse="Stores - TCP1", qty=2, rate=1
+		)
+		po = make_po_from_so(
+			customer_so.name,
+			selected_items=[{"name": customer_so.items[0].name, "supplier": "_Test Internal Supplier 2"}],
+		)[0]
+		po.items[0].from_warehouse = "_Test Internal Warehouse New 1 - TCP1"
+		po.submit()
+
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "was created from", make_inter_company_purchase_order, so.name
+		)
+
 	def test_update_status_accepts_only_hold_close_and_reopen_on_submitted_po(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 

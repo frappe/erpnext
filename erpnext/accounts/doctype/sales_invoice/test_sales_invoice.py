@@ -3708,6 +3708,46 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
+	def test_no_inter_company_pi_from_si_made_from_pi(self):
+		pi = frappe.get_doc(
+			{
+				"doctype": "Purchase Invoice",
+				"company": "_Test Company 1",
+				"supplier": "_Test Internal Supplier",
+				"currency": "USD",
+				"buying_price_list": "_Test Price List Rest of the World",
+				"credit_to": "Creditors - _TC1",
+				"items": [
+					{
+						"item_code": "_Test Item",
+						"qty": 10,
+						"rate": 100,
+						"expense_account": "Cost of Goods Sold - _TC1",
+						"cost_center": "Main - _TC1",
+					}
+				],
+			}
+		).submit()
+
+		si = make_inter_company_transaction("Purchase Invoice", pi.name)
+		si.debit_to = "Debtors - WP"
+		si.items[0].update(
+			{
+				"income_account": "Sales - WP",
+				"expense_account": "Cost of Goods Sold - WP",
+				"cost_center": "Main - WP",
+			}
+		)
+		si.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"was created from",
+			make_inter_company_transaction,
+			"Sales Invoice",
+			si.name,
+		)
+
 	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
 		frappe.get_doc(
 			doctype="Terms and Conditions", title="_Test Sell Only Terms", selling=1, buying=0, terms="Net 30"
