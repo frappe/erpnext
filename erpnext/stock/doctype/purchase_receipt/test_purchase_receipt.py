@@ -4362,7 +4362,43 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(dict(returned_qty), {warehouses.rejected: -1.0, warehouses.transit: 1.0})
 
-	def make_split_transfer_receipt(self, item_doc=None):
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_full_rejected_returns_take_back_all_the_rejected_stock_qty(self):
+		"""A rejected return of all the rejected qty takes back all the rejected stock qty its receipt put
+		in, even when its own stock qty rounds below it."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		def make_rejected_only_return(pr):
+			rejected_return = make_return_doc("Purchase Receipt", pr.name)
+			rejected_return.items[0].update({"qty": 0, "received_qty": -3})
+			return rejected_return
+
+		item_doc = make_item(
+			"_Test Item For Full Rejected Return",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3344}]},
+		)
+		for make_rejected_return in (
+			make_rejected_only_return,
+			lambda pr: make_purchase_return_against_rejected_warehouse(pr.name),
+		):
+			pr, warehouses, _batch_no = self.make_split_transfer_receipt(item_doc, 0.3344)
+			rejected_return = make_rejected_return(pr)
+			rejected_return.submit()
+
+			sle_qty = frappe._dict(
+				frappe.get_all(
+					"Stock Ledger Entry",
+					filters={"voucher_no": rejected_return.name, "is_cancelled": 0},
+					fields=["warehouse", "actual_qty"],
+					as_list=True,
+				)
+			)
+			self.assertEqual(sle_qty, {warehouses.rejected: -1.01, warehouses.transit: 1.01})
+
+	def make_split_transfer_receipt(self, item_doc=None, conversion_factor=0.3356):
 		"""Internal receipt that splits 3 Box accepted and 3 Box rejected, whose stock qty rounds
 		unevenly, of a batch item by default."""
 		item_doc = item_doc or make_item(
@@ -4376,7 +4412,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			},
 		)
 		pr, warehouses, _company, batch_no = self.make_transfer_receipt("Split", item_doc, 3, 3)
-		pr.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+		pr.items[0].update({"uom": "Box", "conversion_factor": conversion_factor})
 		pr.submit()
 		return pr, warehouses, batch_no
 
