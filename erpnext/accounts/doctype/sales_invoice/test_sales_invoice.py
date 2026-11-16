@@ -3973,12 +3973,14 @@ class TestSalesInvoice(ERPNextTestSuite):
 		pi = make_inter_company_transaction("Sales Invoice", si.name)
 		pi.items[0].update(accounts)
 		pi.submit()
-		make_return_doc("Purchase Invoice", pi.name).submit()
+		return_pi = make_return_doc("Purchase Invoice", pi.name).submit()
 
 		pi = make_inter_company_transaction("Sales Invoice", si.name)
 		self.assertEqual(pi.items[0].qty, 2)
 		pi.items[0].update(accounts)
 		pi.submit()
+
+		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
 
 	def test_returned_internal_pi_cannot_be_cancelled_once_invoiced_again(self):
 		company = "_Test Company with perpetual inventory"
