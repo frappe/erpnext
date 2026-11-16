@@ -574,6 +574,47 @@ class TestPurchaseOrder(ERPNextTestSuite):
 		# ordered qty should decrease (back to initial) on row deletion
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
 
+	def test_update_child_cannot_remove_returned_item(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		po = create_purchase_order(do_not_save=1)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 100,
+				"warehouse": po.items[0].warehouse,
+				"schedule_date": po.schedule_date,
+			},
+		)
+		po.submit()
+		pr = make_purchase_receipt(po.name)
+		pr.submit()
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		purchase_return.items = purchase_return.items[1:]
+		purchase_return.submit()
+
+		kept_row = po.items[0]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": kept_row.item_code,
+					"rate": kept_row.rate,
+					"qty": kept_row.qty,
+					"docname": kept_row.name,
+				}
+			]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already been received",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_item,
+			po.name,
+		)
+
 	def test_discount_amount_partial_purchase_receipt(self):
 		po = create_purchase_order(qty=4, rate=100, do_not_save=1)
 		po.apply_discount_on = "Grand Total"
