@@ -55,7 +55,12 @@ from erpnext.stock.serial_batch_bundle import (
 	get_serial_or_batch_items,
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
-from erpnext.stock.utils import _get_incoming_rate, get_bin, get_combine_datetime
+from erpnext.stock.utils import (
+	_get_incoming_rate,
+	get_bin,
+	get_combine_datetime,
+	validate_warehouse_company,
+)
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -246,6 +251,7 @@ class StockEntry(StockController):
 		if self.work_order:
 			self.pro_doc = frappe.get_doc("Work Order", self.work_order)
 
+		self.validate_warehouses_company()
 		self.validate_duplicate_serial_and_batch_bundle("items")
 		self.validate_posting_time()
 		self.validate_purpose()
@@ -1523,9 +1529,15 @@ class StockEntry(StockController):
 					DuplicateEntryForWorkOrderError,
 				)
 
+	def validate_warehouses_company(self):
+		warehouses = {d.s_warehouse for d in self.get("items")} | {d.t_warehouse for d in self.get("items")}
+		for warehouse in warehouses - {None, ""}:
+			validate_warehouse_company(warehouse, self.company)
+
 	def set_actual_qty(self):
 		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
+		self.validate_warehouses_company()
 		for d in self.get("items"):
 			allow_negative_stock = is_negative_stock_allowed(item_code=d.item_code)
 			previous_sle = get_previous_sle(
