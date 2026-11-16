@@ -49,6 +49,35 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(scio.items[0].qty, 12)
 
+	def test_delivery_cancel_reopens_only_its_own_reservation(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		for qty in (3, 2):
+			frappe.new_doc("Stock Entry").update(
+				make_stock_entry_from_wo(wo.name, "Manufacture", qty)
+			).submit()
+
+		for qty in (3, 2):
+			scio.reload()
+			delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+			delivery.items[0].qty = qty
+			delivery.submit()
+		delivery.cancel()
+
+		reservations = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={"voucher_detail_no": scio.items[0].name, "docstatus": 1},
+			fields=["reserved_qty", "delivered_qty"],
+			order_by="creation",
+			as_list=True,
+		)
+		self.assertEqual([tuple(reservation) for reservation in reservations], [(3, 3), (2, 0)])
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 
