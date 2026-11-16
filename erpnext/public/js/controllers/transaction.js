@@ -1170,7 +1170,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (!frappe.model.can_create(target_doctype)) return;
 
 		frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.mapper.get_received_items",
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_received_items",
 			args: {
 				reference_name: this.frm.doc.name,
 				doctype: target_doctype,
