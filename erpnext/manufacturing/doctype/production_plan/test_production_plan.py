@@ -884,6 +884,24 @@ class TestProductionPlan(FrappeTestCase):
 		plan.po_items[0].warehouse = other_company_warehouse
 		self.assertRaises(InvalidWarehouseCompany, plan.save)
 
+		plan.po_items[0].warehouse = "_Test Warehouse - _TC"
+		for fieldname in ("for_warehouse", "sub_assembly_warehouse"):
+			plan.set(fieldname, other_company_warehouse)
+			self.assertRaises(InvalidWarehouseCompany, plan.save)
+			plan.set(fieldname, None)
+
+		plan.append(
+			"mr_items",
+			{
+				"item_code": rm_item,
+				"warehouse": "_Test Warehouse - _TC",
+				"from_warehouse": other_company_warehouse,
+				"material_request_type": "Material Transfer",
+				"quantity": 7,
+			},
+		)
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
+
 	def test_row_warehouse_of_plan_company_reserves_bin_on_submit(self):
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1}).name
