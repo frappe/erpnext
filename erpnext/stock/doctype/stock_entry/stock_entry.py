@@ -4764,9 +4764,9 @@ def get_warehouse_details(args):
 
 	args = frappe._dict(args)
 
+	frappe.has_permission("Item", ptype="select", throw=True)
 	frappe.has_permission("Stock Entry", "read", throw=True)
 	if args.warehouse:
-		erpnext.require_user_permission("Warehouse", args.warehouse)
 		check_stock_entry_warehouse_permission(args.warehouse)
 
 	ret = {}
@@ -4785,10 +4785,12 @@ def get_warehouse_details(args):
 
 
 def check_stock_entry_warehouse_permission(warehouse: str) -> None:
-	permissions = get_user_permissions().get("Warehouse", [])
-	allowed_warehouses = get_allowed_docs_for_doctype(permissions, "Stock Entry")
-	if allowed_warehouses and warehouse not in allowed_warehouses:
-		frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
+	user_permissions = get_user_permissions()
+	company = frappe.get_cached_value("Warehouse", warehouse, "company")
+	for doctype, name in (("Warehouse", warehouse), ("Company", company)):
+		allowed_docs = get_allowed_docs_for_doctype(user_permissions.get(doctype, []), "Stock Entry")
+		if allowed_docs and name not in allowed_docs:
+			frappe.throw(_("Not permitted for {0}").format(name), frappe.PermissionError)
 
 
 @frappe.whitelist()
