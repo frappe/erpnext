@@ -8,10 +8,13 @@ frappe.ui.form.on("Video", {
 	},
 
 	watch_video: (frm) => {
-		if (frm.doc.provider === "YouTube") {
-			frappe.help.show_video(frm.doc.youtube_video_id, frm.doc.title);
-		} else {
+		if (frm.doc.provider !== "YouTube") {
 			open_external_video(frm.doc.url);
+		} else if (frm.doc.youtube_video_id || frappe.utils.is_url(frm.doc.url || "")) {
+			// an unsaved Video has no id yet, so play its URL
+			frappe.help.show_video(frm.doc.youtube_video_id || frm.doc.url, frm.doc.title);
+		} else {
+			frappe.throw(__("Invalid video URL"));
 		}
 	},
 
