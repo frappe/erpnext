@@ -1365,6 +1365,38 @@ class TestSalesOrder(ERPNextTestSuite):
 			so.name,
 		)
 
+	def test_update_child_cannot_remove_bundle_row_ordered_on_purchase_order(self):
+		make_item("_Test Ordered Bundle", {"is_stock_item": 0})
+		make_item("_Test Ordered Bundle Component", {"is_stock_item": 1})
+		make_product_bundle("_Test Ordered Bundle", ["_Test Ordered Bundle Component"])
+		bundle_row = {
+			"item_code": "_Test Ordered Bundle",
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[bundle_row, {"item_code": "_Test Item", "qty": 1, "rate": 100}])
+		purchase_order = make_purchase_order(
+			so.name, selected_items=[{**bundle_row, "name": so.items[0].name}]
+		)[0]
+		purchase_order.set_warehouse = "_Test Warehouse - _TC"
+		purchase_order.submit()
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 1, "rate": 100, "docname": kept_row.name}]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Purchase Order",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_item,
+			so.name,
+		)
+
 	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
 		for workflow_name in frappe.get_all(
 			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
