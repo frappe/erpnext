@@ -25,6 +25,7 @@ ORDER_DOCTYPES_BY_TYPE = {
 
 ORDER_TYPE_BY_DOCTYPE = {
 	"Sales Order": ("Selling", "customer"),
+	"Quotation": ("Selling", "party_name"),
 	"Purchase Order": ("Purchasing", "supplier"),
 }
 
@@ -123,7 +124,7 @@ class BlanketOrder(Document):
 		self.set(f"{other_party_field}_name", None)
 
 	def validate_order_matches(self, order_doc) -> None:
-		order_type, party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
+		order_type, order_party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
 		if self.blanket_order_type != order_type:
 			frappe.throw(
 				_("Blanket Order {0} is a {1} order and cannot be used on a {2}").format(
@@ -131,12 +132,13 @@ class BlanketOrder(Document):
 				)
 			)
 
-		if self.get(party_field) != order_doc.get(party_field):
+		party = self.get(blanket_order_pricing.get_order_type_config(order_type)["party_field"])
+		if party != order_doc.get(order_party_field):
 			frappe.throw(
 				_("Blanket Order {0} is for {1}, not {2}").format(
 					frappe.bold(self.name),
-					frappe.bold(self.get(party_field)),
-					frappe.bold(order_doc.get(party_field)),
+					frappe.bold(party),
+					frappe.bold(order_doc.get(order_party_field)),
 				)
 			)
 
@@ -346,8 +348,13 @@ def make_order(source_name: str):
 
 
 def validate_against_blanket_order(order_doc):
+<<<<<<< HEAD
 	if order_doc.doctype not in ("Sales Order", "Purchase Order"):
 		return
+=======
+	if order_doc.doctype in ORDER_TYPE_BY_DOCTYPE:
+		order_data = {}
+>>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 
 	order_data = {}
 	for item in order_doc.get("items"):
@@ -356,11 +363,22 @@ def validate_against_blanket_order(order_doc):
 			item_data = order_data.setdefault(item.blanket_order, {})
 			item_data[item.item_code] = item_data.get(item.item_code, 0) + stock_qty
 
+<<<<<<< HEAD
 	for bo_name, item_data in sorted(order_data.items()):
 		bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 		bo_doc.validate_order_matches(order_doc)
 		bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
 		bo_doc.set_order_rates(order_doc)
+=======
+		for bo_name, item_data in sorted(order_data.items()):
+			bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
+			bo_doc.validate_can_be_ordered(order_doc.transaction_date)
+			bo_doc.validate_order_matches(order_doc)
+			bo_doc.validate_items_are_open(list(item_data))
+			if order_doc.doctype != "Quotation":
+				bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
+			bo_doc.set_order_rates(order_doc)
+>>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 
 
 def validate_reopen_against_blanket_order(order_doc, rows=None):

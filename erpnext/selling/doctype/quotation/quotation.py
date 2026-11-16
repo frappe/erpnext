@@ -12,6 +12,16 @@ from frappe.utils import add_days, cint, flt, getdate, nowdate
 from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
+<<<<<<< HEAD
+=======
+from erpnext.crm.doctype.lead.mapper import validate_lead_is_enabled
+from erpnext.manufacturing.doctype.blanket_order.blanket_order import validate_against_blanket_order
+
+from .mapper import (
+	get_existing_customer_name,
+	get_ordered_items,
+)
+>>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -152,6 +162,7 @@ class Quotation(SellingController):
 			validate_coupon_code(self.coupon_code, customer)
 
 		self.set_customer_name()
+		validate_against_blanket_order(self)
 		if self.items:
 			self.with_items = 1
 

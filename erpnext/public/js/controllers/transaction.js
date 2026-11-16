@@ -329,7 +329,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					filters: {
 						company: doc.company,
 						currency: doc.currency,
-						blanket_order_type: doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
+						blanket_order_type: ["Sales Order", "Quotation"].includes(doc.doctype)
+							? "Selling"
+							: "Purchasing",
 						item: item.item_code,
 					},
 				};
