@@ -990,15 +990,25 @@ def get_allowance_for(
 def get_total_matching_target_ref_qty(args) -> float:
 	"""Total of the source rows, or the target row's ref qty when it was rounded and the total rounds to it, so parts
 	that add up to the target row within its rounding complete it."""
-	ref_qty, qty, conversion_factor = frappe.db.get_value(
-		args["target_dt"], args["detail_id"], [args["target_ref_field"], "qty", "conversion_factor"]
-	)
 	precision = frappe.get_precision(args["target_dt"], args["target_field"])
-	return match_target_qty(args["source_dt_value"], ref_qty, flt(qty) * flt(conversion_factor), precision)
+	return match_target_qty(args["source_dt_value"], *get_ref_qty_and_unrounded_ref_qty(args), precision)
+
+
+def get_ref_qty_and_unrounded_ref_qty(args) -> tuple:
+	"""Target row's ref qty and its qty * conversion factor. A ref qty other than stock qty, like a Packed Item's qty,
+	is in stock UOM and always rounded, so it has no unrounded qty."""
+	if args["target_ref_field"] != "stock_qty":
+		return frappe.db.get_value(args["target_dt"], args["detail_id"], args["target_ref_field"]), None
+
+	stock_qty, qty, conversion_factor = frappe.db.get_value(
+		args["target_dt"], args["detail_id"], ["stock_qty", "qty", "conversion_factor"]
+	)
+	return stock_qty, flt(qty) * flt(conversion_factor)
 
 
 def match_target_qty(total, target_qty, unrounded_target_qty, precision) -> float:
-	"""``target_qty`` if it was rounded from ``unrounded_target_qty`` and ``total`` rounds to it, else ``total``."""
+	"""``target_qty`` if it was rounded from ``unrounded_target_qty`` (None if always rounded) and ``total`` rounds to
+	it, else ``total``."""
 	target_qty = flt(target_qty)
 	if target_qty and target_qty != flt(unrounded_target_qty, 9) and flt(total, precision) == target_qty:
 		return target_qty
