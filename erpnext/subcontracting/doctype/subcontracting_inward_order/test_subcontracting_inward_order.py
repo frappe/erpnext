@@ -1376,6 +1376,46 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			7,
 		)
 
+	def test_return_extra_customer_material_held_by_work_order(self):
+		scio, wo = make_work_order_with_extra_material()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		self.assertEqual([(row.item_code, row.qty) for row in rm_return.items], [("Basic RM", 2)])
+		rm_return.submit()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Work Order Item", {"parent": wo.name, "item_code": "Basic RM"}, "stock_reserved_qty"
+			),
+			5,
+		)
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5)).submit()
+
+	def test_completed_work_order_hands_back_unused_customer_material(self):
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_qty_details_for_voucher,
+		)
+
+		scio, wo = make_work_order_with_extra_material()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture", 5)).submit()
+
+		scio.reload()
+		basic_rm = next(row for row in scio.received_items if row.rm_item_code == "Basic RM")
+		reserved_qty = get_sre_reserved_qty_details_for_voucher("Subcontracting Inward Order", scio.name)
+		self.assertEqual(reserved_qty[basic_rm.name], 2)
+		frappe.new_doc("Stock Entry").update(scio.make_rm_return()).submit()
+
+	def test_no_return_of_extra_customer_material_consumed_by_work_order(self):
+		scio, wo = make_work_order_with_extra_material()
+		manufacture = frappe.new_doc("Stock Entry").update(
+			make_stock_entry_from_wo(wo.name, "Manufacture", 5)
+		)
+		next(row for row in manufacture.items if row.item_code == "Basic RM").qty = 7
+		manufacture.submit()
+
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		self.assertFalse([row for row in rm_return.items if row.item_code == "Basic RM"])
+
 	def test_cancelled_manufacture_of_closed_work_order_keeps_the_rest_consumed(self):
 		from erpnext.manufacturing.doctype.work_order.services.reservation import (
 			make_stock_reservation_entries,
@@ -1940,6 +1980,20 @@ def receive_customer_material(scio, rm_item, qty, rate):
 	rm_in.submit()
 	scio.reload()
 	return rm_in
+
+
+def make_work_order_with_extra_material():
+	"""Receive 7 Basic RM for an order that needs 5 and make one Work Order for all of it."""
+	so, scio = create_so_scio()
+	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+	next(row for row in rm_in.items if row.item_code == "Basic RM").qty = 7
+	rm_in.submit()
+	scio.reload()
+	wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+	wo.skip_transfer = 1
+	wo.required_items[-1].source_warehouse = "Stores - _TC"
+	wo.submit()
+	return scio, wo
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
