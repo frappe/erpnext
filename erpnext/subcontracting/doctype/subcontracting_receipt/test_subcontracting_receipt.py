@@ -549,6 +549,27 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 
 		self.assertEqual(scr_return.items[1].cost_center, "_Test Cost Center 2 - _TC")
 
+	def test_return_split_over_two_rows_keeps_the_cost_center_of_each_secondary_row(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(fg_item)
+		scr = make_receipt_with_secondary_items(fg_item, 10)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		fg_row, secondary_row = scr_return.items
+		fg_row.qty = -2
+		secondary_row.update({"qty": -1, "received_qty": -1, "cost_center": "_Test Cost Center - _TC"})
+		scr_return.append("items", fg_row.as_dict(no_default_fields=True))
+		split_secondary_row = scr_return.append("items", secondary_row.as_dict(no_default_fields=True))
+		split_secondary_row.cost_center = "_Test Cost Center 2 - _TC"
+		scr_return.docstatus = 1
+		with patch.object(frappe, "in_test", False):
+			scr_return.insert()
+
+		self.assertEqual(
+			[row.cost_center for row in scr_return.items if row.bom_secondary_item],
+			["_Test Cost Center - _TC", "_Test Cost Center 2 - _TC"],
+		)
+
 	def test_rejected_return_leaves_out_secondary_items(self):
 		from erpnext.subcontracting.doctype.subcontracting_receipt.mapper import (
 			make_subcontract_return_against_rejected_warehouse,
