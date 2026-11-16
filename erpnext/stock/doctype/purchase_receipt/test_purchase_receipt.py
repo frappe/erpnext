@@ -2887,8 +2887,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_internal_transfer_that_rejects_material_into_transit(self):
 		"""Material rejected back into the in-transit warehouse stays there, so the receipt and its
 		return book transit with the net stock value that moved through it."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
 		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
 		company = dn.company
