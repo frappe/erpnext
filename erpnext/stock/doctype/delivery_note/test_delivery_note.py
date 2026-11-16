@@ -5073,6 +5073,42 @@ class TestDeliveryNote(ERPNextTestSuite):
 		)
 		self.assertRaises(frappe.ValidationError, inter_company_receipt.submit)
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"over_delivery_receipt_allowance": 0, "role_allowed_to_over_deliver_receive": "System Manager"},
+	)
+	def test_inter_company_receipt_over_receipt_by_allowed_role(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_parties
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		create_internal_parties()
+		make_stock_entry(
+			item_code="_Test Item", target="Stores - WP", company="Wind Power LLC", qty=10, basic_rate=100
+		)
+		delivery_note = create_delivery_note(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			warehouse="Stores - WP",
+			cost_center="Main - WP",
+			expense_account="Cost of Goods Sold - WP",
+			currency="USD",
+			qty=10,
+			do_not_submit=True,
+		)
+		delivery_note.selling_price_list = "_Test Price List Rest of the World"
+		delivery_note.submit()
+
+		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		receipt.items[0].update(
+			{
+				"qty": 12,
+				"warehouse": "Stores - _TC1",
+				"cost_center": "Main - _TC1",
+				"expense_account": "Cost of Goods Sold - _TC1",
+			}
+		)
+		receipt.submit()
+
 	def test_inter_company_receipt_of_bundle_sold_in_another_uom(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
