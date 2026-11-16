@@ -498,7 +498,7 @@ class PaymentEntry(AccountsController):
 
 		uniq_vouchers = {(x.reference_doctype, x.reference_name) for x in self.references}
 		vouchers = [frappe._dict({"voucher_type": x[0], "voucher_no": x[1]}) for x in uniq_vouchers]
-		latest_references = get_outstanding_reference_documents(
+		latest_references = _get_outstanding_reference_documents(
 			{
 				"posting_date": self.posting_date,
 				"company": self.company,
@@ -2513,6 +2513,34 @@ def get_outstanding_reference_documents(args, validate=False):
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	frappe.has_permission("Payment Entry", "create", throw=True)
+	if args.get("company"):
+		frappe.has_permission("Company", doc=args["company"], throw=True)
+
+	data = _get_outstanding_reference_documents(args, validate)
+	return filter_readable_vouchers(data) if data else data
+
+
+def filter_readable_vouchers(data):
+	"""Drop rows whose voucher the user cannot read."""
+	names_by_doctype = {}
+	for d in data:
+		names_by_doctype.setdefault(d["voucher_type"], set()).add(d["voucher_no"])
+
+	readable = set()
+	for doctype, names in names_by_doctype.items():
+		if not frappe.has_permission(doctype, "read"):
+			continue
+
+		readable.update(
+			(doctype, name)
+			for name in frappe.get_list(doctype, filters={"name": ("in", list(names))}, pluck="name", limit=0)
+		)
+
+	return [d for d in data if (d["voucher_type"], d["voucher_no"]) in readable]
+
+
+def _get_outstanding_reference_documents(args, validate=False):
 	if args.get("party_type") == "Member":
 		return
 
