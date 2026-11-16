@@ -1615,6 +1615,35 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		for name in scio_names:
 			self.assertEqual(frappe.db.get_value("Subcontracting Inward Order", name, "status"), "Closed")
 
+	def test_holding_sales_order_keeps_a_closed_inward_order_closed(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
+			update_subcontracting_inward_order_status,
+		)
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		update_subcontracting_inward_order_status(scio.name, "Closed")
+
+		update_status("On Hold", so.name)
+		self.assertEqual(frappe.db.get_value("Sales Order", so.name, "status"), "On Hold")
+		update_status("Draft", so.name)
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Closed")
+
+	def test_reopening_sales_order_keeps_a_closed_inward_order_closed(self):
+		from erpnext.selling.doctype.sales_order.sales_order import update_status
+		from erpnext.subcontracting.doctype.subcontracting_inward_order.subcontracting_inward_order import (
+			update_subcontracting_inward_order_status,
+		)
+
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		update_subcontracting_inward_order_status(scio.name, "Closed")
+
+		update_status("Closed", so.name)
+		update_status("Draft", so.name)
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Closed")
+
 	def test_inward_order_from_closed_sales_order(self):
 		from erpnext.selling.doctype.sales_order.sales_order import update_status
 
