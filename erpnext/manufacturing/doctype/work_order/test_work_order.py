@@ -7081,6 +7081,51 @@ class TestWorkOrder(ERPNextTestSuite):
 		new_bom = frappe.get_doc("Work Order", wo.name).make_bom()
 		self.assertEqual([flt(d.time_in_mins) for d in new_bom.operations], [60, 60])
 
+<<<<<<< HEAD
+=======
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{
+			"material_consumption": 1,
+			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
+		},
+	)
+	def test_bom_from_work_order_includes_material_consumption(self):
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
+		)
+		for purpose in (
+			"Material Transfer for Manufacture",
+			"Material Consumption for Manufacture",
+			"Manufacture",
+		):
+			frappe.get_doc(make_stock_entry(work_order.name, purpose, 10)).submit()
+
+		new_bom = frappe.get_doc("Work Order", work_order.name).make_bom()
+		self.assertEqual([(d.item_code, d.qty) for d in new_bom.items], [(rm_item, 20)])
+
+	def test_semi_fg_schedule_block_needs_full_operation_output_on_job_cards(self):
+		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
+
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
+		wo.db_set({"production_plan": "Test JCO Plan", "production_plan_item": "Test JCO Plan Row"})
+		wheel_operation = wo.operations[0]
+		wheel_jc = self.get_semi_fg_job_card(wo, wheel_operation)
+		wheel_jc.db_set({"for_quantity": 2, "total_time_in_mins": 60})
+
+		block = frappe._dict(
+			production_plan="Test JCO Plan", plan_row="Test JCO Plan Row", operation=wheel_operation.operation
+		)
+		self.assertEqual(filter_covered_schedule_rows([block]), [block])
+
+		wheel_jc.db_set("for_quantity", 4)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
+
+>>>>>>> a51850f (test: BOM from a Work Order includes Material Consumption entries)
 	def test_semi_fg_fractional_output_qty_completes_work_order(self):
 		wo = self.make_car_with_four_wheels_work_order(
 			"Stores - _TC", prefix="Test JCO Kg", stock_uom="Kg", bom_qty=3, wheel_qty=1
