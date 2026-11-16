@@ -787,8 +787,11 @@ class TestAdjustmentEntry(ValuationFixTestCase):
 			posting_date=get_adjustment_date(),
 			posting_time="00:00:00",
 		)
-		self.fix_by_adjustment_entry(item)
+		result = make_adjustment_entry(COMPANY, self.get_differences(item), get_adjustment_date(), "00:00:00")
+		frappe.get_doc("Stock Reconciliation", result["adjustment_entry"]).submit()
 
+		# so only the adjustment guard can refuse the cancel
+		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		receipt.reload()
 		self.assertRaises(BackdatedEntryBeforeAdjustmentError, receipt.cancel)
 
