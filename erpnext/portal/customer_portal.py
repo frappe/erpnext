@@ -8,6 +8,7 @@ own fields, so a customer receives what their page shows and nothing else."""
 import re
 
 import frappe
+from bs4 import BeautifulSoup
 from frappe import _
 from frappe.printing.doctype.print_format.classic_converter import convert_classic_to_beta
 from frappe.printing.layout import iter_fields, iter_zones
@@ -1455,6 +1456,12 @@ def add_portal_comment(doctype: str, name: str, content: str) -> dict:
 	scoped = _portal_filters(doctype, {"name": name})
 	if scoped is None or not frappe.db.exists(doctype, scoped):
 		raise frappe.DoesNotExistError
+
+	# a mention notifies and emails the user named in it: a customer must not reach any internal user
+	html = BeautifulSoup(content, "html.parser")
+	for mention in html.find_all(class_="mention"):
+		mention.unwrap()
+	content = str(html)
 
 	who = frappe.utils.get_fullname(frappe.session.user)
 	comment = frappe.get_doc(
