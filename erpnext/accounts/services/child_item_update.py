@@ -716,7 +716,7 @@ def validate_no_issued_proforma(rows) -> None:
 			)
 
 
-def validate_no_inter_company_sales_order(rows) -> None:
+def validate_no_inter_company_sales_order(rows, parent) -> None:
 	"""Raise if a Purchase Order row being deleted is linked by an inter-company Sales Order row."""
 	if not rows:
 		return
@@ -724,7 +724,11 @@ def validate_no_inter_company_sales_order(rows) -> None:
 	sales_orders = dict(
 		frappe.get_all(
 			"Sales Order Item",
-			filters={"purchase_order_item": ["in", [row.name for row in rows]], "docstatus": ["<", 2]},
+			filters={
+				"purchase_order": parent.name,
+				"purchase_order_item": ["in", [row.name for row in rows]],
+				"docstatus": ["<", 2],
+			},
 			fields=["purchase_order_item", "parent"],
 			as_list=True,
 		)
@@ -767,7 +771,7 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 		validate_no_issued_proforma(deleted_children)
 		validate_no_kept_reservation(deleted_children, parent)
 	elif parent.doctype == "Purchase Order":
-		validate_no_inter_company_sales_order(deleted_children)
+		validate_no_inter_company_sales_order(deleted_children, parent)
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)
