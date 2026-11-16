@@ -293,9 +293,38 @@ class TestBlanketOrder(FrappeTestCase):
 		lead_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
 		lead_quotation.insert()
 
+<<<<<<< HEAD
 	def test_blanket_order_lookup_keeps_order_without_qty_limit(self):
 		item = make_item("_Test Blanket Order No Limit Lookup Item", {"is_stock_item": 1}).name
 		bo = new_blanket_order(blanket_order_type="Purchasing")
+=======
+	def test_blanket_order_rate_is_set_by_the_server(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.items[0].blanket_order_rate = 999
+		po.items[0].rate = 150
+		po.insert()
+
+		self.assertEqual(po.items[0].blanket_order_rate, 100)
+		self.assertIn("differs from the rate", str(frappe.message_log[-1]))
+
+	def test_order_row_item_must_be_in_the_blanket_order(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		other_item = make_item("_Test Blanket Order Missing Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=10, rate=90)
+
+		so = make_sales_order(item_code=other_item, qty=500, do_not_save=True)
+		so.items[0].against_blanket_order = 1
+		so.items[0].blanket_order = bo.name
+		so.items[0].blanket_order_rate = 90
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not in Blanket Order", so.insert)
+
+	def test_party_and_order_type_are_enforced(self):
+		bo = new_blanket_order(blanket_order_type="Selling")
+		bo.customer = None
+>>>>>>> 7f7c5b6 (test: reject a Sales Order row whose item is not in its Blanket Order)
 		bo.supplier = "_Test Supplier"
 		bo.items[0].item_code = item
 		bo.items[0].qty = 0
