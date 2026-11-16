@@ -118,6 +118,10 @@ class Customer(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+		self.set_onload(
+			"load_overview_on_demand",
+			frappe.get_single_value("Selling Settings", "load_customer_overview_on_demand"),
+		)
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)

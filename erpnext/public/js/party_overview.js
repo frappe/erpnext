@@ -56,7 +56,7 @@ erpnext.PartyOverview = class PartyOverview {
 		if (this.frm.get_active_tab()?.df.fieldname !== "overview_tab" || !this.needs_refresh) return;
 		this.needs_refresh = false;
 		if (this.party !== this.frm.doc.name) this.build();
-		else this.load_companies();
+		else this.start();
 	}
 
 	build() {
@@ -67,6 +67,42 @@ erpnext.PartyOverview = class PartyOverview {
 		this.build_header();
 		this.build_sections();
 
+		this.start();
+	}
+
+	start() {
+		if (this.frm.doc.__onload?.load_overview_on_demand && !this.requested) this.render_load_prompt();
+		else this.load_companies();
+	}
+
+	render_load_prompt() {
+		this.$body.hide();
+		this.$header.hide();
+		this.$empty
+			.empty()
+			.append(
+				frappe.ui.empty_state({
+					icon: "chart-column",
+					title: __("Overview not loaded"),
+					description: __("Load it to see totals, balances and recent transactions."),
+					actions: [
+						{
+							label: __("Load Overview"),
+							variant: "solid",
+							icon: "refresh-cw",
+							onclick: () => this.request_overview(),
+						},
+					],
+				})
+			)
+			.show();
+	}
+
+	request_overview() {
+		this.requested = true;
+		this.$empty.hide();
+		this.$body.show();
+		this.$header.show();
 		this.load_companies();
 	}
 
@@ -82,6 +118,7 @@ erpnext.PartyOverview = class PartyOverview {
 			period: PERIODS.includes(this.pref("period")) ? this.pref("period") : PERIODS[0],
 			doc_type: "All",
 		};
+		this.requested = false;
 		this.companies_ready = false;
 		this.list = null;
 		this.destroy_trend();
@@ -91,7 +128,21 @@ erpnext.PartyOverview = class PartyOverview {
 	build_header() {
 		this.$header = $('<div class="co-header">').appendTo(this.$root);
 		this.$controls = $('<div class="co-header-controls">').appendTo(this.$header);
-		this.$period = $('<div class="co-period">').toggle(!!this.accounts).appendTo(this.$header);
+		this.$period = $('<div class="co-period">').toggle(!!this.accounts);
+		$('<div class="flex items-center gap-2">')
+			.append(
+				this.$period,
+				frappe.ui.button({
+					icon: "refresh-cw",
+					variant: "ghost",
+					tooltip: __("Refresh"),
+					onclick: () => {
+						this.load();
+						this.refresh_list();
+					},
+				})
+			)
+			.appendTo(this.$header);
 
 		this.company_field = this.make_select(
 			this.$controls,
@@ -120,8 +171,6 @@ erpnext.PartyOverview = class PartyOverview {
 		);
 		this.period_field.set_value(this.state.period);
 		this.period_field.$wrapper.parent().toggle(!!this.accounts);
-		this.has_controls = !single_company || this.accounts;
-		this.$header.toggle(this.has_controls);
 	}
 
 	build_sections() {
@@ -157,7 +206,7 @@ erpnext.PartyOverview = class PartyOverview {
 				}
 				this.$empty.hide();
 				this.$body.show();
-				this.$header.toggle(this.has_controls);
+				this.$header.show();
 				this.company_field.df.options = companies.join("\n");
 				this.company_field.refresh();
 				const known = companies.includes(this.state.company);

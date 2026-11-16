@@ -33,6 +33,7 @@ class BuyingSettings(Document):
 		buying_price_list: DF.Link | None
 		disable_last_purchase_rate: DF.Check
 		fixed_email: DF.Link | None
+		load_supplier_overview_on_demand: DF.Check
 		maintain_same_rate: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		over_order_allowance: DF.Float

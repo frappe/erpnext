@@ -15,6 +15,7 @@
   "column_break_4",
   "customer_group",
   "territory",
+  "load_customer_overview_on_demand",
   "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
@@ -445,6 +446,13 @@
   {
    "fieldname": "transaction_naming_html",
    "fieldtype": "HTML"
+  },
+  {
+   "default": "0",
+   "description": "Show a Load Overview button on the Customer Overview tab instead of loading it on open. Useful when customers have a very large number of transactions.",
+   "fieldname": "load_customer_overview_on_demand",
+   "fieldtype": "Check",
+   "label": "Load Customer Overview on Demand"
   }
  ],
  "grid_page_length": 50,
@@ -453,7 +461,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-09-23 12:00:00.000000",
+ "modified": "2026-11-17 02:35:06.472188",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

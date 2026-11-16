@@ -13,6 +13,7 @@
   "configure",
   "column_break_4",
   "supplier_group",
+  "load_supplier_overview_on_demand",
   "pricing_tab",
   "buying_price_list",
   "section_break_vwgg",
@@ -335,6 +336,13 @@
   {
    "fieldname": "column_break_kdcm",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Show a Load Overview button on the Supplier Overview tab instead of loading it on open. Useful when suppliers have a very large number of transactions.",
+   "fieldname": "load_supplier_overview_on_demand",
+   "fieldtype": "Check",
+   "label": "Load Supplier Overview on Demand"
   }
  ],
  "grid_page_length": 50,
@@ -343,7 +351,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-10-29 05:53:49.117423",
+ "modified": "2026-11-17 02:35:06.472188",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

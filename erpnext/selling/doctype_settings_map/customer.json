@@ -1,0 +1,20 @@
+{
+ "applies_to_doctype": "Customer",
+ "creation": "2026-11-17 02:24:16.854125",
+ "docstatus": 0,
+ "doctype": "DocType Settings Map",
+ "idx": 0,
+ "is_active": 1,
+ "is_standard": 1,
+ "mappings": [
+  {
+   "setting_field": "load_customer_overview_on_demand",
+   "settings_doctype": "Selling Settings"
+  }
+ ],
+ "modified": "2026-11-17 02:24:16.854125",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer - Selling",
+ "owner": "Administrator"
+}

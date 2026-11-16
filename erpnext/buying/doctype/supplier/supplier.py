@@ -94,6 +94,10 @@ class Supplier(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+		self.set_onload(
+			"load_overview_on_demand",
+			frappe.get_single_value("Buying Settings", "load_supplier_overview_on_demand"),
+		)
 
 	def before_save(self):
 		if not self.on_hold:
