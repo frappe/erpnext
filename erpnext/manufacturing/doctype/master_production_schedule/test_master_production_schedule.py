@@ -141,7 +141,7 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 	def test_lead_time_is_not_int_truncated(self):
 		lead_time = frappe._dict(manufacturing_time_in_mins=720, shift_time_in_hours=8, buffer_time=0)
-		self.assertAlmostEqual(get_own_lead_time(lead_time, 1, True), 1.5, places=2)
+		self.assertAlmostEqual(get_own_lead_time(lead_time, 1), 1.5, places=2)
 
 	def test_cumulative_lead_time_follows_the_longest_path(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
