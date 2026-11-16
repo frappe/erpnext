@@ -4352,6 +4352,36 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			)
 		)
 
+	def test_return_reverses_the_charge_it_was_mapped_from(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			qty=1,
+			rate=100,
+			do_not_submit=True,
+		)
+		for tax_amount in (10, 30):
+			pr.append(
+				"taxes",
+				{
+					"category": "Valuation",
+					"charge_type": "Actual",
+					"account_head": "Expenses Included In Valuation - TCP1",
+					"description": "Freight",
+					"tax_amount": tax_amount,
+				},
+			)
+		pr.submit()
+
+		pr_return = make_purchase_return(pr.name)
+		pr_return.remove(pr_return.taxes[0])
+		pr_return.submit()
+
+		self.assertEqual([tax.tax_amount for tax in pr_return.taxes], [-30])
+
 	def test_return_of_a_fully_rejected_batch_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
 
