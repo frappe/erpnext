@@ -702,7 +702,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 		# allocated rows and the finished good split, so it must be known before those.
 		finished_items_last = sorted(
 			self.get("items"),
-			key=lambda row: (cint(row.is_finished_item), cint(not is_costed_out_of_finished_item(row))),
+			key=lambda row: (cint(row.is_finished_item), cint(not self.is_costed_out(row))),
 		)
 		for d in finished_items_last:
 			if d.s_warehouse or d.set_basic_rate_manually:
@@ -841,7 +841,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 					and not item.set_basic_rate_manually
 					and not is_costed_out_of_finished_item(item)
 				)
-				allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
+				if self.is_sub_assembly_secondary_item(d):
+					allocation_basis = self.get_sub_assembly_component_cost(d, secondary_items_qty)
+				else:
+					allocation_basis = secondary_items_cost_basis - self.get_costed_out_items_cost()
 				d.basic_rate = (allocation_basis * (cost_allocation_per / 100)) / secondary_items_qty
 				has_derived_rate = True
 
@@ -992,7 +995,35 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 	def get_costed_out_items_cost(self) -> float:
 		"""Total value of the rows that are deducted from the cost the other incoming rows split."""
-		return sum(flt(d.basic_amount) for d in self.get("items") if is_costed_out_of_finished_item(d))
+		return sum(flt(d.basic_amount) for d in self.get("items") if self.is_costed_out(d))
+
+	def is_costed_out(self, row) -> bool:
+		return is_costed_out_of_finished_item(row) or self.is_sub_assembly_secondary_item(row)
+
+	def is_sub_assembly_secondary_item(self, row) -> bool:
+		"""A % of Component Cost row of a sub-assembly BOM: it takes its share of that BOM's
+		components, and the finished good and the top BOM's rows split what is left."""
+		return bool(
+			self.bom_no
+			and row.bom_secondary_item
+			and not is_costed_out_of_finished_item(row)
+			and frappe.get_cached_value("BOM Secondary Item", row.bom_secondary_item, "parent") != self.bom_no
+		)
+
+	def get_sub_assembly_component_cost(self, row, secondary_qty) -> float:
+		"""Consumed cost of the components of the sub-assembly BOM the secondary row comes from."""
+		bom_no, qty_per_bom = frappe.get_cached_value(
+			"BOM Secondary Item", row.bom_secondary_item, ["parent", "stock_qty"]
+		)
+		if not flt(qty_per_bom):
+			return 0.0
+
+		boms_made = flt(secondary_qty) / flt(qty_per_bom)
+		consumed_rates = {d.item_code: flt(d.basic_rate) for d in self.get("items") if d.s_warehouse}
+		components = frappe.get_all(
+			"BOM Explosion Item", filters={"parent": bom_no}, fields=["item_code", "stock_qty"]
+		)
+		return sum(flt(c.stock_qty) * boms_made * consumed_rates.get(c.item_code, 0) for c in components)
 
 	def get_basic_rate_for_manufactured_item(
 		self, finished_item_qty, outgoing_items_cost=0, has_consumption_basis=False
