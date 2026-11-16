@@ -732,8 +732,9 @@ class BOM(WebsiteGenerator):
 		elif self.price_list_currency == self.currency:
 			self.plc_conversion_rate = self.conversion_rate
 		else:
-			self.plc_conversion_rate = get_exchange_rate(
-				self.price_list_currency, self.company_currency(), args="for_buying"
+			self.plc_conversion_rate = (
+				get_exchange_rate(self.price_list_currency, self.company_currency(), args="for_buying")
+				or self.plc_conversion_rate
 			)
 >>>>>>> ead69ff (fix(manufacturing): keep the exchange rate for a price list in a third currency)
 
