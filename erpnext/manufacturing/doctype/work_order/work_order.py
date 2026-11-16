@@ -2324,7 +2324,8 @@ class WorkOrder(Document):
 			"voucher_detail_no": row.name,
 			"warehouse": row.source_warehouse,
 		}
-		# serial and batch reservations first, so a qty one only takes what they did not match
+		# serial and batch reservations first, so a qty one only takes what they did not match;
+		# a Closed one stays in, so a qty one does not take what it already matched
 		names = frappe.get_all(
 			"Stock Reservation Entry",
 			# a fully transferred reservation is Closed, and must reopen when its transfer is cancelled
