@@ -4280,6 +4280,135 @@ class TestSalesOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
 
+<<<<<<< HEAD
+=======
+	def test_sales_partner_commission(self):
+		"""Sales Partner commission: total_commission = amount_eligible_for_commission * rate / 100."""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.save()
+
+			self.assertEqual(so.amount_eligible_for_commission, 1000)
+			self.assertEqual(so.total_commission, 70)  # 1000 * 7%
+
+			with self.subTest("commission rate above 100 is rejected"):
+				so.commission_rate = 101
+				self.assertRaises(frappe.ValidationError, so.save)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+
+	def test_commission_fields_not_copied_on_duplicate(self):
+		"""Commission rate/amount fields are no_copy; only the sales partner carries to a copy."""
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.save()
+			self.assertEqual(so.total_commission, 70)
+
+			# ignore_no_copy=False mirrors UI "Duplicate"/amend, which honour no_copy
+			duplicate = frappe.copy_doc(so, ignore_no_copy=False)
+			self.assertEqual(duplicate.sales_partner, "_Test Sales Partner India - 1")
+			self.assertFalse(duplicate.commission_rate)
+			self.assertFalse(duplicate.total_commission)
+			self.assertFalse(duplicate.amount_eligible_for_commission)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+
+	def test_commission_rate_carried_through_mapper(self):
+		"""commission_rate is no_copy, but Make Delivery Note / Sales Invoice still carries it."""
+		from erpnext.selling.doctype.sales_order.mapper import make_delivery_note, make_sales_invoice
+
+		original = frappe.db.get_value("Item", "_Test Item", "grant_commission")
+		frappe.db.set_value("Item", "_Test Item", "grant_commission", 1)
+		try:
+			so = make_sales_order(qty=10, rate=100, do_not_save=True)
+			so.sales_partner = "_Test Sales Partner India - 1"
+			so.commission_rate = 7
+			so.submit()
+
+			# carried to the mapped (unsaved) documents even though the field is no_copy
+			self.assertEqual(make_delivery_note(so.name).commission_rate, 7)
+			self.assertEqual(make_sales_invoice(so.name).commission_rate, 7)
+		finally:
+			frappe.db.set_value("Item", "_Test Item", "grant_commission", original)
+
+	def test_shipping_contact_person_flows_to_delivery_note_and_sales_invoice(self):
+		billing_contact = "_Test Contact for _Test Customer-_Test Customer"
+		shipping_contact = "_Test Contact 2 for _Test Customer-_Test Customer"
+
+		so = make_sales_order(customer="_Test Customer", do_not_submit=True)
+		so.contact_person = billing_contact
+		so.shipping_contact_person = shipping_contact
+		so.save()
+
+		# fetch_from fills the display fields off the shipping contact, not the billing one
+		self.assertEqual(so.shipping_contact_display, "_Test Contact 2 for _Test Customer")
+		self.assertEqual(so.shipping_contact_email, "test_contact_two_customer@example.com")
+
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		self.assertEqual(dn.contact_person, billing_contact)
+		self.assertEqual(dn.shipping_contact_person, shipping_contact)
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.shipping_contact_person, shipping_contact)
+
+	def test_get_party_details_blanks_shipping_contact(self):
+		# unlike the billing contact there is no default to fall back on, so the keys must
+		# still come back as None — that is what clears the previous party's contact on the form
+		party_details = get_party_details(
+			party="_Test Customer",
+			party_type="Customer",
+			company="_Test Company",
+			doctype="Sales Order",
+		)
+		for fieldname in (
+			"shipping_contact_person",
+			"shipping_contact_display",
+			"shipping_contact_mobile",
+			"shipping_contact_email",
+		):
+			self.assertIn(fieldname, party_details)
+			self.assertIsNone(party_details[fieldname])
+
+		# purchase transactions have no such field, so the keys must not be added there
+		purchase_details = get_party_details(
+			party="_Test Supplier",
+			party_type="Supplier",
+			company="_Test Company",
+			doctype="Purchase Order",
+		)
+		self.assertNotIn("shipping_contact_person", purchase_details)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 1})
+	def test_replacement_delivery_after_return_reserves_nothing(self):
+		"""A row delivered again after a return must not take its negative share off other orders."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=100, basic_rate=10)
+		make_sales_order(item_code=item_code, qty=5)
+		so = make_sales_order(item_code=item_code, qty=10)
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		sales_return = make_sales_return(dn.name)
+		sales_return.items[0].qty = -4
+		sales_return.submit()
+		make_delivery_note(so.name).submit()
+
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+		)
+		self.assertEqual(reserved_qty, 5)
+
+>>>>>>> 4d859e4 (test: replacement delivery after a return reserves nothing)
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
