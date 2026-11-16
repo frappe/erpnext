@@ -368,6 +368,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 				self.validate_outputs_of_manufacture()
 
 		self.validate_warehouse()
+		self.validate_warehouses_company()
 		self.validate_with_material_request()
 
 		# Disassembly rows are fully derived from the source manufacture entry / work order;

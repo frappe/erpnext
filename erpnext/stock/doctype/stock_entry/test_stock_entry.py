@@ -1354,6 +1354,43 @@ class TestStockEntry(ERPNextTestSuite):
 		self.assertRaises(InvalidWarehouseCompany, other_entry.get_stock_and_rate)
 		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
 
+	def test_header_warehouse_of_other_company_is_not_priced(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		item_code = make_item("_Test Steel Bar", {"is_stock_item": 1}).name
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse 2 - _TC1",
+			qty=40,
+			basic_rate=123.45,
+			company="_Test Company 1",
+		)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=40, basic_rate=67.89)
+
+		def new_material_issue(header_warehouse):
+			entry = make_stock_entry(
+				item_code=item_code,
+				source="_Test Warehouse - _TC",
+				qty=1,
+				company="_Test Company",
+				do_not_save=True,
+			)
+			entry.from_warehouse = header_warehouse
+			entry.items[0].s_warehouse = None
+			entry.items[0].basic_rate = 0
+			return entry
+
+		own_entry = new_material_issue("_Test Warehouse - _TC")
+		own_entry.insert()
+		self.assertEqual(own_entry.items[0].s_warehouse, "_Test Warehouse - _TC")
+		self.assertEqual(own_entry.items[0].basic_rate, 67.89)
+
+		other_entry = new_material_issue("_Test Warehouse 2 - _TC1")
+		other_entry.get_stock_and_rate()
+		self.assertNotEqual(other_entry.items[0].basic_rate, 123.45)
+		self.assertRaises(InvalidWarehouseCompany, other_entry.insert)
+		self.assertNotEqual(other_entry.items[0].basic_rate, 123.45)
+
 	# permission tests
 	def test_warehouse_user(self):
 		add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
