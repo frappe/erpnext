@@ -179,6 +179,10 @@ class BOMCostingService:
 			self._set_fg_based_operating_cost()
 
 	def _accumulate_operation_cost(self, d, update_hour_rate, save=True):
+		# a batch based operation takes its time per batch, as in the Work Order
+		if frappe.get_cached_value("Operation", d.operation, "create_job_card_based_on_batch_size"):
+			d.set_cost_based_on_bom_qty = 1
+
 		if d.workstation or d.workstation_type:
 			self.update_rate_and_time(d, update_hour_rate, save)
 
