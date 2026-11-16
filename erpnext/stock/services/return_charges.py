@@ -85,22 +85,26 @@ def get_charge_proportions(doc) -> list:
 
 
 def pair_with_original_charges(charges, original_charges) -> list:
-	"""Each charge with the original charge it was mapped from. Charges of returns made before that link
-	take the next original charge on the same account and description."""
-	linked = {tax.original_tax_row for tax in charges}
-	by_name = {}
-	unlinked = {}
+	"""Each charge with the original charge it was mapped from, claimed by one charge only. Other charges,
+	such as those of returns made before that link, take the next unclaimed original charge on the same
+	account and description."""
+	by_name = {tax.name: tax for tax in original_charges}
+	claimed = {}
+	for tax in charges:
+		if tax.original_tax_row in by_name:
+			claimed.setdefault(tax.original_tax_row, tax)
+
+	unclaimed = {}
 	for tax in original_charges:
-		by_name[tax.name] = tax
-		if tax.name not in linked:
-			unlinked.setdefault((tax.account_head, tax.description), []).append(tax)
+		if tax.name not in claimed:
+			unclaimed.setdefault((tax.account_head, tax.description), []).append(tax)
 
 	pairs = []
 	for tax in charges:
-		if tax.original_tax_row:
-			original_tax = by_name.get(tax.original_tax_row)
+		if claimed.get(tax.original_tax_row) is tax:
+			original_tax = by_name[tax.original_tax_row]
 		else:
-			same_charges = unlinked.get((tax.account_head, tax.description))
+			same_charges = unclaimed.get((tax.account_head, tax.description))
 			original_tax = same_charges.pop(0) if same_charges else None
 
 		if original_tax:
