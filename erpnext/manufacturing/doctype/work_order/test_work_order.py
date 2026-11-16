@@ -1144,6 +1144,18 @@ class TestWorkOrder(ERPNextTestSuite):
 				self.assertEqual(get_bin(raw_materials[0], work_order.wip_warehouse).actual_qty, 0)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 1}
+	)
+	def test_partial_manufactures_with_bom_backflush_and_process_loss(self):
+		work_order, raw_materials = make_transfer_based_work_order(1, process_loss_percentage=10)
+		for _ in range(2):
+			entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 5))
+			self.assertEqual([row.qty for row in entry.items if row.s_warehouse], [5])
+			entry.submit()
+
+		self.assertEqual(get_bin(raw_materials[0], work_order.wip_warehouse).actual_qty, 0)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{
 			"backflush_raw_materials_based_on": "Material Transferred for Manufacture",
