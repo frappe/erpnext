@@ -1487,6 +1487,25 @@ class TestGrossProfit(ERPNextTestSuite):
 		frappe.db.set_value("Sales Invoice Item", credit_note.items[0].name, "sales_invoice_item", None)
 		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 0)
 
+	def test_credit_note_after_the_report_period_leaves_a_partly_returned_split_bundle_value(self):
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return as make_delivery_return
+		from erpnext.stock.doctype.pick_list.test_pick_list import (
+			deliver_bundle_from_two_warehouses_at_two_rates,
+		)
+
+		delivery_note = deliver_bundle_from_two_warehouses_at_two_rates()
+		delivery_return = make_delivery_return(delivery_note.name)
+		delivery_return.items[0].qty = -1
+		delivery_return.submit()
+		sinv = make_sales_invoice(delivery_note.name).submit()
+		buying_amount = self.get_invoice_buying_amount(sinv.name)
+
+		credit_note = make_sales_return(sinv.name)
+		credit_note.set_posting_time = 1
+		credit_note.posting_date = add_days(nowdate(), 1)
+		credit_note.submit()
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), buying_amount)
+
 	def test_bundle_invoiced_before_delivery(self):
 		bundle = self.make_stocked_bundle()
 		sinv = create_sales_invoice(
