@@ -1161,6 +1161,19 @@ class TestBOM(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Item", fg_item, "default_bom"), second.name)
 		self.assertEqual(frappe.db.get_value("BOM", second.name, "is_default"), 1)
 
+	def test_bom_tree_returns_item_image_as_stored(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_children
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		image = "/files/bom tree <b>part</b>'s photo.png"
+		raw_material = make_item("_Test BOM Tree Image RM", {"is_stock_item": 1, "image": image}).name
+		plain_material = make_item("_Test BOM Tree Plain RM", {"is_stock_item": 1}).name
+		finished_good = make_item("_Test BOM Tree Image FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material, plain_material])
+
+		images = {row.item_code: row.image for row in get_children(doctype="BOM", parent=bom.name)}
+		self.assertEqual(images, {raw_material: image, plain_material: None})
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
