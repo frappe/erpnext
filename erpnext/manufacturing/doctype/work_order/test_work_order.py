@@ -6007,6 +6007,25 @@ class TestWorkOrder(ERPNextTestSuite):
 		"Stock Settings",
 		{"enable_stock_reservation": 1, "auto_reserve_serial_and_batch": 1},
 	)
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "backflush_raw_materials_based_on": "BOM"}
+	)
+	def test_material_consumption_proposes_pending_qty(self):
+		consumption = "Material Consumption for Manufacture"
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=20, basic_rate=100)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=10, source_warehouse="Stores - _TC"
+		)
+		frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 10)).submit()
+		frappe.get_doc(make_stock_entry(work_order.name, consumption, 4)).submit()
+
+		proposal = frappe.get_doc(make_stock_entry(work_order.name, consumption))
+		self.assertEqual(proposal.fg_completed_qty, 6)
+		self.assertEqual([row.qty for row in proposal.items], [12])
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"material_consumption": 1})
 	def test_material_consumption_uses_batch_reservation(self):
 		production_item = "Test Consumption Reservation FG"
