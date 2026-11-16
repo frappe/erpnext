@@ -1363,7 +1363,7 @@ def get_holding_qty_case(pi_item):
 		Case()
 		.when(
 			(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
-			pi_item.picked_qty - pi_item.delivered_qty,
+			pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty,
 		)
 		.else_(pi_item.stock_qty)
 	)
