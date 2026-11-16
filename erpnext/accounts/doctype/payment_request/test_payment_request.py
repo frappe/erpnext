@@ -4,19 +4,26 @@
 import json
 import re
 import unittest
+from itertools import product
 from unittest.mock import patch
 
 import frappe
 from frappe.handler import execute_cmd
+from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, nowdate, set_request
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_details
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.doctype.purchase_order.purchase_order import (
+	make_purchase_invoice as make_purchase_invoice_from_order,
+)
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.tests.utils import ERPNextTestSuite
@@ -972,28 +979,6 @@ class TestPaymentRequest(ERPNextTestSuite):
 		self.assertEqual(pr.status, "Requested")
 		self.assertEqual(pr.outstanding_amount, so.base_grand_total)
 
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
-	def test_cancelling_invoice_keeps_payment_request_of_its_advance_paid(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-
-		so = make_sales_order(qty=1, rate=100)
-		pr = make_payment_request(dt="Sales Order", dn=so.name, mute_email=1, submit_doc=1, return_doc=1)
-		pe = pr.create_payment_entry()
-
-		si = make_sales_invoice(so.name)
-		si.allocate_advances_automatically = 1
-		si.insert()
-		si.submit()
-		self.assertEqual(si.advances[0].reference_name, pe.name)
-
-		# the advance goes back to the payment entry unallocated, so the request is still paid
-		si.cancel()
-		pe.reload()
-		self.assertEqual(pe.unallocated_amount, 100)
-		pr.reload()
-		self.assertEqual((pr.status, pr.outstanding_amount), ("Paid", 0))
-		self.assertRaises(frappe.ValidationError, pr.create_payment_entry)
-
 	def test_requested_amount_currency_based_precision(self):
 		from unittest.mock import patch
 
@@ -1006,9 +991,11 @@ class TestPaymentRequest(ERPNextTestSuite):
 			patch.object(
 				frappe,
 				"get_system_settings",
-				side_effect=lambda k: 1
-				if k == "use_number_format_from_currency"
-				else frappe.db.get_single_value("System Settings", k),
+				side_effect=lambda k: (
+					1
+					if k == "use_number_format_from_currency"
+					else frappe.db.get_single_value("System Settings", k)
+				),
 			),
 			patch.object(pr_module, "get_company_currency", return_value="JPY"),
 			patch.object(
@@ -1196,6 +1183,79 @@ class TestPaymentRequest(ERPNextTestSuite):
 		pr.load_from_db()
 
 		self.assertEqual(pr.grand_total, pi.outstanding_amount)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
+	def test_unlink_advance_request_reverses_separate_account(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.book_advance_payments_in_separate_party_account = 1
+		company.default_advance_received_account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Customer Advance Request",
+			company=company.name,
+			account_type="Receivable",
+		)
+		company.default_advance_paid_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Supplier Advance Request",
+			company=company.name,
+			account_type="Payable",
+		)
+		company.save()
+
+		for order_type, qty, cancel_invoice in product(
+			("Sales Order", "Purchase Order"), (1, 2), (False, True)
+		):
+			with self.subTest(order_type=order_type, qty=qty, cancel_invoice=cancel_invoice):
+				order = (make_sales_order if order_type == "Sales Order" else create_purchase_order)(
+					qty=2, rate=50
+				)
+				request = make_payment_request(
+					dt=order.doctype, dn=order.name, submit_doc=True, return_doc=True, mute_email=True
+				)
+				payment = request.create_payment_entry()
+				invoice = (
+					make_sales_invoice if order_type == "Sales Order" else make_purchase_invoice_from_order
+				)(order.name)
+				invoice.items[0].qty = qty
+				invoice.allocate_advances_automatically = 1
+				invoice.insert().submit()
+
+				if cancel_invoice:
+					invoice.cancel()
+				else:
+					frappe.get_doc(
+						{
+							"doctype": "Unreconcile Payment",
+							"company": company.name,
+							"voucher_type": payment.doctype,
+							"voucher_no": payment.name,
+							"allocations": [
+								{"reference_doctype": invoice.doctype, "reference_name": invoice.name}
+							],
+						}
+					).insert().submit()
+					self.assertEqual(invoice.reload().outstanding_amount, qty * 50)
+
+				self.assertEqual((request.reload().status, request.outstanding_amount), ("Paid", 0))
+				self.assertEqual(payment.reload().total_allocated_amount, 100)
+				self.assertEqual(payment.unallocated_amount, 0)
+				party_account = invoice.debit_to if order_type == "Sales Order" else invoice.credit_to
+				for ledger in ("GL Entry", "Payment Ledger Entry"):
+					table = frappe.qb.DocType(ledger)
+					amount = table.debit - table.credit if ledger == "GL Entry" else table.amount
+					balance = (
+						frappe.qb.from_(table)
+						.select(Sum(amount))
+						.where(table.voucher_type == payment.doctype)
+						.where(table.voucher_no == payment.name)
+						.where(table.account == party_account)
+					).run()[0][0]
+					self.assertEqual(balance, 0, ledger)
+
+				if not cancel_invoice:
+					invoice.cancel()
+				payment.cancel()
+				self.assertEqual(request.reload().outstanding_amount, 100)
 
 	def test_payment_request_grand_total_from_selected_schedules(self):
 		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=100)
