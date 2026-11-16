@@ -2038,6 +2038,23 @@ def get_stock_qty(row, qty) -> float:
 	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
 
 
+<<<<<<< HEAD
+=======
+def get_posted_stock_qty_by_row(row_names, warehouses) -> dict:
+	"""Stock qty each row's entries moved in the warehouses."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	return dict(
+		frappe.qb.from_(sle)
+		.select(sle.voucher_detail_no, Sum(sle.actual_qty))
+		.where(
+			sle.warehouse.isin(warehouses) & (sle.is_cancelled == 0) & sle.voucher_detail_no.isin(row_names)
+		)
+		.groupby(sle.voucher_detail_no)
+		.run()
+	)
+
+
+>>>>>>> 4d878c1 (fix(stock): put back no more stock on a delivery return to another warehouse than its row took out)
 def get_transit_amount(row, qty) -> float:
 	"""Value of qty of an internal transfer row at its transit rate, as the stock ledger moves it."""
 	return get_stock_qty(row, qty) * flt(row.sales_incoming_rate) / flt(row.conversion_factor)
