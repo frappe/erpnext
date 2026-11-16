@@ -7,7 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Count
+from frappe.query_builder.functions import Count, Min
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
@@ -653,7 +653,7 @@ class StockController(AccountsController):
 
 			for transfer in transfers.get(sco_rm_detail, []):
 				for sre_doc in sre_docs:
-					if sre_doc.creation < transfer.creation:
+					if sre_doc.creation < transfer.submitted_at:
 						add_transfer_to_reservation(sre_doc, transfer)
 
 			for sre_doc in sre_docs:
@@ -665,24 +665,28 @@ class StockController(AccountsController):
 				sre_doc.update_reserved_stock_in_bin()
 
 	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict[str, list]:
-		"""Remaining transfers of each supplied row, oldest first, timed by their stock ledger entries."""
+		"""Remaining transfers of each supplied row, oldest first, timed by their first stock ledger entry."""
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		detail = frappe.qb.DocType("Stock Entry Detail")
 		ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		submitted_at = (
+			frappe.qb.from_(ledger_entry)
+			.select(Min(ledger_entry.creation))
+			.where(ledger_entry.voucher_detail_no == detail.name)
+			.as_("submitted_at")
+		)
 		rows = (
 			frappe.qb.from_(detail)
 			.join(stock_entry)
 			.on(stock_entry.name == detail.parent)
-			.join(ledger_entry)
-			.on((ledger_entry.voucher_detail_no == detail.name) & (ledger_entry.actual_qty < 0))
 			.left_join(bundle_entry)
 			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
 			.select(
 				detail.name,
 				detail.sco_rm_detail,
 				detail.transfer_qty,
-				ledger_entry.creation,
+				submitted_at,
 				bundle_entry.serial_no,
 				bundle_entry.batch_no,
 				bundle_entry.qty,
@@ -692,9 +696,8 @@ class StockController(AccountsController):
 				& (stock_entry.purpose == "Send to Subcontractor")
 				& (stock_entry.subcontracting_order == self.subcontracting_order)
 				& detail.sco_rm_detail.isin(sco_rm_details)
-				& (ledger_entry.is_cancelled == 0)
 			)
-			.orderby(ledger_entry.creation)
+			.orderby(submitted_at)
 		).run(as_dict=True)
 
 		transfers = defaultdict(dict)
@@ -702,7 +705,7 @@ class StockController(AccountsController):
 			transfer = transfers[row.sco_rm_detail].get(row.name)
 			if not transfer:
 				transfer = transfers[row.sco_rm_detail][row.name] = new_reservation_transfer()
-				transfer.qty, transfer.creation = flt(row.transfer_qty), row.creation
+				transfer.qty, transfer.submitted_at = flt(row.transfer_qty), row.submitted_at
 			if row.serial_no:
 				transfer.serial_nos.add(row.serial_no)
 			if row.batch_no:
