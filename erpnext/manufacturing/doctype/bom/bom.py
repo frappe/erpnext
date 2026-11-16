@@ -1309,9 +1309,6 @@ class BOM(WebsiteGenerator):
 	def calculate_exploded_cost(self):
 		return BOMCostingService(self).calculate_exploded_cost()
 
-	def get_rm_rate_map(self):
-		return BOMCostingService(self).get_rm_rate_map()
-
 	def update_exploded_items(self, save=True):
 		return BOMExplodedItemsService(self).update_exploded_items(save)
 

@@ -48,15 +48,22 @@ class BOMExplodedItemsService:
 			}
 		)
 
-	def add_to_cur_exploded_items(self, args):
-		key = args.item_code
-		if args.operation:
-			key = (args.item_code, args.operation)
+	@staticmethod
+	def get_key(row):
+		return (row.item_code, row.operation) if row.operation else row.item_code
 
-		if self.doc.cur_exploded_items.get(key):
-			self.doc.cur_exploded_items[key]["stock_qty"] += args.stock_qty
-		else:
+	def add_to_cur_exploded_items(self, args):
+		key = self.get_key(args)
+		existing = self.doc.cur_exploded_items.get(key)
+		if not existing:
 			self.doc.cur_exploded_items[key] = args
+			return
+
+		# the same item at another rate, e.g. from a sub-assembly: merge at the weighted rate
+		amount = flt(existing.stock_qty) * flt(existing.rate) + flt(args.stock_qty) * flt(args.rate)
+		existing.stock_qty += args.stock_qty
+		if existing.stock_qty:
+			existing.rate = amount / existing.stock_qty
 
 	def get_child_exploded_items(self, bom_no, stock_qty, operation=None):
 		"""Add all items from Flat BOM of child BOM"""
