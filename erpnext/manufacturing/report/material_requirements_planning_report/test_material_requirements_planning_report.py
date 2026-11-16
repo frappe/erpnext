@@ -875,6 +875,15 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 				self.assertTrue(buckets)
 				self.assertEqual({bucket.parent_warehouse for bucket in buckets}, {WAREHOUSE})
 
+	def test_monthly_forecast_is_spread_from_its_own_date(self):
+		row = frappe._dict(frequency="Monthly", item_code="_Test Item", delivery_date="2026-10-27", qty=31)
+
+		buckets = convert_to_daily_bucket_data([row])
+
+		self.assertEqual(getdate(buckets[0].delivery_date), getdate("2026-10-27"))
+		self.assertEqual(getdate(buckets[-1].delivery_date), getdate("2026-11-26"))
+		self.assertAlmostEqual(sum(bucket.qty for bucket in buckets), 31)
+
 	def test_float_noise_in_qty_does_not_round_up_chart_and_lead_time(self):
 		qty = 7 / 3 * 27  # 63.00000000000001
 		report = MaterialRequirementsPlanningReport(frappe._dict())
