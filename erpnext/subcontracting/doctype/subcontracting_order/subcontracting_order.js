@@ -303,10 +303,9 @@ frappe.ui.form.on("Subcontracting Order", {
 		});
 
 		frm.doc.supplied_items.forEach((item) => {
-			let unreserved_qty =
-				flt(item.required_qty) - flt(item.total_supplied_qty) - flt(item.stock_reserved_qty);
+			let unreserved_qty = frm.doc.__onload.unreserved_qty?.[item.name];
 
-			if (unreserved_qty > 0) {
+			if (unreserved_qty) {
 				dialog.fields_dict.items.df.data.push({
 					__checked: 1,
 					subcontracting_order_supplied_item: item.name,
