@@ -1155,8 +1155,8 @@ class BuyingController(SubcontractingController):
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
 	def has_rejected_stock(self, row) -> bool:
-		"""An internal receipt row whose rejected qty doesn't round to 0 in the stock UOM."""
-		return self.is_internal_receipt() and bool(get_stock_qty(row, row.rejected_qty))
+		"""An internal receipt row whose rejected stock qty isn't 0."""
+		return self.is_internal_receipt() and bool(flt(row.rejected_qty) and self.get_rejected_stock_qty(row))
 
 	def get_accepted_stock_qty(self, row) -> float:
 		"""Accepted qty in the stock UOM. A return takes back no more than its receipt row put in the
