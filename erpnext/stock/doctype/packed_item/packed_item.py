@@ -798,7 +798,8 @@ def update_product_bundle_rate(parent_items_price, pi_row, item_row):
 	if not rate:
 		parent_items_price[key] = 0.0
 
-	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.stock_qty)
+	# the row's rate is per its own UOM, so divide by its qty, not its stock qty
+	parent_items_price[key] += flt((pi_row.rate * pi_row.qty) / item_row.qty)
 
 
 def set_product_bundle_rate_amount(doc, parent_items_price):
