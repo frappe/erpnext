@@ -2176,7 +2176,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
 
-<<<<<<< HEAD
 	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_internal_transfer_pr_with_every_unit_rejected(self):
 		"""A receipt that rejects the whole transfer still empties the in-transit warehouse."""
@@ -2208,15 +2207,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			warehouse=from_warehouse,
 			target_warehouse=transit_warehouse,
 		)
-=======
-	def test_internal_transfer_rejected_qty_takes_the_delivered_stock_qty_out_of_transit(self):
-		"""Accepted and rejected qty that round up on their own still take only the delivered stock
-		qty out of the in-transit warehouse."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
-
-		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
-		company = dn.company
->>>>>>> d8767df (test: partial internal transfer receipts take only the delivered stock qty out of transit)
 
 		pr = make_inter_company_purchase_receipt(dn.name)
 		pr.items[0].warehouse = to_warehouse
@@ -2251,7 +2241,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_internal_transfer_partial_receipts_take_only_the_delivered_stock_qty_out_of_transit(self):
 		"""Partial receipts whose stock qty rounds up take no more out of the in-transit warehouse
 		than the delivery put there, and cancelling them puts back what they took."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
 		transit_bin = {"item_code": dn.items[0].item_code, "warehouse": transit_warehouse}
@@ -2277,7 +2267,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		"""A return of a partial receipt puts its stock qty back in transit, so the next receipt can
 		take it again."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
 		to_warehouse = create_warehouse("_Test Transfer To", company=dn.company)
@@ -2299,7 +2289,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		"""Returns of partial receipts put back what each receipt took out of transit, not their own
 		rounded stock qty."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
 		transit_bin = {"item_code": dn.items[0].item_code, "warehouse": transit_warehouse}
@@ -2319,10 +2309,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), delivered_qty)
 
-	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
+	@change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
 	def test_internal_transfer_over_receipt_takes_its_own_stock_qty_out_of_transit(self):
 		"""Over-received stock did not come from the delivery, so it is not capped to what is in transit."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.stock_ledger import NegativeStockError
 
 		dn, _ = make_internal_delivery_of_fractional_boxes()
@@ -8428,28 +8418,12 @@ def make_invoice_against_order(purchase_order: str, qty: float, rate: float):
 	return pi
 
 
-<<<<<<< HEAD
-=======
-def add_valuation_freight(doc, amount):
-	doc.append(
-		"taxes",
-		{
-			"account_head": "Expenses Included In Valuation - TCP1",
-			"add_deduct_tax": "Add",
-			"category": "Valuation",
-			"charge_type": "Actual",
-			"cost_center": "Main - TCP1",
-			"description": "Freight",
-			"tax_amount": amount,
-		},
-	)
-
-
 def make_internal_delivery_of_fractional_boxes():
 	"""Internal Delivery Note of 6 Box at 0.3356 Kg into an in-transit warehouse, so its stock qty (2.01 Kg)
 	is less than the rounded stock qty of two halves (1.01 Kg each)."""
 	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
+	prepare_data_for_internal_transfer()
 	company = "_Test Company with perpetual inventory"
 	from_warehouse = create_warehouse("_Test Transfer From", company=company)
 	transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
@@ -8478,7 +8452,6 @@ def make_internal_delivery_of_fractional_boxes():
 	return dn, transit_warehouse
 
 
->>>>>>> d8767df (test: partial internal transfer receipts take only the delivered stock qty out of transit)
 def make_purchase_receipt(**args):
 	if not frappe.db.exists("Location", "Test Location"):
 		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()

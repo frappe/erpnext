@@ -915,9 +915,6 @@ class BuyingController(SubcontractingController):
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
-<<<<<<< HEAD
-		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
-=======
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
 		delivered row left in transit, so partial receipts that round up add up to the delivery, and its
 		return puts back no more than the receipt took. A cap of nothing left falls back to the row's qty."""
@@ -1049,8 +1046,7 @@ class BuyingController(SubcontractingController):
 
 	def get_received_stock_qty(self, row, accepted_qty):
 		"""Accepted stock qty, plus the rejected stock qty when rejected stock leaves the source warehouse too."""
-		if not self.has_rejected_stock(row):
->>>>>>> 99e9697 (fix(stock): take no more out of transit than an internal delivery row left there)
+		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
 
 		if row.get("serial_and_batch_bundle") and not row.get("rejected_serial_and_batch_bundle"):
