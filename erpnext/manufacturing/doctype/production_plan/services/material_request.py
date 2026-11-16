@@ -187,8 +187,9 @@ def get_items_for_material_requests(
 	ignore_ordered_qty = _effective_ignore_ordered_qty(doc, po_items)
 	so_item_details = _collect_item_details(doc, po_items)
 	is_transfer = bool((ignore_ordered_qty or get_parent_warehouse_data) and warehouses)
+	transfer_warehouses = set(warehouses) if is_transfer else set()
 
-	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer)
+	mr_items = _build_mr_items(doc, so_item_details, ignore_ordered_qty, transfer_warehouses)
 	mr_items = _apply_other_locations(doc, mr_items, warehouses, is_transfer)
 	_set_default_suppliers(mr_items, doc.get("company"))
 	if doc.get("consider_minimum_order_qty"):
@@ -478,7 +479,7 @@ def _accumulate_so_items(so_item_details, sales_order, item_details, qty_precisi
 			so_item_details[sales_order][key] = details
 
 
-def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
+def _build_mr_items(doc, so_item_details, ignore_ordered_qty, transfer_warehouses):
 	mr_items = []
 	consumed_qty = defaultdict(float)
 	# raw_material_group_warehouse (optional, group) only widens the availability
@@ -501,7 +502,7 @@ def _build_mr_items(doc, so_item_details, ignore_ordered_qty, is_transfer):
 				scope_warehouse or fallback,
 				target_warehouse or fallback,
 				consumed_qty,
-				is_transfer,
+				transfer_warehouses,
 			)
 			if row:
 				mr_items.append(row)
@@ -518,9 +519,9 @@ def _mr_item_for_details(
 	warehouse,
 	target_warehouse,
 	consumed_qty,
-	is_transfer,
+	transfer_warehouses,
 ):
-	"""When transferring, size the shortage on For Warehouse alone so group stock is not counted twice."""
+	"""When transferring, leave the stock to be transferred out of the shortage, so it is not counted twice."""
 	# _get_bin_details scopes to the warehouse's descendants, returning one row per
 	# child warehouse; sum them so a group warehouse reflects combined child stock.
 	bins = _get_bin_details(details, doc.company, warehouse)
@@ -528,9 +529,11 @@ def _mr_item_for_details(
 	if details.qty <= 0:
 		return None
 	shortage_warehouse, shortage_bin = warehouse, bin_dict
-	if is_transfer and warehouse != target_warehouse:
+	if transfer_warehouses and warehouse != target_warehouse:
 		shortage_warehouse = target_warehouse
 		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
+	elif transfer_warehouses:
+		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse not in transfer_warehouses)
 	return get_material_request_items(
 		doc,
 		details,
@@ -543,7 +546,7 @@ def _mr_item_for_details(
 		bin_dict,
 		consumed_qty,
 		shortage_bin,
-		is_transfer,
+		bool(transfer_warehouses),
 	)
 
 
