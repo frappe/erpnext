@@ -1478,6 +1478,107 @@ class TestMaterialRequest(FrappeTestCase):
 		)
 		self.assertIn(">30.0<", message)
 
+<<<<<<< HEAD
+=======
+	def test_purchase_request_clears_source_warehouse(self):
+		mr = make_material_request(
+			from_warehouse="_Test Warehouse - _TC",
+			warehouse="_Test Warehouse - _TC",
+			do_not_submit=True,
+		)
+
+		self.assertIsNone(mr.items[0].from_warehouse)
+
+	def test_purchase_request_ignores_customer_item_restrictions(self):
+		from erpnext.selling.doctype.party_specific_item.test_party_specific_item import (
+			create_party_specific_item,
+		)
+
+		create_party_specific_item(
+			party_type="Customer",
+			party="_Test Customer",
+			restrict_based_on="Item",
+			based_on_value="_Test FG Item",
+		)
+		mr = make_material_request(do_not_submit=True)
+		mr.customer = "_Test Customer"
+		mr.save()
+
+		self.assertIsNone(mr.customer)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"auto_indent": 1})
+	def test_variant_without_reorder_levels_is_reordered_from_its_template(self):
+		"""A variant with no re-order levels of its own uses its template's levels."""
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.reorder_item import reorder_item
+
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"reorder_levels": [
+					{
+						"warehouse": "_Test Warehouse - _TC",
+						"warehouse_reorder_level": 20,
+						"warehouse_reorder_qty": 50,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.reorder_levels = []
+		variant.insert()
+		make_stock_entry(item_code=variant.name, target="_Test Warehouse - _TC", qty=5, basic_rate=10)
+
+		requests = reorder_item() or []
+
+		requested_qty = [d.stock_qty for mr in requests for d in mr.items if d.item_code == variant.name]
+		self.assertEqual(requested_qty, [50])
+
+
+def create_item_with_default_supplier(item_code, supplier):
+	item = create_item(item_code)
+	item.set("item_defaults", [])
+	item.append(
+		"item_defaults",
+		{
+			"company": "_Test Company",
+			"default_warehouse": "_Test Warehouse - _TC",
+			"default_supplier": supplier,
+		},
+	)
+	item.save()
+
+	return item.name
+
+
+def make_material_request_for_items(item_codes, **args):
+	args = frappe._dict(args)
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = args.material_request_type or "Purchase"
+	mr.company = args.company or "_Test Company"
+	mr.schedule_date = today()
+	for item_code in item_codes:
+		mr.append(
+			"items",
+			{
+				"item_code": item_code,
+				"qty": args.qty or 10,
+				"schedule_date": today(),
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+			},
+		)
+
+	mr.insert()
+	mr.submit()
+
+	return mr
+
+>>>>>>> 56f12fd (test: variant without re-order levels is re-ordered from its template)
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
