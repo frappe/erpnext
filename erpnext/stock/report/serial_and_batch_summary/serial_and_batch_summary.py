@@ -232,7 +232,7 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 
 	else:
 		query_filters["item_code"] = filters.get("item_code")
-		return frappe.get_all("Serial No", filters=query_filters, as_list=True)
+		return frappe.get_list("Serial No", filters=query_filters, as_list=True)
 
 
 @frappe.whitelist()
@@ -274,7 +274,7 @@ def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 			query_filters["name"] = ["like", f"%{txt}%"]
 
 		query_filters["item"] = filters.get("item_code")
-		return frappe.get_all("Batch", filters=query_filters, as_list=True)
+		return frappe.get_list("Batch", filters=query_filters, as_list=True)
 
 
 def has_filter_permissions(filters):
