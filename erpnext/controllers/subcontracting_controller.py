@@ -345,9 +345,11 @@ class SubcontractingController(StockController):
 		share = min(material.returned_fg_qty / material.received_qty, 1) if material.received_qty else 1
 		precision = frappe.get_precision("Subcontracting Receipt Supplied Item", "consumed_qty")
 		total_returned_qty = flt(material.consumed_qty * share, precision)
-		# a serial no cannot be split
-		if frappe.get_cached_value("Item", material.item_details["rm_item_code"], "has_serial_no"):
-			total_returned_qty = ceil(total_returned_qty)
+		# a serial no or a whole-number unit cannot be split
+		if frappe.get_cached_value(
+			"Item", material.item_details["rm_item_code"], "has_serial_no"
+		) or frappe.get_cached_value("UOM", material.item_details["stock_uom"], "must_be_whole_number"):
+			total_returned_qty = min(ceil(total_returned_qty), material.consumed_qty)
 
 		# earlier returns may have taken back more than their share; a return never consumes
 		return -max(flt(total_returned_qty - material.returned_qty, precision), 0)
