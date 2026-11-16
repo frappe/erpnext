@@ -913,8 +913,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 										if (fetch_valuation_rate_for_internal_transactions) {
 											me.get_incoming_rate(
 												item,
-												me.frm.posting_date,
-												me.frm.posting_time,
+												me.frm.doc.posting_date,
+												me.frm.doc.posting_time,
 												me.frm.doc.doctype,
 												me.frm.doc.company
 											);
@@ -1062,12 +1062,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	get_incoming_rate(item, posting_date, posting_time, voucher_type, company) {
+		const stock_qty = item.qty * item.conversion_factor;
+		// a delivery takes the stock out, so ask for its outgoing rate as the server does
+		const is_outgoing = this.frm.doc.is_internal_customer && !this.frm.doc.is_return;
+
 		let item_args = {
 			item_code: item.item_code,
 			warehouse: item.warehouse,
 			posting_date: posting_date,
 			posting_time: posting_time,
-			qty: item.qty * item.conversion_factor,
+			qty: is_outgoing ? -stock_qty : stock_qty,
 			serial_no: item.serial_no,
 			batch_no: item.batch_no,
 			voucher_type: voucher_type,
