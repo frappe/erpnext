@@ -2433,6 +2433,48 @@ class TestProductionPlan(ERPNextTestSuite):
 		"""
 		self.assertEqual(pln.po_items[0].planned_qty, 10)
 
+	def test_planned_bundle_components_are_not_planned_again(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		rm_item = make_item("_Test PP Bundle Replan RM", {"is_stock_item": 1}).name
+		components = [make_item(f"_Test PP Bundle Replan {name}", {"is_stock_item": 1}).name for name in "AB"]
+		fg_item = make_item("_Test PP Bundle Replan FG", {"is_stock_item": 1}).name
+		for item in [*components, fg_item]:
+			make_bom(item=item, raw_materials=[rm_item], currency="INR")
+		bundle_item = make_item("_Test PP Bundle Replan Bundle", {"is_stock_item": 0}).name
+		make_product_bundle(parent=bundle_item, items=components, qty=2)
+
+		sales_order = make_sales_order(item_code=bundle_item, qty=10, do_not_submit=1)
+		sales_order.append(
+			"items",
+			{"item_code": fg_item, "qty": 10, "rate": 100, "warehouse": sales_order.items[0].warehouse},
+		)
+		sales_order.submit()
+
+		def plan_sales_order():
+			plan = frappe.new_doc("Production Plan")
+			plan.company = sales_order.company
+			plan.get_items_from = "Sales Order"
+			plan.append("sales_orders", {"sales_order": sales_order.name})
+			plan.get_items()
+			return plan
+
+		first_plan = plan_sales_order()
+		first_plan.set("po_items", [row for row in first_plan.po_items if row.item_code != fg_item])
+		first_plan.submit()
+		bundle_line = sales_order.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", bundle_line, "production_plan_qty"), 10)
+
+		second_plan = plan_sales_order()
+		self.assertEqual([(row.item_code, row.planned_qty) for row in second_plan.po_items], [(fg_item, 10)])
+
+		extra_plan = create_production_plan(
+			item_code=components[0], planned_qty=20, skip_getting_mr_items=True, do_not_submit=1
+		)
+		extra_plan.po_items[0].update({"sales_order": sales_order.name, "sales_order_item": bundle_line})
+		extra_plan.po_items[0].product_bundle_item = bundle_item
+		self.assertRaisesRegex(frappe.ValidationError, "is left to plan", extra_plan.submit)
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
