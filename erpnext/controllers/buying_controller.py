@@ -1499,3 +1499,12 @@ def get_linked_asset_qty(detail_field, details, exclude_asset=None):
 	if exclude_asset:
 		query = query.where(asset.name != exclude_asset)
 	return dict(query.run())
+
+
+def get_stock_qty_status_args(round_total=True) -> dict:
+	"""Status updater args that add up rows' stock qty. When rows round their stock qty, add up qty * conversion
+	factor instead, rounded once at the total if the target rounds its stock qty too, so parts add up to it."""
+	if not frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_purchase"):
+		return {"source_field": "stock_qty"}
+
+	return {"source_field": "qty * conversion_factor", "round_to_target_precision": round_total}
