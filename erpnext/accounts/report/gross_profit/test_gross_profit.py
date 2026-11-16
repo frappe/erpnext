@@ -62,6 +62,12 @@ class TestGrossProfit(ERPNextTestSuite):
 		)
 		return sinv
 
+	def append_copy_of_first_item(self, sales_invoice):
+		"""Append a copy of the first item row with its own idx, so rows load in a fixed order."""
+		row = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		row.idx = None
+		return sales_invoice.append("items", row)
+
 	def create_delivery_note(
 		self, item=None, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
@@ -344,7 +350,7 @@ class TestGrossProfit(ERPNextTestSuite):
 
 		# Invoice with an item added twice
 		sinv = self.create_sales_invoice(qty=1, rate=100, posting_date=nowdate(), do_not_submit=True)
-		sinv.append("items", frappe.copy_doc(sinv.items[0], ignore_no_copy=False))
+		self.append_copy_of_first_item(sinv)
 		sinv = sinv.save().submit()
 
 		# Create Credit Note for Invoice
@@ -865,9 +871,8 @@ class TestGrossProfit(ERPNextTestSuite):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": True})
 	def test_legacy_return_prefers_item_without_linked_return(self):
 		sales_invoice = self.create_sales_invoice(qty=2, rate=100, do_not_submit=True)
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item = self.append_copy_of_first_item(sales_invoice)
 		second_item.rate = 200
-		sales_invoice.append("items", second_item)
 		sales_invoice.submit()
 
 		linked_return = make_sales_return(sales_invoice.name)
@@ -1040,13 +1045,10 @@ class TestGrossProfit(ERPNextTestSuite):
 			basic_rate=33.33333,
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
-		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
-		second_item.idx = None
+		second_item = self.append_copy_of_first_item(sales_invoice)
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
-		second_item.idx = None
-		sales_invoice.append("items", second_item)
 		sales_invoice.submit()
 
 		sales_return = make_sales_return(sales_invoice.name)

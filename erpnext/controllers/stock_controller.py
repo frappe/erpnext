@@ -1943,7 +1943,7 @@ class StockController(AccountsController):
 				self.validate_multi_currency()
 				self.validate_packed_items()
 
-				if self.get("is_internal_supplier") and self.docstatus == 1:
+				if self.get("is_internal_supplier") and self.docstatus == 1 and not self.get("is_return"):
 					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
@@ -1989,11 +1989,7 @@ class StockController(AccountsController):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
 			return
 
-		self.__inter_company_reference = (
-			self.get("inter_company_invoice_reference")
-			if self.doctype == "Purchase Invoice"
-			else self.get("inter_company_reference")
-		)
+		self.__inter_company_reference = self.get_inter_company_reference()
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
 		if not item_wise_transfer_qty:
@@ -2028,6 +2024,17 @@ class StockController(AccountsController):
 					),
 					OverAllowanceError,
 				)
+
+	def get_inter_company_reference(self):
+		if self.doctype == "Purchase Receipt":
+			return self.get("inter_company_reference")
+
+		if self.get("is_return"):
+			return frappe.db.get_value(
+				"Purchase Invoice", self.return_against, "inter_company_invoice_reference"
+			)
+
+		return self.get("inter_company_invoice_reference")
 
 	def get_item_wise_inter_transfer_qty(self):
 		parent_doctype = {
@@ -2081,48 +2088,27 @@ class StockController(AccountsController):
 				)
 
 	def get_item_wise_inter_received_qty(self):
-		child_doctype = self.doctype + " Item"
-
-		parent_tab = frappe.qb.DocType(self.doctype)
-		child_tab = frappe.qb.DocType(child_doctype)
-
-		query = (
-			frappe.qb.from_(self.doctype)
-			.inner_join(child_tab)
-			.on(child_tab.parent == parent_tab.name)
-			.select(
-				child_tab.item_code,
-				child_tab.qty,
-			)
-			.where(parent_tab.docstatus == 1)
-		)
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_inter_company_items
 
 		if self.doctype == "Purchase Invoice":
-			query = query.select(
-				child_tab.sales_invoice_item.as_("name"),
-			)
-
-			query = query.where(
-				parent_tab.inter_company_invoice_reference == self.inter_company_invoice_reference
-			)
+			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
+			fields = ["item_code", "qty"]
 		else:
-			query = query.select(
-				child_tab.delivery_note_item.as_("name"),
-				child_tab.delivery_note_packed_item,
-			)
+			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
+			fields = ["item_code", "qty", "delivery_note_packed_item"]
 
-			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
+		other_items = get_inter_company_items(
+			self.doctype,
+			{reference_field: self.__inter_company_reference, "name": ("!=", self.name)},
+			item_reference_field,
+			fields,
+		)
 
-		query = query.where(parent_tab.name != self.name)
+		# a cancelled document no longer counts
+		own_items = self.items if self.docstatus == 1 else []
 		item_wise_received_qty = defaultdict(float)
-		for row in query.run(as_dict=True):
-			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
-				row.qty
-			)
-
-		reference_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
-		for row in self.items:
-			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+		for row in [*other_items, *own_items]:
+			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
 			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
 
 		return item_wise_received_qty
@@ -2280,7 +2266,7 @@ class StockController(AccountsController):
 	def update_stock_reservation_entries(self):
 		from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
 
-		def get_sre_list():
+		def get_sre_list(item):
 			table = frappe.qb.DocType("Stock Reservation Entry")
 			query = (
 				frappe.qb.from_(table)
@@ -2344,9 +2330,14 @@ class StockController(AccountsController):
 		):
 			data_map = get_data_map()
 
+			if purpose == "Send to Subcontractor" and self._action == "cancel":
+				rows = {item.sco_rm_detail: item for item in self.items if item.sco_rm_detail}
+				self.rebuild_subcontracting_transfers({row: get_sre_list(item) for row, item in rows.items()})
+				return
+
 			field = data_map[purpose or self.doctype]["field"]
 			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
-				sre_list = get_sre_list()
+				sre_list = get_sre_list(item)
 
 				if not sre_list:
 					continue
@@ -2417,6 +2408,63 @@ class StockController(AccountsController):
 					sre_doc.update_reserved_stock_in_bin()
 
 					qty -= working_qty
+
+	def rebuild_subcontracting_transfers(self, sre_lists: dict[str, list[str]]):
+		transfers = self.get_subcontracting_transfers(list(sre_lists))
+		for sco_rm_detail, sre_list in sre_lists.items():
+			transfer = transfers.get(sco_rm_detail) or new_reservation_transfer()
+			for sre in sre_list:
+				sre_doc = frappe.get_doc("Stock Reservation Entry", sre)
+				if sre_doc.reservation_based_on == "Serial and Batch":
+					transferred_qty = match_transferred_serial_batch(sre_doc, transfer)
+				else:
+					transferred_qty = min(sre_doc.reserved_qty, transfer.qty)
+
+				transfer.qty -= transferred_qty
+				sre_doc.transferred_qty = flt(transferred_qty, sre_doc.precision("transferred_qty"))
+				sre_doc.db_update()
+				sre_doc.update_reserved_qty_in_voucher()
+				sre_doc.update_status()
+				sre_doc.update_reserved_stock_in_bin()
+
+	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict:
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		detail = frappe.qb.DocType("Stock Entry Detail")
+		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		rows = (
+			frappe.qb.from_(detail)
+			.join(stock_entry)
+			.on(stock_entry.name == detail.parent)
+			.left_join(bundle_entry)
+			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
+			.select(
+				detail.name,
+				detail.sco_rm_detail,
+				detail.transfer_qty,
+				bundle_entry.serial_no,
+				bundle_entry.batch_no,
+				bundle_entry.qty,
+			)
+			.where(
+				(stock_entry.docstatus == 1)
+				& (stock_entry.purpose == "Send to Subcontractor")
+				& (stock_entry.subcontracting_order == self.subcontracting_order)
+				& detail.sco_rm_detail.isin(sco_rm_details)
+			)
+		).run(as_dict=True)
+
+		transfers, counted_rows = {}, set()
+		for row in rows:
+			transfer = transfers.setdefault(row.sco_rm_detail, new_reservation_transfer())
+			if row.name not in counted_rows:
+				counted_rows.add(row.name)
+				transfer.qty += flt(row.transfer_qty)
+			if row.serial_no:
+				transfer.serial_nos.add(row.serial_no)
+			if row.batch_no:
+				transfer.batch_qty[row.batch_no] += abs(flt(row.qty))
+
+		return transfers
 
 	def check_for_on_hold_or_closed_status(
 		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
@@ -2984,6 +3032,29 @@ def make_bundle_for_material_transfer(**kwargs):
 			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
+
+
+def new_reservation_transfer():
+	return frappe._dict(qty=0, serial_nos=set(), batch_qty=defaultdict(float))
+
+
+def match_transferred_serial_batch(sre_doc, transfer) -> float:
+	matched_qty = 0
+	for entry in sre_doc.sb_entries:
+		if sre_doc.has_serial_no:
+			delivered_qty = 1 if entry.serial_no in transfer.serial_nos else 0
+			transfer.serial_nos.discard(entry.serial_no)
+		else:
+			delivered_qty = min(entry.qty, transfer.batch_qty[entry.batch_no])
+			transfer.batch_qty[entry.batch_no] -= delivered_qty
+
+		delivered_qty = flt(delivered_qty, entry.precision("delivered_qty"))
+		if flt(entry.delivered_qty) != delivered_qty:
+			entry.delivered_qty = delivered_qty
+			entry.db_update()
+		matched_qty += delivered_qty
+
+	return matched_qty
 
 
 def set_entries_total_qty(entries, total_qty):

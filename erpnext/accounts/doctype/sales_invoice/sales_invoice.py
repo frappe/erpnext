@@ -3322,29 +3322,39 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 			frappe.ValidationError,
 		)
 
-	filters = {
-		reference_field: reference_name,
-		"docstatus": 1,
-	}
-
-	target_doctypes = frappe.get_all(
-		doctype,
-		filters=filters,
-		pluck="name",
-	)
 	received_items_map = {}
-	if target_doctypes:
-		received_items_data = frappe.get_all(
-			doctype + " Item",
-			filters={"parent": ("in", target_doctypes)},
-			fields=[reference_fieldname, "stock_qty"],
-		)
-		for item in received_items_data:
-			key = item.get(reference_fieldname)
-			if key:
-				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
+	for item in get_inter_company_items(
+		doctype, {reference_field: reference_name}, reference_fieldname, ["stock_qty"]
+	):
+		key = item.get(reference_fieldname)
+		if key:
+			received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
 
 	return received_items_map
+
+
+def get_inter_company_items(doctype, filters, reference_fieldname, fields):
+	"""Items of the submitted documents matching `filters`, and of their returns for Purchase Invoices.
+	A return row links only the invoice row it returns, so it gets that row's `reference_fieldname`."""
+	parents = frappe.get_all(doctype, filters={**filters, "docstatus": 1}, pluck="name")
+	if not parents:
+		return []
+
+	fields = ["name", reference_fieldname, *fields]
+	if doctype == "Purchase Invoice":
+		parents += frappe.get_all(
+			doctype, filters={"return_against": ("in", parents), "docstatus": 1}, pluck="name"
+		)
+		fields.append("purchase_invoice_item")
+
+	items = frappe.get_all(doctype + " Item", filters={"parent": ("in", parents)}, fields=fields)
+	reference_by_row = {item.name: item.get(reference_fieldname) for item in items}
+	for item in items:
+		item[reference_fieldname] = reference_by_row[item.name] or reference_by_row.get(
+			item.get("purchase_invoice_item")
+		)
+
+	return items
 
 
 def set_purchase_references(doc):

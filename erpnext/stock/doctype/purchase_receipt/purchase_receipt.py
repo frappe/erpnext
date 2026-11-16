@@ -18,7 +18,7 @@ import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.accounts_controller import merge_taxes
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty_status_args
+from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock import get_warehouse_account
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -192,9 +192,9 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Material Request",
 				"target_parent_field": "per_received",
 				"target_ref_field": "stock_qty",
-				**get_stock_qty_status_args(),
+				**get_received_stock_qty_status_args(),
 				"second_source_dt": "Purchase Invoice Item",
-				"second_source_field": get_stock_qty_status_args()["source_field"],
+				"second_source_field": "qty * conversion_factor",
 				"second_join_field": "material_request_item",
 				"second_source_extra_cond": """ and exists(select name from `tabPurchase Invoice`
 				where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",

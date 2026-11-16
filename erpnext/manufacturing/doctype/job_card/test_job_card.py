@@ -1858,15 +1858,13 @@ class TestJobCard(ERPNextTestSuite):
 			if job_card is first:
 				job_card.submit()
 
-		self.assertEqual(second.process_loss_qty, 5)
-		self.assertRaises(OperationSequenceError, second.submit)
-
-		second.reload()
-		second.for_quantity = 95
 		second.time_logs[0].completed_qty = 90
 		second.save()
+		self.assertEqual(second.process_loss_qty, 10)
+
+		# 5 of it was already lost by the first operation
 		second.submit()
-		self.assertEqual(second.process_loss_qty, 5)
+		self.assertEqual((second.for_quantity, second.process_loss_qty), (95, 5))
 
 		# A later card without loss can't use the qty already lost.
 		make_job_card(
@@ -1891,6 +1889,32 @@ class TestJobCard(ERPNextTestSuite):
 			},
 		)
 		self.assertRaises(OperationSequenceError, extra.submit)
+
+	def test_job_card_keeps_qty_still_to_come_from_previous_operation(self):
+		work_order = self.make_two_operation_work_order(qty=10)
+		first, second = (
+			frappe.get_doc("Job Card", name)
+			for name in frappe.get_all(
+				"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+			)
+		)
+		for index, (job_card, completed_qty) in enumerate(((first, 5), (second, 4))):
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date("2024-04-10 08:00:00", hours=index),
+					"to_time": add_to_date("2024-04-10 08:00:00", hours=index, minutes=30),
+					"completed_qty": completed_qty,
+				},
+			)
+		first.pending_qty = 5
+		first.save()
+		first.submit()
+
+		# the first operation still has 5 to make, so they aren't its loss
+		second.save()
+		self.assertEqual(second.process_loss_qty, 6)
+		self.assertRaises(OperationSequenceError, second.submit)
 
 	def test_max_completable_qty_excludes_process_loss_of_operation(self):
 		work_order = self.make_two_operation_work_order(qty=100)
