@@ -1259,17 +1259,18 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			self.assertRaises(frappe.PermissionError, make_sales_invoice, so.name, target_doc=target)
 
 	def test_update_child_cannot_remove_item_linked_by_draft_purchase_order(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-
 		so = make_sales_order(
 			item_list=[
 				{"item_code": "_Test Item", "qty": 5, "rate": 1000},
 				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
 			]
 		)
-		po = create_purchase_order(item_code="_Test Item", qty=5, do_not_save=1)
-		po.items[0].update({"sales_order": so.name, "sales_order_item": so.items[0].name})
-		po.insert()
+		make_purchase_order(
+			so.name,
+			selected_items=[
+				{"name": so.items[0].name, "item_code": "_Test Item", "supplier": "_Test Supplier"}
+			],
+		)
 
 		kept_row = so.items[1]
 		trans_item = json.dumps(
