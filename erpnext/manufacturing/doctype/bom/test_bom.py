@@ -7,7 +7,7 @@ from functools import partial
 
 import frappe
 from frappe.tests import timeout
-from frappe.utils import cint, cstr, flt
+from frappe.utils import add_days, cint, cstr, flt, today
 
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
@@ -2059,6 +2059,49 @@ class TestBOM(ERPNextTestSuite):
 				make_item(properties={"is_stock_item": 1}).name,
 				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
 			)
+
+	def test_price_list_rate_valid_today(self):
+		price_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": frappe.generate_hash(length=10),
+				"currency": "INR",
+				"buying": 1,
+			}
+		).insert()
+		current_item = make_item(properties={"is_stock_item": 1}).name
+		expired_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		for item_code, rate, valid_from, valid_upto in (
+			(current_item, 10, -30, None),
+			(current_item, 12, 30, None),
+			(expired_item, 7, -60, -30),
+		):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": price_list.name,
+					"price_list_rate": rate,
+					"valid_from": add_days(today(), valid_from),
+					"valid_upto": valid_upto and add_days(today(), valid_upto),
+				}
+			).insert()
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"rm_cost_as_per": "Price List",
+				"buying_price_list": price_list.name,
+				"items": [{"item_code": current_item, "qty": 1}, {"item_code": expired_item, "qty": 1}],
+			}
+		).insert()
+
+		self.assertEqual(bom.items[0].rate, 10)
+		self.assertEqual(bom.items[1].rate, 0)
 
 
 def make_stage_items():

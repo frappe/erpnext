@@ -9,7 +9,7 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Field
 from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json
+from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
 from frappe.utils.caching import request_cache
 from frappe.website.website_generator import WebsiteGenerator
 
@@ -1369,6 +1369,7 @@ def _get_price_list_item_rate(args, bom_doc):
 			"transaction_type": "buying",
 			"company": bom_doc.company,
 			"currency": bom_doc.currency,
+			"transaction_date": today(),
 			"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 			"conversion_factor": args.get("conversion_factor") or 1,
 			"plc_conversion_rate": 1,
