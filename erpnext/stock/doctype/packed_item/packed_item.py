@@ -341,7 +341,9 @@ def add_packed_item_row(
 
 def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, linked_packed_item):
 	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
-	key = get_packed_item_key(doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item)
+	key = get_packed_item_key(
+		doc, main_item_row, packing_item.item_code, packed_items_table, linked_packed_item
+	)
 	return packed_items_table.get(key)
 
 
