@@ -4026,26 +4026,34 @@ class TestSalesInvoice(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
 	def test_inter_company_pi_cannot_receive_more_than_sales_invoice_qty(self):
-		si = create_sales_invoice(
-			company="Wind Power LLC",
-			customer="_Test Internal Customer",
-			debit_to="Debtors - WP",
-			warehouse="Stores - WP",
-			income_account="Sales - WP",
-			expense_account="Cost of Goods Sold - WP",
-			cost_center="Main - WP",
-			currency="USD",
-			qty=2,
-			do_not_save=1,
-		)
-		si.selling_price_list = "_Test Price List Rest of the World"
-		si.submit()
+		si = create_inter_company_sales_invoice(qty=2)
 
 		pi = make_inter_company_transaction("Sales Invoice", si.name)
 		pi.items[0].update(
 			{"qty": 4, "expense_account": "Cost of Goods Sold - _TC1", "cost_center": "Main - _TC1"}
 		)
 		self.assertRaises(OverAllowanceError, pi.submit)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_inter_company_pi_received_qty_is_compared_in_stock_uom(self):
+		si = create_inter_company_sales_invoice(
+			item_code="_Test Internal Transfer Item", qty=2, uom="Box", conversion_factor=10
+		)
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(
+			{
+				"qty": 21,
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"expense_account": "Cost of Goods Sold - _TC1",
+				"cost_center": "Main - _TC1",
+			}
+		)
+		self.assertRaises(OverAllowanceError, pi.submit)
+
+		pi.items[0].qty = 20
+		pi.submit()
 
 	def test_restrict_inter_company_pi_when_sales_invoice_qty_fully_consumed(self):
 		item_code_1 = "_Test IC Item 1"
@@ -6762,6 +6770,25 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+
+def create_inter_company_sales_invoice(uom="Nos", conversion_factor=1, **args):
+	si = create_sales_invoice(
+		company="Wind Power LLC",
+		customer="_Test Internal Customer",
+		debit_to="Debtors - WP",
+		warehouse="Stores - WP",
+		income_account="Sales - WP",
+		expense_account="Cost of Goods Sold - WP",
+		cost_center="Main - WP",
+		currency="USD",
+		do_not_save=1,
+		**args,
+	)
+	si.items[0].update({"uom": uom, "conversion_factor": conversion_factor})
+	si.selling_price_list = "_Test Price List Rest of the World"
+	si.submit()
+	return si
 
 
 def create_sales_invoice(**args):
