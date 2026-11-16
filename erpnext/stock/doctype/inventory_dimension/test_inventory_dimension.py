@@ -331,7 +331,6 @@ class TestInventoryDimension(FrappeTestCase):
 					get_evaluated_inventory_dimension(row, frappe._dict(actual_qty=qty)), expected
 				)
 
-	def test_dimension_condition_reads_field_values_only(self):
 		stock_entry = make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=7, basic_rate=100, do_not_submit=True
 		)
@@ -341,7 +340,6 @@ class TestInventoryDimension(FrappeTestCase):
 			condition="parent.purpose == 'Material Receipt' and doc.qty == 7 and doc.doctype == 'Stock Entry Detail'",
 			type_of_transaction="Both",
 		)
-		module = "erpnext.stock.doctype.inventory_dimension.inventory_dimension"
 		with patch(f"{module}.get_document_wise_inventory_dimensions", return_value=[dimension]):
 			evaluate = partial(
 				get_evaluated_inventory_dimension, row, frappe._dict(actual_qty=7), stock_entry
