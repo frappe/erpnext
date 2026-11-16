@@ -78,6 +78,39 @@ class TestQueries(ERPNextTestSuite):
 
 		self.assertIn(item.name, [row[0] for row in items])
 
+	def test_item_manufacturer_query_requires_item_read_permission(self):
+		item = make_item("Steel Sheet With Manufacturer", {"is_stock_item": 1})
+		if not frappe.db.exists("Manufacturer", "Northwind Steel"):
+			frappe.get_doc({"doctype": "Manufacturer", "short_name": "Northwind Steel"}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Item Manufacturer",
+				"item_code": item.name,
+				"manufacturer": "Northwind Steel",
+				"manufacturer_part_no": "NS-4242",
+			}
+		).insert()
+
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		with self.set_user(purchase_user.name):
+			self.assertEqual(query(filters={"item_code": item.name}), (("Northwind Steel", "NS-4242"),))
+
+		with self.set_user(website_manager.name), self.assertRaises(frappe.PermissionError):
+			query(filters={"item_code": item.name})
+
+	def test_item_manufacturer_query_needs_a_single_item_code(self):
+		query = add_default_params(queries.item_manufacturer_query, "Manufacturer")
+		purchase_user = create_user("item_manufacturer_purchase_user@example.com", "Purchase User")
+		website_manager = create_user("item_manufacturer_website_manager@example.com", "Website Manager")
+
+		for filters in ({}, {"item_code": None}, {"item_code": ""}, {"item_code": ["like", "%"]}):
+			for user in (purchase_user.name, website_manager.name):
+				with self.subTest(filters=filters, user=user), self.set_user(user):
+					self.assertEqual(query(filters=filters), [])
+
 	def test_subcontracted_item_query(self):
 		variant, _ = make_subcontracted_variant()
 		item_without_bom = make_item(
