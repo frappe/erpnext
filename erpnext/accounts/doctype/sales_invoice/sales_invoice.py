@@ -291,7 +291,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
-		# Only the POS Invoice Merge Log may mark an invoice as consolidated.
+		# Only POS consolidation may mark an invoice as consolidated.
 		if not self.flags.is_consolidated:
 			self.is_consolidated = 0
 

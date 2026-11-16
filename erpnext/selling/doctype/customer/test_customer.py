@@ -288,7 +288,7 @@ class TestCustomer(FrappeTestCase):
 		make_sales_return(sales_invoice.name).submit()
 
 	def test_is_consolidated_key_does_not_skip_blocked_customer_check(self):
-		"""Only the POS Invoice Merge Log may skip the blocked customer check."""
+		"""Only POS consolidation may skip the blocked customer check."""
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
