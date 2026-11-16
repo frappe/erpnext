@@ -718,6 +718,7 @@ class BOM(WebsiteGenerator):
 		if self.price_list_currency == self.company_currency():
 			self.plc_conversion_rate = 1
 <<<<<<< HEAD
+<<<<<<< HEAD
 		elif flt(self.plc_conversion_rate) in (0, 1) or (currency_changed and not self.is_new()):
 			self.plc_conversion_rate = get_exchange_rate(
 				self.price_list_currency, self.company_currency(), args="for_buying"
@@ -727,6 +728,14 @@ class BOM(WebsiteGenerator):
 			# validate_currency allows only the company or the BOM currency
 			self.plc_conversion_rate = self.conversion_rate
 >>>>>>> 324bc5f (fix(manufacturing): use the BOM conversion rate for a price list in the BOM currency)
+=======
+		elif self.price_list_currency == self.currency:
+			self.plc_conversion_rate = self.conversion_rate
+		else:
+			self.plc_conversion_rate = get_exchange_rate(
+				self.price_list_currency, self.company_currency(), args="for_buying"
+			)
+>>>>>>> ead69ff (fix(manufacturing): keep the exchange rate for a price list in a third currency)
 
 	def validate_materials(self):
 		"""Validate raw material entries"""
