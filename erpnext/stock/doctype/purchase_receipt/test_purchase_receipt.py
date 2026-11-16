@@ -8337,10 +8337,159 @@ def prepare_data_for_internal_transfer():
 		company,
 	)
 
+<<<<<<< HEAD
 	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
 		account = "Unrealized Profit and Loss - TCP1"
 		if not frappe.db.exists("Account", account):
 			frappe.get_doc(
+=======
+		invoice = make_invoice_against_order(purchase_order.name, qty=8, rate=200)
+
+		self.assertEqual(
+			self.get_provisional_balance(first.name, receipt_return.name, second.name, invoice.name), 0
+		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (100, 200))
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+		credit_note = make_return_doc("Purchase Invoice", vouchers[-1])
+		credit_note.submit()
+
+		self.assertEqual(self.get_provisional_balance(*vouchers, credit_note.name), -600)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_clears_the_whole_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (200, 100))
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def bill_order_again_after_cancelling_its_first_invoice(self, purchase_order, rates):
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order, 6, rates[0], "08:00").name,
+			self.make_receipt_at_rate(purchase_order, 4, rates[1], "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+		vouchers.append(make_invoice_against_order(purchase_order, qty=6, rate=200).name)
+
+		return vouchers
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_invoice_from_order,
+		)
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00").name,
+			self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00").name,
+		]
+		drafts = []
+		for qty in (3, 7):
+			invoice = make_invoice_from_order(purchase_order.name)
+			invoice.items[0].update({"qty": qty, "rate": 200})
+			drafts.append(invoice.insert())
+
+		for invoice in reversed(drafts):
+			invoice.submit()
+			vouchers.append(invoice.name)
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def test_non_stock_receipt_in_closed_period_can_be_cancelled(self):
+		from erpnext.accounts.doctype.payment_reconciliation.test_payment_reconciliation import (
+			make_period_closing_voucher,
+		)
+		from erpnext.accounts.utils import get_fiscal_year
+
+		closed_date = add_days(get_fiscal_year(today(), company="_Test Company")[1], -1)
+		make_period_closing_voucher(
+			company="_Test Company", cost_center="Main - _TC", posting_date=closed_date
+		)
+		item = make_item("_Test Non Stock Closed Period Item", {"is_stock_item": 0}).name
+
+		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
+			receipt = make_purchase_receipt(item_code=item, posting_date=closed_date)
+			receipt.cancel()
+
+		self.assertEqual(receipt.docstatus, 2)
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
+	def test_stock_receipt_cancel_still_queues_voucher_repost(self):
+		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
+			receipt = make_purchase_receipt(qty=1, rate=100)
+			receipt.cancel()
+
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
+	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_receipt as make_receipt_from_order,
+		)
+
+		receipt = make_receipt_from_order(purchase_order)
+		receipt.set_posting_time = 1
+		receipt.posting_time = posting_time
+		receipt.items[0].update({"received_qty": qty, "qty": qty, "rate": rate})
+		receipt.submit()
+		return receipt
+
+	def test_receipt_from_invoice_at_another_rate_books_matching_account_currency_amounts(self):
+		"""The exchange difference rows of a receipt made from a foreign currency invoice book the same
+		amounts in an account in the company currency."""
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt as make_receipt
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		pi = make_purchase_invoice(
+			company="_Test Company with perpetual inventory",
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=85,
+			qty=10,
+			rate=10,
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Stock Received But Not Billed - TCP1",
+			item_code=make_item(properties={"is_stock_item": 1}).name,
+			do_not_save=True,
+		)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.submit()
+
+		pr = frappe.get_doc(make_receipt(pi.name))
+		pr.conversion_rate = 83
+		pr.submit()
+
+		for entry in frappe.get_all(
+			"GL Entry",
+			{"voucher_no": pr.name, "is_cancelled": 0},
+			["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		):
+			self.assertEqual(entry.debit, entry.debit_in_account_currency)
+			self.assertEqual(entry.credit, entry.credit_in_account_currency)
+
+
+def create_asset_category_for_pr_test():
+	category_name = "Test Asset Category for PR"
+
+	asset_category = frappe.get_doc(
+		{
+			"doctype": "Asset Category",
+			"asset_category_name": category_name,
+			"enable_cwip_accounting": 0,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 12,
+			"frequency_of_depreciation": 1,
+			"accounts": [
+>>>>>>> a1e16a5 (test: receipt from an invoice at another rate books matching account currency amounts)
 				{
 					"doctype": "Account",
 					"account_name": "Unrealized Profit and Loss",
