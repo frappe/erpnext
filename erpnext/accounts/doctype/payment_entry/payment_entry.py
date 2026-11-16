@@ -3658,16 +3658,69 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 
 def split_early_payment_discount_loss(pe, doc, valid_discounts) -> float:
 	"""Split early payment discount into Income Loss & Tax Loss."""
+	discount_loss_rows, base_total_discount_loss = get_early_payment_discount_loss(
+		doc, valid_discounts, pe.payment_type, pe.company, pe.cost_center
+	)
+
+	for row in discount_loss_rows:
+		pe.append("deductions", row)
+
+	return base_total_discount_loss
+
+
+def get_early_payment_discount_loss(
+	doc, valid_discounts, payment_type, company, cost_center=None
+) -> tuple[list[dict], float]:
+	"""Split early payment discount into Income Loss & Tax Loss, in base currency.
+
+	Does not need a Payment Entry, so that other documents can book the same discount.
+
+	Returns the rows (`account`, `cost_center`, `amount`) and the total loss. Amounts are
+	negative for payment type "Pay". The total loss can differ from the sum of the rows
+	by a rounding difference.
+	"""
 	total_discount_percent = get_total_discount_percent(doc, valid_discounts)
 
 	if not total_discount_percent:
-		return 0.0
+		return [], 0.0
 
-	base_loss_on_income = add_income_discount_loss(pe, doc, total_discount_percent)
-	base_loss_on_taxes = add_tax_discount_loss(pe, doc, total_discount_percent)
+	cost_center = cost_center or frappe.get_cached_value("Company", company, "cost_center")
+	positive_negative = -1 if payment_type == "Pay" else 1
+
+	base_loss_on_income = doc.get("base_total") * (total_discount_percent / 100)
+	rows = [
+		{
+			"account": frappe.get_cached_value("Company", company, "default_discount_account"),
+			"cost_center": cost_center,
+			"amount": flt(base_loss_on_income, doc.precision("total")) * positive_negative,
+		}
+	]
+
+	# The same account head could be used more than once
+	base_loss_by_tax_account = {}
+	for tax in doc.get("taxes", []):
+		base_tax_loss = tax.get("base_tax_amount_after_discount_amount") * (total_discount_percent / 100)
+		account = tax.get("account_head")
+		base_loss_by_tax_account[account] = base_loss_by_tax_account.get(account, 0) + base_tax_loss
+
+	tax_precision = doc.precision("tax_amount_after_discount_amount", "taxes")
+	for account, base_tax_loss in base_loss_by_tax_account.items():
+		if base_tax_loss == 0.0:
+			continue
+
+		rows.append(
+			{
+				"account": account,
+				"cost_center": cost_center,
+				"amount": flt(base_tax_loss, tax_precision) * positive_negative,
+			}
+		)
 
 	# Round off total loss rather than individual losses to reduce rounding error
-	return flt(base_loss_on_income + base_loss_on_taxes, doc.precision("grand_total"))
+	base_loss_on_taxes = sum(base_loss_by_tax_account.values())
+	base_total_discount_loss = flt(base_loss_on_income + base_loss_on_taxes, doc.precision("grand_total"))
+
+	return rows, base_total_discount_loss
 
 
 def get_total_discount_percent(doc, valid_discounts) -> float:
@@ -3689,59 +3742,6 @@ def get_total_discount_percent(doc, valid_discounts) -> float:
 		return total_discount_percent
 
 	return total_discount_percent
-
-
-def add_income_discount_loss(pe, doc, total_discount_percent) -> float:
-	"""Add loss on income discount in base currency."""
-	precision = doc.precision("total")
-	base_loss_on_income = doc.get("base_total") * (total_discount_percent / 100)
-	positive_negative = -1 if pe.payment_type == "Pay" else 1
-
-	pe.append(
-		"deductions",
-		{
-			"account": frappe.get_cached_value("Company", pe.company, "default_discount_account"),
-			"cost_center": pe.cost_center or frappe.get_cached_value("Company", pe.company, "cost_center"),
-			"amount": flt(base_loss_on_income, precision) * positive_negative,
-		},
-	)
-
-	return base_loss_on_income  # Return loss without rounding
-
-
-def add_tax_discount_loss(pe, doc, total_discount_percentage) -> float:
-	"""Add loss on tax discount in base currency."""
-	tax_discount_loss = {}
-	base_total_tax_loss = 0
-	precision = doc.precision("tax_amount_after_discount_amount", "taxes")
-	positive_negative = -1 if pe.payment_type == "Pay" else 1
-
-	# The same account head could be used more than once
-	for tax in doc.get("taxes", []):
-		base_tax_loss = tax.get("base_tax_amount_after_discount_amount") * (total_discount_percentage / 100)
-
-		account = tax.get("account_head")
-		if not tax_discount_loss.get(account):
-			tax_discount_loss[account] = base_tax_loss
-		else:
-			tax_discount_loss[account] += base_tax_loss
-
-	for account, loss in tax_discount_loss.items():
-		base_total_tax_loss += loss
-		if loss == 0.0:
-			continue
-
-		pe.append(
-			"deductions",
-			{
-				"account": account,
-				"cost_center": pe.cost_center
-				or frappe.get_cached_value("Company", pe.company, "cost_center"),
-				"amount": flt(loss, precision) * positive_negative,
-			},
-		)
-
-	return base_total_tax_loss  # Return loss without rounding
 
 
 def get_reference_as_per_payment_terms(
