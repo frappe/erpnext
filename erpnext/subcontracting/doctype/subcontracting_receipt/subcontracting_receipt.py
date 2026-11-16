@@ -507,10 +507,13 @@ class SubcontractingReceipt(SubcontractingController):
 				filters={"parent": self.return_against},
 				fields=[
 					"name",
+					"item_code",
 					"qty",
 					"received_qty",
 					"reference_name",
 					"bom_secondary_item",
+					"secondary_item_type",
+					"valuation_type",
 					"returned_qty",
 				],
 			)
@@ -521,17 +524,43 @@ class SubcontractingReceipt(SubcontractingController):
 		if not original_rows:
 			return
 
-		secondary_rows = {
-			(row.reference_name, row.bom_secondary_item): row.name
-			for row in original_rows.values()
-			if row.bom_secondary_item
-		}
+		secondary_rows = {}
+		legacy_rows = defaultdict(list)
+		for row in original_rows.values():
+			if row.bom_secondary_item:
+				secondary_rows[(row.reference_name, row.bom_secondary_item)] = row.name
+			elif row.secondary_item_type or row.valuation_type:
+				legacy_rows[row.reference_name].append(row)
+
+		for fg_row in self.items:
+			if fg_row.bom and fg_row.subcontracting_receipt_item in legacy_rows:
+				secondary_rows.update(
+					self.pair_legacy_secondary_rows(fg_row, legacy_rows[fg_row.subcontracting_receipt_item])
+				)
+
 		returned_fg_rows = {row.name: row.subcontracting_receipt_item for row in self.items if row.bom}
 		for row in self.items:
 			if row.bom_secondary_item:
 				row.subcontracting_receipt_item = secondary_rows.get(
 					(returned_fg_rows.get(row.reference_name), row.bom_secondary_item)
 				)
+
+	@staticmethod
+	def pair_legacy_secondary_rows(fg_row, receipt_rows):
+		"""Pair receipt rows made before v16 with the BOM rows of their item by qty rank, as migration may reorder the BOM."""
+		bom_rows = frappe.get_cached_doc("BOM", fg_row.bom).secondary_items
+		pairs = {}
+		for item_code in {row.item_code for row in receipt_rows}:
+			by_qty = sorted(
+				(row for row in receipt_rows if row.item_code == item_code), key=lambda row: row.qty
+			)
+			bom_by_qty = sorted(
+				(row for row in bom_rows if row.item_code == item_code), key=lambda row: row.stock_qty
+			)
+			for receipt_row, bom_row in zip(by_qty, bom_by_qty, strict=False):
+				pairs[(fg_row.subcontracting_receipt_item, bom_row.name)] = receipt_row.name
+
+		return pairs
 
 	def set_remaining_secondary_qty(self, original_rows):
 		"""A return of a receipt row's last finished goods takes the secondary qty left on it,
