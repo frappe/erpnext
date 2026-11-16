@@ -1338,6 +1338,33 @@ class TestSalesOrder(ERPNextTestSuite):
 				frappe.PermissionError, make_sales_invoice, so.name, target_doc=json.dumps(target)
 			)
 
+	def test_update_child_cannot_remove_item_linked_by_draft_purchase_order(self):
+		so = make_sales_order(
+			item_list=[
+				{"item_code": "_Test Item", "qty": 5, "rate": 1000},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
+			]
+		)
+		make_purchase_order(
+			so.name,
+			selected_items=[
+				{"name": so.items[0].name, "item_code": "_Test Item", "supplier": "_Test Supplier"}
+			],
+		)
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 2, "rate": 500, "docname": kept_row.name}]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Purchase Order",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_item,
+			so.name,
+		)
+
 	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
 		for workflow_name in frappe.get_all(
 			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
