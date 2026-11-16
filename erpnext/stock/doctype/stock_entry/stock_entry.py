@@ -1744,7 +1744,10 @@ class StockEntry(StockController):
 		Updates rate and availability of all the items.
 		Called from Update Rate and Availability button.
 		"""
+		self.check_source_documents_permission()
 		self.set_work_order_details()
+		if self.bom_no:
+			erpnext.require_permission("BOM", self.bom_no)
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
@@ -2877,6 +2880,8 @@ class StockEntry(StockController):
 				pluck="name",
 				limit_page_length=2,
 			)
+			for name in manufacture_entries:
+				erpnext.require_permission("Stock Entry", name)
 			if len(manufacture_entries) == 1:
 				self.source_stock_entry = manufacture_entries[0]
 
@@ -3038,6 +3043,7 @@ class StockEntry(StockController):
 		if self.pick_list:
 			return
 
+		self.check_source_documents_permission()
 		self.set("items", [])
 		self.validate_work_order()
 
@@ -3214,6 +3220,15 @@ class StockEntry(StockController):
 			self.process_loss_percentage = flt(
 				(flt(self.process_loss_qty) / flt(self.fg_completed_qty)) * 100
 			)
+
+	def check_source_documents_permission(self):
+		for doctype, name in (
+			("Work Order", self.work_order),
+			("BOM", self.bom_no),
+			("Stock Entry", self.source_stock_entry),
+		):
+			if name:
+				erpnext.require_permission(doctype, name)
 
 	def set_work_order_details(self):
 		if not getattr(self, "pro_doc", None):
