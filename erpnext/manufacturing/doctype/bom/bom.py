@@ -619,6 +619,8 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
+		# the form may send a stale price list exchange rate
+		self.set_plc_conversion_rate()
 		rate = self.get_rm_rate(args) if args.get("fetch_rate") else 0
 		ret_item = {
 			"item_name": item and args["item_name"] or "",
