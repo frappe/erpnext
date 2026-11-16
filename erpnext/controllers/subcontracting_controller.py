@@ -1641,6 +1641,7 @@ class SubcontractingController(StockController):
 	def calculate_additional_costs(self):
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
 
+<<<<<<< HEAD
 		if self.total_additional_costs:
 			if self.distribute_additional_costs_based_on == "Amount":
 				total_amt = sum(
@@ -1661,6 +1662,39 @@ class SubcontractingController(StockController):
 			for item in self.items:
 				if not item.get("is_scrap_item"):
 					item.additional_cost_per_qty = 0
+=======
+		fg_rows = [
+			item
+			for item in self.get("items")
+			if not item.get("secondary_item_type") and not item.get("valuation_type")
+		]
+		for item in fg_rows:
+			item.additional_cost_per_qty = 0
+
+		if not self.total_additional_costs:
+			return
+
+		based_on_amount = self.distribute_additional_costs_based_on == "Amount"
+		weights = [
+			flt(item.amount) if based_on_amount else self.get_qty_for_costing(item) for item in fg_rows
+		]
+		total_weight = sum(weights)
+		if not total_weight:
+			return
+
+		# rounded shares, the last row takes the remainder, so the rows carry exactly the cost
+		precision = self.precision("total_additional_costs")
+		allocated = 0.0
+		for idx, (item, weight) in enumerate(zip(fg_rows, weights, strict=True)):
+			if idx == len(fg_rows) - 1:
+				share = flt(self.total_additional_costs - allocated, precision)
+			else:
+				share = flt(self.total_additional_costs * weight / total_weight, precision)
+			allocated += share
+
+			if qty := self.get_qty_for_costing(item):
+				item.additional_cost_per_qty = share / qty
+>>>>>>> 4884d5e (fix(subcontracting): round each row's share of the additional costs so the shares add up)
 
 	@frappe.whitelist()
 	def get_current_stock(self):
