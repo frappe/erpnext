@@ -1897,9 +1897,7 @@ def make_rm_stock_entry(
 
 				target_doc.set_stock_entry_type()
 
-				over_transfer_allowance = frappe.get_single_value(
-					"Buying Settings", "over_transfer_allowance"
-				)
+				pending_qty = get_pending_qty_by_material(rm_items)
 				for fg_item_code in fg_item_code_list:
 					for rm_item in rm_items:
 						if (
@@ -1907,19 +1905,16 @@ def make_rm_stock_entry(
 							or rm_item.get("item_code") == fg_item_code
 						):
 							rm_item_code = rm_item.get("rm_item_code")
-							qty = rm_item.get("qty") or max(
-								rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0
-							)
-							if qty <= 0 and rm_item.get("total_supplied_qty"):
-								per_transferred = (
-									flt(
-										rm_item.get("total_supplied_qty") / rm_item.get("required_qty"),
-										frappe.db.get_default("float_precision"),
-									)
-									* 100
+							qty = rm_item.get("qty")
+							if not qty:
+								row_pending_qty = flt(rm_item.get("required_qty")) - flt(
+									rm_item.get("total_supplied_qty")
 								)
-								if per_transferred >= 100 + over_transfer_allowance:
-									continue
+								qty = max(min(row_pending_qty, pending_qty[rm_item_code]), 0)
+								pending_qty[rm_item_code] -= qty
+
+							if qty <= 0:
+								continue
 
 							items_dict = {
 								rm_item_code: {
@@ -1980,6 +1975,17 @@ def make_rm_stock_entry(
 				return stock_entry.as_dict()
 		else:
 			frappe.throw(_("No Items selected for transfer."))
+
+
+def get_pending_qty_by_material(rm_items):
+	"""Qty of each raw material still to be sent, counted across the rows that share it."""
+	pending_qty = defaultdict(float)
+	for rm_item in rm_items:
+		pending_qty[rm_item.get("rm_item_code")] += flt(rm_item.get("required_qty")) - flt(
+			rm_item.get("total_supplied_qty")
+		)
+
+	return pending_qty
 
 
 def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_detail", batch_no=None):
