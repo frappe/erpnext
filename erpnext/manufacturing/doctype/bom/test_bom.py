@@ -1894,7 +1894,12 @@ class TestBOM(ERPNextTestSuite):
 =======
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
-			{"doctype": "Price List", "price_list_name": frappe.generate_hash(length=10), "buying": 1}
+			{
+				"doctype": "Price List",
+				"price_list_name": frappe.generate_hash(length=10),
+				"currency": "INR",
+				"buying": 1,
+			}
 		).insert()
 		current_item = make_item(properties={"is_stock_item": 1}).name
 		expired_item = make_item(properties={"is_stock_item": 1}).name
