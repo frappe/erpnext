@@ -4634,10 +4634,37 @@ def make_stock_in_entry(source_name: str, target_doc: str | dict | Document | No
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 def get_work_order_details(work_order: str, company: str):
+=======
+@frappe.validate_and_sanitize_search_inputs
+def get_pending_work_orders(
+	doctype: str, txt: str, searchfield: str, start: int, page_length: int, filters: dict
+) -> list:
+	work_order = frappe.qb.DocType("Work Order")
+	query = frappe.qb.get_query(
+		"Work Order",
+		fields=["name", "production_item"],
+		filters={
+			"docstatus": 1,
+			"company": filters.get("company"),
+			"name": ("like", f"%{txt}%"),
+		},
+		order_by="name",
+		limit=cint(page_length),
+		offset=cint(start),
+		ignore_permissions=False,
+	)
+	if filters.get("purpose") == "Disassemble":
+		return query.where(work_order.produced_qty > work_order.disassembled_qty).run()
+	return query.where(work_order.qty > work_order.produced_qty).run()
+
+
+@frappe.whitelist()
+def get_work_order_details(work_order: str, company: str, purpose: str | None = None):
+>>>>>>> 3452d02 (fix(stock): propose the Finished Good Quantity for the entry's purpose)
 	work_order = frappe.get_doc("Work Order", work_order)
 	work_order.check_permission("read")
-	pending_qty_to_produce = flt(work_order.qty) - flt(work_order.produced_qty)
 
 	return {
 		"from_bom": 1,
@@ -4645,11 +4672,36 @@ def get_work_order_details(work_order: str, company: str):
 		"use_multi_level_bom": work_order.use_multi_level_bom,
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
-		"fg_completed_qty": pending_qty_to_produce,
+		"fg_completed_qty": get_pending_fg_qty(work_order, purpose),
 	}
 
 
+<<<<<<< HEAD
 def get_consumed_operating_cost(work_order, bom_no, operation_id=None):
+=======
+def get_pending_fg_qty(work_order, purpose):
+	"""Default Finished Good Quantity of a new entry of this purpose for the Work Order."""
+	if purpose == "Disassemble":
+		qty = flt(work_order.produced_qty) - flt(work_order.disassembled_qty)
+	elif purpose == "Material Transfer for Manufacture":
+		qty = flt(work_order.qty) - flt(work_order.material_transferred_for_manufacturing)
+	elif purpose == "Manufacture":
+		transferred_qty = (
+			0 if work_order.skip_transfer else flt(work_order.material_transferred_for_manufacturing)
+		)
+		qty = (
+			(transferred_qty or flt(work_order.qty))
+			- flt(work_order.produced_qty)
+			- flt(work_order.process_loss_qty)
+		)
+	else:
+		qty = flt(work_order.qty) - flt(work_order.produced_qty)
+
+	return max(flt(qty, work_order.precision("qty")), 0)
+
+
+def get_consumed_operating_cost(wo_name, bom_no, operation_id):
+>>>>>>> 3452d02 (fix(stock): propose the Finished Good Quantity for the entry's purpose)
 	table = frappe.qb.DocType("Stock Entry")
 	child_table = frappe.qb.DocType("Landed Cost Taxes and Charges")
 	query = (

@@ -21,11 +21,19 @@ frappe.ui.form.on("Stock Entry", {
 
 		frm.set_query("work_order", function () {
 			return {
+<<<<<<< HEAD
 				filters: [
 					["Work Order", "docstatus", "=", 1],
 					["Work Order", "qty", ">", "`tabWork Order`.produced_qty"],
 					["Work Order", "company", "=", frm.doc.company],
 				],
+=======
+				query: "erpnext.stock.doctype.stock_entry.stock_entry.get_pending_work_orders",
+				filters: {
+					company: frm.doc.company,
+					purpose: frm.doc.purpose,
+				},
+>>>>>>> 3452d02 (fix(stock): propose the Finished Good Quantity for the entry's purpose)
 			};
 		});
 
@@ -1409,6 +1417,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			args: {
 				work_order: me.frm.doc.work_order,
 				company: me.frm.doc.company,
+				purpose: me.frm.doc.purpose,
 			},
 			callback: function (r) {
 				if (!r.exc) {
