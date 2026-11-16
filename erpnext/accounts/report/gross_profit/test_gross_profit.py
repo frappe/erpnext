@@ -1041,6 +1041,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
 		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.idx = None
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
@@ -1048,7 +1049,15 @@ class TestGrossProfit(ERPNextTestSuite):
 		sales_invoice.submit()
 
 		sales_return = make_sales_return(sales_invoice.name)
-		sales_return.set("items", [sales_return.items[0]])
+		sales_return.set(
+			"items",
+			[
+				item
+				for item in sales_return.items
+				if item.sales_invoice_item == sales_invoice.items[0].name
+			],
+		)
+		self.assertEqual(len(sales_return.items), 1)
 		sales_return.items[0].qty = -1
 		sales_return.submit()
 
