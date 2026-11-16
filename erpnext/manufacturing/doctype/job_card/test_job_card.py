@@ -1188,6 +1188,35 @@ class TestJobCard(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_corrective_job_card_takes_the_rate_of_its_new_workstation(self):
+		workstation = make_jc_review_workstation(hour_rate=600)
+		rework_workstation = make_jc_review_workstation(hour_rate=1500)
+		operation = make_jc_review_operation(workstation)
+		rework = make_jc_review_operation(rework_workstation, is_corrective_operation=1)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+			skip_transfer=1,
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		job_card.append("time_logs", jc_review_log("2031-03-06 08:00:00", 60, 10))
+		job_card.submit()
+
+		corrective_job_card = make_corrective_job_card(
+			job_card.name, operation=rework, for_operation=operation
+		)
+		corrective_job_card.workstation = rework_workstation
+		corrective_job_card.append("time_logs", jc_review_log("2031-03-06 10:00:00", 60, 10))
+		corrective_job_card.submit()
+
+		self.assertEqual(corrective_job_card.hour_rate, 1500)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "corrective_operation_cost"), 1500)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):
