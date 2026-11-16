@@ -1672,7 +1672,10 @@ class TestJobCard(FrappeTestCase):
 			job_card_b.submit()
 
 			operation_a = work_order.operations[0]
-			make_job_card(
+			self.assertRaisesRegex(
+				frappe.ValidationError,
+				"cannot be greater than Qty To Manufacture",
+				make_job_card,
 				work_order.name,
 				[
 					{
@@ -1683,13 +1686,6 @@ class TestJobCard(FrappeTestCase):
 						"pending_qty": 1,
 					}
 				],
-			)
-			extra_job_card_a = frappe.get_last_doc(
-				"Job Card", {"operation_id": operation_a.name, "docstatus": 0}
-			)
-			complete(extra_job_card_a, 1, 5)
-			self.assertRaisesRegex(
-				frappe.ValidationError, "Completed Qty cannot be greater", extra_job_card_a.submit
 			)
 
 		work_order.reload()
