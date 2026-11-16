@@ -1541,6 +1541,36 @@ class TestJobCard(ERPNextTestSuite):
 
 		self.complete_second_operation_and_finish(wo_doc, jc2.name)
 
+	def test_schedule_block_is_covered_net_of_upstream_process_loss(self):
+		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
+
+		work_order = self.make_two_operation_work_order(qty=10)
+		job_cards = frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+		)
+		for index, (for_quantity, completed_qty) in enumerate(((10, 9), (9, 9))):
+			job_card = frappe.get_doc("Job Card", job_cards[index])
+			job_card.for_quantity = for_quantity
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": add_to_date("2024-03-01 08:00:00", hours=index),
+					"to_time": add_to_date("2024-03-01 08:00:00", hours=index, minutes=30),
+					"completed_qty": completed_qty,
+				},
+			)
+			job_card.save()
+			job_card.submit()
+
+		work_order.db_set({"production_plan": "Test Loss Plan", "production_plan_item": "Test Loss Plan Row"})
+
+		block = frappe._dict(
+			production_plan="Test Loss Plan",
+			plan_row="Test Loss Plan Row",
+			operation=work_order.operations[1].operation,
+		)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
+
 	def test_upstream_process_loss_in_manufacturing(self):
 		for upstream_qty, upstream_output, downstream_qty, downstream_output, manufacture_entries in (
 			(100, 95, 95, 95, [(100, 5, 95)]),
