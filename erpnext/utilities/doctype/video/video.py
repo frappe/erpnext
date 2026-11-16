@@ -14,6 +14,7 @@ from pyyoutube import Api
 
 YOUTUBE_DOMAINS = ("youtube.com", "youtu.be", "youtube-nocookie.com")
 YOUTUBE_VIDEO_ID = re.compile(r"[A-Za-z0-9_-]{11}")
+HOSTNAME = re.compile(r"[a-z0-9.-]+")
 
 
 class Video(Document):
@@ -41,14 +42,23 @@ class Video(Document):
 
 	def validate(self):
 		if self.provider != "YouTube":
+			self.validate_web_url()
 			return
 
 		self.set_video_id()
 		if is_tracking_enabled():
 			self.set_youtube_statistics()
 
+	def validate_web_url(self):
+		if not self.url:
+			return  # the mandatory check reports it
+
+		parsed = urlparse(self.url.strip())
+		if parsed.scheme not in ("http", "https") or not HOSTNAME.fullmatch(parsed.hostname or ""):
+			frappe.throw(_("Enter a valid http or https URL"), title=_("Invalid URL"))
+
 	def set_video_id(self):
-		if self.url and (not self.get("youtube_video_id") or self.has_value_changed("url")):
+		if self.url:
 			self.youtube_video_id = get_id_from_url(self.url)
 
 	def set_youtube_statistics(self):
