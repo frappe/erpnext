@@ -165,6 +165,33 @@ class TestQueries(ERPNextTestSuite):
 		self.assert_nested_in(open_dn.name, result)
 		self.assertNotIn(returned_dn.name, [row[0] for row in result])
 
+	def test_get_filtered_child_rows_checks_linked_document_permission(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		so = make_sales_order(do_not_submit=True)
+		po = create_purchase_order(do_not_save=True)
+		po.items[0].sales_order = so.name
+		po.insert()
+
+		user = create_user("child_rows_purchase_user@example.com", "Purchase User")
+		params = {
+			"doctype": "Purchase Order Item",
+			"txt": "",
+			"searchfield": "name",
+			"start": 0,
+			"page_len": 20,
+		}
+
+		with self.set_user(user.name):
+			rows = queries.get_filtered_child_rows(**params, filters={"parent": po.name})
+			self.assertEqual([row[0] for row in rows], [po.items[0].name])
+
+			with self.assertRaises(frappe.PermissionError):
+				queries.get_filtered_child_rows(
+					**params, filters={"parent": po.name, "sales_order.grand_total": so.grand_total}
+				)
+
 	def test_default_uoms(self):
 		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)
 
