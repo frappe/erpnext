@@ -18,9 +18,9 @@ from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
-	validate_counterpart_is_free,
 	validate_inter_company_party,
 )
+from erpnext.accounts.doctype.sales_invoice.services.inter_company import validate_inter_company_order_qty
 from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -578,6 +578,9 @@ class SalesOrder(SellingController):
 			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
 
+	def before_submit(self):
+		validate_inter_company_order_qty(self)
+
 	def on_submit(self):
 		super().update_prevdoc_status()
 		self.check_credit_limit()
@@ -592,7 +595,6 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
-		validate_counterpart_is_free(self)
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count

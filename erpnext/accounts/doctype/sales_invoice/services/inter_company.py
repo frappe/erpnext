@@ -9,11 +9,6 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_link_to_form
 
-ORDER_ROW_LINKS = {
-	"Sales Order": ("purchase_order_item", "Purchase Order Item"),
-	"Purchase Order": ("sales_order_item", "Sales Order Item"),
-}
-
 
 def validate_inter_company_party(
 	doctype: str, party: str, company: str, inter_company_reference: str | None
@@ -90,31 +85,16 @@ def update_linked_doc(doctype: str, name: str, inter_company_reference: str | No
 		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, name)
 
 
-def validate_counterpart_is_free(doc) -> None:
-	"""Drafts are mapped from submitted documents only, so check again on submit."""
-	if doc.get("is_return"):
-		return
-
-	if doc.doctype == "Sales Invoice":
-		validate_purchase_invoice_is_free(doc)
-	elif doc.doctype in ORDER_ROW_LINKS:
-		validate_inter_company_order_qty(doc)
-
-
 def validate_purchase_invoice_is_free(doc) -> None:
 	"""Purchase Invoice rows link no Sales Invoice rows, so it can have only one Sales Invoice."""
 	purchase_invoice = doc.inter_company_invoice_reference
-	if not purchase_invoice:
+	if doc.is_return or not purchase_invoice:
 		return
 
 	sales_invoice = frappe.db.get_value(
 		"Purchase Invoice", purchase_invoice, "inter_company_invoice_reference"
 	)
-	if (
-		sales_invoice
-		and sales_invoice != doc.name
-		and frappe.db.get_value("Sales Invoice", sales_invoice, "docstatus") == 1
-	):
+	if sales_invoice and frappe.db.get_value("Sales Invoice", sales_invoice, "docstatus") == 1:
 		frappe.throw(
 			_("Purchase Invoice {0} already has Sales Invoice {1}.").format(
 				purchase_invoice, get_link_to_form("Sales Invoice", sales_invoice)
@@ -123,56 +103,49 @@ def validate_purchase_invoice_is_free(doc) -> None:
 
 
 def validate_inter_company_order_qty(doc) -> None:
-	source = doc.inter_company_order_reference
-	if not source:
+	"""A Sales Order and the other Sales Orders of its Purchase Order must not go over its stock qty."""
+	purchase_order = doc.inter_company_order_reference
+	if not purchase_order:
 		return
 
-	row_field, source_item_doctype = ORDER_ROW_LINKS[doc.doctype]
-	source_qty = dict(
-		frappe.get_all(source_item_doctype, {"parent": source}, ["name", "stock_qty"], as_list=True)
+	purchase_order_qty = dict(
+		frappe.get_all("Purchase Order Item", {"parent": purchase_order}, ["name", "stock_qty"], as_list=True)
 	)
-	ordered_qty = get_inter_company_ordered_qty(doc, row_field)
+	ordered_qty = get_inter_company_qty(
+		"Sales Order", {"inter_company_order_reference": purchase_order}, "purchase_order_item"
+	)
 
 	for row in doc.items:
-		source_row = row.get(row_field)
-		if source_row not in source_qty:
+		if row.purchase_order_item not in purchase_order_qty:
 			continue
 
-		ordered_qty[source_row] += flt(row.stock_qty)
+		ordered_qty[row.purchase_order_item] += flt(row.stock_qty)
 		precision = row.precision("stock_qty")
-		if flt(ordered_qty[source_row], precision) > flt(source_qty[source_row], precision):
-			source_doctype = source_item_doctype.removesuffix(" Item")
+		if flt(ordered_qty[row.purchase_order_item], precision) > flt(
+			purchase_order_qty[row.purchase_order_item], precision
+		):
 			frappe.throw(
-				_("Row #{0}: Item {1} is already ordered in full against {2} {3}.").format(
-					row.idx,
-					frappe.bold(row.item_code),
-					source_doctype,
-					get_link_to_form(source_doctype, source),
+				_("Row #{0}: Item {1} is already ordered in full against Purchase Order {2}.").format(
+					row.idx, frappe.bold(row.item_code), get_link_to_form("Purchase Order", purchase_order)
 				)
 			)
 
 
-def get_inter_company_ordered_qty(doc, row_field: str) -> defaultdict:
-	"""Stock qty of the other submitted orders against the same counterpart, by counterpart row."""
-	other_orders = frappe.get_all(
-		doc.doctype,
-		filters={
-			"inter_company_order_reference": doc.inter_company_order_reference,
-			"docstatus": 1,
-			"name": ("!=", doc.name),
-		},
-		pluck="name",
-	)
-	ordered_qty = defaultdict(float)
-	if not other_orders:
-		return ordered_qty
+def get_inter_company_qty(doctype: str, filters: dict, row_field: str) -> defaultdict:
+	"""Stock qty of the submitted `doctype` documents matching `filters`, by the counterpart row they link."""
+	parents = frappe.get_all(doctype, filters={**filters, "docstatus": 1}, pluck="name")
+	qty = defaultdict(float)
+	if not parents:
+		return qty
 
 	for row in frappe.get_all(
-		doc.doctype + " Item", {"parent": ("in", other_orders)}, [row_field, "stock_qty"]
+		doctype + " Item",
+		filters={"parent": ("in", parents), row_field: ("is", "set")},
+		fields=[row_field, "stock_qty"],
 	):
-		ordered_qty[row.get(row_field)] += flt(row.stock_qty)
+		qty[row.get(row_field)] += flt(row.stock_qty)
 
-	return ordered_qty
+	return qty
 
 
 def unlink_inter_company_doc(doctype: str, name: str, inter_company_reference: str | None) -> None:
