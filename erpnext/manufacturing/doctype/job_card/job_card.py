@@ -339,11 +339,8 @@ class JobCard(Document):
 		if self.is_corrective_job_card or not (self.operation_id and self.work_order):
 			return
 
-		wo_qty = self.get_allowed_wo_qty()
-		completed_qty = flt(frappe.db.get_value("Work Order Operation", self.operation_id, "completed_qty"))
-		job_card_qty = self.get_total_job_card_qty()
-
-		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
+		precision = self.precision("for_quantity")
+		if flt(self.get_total_job_card_qty(), precision) > flt(self.get_allowed_wo_qty(), precision):
 			self.throw_extra_qty_error()
 
 	def get_allowed_wo_qty(self):
