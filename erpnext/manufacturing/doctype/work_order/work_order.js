@@ -316,7 +316,8 @@ frappe.ui.form.on("Work Order", {
 	add_custom_button_to_return_components: function (frm) {
 		if (frm.doc.docstatus === 1 && ["Closed", "Completed"].includes(frm.doc.status)) {
 			let non_consumed_items = frm.doc.required_items.filter((d) => {
-				return flt(d.consumed_qty) < flt(d.transferred_qty - d.returned_qty);
+				// consumed_qty already includes returned_qty
+				return flt(d.consumed_qty) < flt(d.transferred_qty);
 			});
 
 			if (non_consumed_items && non_consumed_items.length) {
