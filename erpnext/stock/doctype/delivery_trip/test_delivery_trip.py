@@ -350,10 +350,14 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		return str(context.exception)
 
 	def test_route_transport_error_hides_the_google_maps_key(self):
+		from unittest.mock import patch
+
 		import googlemaps
 
 		error = googlemaps.exceptions.TransportError(Exception("/directions/json?key=AIzaTestRouteKey"))
-		self.assertNotIn("AIzaTestRouteKey", self.get_route_error(error))
+		with patch("frappe.log_error") as log_error:
+			self.assertNotIn("AIzaTestRouteKey", self.get_route_error(error))
+		log_error.assert_called_once()
 
 	def test_route_api_error_shows_the_google_maps_status(self):
 		import googlemaps
