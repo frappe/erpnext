@@ -697,10 +697,7 @@ class StockController(AccountsController):
 		if is_rejected:
 			serial_nos = row.get("rejected_serial_no")
 			type_of_transaction = "Inward" if not self.is_return else "Outward"
-			qty = flt(
-				row.get("rejected_qty") * row.get("conversion_factor", 1.0),
-				frappe.get_precision("Serial and Batch Entry", "qty"),
-			)
+			qty = flt(self.get_rejected_stock_qty(row), frappe.get_precision("Serial and Batch Entry", "qty"))
 			warehouse = row.get("rejected_warehouse")
 
 		if (
@@ -1084,6 +1081,10 @@ class StockController(AccountsController):
 					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
 						self, row, qty_field=QTY_FIELD[field]
 					)
+
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty of a row in the stock UOM."""
+		return flt(row.rejected_qty) * flt(row.get("conversion_factor") or 1)
 
 	def make_package_for_transfer(
 		self,
