@@ -1046,6 +1046,25 @@ class TestGetItemDetail(ERPNextTestSuite):
 				details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
 				self.assertEqual(details.price_list_rate, expected_rate)
 
+	def test_party_price_in_stock_uom_comes_before_general_price_in_row_uom(self):
+		item_code = self.make_multi_uom_item()
+		price_list = self.make_selling_price_list("_Test UOM Price List")
+		for uom, rate, customer in (("_Test UOM 1", 100, None), ("_Test UOM", 8, "_Test Customer")):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": price_list.name,
+					"uom": uom,
+					"price_list_rate": rate,
+					"customer": customer,
+				}
+			).insert()
+
+		details = get_item_details(self.get_uom_rate_context(item_code, price_list.name))
+
+		self.assertEqual(details.price_list_rate, 80)
+
 	def test_fallback_price_list_uses_its_own_uom_setting(self):
 		item_code = self.make_multi_uom_item()
 		selected_list = self.make_selling_price_list("_Test UOM Price List", not_uom_dependent=1)
