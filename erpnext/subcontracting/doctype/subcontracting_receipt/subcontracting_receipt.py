@@ -623,11 +623,13 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def keep_secondary_row_values(self, sent_rows):
 		"""Keep the accounts and dimensions set on a return's secondary rows before the rebuild,
-		and their serial nos and batches when they fit the rebuilt qty."""
-		sent_rows = {
-			row.subcontracting_receipt_item: row for row in sent_rows if row.subcontracting_receipt_item
-		}
-		if not sent_rows:
+		and their serial nos and batches when they fit the rebuilt qty.
+		Rows sent for one receipt row, e.g. when its finished goods are split, are kept in their order."""
+		sent_by_receipt_row = defaultdict(list)
+		for row in sent_rows:
+			if row.subcontracting_receipt_item:
+				sent_by_receipt_row[row.subcontracting_receipt_item].append(row)
+		if not sent_by_receipt_row:
 			return
 
 		kept_fields = [
@@ -638,9 +640,10 @@ class SubcontractingReceipt(SubcontractingController):
 			*[dimension.source_fieldname for dimension in get_inventory_dimensions()],
 		]
 		for row in self.items:
-			if not (row.bom_secondary_item and (sent := sent_rows.get(row.subcontracting_receipt_item))):
+			if not (row.bom_secondary_item and sent_by_receipt_row.get(row.subcontracting_receipt_item)):
 				continue
 
+			sent = sent_by_receipt_row[row.subcontracting_receipt_item].pop(0)
 			fieldnames = kept_fields
 			# qty is the final one only after calculate_items_qty_and_amount
 			if self.has_picks_for_qty(sent, flt(row.received_qty) - flt(row.process_loss_qty)):
