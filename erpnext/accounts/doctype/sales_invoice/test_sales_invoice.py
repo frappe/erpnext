@@ -4093,6 +4093,51 @@ class TestSalesInvoice(ERPNextTestSuite):
 		self.assertRaises(OverAllowanceError, extra_pi.submit)
 		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 0})
+	def test_inter_company_pi_counts_rejected_qty_and_unlinked_rows(self):
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=2,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		def make_pi(**row):
+			pi = make_inter_company_transaction("Sales Invoice", si.name)
+			pi.update_stock = 1
+			pi.items[0].update(
+				{
+					"expense_account": "Cost of Goods Sold - _TC1",
+					"cost_center": "Main - _TC1",
+					"warehouse": "Stores - _TC1",
+					"rejected_warehouse": "_Test Warehouse 2 - _TC1",
+					**row,
+				}
+			)
+			return pi
+
+		unlinked_row_pi = make_pi()
+		row = unlinked_row_pi.items[0]
+		unlinked_row_pi.append(
+			"items",
+			{
+				field: row.get(field)
+				for field in ("item_code", "qty", "rate", "expense_account", "cost_center")
+			},
+		)
+		self.assertRaises(OverAllowanceError, unlinked_row_pi.submit)
+
+		self.assertRaises(OverAllowanceError, make_pi(qty=2, rejected_qty=1).submit)
+		make_pi(qty=1, rejected_qty=1).submit()
+
 	def test_returned_internal_pi_cannot_be_cancelled_once_invoiced_again(self):
 		company = "_Test Company with perpetual inventory"
 		make_stock_entry(
