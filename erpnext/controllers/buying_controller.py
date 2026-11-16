@@ -1285,7 +1285,8 @@ class BuyingController(SubcontractingController):
 			)
 		}
 		for sle in sl_entries:
-			key = (sle.voucher_detail_no, sle.warehouse, flt(sle.actual_qty) > 0)
+			# an entry that now rounds to 0 is one into the warehouse, as a return reverses its posted qty itself
+			key = (sle.voucher_detail_no, sle.warehouse, flt(sle.actual_qty) >= 0)
 			if key in posted_qty:
 				sle.actual_qty = posted_qty[key]
 
