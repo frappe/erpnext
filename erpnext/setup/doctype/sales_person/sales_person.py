@@ -89,21 +89,23 @@ class SalesPerson(NestedSet):
 		self.validate_one_root()
 
 	def validate_sales_person(self):
+		if reason := self.get_disable_blocker():
+			frappe.throw(reason)
+
+	def get_disable_blocker(self) -> str | None:
+		"""Return why this Sales Person cannot be disabled, or None when it can."""
 		sales_team = frappe.qb.DocType("Sales Team")
 
-		query = (
+		linked_to_customer = (
 			frappe.qb.from_(sales_team)
 			.select(sales_team.sales_person)
 			.where((sales_team.sales_person == self.name) & (sales_team.parenttype == "Customer"))
-			.groupby(sales_team.sales_person)
-		).run(as_dict=True)
-
-		if query:
-			frappe.throw(
-				_("The Sales Person is linked with {0}").format(
-					frappe.bold(
-						f"""<a href="{get_url_to_list("Customer")}?sales_person={self.name}">{"Customers"}</a>"""
-					)
+			.limit(1)
+		).run()
+		if linked_to_customer:
+			return _("The Sales Person is linked with {0}").format(
+				frappe.bold(
+					f"""<a href="{get_url_to_list("Customer")}?sales_person={self.name}">{"Customers"}</a>"""
 				)
 			)
 
@@ -123,13 +125,13 @@ class SalesPerson(NestedSet):
 				.limit(1)
 			).run()
 			if linked_transactions:
-				frappe.throw(
-					_("Sales Person {0} cannot be disabled because {1} {2} is unfinished.").format(
-						frappe.bold(self.name),
-						_(doctype),
-						get_link_to_form(doctype, linked_transactions[0][0]),
-					)
+				return _("Sales Person {0} cannot be disabled because {1} {2} is unfinished.").format(
+					frappe.bold(self.name),
+					_(doctype),
+					get_link_to_form(doctype, linked_transactions[0][0]),
 				)
+
+		return None
 
 	def get_email_id(self):
 		if self.employee:

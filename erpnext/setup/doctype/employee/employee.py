@@ -10,7 +10,7 @@ from frappe.permissions import (
 	remove_user_permission,
 )
 from frappe.query_builder import Criterion
-from frappe.utils import cint, cstr, getdate, today, validate_email_address
+from frappe.utils import cint, cstr, get_link_to_form, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
 import erpnext
@@ -141,7 +141,6 @@ class Employee(NestedSet):
 			if frappe.db.get_value("Department", self.department, "disabled"):
 				frappe.throw(_("Cannot assign a disabled Department"))
 		self.validate_department_company()
-		self.validate_sales_persons_can_be_disabled()
 		self.set_preferred_email()
 		self.validate_preferred_email()
 
@@ -215,14 +214,8 @@ class Employee(NestedSet):
 			if not active_rehire:
 				self.update_user_status()
 		self.reset_employee_emails_cache()
-		disable_sales_persons(self.flags.pop("sales_persons_to_disable", None))
-
-	def validate_sales_persons_can_be_disabled(self):
-		"""Check linked Sales Persons before any write, so a refusal leaves no partial update."""
-		# Reset on every save, so a list from a failed save is not used by the next one.
-		self.flags.sales_persons_to_disable = None
 		if self.status == "Left" and self.has_value_changed("status"):
-			self.flags.sales_persons_to_disable = get_sales_persons_to_disable(self.name)
+			disable_sales_persons(self.name)
 
 	def before_insert(self):
 		self.validate_auto_user_creation()
@@ -629,23 +622,27 @@ def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False,
 def deactivate_sales_person(status: str, employee: str):
 	frappe.has_permission("Employee", doc=employee, ptype="write", throw=True)
 	if status == "Left" and frappe.db.get_value("Employee", employee, "status") == "Left":
-		disable_sales_persons(get_sales_persons_to_disable(employee))
+		disable_sales_persons(employee)
 
 
-def get_sales_persons_to_disable(employee):
-	sales_persons = []
+def disable_sales_persons(employee: str):
+	"""Disable the Employee's Sales Persons. Keep one enabled while its open sales still need it."""
+	kept = []
 	for name in frappe.get_all("Sales Person", filters={"employee": employee, "enabled": 1}, pluck="name"):
 		sales_person = frappe.get_doc("Sales Person", name)
-		# Run the checks that Sales Person applies when it is disabled.
-		sales_person.validate_sales_person()
-		sales_persons.append(sales_person)
-	return sales_persons
-
-
-def disable_sales_persons(sales_persons):
-	# Checked by get_sales_persons_to_disable, so these writes cannot be refused after the Employee is saved.
-	for sales_person in sales_persons or []:
+		# A disabled Sales Person blocks the follow-up documents of its open sales.
+		if reason := sales_person.get_disable_blocker():
+			kept.append(f"<li>{get_link_to_form('Sales Person', name)}: {reason}</li>")
+			continue
 		sales_person.db_set("enabled", 0)
+
+	if kept:
+		frappe.msgprint(
+			_("These Sales Persons stay enabled. Reassign their work, then disable them:")
+			+ f"<ul>{''.join(kept)}</ul>",
+			title=_("Sales Persons Not Disabled"),
+			indicator="orange",
+		)
 
 
 @frappe.whitelist(methods=["POST"])

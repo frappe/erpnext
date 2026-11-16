@@ -145,54 +145,34 @@ class TestEmployee(ERPNextTestSuite):
 		employee.save()
 		self.assertEqual(person.reload().enabled, 0)
 
-	def test_refused_sales_person_leaves_no_partial_update(self):
-		from frappe.client import bulk_update
-
-		user = "employee-sales-refused@example.com"
-		employee = frappe.get_doc("Employee", make_employee(user, company="_Test Company"))
+	def test_sales_person_with_open_sales_stays_enabled_when_employee_leaves(self):
+		employee = frappe.get_doc(
+			"Employee", make_employee("employee-sales-kept@example.com", company="_Test Company")
+		)
 		free = frappe.get_doc(
 			doctype="Sales Person", sales_person_name="Employee Sales Free", employee=employee.name
 		).insert()
-		blocked = frappe.get_doc(doctype="Sales Person", sales_person_name="Employee Sales Blocked").insert()
+		kept = frappe.get_doc(doctype="Sales Person", sales_person_name="Employee Sales Kept").insert()
 		# Legacy data: a second Sales Person for the same Employee.
-		frappe.db.set_value("Sales Person", blocked.name, "employee", employee.name)
-		customer = frappe.get_doc(
+		frappe.db.set_value("Sales Person", kept.name, "employee", employee.name)
+		frappe.get_doc(
 			doctype="Customer",
 			customer_name="Employee Sales Customer",
-			sales_team=[{"sales_person": blocked.name, "allocated_percentage": 100}],
+			sales_team=[{"sales_person": kept.name, "allocated_percentage": 100}],
 		).insert()
 
-		# frappe.client.bulk_update catches the error but does not roll back.
-		result = bulk_update(
-			[
-				{
-					"doctype": "Employee",
-					"docname": employee.name,
-					"status": "Left",
-					"relieving_date": "2020-01-01",
-				}
-			]
-		)
-
-		self.assertEqual(len(result["failed_docs"]), 1)
-		self.assertEqual(frappe.db.get_value("Employee", employee.name, "status"), "Active")
-		self.assertEqual(frappe.db.get_value("User", user, "enabled"), 1)
-		self.assertEqual(free.reload().enabled, 1)
-		self.assertEqual(blocked.reload().enabled, 1)
-
-		# A failed save must not leave its Sales Person list for the next save of the same object.
-		employee = frappe.get_doc("Employee", employee.name)
-		employee.flags.sales_persons_to_disable = [free]
-		employee.save()
-		self.assertEqual(free.reload().enabled, 1)
-
-		customer.delete()
-		employee.reload()
+		frappe.clear_messages()
 		employee.status = "Left"
 		employee.relieving_date = "2020-01-01"
 		employee.save()
+
+		self.assertEqual(frappe.db.get_value("Employee", employee.name, "status"), "Left")
 		self.assertEqual(free.reload().enabled, 0)
-		self.assertEqual(blocked.reload().enabled, 0)
+		self.assertEqual(kept.reload().enabled, 1)
+		messages = [frappe.parse_json(m) for m in frappe.message_log]
+		warning = next(m for m in messages if m.get("title") == "Sales Persons Not Disabled")
+		self.assertIn(kept.name, warning.message)
+		self.assertNotIn(free.name, warning.message)
 
 	def test_edit_left_employee_after_rehire(self):
 		user = "employee-rehire@example.com"
