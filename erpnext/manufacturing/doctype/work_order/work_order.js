@@ -1273,6 +1273,15 @@ erpnext.work_order = {
 		});
 	},
 
+	get_allowance_percentage: (frm, purpose) => {
+		// same as the server: transfers use Transfer Extra %, falling back to Overproduction %
+		const overproduction = flt(frm.doc.__onload?.overproduction_percentage);
+		if (purpose === "Material Transfer for Manufacture") {
+			return flt(frm.doc.__onload?.transfer_extra_materials_percentage) || overproduction;
+		}
+		return overproduction;
+	},
+
 	show_prompt_for_qty_input: function (frm, purpose, { qty, additional_transfer_entry, target } = {}) {
 		let max = qty == null ? this.get_max_transferable_qty(frm, purpose) : qty;
 		if (purpose === "Manufacture") {
@@ -1280,7 +1289,7 @@ erpnext.work_order = {
 		}
 		// a passed qty is already the caller's cap
 		const allowance =
-			qty == null ? (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100 : 0;
+			qty == null ? (flt(frm.doc.qty) * this.get_allowance_percentage(frm, purpose)) / 100 : 0;
 		const allowed_qty = flt(max + allowance, precision("qty"));
 		// only the overproduction allowance may be left
 		const default_qty = max || allowed_qty;
