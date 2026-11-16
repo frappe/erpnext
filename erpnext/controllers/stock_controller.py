@@ -1218,11 +1218,13 @@ def group_reservation_usage(rows: list[dict]) -> dict:
 def match_used_serial_batch(sre_doc, usage) -> float:
 	matched_qty = 0
 	for entry in sre_doc.sb_entries:
+		# a Qty reservation of the same row may already hold part of the usage
+		open_qty = flt(usage.qty - matched_qty, entry.precision("delivered_qty"))
 		if sre_doc.has_serial_no:
-			delivered_qty = 1 if entry.serial_no in usage.serial_nos else 0
+			delivered_qty = 1 if entry.serial_no in usage.serial_nos and open_qty >= 1 else 0
 			usage.serial_nos.discard(entry.serial_no)
 		else:
-			delivered_qty = min(entry.qty, usage.batch_qty[entry.batch_no])
+			delivered_qty = min(entry.qty, usage.batch_qty[entry.batch_no], open_qty)
 			usage.batch_qty[entry.batch_no] -= delivered_qty
 
 		delivered_qty = flt(delivered_qty, entry.precision("delivered_qty"))
