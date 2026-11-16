@@ -853,6 +853,12 @@ class SubcontractingReceipt(SubcontractingController):
 			else:
 				rm_cost_map[item.reference_name] = item.amount
 
+		# before the percentage rows, which are priced from it
+		for item in self.get("items") or []:
+			if item.qty and item.name in rm_cost_map:
+				item.rm_supp_cost = rm_cost_map[item.name]
+				item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
+
 		# own-cost rows first: they are deducted from the finished good, and the
 		# percentage rows reprice from the basis net of them
 		secondary_items_cost_map = {}
@@ -896,11 +902,6 @@ class SubcontractingReceipt(SubcontractingController):
 					)
 
 				if item.qty:
-					if item.name in rm_cost_map:
-						item.rm_supp_cost = rm_cost_map[item.name]
-						item.rm_cost_per_qty = item.rm_supp_cost / (item.received_qty or item.qty)
-						rm_cost_map.pop(item.name)
-
 					# the stock ledger returns the finished good at its receipt rate
 					if returned and item.name not in rejected_return_rows:
 						item.secondary_items_cost_per_qty = returned.secondary_items_cost_per_qty
