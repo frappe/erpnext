@@ -1382,6 +1382,7 @@ class TestPickList(FrappeTestCase):
 		)
 		self.assertEqual(sum(values), 2 * 100 + 2 * 200)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_two_return_rows_of_a_split_bundle_take_back_different_delivered_rows(self):
 		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
 
