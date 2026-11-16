@@ -140,6 +140,7 @@ def make_user_restricted_to_cost_center(cost_center):
 				"doctype": "User",
 				"email": user,
 				"first_name": "Dimension-wise Balance",
+				"send_welcome_email": 0,
 				"roles": [{"role": "Accounts User"}],
 			}
 		).insert()
