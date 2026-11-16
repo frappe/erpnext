@@ -4269,6 +4269,17 @@ class TestPickList(ERPNextTestSuite):
 		result = get_pick_list_query("Pick List", "", "name", 0, 20, filters)
 		self.assertIn(pick_list.name, [row["name"] for row in result])
 
+	def test_pick_list_query_refuses_a_company_that_is_not_text(self):
+		from erpnext.stock.doctype.pick_list.pick_list import get_pending_work_orders, get_pick_list_query
+
+		filters = {"company": 123, "customer": "_Test Customer"}
+		self.assertRaises(
+			frappe.ValidationError, get_pick_list_query, "Pick List", "", "name", 0, 20, filters
+		)
+		self.assertRaises(
+			frappe.ValidationError, get_pending_work_orders, "Work Order", "", "name", 0, 20, filters
+		)
+
 
 def make_work_order_pick_list_with_reserved_serials():
 	"""Saved pick list for a Work Order that reserves 2 of 4 serial nos of its raw material."""
