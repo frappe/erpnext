@@ -261,6 +261,53 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		self.assertEqual(pricing["children"], [])
 
+	def test_applying_price_list_needs_blanket_order_read_permission(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		blanket_order, _price_list = make_priced_blanket_order(price_list_rate=4321.5)
+		expected = apply_price_list(blanket_order.as_dict())
+		self.assertEqual(expected["children"][0]["price_list_rate"], 4321.5)
+
+		for user, roles in (
+			("_test_bo_no_role@example.com", []),
+			("_test_bo_sales@example.com", ["Sales User"]),
+		):
+			with as_user(make_fenced_user(user, roles)):
+				self.assertRaises(frappe.PermissionError, apply_price_list, blanket_order.as_dict())
+
+		with as_user(make_fenced_user("_test_bo_manager@example.com", ["System Manager", "Sales User"])):
+			self.assertEqual(apply_price_list(blanket_order.as_dict()), expected)
+
+	def test_applying_price_list_checks_party_and_user_permissions(self):
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		for order_type, party_type, other_party, party_role in (
+			("Selling", "Customer", "_Test Customer 1", "Sales User"),
+			("Purchasing", "Supplier", "_Test Supplier 1", "Purchase User"),
+		):
+			with self.subTest(order_type=order_type):
+				blanket_order, _price_list = make_priced_blanket_order(order_type, price_list_rate=4321.5)
+				party = blanket_order.get(frappe.scrub(party_type))
+				expected = apply_price_list(blanket_order.as_dict())
+				prefix = f"_test_bo_{order_type.lower()}"
+				denied_users = (
+					make_fenced_user(f"{prefix}_no_party@example.com", ["System Manager"]),
+					make_fenced_user(
+						f"{prefix}_other_company@example.com",
+						["System Manager", party_role],
+						[("Company", "_Test Company 1")],
+					),
+					make_party_reader(
+						f"{prefix}_other_party@example.com", party_role, party_type, other_party
+					),
+				)
+				for user in denied_users:
+					with as_user(user):
+						self.assertRaises(frappe.PermissionError, apply_price_list, blanket_order.as_dict())
+
+				with as_user(make_party_reader(f"{prefix}_party@example.com", party_role, party_type, party)):
+					self.assertEqual(apply_price_list(blanket_order.as_dict()), expected)
+
 	def test_price_list_rate_is_fetched_on_item_selection(self):
 		company = "_Test Company"
 		company_currency = get_company_currency(company)
@@ -641,6 +688,24 @@ def make_blanket_order(**args):
 	bo.insert()
 	bo.submit()
 	return bo
+
+
+def make_party_reader(email, party_role, party_type, party):
+	from erpnext.tests.permission_test_utils import make_fenced_user
+
+	user = make_fenced_user(email, ["System Manager", party_role])
+	frappe.get_doc(
+		{
+			"doctype": "User Permission",
+			"user": user,
+			"allow": party_type,
+			"for_value": party,
+			"apply_to_all_doctypes": 0,
+			"applicable_for": party_type,
+		}
+	).insert(ignore_permissions=True)
+	frappe.clear_cache(user=user)
+	return user
 
 
 def make_priced_blanket_order(
