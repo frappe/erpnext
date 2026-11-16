@@ -542,6 +542,29 @@ class TestPricingRule(ERPNextTestSuite):
 		self.assertEqual(si.items[0].rate, 120)
 		self.assertEqual(si.items[0].margin_rate_or_amount, 20)
 
+	def test_typed_rate_stays_on_row_with_pricing_rule(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		make_pricing_rule(selling=1, discount_percentage=5)
+
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 100
+		si.payment_schedule = []
+		si.insert(ignore_permissions=True)
+		self.assertEqual(si.items[0].rate, 95)
+
+		si.items[0].rate = 110
+		si.save()
+		self.assertEqual(si.items[0].rate, 110)
+		self.assertEqual(si.items[0].margin_type, "Amount")
+		self.assertEqual(si.items[0].margin_rate_or_amount, 10)
+		self.assertEqual(si.items[0].discount_amount, 0)
+
+		si.items[0].rate = 90
+		si.save()
+		self.assertEqual(si.items[0].rate, 90)
+		self.assertEqual(si.items[0].discount_amount, 10)
+		self.assertEqual(si.items[0].margin_rate_or_amount, 0)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_pricing_rule_for_product_discount_on_same_item(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
