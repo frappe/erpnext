@@ -349,6 +349,16 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
 		self.assertEqual(wo.qty, 2)
 
+	def test_raw_material_received_ignores_excess_of_one_material(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "Basic RM"]
+		rm_in.items[0].qty = 20
+		rm_in.submit()
+
+		scio.reload()
+		self.assertEqual(scio.per_raw_material_received, 25)
+
 	def test_rm_return(self):
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
 
