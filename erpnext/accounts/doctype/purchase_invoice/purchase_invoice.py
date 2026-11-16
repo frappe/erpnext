@@ -39,7 +39,7 @@ from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import merge_taxes, validate_account_head
-from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
+from erpnext.controllers.buying_controller import BuyingController, get_stock_qty, get_transit_amount
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.projects.doctype.project.project import update_purchase_cost
 from erpnext.stock import get_warehouse_account_map
@@ -1568,7 +1568,7 @@ class PurchaseInvoice(BuyingController):
 			if item.sales_incoming_rate:
 				# Material of a transfer goes back at the rate it came in with, the rejected
 				# material along with the accepted.
-				net_rate = (flt(item.qty) + flt(item.rejected_qty)) * item.sales_incoming_rate
+				net_rate = get_transit_amount(item, item.qty) + get_transit_amount(item, item.rejected_qty)
 
 			stock_amount = net_rate + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 			warehouse_debit_amount = flt(
