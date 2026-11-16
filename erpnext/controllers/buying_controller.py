@@ -914,6 +914,14 @@ class BuyingController(SubcontractingController):
 	def is_internal_receipt(self) -> bool:
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
+	def has_rejected_qty_from_transit(self, row) -> bool:
+		"""An internal receipt row without packages takes its accepted and rejected qty out of the in-transit
+		warehouse as one stock qty."""
+		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
+			return False
+
+		return not (row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"))
+
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
@@ -922,6 +930,16 @@ class BuyingController(SubcontractingController):
 			return accepted_qty
 
 		return get_stock_qty(row, flt(row.qty) + flt(row.rejected_qty))
+
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty in the stock UOM. A row that takes it out of the in-transit warehouse takes it out of
+		the stock qty it receives, so the accepted and rejected parts add up to what leaves the warehouse."""
+		if not self.has_rejected_qty_from_transit(row):
+			return get_stock_qty(row, row.rejected_qty)
+
+		return flt(
+			self.get_source_warehouse_qty(row, None) - get_stock_qty(row, row.qty), row.precision("stock_qty")
+		)
 
 	def get_accepted_warehouse_package(self, row, type_of_transaction, via_landed_cost_voucher):
 		"""Package for the entry into the accepted warehouse, which is the package of the row itself
@@ -1124,7 +1142,7 @@ class BuyingController(SubcontractingController):
 						d,
 						{
 							"warehouse": d.rejected_warehouse,
-							"actual_qty": get_stock_qty(d, d.rejected_qty),
+							"actual_qty": self.get_rejected_stock_qty(d),
 							"incoming_rate": valuation_rate_for_rejected_item if not self.is_return else 0.0,
 							"outgoing_rate": valuation_rate_for_rejected_item if self.is_return else 0.0,
 							"serial_and_batch_bundle": d.rejected_serial_and_batch_bundle,
