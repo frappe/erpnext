@@ -1394,8 +1394,8 @@ def get_valuation_rate(data):
 
 	valuation_rate = _get_avg_valuation_rate_from_bins(item_code, company, data)
 
-	if (valuation_rate is not None) and valuation_rate <= 0:
-		# Explicit null value check. If None, Bins don't exist, neither does SLE
+	# None: no Bin, e.g. a source warehouse that never held the item
+	if flt(valuation_rate) <= 0:
 		valuation_rate = _get_last_valuation_rate_from_sle(item_code)
 
 	if not valuation_rate:
