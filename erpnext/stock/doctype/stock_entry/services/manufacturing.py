@@ -1217,7 +1217,6 @@ class RepackStockEntry(BaseManufactureStockEntry):
 
 	def validate(self):
 		self.validate_raw_materials_exists()
-		self.validate_repack_entry()
 
 	def validate_fg_conversion(self):
 		if not self.doc.is_fg_conversion:
