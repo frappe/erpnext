@@ -2103,6 +2103,34 @@ class TestBOM(ERPNextTestSuite):
 
 		self.assertEqual(bom.items[0].rate, 5)
 
+	def test_valuation_rate_secondary_item_cost_net_of_process_loss(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		scrap_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 5}).name
+
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100}],
+				"secondary_items": [
+					{
+						"item_code": scrap_item,
+						"secondary_item_type": "Scrap",
+						"valuation_type": "Valuation Rate",
+						"qty": 10,
+						"process_loss_per": 20,
+					}
+				],
+			}
+		).insert()
+
+		# only 8 of the 10 scrap units are made
+		self.assertEqual(bom.secondary_items_cost, 40)
+		self.assertEqual(bom.total_cost, 60)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
