@@ -439,6 +439,9 @@ class PurchaseOrder(BuyingController):
 	def is_item_closable(self, item):
 		return flt(item.received_qty) < flt(item.qty) or super().is_item_closable(item)
 
+	def validate_item_close(self, items):
+		SubcontractingService(self).validate_item_close(items)
+
 	def update_prevdoc_status(self):
 		if self.is_subcontracted:
 			self.status_updater[0]["source_field"] = "fg_item_qty"
