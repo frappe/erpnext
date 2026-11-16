@@ -474,6 +474,22 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(return_pi.on_hold, 0)
 		self.assertLess(return_pi.outstanding_amount, 0)
 
+	def test_stock_return_after_a_debit_note_without_update_stock_takes_back_its_own_qty(self):
+		"""A debit note without Update Stock moves no stock, so it does not count towards the stock left to return."""
+		pi = make_purchase_invoice(qty=10, update_stock=1)
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.update_stock = 0
+		debit_note.items[0].update({"qty": -5, "received_qty": -5})
+		debit_note.submit()
+
+		stock_return = make_return_doc(pi.doctype, pi.name)
+		stock_return.submit()
+
+		actual_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": stock_return.name, "is_cancelled": 0}, "actual_qty"
+		)
+		self.assertEqual(actual_qty, -5)
+
 	def test_settled_purchase_invoice_cannot_be_held(self):
 		pi = make_purchase_invoice()
 
