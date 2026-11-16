@@ -383,13 +383,7 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 	make_purchase_return() {
 		let me = this;
 
-		let has_rejected_items = this.frm.doc.items.filter((item) => {
-			if (item.rejected_qty > 0) {
-				return true;
-			}
-		});
-
-		if (has_rejected_items && has_rejected_items.length > 0) {
+		if (this.frm.doc.__onload?.has_rejected_qty_to_return) {
 			frappe.prompt(
 				[
 					{

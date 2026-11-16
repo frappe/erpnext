@@ -9,6 +9,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Case
 from frappe.query_builder.functions import Coalesce, Sum
 from frappe.utils import ceil, cint, cstr, escape_html, flt, get_link_to_form
 
@@ -57,6 +58,30 @@ class SubcontractingController(StockController):
 					"order_supplied_items_field": "Subcontracting Order Supplied Item",
 				}
 			)
+
+	def has_rejected_qty_to_return(self) -> bool:
+		rejected_rows = {row.name: row for row in self.items if flt(row.rejected_qty)}
+		if not rejected_rows:
+			return False
+
+		item = frappe.qb.DocType(self.meta.get_field("items").options)
+		return_link = item[f"{frappe.scrub(self.doctype)}_item"]
+		# a rejected warehouse return sends back its qty, any other return its rejected qty
+		returned_rejected_qty = (
+			Case().when(item.return_qty_from_rejected_warehouse == 1, item.qty).else_(item.rejected_qty)
+		)
+		returned_qty = frappe._dict(
+			frappe.qb.from_(item)
+			.select(return_link, Sum(returned_rejected_qty))
+			.where(return_link.isin(list(rejected_rows)) & (item.docstatus == 1))
+			.groupby(return_link)
+			.run()
+		)
+		# return qty is negative
+		return any(
+			flt(row.rejected_qty + flt(returned_qty.get(name)), row.precision("rejected_qty")) > 0
+			for name, row in rejected_rows.items()
+		)
 
 	def before_validate(self):
 		if self.doctype in [
