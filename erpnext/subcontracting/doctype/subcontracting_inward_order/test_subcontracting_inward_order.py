@@ -1087,6 +1087,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		si = make_sales_invoice(so.name)
 		self.assertEqual(len(si.items), 0)
 
+	def test_own_material_on_two_manufacture_rows_is_counted_in_full(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		own_row = next(item for item in manufacture.items if item.item_code == "Self RM")
+		own_row.qty = 3
+		manufacture.append("items", own_row.as_dict(no_default_fields=True))
+		manufacture.submit()
+
+		scio.reload()
+		row = next(row for row in scio.received_items if row.rm_item_code == "Self RM")
+		self.assertEqual(row.consumed_qty, 6)
+
 	def test_extra_items_reservation_transfer(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
@@ -1407,6 +1426,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			)
 		]
 		self.assertEqual(delivered, [[3], [2]])
+
+	def test_manufacture_of_customer_batch_received_in_two_lots(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code != "RM with Batch"]
+		rm_in.submit()
+		receive_batch_in_two_lots(scio)
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		self.assertEqual(len([item for item in manufacture.items if item.item_code == "RM with Batch"]), 2)
+		manufacture.submit()
+
+		scio.reload()
+		row = next(row for row in scio.received_items if row.rm_item_code == "RM with Batch")
+		self.assertEqual(row.consumed_qty, 5)
 
 	def test_closing_work_order_gives_back_a_returned_batch_to_the_reservation_it_used(self):
 		from erpnext.manufacturing.doctype.work_order.work_order import close_work_order
