@@ -7,7 +7,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import Case, DocType
-from frappe.query_builder.functions import Abs, NullIf, Sum
+from frappe.query_builder.functions import Abs, IfNull, NullIf, Sum
 from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
@@ -222,11 +222,11 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 	"""Hold the components of returned bundles to what is left of each delivered component."""
 	from erpnext.stock.doctype.packed_item.packed_item import (
 		get_bundle_version_for_row,
+		get_component_order_rows,
 		get_component_stock_qty_per_unit,
 		get_order_packed_items,
 		get_order_row,
 		get_product_bundle_items_by_name,
-		pop_order_packed_item,
 	)
 
 	returned_rows = [row for row in doc.get("items") if row.item_code and flt(row.qty) < 0]
@@ -255,8 +255,9 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 
 		bundle_stock_qty = get_returned_stock_qty(doc, row)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
-		for component in components[bundle]:
-			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
+		for component, so_packed_item in get_component_order_rows(
+			doc, row.item_code, components[bundle], so_packed_items
+		):
 			ref = valid_items.get(component.item_code)
 			if not ref:
 				continue
@@ -952,7 +953,10 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
 			"Packed Item": {
 				"doctype": "Packed Item",
-				"field_map": {"parent_detail_docname": "parent_detail_docname"},
+				"field_map": {
+					"parent_detail_docname": "parent_detail_docname",
+					"name": "return_against_packed_item",
+				},
 			},
 		},
 		target_doc,
@@ -1016,7 +1020,9 @@ def get_rate_for_return(
 			)
 			return 0
 
-	rate = flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
+	rate = get_rate_for_returned_packed_item(voucher_type, return_against, item_row, sle)
+	if rate is None:
+		rate = flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
 	if not (rate and return_against) and voucher_type in ["Sales Invoice", "Delivery Note"]:
 		rate = frappe.db.get_value(f"{voucher_type} Item", voucher_detail_no, "incoming_rate")
 
@@ -1045,6 +1051,77 @@ def get_rate_for_return(
 			rate = flt(details.rate)
 
 	return rate
+
+
+def get_rate_for_returned_packed_item(voucher_type, return_against, item_row=None, sle=None):
+	"""Rate of the delivered packed rows a return's packed row reverses, None for a row without them;
+	by qty when its ledger entry matches several returned rows, e.g. all returned to one warehouse."""
+	if not return_against or voucher_type not in ("Delivery Note", "Sales Invoice"):
+		return None
+
+	returned_qty = get_returned_qty_by_delivered_packed_item(item_row, sle)
+	if not returned_qty:
+		return None
+
+	rates = get_delivered_packed_item_rates(voucher_type, return_against, list(returned_qty))
+	if not rates:
+		return None
+
+	return sum(flt(rates.get(name)) * qty for name, qty in returned_qty.items()) / sum(returned_qty.values())
+
+
+def get_returned_qty_by_delivered_packed_item(item_row=None, sle=None) -> dict:
+	"""Qty of the return's packed row, or of the ones its ledger entry is for, by the delivered row it reverses."""
+	from erpnext.stock.doctype.packed_item.packed_item import get_location_filters
+
+	if item_row:
+		returned_rows = [item_row] if item_row.get("doctype") == "Packed Item" else []
+	else:
+		filters = {
+			"parent_detail_docname": sle.voucher_detail_no,
+			"item_code": sle.item_code,
+			"qty": ("!=", 0),
+		}
+		returned_rows = frappe.get_all(
+			"Packed Item",
+			filters=filters | get_location_filters(sle),
+			fields=["qty", "return_against_packed_item"],
+		)
+
+	return {
+		row.return_against_packed_item: abs(flt(row.qty)) or 1
+		for row in returned_rows
+		if row.get("return_against_packed_item")
+	}
+
+
+def get_delivered_packed_item_rates(voucher_type, voucher_no, packed_items) -> dict:
+	"""Rate each of the given packed rows of a delivery left the warehouse at, by row."""
+	packed_item = DocType("Packed Item")
+	sle = DocType("Stock Ledger Entry")
+	# a component's packed rows of one bundle row differ by bundle, else by warehouse
+	same_location = (sle.serial_and_batch_bundle == packed_item.serial_and_batch_bundle) | (
+		(IfNull(packed_item.serial_and_batch_bundle, "") == "") & (sle.warehouse == packed_item.warehouse)
+	)
+	rates = (
+		frappe.qb.from_(packed_item)
+		.join(sle)
+		.on(
+			(sle.voucher_no == packed_item.parent)
+			& (sle.voucher_detail_no == packed_item.parent_detail_docname)
+			& (sle.item_code == packed_item.item_code)
+			& same_location
+		)
+		.select(packed_item.name, Abs(sle.stock_value_difference / NullIf(sle.actual_qty, 0)))
+		.where(
+			packed_item.name.isin(packed_items)
+			& (sle.voucher_type == voucher_type)
+			& (sle.voucher_no == voucher_no)
+			& (sle.is_cancelled == 0)
+		)
+		.run()
+	)
+	return dict(rates)
 
 
 def get_return_against_item_fields(voucher_type):
