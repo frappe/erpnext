@@ -8,8 +8,10 @@ from math import floor
 
 import frappe
 from frappe import _, bold
+from frappe.core.doctype.user_permission.user_permission import get_user_permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.permissions import get_allowed_docs_for_doctype
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce, IfNull, Max, NullIf, Sum
 from frappe.utils import (
@@ -4762,9 +4764,10 @@ def get_warehouse_details(args):
 
 	args = frappe._dict(args)
 
-	# `select`, not `read`: reached from stock_entry.js:740, and the desk roles that open that form
-	# clear select through the Desk User row while holding no Item read.
-	frappe.has_permission("Item", ptype="select", throw=True)
+	frappe.has_permission("Stock Entry", "read", throw=True)
+	if args.warehouse:
+		erpnext.require_user_permission("Warehouse", args.warehouse)
+		check_stock_entry_warehouse_permission(args.warehouse)
 
 	ret = {}
 	if args.warehouse and args.item_code:
@@ -4779,6 +4782,13 @@ def get_warehouse_details(args):
 			"basic_rate": _get_incoming_rate(args),
 		}
 	return ret
+
+
+def check_stock_entry_warehouse_permission(warehouse: str) -> None:
+	permissions = get_user_permissions().get("Warehouse", [])
+	allowed_warehouses = get_allowed_docs_for_doctype(permissions, "Stock Entry")
+	if allowed_warehouses and warehouse not in allowed_warehouses:
+		frappe.throw(_("Not permitted for {0}").format(warehouse), frappe.PermissionError)
 
 
 @frappe.whitelist()
