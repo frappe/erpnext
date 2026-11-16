@@ -1168,7 +1168,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr = frappe.get_doc(make_receipt_from_order(po.name))
 		pr.items[0].rate = 150
 
-		self.assertRaises(frappe.ValidationError, pr.insert)
+		self.assertRaisesRegex(frappe.ValidationError, "Rate must be same as Purchase Order", pr.insert)
 
 	@ERPNextTestSuite.change_settings(
 		"Buying Settings", {"maintain_same_rate": 0, "set_landed_cost_based_on_purchase_invoice_rate": 1}
