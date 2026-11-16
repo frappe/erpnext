@@ -878,6 +878,22 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(pricing["children"][0]["base_price_list_rate"], expected_base_rate)
 		self.assertNotIn("rate", pricing["children"][0])
 
+	def test_typed_rate_is_kept_when_qty_or_exchange_rate_changes(self):
+		blanket_order, _price_list = make_priced_blanket_order(price_list_rate=100, qty=10)
+		blanket_order.items[0].name = "row-1"
+		blanket_order.items[0].rate = 90
+
+		blanket_order.items[0].qty = 12
+		pricing = apply_price_list(blanket_order.as_dict(), item_name="row-1")
+		self.assertEqual(pricing["children"][0]["price_list_rate"], 100)
+		self.assertNotIn("rate", pricing["children"][0])
+
+		pricing = apply_price_list(blanket_order.as_dict(), reset_plc_conversion_rate=True)
+		self.assertNotIn("rate", pricing["children"][0])
+
+		pricing = apply_price_list(blanket_order.as_dict(), item_name="row-1", reset_rate=True)
+		self.assertEqual(pricing["children"][0]["rate"], 100)
+
 	def test_blanket_order_lookup_skips_fully_ordered_order(self):
 		item = make_item("_Test Blanket Order Lookup Item", {"is_stock_item": 1}).name
 		used_up = make_blanket_order(blanket_order_type="Purchasing", quantity=10, rate=100, item_code=item)
