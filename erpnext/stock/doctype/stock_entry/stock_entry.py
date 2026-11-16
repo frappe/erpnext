@@ -1084,16 +1084,31 @@ class StockEntry(StockController, SubcontractingInwardController):
 
 		self.total_additional_costs = sum(flt(t.base_amount) for t in self.get("additional_costs"))
 
-		incoming_items, basis, total_basis = self.get_additional_cost_allocation()
-
 		for d in self.get("items"):
 			d.additional_cost = 0
 
-		if not total_basis:
-			return
+		for d, _account, _amount, base_amount in self.get_additional_cost_split():
+			d.additional_cost = flt(d.additional_cost + base_amount, d.precision("additional_cost"))
 
-		for d in incoming_items:
-			d.additional_cost = (flt(d.get(basis)) / total_basis) * self.total_additional_costs
+	def get_additional_cost_split(self) -> list[tuple]:
+		"""(row, expense account, amount, base amount) for each additional cost's share of each
+		incoming row. Shares are rounded and the last row takes the remainder, so the rows and the
+		accounts carry exactly the cost."""
+		incoming_items, basis, total_basis = self.get_additional_cost_allocation()
+		if not total_basis:
+			return []
+
+		precision = self.precision("additional_cost", "items")
+		weights = [flt(d.get(basis)) / total_basis for d in incoming_items]
+
+		split = []
+		for cost in self.get("additional_costs"):
+			amounts = split_by_weights(flt(cost.amount), weights, precision)
+			base_amounts = split_by_weights(flt(cost.base_amount), weights, precision)
+			for d, amount, base_amount in zip(incoming_items, amounts, base_amounts, strict=True):
+				split.append((d, cost.expense_account, amount, base_amount))
+
+		return split
 
 	def get_additional_cost_allocation(self):
 		if self.purpose in ("Repack", "Manufacture"):
@@ -2113,6 +2128,12 @@ class StockEntry(StockController, SubcontractingInwardController):
 		self.set_transfer_qty()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
+
+
+def split_by_weights(amount: float, weights: list[float], precision: int) -> list[float]:
+	"""`amount` split by `weights` and rounded; the last share takes the remainder."""
+	shares = [flt(amount * weight, precision) for weight in weights[:-1]]
+	return [*shares, flt(amount - sum(shares), precision)]
 
 
 @frappe.whitelist()
