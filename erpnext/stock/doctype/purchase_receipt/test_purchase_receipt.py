@@ -521,6 +521,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		last_return.cancel()
 		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 5)
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	@ERPNextTestSuite.change_settings("Buying Settings", {"allow_multiple_items": 1})
+	def test_return_with_two_rows_of_a_receipt_row_takes_back_only_its_stock_qty(self):
+		"""Two rows of one return that return parts of the same receipt row take back the stock it put in."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item_for_returns_of_parts(0.3356)
+		pr = make_purchase_receipt(item_code=item, qty=6, uom="Box", conversion_factor=0.3356, rate=100)
+
+		pr_return = make_return_doc("Purchase Receipt", pr.name)
+		pr_return.items[0].update({"qty": -3, "received_qty": -3})
+		pr_return.append("items", pr_return.items[0].as_dict(no_default_fields=True))
+		pr_return.submit()
+
+		stock_bin = {"item_code": item, "warehouse": pr.items[0].warehouse}
+		self.assertEqual(frappe.db.get_value("Bin", stock_bin, "actual_qty"), 0)
+
 	def return_receipt_in_parts(self, conversion_factor=0.3356):
 		"""Receipt of 6 Box, returned as two parts of 3 Box, whose stock qty rounds unevenly: at 0.3356 Kg
 		the parts round up (1.01 Kg each of 2.01 Kg), at 0.3344 Kg they round down (1.00 Kg each of 2.01 Kg)."""
