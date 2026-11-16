@@ -9951,6 +9951,59 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			self.assertEqual(entry.debit, entry.debit_in_account_currency)
 			self.assertEqual(entry.credit, entry.credit_in_account_currency)
 
+	def test_landed_cost_on_internal_receipt_stays_out_of_transit(self):
+		"""The transit leg of an internal receipt gives back what the delivery put in transit; the
+		landed cost goes only to the stock received."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		transit_warehouse = "Goods In Transit - TCP1"
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item_code, qty=6, rate=100, to_warehouse="Stores - TCP1", company=company)
+		for _ in range(2):
+			dn = create_delivery_note(
+				item_code=item_code,
+				company=company,
+				customer="_Test Internal Customer 2",
+				cost_center="Main - TCP1",
+				expense_account="Cost of Goods Sold - TCP1",
+				qty=3,
+				rate=100,
+				warehouse="Stores - TCP1",
+				target_warehouse=transit_warehouse,
+			)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		make_landed_cost_voucher(
+			company=company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=30,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - TCP1",
+		)
+
+		bin_value = {
+			warehouse: frappe.db.get_value(
+				"Bin", {"item_code": item_code, "warehouse": warehouse}, "stock_value"
+			)
+			for warehouse in (transit_warehouse, "Finished Goods - TCP1")
+		}
+		self.assertEqual(bin_value, {transit_warehouse: 300, "Finished Goods - TCP1": 330})
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry",
+				{"voucher_no": pr.name, "account": "Cost of Goods Sold - TCP1", "is_cancelled": 0},
+			)
+		)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
