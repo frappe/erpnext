@@ -14,7 +14,9 @@ from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
 from frappe.utils.caching import request_cache
 from frappe.utils.nestedset import get_descendants_of
 
+import erpnext
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
+from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
 
@@ -338,7 +340,11 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 					continue
 
 				msg = validate_quantity_and_amount_for_suggestion(
-					d, stock_qty, amount, args.get("item_code"), args.get("transaction_type")
+					d,
+					stock_qty,
+					get_amount_in_rule_currency(amount, d, args),
+					args.get("item_code"),
+					args.get("transaction_type"),
 				)
 
 				if msg:
@@ -421,7 +427,22 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 	return msg
 
 
-def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
+def get_amount_in_rule_currency(amount, rule, doc):
+	"""Convert an amount in the document currency to the pricing rule currency."""
+	currency = doc and doc.get("currency")
+	if not currency or not rule.currency or rule.currency == currency:
+		return amount
+
+	if rule.currency == erpnext.get_company_currency(doc.get("company")):
+		return flt(amount) * flt(doc.get("conversion_rate"))
+
+	return flt(amount) * flt(
+		get_exchange_rate(currency, rule.currency, doc.get("transaction_date") or doc.get("posting_date"))
+	)
+
+
+def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None, doc=None):
+	"""`rate` is the amount in the currency of `doc`, or of `args` when no `doc` is given."""
 	rules = []
 	# strip float noise only: Float and Currency columns hold 9 decimals, so no stored value is cut
 	precision = 9
@@ -431,6 +452,7 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	for rule in pricing_rules:
 		status = False
 		conversion_factor = 1
+		amount = flt(get_amount_in_rule_currency(rate, rule, doc or args), precision)
 
 		if rule.get("uom"):
 			conversion_factor = get_conversion_factor(rule.item_code, rule.uom).get("conversion_factor", 1)
@@ -445,8 +467,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 			conversion_factor = 1.0
 
 		if status and (
-			rate >= flt(flt(rule.min_amt) * conversion_factor, precision)
-			and (rate <= flt(rule.max_amt * conversion_factor, precision) if rule.max_amt else True)
+			amount >= flt(flt(rule.min_amt) * conversion_factor, precision)
+			and (amount <= flt(rule.max_amt * conversion_factor, precision) if rule.max_amt else True)
 		):
 			status = True
 		else:
@@ -536,7 +558,7 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
 
 			stock_qty = row.get("qty") * (row.get("conversion_factor") or 1.0)
 			amount = stock_qty * (flt(row.get("price_list_rate")) or flt(row.get("rate")))
-			pricing_rules = filter_pricing_rules_for_qty_amount(stock_qty, amount, pricing_rules, row)
+			pricing_rules = filter_pricing_rules_for_qty_amount(stock_qty, amount, pricing_rules, row, doc)
 
 			if pricing_rules and pricing_rules[0]:
 				pricing_rules[0].apply_rule_on_other_items = other_items
@@ -648,7 +670,7 @@ def apply_pricing_rule_on_transaction(doc):
 	applied_rules = []
 
 	if pricing_rules:
-		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
+		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules, doc=doc)
 		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 	remove_free_item(doc, {d.name for d in pricing_rules})
@@ -748,7 +770,7 @@ def get_transaction_pricing_rules(doc):
 	# nosemgrep: frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- transaction_type is validated; values use placeholders or are escaped
 	coupon_rules = frappe.db.sql(f"select * from `tabPricing Rule` where {conditions}", values, as_dict=True)
 	coupon_rules = filter_pricing_rules_for_qty_amount(
-		doc_before_save.total_qty, doc_before_save.total, coupon_rules
+		doc_before_save.total_qty, doc_before_save.total, coupon_rules, doc=doc_before_save
 	)
 	for rule in filter_pricing_rule_based_on_condition(coupon_rules, doc_before_save):
 		field = "additional_discount_percentage" if rule.discount_percentage else "discount_amount"
