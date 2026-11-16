@@ -40,10 +40,12 @@ class ReturnChargesService:
 		"""Accepted and rejected stock qty returned, by original row."""
 		returned_qty = {}
 		for row in self.doc.get("items"):
+			# the stock ledger takes back no more than the original row has left
+			stock_qty = -self.doc.get_accepted_stock_qty(row)
 			if row.get("return_qty_from_rejected_warehouse"):
-				accepted, rejected = 0.0, -get_stock_qty(row, row.qty)
+				accepted, rejected = 0.0, stock_qty
 			else:
-				accepted, rejected = -get_stock_qty(row, row.qty), -get_stock_qty(row, row.rejected_qty)
+				accepted, rejected = stock_qty, -get_stock_qty(row, row.rejected_qty)
 
 			qty = returned_qty.setdefault(row.get(self.detail_field), {"accepted": 0.0, "rejected": 0.0})
 			qty["accepted"] += accepted
