@@ -3110,6 +3110,34 @@ class TestProductionPlan(FrappeTestCase):
 		third.get_pending_material_requests()
 		self.assertNotIn(request.name, [row.material_request for row in third.material_requests])
 
+	def test_manufacture_request_in_another_uom_keeps_its_pending_qty(self):
+		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		fg_item = make_item(
+			"_Test FG For MR UOM Planning",
+			{"is_stock_item": 1, "stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 12}]},
+		).name
+		make_bom(item=fg_item, raw_materials=[make_item("_Test RM For MR UOM Planning").name])
+		request = make_material_request(
+			item_code=fg_item, qty=2, uom="Box", conversion_factor=12, material_request_type="Manufacture"
+		)
+
+		work_order = make_wo_order_test_record(item=fg_item, qty=12, stock_uom="Kg", do_not_save=1)
+		work_order.material_request = request.name
+		work_order.material_request_item = request.items[0].name
+		work_order.submit()
+
+		plan = frappe.new_doc("Production Plan")
+		plan.company = request.company
+		plan.get_items_from = "Material Request"
+		plan.get_pending_material_requests()
+		self.assertIn(request.name, [row.material_request for row in plan.material_requests])
+
+		plan.set("material_requests", [{"material_request": request.name}])
+		plan.get_items()
+		self.assertEqual([row.planned_qty for row in plan.po_items], [12])
+
 	def test_raw_materials_keep_their_own_default_warehouse(self):
 		warehouses = {
 			"_Test PP Default WH RM 1": "Stores - _TC",
