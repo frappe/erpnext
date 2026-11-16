@@ -4704,6 +4704,22 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_internal_receipt_takes_a_small_rejected_stock_qty_out_of_transit(self):
+		"""A rejected qty that rounds to 0 on its own but not in the split still leaves transit."""
+		item_doc = make_item(
+			"_Test Item For Small Rejected Split",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3344}]},
+		)
+		pr, warehouses, *_ = self.make_transfer_receipt(item_doc, 1, 0.01)
+		pr.items[0].update({"uom": "Box", "conversion_factor": 0.3344})
+		pr.submit()
+
+		self.assertEqual(
+			get_net_qty_by_warehouse([pr.name]),
+			{warehouses.transit: -0.34, warehouses.accepted: 0.33, warehouses.rejected: 0.01},
+		)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_return_by_batch_field_takes_back_the_rejected_stock_qty(self):
 		"""A return made from the batch field takes back the rejected stock qty its receipt put in."""
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
@@ -4786,26 +4802,31 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_cancel_reverses_its_posted_stock_qty(self):
-		"""Cancelling an internal receipt posted with an older split reverses what it posted."""
+		"""Cancelling an internal receipt posted with an older split reverses what it posted, also when
+		its rejected stock qty now rounds to 0."""
 		from erpnext.controllers.buying_controller import BuyingController, get_stock_qty
 
-		item_doc = make_item(
-			"_Test Item For Cancel Of Old Split",
-			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
-		)
-		with patch.object(
-			BuyingController,
-			"get_rejected_stock_qty",
-			lambda self, row: get_stock_qty(row, row.rejected_qty),
-		):
-			pr, warehouses, _batch_no = self.make_split_transfer_receipt(item_doc)
+		for conversion_factor, posted_rejected_qty in ((0.3356, 1.01), (0.002, 0.01)):
+			with self.subTest(conversion_factor=conversion_factor):
+				item_doc = make_item(
+					f"_Test Item For Cancel Of Old Split {conversion_factor}",
+					{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
+				)
+				with patch.object(
+					BuyingController,
+					"get_rejected_stock_qty",
+					lambda self, row: get_stock_qty(row, row.rejected_qty),
+				):
+					pr, warehouses, _batch_no = self.make_split_transfer_receipt(item_doc, conversion_factor)
 
-		sle_filters = {"voucher_no": pr.name, "warehouse": warehouses.rejected}
-		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), 1.01)
+				sle_filters = {"voucher_no": pr.name, "warehouse": warehouses.rejected}
+				self.assertEqual(
+					frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), posted_rejected_qty
+				)
 
-		pr.cancel()
-		for warehouse, qty in get_net_qty_by_warehouse([pr.name], is_cancelled=1).items():
-			self.assertEqual(qty, 0, warehouse)
+				pr.cancel()
+				for warehouse, qty in get_net_qty_by_warehouse([pr.name], is_cancelled=1).items():
+					self.assertEqual(qty, 0, warehouse)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_rejected_only_return_of_a_batch(self):
