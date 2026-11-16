@@ -3421,6 +3421,55 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"set_op_cost_and_secondary_items_from_sub_assemblies": 1}
+	)
+	def test_sub_assembly_co_product_takes_its_share_of_the_sub_assembly_components(self):
+		rm_a, rm_b, sub_assembly, fg_item, co_product = (
+			make_item(properties={"is_stock_item": 1}).name for _ in range(5)
+		)
+		for item, rate in ((rm_a, 100), (rm_b, 900)):
+			test_stock_entry.make_stock_entry(
+				item_code=item, target="_Test Warehouse - _TC", qty=5, basic_rate=rate
+			)
+
+		sub_bom = frappe.new_doc("BOM")
+		sub_bom.update({"item": sub_assembly, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		sub_bom.append("items", {"item_code": rm_a, "qty": 1})
+		sub_bom.append(
+			"secondary_items",
+			{
+				"item_code": co_product,
+				"secondary_item_type": "Co-Product",
+				"qty": 1,
+				"cost_allocation_per": 20,
+				"valuation_type": "% of Component Cost",
+			},
+		)
+		sub_bom.submit()
+
+		bom = frappe.new_doc("BOM")
+		bom.update({"item": fg_item, "quantity": 1, "company": "_Test Company", "currency": "INR"})
+		bom.append("items", {"item_code": sub_assembly, "qty": 1, "bom_no": sub_bom.name})
+		bom.append("items", {"item_code": rm_b, "qty": 1})
+		bom.submit()
+
+		wo_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=1,
+			use_multi_level_bom=1,
+			skip_transfer=1,
+			source_warehouse="_Test Warehouse - _TC",
+		)
+		se_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
+		se_doc.insert()
+		se_doc.submit()
+
+		amounts = {d.item_code: d.amount for d in se_doc.items if d.t_warehouse}
+		self.assertEqual(amounts[co_product], 20)
+		self.assertEqual(amounts[fg_item], 980)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
 	)
 	def test_get_rm_cost_from_consumption_entry(self):
