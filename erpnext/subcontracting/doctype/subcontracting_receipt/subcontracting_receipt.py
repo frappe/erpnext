@@ -630,12 +630,18 @@ class SubcontractingReceipt(SubcontractingController):
 		if not sent_rows:
 			return
 
-		accounting_fields = ["expense_account", "cost_center", "project", *get_accounting_dimensions()]
+		kept_fields = [
+			"expense_account",
+			"cost_center",
+			"project",
+			*get_accounting_dimensions(),
+			*[dimension.source_fieldname for dimension in get_inventory_dimensions()],
+		]
 		for row in self.items:
 			if not (row.bom_secondary_item and (sent := sent_rows.get(row.subcontracting_receipt_item))):
 				continue
 
-			fieldnames = accounting_fields
+			fieldnames = kept_fields
 			if self.has_picks_for_qty(sent, row.qty):
 				fieldnames = [
 					*fieldnames,
