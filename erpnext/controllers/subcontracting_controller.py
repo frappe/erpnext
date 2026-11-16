@@ -745,8 +745,11 @@ class SubcontractingController(StockController):
 				se_detail.description,
 				(
 					frappe.qb.terms.Case()
-					.when(((se.purpose == "Material Transfer") & (se.is_return == 1)), -1 * se_detail.qty)
-					.else_(se_detail.qty)
+					.when(
+						((se.purpose == "Material Transfer") & (se.is_return == 1)),
+						-1 * se_detail.transfer_qty,
+					)
+					.else_(se_detail.transfer_qty)
 				).as_("qty"),
 				se_detail.basic_rate.as_("rate"),
 				se_detail.amount,
@@ -1989,6 +1992,8 @@ def add_items_in_ste(ste_doc, row, qty, rm_details, rm_detail_field="sco_rm_deta
 	item.update(
 		{
 			"qty": qty,
+			"uom": row.item_details["stock_uom"],
+			"conversion_factor": 1,
 			"batch_no": batch_no,
 			"basic_rate": row.item_details["rate"],
 			rm_detail_field: rm_detail[0] if rm_detail else "",
