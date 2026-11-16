@@ -1562,14 +1562,36 @@ class TestJobCard(ERPNextTestSuite):
 			job_card.save()
 			job_card.submit()
 
-		work_order.db_set({"production_plan": "Test Loss Plan", "production_plan_item": "Test Loss Plan Row"})
+		block = self.make_second_operation_schedule_block(work_order)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
 
-		block = frappe._dict(
+	def test_schedule_block_is_covered_after_total_upstream_process_loss(self):
+		from erpnext.manufacturing.scheduling.loaders import filter_covered_schedule_rows
+
+		work_order = self.make_two_operation_work_order(qty=10)
+		first, second = frappe.get_all(
+			"Job Card", filters={"work_order": work_order.name}, order_by="sequence_id", pluck="name"
+		)
+		job_card = frappe.get_doc("Job Card", first)
+		job_card.append(
+			"time_logs",
+			{"from_time": "2024-03-01 08:00:00", "to_time": "2024-03-01 08:30:00", "completed_qty": 0},
+		)
+		job_card.process_loss_qty = 10
+		job_card.save()
+		job_card.submit()
+		frappe.db.set_value("Job Card", second, "total_time_in_mins", 30)
+
+		block = self.make_second_operation_schedule_block(work_order)
+		self.assertEqual(filter_covered_schedule_rows([block]), [])
+
+	def make_second_operation_schedule_block(self, work_order):
+		work_order.db_set({"production_plan": "Test Loss Plan", "production_plan_item": "Test Loss Plan Row"})
+		return frappe._dict(
 			production_plan="Test Loss Plan",
 			plan_row="Test Loss Plan Row",
 			operation=work_order.operations[1].operation,
 		)
-		self.assertEqual(filter_covered_schedule_rows([block]), [])
 
 	def test_upstream_process_loss_in_manufacturing(self):
 		for upstream_qty, upstream_output, downstream_qty, downstream_output, manufacture_entries in (
