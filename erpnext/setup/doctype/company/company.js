@@ -15,6 +15,13 @@ const WAREHOUSE_DEFAULT_FIELDS = [
 ];
 
 frappe.ui.form.on("Company", {
+	// Manufacturing needs Stock. Subcontracting needs Manufacturing.
+	stock: function (frm) {
+		if (!frm.doc.stock) frm.set_value("manufacturing", 0);
+	},
+	manufacturing: function (frm) {
+		if (!frm.doc.manufacturing) frm.set_value("subcontracting", 0);
+	},
 	onload: function (frm) {
 		if (frm.doc.__islocal && frm.doc.parent_company) {
 			frappe.db.get_value("Company", frm.doc.parent_company, "is_group", (r) => {
