@@ -4641,14 +4641,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			warehouse=wh.source,
 			target_warehouse=wh.transit,
 			batch_no=batch_no,
+			use_serial_batch_fields=bool(uom),
 			do_not_submit=bool(uom),
 		)
 		if uom:
 			dn.items[0].update({"uom": uom, "conversion_factor": conversion_factor})
-			if batch_no:
-				dn.items[0].update(
-					{"serial_and_batch_bundle": None, "use_serial_batch_fields": 1, "batch_no": batch_no}
-				)
 			dn.submit()
 
 		pr = make_inter_company_purchase_receipt(dn.name)
@@ -4660,7 +4657,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		return pr, wh, company, batch_no
 
 	def test_internal_pr_with_rejected_stock_qty_rounding_to_zero(self):
-		"""A rejected qty that rounds to 0 in the stock UOM posts no rejected stock."""
+		"""A rejected qty that rounds to 0 in the stock UOM posts no rejected stock, and can be returned."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
 		for tag, properties in (
 			("Plain", {}),
 			("Batch", {"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIRZ-.####"}),
@@ -4681,6 +4680,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 						"Stock Ledger Entry", {"voucher_no": pr.name, "warehouse": warehouses.rejected}
 					)
 				)
+
+				make_return_doc("Purchase Receipt", pr.name).submit()
 
 	def test_removing_the_rejection_moves_the_package_back(self):
 		"""A row that no longer rejects anything carries the package of the in-transit warehouse
