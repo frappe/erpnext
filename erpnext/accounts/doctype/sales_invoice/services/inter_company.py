@@ -112,7 +112,9 @@ def validate_inter_company_order_qty(doc) -> None:
 		frappe.get_all("Purchase Order Item", {"parent": purchase_order}, ["name", "stock_qty"], as_list=True)
 	)
 	ordered_qty = get_inter_company_qty(
-		"Sales Order", {"inter_company_order_reference": purchase_order}, "purchase_order_item"
+		"Sales Order",
+		{"inter_company_order_reference": purchase_order, "name": ("!=", doc.name)},
+		"purchase_order_item",
 	)
 
 	for row in doc.items:
@@ -128,6 +130,21 @@ def validate_inter_company_order_qty(doc) -> None:
 				_("Row #{0}: Item {1} is already ordered in full against Purchase Order {2}.").format(
 					row.idx, frappe.bold(row.item_code), get_link_to_form("Purchase Order", purchase_order)
 				)
+			)
+
+
+def validate_inter_company_purchase_order_qty(doc) -> None:
+	"""A Purchase Order row must not go below the stock qty of its submitted Sales Orders."""
+	ordered_qty = get_inter_company_qty(
+		"Sales Order", {"inter_company_order_reference": doc.name}, "purchase_order_item"
+	)
+	for row in doc.items:
+		precision = row.precision("stock_qty")
+		if flt(ordered_qty.get(row.name), precision) > flt(row.stock_qty, precision):
+			frappe.throw(
+				_(
+					"Row #{0}: Qty of Item {1} cannot be less than the qty ordered on its Sales Orders."
+				).format(row.idx, frappe.bold(row.item_code))
 			)
 
 
