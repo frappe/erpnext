@@ -2265,6 +2265,38 @@ class TestPurchaseReceipt(FrappeTestCase):
 					delivered_qty,
 				)
 
+	@change_settings("System Settings", {"float_precision": 2})
+	def test_internal_transfer_pr_rejected_return_takes_back_the_rejected_stock_qty(self):
+		"""A return of the rejected qty takes back the rejected stock qty its receipt put in, whether that
+		rounded down or up."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		def make_rejected_only_return(pr):
+			rejected_return = make_return_doc("Purchase Receipt", pr.name)
+			rejected_return.items[0].update({"qty": 0, "received_qty": -3})
+			return rejected_return
+
+		for conversion_factor in (0.3356, 0.3344):
+			item_doc = make_item(
+				f"Test Rejected Return Internal Transfer Item {conversion_factor}",
+				{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": conversion_factor}]},
+			)
+			for make_rejected_return in (
+				make_rejected_only_return,
+				lambda pr: make_purchase_return_against_rejected_warehouse(pr.name),
+			):
+				with self.subTest(conversion_factor=conversion_factor, make_return=make_rejected_return):
+					pr, warehouses, _dn = self.make_rounded_internal_receipt(
+						item_doc, conversion_factor, qty=3, rejected_qty=3
+					)
+					make_rejected_return(pr).submit()
+
+					rejected_bin = {"item_code": item_doc.name, "warehouse": warehouses.rejected}
+					self.assertEqual(frappe.db.get_value("Bin", rejected_bin, "actual_qty"), 0)
+
 	def make_rounded_internal_receipt(self, item_doc, conversion_factor=1.00555, qty=1, rejected_qty=1):
 		"""Submitted internal receipt of a delivery in Box, split into accepted and rejected qty whose stock
 		qty rounds unevenly."""
