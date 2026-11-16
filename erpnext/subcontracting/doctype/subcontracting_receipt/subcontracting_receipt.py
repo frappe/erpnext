@@ -642,7 +642,8 @@ class SubcontractingReceipt(SubcontractingController):
 				continue
 
 			fieldnames = kept_fields
-			if self.has_picks_for_qty(sent, row.qty):
+			# qty is the final one only after calculate_items_qty_and_amount
+			if self.has_picks_for_qty(sent, flt(row.received_qty) - flt(row.process_loss_qty)):
 				fieldnames = [
 					*fieldnames,
 					"use_serial_batch_fields",
