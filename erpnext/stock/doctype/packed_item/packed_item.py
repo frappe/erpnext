@@ -72,24 +72,8 @@ def make_packing_list(doc):
 	reset = reset_packing_list(doc)
 
 	for item_row in doc.get("items"):
-<<<<<<< HEAD
 		if is_product_bundle(item_row.item_code):
-			so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
-			for bundle_item in get_product_bundle_items(item_row.item_code):
-=======
-		# Pack from the version chosen on the row (default: the item's active version)
-		# and record it so the document keeps a reference to the exact version used.
-		bundle_name = get_bundle_version_for_row(item_row, doc)
-		if item_row.meta.has_field("product_bundle"):
-			item_row.product_bundle = bundle_name
-		if item_row.meta.has_field("is_product_bundle"):
-			item_row.is_product_bundle = 1 if bundle_name else 0
-
-		if bundle_name:
-			for bundle_item, so_packed_item in get_bundle_components(
-				doc, item_row, bundle_name, order_packed_items
-			):
->>>>>>> fa1a565 (fix(stock): count packed rows at their current qty when auto-setting a row's batch or serial no)
+			for bundle_item, so_packed_item in get_bundle_components(doc, item_row, order_packed_items):
 				pi_row = add_packed_item_row(
 					doc=doc,
 					packing_item=bundle_item,
@@ -98,9 +82,6 @@ def make_packing_list(doc):
 					reset=reset,
 				)
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
-				so_packed_item = pop_order_packed_item(
-					so_packed_items, item_row.item_code, bundle_item.item_code
-				)
 				update_packed_item_basic_data(item_row, pi_row, bundle_item, item_data, so_packed_item)
 				update_packed_item_stock_data(item_row, pi_row, bundle_item, item_data, doc)
 				update_packed_item_price_data(pi_row, item_data, doc)
@@ -117,11 +98,10 @@ def make_packing_list(doc):
 		set_product_bundle_rate_amount(doc, parent_items_price)  # set price in bundle item
 
 
-def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
+def get_bundle_components(doc, item_row, order_packed_items):
 	"""Components of ``item_row``'s bundle, each with the order's packed row it delivers."""
-	order_row = item_row.name if doc.doctype == "Sales Order" else get_order_row(doc, item_row)
-	so_packed_items = list(order_packed_items.get(order_row, []))
-	for bundle_item in get_product_bundle_items_by_name(bundle_name):
+	so_packed_items = list(order_packed_items.get(get_order_row(doc, item_row), []))
+	for bundle_item in get_product_bundle_items(item_row.item_code):
 		yield (
 			bundle_item,
 			pop_order_packed_item(so_packed_items, item_row.item_code, bundle_item.item_code),
@@ -139,20 +119,8 @@ def get_kept_packed_items(doc):
 		if item_row.item_code not in parent_items:
 			continue
 
-		if not (bundle_name := get_bundle_version_for_row(item_row, doc)):
-			continue
-
-		for bundle_item, so_packed_item in get_bundle_components(
-			doc, item_row, bundle_name, order_packed_items
-		):
-			stale_rows = get_stale_packed_rows(
-				doc,
-				item_row,
-				bundle_item,
-				packed_items_table,
-				get_sales_order_packed_item(doc, so_packed_item),
-			)
-			if stale_rows:
+		for bundle_item, so_packed_item in get_bundle_components(doc, item_row, order_packed_items):
+			if stale_rows := get_stale_packed_rows(doc, item_row, bundle_item, packed_items_table):
 				packed_row = stale_rows.pop(0)
 				yield (
 					packed_row,
@@ -223,14 +191,8 @@ def reset_packing_list(doc):
 	return reset_table
 
 
-<<<<<<< HEAD
 def get_product_bundle_items(item_code):
 	product_bundle = frappe.qb.DocType("Product Bundle")
-=======
-@frappe.request_cache
-def get_product_bundle_items_by_name(bundle_name):
-	"Component rows of a specific Product Bundle version, which cannot change once submitted."
->>>>>>> 7945a37 (perf(stock): fetch a Product Bundle version's components once per request)
 	product_bundle_item = frappe.qb.DocType("Product Bundle Item")
 
 	query = (
@@ -259,20 +221,9 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	"""
 	exists, pi_row = False, {}
 
-<<<<<<< HEAD
-	# check if row already exists in packed items table
-	key = (
-		main_item_row.item_code,
-		packing_item.item_code,
-		None if doc.is_new() else main_item_row.name,
-	)
-=======
->>>>>>> fa1a565 (fix(stock): count packed rows at their current qty when auto-setting a row's batch or serial no)
 	# a component repeated on the bundle shares one key; consume stale rows in order so
 	# each occurrence keeps its own packed row instead of overwriting a single one
-	if stale_rows := get_stale_packed_rows(
-		doc, main_item_row, packing_item, packed_items_table, sales_order_packed_item
-	):
+	if stale_rows := get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table):
 		pi_row, exists = stale_rows.pop(0), True
 
 	if not exists:
@@ -286,19 +237,13 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 	return pi_row
 
 
-def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table, sales_order_packed_item):
+def get_stale_packed_rows(doc, main_item_row, packing_item, packed_items_table):
 	"""Rows of the packed items table before save that ``main_item_row``'s component can reuse."""
 	key = (
 		main_item_row.item_code,
 		packing_item.item_code,
-		main_item_row.idx if doc.is_new() else main_item_row.name,
+		None if doc.is_new() else main_item_row.name,
 	)
-	# an unsaved row made from a Sales Order is found by its order packed row, since its idx
-	# shifts when a row above it is deleted
-	order_key = (main_item_row.item_code, packing_item.item_code, sales_order_packed_item)
-	if doc.is_new() and sales_order_packed_item and packed_items_table.get(order_key):
-		key = order_key
-
 	return packed_items_table.get(key)
 
 

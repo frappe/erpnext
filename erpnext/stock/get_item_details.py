@@ -352,7 +352,8 @@ def set_serial_nos_for_outward(ctx, out, kwargs, doc):
 	if out.has_batch_no and batch_no:
 		kwargs["batches"] = [batch_no]
 
-	serial_nos = get_filtered_serial_nos(get_serial_nos_for_outward(kwargs), doc)
+	kwargs["ignore_serial_nos"] = [*(kwargs.get("ignore_serial_nos") or []), *get_used_serial_nos(doc)]
+	serial_nos = get_serial_nos_for_outward(kwargs)
 	out["serial_no"] = "\n".join(serial_nos[: cint(out.stock_qty)])
 
 
@@ -441,7 +442,7 @@ def get_current_packed_items(doc):
 def get_bundle_row_stock_qty(item_row):
 	"""The stock_qty set_qty_as_per_stock_uom gives a bundle row, which packing scales its components by."""
 	stock_qty = get_row_stock_qty(item_row, item_row.item_code)
-	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
+	if frappe.db.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		return flt(stock_qty, item_row.precision("stock_qty"))
 
 	return stock_qty
@@ -465,24 +466,21 @@ def get_uom_conversion_factor(item_code, uom):
 
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
+	used = get_used_serial_nos(doc, table)
+	return [serial_no for serial_no in serial_nos if serial_no not in used]
+
+
+def get_used_serial_nos(doc, table=None):
+	"""Serial nos held by the rows of ``table``, or of the items and packed items."""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-	if not table:
-		table = "items"
 	rows = doc.get(table) if table else [*doc.get("items"), *get_current_packed_items(doc)]
-	numbers_by_item = defaultdict(list)
+	used = set()
 	for row in rows:
-		item_code = row.get("item_code") or row.get("rm_item_code")
-		if item_code and row.get("serial_no"):
-			numbers_by_item[item_code].extend(get_serial_nos(row.get("serial_no")))
-
-	for row in doc.get(table):
 		if row.get("serial_no"):
-			for serial_no in get_serial_nos(row.get("serial_no")):
-				if serial_no in serial_nos:
-					serial_nos.remove(serial_no)
+			used.update(get_serial_nos(row.get("serial_no")))
 
-	return serial_nos
+	return used
 
 
 def process_args(args):
