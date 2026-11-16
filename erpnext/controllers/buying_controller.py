@@ -293,13 +293,13 @@ class BuyingController(SubcontractingController):
 		if not old_row or get_stock_qty(old_row, old_row.get(qty_field)) == qty:
 			return
 
-		entries = frappe.get_all(
-			"Serial and Batch Entry",
-			filters={"parent": row.get(bundle_field), "serial_no": ["is", "not set"]},
-			pluck="name",
-		)
-		if len(entries) == 1:
-			frappe.set_value("Serial and Batch Entry", entries[0], "qty", qty)
+		package = frappe.get_doc("Serial and Batch Bundle", row.get(bundle_field))
+		entries = [d for d in package.entries if not d.serial_no]
+		if package.voucher_detail_no != row.name or len(entries) != 1:
+			return
+
+		entries[0].qty = qty
+		package.save(ignore_permissions=True)
 
 	def get_accepted_serial_nos(self, row) -> list:
 		if not row.get("serial_and_batch_bundle"):
