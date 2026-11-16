@@ -983,6 +983,8 @@ def get_item_tax_map(company, item_tax_template, as_json=True):
 def calculate_service_end_date(args, item=None):
 	args = process_args(args)
 	if not item:
+		if not isinstance(args.item_code, str):
+			frappe.throw(_("Invalid Item Code"))
 		item = frappe.get_cached_doc("Item", args.item_code)
 
 	doctype = args.get("parenttype") or args.get("doctype")
