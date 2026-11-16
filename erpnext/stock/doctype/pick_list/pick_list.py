@@ -1256,9 +1256,239 @@ def get_picked_items_qty(items, contains_packed_items=False) -> list[dict]:
 	return query.run(as_dict=True)
 
 
+<<<<<<< HEAD
 def validate_item_locations(pick_list):
 	if not pick_list.locations:
 		frappe.throw(_("Add items in the Item Locations table"))
+=======
+def get_uom_conversion_factors(item_codes) -> dict:
+	if not item_codes:
+		return {}
+
+	return {
+		(row.parent, row.uom): flt(row.conversion_factor)
+		for row in frappe.get_all(
+			"UOM Conversion Detail",
+			filters={"parent": ("in", list(item_codes)), "parenttype": "Item"},
+			fields=["parent", "uom", "conversion_factor"],
+		)
+	}
+
+
+def get_open_pick_list_items_query(item_codes, exclude_pick_list=None):
+	pi = frappe.qb.DocType("Pick List")
+	pi_item = frappe.qb.DocType("Pick List Item")
+
+	query = (
+		frappe.qb.from_(pi)
+		.inner_join(pi_item)
+		.on(pi.name == pi_item.parent)
+		.where(
+			(pi_item.item_code.isin(item_codes))
+			& ((pi_item.picked_qty > 0) | (pi_item.stock_qty > 0))
+			& (pi.status != "Completed")
+			& (pi.status != "Cancelled")
+			& (pi_item.docstatus != 2)
+			& ExistsCriterion(get_delivered_sales_order_item_query(pi_item)).negate()
+		)
+	)
+
+	if exclude_pick_list:
+		query = query.where(pi_item.parent != exclude_pick_list)
+
+	return query
+
+
+def get_delivered_sales_order_item_query(pi_item):
+	so_item = frappe.qb.DocType("Sales Order Item")
+	return (
+		frappe.qb.from_(so_item)
+		.select(so_item.name)
+		.where((so_item.name == pi_item.sales_order_item) & (so_item.delivered_qty >= so_item.qty))
+	)
+
+
+def get_holding_qty_case(pi_item):
+	return (
+		Case()
+		.when(
+			(pi_item.picked_qty > 0) & (pi_item.docstatus == 1),
+			pi_item.picked_qty - pi_item.delivered_qty - pi_item.transferred_qty,
+		)
+		.else_(pi_item.stock_qty)
+	)
+
+
+def get_pick_list_holders(item_codes, warehouses=None, exclude_pick_list=None):
+	pi = frappe.qb.DocType("Pick List")
+	pi_item = frappe.qb.DocType("Pick List Item")
+	batch = frappe.qb.DocType("Batch")
+
+	query = (
+		get_open_pick_list_items_query(item_codes, exclude_pick_list=exclude_pick_list)
+		.left_join(batch)
+		.on(batch.name == pi_item.batch_no)
+		.select(
+			pi.name.as_("pick_list"),
+			pi.status,
+			pi_item.item_code,
+			pi_item.warehouse,
+			pi_item.batch_no,
+			batch.batch_id,
+			Sum(get_holding_qty_case(pi_item)).as_("holding_qty"),
+		)
+		.groupby(pi.name, pi.status, pi_item.item_code, pi_item.warehouse, pi_item.batch_no, batch.batch_id)
+	)
+
+	if warehouses:
+		query = query.where(pi_item.warehouse.isin(warehouses))
+
+	return query.run(as_dict=True)
+
+
+def get_remaining_pick_list_reservations(pick_lists):
+	if not pick_lists:
+		return {}
+
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
+	rows = (
+		frappe.qb.from_(sre)
+		.inner_join(sb_entry)
+		.on((sb_entry.parent == sre.name) & (sb_entry.parenttype == "Stock Reservation Entry"))
+		.select(
+			sre.from_voucher_no,
+			sre.item_code,
+			sre.warehouse,
+			sb_entry.batch_no,
+			Sum(sb_entry.qty - sb_entry.delivered_qty).as_("qty"),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.from_voucher_type == "Pick List")
+			& (sre.from_voucher_no.isin(list(pick_lists)))
+			& (sre.status.notin(["Closed", "Delivered", "Cancelled"]))
+		)
+		.groupby(sre.from_voucher_no, sre.item_code, sre.warehouse, sb_entry.batch_no)
+	).run(as_dict=True)
+
+	return {
+		(row.from_voucher_no, row.item_code, row.warehouse, row.batch_no or ""): flt(row.qty) for row in rows
+	}
+
+
+def get_reservation_holders(item_codes, warehouses):
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+
+	reservations = (
+		frappe.qb.from_(sre)
+		.select(
+			sre.name,
+			sre.status,
+			sre.item_code,
+			sre.warehouse,
+			sre.voucher_type,
+			sre.voucher_no,
+			(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty).as_(
+				"reserved_qty"
+			),
+		)
+		.where(
+			(sre.docstatus == 1)
+			& (sre.item_code.isin(item_codes))
+			& (sre.warehouse.isin(warehouses))
+			& (sre.delivered_qty < sre.reserved_qty)
+			& (sre.status.notin(["Closed", "Delivered"]))
+			& (Coalesce(sre.from_voucher_type, "") != "Pick List")
+		)
+	).run(as_dict=True)
+
+	# stock picked for a work order is counted as a pick list hold, not as reserved
+	held_qty = get_work_order_pick_list_holds(item_codes, warehouses)
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	for row in reservations:
+		key = (row.voucher_no, row.item_code, row.warehouse)
+		if row.voucher_type == "Work Order" and held_qty.get(key):
+			released_qty = min(flt(row.reserved_qty), held_qty[key])
+			row.reserved_qty = flt(flt(row.reserved_qty) - released_qty, precision)
+			held_qty[key] -= released_qty
+
+	return reservations
+
+
+def get_work_order_pick_list_holds(item_codes, warehouses):
+	pi = frappe.qb.DocType("Pick List")
+	pi_item = frappe.qb.DocType("Pick List Item")
+
+	rows = (
+		get_open_pick_list_items_query(item_codes)
+		.select(
+			pi.work_order,
+			pi_item.item_code,
+			pi_item.warehouse,
+			Sum(get_holding_qty_case(pi_item)).as_("holding_qty"),
+		)
+		.where(pi.work_order.isnotnull() & pi_item.warehouse.isin(warehouses))
+		.groupby(pi.work_order, pi_item.item_code, pi_item.warehouse)
+	).run(as_dict=True)
+
+	return {(row.work_order, row.item_code, row.warehouse): flt(row.holding_qty) for row in rows}
+
+
+def get_bin_qty_map(item_codes, warehouses):
+	bin = frappe.qb.DocType("Bin")
+
+	data = (
+		frappe.qb.from_(bin)
+		.select(bin.item_code, bin.warehouse, bin.actual_qty)
+		.where((bin.item_code.isin(item_codes)) & (bin.warehouse.isin(warehouses)))
+	).run(as_dict=True)
+
+	return {(d.item_code, d.warehouse): flt(d.actual_qty) for d in data}
+
+
+@frappe.whitelist()
+def get_stock_availability(items: str | list, pick_list: str | None = None) -> list[dict]:
+	frappe.has_permission("Pick List", throw=True)
+
+	items = frappe.parse_json(items)
+	keys = {(d.get("item_code"), d.get("warehouse")) for d in items}
+	keys = {key for key in keys if all(key)}
+	if not keys:
+		return []
+
+	item_codes = list({key[0] for key in keys})
+	warehouses = list({key[1] for key in keys})
+
+	holders = get_pick_list_holders(item_codes, warehouses=warehouses, exclude_pick_list=pick_list)
+	reservations = get_reservation_holders(item_codes, warehouses)
+	bin_qty_map = get_bin_qty_map(item_codes, warehouses)
+
+	return [get_availability_row(key, bin_qty_map, holders, reservations) for key in sorted(keys)]
+
+
+def get_availability_row(key, bin_qty_map, holders, reservations):
+	item_code, warehouse = key
+	row_holders = [d for d in holders if (d.item_code, d.warehouse) == key]
+	row_reservations = [d for d in reservations if (d.item_code, d.warehouse) == key]
+
+	actual_qty = flt(bin_qty_map.get(key))
+	picked_qty = flt(sum(flt(d.holding_qty) for d in row_holders))
+	reserved_qty = flt(sum(flt(d.reserved_qty) for d in row_reservations))
+
+	return frappe._dict(
+		item_code=item_code,
+		warehouse=warehouse,
+		actual_qty=actual_qty,
+		picked_qty=picked_qty,
+		reserved_qty=reserved_qty,
+		free_qty=flt(
+			actual_qty - picked_qty - reserved_qty, frappe.get_precision("Pick List Item", "stock_qty")
+		),
+		pick_lists=row_holders,
+		reservations=row_reservations,
+	)
+>>>>>>> 3d24a5b (fix(stock): stop holding the qty a pick list already transferred)
 
 
 def get_whole_bundle_count(qty: float, qty_per_bundle: list[float]) -> int:
