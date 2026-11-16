@@ -6,7 +6,7 @@ from collections import defaultdict
 import frappe
 from frappe.utils import cint, flt, get_datetime, get_time
 
-from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
+from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty, get_upstream_process_loss
 from erpnext.manufacturing.scheduling.models import Interval, Resource, ResourceCalendar, Task
 
 
@@ -157,15 +157,25 @@ def get_job_card_coverage(production_plans):
 
 
 def get_required_operation_qty(work_orders):
+	"""Operation qty net of the process loss of earlier operations, as job cards are made for it."""
 	by_name = {row.name: row for row in work_orders}
-	required = defaultdict(float)
-	for operation_row in frappe.get_all(
+	operations = frappe.get_all(
 		"Work Order Operation",
 		filters={"parent": ("in", list(by_name))},
-		fields=["parent", "operation", "output_qty"],
-	):
+		fields=["parent", "operation", "output_qty", "sequence_id", "completed_qty", "process_loss_qty"],
+	)
+	for operation_row in operations:
+		by_name[operation_row.parent].setdefault("operations", []).append(operation_row)
+
+	precision = frappe.get_precision("Work Order Operation", "completed_qty")
+	required = defaultdict(float)
+	for operation_row in operations:
 		work_order = by_name[operation_row.parent]
-		qty = get_operation_qty(work_order, operation_row)
+		qty = flt(
+			get_operation_qty(work_order, operation_row)
+			- get_upstream_process_loss(work_order, operation_row),
+			precision,
+		)
 		add_operation_qty(required, work_order, operation_row.operation, qty)
 
 	return required
