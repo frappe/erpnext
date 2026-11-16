@@ -164,6 +164,25 @@ class TestStockEntry(ERPNextTestSuite):
 		se.save()
 		self.assertEqual(se.items[0].qty, 1)
 
+	def test_material_receipt_without_rate_takes_buying_price_per_stock_uom(self):
+		item_code = make_item(
+			properties={"is_stock_item": 1}, uoms=[{"uom": "Box", "conversion_factor": 12}]
+		).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": "_Test Price List India",
+				"uom": "Box",
+				"price_list_rate": 1200,
+			}
+		).insert()
+
+		receipt = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5)
+
+		self.assertEqual(receipt.items[0].basic_rate, 100)
+		self.assertEqual(receipt.items[0].basic_amount, 500)
+
 	def test_fifo(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
