@@ -150,9 +150,10 @@ class RequiredItemsService:
 		return self._item_group_warehouses[item.item_group]
 
 	def _required_item_row(self, item, operation, source_warehouse):
+		rate = flt(item.rate, self.doc.precision("rate", "required_items"))
 		return {
-			"rate": item.rate,
-			"amount": item.rate * item.qty,
+			"rate": rate,
+			"amount": rate * item.qty,
 			"operation": item.operation or operation,
 			"item_code": item.item_code,
 			"item_name": item.item_name,
