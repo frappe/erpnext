@@ -3576,6 +3576,37 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pick_list.locations[0].transferred_qty, 0.013)
 		self.assertEqual(pick_list.status, "Completed")
 
+	def test_pick_list_query_keeps_company_restricted_user_in_own_company(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.stock.doctype.pick_list.pick_list import get_pick_list_query
+
+		item = make_item().name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, qty=5, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"pick-list-query-{frappe.scrub(company)}@example.com", "Stock User"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+		filters = {"company": sales_order.company, "customer": sales_order.customer}
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(users["_Test Company 1"])
+		self.assertRaises(
+			frappe.PermissionError, get_pick_list_query, "Pick List", "", "name", 0, 20, filters
+		)
+
+		frappe.set_user(users["_Test Company"])
+		result = get_pick_list_query("Pick List", "", "name", 0, 20, filters)
+		self.assertIn(pick_list.name, [row["name"] for row in result])
+
 
 def make_serialized_bundle_pick_list():
 	"""Pick 4 bundles of 1 serialized component each."""

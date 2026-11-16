@@ -2222,12 +2222,26 @@ def get_rejected_warehouses():
 	return frappe.local.rejected_warehouses
 
 
+def check_pick_list_company(company: str | None) -> None:
+	if not isinstance(company, str) or not company:
+		return
+
+	from frappe.core.doctype.user_permission.user_permission import get_user_permissions
+	from frappe.permissions import get_allowed_docs_for_doctype
+
+	allowed_companies = get_allowed_docs_for_doctype(get_user_permissions().get("Company", []), "Pick List")
+	if allowed_companies and company not in allowed_companies:
+		frappe.throw(_("Not permitted for {0}").format(company), frappe.PermissionError)
+
+
 @frappe.whitelist()
 def get_pick_list_query(doctype, txt, searchfield, start, page_len, filters):
 	frappe.has_permission("Pick List", throw=True)
 
 	if not filters.get("company"):
 		frappe.throw(_("Please select a Company"))
+
+	check_pick_list_company(filters.get("company"))
 
 	PICK_LIST = frappe.qb.DocType("Pick List")
 	PICK_LIST_ITEM = frappe.qb.DocType("Pick List Item")
