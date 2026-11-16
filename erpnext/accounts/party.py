@@ -591,7 +591,8 @@ def get_party_advance_account(party_type, party, company):
 
 def get_party_account_currency(party_type, party, company):
 	def generator():
-		party_account = get_party_account(party_type, party, company)
+		# only the currency leaves here, never the account, so the user needs no permission on it
+		party_account = find_party_account(party_type, party, company)
 		return frappe.get_cached_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)

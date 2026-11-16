@@ -129,7 +129,9 @@ def _get_item_details(
 	for_validate = parse_json(for_validate)
 	overwrite_warehouse = parse_json(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", ctx.item_code)
-	item.check_permission()
+	# a document saved past permissions, as a portal saves one for its user, fills its items in too
+	if not (isinstance(doc, Document) and doc.flags.ignore_permissions):
+		item.check_permission()
 	validate_item_details(ctx, item)
 
 	doc = frappe.parse_json(doc)

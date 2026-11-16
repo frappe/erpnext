@@ -5,9 +5,8 @@
 endpoint chooses its own fields, so a supplier receives what their page shows and nothing else --
 above all, never the other suppliers invited to the same request for quotation, nor their quotes."""
 
-from contextlib import contextmanager
-
 import frappe
+from bs4 import BeautifulSoup
 from frappe import _
 from frappe.printing.doctype.print_format.classic_converter import convert_classic_to_beta
 from frappe.printing.layout import iter_fields, iter_zones
@@ -423,10 +422,18 @@ def _documents_scope(doctype: str, extra=None):
 	return (lambda tab: scoped + list(tab or [])), (extra or (lambda rows: {}))
 
 
+def _user_suppliers() -> list[str]:
+	"""The suppliers the signed-in user acts for. None without the Supplier role: taking the role
+	away closes the portal, as it closed the old one, even while the user is still listed."""
+	if "Supplier" not in frappe.get_roles():
+		return []
+	return get_parents_for_user("Supplier")
+
+
 def _supplier_filters(doctype: str) -> list:
 	"""Filters for the user's suppliers' submitted documents of this doctype. With no supplier, they
 	match nothing rather than everything."""
-	suppliers = get_parents_for_user("Supplier") or [""]
+	suppliers = _user_suppliers() or [""]
 	return [
 		[SUPPLIER_DOCTYPES[doctype], "in", suppliers],
 		["docstatus", "=", 1],
@@ -438,7 +445,7 @@ def _replaced_by(doctype: str, name: str) -> dict | None:
 	"""For an old link to one of the user's suppliers' documents that has since been cancelled and
 	amended: the revision that took its place, for the page to open instead. Anything else is None."""
 	field = SUPPLIER_DOCTYPES[doctype]
-	suppliers = get_parents_for_user("Supplier") or [""]
+	suppliers = _user_suppliers() or [""]
 	if not frappe.db.exists(doctype, [["name", "=", name], ["docstatus", "=", 2], [field, "in", suppliers]]):
 		return None
 	seen = {name}
@@ -583,7 +590,7 @@ def _invited_rfqs() -> dict[str, str]:
 
 	An RFQ has no supplier of its own: it belongs to every supplier on its `suppliers` table.
 	When two of the user's suppliers are on one RFQ, it stays Pending until both have quoted."""
-	suppliers = get_parents_for_user("Supplier")
+	suppliers = _user_suppliers()
 	if not suppliers:
 		return {}
 
@@ -809,20 +816,13 @@ def submit_rfq_quotation(
 		}
 	)
 
-	sender = frappe.session.user
-	with _as_administrator():
-		if previous:
-			frappe.get_doc("Supplier Quotation", previous).cancel()
-		quotation.insert()
-		quotation.submit()
-
-	# saving elevated records Administrator as the owner and editor; the quote and its revision are
-	# the supplier's
-	frappe.db.set_value(
-		"Supplier Quotation", quotation.name, {"owner": sender, "modified_by": sender}, update_modified=False
-	)
+	# the supplier has no permission on quotations in Desk: the checks above are the ones that apply
 	if previous:
-		frappe.db.set_value("Supplier Quotation", previous, "modified_by", sender, update_modified=False)
+		replaced = frappe.get_doc("Supplier Quotation", previous)
+		replaced.flags.ignore_permissions = True
+		replaced.cancel()
+	quotation.insert()
+	quotation.submit()
 
 	# whoever raised the RFQ, or is assigned to it, hears of the quote
 	headline = _("{0} sent a revised quotation for {1}") if previous else _("{0} sent a quotation for {1}")
@@ -877,11 +877,11 @@ def _build_quotation(rfq, supplier: str, items: list):
 
 	# Filling in the item details and taxes reads the Item, the supplier's payable Account and the
 	# buyer's tax rules, which a supplier may not read, and must not: that would open them to every
-	# supplier. The callers checked the supplier may quote, so only this runs elevated.
-	with _as_administrator():
-		quotation.run_method("set_missing_values")
-		_apply_supplier_terms(quotation, rows)
-		quotation.run_method("calculate_taxes_and_totals")
+	# supplier. The callers checked the supplier may quote, so the quote skips those checks.
+	quotation.flags.ignore_permissions = True
+	quotation.run_method("set_missing_values")
+	_apply_supplier_terms(quotation, rows)
+	quotation.run_method("calculate_taxes_and_totals")
 	return quotation
 
 
@@ -902,7 +902,7 @@ def _apply_supplier_terms(quotation, rows: dict[str, dict]) -> None:
 def _invited_supplier(rfq: str) -> tuple[str, str]:
 	"""Which of the user's suppliers is invited to this submitted RFQ, with its quote status.
 	One still to quote comes first. Anything else is not found, as if the RFQ did not exist."""
-	suppliers = get_parents_for_user("Supplier")
+	suppliers = _user_suppliers()
 	invited = []
 	if suppliers and frappe.db.get_value("Request for Quotation", rfq, "docstatus") == 1:
 		invited = frappe.get_all(
@@ -1054,19 +1054,6 @@ def _quote_currency(supplier: str, company: str) -> str:
 	return frappe.db.get_value("Supplier", supplier, "default_currency") or frappe.get_cached_value(
 		"Company", company, "default_currency"
 	)
-
-
-@contextmanager
-def _as_administrator():
-	"""Run the block as Administrator, then hand the session back. Frappe's web forms switch users
-	the same way: only `frappe.session.user`, since `frappe.set_user` would also reset the session
-	id and the request's form data."""
-	user = frappe.session.user
-	frappe.session.user = "Administrator"
-	try:
-		yield
-	finally:
-		frappe.session.user = user
 
 
 @frappe.whitelist()
@@ -1396,6 +1383,12 @@ def add_portal_comment(doctype: str, name: str, content: str) -> dict:
 	if not content:
 		frappe.throw(_("Write something first"))
 
+	# a mention notifies and emails the user named in it: a supplier must not reach any internal user
+	html = BeautifulSoup(content, "html.parser")
+	for mention in html.find_all(class_="mention"):
+		mention.unwrap()
+	content = str(html)
+
 	comment = frappe.get_doc(
 		{
 			"doctype": "Comment",
@@ -1552,7 +1545,7 @@ def get_home() -> dict:
 		"supplier_name": ", ".join(
 			frappe.get_all(
 				"Supplier",
-				filters={"name": ["in", get_parents_for_user("Supplier") or [""]]},
+				filters={"name": ["in", _user_suppliers() or [""]]},
 				pluck="supplier_name",
 			)
 		),
@@ -1650,7 +1643,7 @@ def get_portal_context() -> dict:
 	"""Who the signed-in portal user is, and which suppliers they may see."""
 	user = frappe.session.user
 	full_name, email = frappe.db.get_value("User", user, ["full_name", "email"]) or (None, None)
-	suppliers = get_parents_for_user("Supplier")
+	suppliers = _user_suppliers()
 
 	return {
 		"user": user,
