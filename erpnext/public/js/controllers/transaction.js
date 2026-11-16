@@ -3487,9 +3487,11 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 
 	new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
 		if (r) {
+			// the bundle counts in the stock UOM, the row qty is in the row's UOM
+			let qty = Math.abs(r.total_qty) / flt(item_row.conversion_factor || 1);
 			let update_values = {
 				serial_and_batch_bundle: r.name,
-				qty: Math.abs(r.total_qty),
+				qty: frm.doc.is_return ? -qty : qty,
 			};
 
 			if (r.warehouse) {
