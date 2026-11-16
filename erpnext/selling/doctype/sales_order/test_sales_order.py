@@ -1247,9 +1247,88 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		)
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
 
+<<<<<<< HEAD
 		# add new item
 		trans_item = json.dumps([{"item_code": "_Test Item", "rate": 100, "qty": 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, "Sales Order", trans_item, so.name)
+=======
+	def test_update_child_cannot_remove_bundle_row_ordered_on_purchase_order(self):
+		make_item("_Test Ordered Bundle", {"is_stock_item": 0})
+		make_item("_Test Ordered Bundle Component", {"is_stock_item": 1})
+		make_product_bundle("_Test Ordered Bundle", ["_Test Ordered Bundle Component"])
+		bundle_row = {
+			"item_code": "_Test Ordered Bundle",
+			"warehouse": "",
+			"qty": 2,
+			"rate": 400,
+			"delivered_by_supplier": 1,
+			"supplier": "_Test Supplier",
+		}
+		so = make_sales_order(item_list=[bundle_row, {"item_code": "_Test Item", "qty": 1, "rate": 100}])
+		purchase_order = make_purchase_order(
+			so.name, selected_items=[{**bundle_row, "name": so.items[0].name}]
+		)[0]
+		purchase_order.set_warehouse = "_Test Warehouse - _TC"
+		purchase_order.submit()
+
+		kept_row = so.items[1]
+		trans_item = json.dumps(
+			[{"item_code": kept_row.item_code, "qty": 1, "rate": 100, "docname": kept_row.name}]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Purchase Order",
+			update_child_qty_rate,
+			"Sales Order",
+			trans_item,
+			so.name,
+		)
+
+	def test_update_child_removing_item_without_cancel_and_delete_perms(self):
+		for workflow_name in frappe.get_all(
+			"Workflow", filters={"document_type": "Sales Order", "is_active": 1}, pluck="name"
+		):
+			workflow = frappe.get_doc("Workflow", workflow_name)
+			workflow.is_active = 0
+			workflow.save()
+
+		role = "_Test Sales Order Item Editor"
+		if not frappe.db.exists("Role", role):
+			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1}).insert()
+
+		frappe.permissions.add_permission("Sales Order", role, 0)
+		for right, value in {
+			"read": 1,
+			"write": 1,
+			"create": 1,
+			"submit": 1,
+			"cancel": 0,
+			"delete": 0,
+		}.items():
+			frappe.permissions.update_permission_property("Sales Order", role, 0, right, value)
+		frappe.clear_cache()
+
+		so = make_sales_order(**{"item_list": [{"item_code": "_Test Item", "qty": 5, "rate": 1000}]})
+		trans_item = json.dumps(
+			[
+				{"item_code": "_Test Item", "qty": 5, "rate": 1000, "docname": so.items[0].name},
+				{"item_code": "_Test Item 2", "qty": 2, "rate": 500},
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
+		so.reload()
+		self.assertEqual(len(so.items), 2)
+
+		test_user = create_user("test_so_item_editor@example.com", role, "Accounts User", "Stock User")
+		trans_item = json.dumps(
+			[{"item_code": "_Test Item", "qty": 5, "rate": 1000, "docname": so.items[0].name}]
+		)
+		with self.set_user(test_user.name):
+			update_child_qty_rate("Sales Order", trans_item, so.name)
+
+		so.reload()
+		self.assertEqual(len(so.items), 1)
+>>>>>>> a71e7b8 (test: don't delete a bundle row ordered on a purchase order)
 
 	def test_update_child_cannot_remove_item_linked_by_draft_purchase_order(self):
 		so = make_sales_order(
