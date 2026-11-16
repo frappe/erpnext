@@ -924,6 +924,7 @@ class PurchaseInvoice(BuyingController):
 		validate_docs_for_deferred_accounting([], [self.name])
 
 	def before_submit(self):
+		super().before_submit()
 		self.create_remarks()
 
 	def on_submit(self):

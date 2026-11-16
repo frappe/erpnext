@@ -7,7 +7,7 @@ from collections import defaultdict
 import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
-from frappe.query_builder import Criterion
+from frappe.query_builder import Criterion, Tuple
 from frappe.query_builder.functions import Count, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
@@ -99,6 +99,19 @@ def stock_entry_row_requires_inspection(purpose, row):
 	if purpose in QI_OUTGOING_PURPOSES:
 		return bool(row.s_warehouse and row.s_warehouse != row.t_warehouse)
 	return False
+
+
+BIN_LOCK_RETRIES = 4
+STOCK_ITEM_TABLES = ("items", "packed_items", "supplied_items", "stock_items")
+STOCK_WAREHOUSE_FIELDS = (
+	"warehouse",
+	"s_warehouse",
+	"t_warehouse",
+	"rejected_warehouse",
+	"target_warehouse",
+	"from_warehouse",
+	"set_warehouse",
+)
 
 
 class StockController(AccountsController):
@@ -2194,6 +2207,52 @@ class StockController(AccountsController):
 		rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
+
+	def before_submit(self):
+		if self.has_stock_update:
+			self.lock_bins()
+
+	def before_cancel(self):
+		super().before_cancel()
+		if self.has_stock_update:
+			self.lock_bins()
+
+	@property
+	def has_stock_update(self):
+		return not self.meta.has_field("update_stock") or bool(self.update_stock)
+
+	def lock_bins(self):
+		item_warehouses = self.get_item_warehouses()
+		if not item_warehouses:
+			return
+
+		bin = frappe.qb.DocType("Bin")
+		query = (
+			frappe.qb.from_(bin)
+			.select(bin.name)
+			.where(Tuple(bin.item_code, bin.warehouse).isin(sorted(item_warehouses)))
+			.orderby(bin.name)
+			.for_update()
+		)
+
+		for _attempt in range(BIN_LOCK_RETRIES):
+			try:
+				return query.run()
+			except frappe.QueryTimeoutError:
+				continue
+
+		return query.run()
+
+	def get_item_warehouses(self):
+		item_warehouses = set()
+		for table_name in STOCK_ITEM_TABLES:
+			for row in self.get(table_name) or []:
+				item_code = row.get("rm_item_code") or row.get("item_code")
+				for fieldname in STOCK_WAREHOUSE_FIELDS:
+					if item_code and row.get(fieldname):
+						item_warehouses.add((item_code, row.get(fieldname)))
+
+		return item_warehouses
 
 	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		args = frappe._dict(

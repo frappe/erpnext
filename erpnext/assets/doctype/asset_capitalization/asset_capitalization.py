@@ -112,6 +112,7 @@ class AssetCapitalization(StockController):
 			self.set_serial_and_batch_bundle(table_name="stock_items")
 
 	def before_submit(self):
+		super().before_submit()
 		self.validate_source_mandatory()
 		# self.create_target_asset()
 
@@ -124,6 +125,7 @@ class AssetCapitalization(StockController):
 		self.update_target_asset()
 
 	def before_cancel(self):
+		super().before_cancel()
 		self.cancel_target_asset()
 
 	def cancel_target_asset(self):
