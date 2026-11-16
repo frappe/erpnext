@@ -438,6 +438,27 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		pr.cancel()
 
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_returns_of_parts_of_a_receipt_add_up_to_its_received_stock_qty(self):
+		"""Returns of parts of a row whose stock qty rounds unevenly can return all of it."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = make_item(
+			"_Test Item For Returns Of Parts",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.3356}]},
+		).name
+		make_purchase_receipt(item_code=item, qty=1, rate=100)
+		pr = make_purchase_receipt(item_code=item, qty=6, uom="Box", conversion_factor=0.3356, rate=100)
+
+		first_return = make_return_doc("Purchase Receipt", pr.name)
+		first_return.items[0].update({"qty": -3, "received_qty": -3})
+		first_return.submit()
+		make_return_doc("Purchase Receipt", pr.name).submit()
+
+		pr.reload()
+		self.assertEqual(pr.items[0].returned_qty, pr.items[0].received_stock_qty)
+		self.assertEqual(pr.per_returned, 100)
+
 	def test_purchase_return_partial(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
