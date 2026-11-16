@@ -1963,6 +1963,7 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			is_internal_supplier = 0
 			return_against = None
 			project = None
+			get_transit_stock_value = PurchaseInvoice.get_transit_stock_value
 
 			def __init__(self, is_return, defaults):
 				self.is_return = is_return
@@ -3109,6 +3110,47 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(flt(moved_value[transit_warehouse]), -1000)
 		self.assertEqual(flt(moved_value[to_warehouse]), 700)
 		self.assertEqual(flt(moved_value[rejected_warehouse]), 300)
+
+	def test_internal_transfer_invoice_credits_transit_with_its_stock_value(self):
+		"""A stock updating internal transfer invoice in a non-stock UOM, and its return, book the
+		in-transit account with the stock value that moved through the in-transit warehouse."""
+		pi = make_internal_transfer_invoice()
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.update_stock = 1
+		returned.submit()
+
+		for invoice in (pi, returned):
+			self.assert_warehouse_accounts_match_stock(invoice)
+
+	def test_landed_cost_on_an_internal_transfer_invoice(self):
+		"""Landed cost on a stock updating internal transfer invoice goes into the accepted warehouse."""
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		pi = make_internal_transfer_invoice()
+		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=50)
+
+		self.assert_warehouse_accounts_match_stock(pi)
+
+	def assert_warehouse_accounts_match_stock(self, invoice):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+
+		booked_value = {}
+		for entry in get_gl_entries("Purchase Invoice", invoice.name, skip_cancelled=True):
+			booked_value.setdefault(entry.account, 0)
+			booked_value[entry.account] += flt(entry.debit) - flt(entry.credit)
+
+		self.assertEqual(flt(sum(booked_value.values()), 2), 0)
+		for stock_entry in frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": invoice.name, "is_cancelled": 0},
+			fields=["warehouse", "stock_value_difference"],
+		):
+			self.assertEqual(
+				flt(booked_value[get_inventory_account(invoice.company, stock_entry.warehouse)], 2),
+				flt(stock_entry.stock_value_difference, 2),
+			)
 
 	def test_internal_transfer_invoice_with_every_unit_rejected(self):
 		"""An invoice may reject a whole row, and the in-transit warehouse is emptied all the same."""
@@ -4621,6 +4663,59 @@ def make_fully_rejected_stock_invoice():
 		cost_center="Main - TCP1",
 		do_not_save=True,
 	)
+	pi.submit()
+	return pi
+
+
+def make_internal_transfer_invoice():
+	"""A stock updating internal transfer invoice of 6 Box (0.3356 Kg each, 100 per Kg), received
+	from an in-transit warehouse."""
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
+	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+		prepare_data_for_internal_transfer,
+	)
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	prepare_data_for_internal_transfer()
+	company = "_Test Company with perpetual inventory"
+	from_warehouse = create_warehouse("_Test Invoice Transfer From", company=company)
+	item = make_item(
+		properties={"is_stock_item": 1, "stock_uom": "Kg"},
+		uoms=[{"uom": "Box", "conversion_factor": 0.3356}],
+	).name
+	make_purchase_receipt(
+		item_code=item, company=company, warehouse=from_warehouse, qty=10, rate=100, uom="Kg"
+	)
+
+	si = create_sales_invoice(
+		company=company,
+		customer="_Test Internal Customer 2",
+		item_code=item,
+		qty=6,
+		rate=33.56,
+		warehouse=from_warehouse,
+		update_stock=1,
+		cost_center="Main - TCP1",
+		debit_to="Debtors - TCP1",
+		income_account="Sales - TCP1",
+		do_not_save=1,
+	)
+	si.items[0].update(
+		{
+			"uom": "Box",
+			"conversion_factor": 0.3356,
+			"target_warehouse": create_warehouse("_Test Invoice Transfer Transit", company=company),
+		}
+	)
+	si.insert()
+	si.submit()
+
+	pi = make_inter_company_purchase_invoice(si.name)
+	pi.update_stock = 1
+	pi.items[0].warehouse = create_warehouse("_Test Invoice Transfer To", company=company)
+	pi.items[0].expense_account = "Cost of Goods Sold - TCP1"
 	pi.submit()
 	return pi
 
