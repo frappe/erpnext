@@ -1165,6 +1165,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Inter Company Order Reference",
+   "no_copy": 1,
    "options": "Purchase Order",
    "read_only": 1,
    "search_index": 1
@@ -1828,7 +1829,7 @@
  "is_submittable": 1,
  "link_display_mode": "Search",
  "links": [],
- "modified": "2026-11-15 00:15:26.802348",
+ "modified": "2026-11-16 04:16:51.560603",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
