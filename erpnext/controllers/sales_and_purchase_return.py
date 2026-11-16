@@ -169,9 +169,12 @@ def validate_returned_items(doc):
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
 				add_returned_row(doc, key, d, already_returned_items)
 
+				# compare per stock UOM, the return row may be in another UOM than the original
+				rate_precision = d.precision("rate")
 				if (
-					ref.rate
-					and flt(d.rate) > ref.rate
+					ref.stock_uom_rate
+					and flt(flt(d.rate) / flt(d.conversion_factor or 1), rate_precision)
+					> flt(ref.stock_uom_rate, rate_precision)
 					and doc.doctype in ("Delivery Note", "Sales Invoice")
 					and get_valuation_method(d.item_code, doc.company) != "Moving Average"
 				):
@@ -286,9 +289,8 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 
 
 def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
+	# stock qty, so that a return in another UOM is held to what was billed or moved
 	fields = ["stock_qty"]
-	if (doc.doctype == "Purchase Invoice" or doc.doctype == "Sales Invoice") and not doc.update_stock:
-		fields = ["qty"]
 
 	tracks_accepted_rejected_split = doc.doctype in (
 		"Purchase Receipt",
@@ -411,6 +413,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 			{
 				"qty": 0,
 				"rate": 0,
+				"stock_uom_rate": 0,
 				"stock_qty": 0,
 				"rejected_qty": 0,
 				"received_qty": 0,
@@ -425,6 +428,9 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	item_dict["stock_qty"] += ref_item_row.get("stock_qty", 0)
 	if ref_item_row.get("rate", 0) > item_dict["rate"]:
 		item_dict["rate"] = ref_item_row.get("rate", 0)
+
+	stock_uom_rate = flt(ref_item_row.get("rate")) / flt(ref_item_row.get("conversion_factor") or 1)
+	item_dict["stock_uom_rate"] = max(item_dict["stock_uom_rate"], stock_uom_rate)
 
 	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		item_dict["received_qty"] += ref_item_row.received_qty
@@ -566,7 +572,7 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 
 	for row in data:
 		if row.warehouse and row.warehouse not in _return_map:
-			_return_map[row.warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
+			_return_map[row.warehouse] = frappe._dict({"qty": 0, "stock_qty": 0, "qty_in_stock_uom": 0})
 
 		if row.rejected_warehouse and row.rejected_warehouse not in _return_map:
 			_return_map[row.rejected_warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
@@ -575,6 +581,7 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 			qty_map = _return_map.get(row.warehouse)
 			qty_map.qty += abs(flt(row.qty))
 			qty_map.stock_qty += abs(flt(row.stock_qty))
+			qty_map.qty_in_stock_uom += abs(flt(row.qty)) * flt(row.conversion_factor)
 
 		if row.rejected_warehouse:
 			rejected_qty_map = _return_map.get(row.rejected_warehouse)
@@ -595,6 +602,12 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 
 	fields = [
 		{"SUM": [{"ABS": f"`tab{child_doctype}`.qty"}], "as": "qty"},
+		{
+			"SUM": [
+				{"MUL": [{"ABS": f"`tab{child_doctype}`.qty"}, f"`tab{child_doctype}`.conversion_factor"]}
+			],
+			"as": "qty_in_stock_uom",
+		},
 	]
 
 	if doctype != "Subcontracting Receipt":
@@ -627,6 +640,12 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	)
 
 	return data[0]
+
+
+def get_qty_left_to_return(source_row, returned_qty_in_stock_uom) -> float:
+	"""Qty of the source row left to return, in its UOM; earlier returns may be in another UOM."""
+	returned_qty = flt(returned_qty_in_stock_uom) / flt(source_row.conversion_factor or 1)
+	return flt(flt(source_row.qty) - returned_qty, source_row.precision("qty"))
 
 
 def make_return_doc(doctype: str, source_name: str, target_doc=None, return_against_rejected_qty=False):
@@ -760,7 +779,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			else:
 				target_doc.rejected_qty = -1 * flt(source_doc.rejected_qty - (rejected_wh_map.qty or 0))
 
-			target_doc.qty = -1 * flt(source_doc.qty - (wh_map.qty or 0))
+			target_doc.qty = -1 * get_qty_left_to_return(source_doc, wh_map.qty_in_stock_uom)
 
 			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
 				target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (flt(wh_map.stock_qty) or 0))
@@ -803,7 +822,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.rejected_qty = -1 * flt(
 				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			target_doc.qty = -1 * get_qty_left_to_return(source_doc, returned_qty_map.get("qty_in_stock_uom"))
 
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 			target_doc.purchase_order = source_doc.purchase_order
@@ -819,7 +838,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			target_doc.qty = -1 * get_qty_left_to_return(source_doc, returned_qty_map.get("qty_in_stock_uom"))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 
 			target_doc.against_sales_order = source_doc.against_sales_order
@@ -835,7 +854,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
 			)
-			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
+			target_doc.qty = -1 * get_qty_left_to_return(source_doc, returned_qty_map.get("qty_in_stock_uom"))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
 
 			target_doc.sales_order = source_doc.sales_order
