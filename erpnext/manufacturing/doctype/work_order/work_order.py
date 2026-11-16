@@ -201,6 +201,8 @@ class WorkOrder(Document):
 	# end: auto-generated types
 
 	def onload(self):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import get_converted_fg_qty
+
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
@@ -210,6 +212,7 @@ class WorkOrder(Document):
 		self.set_onload("allow_alternative_finished_goods", ms.allow_alternative_finished_goods)
 		if ms.allow_alternative_finished_goods and self.docstatus == 1 and flt(self.produced_qty):
 			self.set_onload("has_alternative_finished_goods", self.has_alternative_finished_goods())
+			self.set_onload("converted_fg_qty", get_converted_fg_qty(self.name))
 		self.set_onload("show_create_job_card_button", self.show_create_job_card_button())
 		self.set_onload(
 			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}

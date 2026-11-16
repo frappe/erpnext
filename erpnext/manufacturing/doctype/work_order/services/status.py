@@ -303,6 +303,8 @@ class StatusService:
 			update_produced_qty_in_so_item(self.doc.sales_order, self.doc.sales_order_item)
 
 	def update_disassembled_qty(self, qty, is_cancel=False):
+		from erpnext.stock.doctype.stock_entry.services.manufacturing import get_converted_fg_qty
+
 		precision = self.doc.precision("disassembled_qty")
 		if is_cancel:
 			self.doc.disassembled_qty = max(0, flt(self.doc.disassembled_qty - qty, precision))
@@ -310,8 +312,14 @@ class StatusService:
 			if self.doc.docstatus == 1:
 				self.doc.disassembled_qty = flt(self.doc.disassembled_qty + qty, precision)
 
-		if not is_cancel and self.doc.disassembled_qty > self.doc.produced_qty:
-			frappe.throw(_("Cannot disassemble more than produced quantity."))
+		if not is_cancel:
+			available_qty = flt(self.doc.produced_qty - get_converted_fg_qty(self.doc.name), precision)
+			if self.doc.disassembled_qty > available_qty:
+				frappe.throw(
+					_(
+						"Cannot disassemble more than the produced quantity that is not converted to an alternative item."
+					)
+				)
 
 		self.doc.db_set("disassembled_qty", self.doc.disassembled_qty)
 

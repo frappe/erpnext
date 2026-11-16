@@ -1277,12 +1277,8 @@ class RepackStockEntry(BaseManufactureStockEntry):
 		self.validate_conversion_output_qty(consumed_qty, production_item)
 
 		is_submitting = self.doc.docstatus == 1
-		produced_qty = flt(
-			frappe.db.get_value("Work Order", self.doc.work_order, "produced_qty", for_update=is_submitting)
-		)
 		available_qty = flt(
-			produced_qty
-			- get_converted_fg_qty(self.doc.work_order, exclude=self.doc.name, for_update=is_submitting),
+			get_available_fg_qty(self.doc.work_order, exclude=self.doc.name, for_update=is_submitting),
 			precision,
 		)
 		if consumed_qty > available_qty:
@@ -1892,6 +1888,15 @@ def get_alternative_finished_goods(production_item):
 		pluck="item_code",
 	)
 	return list(dict.fromkeys(alternatives))
+
+
+def get_available_fg_qty(work_order, exclude=None, for_update=False):
+	"""Produced qty of the Work Order not yet disassembled or converted to an alternative item."""
+	produced_qty, disassembled_qty = frappe.db.get_value(
+		"Work Order", work_order, ["produced_qty", "disassembled_qty"], for_update=for_update
+	)
+	converted_qty = get_converted_fg_qty(work_order, exclude=exclude, for_update=for_update)
+	return flt(produced_qty) - flt(disassembled_qty) - converted_qty
 
 
 def get_converted_fg_qty(work_order, exclude=None, for_update=False):
