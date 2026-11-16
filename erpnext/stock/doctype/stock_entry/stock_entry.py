@@ -3232,16 +3232,18 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def make_stock_reserve_for_wip_and_fg(self):
 		if self.is_stock_reserve_for_work_order():
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
-			if (
-				self.purpose == "Manufacture"
-				and not pro_doc.sales_order
-				and not self.job_card
-				and not pro_doc.production_plan_sub_assembly_item
-				and not pro_doc.subcontracting_inward_order
-			):
+			if self.skips_finished_good_reservation(pro_doc):
 				return
 
 			pro_doc.set_reserved_qty_for_wip_and_fg(self)
+
+	def skips_finished_good_reservation(self, pro_doc) -> bool:
+		return self.purpose == "Manufacture" and not (
+			pro_doc.sales_order
+			or self.job_card
+			or pro_doc.production_plan_sub_assembly_item
+			or pro_doc.subcontracting_inward_order
+		)
 
 	def reserve_stock_for_subcontracting(self):
 		if self.purpose == "Send to Subcontractor" and frappe.get_value(
@@ -3280,11 +3282,7 @@ class StockEntry(StockController, SubcontractingInwardController):
 	def cancel_stock_reserve_for_wip_and_fg(self):
 		if self.is_stock_reserve_for_work_order():
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
-			if (
-				self.purpose == "Manufacture"
-				and not pro_doc.sales_order
-				and not pro_doc.production_plan_sub_assembly_item
-			):
+			if self.skips_finished_good_reservation(pro_doc):
 				return
 
 			pro_doc.cancel_reserved_qty_for_wip_and_fg(self)

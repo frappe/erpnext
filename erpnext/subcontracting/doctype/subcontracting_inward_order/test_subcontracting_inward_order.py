@@ -52,6 +52,23 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		self.assertEqual(scio.items[0].qty, 12)
 
+	def test_manufacture_cancel_releases_its_finished_good_reservation(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+		reservation = {"from_voucher_no": manufacture.name, "docstatus": 1}
+		self.assertTrue(frappe.db.exists("Stock Reservation Entry", reservation))
+
+		manufacture.cancel()
+
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
+
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
 
