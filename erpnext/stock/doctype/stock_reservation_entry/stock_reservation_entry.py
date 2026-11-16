@@ -394,11 +394,14 @@ class StockReservationEntry(Document):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if self.reserved_qty == self.delivered_qty:
+				precision = self.precision("reserved_qty")
+				reserved_qty = flt(self.reserved_qty, precision)
+				delivered_qty = flt(self.delivered_qty, precision)
+				if reserved_qty == delivered_qty:
 					status = "Delivered"
-				elif self.delivered_qty and self.delivered_qty < self.reserved_qty:
+				elif delivered_qty and delivered_qty < reserved_qty:
 					status = "Partially Delivered"
-				elif self.reserved_qty == self.voucher_qty:
+				elif reserved_qty == flt(self.voucher_qty, precision):
 					status = "Reserved"
 				else:
 					status = "Partially Reserved"
@@ -1283,66 +1286,6 @@ def _get_stock_reservation_entries_for_voucher(
 def get_sre_against_so_for_dn(so_name: str, so_detail_no: str) -> list[str]:
 	"""Returns list of Stock Reservation Entries against Delivery Note with Sales Order Reference."""
 
-<<<<<<< HEAD
-=======
-	sb_entry = frappe.qb.DocType("Serial and Batch Entry")
-	open_qty = defaultdict(float)
-	for parent, qty in (
-		frappe.qb.from_(sb_entry)
-		.select(sb_entry.parent, sb_entry.qty - sb_entry.delivered_qty)
-		.where((sb_entry.parenttype == "Stock Reservation Entry") & sb_entry.parent.isin(sre_names))
-		.for_update()
-	).run():
-		open_qty[parent] += flt(qty)
-
-	return open_qty
-
-
-def set_delivered_qty(sre: frappe._dict, delivered_qty: float) -> None:
-	sre.delivered_qty = delivered_qty
-	frappe.db.set_value(
-		"Stock Reservation Entry", sre.name, {"delivered_qty": delivered_qty, "status": get_status(sre)}
-	)
-
-
-def get_status(sre) -> str:
-	"""Status of a reservation from its docstatus and quantities."""
-	if sre.docstatus == 2:
-		return "Cancelled"
-	if sre.docstatus != 1:
-		return "Draft"
-	if sre.transferred_qty:
-		return "Partially Used" if sre.transferred_qty < sre.reserved_qty else "Closed"
-	if flt(sre.delivered_qty) + flt(sre.consumed_qty) >= flt(sre.reserved_qty):
-		return "Delivered"
-	if sre.delivered_qty:
-		return "Partially Delivered"
-	if sre.consumed_qty:
-		return "Partially Used"
-	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
-	if flt(sre.reserved_qty, precision) >= flt(sre.voucher_qty, precision):
-		return "Reserved"
-	return "Partially Reserved"
-
-
-def move_serial_batch_delivered_qty(
-	limits: dict[str, float], serial_batch: frappe._dict, release: bool = False
-) -> None:
-	"""Mark serial and batch qty delivered on these reservations once, oldest first, or give it back newest first.
-
-	`limits` holds the most each reservation may take or give back.
-	"""
-	if not limits:
-		return
-
-	entries = get_open_serial_batch_entries(list(limits), release)
-	moved_qty = allocate_serial_batch_qty(entries, limits, serial_batch)
-	add_serial_batch_delivered_qty({name: -qty if release else qty for name, qty in moved_qty.items()})
-
-
-def get_open_serial_batch_entries(sre_names: list[str], release: bool) -> list[dict]:
-	"""Rows of these reservations with qty still to deliver, oldest reservation first, or to give back, newest first, locked until the transaction ends."""
->>>>>>> d463939 (fix(stock): round the reserved qty compared for the Reserved status)
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	query = (
 		frappe.qb.from_(sre)
