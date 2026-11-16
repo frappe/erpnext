@@ -15,6 +15,7 @@ REFERENCE = re.compile(r"#(\d+)")
 TOKEN = re.compile(r"[^,()]+")
 UNICODE_ESCAPE = re.compile(r"\\X2\\((?:[0-9A-F]{4})+)\\X0\\")
 LATIN_ESCAPE = re.compile(r"\\X\\([0-9A-F]{2})")
+MAX_PARTS = 5000
 
 
 def read_step_file(content: str) -> dict:
@@ -115,6 +116,7 @@ class StepProductStructure:
 
 		self.children = defaultdict(Counter)
 		self.used_definitions = set()
+		self.part_count = 0
 		for entity_type, arguments in self.entities.values():
 			if entity_type == "NEXT_ASSEMBLY_USAGE_OCCURRENCE":
 				self.children[arguments[3]][arguments[4]] += 1
@@ -147,6 +149,12 @@ class StepProductStructure:
 		if definition in ancestors:
 			frappe.throw(
 				_("The STEP file has an assembly that contains itself."), title=_("Invalid Design File")
+			)
+
+		self.part_count += 1
+		if self.part_count > MAX_PARTS:
+			frappe.throw(
+				_("The STEP file has more than {0} parts.").format(MAX_PARTS), title=_("Invalid Design File")
 			)
 
 		node = self.get_product(definition)
