@@ -3318,6 +3318,61 @@ class TestPurchaseInvoice(ERPNextTestSuite, StockTestMixin):
 			"set_valuation_rate_for_rejected_materials": 1,
 		},
 	)
+	def test_debit_note_books_the_variance_of_rejected_stock_in_another_uom(self):
+		"""Rejected stock goes back at the invoice's rate per Kg and the debit note bills 100 per Box,
+		so the difference is a variance."""
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		company = "_Test Company with perpetual inventory"
+		item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Kg"},
+			uoms=[{"uom": "Box", "conversion_factor": 0.3344}],
+		).name
+		pi = make_purchase_invoice(
+			company=company,
+			item_code=item,
+			warehouse="Stores - TCP1",
+			qty=1,
+			rejected_qty=6,
+			rate=100,
+			rejected_warehouse=create_warehouse("_Test Debit Note Rejected UOM", company=company),
+			update_stock=1,
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			do_not_save=True,
+		)
+		pi.items[0].update({"uom": "Box", "conversion_factor": 0.3344})
+		pi.submit()
+
+		returned = make_return_doc("Purchase Invoice", pi.name)
+		returned.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+		returned.submit()
+
+		booked = {}
+		for entry in frappe.get_all(
+			"GL Entry",
+			filters={"voucher_no": returned.name, "is_cancelled": 0},
+			fields=["account", "debit", "credit"],
+		):
+			booked[entry.account] = flt(entry.debit - entry.credit, 2)
+
+		# 1.00 Kg leaves at 601.28 / 2.01 Kg per Kg, the debit note bills 300
+		self.assertEqual(
+			booked,
+			{
+				returned.credit_to: 300,
+				get_inventory_account(company, pi.items[0].rejected_warehouse): -299.15,
+				"Cost of Goods Sold - TCP1": -0.85,
+			},
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings",
+		{
+			"bill_for_rejected_quantity_in_purchase_invoice": 1,
+			"set_valuation_rate_for_rejected_materials": 1,
+		},
+	)
 	def test_stock_updating_invoice_bills_the_rejected_quantity(self):
 		"""With the rejected quantity billed and valued, the invoice pays for every unit received and
 		the stock it moves matches the entries it books."""
