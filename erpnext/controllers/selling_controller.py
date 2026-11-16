@@ -474,7 +474,7 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if is_internal_customer or not is_stock_item:
+			if is_internal_customer or not (is_stock_item or self.has_product_bundle(item.item_code)):
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
