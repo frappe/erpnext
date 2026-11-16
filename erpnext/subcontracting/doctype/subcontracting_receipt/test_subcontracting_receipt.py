@@ -636,6 +636,42 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
 		self.assertEqual(len(returned), 2)
 
+	def test_secondary_items_of_a_saved_return_drop_a_bundle_picked_for_another_qty(self):
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+			add_serial_batch_ledgers,
+		)
+
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(
+			fg_item,
+			secondary_qty=1,
+			secondary_properties={"has_serial_no": 1, "serial_no_series": "SCR-SEC-.####"},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+		serial_nos = frappe.get_all("Serial No", filters={"item_code": scr.items[1].item_code}, pluck="name")
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+		secondary_row = scr_return.items[1]
+		bundle = add_serial_batch_ledgers(
+			[{"serial_no": serial_no, "qty": 1} for serial_no in serial_nos[:2]],
+			secondary_row.as_dict(),
+			scr_return.as_dict(),
+			secondary_row.warehouse,
+		)
+		secondary_row.serial_and_batch_bundle = bundle.name
+		scr_return.save()
+
+		scr_return.items[0].qty = scr_return.items[0].received_qty = -1
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.save()
+		scr_return.submit()
+
+		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
+		self.assertEqual(len(returned), 1)
+
 	def test_return_takes_secondary_items_from_the_warehouse_they_were_received_in(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item)
