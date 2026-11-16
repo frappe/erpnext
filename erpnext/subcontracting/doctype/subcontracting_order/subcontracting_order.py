@@ -273,9 +273,13 @@ class SubcontractingOrder(SubcontractingController):
 					)
 
 	def set_missing_values(self):
-		self.calculate_additional_costs()
 		self.calculate_service_costs()
 		self.calculate_supplied_items_qty_and_amount()
+		for item in self.items:
+			# additional costs split by Amount use the cost before them
+			item.amount = item.qty * (item.rm_cost_per_qty + item.service_cost_per_qty)
+
+		self.calculate_additional_costs()
 		self.calculate_items_qty_and_amount()
 
 	def set_service_item_base_amounts(self):
