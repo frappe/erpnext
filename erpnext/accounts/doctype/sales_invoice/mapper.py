@@ -205,8 +205,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
-	if doctype == "Purchase Invoice":
-		validate_no_counterpart_sales_invoice(source_doc)
 
 	def set_missing_values(source, target):
 		target.conversion_rate = target.plc_conversion_rate = 0
@@ -299,6 +297,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
+	if doctype == "Purchase Invoice":
+		validate_no_counterpart_sales_invoice(source_doc)
+
 	if not doclist.get("items"):
 		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
 			message = _(
