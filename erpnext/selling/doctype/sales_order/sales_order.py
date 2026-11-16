@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
+	validate_counterpart_is_free,
 	validate_inter_company_party,
 )
 from erpnext.accounts.utils import pre_submit_validation
@@ -591,6 +592,7 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
+		validate_counterpart_is_free(self)
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count

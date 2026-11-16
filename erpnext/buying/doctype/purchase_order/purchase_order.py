@@ -12,6 +12,7 @@ from frappe.utils import cint, flt
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
+	validate_counterpart_is_free,
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import get_party_account_currency
@@ -476,6 +477,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
+		validate_counterpart_is_free(self)
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 		SubcontractingService(self).auto_create_subcontracting_order()

@@ -45,6 +45,7 @@ from .services.fixed_assets import FixedAssetService
 from .services.inter_company import (
 	unlink_inter_company_doc,
 	update_linked_doc,
+	validate_counterpart_is_free,
 	validate_inter_company_party,
 )
 from .services.loyalty import LoyaltyService
@@ -512,6 +513,7 @@ class SalesInvoice(SellingController):
 		if frappe.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
 			update_company_current_month_sales(self.company)
 			self.update_project()
+		validate_counterpart_is_free(self)
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		if self.coupon_code and self.counts_coupon_use():
