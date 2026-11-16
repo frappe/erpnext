@@ -2230,6 +2230,73 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertEqual(received_qty, -delivered_qty)
 
+	def test_internal_transfer_pr_rejected_qty_adds_up_to_the_delivered_stock_qty(self):
+		"""Accepted and rejected stock qty of an internal transfer add up to what left for transit,
+		even when each part rounds up on its own in the stock UOM."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Rounded Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Rounded Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Rounded Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Rounded Transfer Rejected", company=company)
+
+		item_doc = make_item(
+			"Test Rounded Rejected Internal Transfer Item",
+			{"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 1.00555}]},
+		)
+		make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=20, rate=100
+		)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=2,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			do_not_submit=True,
+		)
+		dn.items[0].update({"uom": "Box", "conversion_factor": 1.00555})
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": to_warehouse,
+				"qty": 1,
+				"rejected_qty": 1,
+				"received_qty": 2,
+				"rejected_warehouse": rejected_warehouse,
+			}
+		)
+		pr.submit()
+
+		stock_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": ("in", [dn.name, pr.name]), "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+			if d.warehouse != transit_warehouse or d.actual_qty < 0
+		}
+		delivered_qty = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": dn.name, "warehouse": transit_warehouse}, "actual_qty"
+		)
+		precision = pr.items[0].precision("stock_qty")
+
+		self.assertEqual(stock_qty[transit_warehouse], -delivered_qty)
+		self.assertEqual(
+			flt(stock_qty[to_warehouse] + stock_qty[rejected_warehouse], precision), delivered_qty
+		)
+
 	@change_settings("Buying Settings", {"set_valuation_rate_for_rejected_materials": 0})
 	def test_internal_transfer_pr_with_every_unit_rejected(self):
 		"""A receipt that rejects the whole transfer still empties the in-transit warehouse."""
