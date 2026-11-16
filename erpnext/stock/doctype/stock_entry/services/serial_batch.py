@@ -237,7 +237,7 @@ class StockEntrySABB(BaseStockEntry):
 
 	def _make_overflow_batch_row(self, d, batches, details, new_items_to_add, batch_no, qty):
 		new_row = frappe.copy_doc(d)
-		new_row.name = None
+		new_row.update({"name": None, "use_serial_batch_fields": 1})
 		self._assign_batch_to_item(new_row, batches, details, batch_no, qty)
 		new_items_to_add.append(new_row)
 
