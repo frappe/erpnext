@@ -169,6 +169,16 @@ def validate_inter_company_transaction(doc, doctype):
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 
+def validate_no_counterpart_sales_invoice(purchase_invoice):
+	"""Purchase Invoice rows link no Sales Invoice rows, so its header link marks it as already invoiced."""
+	if sales_invoice := purchase_invoice.inter_company_invoice_reference:
+		frappe.throw(
+			_(
+				"Cannot create Intercompany Sales Invoice. Purchase Invoice {0} already has Sales Invoice {1}."
+			).format(purchase_invoice.name, get_link_to_form("Sales Invoice", sales_invoice))
+		)
+
+
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name: str, target_doc: str | dict | Document | None = None):
 	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
@@ -195,6 +205,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
+	if doctype == "Purchase Invoice":
+		validate_no_counterpart_sales_invoice(source_doc)
 
 	def set_missing_values(source, target):
 		target.conversion_rate = target.plc_conversion_rate = 0
