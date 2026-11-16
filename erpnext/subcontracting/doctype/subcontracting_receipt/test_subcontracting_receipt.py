@@ -2563,6 +2563,100 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		self.assertEqual(subcontracting_receipt.supplied_items[0].consumed_qty, 10)
 		self.assertEqual(subcontracting_receipt.supplied_items[1].consumed_qty, 10)
 
+	def test_repost_revalues_the_secondary_items_with_the_finished_good(self):
+		scr = make_receipt_with_scrap(co_product_allocation=20)
+		create_stock_reconciliation(
+			item_code=scr.supplied_items[0].rm_item_code,
+			warehouse=scr.supplier_warehouse,
+			qty=100,
+			rate=50,
+			posting_date=add_days(today(), -1),
+		)
+
+		scr.load_from_db()
+		consumed = sum(row.amount for row in scr.supplied_items)
+		self.assertNotEqual(consumed, 200)
+
+		fg, scrap, co_product = scr.items
+		self.assertEqual(scrap.amount, 20)
+		self.assertAlmostEqual(co_product.amount, (consumed + 200 - 20) * 0.2)
+		self.assertAlmostEqual(fg.amount + scrap.amount + co_product.amount, consumed + 200)
+		stock_values = dict(
+			frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": scr.name, "is_cancelled": 0, "actual_qty": (">", 0)},
+				fields=["voucher_detail_no", "stock_value_difference"],
+				as_list=True,
+			)
+		)
+		for row in scr.items:
+			self.assertAlmostEqual(stock_values[row.name], row.amount, places=2)
+
+	def test_backdated_receipt_values_valuation_rate_secondary_items_at_its_posting_date(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+		set_backflush_based_on("BOM")
+		posting_date = add_days(today(), -2)
+		fg_item = make_item(properties={"is_stock_item": 1, "is_sub_contracted_item": 1}).name
+		bom = make_bom_with_secondary_item(fg_item, secondary_qty=1)
+		scrap_item = bom.secondary_items[0].item_code
+		make_stock_entry(
+			item_code=scrap_item,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=5,
+			posting_date=add_days(today(), -5),
+		)
+		make_stock_entry(item_code=scrap_item, target="_Test Warehouse - _TC", qty=10, basic_rate=50)
+		make_stock_entry(
+			item_code=bom.items[0].item_code,
+			target="_Test Warehouse - _TC",
+			qty=10,
+			basic_rate=100,
+			posting_date=add_days(today(), -5),
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 10,
+				"fg_item": fg_item,
+				"fg_item_qty": 10,
+			}
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		transfer = frappe.get_doc(
+			make_rm_stock_entry(
+				sco.name,
+				[
+					{
+						"item_code": fg_item,
+						"rm_item_code": row.rm_item_code,
+						"item_name": row.rm_item_code,
+						"qty": row.required_qty,
+						"rate": 100,
+						"stock_uom": row.stock_uom,
+						"warehouse": "_Test Warehouse - _TC",
+					}
+					for row in sco.supplied_items
+				],
+			)
+		)
+		transfer.set_posting_time = 1
+		transfer.posting_date = add_days(today(), -3)
+		transfer.submit()
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.set_posting_time = 1
+		scr.posting_date = posting_date
+		scr.save()
+		scr.get_secondary_items(recalculate_rate=True)
+		scr.save()
+
+		self.assertEqual(scr.items[1].item_code, scrap_item)
+		self.assertEqual(scr.items[1].rate, 5)
+
 	def test_supplied_items_cost_after_reposting(self):
 		# Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")
