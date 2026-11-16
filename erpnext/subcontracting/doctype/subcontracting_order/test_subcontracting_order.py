@@ -553,6 +553,111 @@ class TestSubcontractingOrder(FrappeTestCase):
 			bin_after_cancel_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract
 		)
 
+<<<<<<< HEAD
+=======
+	def test_reserved_qty_for_subcontracting_ignores_other_orders_transfers(self):
+		get_subcontracting_order()
+		sco = get_subcontracting_order(do_not_save=1)
+		sco.set_reserve_warehouse = "_Test Warehouse 2 - _TC"
+		sco.insert()
+		sco.submit()
+
+		stock_bin = get_bin("Subcontracted SRM Item 1", "_Test Warehouse - _TC")
+		stock_bin.update_reserved_qty_for_sub_contracting()
+		reserved_qty_before_transfer = stock_bin.reserved_qty_for_sub_contract
+
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+		stock_bin.update_reserved_qty_for_sub_contracting()
+
+		self.assertEqual(stock_bin.reserved_qty_for_sub_contract, reserved_qty_before_transfer)
+
+	def test_alternative_item_transfer_without_supplied_row_releases_reserved_qty(self):
+		sco = get_subcontracting_order()
+		row = sco.supplied_items[0]
+		alternative = make_item("_Test SCO Alternative RM", {"is_stock_item": 1, "valuation_rate": 10}).name
+		set_alternative_item(row.rm_item_code, alternative)
+		make_stock_entry(
+			item_code=alternative, target=row.reserve_warehouse, qty=row.required_qty, basic_rate=10
+		)
+
+		transfer = make_supplied_item_transfer(sco, row, link=False)
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": row.rm_item_code, "allow_alternative_item": 1}
+		)
+		transfer.insert()
+		transfer.submit()
+
+		self.assertEqual(frappe.db.get_value(row.doctype, row.name, "total_supplied_qty"), row.required_qty)
+		self.assertEqual(get_bin(row.rm_item_code, row.reserve_warehouse).reserved_qty_for_sub_contract, 0)
+
+	def test_alternative_item_transfer_counts_against_its_original_requirement(self):
+		service_item = {
+			"warehouse": "_Test Warehouse - _TC",
+			"item_code": "Subcontracted Service Item 1",
+			"qty": 10,
+			"rate": 100,
+			"fg_item": "Subcontracted Item SA1",
+			"fg_item_qty": 10,
+		}
+		sco = get_subcontracting_order(service_items=[service_item])
+		original, alternative = sco.supplied_items[0], sco.supplied_items[1]
+		set_alternative_item(original.rm_item_code, alternative.rm_item_code)
+		make_stock_entry(
+			item_code=alternative.rm_item_code,
+			target=alternative.reserve_warehouse,
+			qty=original.required_qty + alternative.required_qty,
+			basic_rate=10,
+		)
+
+		replacement = make_supplied_item_transfer(sco, original)
+		replacement.items[0].update(
+			{
+				"item_code": alternative.rm_item_code,
+				"original_item": original.rm_item_code,
+				"allow_alternative_item": 1,
+			}
+		)
+		replacement.insert()
+		replacement.submit()
+
+		own_transfer = make_supplied_item_transfer(sco, alternative)
+		own_transfer.insert()
+		own_transfer.submit()
+
+		self.assertEqual(own_transfer.docstatus, 1)
+
+	def test_consumed_alternative_item_counts_on_its_original_row(self):
+		sco = make_reserving_order_with_new_items("Alt Consumed")
+		frappe.db.set_value("BOM", sco.items[0].bom, "allow_alternative_item", 1)
+		sco.reserve_stock = 0
+		sco.submit()
+		original = sco.supplied_items[0]
+		alternative = make_item("Subcontracted RM Item Alt Consumed Alternative", {"is_stock_item": 1}).name
+		set_alternative_item(original.rm_item_code, alternative)
+		make_stock_entry(
+			item_code=alternative,
+			target=original.reserve_warehouse,
+			qty=original.required_qty,
+			basic_rate=120,
+		)
+
+		transfer = make_supplied_item_transfer(sco, original)
+		transfer.items[0].update(
+			{"item_code": alternative, "original_item": original.rm_item_code, "allow_alternative_item": 1}
+		)
+		transfer.insert()
+		transfer.submit()
+		make_subcontracting_receipt(sco.name).submit()
+
+		self.assertEqual(
+			frappe.db.get_value(original.doctype, original.name, "consumed_qty"), original.required_qty
+		)
+
+>>>>>>> e561570 (test: a consumed alternative item counts on its original row)
 	def test_close_subcontracting_order_releases_reserved_qty(self):
 		# RM in stock at the reserve warehouse for transfer
 		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
