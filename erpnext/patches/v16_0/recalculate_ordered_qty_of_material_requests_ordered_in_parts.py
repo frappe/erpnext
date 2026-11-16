@@ -10,7 +10,9 @@ def execute():
 	precision = frappe.get_precision("Material Request Item", "ordered_qty")
 	updates, requests = {}, {}
 	for row in get_ordered_rows_of_open_requests():
-		ordered_qty = match_target_qty(row.qty, row.stock_qty, precision)
+		ordered_qty = match_target_qty(
+			row.qty, row.stock_qty, row.request_qty * row.conversion_factor, precision
+		)
 		if ordered_qty != flt(row.ordered_qty):
 			updates[row.name] = {"ordered_qty": ordered_qty}
 			requests.setdefault(row.parent, []).append(row.name)
@@ -47,9 +49,18 @@ def get_ordered_rows_of_open_requests():
 			request_item.name,
 			request_item.parent,
 			request_item.stock_qty,
+			request_item.qty.as_("request_qty"),
+			request_item.conversion_factor,
 			request_item.ordered_qty,
 			Sum(ordered_qty).as_("qty"),
 		)
 		.where((request.docstatus == 1) & (request.status != "Stopped") & (order.docstatus == 1))
-		.groupby(request_item.name, request_item.parent, request_item.stock_qty, request_item.ordered_qty)
+		.groupby(
+			request_item.name,
+			request_item.parent,
+			request_item.stock_qty,
+			request_item.qty,
+			request_item.conversion_factor,
+			request_item.ordered_qty,
+		)
 	).run(as_dict=True)
