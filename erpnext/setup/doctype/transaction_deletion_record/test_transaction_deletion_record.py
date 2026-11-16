@@ -813,6 +813,15 @@ class TestTransactionDeletionRecord(ERPNextTestSuite):
 		tdr.generate_to_delete_list()
 		self.assertFalse(expected & {row.doctype_name for row in tdr.doctypes_to_delete})
 
+	def test_email_accounts_and_communications_are_excluded(self):
+		tdr = frappe.get_doc(
+			{"doctype": "Transaction Deletion Record", "company": "_Test Company 7"}
+		).insert()
+		tdr.generate_to_delete_list()
+		listed = {row.doctype_name for row in tdr.doctypes_to_delete}
+		self.assertNotIn("Email Account", listed)
+		self.assertNotIn("Communication", listed)
+
 	def test_partial_deletion_preserves_stock_and_sales_order_reservation(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		from erpnext.stock.doctype.item.test_item import make_item
