@@ -848,6 +848,76 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item", pln.save)
 
+	def test_row_warehouse_of_another_company_is_rejected(self):
+		from erpnext.stock.utils import InvalidWarehouseCompany
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		other_company_warehouse = "_Test Warehouse 2 - _TC1"
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			warehouse="_Test Warehouse - _TC",
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		plan.append(
+			"mr_items",
+			{"item_code": rm_item, "warehouse": other_company_warehouse, "quantity": 7},
+		)
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
+
+		plan.set("mr_items", [])
+		plan.append(
+			"sub_assembly_items",
+			{
+				"production_item": rm_item,
+				"fg_warehouse": other_company_warehouse,
+				"type_of_manufacturing": "In House",
+				"qty": 5,
+			},
+		)
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
+
+		plan.set("sub_assembly_items", [])
+		plan.po_items[0].warehouse = other_company_warehouse
+		self.assertRaises(InvalidWarehouseCompany, plan.save)
+
+	def test_row_warehouse_of_plan_company_reserves_bin_on_submit(self):
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item])
+		warehouse = "_Test Warehouse - _TC"
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			warehouse=warehouse,
+			do_not_save=1,
+			skip_getting_mr_items=1,
+		)
+		plan.append(
+			"mr_items",
+			{"item_code": rm_item, "warehouse": warehouse, "quantity": 7, "required_bom_qty": 7},
+		)
+
+		def reserved_qty():
+			return flt(
+				frappe.db.get_value(
+					"Bin",
+					{"item_code": rm_item, "warehouse": warehouse},
+					"reserved_qty_for_production_plan",
+				)
+			)
+
+		reserved_before = reserved_qty()
+		plan.insert()
+		plan.submit()
+		self.assertEqual(reserved_qty() - reserved_before, 7)
+
+		plan.cancel()
+		self.assertEqual(reserved_qty(), reserved_before)
+
 	def test_get_warehouse_list_group(self):
 		"Check if required child warehouses are returned."
 		warehouse_json = '[{"warehouse":"_Test Warehouse Group - _TC"}]'
