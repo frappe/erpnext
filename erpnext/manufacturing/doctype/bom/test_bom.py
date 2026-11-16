@@ -7,7 +7,7 @@ from functools import partial
 
 import frappe
 from frappe.tests import timeout
-from frappe.utils import cint, cstr, flt
+from frappe.utils import add_days, cint, cstr, flt, today
 
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
@@ -2061,8 +2061,6 @@ class TestBOM(ERPNextTestSuite):
 			)
 
 	def test_price_list_rate_valid_today(self):
-		from frappe.utils import add_days, today
-
 		price_list = frappe.get_doc(
 			{"doctype": "Price List", "price_list_name": frappe.generate_hash(length=10), "buying": 1}
 		).insert()
