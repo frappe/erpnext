@@ -143,6 +143,17 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 			["Closed", "Closed"],
 		)
 
+	def test_reopening_purchase_order_keeps_a_closed_subcontracting_order_closed(self):
+		sco = get_subcontracting_order()
+		update_subcontracting_order_status(sco.name, "Closed")
+
+		po = frappe.get_doc("Purchase Order", sco.purchase_order)
+		po.update_status("Closed")
+		po.reload()
+		po.update_status("Re-open")
+
+		self.assertEqual(frappe.db.get_value("Subcontracting Order", sco.name, "status"), "Closed")
+
 	def test_holding_purchase_order_keeps_a_closed_subcontracting_order_closed(self):
 		sco = get_subcontracting_order(do_not_save=1)
 		sco.items[0].qty = 4
