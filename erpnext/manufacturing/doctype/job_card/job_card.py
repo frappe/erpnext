@@ -830,12 +830,8 @@ class JobCard(Document):
 			self.validate_overlap_for_workstation(args, row)
 
 	def schedule_without_working_hours(self, row):
-		if get_datetime(row.planned_end_time) <= get_datetime(row.planned_start_time):
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.time_in_mins)
-			row.remaining_time_in_mins = 0.0
-		else:
-			row.remaining_time_in_mins -= time_diff_in_minutes(row.planned_end_time, row.planned_start_time)
-
+		row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		row.remaining_time_in_mins = 0.0
 		self.update_time_logs(row)
 
 	def adjust_start_date_for_holiday(self, workstation_doc, row):
