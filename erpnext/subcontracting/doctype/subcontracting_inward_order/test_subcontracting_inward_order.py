@@ -1463,6 +1463,24 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		self.assertEqual([(item.item_code, item.qty) for item in rm_return.items], [("Basic RM", 2)])
 
+	def test_rm_return_counts_every_row_of_one_received_item(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		make_stock_entry(
+			item_code="Basic RM", qty=5, to_warehouse=scio.customer_warehouse, purpose="Material Receipt"
+		)
+		scio.reload()
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		rm_return.items = [item for item in rm_return.items if item.item_code == "Basic RM"]
+		rm_return.append("items", rm_return.items[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, rm_return.submit)
+
+		rm_return.items[0].qty = 3
+		rm_return.items[1].qty = 2
+		rm_return.submit()
+		scio.reload()
+		self.assertEqual(scio.received_items[0].returned_qty, 5)
+
 	def test_partly_subcontracted_service_item_in_larger_uom(self):
 		item_list = [
 			{
@@ -1669,6 +1687,35 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		self.assertFalse([item for item in delivery.items if item.is_finished_item])
+
+	def test_delivery_and_return_limits_cover_every_row_of_one_item(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
+		make_stock_entry(
+			item_code="Basic FG Item",
+			qty=5,
+			to_warehouse="_Test Warehouse - _TC",
+			purpose="Material Receipt",
+			rate=100,
+		)
+		scio.reload()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.append("items", delivery.items[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, delivery.submit)
+
+		delivery.items = delivery.items[:1]
+		delivery.submit()
+		scio.reload()
+		fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+		fg_return.items[0].t_warehouse = "_Test Warehouse - _TC"
+		fg_return.append("items", fg_return.items[0].as_dict(no_default_fields=True))
+		self.assertRaises(frappe.ValidationError, fg_return.submit)
 
 	def test_subcontracting_return_uses_delivery_expense_account(self):
 		so, scio = create_delivered_so_scio()
