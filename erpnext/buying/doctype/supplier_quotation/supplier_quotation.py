@@ -10,7 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 from pypika.terms import ExistsCriterion
 
-from erpnext.buying.utils import validate_for_items
+from erpnext.buying.utils import get_qty_to_order, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.deprecation_dumpster import deprecated
@@ -270,7 +270,8 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None, args=None):
-	if frappe.get_doc("Supplier Quotation", source_name).get_status()["status"] == "Expired":
+	supplier_quotation = frappe.get_doc("Supplier Quotation", source_name)
+	if supplier_quotation.get_status()["status"] == "Expired":
 		frappe.throw(_("Supplier Quotation {0} has expired.").format(source_name))
 
 	if args is None:
@@ -278,7 +279,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 	if isinstance(args, str):
 		args = json.loads(args)
 
-	ordered_items = get_ordered_items(source_name)
+	qty_to_order = get_qty_to_order(supplier_quotation.items, "supplier_quotation_item")
 
 	mapped_items = get_qty_already_mapped(target_doc, "supplier_quotation_item")
 
@@ -288,9 +289,8 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(obj, target, source_parent):
-		balance_stock_qty = obj.stock_qty - ordered_items.get(obj.name, 0.0)
-		target.stock_qty = balance_stock_qty if balance_stock_qty > 0 else 0
-		target.qty = flt(target.stock_qty) / flt(obj.conversion_factor)
+		target.qty = max(qty_to_order[obj.name], 0)
+		target.stock_qty = target.qty * flt(obj.conversion_factor)
 
 	def select_item(d):
 		filtered_items = args.get("filtered_children", [])
@@ -319,7 +319,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 				],
 				"postprocess": update_item,
 				"condition": lambda item: item.name not in mapped_items
-				and (item.stock_qty > ordered_items.get(item.name, 0.0) or item.qty == 0)
+				and (qty_to_order[item.name] > 0 or item.qty == 0)
 				and select_item(item),
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
