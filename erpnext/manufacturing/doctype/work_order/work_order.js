@@ -1028,12 +1028,7 @@ erpnext.work_order = {
 							frm.add_custom_button(
 								__("Material Consumption"),
 								function () {
-									const backflush_raw_materials_based_on =
-										frm.doc.__onload.backflush_raw_materials_based_on;
-									erpnext.work_order.make_consumption_se(
-										frm,
-										backflush_raw_materials_based_on
-									);
+									erpnext.work_order.make_consumption_se(frm);
 								},
 								__("Create")
 							);
@@ -1439,24 +1434,13 @@ erpnext.work_order = {
 		}).then((data) => get_pick_list(data.qty));
 	},
 
-	make_consumption_se: function (frm, backflush_raw_materials_based_on) {
-		let max = 0;
-		if (!frm.doc.skip_transfer) {
-			max =
-				backflush_raw_materials_based_on === "Material Transferred for Manufacture"
-					? flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty)
-					: flt(frm.doc.qty) - flt(frm.doc.produced_qty);
-			// flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
-		} else {
-			max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
-		}
-
+	make_consumption_se: function (frm) {
+		// the server proposes the qty still to consume
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.work_order.mapper.make_stock_entry",
 			args: {
 				work_order_id: frm.doc.name,
 				purpose: "Material Consumption for Manufacture",
-				qty: max,
 			},
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);

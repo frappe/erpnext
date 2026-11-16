@@ -17,8 +17,10 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import Sum
 from frappe.utils import cint, flt, get_link_to_form, nowdate
 
+from erpnext.manufacturing.doctype.bom.bom import get_backflush_based_on
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -283,10 +285,38 @@ def _new_manufacture_stock_entry(work_order, purpose, qty):
 	if purpose in ["Material Transfer for Manufacture", "Manufacture"]:
 		stock_entry.subcontracting_inward_order = work_order.subcontracting_inward_order
 	# accept 0 qty as well
-	stock_entry.fg_completed_qty = (
-		qty if qty is not None else (flt(work_order.qty) - flt(work_order.produced_qty))
-	)
+	if qty is None:
+		qty = (
+			get_pending_consumption_qty(work_order)
+			if purpose == "Material Consumption for Manufacture"
+			else flt(work_order.qty) - flt(work_order.produced_qty)
+		)
+	stock_entry.fg_completed_qty = qty
 	return stock_entry
+
+
+def get_pending_consumption_qty(work_order):
+	"""Consumption runs ahead of production, so the larger of the produced qty (with process loss)
+	and the For Quantity already consumed is done."""
+	based_on_transfer = (
+		not work_order.skip_transfer
+		and get_backflush_based_on(work_order.bom_no) == "Material Transferred for Manufacture"
+	)
+	planned_qty = work_order.material_transferred_for_manufacturing if based_on_transfer else work_order.qty
+
+	ste = frappe.qb.DocType("Stock Entry")
+	consumed_qty = (
+		frappe.qb.from_(ste)
+		.select(Sum(ste.fg_completed_qty))
+		.where(
+			(ste.work_order == work_order.name)
+			& (ste.docstatus == 1)
+			& (ste.purpose == "Material Consumption for Manufacture")
+		)
+	).run()[0][0]
+
+	done_qty = max(flt(work_order.produced_qty) + flt(work_order.process_loss_qty), flt(consumed_qty))
+	return max(flt(flt(planned_qty) - done_qty, work_order.precision("qty")), 0)
 
 
 def _set_stock_entry_warehouses(stock_entry, work_order, purpose, target_warehouse, source_stock_entry):
