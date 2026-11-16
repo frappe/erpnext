@@ -1290,7 +1290,9 @@ def get_price_list_rate(ctx: ItemDetailsCtx, item_doc, out: ItemDetails = None):
 		if not ctx.is_internal_supplier and not out.price_list_rate and ctx.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
-			out.update(get_last_purchase_details(item_doc.name, ctx.name, ctx.conversion_rate))
+			out.update(
+				get_last_purchase_details(item_doc.name, ctx.name, ctx.conversion_rate, ctx.conversion_factor)
+			)
 
 	return out
 
