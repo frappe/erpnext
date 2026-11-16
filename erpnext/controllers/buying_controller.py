@@ -45,6 +45,9 @@ class QtyMismatchError(ValidationError):
 	pass
 
 
+PREVIOUS_ROW_CHARGE_TYPES = ("On Previous Row Amount", "On Previous Row Total")
+
+
 class BuyingController(SubcontractingController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
@@ -87,6 +90,7 @@ class BuyingController(SubcontractingController):
 			set_landed_cost_voucher_amount(self)
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
+			self.set_allocate_by_item_wise_tax()
 			self.update_valuation_rate()
 			self.sync_accepted_packages()
 			self.set_serial_and_batch_bundle()
@@ -879,6 +883,21 @@ class BuyingController(SubcontractingController):
 
 		update_regional_item_valuation_rate(self)
 
+	def set_allocate_by_item_wise_tax(self):
+		"""Previous Row charges of documents valued before this flag keep their net amount split.
+		A return values its charges as its original did."""
+		allocate = True
+		if self.get("is_return") and self.get("return_against"):
+			allocate = frappe.db.exists(
+				"Purchase Taxes and Charges",
+				{"parenttype": self.doctype, "parent": self.return_against, "allocate_by_item_wise_tax": 1},
+			)
+
+		for tax in self.get("taxes"):
+			tax.allocate_by_item_wise_tax = cint(
+				bool(allocate) and tax.charge_type in PREVIOUS_ROW_CHARGE_TYPES
+			)
+
 	def get_rejected_valuation_rate(self, row) -> float:
 		if not is_rejected_material_valued(self.doctype, row.name):
 			return 0.0
@@ -915,7 +934,7 @@ class BuyingController(SubcontractingController):
 			elif d.charge_type == "Actual" and d.get("allocate_full_amount_to_stock_items"):
 				# Allocate the full amount to stock/asset items only (e.g. Freight)
 				total_actual_tax_on_stock_items += amount
-			elif d.charge_type != "On Item Quantity":
+			elif not is_valued_by_item_wise_tax(d):
 				total_actual_tax_amount += amount
 
 		return tax_accounts, total_valuation_amount, total_actual_tax_amount, total_actual_tax_on_stock_items
@@ -952,12 +971,12 @@ class BuyingController(SubcontractingController):
 		self._spread_charge_over_items(charge_per_item, total_on_all_items, all_items)
 		self._spread_charge_over_items(charge_per_item, total_on_stock_items, stock_items)
 		for tax in self.get("taxes"):
-			if tax.charge_type == "On Item Quantity" and tax.category in ("Valuation", "Valuation and Total"):
-				for item_idx, amount in self.get_quantity_based_tax_amounts(tax).items():
+			if tax.category in ("Valuation", "Valuation and Total") and is_valued_by_item_wise_tax(tax):
+				for item_idx, amount in self.get_item_wise_tax_amounts(tax).items():
 					charge_per_item[item_idx] = charge_per_item.get(item_idx, 0.0) + amount
 		return charge_per_item
 
-	def get_quantity_based_tax_amounts(self, tax):
+	def get_item_wise_tax_amounts(self, tax):
 		# Reuse the signed, rounded base amounts calculated for each item.
 		if self.get("_item_wise_tax_details"):
 			return {
@@ -1045,10 +1064,10 @@ class BuyingController(SubcontractingController):
 			if not amount:
 				continue
 
-			if tax.charge_type == "On Item Quantity":
+			if is_valued_by_item_wise_tax(tax):
 				amount = sum(
 					charge
-					for item_idx, charge in self.get_quantity_based_tax_amounts(tax).items()
+					for item_idx, charge in self.get_item_wise_tax_amounts(tax).items()
 					if item_idx in stock_item_idx
 				)
 			elif tax.charge_type == "Actual" and not tax.get("allocate_full_amount_to_stock_items"):
@@ -2028,6 +2047,14 @@ def get_purchase_expense_account(item_code, company):
 			for field in ("purchase_expense_account", "purchase_expense_contra_account")
 		}
 	)
+
+
+def is_valued_by_item_wise_tax(tax) -> bool:
+	"""A valuation charge whose share of each item comes from the tax calculation."""
+	if tax.charge_type == "On Item Quantity":
+		return True
+
+	return tax.charge_type in PREVIOUS_ROW_CHARGE_TYPES and bool(tax.get("allocate_by_item_wise_tax"))
 
 
 def get_stock_qty(row, qty) -> float:
