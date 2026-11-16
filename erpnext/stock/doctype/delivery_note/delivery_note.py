@@ -8,6 +8,7 @@ from frappe.utils import cint, flt
 
 from erpnext.accounts.utils import pre_submit_validation
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.stock.doctype.delivery_note.mapper import validate_no_counterpart_delivery_note
 from erpnext.stock.doctype.delivery_note.services.billing_status import BillingStatusService
 from erpnext.stock.doctype.delivery_note.services.packing import PackingService
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -538,6 +539,10 @@ class DeliveryNote(SellingController):
 						item.expense_account = default_expense_account
 			if not item.expense_account and default_expense_account:
 				item.expense_account = default_expense_account
+
+	def before_submit(self):
+		if self.inter_company_reference and not self.is_return:
+			validate_no_counterpart_delivery_note(self.inter_company_reference)
 
 	def on_submit(self):
 		self.validate_packed_qty()
