@@ -441,7 +441,28 @@ class BOM(WebsiteGenerator):
 		)
 		args.update(item)
 
+<<<<<<< HEAD
 		rate = self.get_rm_rate(args)
+=======
+		# the form may send a stale price list exchange rate
+		self.set_plc_conversion_rate()
+		rate = self.get_rm_rate(args) if args.get("fetch_rate") else 0
+		return self._build_rm_detail(args, item, rate)
+
+	@staticmethod
+	def _normalize_material_args(kwargs):
+		if not kwargs:
+			kwargs = frappe.form_dict.get("args")
+
+		if isinstance(kwargs, str):
+			import json
+
+			kwargs = frappe.parse_json(kwargs)
+
+		return kwargs
+
+	def _build_rm_detail(self, args, item, rate):
+>>>>>>> 9ff6216 (fix(manufacturing): fetch a BOM row rate at the BOM conversion rate)
 		ret_item = {
 			"item_name": item and args["item_name"] or "",
 			"description": item and args["description"] or "",
