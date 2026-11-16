@@ -1,9 +1,12 @@
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.gross_profit import gross_profit
 from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -1038,6 +1041,7 @@ class TestGrossProfit(ERPNextTestSuite):
 		)
 		sales_invoice = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
 		second_item = frappe.copy_doc(sales_invoice.items[0], ignore_no_copy=False)
+		second_item.idx = None
 		second_item.item_code = unreturned_item.name
 		second_item.item_name = unreturned_item.name
 		second_item.qty = 30000
@@ -1046,7 +1050,11 @@ class TestGrossProfit(ERPNextTestSuite):
 		sales_invoice.submit()
 
 		sales_return = make_sales_return(sales_invoice.name)
-		sales_return.set("items", [sales_return.items[0]])
+		sales_return.set(
+			"items",
+			[item for item in sales_return.items if item.sales_invoice_item == sales_invoice.items[0].name],
+		)
+		self.assertEqual(len(sales_return.items), 1)
 		sales_return.items[0].qty = -1
 		sales_return.submit()
 
@@ -1407,11 +1415,16 @@ class TestGrossProfit(ERPNextTestSuite):
 			invoices.append(sinv.submit())
 
 		filters = dict(company=self.company, from_date=earlier_date, to_date=nowdate(), item_code=item.name)
-		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		with patch.object(
+			gross_profit, "_get_incoming_rate", wraps=gross_profit._get_incoming_rate
+		) as rate_lookup:
+			_, data = execute(frappe._dict(filters, group_by="Invoice"))
 		buying_amounts = {row.sales_invoice: row.buying_amount for row in data if row.indent == 0}
 
 		self.assertEqual(buying_amounts[invoices[0].name], 200)
 		self.assertEqual(buying_amounts[invoices[1].name], 400)
+		self.assertTrue(rate_lookup.call_args_list)
+		self.assertTrue(all(call.args[0].get("item_code") for call in rate_lookup.call_args_list))
 
 	def test_invoice_warehouse_changed_after_mapping_from_delivery_note(self):
 		item = create_item("_Test Gross Profit Warehouse Item").name
