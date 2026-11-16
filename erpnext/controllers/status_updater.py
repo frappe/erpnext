@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import comma_or, flt, get_link_to_form, getdate, now, nowdate, safe_div
 
 from erpnext.controllers.item_close import closed_rows_settle, has_closable_items
@@ -526,11 +526,12 @@ class StatusUpdater(Document):
 				.select(bundle.new_item_code)
 				.where((bundle.is_active == 1) & (bundle.docstatus == 1) & (bundle.disabled == 0))
 			)
-			query = (
-				query.join(item_table)
-				.on(item_table.name == item_field_col)
-				.where((item_table.is_stock_item == 1) | item_field_col.isin(active_bundle_items))
-			)
+			is_limited = (item_table.is_stock_item == 1) | item_field_col.isin(active_bundle_items)
+			if args["target_dt"] == "Purchase Order Item":
+				# a subcontracted service row is received with its finished goods, so limit it too
+				is_limited |= IfNull(doctype.fg_item, "") != ""
+
+			query = query.join(item_table).on(item_table.name == item_field_col).where(is_limited)
 
 		return query.run(as_dict=True)
 
