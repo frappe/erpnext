@@ -401,6 +401,27 @@ class TestSerialNo(ERPNextTestSuite):
 
 		self.assertEqual(non_expired_serials, [])
 
+	def test_pos_screen_reservation_lookup_requires_pos_invoice_and_warehouse_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission, remove_user_permission
+
+		item_code = make_item(properties={"has_serial_no": 1, "is_stock_item": 1}).name
+		accounts_user = create_user("test_pos_reserved_accounts_user@example.com", "Accounts User").name
+		add_user_permission("Warehouse", "_Test Warehouse - _TC", accounts_user)
+		self.addCleanup(remove_user_permission, "Warehouse", "_Test Warehouse - _TC", accounts_user)
+		projects_user = create_user("test_pos_reserved_projects_user@example.com", "Projects User").name
+
+		def get_reserved(warehouse):
+			return get_pos_reserved_serial_nos({"item_code": item_code, "warehouse": warehouse})
+
+		expected = get_reserved("_Test Warehouse - _TC")
+		with self.set_user(accounts_user):
+			self.assertEqual(get_reserved("_Test Warehouse - _TC"), expected)
+			self.assertRaises(frappe.PermissionError, get_reserved, "_Test Warehouse 1 - _TC")
+
+		with self.set_user(projects_user):
+			self.assertRaises(frappe.PermissionError, get_reserved, "_Test Warehouse - _TC")
+
 
 def get_auto_serial_nos(kwargs):
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
