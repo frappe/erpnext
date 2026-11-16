@@ -435,6 +435,117 @@ class TestSubcontractingReceipt(FrappeTestCase):
 	def test_batch_return_uses_accepted_receipt_rate(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
+<<<<<<< HEAD
+=======
+		# the secondary row keeps the full receipt qty
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.items[0].qty = -1
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": scr.items[0].item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, scr_return.items[0].amount)
+
+	def test_return_values_the_secondary_items_at_the_receipt_rate(self):
+		scr = make_receipt_with_scrap()
+		make_stock_entry(
+			item_code=scr.items[1].item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=30
+		)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -1
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[1].rate, scr.items[1].rate)
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+
+	def test_return_values_manual_secondary_items_at_the_receipt_rate(self):
+		scr = make_receipt_with_scrap(valuation_type="Manual", scrap_rate=15)
+
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.submit()
+
+		self.assertEqual(scr_return.items[1].rate, 15)
+		self.assertEqual(scr_return.items[0].rate, scr.items[0].rate)
+
+	def test_return_values_percentage_secondary_items_at_the_receipt_rate(self):
+		scr = make_receipt_with_scrap(co_product_allocation=10)
+
+		# the secondary rows keep the full receipt qty
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.save()
+		scr_return.get_secondary_items(recalculate_rate=True)
+		scr_return.items[0].qty = -1
+		scr_return.submit()
+
+		co_product = scr_return.items[2]
+		self.assertEqual(co_product.rate, scr.items[2].rate)
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": scr_return.name, "item_code": co_product.item_code, "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, co_product.amount)
+
+	def test_partial_receipts_take_the_order_additional_costs_once(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order(do_not_submit=1)
+		sco.append(
+			"additional_costs",
+			{"expense_account": "Cost of Goods Sold - _TC", "description": "Freight", "amount": 1000},
+		)
+		sco.submit()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		first = make_subcontracting_receipt(sco.name)
+		first.items[0].qty = 4
+		first.save()
+		first.submit()
+		second = make_subcontracting_receipt(sco.name)
+		second.save()
+		second.submit()
+
+		self.assertEqual(first.total_additional_costs + second.total_additional_costs, 1000)
+
+	def test_full_return_of_receipt_with_process_loss_returns_the_accepted_qty(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].process_loss_qty = 2
+		scr.save()
+		scr.submit()
+
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-8)
+
+		self.assertEqual(scr_return.items[0].process_loss_qty, 0)
+		self.assertEqual(scr_return.items[0].received_qty, -8)
+
+	def test_batch_return_value_matches_receipt(self):
+>>>>>>> 79b2235 (test: partial receipts take the order's additional costs once)
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
 		).name
