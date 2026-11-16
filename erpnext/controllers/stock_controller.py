@@ -1443,6 +1443,10 @@ class StockController(AccountsController):
 				row.from_warehouse = None
 
 	def validate_in_transit_warehouses(self):
+		# a draft saved with ignore_mandatory (e.g. mapped from a Pick List) gets its warehouses before submit
+		if self.docstatus == 0 and self.flags.ignore_mandatory:
+			return
+
 		if (self.doctype == "Sales Invoice" and self.get("update_stock")) or self.doctype == "Delivery Note":
 			for item in self.get("items"):
 				if not item.target_warehouse:
