@@ -139,13 +139,14 @@ export default function setup(context) {
 	/** The order lines by row: each shipment row names the one it delivers (`so_detail`), so the same
 	 *  item on two lines, in two units say, is never added up. */
 	const orderLines = computed(() => {
-		const map: Record<string, { qty: number; left: number }> = {}
+		const map: Record<string, { qty: number; left: number; uom: string }> = {}
 		for (const row of doc.value.order_lines ?? []) {
 			if (!row?.name) continue
 			// a service the order skips delivery for, or a closed line, has nothing still to ship
 			const shipsNoMore = row.skip_delivery || row.closed
 			const qty = Number(row.qty ?? 0)
-			map[row.name] = { qty, left: shipsNoMore ? 0 : Math.max(0, qty - Number(row.delivered_qty ?? 0)) }
+			const left = shipsNoMore ? 0 : Math.max(0, qty - Number(row.delivered_qty ?? 0))
+			map[row.name] = { qty, left, uom: row.uom }
 		}
 		return map
 	})
@@ -193,19 +194,11 @@ export default function setup(context) {
 	// the server only sends photos when the print format shows them
 	const itemImages = computed(() => items.value.some((item: any) => item.image))
 
-	/** What is still to ship on this shipment's order lines. Each line counts once, even when
-	 *  the shipment splits it over two rows. */
-	const pending = computed(() => {
-		const seen = new Set<string>()
-		const left: [number, string][] = []
-		for (const row of doc.value.items ?? []) {
-			const line = orderLines.value[row.so_detail]
-			if (!line || seen.has(row.so_detail)) continue
-			seen.add(row.so_detail)
-			left.push([line.left, row.uom])
-		}
-		return left
-	})
+	/** What is still to ship on the whole of this shipment's orders, not only the lines it carries:
+	 *  an order is complete only when every line is. */
+	const pending = computed(() =>
+		Object.values(orderLines.value).map((line): [number, string] => [line.left, line.uom]),
+	)
 
 	const termsText = computed(() => plainText(doc.value.terms))
 

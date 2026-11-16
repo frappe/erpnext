@@ -900,7 +900,8 @@ def _credited(invoice: str) -> float:
 
 
 def _order_lines(shipment) -> list[dict]:
-	"""Every line of the orders a shipment delivers against, for its "Yet to ship" column."""
+	"""Every line of the orders a shipment delivers against: its "Yet to ship" column, and what is
+	still to ship on the whole order."""
 	orders = sorted({row.against_sales_order for row in shipment.items if row.against_sales_order})
 	if not orders:
 		return []
@@ -913,7 +914,7 @@ def _order_lines(shipment) -> list[dict]:
 	return frappe.get_all(
 		"Sales Order Item",
 		filters={"parenttype": "Sales Order", "parent": ["in", visible]},
-		fields=["name", "qty", "delivered_qty", "skip_delivery", "closed"],
+		fields=["name", "qty", "uom", "delivered_qty", "skip_delivery", "closed"],
 	)
 
 
