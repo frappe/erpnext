@@ -1207,6 +1207,8 @@ def get_doctypes_to_be_ignored():
 		"Authorization Rule",
 		"Bank Transaction Rule",
 		"Dunning Type",
+		"Email Account",
+		"Communication",
 		"Email Digest",
 		"Journal Entry Template",
 		"Loyalty Program",
