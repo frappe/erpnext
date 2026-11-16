@@ -3748,6 +3748,67 @@ class TestSalesInvoice(ERPNextTestSuite):
 			si.name,
 		)
 
+	def test_returned_inter_company_pi_can_be_invoiced_again(self):
+		si = create_sales_invoice(
+			company="Wind Power LLC",
+			customer="_Test Internal Customer",
+			debit_to="Debtors - WP",
+			warehouse="Stores - WP",
+			income_account="Sales - WP",
+			expense_account="Cost of Goods Sold - WP",
+			cost_center="Main - WP",
+			currency="USD",
+			qty=2,
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		accounts = {"expense_account": "Cost of Goods Sold - _TC1", "cost_center": "Main - _TC1"}
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].update(accounts)
+		pi.submit()
+		return_pi = make_return_doc("Purchase Invoice", pi.name).submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		self.assertEqual(pi.items[0].qty, 2)
+		pi.items[0].update(accounts)
+		pi.submit()
+
+		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
+
+	def test_returned_internal_pi_cannot_be_cancelled_once_invoiced_again(self):
+		company = "_Test Company with perpetual inventory"
+		make_stock_entry(
+			item_code="_Test Item", target="Stores - TCP1", company=company, qty=1, basic_rate=100
+		)
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			debit_to="Debtors - TCP1",
+			warehouse="Stores - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			currency="INR",
+			do_not_save=1,
+		)
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.update_stock = 1
+		si.items[0].target_warehouse = "Work In Progress - TCP1"
+		si.submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.submit()
+		return_pi = make_return_doc("Purchase Invoice", pi.name).submit()
+
+		pi = make_inter_company_transaction("Sales Invoice", si.name)
+		pi.items[0].warehouse = "Finished Goods - TCP1"
+		pi.submit()
+
+		self.assertRaises(OverAllowanceError, return_pi.reload().cancel)
+
 	def test_inter_company_purchase_invoice_drops_selling_only_terms(self):
 		frappe.get_doc(
 			doctype="Terms and Conditions", title="_Test Sell Only Terms", selling=1, buying=0, terms="Net 30"
