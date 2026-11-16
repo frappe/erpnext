@@ -1986,7 +1986,10 @@ def remove_serial_nos_reserved_for_others(item_code, locations, own_vouchers=Non
 
 def check_pick_list_company(company: str | None) -> None:
 	"""Keep a company-restricted caller inside their own companies; a no-op for everyone else."""
-	if not isinstance(company, str) or not company:
+	if company is not None and not isinstance(company, str):
+		frappe.throw(_("Company must be text"), frappe.ValidationError)
+
+	if not company:
 		return
 
 	from erpnext.stock.doctype.company_restriction.company_restriction import get_allowed_companies
