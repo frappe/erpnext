@@ -988,24 +988,16 @@ class BuyingController(SubcontractingController):
 			)
 			.run(as_dict=True)
 		)
+		posted_qty = get_posted_stock_qty_by_row([d.name for d in rows], warehouse)
 		for d in rows:
+			if d.name not in posted_qty:
+				continue  # moved no stock, like a debit note without Update Stock
 			if d.warehouse == warehouse:
 				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
 			if d.rejected_warehouse == warehouse:
 				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
 
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-		stock_qty = (
-			frappe.qb.from_(sle)
-			.select(Sum(sle.actual_qty))
-			.where(
-				(sle.warehouse == warehouse)
-				& (sle.is_cancelled == 0)
-				& sle.voucher_detail_no.isin([d.name for d in rows])
-			)
-			.run()[0][0]
-		)
-		left.stock_qty = flt(stock_qty, row.precision("stock_qty"))
+		left.stock_qty = flt(sum(posted_qty.values()), row.precision("stock_qty"))
 		return left
 
 	def get_posted_return_qty(self, row, warehouse):
@@ -1755,6 +1747,59 @@ def get_linked_asset_qty(detail_field, details, exclude_asset=None):
 	return dict(query.run())
 
 
+<<<<<<< HEAD
+=======
+@frappe.request_cache
+def get_purchase_expense_account(item_code, company):
+	from erpnext.setup.doctype.brand.brand import get_brand_defaults
+	from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+
+	defaults = get_item_defaults(item_code, company)
+
+	details = frappe._dict(
+		{
+			"purchase_expense_account": defaults.get("purchase_expense_account"),
+			"purchase_expense_contra_account": defaults.get("purchase_expense_contra_account"),
+		}
+	)
+
+	if not details.purchase_expense_account:
+		details = get_item_group_defaults(item_code, company)
+
+	if not details.purchase_expense_account:
+		details = get_brand_defaults(item_code, company)
+
+	return frappe._dict(
+		{
+			field: details.get(field)
+			for field in ("purchase_expense_account", "purchase_expense_contra_account")
+		}
+	)
+
+
+def get_stock_qty(row, qty) -> float:
+	"""Qty of a row in the stock UOM, rounded as the stock ledger posts it."""
+	return flt(flt(qty) * flt(row.conversion_factor), row.precision("stock_qty"))
+
+
+def get_posted_stock_qty_by_row(row_names, warehouse) -> dict:
+	"""Stock qty each row's entries moved in the warehouse."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	return dict(
+		frappe.qb.from_(sle)
+		.select(sle.voucher_detail_no, Sum(sle.actual_qty))
+		.where((sle.warehouse == warehouse) & (sle.is_cancelled == 0) & sle.voucher_detail_no.isin(row_names))
+		.groupby(sle.voucher_detail_no)
+		.run()
+	)
+
+
+def get_transit_amount(row, qty) -> float:
+	"""Value of qty of an internal transfer row at its transit rate, as the stock ledger moves it."""
+	return get_stock_qty(row, qty) * flt(row.sales_incoming_rate) / flt(row.conversion_factor)
+
+
+>>>>>>> ee7e6de (fix(stock): leave returns that moved no stock out of a receipt row's rest)
 def get_stock_qty_status_args(round_total=True) -> dict:
 	"""Status updater args that add up rows' stock qty. When rows round their stock qty, add up qty * conversion
 	factor instead, rounded once at the total if the target rounds its stock qty too, so parts add up to it."""
