@@ -5209,7 +5209,7 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_transfer_of_a_batch_outside_the_batch_reservation_uses_the_qty_reservation(self):
 		work_order = self.make_work_order_with_mixed_reservations("Batch RM For SR Qty Batch Transfer")
 		first_batch = frappe.db.get_value(
-			"Batch", {"item": work_order.required_items[0].item_code}, "name", order_by="creation"
+			"Batch", {"item": work_order.required_items[0].item_code}, "name", order_by="creation asc"
 		)
 
 		self.transfer_for_manufacture(work_order, 4, first_batch)
