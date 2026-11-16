@@ -605,7 +605,7 @@ class SerialBatchBundleService:
 			serial_nos = row.get("rejected_serial_no")
 			type_of_transaction = "Inward" if not self.doc.is_return else "Outward"
 			qty = flt(
-				row.get("rejected_qty") * row.get("conversion_factor", 1.0),
+				self.doc.get_rejected_stock_qty(row),
 				frappe.get_precision("Serial and Batch Entry", "qty"),
 			)
 			warehouse = row.get("rejected_warehouse")
