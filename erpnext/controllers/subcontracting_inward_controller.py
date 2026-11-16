@@ -139,6 +139,7 @@ class SubcontractingInwardController:
 			item.scio_detail = row_names.get((item.item_code, item.against_fg))
 
 	def validate_returns(self):
+		qty_by_row = defaultdict(float)
 		for item in self.items:
 			if not item.scio_detail:
 				frappe.throw(
@@ -160,6 +161,7 @@ class SubcontractingInwardController:
 					)
 				)
 
+			qty_by_row[item.scio_detail] += item.transfer_qty
 			precision = item.precision("transfer_qty")
 			if self.purpose == "Return Raw Material to Customer":
 				data = frappe.get_value(
@@ -168,7 +170,7 @@ class SubcontractingInwardController:
 					["received_qty", "returned_qty", "work_order_qty"],
 					as_dict=True,
 				)
-				if flt(data.returned_qty + item.transfer_qty, precision) > flt(
+				if flt(data.returned_qty + qty_by_row[item.scio_detail], precision) > flt(
 					data.received_qty - data.work_order_qty, precision
 				):
 					frappe.throw(
@@ -183,7 +185,9 @@ class SubcontractingInwardController:
 					["returned_qty", "delivered_qty"],
 					as_dict=True,
 				)
-				if flt(item.transfer_qty, precision) > flt(data.delivered_qty - data.returned_qty, precision):
+				if flt(qty_by_row[item.scio_detail], precision) > flt(
+					data.delivered_qty - data.returned_qty, precision
+				):
 					frappe.throw(
 						_(
 							"Row #{0}: Returned quantity cannot be greater than available quantity to return for Item {1}"
@@ -542,6 +546,7 @@ class SubcontractingInwardController:
 			"Selling Settings", "allow_delivery_of_overproduced_qty"
 		)
 
+		qty_by_row = defaultdict(float)
 		for item in self.items:
 			if not item.scio_detail:
 				frappe.throw(
@@ -552,6 +557,7 @@ class SubcontractingInwardController:
 					)
 				)
 
+			qty_by_row[item.scio_detail] += item.transfer_qty
 			table = frappe.qb.DocType("Subcontracting Inward Order Item")
 			allowed_qty = table.produced_qty
 			if not allow_delivery_of_overproduced_qty:
@@ -575,7 +581,7 @@ class SubcontractingInwardController:
 				)
 				max_allowed_qty = query.run(pluck="max_allowed_qty")[0]
 
-			if item.transfer_qty > max_allowed_qty:
+			if qty_by_row[item.scio_detail] > max_allowed_qty:
 				frappe.throw(
 					_(
 						"Row #{0}: Quantity of Item {1} cannot be more than {2} {3} against Subcontracting Inward Order {4}"
@@ -720,12 +726,11 @@ class SubcontractingInwardController:
 				case "Manufacture":
 					self.update_inward_order_received_items_for_manufacture()
 				case "Return Raw Material to Customer":
-					scio_rm_names = {
-						item.scio_detail: item.transfer_qty
-						if self._action == "submit"
-						else -item.transfer_qty
-						for item in self.items
-					}
+					scio_rm_names = defaultdict(float)
+					for item in self.items:
+						scio_rm_names[item.scio_detail] += (
+							item.transfer_qty if self._action == "submit" else -item.transfer_qty
+						)
 					table = frappe.qb.DocType("Subcontracting Inward Order Received Item")
 					doc_updates = {
 						scio_rm_name: {"returned_qty": table.returned_qty + qty}
