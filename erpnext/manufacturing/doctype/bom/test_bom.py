@@ -1301,6 +1301,25 @@ class TestBOM(FrappeTestCase):
 		images = {row.item_code: row.image for row in get_children(doctype="BOM", parent=bom.name)}
 		self.assertEqual(images, {raw_material: image, plain_material: None})
 
+	def test_clearing_process_loss_percentage_clears_process_loss_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		sub_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(
+			item=sub_item,
+			raw_materials=[rm_item],
+			quantity=10,
+			rm_qty=10,
+			process_loss_percentage=10,
+			do_not_submit=True,
+		)
+		self.assertEqual(bom.process_loss_qty, 1)
+
+		bom.process_loss_percentage = 0
+		bom.save()
+		self.assertEqual(bom.process_loss_qty, 0)
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
