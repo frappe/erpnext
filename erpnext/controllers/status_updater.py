@@ -993,12 +993,16 @@ def get_allowance_for(
 
 
 def get_total_matching_target_ref_qty(args) -> float:
-	"""Total of the source rows, or the target row's ref qty when the two are equal at its precision, so parts that
-	add up to the target row within rounding complete it."""
+	"""Total of the source rows, or the target row's ref qty when it was rounded and the total rounds to it, so parts
+	that add up to the target row within its rounding complete it."""
 	ref_qty = frappe.db.get_value(args["target_dt"], args["detail_id"], args["target_ref_field"])
 	precision = frappe.get_precision(args["target_dt"], args["target_field"])
 	return match_target_qty(args["source_dt_value"], ref_qty, precision)
 
 
 def match_target_qty(total, target_qty, precision) -> float:
-	return flt(target_qty) if flt(total, precision) == flt(target_qty, precision) else flt(total)
+	"""``target_qty`` if it was rounded and ``total`` rounds to it, else ``total``."""
+	target_qty = flt(target_qty)
+	if target_qty and flt(total, precision) == target_qty == flt(target_qty, precision):
+		return target_qty
+	return flt(total)
