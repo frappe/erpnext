@@ -2859,34 +2859,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		"""Accepted and rejected qty that round up on their own still take only the delivered stock
 		qty out of the in-transit warehouse."""
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		prepare_data_for_internal_transfer()
-		company = "_Test Company with perpetual inventory"
-		from_warehouse = create_warehouse("_Test Transfer From", company=company)
-		transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
-		item = make_item(
-			properties={"is_stock_item": 1, "stock_uom": "Kg"},
-			uoms=[{"uom": "Box", "conversion_factor": 0.3356}],
-		).name
-
-		make_purchase_receipt(
-			item_code=item, company=company, warehouse=from_warehouse, qty=10, rate=100, uom="Kg"
-		)
-
-		dn = create_delivery_note(
-			item_code=item,
-			company=company,
-			customer="_Test Internal Customer 2",
-			cost_center="Main - TCP1",
-			expense_account="Cost of Goods Sold - TCP1",
-			qty=6,
-			warehouse=from_warehouse,
-			target_warehouse=transit_warehouse,
-			do_not_submit=True,
-		)
-		dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
-		dn.submit()
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		company = dn.company
 
 		pr = make_inter_company_purchase_receipt(dn.name)
 		pr.items[0].update(
@@ -3041,6 +3016,89 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(sum(booked_value.values()), 0)
 		self.assertEqual(booked_value[get_inventory_account(company, transit_warehouse)], -1000)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 1000)
+
+	def test_internal_transfer_partial_receipts_take_only_the_delivered_stock_qty_out_of_transit(self):
+		"""Partial receipts whose stock qty rounds up take no more out of the in-transit warehouse
+		than the delivery put there, and cancelling them puts back what they took."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		transit_bin = {"item_code": dn.items[0].item_code, "warehouse": transit_warehouse}
+		delivered_qty = frappe.db.get_value("Bin", transit_bin, "actual_qty")
+
+		receipts = []
+		for _ in range(2):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update(
+				{"warehouse": create_warehouse("_Test Transfer To", company=dn.company), "qty": 3}
+			)
+			pr.submit()
+			receipts.append(pr)
+
+		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), 0)
+
+		for pr in receipts:
+			pr.cancel()
+
+		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), delivered_qty)
+
+	def test_internal_transfer_receipt_after_a_return_takes_what_the_return_put_back(self):
+		"""A return of a partial receipt puts its stock qty back in transit, so the next receipt can
+		take it again."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		to_warehouse = create_warehouse("_Test Transfer To", company=dn.company)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update({"warehouse": to_warehouse, "qty": 3})
+		pr.submit()
+		make_return_doc("Purchase Receipt", pr.name).submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.set_posting_time = 0
+		pr.items[0].update({"warehouse": to_warehouse, "qty": 3})
+		pr.submit()
+
+		sle_filters = {"voucher_no": pr.name, "warehouse": transit_warehouse, "is_cancelled": 0}
+		self.assertEqual(frappe.db.get_value("Stock Ledger Entry", sle_filters, "actual_qty"), -1.01)
+
+	def test_internal_transfer_returns_put_back_only_what_the_receipts_took(self):
+		"""Returns of partial receipts put back what each receipt took out of transit, not their own
+		rounded stock qty."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		dn, transit_warehouse = make_internal_delivery_of_fractional_boxes()
+		transit_bin = {"item_code": dn.items[0].item_code, "warehouse": transit_warehouse}
+		delivered_qty = frappe.db.get_value("Bin", transit_bin, "actual_qty")
+
+		receipts = []
+		for _ in range(2):
+			pr = make_inter_company_purchase_receipt(dn.name)
+			pr.items[0].update(
+				{"warehouse": create_warehouse("_Test Transfer To", company=dn.company), "qty": 3}
+			)
+			pr.submit()
+			receipts.append(pr)
+
+		for pr in receipts:
+			make_return_doc("Purchase Receipt", pr.name).submit()
+
+		self.assertEqual(frappe.db.get_value("Bin", transit_bin, "actual_qty"), delivered_qty)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"over_delivery_receipt_allowance": 50})
+	def test_internal_transfer_over_receipt_takes_its_own_stock_qty_out_of_transit(self):
+		"""Over-received stock did not come from the delivery, so it is not capped to what is in transit."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		dn, _ = make_internal_delivery_of_fractional_boxes()
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update({"warehouse": create_warehouse("_Test Transfer To", company=dn.company), "qty": 7})
+
+		self.assertRaises(NegativeStockError, pr.submit)
 
 	def test_internal_transfer_rejected_qty_for_serial_item(self):
 		"""Rejected serial numbers leave the in-transit warehouse and stay out of the package of
@@ -9807,6 +9865,40 @@ def add_valuation_freight(doc, amount):
 			"tax_amount": amount,
 		},
 	)
+
+
+def make_internal_delivery_of_fractional_boxes():
+	"""Internal Delivery Note of 6 Box at 0.3356 Kg into an in-transit warehouse, so its stock qty (2.01 Kg)
+	is less than the rounded stock qty of two halves (1.01 Kg each)."""
+	from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+	prepare_data_for_internal_transfer()
+	company = "_Test Company with perpetual inventory"
+	from_warehouse = create_warehouse("_Test Transfer From", company=company)
+	transit_warehouse = create_warehouse("_Test Transfer Transit", company=company)
+	item = make_item(
+		properties={"is_stock_item": 1, "stock_uom": "Kg"},
+		uoms=[{"uom": "Box", "conversion_factor": 0.3356}],
+	).name
+
+	make_purchase_receipt(
+		item_code=item, company=company, warehouse=from_warehouse, qty=10, rate=100, uom="Kg"
+	)
+
+	dn = create_delivery_note(
+		item_code=item,
+		company=company,
+		customer="_Test Internal Customer 2",
+		cost_center="Main - TCP1",
+		expense_account="Cost of Goods Sold - TCP1",
+		qty=6,
+		warehouse=from_warehouse,
+		target_warehouse=transit_warehouse,
+		do_not_submit=True,
+	)
+	dn.items[0].update({"uom": "Box", "conversion_factor": 0.3356})
+	dn.submit()
+	return dn, transit_warehouse
 
 
 def make_purchase_receipt(**args):
