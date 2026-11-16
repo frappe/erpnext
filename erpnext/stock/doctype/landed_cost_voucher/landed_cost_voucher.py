@@ -666,7 +666,11 @@ def get_vendor_invoices(doctype, txt, searchfield, start, page_len, filters):
 	if txt and txt.lower().startswith(("select", "delete", "update")):
 		frappe.throw(_("Invalid search query"), title=_("Invalid Query"))
 
-	query = get_vendor_invoice_query(filters)
+	query = get_vendor_invoice_query(filters).where(
+		frappe.qb.DocType("Purchase Invoice").name.isin(
+			frappe.qb.get_query("Purchase Invoice", fields=["name"], ignore_permissions=False)
+		)
+	)
 
 	if txt:
 		query = query.where(frappe.qb.DocType(doctype).name.like(f"%{txt}%"))
