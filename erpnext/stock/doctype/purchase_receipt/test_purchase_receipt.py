@@ -7666,6 +7666,23 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertFalse(pr.items[0].rejected_serial_and_batch_bundle)
 		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", package))
 
+	def test_internal_pr_accepted_qty_cleared_removes_accepted_package(self):
+		"""Rejecting all of a draft internal receipt removes its accepted package."""
+		item = make_item(
+			"_Test Batch Item For Accepted Qty Cleared",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIAQX-.####"},
+		)
+
+		pr, *_ = self.make_transfer_receipt(item, 1, 2)
+		pr.save()
+		package = pr.items[0].serial_and_batch_bundle
+
+		pr.items[0].update({"qty": 0, "rejected_qty": 3})
+		pr.save()
+
+		self.assertFalse(pr.items[0].serial_and_batch_bundle)
+		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", package))
+
 	def test_valuation_rate_for_rejected_materials(self):
 		item = make_item("Test Item with Rej Material Valuation", {"is_stock_item": 1})
 		company = "_Test Company with perpetual inventory"
