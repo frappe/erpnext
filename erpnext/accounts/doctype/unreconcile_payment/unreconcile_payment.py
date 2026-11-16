@@ -352,7 +352,7 @@ def get_linked_advances(company, docname):
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_unreconcile_doc_for_selection(selections: str | list | None = None):
 	if selections:
 		selections = frappe.parse_json(selections)

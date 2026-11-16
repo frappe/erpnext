@@ -447,7 +447,7 @@ def get_older_unreconciled_transactions(bank_account: str, from_date: str):
 	return {"count": 0, "oldest_date": None}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def update_clearance_date(
 	payment_document: str, payment_entry: str, account: str, clearance_date: str | None
 ):
@@ -484,7 +484,7 @@ def update_clearance_date(
 		frappe.db.set_value(payment_document, payment_entry, "clearance_date", clearance_date)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def clear_clearing_date(voucher_type: str, voucher_name: str):
 	"""
 	Clear the clearing date of a voucher
