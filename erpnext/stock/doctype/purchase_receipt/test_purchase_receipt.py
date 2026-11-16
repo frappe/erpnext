@@ -9542,6 +9542,13 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_inter_company_delivery_note
 
 		receipt = make_purchase_receipt(qty=5, rate=100)
+
+		def make_delivery_note():
+			delivery_note = make_inter_company_delivery_note(receipt.name)
+			delivery_note.selling_price_list = "Standard Selling"
+			delivery_note.items[0].warehouse = receipt.items[0].warehouse
+			return delivery_note.insert()
+
 		with (
 			patch("erpnext.accounts.doctype.sales_invoice.mapper.validate_inter_company_transaction"),
 			patch(
@@ -9549,14 +9556,11 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				return_value=frappe._dict(company="_Test Company", party="_Test Customer"),
 			),
 		):
-			delivery_note = make_inter_company_delivery_note(receipt.name)
-			delivery_note.selling_price_list = "Standard Selling"
-			delivery_note.items[0].warehouse = receipt.items[0].warehouse
-			delivery_note.submit()
+			draft = make_delivery_note()
+			make_delivery_note().submit()
 
-			self.assertRaisesRegex(
-				frappe.ValidationError, "already has", make_inter_company_delivery_note, receipt.name
-			)
+			self.assertRaisesRegex(frappe.ValidationError, "already has", make_delivery_note)
+			self.assertRaisesRegex(frappe.ValidationError, "already has", draft.submit)
 
 	def test_inter_company_delivery_note_maps_the_kept_qty_of_a_submitted_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.mapper import make_inter_company_delivery_note
