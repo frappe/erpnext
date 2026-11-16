@@ -285,10 +285,7 @@ class BuyingController(SubcontractingController):
 		if not package:
 			return
 
-		details = frappe.db.get_value(
-			"Serial and Batch Bundle", package, ["docstatus", "voucher_detail_no"], as_dict=True
-		)
-		if not details or details.docstatus != 0 or details.voucher_detail_no != row.name:
+		if frappe.db.get_value("Serial and Batch Bundle", package, "voucher_detail_no") != row.name:
 			return
 
 		row.rejected_serial_and_batch_bundle = None
