@@ -501,9 +501,6 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 	source_doc = frappe.get_doc(doctype, source_name)
 
 	validate_inter_company_transaction(source_doc, doctype)
-	if doctype == "Purchase Receipt":
-		validate_no_counterpart_delivery_note(source_doc.name)
-
 	details = get_inter_company_details(source_doc, doctype)
 	accepted_returns = get_accepted_returned_qty(source_doc) if doctype == "Purchase Receipt" else {}
 
@@ -682,6 +679,9 @@ def make_inter_company_transaction(doctype: str, source_name: str, target_doc=No
 		set_missing_values,
 		ignore_permissions=not can_read_source,
 	)
+	if doctype == "Purchase Receipt":
+		validate_no_counterpart_delivery_note(source_name)
+
 	if not can_read_source:
 		doclist.check_permission("create")
 		validate_receiving_warehouses(doclist)
