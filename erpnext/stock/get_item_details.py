@@ -1985,6 +1985,7 @@ def _get_blanket_order_details(args):
 			.limit(1)
 		)
 
+<<<<<<< HEAD
 		if args.customer and args.doctype == "Sales Order":
 			query = query.where(bo.customer == args.customer)
 		elif args.supplier and args.doctype == "Purchase Order":
@@ -1995,6 +1996,22 @@ def _get_blanket_order_details(args):
 			query = query.where(
 				(bo.from_date <= args.transaction_date) & (bo.to_date >= args.transaction_date)
 			)
+=======
+		if ctx.doctype in ("Sales Order", "Quotation"):
+			query = query.where(bo.blanket_order_type == "Selling")
+			if ctx.customer:
+				query = query.where(bo.customer == ctx.customer)
+		elif ctx.doctype == "Purchase Order":
+			query = query.where(bo.blanket_order_type == "Purchasing")
+			if ctx.supplier:
+				query = query.where(bo.supplier == ctx.supplier)
+		if ctx.blanket_order:
+			query = query.where(bo.name == ctx.blanket_order)
+		if ctx.currency:
+			query = query.where(bo.currency == ctx.currency)
+		if ctx.transaction_date:
+			query = query.where((bo.from_date <= ctx.transaction_date) & (bo.to_date >= ctx.transaction_date))
+>>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 
 		blanket_order_details = query.run(as_dict=True)
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ""

@@ -263,11 +263,23 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				return {
 					query: "erpnext.controllers.queries.get_blanket_orders",
 					filters: {
+<<<<<<< HEAD
 						"company": doc.company,
 						"blanket_order_type": doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
 						"item": item.item_code
 					}
 				}
+=======
+						company: doc.company,
+						currency: doc.currency,
+						blanket_order_type: ["Sales Order", "Quotation"].includes(doc.doctype)
+							? "Selling"
+							: "Purchasing",
+						item: item.item_code,
+						transaction_date: doc.transaction_date,
+					},
+				};
+>>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 			});
 		}
 
