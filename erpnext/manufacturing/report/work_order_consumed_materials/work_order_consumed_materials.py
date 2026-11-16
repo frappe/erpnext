@@ -3,6 +3,8 @@
 
 import frappe
 from frappe import _
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
+from frappe.utils import make_filter_tuple
 
 from erpnext.accounts.report.utils import validate_date_range
 
@@ -19,7 +21,12 @@ def execute(filters=None):
 
 def get_data(report_filters):
 	fields = get_fields()
-	filters = get_filter_condition(report_filters)
+	filters = [
+		make_filter_tuple("Work Order", key, value)
+		for key, value in get_filter_condition(report_filters).items()
+	]
+	if allowed_companies := get_allowed_companies():
+		filters.append(["Work Order", "company", "in", allowed_companies])
 
 	wo_items = {}
 
@@ -44,6 +51,11 @@ def get_data(report_filters):
 			data.append(row)
 
 	return data
+
+
+def get_allowed_companies():
+	user_permissions = get_user_permissions(frappe.session.user)
+	return get_allowed_docs_for_doctype(user_permissions.get("Company", []), "Work Order")
 
 
 def get_fields():
