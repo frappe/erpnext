@@ -210,7 +210,7 @@ def _open_so_base_query(plan, so, so_item):
 			& (so_item.closed == 0)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == plan.company)
-			& (so_item.stock_qty > so_item.production_plan_qty)
+			& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.production_plan_qty)
 		)
 	)
 
