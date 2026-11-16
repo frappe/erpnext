@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils.user import is_website_user
 
+from erpnext.controllers.website_list_for_contact import has_website_permission
+
 
 def get_context(context):
 	project_user = validate_and_get_project_user(project=frappe.form_dict.project)
@@ -123,7 +125,7 @@ def get_attachments(project):
 
 def validate_and_get_project_user(project: str):
 	project_doc = frappe.get_doc("Project", project)
-	if not (is_website_user() and frappe.has_website_permission(project_doc)):
+	if not (is_website_user() and has_website_permission(project_doc, "read", frappe.session.user)):
 		project_doc.check_permission()
 
 	project_user = next((d for d in project_doc.users if d.user == frappe.session.user), None)
