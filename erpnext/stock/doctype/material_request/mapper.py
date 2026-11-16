@@ -55,14 +55,14 @@ def get_ordered_stock_qty(material_request):
 	)
 
 
-def get_pending_qty(row, ordered_stock_qty):
-	"""Qty of a row still to order, in its UOM."""
+def get_pending_qty(row, ordered_stock_qty, precision):
+	"""Qty of a row still to order, in its UOM, rounded to the ``precision`` of the qty it is mapped to."""
 	stored_qty = row.ordered_qty or row.received_qty
 	if ordered_stock_qty is None or (row.name not in ordered_stock_qty and stored_qty):
 		return (flt(row.stock_qty) - flt(stored_qty)) / (flt(row.conversion_factor) or 1)
 
 	pending_qty = flt(row.qty) - flt(ordered_stock_qty.get(row.name)) / flt(row.conversion_factor)
-	return flt(pending_qty, row.precision("qty"))
+	return flt(pending_qty, precision)
 
 
 def update_item(obj, target, qty):
@@ -129,7 +129,7 @@ def make_purchase_order(
 		set_missing_values(source, target_doc)
 
 	def update_requested_item(obj, target, source_parent):
-		qty = requested_qty.get(obj.name) or get_pending_qty(obj, ordered_stock_qty)
+		qty = requested_qty.get(obj.name) or get_pending_qty(obj, ordered_stock_qty, target.precision("qty"))
 		update_item(obj, target, flt(qty))
 		if not target.rate and not target.price_list_rate:
 			# unpriced rows fetch the price for the Purchase Order's supplier
@@ -195,7 +195,7 @@ def make_request_for_quotation(source_name: str, target_doc: str | dict | Docume
 	ordered_stock_qty = get_ordered_stock_qty(source_name)
 
 	def update_item(obj, target, source_parent):
-		target.qty = get_pending_qty(obj, ordered_stock_qty)
+		target.qty = get_pending_qty(obj, ordered_stock_qty, target.precision("qty"))
 		target.stock_qty = target.qty * target.conversion_factor
 
 	def select_item(d):
@@ -246,6 +246,7 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 	material_request.check_permission("read")
 
 	ordered_stock_qty = get_ordered_stock_qty(source_name)
+	precision = frappe.get_precision("Purchase Order Item", "qty")
 	items = []
 	for item in material_request.items:
 		if filtered_children and item.name not in filtered_children:
@@ -260,7 +261,7 @@ def get_item_default_suppliers(source_name: str, filtered_children: str | list |
 				"material_request_item": item.name,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
-				"pending_qty": get_pending_qty(item, ordered_stock_qty),
+				"pending_qty": get_pending_qty(item, ordered_stock_qty, precision),
 				"uom": item.uom,
 				"supplier": get_default_supplier_for_item(item.item_code, material_request.company),
 			}

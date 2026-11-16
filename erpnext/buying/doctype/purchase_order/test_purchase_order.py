@@ -278,7 +278,7 @@ class TestPurchaseOrder(ERPNextTestSuite):
 
 		row = frappe.new_doc("Material Request Item")
 		row.update({"qty": 3, "stock_qty": 36, "conversion_factor": 12, "ordered_qty": 1})
-		self.assertEqual(get_pending_qty(row, None) * row.conversion_factor, 35)
+		self.assertEqual(get_pending_qty(row, None, 2) * row.conversion_factor, 35)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1})
 	def test_receipts_for_parts_of_a_material_request_add_up_to_its_stock_qty(self):
