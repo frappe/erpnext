@@ -107,7 +107,7 @@ class StockEntryDetail(Document):
 				)
 			)
 
-	def validate_and_update_item_details(self, item_details, company, purpose):
+	def validate_and_update_item_details(self, item_details):
 		if flt(self.qty) and flt(self.qty) < 0:
 			frappe.throw(
 				_("Row {0}: The item {1}, quantity must be a positive number").format(
@@ -140,9 +140,6 @@ class StockEntryDetail(Document):
 			self.transfer_qty = flt(
 				flt(self.qty) * flt(self.conversion_factor), self.precision("transfer_qty")
 			)
-
-		if purpose in ["Subcontracting Delivery", "Subcontracting Return"]:
-			self.expense_account = frappe.get_value("Company", company, "default_expense_account")
 
 	def validate_expense_account(self, is_opening, purpose):
 		if not self.expense_account:
