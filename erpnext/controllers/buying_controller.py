@@ -925,6 +925,64 @@ class BuyingController(SubcontractingController):
 	def is_internal_receipt(self) -> bool:
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
+	def get_accepted_stock_qty(self, row) -> float:
+		"""Accepted qty in the stock UOM. A return takes back no more than its receipt row put in the
+		warehouse, less the row's other returns, so returns of parts add up to it. A row with a package
+		is not capped, as its package holds the qty."""
+		stock_qty = get_stock_qty(row, row.qty)
+		if not self.is_return or row.get("serial_and_batch_bundle"):
+			return stock_qty
+
+		if self.docstatus == 2:
+			return flt(self.get_posted_return_qty(row, row.warehouse)) or stock_qty
+
+		qty_left = self.get_stock_qty_left_to_return(row, row.warehouse)
+		return max(stock_qty, -qty_left) if flt(qty_left) > 0 else stock_qty
+
+	def get_stock_qty_left_to_return(self, row, warehouse) -> float:
+		"""Stock qty the returned receipt row put in the warehouse that its other returns have not taken back."""
+		reference_field = (
+			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
+		)
+		receipt_row = row.get(reference_field)
+		if not receipt_row:
+			return 0.0
+
+		receipt_item = frappe.qb.DocType(row.doctype)
+		receipt_and_other_returns = (
+			frappe.qb.from_(receipt_item)
+			.select(receipt_item.name)
+			.where(
+				(receipt_item.name == receipt_row)
+				| ((receipt_item[reference_field] == receipt_row) & (receipt_item.parent != self.name))
+			)
+		)
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		qty_left = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where(
+				(sle.warehouse == warehouse)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_detail_no.isin(receipt_and_other_returns)
+			)
+			.run()[0][0]
+		)
+		return flt(qty_left, row.precision("stock_qty"))
+
+	def get_posted_return_qty(self, row, warehouse):
+		"""Qty the return row's entry took out of the warehouse."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_detail_no": row.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0),
+			},
+			"actual_qty",
+		)
+
 	def get_source_warehouse_qty(self, row, accepted_qty):
 		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
 		delivered row left in transit, so partial receipts that round up add up to the delivery, and its
@@ -1164,7 +1222,7 @@ class BuyingController(SubcontractingController):
 
 			source_reversal_sle = None
 
-			pr_qty = get_stock_qty(d, d.qty)
+			pr_qty = self.get_accepted_stock_qty(d)
 			source_qty = self.get_source_warehouse_qty(d, pr_qty)
 
 			if source_qty and (d.warehouse or not pr_qty):
