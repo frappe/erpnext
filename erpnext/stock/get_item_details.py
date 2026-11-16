@@ -1670,8 +1670,9 @@ def validate_conversion_rate(ctx: frappe._dict, meta):
 		ctx.conversion_rate = 1.0
 
 	if not ctx.ignore_conversion_rate and ctx.conversion_rate == 1 and ctx.currency != company_currency:
+		exchange_rate_for = "for_selling" if ctx.doctype in sales_doctypes else "for_buying"
 		ctx.conversion_rate = (
-			get_exchange_rate(ctx.currency, company_currency, ctx.transaction_date, "for_buying") or 1.0
+			get_exchange_rate(ctx.currency, company_currency, ctx.transaction_date, exchange_rate_for) or 1.0
 		)
 
 	# validate currency conversion rate
