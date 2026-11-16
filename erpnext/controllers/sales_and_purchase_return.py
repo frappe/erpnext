@@ -253,7 +253,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		bundle_stock_qty = get_returned_stock_qty(doc, row)
+		bundle_stock_qty = get_returned_stock_qty(row)
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component in components[bundle]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
@@ -319,11 +319,7 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		):
 			returned_column = "rejected_qty"
 
-		returned_qty = (
-			flt(already_returned_data.get(returned_column, 0), field_precision)
-			if len(already_returned_data) > 0
-			else 0
-		)
+		returned_qty = flt(already_returned_data.get(returned_column, 0))
 
 		if column in ("stock_qty", "qty") and not args.get("return_qty_from_rejected_warehouse"):
 			reference_qty = ref.get(column)
@@ -347,11 +343,13 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 		if reference_qty or flt(current_stock_qty):
 			if flt(current_stock_qty) > 0:
 				frappe.throw(_("{0} must be negative in return document").format(label))
-			elif returned_qty >= reference_qty and returns_nothing:
+			elif flt(returned_qty, field_precision) >= reference_qty and returns_nothing:
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
-			elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
+			elif flt(returned_qty + abs(flt(current_stock_qty)), field_precision) > flt(
+				reference_qty, field_precision
+			):
 				frappe.throw(
 					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
 						args.idx, max_returnable_qty, args.item_code
@@ -371,7 +369,7 @@ def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned
 def add_returned_row(doc, key, row, already_returned_items):
 	"""Count a validated row so that the next rows of the same return see it."""
 	conversion_factor = flt(row.conversion_factor or 1)
-	stock_qty = get_returned_stock_qty(doc, row)
+	stock_qty = get_returned_stock_qty(row)
 	rejected_qty = abs(flt(row.get("rejected_qty"))) * conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES and row.get("return_qty_from_rejected_warehouse"):
 		rejected_qty += stock_qty
@@ -384,17 +382,10 @@ def add_returned_row(doc, key, row, already_returned_items):
 	returned.rejected_qty = flt(returned.rejected_qty) + rejected_qty
 
 
-def get_returned_stock_qty(doc, row):
-	"""Stock qty of a return row, rounded the way set_qty_as_per_stock_uom stores it."""
-	stock_qty = abs(flt(row.qty) * flt(row.conversion_factor or 1))
-	setting = (
-		"allow_to_edit_stock_uom_qty_for_sales"
-		if doc.doctype in ("Delivery Note", "Sales Invoice", "POS Invoice")
-		else "allow_to_edit_stock_uom_qty_for_purchase"
-	)
-	if frappe.get_single_value("Stock Settings", setting):
-		stock_qty = flt(stock_qty, row.precision("stock_qty"))
-	return stock_qty
+def get_returned_stock_qty(row):
+	"""Stock qty of a return row as qty * conversion factor. Returns add it up unrounded, as each row rounds
+	its stock qty on its own."""
+	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
@@ -444,9 +435,7 @@ def get_already_returned_items(doc):
 
 	field = frappe.scrub(doc.doctype) + "_item" if doc.doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
 
-	stock_qty = Abs(child.stock_qty)
-	if doc.doctype == "Subcontracting Receipt":
-		stock_qty = Abs(child.qty) * child.conversion_factor
+	stock_qty = Abs(child.qty) * child.conversion_factor
 
 	rejected_qty = Abs(child.rejected_qty) * child.conversion_factor
 	if doc.doctype in REJECTED_WAREHOUSE_RETURN_DOCTYPES:
