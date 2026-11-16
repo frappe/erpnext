@@ -6393,7 +6393,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_internal_pr_of_batch_item_takes_the_value_that_leaves_transit(self):
 		"""A batch item received from transit in another UOM is valued at the stock qty that moved."""
-		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		company = "_Test Company with perpetual inventory"
