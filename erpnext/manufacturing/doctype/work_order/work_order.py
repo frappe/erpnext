@@ -64,6 +64,7 @@ from erpnext.manufacturing.doctype.work_order.services.reservation import (
 	get_row_wise_serial_batch,
 	get_sre_details,
 	make_stock_reservation_entries,
+	release_unused_inward_reservations,
 )
 from erpnext.manufacturing.doctype.work_order.services.status import (
 	StatusService,
@@ -1209,8 +1210,10 @@ class WorkOrder(Document):
 
 	def update_required_items(self):
 		RequiredItemsService(self).update_required_items()
-		if self.status == "Closed":
-			self.update_subcontracting_inward_order_received_items()
+		if self.status == "Completed" and self.subcontracting_inward_order:
+			release_unused_inward_reservations(work_order=self.name)
+
+		self.update_subcontracting_inward_order_received_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		return RequiredItemsService(self).update_reserved_qty_for_production(items)
@@ -1296,9 +1299,17 @@ class WorkOrder(Document):
 
 
 def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) -> dict[str, float]:
-	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed order the qty it used or still holds, any other its required qty."""
+	"""Qty of each raw material held by the submitted Work Orders of an inward order item: a closed or completed order the qty it used or still holds, any other its required qty or the qty it used if more."""
 	work_order = frappe.qb.DocType("Work Order")
 	work_order_item = frappe.qb.DocType("Work Order Item")
+	used_qty = (
+		Case()
+		.when(
+			work_order_item.transferred_qty > work_order_item.consumed_qty,
+			work_order_item.transferred_qty - work_order_item.returned_qty,
+		)
+		.else_(work_order_item.consumed_qty - work_order_item.returned_qty)
+	)
 	return dict(
 		frappe.qb.from_(work_order_item)
 		.join(work_order)
@@ -1308,13 +1319,9 @@ def get_work_order_allocated_qty(scio_item_name: str, rm_item_codes: list[str]) 
 			Sum(
 				Case()
 				.when(
-					(work_order.status == "Closed")
-					& (work_order_item.transferred_qty > work_order_item.consumed_qty),
-					work_order_item.transferred_qty - work_order_item.returned_qty,
-				)
-				.when(
-					work_order.status == "Closed",
-					work_order_item.consumed_qty - work_order_item.returned_qty,
+					work_order.status.isin(["Closed", "Completed"])
+					| (used_qty > work_order_item.required_qty),
+					used_qty,
 				)
 				.else_(work_order_item.required_qty)
 			),
