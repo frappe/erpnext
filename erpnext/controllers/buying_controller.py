@@ -945,15 +945,16 @@ class BuyingController(SubcontractingController):
 		if flt(left.stock_qty) <= 0:
 			return stock_qty
 
-		if flt(left.qty + flt(qty), row.precision("qty")) <= 0:
+		unreturned_stock_qty = left.unrounded_stock_qty + flt(qty) * flt(row.conversion_factor)
+		if flt(unreturned_stock_qty, row.precision("stock_qty")) <= 0:
 			return -left.stock_qty
 
 		return max(stock_qty, -left.stock_qty)
 
 	def get_receipt_row_left_to_return(self, row, warehouse) -> frappe._dict:
-		"""Qty and stock qty the returned receipt row put in the warehouse that its other returns have not
-		taken back."""
-		left = frappe._dict(qty=0.0, stock_qty=0.0)
+		"""Unrounded and posted stock qty the returned receipt row put in the warehouse that its other
+		returns have not taken back."""
+		left = frappe._dict(unrounded_stock_qty=0.0, stock_qty=0.0)
 		reference_field = (
 			"purchase_receipt_item" if self.doctype == "Purchase Receipt" else "purchase_invoice_item"
 		)
@@ -968,6 +969,7 @@ class BuyingController(SubcontractingController):
 				receipt_item.name,
 				receipt_item.qty,
 				receipt_item.rejected_qty,
+				receipt_item.conversion_factor,
 				receipt_item.warehouse,
 				receipt_item.rejected_warehouse,
 			)
@@ -985,9 +987,9 @@ class BuyingController(SubcontractingController):
 
 		for d in rows:
 			if d.warehouse == warehouse:
-				left.qty += flt(d.qty)
+				left.unrounded_stock_qty += flt(d.qty) * flt(d.conversion_factor)
 			if d.rejected_warehouse == warehouse:
-				left.qty += flt(d.rejected_qty)
+				left.unrounded_stock_qty += flt(d.rejected_qty) * flt(d.conversion_factor)
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		stock_qty = (
