@@ -23,6 +23,7 @@ from pypika.terms import ExistsCriterion
 from erpnext.manufacturing.doctype.production_plan.services.reservation import hand_off_reserved_stock
 from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	StockReservation,
+	allocate_serial_batch_qty,
 	clear_reserve_stock_if_disabled,
 )
 
@@ -804,8 +805,10 @@ def _accumulate_serial_batch(row_wise_serial_batch, entry):
 		details.batch_nos[entry.batch_no] += abs(entry.qty)
 
 
-def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -> None:
-	"""Give each inward order row back, up to its `short_qty`, the customer material Work Orders hold beyond their required or used qty."""
+def release_unused_inward_reservations(
+	scio: str, short_qty: dict[str, float], serial_batch: frappe._dict | None = None
+) -> None:
+	"""Give each inward order row back, up to its `short_qty` and within `serial_batch` if given, the customer material Work Orders hold beyond their required or used qty."""
 	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	sres = get_inward_reservations(scio, list(short_qty))
 	unused_qty = get_unused_inward_qty(sres)
@@ -821,9 +824,27 @@ def release_unused_inward_reservations(scio: str, short_qty: dict[str, float]) -
 		if release_qty <= 0:
 			continue
 
-		released_qty = release_inward_reservation(sre, release_qty)
+		released_qty = release_inward_reservation(sre, release_qty, serial_batch)
 		unused_qty[sre.voucher_detail_no] -= released_qty
 		short_qty[sre.from_voucher_detail_no] -= released_qty
+
+
+def get_unused_inward_serial_batch(scio: str, scio_detail: str) -> frappe._dict:
+	"""Serial nos and batch qty Work Orders hold from an inward order row beyond their need."""
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	sres = get_inward_reservations(scio, [scio_detail])
+	unused_qty = get_unused_inward_qty(sres)
+	unused = frappe._dict(serial_nos=[], batches=defaultdict(float))
+	for sre in sres:
+		qty = flt(min(sre.reserved_qty - sre.used_qty, unused_qty[sre.voucher_detail_no]), precision)
+		if qty <= 0 or sre.reservation_based_on != "Serial and Batch":
+			continue
+
+		doc = frappe.get_doc("Stock Reservation Entry", sre.name)
+		add_serial_batch(unused, doc, get_serial_batch_qty_to_release(doc, qty))
+		unused_qty[sre.voucher_detail_no] -= qty
+
+	return unused
 
 
 def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
@@ -841,7 +862,7 @@ def get_unused_inward_qty(sres: list[dict]) -> dict[str, float]:
 
 
 def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
-	"""Qty based Work Order reservations taken from these inward order rows, newest first."""
+	"""Work Order reservations taken from these inward order rows, newest first."""
 	sre = frappe.qb.DocType("Stock Reservation Entry")
 	wo_item = frappe.qb.DocType("Work Order Item")
 	return (
@@ -853,6 +874,7 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 			sre.voucher_detail_no,
 			sre.from_voucher_detail_no,
 			sre.reserved_qty,
+			sre.reservation_based_on,
 			(sre.delivered_qty + sre.transferred_qty + sre.consumed_qty).as_("used_qty"),
 			wo_item.required_qty,
 		)
@@ -860,7 +882,6 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 			(sre.docstatus == 1)
 			& (sre.voucher_type == "Work Order")
 			& (sre.from_voucher_type == "Subcontracting Inward Order")
-			& (sre.reservation_based_on == "Qty")
 			& (sre.from_voucher_no == scio)
 			& (sre.from_voucher_detail_no.isin(scio_details))
 		)
@@ -868,18 +889,63 @@ def get_inward_reservations(scio: str, scio_details: list[str]) -> list[dict]:
 	).run(as_dict=True)
 
 
-def release_inward_reservation(sre: dict, qty: float) -> float:
-	"""Lower a Work Order reservation by `qty`, not below what it used, and give it back to the inward order reservation it came from."""
+def release_inward_reservation(sre: dict, qty: float, serial_batch: frappe._dict | None = None) -> float:
+	"""Lower a Work Order reservation by `qty`, not below what it used and within `serial_batch` if given, and give it back to the inward order reservation it came from."""
 	doc = frappe.get_doc("Stock Reservation Entry", sre.name, for_update=True)
+	released = frappe._dict(serial_nos=[], batches=defaultdict(float))
+	if doc.reservation_based_on == "Serial and Batch":
+		entry_qty = get_serial_batch_qty_to_release(doc, qty, serial_batch)
+		add_serial_batch(released, doc, entry_qty)
+		lower_serial_batch_qty(doc, entry_qty)
+		qty = sum(entry_qty.values())
+
 	used_qty = doc.delivered_qty + doc.transferred_qty + doc.consumed_qty
 	reserved_qty = flt(max(doc.reserved_qty - qty, used_qty), doc.precision("reserved_qty"))
 	released_qty = doc.reserved_qty - reserved_qty
+	if released_qty <= 0:
+		return 0
+
 	doc.db_set(
 		{"reserved_qty": reserved_qty, "voucher_qty": max(sre.required_qty, reserved_qty)},
 		update_modified=False,
 	)
 	doc.update_status()
 	doc.update_reserved_qty_in_voucher()
-	doc.update_delivered_qty_in_from_voucher_reservations()
+	doc.give_back_to_from_voucher(released)
 	doc.update_reserved_stock_in_bin()
 	return released_qty
+
+
+def get_serial_batch_qty_to_release(
+	doc: Document, qty: float, serial_batch: frappe._dict | None = None
+) -> dict[str, float]:
+	"""Qty to take from each open serial and batch entry of a reservation, up to `qty`, within `serial_batch` if given."""
+	entries = [
+		frappe._dict(
+			name=entry.name,
+			parent=doc.name,
+			serial_no=entry.serial_no,
+			batch_no=entry.batch_no,
+			open_qty=flt(entry.qty) - flt(entry.delivered_qty),
+		)
+		for entry in doc.sb_entries
+	]
+	return allocate_serial_batch_qty(entries, {doc.name: qty}, serial_batch or doc.get_serial_batch_entries())
+
+
+def add_serial_batch(serial_batch: frappe._dict, doc: Document, entry_qty: dict[str, float]) -> None:
+	"""Add the serial nos and batch qty of these entries of a reservation to `serial_batch`."""
+	for entry in doc.sb_entries:
+		if not (qty := entry_qty.get(entry.name)):
+			continue
+
+		if entry.serial_no:
+			serial_batch.serial_nos.append(entry.serial_no)
+		if entry.batch_no:
+			serial_batch.batches[entry.batch_no] += qty
+
+
+def lower_serial_batch_qty(doc: Document, entry_qty: dict[str, float]) -> None:
+	for entry in doc.sb_entries:
+		if qty := entry_qty.get(entry.name):
+			entry.db_set("qty", flt(entry.qty - qty, entry.precision("qty")), update_modified=False)
