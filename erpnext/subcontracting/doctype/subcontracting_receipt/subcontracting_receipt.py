@@ -255,6 +255,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status()
 		self.auto_create_purchase_receipt()
 		self.update_job_card()
+		self.update_production_plan_received_qty()
 
 	def validate_consumed_batches(self):
 		from erpnext.stock.services.serial_batch_bundle_service import SerialBatchBundleService
@@ -299,6 +300,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status()
 		self.delete_auto_created_batches()
 		self.update_job_card()
+		self.update_production_plan_received_qty()
 
 	@frappe.whitelist()
 	def reset_raw_materials(self):
@@ -308,6 +310,15 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def validate_closed_subcontracting_order(self):
 		self.check_for_on_hold_or_closed_status("Subcontracting Order", "subcontracting_order")
+
+	def update_production_plan_received_qty(self):
+		from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries import (
+			update_subcontracted_received_qty,
+		)
+
+		update_subcontracted_received_qty(
+			list({row.subcontracting_order_item for row in self.items if row.subcontracting_order_item})
+		)
 
 	def update_job_card(self):
 		for row in self.get("items"):

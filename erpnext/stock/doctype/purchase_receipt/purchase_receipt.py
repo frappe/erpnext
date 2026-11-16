@@ -410,6 +410,8 @@ class PurchaseReceipt(BuyingController):
 				.where(
 					table.name.isin(items_from_po)
 					& Coalesce(table.production_plan_sub_assembly_item, "").ne("")
+					# a Subcontracting Receipt sets the qty of a subcontracted row
+					& Coalesce(table.fg_item, "").eq("")
 				)
 			)
 			result = subquery.run(as_dict=True)
