@@ -122,10 +122,16 @@ class OperationsService:
 
 		for idx, row in enumerate(self.doc.operations):
 			qty = get_operation_qty(self.doc, row)
+			planned_start_time = None
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self.doc, row, qty)
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
+					planned_start_time = planned_start_time or row.planned_start_time
+
+			# with batch cards the operation starts with the first card
+			if planned_start_time and planned_start_time != row.planned_start_time:
+				row.db_set("planned_start_time", planned_start_time)
 
 		planned_end_date = self.doc.operations and self.doc.operations[-1].planned_end_time
 		if planned_end_date:

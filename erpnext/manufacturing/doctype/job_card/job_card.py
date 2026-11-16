@@ -749,7 +749,7 @@ class JobCard(Document):
 		return time_slot
 
 	def schedule_time_logs(self, row):
-		row.remaining_time_in_mins = row.time_in_mins
+		row.remaining_time_in_mins = flt(self.time_required)
 		while row.remaining_time_in_mins > 0:
 			slot_end = self.place_row_start(row)
 			if not slot_end:
