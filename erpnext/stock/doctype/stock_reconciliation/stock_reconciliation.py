@@ -8,11 +8,13 @@ from datetime import timedelta
 import frappe
 from frappe import _, bold, json, msgprint
 from frappe.model.docstatus import DocStatus
+from frappe.permissions import get_allowed_docs_for_doctype, get_user_permissions
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_to_date, cint, cstr, flt, get_datetime, now
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
+from erpnext import _refuse
 from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_available_batches
@@ -1727,8 +1729,24 @@ def get_stock_balance_for(
 	}
 
 
+def _reconciliation_allowed_docs(doctype):
+	return get_allowed_docs_for_doctype(
+		get_user_permissions(frappe.session.user).get(doctype, []), "Stock Reconciliation"
+	)
+
+
+def _require_reconciliation_permission(doctype, name):
+	allowed_docs = _reconciliation_allowed_docs(doctype)
+	if allowed_docs and name not in allowed_docs:
+		_refuse()
+
+
 @frappe.whitelist()
 def get_difference_account(purpose: str, company: str):
+	frappe.has_permission("Stock Reconciliation", "read", throw=True)
+	frappe.has_permission("Company", "select", doc=company, throw=True)
+	_require_reconciliation_permission("Company", company)
+
 	if purpose in ("Stock Reconciliation", ADJUSTMENT_ENTRY):
 		account = get_company_default(company, "stock_adjustment_account")
 	else:
