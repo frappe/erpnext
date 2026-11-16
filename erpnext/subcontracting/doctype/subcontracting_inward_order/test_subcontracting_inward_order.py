@@ -737,6 +737,30 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			self.assertEqual(delivery.items[0].qty, 6)
 			delivery.submit()
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"overproduction_percentage_for_work_order": 20}
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_delivery_of_overproduced_qty": 1})
+	def test_status_after_overproduction_and_over_delivery(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.items[-1].qty = 6
+		manufacture.fg_completed_qty = 6
+		manufacture.submit()
+		scio.reload()
+		self.assertEqual((scio.per_produced, scio.status), (120, "Produced"))
+
+		frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
+		scio.reload()
+		self.assertEqual((scio.per_delivered, scio.status), (120, "Delivered"))
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"deliver_secondary_items": 1})
 	def test_secondary_items_delivery(self):
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", "BOM-Basic FG Item-001"))
