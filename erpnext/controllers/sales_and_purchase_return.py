@@ -221,6 +221,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		get_order_packed_items,
 		get_order_row,
 		get_product_bundle_items_by_name,
+		get_stock_qty_left_to_return,
 		pop_order_packed_item,
 	)
 
@@ -233,6 +234,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		)
 	)
 	order_packed_items = get_order_packed_items(doc)
+	stock_qty_left = get_stock_qty_left_to_return(doc)
 	bundles, components = {}, {}
 	for row in returned_rows:
 		if row.item_code not in bundle_items:
@@ -248,7 +250,7 @@ def validate_returned_bundle_components(doc, valid_items, already_returned_items
 		if bundle not in components:
 			components[bundle] = get_product_bundle_items_by_name(bundle)
 
-		bundle_stock_qty = get_packed_stock_qty(row)
+		bundle_stock_qty = get_packed_stock_qty(row, stock_qty_left.get(get_order_row(doc, row)))
 		so_packed_items = list(order_packed_items.get(get_order_row(doc, row), []))
 		for component in components[bundle]:
 			so_packed_item = pop_order_packed_item(so_packed_items, row.item_code, component.item_code)
@@ -385,12 +387,15 @@ def get_returned_stock_qty(row):
 	return abs(flt(row.qty) * flt(row.conversion_factor or 1))
 
 
-def get_packed_stock_qty(row):
-	"""Stock qty of a returned bundle row as packing reads it, rounded when the row rounds its stock qty."""
-	stock_qty = get_returned_stock_qty(row)
+def get_packed_stock_qty(row, stock_qty_left=None):
+	"""Stock qty of a returned bundle row as packing reads it, rounded when the row rounds its stock qty, or
+	all that is left of the returned row on the return of its rest."""
+	from erpnext.stock.doctype.packed_item.packed_item import get_returned_bundle_stock_qty
+
+	stock_qty = flt(row.qty) * flt(row.conversion_factor or 1)
 	if frappe.get_single_value("Stock Settings", "allow_to_edit_stock_uom_qty_for_sales"):
 		stock_qty = flt(stock_qty, row.precision("stock_qty"))
-	return stock_qty
+	return abs(get_returned_bundle_stock_qty(row, stock_qty, stock_qty_left))
 
 
 def get_ref_item_dict(valid_items, ref_item_row):
