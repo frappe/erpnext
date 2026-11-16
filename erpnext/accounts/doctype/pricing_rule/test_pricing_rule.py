@@ -2057,6 +2057,39 @@ class TestPricingRule(ERPNextTestSuite):
 		si = create_sales_invoice(item_code=item, qty=2, do_not_submit=True)
 		self.assertEqual([d.item_code for d in si.items if d.is_free_item], [free_item])
 
+	def test_min_amt_is_compared_in_the_rule_currency(self):
+		item = make_item("_Test Min Amt Currency Item", {"is_stock_item": 0}).name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item,
+				"price_list": "Standard Selling",
+				"price_list_rate": 8500,
+			}
+		).insert()
+		make_pricing_rule(
+			title="_Test Min Amt INR Rule",
+			selling=1,
+			item_code=item,
+			min_amt=100000,
+			discount_percentage=10,
+		)
+
+		# 20 x 8,500 INR is 2,048.19 USD at 83, above the rule's 1,00,000 INR
+		so = make_sales_order(
+			item_code=item,
+			customer="_Test Customer USD",
+			currency="USD",
+			selling_price_list="Standard Selling",
+			qty=20,
+			do_not_save=True,
+		)
+		so.conversion_rate = 83
+		so.items[0].rate = 0
+		so.insert()
+
+		self.assertEqual(so.items[0].discount_percentage, 10)
+
 	def test_free_item_of_unmatched_transaction_rule_is_removed(self):
 		item = make_item("PR Recheck Item", {"is_stock_item": 0}).name
 		free_item = make_item("PR Recheck Free Item", {"is_stock_item": 0}).name
