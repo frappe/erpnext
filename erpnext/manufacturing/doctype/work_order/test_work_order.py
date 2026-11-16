@@ -4594,6 +4594,34 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(consumed_qty, [1, 0, 0, 0])
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "BOM", "material_consumption": 0}
+	)
+	def test_partial_manufactures_consume_the_rounded_transfer(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=2.1825)
+		test_stock_entry.make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=50, basic_rate=45)
+		work_order = make_wo_order_test_record(
+			production_item=fg_item, bom_no=bom.name, qty=3, source_warehouse="Stores - _TC", stock_uom="Kg"
+		)
+
+		for purpose, qty in (
+			("Material Transfer for Manufacture", 3),
+			("Manufacture", 2),
+			("Manufacture", 1),
+		):
+			frappe.get_doc(make_stock_entry(work_order.name, purpose, qty)).submit()
+
+		self.assertEqual(
+			flt(
+				frappe.db.get_value(
+					"Bin", {"item_code": rm_item, "warehouse": work_order.wip_warehouse}, "actual_qty"
+				)
+			),
+			0,
+		)
+
 	def test_partial_disassemblies_round_whole_number_components(self):
 		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
 		wo, rm_item = make_whole_number_work_order("Test Whole Number Partial Disassembly")
