@@ -9857,6 +9857,53 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 
 		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
 
+	def test_previous_row_valuation_charge_follows_each_item_tax(self):
+		excise_account = "_Test Account Excise Duty - _TC"
+		nil_rated = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Nil Rated Excise",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": excise_account, "tax_rate": 0}],
+			}
+		).insert()
+		exempt_item = make_item("_Test Excise Exempt Item", {"is_stock_item": 1}).name
+		taxed_item = make_item("_Test Excise Taxed Item", {"is_stock_item": 1}).name
+
+		receipt = make_purchase_receipt(item_code=exempt_item, qty=10, rate=100, do_not_save=True)
+		receipt.items[0].item_tax_template = nil_rated.name
+		row = receipt.items[0]
+		receipt.append(
+			"items",
+			{"item_code": taxed_item, "qty": 10, "rate": 100, "warehouse": row.warehouse, "uom": row.uom},
+		)
+		receipt.append(
+			"taxes",
+			{
+				"category": "Total",
+				"charge_type": "On Net Total",
+				"account_head": excise_account,
+				"description": "Excise",
+				"rate": 10,
+			},
+		)
+		receipt.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "On Previous Row Amount",
+				"row_id": 1,
+				"account_head": "_Test Account Shipping Charges - _TC",
+				"cost_center": "Main - _TC",
+				"description": "Freight on excise",
+				"rate": 50,
+			},
+		)
+		receipt.insert()
+
+		self.assertEqual([d.item_tax_amount for d in receipt.items], [0, 50])
+		self.assertEqual([d.valuation_rate for d in receipt.items], [100, 105])
+
 	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
 		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_receipt as make_receipt_from_order,
