@@ -81,11 +81,11 @@ from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	_get_bin_details,
 	_get_item_details,
+	_get_item_tax_map,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
 	get_default_bom,
-	get_item_tax_map,
 	get_item_warehouse_,
 )
 from erpnext.stock.utils import (
@@ -4366,7 +4366,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group)
 
 	child_item.item_tax_template = item_tax_template
-	child_item.item_tax_rate = get_item_tax_map(
+	child_item.item_tax_rate = _get_item_tax_map(
 		doc=parent_doc,
 		tax_template=child_item.item_tax_template,
 		as_json=True,
