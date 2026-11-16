@@ -1116,9 +1116,120 @@ class TestStockReservationEntry(FrappeTestCase):
 		# Test - 1: ValidationError should be thrown as the inwarded stock is reserved.
 		self.assertRaises(frappe.ValidationError, se.cancel)
 
+<<<<<<< HEAD
 	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
 	def test_reserved_stock_validation_for_batch_item(self):
 		item_properties = {
+=======
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 1,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_batch_delivery_is_counted_once_across_reservations_of_a_row(self) -> None:
+		"""Two reservations of one row for the same batch share a delivery instead of each taking all of it."""
+		item_code = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch_no = (
+			frappe.get_doc({"doctype": "Batch", "item": item_code, "batch_id": item_code + "-B"})
+			.insert()
+			.name
+		)
+
+		def receive_batch():
+			make_stock_entry(
+				item_code=item_code,
+				qty=5,
+				rate=10,
+				to_warehouse=self.warehouse,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+
+		receive_batch()
+		so = make_sales_order(
+			item_code=item_code, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = so.items[0].reserve_stock = 1
+		so.submit()
+		receive_batch()
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].update(
+			{"qty": 6, "batch_no": batch_no, "use_serial_batch_fields": 1, "serial_and_batch_bundle": None}
+		)
+		dn.submit()
+
+		def delivered_qty():
+			return frappe.get_all(
+				"Stock Reservation Entry",
+				{"voucher_no": so.name, "docstatus": 1},
+				pluck="delivered_qty",
+				order_by="creation",
+			)
+
+		self.assertEqual(delivered_qty(), [5, 1])
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"item_code": item_code, "warehouse": self.warehouse}, "reserved_stock"
+			),
+			4,
+		)
+
+		second_dn = make_delivery_note(so.name)
+		second_dn.items[0].update(
+			{"qty": 4, "batch_no": batch_no, "use_serial_batch_fields": 1, "serial_and_batch_bundle": None}
+		)
+		second_dn.submit()
+		frappe.get_doc("Delivery Note", dn.name).cancel()
+		self.assertEqual(delivered_qty(), [0, 4])
+
+
+SR_ITEM_PROPERTIES = {
+	"stock": {"is_stock_item": 1, "valuation_rate": 100},
+	"serial": {
+		"is_stock_item": 1,
+		"valuation_rate": 200,
+		"has_serial_no": 1,
+		"serial_no_series": "SRSI-.#####",
+	},
+	"batch": {
+		"is_stock_item": 1,
+		"valuation_rate": 300,
+		"has_batch_no": 1,
+		"create_new_batch": 1,
+		"batch_number_series": "SRBI-.#####.",
+	},
+	"serial_and_batch": {
+		"is_stock_item": 1,
+		"valuation_rate": 400,
+		"has_serial_no": 1,
+		"serial_no_series": "SRSBI-.#####",
+		"has_batch_no": 1,
+		"create_new_batch": 1,
+		"batch_number_series": "SRSBI-.#####.",
+	},
+}
+
+
+def create_items(*kinds: str) -> dict:
+	items = {}
+	for kind in kinds or SR_ITEM_PROPERTIES:
+		item = make_item(properties=SR_ITEM_PROPERTIES[kind])
+		items[item.name] = item
+
+	return items
+
+
+def make_batch_item():
+	return make_item(
+		properties={
+>>>>>>> 2745ae0 (test: batch delivery is counted once across the reservations of a row)
 			"is_stock_item": 1,
 			"valuation_rate": 100,
 			"has_batch_no": 1,
