@@ -1429,7 +1429,22 @@ class TestBOM(FrappeTestCase):
 		bom.save()
 		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (0, 0))
 
+<<<<<<< HEAD
 >>>>>>> 1b6d72f (test: BOM operation hour rate follows its workstation and the conversion rate)
+=======
+		bom.operations[0].hour_rate = 10
+		bom.conversion_rate = 83
+		bom.save()
+		bom.conversion_rate = 80
+		bom.save()
+		self.assertEqual(bom.operations[0].hour_rate, 10.38)
+
+		bom.reload()
+		bom.conversion_rate = 70
+		bom.save()
+		self.assertEqual(bom.operations[0].hour_rate, 11.86)
+
+>>>>>>> 8e424c6 (test: keep a manual BOM operation hour rate in company currency when the conversion rate changes)
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
