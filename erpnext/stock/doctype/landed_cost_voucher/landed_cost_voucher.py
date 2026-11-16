@@ -608,7 +608,7 @@ def check_receipt_document_access(receipt_document_type, receipt_document):
 	if receipt_document_type not in RECEIPT_DOCUMENT_TYPES:
 		frappe.throw(_("Receipt Document Type {0} is not supported").format(receipt_document_type))
 
-	frappe.has_permission(receipt_document_type, "read", receipt_document, throw=True)
+	frappe.has_permission(receipt_document_type, "select", receipt_document, throw=True)
 
 
 def get_pr_items(purchase_receipt):
