@@ -203,6 +203,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			else {}
 		)
 
+	if doctype != "Purchase Invoice":
+		validate_not_made_from_counterpart(source_doc, target_doctype, received_items)
+
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
@@ -314,6 +317,21 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
+
+
+def validate_not_made_from_counterpart(source_doc, target_doctype, received_items):
+	"""A document made from its counterpart links it, but the counterpart rows link none of its rows back."""
+	reference_field = get_inter_company_counterpart(source_doc.doctype)[1]
+	reference = source_doc.get(reference_field)
+	if reference and not any(row.name in received_items for row in source_doc.items):
+		frappe.throw(
+			_("Cannot create Intercompany {0}. {1} {2} was created from {0} {3}.").format(
+				target_doctype,
+				source_doc.doctype,
+				source_doc.name,
+				get_link_to_form(target_doctype, reference),
+			)
+		)
 
 
 def clear_item_tax_template_of_other_company(item, company):
