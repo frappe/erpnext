@@ -3264,11 +3264,18 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 
 	doctype = "Delivery Note Item" if sle.voucher_type == "Purchase Receipt" else "Sales Invoice Item"
 
-	reference_name = frappe.get_cached_value(sle.voucher_type + " Item", sle.voucher_detail_no, field)
+	# a return row reaches the delivery row through the receipt row it returns
+	child_doctype = sle.voucher_type + " Item"
+	detail_no = (
+		frappe.get_cached_value(child_doctype, sle.voucher_detail_no, frappe.scrub(child_doctype))
+		or sle.voucher_detail_no
+	)
+
+	reference_name = frappe.get_cached_value(child_doctype, detail_no, field)
 	if sle.voucher_type == "Purchase Receipt" and not reference_name:
 		doctype = "Packed Item"
 		reference_name = frappe.get_cached_value(
-			"Purchase Receipt Item", sle.voucher_detail_no, "delivery_note_packed_item"
+			"Purchase Receipt Item", detail_no, "delivery_note_packed_item"
 		)
 
 	if reference_name:
