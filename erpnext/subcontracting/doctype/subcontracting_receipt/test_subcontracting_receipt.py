@@ -592,6 +592,29 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
 		self.assertEqual(sorted(returned), serial_nos[:2])
 
+	def test_partial_return_drops_the_serial_nos_its_secondary_rows_were_mapped_with(self):
+		fg_item = "Subcontracted Item SA1"
+		make_bom_with_secondary_item(
+			fg_item,
+			secondary_qty=1,
+			secondary_properties={"has_serial_no": 1, "serial_no_series": "SCR-SEC-.####"},
+		)
+		scr = make_receipt_with_secondary_items(fg_item, 4)
+		serial_nos = frappe.get_all(
+			"Serial No", filters={"item_code": scr.items[1].item_code}, pluck="serial_no"
+		)
+
+		# make_return_doc maps a row received with serial no fields with all its serial nos
+		scr_return = make_return_doc("Subcontracting Receipt", scr.name)
+		scr_return.items[0].qty = -2
+		scr_return.items[1].update({"use_serial_batch_fields": 1, "serial_no": "\n".join(serial_nos)})
+		with patch.object(frappe, "in_test", False):
+			scr_return.save()
+		scr_return.submit()
+
+		returned = get_serial_numbers_from_bundle(scr_return.items[1].serial_and_batch_bundle)
+		self.assertEqual(len(returned), 2)
+
 	def test_return_takes_secondary_items_from_the_warehouse_they_were_received_in(self):
 		fg_item = "Subcontracted Item SA1"
 		make_bom_with_secondary_item(fg_item)
