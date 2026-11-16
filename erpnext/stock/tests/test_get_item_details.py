@@ -1205,3 +1205,46 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		with as_user(make_fenced_user("_test_tax_info_sales@example.com", ["Sales User"])):
 			self.assertEqual(get_item_tax_info(**kwargs), expected)
+
+	def test_sales_document_fetches_selling_exchange_rate(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("_Test Item Selling Exchange Rate").name
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item,
+				"price_list": "Standard Selling",
+				"price_list_rate": 8500,
+			}
+		).insert()
+		for exchange_rate, for_selling in ((90, 1), (95, 0)):
+			frappe.get_doc(
+				{
+					"doctype": "Currency Exchange",
+					"date": "2030-01-15",
+					"from_currency": "USD",
+					"to_currency": "INR",
+					"exchange_rate": exchange_rate,
+					"for_selling": for_selling,
+					"for_buying": 1 - for_selling,
+				}
+			).insert()
+
+		details = get_item_details(
+			{
+				"item_code": item,
+				"company": "_Test Company",
+				"customer": "_Test Customer USD",
+				"doctype": "Sales Order",
+				"currency": "USD",
+				"conversion_rate": 1,
+				"price_list": "Standard Selling",
+				"price_list_currency": "INR",
+				"plc_conversion_rate": 1,
+				"qty": 1,
+				"transaction_date": "2030-01-15",
+			}
+		)
+
+		self.assertAlmostEqual(details.price_list_rate, 8500 / 90, places=2)
