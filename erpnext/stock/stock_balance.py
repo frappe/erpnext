@@ -106,7 +106,9 @@ def get_reserved_qty(item_code, warehouse):
 	# nothing anyway -- are excluded on both databases.
 	reservable = (so_item.qty != 0) & (so_item.qty >= so_item.delivered_qty)
 	if dont_reserve_on_return:
+		# delivered_qty is net of returns, so a replacement delivery takes this below 0
 		net_reserved = so_item.qty - so_item.delivered_qty - so_item.returned_qty
+		net_reserved = Case().when(net_reserved > 0, net_reserved).else_(0)
 	else:
 		net_reserved = so_item.qty - so_item.delivered_qty
 
