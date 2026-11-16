@@ -447,6 +447,7 @@ class PaymentEntry(AccountsController):
 		if self.payment_type == "Internal Transfer":
 			return
 
+		self.validate_payment_request_reference()
 		self.validate_allocated_amount_as_per_payment_request()
 
 		if self.party_type in ("Customer", "Supplier"):
@@ -465,6 +466,39 @@ class PaymentEntry(AccountsController):
 			# Check for negative outstanding invoices as well
 			if allocated_amount < 0 and allocated_amount < outstanding_amount:
 				frappe.throw(fail_message.format(d.idx))
+
+	def validate_payment_request_reference(self):
+		"""A row's Payment Request must belong to the row's document (or the order it was advanced against)."""
+		payment_requests = {ref.payment_request for ref in self.references if ref.payment_request}
+		if not payment_requests:
+			return
+
+		pr_references = {
+			pr.name: (pr.reference_doctype, pr.reference_name)
+			for pr in frappe.get_all(
+				"Payment Request",
+				filters={"name": ("in", list(payment_requests))},
+				fields=["name", "reference_doctype", "reference_name"],
+			)
+		}
+
+		for ref in self.references:
+			if not ref.payment_request:
+				continue
+
+			if pr_references.get(ref.payment_request) not in (
+				(ref.reference_doctype, ref.reference_name),
+				(ref.advance_voucher_type, ref.advance_voucher_no),
+			):
+				frappe.throw(
+					_("Row #{0}: Payment Request {1} does not belong to {2} {3}").format(
+						ref.idx,
+						get_link_to_form("Payment Request", ref.payment_request),
+						_(ref.reference_doctype),
+						frappe.bold(ref.reference_name),
+					),
+					title=_("Invalid Payment Request"),
+				)
 
 	def validate_allocated_amount_as_per_payment_request(self):
 		"""
