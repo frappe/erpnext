@@ -6,6 +6,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+import erpnext
+
 
 class ItemAlternative(Document):
 	# begin: auto-generated types
@@ -110,6 +112,7 @@ def get_alternative_item_pairs(item_codes) -> set:
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
+	erpnext.require_permission("Item", filters.get("item_code"))
 	return frappe.db.sql(
 		f""" (select alternative_item_code from `tabItem Alternative`
 			where item_code = %(item_code)s and alternative_item_code like %(txt)s)
