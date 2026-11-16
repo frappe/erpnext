@@ -135,6 +135,259 @@ class TestBlanketOrder(ERPNextTestSuite):
 				order.flags.ignore_permissions = True
 				self.assertRaises(frappe.ValidationError, order.submit)
 
+<<<<<<< HEAD
+=======
+	def test_blanket_order_over_order_aggregated_across_rows(self):
+		# the over-order check should sum the same item across multiple order rows
+		frappe.db.set_single_value("Selling Settings", "blanket_order_allowance", 0)
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=100)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		so.items[0].qty = 60
+		so.append(
+			"items",
+			{
+				"item_code": so.items[0].item_code,
+				"qty": 50,  # 60 + 50 = 110 > 100 blanket qty
+				"rate": so.items[0].rate,
+				"delivery_date": today(),
+				"against_blanket_order": 1,
+				"blanket_order": bo.name,
+			},
+		)
+		self.assertRaises(frappe.ValidationError, so.submit)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_over_order_check_uses_stock_qty(self):
+		item = make_box_item("_Test Blanket Order Box Item")
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, item_code=item)
+
+		po = make_purchase_order_against(bo, qty=9)
+		po.items[0].uom = "Box"
+		po.items[0].conversion_factor = 12
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be ordered more than", po.submit)
+
+		po.items[0].qty = 8
+		po.submit()
+		self.assertEqual(frappe.db.get_value("Blanket Order Item", bo.items[0].name, "ordered_qty"), 96)
+
+	def test_blanket_order_rate_applies_per_stock_uom(self):
+		item = make_box_item("_Test Blanket Order Box Item")
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=100, item_code=item, rate=100)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.delivery_date = today()
+		so.items[0].update(
+			{"qty": 1, "uom": "Box", "conversion_factor": 12, "warehouse": "_Test Warehouse - _TC"}
+		)
+		so.insert()
+
+		so.process_item_selection(item_idx=1)
+		self.assertEqual(so.items[0].blanket_order_rate, 100)
+		self.assertEqual(so.items[0].rate, 1200)
+
+	def test_order_must_match_blanket_order_party_type_and_currency(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+
+		other_party = make_purchase_order_against(bo, qty=4)
+		other_party.supplier = "_Test Supplier 1"
+		self.assertRaisesRegex(frappe.ValidationError, "is for", other_party.insert)
+
+		other_currency = make_purchase_order_against(bo, qty=4)
+		other_currency.currency = "USD"
+		other_currency.conversion_rate = 50
+		self.assertRaisesRegex(frappe.ValidationError, "is in", other_currency.insert)
+
+		selling_bo = make_blanket_order(blanket_order_type="Selling", quantity=100)
+		wrong_type = make_purchase_order_against(bo, qty=4)
+		wrong_type.items[0].blanket_order = selling_bo.name
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be used on", wrong_type.insert)
+
+		make_purchase_order_against(bo, qty=4).insert()
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_closed_order_keeps_its_received_qty(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=100)
+		po.submit()
+		receive_purchase_order(po, 80)
+
+		po.reload()
+		po.update_status("Closed")
+		self.assertEqual(blanket_order_ordered_qty(bo), 80)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"cannot be ordered more than",
+			make_purchase_order_against(bo, qty=30).submit,
+		)
+
+		make_purchase_order_against(bo, qty=20).submit()
+		po.reload()
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be ordered more than", po.update_status, "Draft"
+		)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_closed_row_keeps_only_its_received_qty(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=100)
+		po.submit()
+		receive_purchase_order(po, 80)
+
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+		self.assertEqual(blanket_order_ordered_qty(bo), 80)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
+	def test_closing_and_reopening_one_row_of_an_open_order(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=100)
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 1,
+				"rate": 100,
+				"schedule_date": today(),
+				"warehouse": po.items[0].warehouse,
+			},
+		)
+		po.submit()
+		receive_purchase_order(po, 80)
+
+		update_closed_status("Purchase Order", po.name, [po.items[0].name], 1)
+		self.assertEqual(blanket_order_ordered_qty(bo), 80)
+
+		make_purchase_order_against(bo, qty=20).submit()
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"cannot be ordered more than",
+			update_closed_status,
+			"Purchase Order",
+			po.name,
+			[po.items[0].name],
+			0,
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Buying Settings", {"blanket_order_allowance": 0, "allow_multiple_items": 1}
+	)
+	def test_update_items_checks_the_net_change(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100)
+		po = make_purchase_order_against(bo, qty=50)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None, "qty": 50})
+		po.submit()
+
+		payload = [
+			{
+				"docname": row.name,
+				"item_code": row.item_code,
+				"qty": qty,
+				"rate": row.rate,
+				"uom": row.uom,
+				"conversion_factor": row.conversion_factor,
+				"schedule_date": str(row.schedule_date),
+			}
+			for row, qty in zip(po.items, (40, 60), strict=True)
+		]
+		update_child_qty_rate("Purchase Order", json.dumps(payload), po.name)
+
+		self.assertEqual(
+			[frappe.db.get_value("Purchase Order Item", row.name, "qty") for row in po.items], [40, 60]
+		)
+
+	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 10})
+	def test_blanket_order_lookup_keeps_order_within_allowance(self):
+		item = make_item("_Test Blanket Order Allowance Lookup Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=90, item_code=item)
+		po = make_purchase_order_against(bo, qty=100)
+		po.items[0].warehouse = "_Test Warehouse - _TC"
+		po.submit()
+
+		details = get_blanket_order_details(
+			{
+				"company": "_Test Company",
+				"currency": bo.currency,
+				"supplier": bo.supplier,
+				"doctype": "Purchase Order",
+				"item_code": item,
+				"transaction_date": today(),
+			}
+		)
+		self.assertEqual(details.blanket_order, bo.name)
+
+	def test_quotation_uses_only_a_selling_blanket_order_of_its_customer(self):
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		item = make_item("_Test Blanket Order Quotation Item", {"is_stock_item": 1}).name
+		purchasing = make_blanket_order(blanket_order_type="Purchasing", rate=40, item_code=item)
+		other_customer = make_blanket_order(
+			blanket_order_type="Selling", customer="_Test Customer 1", rate=60, item_code=item
+		)
+		selling = make_blanket_order(blanket_order_type="Selling", rate=90, item_code=item)
+		for bo, days in ((purchasing, 3), (other_customer, 5)):
+			bo.db_set("to_date", add_days(today(), days))
+
+		details = get_blanket_order_details(
+			{
+				"company": "_Test Company",
+				"currency": selling.currency,
+				"customer": selling.customer,
+				"doctype": "Quotation",
+				"item_code": item,
+				"transaction_date": today(),
+			}
+		)
+		self.assertEqual(details.blanket_order, selling.name)
+
+		def quotation_against(bo):
+			quotation = make_quotation(item_code=item, party_name=selling.customer, do_not_save=True)
+			quotation.items[0].against_blanket_order = 1
+			quotation.items[0].blanket_order = bo.name
+			return quotation
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be used on", quotation_against(purchasing).insert
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is for", quotation_against(other_customer).insert)
+		quotation_against(selling).insert()
+
+	def test_blanket_order_rate_is_set_by_the_server(self):
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
+		po = make_purchase_order_against(bo, qty=10)
+		po.items[0].blanket_order_rate = 999
+		po.items[0].rate = 150
+		po.insert()
+
+		self.assertEqual(po.items[0].blanket_order_rate, 100)
+		self.assertIn("differs from the rate", str(frappe.message_log[-1]))
+
+	def test_party_and_order_type_are_enforced(self):
+		bo = new_blanket_order(blanket_order_type="Selling")
+		bo.customer = None
+		bo.supplier = "_Test Supplier"
+		bo.append("items", {"item_code": "_Test Item", "qty": 10, "rate": 100})
+		self.assertRaises(frappe.MandatoryError, bo.insert)
+
+		bo.customer = "_Test Customer"
+		bo.insert()
+		self.assertIsNone(bo.supplier)
+		bo.submit()
+
+		frappe.flags.args.doctype = "Purchase Order"
+		self.assertRaisesRegex(frappe.ValidationError, "cannot be made from", make_order, bo.name)
+
+		untyped = new_blanket_order(blanket_order_type="Selling")
+		untyped.blanket_order_type = None
+		untyped.append("items", {"item_code": "_Test Item", "qty": 10, "rate": 100})
+		self.assertRaises(frappe.MandatoryError, untyped.insert)
+
+>>>>>>> c92e00f (test: a Quotation uses only a Selling Blanket Order of its customer)
 	@ERPNextTestSuite.change_settings("Buying Settings", {"blanket_order_allowance": 0})
 	def test_last_fraction_of_blanket_order_can_be_ordered(self):
 		item = make_item(properties={"stock_uom": "Kg", "is_stock_item": 0}).name
