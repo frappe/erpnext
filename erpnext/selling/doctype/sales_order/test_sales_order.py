@@ -4703,6 +4703,45 @@ class TestSalesOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(reserved_qty, 5)
 
+	def test_price_list_in_document_currency_uses_document_exchange_rate(self):
+		price_list = frappe.get_doc(
+			{"doctype": "Price List", "price_list_name": "_Test USD Selling", "currency": "USD", "selling": 1}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": "_Test Item",
+				"price_list": price_list.name,
+				"price_list_rate": 100,
+			}
+		).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Currency Exchange",
+				"date": "2030-01-15",
+				"from_currency": "USD",
+				"to_currency": "INR",
+				"exchange_rate": 83,
+			}
+		).insert()
+
+		so = make_sales_order(
+			customer="_Test Customer USD",
+			currency="USD",
+			transaction_date="2030-01-15",
+			selling_price_list=price_list.name,
+			price_list_rate=100,
+			qty=1,
+			do_not_save=True,
+		)
+		so.conversion_rate = 80
+		so.items[0].price_list_rate = so.items[0].rate = None
+		so.insert()
+
+		self.assertEqual(so.plc_conversion_rate, 80)
+		self.assertEqual(so.items[0].price_list_rate, 100)
+		self.assertEqual(so.items[0].rate, 100)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
