@@ -88,11 +88,12 @@ class SubcontractingInwardOrder(SubcontractingController):
 		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Sales Order", self.sales_order)
 
-		total_to_be_received = total_received = total_rm_returned = 0
+		total_to_be_received = total_received = total_usable = total_rm_returned = 0
 		for rm in self.get("received_items"):
 			if rm.get("is_customer_provided_item"):
 				total_to_be_received += flt(rm.required_qty)
 				total_received += flt(rm.received_qty)
+				total_usable += min(flt(rm.received_qty), flt(rm.required_qty))
 				total_rm_returned += flt(rm.returned_qty)
 
 		total_to_be_produced = total_produced = total_process_loss = total_delivered = total_fg_returned = 0
@@ -103,7 +104,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 			total_delivered += flt(item.delivered_qty)
 			total_fg_returned += flt(item.returned_qty)
 
-		per_raw_material_received = flt(total_received / total_to_be_received * 100, 2)
+		per_raw_material_received = flt(total_usable / total_to_be_received * 100, 2)
 		per_raw_material_returned = flt(total_rm_returned / total_received * 100, 2) if total_received else 0
 		per_produced = flt(total_produced / total_to_be_produced * 100, 2)
 		per_process_loss = flt(total_process_loss / total_produced * 100, 2) if total_produced else 0
