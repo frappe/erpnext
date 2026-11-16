@@ -4615,8 +4615,12 @@ def make_internal_transfer_invoice():
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_purchase_invoice
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 	from erpnext.stock.doctype.item.test_item import make_item
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+		prepare_data_for_internal_transfer,
+	)
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
+	prepare_data_for_internal_transfer()
 	company = "_Test Company with perpetual inventory"
 	from_warehouse = create_warehouse("_Test Invoice Transfer From", company=company)
 	item = make_item(
