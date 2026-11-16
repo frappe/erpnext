@@ -2173,6 +2173,7 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertEqual(frappe.db.get_value("Purchase Order Item", po.items[0].name, "returned_qty"), 3)
 
+<<<<<<< HEAD
 	def test_second_partial_internal_order_links_to_its_own_source(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_inter_company_purchase_order
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -2272,6 +2273,30 @@ class TestPurchaseOrder(FrappeTestCase):
 
 			orders[1].cancel()
 			self.assertFalse(source.get_db_value("inter_company_order_reference"))
+=======
+	def test_supplier_from_first_item_default_found(self):
+		item_group = frappe.get_doc(
+			{
+				"doctype": "Item Group",
+				"item_group_name": "_Test Default Supplier Group",
+				"parent_item_group": "All Item Groups",
+				"item_group_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier 1"}],
+			}
+		).insert()
+		item_with_default = make_item(
+			"_Test Item With Default Supplier",
+			{"item_defaults": [{"company": "_Test Company", "default_supplier": "_Test Supplier"}]},
+		)
+		item_from_group = make_item("_Test Item With Group Default Supplier", {"item_group": item_group.name})
+
+		po = frappe.new_doc("Purchase Order")
+		po.company = "_Test Company"
+		po.append("items", {"item_code": item_with_default.name})
+		po.append("items", {"item_code": item_from_group.name})
+		po.set_supplier_from_item_default()
+
+		self.assertEqual(po.supplier, "_Test Supplier")
+>>>>>>> 1625973 (test: supplier from the first row's item default)
 
 
 def create_po_for_sc_testing():
