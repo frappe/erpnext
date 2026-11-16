@@ -320,6 +320,42 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertEqual(details.blanket_order, bo.name)
 
+	def test_quotation_uses_only_a_selling_blanket_order_of_its_customer(self):
+		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
+
+		item = make_item("_Test Blanket Order Quotation Item", {"is_stock_item": 1}).name
+		purchasing = make_blanket_order(blanket_order_type="Purchasing", rate=40, item_code=item)
+		other_customer = make_blanket_order(
+			blanket_order_type="Selling", customer="_Test Customer 1", rate=60, item_code=item
+		)
+		selling = make_blanket_order(blanket_order_type="Selling", rate=90, item_code=item)
+		for bo, days in ((purchasing, 3), (other_customer, 5)):
+			bo.db_set("to_date", add_days(today(), days))
+
+		details = get_blanket_order_details(
+			{
+				"company": "_Test Company",
+				"currency": selling.currency,
+				"customer": selling.customer,
+				"doctype": "Quotation",
+				"item_code": item,
+				"transaction_date": today(),
+			}
+		)
+		self.assertEqual(details.blanket_order, selling.name)
+
+		def quotation_against(bo):
+			quotation = make_quotation(item_code=item, party_name=selling.customer, do_not_save=True)
+			quotation.items[0].against_blanket_order = 1
+			quotation.items[0].blanket_order = bo.name
+			return quotation
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "cannot be used on", quotation_against(purchasing).insert
+		)
+		self.assertRaisesRegex(frappe.ValidationError, "is for", quotation_against(other_customer).insert)
+		quotation_against(selling).insert()
+
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
 		po = make_purchase_order_against(bo, qty=10)
