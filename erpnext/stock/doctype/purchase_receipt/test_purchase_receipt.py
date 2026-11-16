@@ -10516,6 +10516,83 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		self.assertEqual(receipt.items[0].received_qty, 3)
 		self.assertEqual(receipt.items[0].received_stock_qty, 36)
 
+	def test_previous_row_valuation_charge_follows_each_item_tax(self):
+		receipt = self.make_receipt_with_previous_row_charge()
+
+		self.assertEqual([d.item_tax_amount for d in receipt.items], [0, 50])
+		self.assertEqual([d.valuation_rate for d in receipt.items], [100, 105])
+
+	def test_previous_row_charge_keeps_split_of_older_receipts(self):
+		receipt = self.make_receipt_with_previous_row_charge()
+		charge = receipt.taxes[1]
+
+		receipt.reload()
+		receipt.update_valuation_rate(reset_outgoing_rate=False)
+		self.assertEqual([d.item_tax_amount for d in receipt.items], [0, 50])
+
+		# a receipt valued before the flag existed was split by net amount
+		charge.db_set("allocate_by_item_wise_tax", 0)
+		receipt.reload()
+		receipt.update_valuation_rate(reset_outgoing_rate=False)
+		self.assertEqual([d.item_tax_amount for d in receipt.items], [25, 25])
+		self.assertEqual(receipt.get_capitalized_valuation_tax()[charge.name], 50)
+
+	def test_return_values_previous_row_charge_as_its_receipt(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		receipt = self.make_receipt_with_previous_row_charge()
+		receipt.submit()
+		receipt.taxes[1].db_set("allocate_by_item_wise_tax", 0)
+
+		return_receipt = make_purchase_return(receipt.name)
+		return_receipt.insert()
+		self.assertEqual([d.item_tax_amount for d in return_receipt.items], [-25, -25])
+
+	def make_receipt_with_previous_row_charge(self):
+		"""Item A is exempt from the 10% tax that a 50% Previous Row valuation charge is based on."""
+		excise_account = "_Test Account Excise Duty - _TC"
+		nil_rated = frappe.get_doc(
+			{
+				"doctype": "Item Tax Template",
+				"title": "_Test Nil Rated Excise",
+				"company": "_Test Company",
+				"taxes": [{"tax_type": excise_account, "tax_rate": 0}],
+			}
+		).insert()
+		exempt_item = make_item("_Test Excise Exempt Item", {"is_stock_item": 1}).name
+		taxed_item = make_item("_Test Excise Taxed Item", {"is_stock_item": 1}).name
+
+		receipt = make_purchase_receipt(item_code=exempt_item, qty=10, rate=100, do_not_save=True)
+		receipt.items[0].item_tax_template = nil_rated.name
+		row = receipt.items[0]
+		receipt.append(
+			"items",
+			{"item_code": taxed_item, "qty": 10, "rate": 100, "warehouse": row.warehouse, "uom": row.uom},
+		)
+		receipt.append(
+			"taxes",
+			{
+				"category": "Total",
+				"charge_type": "On Net Total",
+				"account_head": excise_account,
+				"description": "Excise",
+				"rate": 10,
+			},
+		)
+		receipt.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "On Previous Row Amount",
+				"row_id": 1,
+				"account_head": "_Test Account Shipping Charges - _TC",
+				"cost_center": "Main - _TC",
+				"description": "Freight on excise",
+				"rate": 50,
+			},
+		)
+		return receipt.insert()
+
 	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
 		from erpnext.buying.doctype.purchase_order.mapper import (
 			make_purchase_receipt as make_receipt_from_order,
