@@ -401,11 +401,16 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	return valid_items
 
 
+def get_return_reference_field(doctype: str) -> str:
+	"""Field through which a return row of the doctype refers to its original row."""
+	return frappe.scrub(doctype) + "_item" if doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
+
+
 def get_already_returned_items(doc):
 	child = DocType(f"{doc.doctype} Item")
 	par = DocType(doc.doctype)
 
-	field = frappe.scrub(doc.doctype) + "_item" if doc.doctype in ROW_REFERENCE_DOCTYPES else "dn_detail"
+	field = get_return_reference_field(doc.doctype)
 
 	stock_qty = Abs(child.qty) * child.conversion_factor
 
