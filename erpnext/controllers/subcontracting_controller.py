@@ -552,6 +552,7 @@ class SubcontractingController(StockController):
 				item.conversion_factor = 1
 
 	def validate_items(self):
+		order_items = set()
 		for item in self.items:
 			is_stock_item, is_sub_contracted_item = frappe.get_value(
 				"Item", item.item_code, ["is_stock_item", "is_sub_contracted_item"]
@@ -594,6 +595,14 @@ class SubcontractingController(StockController):
 								item.idx, item.item_name, order_item_doctype
 							)
 						)
+
+					if item.get(order_item_field) in order_items:
+						frappe.throw(
+							_("Row {0}: Item {1} is linked to the same {2} row as an earlier row.").format(
+								item.idx, item.item_name, order_item_doctype
+							)
+						)
+					order_items.add(item.get(order_item_field))
 
 					pending_qty = flt(
 						flt(
