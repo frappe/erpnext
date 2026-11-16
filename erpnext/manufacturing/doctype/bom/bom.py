@@ -1566,8 +1566,15 @@ def get_bom_item_rate(args, bom_doc):
 
 def get_valuation_rate(data):
 	"""
+<<<<<<< HEAD
 	1) Get average valuation rate from all warehouses
 	2) If no value, get last valuation rate from SLE
+=======
+	1) Get average valuation rate from the scoping warehouse if one is passed
+	   (source warehouse for raw materials, default target warehouse for secondary
+	   items), else from all warehouses
+	2) If no value, get last valuation rate from the company's SLE
+>>>>>>> 95bf477 (fix(manufacturing): take the BOM's last valuation rate fallback from its own company)
 	3) If no value, get valuation rate from Item
 	"""
 <<<<<<< HEAD
@@ -1578,7 +1585,7 @@ def get_valuation_rate(data):
 
 	# None: no Bin, e.g. a source warehouse that never held the item
 	if flt(valuation_rate) <= 0:
-		valuation_rate = _get_last_valuation_rate_from_sle(item_code)
+		valuation_rate = _get_last_valuation_rate_from_sle(item_code, company)
 
 	if not valuation_rate:
 		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
@@ -1621,6 +1628,7 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 
 	valuation_rate = item_valuation.get("valuation_rate")
 
+<<<<<<< HEAD
 	if (valuation_rate is not None) and valuation_rate <= 0:
 		# Explicit null value check. If None, Bins don't exist, neither does SLE
 		sle = frappe.qb.DocType("Stock Ledger Entry")
@@ -1632,6 +1640,23 @@ def _get_avg_valuation_rate_from_bins(item_code, company, data):
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
 		).run(as_dict=True)
+=======
+def _get_last_valuation_rate_from_sle(item_code, company):
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	last_val_rate = (
+		frappe.qb.from_(sle)
+		.select(sle.valuation_rate)
+		.where(
+			(sle.item_code == item_code)
+			& (sle.company == company)
+			& (sle.valuation_rate > 0)
+			& (sle.is_cancelled == 0)
+		)
+		.orderby(sle.posting_datetime, order=frappe.qb.desc)
+		.orderby(sle.creation, order=frappe.qb.desc)
+		.limit(1)
+	).run(as_dict=True)
+>>>>>>> 95bf477 (fix(manufacturing): take the BOM's last valuation rate fallback from its own company)
 
 		valuation_rate = flt(last_val_rate[0].get("valuation_rate")) if last_val_rate else 0
 
