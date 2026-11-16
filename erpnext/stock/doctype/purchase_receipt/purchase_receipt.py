@@ -18,7 +18,11 @@ import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.controllers.accounts_controller import merge_taxes
-from erpnext.controllers.buying_controller import BuyingController, get_received_stock_qty_status_args
+from erpnext.controllers.buying_controller import (
+	BuyingController,
+	get_received_stock_qty_status_args,
+	get_returned_stock_qty_status_args,
+)
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.stock import get_warehouse_account
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -266,7 +270,7 @@ class PurchaseReceipt(BuyingController):
 				"target_parent_dt": "Purchase Receipt",
 				"target_parent_field": "per_returned",
 				"target_ref_field": "received_stock_qty",
-				"source_field": "-1 * received_stock_qty",
+				**get_returned_stock_qty_status_args(),
 				"percent_join_field_parent": "return_against",
 			},
 		]
