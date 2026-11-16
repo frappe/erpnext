@@ -1060,6 +1060,44 @@ class TestGetItemDetail(ERPNextTestSuite):
 
 		self.assertEqual(details.price_list_rate, 1000)
 
+	def test_fallback_price_is_converted_from_the_default_price_list_currency(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item().name
+		usd_list = frappe.get_doc(
+			{
+				"doctype": "Price List",
+				"price_list_name": "_Test USD Fallback",
+				"currency": "USD",
+				"selling": 1,
+			}
+		).insert()
+		default_list = self.make_selling_price_list("_Test INR Default Price List")
+		self.make_item_price(item_code, default_list.name, 8500)
+		ctx = frappe._dict(
+			{
+				"item_code": item_code,
+				"company": "_Test Company",
+				"customer": "_Test Customer USD",
+				"currency": "USD",
+				"conversion_rate": 83,
+				"price_list": usd_list.name,
+				"price_list_currency": "USD",
+				"plc_conversion_rate": 83,
+				"doctype": "Sales Order",
+				"ignore_pricing_rule": 1,
+				"qty": 1,
+			}
+		)
+
+		with self.change_settings(
+			"Selling Settings",
+			{"fallback_to_default_price_list": 1, "selling_price_list": default_list.name},
+		):
+			details = get_item_details(ctx)
+
+		self.assertAlmostEqual(details.price_list_rate, 8500 / 83, places=2)
+
 	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
 			frappe.get_doc(
