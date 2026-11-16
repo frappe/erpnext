@@ -1075,8 +1075,13 @@ def get_doctypes_for_closing(doctype, txt, searchfield, start, page_len, filters
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
-	item_doc = frappe.get_cached_doc("Item", filters.get("item_code"))
+	item_code = filters.get("item_code")
 	item_group = filters.get("item_group")
+	if not isinstance(item_code, str) or not isinstance(item_group, str | None):
+		frappe.throw(_("Invalid Item Code or Item Group"), frappe.PermissionError)
+
+	frappe.has_permission("Item", "read", item_code, throw=True)
+	item_doc = frappe.get_cached_doc("Item", item_code)
 	company = filters.get("company")
 	taxes = item_doc.taxes or []
 
@@ -1113,7 +1118,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 		ctx = ItemDetailsCtx(
 			{
-				"item_code": filters.get("item_code"),
+				"item_code": item_code,
 				"posting_date": valid_from,
 				"tax_category": filters.get("tax_category"),
 				"company": company,
@@ -1123,7 +1128,11 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 		taxes = _get_item_tax_template(ctx, taxes, for_validate=True)
 		txt = txt.lower()
-		return [(d,) for d in set(taxes) if not txt or txt in d.lower()]
+		templates = [d for d in set(taxes) if not txt or txt in d.lower()]
+		if not templates:
+			return []
+
+		return frappe.get_list("Item Tax Template", filters={"name": ["in", templates]}, as_list=True)
 
 
 def get_fields(doctype, fields=None):
