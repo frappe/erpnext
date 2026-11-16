@@ -101,10 +101,14 @@ def validate_return_against(doc):
 def validate_returned_items(doc):
 	valid_items = frappe._dict()
 
+<<<<<<< HEAD
 	select_fields = "item_code, qty, rate, parenttype, conversion_factor, name"
 	if doc.doctype != "Subcontracting Receipt":
 		select_fields += ", stock_qty"
 
+=======
+	select_fields = ["item_code", "qty", "rate", "parenttype", "conversion_factor", "name"]
+>>>>>>> 384e7a1 (fix(stock): add up the returnable stock qty from qty × conversion factor)
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ",serial_no, batch_no"
 
@@ -116,9 +120,7 @@ def validate_returned_items(doc):
 		doc.return_against,
 		as_dict=1,
 	):
-		if doc.doctype == "Subcontracting Receipt":
-			d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
-
+		d.stock_qty = flt(d.qty) * flt(d.conversion_factor or 1)
 		valid_items = get_ref_item_dict(valid_items, d)
 		if doc.doctype == "Delivery Note":
 			valid_items = get_ref_item_dict(valid_items, frappe._dict(d, name=None))
