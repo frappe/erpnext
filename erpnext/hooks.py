@@ -426,9 +426,10 @@ doc_events = {
 		],
 	},
 	"Quotation": {
-		# before_save covers drafts; a submitted quotation takes the
-		# update-after-submit path instead, which is where the signature is written
+		# Frappe runs one of these per action: a draft's save, its submit, and an update after
+		# submit (where the portal writes the signature) each need the guard
 		"before_save": "erpnext.portal.customer_portal.protect_quotation_signature",
+		"before_submit": "erpnext.portal.customer_portal.protect_quotation_signature",
 		"before_update_after_submit": "erpnext.portal.customer_portal.protect_quotation_signature",
 	},
 	"Comment": {
