@@ -2,7 +2,6 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	constructor(frm, item, callback) {
 		this.frm = frm;
 		this.item = item;
-		this.qty = item.qty;
 		this.callback = callback;
 		this.bundle = this.item?.is_rejected
 			? this.item.rejected_serial_and_batch_bundle
@@ -49,6 +48,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		}
 
 		qty = Math.abs(qty);
+		this.qty = qty;
 		if (qty > 0) {
 			this.dialog.set_value("qty", qty).then(() => {
 				if (this.item.serial_no && !this.item.serial_and_batch_bundle) {
@@ -518,10 +518,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	get_auto_data() {
 		let { qty, based_on } = this.dialog.get_values();
 
-		if (this.item.serial_and_batch_bundle || this.item.rejected_serial_and_batch_bundle) {
-			if (this.qty && qty === Math.abs(this.qty)) {
-				return;
-			}
+		if (this.bundle && qty === this.qty) {
+			return;
 		}
 
 		if (this.item.serial_no || this.item.batch_no) {
@@ -662,14 +660,13 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			frappe.throw(__("Rejected Warehouse and Accepted Warehouse cannot be same."));
 		}
 
-		let qty_to_fetch = flt(this.dialog.get_value("qty"));
 		let total_qty = entries.reduce((total, row) => total + (flt(row.qty) || 1.0), 0);
 
-		if (flt(total_qty, 6) !== flt(qty_to_fetch, 6)) {
+		if (flt(total_qty, 6) !== flt(this.qty, 6)) {
 			const confirm_dialog = frappe.confirm(
 				__(
-					"<strong>Total qty</strong> of the rows (<strong>{0}</strong>) does not match the <strong>Qty to Fetch</strong> (<strong>{1}</strong>). Qty of the item will be changed to <strong>{0}</strong>. Are you sure want to proceed?",
-					[format_number(total_qty), format_number(qty_to_fetch)]
+					"<strong>Total qty</strong> of the rows (<strong>{0}</strong>) does not match the <strong>Item Qty</strong> (<strong>{1}</strong>). Qty of the item will be changed to <strong>{0}</strong>. Are you sure want to proceed?",
+					[format_number(total_qty), format_number(this.qty)]
 				),
 				() => this.create_bundle_entries(entries, warehouse)
 			);

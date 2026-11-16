@@ -3,6 +3,8 @@
 
 import copy
 import json
+from itertools import product
+from unittest.mock import patch
 
 import frappe
 from frappe import qb
@@ -11,6 +13,11 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, flt, format_date, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.deferred_revenue import (
+	book_deferred_income_or_expense,
+	get_already_booked_amount,
+	get_deferred_revenue_returns,
+)
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.mode_of_payment.test_mode_of_payment import (
 	set_default_account_for_mode_of_payment,
@@ -1183,9 +1190,10 @@ class TestSalesInvoice(FrappeTestCase):
 
 		pos.is_pos = 1
 		pos.pos_profile = pos_profile.name
+		pos.account_for_change_amount = "Cash - _TC"
 
 		pos.append("payments", {"mode_of_payment": "Bank Draft", "amount": 500})
-		pos.append("payments", {"mode_of_payment": "Cash", "amount": 500})
+		pos.append("payments", {"mode_of_payment": "Cash", "amount": 512.07})
 		pos.insert()
 		pos.submit()
 
@@ -2457,6 +2465,99 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
+	def test_rounding_adjustment_in_foreign_currency(self):
+		"""The receivable is posted at the base rounded total and the round off at the base
+		adjustment, so the entries balance without a second round off."""
+		frappe.db.set_value("Currency", "JPY", "enabled", 1)
+		debit_to = create_account(
+			account_name="_Test Receivable JPY",
+			parent_account="Accounts Receivable - _TC",
+			company="_Test Company",
+			account_currency="JPY",
+			account_type="Receivable",
+		)
+		if not frappe.db.exists("Customer", "_Test Customer JPY"):
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "_Test Customer JPY",
+					"customer_group": "_Test Customer Group",
+					"territory": "_Test Territory",
+					"default_currency": "JPY",
+				}
+			).insert()
+
+		si = create_sales_invoice(
+			customer="_Test Customer JPY",
+			currency="JPY",
+			conversion_rate=0.567,
+			debit_to=debit_to,
+			rate=1701.4,
+		)
+
+		self.assertEqual(si.rounded_total, 1701)
+		self.assertEqual(si.rounding_adjustment, -0.4)
+		self.assertEqual(si.base_grand_total, 964.69)
+		self.assertEqual(si.base_rounding_adjustment, -0.22)
+		self.assertEqual(si.base_rounded_total, 964.47)
+
+		round_off_account = frappe.get_cached_value("Company", si.company, "round_off_account")
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"voucher_type": "Sales Invoice", "voucher_no": si.name},
+			fields=["account", "debit", "credit", "debit_in_account_currency"],
+			order_by="account asc",
+		)
+		expected_values = {
+			debit_to: [964.47, 0.0],
+			round_off_account: [0.22, 0.0],
+			"Sales - _TC": [0.0, 964.69],
+		}
+		self.assertEqual({gle.account for gle in gl_entries}, set(expected_values))
+		for gle in gl_entries:
+			self.assertEqual([gle.debit, gle.credit], expected_values[gle.account])
+			if gle.account == round_off_account:
+				# the round off account is in company currency, so both amounts are the base adjustment
+				self.assertEqual(gle.debit_in_account_currency, 0.22)
+
+		payment = get_payment_entry(
+			si.doctype,
+			si.name,
+			bank_account="_Test Cash - _TC",
+			bank_amount=964.47,
+		)
+		payment.source_exchange_rate = si.conversion_rate
+		payment.insert()
+		payment.submit()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={"account": debit_to, "voucher_no": ["in", [si.name, payment.name]], "is_cancelled": 0},
+			fields=["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		self.assertAlmostEqual(sum(gle.debit - gle.credit for gle in gl_entries), 0, places=2)
+		self.assertAlmostEqual(
+			sum(gle.debit_in_account_currency - gle.credit_in_account_currency for gle in gl_entries),
+			0,
+			places=2,
+		)
+		self.assertAlmostEqual(
+			sum(
+				frappe.get_all(
+					"Payment Ledger Entry",
+					filters={"against_voucher_no": si.name, "delinked": 0},
+					pluck="amount",
+				)
+			),
+			0,
+			places=2,
+		)
+		payment.cancel()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 1701)
+		si.cancel()
+
 	def test_rounding_adjustment_2(self):
 		si = create_sales_invoice(rate=400, do_not_save=True)
 		for rate in [400.25, 600.30, 100.65]:
@@ -2929,6 +3030,271 @@ class TestSalesInvoice(FrappeTestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
+
+	@change_settings("Accounts Settings", {"automatically_process_deferred_accounting_entry": 0})
+	def test_credit_note_for_unrecognized_deferred_revenue(self):
+		deferred_account = create_account(
+			account_name="_Test Unrecognized Deferred Revenue",
+			parent_account="Current Liabilities - _TC",
+			company="_Test Company",
+		)
+		for currency, discount_accounting in (("INR", 0), ("USD", 0), ("INR", 1)):
+			with change_settings("Selling Settings", {"enable_discount_accounting": discount_accounting}):
+				for basis, (via_journal, submit_journal), returned_qty in product(
+					("Days", "Months"), ((0, 0), (1, 0), (1, 1)), (1, 2)
+				):
+					with (
+						self.subTest(
+							basis=basis,
+							via_journal=via_journal,
+							submit_journal=submit_journal,
+							returned_qty=returned_qty,
+							currency=currency,
+							discount_accounting=discount_accounting,
+						),
+						change_settings(
+							"Accounts Settings",
+							{
+								"book_deferred_entries_based_on": basis,
+								"book_deferred_entries_via_journal_entry": via_journal,
+								"submit_journal_entries": submit_journal,
+							},
+						),
+					):
+						invoice = make_recurring_reference_invoice(
+							"2019-01-01", "2019-03-31", [("2019-01-01", "2019-03-31")]
+						)
+						invoice.items[0].deferred_revenue_account = deferred_account
+						invoice.items[0].qty = 2
+						invoice.items[0].rate = 50
+						if currency == "USD":
+							invoice.customer = "_Test Customer USD"
+							invoice.currency = "USD"
+							invoice.conversion_rate = 60
+							invoice.debit_to = "_Test Receivable USD - _TC"
+						if discount_accounting:
+							invoice.items[0].discount_account = create_account(
+								account_name="Discount Account",
+								parent_account="Indirect Expenses - _TC",
+								company=invoice.company,
+							)
+							invoice.items[0].price_list_rate = 100
+							invoice.items[0].discount_percentage = 50
+						invoice.insert().submit()
+
+						credit_note = make_return_doc("Sales Invoice", invoice.name)
+						credit_note.set_posting_time = 1
+						credit_note.posting_date = "2019-01-01"
+						credit_note.items[0].qty = -returned_qty
+						credit_note.insert().submit()
+
+						returned_amount = 50 * returned_qty
+						base_returned_amount = returned_amount * invoice.conversion_rate
+						expected_entries = [
+							(
+								invoice.items[0].deferred_revenue_account,
+								base_returned_amount * (1 + discount_accounting),
+								0,
+								returned_amount * (1 + discount_accounting),
+								0,
+							),
+							(invoice.debit_to, 0, base_returned_amount, 0, returned_amount),
+						]
+						if discount_accounting:
+							expected_entries.append(
+								(
+									invoice.items[0].discount_account,
+									0,
+									base_returned_amount,
+									0,
+									returned_amount,
+								)
+							)
+						self.assertCountEqual(
+							frappe.get_all(
+								"GL Entry",
+								filters={
+									"voucher_type": "Sales Invoice",
+									"voucher_no": credit_note.name,
+									"is_cancelled": 0,
+								},
+								fields=[
+									"account",
+									"debit",
+									"credit",
+									"debit_in_transaction_currency",
+									"credit_in_transaction_currency",
+								],
+								as_list=True,
+							),
+							expected_entries,
+						)
+						returned = get_deferred_revenue_returns(invoice)[invoice.items[0].name]
+						self.assertEqual(returned.base_amount, base_returned_amount)
+						self.assertEqual(returned.amount, returned_amount)
+
+						if returned_qty == 1:
+							second_credit_note = make_return_doc("Sales Invoice", invoice.name)
+							second_credit_note.set_posting_time = 1
+							second_credit_note.posting_date = "2019-01-01"
+							second_credit_note.insert().submit()
+							self.assertEqual(
+								get_deferred_revenue_returns(invoice)[invoice.items[0].name].amount, 100
+							)
+							second_credit_note.cancel()
+
+						process = (
+							frappe.get_doc(
+								doctype="Process Deferred Accounting",
+								company=invoice.company,
+								type="Income",
+								account=deferred_account,
+								posting_date="2019-03-31",
+								start_date="2019-01-01",
+								end_date="2019-03-31",
+							)
+							.insert()
+							.submit()
+						)
+						invoice.reload()
+						self.assertEqual(
+							get_already_booked_amount(invoice, invoice.items[0])[0],
+							50 * (2 - returned_qty) * invoice.conversion_rate,
+						)
+						self.assertEqual(invoice.items[0].base_net_amount, 100 * invoice.conversion_rate)
+						self.assertEqual(invoice.items[0].net_amount, 100)
+						self.assertEqual(
+							credit_note.get_item_income_account(credit_note.items[0]),
+							invoice.items[0].deferred_revenue_account,
+						)
+
+						if returned_qty == 1:
+							with self.assertRaisesRegex(
+								frappe.ValidationError, "before cancelling this credit note"
+							):
+								credit_note.cancel()
+							credit_note.reload()
+
+						for name in frappe.get_all(
+							"Journal Entry", {"process_deferred_accounting": process.name}, pluck="name"
+						):
+							journal = frappe.get_doc("Journal Entry", name)
+							if journal.docstatus == 1:
+								journal.cancel()
+							else:
+								journal.delete()
+						process.cancel()
+						credit_note.cancel()
+						self.assertEqual(get_deferred_revenue_returns(invoice), {})
+						book_deferred_income_or_expense(invoice, None, "2019-03-31")
+						self.assertEqual(
+							get_already_booked_amount(invoice, invoice.items[0])[0],
+							100 * invoice.conversion_rate,
+						)
+						cancel_deferred_invoice(invoice)
+
+	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Days"})
+	def test_credit_note_after_deferred_revenue_recognition(self):
+		for recognition_date, (via_journal, submit_journal) in product(
+			("2019-01-31", "2019-03-31"), ((0, 0), (1, 0), (1, 1))
+		):
+			with (
+				self.subTest(
+					recognition_date=recognition_date, via_journal=via_journal, submit_journal=submit_journal
+				),
+				change_settings(
+					"Accounts Settings",
+					{
+						"book_deferred_entries_via_journal_entry": via_journal,
+						"submit_journal_entries": submit_journal,
+					},
+				),
+			):
+				invoice = make_recurring_reference_invoice(
+					"2019-01-01", "2019-03-31", [("2019-01-01", "2019-03-31")]
+				)
+				invoice.insert().submit()
+				book_deferred_income_or_expense(invoice.reload(), None, recognition_date)
+				credit_note = make_return_doc("Sales Invoice", invoice.name)
+				credit_note.insert().submit()
+				self.assertEqual(
+					frappe.get_all(
+						"GL Entry",
+						{
+							"voucher_type": "Sales Invoice",
+							"voucher_no": credit_note.name,
+							"is_cancelled": 0,
+							"debit": [">", 0],
+						},
+						pluck="account",
+					),
+					[invoice.items[0].income_account],
+				)
+				self.assertEqual(get_deferred_revenue_returns(invoice), {})
+				credit_note.cancel()
+				cancel_deferred_invoice(invoice)
+
+	@change_settings("Selling Settings", {"allow_multiple_items": 1})
+	@change_settings(
+		"Accounts Settings",
+		{
+			"automatically_process_deferred_accounting_entry": 0,
+			"book_deferred_entries_based_on": "Days",
+			"book_deferred_entries_via_journal_entry": 0,
+		},
+	)
+	def test_deferred_return_account_queries(self):
+		invoice = make_recurring_reference_invoice(
+			"2019-01-01",
+			"2019-02-28",
+			[("2019-01-01", "2019-01-31")] * 5 + [("2019-02-01", "2019-02-28")] * 5,
+		)
+		other_account = create_account(
+			account_name="Deferred Subscription Revenue",
+			parent_account="Current Liabilities - _TC",
+			company=invoice.company,
+		)
+		for index, item in enumerate(invoice.items):
+			item.qty = 2
+			item.rate = 50
+			if index % 2:
+				item.deferred_revenue_account = other_account
+		invoice.insert().submit()
+		credit_note = make_return_doc("Sales Invoice", invoice.name)
+		for item in credit_note.items:
+			item.qty = -1
+		credit_note.insert()
+		frappe.get_cached_doc("Sales Invoice", invoice.name)
+		credit_note.get_deferred_return_items()
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			deferred_return_items = credit_note.get_deferred_return_items()
+			for item in credit_note.items:
+				self.assertEqual(
+					credit_note.get_item_income_account(item, deferred_return_items),
+					item.deferred_revenue_account,
+				)
+				self.assertEqual(
+					credit_note.get_item_income_account(item, deferred_return_items),
+					item.deferred_revenue_account,
+				)
+			self.assertLessEqual(queries.call_count, 5)
+
+		book_deferred_income_or_expense(invoice.reload(), None, "2019-01-31")
+		credit_note.get_deferred_return_items()
+		with patch.object(frappe.db, "sql", wraps=frappe.db.sql) as queries:
+			deferred_return_items = credit_note.get_deferred_return_items()
+			for index, item in enumerate(credit_note.items):
+				self.assertEqual(
+					credit_note.get_item_income_account(item, deferred_return_items),
+					item.income_account if index < 5 else item.deferred_revenue_account,
+				)
+			self.assertLessEqual(queries.call_count, 5)
+		credit_note.submit()
+		self.assertEqual(
+			set(get_deferred_revenue_returns(invoice)), {item.name for item in invoice.items[5:]}
+		)
+		credit_note.cancel()
+		cancel_deferred_invoice(invoice)
 
 	def test_deferred_revenue_missing_account(self):
 		si = create_sales_invoice(posting_date="2019-01-10", do_not_submit=True)
@@ -6133,6 +6499,27 @@ def make_recurring_reference_invoice(from_date, to_date, service_dates):
 		row.service_start_date = service_start_date
 		row.service_end_date = service_end_date
 	return reference
+
+
+def cancel_deferred_invoice(invoice):
+	# Deferred booking commits on v15, so clean up through the normal document lifecycle.
+	for name in set(
+		frappe.get_all(
+			"Journal Entry Account",
+			filters={
+				"reference_type": "Sales Invoice",
+				"reference_name": invoice.name,
+				"docstatus": ["<", 2],
+			},
+			pluck="parent",
+		)
+	):
+		journal = frappe.get_doc("Journal Entry", name)
+		if journal.docstatus == 1:
+			journal.cancel()
+		else:
+			journal.delete()
+	invoice.reload().cancel()
 
 
 def make_recurring_invoice(reference, from_date, to_date):

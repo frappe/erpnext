@@ -10,7 +10,13 @@ from erpnext.patches.v16_0.set_not_applicable_on_german_item_tax_templates impor
 	execute as backfill_not_applicable,
 )
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.get_item_details import get_item_tax_template
+from erpnext.stock.get_item_details import get_item_tax_map, get_item_tax_template
+from erpnext.tests.permission_test_utils import (
+	as_user,
+	assert_refused,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 
 COMPANY = "_Test Company"
 TAX_ACCOUNT = "_Test Account VAT - _TC"
@@ -188,6 +194,31 @@ class TestItemTaxTemplate(FrappeTestCase):
 		doc = self.make_template([("Duties and Taxes - _TC", 7, 0)])
 		self.assertRaisesRegex(frappe.ValidationError, "is a group account", doc.insert)
 
+	def test_item_tax_map_needs_template_permission(self):
+		template = self.make_tax_template(18)
+		kwargs = {"company": COMPANY, "item_tax_template": template, "as_json": False}
+		expected = {TAX_ACCOUNT: 18}
+		self.assertEqual(get_item_tax_map(**kwargs), expected)
+
+		sales_user = make_fenced_user("_test_itt_sales@example.com", ["Sales User"])
+		other_company_user = make_company_fenced_user(
+			"_test_itt_other_company@example.com", ["Sales User"], "_Test Company 1"
+		)
+		no_role_user = make_fenced_user("_test_itt_no_role@example.com", [])
+
+		for user in (other_company_user, no_role_user):
+			with as_user(user):
+				assert_refused(self, get_item_tax_map, **kwargs)
+
+		with as_user(sales_user):
+			self.assertEqual(get_item_tax_map(**kwargs), expected)
+
+		si = create_sales_invoice(rate=1000, do_not_save=True)
+		si.items[0].item_tax_template = template
+		with as_user(no_role_user):
+			si.calculate_taxes_and_totals()
+		self.assertEqual(frappe.parse_json(si.items[0].item_tax_rate), expected)
+
 	def test_disabled_template_on_transaction_throws(self):
 		template = self.make_template([(TAX_ACCOUNT, 28, 0)])
 		template.disabled = 1
@@ -257,6 +288,19 @@ class TestItemTaxTemplate(FrappeTestCase):
 
 		self.assertEqual(pi.company, "_Test Company 1")
 		self.assertNotEqual(pi.items[0].item_tax_template, seller_template.name)
+
+	def test_item_code_must_be_a_string_to_get_template(self):
+		template = self.make_tax_template(10)
+		item_code = self.make_item_with_taxes([{"item_tax_template": template}])
+		item_name = frappe.db.get_value("Item", item_code, "item_name")
+
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"Item Code required",
+			self.get_template_for,
+			{"item_name": ["=", item_name]},
+		)
+		self.assertEqual(self.get_template_for(item_code), template)
 
 
 class TestGermanNotApplicableBackfill(FrappeTestCase):

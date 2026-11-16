@@ -252,8 +252,6 @@ class StockEntry(StockController):
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.set_transfer_qty()
-		self.validate_uom_is_integer("uom", "qty")
-		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse_of_sabb()
 		self.validate_work_order()
 		self.validate_returned_qty_within_work_order()
@@ -282,6 +280,8 @@ class StockEntry(StockController):
 		self.validate_against_pick_list()
 		self.validate_inspection()
 		self.validate_fg_completed_qty()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_finished_good_qty_against_fg_completed_qty()
 		self.validate_difference_account()
 		self.set_job_card_data()
@@ -821,11 +821,15 @@ class StockEntry(StockController):
 			for d in self.items:
 				if d.is_finished_item:
 					if self.process_loss_qty:
-						d.qty = self.fg_completed_qty - self.process_loss_qty
+						d.transfer_qty = flt(
+							self.fg_completed_qty - self.process_loss_qty, d.precision("transfer_qty")
+						)
+						d.qty = flt(d.transfer_qty / flt(d.conversion_factor), d.precision("qty"))
 
-					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+					# Finished Good Quantity is in the stock UOM
+					item_wise_qty.setdefault(d.item_code, []).append(d.transfer_qty)
 
-		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		precision = frappe.get_precision("Stock Entry Detail", "transfer_qty")
 		for item_code, qty_list in item_wise_qty.items():
 			total = flt(sum(qty_list), precision)
 
@@ -3000,7 +3004,6 @@ class StockEntry(StockController):
 			SED.description,
 			SED.stock_uom,
 			SED.uom,
-			SED.basic_rate,
 			SED.conversion_factor,
 			SED.is_finished_item,
 			SED.is_scrap_item,
@@ -3014,14 +3017,20 @@ class StockEntry(StockController):
 
 		if self.source_stock_entry:
 			return (
-				query.select(SED.name, SED.qty, SED.transfer_qty, *common_fields)
+				query.select(SED.name, SED.qty, SED.transfer_qty, SED.basic_rate, *common_fields)
 				.where(SE.name == self.source_stock_entry)
 				.orderby(SED.idx)
 				.run(as_dict=True)
 			)
 
 		return (
-			query.select(Sum(SED.qty).as_("qty"), Sum(SED.transfer_qty).as_("transfer_qty"), *common_fields)
+			query.select(
+				Sum(SED.qty).as_("qty"),
+				Sum(SED.transfer_qty).as_("transfer_qty"),
+				# basic_rate is per stock UOM, so weight it by transfer_qty
+				(Sum(SED.basic_rate * SED.transfer_qty) / NullIf(Sum(SED.transfer_qty), 0)).as_("basic_rate"),
+				*common_fields,
+			)
 			.where(SE.purpose == "Manufacture")
 			.where(SE.work_order == self.work_order)
 			.groupby(SED.item_code)
@@ -4866,74 +4875,143 @@ def get_items_from_subcontract_order(source_name, target_doc=None):
 
 def get_available_materials(work_order, stock_entry_doc=None) -> dict:
 	data = get_stock_entry_data(work_order, stock_entry_doc=stock_entry_doc)
+	is_disassembly = stock_entry_doc and stock_entry_doc.purpose == "Disassemble"
 
 	available_materials = {}
 	for row in data:
-		key = (row.item_code, row.warehouse)
+		warehouse = row.warehouse
 		if row.purpose != "Material Transfer for Manufacture":
-			key = (row.item_code, row.s_warehouse)
-
-		if stock_entry_doc and stock_entry_doc.purpose == "Disassemble":
-			key = _get_disassembly_material_key(row)
-
-		if key not in available_materials:
-			available_materials.setdefault(
-				key,
-				frappe._dict(
-					{
-						"item_details": row,
-						"batch_details": defaultdict(float),
-						"qty": 0,
-						"serial_nos": [],
-						"consumed_for": {},
-					}
-				),
-			)
-
-		item_data = available_materials[key]
+			warehouse = row.s_warehouse
 
 		if row.purpose == "Material Transfer for Manufacture" or (
-			stock_entry_doc and stock_entry_doc.purpose == "Disassemble" and row.purpose == "Manufacture"
+			is_disassembly and row.purpose == "Manufacture"
 		):
-			item_data.qty += row.qty
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] += row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] += abs(qty)
-
-			if row.serial_no:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
-				item_data.serial_nos.sort()
-
-			elif row.serial_nos:
-				item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
-				item_data.serial_nos.sort()
+			key = (
+				_get_disassembly_material_key(row)
+				if is_disassembly
+				else (row.item_code, warehouse, row.original_item or None)
+			)
+			item_data = available_materials.setdefault(key, get_available_material_bucket(row))
+			add_transferred_material(item_data, row)
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
+			if is_disassembly:
+				key = _get_disassembly_material_key(row)
+				buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
+			else:
+				buckets = get_available_buckets(available_materials, row, warehouse)
 
-			item_data.qty -= row.qty
-			if row.qty:
-				item_data.consumed_for[row.name] = flt(row.fg_completed_qty)
-			if row.batch_no:
-				item_data.batch_details[row.batch_no] -= row.qty
-
-			elif row.batch_nos:
-				for batch_no, qty in row.batch_nos.items():
-					item_data.batch_details[batch_no] -= abs(qty)
-
-			if row.serial_no:
-				for serial_no in get_serial_nos(row.serial_no):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
-
-			elif row.serial_nos:
-				for serial_no in get_serial_nos(row.serial_nos):
-					if serial_no in item_data.serial_nos:
-						item_data.serial_nos.remove(serial_no)
+			available_qty = [bucket.qty for bucket in buckets]
+			deduct_consumed_material(buckets, row)
+			for bucket, qty in zip(buckets, available_qty, strict=True):
+				if bucket.qty != qty:
+					bucket.consumed_for[row.name] = flt(row.fg_completed_qty)
 
 	return available_materials
+
+
+def get_available_material_bucket(row):
+	return frappe._dict(
+		{
+			"item_details": row,
+			"batch_details": defaultdict(float),
+			"qty": 0,
+			"serial_nos": [],
+			"consumed_for": {},
+		}
+	)
+
+
+def add_transferred_material(item_data, row):
+	item_data.qty += row.qty
+	if row.batch_no:
+		item_data.batch_details[row.batch_no] += row.qty
+
+	elif row.batch_nos:
+		for batch_no, qty in row.batch_nos.items():
+			item_data.batch_details[batch_no] += abs(qty)
+
+	if row.serial_no:
+		item_data.serial_nos.extend(get_serial_nos(row.serial_no))
+		item_data.serial_nos.sort()
+
+	elif row.serial_nos:
+		item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
+		item_data.serial_nos.sort()
+
+
+def get_available_buckets(available_materials, row, warehouse):
+	"""Use exact attribution when present; otherwise drain the direct item first."""
+	key = (row.item_code, warehouse, row.original_item or None)
+	if row.original_item and key in available_materials:
+		return [available_materials[key]]
+
+	buckets = [available_materials[key]] if key in available_materials else []
+	buckets.extend(
+		bucket
+		for material_key, bucket in available_materials.items()
+		if material_key[:2] == key[:2] and material_key != key
+	)
+	if not buckets:
+		key = (row.item_code, warehouse, None)
+		buckets = [available_materials.setdefault(key, get_available_material_bucket(row))]
+
+	return buckets
+
+
+def deduct_consumed_material(buckets, row):
+	remaining_qty = flt(row.qty)
+	if row.batch_no:
+		batches = {row.batch_no: flt(row.qty)}
+	else:
+		batches = {batch_no: abs(flt(qty)) for batch_no, qty in (row.batch_nos or {}).items()}
+
+	for batch_no, qty in batches.items():
+		remaining_qty = deduct_consumed_batch_qty(buckets, batch_no, qty, remaining_qty)
+
+	for serial_no in get_serial_nos(row.serial_no or row.serial_nos):
+		bucket = get_serial_no_bucket(buckets, serial_no)
+		if serial_no not in bucket.serial_nos:
+			continue
+
+		bucket.serial_nos.remove(serial_no)
+		if not batches and remaining_qty > 0:
+			bucket.qty -= 1
+			remaining_qty -= 1
+
+	deduct_consumed_qty(buckets, remaining_qty)
+
+
+def deduct_consumed_qty(buckets, consumed_qty):
+	for bucket in buckets[:-1]:
+		deducted = min(max(flt(bucket.qty), 0.0), consumed_qty)
+		bucket.qty -= deducted
+		consumed_qty -= deducted
+	buckets[-1].qty -= consumed_qty
+
+
+def get_serial_no_bucket(buckets, serial_no):
+	for bucket in buckets:
+		if serial_no in bucket.serial_nos:
+			return bucket
+	return buckets[-1]
+
+
+def deduct_consumed_batch_qty(buckets, batch_no, consumed_qty, remaining_qty):
+	holders = [bucket for bucket in buckets if batch_no in bucket.batch_details] or buckets[-1:]
+	for bucket in holders:
+		deducted = consumed_qty
+		if bucket is not holders[-1]:
+			deducted = min(max(flt(bucket.batch_details[batch_no]), 0.0), consumed_qty)
+
+		bucket.batch_details[batch_no] -= deducted
+		consumed_qty -= deducted
+
+		qty = max(min(deducted, remaining_qty), 0.0)
+		bucket.qty -= qty
+		remaining_qty -= qty
+
+	return remaining_qty
 
 
 def _get_disassembly_material_key(row):

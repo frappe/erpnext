@@ -643,6 +643,33 @@ class TestWorkOrder(FrappeTestCase):
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
 
+	def test_finished_good_row_in_another_uom_books_no_process_loss(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+		test_stock_entry.make_stock_entry(item_code=rm_item, qty=10, rate=10, target="_Test Warehouse - _TC")
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=10,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Work In Progress - _TC",
+			fg_warehouse="_Test Warehouse 1 - _TC",
+		)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+
+		se = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		fg_row = next(row for row in se.items if row.is_finished_item)
+		fg_row.update({"uom": "Box", "conversion_factor": 10, "qty": 1})
+		se.submit()
+
+		self.assertEqual(se.process_loss_qty, 0)
+		wo.reload()
+		self.assertEqual(wo.produced_qty, 10)
+		self.assertEqual(wo.process_loss_qty, 0)
+
 	def test_skip_transfer_work_order_completed_with_fractional_process_loss(self):
 		# 11.2 + 0.2 == 11.399999999999999 in float, which must still complete 11.4
 		work_order = frappe.new_doc("Work Order")
@@ -1940,6 +1967,70 @@ class TestWorkOrder(FrappeTestCase):
 		work_order.reload()
 		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
 
+	def _make_shared_alternative_transfer(self):
+		work_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		allow_alternative_item(work_order, "_Test Item Home Desktop 100", "_Test Item")
+		test_stock_entry.make_stock_entry(
+			item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0
+		)
+
+		transfer_entry = frappe.get_doc(
+			make_stock_entry(work_order.name, "Material Transfer for Manufacture", 2)
+		)
+		for item in transfer_entry.items:
+			if item.item_code == "_Test Item Home Desktop 100":
+				item.item_code = "_Test Item"
+				item.original_item = "_Test Item Home Desktop 100"
+		transfer_entry.submit()
+		return work_order
+
+	def test_return_attribution_when_item_doubles_as_alternative(self):
+		"""An item transferred for itself and as an alternative must return per requirement."""
+		work_order = self._make_shared_alternative_transfer()
+
+		work_order.reload()
+		self.assertEqual(work_order.material_transferred_for_manufacturing, 2.0)
+		close_work_order(work_order.name, "Closed")
+
+		return_entry = make_stock_return_entry(work_order.name)
+		return_entry.company = work_order.company
+		for row in return_entry.items:
+			row.cost_center = frappe.get_cached_value("Company", work_order.company, "cost_center")
+		rows_by_attribution = {row.original_item: row for row in return_entry.items}
+		self.assertEqual(set(rows_by_attribution), {None, "_Test Item Home Desktop 100"})
+		self.assertEqual(rows_by_attribution[None].qty, 2)
+		self.assertEqual(rows_by_attribution["_Test Item Home Desktop 100"].qty, 4)
+
+		return_entry.remove(rows_by_attribution[None])
+		return_entry.items[0].qty = 2
+		return_entry.save()
+		return_entry.submit()
+
+		work_order.reload()
+		returned_by_item = {row.item_code: row.returned_qty for row in work_order.required_items}
+		self.assertEqual(returned_by_item["_Test Item"], 0)
+		self.assertEqual(returned_by_item["_Test Item Home Desktop 100"], 2)
+
+	@change_settings(
+		"Manufacturing Settings", {"backflush_raw_materials_based_on": "Material Transferred for Manufacture"}
+	)
+	def test_return_after_consumption_preserves_attribution(self):
+		work_order = self._make_shared_alternative_transfer()
+
+		manufacture_entry = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		consumed_by_attribution = {
+			row.original_item: row.qty for row in manufacture_entry.items if row.s_warehouse
+		}
+		self.assertEqual(consumed_by_attribution, {None: 1.0, "_Test Item Home Desktop 100": 2.0})
+		manufacture_entry.submit()
+		work_order.reload()
+		consumed_by_item = {row.item_code: row.consumed_qty for row in work_order.required_items}
+		self.assertEqual(consumed_by_item, {"_Test Item": 1.0, "_Test Item Home Desktop 100": 2.0})
+
+		return_entry = make_stock_return_entry(work_order.name)
+		available_by_attribution = {row.original_item: row.qty for row in return_entry.items}
+		self.assertEqual(available_by_attribution, {None: 1.0, "_Test Item Home Desktop 100": 2.0})
+
 	def test_status_in_process_when_only_one_required_item_transferred(self):
 		"""Stock Entry created from a Pick List that picked only one of the required items:
 		min-fraction keeps material_transferred_for_manufacturing at 0, but the work order must
@@ -2906,6 +2997,34 @@ class TestWorkOrder(FrappeTestCase):
 			"backflush_raw_materials_based_on",
 			"BOM",
 		)
+
+	def test_disassembly_from_work_order_uses_weighted_rate(self):
+		source_warehouse = "Stores - _TC"
+		fg_item = make_item("Test Disassembly Weighted Rate FG", {"is_stock_item": 1}).name
+		rm_item = make_item(
+			"Test Disassembly Weighted Rate RM", {"is_stock_item": 1, "valuation_method": "FIFO"}
+		).name
+		for rate in (100, 120):
+			test_stock_entry.make_stock_entry(
+				item_code=rm_item, target=source_warehouse, qty=1, basic_rate=rate
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=2, source_warehouse=source_warehouse, skip_transfer=1
+		)
+		for _ in range(2):
+			stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+			for row in stock_entry.items:
+				if row.item_code == rm_item:
+					row.s_warehouse = source_warehouse
+			stock_entry.submit()
+
+		disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+		rm_row = next(
+			row for row in disassembly.get_items_from_manufacture_stock_entry() if row.item_code == rm_item
+		)
+		self.assertEqual(flt(rm_row.basic_rate), 110)
 
 	def test_disassemby_order(self):
 		fg_item = "Test Disassembly Item"

@@ -932,14 +932,18 @@ erpnext.work_order = {
 
 	show_prompt_for_qty_input: function (frm, purpose) {
 		let max = this.get_max_transferable_qty(frm, purpose);
+		const allowance = (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100;
+		const allowed_qty = flt(max + allowance, precision("qty"));
+		// only the overproduction allowance may be left
+		const default_qty = max || allowed_qty;
 
 		let fields = [
 			{
 				fieldtype: "Float",
 				label: __("Qty for {0}", [__(purpose)]),
 				fieldname: "qty",
-				description: __("Max: {0}", [max]),
-				default: max,
+				description: __("Max: {0}", [allowed_qty]),
+				default: default_qty,
 			},
 			{
 				fieldtype: "Check",
@@ -960,10 +964,8 @@ erpnext.work_order = {
 			frm.qty_prompt = frappe.prompt(
 				fields,
 				(data) => {
-					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
-
-					if (data.qty > max) {
-						frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+					if (data.qty > allowed_qty) {
+						frappe.msgprint(__("Quantity must not be more than {0}", [allowed_qty]));
 						reject();
 					}
 					data.purpose = purpose;
@@ -976,7 +978,14 @@ erpnext.work_order = {
 	},
 
 	make_se: function (frm, purpose) {
-		this.show_prompt_for_qty_input(frm, purpose)
+		const only_leftover_items_pending =
+			purpose === "Material Transfer for Manufacture" &&
+			this.get_max_transferable_qty(frm, purpose) <= 0;
+		const get_qty = only_leftover_items_pending
+			? Promise.resolve({ qty: 0 })
+			: this.show_prompt_for_qty_input(frm, purpose);
+
+		get_qty
 			.then((data) => {
 				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,

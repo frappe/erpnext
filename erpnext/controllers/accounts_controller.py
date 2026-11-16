@@ -74,10 +74,10 @@ from erpnext.stock.get_item_details import (
 	NOT_APPLICABLE_TAX,
 	_get_bin_details,
 	_get_item_details,
+	_get_item_tax_map,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
-	get_item_tax_map,
 	get_item_warehouse,
 )
 from erpnext.stock.utils import (
@@ -852,7 +852,7 @@ class AccountsController(TransactionBase):
 
 	def before_print(self, settings=None):
 		if self.docstatus.is_draft():
-			self.set_missing_terms()
+			self.set_missing_terms_for_display()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -877,15 +877,42 @@ class AccountsController(TransactionBase):
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
 
-	def set_missing_terms(self):
+	def set_missing_terms(self, raise_exception=True):
 		if not self.get("tc_name") or self.get("terms"):
 			return
+
+		from jinja2 import TemplateError
 
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
 			get_terms_and_conditions,
 		)
 
-		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		try:
+			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		except (TemplateError, TypeError) as e:
+			# TypeError: a helper called with arguments the terms sandbox does not take
+			message = _("Terms and Conditions {0} could not be rendered: {1}").format(
+				frappe.bold(self.tc_name), e
+			)
+			if raise_exception:
+				frappe.throw(message)
+			# loading or printing a draft must not fail on a template it cannot render
+			frappe.msgprint(message, indicator="orange", alert=True)
+
+	def set_missing_terms_for_display(self):
+		"""Render missing terms to show or print, leaving them empty if they cannot be rendered."""
+		message_count = len(frappe.message_log)
+		try:
+			self.set_missing_terms(raise_exception=False)
+		except frappe.PermissionError:
+			# a check on the template's last editor fails without logging a message
+			del frappe.message_log[message_count:]
+			frappe.msgprint(
+				_("Terms and Conditions {0} could not be rendered due to missing permissions.").format(
+					bold(self.tc_name)
+				),
+				alert=True,
+			)
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -1645,7 +1672,7 @@ class AccountsController(TransactionBase):
 	def validate_zero_qty_for_return_invoices_with_stock(self):
 		rows = []
 		for item in self.items:
-			if not flt(item.qty):
+			if not (flt(item.qty) or flt(item.get("rejected_qty"))):
 				rows.append(item)
 		if rows:
 			frappe.throw(
@@ -1654,12 +1681,18 @@ class AccountsController(TransactionBase):
 				).format(frappe.bold(comma_and(["#" + str(x.idx) for x in rows])))
 			)
 
+	def is_stock_receipt(self) -> bool:
+		"""Whether this document receives material into a warehouse."""
+		return self.doctype == "Purchase Receipt" or (
+			self.doctype == "Purchase Invoice" and self.update_stock
+		)
+
 	def validate_qty_is_not_zero(self):
 		if self.flags.allow_zero_qty:
 			return
 
 		for item in self.items:
-			if self.doctype == "Purchase Receipt" and item.rejected_qty:
+			if self.is_stock_receipt() and item.get("rejected_qty"):
 				continue
 
 			if not flt(item.qty):
@@ -2289,7 +2322,7 @@ class AccountsController(TransactionBase):
 
 		return amount, base_amount
 
-	def make_discount_gl_entries(self, gl_entries):
+	def make_discount_gl_entries(self, gl_entries, deferred_return_items=None):
 		if self.doctype == "Purchase Invoice":
 			enable_discount_accounting = cint(
 				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
@@ -2320,11 +2353,7 @@ class AccountsController(TransactionBase):
 							else item.deferred_expense_account
 						)
 					else:
-						income_or_expense_account = (
-							item.income_account
-							if (not item.enable_deferred_revenue or self.is_return)
-							else item.deferred_revenue_account
-						)
+						income_or_expense_account = self.get_item_income_account(item, deferred_return_items)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
@@ -2352,6 +2381,11 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_or_expense_account,
+								"voucher_detail_no": item.name
+								if self.doctype == "Sales Invoice"
+								and self.is_return
+								and item.enable_deferred_revenue
+								else None,
 								"against": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"),
@@ -3572,6 +3606,10 @@ class AccountsController(TransactionBase):
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if not frappe.has_permission("Account", ptype, account_head):
+		erpnext._refuse()
+
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
@@ -4187,7 +4225,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 		child_item.item_tax_template = _get_item_tax_template_from_item_group(args, item.item_group)
 
 	if child_item.get("item_tax_template"):
-		child_item.item_tax_rate = get_item_tax_map(
+		child_item.item_tax_rate = _get_item_tax_map(
 			parent_doc.get("company"), child_item.item_tax_template, as_json=True
 		)
 

@@ -123,7 +123,7 @@ def _get_item_details(
 	out = get_basic_details(args, item, overwrite_warehouse)
 
 	get_item_tax_template(args, item, out)
-	out["item_tax_rate"] = get_item_tax_map(
+	out["item_tax_rate"] = _get_item_tax_map(
 		args.company,
 		args.get("item_tax_template")
 		if out.get("item_tax_template") is None
@@ -303,6 +303,7 @@ def update_stock(ctx, out, doc=None):
 		if doc and isinstance(doc, dict):
 			doc = frappe._dict(doc)
 
+		out.stock_qty = flt(out.stock_qty, frappe.get_precision(f"{ctx.doctype} Item", "stock_qty"))
 		kwargs = frappe._dict(
 			{
 				"item_code": ctx.item_code,
@@ -373,21 +374,42 @@ def get_batch_no_covering_qty(kwargs, doc, qty):
 
 	batches = get_available_batches(frappe._dict(kwargs, qty=0))
 	if doc:
-		filter_batches(batches, doc)
+		filter_batches(batches, doc, kwargs.item_code, kwargs.warehouse)
 
 	batch_no = next(iter(batches), None)
-	if batch_no and flt(batches[batch_no]) >= flt(qty):
+	if batch_no and flt(batches[batch_no]) >= flt(qty, frappe.get_precision("Serial and Batch Entry", "qty")):
 		return batch_no
 
 	return None
 
 
-def filter_batches(batches, doc):
-	for row in doc.get("items"):
-		if row.get("batch_no") in batches:
-			batches[row.get("batch_no")] -= row.get("qty")
-			if batches[row.get("batch_no")] <= 0:
-				del batches[row.get("batch_no")]
+def filter_batches(batches, doc, item_code, warehouse):
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	for row in [*doc.get("items"), *(doc.get("packed_items") or [])]:
+		batch_no = row.get("batch_no")
+		# a later row without a warehouse yet may get this one from set_warehouse, item or POS defaults
+		if batch_no in batches and row.get("warehouse") in (None, "", warehouse):
+			stock_qty = flt(get_row_stock_qty(row, item_code), precision)
+			batches[batch_no] = flt(batches[batch_no] - stock_qty, precision)
+			if batches[batch_no] <= 0:
+				del batches[batch_no]
+
+
+def get_row_stock_qty(row, item_code):
+	"""A row's stock_qty and conversion_factor can be missing or stale until validate resets them."""
+	item = frappe.get_cached_value("Item", item_code, ["stock_uom", "sales_uom"], as_dict=True)
+	# a row without uom gets the Default Sales UOM in get_basic_details
+	uom = row.get("uom") or item.sales_uom or item.stock_uom
+	if uom == item.stock_uom:
+		return flt(row.get("qty"))
+
+	conversion_factor = row.get("conversion_factor") or get_uom_conversion_factor(item_code, uom)
+	return flt(row.get("qty")) * flt(conversion_factor)
+
+
+@frappe.request_cache
+def get_uom_conversion_factor(item_code, uom):
+	return get_conversion_factor(item_code, uom)["conversion_factor"]
 
 
 def get_filtered_serial_nos(serial_nos, doc, table=None):
@@ -815,6 +837,9 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 		if not item_code or item_code[1] in out or not item_tax_templates.get(item_code[1]):
 			continue
 
+		if not isinstance(item_code[0], str):
+			frappe.throw(_("Invalid Item Code"))
+
 		out[item_code[1]] = {}
 		item = frappe.get_cached_doc("Item", item_code[0])
 		args = {
@@ -827,9 +852,14 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 			args.update({"item_tax_template": item_tax_templates.get(item_code[1])})
 
 		get_item_tax_template(args, item, out[item_code[1]])
-		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
+		out[item_code[1]]["item_tax_rate"] = _get_item_tax_map(
 			company, out[item_code[1]].get("item_tax_template"), as_json=True
 		)
+
+	for item_tax_template in {
+		row.get("item_tax_template") for row in out.values() if row.get("item_tax_template")
+	}:
+		erpnext.require_permission("Item Tax Template", item_tax_template, "select")
 
 	return out
 
@@ -841,7 +871,7 @@ def get_item_tax_template(args, item=None, out=None):
 		args = json.loads(args)
 
 	if not item:
-		if not args.get("item_code"):
+		if not args.get("item_code") or not isinstance(args.get("item_code"), str):
 			frappe.throw(_("Item/Item Code required to get Item Tax Template."))
 		else:
 			item = frappe.get_cached_doc("Item", args.get("item_code"))
@@ -944,6 +974,13 @@ def is_within_valid_range(args, tax):
 
 @frappe.whitelist()
 def get_item_tax_map(company, item_tax_template, as_json=True):
+	if item_tax_template:
+		erpnext.require_permission("Item Tax Template", item_tax_template, "select")
+
+	return _get_item_tax_map(company, item_tax_template, as_json=as_json)
+
+
+def _get_item_tax_map(company, item_tax_template, as_json=True):
 	item_tax_map = {}
 	if item_tax_template:
 		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)

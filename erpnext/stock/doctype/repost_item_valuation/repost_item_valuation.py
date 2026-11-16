@@ -33,7 +33,6 @@ from erpnext.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
 	get_reposting_data,
-	is_transfer_stock_entry,
 	repost_future_sle,
 )
 from erpnext.stock.utils import get_combine_datetime
@@ -127,7 +126,7 @@ class RepostItemValuation(Document):
 		if self.recalculate_valuation_rate and not self.can_recalculate_valuation_rate():
 			frappe.throw(
 				_(
-					"Recalculate Valuation Rate is only allowed for a Purchase Receipt, a Purchase Invoice with Update Stock or a Stock Entry with no row that has both a Source and Target Warehouse"
+					"Recalculate Valuation Rate is only allowed for a Purchase Receipt or a Purchase Invoice with Update Stock"
 				)
 			)
 
@@ -140,9 +139,6 @@ class RepostItemValuation(Document):
 
 		if self.voucher_type == "Purchase Invoice":
 			return bool(frappe.db.get_value("Purchase Invoice", self.voucher_no, "update_stock"))
-
-		if self.voucher_type == "Stock Entry":
-			return not is_transfer_stock_entry(self.voucher_no)
 
 		return False
 
@@ -575,10 +571,7 @@ def repost(doc):
 			# nosemgrep: frappe-semgrep-rules.rules.frappe-manual-commit -- background job saves progress or failure status
 			frappe.db.commit()
 
-		if (
-			doc.voucher_type in ["Purchase Receipt", "Purchase Invoice", "Stock Entry"]
-			and doc.recalculate_valuation_rate
-		):
+		if doc.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and doc.recalculate_valuation_rate:
 			doc._recalculate_valuation_rate()
 
 		if doc.recreate_stock_ledgers:

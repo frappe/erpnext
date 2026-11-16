@@ -239,6 +239,26 @@ class TestBOMCreator(FrappeTestCase):
 		data = frappe.get_all("BOM", filters={"bom_creator": doc.name, "docstatus": 1})
 		self.assertEqual(len(data), 2)
 
+	def test_repeated_sub_assembly_keeps_own_raw_materials(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom(
+			"Bicycle BOM with Repeated Sub Assembly"
+		)
+
+		self.assertEqual(tree_child_items(doc, doc.name), ["Frame Assembly", "Seat Assembly"])
+		self.assertEqual(tree_child_items(doc, first_wheel), ["Rim", "Spokes"])
+		self.assertEqual(tree_child_items(doc, second_wheel), ["Hub"])
+
+	def test_delete_repeated_sub_assembly_keeps_sibling_raw_materials(self):
+		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom(
+			"Bicycle BOM with Deleted Sub Assembly"
+		)
+
+		doc.delete_node(doctype="BOM Creator Item", docname=second_wheel)
+		doc.reload()
+
+		self.assertEqual(tree_child_items(doc, first_wheel), ["Rim", "Spokes"])
+		self.assertFalse([row for row in doc.items if row.item_code == "Hub"])
+
 	def test_repeated_sub_assembly_is_costed_with_its_own_raw_materials(self):
 		doc, first_wheel, second_wheel = make_repeated_sub_assembly_bom("Bicycle BOM with Repeated Costing")
 		rows = {row.name: row for row in doc.items}
@@ -683,6 +703,12 @@ def create_items():
 				"stock_uom": "Nos",
 			},
 		)
+
+
+def tree_child_items(doc, parent):
+	from erpnext.manufacturing.doctype.bom_creator.bom_creator import get_children
+
+	return sorted(row.item_code for row in get_children(parent=parent, parent_id=doc.name))
 
 
 def make_bom_creator(**kwargs):

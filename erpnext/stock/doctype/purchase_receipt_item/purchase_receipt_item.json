@@ -293,6 +293,7 @@
    "label": "Conversion Factor",
    "oldfieldname": "conversion_factor",
    "oldfieldtype": "Currency",
+   "precision": "9",
    "print_hide": 1,
    "print_width": "100px",
    "reqd": 1,

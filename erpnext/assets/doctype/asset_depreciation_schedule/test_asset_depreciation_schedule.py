@@ -3,8 +3,9 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 
+from erpnext.accounts.utils import FiscalYearError
 from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.assets.doctype.asset.depreciation import (
 	_make_depreciation_entry,
@@ -32,6 +33,56 @@ from erpnext.assets.doctype.asset_value_adjustment.test_asset_value_adjustment i
 class TestAssetDepreciationSchedule(FrappeTestCase):
 	def setUp(self):
 		create_asset_data()
+
+	def test_wdv_schedule_uses_asset_company_fiscal_year(self):
+		self.addCleanup(frappe.cache().delete_value, "fiscal_years")
+
+		india_fiscal_year = frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": "_Test Asset India FY 2092",
+				"year_start_date": "2092-04-01",
+				"year_end_date": "2093-03-31",
+				"companies": [{"company": "_Test Company"}],
+			}
+		).insert()
+		self.addCleanup(frappe.delete_doc, "Fiscal Year", india_fiscal_year.name)
+		australia_fiscal_year = frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": "_Test Asset Australia FY 2092",
+				"year_start_date": "2092-07-01",
+				"year_end_date": "2093-06-30",
+				"companies": [{"company": "_Test Company 1"}],
+			}
+		).insert()
+		self.addCleanup(frappe.delete_doc, "Fiscal Year", australia_fiscal_year.name)
+
+		self.assertEqual(india_fiscal_year.disabled, 0)
+		self.assertEqual(australia_fiscal_year.disabled, 0)
+
+		asset = create_asset(
+			company="_Test Company",
+			calculate_depreciation=1,
+			purchase_date="2092-11-01",
+			available_for_use_date="2092-11-01",
+			depreciation_start_date="2092-11-30",
+			depreciation_method="Written Down Value",
+			gross_purchase_amount=100000,
+			rate_of_depreciation=40,
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=1,
+		)
+
+		schedule = get_depr_schedule(asset.name, "Draft")
+		self.assertEqual(getdate(schedule[5].schedule_date), getdate("2093-04-30"))
+		self.assertEqual(flt(schedule[5].depreciation_amount, 2), 3333.33)
+
+		india_fiscal_year.disabled = 1
+		india_fiscal_year.save()
+		asset.finance_books[0].depreciation_start_date = "2092-12-31"
+		with self.assertRaises(FiscalYearError):
+			asset.save()
 
 	def test_restore_after_scrap_on_last_booked_schedule_date(self):
 		asset = create_asset(

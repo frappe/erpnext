@@ -375,7 +375,7 @@ frappe.ui.form.on("Job Card", {
 	start_job: function (frm, status, employee) {
 		const args = {
 			job_card_id: frm.doc.name,
-			start_time: frappe.datetime.now_datetime(),
+			start_time: frappe.datetime.system_datetime(),
 			employees: employee,
 			status: status,
 		};
@@ -385,7 +385,7 @@ frappe.ui.form.on("Job Card", {
 	complete_job: function (frm, status, completed_qty) {
 		const args = {
 			job_card_id: frm.doc.name,
-			complete_time: frappe.datetime.now_datetime(),
+			complete_time: frappe.datetime.system_datetime(),
 			status: status,
 			completed_qty: completed_qty,
 		};
@@ -492,7 +492,7 @@ frappe.ui.form.on("Job Card", {
 					current_time += get_seconds_diff(d.to_time, d.from_time);
 				}
 			} else {
-				current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+				current_time += get_seconds_diff(frappe.datetime.system_datetime(), d.from_time);
 			}
 		});
 

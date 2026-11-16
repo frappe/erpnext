@@ -882,10 +882,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			},
 			freeze: true,
 			callback: function (r) {
-				if (!r.message) {
+				if (r.message.length === 0) {
 					frappe.msgprint({
 						title: __("Work Order not created"),
-						message: __("No Items with Bill of Materials to Manufacture"),
+						message: __(
+							"No Items with Bill of Materials to Manufacture or all items already manufactured"
+						),
 						indicator: "orange",
 					});
 					return;
@@ -895,13 +897,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							label: __("Items"),
 							fieldtype: "Table",
 							fieldname: "items",
+							cannot_add_rows: true,
 							description: __("Select BOM and Qty for Production"),
 							fields: [
 								{
-									fieldtype: "Read Only",
+									fieldtype: "Link",
 									fieldname: "item_code",
+									options: "Item",
 									label: __("Item Code"),
 									in_list_view: 1,
+									read_only: 1,
 								},
 								{
 									fieldtype: "Link",
@@ -927,6 +932,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 									reqd: 1,
 									label: __("Sales Order Item"),
 									hidden: 1,
+									read_only: 1,
 								},
 							],
 							data: r.message,

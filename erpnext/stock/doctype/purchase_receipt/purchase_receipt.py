@@ -510,6 +510,7 @@ class PurchaseReceipt(BuyingController):
 			if (
 				self.get("is_return")
 				and item.return_qty_from_rejected_warehouse
+				and not self.is_internal_transfer()
 				and not frappe.db.get_single_value(
 					"Buying Settings", "set_valuation_rate_for_rejected_materials"
 				)
@@ -531,7 +532,9 @@ class PurchaseReceipt(BuyingController):
 
 			outgoing_amount = item.base_net_amount
 			if self.is_internal_transfer() and item.valuation_rate:
-				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
+				outgoing_amount = -1 * flt(
+					get_stock_value_difference(self.name, item.name, item.from_warehouse)
+				)
 				credit_amount = outgoing_amount
 
 			if (
@@ -541,6 +544,9 @@ class PurchaseReceipt(BuyingController):
 				and frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
 			):
 				outgoing_amount += get_stock_value_difference(self.name, item.name, item.rejected_warehouse)
+				if not flt(item.qty):
+					# Valuation charges are in the rejected stock value; the tax accounts are credited for them.
+					outgoing_amount -= flt(item.item_tax_amount)
 				credit_amount = outgoing_amount
 
 			if credit_amount:
@@ -786,7 +792,7 @@ class PurchaseReceipt(BuyingController):
 				make_sub_contracting_gl_entries(d)
 				make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.qty and d.warehouse not in warehouse_with_no_account) or (
-				not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials")
+				not self.is_rejected_material_valued()
 				and d.rejected_warehouse
 				and d.rejected_warehouse not in warehouse_with_no_account
 			):

@@ -1216,6 +1216,24 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.items[0].rate, 200.34669)
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
+	def test_sales_invoice_does_not_show_an_address_the_user_cannot_read(self):
+		from erpnext.crm.doctype.prospect.test_prospect import make_address
+		from erpnext.selling.doctype.customer.test_customer import make_customer
+
+		allowed, restricted = (make_address(address_title=title).name for title in ("Allowed", "Restricted"))
+		test_user = create_user("test_so_address_perms@example.com", "Sales User", "Accounts User")
+		frappe.permissions.add_user_permission("Address", allowed, test_user.name, applicable_for="Address")
+		so = make_sales_order(customer=make_customer(frappe.generate_hash(length=10)))
+
+		with self.set_user(test_user.name):
+			self.assertTrue(make_sales_invoice(so.name).items)
+			self.assertRaises(
+				frappe.PermissionError,
+				make_sales_invoice,
+				so.name,
+				target_doc=json.dumps({"doctype": "Sales Invoice", "shipping_address_name": restricted}),
+			)
+
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code="_Test Item", qty=4)
 
@@ -2555,6 +2573,36 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		)[0]
 		mr_doc = frappe.get_doc("Material Request", mr.get("name"))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
+
+	def test_request_for_raw_materials_keeps_planned_uom(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+
+		frappe.db.set_value("UOM", "Box", "must_be_whole_number", 0)
+		frappe.db.set_value("UOM", "Nos", "must_be_whole_number", 1)
+		rm_item = make_item(
+			"_Test SO Fraction Box RM",
+			{
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"purchase_uom": "Box",
+				"uoms": [{"uom": "Nos", "conversion_factor": 1}, {"uom": "Box", "conversion_factor": 12}],
+				"item_defaults": [{"default_warehouse": "_Test Warehouse - _TC", "company": "_Test Company"}],
+			},
+		).name
+		fg_item = make_item("_Test SO Fraction Box FG", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], rm_qty=13, currency="INR")
+
+		so = make_sales_order(
+			item_list=[{"item_code": fg_item, "qty": 1, "rate": 1000, "warehouse": "_Test Warehouse - _TC"}]
+		)
+		so.submit()
+		mr_dict = frappe._dict(
+			items=get_work_order_items(so.name, 1), include_exploded_items=0, ignore_existing_ordered_qty=1
+		)
+		mr = make_raw_material_request(mr_dict, so.company, so.name)
+
+		self.assertEqual((mr.items[0].qty, mr.items[0].uom, mr.items[0].stock_qty), (13, "Nos", 13))
 
 	def test_so_optional_blanket_order(self):
 		"""

@@ -1033,16 +1033,12 @@ class PickList(TransactionBase):
 		)
 		updates = {}
 		for bundle_key, locations in bundle_locations.items():
-			remaining_qty = max(delivered_qty_by_key.get(bundle_key, 0), 0)
-			# rows with serial nos take what they delivered first, the rest share the remaining qty
-			for location in sorted(locations, key=lambda row: not row.serial_no):
+			qty_by_location = self._get_bundle_location_delivered_qty(
+				locations, delivered_qty_by_key.get(bundle_key, 0), delivered_serial_nos[bundle_key]
+			)
+			for location in locations:
 				precision = location.precision("delivered_qty")
-				if location.serial_no:
-					picked_serial_nos = {number.lower() for number in get_serial_nos(location.serial_no)}
-					delivered_qty = len(picked_serial_nos & delivered_serial_nos[bundle_key])
-				else:
-					delivered_qty = flt(min(flt(location.picked_qty), remaining_qty), precision)
-				remaining_qty -= delivered_qty
+				delivered_qty = flt(qty_by_location[location.name], precision)
 				if flt(location.delivered_qty, precision) == delivered_qty:
 					continue
 
@@ -1053,6 +1049,23 @@ class PickList(TransactionBase):
 			frappe.db.bulk_update("Pick List Item", updates, update_modified=False)
 
 		self._set_delivery_status_from_items()
+
+	@staticmethod
+	def _get_bundle_location_delivered_qty(locations, delivered_qty, delivered_serial_nos):
+		"""Rows take their picked serial nos that were delivered, then the rest of the delivered qty by picked qty."""
+		qty_by_location = {
+			location.name: len(
+				{number.lower() for number in get_serial_nos(location.serial_no)} & delivered_serial_nos
+			)
+			for location in locations
+		}
+		remaining_qty = max(delivered_qty - sum(qty_by_location.values()), 0)
+		for location in locations:
+			qty = min(flt(location.picked_qty) - qty_by_location[location.name], remaining_qty)
+			qty_by_location[location.name] += qty
+			remaining_qty -= qty
+
+		return qty_by_location
 
 	def _get_delivered_bundle_component_qty(self, sales_order_items):
 		"""Return the delivered qty and the lower-cased delivered serial nos by bundle location key."""
@@ -1896,15 +1909,17 @@ def get_serial_nos_in_stock(locations, moved_qty_field="delivered_qty"):
 
 
 def get_pending_serial_nos(location, serial_nos_in_stock, moved_qty_field="delivered_qty"):
-	"""Drop the serial nos that earlier deliveries or transfers of a partly moved row took."""
+	"""Return the serial nos a partly moved row still has to move, capped at its pending qty."""
 	if not location.get(moved_qty_field):
 		return location.serial_no
 
-	return "\n".join(
+	pending_serial_nos = [
 		number
 		for number in get_serial_nos(location.serial_no)
 		if (location.item_code, number.lower(), location.warehouse) in serial_nos_in_stock
-	)
+	]
+	pending_qty = max(cint(flt(location.picked_qty) - flt(location.get(moved_qty_field))), 0)
+	return "\n".join(pending_serial_nos[:pending_qty])
 
 
 def add_product_bundles_to_delivery_note(
@@ -1954,14 +1969,21 @@ def create_stock_entry(pick_list: str | dict):
 	stock_entry.pick_list = pick_list.get("name")
 	stock_entry.purpose = pick_list.get("purpose")
 	stock_entry.company = pick_list.get("company")
-	stock_entry.set_stock_entry_type()
 
-	if pick_list.get("work_order"):
+	job_card = pick_list.get("material_request") and frappe.db.get_value(
+		"Material Request", pick_list.get("material_request"), "job_card"
+	)
+
+	if job_card:
+		stock_entry = update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card)
+	elif pick_list.get("work_order"):
 		stock_entry = update_stock_entry_based_on_work_order(pick_list, stock_entry)
 	elif pick_list.get("material_request"):
 		stock_entry = update_stock_entry_based_on_material_request(pick_list, stock_entry)
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
+
+	stock_entry.set_stock_entry_type()
 
 	if not stock_entry.get("items"):
 		return frappe.msgprint(_("All picked items have already been transferred against this Pick List"))
@@ -2050,9 +2072,59 @@ def stock_entry_exists(pick_list_name):
 	return frappe.db.exists("Stock Entry", {"pick_list": pick_list_name})
 
 
+def update_stock_entry_based_on_job_card(pick_list, stock_entry, job_card):
+	job_card = frappe.db.get_value(
+		"Job Card",
+		job_card,
+		["name", "work_order", "bom_no", "for_quantity", "transferred_qty", "wip_warehouse", "project"],
+		as_dict=True,
+	)
+
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.job_card = job_card.name
+	stock_entry.work_order = job_card.work_order
+	stock_entry.from_bom = 1
+	stock_entry.bom_no = job_card.bom_no
+	stock_entry.fg_completed_qty = max(flt(job_card.for_quantity) - flt(job_card.transferred_qty), 0)
+	stock_entry.to_warehouse = job_card.wip_warehouse
+	stock_entry.project = job_card.project
+
+	job_card_items = get_job_card_items_by_material_request_item(pick_list)
+
+	serial_nos_in_stock = get_serial_nos_in_stock(pick_list.locations, "transferred_qty")
+	for location in pick_list.locations:
+		if get_pending_transfer_stock_qty(location) <= 0:
+			continue
+		item = frappe._dict()
+		update_common_item_properties(item, location, serial_nos_in_stock)
+		item.t_warehouse = job_card.wip_warehouse
+		item.job_card_item = job_card_items.get(location.material_request_item)
+		stock_entry.append("items", item)
+
+	return stock_entry
+
+
+def get_job_card_items_by_material_request_item(pick_list):
+	material_request_items = [
+		location.material_request_item for location in pick_list.locations if location.material_request_item
+	]
+	if not material_request_items:
+		return {}
+
+	return dict(
+		frappe.get_all(
+			"Material Request Item",
+			filters={"name": ["in", material_request_items]},
+			fields=["name", "job_card_item"],
+			as_list=True,
+		)
+	)
+
+
 def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	work_order = frappe.get_doc("Work Order", pick_list.get("work_order"))
 
+	stock_entry.purpose = "Material Transfer for Manufacture"
 	stock_entry.work_order = work_order.name
 	stock_entry.company = work_order.company
 	stock_entry.from_bom = 1
@@ -2133,6 +2205,7 @@ def update_common_item_properties(item, location, serial_nos_in_stock):
 	item.material_request = location.material_request
 	item.serial_no = get_pending_serial_nos(location, serial_nos_in_stock, "transferred_qty")
 	item.batch_no = location.batch_no
+	item.use_serial_batch_fields = location.use_serial_batch_fields
 	item.material_request_item = location.material_request_item
 	item.pick_list_item = location.name
 

@@ -444,7 +444,9 @@ class AssetDepreciationSchedule(Document):
 				add_months(row.depreciation_start_date, n * cint(row.frequency_of_depreciation))
 			)
 			if not current_fiscal_year_end_date:
-				current_fiscal_year_end_date = get_fiscal_year(row.depreciation_start_date)[2]
+				current_fiscal_year_end_date = get_fiscal_year(
+					row.depreciation_start_date, company=asset_doc.company
+				)[2]
 			elif getdate(schedule_date) > getdate(current_fiscal_year_end_date):
 				current_fiscal_year_end_date = add_years(current_fiscal_year_end_date, 1)
 				yearly_opening_wdv = value_after_depreciation

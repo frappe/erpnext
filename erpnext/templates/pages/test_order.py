@@ -37,12 +37,15 @@ class TestOrder(FrappeTestCase):
 		invoice = create_sales_invoice()
 		user = make_fenced_user("_test_portal_customer@example.com", ["Customer"])
 		accounts_user = make_fenced_user("_test_portal_accounts@example.com", ["Accounts User"])
+		customer = frappe.get_doc("Customer", so.customer)
+		customer.append("portal_users", {"user": user})
+		customer.save()
 		cancelled_order = make_sales_order()
 		cancelled_order.cancel()
 
 		for payer, doc, allowed in (
-			(user, so, False),
-			(user, invoice, False),
+			(user, so, True),
+			(user, invoice, True),
 			(user, make_sales_order(customer="_Test Customer 1"), False),
 			(user, make_sales_order(do_not_submit=True), False),
 			(user, cancelled_order, False),

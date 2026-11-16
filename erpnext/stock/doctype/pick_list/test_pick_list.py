@@ -959,6 +959,30 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(get_serial_nos(second_delivery.items[0].serial_no), picked_serial_nos[2:])
 		second_delivery.submit()
 
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_next_delivery_from_pick_list_after_an_unpicked_serial_no_gets_its_pending_qty(self):
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUNP-.#####"}
+		).name
+		make_stock_entry(item=item, to_warehouse="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		sales_order = make_sales_order(item_code=item, warehouse="_Test Warehouse - _TC", qty=3, rate=100)
+		pick_list = create_pick_list(sales_order.name)
+		pick_list.submit()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+		unpicked_serial_no = frappe.get_all(
+			"Serial No", {"item_code": item, "serial_no": ("not in", picked_serial_nos)}, pluck="serial_no"
+		)[0]
+
+		first_delivery = create_delivery_note(pick_list.name)
+		first_delivery.items[0].qty = 1
+		first_delivery.items[0].serial_no = unpicked_serial_no
+		first_delivery.submit()
+
+		second_delivery = create_delivery_note(pick_list.name)
+		self.assertEqual(second_delivery.items[0].qty, 2)
+		self.assertEqual(get_serial_nos(second_delivery.items[0].serial_no), picked_serial_nos[:2])
+		second_delivery.submit()
+
 	@change_settings("Selling Settings", {"allow_multiple_items": 1})
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_rows_of_the_same_serialized_item_get_the_oldest_serial_nos_in_a_fractional_uom(self):
@@ -1154,30 +1178,99 @@ class TestPickList(FrappeTestCase):
 		second_delivery.submit()
 
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_lowered_bundle_qty_keeps_as_many_picked_serial_nos(self):
+		pick_list = make_serialized_bundle_pick_list()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+
+		delivery = create_delivery_note(pick_list.name)
+		delivery.items[0].qty = 1
+		delivery.save()
+
+		self.assertEqual(get_serial_nos(delivery.packed_items[0].serial_no), picked_serial_nos[:1])
+		delivery.submit()
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_raised_bundle_qty_tops_up_picked_serial_nos(self):
+		pick_list = make_serialized_bundle_pick_list()
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+
+		delivery = create_delivery_note(pick_list.name)
+		delivery.items[0].qty = 1
+		delivery.save()
+		delivery.items[0].qty = 4
+		delivery.save()
+
+		self.assertEqual(get_serial_nos(delivery.packed_items[0].serial_no), picked_serial_nos)
+		delivery.submit()
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_bundle_delivery_takes_the_component_warehouse_not_delivered_yet(self):
-		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		pick_list, _first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
+
+		second_delivery = create_delivery_note(pick_list.name)
+		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
+		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
+		second_delivery.submit()
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_draft_bundle_delivery_keeps_its_warehouse_after_earlier_delivery_is_cancelled(self):
+		pick_list, first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses()
+		second_delivery = create_delivery_note(pick_list.name)
+		second_delivery.save()
+
+		first_delivery.cancel()
+		second_delivery.reload()
+		second_delivery.save()
+
+		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
+		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
+		second_delivery.submit()
+
+	@change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "enable_stock_reservation": 1, "allow_partial_reservation": 1},
+	)
+	def test_draft_bundle_delivery_keeps_its_warehouse_when_order_reserves_stock(self):
+		pick_list, first_delivery, other_location = deliver_bundle_from_first_of_two_warehouses(
+			reserve_stock=1
+		)
+		second_delivery = create_delivery_note(pick_list.name)
+		second_delivery.save()
+
+		first_delivery.cancel()
+		second_delivery.reload()
+		second_delivery.save()
+
+		self.assertEqual(second_delivery.packed_items[0].warehouse, other_location.warehouse)
+		second_delivery.submit()
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_bundle_delivered_with_unpicked_serial_no_counts_on_pick_list(self):
+		warehouse = "_Test Warehouse - _TC"
 		component = make_item(
-			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBWH-.#####"}
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLUSB-.#####"}
 		).name
-		make_stock_entry(item=component, to_warehouse=warehouse, qty=2, basic_rate=100)
-		make_stock_entry(item=component, to_warehouse=other_warehouse, qty=1, basic_rate=100)
 		bundle = make_item(properties={"is_stock_item": 0}).name
 		make_product_bundle(bundle, [component])
+		make_stock_entry(item=component, to_warehouse=warehouse, qty=5, basic_rate=100)
 
 		sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100)
 		pick_list = create_pick_list(sales_order.name)
 		pick_list.submit()
-		other_location = next(row for row in pick_list.locations if row.warehouse == other_warehouse)
+		picked_serial_nos = get_serial_nos(pick_list.locations[0].serial_no)
+		unpicked_serial_no = frappe.db.get_value(
+			"Serial No", {"item_code": component, "serial_no": ("not in", picked_serial_nos)}, "serial_no"
+		)
 
-		first_delivery = create_delivery_note(pick_list.name)
-		first_delivery.items[0].qty = 2
-		first_delivery.save()
-		first_delivery.submit()
+		delivery_note = create_delivery_note(pick_list.name)
+		delivery_note.items[0].qty = 1
+		delivery_note.packed_items[0].qty = 1
+		delivery_note.packed_items[0].serial_no = unpicked_serial_no
+		delivery_note.save()
+		delivery_note.submit()
 
-		second_delivery = create_delivery_note(pick_list.name)
-		self.assertEqual(second_delivery.packed_items[0].warehouse, other_warehouse)
-		self.assertEqual(second_delivery.packed_items[0].serial_no, other_location.serial_no)
-		second_delivery.submit()
+		pick_list.reload()
+		self.assertEqual(pick_list.locations[0].delivered_qty, 1)
 
 	def test_next_pick_list_picks_what_is_left_on_each_bundle_component(self):
 		warehouse = "_Test Warehouse - _TC"
@@ -3482,3 +3575,49 @@ class TestPickList(FrappeTestCase):
 		pick_list.reload()
 		self.assertEqual(pick_list.locations[0].transferred_qty, 0.013)
 		self.assertEqual(pick_list.status, "Completed")
+
+
+def make_serialized_bundle_pick_list():
+	"""Pick 4 bundles of 1 serialized component each."""
+	warehouse = "_Test Warehouse - _TC"
+	component = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLLBQ-.#####"}
+	).name
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+	make_stock_entry(item=component, to_warehouse=warehouse, qty=4, basic_rate=100)
+
+	sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=4, rate=100)
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	return pick_list
+
+
+def deliver_bundle_from_first_of_two_warehouses(reserve_stock=0):
+	"""Pick a serialized bundle component from two warehouses and deliver the first one."""
+	warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+	component = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "PLBWH-.#####"}
+	).name
+	make_stock_entry(item=component, to_warehouse=warehouse, qty=2, basic_rate=100)
+	make_stock_entry(item=component, to_warehouse=other_warehouse, qty=1, basic_rate=100)
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [component])
+
+	sales_order = make_sales_order(item_code=bundle, warehouse=warehouse, qty=3, rate=100, do_not_save=True)
+	sales_order.reserve_stock = reserve_stock
+	sales_order.insert()
+	sales_order.submit()
+	if reserve_stock:
+		# a pick list needs the order's stock unreserved
+		sales_order.cancel_stock_reservation_entries(notify=False)
+
+	pick_list = create_pick_list(sales_order.name)
+	pick_list.submit()
+	other_location = next(row for row in pick_list.locations if row.warehouse == other_warehouse)
+
+	first_delivery = create_delivery_note(pick_list.name)
+	first_delivery.items[0].qty = 2
+	first_delivery.save()
+	first_delivery.submit()
+	return pick_list, first_delivery, other_location

@@ -342,10 +342,62 @@ class TestRequestforQuotation(FrappeTestCase):
 		parsed_link = urlparse(rfq.get_link())
 		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
 
+	def test_send_supplier_emails_needs_write_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+			RequestforQuotation,
+			send_supplier_emails,
+		)
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		rfq = make_request_for_quotation()
+		email_id = "rfq-send-email-supplier@example.com"
+		rfq.suppliers[0].db_set({"email_id": email_id, "send_email": 1})
+		reader = make_fenced_user("rfq-send-email-reader@example.com", ["Stock User"])
+		manager = make_fenced_user("rfq-send-email-manager@example.com", ["Purchase Manager"])
+
+		with patch.object(RequestforQuotation, "send_email") as send_email:
+			with as_user(reader):
+				self.assertRaises(frappe.PermissionError, send_supplier_emails, rfq.name)
+			self.assertFalse(frappe.db.exists("User", email_id))
+			send_email.assert_not_called()
+
+			with as_user(manager):
+				send_supplier_emails(rfq.name)
+			send_email.assert_called_once()
+
+		self.assertTrue(frappe.db.exists("User", email_id))
+		self.assertEqual(
+			frappe.db.get_value("Request for Quotation Supplier", rfq.suppliers[0].name, "email_sent"), 1
+		)
+
 	def test_get_pdf(self):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
 		self.assertEqual(frappe.local.response.type, "pdf")
+
+	def test_email_preview_keeps_formatting_and_drops_event_handlers(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[
+				{
+					"supplier": "_Test Supplier",
+					"supplier_name": "_Test Supplier",
+					"email_id": "rfq-preview-supplier@example.com",
+				}
+			],
+			do_not_submit=True,
+		)
+		rfq.use_html = 1
+		rfq.mfs_html = '<p>Dear {{ supplier_name }}</p><b onclick="return false">Steel Sheet</b>'
+		rfq.save()
+
+		supplier = rfq.suppliers[0]
+		preview = rfq.get_supplier_email_preview(supplier.supplier)
+
+		self.assertIn(f"<p>Dear {supplier.supplier_name}</p>", preview["message"])
+		self.assertIn("<b>Steel Sheet</b>", preview["message"])
+		self.assertNotIn("onclick", preview["message"])
 
 	def test_portal_user_with_new_supplier(self):
 		supplier_doc = frappe.get_doc(

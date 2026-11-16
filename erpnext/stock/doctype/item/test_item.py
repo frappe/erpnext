@@ -75,6 +75,42 @@ def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	return item
 
 
+def make_uom_conversion_factor(from_uom, to_uom, value, category="Mass", legacy=False):
+	for uom in (from_uom, to_uom):
+		if not frappe.db.exists("UOM", uom):
+			frappe.get_doc(doctype="UOM", uom_name=uom, category=category).insert()
+
+	if legacy:
+		return frappe.get_doc(
+			doctype="UOM Conversion Factor",
+			category=category,
+			from_uom=from_uom,
+			to_uom=to_uom,
+			value=value,
+		).db_insert()
+
+	# only one conversion may exist between two UOMs, and an earlier test of the class may have made it
+	conversion = frappe.qb.DocType("UOM Conversion Factor")
+	existing = (
+		frappe.qb.from_(conversion)
+		.select(conversion.name)
+		.where(conversion.category == category)
+		.where(
+			((conversion.from_uom == from_uom) & (conversion.to_uom == to_uom))
+			| ((conversion.from_uom == to_uom) & (conversion.to_uom == from_uom))
+		)
+		.limit(1)
+		.run(pluck=True)
+	)
+	doc = (
+		frappe.get_doc("UOM Conversion Factor", existing[0])
+		if existing
+		else frappe.new_doc("UOM Conversion Factor")
+	)
+	doc.update({"category": category, "from_uom": from_uom, "to_uom": to_uom, "value": value})
+	return doc.save()
+
+
 class TestItem(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
@@ -1136,6 +1172,36 @@ class TestItem(FrappeTestCase):
 	def test_uom_conv_intermediate(self):
 		factor = get_uom_conv_factor("Pound", "Gram")
 		self.assertAlmostEqual(factor, 453.592, 3)
+
+	def test_uom_conv_intermediate_with_shared_target(self):
+		make_uom_conversion_factor("_Test 3 Kg Bag", "Kg", 3)
+		make_uom_conversion_factor("_Test 25 Kg Bag", "Kg", 25)
+
+		factor = get_uom_conv_factor("_Test 3 Kg Bag", "_Test 25 Kg Bag")
+
+		self.assertEqual(factor, 0.12)
+
+	def test_uom_conv_intermediate_with_shared_target_is_deterministic(self):
+		from_uom = "_Test Duplicate UOM Factor From"
+		to_uom = "_Test Duplicate UOM Factor To"
+		make_uom_conversion_factor(from_uom, "Kg", 3, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 25, legacy=True)
+		make_uom_conversion_factor(from_uom, "Kg", 6, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 20, legacy=True)
+
+		factor = get_uom_conv_factor(from_uom, to_uom)
+
+		self.assertEqual(factor, 0.12)
+
+	def test_uom_conv_intermediate_with_shared_target_ignores_zero_divisor(self):
+		from_uom = "_Test Zero UOM Factor From"
+		to_uom = "_Test Zero UOM Factor To"
+		make_uom_conversion_factor(from_uom, "Kg", 3, legacy=True)
+		make_uom_conversion_factor(to_uom, "Kg", 0, legacy=True)
+
+		factor = get_uom_conv_factor(from_uom, to_uom)
+
+		self.assertIsNone(factor)
 
 	def test_uom_conv_base_case(self):
 		factor = get_uom_conv_factor("m", "m")
