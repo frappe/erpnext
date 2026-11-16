@@ -364,10 +364,7 @@ class MaterialTransferForManufactureStockEntry(BaseMaterialTransferStockEntry):
 		if self.doc.is_return:
 			return
 
-		if (
-			frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")
-			== "Material Transferred for Manufacture"
-		):
+		if self.backflush_based_on == "Material Transferred for Manufacture":
 			return
 
 		wo = self.wo_doc
