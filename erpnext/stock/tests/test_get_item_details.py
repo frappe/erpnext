@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe.utils import today
 
@@ -1059,6 +1061,30 @@ class TestGetItemDetail(ERPNextTestSuite):
 			details = get_item_details(self.get_uom_rate_context(item_code, selected_list.name))
 
 		self.assertEqual(details.price_list_rate, 1000)
+
+	def test_missing_price_list_exchange_rate_is_not_taken_as_1(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item().name
+		usd_list = frappe.get_doc(
+			{"doctype": "Price List", "price_list_name": "_Test USD No Rate", "currency": "USD", "selling": 1}
+		).insert()
+		self.make_item_price(item_code, usd_list.name, 100)
+		ctx = frappe._dict(
+			{
+				"item_code": item_code,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+				"currency": "INR",
+				"conversion_rate": 1,
+				"price_list": usd_list.name,
+				"doctype": "Sales Order",
+				"qty": 1,
+			}
+		)
+
+		with patch("erpnext.stock.get_item_details.get_exchange_rate", return_value=0):
+			self.assertRaises(frappe.ValidationError, get_item_details, ctx)
 
 	def test_supplier_quotation_uses_buying_price_list_exchange_rate(self):
 		for exchange_rate, for_buying in ((90, 1), (95, 0)):
