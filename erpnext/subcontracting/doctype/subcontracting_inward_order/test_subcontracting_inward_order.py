@@ -1695,6 +1695,17 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		wo.required_items[-1].source_warehouse = "Stores - _TC"
 		wo.submit()
 
+	def test_material_from_customer_skips_fully_received_material(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = [item for item in rm_in.items if item.item_code == "Basic RM"]
+		rm_in.items[0].qty = 7
+		rm_in.submit()
+
+		scio.reload()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		self.assertNotIn("Basic RM", [item.item_code for item in rm_in.items])
+
 	def test_variant_without_bom_uses_template_bom(self):
 		variant, template_bom = make_subcontracted_variant()
 		item_list = [{"item_code": "Service Item 1", "qty": 5, "fg_item": variant.name, "fg_item_qty": 5}]
