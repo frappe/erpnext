@@ -4080,6 +4080,51 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual([row.completed_qty for row in job_card.sub_operations], [10, 10])
 		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (10, 0))
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_workstation_type_card_is_scheduled_on_the_free_workstation(self):
+		from erpnext.manufacturing.doctype.workstation_type.test_workstation_type import (
+			create_workstation_type,
+		)
+
+		workstation_type = create_workstation_type(
+			workstation_type=f"_Test JC Review Type {random_string(6)}"
+		)
+		busy, free = (
+			make_workstation(
+				workstation_name=f"_Test JC Review Workstation {random_string(6)}",
+				workstation_type=workstation_type.name,
+			).name
+			for _ in range(2)
+		)
+		rm_item = make_jc_review_item()
+		make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": rm_item, "qty": 1}],
+			[{"operation": make_jc_review_operation(busy), "workstation": busy, "time_in_mins": 12}],
+			planned_start_date="2031-03-03 08:00:00",
+		)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": rm_item, "qty": 1}],
+			[
+				{
+					"operation": make_jc_review_operation(None),
+					"workstation_type": workstation_type.name,
+					"time_in_mins": 6,
+				}
+			],
+			planned_start_date="2031-03-03 09:00:00",
+		)
+
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		self.assertEqual(job_card.workstation, free)
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 09:00:00", "2031-03-03 10:00:00")],
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_partial_sub_operation_cycles_keep_job_card_qty(self):
 		workstation = make_jc_review_workstation()
