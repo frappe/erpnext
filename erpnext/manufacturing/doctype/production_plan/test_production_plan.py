@@ -919,6 +919,28 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertFalse(pln.po_items)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_reserved_part_of_sales_order_is_not_planned_again(self):
+		fg_item = make_item("_Test FG For Reserved SO Planning", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[make_item("_Test RM For Reserved SO Planning").name])
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse - _TC", qty=4, basic_rate=100)
+		sales_order = make_sales_order(item_code=fg_item, qty=10)
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		def plan_sales_order():
+			plan = frappe.new_doc("Production Plan")
+			plan.company = sales_order.company
+			plan.get_items_from = "Sales Order"
+			plan.append("sales_orders", {"sales_order": sales_order.name})
+			plan.get_items()
+			return plan
+
+		first_plan = plan_sales_order()
+		self.assertEqual([row.planned_qty for row in first_plan.po_items], [6])
+		first_plan.submit()
+
+		self.assertFalse(plan_sales_order().po_items)
+
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
 		item = "Test Production Item 1"
