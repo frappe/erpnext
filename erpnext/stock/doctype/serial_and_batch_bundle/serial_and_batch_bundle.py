@@ -3591,7 +3591,7 @@ def get_qty_based_available_batches(available_batches, qty):
 	precision = frappe.get_precision("Stock Ledger Entry", "actual_qty")
 	batches = []
 	for batch in available_batches:
-		if qty <= 0:
+		if flt(qty, precision) <= 0:
 			break
 
 		batch_qty = flt(batch.qty)
@@ -3605,7 +3605,7 @@ def get_qty_based_available_batches(available_batches, qty):
 					}
 				)
 			)
-			qty = flt(qty - batch_qty, precision)
+			qty -= batch_qty
 		else:
 			batches.append(
 				frappe._dict(
