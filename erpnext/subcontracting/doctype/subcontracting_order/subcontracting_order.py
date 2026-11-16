@@ -216,6 +216,15 @@ class SubcontractingOrder(SubcontractingController):
 			if service_item.purchase_order_item in purchase_order_items
 		]
 
+		service_purchase_order_items = {
+			service_item.purchase_order_item for service_item in self.service_items
+		}
+		for item in self.items:
+			if item.purchase_order_item not in service_purchase_order_items:
+				frappe.throw(
+					_("Row {0}: Finished Good {1} has no Service Item row.").format(item.idx, item.item_code)
+				)
+
 		for service_item in self.service_items:
 			if frappe.get_value("Item", service_item.item_code, "is_stock_item"):
 				frappe.throw(_("Service Item {0} must be a non-stock item.").format(service_item.item_code))
