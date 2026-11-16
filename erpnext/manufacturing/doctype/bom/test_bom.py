@@ -2260,6 +2260,41 @@ class TestBOM(ERPNextTestSuite):
 		bom.save()
 		self.assertEqual(bom.process_loss_qty, 0)
 
+	def test_operation_hour_rate_follows_workstation_and_conversion_rate(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		workstation = {
+			rate: make_workstation(workstation_name=f"_Test BOM Hour Rate {rate}", hour_rate_rent=rate).name
+			for rate in (100, 300, 0)
+		}
+		operation = make_operation(operation="_Test BOM Hour Rate Op", workstation=workstation[100]).name
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": make_item(properties={"is_stock_item": 1}).name,
+				"company": "_Test Company",
+				"currency": "USD",
+				"conversion_rate": 50,
+				"with_operations": 1,
+				"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+				"operations": [{"operation": operation, "workstation": workstation[100], "time_in_mins": 60}],
+			}
+		).insert()
+		self.assertEqual(bom.operations[0].hour_rate, 2)
+
+		bom.conversion_rate = 100
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (1, 100))
+
+		bom.operations[0].workstation = workstation[300]
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (3, 300))
+
+		bom.operations[0].workstation = workstation[0]
+		bom.save()
+		self.assertEqual((bom.operations[0].hour_rate, bom.base_operating_cost), (0, 0))
+
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
