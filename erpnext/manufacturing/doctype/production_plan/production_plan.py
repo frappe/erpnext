@@ -44,6 +44,8 @@ from erpnext.manufacturing.doctype.production_plan.services.reservation import (
 )
 from erpnext.manufacturing.doctype.production_plan.services.sales_order_planning import (
 	SalesOrderSourcingService,
+	get_planned_bundle_component_qty,
+	get_planned_bundle_qty,
 )
 from erpnext.manufacturing.doctype.production_plan.services.sub_assembly import (
 	SubAssemblyService,
@@ -352,6 +354,7 @@ class ProductionPlan(Document):
 
 	def before_submit(self):
 		self.validate_sales_order_planned_qty()
+		self.validate_bundle_component_planned_qty()
 
 	def validate_sales_order_planned_qty(self):
 		planned_qty = self.get_so_item_planned_qty()
@@ -379,14 +382,41 @@ class ProductionPlan(Document):
 				precision,
 			)
 			if flt(qty, precision) > unplanned_qty:
-				frappe.throw(
-					_(
-						"Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan."
-					).format(
-						qty, row.stock_uom, frappe.bold(row.item_code), sales_order, max(unplanned_qty, 0)
-					),
-					title=_("Sales Order Qty Exceeded"),
-				)
+				throw_sales_order_qty_exceeded(qty, row.stock_uom, row.item_code, sales_order, unplanned_qty)
+
+	def validate_bundle_component_planned_qty(self):
+		planned_qty = {}
+		for row in self.po_items:
+			if row.sales_order_item and row.product_bundle_item:
+				key = (row.sales_order, row.sales_order_item, row.item_code)
+				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+		if not planned_qty:
+			return
+
+		so_items = list({key[1] for key in planned_qty})
+		already_planned = get_planned_bundle_component_qty(so_items)
+		packed_qty = {
+			(row.parent_detail_docname, row.item_code): row
+			for row in frappe.get_all(
+				"Packed Item",
+				filters={"parenttype": "Sales Order", "parent_detail_docname": ("in", so_items)},
+				fields=["parent_detail_docname", "item_code", "uom", {"SUM": "qty", "as": "qty"}],
+				group_by="parent_detail_docname, item_code, uom",
+			)
+		}
+		allowance = flt(
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
+		)
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
+
+		for (sales_order, so_item, item_code), qty in planned_qty.items():
+			packed = packed_qty.get((so_item, item_code)) or frappe._dict()
+			unplanned_qty = flt(
+				flt(packed.qty) * (1 + allowance / 100) - already_planned.get((so_item, item_code), 0),
+				precision,
+			)
+			if flt(qty, precision) > unplanned_qty:
+				throw_sales_order_qty_exceeded(qty, packed.uom, item_code, sales_order, unplanned_qty)
 
 	def get_so_item_planned_qty(self):
 		"""Planned qty per Sales Order line, excluding product bundle components."""
@@ -480,11 +510,13 @@ class ProductionPlan(Document):
 				"sales_order": ("in", sales_orders),
 				"docstatus": 1,
 				"sales_order_item": ("is", "set"),
+				"product_bundle_item": ("is", "not set"),
 			},
 			group_by="sales_order, sales_order_item",
 		)
 
 		data += get_planned_qty_of_references(sales_orders)
+		data += get_planned_bundle_qty(sales_orders)
 
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
@@ -680,6 +712,15 @@ def get_schedule_signature(doc):
 			(row.name, row.production_item, row.bom_no, flt(row.qty), row.type_of_manufacturing)
 			for row in doc.sub_assembly_items
 		),
+	)
+
+
+def throw_sales_order_qty_exceeded(qty, uom, item_code, sales_order, unplanned_qty):
+	frappe.throw(
+		_("Cannot plan {0} {1} of Item {2} against Sales Order {3}. Only {4} {1} is left to plan.").format(
+			qty, uom, frappe.bold(item_code), sales_order, max(unplanned_qty, 0)
+		),
+		title=_("Sales Order Qty Exceeded"),
 	)
 
 
