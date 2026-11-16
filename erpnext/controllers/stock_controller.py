@@ -8,11 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
-<<<<<<< HEAD
-from frappe.query_builder.functions import Count, Sum
-=======
-from frappe.query_builder.functions import Count, Min
->>>>>>> 47bd8f9 (fix(subcontracting): time a transfer by its first stock ledger entry)
+from frappe.query_builder.functions import Count, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
