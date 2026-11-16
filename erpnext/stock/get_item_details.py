@@ -123,7 +123,7 @@ def _get_item_details(
 	out = get_basic_details(args, item, overwrite_warehouse)
 
 	get_item_tax_template(args, item, out)
-	out["item_tax_rate"] = get_item_tax_map(
+	out["item_tax_rate"] = _get_item_tax_map(
 		args.company,
 		args.get("item_tax_template")
 		if out.get("item_tax_template") is None
@@ -849,7 +849,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 			args.update({"item_tax_template": item_tax_templates.get(item_code[1])})
 
 		get_item_tax_template(args, item, out[item_code[1]])
-		out[item_code[1]]["item_tax_rate"] = get_item_tax_map(
+		out[item_code[1]]["item_tax_rate"] = _get_item_tax_map(
 			company, out[item_code[1]].get("item_tax_template"), as_json=True
 		)
 
@@ -966,6 +966,13 @@ def is_within_valid_range(args, tax):
 
 @frappe.whitelist()
 def get_item_tax_map(company, item_tax_template, as_json=True):
+	if item_tax_template:
+		erpnext.require_permission("Item Tax Template", item_tax_template, "select")
+
+	return _get_item_tax_map(company, item_tax_template, as_json=as_json)
+
+
+def _get_item_tax_map(company, item_tax_template, as_json=True):
 	item_tax_map = {}
 	if item_tax_template:
 		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
