@@ -1532,6 +1532,9 @@ def get_purchase_voucher_details(doctype, item_code, document_name=None):
 		)
 		.where(parent_doc.docstatus == 1)
 		.where(child_doc.item_code == item_code)
+		# skipped when the last purchase rate is updated on submit
+		.where(child_doc.is_free_item == 0)
+		.where(parent_doc.is_internal_supplier == 0)
 	)
 
 	if document_name:
