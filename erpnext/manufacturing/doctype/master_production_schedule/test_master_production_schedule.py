@@ -75,6 +75,21 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 			[("Finished Goods - _TC", 4), ("Stores - _TC", 3)],
 		)
 
+	def test_actual_demand_leaves_out_closed_rows(self):
+		from erpnext.controllers.item_close import update_closed_status
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Closed Row Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5, do_not_submit=True)
+		order.append("items", {**order.items[0].as_dict(), "name": None, "qty": 7})
+		order.submit()
+		update_closed_status("Sales Order", order.name, [order.items[1].name], 1)
+
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+
+		self.assertEqual([row.planned_qty for row in mps.items], [5])
+
 	def test_delivery_schedules_leave_out_delivered_and_closed_orders(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
 			create_dn_against_so,
