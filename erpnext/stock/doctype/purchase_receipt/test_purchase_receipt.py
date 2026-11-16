@@ -2491,6 +2491,64 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(stock_qty[transit_warehouse], -12)
 		self.assertEqual(stock_qty[to_warehouse], 12)
 
+	def test_partial_internal_transfer_of_batch_item_received_in_another_uom(self):
+		"""A receipt of part of the delivery in another UOM moves only its stock qty out of the
+		in-transit warehouse."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Partial Box Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Partial Box Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Partial Box Transfer To", company=company)
+
+		item_doc = make_item(
+			"_Test Partial Box Batch Item For Transfer",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-PBOXT-.####"},
+		)
+		make_uom_conversion_factor("Box", "Nos", 4)
+
+		receipt = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=12, rate=100
+		)
+		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=12,
+			rate=100,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			batch_no=batch_no,
+		)
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = to_warehouse
+		pr.items[0].uom = "Box"
+		pr.items[0].conversion_factor = 4
+		pr.items[0].qty = 2
+		pr.items[0].received_qty = 2
+		pr.submit()
+
+		self.assertEqual(pr.items[0].stock_qty, 8)
+
+		stock_qty = {
+			d.warehouse: d.actual_qty
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_type": "Purchase Receipt", "voucher_no": pr.name, "is_cancelled": 0},
+				fields=["warehouse", "actual_qty"],
+			)
+		}
+		self.assertEqual(stock_qty[transit_warehouse], -8)
+		self.assertEqual(stock_qty[to_warehouse], 8)
+
 	def test_rejected_batch_material_of_a_receipt_bought_in_another_uom(self):
 		"""Accepted and rejected packages of an ordinary receipt are both sized in stock UOM."""
 		from erpnext.stock.doctype.batch.test_batch import make_new_batch
