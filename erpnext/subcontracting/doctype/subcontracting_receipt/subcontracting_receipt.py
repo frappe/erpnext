@@ -632,6 +632,7 @@ class SubcontractingReceipt(SubcontractingController):
 		if not sent_by_receipt_row:
 			return
 
+		bundle_qty = self.get_bundle_qty(sent_rows)
 		kept_fields = [
 			"expense_account",
 			"cost_center",
@@ -646,7 +647,7 @@ class SubcontractingReceipt(SubcontractingController):
 			sent = sent_by_receipt_row[row.subcontracting_receipt_item].pop(0)
 			fieldnames = kept_fields
 			# qty is the final one only after calculate_items_qty_and_amount
-			if self.has_picks_for_qty(sent, flt(row.received_qty) - flt(row.process_loss_qty)):
+			if self.has_picks_for_qty(sent, flt(row.received_qty) - flt(row.process_loss_qty), bundle_qty):
 				fieldnames = [
 					*fieldnames,
 					"use_serial_batch_fields",
@@ -659,12 +660,32 @@ class SubcontractingReceipt(SubcontractingController):
 				row.set(fieldname, sent.get(fieldname))
 
 	@staticmethod
-	def has_picks_for_qty(row, qty):
-		"""Whether the serial nos and batches on a row fit qty: a mapped return row has all the serial nos left to return."""
-		if row.serial_no:
-			return len(get_serial_nos(row.serial_no)) == flt(abs(qty), row.precision("qty"))
+	def get_bundle_qty(rows) -> dict:
+		bundles = [row.serial_and_batch_bundle for row in rows if row.serial_and_batch_bundle]
+		if not bundles:
+			return {}
 
-		return bool(row.batch_no or row.serial_and_batch_bundle)
+		return dict(
+			frappe.get_all(
+				"Serial and Batch Bundle",
+				filters={"name": ["in", bundles]},
+				fields=["name", "total_qty"],
+				as_list=True,
+			)
+		)
+
+	@staticmethod
+	def has_picks_for_qty(row, qty, bundle_qty):
+		"""Whether the serial nos and batches on a row fit qty: a mapped return row has all the serial nos left to return."""
+		precision = row.precision("qty")
+		qty = flt(abs(qty), precision)
+		if row.serial_and_batch_bundle:
+			return flt(abs(flt(bundle_qty.get(row.serial_and_batch_bundle))), precision) == qty
+
+		if row.serial_no:
+			return len(get_serial_nos(row.serial_no)) == qty
+
+		return bool(row.batch_no)
 
 	def calculate_percentage_secondary_rows(self, percentage_rows, secondary_items_cost_map):
 		allocation_map = {}
