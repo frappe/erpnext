@@ -126,3 +126,26 @@ class TestSellingControllerConversions(ERPNextTestSuite):
 
 		so.reload()
 		self.assertEqual(so.per_delivered, 40.0)
+
+	@ERPNextTestSuite.change_settings("Selling Settings", {"validate_selling_price": 1})
+	def test_internal_transfer_skips_the_last_purchase_rate_check(self):
+		"""An internal transfer moves stock at its valuation rate, below the last purchase rate."""
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="Stores - TCP1", qty=10, basic_rate=89.48)
+		frappe.db.set_value("Item", item_code, "last_purchase_rate", 120)
+		frappe.clear_document_cache("Item", item_code)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			company="_Test Company with perpetual inventory",
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			warehouse="Stores - TCP1",
+			target_warehouse="Goods In Transit - TCP1",
+		)
+
+		self.assertEqual(dn.docstatus, 1)
