@@ -1607,6 +1607,11 @@ $.extend(erpnext.item, {
 });
 
 frappe.ui.form.on("UOM Conversion Detail", {
+	uoms_add(frm, cdt, cdn) {
+		// Target UOM is display-only; it always shows the Item's Stock UOM
+		frappe.model.set_value(cdt, cdn, "target_uom", frm.doc.stock_uom);
+	},
+
 	uom: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.uom) {

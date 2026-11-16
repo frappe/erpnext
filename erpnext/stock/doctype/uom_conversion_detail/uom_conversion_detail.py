@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import frappe
 from frappe.model.document import Document
 
 
@@ -18,7 +19,13 @@ class UOMConversionDetail(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		target_uom: DF.Link | None
 		uom: DF.Link
 	# end: auto-generated types
 
-	pass
+	@property
+	def target_uom(self):
+		if self.parent_doc:
+			return self.parent_doc.get("stock_uom")
+		if self.parent:
+			return frappe.get_cached_value("Item", self.parent, "stock_uom")
