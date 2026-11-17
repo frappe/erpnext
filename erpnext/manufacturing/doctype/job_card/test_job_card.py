@@ -1110,6 +1110,7 @@ class TestJobCard(ERPNextTestSuite):
 
 		amended = frappe.copy_doc(corrective_job_card)
 		amended.amended_from = corrective_job_card.name
+		amended.docstatus = 0
 		amended.insert()
 
 		self.assertEqual(amended.hour_rate, 1400)
