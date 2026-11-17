@@ -1821,6 +1821,36 @@ class TestPurchaseOrder(FrappeTestCase):
 			frappe.db.get_value("Purchase Order", po.name, "inter_company_order_reference"), so.name
 		)
 
+	def test_row_linked_by_internal_sales_order_cannot_be_deleted(self):
+		po = make_internal_purchase_order(do_not_submit=True)
+		po.append("items", {**po.items[0].as_dict(), "name": None, "idx": None})
+		po.submit()
+
+		so = make_inter_company_sales_order(po.name)
+		so.items = [row for row in so.items if row.purchase_order_item == po.items[0].name]
+		so.items[0].delivery_date = today()
+		so.submit()
+
+		kept_row = po.items[1]
+		trans_item = json.dumps(
+			[
+				{
+					"docname": kept_row.name,
+					"item_code": kept_row.item_code,
+					"qty": kept_row.qty,
+					"rate": kept_row.rate,
+				}
+			]
+		)
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"already ordered on Sales Order",
+			update_child_qty_rate,
+			"Purchase Order",
+			trans_item,
+			po.name,
+		)
+
 	def test_internal_sales_order_drops_buying_only_terms(self):
 		frappe.get_doc(
 			doctype="Terms and Conditions", title="_Test Buy Only Terms", buying=1, selling=0, terms="FOB"
