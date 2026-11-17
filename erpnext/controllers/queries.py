@@ -24,6 +24,7 @@ from pypika import Order
 
 import erpnext
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
+from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item import get_allowed_uoms
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
@@ -942,10 +943,15 @@ def get_account_list(
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	party = filters.get("party")
+	if filters.get("quotation_to"):
+		party = get_existing_customer_name(filters.get("quotation_to"), party)
+
 	bo_filters = [
 		["docstatus", "=", 1],
 		["status", "!=", "Closed"],
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
+		["customer" if filters.get("blanket_order_type") == "Selling" else "supplier", "=", party],
 		["company", "=", filters.get("company")],
 	]
 
