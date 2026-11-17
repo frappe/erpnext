@@ -122,6 +122,7 @@ class MaterialRequirementsPlanningReport:
 				(so.docstatus == 1)
 				& (so.status.notin(["Closed", "Completed", "Stopped"]))
 				& (so_item.docstatus == 1)
+				& (so_item.closed == 0)
 			)
 		)
 
@@ -727,6 +728,7 @@ class MaterialRequirementsPlanningReport:
 			.where(
 				(doctype.docstatus == 1)
 				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
+				& (doctype.closed == 0)
 			)
 		)
 
@@ -773,6 +775,7 @@ class MaterialRequirementsPlanningReport:
 			.where(
 				(doctype.docstatus == 1)
 				& (parent_doctype.status.notin(["Stopped", "Closed", "Completed", "Received"]))
+				& (so_item.closed == 0)
 				& (pending_qty > 0)
 			)
 		)
