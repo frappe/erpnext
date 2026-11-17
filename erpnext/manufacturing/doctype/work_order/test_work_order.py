@@ -8125,6 +8125,23 @@ class TestWorkOrder(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 4)
 
+	def test_closed_work_order_refuses_manufacture_marked_as_return(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg_item, [{"item_code": rm_item, "qty": 1}])
+		test_stock_entry.make_stock_entry(
+			item_code=rm_item, target="_Test Warehouse - _TC", qty=20, basic_rate=100
+		)
+		wo = make_review_work_order(fg_item, bom.name, 10, skip_transfer=1)
+		frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 6)).submit()
+		close_work_order(wo.name, "Closed")
+
+		entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 4))
+		entry.is_return = 1
+		entry.insert()
+		self.assertRaisesRegex(frappe.ValidationError, "closed Work Order", entry.submit)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "produced_qty"), 6)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_job_card_transfer_takes_only_its_operation_rows(self):
 		from erpnext.manufacturing.doctype.job_card.mapper import make_stock_entry as make_job_card_entry
