@@ -3888,20 +3888,13 @@ class TestJobCard(ERPNextTestSuite):
 		return frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 10))
 
 	def test_partial_manufacture_consumes_its_share_of_job_card_transfer(self):
+		"""The RM is used in two operations, so each Job Card moves its own share of it."""
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		warehouse = "Stores - _TC"
 		rm = make_item("JC Transfer Share RM", {"is_stock_item": 1, "valuation_rate": 50}).name
 		fg = make_item("JC Transfer Share FG", {"is_stock_item": 1}).name
-		operation = {
-			"operation": "JC Transfer Share Op",
-			"workstation": "JC Transfer Share WS",
-			"time_in_mins": 6,
-		}
-		make_workstation(operation)
-		make_operation(operation)
-
 		bom = frappe.new_doc(
 			"BOM",
 			company="_Test Company",
@@ -3911,28 +3904,42 @@ class TestJobCard(ERPNextTestSuite):
 			transfer_material_against="Job Card",
 			backflush_based_on="Material Transferred for Manufacture",
 		)
-		bom.append("items", {"item_code": rm, "qty": 1, "operation": operation["operation"]})
-		bom.append("operations", operation)
+		for idx in (1, 2):
+			operation = {
+				"operation": f"JC Transfer Share Op {idx}",
+				"workstation": f"JC Transfer Share WS {idx}",
+				"time_in_mins": 6,
+			}
+			make_workstation(operation)
+			make_operation(operation)
+			bom.append("items", {"item_code": rm, "qty": 1, "operation": operation["operation"]})
+			bom.append("operations", operation)
 		bom.insert()
 		bom.submit()
 
-		make_stock_entry(item_code=rm, target=warehouse, qty=10, basic_rate=50)
+		make_stock_entry(item_code=rm, target=warehouse, qty=20, basic_rate=50)
 		work_order = make_wo_order_test_record(
 			item=fg, qty=10, bom_no=bom.name, source_warehouse=warehouse, transfer_material_against="Job Card"
 		)
-		job_card = frappe.get_last_doc("Job Card", {"work_order": work_order.name})
-		frappe.get_doc(make_stock_entry_from_jc(job_card.name)).submit()
-
-		job_card.reload()
-		job_card.append(
-			"time_logs",
-			{"from_time": "2024-06-01 08:00:00", "to_time": "2024-06-01 08:36:00", "completed_qty": 6},
+		job_cards = frappe.get_all(
+			"Job Card", {"work_order": work_order.name}, pluck="name", order_by="sequence_id, creation"
 		)
-		job_card.pending_qty = 4
-		job_card.submit()
+		for hour, name in enumerate(job_cards, start=8):
+			frappe.get_doc(make_stock_entry_from_jc(name)).submit()
+			job_card = frappe.get_doc("Job Card", name)
+			job_card.append(
+				"time_logs",
+				{
+					"from_time": f"2024-06-01 {hour:02d}:00:00",
+					"to_time": f"2024-06-01 {hour:02d}:36:00",
+					"completed_qty": 6,
+				},
+			)
+			job_card.pending_qty = 4
+			job_card.submit()
 
 		manufacture = frappe.get_doc(make_stock_entry_for_work_order(work_order.name, "Manufacture", 6))
-		self.assertEqual(sum(row.transfer_qty for row in manufacture.items if row.item_code == rm), 6)
+		self.assertEqual(sum(row.transfer_qty for row in manufacture.items if row.item_code == rm), 12)
 
 	def test_secondary_items_from_multiple_boms_stay_separate(self):
 		"""Rows linked to different BOM rows keep their own quantity and valuation mode."""
