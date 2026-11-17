@@ -4944,6 +4944,33 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
+	def test_inline_editor_gets_the_rejected_stock_qty_a_return_takes_back(self):
+		"""The inline editor gets the capped rejected stock qty of a return row, and only for a receipt the
+		user can read."""
+		from frappe.permissions import add_user_permission
+
+		from erpnext.buying.test_utils import create_user_with_roles
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.serial_and_batch_bundle.inline_editor import get_return_stock_qty
+
+		pr, _warehouses, _batch_no = self.make_split_transfer_receipt()
+		rejected_return = make_return_doc("Purchase Receipt", pr.name)
+		rejected_return.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+		rejected_return.insert()
+		args = {
+			"doc": rejected_return.as_dict(),
+			"row_name": rejected_return.items[0].name,
+			"qty_field": "rejected_qty",
+		}
+
+		self.assertEqual(get_return_stock_qty(**args), 1.0)
+
+		user = create_user_with_roles("pr-other-company-user@example.com", "Purchase User").name
+		add_user_permission("Company", "_Test Company", user)
+		with self.set_user(user):
+			self.assertRaises(frappe.PermissionError, get_return_stock_qty, **args)
+
+	@ERPNextTestSuite.change_settings("System Settings", {"float_precision": 2})
 	def test_internal_receipt_rejected_warehouse_return_of_a_batch(self):
 		"""A return of a batch from the rejected warehouse, by package or by batch field, takes back the
 		rejected stock qty its receipt put in."""
