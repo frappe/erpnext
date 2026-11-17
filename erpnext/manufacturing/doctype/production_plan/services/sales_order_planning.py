@@ -321,6 +321,7 @@ def _so_items_filter(so_item, so_list):
 	return (
 		(so_item.parent.isin(so_list))
 		& (so_item.docstatus == 1)
+		& (so_item.closed == 0)
 		& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
 		& (so_item.stock_qty > so_item.production_plan_qty)
 	)
@@ -398,6 +399,7 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 		(so_item.parent == pi.parent)
 		& (so_item.docstatus == 1)
 		& (pi.parent_item == so_item.item_code)
+		& (so_item.closed == 0)
 		& (so_item.parent.isin(so_list))
 		& pending
 		& bom_exists
