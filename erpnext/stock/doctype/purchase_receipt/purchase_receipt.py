@@ -643,8 +643,11 @@ class PurchaseReceipt(BuyingController):
 						and self.conversion_rate != exchange_rate_map[item.purchase_invoice]
 						and item.net_rate == net_rate_map[item.purchase_invoice_item]
 					):
-						discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * (
-							exchange_rate_map[item.purchase_invoice] - self.conversion_rate
+						discrepancy_caused_by_exchange_rate_difference = flt(
+							item.qty
+							* item.net_rate
+							* (exchange_rate_map[item.purchase_invoice] - self.conversion_rate),
+							item.precision("base_net_amount"),
 						)
 
 						self.add_gl_entry(
@@ -655,7 +658,6 @@ class PurchaseReceipt(BuyingController):
 							credit=discrepancy_caused_by_exchange_rate_difference,
 							remarks=remarks,
 							against_account=self.supplier,
-							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
 							project=item.project,
 							item=item,
@@ -669,7 +671,6 @@ class PurchaseReceipt(BuyingController):
 							credit=0.0,
 							remarks=remarks,
 							against_account=self.supplier,
-							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
 							project=item.project,
 							item=item,

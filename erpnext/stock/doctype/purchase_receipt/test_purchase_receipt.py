@@ -9676,7 +9676,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 	def test_receipt_from_invoice_at_another_rate_books_matching_account_currency_amounts(self):
 		"""The exchange difference rows of a receipt made from a foreign currency invoice book the same
 		amounts in an account in the company currency."""
-		from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt as make_receipt
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_receipt,
+		)
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
 		pi = make_purchase_invoice(
