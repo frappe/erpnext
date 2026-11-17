@@ -2910,6 +2910,37 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln.reload()
 		self.assertEqual(pln.po_items[0].pending_qty, 1)
 
+	def test_delivered_part_of_sales_order_is_not_planned_again(self):
+		fg_item = make_item("_Test FG For Delivered SO Planning", {"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[make_item("_Test RM For Delivered SO Planning").name])
+		make_stock_entry(item_code=fg_item, target="_Test Warehouse - _TC", qty=4, basic_rate=100)
+		sales_order = make_sales_order(item_code=fg_item, qty=10)
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.items[0].qty = 4
+		delivery_note.submit()
+
+		def plan_sales_order():
+			plan = frappe.new_doc("Production Plan")
+			plan.company = sales_order.company
+			plan.get_items_from = "Sales Order"
+			plan.item_code = fg_item
+			plan.append("sales_orders", {"sales_order": sales_order.name})
+			plan.get_items()
+			return plan
+
+		first_plan, second_plan = plan_sales_order(), plan_sales_order()
+		self.assertEqual([row.planned_qty for row in first_plan.po_items], [6])
+		first_plan.po_items[0].planned_qty = 2
+		first_plan.submit()
+		self.assertRaisesRegex(frappe.ValidationError, "Only 4.0 Nos is left to plan", second_plan.submit)
+
+		last_plan = plan_sales_order()
+		self.assertEqual([row.planned_qty for row in last_plan.po_items], [4])
+		last_plan.submit()
+
+		self.assertFalse(plan_sales_order().po_items)
+		self.assertFalse(get_sales_orders(last_plan))
+
 	def test_sales_order_items_fetch_unplanned_qty(self):
 		so = make_sales_order(
 			item_list=[
