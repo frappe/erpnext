@@ -10027,9 +10027,8 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		receipt.submit()
 		return receipt
 
-	def test_receipt_from_invoice_at_another_rate_books_matching_account_currency_amounts(self):
-		"""The exchange difference rows of a receipt made from a foreign currency invoice book the same
-		amounts in an account in the company currency."""
+	def make_receipt_from_usd_invoice(self, receipt_conversion_rate):
+		"""Receipt at another exchange rate from a USD invoice of 3 @ 10.33 at 85.37."""
 		from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt as make_receipt
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 
@@ -10050,8 +10049,14 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pi.submit()
 
 		pr = frappe.get_doc(make_receipt(pi.name))
-		pr.conversion_rate = 83.11
+		pr.conversion_rate = receipt_conversion_rate
 		pr.submit()
+		return pr
+
+	def test_receipt_from_invoice_at_another_rate_books_matching_account_currency_amounts(self):
+		"""The exchange difference rows of a receipt made from a foreign currency invoice book the same
+		amounts in an account in the company currency."""
+		pr = self.make_receipt_from_usd_invoice(83.11)
 
 		gl_entries = frappe.get_all(
 			"GL Entry",
@@ -10148,6 +10153,21 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 				"GL Entry", {"voucher_no": purchase_return.name, "account": "Cost of Goods Sold - TCP1"}
 			)
 		)
+
+	def test_return_of_receipt_from_invoice_at_another_rate_reverses_exchange_difference(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = self.make_receipt_from_usd_invoice(83.11)
+		pr_return = make_purchase_return(pr.name)
+		pr_return.submit()
+
+		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
+		reversed_amount = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pr_return.name, "account": gain_loss_account, "is_cancelled": 0},
+			"credit",
+		)
+		self.assertEqual(reversed_amount, 70.04)
 
 
 def create_asset_category_for_pr_test():
