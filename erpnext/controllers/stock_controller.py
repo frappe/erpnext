@@ -47,7 +47,15 @@ STOCK_WAREHOUSE_FIELDS = (
 	"rejected_warehouse",
 	"target_warehouse",
 	"from_warehouse",
+)
+PARENT_WAREHOUSE_FIELDS = (
 	"set_warehouse",
+	"set_target_warehouse",
+	"set_from_warehouse",
+	"rejected_warehouse",
+	"supplier_warehouse",
+	"from_warehouse",
+	"to_warehouse",
 )
 
 
@@ -473,13 +481,15 @@ class StockController(AccountsController):
 		return not self.meta.has_field("update_stock") or bool(self.update_stock)
 
 	def get_item_warehouses(self):
+		parent_warehouses = {self.get(fieldname) for fieldname in PARENT_WAREHOUSE_FIELDS}
 		item_warehouses = set()
 		for table_name in STOCK_ITEM_TABLES:
 			for row in self.get(table_name) or []:
 				item_code = row.get("rm_item_code") or row.get("item_code")
-				for fieldname in STOCK_WAREHOUSE_FIELDS:
-					if item_code and row.get(fieldname):
-						item_warehouses.add((item_code, row.get(fieldname)))
+				warehouses = parent_warehouses | {row.get(fieldname) for fieldname in STOCK_WAREHOUSE_FIELDS}
+				item_warehouses.update(
+					(item_code, warehouse) for warehouse in warehouses if item_code and warehouse
+				)
 
 		return item_warehouses
 

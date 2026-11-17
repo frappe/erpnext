@@ -42,6 +42,26 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		frappe.local.future_sle = {}
 		self.load_test_records("Purchase Receipt")
 
+	def test_bin_lock_includes_parent_warehouses(self):
+		receipt = frappe.get_doc(
+			{
+				"doctype": "Purchase Receipt",
+				"set_warehouse": "_Test Warehouse - _TC",
+				"supplier_warehouse": "_Test Warehouse 1 - _TC",
+				"items": [{"item_code": "_Test Item"}],
+				"supplied_items": [{"rm_item_code": "_Test Item Home Desktop 100"}],
+			}
+		)
+
+		self.assertEqual(
+			receipt.get_item_warehouses(),
+			{
+				(item_code, warehouse)
+				for item_code in ("_Test Item", "_Test Item Home Desktop 100")
+				for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC")
+			},
+		)
+
 	def test_purchase_receipt_skips_validation(self):
 		"""
 		Test that validation is skipped when over delivery receipt allowance is reduced after PO submission
