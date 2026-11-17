@@ -952,14 +952,11 @@ frappe.ui.form.on("Job Card", {
 			timer_el.text(`${pad(h)}:${pad(m)}:${pad(s)}`);
 		};
 
-		let current_increment = frm.events.get_current_time(frm);
-		update_stopwatch(current_increment);
+		const tick = () => update_stopwatch(frm.events.get_current_time(frm));
+		tick();
 
 		if (is_actively_running) {
-			frm._jcd_timer_interval = setInterval(() => {
-				current_increment += 1;
-				update_stopwatch(current_increment);
-			}, 1000);
+			frm._jcd_timer_interval = setInterval(tick, 1000);
 		}
 
 		// Demote Submit to btn-default when an action button is already primary.
