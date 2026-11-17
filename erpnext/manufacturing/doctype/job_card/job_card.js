@@ -974,11 +974,11 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	get_current_time(frm) {
-		// union of the time log intervals, so parallel operators count once (as on the server)
+		// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
 		const now = frappe.datetime.system_datetime();
 		const intervals = frm.doc.time_logs
 			.filter((d) => d.from_time)
-			.map((d) => [moment(d.from_time), moment(d.to_time || now)])
+			.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
 			.sort((a, b) => a[0] - b[0]);
 
 		let current_time = 0;
@@ -990,13 +990,13 @@ frappe.ui.form.on("Job Card", {
 				return;
 			}
 			if (current_end) {
-				current_time += get_seconds_diff(current_end, current_start);
+				current_time += current_end.diff(current_start, "seconds", true);
 			}
 			[current_start, current_end] = [start, end];
 		});
 
 		if (current_end) {
-			current_time += get_seconds_diff(current_end, current_start);
+			current_time += current_end.diff(current_start, "seconds", true);
 		}
 		return current_time;
 	},
@@ -1077,10 +1077,6 @@ frappe.ui.form.on("Job Card Time Log", {
 		frm.events.set_total_completed_qty(frm);
 	},
 });
-
-function get_seconds_diff(d1, d2) {
-	return moment(d1).diff(d2, "seconds");
-}
 
 function get_last_completed_row(time_logs) {
 	const completed_rows = time_logs.filter((d) => d.to_time);
