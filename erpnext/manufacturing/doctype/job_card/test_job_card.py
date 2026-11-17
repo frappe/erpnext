@@ -3751,6 +3751,7 @@ class TestJobCard(ERPNextTestSuite):
 		warehouse = "Stores - _TC"
 		rm = make_item("Per Op Service RM", {"is_stock_item": 1, "valuation_rate": 50}).name
 		service = make_item("Per Op Service", {"is_stock_item": 0, "valuation_rate": 100}).name
+		unassigned = make_item("Per Op Unassigned Service", {"is_stock_item": 0, "valuation_rate": 40}).name
 		sfg = make_item("Per Op Service SFG", {"is_stock_item": 1}).name
 		fg = make_item("Per Op Service FG", {"is_stock_item": 1}).name
 		make_stock_entry(item_code=rm, target=warehouse, qty=20, basic_rate=50)
@@ -3784,9 +3785,12 @@ class TestJobCard(ERPNextTestSuite):
 			fg_bom.append("operations", operation)
 		fg_bom.append("items", {"item_code": sfg, "qty": 1, "operation_row_id": 2})
 		fg_bom.append("items", {"item_code": service, "qty": 1, "operation_row_id": 2})
+		fg_bom.append("items", {"item_code": unassigned, "qty": 1})
 		fg_bom.insert()
 		fg_bom.submit()
-		service_amount = next(row.base_amount for row in fg_bom.items if row.item_code == service)
+		service_amount = sum(
+			row.base_amount for row in fg_bom.items if row.item_code in (service, unassigned)
+		)
 
 		work_order = make_wo_order_test_record(
 			item=fg, qty=10, source_warehouse=warehouse, bom_no=fg_bom.name, skip_transfer=1
