@@ -1669,16 +1669,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(fg_return.items[0].expense_account, delivery_account)
 
 	def test_subcontracting_delivery_keeps_the_chosen_difference_account(self):
-		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
-		scio.reload()
-		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
-		wo.skip_transfer = 1
-		wo.required_items[-1].source_warehouse = "Stores - _TC"
-		wo.submit()
-		frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
-
-		scio.reload()
+		so, scio = create_manufactured_so_scio()
 		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
 		delivery.save()
 		self.assertEqual(
@@ -1689,6 +1680,16 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		delivery.items[0].expense_account = "Freight and Forwarding Charges - _TC"
 		delivery.save()
 		self.assertEqual(delivery.items[0].expense_account, "Freight and Forwarding Charges - _TC")
+
+	def test_subcontracting_return_uses_the_chosen_delivery_account(self):
+		so, scio = create_manufactured_so_scio()
+		delivery = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery())
+		delivery.items[0].expense_account = "Freight and Forwarding Charges - _TC"
+		delivery.submit()
+
+		scio.reload()
+		fg_return = frappe.new_doc("Stock Entry").update(scio.make_subcontracting_return())
+		self.assertEqual(fg_return.items[0].expense_account, "Freight and Forwarding Charges - _TC")
 
 	def test_extra_receipt_of_bom_item_uses_existing_row(self):
 		so, scio = create_so_scio()
@@ -1746,7 +1747,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 			)
 
 
-def create_delivered_so_scio():
+def create_manufactured_so_scio():
 	so, scio = create_so_scio()
 	frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
 	scio.reload()
@@ -1756,6 +1757,11 @@ def create_delivered_so_scio():
 	wo.submit()
 	frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture")).submit()
 	scio.reload()
+	return so, scio
+
+
+def create_delivered_so_scio():
+	so, scio = create_manufactured_so_scio()
 	frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
 	scio.reload()
 	return so, scio
