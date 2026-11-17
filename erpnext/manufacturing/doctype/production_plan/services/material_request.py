@@ -532,7 +532,8 @@ def _mr_item_for_details(
 	if transfer_warehouses and warehouse != target_warehouse:
 		shortage_warehouse = target_warehouse
 		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse == target_warehouse)
-	elif transfer_warehouses:
+	elif transfer_warehouses and not warehouse:
+		# no warehouse: availability spans all warehouses, the selected ones included
 		shortage_bin = aggregate_bin_details(row for row in bins if row.warehouse not in transfer_warehouses)
 	return get_material_request_items(
 		doc,
