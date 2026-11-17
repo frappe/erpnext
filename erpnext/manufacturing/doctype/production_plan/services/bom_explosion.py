@@ -242,18 +242,18 @@ def _process_subitem(
 ):
 	# a Do Not Explode line has no BOM, so it must not take the item's default BOM
 	child_bom = d.bom_no or (None if d.do_not_explode else d.default_bom)
-	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
+	# of a planned sub-assembly, only the share that is made (or subcontracted) adds its components
+	exploded_share = (data.get("exploded_sub_assembly_shares") or {}).get((d.item_code, d.bom_no))
+	if exploded_share == 0:
 		return
 
-	# a planned sub-assembly is made or subcontracted, so only its components are requested
-	sub_assembly_type = (data.get("planned_sub_assemblies") or {}).get((d.item_code, d.bom_no))
-	if sub_assembly_type == "Subcontract" and not include_subcontracted_items:
-		return
+	if exploded_share:
+		d.qty *= exploded_share
 
 	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
 	explode = (
 		explodable
-		and (sub_assembly_type or _should_explode_subitem(d, include_subcontracted_items))
+		and (exploded_share or _should_explode_subitem(d, include_subcontracted_items))
 		and d.qty > 0
 	)
 	# a phantom item is never requested, and merging it could hide a real line of the same item
