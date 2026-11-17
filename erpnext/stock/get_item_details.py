@@ -373,7 +373,11 @@ def update_stock(ctx, out, doc=None, has_locked_rate=False):
 				out.update({"batch_no": batch_no, "actual_batch_qty": out.stock_qty})
 				if not has_locked_rate:
 					rate = _get_batch_based_item_price(
-						{"price_list": ctx.price_list, "uom": out.uom, "batch_no": batch_no},
+						{
+							"price_list": doc.get("selling_price_list") if doc else ctx.price_list,
+							"uom": out.uom,
+							"batch_no": batch_no,
+						},
 						out.item_code,
 					)
 					if rate:
