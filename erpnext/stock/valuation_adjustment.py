@@ -156,9 +156,7 @@ def set_adjustment_rows(plan: AdjustmentPlan, stock, details, posting_datetime, 
 	for batch_no, lot in sorted(stock.batch_lots.items()):
 		if lot.qty >= details.qty_tolerance:
 			plan.rows.append(
-				AdjustmentRow(
-					qty=lot.qty, valuation_rate=flt(lot.value / lot.qty, precision), batch_no=batch_no
-				)
+				AdjustmentRow(qty=lot.qty, valuation_rate=lot.value / lot.qty, batch_no=batch_no)
 			)
 
 	pooled_lots = get_pooled_lots(plan, details, posting_datetime, exclude_voucher_no)
@@ -174,15 +172,14 @@ def get_pool_layers(stock, details, posting_datetime) -> list[tuple[float, float
 	"""The [qty, rate] layers the pool should hold, oldest first: counted in in this order, they
 	give a FIFO queue or a LIFO stack back as it should be. A moving average pool is one layer, and
 	so is a Standard Cost item's stock, at the standard rate on the date."""
-	precision = details.currency_precision
 	pool = stock.pool
 
 	if details.valuation_method == "Standard Cost":
-		layers = [(pool.qty, flt(details.get_standard_rate(getdate(posting_datetime)), precision))]
+		layers = [(pool.qty, flt(details.get_standard_rate(getdate(posting_datetime))))]
 	elif isinstance(pool, QueuePool):
-		layers = [(qty, flt(rate, precision)) for qty, rate in pool.layers]
+		layers = [(qty, flt(rate)) for qty, rate in pool.layers]
 	else:
-		layers = [(pool.qty, flt(pool.rate, precision))]
+		layers = [(pool.qty, flt(pool.rate))]
 
 	return [(qty, rate) for qty, rate in layers if abs(qty) >= details.qty_tolerance]
 

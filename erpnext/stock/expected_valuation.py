@@ -747,7 +747,7 @@ class ValuationDetails:
 			if flt(entry.actual_qty) < 0 and (entry.serial_and_batch_bundle or entry.serial_no):
 				rate = reconciled.current_valuation_rate
 
-			return flt(reconciled.qty), flt(rate, self.currency_precision)
+			return flt(reconciled.qty), flt(rate)
 
 		return flt(entry.qty_after_transaction), flt(entry.valuation_rate)
 
