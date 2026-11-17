@@ -157,7 +157,13 @@ class TestAssetMaintenance(unittest.TestCase):
 		user = "test_asset_maintenance_qm@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
-				{"doctype": "User", "email": user, "first_name": "QM", "roles": [{"role": "Quality Manager"}]}
+				{
+					"doctype": "User",
+					"send_welcome_email": 0,
+					"email": user,
+					"first_name": "QM",
+					"roles": [{"role": "Quality Manager"}],
+				}
 			).insert()
 
 		frappe.set_user(user)
@@ -224,6 +230,7 @@ def create_maintenance_team():
 			frappe.get_doc(
 				{
 					"doctype": "User",
+					"send_welcome_email": 0,
 					"email": user,
 					"first_name": user,
 					"new_password": "password",
