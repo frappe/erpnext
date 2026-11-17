@@ -2203,6 +2203,36 @@ class TestStockReservationEntryValidation(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"enable_stock_reservation": 1, "allow_partial_reservation": 1, "allow_negative_stock": 0},
+	)
+	def test_row_covered_with_a_fractional_conversion_factor_has_no_unreserved_stock(self):
+		for uom in ("Kg", "Gram"):
+			frappe.db.set_value("UOM", uom, "must_be_whole_number", 0)
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Gram", "conversion_factor": 0.1}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		sales_order = make_sales_order(
+			item_code=item_code, warehouse="_Test Warehouse - _TC", qty=4, uom="Gram", do_not_submit=1
+		)
+		sales_order.items[0].update({"conversion_factor": 0.1, "reserve_stock": 1})
+		sales_order.submit()
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.items[0].qty = 1
+		delivery_note.submit()
+		sales_order.reload()
+		sales_order.create_stock_reservation_entries(notify=False)
+
+		sales_order.reload()
+		self.assertFalse(sales_order.has_unreserved_stock())
+
+	@ERPNextTestSuite.change_settings(
 		"Stock Settings", {"enable_stock_reservation": 1, "allow_partial_reservation": 1}
 	)
 	def test_pick_list_reservation_is_not_rounded_up_to_a_whole_sales_unit(self):
