@@ -6213,7 +6213,7 @@ def create_production_plan(**args):
 		pln.append(
 			"po_items",
 			{
-				"use_multi_level_bom": args.use_multi_level_bom or 1,
+				"include_exploded_items": args.get("use_multi_level_bom", 1),
 				"item_code": args.item_code,
 				"bom_no": frappe.db.get_value("Item", args.item_code, "default_bom"),
 				"planned_qty": args.planned_qty or 1,
