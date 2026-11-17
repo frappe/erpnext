@@ -46,6 +46,7 @@ class TestCustomersWithoutAnySalesTransactions(FrappeTestCase):
 		user = "_test_cwst_restricted@example.com"
 		if not frappe.db.exists("User", user):
 			restricted = frappe.new_doc("User")
+			restricted.send_welcome_email = 0
 			restricted.email = user
 			restricted.first_name = "CWST Restricted"
 			restricted.append("roles", {"role": "Sales User"})

@@ -84,7 +84,12 @@ class TestVATAuditReport(FrappeTestCase):
 			invoice.submit()
 
 		user = frappe.get_doc(
-			{"doctype": "User", "email": "test-sa-vat-audit@example.com", "first_name": "SA VAT Audit"}
+			{
+				"doctype": "User",
+				"send_welcome_email": 0,
+				"email": "test-sa-vat-audit@example.com",
+				"first_name": "SA VAT Audit",
+			}
 		).insert()
 		user.add_roles("Accounts User")
 		user = user.name

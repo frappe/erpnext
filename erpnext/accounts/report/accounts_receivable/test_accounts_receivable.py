@@ -1587,6 +1587,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		test_user = "test_ar_user_permission@example.com"
 		if not frappe.db.exists("User", test_user):
 			user = frappe.new_doc("User")
+			user.send_welcome_email = 0
 			user.email = test_user
 			user.first_name = "AR Perm"
 			user.append("roles", {"role": "Accounts User"})

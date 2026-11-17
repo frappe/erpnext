@@ -892,6 +892,7 @@ class TestMaterialRequest(FrappeTestCase):
 				frappe.get_doc(
 					{
 						"doctype": "User",
+						"send_welcome_email": 0,
 						"email": user,
 						"first_name": user,
 						"send_notifications": 0,
