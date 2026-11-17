@@ -1714,7 +1714,7 @@ class TestJobCard(FrappeTestCase):
 				"workstation": workstation,
 				"for_quantity": 10,
 				"company": wo.company,
-				"wip_warehouse": wo.wip_warehouse,
+				"wip_warehouse": "_Test Warehouse 1 - _TC",
 				"posting_date": today(),
 			}
 		)
