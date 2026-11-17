@@ -182,7 +182,6 @@ class SalesOrderSourcingService:
 			frappe.qb.from_(so_item)
 			.from_(pi)
 			.select(*_so_packed_columns(so_item, pi))
-			.distinct()
 			.where(_so_packed_filter(bom, so_item, pi, so_list))
 		)
 		if self.doc.item_code:
