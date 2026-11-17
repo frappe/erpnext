@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import today
+from frappe.utils import add_days, today
 
 from erpnext.stock.get_item_details import (
 	get_batch_qty,
@@ -806,7 +806,12 @@ class TestGetItemDetail(ERPNextTestSuite):
 				**fields,
 			}
 		)
-		doc = {"doctype": "Delivery Note", "selling_price_list": "_Test Price List", "items": items or []}
+		doc = {
+			"doctype": "Delivery Note",
+			"posting_date": today(),
+			"selling_price_list": "_Test Price List",
+			"items": items or [],
+		}
 		return get_item_details(ctx, doc=doc)
 
 	def get_picked_batch_no(self, item_code, qty, items=None):
@@ -1060,6 +1065,32 @@ class TestGetItemDetail(ERPNextTestSuite):
 		):
 			self.assertEqual(self.get_picked_batch_no(item_code, 5, items=box_row), batches[0])
 			self.assertIsNone(self.get_picked_batch_no(item_code, 6, items=box_row))
+
+	def test_auto_picked_batch_price_respects_validity_and_customer(self):
+		item_code, batches = self.make_batched_item_with_stock([10])
+
+		def add_batch_price(rate, **fields):
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": item_code,
+					"price_list": "_Test Price List",
+					"batch_no": batches[0],
+					"price_list_rate": rate,
+					**fields,
+				}
+			).insert()
+
+		def get_price_list_rate():
+			return self.get_item_details_for_row(item_code, 2, customer="_Test Customer").price_list_rate
+
+		add_batch_price(99, valid_from=add_days(today(), -30), valid_upto=add_days(today(), -1))
+		add_batch_price(98, customer="_Test Customer 1")
+
+		with self.change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1}):
+			self.assertFalse(get_price_list_rate())
+			add_batch_price(97, customer="_Test Customer")
+			self.assertEqual(get_price_list_rate(), 97)
 
 	def test_price_not_uom_dependent_is_applied_to_item_rows(self):
 		"""An Item Price saved for the stock UOM is scaled to the row UOM unless the Price List
