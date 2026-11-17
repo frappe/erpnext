@@ -401,17 +401,16 @@ class TestBlanketOrder(FrappeTestCase):
 		for bo, days in ((purchasing, 3), (other_customer, 5)):
 			bo.db_set("to_date", add_days(today(), days))
 
-		details = get_blanket_order_details(
-			{
-				"company": "_Test Company",
-				"currency": selling.currency,
-				"customer": selling.customer,
-				"doctype": "Quotation",
-				"item_code": item,
-				"transaction_date": today(),
-			}
-		)
-		self.assertEqual(details.blanket_order, selling.name)
+		lookup = {
+			"company": "_Test Company",
+			"currency": selling.currency,
+			"customer": selling.customer,
+			"doctype": "Quotation",
+			"item_code": item,
+			"transaction_date": today(),
+		}
+		self.assertEqual(get_blanket_order_details(lookup).blanket_order, selling.name)
+		self.assertFalse(get_blanket_order_details({**lookup, "customer": None}))
 
 		def quotation_against(bo):
 			quotation = make_quotation(item_code=item, party_name=selling.customer, do_not_save=True)
