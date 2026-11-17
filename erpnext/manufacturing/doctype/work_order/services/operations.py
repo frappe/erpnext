@@ -122,20 +122,32 @@ class OperationsService:
 
 		for idx, row in enumerate(self.doc.operations):
 			qty = get_operation_qty(self.doc, row)
-			planned_start_time = None
+			card_times = []
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self.doc, row, qty)
 				if row.job_card_qty > 0:
 					self.prepare_data_for_job_card(row, idx, plan_days, enable_capacity_planning)
-					planned_start_time = planned_start_time or row.planned_start_time
+					card_times.append(
+						(get_datetime(row.planned_start_time), get_datetime(row.planned_end_time))
+					)
 
-			# with batch cards the operation starts with the first card
-			if planned_start_time and planned_start_time != row.planned_start_time:
-				row.db_set("planned_start_time", planned_start_time)
+			self.set_batch_operation_time(row, card_times)
 
 		planned_end_date = self.doc.operations and self.doc.operations[-1].planned_end_time
 		if planned_end_date:
 			self.doc.db_set("planned_end_date", planned_end_date)
+
+	@staticmethod
+	def set_batch_operation_time(row, card_times):
+		"""Batch cards can be scheduled out of order, so the operation spans all of them."""
+		if len(card_times) < 2:
+			return
+
+		start = min(start for start, _end in card_times)
+		end = max(end for _start, end in card_times)
+		if (start, end) != card_times[-1]:
+			row.planned_start_time, row.planned_end_time = start, end
+			row.db_update()
 
 	def prepare_data_for_job_card(self, row, idx, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(row, idx)
