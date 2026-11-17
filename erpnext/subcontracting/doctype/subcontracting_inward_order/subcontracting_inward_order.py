@@ -154,10 +154,11 @@ class SubcontractingInwardOrder(SubcontractingController):
 		for item in self.items:
 			doc = frappe.get_doc("Sales Order Item", item.sales_order_item)
 			stock_qty = item.qty * item.subcontracting_conversion_factor
-			doc.subcontracted_qty = (
+			doc.subcontracted_qty = flt(
 				(doc.subcontracted_qty + stock_qty)
 				if self._action == "submit"
-				else (doc.subcontracted_qty - stock_qty)
+				else (doc.subcontracted_qty - stock_qty),
+				doc.precision("subcontracted_qty"),
 			)
 			doc.save()
 
