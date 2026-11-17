@@ -156,8 +156,9 @@ class BOMCostingService:
 
 		old_cost = self.doc.total_cost
 
-		self.doc.total_cost = (
-			self.doc.operating_cost + self.doc.raw_material_cost - self.doc.secondary_items_cost
+		self.doc.total_cost = flt(
+			self.doc.operating_cost + self.doc.raw_material_cost - self.doc.secondary_items_cost,
+			self.doc.precision("total_cost"),
 		)
 		self.doc.base_total_cost = flt(
 			self.doc.base_operating_cost
@@ -179,6 +180,7 @@ class BOMCostingService:
 		elif self.doc.get("fg_based_operating_cost"):
 			self._set_fg_based_operating_cost()
 
+		self.doc.operating_cost = flt(self.doc.operating_cost, self.doc.precision("operating_cost"))
 		self.doc.base_operating_cost = flt(
 			self.doc.base_operating_cost, self.doc.precision("base_operating_cost")
 		)
@@ -228,10 +230,11 @@ class BOMCostingService:
 			)
 
 	def _set_row_operating_costs(self, row):
-		row.operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
-		base_operating_cost = flt(row.operating_cost) * flt(self.doc.conversion_rate)
+		operating_cost = flt(row.hour_rate) * flt(row.time_in_mins) / 60.0
+		base_operating_cost = operating_cost * flt(self.doc.conversion_rate)
+		row.operating_cost = flt(operating_cost, row.precision("operating_cost"))
 		row.base_operating_cost = flt(base_operating_cost, row.precision("base_operating_cost"))
-		row.cost_per_unit = row.operating_cost / (row.batch_size or 1.0)
+		row.cost_per_unit = operating_cost / (row.batch_size or 1.0)
 		row.base_cost_per_unit = base_operating_cost / (row.batch_size or 1.0)
 
 	def calculate_rm_cost(self, save=False):
