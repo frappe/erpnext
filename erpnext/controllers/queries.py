@@ -751,9 +751,16 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
+	from erpnext.selling.doctype.quotation.quotation import get_existing_customer_name
+
+	party = filters.get("party")
+	if filters.get("quotation_to"):
+		party = get_existing_customer_name(filters.get("quotation_to"), party)
+
 	bo_filters = [
 		["docstatus", "=", 1],
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
+		["customer" if filters.get("blanket_order_type") == "Selling" else "supplier", "=", party],
 		["company", "=", filters.get("company")],
 	]
 
