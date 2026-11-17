@@ -581,8 +581,13 @@ class StatusService:
 			return 1
 
 		pbi = frappe.qb.DocType("Product Bundle Item")
+		so_item = frappe.qb.DocType("Sales Order Item")
 		total_bundle_qty = (
-			frappe.qb.from_(pbi).select(Sum(pbi.qty)).where(pbi.parent == self.doc.product_bundle_item)
+			frappe.qb.from_(pbi)
+			.join(so_item)
+			.on(pbi.parent == so_item.product_bundle)
+			.select(Sum(pbi.qty))
+			.where(so_item.name == self.doc.sales_order_item)
 		).run()[0][0]
 		# product bundle is 0 (product bundle allows 0 qty for items)
 		return total_bundle_qty or 1
