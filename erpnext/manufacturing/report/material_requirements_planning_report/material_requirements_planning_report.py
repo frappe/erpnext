@@ -1251,7 +1251,7 @@ class MaterialRequirementsPlanningReport:
 
 		return [
 			row
-			for row in convert_to_daily_bucket_data(sales_data)
+			for row in convert_to_daily_bucket_data([row for row in sales_data if row.qty])
 			if self.is_in_date_range(row.delivery_date)
 		]
 
@@ -1267,7 +1267,7 @@ class MaterialRequirementsPlanningReport:
 			for demand in demand_by_item.get(row.item_code, []):
 				if start_date <= demand.date < end_date:
 					consumed_qty = min(row.qty, demand.qty)
-					row.qty -= consumed_qty
+					row.qty = flt(row.qty - consumed_qty, self.qty_precision)
 					demand.qty -= consumed_qty
 
 
