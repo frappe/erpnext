@@ -749,7 +749,7 @@ class JobCard(Document):
 		return time_slot
 
 	def schedule_time_logs(self, row):
-		row.remaining_time_in_mins = flt(self.time_required, self.precision("time_required"))
+		row.remaining_time_in_mins = flt(self.time_required)
 		while row.remaining_time_in_mins > 0:
 			slot_end = self.place_row_start(row)
 			if not slot_end:
@@ -855,7 +855,9 @@ class JobCard(Document):
 			row.remaining_time_in_mins = 0
 		else:
 			row.planned_end_time = add_to_date(row.planned_start_time, minutes=time_in_mins)
-			row.remaining_time_in_mins -= time_in_mins
+			row.remaining_time_in_mins = flt(
+				row.remaining_time_in_mins - time_in_mins, self.precision("time_required")
+			)
 
 		self.update_time_logs(row)
 
