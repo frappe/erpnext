@@ -1664,6 +1664,38 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		)
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_return_of_components_reserves_each_warehouse_it_returns_to(self):
+		sco = make_reserving_order_with_new_items("Return Split", qty=10)
+		row = sco.supplied_items[0]
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		return_entry = make_return_of_components(sco, qty=2, do_not_submit=True)
+		return_entry.append("items", frappe.copy_doc(return_entry.items[0]))
+		return_entry.items[1].t_warehouse = "_Test Warehouse 2 - _TC"
+		return_entry.submit()
+
+		self.assertEqual(
+			get_reserved_stock(row.rm_item_code, [row.reserve_warehouse, "_Test Warehouse 2 - _TC"]), [2, 2]
+		)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_transfer_cancels_only_after_the_return_of_its_stock(self):
+		sco = make_reserving_order_with_new_items("Return Before Cancel", qty=10)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		transfer = make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		return_entry = make_return_of_components(sco, qty=4)
+
+		self.assertRaisesRegex(frappe.ValidationError, "Return of Components", transfer.cancel)
+
+		return_entry.cancel()
+		frappe.get_doc("Stock Entry", transfer.name).cancel()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_reservation_counts_supplied_qty(self):
 		service_items = [
 			{
@@ -1951,13 +1983,14 @@ def make_reserving_order_with_new_items(suffix, qty=4, rm_properties=None):
 	return sco
 
 
-def make_return_of_components(sco, qty):
+def make_return_of_components(sco, qty, do_not_submit=False):
 	frappe.flags.args = frappe._dict(
 		subcontract_order=sco.name, rm_details=[d.name for d in sco.supplied_items], order_doctype=sco.doctype
 	)
 	return_entry = get_materials_from_supplier(sco.name)
 	return_entry.items[0].qty = qty
-	return_entry.submit()
+	if not do_not_submit:
+		return_entry.submit()
 	return return_entry
 
 
