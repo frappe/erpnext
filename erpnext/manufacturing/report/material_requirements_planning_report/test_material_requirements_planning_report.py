@@ -114,6 +114,13 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 
 		self.assertAlmostEqual(sum(row.demand_qty for row in rows if row.item_code == item), 100)
 
+	def test_forecast_used_up_by_mps_demand_adds_no_rows(self):
+		item, mps = make_forecast_with_mps_demand(150)
+
+		rows = get_mrp_row_list(mps)
+
+		self.assertEqual([row.demand_qty for row in rows if row.item_code == item], [150])
+
 	def test_detailed_chart_distinguishes_delivery_dates_across_years(self):
 		with freeze_time("2026-08-12"):
 			delivery_dates = ["2026-08-15", "2027-08-15"]
