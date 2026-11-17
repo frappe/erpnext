@@ -145,8 +145,11 @@ frappe.ui.form.on("Job Card", {
 
 		if (!can_make_stock_entry) return;
 
-		frm.add_custom_button(__("Record Output"), () => frm.events.confirm_record_output(frm)).addClass(
-			"btn-primary"
+		frm.add_custom_button(
+			__("Record Output"),
+			() => frm.events.confirm_record_output(frm),
+			null,
+			"primary"
 		);
 	},
 
