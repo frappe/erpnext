@@ -401,6 +401,20 @@ class TestBlanketOrder(ERPNextTestSuite):
 
 		self.assertRaisesRegex(frappe.ValidationError, "is not in Blanket Order", so.insert)
 
+	def test_item_change_clears_a_blanket_order_without_the_new_item(self):
+		other_item = make_item("_Test Blanket Order Missing Item", {"is_stock_item": 1}).name
+		bo = make_blanket_order(blanket_order_type="Selling", quantity=10, rate=90)
+
+		frappe.flags.args.doctype = "Sales Order"
+		so = make_order(bo.name)
+		so.currency = get_company_currency(so.company)
+		so.items[0].item_code = other_item
+		so.process_item_selection(item_idx=1, reset_item_details=True)
+
+		self.assertEqual(so.items[0].against_blanket_order, 1)
+		self.assertIsNone(so.items[0].blanket_order)
+		self.assertEqual(so.items[0].blanket_order_rate, 0)
+
 	def test_party_and_order_type_are_enforced(self):
 		bo = new_blanket_order(blanket_order_type="Selling")
 		bo.customer = None
