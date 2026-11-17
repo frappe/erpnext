@@ -5037,6 +5037,40 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(frappe.db.count("Job Card Time Log", {"parent": job_card.name}), time_logs)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_make_time_log_validates_time_logs(self):
+		from erpnext.manufacturing.doctype.job_card.job_card import make_time_log
+
+		workstation = make_jc_review_workstation(capacity=1)
+		operation = make_jc_review_operation(workstation)
+		first_card, second_card = (
+			get_jc_review_job_cards(
+				make_jc_review_work_order(
+					make_jc_review_item(),
+					[{"item_code": make_jc_review_item(), "qty": 1}],
+					[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+					skip_transfer=1,
+				).name
+			)[0]
+			for _ in range(2)
+		)
+		first_card.append("time_logs", jc_review_log("2031-03-10 08:00:00", 60))
+		first_card.save()
+
+		self.assertRaises(
+			OverlapError,
+			make_time_log,
+			{"job_card_id": second_card.name, "start_time": "2031-03-10 08:30:00"},
+		)
+
+		make_time_log({"job_card_id": second_card.name, "start_time": "2031-03-10 10:00:00"})
+		self.assertRaisesRegex(
+			frappe.ValidationError,
+			"From time must be less than to time",
+			make_time_log,
+			{"job_card_id": second_card.name, "complete_time": "2031-03-10 09:30:00"},
+		)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_job_card_lookups_follow_work_order_user_permissions(self):
 		from frappe.core.doctype.user_permission.test_user_permission import create_user
 		from frappe.permissions import add_user_permission
