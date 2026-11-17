@@ -5129,6 +5129,107 @@ class TestDeliveryNote(ERPNextTestSuite):
 			[row.qty for row in make_inter_company_purchase_receipt(delivery_note.name).items], [6]
 		)
 
+	def test_inter_company_receipt_return_reopens_delivery_note_row(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+			make_purchase_receipt,
+		)
+
+		company = "_Test Company with perpetual inventory"
+		transit_warehouse = "Work In Progress - TCP1"
+		item = make_item(properties={"is_stock_item": 1}).name
+		make_purchase_receipt(item_code=item, warehouse="Stores - TCP1", company=company, qty=10)
+		delivery_note = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse=transit_warehouse,
+		)
+
+		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		receipt.items[0].warehouse = "Stores - TCP1"
+		receipt.submit()
+		self.assertEqual(
+			frappe.db.get_value("Delivery Note Item", delivery_note.items[0].name, "received_qty"), 10
+		)
+
+		receipt_return = make_return_doc("Purchase Receipt", receipt.name)
+		self.assertEqual(receipt_return.items[0].delivery_note_item, delivery_note.items[0].name)
+		receipt_return.submit()
+		self.assertEqual(
+			frappe.db.get_value("Delivery Note Item", delivery_note.items[0].name, "received_qty"), 0
+		)
+		self.assertEqual(
+			flt(
+				frappe.db.get_value("Bin", {"item_code": item, "warehouse": transit_warehouse}, "actual_qty")
+			),
+			10,
+		)
+		self.assertEqual(
+			[row.qty for row in make_inter_company_purchase_receipt(delivery_note.name).items], [10]
+		)
+
+	def test_inter_company_receipt_return_of_a_batch_item_keeps_its_own_package(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		transit_warehouse = "Work In Progress - TCP1"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "_T-ICR-BATCH-.####",
+			}
+		).name
+		make_stock_entry(item_code=item, target=warehouse, company=company, qty=10, basic_rate=100)
+		delivery_note = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=100,
+			warehouse=warehouse,
+			target_warehouse=transit_warehouse,
+		)
+
+		receipt = make_inter_company_purchase_receipt(delivery_note.name)
+		receipt.items[0].warehouse = warehouse
+		receipt.submit()
+
+		receipt_return = make_return_doc("Purchase Receipt", receipt.name)
+		receipt_return.submit()
+		batch = frappe.db.get_value("Batch", {"item": item}, "name")
+		for returned_warehouse, qty in ((warehouse, 0), (transit_warehouse, 10)):
+			package = frappe.db.get_value(
+				"Serial and Batch Bundle",
+				{"voucher_no": receipt_return.name, "warehouse": returned_warehouse, "docstatus": 1},
+			)
+			self.assertEqual(
+				frappe.db.get_value("Serial and Batch Entry", {"parent": package}, "batch_no"), batch
+			)
+			self.assertEqual(
+				flt(
+					frappe.db.get_value(
+						"Bin", {"item_code": item, "warehouse": returned_warehouse}, "actual_qty"
+					)
+				),
+				qty,
+			)
+		self.assertEqual(
+			frappe.db.get_value("Delivery Note Item", delivery_note.items[0].name, "received_qty"), 0
+		)
+
 	def test_internal_return_keeps_target_warehouse(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
