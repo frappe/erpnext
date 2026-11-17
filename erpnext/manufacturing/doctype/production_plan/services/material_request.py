@@ -313,7 +313,10 @@ def _build_sub_assembly_map(doc):
 
 	sub_assembly_items = defaultdict(int)
 	for d in doc.get("sub_assembly_items"):
-		if d.get("type_of_manufacturing") == "Material Request":
+		# a requested sub-assembly is bought as it is; a subcontracted one only adds its components when asked
+		if d.get("type_of_manufacturing") == "Material Request" or (
+			d.get("type_of_manufacturing") == "Subcontract" and not doc.get("include_subcontracted_items")
+		):
 			continue
 		key = (d.get("production_item"), d.get("bom_no"), d.get("type_of_manufacturing"))
 		sub_assembly_items[key] += get_qty_before_process_loss(
