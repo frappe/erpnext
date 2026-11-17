@@ -7,6 +7,10 @@ import frappe
 from frappe.utils import cint, flt, get_datetime, get_time
 
 from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty, get_upstream_process_loss
+from erpnext.manufacturing.doctype.work_order.services.operations import (
+	_operation_time_per_unit,
+	get_batch_size_flags,
+)
 from erpnext.manufacturing.scheduling.models import Interval, Resource, ResourceCalendar, Task
 
 
@@ -226,9 +230,12 @@ def build_bom_operation_tasks(bom_no, qty, prefix, earliest_start=None, priority
 			"time_in_mins",
 			"fixed_time",
 			"sequence_id",
+			"batch_size",
+			"set_cost_based_on_bom_qty",
 		],
 		order_by="idx",
 	)
+	batch_size_flags = get_batch_size_flags(row.operation for row in rows)
 
 	tasks = []
 	previous_group, current_group, current_sequence = [], [], None
@@ -236,7 +243,8 @@ def build_bom_operation_tasks(bom_no, qty, prefix, earliest_start=None, priority
 		if current_group and (not row.sequence_id or row.sequence_id != current_sequence):
 			previous_group, current_group = current_group, []
 
-		task = build_operation_task(row, qty, bom_qty, prefix, previous_group, earliest_start, priority)
+		duration = get_operation_duration(row, qty, bom_qty, batch_size_flags)
+		task = build_operation_task(row, duration, prefix, previous_group, earliest_start, priority)
 		tasks.append(task)
 		current_group.append(task.key)
 		current_sequence = row.sequence_id
@@ -244,11 +252,14 @@ def build_bom_operation_tasks(bom_no, qty, prefix, earliest_start=None, priority
 	return tasks, current_group
 
 
-def build_operation_task(row, qty, bom_qty, prefix, previous_group, earliest_start, priority):
-	duration = flt(row.time_in_mins)
-	if not row.fixed_time:
-		duration = duration * qty / bom_qty
+def get_operation_duration(row, qty, bom_qty, batch_size_flags):
+	"""Operation time for `qty`, per batch as in the Work Order."""
+	if row.fixed_time:
+		return flt(row.time_in_mins)
+	return _operation_time_per_unit(row, bom_qty, 1, False, batch_size_flags) * flt(qty)
 
+
+def build_operation_task(row, duration, prefix, previous_group, earliest_start, priority):
 	return Task(
 		key=f"{prefix}:{row.name}",
 		duration_mins=duration,
