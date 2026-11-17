@@ -481,6 +481,22 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		self.assertNotIn(call("gl_reposting_index", 1), doc.db_set.mock_calls)
 
+	def test_gl_repost_leaves_a_cancelled_voucher_alone(self):
+		company = "_Test Company with perpetual inventory"
+		stock_entry = make_stock_entry(company=company, qty=1, rate=2, target="Stores - TCP1")
+		stock_entry.cancel()
+		gl_entries = frappe.get_all("GL Entry", filters={"voucher_no": stock_entry.name}, pluck="name")
+
+		repost_gle_for_stock_vouchers(
+			stock_vouchers=[(stock_entry.doctype, stock_entry.name)], posting_date=today(), company=company
+		)
+
+		self.assertTrue(gl_entries)
+		self.assertEqual(
+			sorted(frappe.get_all("GL Entry", filters={"voucher_no": stock_entry.name}, pluck="name")),
+			sorted(gl_entries),
+		)
+
 	def test_gl_complete_gl_reposting(self):
 		from erpnext.accounts import utils
 
