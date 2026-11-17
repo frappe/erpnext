@@ -9,17 +9,11 @@ from frappe.tests import change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-<<<<<<< HEAD
 from erpnext.selling.doctype.quotation.quotation import make_sales_order
-=======
-from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
-from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_invoice, make_sales_order
-from erpnext.selling.doctype.quotation.quotation import get_open_count
 from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
 	patched_requests_get,
 	test_exchange_values,
 )
->>>>>>> cba412c (test(quotation): stub the provider instead of seeding the rate cache)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
