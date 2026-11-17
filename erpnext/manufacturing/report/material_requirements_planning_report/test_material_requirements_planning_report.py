@@ -907,7 +907,6 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		forecast = make_sales_forecast(from_date=add_days(today(), 10), demand_number=1)
 		from_date, to_date = add_days(today(), 20), add_days(today(), 30)
 		report = MaterialRequirementsPlanningReport(frappe._dict(from_date=from_date, to_date=to_date))
-		report.mps_data = []
 
 		dates = [
 			row.delivery_date
