@@ -192,9 +192,8 @@ erpnext.PartyOverview = class PartyOverview {
 	load_companies() {
 		const party = this.party;
 		const token = (this.company_seq = (this.company_seq || 0) + 1);
-		this.companies_ready = !!this.state.company;
+		this.companies_ready = false;
 		this.load();
-		this.refresh_list();
 		return frappe
 			.xcall(`${this.method_path}.get_${this.party_key}_companies`, { [this.party_key]: party })
 			.then((companies) => {
@@ -212,8 +211,7 @@ erpnext.PartyOverview = class PartyOverview {
 				if (!known) this.state.company = companies[0];
 				this.company_field.set_value(this.state.company);
 				this.companies_ready = true;
-				if (known) return;
-				this.load();
+				if (!known) this.load();
 				this.refresh_list();
 			});
 	}
@@ -237,7 +235,7 @@ erpnext.PartyOverview = class PartyOverview {
 	}
 
 	load({ balances = true } = {}) {
-		if (!this.companies_ready || !this.state.company) return;
+		if (!this.state.company) return;
 		this.fetch("overview", `get_${this.party_key}_overview`, { period: this.state.period });
 		if (balances && this.accounts) this.fetch("balances", this.balances_method);
 	}
