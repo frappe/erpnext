@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.query_builder import Case, Tuple
 from frappe.query_builder.functions import Abs, IfNull, Sum
-from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
+from frappe.utils import cint, cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 from frappe.utils.data import DateTimeLikeObject
 
 import erpnext
@@ -23,6 +23,7 @@ from erpnext.stock.serial_batch_identity import SerialBatchIdentity
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = dict[str, Any]
+BIN_LOCK_WAIT_TIMEOUT = 600
 
 
 class InvalidWarehouseCompany(frappe.ValidationError):
@@ -332,7 +333,6 @@ def get_or_make_bin(item_code: str, warehouse: str) -> str:
 
 
 def lock_bins(item_warehouses):
-	"""Lock the Bins of the (item_code, warehouse) pairs by name, in sorted order."""
 	if not item_warehouses:
 		return
 
@@ -343,10 +343,21 @@ def lock_bins(item_warehouses):
 		.where(Tuple(bin.item_code, bin.warehouse).isin(sorted(item_warehouses)))
 		.run(pluck=True)
 	)
-	if bin_names:
-		frappe.qb.from_(bin).select(bin.name).where(bin.name.isin(bin_names)).orderby(
-			bin.name
-		).for_update().run()
+	if not bin_names:
+		return
+
+	query, params = (
+		frappe.qb.from_(bin).select(bin.name).where(bin.name.isin(bin_names)).orderby(bin.name).for_update()
+	).walk()
+	frappe.db.sql(get_bin_lock_wait_clause() + query, params)
+
+
+def get_bin_lock_wait_clause():
+	if frappe.db.db_type != "mariadb":
+		return ""
+
+	timeout = cint(frappe.conf.bin_lock_wait_timeout) or BIN_LOCK_WAIT_TIMEOUT
+	return f"SET STATEMENT innodb_lock_wait_timeout={timeout} FOR "
 
 
 def _create_bin(item_code, warehouse):
