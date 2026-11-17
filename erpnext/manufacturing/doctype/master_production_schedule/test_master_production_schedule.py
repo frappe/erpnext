@@ -90,6 +90,21 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 
 		self.assertEqual([row.planned_qty for row in mps.items], [5])
 
+	def test_actual_demand_clears_saved_rows_when_none_is_left(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		item = make_item("_Test MPS Cleared Demand Item", {"is_stock_item": 1}).name
+		order = make_sales_order(item_code=item, qty=5)
+		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
+		mps.get_actual_demand()
+		self.assertEqual(len(mps.items), 1)
+
+		order.update_status("Closed")
+		mps.get_actual_demand()
+		mps.reload()
+
+		self.assertEqual(mps.items, [])
+
 	def test_delivery_schedules_leave_out_delivered_and_closed_orders(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import (
 			create_dn_against_so,
