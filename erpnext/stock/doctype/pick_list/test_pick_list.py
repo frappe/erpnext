@@ -3660,6 +3660,70 @@ class TestPickList(ERPNextTestSuite):
 				)
 				second_delivery.submit()
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_batches_transferred_from_a_bundle_are_no_longer_held(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": f"PLBND-{frappe.generate_hash(length=6)}-.###",
+			}
+		).name
+		first_batch, second_batch = (
+			get_batch_from_bundle(
+				make_stock_entry(item=item, to_warehouse=warehouse, qty=qty).items[0].serial_and_batch_bundle
+			)
+			for qty in (2, 1)
+		)
+
+		def make_outward_bundle(voucher_type, batches):
+			return make_serial_batch_bundle(
+				{
+					"item_code": item,
+					"warehouse": warehouse,
+					"voucher_type": voucher_type,
+					"qty": -sum(batches.values()),
+					"batches": frappe._dict(batches),
+					"type_of_transaction": "Outward",
+					"do_not_submit": True,
+				}
+			).name
+
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 3,
+						"stock_qty": 3,
+						"picked_qty": 3,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+						"use_serial_batch_fields": 0,
+						"serial_and_batch_bundle": make_outward_bundle(
+							"Pick List", {first_batch: 2, second_batch: 1}
+						),
+					}
+				],
+			}
+		).submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		row = stock_entry.items[0]
+		row.qty, row.t_warehouse, row.use_serial_batch_fields = 2, "_Test Warehouse 1 - _TC", 0
+		row.serial_and_batch_bundle = make_outward_bundle("Stock Entry", {first_batch: 2})
+		stock_entry.submit()
+
+		new_pick_list = frappe.new_doc("Pick List")
+		held = new_pick_list.get_picked_items_details([_dict(item_code=item)])[item]
+		self.assertEqual(held, {(warehouse, second_batch): {"picked_qty": 1}})
+
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_stock_entry_from_pick_list_skips_a_serial_no_moved_back_to_its_warehouse(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
