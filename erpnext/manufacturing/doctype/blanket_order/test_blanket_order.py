@@ -408,6 +408,7 @@ class TestBlanketOrder(FrappeTestCase):
 			"customer": selling.customer,
 			"doctype": "Quotation",
 			"item_code": item,
+			"quotation_to": "Customer",
 			"transaction_date": today(),
 		}
 		self.assertEqual(get_blanket_order_details(lookup).blanket_order, selling.name)
@@ -427,6 +428,8 @@ class TestBlanketOrder(FrappeTestCase):
 
 		lead = make_lead()
 		frappe.db.set_value("Customer", other_customer.customer, "lead_name", lead.name)
+		lead_lookup = {**lookup, "quotation_to": "Lead", "customer": lead.name}
+		self.assertEqual(get_blanket_order_details(lead_lookup).blanket_order, other_customer.name)
 		lead_quotation = quotation_against(other_customer)
 		lead_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
 		lead_quotation.insert()
