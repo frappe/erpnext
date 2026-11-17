@@ -78,6 +78,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 		self.set_is_customer_provided_item()
 		self.validate_customer_provided_items()
 		self.validate_customer_warehouse()
+		self.validate_with_previous_doc()
 		self.validate_service_items()
 		self.set_missing_values()
 
@@ -160,6 +161,17 @@ class SubcontractingInwardOrder(SubcontractingController):
 					frappe.bold(self.customer_warehouse), frappe.bold(self.customer)
 				)
 			)
+
+	def validate_with_previous_doc(self):
+		super().validate_with_previous_doc(
+			{
+				"Sales Order Item": {
+					"ref_dn_field": "sales_order_item",
+					"compare_fields": [],
+					"is_child_table": True,
+				},
+			}
+		)
 
 	def validate_service_items(self):
 		sales_order_items = [item.sales_order_item for item in self.items]
