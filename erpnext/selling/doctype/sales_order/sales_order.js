@@ -1921,5 +1921,5 @@ function get_unreserved_qty(item) {
 		flt(item.stock_qty) -
 		flt(item.delivered_qty) * flt(item.conversion_factor) -
 		flt(item.stock_reserved_qty);
-	return unreserved_stock_qty / flt(item.conversion_factor);
+	return flt(unreserved_stock_qty / flt(item.conversion_factor), precision("qty", item));
 }
