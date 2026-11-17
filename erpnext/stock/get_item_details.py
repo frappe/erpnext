@@ -24,6 +24,7 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	set_transaction_type,
 	validate_pricing_context,
 )
+from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.utils import get_exchange_rate
@@ -2186,10 +2187,13 @@ def _get_blanket_order_details(ctx: ItemDetailsCtx):
 			.limit(1)
 		)
 
-		if ctx.customer and ctx.doctype == "Sales Order":
-			query = query.where(bo.customer == ctx.customer)
-		elif ctx.supplier and ctx.doctype == "Purchase Order":
-			query = query.where(bo.supplier == ctx.supplier)
+		if ctx.doctype in ("Sales Order", "Quotation"):
+			customer = ctx.customer
+			if ctx.doctype == "Quotation":
+				customer = get_existing_customer_name(ctx.quotation_to, ctx.party_name or ctx.customer)
+			query = query.where((bo.blanket_order_type == "Selling") & (bo.customer == customer))
+		elif ctx.doctype == "Purchase Order":
+			query = query.where((bo.blanket_order_type == "Purchasing") & (bo.supplier == ctx.supplier))
 		if ctx.blanket_order:
 			query = query.where(bo.name == ctx.blanket_order)
 		if ctx.currency:
