@@ -4280,6 +4280,28 @@ class TestSalesOrder(ERPNextTestSuite):
 		finally:
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"dont_reserve_sales_order_qty_on_sales_return": 1})
+	def test_replacement_delivery_after_return_reserves_nothing(self):
+		"""A row delivered again after a return must not take its negative share off other orders."""
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(properties={"is_stock_item": 1}).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=100, basic_rate=10)
+		make_sales_order(item_code=item_code, qty=5)
+		so = make_sales_order(item_code=item_code, qty=10)
+		dn = make_delivery_note(so.name)
+		dn.submit()
+
+		sales_return = make_sales_return(dn.name)
+		sales_return.items[0].qty = -4
+		sales_return.submit()
+		make_delivery_note(so.name).submit()
+
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty"
+		)
+		self.assertEqual(reserved_qty, 5)
+
 
 def compare_payment_schedules(doc, doc1, doc2):
 	for index, schedule in enumerate(doc1.get("payment_schedule")):
