@@ -1194,9 +1194,9 @@ def make_new_batch(**args):
 
 def make_stock_user(email):
 	if not frappe.db.exists("User", email):
-		frappe.get_doc({"doctype": "User", "email": email, "first_name": "Batch Stock User"}).insert(
-			ignore_permissions=True
-		)
+		frappe.get_doc(
+			{"doctype": "User", "send_welcome_email": 0, "email": email, "first_name": "Batch Stock User"}
+		).insert(ignore_permissions=True)
 
 	user = frappe.get_doc("User", email)
 	user.remove_roles(*[role.role for role in user.roles])
