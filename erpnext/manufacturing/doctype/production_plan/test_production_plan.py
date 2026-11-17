@@ -2504,6 +2504,20 @@ class TestProductionPlan(ERPNextTestSuite):
 		second_plan = make_plan_from_sales_orders([sales_order])
 		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 25)
 
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_bundle_on_two_sales_order_lines(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Two Lines")
+		sales_order = make_sales_order(item_code=bundle_item, qty=10, do_not_submit=1)
+		sales_order.append(
+			"items",
+			{"item_code": bundle_item, "qty": 5, "rate": 100, "warehouse": sales_order.items[0].warehouse},
+		)
+		sales_order.submit()
+
+		plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(sorted(row.planned_qty for row in plan.po_items), [10, 10, 20, 20])
+		plan.submit()
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
