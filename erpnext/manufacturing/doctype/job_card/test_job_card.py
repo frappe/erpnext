@@ -4881,6 +4881,31 @@ class TestJobCard(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
+		{"disable_capacity_planning": 0, "mins_between_operations": 10, "allow_overtime": 0},
+	)
+	def test_fixed_time_job_card_ends_with_its_working_hours(self):
+		# Expected Time Required is 60 / 29 * 29 = 60.00000000000001
+		workstation = frappe.get_doc("Workstation", make_jc_review_workstation())
+		workstation.append("working_hours", {"start_time": "08:00:00", "end_time": "09:00:00"})
+		workstation.append("working_hours", {"start_time": "10:00:00", "end_time": "12:00:00"})
+		workstation.save()
+		operation = make_jc_review_operation(workstation.name)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation.name, "time_in_mins": 60, "fixed_time": 1}],
+			qty=29,
+			planned_start_date="2031-03-03 08:00:00",
+		)
+
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 08:00:00", "2031-03-03 09:00:00")],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
 		{"disable_capacity_planning": 1, "overproduction_percentage_for_work_order": 100},
 	)
 	def test_split_job_cards_keep_rounded_shares_on_recalculation_and_submit(self):
