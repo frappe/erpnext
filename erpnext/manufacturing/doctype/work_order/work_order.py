@@ -1206,6 +1206,7 @@ class WorkOrder(Document):
 					"batch_size",
 					"sequence_id",
 					"fixed_time",
+					"set_cost_based_on_bom_qty",
 				],
 				order_by="idx",
 			)
@@ -1241,9 +1242,23 @@ class WorkOrder(Document):
 		self.calculate_time()
 
 	def calculate_time(self):
+		batch_based = set(
+			frappe.get_all(
+				"Operation",
+				filters={
+					"name": ("in", list({d.operation for d in self.operations}) or [""]),
+					"create_job_card_based_on_batch_size": 1,
+				},
+				pluck="name",
+			)
+		)
 		for d in self.get("operations"):
-			if not d.fixed_time:
-				d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
+			if d.fixed_time:
+				continue
+
+			# as in the BOM, the time is per batch only for a batch based operation
+			is_per_batch = d.operation in batch_based or d.get("set_cost_based_on_bom_qty")
+			d.time_in_mins = flt(d.time_in_mins) * flt(self.qty) / (flt(d.batch_size) if is_per_batch else 1)
 
 		self.calculate_operating_cost()
 
