@@ -365,7 +365,6 @@ def get_dimension_filter_sql_condition(fieldname, values, dimension_doctype=None
 	return f"({' OR '.join(parts)})" if parts else None, values
 
 
-@frappe.whitelist()
 def get_dimensions(with_cost_center_and_project: str | bool = False):
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 	p = frappe.qb.DocType("Accounting Dimension")
@@ -400,6 +399,20 @@ def get_dimensions(with_cost_center_and_project: str | bool = False):
 		default_dimensions_map[dimension.company][dimension.fieldname] = dimension.default_dimension
 
 	return dimension_filters, default_dimensions_map
+
+
+@frappe.whitelist()
+def get_dimensions_for_user(with_cost_center_and_project: str | bool = False):
+	"""`get_dimensions` for client scripts, with defaults only for the companies the user can see.
+
+	`override_whitelisted_methods` sends calls to `get_dimensions` here.
+	"""
+	# raises PermissionError for users without access to Company, such as Website Users
+	companies = set(frappe.get_list("Company", pluck="name"))
+	dimension_filters, default_dimensions_map = get_dimensions(with_cost_center_and_project)
+	return dimension_filters, {
+		company: defaults for company, defaults in default_dimensions_map.items() if company in companies
+	}
 
 
 def create_accounting_dimensions_for_doctype(doctype):
