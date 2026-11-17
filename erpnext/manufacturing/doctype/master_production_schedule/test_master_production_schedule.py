@@ -83,6 +83,13 @@ class TestMasterProductionSchedule(ERPNextTestSuite):
 		order = make_sales_order(item_code=item, qty=5, do_not_submit=True)
 		order.append("items", {**order.items[0].as_dict(), "name": None, "qty": 7})
 		order.submit()
+		order.create_delivery_schedule(
+			order.items[1].as_dict(),
+			[
+				{"delivery_date": add_days(today(), 5), "qty": 3},
+				{"delivery_date": add_days(today(), 10), "qty": 4},
+			],
+		)
 		update_closed_status("Sales Order", order.name, [order.items[1].name], 1)
 
 		mps = make_mps(to_date=add_days(today(), 30), sales_orders=[order.name])
