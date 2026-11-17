@@ -1152,23 +1152,25 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	async set_total_amount_to_default_mop() {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
-		let total_amount_to_pay;
+		let total_amount_to_pay, amount_precision;
 
 		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			amount_precision = precision("grand_total");
 			total_amount_to_pay = flt(
 				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
-				precision("grand_total")
+				amount_precision
 			);
 		} else {
+			amount_precision = precision("base_grand_total");
 			total_amount_to_pay = flt(
 				(
 					flt(
 						base_grand_total,
-						precision("base_grand_total")
+						amount_precision
 					)
 					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount
 				),
-				precision("base_grand_total")
+				amount_precision
 			);
 		}
 
@@ -1183,7 +1185,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			payment_amount += payment.amount
 		});
 
-		if (payment_amount == total_amount_to_pay) {
+		if (flt(payment_amount, amount_precision) == total_amount_to_pay) {
 			return;
 		}
 
