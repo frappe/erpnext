@@ -190,8 +190,10 @@ class SalesOrderSourcingService:
 
 		items = query.run(as_dict=True)
 		planned_qty = get_planned_bundle_component_qty([item.name for item in items])
+		precision = frappe.get_precision("Production Plan Item", "planned_qty")
 		for item in items:
-			item.pending_qty = max(flt(item.pending_qty) - planned_qty.get((item.name, item.item_code), 0), 0)
+			unplanned_qty = flt(item.qty) - planned_qty.get((item.name, item.item_code), 0)
+			item.pending_qty = flt(max(min(flt(item.pending_qty), unplanned_qty), 0), precision)
 		return items
 
 	def get_mr_items(self):
@@ -350,6 +352,7 @@ def _so_packed_columns(so_item, pi):
 		pi.item_code,
 		pi.warehouse.as_("warehouse"),
 		pending_qty.as_("pending_qty"),
+		pi.qty,
 		pi.parent_item,
 		pi.description,
 		so_item.name,
