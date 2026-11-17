@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 import frappe
 from frappe.tests import UnitTestCase
+from frappe.utils import add_days, add_months, getdate
 
 from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import SalesForecast, create_mps
 from erpnext.tests.utils import ERPNextTestSuite
@@ -84,6 +85,14 @@ class TestSalesForecastIntegration(ERPNextTestSuite):
 
 		self.assertEqual(frappe.db.get_value("Sales Forecast", amended.name, "status"), "Planned")
 		create_mps(amended.name).insert()
+
+	def test_mps_to_date_covers_the_last_forecast_period(self):
+		forecast = make_sales_forecast()
+		last_date = forecast.items[-1].delivery_date
+
+		mps = create_mps(forecast.name)
+
+		self.assertEqual(getdate(mps.to_date), getdate(add_days(add_months(last_date, 1), -1)))
 
 	def test_second_mps_draft_of_a_forecast_is_refused(self):
 		forecast = make_sales_forecast()
