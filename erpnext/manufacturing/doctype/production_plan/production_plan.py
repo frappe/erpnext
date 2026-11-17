@@ -387,7 +387,7 @@ class ProductionPlan(Document):
 	def validate_bundle_component_planned_qty(self):
 		planned_qty = {}
 		for row in self.po_items:
-			if row.sales_order_item and row.product_bundle_item:
+			if row.sales_order and row.sales_order_item and row.product_bundle_item:
 				key = (row.sales_order, row.sales_order_item, row.item_code)
 				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
 		if not planned_qty:

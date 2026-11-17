@@ -383,7 +383,12 @@ def get_planned_bundle_component_qty(so_items):
 
 	rows = frappe.get_all(
 		"Production Plan Item",
-		filters={"sales_order_item": ("in", so_items), "product_bundle_item": ("is", "set"), "docstatus": 1},
+		filters={
+			"sales_order": ("is", "set"),
+			"sales_order_item": ("in", so_items),
+			"product_bundle_item": ("is", "set"),
+			"docstatus": 1,
+		},
 		fields=["sales_order_item", "item_code", {"SUM": "planned_qty", "as": "qty"}],
 		group_by="sales_order_item, item_code",
 	)
