@@ -380,7 +380,7 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 		(so_item.work_order_qty <= so_item.delivered_qty) & (so_item.qty > so_item.delivered_qty)
 	)
 	return (
-		(so_item.parent == pi.parent)
+		(pi.parent_detail_docname == so_item.name)
 		& (so_item.docstatus == 1)
 		& (pi.parent_item == so_item.item_code)
 		& (so_item.parent.isin(so_list))
