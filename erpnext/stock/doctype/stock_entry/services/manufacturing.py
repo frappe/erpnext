@@ -1747,7 +1747,7 @@ def get_running_total_qty(qty_per_unit, done_qty, qty, stock_uom=None):
 		total_qty = flt(qty_per_unit * units, precision)
 		return ceil(total_qty) if is_whole_number else total_qty
 
-	return max(flt(get_total_qty(done_qty + qty) - get_total_qty(done_qty), precision), 0)
+	return flt(get_total_qty(done_qty + qty) - get_total_qty(done_qty), precision)
 
 
 def ceil_qty_if_uom_has_whole_number(qty, stock_uom):
