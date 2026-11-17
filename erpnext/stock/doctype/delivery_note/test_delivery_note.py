@@ -2798,6 +2798,53 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(stock_value_difference[warehouse], -120)
 		self.assertEqual(stock_value_difference[transit_warehouse], 120)
 
+	def test_packed_rows_of_a_component_keep_the_rate_of_their_own_warehouse(self):
+		component = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		bundle_item = make_item(properties={"is_stock_item": 0}).name
+		product_bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle_item})
+		product_bundle.append("items", {"item_code": component, "qty": 1})
+		product_bundle.append("items", {"item_code": component, "qty": 2})
+		product_bundle.insert()
+
+		posting_date = add_days(today(), -5)
+		make_stock_entry(
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=100,
+			item_code=component,
+			posting_date=posting_date,
+		)
+		make_stock_entry(
+			target="_Test Warehouse 1 - _TC",
+			qty=5,
+			basic_rate=200,
+			item_code=component,
+			posting_date=posting_date,
+		)
+
+		dn = create_delivery_note(
+			item_code=bundle_item, qty=1, rate=500, posting_date=add_days(today(), -2), do_not_submit=True
+		)
+		dn.packed_items[1].warehouse = "_Test Warehouse 1 - _TC"
+		dn.save()
+		dn.submit()
+
+		make_stock_entry(
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=400,
+			item_code=component,
+			posting_date=add_days(today(), -3),
+		)
+
+		rates = {
+			d.warehouse: d.incoming_rate
+			for d in frappe.get_all(
+				"Packed Item", filters={"parent": dn.name}, fields=["warehouse", "incoming_rate"]
+			)
+		}
+		self.assertEqual(rates, {"_Test Warehouse - _TC": 250, "_Test Warehouse 1 - _TC": 200})
+
 	def test_internal_transfer_return_carries_the_batch_back(self):
 		"""Material coming back from an in-transit warehouse returns under the batch it left with."""
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
