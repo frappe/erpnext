@@ -577,6 +577,26 @@ class TestBOMCreator(ERPNextTestSuite):
 		self.assertEqual(design.items[0].rate, 10)
 		self.assertEqual(design.raw_material_cost, 10)
 
+	def test_price_list_in_creator_currency_uses_its_conversion_rate(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import make_usd_buying_price_list
+
+		price_list = make_usd_buying_price_list(83)
+		material = make_item("_Test Creator USD Price List Material").name
+		frappe.get_doc(
+			{"doctype": "Item Price", "item_code": material, "price_list": price_list, "price_list_rate": 10}
+		).insert()
+
+		design = make_bom_creator(
+			currency="USD",
+			conversion_rate=80,
+			rm_cost_as_per="Price List",
+			buying_price_list=price_list,
+			items=[{"item_code": material, "qty": 1}],
+		)
+
+		self.assertEqual(design.plc_conversion_rate, 80)
+		self.assertEqual(design.items[0].rate, 10)
+
 	def test_currency_change_refreshes_the_exchange_rate(self):
 		if not frappe.db.exists("Currency", "TSR"):
 			frappe.get_doc({"doctype": "Currency", "currency_name": "TSR", "enabled": 1}).insert()
