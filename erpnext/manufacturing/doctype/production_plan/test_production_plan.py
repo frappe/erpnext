@@ -2572,6 +2572,31 @@ class TestProductionPlan(ERPNextTestSuite):
 		"""
 		self.assertEqual(pln.po_items[0].planned_qty, 10)
 
+	def test_work_order_qty_of_product_bundle_line_in_bundle_units(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		component = make_item("_Test PP Bundle WO Qty Component", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=["_Test Item"], currency="INR")
+		bundle_item = make_item("_Test PP Bundle WO Qty", {"is_stock_item": 0}).name
+		make_product_bundle(parent=bundle_item, items=[component], qty=2)
+		sales_order = make_sales_order(item_code=bundle_item, qty=5)
+
+		pln = frappe.new_doc("Production Plan")
+		pln.company = sales_order.company
+		pln.get_items_from = "Sales Order"
+		pln.append("sales_orders", {"sales_order": sales_order.name})
+		pln.get_items()
+		pln.submit()
+		pln.make_work_order()
+
+		work_order = frappe.get_doc("Work Order", {"production_plan": pln.name})
+		work_order.wip_warehouse = "Work In Progress - _TC"
+		work_order.submit()
+		self.assertEqual(work_order.qty, 10)
+		self.assertEqual(
+			frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "work_order_qty"), 5
+		)
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
