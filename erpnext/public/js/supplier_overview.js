@@ -85,9 +85,11 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			{
 				label: labels[1],
 				value: this.money0(overdue.value),
-				caption: overdue.count
+				caption: !flt(overdue.value)
+					? __("Nothing overdue")
+					: overdue.count
 					? [COUNT.bills(overdue.count), COUNT.days_late(overdue.oldest_days)].join(" · ")
-					: __("Nothing overdue"),
+					: null,
 				onclick: () => this.open_ledger(),
 			},
 			this.advances_card(labels[2], advances, outstanding.unpaid_count),
@@ -95,8 +97,6 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 	}
 
 	advances_card(label, advances, unpaid_count) {
-		if (advances.value == null)
-			return { label, value: "—", caption: __("Not available with your permissions") };
 		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ledger() };
 		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
 		if (!unpaid_count) return { ...card, caption: __("Debit balance, no bills to apply it to") };

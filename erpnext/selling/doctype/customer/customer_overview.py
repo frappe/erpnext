@@ -246,8 +246,14 @@ def receivables(customer, company, report_date):
 
 
 def late_summary(owed):
-	late = [row for row in owed if flt(row.get("total_due")) > 0]
-	return {"count": len(late), "oldest_days": max((cint(row.get("age")) for row in late), default=0)}
+	invoice_doctypes = frappe.get_hooks("invoice_doctypes")
+	late = [
+		row for row in owed if row.get("voucher_type") in invoice_doctypes and flt(row.get("total_due")) > 0
+	]
+	return {
+		"count": len({row.get("voucher_no") for row in late}),
+		"oldest_days": max((cint(row.get("age")) for row in late), default=0),
+	}
 
 
 def unallocated_credit(rows):
