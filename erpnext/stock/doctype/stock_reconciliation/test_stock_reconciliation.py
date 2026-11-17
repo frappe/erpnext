@@ -3250,7 +3250,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"is_stock_item": 1,
 				"stock_uom": "Nos",
 				"valuation_rate": 0,
-				"uoms": [{"uom": "Box", "conversion_factor": 12}],
+				"uoms": [{"uom": "Box", "conversion_factor": 1000}],
 			}
 		).name
 		price_list = frappe.get_doc(
@@ -3268,7 +3268,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				"item_code": item_code,
 				"price_list": price_list.name,
 				"uom": "Box",
-				"price_list_rate": 1200,
+				"price_list_rate": 1,
 			}
 		).insert()
 
@@ -3281,7 +3281,7 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			}
 		).insert()
 
-		self.assertEqual(sr.items[0].valuation_rate, 100)
+		self.assertEqual(sr.items[0].valuation_rate, 0.001)
 
 
 def create_batch_item_with_batch(item_name, batch_id):
