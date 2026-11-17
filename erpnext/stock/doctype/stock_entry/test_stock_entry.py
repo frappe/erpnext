@@ -5885,6 +5885,7 @@ class TestStockEntry(ERPNextTestSuite):
 		from frappe.utils import get_datetime
 
 		from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+		from erpnext.stock.utils import lock_bins
 
 		item_code = make_item(
 			properties={
@@ -5905,10 +5906,13 @@ class TestStockEntry(ERPNextTestSuite):
 		)
 
 		calls = []
-		lock_bins, validate = StockEntry.lock_bins, StockEntry.validate
+		validate = StockEntry.validate
 		lock_time = get_datetime(f"{transfer.posting_date} 23:59:59.123456")
 		with (
-			patch.object(StockEntry, "lock_bins", lambda doc: calls.append("lock_bins") or lock_bins(doc)),
+			patch(
+				"erpnext.stock.utils.lock_bins",
+				lambda item_warehouses: calls.append("lock_bins") or lock_bins(item_warehouses),
+			),
 			patch.object(StockEntry, "validate", lambda doc: calls.append("validate") or validate(doc)),
 			patch("erpnext.utilities.transaction_base.now_datetime", return_value=lock_time),
 		):
