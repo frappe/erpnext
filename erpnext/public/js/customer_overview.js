@@ -3,6 +3,7 @@ const COUNT = {
 	invoices: (n) => (n === 1 ? __("1 invoice") : __("{0} invoices", [n])),
 	quotations: (n) => (n === 1 ? __("1 quotation") : __("{0} quotations", [n])),
 	orders: (n) => (n === 1 ? __("1 order") : __("{0} orders", [n])),
+	days_late: (n) => (n === 1 ? __("oldest 1 day late") : __("oldest {0} days late", [n])),
 	reconcile: (n) =>
 		n === 1 ? __("Reconcile with 1 unpaid invoice") : __("Reconcile with {0} unpaid invoices", [n]),
 	unapplied: (n) =>
@@ -37,6 +38,10 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			empty_doctypes: ["Quotation", "Sales Order"],
 			empty_description: __(
 				"Quotations, orders, invoices and payments for this customer will show up here."
+			),
+			prompt_title: __("Customer Overview"),
+			prompt_description: __(
+				"Sales, receivables, open orders and recent transactions for this customer. To load it every time, turn on Enable Customer Overview Dashboard in Selling Settings."
 			),
 		});
 	}
@@ -80,8 +85,11 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			{
 				label: labels[1],
 				value: this.money0(overdue.value),
-				delta: this.delta_opts(overdue, __("since last month")),
-				caption: flt(overdue.value) ? null : __("Nothing overdue"),
+				caption: !flt(overdue.value)
+					? __("Nothing overdue")
+					: overdue.count
+					? [COUNT.invoices(overdue.count), COUNT.days_late(overdue.oldest_days)].join(" · ")
+					: null,
 				onclick: () => this.open_ledger(),
 			},
 			this.advances_card(labels[2], advances, outstanding.unpaid_count),
@@ -89,13 +97,6 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 	}
 
 	advances_card(label, advances, unpaid_count) {
-		if (advances.value == null)
-			return {
-				label,
-				value: "—",
-				caption: __("Not available with your permissions"),
-				onclick: () => this.open_ledger(),
-			};
 		const card = { label, value: this.money0(advances.value), onclick: () => this.open_ledger() };
 		if (!flt(advances.value)) return { ...card, caption: __("No unapplied payments") };
 		if (!unpaid_count) return { ...card, caption: __("Credit balance, no invoices to apply it to") };

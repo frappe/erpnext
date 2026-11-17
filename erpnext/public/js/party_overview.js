@@ -56,7 +56,7 @@ erpnext.PartyOverview = class PartyOverview {
 		if (this.frm.get_active_tab()?.df.fieldname !== "overview_tab" || !this.needs_refresh) return;
 		this.needs_refresh = false;
 		if (this.party !== this.frm.doc.name) this.build();
-		else this.load_companies();
+		else this.start();
 	}
 
 	build() {
@@ -67,6 +67,41 @@ erpnext.PartyOverview = class PartyOverview {
 		this.build_header();
 		this.build_sections();
 
+		this.start();
+	}
+
+	start() {
+		if (this.frm.doc.__onload?.defer_overview && !this.requested) this.render_load_prompt();
+		else this.load_companies();
+	}
+
+	render_load_prompt() {
+		this.$body.hide();
+		this.$header.hide();
+		this.$empty
+			.empty()
+			.append(
+				frappe.ui.empty_state({
+					icon: "chart-column",
+					title: this.prompt_title,
+					description: this.prompt_description,
+					actions: [
+						{
+							label: __("Load Overview"),
+							icon: "refresh-cw",
+							onclick: () => this.request_overview(),
+						},
+					],
+				})
+			)
+			.show();
+	}
+
+	request_overview() {
+		this.requested = true;
+		this.$empty.hide();
+		this.$body.show();
+		this.$header.show();
 		this.load_companies();
 	}
 
@@ -74,6 +109,8 @@ erpnext.PartyOverview = class PartyOverview {
 		const { PERIODS } = erpnext.PartyOverview;
 		this.seq.overview++;
 		this.seq.balances++;
+		this.company_seq = (this.company_seq || 0) + 1;
+		this.companies_request = null;
 		this.overview = null;
 		this.balances = null;
 		this.party = this.frm.doc.name;
@@ -82,6 +119,7 @@ erpnext.PartyOverview = class PartyOverview {
 			period: PERIODS.includes(this.pref("period")) ? this.pref("period") : PERIODS[0],
 			doc_type: "All",
 		};
+		this.requested = false;
 		this.companies_ready = false;
 		this.list = null;
 		this.destroy_trend();
@@ -91,7 +129,22 @@ erpnext.PartyOverview = class PartyOverview {
 	build_header() {
 		this.$header = $('<div class="co-header">').appendTo(this.$root);
 		this.$controls = $('<div class="co-header-controls">').appendTo(this.$header);
-		this.$period = $('<div class="co-period">').toggle(!!this.accounts).appendTo(this.$header);
+		this.$period = $('<div class="co-period">').toggle(!!this.accounts);
+		$('<div class="flex items-center gap-2">')
+			.append(
+				this.$period,
+				frappe.ui.button({
+					icon: "refresh-cw",
+					variant: "ghost",
+					tooltip: __("Refresh"),
+					onclick: () => {
+						if (!this.companies_ready) return this.companies_request || this.load_companies();
+						this.load();
+						this.refresh_list();
+					},
+				})
+			)
+			.appendTo(this.$header);
 
 		this.company_field = this.make_select(
 			this.$controls,
@@ -120,8 +173,6 @@ erpnext.PartyOverview = class PartyOverview {
 		);
 		this.period_field.set_value(this.state.period);
 		this.period_field.$wrapper.parent().toggle(!!this.accounts);
-		this.has_controls = !single_company || this.accounts;
-		this.$header.toggle(this.has_controls);
 	}
 
 	build_sections() {
@@ -145,7 +196,8 @@ erpnext.PartyOverview = class PartyOverview {
 		const party = this.party;
 		const token = (this.company_seq = (this.company_seq || 0) + 1);
 		this.companies_ready = false;
-		return frappe
+		this.load();
+		this.companies_request = frappe
 			.xcall(`${this.method_path}.get_${this.party_key}_companies`, { [this.party_key]: party })
 			.then((companies) => {
 				if (party !== this.party || token !== this.company_seq) return;
@@ -155,16 +207,20 @@ erpnext.PartyOverview = class PartyOverview {
 				}
 				this.$empty.hide();
 				this.$body.show();
-				this.$header.toggle(this.has_controls);
+				this.$header.show();
 				this.company_field.df.options = companies.join("\n");
 				this.company_field.refresh();
 				const known = companies.includes(this.state.company);
 				if (!known) this.state.company = companies[0];
 				this.company_field.set_value(this.state.company);
 				this.companies_ready = true;
-				this.load();
+				if (!known) this.load();
 				this.refresh_list();
+			})
+			.finally(() => {
+				if (token === this.company_seq) this.companies_request = null;
 			});
+		return this.companies_request;
 	}
 
 	refresh_list() {
@@ -186,7 +242,7 @@ erpnext.PartyOverview = class PartyOverview {
 	}
 
 	load({ balances = true } = {}) {
-		if (!this.companies_ready || !this.state.company) return;
+		if (!this.state.company) return;
 		this.fetch("overview", `get_${this.party_key}_overview`, { period: this.state.period });
 		if (balances && this.accounts) this.fetch("balances", this.balances_method);
 	}
