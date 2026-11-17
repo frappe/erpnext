@@ -1636,7 +1636,9 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
 		scio.append("items", scio.items[0].as_dict(no_default_fields=True))
 
-		self.assertRaises(frappe.ValidationError, scio.submit)
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Duplicate row 2 with same Sales Order Item", scio.submit
+		)
 
 	def test_delivery_mapper_qty(self):
 		so, scio = create_so_scio()
