@@ -4344,7 +4344,7 @@ def get_rows_with_kept_reservation(parent):
 def validate_child_on_delete(row, parent, ordered_item=None):
 	"""Check if partially transacted item (row) is being deleted."""
 	if parent.doctype == "Sales Order":
-		if flt(row.delivered_qty):
+		if flt(row.delivered_qty) or flt(row.returned_qty):
 			frappe.throw(
 				_("Row #{0}: Cannot delete item {1} which has already been delivered").format(
 					row.idx, row.item_code
@@ -4363,7 +4363,7 @@ def validate_child_on_delete(row, parent, ordered_item=None):
 				).format(row.idx, row.item_code)
 			)
 
-	if parent.doctype == "Purchase Order" and flt(row.received_qty):
+	if parent.doctype == "Purchase Order" and (flt(row.received_qty) or flt(row.returned_qty)):
 		frappe.throw(
 			_("Row #{0}: Cannot delete item {1} which has already been received").format(
 				row.idx, row.item_code
