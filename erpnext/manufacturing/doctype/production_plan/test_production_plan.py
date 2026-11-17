@@ -2488,7 +2488,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		bundle_item = make_item("_Test PP Bundle Twice", {"is_stock_item": 0}).name
 		bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle_item})
 		bundle.append("items", {"item_code": component, "qty": 2})
-		bundle.append("items", {"item_code": component, "qty": 3})
+		bundle.append("items", {"item_code": component, "qty": 2})
 		bundle.insert().submit()
 		sales_order = make_sales_order(item_code=bundle_item, qty=10)
 
@@ -2502,7 +2502,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		frappe.db.set_value("Sales Order Item", bundle_line, "work_order_qty", 5)
 
 		second_plan = make_plan_from_sales_orders([sales_order])
-		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 25)
+		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 20)
 
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_bundle_on_two_sales_order_lines(self):
