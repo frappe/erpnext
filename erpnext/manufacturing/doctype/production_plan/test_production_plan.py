@@ -2958,6 +2958,20 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual([row.planned_qty for row in plan.po_items], [40, 40])
 		plan.submit()
 
+	def test_combined_bundle_components_are_planned_per_sales_order_line(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine Lines")
+		sales_orders = [make_sales_order(item_code=bundle_item, qty=10) for _ in range(2)]
+		make_plan_from_sales_orders(sales_orders, combine_items=1).submit()
+
+		self.assertEqual(
+			[
+				frappe.db.get_value("Sales Order Item", sales_order.items[0].name, "production_plan_qty")
+				for sales_order in sales_orders
+			],
+			[10, 10],
+		)
+		self.assertFalse(make_plan_from_sales_orders(sales_orders, combine_items=1).po_items)
+
 	def test_planned_qty_of_bundle_component_on_two_rows(self):
 		rm_item = make_item("_Test PP Bundle Twice RM", {"is_stock_item": 1}).name
 		component = make_item("_Test PP Bundle Twice A", {"is_stock_item": 1}).name
