@@ -3177,6 +3177,14 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation", sr.name, "docstatus"), 0)
 		self.assertEqual(frappe.db.get_value("Stock Reconciliation Item", sr.items[0].name, "qty"), 20)
 
+	def test_quantity_difference_is_rounded_for_fractional_qty(self):
+		item_code = self.make_item(properties={"is_stock_item": 1, "stock_uom": "Kg"}).name
+		create_stock_reconciliation(item_code=item_code, qty=10.1, rate=100)
+
+		sr = create_stock_reconciliation(item_code=item_code, qty=10.3, rate=100, do_not_submit=True)
+
+		self.assertEqual(flt(sr.items[0].quantity_difference), 0.2)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
