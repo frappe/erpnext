@@ -610,53 +610,36 @@ class BuyingController(SubcontractingController):
 
 		TODO: rename item_tax_amount to valuation_tax_amount
 		"""
-		stock_and_asset_items = []
 		stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
-
-		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
-		last_item_idx = 1
-
-		total_rejected_qty = 0
-		for d in self.get("items"):
-			if d.item_code and d.item_code in stock_and_asset_items:
-				stock_and_asset_items_qty += flt(d.qty)
-				total_rejected_qty += flt(d.get("rejected_qty", 0))
-				stock_and_asset_items_amount += flt(d.base_net_amount)
-				last_item_idx = d.idx
-
-		total_valuation_amount = sum(
-			flt(d.base_tax_amount_after_discount_amount) * (-1 if d.get("add_deduct_tax") == "Deduct" else 1)
-			for d in self.get("taxes")
-			if d.category in ["Valuation", "Valuation and Total"]
+		basis = self.get_valuation_charge_basis(
+			[d for d in self.get("items") if d.item_code and d.item_code in stock_and_asset_items]
 		)
+		total_basis = sum(basis.values())
+		# the rounding remainder goes to the last row with a share
+		last_item_idx = max((idx for idx, value in basis.items() if value), default=0)
 
-		if not stock_and_asset_items_qty and not frappe.db.get_single_value(
-			"Buying Settings", "set_valuation_rate_for_rejected_materials"
-		):
-			# Rejected material that is not valued cannot carry valuation charges.
-			total_valuation_amount = 0
+		total_valuation_amount = 0.0
+		if total_basis:
+			total_valuation_amount = sum(
+				flt(d.base_tax_amount_after_discount_amount)
+				* (-1 if d.get("add_deduct_tax") == "Deduct" else 1)
+				for d in self.get("taxes")
+				if d.category in ["Valuation", "Valuation and Total"]
+			)
 
 		valuation_amount_adjustment = total_valuation_amount
-		for i, item in enumerate(self.get("items")):
+		for item in self.get("items"):
 			if (
 				item.item_code
 				and (item.qty or item.get("rejected_qty"))
 				and item.item_code in stock_and_asset_items
 			):
-				if stock_and_asset_items_qty:
-					item_proportion = (
-						flt(item.base_net_amount) / stock_and_asset_items_amount
-						if stock_and_asset_items_amount
-						else flt(item.qty) / stock_and_asset_items_qty
-					)
-				elif total_rejected_qty:
-					item_proportion = flt(item.get("rejected_qty")) / flt(total_rejected_qty)
-
-				if i == (last_item_idx - 1):
+				if item.idx == last_item_idx:
 					item.item_tax_amount = flt(
 						valuation_amount_adjustment, self.precision("item_tax_amount", item)
 					)
 				else:
+					item_proportion = basis[item.idx] / total_basis if total_basis else 0.0
 					item.item_tax_amount = flt(
 						item_proportion * total_valuation_amount, self.precision("item_tax_amount", item)
 					)
@@ -706,6 +689,35 @@ class BuyingController(SubcontractingController):
 				item.valuation_rate = 0.0
 
 		update_regional_item_valuation_rate(self)
+
+	def get_valuation_charge_basis(self, rows) -> dict:
+		"""What each row spreads valuation charges over: its net amount, else its qty. When no row accepts
+		qty, its rejected qty, if rejected material is valued and its stock carried the charge."""
+		if sum(flt(d.qty) for d in rows):
+			basis = {d.idx: flt(d.base_net_amount) for d in rows}
+			return basis if sum(basis.values()) else {d.idx: flt(d.qty) for d in rows}
+
+		if not frappe.db.get_single_value("Buying Settings", "set_valuation_rate_for_rejected_materials"):
+			# Rejected material that is not valued cannot carry valuation charges.
+			return {}
+
+		uncharged_rows = ()
+		if self.doctype == "Purchase Receipt" and self.is_return:
+			uncharged_rows = self.get_uncharged_receipt_rows(rows)
+
+		return {
+			d.idx: 0.0 if d.get("purchase_receipt_item") in uncharged_rows else flt(d.get("rejected_qty"))
+			for d in rows
+		}
+
+	def get_uncharged_receipt_rows(self, rows) -> set:
+		"""Receipt rows whose rejected stock carried no charge: they accepted qty or got none."""
+		receipt_rows = frappe.get_all(
+			"Purchase Receipt Item",
+			filters={"name": ["in", [d.purchase_receipt_item for d in rows if d.purchase_receipt_item]]},
+			fields=["name", "qty", "item_tax_amount"],
+		)
+		return {d.name for d in receipt_rows if flt(d.qty) or not flt(d.item_tax_amount)}
 
 	def get_rejected_valuation_rate(self, row) -> float:
 		if not is_rejected_material_valued(self.doctype, row.name):
