@@ -169,12 +169,12 @@ def validate_returned_items(doc):
 					validate_delivery_note_item_qty(doc, key, d, valid_items, already_returned_items)
 				add_returned_row(doc, key, d, already_returned_items)
 
-				# compare per stock UOM, the return row may be in another UOM than the original
+				# the return row may be in another UOM than the original
 				rate_precision = d.precision("rate")
 				if (
 					ref.stock_uom_rate
-					and flt(flt(d.rate) / flt(d.conversion_factor or 1), rate_precision)
-					> flt(ref.stock_uom_rate, rate_precision)
+					and flt(d.rate, rate_precision)
+					> flt(ref.stock_uom_rate * flt(d.conversion_factor or 1), rate_precision)
 					and doc.doctype in ("Delivery Note", "Sales Invoice")
 					and get_valuation_method(d.item_code, doc.company) != "Moving Average"
 				):
@@ -412,7 +412,6 @@ def get_ref_item_dict(valid_items, ref_item_row):
 		frappe._dict(
 			{
 				"qty": 0,
-				"rate": 0,
 				"stock_uom_rate": 0,
 				"stock_qty": 0,
 				"rejected_qty": 0,
@@ -426,9 +425,6 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	item_dict = valid_items[key]
 	item_dict["qty"] += ref_item_row.qty
 	item_dict["stock_qty"] += ref_item_row.get("stock_qty", 0)
-	if ref_item_row.get("rate", 0) > item_dict["rate"]:
-		item_dict["rate"] = ref_item_row.get("rate", 0)
-
 	stock_uom_rate = flt(ref_item_row.get("rate")) / flt(ref_item_row.get("conversion_factor") or 1)
 	item_dict["stock_uom_rate"] = max(item_dict["stock_uom_rate"], stock_uom_rate)
 
