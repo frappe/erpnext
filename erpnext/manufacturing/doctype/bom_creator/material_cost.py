@@ -95,8 +95,9 @@ class MaterialCost:
 				)
 
 			row.amount = flt(row.rate) * flt(row.qty)
-			row.base_rate = flt(row.rate) * flt(self.design.conversion_rate or 1)
-			row.base_amount = flt(row.amount) * flt(self.design.conversion_rate or 1)
+			conversion_rate = flt(self.design.conversion_rate or 1)
+			row.base_rate = flt(flt(row.rate) * conversion_rate, row.precision("base_rate"))
+			row.base_amount = flt(flt(row.amount) * conversion_rate, row.precision("base_amount"))
 			cost += row.amount
 
 		return cost
