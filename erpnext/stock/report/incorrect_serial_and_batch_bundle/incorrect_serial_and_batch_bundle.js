@@ -35,8 +35,9 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 	},
 
 	onload(report) {
-		report.page
-			.add_inner_button(__("Fix SABB Entry"), () => {
+		report.page.add_inner_button(
+			__("Fix SABB Entry"),
+			() => {
 				let indexes = frappe.query_report.datatable.rowmanager.getCheckedRows();
 				let selected_rows = indexes.map((i) => frappe.query_report.data[i]);
 
@@ -54,7 +55,9 @@ frappe.query_reports["Incorrect Serial and Batch Bundle"] = {
 						},
 					});
 				}
-			})
-			.addClass("btn-primary");
+			},
+			null,
+			"primary"
+		);
 	},
 };

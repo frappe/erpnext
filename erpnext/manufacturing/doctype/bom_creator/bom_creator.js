@@ -113,9 +113,7 @@ frappe.ui.form.on("BOM Creator", {
 		}
 
 		if (["Submitted", "Failed", "In Progress"].includes(frm.doc.status)) {
-			frm.add_custom_button(__("Create BOMs"), () => frm.events.create_boms(frm)).addClass(
-				"btn-primary"
-			);
+			frm.add_custom_button(__("Create BOMs"), () => frm.events.create_boms(frm), null, "primary");
 		}
 
 		frm.add_custom_button(__("New Revision"), () =>
