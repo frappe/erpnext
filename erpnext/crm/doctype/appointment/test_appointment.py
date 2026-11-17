@@ -82,6 +82,11 @@ def get_todo_statuses(appointment_name):
 	)
 
 
+def render_sent_email(sendmail):
+	kwargs = sendmail.call_args.kwargs
+	return frappe.render_template(f"templates/emails/{kwargs['template']}.html", kwargs["args"])
+
+
 def parse_verify_url(verify_url):
 	parsed = urlparse(verify_url)
 	return parsed, {key: value[0] for key, value in parse_qs(parsed.query).items()}
@@ -162,6 +167,26 @@ class TestAppointment(ERPNextTestSuite):
 			frappe.local.request = old_request
 			frappe.local.form_dict = old_form_dict
 			frappe.local.flags.commit = False
+
+	def test_verification_email_holds_no_guest_text(self):
+		self._configure_booking_settings()
+		guest_name = "Customer. Pay invoice INV-777 now at https://pay.example.com"
+		with self.set_user("Guest"), patch("frappe.sendmail") as sendmail:
+			appointment = create_appointment(
+				date=str(datetime.date.today() + datetime.timedelta(days=7)),
+				time="10:00:00",
+				tz="UTC",
+				contact={"name": guest_name, "email": "_test_appointment_mail@example.com"},
+			)
+
+		verification_email = render_sent_email(sendmail)
+		self.assertNotIn("pay.example.com", verification_email)
+		self.assertNotIn("INV-777", verification_email)
+		self.assertIn("/book_appointment/verify?key=", verification_email)
+
+		with patch("frappe.sendmail") as sendmail:
+			appointment.send_appointment_confirmed_email()
+		self.assertIn(guest_name, render_sent_email(sendmail))
 
 	def test_calendar_event_created(self):
 		cal_event = frappe.get_doc("Event", self.test_appointment.calendar_event)
