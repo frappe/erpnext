@@ -8,6 +8,7 @@ import frappe.permissions
 
 from erpnext.buying.utils import get_linked_material_requests
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.material_request.mapper import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.tests.utils import ERPNextTestSuite
 
@@ -57,8 +58,20 @@ class TestGetLinkedMaterialRequests(ERPNextTestSuite):
 		for row in rows:
 			self.assertNotIsInstance(row, list | tuple)
 			self.assertIsInstance(row, dict)
-			for fieldname in ("mr_name", "mr_item", "item_code", "qty"):
+			for fieldname in ("mr_name", "mr_item", "item_code", "stock_qty"):
 				self.assertIn(fieldname, row)
+
+	def test_partly_ordered_request_in_other_uom_returns_stock_qty_left_to_order(self):
+		item = make_item(properties={"is_stock_item": 1, "uoms": [{"uom": "Box", "conversion_factor": 12}]})
+		material_request = make_material_request(item_code=item.name, qty=2, uom="Box", conversion_factor=12)
+		purchase_order = make_purchase_order(material_request.name)
+		purchase_order.supplier = "_Test Supplier"
+		purchase_order.items[0].update({"uom": item.stock_uom, "conversion_factor": 1, "qty": 12})
+		purchase_order.submit()
+
+		rows = get_linked_material_requests([item.name])
+
+		self.assertEqual([(row.mr_name, row.stock_qty) for row in rows], [(material_request.name, 12)])
 
 	def test_empty_result_is_a_flat_empty_list(self):
 		item_without_request = make_item("_Test Item Without Material Request").name
