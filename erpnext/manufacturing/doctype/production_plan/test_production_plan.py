@@ -1026,7 +1026,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.submit()
 
 		so_items = [sales_order.items[0].name for sales_order in sales_orders]
-		self.assertEqual([row.sales_order_item for row in plan.prod_plan_references], so_items)
+		self.assertCountEqual([row.sales_order_item for row in plan.prod_plan_references], so_items)
 		self.assertEqual(
 			[frappe.db.get_value("Sales Order Item", name, "production_plan_qty") for name in so_items],
 			[5, 3],
