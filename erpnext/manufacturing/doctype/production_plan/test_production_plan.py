@@ -2493,13 +2493,16 @@ class TestProductionPlan(ERPNextTestSuite):
 		sales_order = make_sales_order(item_code=bundle_item, qty=10)
 
 		first_plan = make_plan_from_sales_orders([sales_order])
-		first_plan.set("po_items", [row for row in first_plan.po_items if row.planned_qty == 20])
+		for row in first_plan.po_items:
+			row.planned_qty /= 2
 		first_plan.submit()
 		bundle_line = sales_order.items[0].name
-		self.assertEqual(frappe.db.get_value("Sales Order Item", bundle_line, "production_plan_qty"), 4)
+		self.assertEqual(frappe.db.get_value("Sales Order Item", bundle_line, "production_plan_qty"), 5)
+		# what Work Orders for 5 of the 10 bundles write
+		frappe.db.set_value("Sales Order Item", bundle_line, "work_order_qty", 5)
 
 		second_plan = make_plan_from_sales_orders([sales_order])
-		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 30)
+		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 25)
 
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
