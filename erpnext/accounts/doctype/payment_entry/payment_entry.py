@@ -3465,7 +3465,9 @@ def get_early_payment_discount_loss(
 			}
 		)
 
-	base_total_discount_loss = flt(abs(sum(flt(row["amount"]) for row in rows)), doc.precision("grand_total"))
+	base_total_discount_loss = flt(
+		sum(flt(row["amount"]) for row in rows) * positive_negative, doc.precision("grand_total")
+	)
 
 	return rows, base_total_discount_loss
 
