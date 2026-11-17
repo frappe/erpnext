@@ -274,6 +274,19 @@ class TestWorkstation(ERPNextTestSuite):
 		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
 		self.assertFalse([row for row in entry.additional_costs if row.has_operating_cost])
 
+	def test_component_wise_operating_cost_adds_up_to_the_actual_cost(self):
+		from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_wo_stock_entry
+
+		workstation = make_workstation(workstation_name="_Test WS Split Cost")
+		for component in (_("Rent"), _("Wages"), _("Electricity")):
+			workstation.append("workstation_costs", {"operating_component": component, "operating_cost": 1})
+		workstation.save()
+		work_order = make_work_order_with_completed_job_card(workstation.name, minutes=20)
+
+		entry = frappe.get_doc(make_wo_stock_entry(work_order.name, "Manufacture", 10))
+		amounts = [row.amount for row in entry.additional_costs if row.has_operating_cost]
+		self.assertEqual(sorted(amounts), [0.33, 0.33, 0.34])
+
 	@change_settings("Manufacturing Settings", {"disable_capacity_planning": 0, "allow_overtime": 0})
 	def test_job_card_starts_in_the_next_shift_of_the_same_day(self):
 		shifts = [("13:00:00", "17:00:00"), ("08:00:00", "12:00:00")]
@@ -415,8 +428,8 @@ def make_workstation(*args, **kwargs):
 	return frappe.get_doc("Workstation", workstation_name)
 
 
-def make_work_order_with_completed_job_card(workstation, job_card_workstation=None):
-	"""Work Order for 10 with one operation on the workstation, its Job Card run for 60 minutes."""
+def make_work_order_with_completed_job_card(workstation, job_card_workstation=None, minutes=60):
+	"""Work Order for 10 with one operation on the workstation, its Job Card run for the given minutes."""
 	from frappe.utils import add_to_date, now
 
 	from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
@@ -430,7 +443,11 @@ def make_work_order_with_completed_job_card(workstation, job_card_workstation=No
 	rm_item = make_item(f"_Test RM {workstation}", {"is_stock_item": 1}).name
 	routing = create_routing(routing_name=f"Route {workstation}", operations=operations)
 	bom = setup_bom(
-		item_code=fg_item, routing=routing.name, raw_materials=[rm_item], source_warehouse="Stores - _TC"
+		item_code=fg_item,
+		routing=routing.name,
+		raw_materials=[rm_item],
+		source_warehouse="Stores - _TC",
+		currency="INR",
 	)
 	make_test_entry(item_code=rm_item, target="Stores - _TC", qty=10, basic_rate=50)
 
@@ -442,7 +459,7 @@ def make_work_order_with_completed_job_card(workstation, job_card_workstation=No
 	from_time = add_to_date(now(), days=1)
 	job_card.append(
 		"time_logs",
-		{"from_time": from_time, "to_time": add_to_date(from_time, minutes=60), "completed_qty": 10},
+		{"from_time": from_time, "to_time": add_to_date(from_time, minutes=minutes), "completed_qty": 10},
 	)
 	job_card.submit()
 	return work_order
