@@ -249,7 +249,7 @@ def _process_subitem(
 		return
 
 	# a planned sub-assembly is made or subcontracted, so only its components are requested
-	sub_assembly_type = (data.get("planned_sub_assemblies") or {}).get((d.item_code, child_bom))
+	sub_assembly_type = (data.get("planned_sub_assemblies") or {}).get((d.item_code, d.line_bom_no))
 	if sub_assembly_type == "Subcontract" and not include_subcontracted_items:
 		return
 
