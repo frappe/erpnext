@@ -82,7 +82,7 @@ class MaterialRequirementsPlanningReport:
 		self.fg_items = []
 		self.rm_items = []
 		self.dates = self.get_dates()
-		self.mps_data = self.get_mps_data()
+		self.mps_data = self.get_mps_data(self.filters.from_date, self.filters.to_date)
 		items = self.get_items_from_mps(self.mps_data)
 		self.update_sales_forecast_data()
 
@@ -858,7 +858,7 @@ class MaterialRequirementsPlanningReport:
 					warehouse,
 				)
 
-	def get_mps_data(self):
+	def get_mps_data(self, from_date=None, to_date=None):
 		doctype = frappe.qb.DocType("Master Production Schedule")
 		child_doctype = frappe.qb.DocType("Master Production Schedule Item")
 
@@ -880,11 +880,11 @@ class MaterialRequirementsPlanningReport:
 			.orderby(child_doctype.delivery_date)
 		)
 
-		if self.filters.get("from_date"):
-			query = query.where(child_doctype.delivery_date >= self.filters.from_date)
+		if from_date:
+			query = query.where(child_doctype.delivery_date >= from_date)
 
-		if self.filters.get("to_date"):
-			query = query.where(child_doctype.delivery_date <= self.filters.to_date)
+		if to_date:
+			query = query.where(child_doctype.delivery_date <= to_date)
 
 		if self.filters.get("warehouse"):
 			query = query.where(doctype.parent_warehouse.isin(self.get_warehouses(True)))
@@ -1258,13 +1258,19 @@ class MaterialRequirementsPlanningReport:
 
 	def consume_forecast(self, forecast_rows):
 		"""Let the MPS demand of a forecast period use up that period's forecast."""
+		if not forecast_rows:
+			return
+
+		periods = [get_forecast_period(row) for row in forecast_rows]
+		# the whole period counts, even the days outside the report dates
+		mps_data = self.get_mps_data(min(start for start, _ in periods), max(end for _, end in periods))
+
 		demand_by_item = {}
-		for row in self.mps_data:
+		for row in mps_data:
 			demand = frappe._dict(date=getdate(row.delivery_date), qty=flt(row.planned_qty))
 			demand_by_item.setdefault(row.item_code, []).append(demand)
 
-		for row in forecast_rows:
-			start_date, end_date = get_forecast_period(row)
+		for row, (start_date, end_date) in zip(forecast_rows, periods, strict=True):
 			for demand in demand_by_item.get(row.item_code, []):
 				if start_date <= demand.date < end_date:
 					consumed_qty = min(row.qty, demand.qty)
