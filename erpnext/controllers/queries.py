@@ -15,8 +15,16 @@ from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
+<<<<<<< HEAD
 from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_party_specific_items
+=======
+from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
+from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
+from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
+from erpnext.stock.doctype.item.item import get_allowed_uoms
+from erpnext.stock.doctype.item.item_search import get_item_search_candidates
+>>>>>>> a5a5cbb (fix: offer only the party's Blanket Orders in the row link)
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.stock.utils import get_combine_datetime
 
@@ -623,10 +631,19 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+<<<<<<< HEAD
 def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
+=======
+def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	party = filters.get("party")
+	if filters.get("quotation_to"):
+		party = get_existing_customer_name(filters.get("quotation_to"), party)
+
+>>>>>>> a5a5cbb (fix: offer only the party's Blanket Orders in the row link)
 	bo_filters = [
 		["docstatus", "=", 1],
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
+		["customer" if filters.get("blanket_order_type") == "Selling" else "supplier", "=", party],
 		["company", "=", filters.get("company")],
 	]
 
