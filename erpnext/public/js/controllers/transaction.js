@@ -2188,12 +2188,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			var params = this._get_args(row);
 			params.batch_no = row.batch_no;
 			params.uom = row.uom;
+			params.child_docname = row.name;
 
 			frappe.call({
 				method: "erpnext.stock.get_item_details.get_batch_based_item_price",
 				args: {
 					ctx: params,
 					item_code: row.item_code,
+					doc: this.frm.doc,
 				},
 				callback: function (r) {
 					if (!r.exc && r.message) {
