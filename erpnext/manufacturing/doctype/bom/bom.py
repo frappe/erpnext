@@ -1568,7 +1568,7 @@ def get_bom_item_rate(args, bom_doc):
 def get_valuation_rate(data):
 	"""
 	1) Get average valuation rate from all warehouses
-	2) If no value, get last valuation rate from SLE
+	2) If no value, get last valuation rate from the company's SLE
 	3) If no value, get valuation rate from Item
 	"""
 	from pypika import Case
@@ -1604,13 +1604,18 @@ def get_valuation_rate(data):
 
 	valuation_rate = item_valuation.get("valuation_rate")
 
-	if (valuation_rate is not None) and valuation_rate <= 0:
-		# Explicit null value check. If None, Bins don't exist, neither does SLE
+	# None: no Bin, e.g. a source warehouse that never held the item
+	if flt(valuation_rate) <= 0:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		last_val_rate = (
 			frappe.qb.from_(sle)
 			.select(sle.valuation_rate)
-			.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
+			.where(
+				(sle.item_code == item_code)
+				& (sle.company == company)
+				& (sle.valuation_rate > 0)
+				& (sle.is_cancelled == 0)
+			)
 			.orderby(sle.posting_datetime, order=frappe.qb.desc)
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
