@@ -217,6 +217,7 @@ const blanket_order_pricing = {
 		}
 
 		frm.__applying_blanket_order_price_list = true;
+		let pending;
 		try {
 			let response = await frappe.call({
 				method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.apply_price_list",
@@ -242,10 +243,11 @@ const blanket_order_pricing = {
 			}
 		} finally {
 			frm.__applying_blanket_order_price_list = false;
+			pending = frm.__pending_blanket_order_price_list;
+			frm.__pending_blanket_order_price_list = null;
 		}
-		let pending = frm.__pending_blanket_order_price_list?.shift();
-		if (pending) {
-			return this.apply(frm, pending.item_name, pending.options);
+		for (const { item_name, options } of pending || []) {
+			await this.apply(frm, item_name, options);
 		}
 	},
 };
