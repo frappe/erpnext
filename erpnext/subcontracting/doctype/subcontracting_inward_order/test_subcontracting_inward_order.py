@@ -1977,10 +1977,10 @@ def receive_customer_material(scio, rm_item, qty, rate):
 	return rm_in
 
 
-def receive_batch_in_two_lots(scio, first_qty=3):
+def receive_batch_in_two_lots(scio):
 	"""Receive the batch raw material in two entries, each making its own batch."""
 	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-	next(item for item in rm_in.items if item.item_code == "RM with Batch").qty = first_qty
+	next(item for item in rm_in.items if item.item_code == "RM with Batch").qty = 3
 	rm_in.submit()
 
 	scio.reload()
