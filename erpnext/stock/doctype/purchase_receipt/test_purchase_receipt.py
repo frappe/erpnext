@@ -8600,10 +8600,267 @@ def prepare_data_for_internal_transfer():
 		company,
 	)
 
+<<<<<<< HEAD
 	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
 		account = "Unrealized Profit and Loss - TCP1"
 		if not frappe.db.exists("Account", account):
 			frappe.get_doc(
+=======
+		invoice = make_invoice_against_order(purchase_order.name, qty=8, rate=200)
+
+		self.assertEqual(
+			self.get_provisional_balance(first.name, receipt_return.name, second.name, invoice.name), 0
+		)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_reverses_only_the_open_provision(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (100, 200))
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+		credit_note = make_return_doc("Purchase Invoice", vouchers[-1])
+		credit_note.submit()
+
+		self.assertEqual(self.get_provisional_balance(*vouchers, credit_note.name), -600)
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoice_after_a_cancelled_one_clears_the_whole_open_provision(self):
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = self.bill_order_again_after_cancelling_its_first_invoice(purchase_order.name, (200, 100))
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def bill_order_again_after_cancelling_its_first_invoice(self, purchase_order, rates):
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order, 6, rates[0], "08:00").name,
+			self.make_receipt_at_rate(purchase_order, 4, rates[1], "10:00").name,
+		]
+		first = make_invoice_against_order(purchase_order, qty=6, rate=200)
+		vouchers.append(make_invoice_against_order(purchase_order, qty=4, rate=200).name)
+		frappe.get_doc("Purchase Invoice", first.name).cancel()
+		vouchers.append(make_invoice_against_order(purchase_order, qty=6, rate=200).name)
+
+		return vouchers
+
+	@ERPNextTestSuite.change_settings("Accounts Settings", {"over_billing_allowance": 200})
+	def test_order_invoices_submitted_out_of_order_clear_the_provision(self):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_invoice as make_invoice_from_order,
+		)
+
+		purchase_order = self.make_provisional_purchase_order()
+		vouchers = [
+			self.make_receipt_at_rate(purchase_order.name, 6, 100, "08:00").name,
+			self.make_receipt_at_rate(purchase_order.name, 4, 200, "10:00").name,
+		]
+		drafts = []
+		for qty in (3, 7):
+			invoice = make_invoice_from_order(purchase_order.name)
+			invoice.items[0].update({"qty": qty, "rate": 200})
+			drafts.append(invoice.insert())
+
+		for invoice in reversed(drafts):
+			invoice.submit()
+			vouchers.append(invoice.name)
+
+		self.assertEqual(self.get_provisional_balance(*vouchers), 0)
+
+	def test_non_stock_receipt_in_closed_period_can_be_cancelled(self):
+		from erpnext.accounts.doctype.payment_reconciliation.test_payment_reconciliation import (
+			make_period_closing_voucher,
+		)
+		from erpnext.accounts.utils import get_fiscal_year
+
+		closed_date = add_days(get_fiscal_year(today(), company="_Test Company")[1], -1)
+		make_period_closing_voucher(
+			company="_Test Company", cost_center="Main - _TC", posting_date=closed_date
+		)
+		item = make_item("_Test Non Stock Closed Period Item", {"is_stock_item": 0}).name
+
+		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
+			receipt = make_purchase_receipt(item_code=item, posting_date=closed_date)
+			receipt.cancel()
+
+		self.assertEqual(receipt.docstatus, 2)
+		self.assertFalse(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
+	def test_stock_receipt_cancel_still_queues_voucher_repost(self):
+		with self.change_settings("Stock Reposting Settings", item_based_reposting=0):
+			receipt = make_purchase_receipt(qty=1, rate=100)
+			receipt.cancel()
+
+		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": receipt.name}))
+
+	def make_receipt_at_rate(self, purchase_order, qty, rate, posting_time):
+		from erpnext.buying.doctype.purchase_order.mapper import (
+			make_purchase_receipt as make_receipt_from_order,
+		)
+
+		receipt = make_receipt_from_order(purchase_order)
+		receipt.set_posting_time = 1
+		receipt.posting_time = posting_time
+		receipt.items[0].update({"received_qty": qty, "qty": qty, "rate": rate})
+		receipt.submit()
+		return receipt
+
+	def make_receipt_from_usd_invoice(self, receipt_conversion_rate):
+		"""Receipt at another exchange rate from a USD invoice of 3 @ 10.33 at 85.37."""
+		from erpnext.accounts.doctype.purchase_invoice.mapper import make_purchase_receipt as make_receipt
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		pi = make_purchase_invoice(
+			company="_Test Company with perpetual inventory",
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=85.37,
+			qty=3,
+			rate=10.33,
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Stock Received But Not Billed - TCP1",
+			item_code=make_item(properties={"is_stock_item": 1}).name,
+			do_not_save=True,
+		)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.submit()
+
+		pr = frappe.get_doc(make_receipt(pi.name))
+		pr.conversion_rate = receipt_conversion_rate
+		pr.submit()
+		return pr
+
+	def test_receipt_from_invoice_at_another_rate_books_matching_account_currency_amounts(self):
+		"""The exchange difference rows of a receipt made from a foreign currency invoice book the same
+		amounts in an account in the company currency."""
+		pr = self.make_receipt_from_usd_invoice(83.11)
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			{"voucher_no": pr.name, "is_cancelled": 0},
+			["account", "debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
+		self.assertEqual({entry.account: entry.debit for entry in gl_entries}.get(gain_loss_account), 70.04)
+
+		for entry in gl_entries:
+			self.assertEqual(entry.debit, entry.debit_in_account_currency)
+			self.assertEqual(entry.credit, entry.credit_in_account_currency)
+
+	def test_moving_average_purchase_return_leaves_no_negative_stock_value(self):
+		"""A purchase return at a rate above the moving average takes out at most what is in stock."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "Moving Average"}).name
+		make_stock_entry(item_code=item_code, qty=10, rate=100, to_warehouse="Stores - TCP1")
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=10,
+			rate=300,
+			warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+		)
+		make_stock_entry(item_code=item_code, qty=15, from_warehouse="Stores - TCP1")
+
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		purchase_return.items[0].qty = -4
+		purchase_return.items[0].received_qty = -4
+		purchase_return.submit()
+
+		stock_value, valuation_rate = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": purchase_return.name, "is_cancelled": 0},
+			["stock_value", "valuation_rate"],
+		)
+		self.assertEqual(stock_value, 0)
+		self.assertEqual(valuation_rate, 0)
+
+		gl_entries = get_gl_entries("Purchase Receipt", purchase_return.name, skip_cancelled=True)
+		self.assertEqual(
+			{gle.account: (gle.debit, gle.credit) for gle in gl_entries},
+			{
+				"Stock In Hand - TCP1": (0, 1000),
+				"Stock Received But Not Billed - TCP1": (1200, 0),
+				"Cost of Goods Sold - TCP1": (0, 200),
+			},
+		)
+
+	def test_internal_receipt_return_takes_back_the_lot_it_received(self):
+		"""A return of an internal receipt with no delivery row link still takes back the lot it received."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.mapper import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		company = "_Test Company with perpetual inventory"
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		make_stock_entry(item_code=item_code, qty=3, rate=100, to_warehouse="Stores - TCP1", company=company)
+		make_stock_entry(
+			item_code=item_code, qty=10, rate=300, to_warehouse="Finished Goods - TCP1", company=company
+		)
+		dn = create_delivery_note(
+			item_code=item_code,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=3,
+			rate=100,
+			warehouse="Stores - TCP1",
+			target_warehouse="Goods In Transit - TCP1",
+		)
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].warehouse = "Finished Goods - TCP1"
+		pr.submit()
+
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		# as on a return made before the delivery row link was copied onto it
+		purchase_return.items[0].delivery_note_item = None
+		purchase_return.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_no": purchase_return.name, "warehouse": "Finished Goods - TCP1", "is_cancelled": 0},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, -300)
+		self.assertFalse(
+			frappe.db.exists(
+				"GL Entry", {"voucher_no": purchase_return.name, "account": "Cost of Goods Sold - TCP1"}
+			)
+		)
+
+	def test_return_of_receipt_from_invoice_at_another_rate_reverses_exchange_difference(self):
+		from erpnext.stock.doctype.purchase_receipt.mapper import make_purchase_return
+
+		pr = self.make_receipt_from_usd_invoice(83.11)
+		pr_return = make_purchase_return(pr.name)
+		pr_return.submit()
+
+		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
+		reversed_amount = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_no": pr_return.name, "account": gain_loss_account, "is_cancelled": 0},
+			"credit",
+		)
+		self.assertEqual(reversed_amount, 70.04)
+
+
+def create_asset_category_for_pr_test():
+	category_name = "Test Asset Category for PR"
+
+	asset_category = frappe.get_doc(
+		{
+			"doctype": "Asset Category",
+			"asset_category_name": category_name,
+			"enable_cwip_accounting": 0,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 12,
+			"frequency_of_depreciation": 1,
+			"accounts": [
+>>>>>>> 3501101 (test: return of a receipt made from an invoice reverses the exchange difference)
 				{
 					"doctype": "Account",
 					"account_name": "Unrealized Profit and Loss",
