@@ -6,7 +6,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_to_date, nowdate
 
+<<<<<<< HEAD
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+=======
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
+>>>>>>> 87eb5b6 (test: import make_product_bundle at the top)
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
@@ -367,8 +372,6 @@ class TestPackedItem(FrappeTestCase):
 	@ERPNextTestSuite.change_settings("Selling Settings", {"editable_bundle_item_rates": 1})
 	def test_bundle_rate_from_components_is_per_row_uom(self):
 		"""The bundle row's rate is per its own UOM, so a Box of 12 bundles costs 12 components."""
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-
 		bundle = make_item(
 			properties={
 				"is_stock_item": 0,
