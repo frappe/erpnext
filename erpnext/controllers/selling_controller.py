@@ -417,9 +417,11 @@ class SellingController(StockController):
 		):
 			return
 
-		# stock moved to an internal customer is not sold, so neither rate applies
-		if self.get("is_internal_customer"):
+		# an internal transfer is not a sale, so neither rate applies
+		if self.is_internal_transfer():
 			return
+
+		is_internal_customer = self.get("is_internal_customer")
 
 		for item in self.items:
 			if not item.item_code or item.is_free_item:
@@ -436,7 +438,7 @@ class SellingController(StockController):
 			if flt(item.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(item.idx, item.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
-			if not is_stock_item:
+			if is_internal_customer or not is_stock_item:
 				continue
 
 			rate_field = "valuation_rate" if self.doctype in ["Sales Order", "Quotation"] else "incoming_rate"
