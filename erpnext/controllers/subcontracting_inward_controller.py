@@ -1012,6 +1012,7 @@ class SubcontractingInwardController:
 		)
 
 		if data := data.run(as_dict=True):
+			precision = frappe.get_precision("Subcontracting Inward Order Received Item", "consumed_qty")
 			used_item_wh = []
 			doc_updates = {}
 			for d in data:
@@ -1023,7 +1024,7 @@ class SubcontractingInwardController:
 					)
 					used_item_wh.append((d.rm_item_code, d.warehouse))
 
-				qty = d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)]
+				qty = flt(d.consumed_qty + item_code_wh[(d.rm_item_code, d.warehouse)], precision)
 				if qty or d.is_customer_provided_item or not d.is_additional_item:
 					doc_updates[d.name] = {"consumed_qty": qty}
 				else:
@@ -1081,7 +1082,7 @@ class SubcontractingInwardController:
 						"Work Order", self.work_order, "subcontracting_inward_order_item"
 					),
 					required_qty=0,
-					consumed_qty=qty,
+					consumed_qty=flt(qty, precision),
 					warehouse=warehouse,
 					is_additional_item=True,
 				)
