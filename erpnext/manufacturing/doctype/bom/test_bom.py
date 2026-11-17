@@ -51,6 +51,26 @@ class TestBOM(ERPNextTestSuite):
 		self.assertTrue(self.globalTestRecords["BOM"][0]["items"][1]["item_code"] in items_dict)
 		self.assertEqual(len(items_dict.values()), 3)
 
+	def test_get_items_rate_in_stock_uom(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		rm_item = make_box_item("_Test BOM Box Rate RM")
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
+		bom.insert()
+		bom.submit()
+		self.assertEqual(bom.items[0].base_rate, 120)
+
+		in_stock_uom = get_bom_items_as_dict(bom.name, "_Test Company", fetch_exploded=0)[rm_item]
+		self.assertEqual((in_stock_uom.qty, in_stock_uom.rate), (12, 10))
+
+		in_row_uom = get_bom_items_as_dict(
+			bom.name, "_Test Company", fetch_exploded=0, fetch_qty_in_stock_uom=False
+		)[rm_item]
+		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
+
 	@timeout
 	def test_get_items_list(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
@@ -1897,64 +1917,8 @@ class TestBOM(ERPNextTestSuite):
 		finished_good = make_item("_Test BOM Tree Image FG", {"is_stock_item": 1}).name
 		bom = make_bom(item=finished_good, raw_materials=[raw_material, plain_material])
 
-<<<<<<< HEAD
 		images = {row.item_code: row.image for row in get_children(doctype="BOM", parent=bom.name)}
 		self.assertEqual(images, {raw_material: image, plain_material: None})
-=======
-		self.assertEqual(bom.items[0].rate, 10)
-		self.assertEqual(bom.items[1].rate, 0)
-
-	def test_get_items_rate_in_stock_uom(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		rm_item = make_box_item("_Test BOM Box Rate RM")
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
-		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
-		bom.insert()
-		bom.submit()
-		self.assertEqual(bom.items[0].base_rate, 120)
-
-		in_stock_uom = get_bom_items_as_dict(bom.name, "_Test Company", fetch_exploded=0)[rm_item]
-		self.assertEqual((in_stock_uom.qty, in_stock_uom.rate), (12, 10))
-
-		in_row_uom = get_bom_items_as_dict(
-			bom.name, "_Test Company", fetch_exploded=0, fetch_qty_in_stock_uom=False
-		)[rm_item]
-		self.assertEqual((in_row_uom.qty, in_row_uom.rate), (1, 120))
-
-
-def make_stage_items():
-	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
-	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
-
-	make_workstation({"workstation": "_Test SFG Workstation"})
-	for operation in ("_Test SFG Operation", "_Test SFG Final Operation"):
-		make_operation({"operation": operation, "workstation": "_Test SFG Workstation"})
-
-	return (
-		make_item(properties={"is_stock_item": 1}).name,
-		make_item(properties={"is_stock_item": 1}).name,
-		make_item(properties={"is_stock_item": 1, "valuation_rate": 100.0}).name,
-	)
-
-
-def make_stage_bom(fg_item, operations):
-	bom = frappe.new_doc("BOM")
-	bom.update(
-		{"company": "_Test Company", "item": fg_item, "quantity": 1, "with_operations": 1, "currency": "USD"}
-	)
-	bom.track_semi_finished_goods = 1
-	for operation in operations:
-		bom.append("operations", {"workstation": "_Test SFG Workstation", "time_in_mins": 30, **operation})
-
-	return bom
-
-
-def get_step_items(bom, step):
-	return [row.item_code for row in bom.items if row.operation_row_id == step]
->>>>>>> 922f868 (test: BOM items dict rate matches the UOM of its qty)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
