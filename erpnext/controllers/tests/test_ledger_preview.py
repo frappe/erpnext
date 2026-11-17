@@ -31,7 +31,12 @@ class TestLedgerPreviewPermissions(FrappeTestCase):
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
 		)
 		user = frappe.get_doc(
-			{"doctype": "User", "email": "ledger-preview@example.com", "first_name": "Preview"}
+			{
+				"doctype": "User",
+				"send_welcome_email": 0,
+				"email": "ledger-preview@example.com",
+				"first_name": "Preview",
+			}
 		).insert(ignore_permissions=True)
 		user.add_roles("Stock User")
 

@@ -17,5 +17,7 @@ class TestAssetMaintenanceReport(FrappeTestCase):
 
 def create_user_with_roles(email: str, *roles: str):
 	if not frappe.db.exists("User", email):
-		frappe.get_doc({"doctype": "User", "email": email, "first_name": email.split("@")[0]}).insert()
+		frappe.get_doc(
+			{"doctype": "User", "send_welcome_email": 0, "email": email, "first_name": email.split("@")[0]}
+		).insert()
 	frappe.get_doc("User", email).add_roles(*roles)

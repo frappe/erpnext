@@ -377,7 +377,11 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		user = "test_deferred_report_user@example.com"
 		if not frappe.db.exists("User", user):
 			frappe.get_doc(
-				doctype="User", email=user, first_name="Deferred", roles=[{"role": "Accounts User"}]
+				doctype="User",
+				send_welcome_email=0,
+				email=user,
+				first_name="Deferred",
+				roles=[{"role": "Accounts User"}],
 			).insert()
 		frappe.permissions.add_user_permission("Customer", self.customer, user)
 

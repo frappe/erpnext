@@ -198,6 +198,7 @@ class TestPendingSOItemsForPurchaseRequest(FrappeTestCase):
 		user = "_test_pso_perm@example.com"
 		if not frappe.db.exists("User", user):
 			u = frappe.new_doc("User")
+			u.send_welcome_email = 0
 			u.email = user
 			u.first_name = "PSO Perm"
 			u.append("roles", {"role": "Sales User"})
