@@ -391,7 +391,7 @@ class ReceivedStockReservation:
 
 @frappe.whitelist()
 def make_stock_reservation_entries(
-	doc: str | Document, items: str | list | None = None, table_name: str | None = None, notify: bool = False
+	doc: str | dict, items: str | list | None = None, table_name: str | None = None, notify: bool = False
 ):
 	"""Whitelisted entry point: verify Production Plan write access, then reserve stock."""
 	doc = _load_production_plan(doc)
@@ -408,15 +408,12 @@ def reserve_stock_for_production_plan(
 
 
 @frappe.whitelist()
-def cancel_stock_reservation_entries(doc: str | Document, sre_list: str | list):
+def cancel_stock_reservation_entries(doc: str | dict, sre_list: str | list):
 	"""Whitelisted entry point: verify Production Plan write access, then cancel reservations."""
 	doc = _load_production_plan(doc)
 	frappe.has_permission("Production Plan", "write", doc=doc, throw=True)
 	ProductionPlanStockReservation(doc).cancel(sre_list)
 
 
-def _load_production_plan(doc: str | dict | Document) -> Document:
-	if isinstance(doc, str | dict):
-		doc = parse_json(doc)
-		doc = frappe.get_doc("Production Plan", doc.get("name"))
-	return doc
+def _load_production_plan(doc: str | dict) -> Document:
+	return frappe.get_doc("Production Plan", parse_json(doc).get("name"))
