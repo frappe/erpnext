@@ -88,7 +88,6 @@ erpnext.PartyOverview = class PartyOverview {
 					actions: [
 						{
 							label: __("Load Overview"),
-							variant: "solid",
 							icon: "refresh-cw",
 							onclick: () => this.request_overview(),
 						},
