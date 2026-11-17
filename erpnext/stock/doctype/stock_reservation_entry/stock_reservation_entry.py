@@ -2286,10 +2286,11 @@ def get_status(sre) -> str:
 		return "Cancelled"
 	if sre.docstatus != 1:
 		return "Draft"
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 	if sre.transferred_qty:
 		# a supplier warehouse reservation is both consumed and returned
-		used_qty = flt(sre.transferred_qty) + flt(sre.consumed_qty)
-		return "Partially Used" if used_qty < flt(sre.reserved_qty) else "Closed"
+		used_qty = flt(flt(sre.transferred_qty) + flt(sre.consumed_qty), precision)
+		return "Partially Used" if used_qty < flt(sre.reserved_qty, precision) else "Closed"
 	if flt(sre.delivered_qty) + flt(sre.consumed_qty) >= flt(sre.reserved_qty):
 		return "Delivered"
 	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
