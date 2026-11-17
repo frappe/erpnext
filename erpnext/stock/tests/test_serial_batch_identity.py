@@ -902,7 +902,7 @@ class TestSerialBatchIdentity(ERPNextTestSuite):
 				self.assertEqual(row.serial_no, "Subcontracting-002\nSubcontracting-001")
 				self.assertEqual(row.batch_no, batch.name)
 				lookup.assert_called_once_with(
-					"Subcontracting-Order-Row", 2, {}, only_pending=purpose != "Subcontracting Return"
+					"Subcontracting-Order-Row", 2, only_pending=purpose != "Subcontracting Return"
 				)
 				row.serial_no = "Manual-Selection"
 				service.get_serial_batch_fields_for_subcontracting_inward()
