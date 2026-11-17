@@ -286,6 +286,34 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		self.assertEqual(second_return.items[0].qty, -24)
 		second_return.save().submit()
 
+	def test_returns_below_stock_qty_precision_are_held_to_the_sold_qty(self):
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from erpnext.controllers.sales_and_purchase_return import StockOverReturnError, make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Kg",
+				"uoms": [{"uom": "Gram", "conversion_factor": 0.001}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		si = create_sales_invoice(item_code=item_code, update_stock=1, do_not_submit=True)
+		si.items[0].update({"uom": "Gram", "conversion_factor": 0.001, "qty": 10})
+		si.submit()
+
+		def return_in_gram():
+			return_si = make_return_doc(si.doctype, si.name)
+			return_si.items[0].qty = -4
+			return return_si
+
+		# 4 Gram is 0.004 Kg, which the stock qty precision rounds to nothing
+		return_in_gram().submit()
+		return_in_gram().submit()
+		self.assertRaises(StockOverReturnError, return_in_gram().insert)
+
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_sales_invoice_return_rows_share_the_original_row_qty(self):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
