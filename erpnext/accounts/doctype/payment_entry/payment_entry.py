@@ -3387,7 +3387,7 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 	discount_amount = flt(discount_amount - base_total_discount_loss, doc.precision("grand_total"))
 
 	# Set base discount amount (discount loss/pending rounding loss) in deductions
-	if discount_amount > 0.0:
+	if discount_amount:
 		positive_negative = -1 if pe.payment_type == "Pay" else 1
 
 		# If tax loss booking is enabled, pending loss will be rounding loss.
@@ -3426,8 +3426,7 @@ def get_early_payment_discount_loss(
 	Does not need a Payment Entry, so that other documents can book the same discount.
 
 	Returns the rows (`account`, `cost_center`, `amount`) and the total loss. Amounts are
-	negative for payment type "Pay". The total loss can differ from the sum of the rows
-	by a rounding difference.
+	negative for payment type "Pay".
 	"""
 	total_discount_percent = get_total_discount_percent(doc, valid_discounts)
 
@@ -3466,9 +3465,7 @@ def get_early_payment_discount_loss(
 			}
 		)
 
-	# Round off total loss rather than individual losses to reduce rounding error
-	base_loss_on_taxes = sum(base_loss_by_tax_account.values())
-	base_total_discount_loss = flt(base_loss_on_income + base_loss_on_taxes, doc.precision("grand_total"))
+	base_total_discount_loss = flt(abs(sum(flt(row["amount"]) for row in rows)), doc.precision("grand_total"))
 
 	return rows, base_total_discount_loss
 
