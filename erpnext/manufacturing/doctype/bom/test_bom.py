@@ -447,6 +447,34 @@ class TestBOM(ERPNextTestSuite):
 		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
 		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
 
+	def test_base_costs_are_rounded_for_foreign_currency_bom(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+
+		make_workstation(workstation_name="_Test WS Base Cost", hour_rate_rent=100)
+		make_operation(operation="_Test Op Base Cost", workstation="_Test WS Base Cost")
+		rm_item = make_box_item("_Test BOM Box Base Cost RM")
+		bom = make_bom(
+			item=make_item(properties={"is_stock_item": 1}).name, raw_materials=[rm_item], do_not_save=True
+		)
+		bom.update({"currency": "USD", "conversion_rate": 80.07, "with_operations": 1})
+		bom.items[0].update({"uom": "Box", "conversion_factor": 12})
+		bom.append(
+			"operations",
+			{"operation": "_Test Op Base Cost", "workstation": "_Test WS Base Cost", "time_in_mins": 7},
+		)
+		bom.insert()
+
+		# amount 1.5 USD and 7 minutes at 100 INR an hour
+		self.assertEqual(bom.items[0].base_amount, 120.1)
+		self.assertEqual(
+			(bom.operations[0].base_hour_rate, bom.operations[0].base_operating_cost), (100, 11.67)
+		)
+		self.assertEqual(
+			(bom.base_raw_material_cost, bom.base_operating_cost, bom.base_total_cost), (120.1, 11.67, 131.77)
+		)
+
 	@timeout
 	def test_subcontractor_sourced_item(self):
 		item_code = "_Test Subcontracted FG Item 1"
