@@ -1093,7 +1093,9 @@ class BOM(WebsiteGenerator):
 			self._append_bom_material_row(row, operation_row_id)
 
 	def _append_bom_material_row(self, row, operation_row_id):
+		# get_bom_items returns the qty in stock UOM
 		row.uom = row.stock_uom
+		row.conversion_factor = 1
 		row.operation_row_id = operation_row_id
 		row.idx = None
 		row.do_not_explode = 1
