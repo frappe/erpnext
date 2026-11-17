@@ -3265,6 +3265,31 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(sorted(row.get("item_code") for row in items), sorted([rm_items[0], rm_items[2]]))
 
+	def test_do_not_explode_line_of_a_planned_sub_assembly_is_requested(self):
+		rm_item = make_item("_Test PP Unplanned Line RM", {"is_stock_item": 1}).name
+		subcontracted = make_item(
+			"_Test PP Unplanned Line Subcontracted", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		in_house = make_item("_Test PP Unplanned Line In House", {"is_stock_item": 1}).name
+		make_bom(item=subcontracted, raw_materials=[rm_item], currency="INR")
+		make_bom(item=in_house, raw_materials=[subcontracted], currency="INR")
+		fg_item = make_item("_Test PP Unplanned Line FG", {"is_stock_item": 1}).name
+		fg_bom = make_bom(
+			item=fg_item, raw_materials=[in_house, subcontracted], currency="INR", do_not_save=True
+		)
+		fg_bom.items[1].do_not_explode = 1
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		plan.include_subcontracted_items = 0
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual([row.get("item_code") for row in items], [subcontracted])
+
 	def test_raw_materials_cover_finished_good_process_loss(self):
 		rm_item = make_item("_Test PP FG Loss RM", {"is_stock_item": 1, "stock_uom": "Kg"}).name
 		fg_item = make_item("_Test PP FG Loss FG", {"is_stock_item": 1, "stock_uom": "Kg"}).name
