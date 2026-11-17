@@ -245,7 +245,8 @@ def _process_subitem(
 ):
 	# a Do Not Explode line has no BOM, so it must not take the item's default BOM
 	child_bom = d.line_bom_no or (None if d.do_not_explode else d.default_bom)
-	if (d.item_code, child_bom) in (data.get("requested_sub_assemblies") or ()):
+	# sub-assembly rows are only made from lines with a BOM (not Do Not Explode ones)
+	if (d.item_code, d.line_bom_no) in (data.get("requested_sub_assemblies") or ()):
 		return
 
 	explodable = d.is_phantom_item or (data.get("include_exploded_items") and child_bom)
