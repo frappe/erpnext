@@ -16,6 +16,7 @@ from erpnext.controllers.sales_and_purchase_return import (
 	validate_return,
 )
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.manufacturing.doctype.bom_secondary_item.bom_secondary_item import get_manual_rate
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -703,9 +704,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def get_secondary_item_rate(self, item, secondary_item, warehouse, qty, own_cost):
 		if secondary_item.valuation_type == "Manual":
-			if not flt(secondary_item.stock_qty):
-				return 0
-			return flt(secondary_item.base_cost) / flt(secondary_item.stock_qty)
+			return get_manual_rate(secondary_item)
 
 		if secondary_item.valuation_type == "Valuation Rate":
 			rate = get_valuation_rate(

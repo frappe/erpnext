@@ -1,8 +1,8 @@
 # Copyright (c) 2026, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class BOMSecondaryItem(Document):
@@ -36,3 +36,9 @@ class BOMSecondaryItem(Document):
 	# end: auto-generated types
 
 	pass
+
+
+def get_manual_rate(row) -> float:
+	"""Rate of a Manual row: its cost is for the qty made, net of process loss."""
+	made_qty = flt(row.stock_qty) - flt(row.process_loss_qty)
+	return flt(row.base_cost) / made_qty if made_qty else 0
