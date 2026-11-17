@@ -915,6 +915,137 @@ class BuyingController(SubcontractingController):
 		return self.is_internal_transfer() and self.is_stock_receipt()
 
 	def get_source_warehouse_qty(self, row, accepted_qty):
+		"""Stock qty the row takes out of the source warehouse. An internal receipt takes no more than its
+		delivered row left in transit, so partial receipts that round up add up to the delivery, and its
+		return puts back no more than the receipt took. A cap of nothing left falls back to the row's qty."""
+		qty = self.get_received_stock_qty(row, accepted_qty)
+		if not self.is_capped_in_transit(row):
+			return qty
+
+		if self.docstatus == 2:
+			return -flt(self.get_posted_qty(row.name, row.from_warehouse, outward=not self.is_return)) or qty
+
+		if self.is_return:
+			qty_left = self.get_qty_left_to_return(row)
+			return max(qty, -qty_left) if flt(qty_left) > 0 else qty
+
+		qty_left = self.get_qty_left_in_transit(row)
+		return min(qty, qty_left) if flt(qty_left) > 0 else qty
+
+	def is_capped_in_transit(self, row) -> bool:
+		"""Whether the row moves the stock of a delivered row through transit. A row with a package is not
+		capped, as its package holds the qty."""
+		if not self.is_internal_receipt():
+			return False
+
+		if row.get("serial_and_batch_bundle") or row.get("rejected_serial_and_batch_bundle"):
+			return False
+
+		return bool(row.get("purchase_receipt_item") if self.is_return else row.get("delivery_note_item"))
+
+	def get_qty_left_to_return(self, row) -> float:
+		"""Stock qty the returned receipt row took out of transit that its other returns have not put back.
+		Only the receipt's entry out of transit and the returns' entries into it count, as rejected stock
+		can stay in transit."""
+		receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+		other_returns = (
+			frappe.qb.from_(receipt_item)
+			.select(receipt_item.name)
+			.where(
+				(receipt_item.purchase_receipt_item == row.purchase_receipt_item)
+				& (receipt_item.parent != self.name)
+			)
+		)
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		moved_qty = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where(
+				(sle.warehouse == row.from_warehouse)
+				& (sle.is_cancelled == 0)
+				& (
+					((sle.voucher_detail_no == row.purchase_receipt_item) & (sle.actual_qty < 0))
+					| (sle.voucher_detail_no.isin(other_returns) & (sle.actual_qty > 0))
+				)
+			)
+			.run()[0][0]
+		)
+		return -flt(moved_qty, row.precision("stock_qty"))
+
+	def get_qty_left_in_transit(self, row) -> float | None:
+		"""Stock qty the delivered row put in transit that its other receipts, net of their returns, have not
+		taken out. None if the receipts take more than was delivered: only rounding is capped."""
+		delivered_qty = self.get_posted_qty(row.delivery_note_item, row.from_warehouse, outward=False)
+		if not delivered_qty:
+			return None
+
+		received_qty, taken_qty = self.get_other_receipts_of_delivered_row(row)
+		received_qty += (flt(row.qty) + flt(row.rejected_qty)) * flt(row.conversion_factor)
+		precision = row.precision("stock_qty")
+		if flt(received_qty, precision) > delivered_qty:
+			return None
+
+		return flt(delivered_qty + taken_qty, precision)
+
+	def get_other_receipts_of_delivered_row(self, row) -> tuple[float, float]:
+		"""Unrounded stock qty the other receipts of the delivered row and their returns received, and the
+		stock qty their entries took out of transit."""
+		receipt_item = frappe.qb.DocType("Purchase Receipt Item")
+		other_receipt_rows = (
+			frappe.qb.from_(receipt_item)
+			.select(receipt_item.name)
+			.where(
+				(receipt_item.delivery_note_item == row.delivery_note_item)
+				& (receipt_item.parent != self.name)
+			)
+		)
+		rows = (
+			frappe.qb.from_(receipt_item)
+			.select(
+				receipt_item.name,
+				((receipt_item.qty + receipt_item.rejected_qty) * receipt_item.conversion_factor).as_("qty"),
+			)
+			.where(
+				(receipt_item.docstatus == 1)
+				& (
+					receipt_item.name.isin(other_receipt_rows)
+					| receipt_item.purchase_receipt_item.isin(other_receipt_rows)
+				)
+			)
+			.run(as_dict=True)
+		)
+		if not rows:
+			return 0.0, 0.0
+
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		taken_qty = (
+			frappe.qb.from_(sle)
+			.select(Sum(sle.actual_qty))
+			.where(
+				(sle.warehouse == row.from_warehouse)
+				& (sle.is_cancelled == 0)
+				& sle.voucher_detail_no.isin([d.name for d in rows])
+			)
+			.run()[0][0]
+		)
+		return sum(flt(d.qty) for d in rows), flt(taken_qty)
+
+	def get_posted_qty(self, voucher_detail_no, warehouse, outward):
+		"""Qty of the row's entry out of or into the warehouse; a row can have both when rejected stock
+		stays in transit."""
+		return frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_detail_no": voucher_detail_no,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"actual_qty": ("<", 0) if outward else (">", 0),
+			},
+			"actual_qty",
+		)
+
+	def get_received_stock_qty(self, row, accepted_qty):
+		"""Accepted stock qty, plus the rejected stock qty when rejected stock leaves the source warehouse too."""
 		if not (self.is_internal_receipt() and flt(row.rejected_qty)):
 			return accepted_qty
 
