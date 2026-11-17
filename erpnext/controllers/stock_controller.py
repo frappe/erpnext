@@ -61,10 +61,11 @@ class StockController(AccountsController):
 		sbb.validate_serialized_batch()
 		sbb.clean_serial_nos()
 		self.validate_customer_provided_item()
+		# before the stock UOM rate, which divides by the factor
+		self.reset_conversion_factor()
 		self.set_rate_of_stock_uom()
 		StockInternalTransferService(self).validate_internal_transfer()
 		validate_putaway_capacity(self)
-		self.reset_conversion_factor()
 
 	def on_update(self):
 		super().on_update()
