@@ -108,6 +108,41 @@ class TestRepostItemValuation(ERPNextTestSuite, StockTestMixin):
 		repost.submit()
 		return repost
 
+	def test_missing_or_corrupt_reposting_data_file_fails_loudly(self):
+		import gzip
+
+		from erpnext.stock.stock_ledger import get_reposting_data
+
+		self.assertRaises(
+			frappe.ValidationError, get_reposting_data, "/files/non-existent-repost-data.json.gz"
+		)
+
+		riv = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"company": "_Test Company",
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"posting_date": today(),
+			}
+		).insert(ignore_permissions=True)
+
+		for index, content in enumerate(("not gzip content", gzip.compress(b"not json"))):
+			attached = frappe.get_doc(
+				{
+					"doctype": "File",
+					"file_name": f"corrupt_repost_data_{index}.json.gz",
+					"content": content,
+					"attached_to_doctype": riv.doctype,
+					"attached_to_name": riv.name,
+					"attached_to_field": "reposting_data_file",
+				}
+			).insert(ignore_permissions=True)
+
+			with self.assertRaisesRegex(frappe.ValidationError, "is corrupted"):
+				get_reposting_data(attached.file_url)
+
 	def test_repost_queued_after_start_is_not_skipped(self):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		running = self.make_queued_item_repost(item_code, add_days(today(), -18))
