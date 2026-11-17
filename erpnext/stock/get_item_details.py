@@ -1985,10 +1985,15 @@ def _get_blanket_order_details(args):
 			.limit(1)
 		)
 
-		if args.customer and args.doctype == "Sales Order":
-			query = query.where(bo.customer == args.customer)
-		elif args.supplier and args.doctype == "Purchase Order":
-			query = query.where(bo.supplier == args.supplier)
+		if args.doctype in ("Sales Order", "Quotation"):
+			customer = args.customer
+			if args.doctype == "Quotation":
+				from erpnext.selling.doctype.quotation.quotation import get_existing_customer_name
+
+				customer = get_existing_customer_name(args.quotation_to, args.party_name or args.customer)
+			query = query.where((bo.blanket_order_type == "Selling") & (bo.customer == customer))
+		elif args.doctype == "Purchase Order":
+			query = query.where((bo.blanket_order_type == "Purchasing") & (bo.supplier == args.supplier))
 		if args.blanket_order:
 			query = query.where(bo.name == args.blanket_order)
 		if args.transaction_date:

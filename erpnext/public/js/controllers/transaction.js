@@ -260,11 +260,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
 			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
 				var item = locals[cdt][cdn];
+				const is_selling = ["Sales Order", "Quotation"].includes(doc.doctype);
 				return {
 					query: "erpnext.controllers.queries.get_blanket_orders",
 					filters: {
 						"company": doc.company,
-						"blanket_order_type": doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
+						"blanket_order_type": is_selling ? "Selling" : "Purchasing",
+						"party": is_selling ? doc.customer || doc.party_name : doc.supplier,
+						"quotation_to": doc.quotation_to,
 						"item": item.item_code
 					}
 				}
