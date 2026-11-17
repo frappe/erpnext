@@ -322,6 +322,7 @@ class TestBlanketOrder(ERPNextTestSuite):
 		self.assertEqual(details.blanket_order, bo.name)
 
 	def test_quotation_uses_only_a_selling_blanket_order_of_its_customer(self):
+		from erpnext.crm.doctype.lead.test_lead import make_lead
 		from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 
 		item = make_item("_Test Blanket Order Quotation Item", {"is_stock_item": 1}).name
@@ -355,6 +356,12 @@ class TestBlanketOrder(ERPNextTestSuite):
 		)
 		self.assertRaisesRegex(frappe.ValidationError, "is for", quotation_against(other_customer).insert)
 		quotation_against(selling).insert()
+
+		lead = make_lead()
+		frappe.db.set_value("Customer", other_customer.customer, "lead_name", lead.name)
+		lead_quotation = quotation_against(other_customer)
+		lead_quotation.update({"quotation_to": "Lead", "party_name": lead.name})
+		lead_quotation.insert()
 
 	def test_blanket_order_rate_is_set_by_the_server(self):
 		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=100, rate=100)
