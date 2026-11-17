@@ -456,6 +456,10 @@ class SellingController(StockController):
 		if self.get("is_return") or not frappe.get_single_value("Selling Settings", "validate_selling_price"):
 			return
 
+		# an internal transfer is not a sale, so neither rate applies
+		if self.is_internal_transfer():
+			return
+
 		is_internal_customer = self.get("is_internal_customer")
 
 		for item in self.items:
