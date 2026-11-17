@@ -336,6 +336,30 @@ class JobCard(Document):
 
 		return time_logs[0]
 
+<<<<<<< HEAD
+=======
+	def get_overlapping_time_logs(self, args, open_job_cards=None):
+		time_logs = []
+		time_logs.extend(self.get_time_logs(args, "Job Card Time Log"))
+		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
+		return time_logs
+
+	def get_production_capacity(self, workstation=None):
+		workstation = workstation or self.workstation
+		if workstation:
+			return frappe.get_cached_value("Workstation", workstation, "production_capacity") or 1
+		return 1
+
+	def validate_employee_overlap(self, args):
+		if self.get_open_job_cards(args.get("employee")):
+			frappe.throw(
+				_(
+					"Employee {0} is currently working on another workstation. Please assign another employee."
+				).format(args.get("employee")),
+				OverlapError,
+			)
+
+>>>>>>> 38bff92 (fix(manufacturing): use spare workstation capacity for Workstation Type job cards)
 	def has_overlap(self, production_capacity, time_logs):
 		overlap = False
 		if production_capacity == 1 and len(time_logs) >= 1:
@@ -461,9 +485,9 @@ class JobCard(Document):
 		return [job.get("name") for job in jobs] if jobs else []
 
 	def get_free_workstation(self, overlapping_time_logs):
-		busy_workstations = {row.workstation for row in overlapping_time_logs}
 		for workstation in get_workstations(self.workstation_type):
-			if workstation not in busy_workstations:
+			time_logs = [row for row in overlapping_time_logs if row.workstation == workstation]
+			if not self.has_overlap(self.get_production_capacity(workstation), time_logs):
 				return workstation
 
 	def schedule_time_logs(self, row):
