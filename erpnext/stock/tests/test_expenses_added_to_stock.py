@@ -187,3 +187,22 @@ class TestExpensesAddedToStock(ERPNextTestSuite):
 			},
 		)
 		self.assertFalse(booked)
+
+	def test_opening_stock_reconciliation_books_nothing(self):
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		sr = create_stock_reconciliation(
+			item_code=self.item,
+			warehouse=WAREHOUSE,
+			qty=4,
+			rate=100,
+			company=COMPANY,
+			purpose="Opening Stock",
+			expense_account="Temporary Opening - TCP1",
+		)
+
+		_balances, debits, credits = self.get_gl_balances("Stock Reconciliation", sr.name)
+		self.assertEqual(debits[self.eats_account], 0)
+		self.assertEqual(credits[self.eats_contra_account], 0)
