@@ -567,11 +567,9 @@ def get_returned_qty_map_for_purchase_flow(return_against, supplier, row_name, d
 	_return_map = frappe._dict({})
 
 	for row in data:
-		if row.warehouse and row.warehouse not in _return_map:
-			_return_map[row.warehouse] = frappe._dict({"qty": 0, "stock_qty": 0, "qty_in_stock_uom": 0})
-
-		if row.rejected_warehouse and row.rejected_warehouse not in _return_map:
-			_return_map[row.rejected_warehouse] = frappe._dict({"qty": 0, "stock_qty": 0})
+		for warehouse in (row.warehouse, row.rejected_warehouse):
+			if warehouse and warehouse not in _return_map:
+				_return_map[warehouse] = frappe._dict({"qty": 0, "stock_qty": 0, "qty_in_stock_uom": 0})
 
 		if row.warehouse:
 			qty_map = _return_map.get(row.warehouse)
