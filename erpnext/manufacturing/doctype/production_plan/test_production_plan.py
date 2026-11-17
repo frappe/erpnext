@@ -1806,6 +1806,34 @@ class TestProductionPlan(ERPNextTestSuite):
 			[("_Test PP Default WH SA", "Stores - _TC")],
 		)
 
+	def test_do_not_explode_line_of_a_requested_sub_assembly_is_requested(self):
+		rm_item = make_item("_Test PP Requested DNE RM", {"is_stock_item": 1}).name
+		sub_assembly = make_item(
+			"_Test PP Requested DNE SA", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		parent = make_item("_Test PP Requested DNE Parent", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test PP Requested DNE FG", {"is_stock_item": 1}).name
+		make_bom(item=sub_assembly, raw_materials=[rm_item], currency="INR")
+		make_bom(item=parent, raw_materials=[sub_assembly], currency="INR")
+		fg_bom = make_bom(
+			item=fg_item, raw_materials=[parent, sub_assembly], currency="INR", do_not_save=True
+		)
+		fg_bom.items[1].do_not_explode = 1
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		plan.get_sub_assembly_items()
+		for row in plan.sub_assembly_items:
+			if row.production_item == sub_assembly:
+				row.type_of_manufacturing = "Material Request"
+		plan.save()
+
+		items = get_items_for_material_requests(plan.as_dict())
+		self.assertEqual([(row.get("item_code"), row.get("quantity")) for row in items], [(sub_assembly, 2)])
+
 	def test_sub_assembly_bought_for_one_row_is_still_made_for_another(self):
 		for item in (
 			"_Test PP Mixed SA RM",
