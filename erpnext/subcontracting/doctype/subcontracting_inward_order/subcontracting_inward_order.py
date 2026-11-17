@@ -207,21 +207,18 @@ class SubcontractingInwardOrder(SubcontractingController):
 			if service_item.sales_order_item in sales_order_items
 		]
 
-		conversion_factors = dict(
-			frappe.get_all(
+		so_items = {
+			so_item.name: so_item
+			for so_item in frappe.get_all(
 				"Sales Order Item",
 				filters={"name": ["in", sales_order_items]},
-				fields=["name", "conversion_factor"],
-				as_list=True,
+				fields=["name", "qty", "fg_item_qty"],
 			)
-		)
+		}
 		for service_item in self.service_items:
 			item = next(item for item in self.items if item.sales_order_item == service_item.sales_order_item)
-			qty = (
-				item.qty
-				* item.subcontracting_conversion_factor
-				/ conversion_factors[service_item.sales_order_item]
-			)
+			so_item = so_items[service_item.sales_order_item]
+			qty = item.qty * so_item.qty / so_item.fg_item_qty
 			service_item.qty = flt(qty, service_item.precision("qty"))
 			service_item.fg_item_qty = item.qty
 			service_item.amount = flt(qty * service_item.rate, service_item.precision("amount"))
