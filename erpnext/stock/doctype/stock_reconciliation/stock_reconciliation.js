@@ -240,8 +240,11 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_amount_quantity: function (doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
-		frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
-		frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
+		// a blank qty or rate keeps the current one on save
+		const qty = d.qty ?? d.current_qty;
+		const rate = d.valuation_rate ?? d.current_valuation_rate;
+		frappe.model.set_value(cdt, cdn, "amount", flt(qty) * flt(rate));
+		frappe.model.set_value(cdt, cdn, "quantity_difference", flt(qty) - flt(d.current_qty));
 		frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
 	},
 	toggle_display_account_head: function (frm) {
