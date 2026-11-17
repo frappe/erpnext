@@ -347,6 +347,31 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		return_in_nos(si, -5, 200).insert()
 		self.assertRaises(frappe.ValidationError, return_in_nos(si, -1, 2400).insert)
 
+	def test_return_rate_ceiling_holds_for_large_conversion_factor(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 1000}],
+			}
+		).name
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1000, basic_rate=1)
+
+		dn = create_delivery_note(item_code=item_code, do_not_submit=True)
+		dn.items[0].update(
+			{"uom": "Box", "conversion_factor": 1000, "qty": 1, "rate": 1, "price_list_rate": 1}
+		)
+		dn.submit()
+
+		return_dn = make_return_doc(dn.doctype, dn.name)
+		return_dn.items[0].update({"rate": 4, "price_list_rate": 4})
+		self.assertRaises(frappe.ValidationError, return_dn.insert)
+
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
 	from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
