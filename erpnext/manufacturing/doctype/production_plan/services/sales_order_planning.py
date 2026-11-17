@@ -226,11 +226,11 @@ class SalesOrderSourcingService:
 				continue
 
 			item_details = get_item_details(data.item_code, throw=False)
-			if self.doc.combine_items and self._add_combine_ref(refs, data, item_details):
-				continue
-
 			bom_no = data.bom_no or item_details and item_details.get("bom_no") or ""
 			if not bom_no:
+				continue
+
+			if self.doc.combine_items and self._add_combine_ref(refs, data, bom_no):
 				continue
 			self._append_po_item(data, item_details, bom_no)
 
@@ -238,8 +238,7 @@ class SalesOrderSourcingService:
 			self._apply_combined_refs(refs)
 
 	@staticmethod
-	def _add_combine_ref(refs, data, item_details):
-		bom_no = data.get("bom_no") or item_details.get("bom_no")
+	def _add_combine_ref(refs, data, bom_no):
 		detail = {"sales_order": data.parent, "sales_order_item": data.name, "qty": data.pending_qty}
 		if bom_no in refs:
 			refs[bom_no]["so_details"].append(detail)
