@@ -82,7 +82,7 @@ def add_operating_cost_component_wise(stock_entry, work_order=None, op_expense_a
 			continue
 
 		workstation_cost = _get_operating_components(row)
-		if not workstation_cost:
+		if not any(flt(wc.operating_cost) for wc in workstation_cost):
 			without_components.append(row)
 		elif _add_operation_workstation_costs(
 			stock_entry, work_order, row, workstation_cost, op_expense_account
