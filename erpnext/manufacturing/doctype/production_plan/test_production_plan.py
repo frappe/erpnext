@@ -2481,6 +2481,26 @@ class TestProductionPlan(ERPNextTestSuite):
 		self.assertEqual([row.planned_qty for row in plan.po_items], [40, 40])
 		plan.submit()
 
+	def test_planned_qty_of_bundle_component_on_two_rows(self):
+		rm_item = make_item("_Test PP Bundle Twice RM", {"is_stock_item": 1}).name
+		component = make_item("_Test PP Bundle Twice A", {"is_stock_item": 1}).name
+		make_bom(item=component, raw_materials=[rm_item], currency="INR")
+		bundle_item = make_item("_Test PP Bundle Twice", {"is_stock_item": 0}).name
+		bundle = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle_item})
+		bundle.append("items", {"item_code": component, "qty": 2})
+		bundle.append("items", {"item_code": component, "qty": 3})
+		bundle.insert().submit()
+		sales_order = make_sales_order(item_code=bundle_item, qty=10)
+
+		first_plan = make_plan_from_sales_orders([sales_order])
+		first_plan.set("po_items", [row for row in first_plan.po_items if row.planned_qty == 20])
+		first_plan.submit()
+		bundle_line = sales_order.items[0].name
+		self.assertEqual(frappe.db.get_value("Sales Order Item", bundle_line, "production_plan_qty"), 4)
+
+		second_plan = make_plan_from_sales_orders([sales_order])
+		self.assertEqual(sum(row.planned_qty for row in second_plan.po_items), 30)
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
