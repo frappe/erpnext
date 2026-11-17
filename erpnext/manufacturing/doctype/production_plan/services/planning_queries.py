@@ -165,6 +165,19 @@ def set_default_warehouses(row, default_warehouses):
 			row[field] = default_warehouses.get(field)
 
 
+def is_so_item_open_to_plan(so_item):
+	"""Sales Order Item has stock qty not yet planned or delivered from stock."""
+	delivered_from_stock = so_item.delivered_qty * so_item.conversion_factor - so_item.produced_qty
+	return (so_item.stock_qty > so_item.production_plan_qty) & (
+		so_item.stock_qty > so_item.production_plan_qty + delivered_from_stock
+	)
+
+
+def get_so_item_delivered_from_stock(so_item):
+	"""Delivered stock qty of a Sales Order Item that its Work Orders did not produce."""
+	return max(flt(so_item.delivered_qty) * flt(so_item.conversion_factor) - flt(so_item.produced_qty), 0)
+
+
 def get_sales_orders(self):
 	bom = frappe.qb.DocType("BOM")
 	so = frappe.qb.DocType("Sales Order")
@@ -210,7 +223,7 @@ def _open_so_base_query(plan, so, so_item):
 			& (so_item.closed == 0)
 			& (so.status.notin(["Stopped", "Closed"]))
 			& (so.company == plan.company)
-			& (so_item.stock_qty > so_item.production_plan_qty)
+			& is_so_item_open_to_plan(so_item)
 		)
 	)
 

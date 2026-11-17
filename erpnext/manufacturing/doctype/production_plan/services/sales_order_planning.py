@@ -12,6 +12,8 @@ from pypika.terms import ExistsCriterion
 from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
 	get_item_or_template_bom_query,
 	get_sales_orders,
+	get_so_item_delivered_from_stock,
+	is_so_item_open_to_plan,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 
@@ -308,6 +310,7 @@ def _so_item_columns(so_item):
 		so_item.stock_qty,
 		so_item.production_plan_qty,
 		so_item.delivered_qty,
+		so_item.produced_qty,
 		so_item.conversion_factor,
 		so_item.description,
 		so_item.name,
@@ -321,7 +324,7 @@ def _so_items_filter(so_item, so_list):
 		& (so_item.docstatus == 1)
 		& (so_item.closed == 0)
 		& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
-		& (so_item.stock_qty > so_item.production_plan_qty)
+		& is_so_item_open_to_plan(so_item)
 	)
 
 
@@ -361,9 +364,10 @@ def _set_so_item_pending_qty(items):
 			item.reserved_work_order_output_qty
 		)
 		pending_qty = flt(item.qty) - max(item.work_order_qty, delivered_or_reserved_qty, 0)
-		item.pending_qty = flt(
-			min(pending_qty, flt(item.stock_qty) - flt(item.production_plan_qty)), precision
+		unplanned_qty = (
+			flt(item.stock_qty) - flt(item.production_plan_qty) - get_so_item_delivered_from_stock(item)
 		)
+		item.pending_qty = flt(min(pending_qty, unplanned_qty), precision)
 
 
 def _so_packed_columns(so_item, pi):
