@@ -98,29 +98,15 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		rm_item = "Basic RM"
 
 		# Receipt 1: 5 Qty @ Unit Cost 10
-		rm_in_1 = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in_1.items = [item for item in rm_in_1.items if item.item_code == rm_item]
-		rm_in_1.items[0].qty = 5
-		rm_in_1.items[0].basic_rate = 10
-		rm_in_1.items[0].transfer_qty = 5
-		rm_in_1.submit()
-
-		scio.reload()
+		receive_customer_material(scio, rm_item, 5, 10)
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertEqual(received_item.rate, 10)
 
 		# Receipt 2: 5 Qty @ Unit Cost 20
-		rm_in_2 = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in_2.items = [item for item in rm_in_2.items if item.item_code == rm_item]
-		rm_in_2.items[0].qty = 5
-		rm_in_2.items[0].basic_rate = 20
-		rm_in_2.items[0].transfer_qty = 5
-		rm_in_2.save()
-		rm_in_2.submit()
+		rm_in_2 = receive_customer_material(scio, rm_item, 5, 20)
 
 		# Check 2: Rate should be Weighted Average
 		# (5 * 10 + 5 * 20) / 10 = 150 / 10 = 15
-		scio.reload()
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertEqual(received_item.rate, 15)
 
@@ -142,17 +128,8 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		so, scio = create_so_scio()
 		rm_item = "Basic RM"
 
-		def receive(qty, rate):
-			rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-			rm_in.items = [item for item in rm_in.items if item.item_code == rm_item]
-			rm_in.items[0].qty = qty
-			rm_in.items[0].transfer_qty = qty
-			rm_in.items[0].basic_rate = rate
-			rm_in.submit()
-			scio.reload()
-
 		# Receipt 1: 10 @ 100
-		receive(10, 100)
+		receive_customer_material(scio, rm_item, 10, 100)
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertEqual(received_item.rate, 100)
 
@@ -168,7 +145,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual(received_item.returned_qty, 5)
 
 		# Receipt 2: 6 @ 130 — must weight against the balance of 5, not gross 10
-		receive(6, 130)
+		receive_customer_material(scio, rm_item, 6, 130)
 		received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
 		self.assertAlmostEqual(received_item.rate, (5 * 100 + 6 * 130) / 11, places=2)
 
@@ -1795,6 +1772,28 @@ def receive_batch_twice(scio, first_qty=3):
 
 	scio.reload()
 	return batch_no, batch_row
+
+
+def receive_customer_material(scio, rm_item, qty, rate):
+	"""Receive the material at the rate, also beyond its required qty."""
+	received_item = next(item for item in scio.received_items if item.rm_item_code == rm_item)
+	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+	rm_in.items = []
+	rm_in.append(
+		"items",
+		{
+			"scio_detail": received_item.name,
+			"item_code": rm_item,
+			"qty": qty,
+			"transfer_qty": qty,
+			"basic_rate": rate,
+			"t_warehouse": received_item.warehouse,
+			"stock_uom": received_item.stock_uom,
+		},
+	)
+	rm_in.submit()
+	scio.reload()
+	return rm_in
 
 
 def create_so_scio(service_item="Service Item 1", fg_item="Basic FG Item"):
