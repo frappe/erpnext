@@ -100,6 +100,9 @@ class BuyingController(SubcontractingController):
 	def create_package_for_transfer(self) -> None:
 		"""Create serial and batch package for Sourece Warehouse in case of inter transfer."""
 
+		if self.get("is_return"):
+			return
+
 		if self.is_internal_transfer() and (
 			self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock)
 		):
