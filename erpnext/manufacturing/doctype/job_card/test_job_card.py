@@ -4880,6 +4880,44 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(str(wo.operations[0].planned_start_time), "2031-03-03 08:00:00")
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_batch_operation_spans_job_cards_scheduled_out_of_order(self):
+		workstation = make_jc_review_workstation()
+		make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[
+				{
+					"operation": make_jc_review_operation(workstation),
+					"workstation": workstation,
+					"time_in_mins": 3,
+				}
+			],
+			planned_start_date="2031-03-03 08:30:00",
+		)
+		operation = make_jc_review_operation(workstation, create_job_card_based_on_batch_size=1, batch_size=5)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 50, "batch_size": 5}],
+			qty=11,
+			planned_start_date="2031-03-03 08:00:00",
+		)
+
+		# the 10 minute card for the last unit fits before the 08:30 booking
+		self.assertEqual(
+			[str(job_card.expected_start_date) for job_card in get_jc_review_job_cards(wo.name)],
+			["2031-03-03 09:10:00", "2031-03-03 10:10:00", "2031-03-03 08:00:00"],
+		)
+		wo.reload()
+		self.assertEqual(
+			(str(wo.operations[0].planned_start_time), str(wo.operations[0].planned_end_time)),
+			("2031-03-03 08:00:00", "2031-03-03 11:00:00"),
+		)
+		self.assertEqual(str(wo.planned_end_date), "2031-03-03 11:00:00")
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 0, "mins_between_operations": 10, "allow_overtime": 0},
 	)
