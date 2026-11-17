@@ -1106,9 +1106,15 @@ class SubcontractingReceipt(SubcontractingController):
 						"target_field": "returned_qty",
 						"target_parent_dt": "Subcontracting Receipt",
 						"target_parent_field": "per_returned",
-						"target_ref_field": "received_qty",
+						# a return sends back no process loss
+						"target_ref_field": {
+							"SUB": ["received_qty", "process_loss_qty"],
+							"as": "returnable_qty",
+						},
 						"source_field": "-1 * received_qty",
 						"percent_join_field_parent": "return_against",
+						# validate_return checks over-returns
+						"validate_qty": False,
 					},
 				]
 			)
