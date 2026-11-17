@@ -1992,6 +1992,26 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		self.assertEqual((service_item.qty, service_item.uom, service_item.amount), (2, "Box", 1000))
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "subcontracted_qty"), 20)
 
+	def test_service_item_with_an_uneven_fg_ratio_is_fully_subcontracted(self):
+		item_list = [
+			{
+				"item_code": "Service Item 1",
+				"qty": 1,
+				"uom": "Box",
+				"conversion_factor": 10,
+				"fg_item": "Basic FG Item",
+				"fg_item_qty": 3,
+			}
+		]
+		so = make_sales_order(is_subcontracted=1, item_list=item_list)
+		scio = make_subcontracting_inward_order(so.name)
+		scio.items[0].delivery_warehouse = "_Test Warehouse - _TC"
+		scio.save()
+		scio.reload()
+		scio.submit()
+
+		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[0].name, "subcontracted_qty"), 10)
+
 	def test_receipt_cancel_keeps_other_receipt_reservation(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_qty_details_for_voucher,
