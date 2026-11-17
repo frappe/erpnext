@@ -1622,7 +1622,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		)
 
 		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
 		update_subcontracting_inward_order_status(scio.name, "Closed")
 
 		update_status("On Hold", so.name)
@@ -1637,7 +1636,6 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		)
 
 		so, scio = create_so_scio()
-		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
 		update_subcontracting_inward_order_status(scio.name, "Closed")
 
 		update_status("Closed", so.name)
