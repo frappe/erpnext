@@ -4,14 +4,16 @@ from frappe.query_builder import Case, DocType
 from frappe.query_builder.functions import Coalesce, Count, Sum
 from frappe.utils import add_days, add_months, cint, date_diff, flt, getdate, today
 
-from erpnext.accounts.party import get_partywise_advanced_payment_amount
 from erpnext.selling.doctype.customer.customer_overview import (
 	PERIODS,
 	_unrestricted_read,
 	ageing,
+	late_summary,
+	party_companies,
 	pct_change,
 	permitted,
 	resolve_period,
+	unallocated_credit,
 )
 from erpnext.stock.doctype.purchase_receipt.services.billing_status import get_invoiced_qty_against_po_items
 
@@ -65,7 +67,6 @@ def get_supplier_payables(supplier: str, company: str):
 
 	as_of = getdate(today())
 	ap = payables(supplier, company, as_of)
-	overdue_prev = payables(supplier, company, add_days(as_of, -30))["overdue"]
 	return {
 		"currency": frappe.get_cached_value("Company", company, "default_currency"),
 		"outstanding": {
@@ -73,12 +74,8 @@ def get_supplier_payables(supplier: str, company: str):
 			"unpaid_count": unpaid_bills(supplier, company),
 			"days_to_pay": payment_days(supplier, company, as_of, ap["outstanding"]),
 		},
-		"overdue": {
-			"value": ap["overdue"],
-			"delta": pct_change(ap["overdue"], overdue_prev),
-			"delta_positive_is_good": False,
-		},
-		"advances": {"value": advances(supplier, company, as_of)},
+		"overdue": {"value": ap["overdue"], **ap["late"]},
+		"advances": {"value": ap["advance"]},
 		"ageing": ageing(ap),
 	}
 
@@ -438,6 +435,8 @@ def payables(supplier, company, report_date):
 	return {
 		"outstanding": outstanding,
 		"overdue": total["total_due"],
+		"late": late_summary(owed),
+		"advance": unallocated_credit(data),
 		"buckets": [
 			{"label": _("Not due"), "value": outstanding - total["total_due"], "overdue": False},
 			{"label": _("0–30 days"), "value": total["range1"], "overdue": True},
@@ -488,16 +487,6 @@ def payment_days(supplier, company, as_of, outstanding):
 		return None
 	days = round(outstanding / (trailing / history))
 	return days if days <= 730 else None
-
-
-def advances(supplier, company, as_of):
-	if not _unrestricted_read("Payment Ledger Entry"):
-		return None
-	return flt(
-		get_partywise_advanced_payment_amount(["Supplier"], as_of, company=company, party=supplier).get(
-			supplier
-		)
-	)
 
 
 TRANSACTION_TYPES = ("Purchase Invoice", "Purchase Order", "Purchase Receipt", "Payment Entry")
@@ -560,18 +549,13 @@ def invoice_outstanding(row, currency):
 def get_supplier_companies(supplier: str):
 	check_access(supplier)
 
-	companies = set()
-	for doctype, filters in (
-		("Purchase Invoice", {"supplier": supplier}),
-		("Purchase Order", {"supplier": supplier}),
-		("Purchase Receipt", {"supplier": supplier}),
-		("Supplier Quotation", {"supplier": supplier}),
-		("Payment Entry", {"party_type": "Supplier", "party": supplier}),
-		("GL Entry", {"party_type": "Supplier", "party": supplier, "is_cancelled": 0}),
-	):
-		if frappe.has_permission(doctype, "read"):
-			companies.update(
-				frappe.get_list(doctype, filters={**filters, "docstatus": 1}, distinct=True, pluck="company")
-			)
-	companies.discard(None)
-	return sorted(companies)
+	return party_companies(
+		(
+			("Purchase Invoice", {"supplier": supplier}),
+			("Purchase Order", {"supplier": supplier}),
+			("Purchase Receipt", {"supplier": supplier}),
+			("Supplier Quotation", {"supplier": supplier}),
+			("Payment Entry", {"party_type": "Supplier", "party": supplier}),
+			("GL Entry", {"party_type": "Supplier", "party": supplier, "is_cancelled": 0}),
+		)
+	)
