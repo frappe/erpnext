@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import (
+	get_print_format_list,
 	get_subscription_details,
 	make_payment_request,
 )
@@ -1647,6 +1648,31 @@ class TestPaymentRequest(ERPNextTestSuite):
 
 		with as_user(sales_user):
 			self.assertRaises(frappe.PermissionError, make_payment_request, dt="Sales Order", dn=so.name)
+
+	def test_print_format_list_follows_print_format_permissions(self):
+		print_format = frappe.get_doc(
+			{
+				"doctype": "Print Format",
+				"name": "_Test Payment Request Print Format",
+				"doc_type": "Sales Invoice",
+				"standard": "No",
+				"custom_format": 1,
+				"print_format_type": "Jinja",
+				"html": "<p>{{ doc.name }}</p>",
+			}
+		).insert()
+		# Accounts User has no Print Format role of its own, only select through Desk User
+		accounts_user = make_fenced_user("_test_pr_accounts_user@example.com", ["Accounts User"])
+		portal_user = make_portal_user("_test_portal_payer@example.com", "_Test Customer")
+
+		with as_user(accounts_user):
+			print_formats = get_print_format_list("Sales Invoice")["print_format"]
+		self.assertEqual(print_formats[0], "Standard")
+		self.assertIn(print_format.name, print_formats)
+
+		for user in (portal_user, "Guest"):
+			with self.subTest(user=user), as_user(user):
+				self.assertRaises(frappe.PermissionError, get_print_format_list, "Sales Invoice")
 
 	def test_schedule_payment_request_counts_existing_payment_requests(self):
 		si = create_sales_invoice(qty=1, rate=1000)
