@@ -581,7 +581,8 @@ class SubcontractingInwardController:
 				)
 				max_allowed_qty = query.run(pluck="max_allowed_qty")[0]
 
-			if qty_by_row[item.scio_detail] > max_allowed_qty:
+			precision = item.precision("transfer_qty")
+			if flt(qty_by_row[item.scio_detail], precision) > flt(max_allowed_qty, precision):
 				frappe.throw(
 					_(
 						"Row #{0}: Quantity of Item {1} cannot be more than {2} {3} against Subcontracting Inward Order {4}"
