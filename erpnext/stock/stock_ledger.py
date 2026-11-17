@@ -2519,9 +2519,11 @@ def get_valuation_rate(
 				& (table.warehouse == warehouse)
 				& (table.batch_no == batch_no)
 				& (table.is_cancelled == 0)
-				& ((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
 			)
 		)
+		if voucher_no:
+			query = query.where((table.voucher_no != voucher_no) | (table.voucher_type != voucher_type))
+
 		if posting_datetime:
 			query = query.where(get_prior_ledger_condition(table, posting_datetime, creation))
 
@@ -2561,12 +2563,16 @@ def get_valuation_rate(
 			& (sle_entry.warehouse == warehouse)
 			& (sle_entry.valuation_rate >= 0)
 			& (sle_entry.is_cancelled == 0)
-			& ~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
 		)
 		.orderby(sle_entry.posting_datetime, order=Order.desc)
 		.orderby(sle_entry.creation, order=Order.desc)
 		.limit(1)
 	)
+	if voucher_no:
+		last_sle_query = last_sle_query.where(
+			~((sle_entry.voucher_no == voucher_no) & (sle_entry.voucher_type == voucher_type))
+		)
+
 	if posting_datetime:
 		last_sle_query = last_sle_query.where(
 			get_prior_ledger_condition(sle_entry, posting_datetime, creation)
