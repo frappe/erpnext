@@ -255,7 +255,15 @@ class BaseGLComposer:
 
 		return self._book_stock_expense_enabled
 
+	def append_expenses_added_to_stock_for_landed_cost(self, gl_list, item):
+		"""Book the landed cost, which the purchase expense pair leaves out."""
+		if self.book_stock_expense_enabled():
+			amount = flt(item.landed_cost_voucher_amount, item.precision("base_net_amount"))
+			self.append_expenses_added_to_stock_pair(gl_list, item.item_code, amount, item)
+
 	def append_expenses_added_to_stock_pair(self, gl_list, item_code, amount, item_row):
+		from erpnext.stock.services.base_stock_gl_composer import get_expenses_added_to_stock_accounts
+
 		# A service item holds no stock value, so there is nothing to book against it - and it must
 		# not make the expense accounts mandatory either. A zero pair would be rejected by GL Entry
 		# anyway, which needs a debit or a credit on every row.
@@ -264,8 +272,6 @@ class BaseGLComposer:
 
 		doc = self.doc
 		fields = ("expenses_added_to_stock_account", "expenses_added_to_stock_contra_account")
-		from erpnext.stock.services.base_stock_gl_composer import get_expenses_added_to_stock_accounts
-
 		details = get_expenses_added_to_stock_accounts(item_code, doc.company)
 
 		for field in fields:
