@@ -1132,6 +1132,25 @@ class TestMaterialRequest(ERPNextTestSuite):
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(mr.status, "Ordered")
 
+	def test_request_saved_before_stock_uom_qty_was_editable_is_fully_ordered(self):
+		"""A row saved with the setting off keeps its unrounded stock qty: 1 Box is 0.333333333 Kg."""
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			properties={"stock_uom": "Kg", "uoms": [{"uom": "Box", "conversion_factor": 0.333333333}]}
+		).name
+		mr = make_material_request(item_code=item, qty=1, uom="Box", conversion_factor=0.333333333)
+
+		with self.change_settings("Stock Settings", {"allow_to_edit_stock_uom_qty_for_purchase": 1}):
+			po = make_purchase_order(mr.name)
+			po.supplier = "_Test Supplier"
+			po.submit()
+
+		mr.reload()
+		self.assertEqual(mr.items[0].ordered_qty, mr.items[0].stock_qty)
+		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(mr.status, "Ordered")
+
 	def test_customer_provided_received_status(self):
 		create_item("CUST-0989", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 
