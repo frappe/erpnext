@@ -3394,11 +3394,20 @@ def set_pending_discount_loss(pe, doc, discount_amount, base_total_discount_loss
 		# Otherwise it will be the total discount loss.
 		book_tax_loss = frappe.get_single_value("Accounts Settings", "book_tax_discount_loss")
 		account_type = "round_off_account" if book_tax_loss else "default_discount_account"
+		account = frappe.get_cached_value("Company", pe.company, account_type)
+
+		if not account:
+			label = frappe.get_meta("Company").get_translated_label(account_type)
+			frappe.throw(
+				_("Please set {0} in Company {1}").format(
+					frappe.bold(label), get_link_to_form("Company", pe.company)
+				)
+			)
 
 		pe.append(
 			"deductions",
 			{
-				"account": frappe.get_cached_value("Company", pe.company, account_type),
+				"account": account,
 				"cost_center": pe.cost_center
 				or frappe.get_cached_value("Company", pe.company, "cost_center"),
 				"amount": discount_amount * positive_negative,
