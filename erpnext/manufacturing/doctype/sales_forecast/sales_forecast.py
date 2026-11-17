@@ -5,7 +5,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_to_date, cint, formatdate, getdate
+from frappe.utils import add_days, add_months, add_to_date, cint, formatdate, getdate
 
 
 class SalesForecast(Document):
@@ -145,6 +145,15 @@ class SalesForecast(Document):
 	def generate_demand(self):
 		self.set("items", [])
 		self.generate_manual_demand()
+
+
+def get_forecast_period(row):
+	"""Return the start date of a forecast row and the day after its period ends."""
+	start_date = getdate(row.delivery_date)
+	if row.frequency == "Monthly":
+		return start_date, add_months(start_date, 1)
+
+	return start_date, add_days(start_date, 7)
 
 
 @frappe.whitelist()

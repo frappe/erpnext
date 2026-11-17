@@ -21,6 +21,7 @@ from frappe.utils import (
 )
 
 from erpnext.accounts.report.utils import get_filter_values, validate_date_range
+from erpnext.manufacturing.doctype.sales_forecast.sales_forecast import get_forecast_period
 from erpnext.manufacturing.scheduling.plan_adapter import get_material_lead_days, get_supplier_lead_times
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -1438,15 +1439,6 @@ def convert_to_daily_bucket_data(data):
 			)
 
 	return bucketed_data
-
-
-def get_forecast_period(row):
-	"""Return the start date of a forecast row and the day after its period ends."""
-	start_date = getdate(row.delivery_date)
-	if row.frequency == "Monthly":
-		return start_date, add_months(start_date, 1)
-
-	return start_date, add_days(start_date, 7)
 
 
 @frappe.request_cache
