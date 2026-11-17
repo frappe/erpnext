@@ -13,6 +13,7 @@ from frappe.utils import flt, getdate
 from erpnext import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
+from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
 
@@ -133,7 +134,11 @@ class BlanketOrder(Document):
 			)
 
 		party = self.get(blanket_order_pricing.get_order_type_config(order_type)["party_field"])
-		if party != order_doc.get(order_party_field):
+		order_party = order_doc.get(order_party_field)
+		if order_doc.doctype == "Quotation":
+			order_party = get_existing_customer_name(order_doc.quotation_to, order_party)
+
+		if party != order_party:
 			frappe.throw(
 				_("Blanket Order {0} is for {1}, not {2}").format(
 					frappe.bold(self.name),
