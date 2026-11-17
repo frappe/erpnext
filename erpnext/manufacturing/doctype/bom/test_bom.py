@@ -431,8 +431,9 @@ class TestBOM(ERPNextTestSuite):
 		for row in bom.items:
 			raw_material_cost += row.amount
 
-		base_raw_material_cost = raw_material_cost * flt(
-			bom.conversion_rate, bom.precision("conversion_rate")
+		base_raw_material_cost = flt(
+			raw_material_cost * flt(bom.conversion_rate, bom.precision("conversion_rate")),
+			bom.precision("base_raw_material_cost"),
 		)
 		base_op_cost = op_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
 
