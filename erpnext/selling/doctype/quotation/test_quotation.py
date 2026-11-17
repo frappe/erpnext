@@ -9,21 +9,14 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-<<<<<<< HEAD
 from erpnext.selling.doctype.quotation.quotation import make_sales_order
-from erpnext.setup.utils import get_exchange_rate
-
-test_dependencies = ["Product Bundle"]
-=======
-from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
-from erpnext.selling.doctype.quotation.mapper import make_revision, make_sales_invoice, make_sales_order
-from erpnext.selling.doctype.quotation.quotation import get_open_count
 from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
 	patched_requests_get,
 	test_exchange_values,
 )
-from erpnext.tests.utils import ERPNextTestSuite
->>>>>>> cba412c (test(quotation): stub the provider instead of seeding the rate cache)
+from erpnext.setup.utils import get_exchange_rate
+
+test_dependencies = ["Product Bundle"]
 
 
 class TestQuotation(FrappeTestCase):
@@ -1172,20 +1165,10 @@ class TestQuotation(FrappeTestCase):
 		quotation.reload()
 		self.assertEqual(quotation.status, "Ordered")
 
-<<<<<<< HEAD
 	@change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
-	def test_make_quotation_qar_to_inr(self):
-		# QAR is pegged to USD, so the USD to INR rate is fetched and divided by the peg.
-		# Seed the fetched rate so the test does not depend on the live provider.
-		usd_to_inr = 88.0
-		frappe.cache().set_value("currency_exchange_rate_2026-01-01:QAR:INR", usd_to_inr)
-
-=======
-	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
 	@patch("requests.get", side_effect=patched_requests_get)
 	def test_make_quotation_qar_to_inr(self, mock_get):
 		# QAR is pegged to USD, so the USD to INR rate is fetched and divided by the peg
->>>>>>> cba412c (test(quotation): stub the provider instead of seeding the rate cache)
 		quotation = make_quotation(
 			currency="QAR",
 			transaction_date="2016-01-15",
