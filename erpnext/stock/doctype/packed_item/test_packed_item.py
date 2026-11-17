@@ -658,3 +658,21 @@ class TestPackedItem(ERPNextTestSuite):
 
 		self.assertEqual(so.items[0].rate, 120)
 		self.assertEqual(so.items[0].amount, 120)
+
+	def test_return_keeps_bundle_rate_of_original(self):
+		"""A return credits its original's bundle rate, not one rebuilt from component rates."""
+		from erpnext.stock.doctype.delivery_note.mapper import make_sales_return
+
+		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=1, rate=100)
+		dn = make_delivery_note(so.name)
+		dn.save()
+		for row in dn.packed_items:
+			row.rate = 10
+		dn.save()
+		dn.submit()
+
+		with self.change_settings("Selling Settings", {"editable_bundle_item_rates": 1}):
+			dn_ret = make_sales_return(dn.name)
+			dn_ret.save()
+
+		self.assertEqual(dn_ret.items[0].rate, 100)
