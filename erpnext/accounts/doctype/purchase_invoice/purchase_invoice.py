@@ -1944,6 +1944,9 @@ class PurchaseInvoice(BuyingController):
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
+		if self.is_return and self.is_internal_supplier:
+			# cancelling a return gives its qty back to the invoice it returned
+			self.validate_internal_transfer_qty()
 
 		super().on_cancel()
 
