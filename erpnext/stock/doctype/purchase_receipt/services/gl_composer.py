@@ -144,8 +144,11 @@ class PurchaseReceiptGLComposer(BaseStockGLComposer):
 						and doc.conversion_rate != exchange_rate_map[item.purchase_invoice]
 						and item.net_rate == net_rate_map[item.purchase_invoice_item]
 					):
-						discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * (
-							exchange_rate_map[item.purchase_invoice] - doc.conversion_rate
+						discrepancy_caused_by_exchange_rate_difference = flt(
+							item.qty
+							* item.net_rate
+							* (exchange_rate_map[item.purchase_invoice] - doc.conversion_rate),
+							item.precision("base_net_amount"),
 						)
 
 						self.add_gl_entry(
