@@ -152,3 +152,30 @@ class TestStockProjectedQty(ERPNextTestSuite):
 		row = dict(zip([column["fieldname"] for column in columns], data[0], strict=False))
 
 		self.assertEqual((row["actual_qty"], row["actual_qty_box"]), (24, None))
+
+	def test_variant_without_reorder_levels_shows_its_templates(self):
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		template = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_variants": 1,
+				"attributes": [{"attribute": "Test Size"}],
+				"reorder_levels": [
+					{
+						"warehouse": WAREHOUSE,
+						"warehouse_reorder_level": 20,
+						"warehouse_reorder_qty": 50,
+						"material_request_type": "Purchase",
+					}
+				],
+			}
+		).name
+		variant = create_variant(template, {"Test Size": "Large"})
+		variant.reorder_levels = []
+		variant.insert()
+		make_stock_entry(item_code=variant.name, qty=5, to_warehouse=WAREHOUSE, basic_rate=100)
+
+		row = self.run_report(variant.name, warehouse=WAREHOUSE)[0]
+		self.assertEqual((row["re_order_level"], row["re_order_qty"], row["shortage_qty"]), (20, 50, 15))
