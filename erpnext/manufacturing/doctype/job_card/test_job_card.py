@@ -4921,26 +4921,43 @@ class TestJobCard(ERPNextTestSuite):
 		"Manufacturing Settings",
 		{"disable_capacity_planning": 0, "mins_between_operations": 10, "allow_overtime": 0},
 	)
-	def test_fixed_time_job_card_ends_with_its_working_hours(self):
-		# Expected Time Required is 60 / 29 * 29 = 60.00000000000001
-		workstation = frappe.get_doc("Workstation", make_jc_review_workstation())
-		workstation.append("working_hours", {"start_time": "08:00:00", "end_time": "09:00:00"})
-		workstation.append("working_hours", {"start_time": "10:00:00", "end_time": "12:00:00"})
-		workstation.save()
-		operation = make_jc_review_operation(workstation.name)
-		wo = make_jc_review_work_order(
-			make_jc_review_item(),
-			[{"item_code": make_jc_review_item(), "qty": 1}],
-			[{"operation": operation, "workstation": workstation.name, "time_in_mins": 60, "fixed_time": 1}],
-			qty=29,
-			planned_start_date="2031-03-03 08:00:00",
-		)
+	def test_float_noise_does_not_book_another_working_hour_slot(self):
+		for time_in_mins, qty, start, expected in [
+			# 60 / 29 * 29 is 60.00000000000001
+			(60, 29, "2031-03-03 11:00:00", [("2031-03-03 11:00:00", "2031-03-03 12:00:00")]),
+			# 256.1 - 16.1 - 240 leaves 2.8e-14 minutes
+			(
+				256.1,
+				1,
+				"2031-03-03 11:43:54",
+				[
+					("2031-03-03 11:43:54", "2031-03-03 12:00:00"),
+					("2031-03-03 13:00:00", "2031-03-03 17:00:00"),
+				],
+			),
+		]:
+			workstation = frappe.get_doc("Workstation", make_jc_review_workstation())
+			workstation.append("working_hours", {"start_time": "08:00:00", "end_time": "12:00:00"})
+			workstation.append("working_hours", {"start_time": "13:00:00", "end_time": "17:00:00"})
+			workstation.save()
+			operation = {
+				"operation": make_jc_review_operation(workstation.name),
+				"workstation": workstation.name,
+				"time_in_mins": time_in_mins,
+				"fixed_time": 1,
+			}
+			wo = make_jc_review_work_order(
+				make_jc_review_item(),
+				[{"item_code": make_jc_review_item(), "qty": 1}],
+				[operation],
+				qty=qty,
+				planned_start_date=start,
+			)
 
-		job_card = get_jc_review_job_cards(wo.name)[0]
-		self.assertEqual(
-			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
-			[("2031-03-03 08:00:00", "2031-03-03 09:00:00")],
-		)
+			job_card = get_jc_review_job_cards(wo.name)[0]
+			self.assertEqual(
+				[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs], expected
+			)
 
 	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings",
