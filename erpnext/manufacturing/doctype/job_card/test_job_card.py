@@ -1217,6 +1217,21 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(amended.hour_rate, 1400)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_corrective_job_card_rate_follows_a_workstation_change_after_save(self):
+		wo, corrective_job_card = make_jc_review_corrective_job_card_on_new_workstation()
+		corrective_job_card.insert()
+		corrective_job_card.workstation = frappe.db.get_value(
+			"Job Card", corrective_job_card.for_job_card, "workstation"
+		)
+		corrective_job_card.submit()
+
+		self.assertEqual(corrective_job_card.hour_rate, 600)
+		self.assertEqual(frappe.db.get_value("Work Order", wo.name, "corrective_operation_cost"), 600)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):
