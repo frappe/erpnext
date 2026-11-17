@@ -847,17 +847,17 @@ class JobCard(Document):
 		return start_date
 
 	def consume_working_hour_slot(self, row, workstation_end_time):
-		time_in_mins = time_diff_in_minutes(workstation_end_time, row.planned_start_time)
+		planned_end_time = get_datetime(
+			add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		)
 
-		# If remaining time fits in workstation time logs else split hours as per workstation time
-		if time_in_mins > row.remaining_time_in_mins:
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+		# compare datetimes, not float minutes, so float noise cannot spill into the next slot
+		if planned_end_time <= workstation_end_time:
+			row.planned_end_time = planned_end_time
 			row.remaining_time_in_mins = 0
 		else:
-			row.planned_end_time = add_to_date(row.planned_start_time, minutes=time_in_mins)
-			row.remaining_time_in_mins = flt(
-				row.remaining_time_in_mins - time_in_mins, self.precision("time_required")
-			)
+			row.planned_end_time = workstation_end_time
+			row.remaining_time_in_mins -= time_diff_in_minutes(workstation_end_time, row.planned_start_time)
 
 		self.update_time_logs(row)
 
