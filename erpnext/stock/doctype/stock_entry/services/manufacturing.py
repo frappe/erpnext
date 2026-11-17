@@ -802,15 +802,34 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		"""Qty the material left in WIP is for, and the part of it that is ready to manufacture."""
 		# a material is only covered by the entries that consumed it
 		consumed_qty = sum(material.consumed_for.values())
-		if self.wo_doc.transfer_material_against == "Job Card":
-			# the Work Order's transferred qty follows the completed operations, not the moved material;
-			# each operation that uses the material moves its own share for the same finished goods
-			transferred_qty = max(sum(entries.values()) for entries in material.transferred_for.values())
+		if self.wo_doc.transfer_material_against != "Job Card":
 			pending_qty = transferred_qty - consumed_qty
-			return pending_qty, pending_qty
+			return pending_qty, min(pending_qty_to_mfg, pending_qty)
 
-		pending_qty = transferred_qty - consumed_qty
-		return pending_qty, min(pending_qty_to_mfg, pending_qty)
+		# the Work Order's transferred qty follows the completed operations, not the moved material;
+		# material moved in excess is spread over the order qty
+		transferred_for_qty = self.get_material_transferred_for_qty(material)
+		pending_qty = min(transferred_for_qty, max(flt(self.wo_doc.qty), transferred_qty)) - consumed_qty
+		return pending_qty, pending_qty
+
+	def get_material_transferred_for_qty(self, material):
+		"""Finished goods qty the material moved to WIP is for, as its share of the required qty."""
+		item_code = material.original_item or material.item_code
+		required_qty = sum(
+			flt(d.required_qty) for d in self.wo_doc.required_items if d.item_code == item_code
+		)
+		if not required_qty:
+			return flt(self.wo_doc.qty)
+
+		return self.transferred_qty_by_item[item_code] * flt(self.wo_doc.qty) / required_qty
+
+	@cached_property
+	def transferred_qty_by_item(self):
+		qty = defaultdict(float)
+		for row in self._transfer_entries:
+			qty[row.original_item or row.item_code] += flt(row.transfer_qty)
+
+		return qty
 
 	def _append_transfer_based_rm(self, row, pending_qty_to_mfg):
 		item_args = self.get_item_dict(row)
@@ -939,19 +958,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def get_transfer_entries(self):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
-		job_card = frappe.qb.DocType("Job Card")
 
 		return (
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.left_join(job_card)
-			.on(stock_entry.job_card == job_card.name)
-			.select(
-				stock_entry_detail.star,
-				stock_entry.fg_completed_qty.as_("transfer_fg_qty"),
-				job_card.operation_id,
-			)
+			.select(stock_entry_detail.star)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (stock_entry.purpose == "Material Transfer for Manufacture")
@@ -976,14 +988,12 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 					serial_nos=[],
 					batches=defaultdict(float),
 					consumed_for={},
-					transferred_for={},
 				)
 
-			material = self.available_materials[key]
-			material.qty += flt(row.transfer_qty)
-			material.transferred_for.setdefault(row.operation_id, {})[row.parent] = flt(row.transfer_fg_qty)
+			self.available_materials[key].qty += flt(row.transfer_qty)
 
 			if row.serial_and_batch_bundle:
+				material = self.available_materials[key]
 				details = self.get_sabb_details(row.serial_and_batch_bundle)
 				material.serial_nos.extend(details.serial_nos)
 				for batch_no, qty in details.batches.items():
