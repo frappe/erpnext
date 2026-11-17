@@ -42,6 +42,7 @@ RAIL = (
 	"support",
 	"utilities",
 	"assets",
+	"portal",
 	"maintenance",
 	"regional",
 	"erpnext-integrations",
@@ -53,14 +54,14 @@ RAIL = (
 	"edi",
 )
 
-# The two modules whose authored sidebar would hold one row or none, so none is shipped. Their
+# The modules whose authored sidebar would hold one row or none, so none is shipped. Their
 # rail item is a `Module`, which lands on the module page -- a list derived from the module's
 # contents, which is a different list on purpose (frappe/frappe#42357).
 #
-# `Portal` is on desk v1's dock and is deliberately not here: it holds no doctypes at all, so
-# it has neither a sidebar to open nor a module page to land on, and the renderer would find no
-# address and skip the row.
-INDEPENDENT = ("erpnext-integrations", "communication")
+# `Portal` is on desk v1's dock, so it is on the rail (frappe/frappe#47735). It holds no doctypes
+# of its own, so it has no module page to land on yet: the renderer finds no address and skips
+# the row until the module owns a doctype.
+INDEPENDENT = ("erpnext-integrations", "communication", "portal")
 
 # Every other module ships a sidebar, addressed at its `Module Def`. The scrubbed address is
 # both the standard record's name and the key boot files it under, and it is the string the
@@ -102,7 +103,7 @@ class TestERPNextNavigation(IntegrationTestCase):
 		frappe.clear_cache(user=self.user)
 		frappe.set_user(self.user)
 
-	def test_the_rail_is_the_twenty_authored_items(self):
+	def test_the_rail_is_the_twenty_one_authored_items(self):
 		"""As Administrator, who is filtered by nothing, so this is the shipped list itself."""
 		frappe.set_user("Administrator")
 
