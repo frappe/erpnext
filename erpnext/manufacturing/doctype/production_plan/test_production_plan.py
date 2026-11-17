@@ -87,14 +87,14 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_production_plan_mr_creation(self):
 		"Test if MRs are created for unavailable raw materials."
 		pln = create_production_plan(item_code="Test Production Item 1")
-		self.assertTrue(len(pln.mr_items), 2)
+		self.assertEqual(len(pln.mr_items), 2)
 
 		for row in pln.mr_items:
 			row.db_set("schedule_date", add_to_date(nowdate(), days=10))
 
 		pln.make_material_request()
 		pln.reload()
-		self.assertTrue(pln.status, "Material Requested")
+		self.assertEqual(pln.status, "Material Requested")
 
 		material_requests = frappe.get_all(
 			"Material Request Item",
@@ -104,7 +104,7 @@ class TestProductionPlan(ERPNextTestSuite):
 			distinct=True,
 		)
 
-		self.assertTrue(len(material_requests), 2)
+		self.assertEqual(len(material_requests), 2)
 
 		for row in material_requests:
 			mr_schedule_date = getdate(frappe.db.get_value("Material Request", row[0], "schedule_date"))
@@ -123,9 +123,9 @@ class TestProductionPlan(ERPNextTestSuite):
 			"Work Order", fields=["name"], filters={"production_plan": pln.name}, as_list=1
 		)
 
-		self.assertTrue(len(work_orders), len(nwork_orders))
+		self.assertEqual(len(work_orders), len(nwork_orders))
 
-		self.assertTrue(len(work_orders), len(pln.po_items))
+		self.assertEqual(len(work_orders), len(pln.po_items))
 
 		for name in material_requests:
 			mr = frappe.get_doc("Material Request", name[0])
@@ -259,7 +259,7 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		pln = create_production_plan(item_code="Test Production Item 1", ignore_existing_ordered_qty=0)
 		self.assertTrue(len(pln.mr_items))
-		self.assertTrue(flt(pln.mr_items[0].quantity), 1.0)
+		self.assertEqual(flt(pln.mr_items[0].quantity), 1.0)
 
 		sr1.cancel()
 		sr2.cancel()
@@ -335,13 +335,13 @@ class TestProductionPlan(ERPNextTestSuite):
 	def test_production_plan_with_non_stock_item(self):
 		"Test if MR Planning table includes Non Stock RM."
 		pln = create_production_plan(item_code="Test Production Item 1", include_non_stock_items=1)
-		self.assertTrue(len(pln.mr_items), 3)
+		self.assertEqual(len(pln.mr_items), 3)
 		pln.cancel()
 
 	def test_production_plan_without_multi_level(self):
 		"Test MR Planning table for non exploded BOM."
 		pln = create_production_plan(item_code="Test Production Item 1", use_multi_level_bom=0)
-		self.assertTrue(len(pln.mr_items), 2)
+		self.assertEqual(len(pln.mr_items), 2)
 		pln.cancel()
 
 	def test_production_plan_without_multi_level_for_existing_ordered_qty(self):
@@ -408,7 +408,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		wo_doc.submit()
 
 		so_wo_qty = frappe.db.get_value("Sales Order Item", sales_order_item, "work_order_qty")
-		self.assertTrue(so_wo_qty, 5)
+		self.assertEqual(so_wo_qty, 5)
 
 		pln = frappe.new_doc("Production Plan")
 		pln.update(
@@ -574,7 +574,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		pln.get_items()
 		pln.submit()
 
-		self.assertTrue(pln.po_items[0].planned_qty, 3)
+		self.assertEqual(pln.po_items[0].planned_qty, 3)
 
 		pln.make_work_order()
 		work_order = frappe.db.get_value(
@@ -2141,12 +2141,12 @@ class TestProductionPlan(ERPNextTestSuite):
 			},
 		)
 		plan.get_sub_assembly_items()
-		self.assertTrue(len(plan.sub_assembly_items), 2)
+		self.assertEqual(len(plan.sub_assembly_items), 2)
 
 		plan.combine_sub_items = 1
 		plan.get_sub_assembly_items()
 
-		self.assertTrue(len(plan.sub_assembly_items), 1)  # check if sub-assembly items merged
+		self.assertEqual(len(plan.sub_assembly_items), 1)  # check if sub-assembly items merged
 		self.assertEqual(plan.sub_assembly_items[0].qty, 2.0)
 		self.assertEqual(plan.sub_assembly_items[0].stock_qty, 2.0)
 		self.assertEqual(plan.sub_assembly_items[0].required_qty, 2.0)
@@ -2154,7 +2154,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		# change warehouse in one row, sub-assemblies should not merge
 		plan.po_items[0].warehouse = "Finished Goods - _TC"
 		plan.get_sub_assembly_items()
-		self.assertTrue(len(plan.sub_assembly_items), 2)
+		self.assertEqual(len(plan.sub_assembly_items), 2)
 
 	def test_consolidated_subassembly_required_qty_with_projected_stock(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -2206,7 +2206,7 @@ class TestProductionPlan(ERPNextTestSuite):
 		)
 		mr = frappe.get_doc("Material Request", material_request)
 
-		self.assertTrue(mr.material_request_type, "Customer Provided")
+		self.assertEqual(mr.material_request_type, "Customer Provided")
 
 	def test_production_plan_with_multi_level_bom(self):
 		"""
