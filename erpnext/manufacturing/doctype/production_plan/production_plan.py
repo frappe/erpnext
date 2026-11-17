@@ -744,7 +744,21 @@ class ProductionPlan(Document):
 				key = (row.sales_order, row.sales_order_item)
 				planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
 
+		for row in self.get_consolidated_planned_qty():
+			key = (row.sales_order, row.sales_order_item)
+			planned_qty[key] = planned_qty.get(key, 0) + row.qty
+
 		return planned_qty
+
+	def get_consolidated_planned_qty(self):
+		"""Planned qty of consolidated rows allotted to their Sales Order lines, excluding product bundle components."""
+		row_qty = {}
+		for row in self.po_items:
+			if not row.sales_order and row.sales_order_item and not row.product_bundle_item:
+				key = (row.parent, row.sales_order_item)
+				row_qty[key] = row_qty.get(key, 0) + flt(row.planned_qty)
+
+		return [row for row in allocate_reference_qty(self.prod_plan_references, row_qty) if row.qty > 0]
 
 	def on_submit(self):
 		self.update_bin_qty()
