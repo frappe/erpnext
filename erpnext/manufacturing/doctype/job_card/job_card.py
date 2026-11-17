@@ -2,11 +2,6 @@
 # For license information, please see license.txt
 import datetime
 import json
-<<<<<<< HEAD
-from collections import OrderedDict
-=======
-from typing import Any
->>>>>>> 305cc7a (fix(manufacturing): check Workstation Type job cards against the cards on its workstations)
 
 import frappe
 from frappe import _, bold

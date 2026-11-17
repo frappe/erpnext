@@ -5344,8 +5344,6 @@ def make_jc_review_work_order(fg_item, rows, operations, qty=10, bom_quantity=1,
 	return wo
 
 
-<<<<<<< HEAD
-=======
 def make_jc_review_type_workstations(count):
 	from erpnext.manufacturing.doctype.workstation_type.test_workstation_type import (
 		create_workstation_type,
@@ -5380,13 +5378,6 @@ def make_jc_review_scheduled_job_card(planned_start, time_in_mins, workstation=N
 	return get_jc_review_job_cards(wo.name)[0]
 
 
-def make_jc_review_employee():
-	from erpnext.setup.doctype.employee.test_employee import make_employee
-
-	return make_employee(f"jc-review-{frappe.generate_hash(length=8)}@example.com", company="_Test Company")
-
-
->>>>>>> 46e8ec2 (test: Workstation Type job card uses spare workstation capacity)
 def get_jc_review_job_cards(work_order):
 	return [
 		frappe.get_doc("Job Card", name)
