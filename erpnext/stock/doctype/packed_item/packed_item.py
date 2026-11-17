@@ -64,7 +64,14 @@ def make_packing_list(doc):
 		return
 
 	parent_items_price, reset = {}, False
+<<<<<<< HEAD
 	set_price_from_children = frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates")
+=======
+	# a return keeps its original's rates
+	set_price_from_children = not doc.get("return_against") and frappe.get_single_value(
+		"Selling Settings", "editable_bundle_item_rates"
+	)
+>>>>>>> d70a7a5 (fix(selling): keep a return's bundle rate from its original)
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 	order_packed_items = get_order_packed_items(doc)
