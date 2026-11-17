@@ -39,6 +39,7 @@ from erpnext.manufacturing.doctype.production_plan.services.sub_assembly_queries
 	get_raw_materials_of_sub_assembly_items,
 	get_sub_assembly_items,
 )
+from erpnext.manufacturing.scheduling.plan_adapter import get_supplier_lead_times
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -610,16 +611,12 @@ def _set_default_suppliers(mr_items, company):
 
 
 def _get_default_lead_time_suppliers(items):
-	table = frappe.qb.DocType("Item Lead Time Supplier")
-	rows = (
-		frappe.qb.from_(table)
-		.select(table.parent, table.supplier)
-		.where(
-			table.parent.isin(list(items)) & (table.parenttype == "Item Lead Time") & (table.is_default == 1)
-		)
-		.run(as_dict=True)
-	)
-	return {row.parent: row.supplier for row in rows}
+	return {
+		item_code: row.supplier
+		for item_code, rows in get_supplier_lead_times(items).items()
+		for row in rows.values()
+		if row.is_default
+	}
 
 
 def _get_item_default_suppliers(items, company):

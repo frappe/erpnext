@@ -178,17 +178,20 @@ def get_supplier_lead_times(item_codes):
 	if not item_codes:
 		return {}
 
+	lead_time = frappe.qb.DocType("Item Lead Time")
 	table = frappe.qb.DocType("Item Lead Time Supplier")
 	rows = (
 		frappe.qb.from_(table)
-		.select(table.parent, table.supplier, table.purchase_time, table.buffer_time, table.is_default)
-		.where(table.parent.isin(list(item_codes)) & (table.parenttype == "Item Lead Time"))
+		.join(lead_time)
+		.on(lead_time.name == table.parent)
+		.select(lead_time.item_code, table.supplier, table.purchase_time, table.buffer_time, table.is_default)
+		.where(lead_time.item_code.isin(list(item_codes)) & (table.parenttype == "Item Lead Time"))
 		.run(as_dict=True)
 	)
 
 	grouped = defaultdict(dict)
 	for row in rows:
-		grouped[row.parent][row.supplier] = row
+		grouped[row.item_code][row.supplier] = row
 	return dict(grouped)
 
 
