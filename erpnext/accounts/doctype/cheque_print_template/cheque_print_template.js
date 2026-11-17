@@ -11,8 +11,10 @@ frappe.ui.form.on("Cheque Print Template", {
 					frm.doc.has_print_format ? __("Update Print Format") : __("Create Print Format"),
 					function () {
 						erpnext.cheque_print.view_cheque_print(frm);
-					}
-				).addClass("btn-primary");
+					},
+					null,
+					"primary"
+				);
 			}
 
 			$(frm.fields_dict.cheque_print_preview.wrapper).empty();

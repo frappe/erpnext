@@ -1050,14 +1050,14 @@ erpnext.work_order = {
 							precision("qty")
 						);
 						if (remaining_qty > 0) {
-							let finish_btn = frm.add_custom_button(__("Finish"), function () {
-								erpnext.work_order.make_se(frm, "Manufacture");
-							});
-
-							if (doc.material_transferred_for_manufacturing >= doc.qty) {
-								// all materials transferred for manufacturing, make this primary
-								finish_btn.addClass("btn-primary");
-							}
+							frm.add_custom_button(
+								__("Finish"),
+								function () {
+									erpnext.work_order.make_se(frm, "Manufacture");
+								},
+								null,
+								doc.material_transferred_for_manufacturing >= doc.qty ? "primary" : "default"
+							);
 						} else if (frm.doc.__onload && frm.doc.__onload.overproduction_percentage) {
 							let allowance_percentage = frm.doc.__onload.overproduction_percentage;
 
@@ -1074,10 +1074,14 @@ erpnext.work_order = {
 					}
 				} else {
 					if (flt(doc.produced_qty) < flt(doc.qty)) {
-						let finish_btn = frm.add_custom_button(__("Finish"), function () {
-							erpnext.work_order.make_se(frm, "Manufacture");
-						});
-						finish_btn.addClass("btn-primary");
+						frm.add_custom_button(
+							__("Finish"),
+							function () {
+								erpnext.work_order.make_se(frm, "Manufacture");
+							},
+							null,
+							"primary"
+						);
 					}
 				}
 			}
@@ -1091,10 +1095,14 @@ erpnext.work_order = {
 			return;
 		}
 
-		const start_btn = frm.add_custom_button(__("Start"), () => {
-			erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
-		});
-		start_btn.addClass("btn-primary");
+		frm.add_custom_button(
+			__("Start"),
+			() => {
+				erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
+			},
+			null,
+			"primary"
+		);
 	},
 
 	setup_stock_reservation(frm) {
