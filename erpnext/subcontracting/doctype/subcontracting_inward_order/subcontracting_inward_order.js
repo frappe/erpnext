@@ -153,7 +153,13 @@ frappe.ui.form.on("Subcontracting Inward Order", {
 						__("Receive")
 					);
 				}
-				if (frm.doc.per_produced > 0 && frm.doc.per_delivered < 100) {
+				const has_overproduced_to_deliver =
+					frm.doc.__onload?.allow_delivery_of_overproduced_qty &&
+					frm.doc.items.some((item) => item.produced_qty > item.delivered_qty);
+				if (
+					frm.doc.per_produced > 0 &&
+					(frm.doc.per_delivered < 100 || has_overproduced_to_deliver)
+				) {
 					frm.add_custom_button(
 						__("Subcontracting Delivery"),
 						() => frm.events.make_subcontracting_delivery(frm),
