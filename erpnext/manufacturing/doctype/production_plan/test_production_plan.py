@@ -2474,6 +2474,13 @@ class TestProductionPlan(ERPNextTestSuite):
 		second_plan = make_plan_from_sales_orders([sales_order])
 		self.assertEqual([row.planned_qty for row in second_plan.po_items], [10, 10])
 
+	def test_combined_bundle_components_of_two_orders_submit(self):
+		bundle_item, components = make_manufactured_bundle("_Test PP Bundle Combine")
+		sales_orders = [make_sales_order(item_code=bundle_item, qty=10) for _ in range(2)]
+		plan = make_plan_from_sales_orders(sales_orders, combine_items=1)
+		self.assertEqual([row.planned_qty for row in plan.po_items], [40, 40])
+		plan.submit()
+
 	def test_multiple_work_order_for_production_plan_item(self):
 		"Test producing Prod Plan (making WO) in parts."
 
