@@ -1262,21 +1262,17 @@ class TestQuotation(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Accounts Settings", {"allow_pegged_currencies_exchange_rates": True})
 	def test_make_quotation_qar_to_inr(self):
+		# QAR is pegged to USD, so the USD to INR rate is fetched and divided by the peg.
+		# Seed the fetched rate so the test does not depend on the live provider.
+		usd_to_inr = 88.0
+		frappe.cache().set_value("currency_exchange_rate_2026-01-01:QAR:INR", usd_to_inr)
+
 		quotation = make_quotation(
 			currency="QAR",
 			transaction_date="2026-01-01",
 		)
 
-		cache = frappe.cache()
-		key = "currency_exchange_rate_{}:{}:{}".format("2026-01-01", "QAR", "INR")
-		value = cache.get_value(key)
-		expected_rate = flt(value) / 3.64
-
-		self.assertEqual(
-			quotation.conversion_rate,
-			expected_rate,
-			f"Expected conversion rate {expected_rate}, got {quotation.conversion_rate}",
-		)
+		self.assertEqual(quotation.conversion_rate, usd_to_inr / 3.64)
 
 	def test_over_order_limit(self):
 		quotation = make_quotation(qty=5)
