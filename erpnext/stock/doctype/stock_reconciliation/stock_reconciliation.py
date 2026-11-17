@@ -434,7 +434,7 @@ class StockReconciliation(StockController):
 						}
 					)
 
-				if not item.valuation_rate:
+				if item.valuation_rate in ("", None):
 					item.valuation_rate = item.current_valuation_rate
 				continue
 
