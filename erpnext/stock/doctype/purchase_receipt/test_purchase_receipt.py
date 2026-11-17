@@ -9673,6 +9673,46 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		receipt.submit()
 		return receipt
 
+	def test_receipt_from_invoice_at_another_rate_books_matching_account_currency_amounts(self):
+		"""The exchange difference rows of a receipt made from a foreign currency invoice book the same
+		amounts in an account in the company currency."""
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+			make_purchase_receipt as make_receipt,
+		)
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		pi = make_purchase_invoice(
+			company="_Test Company with perpetual inventory",
+			supplier="_Test Supplier USD",
+			currency="USD",
+			conversion_rate=85.37,
+			qty=3,
+			rate=10.33,
+			warehouse="Stores - TCP1",
+			cost_center="Main - TCP1",
+			expense_account="Stock Received But Not Billed - TCP1",
+			item_code=make_item(properties={"is_stock_item": 1}).name,
+			do_not_save=True,
+		)
+		pi.credit_to = "_Test Payable USD - TCP1"
+		pi.submit()
+
+		pr = frappe.get_doc(make_receipt(pi.name))
+		pr.conversion_rate = 83.11
+		pr.submit()
+
+		gl_entries = frappe.get_all(
+			"GL Entry",
+			{"voucher_no": pr.name, "is_cancelled": 0},
+			["account", "debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
+		self.assertEqual({entry.account: entry.debit for entry in gl_entries}.get(gain_loss_account), 70.04)
+
+		for entry in gl_entries:
+			self.assertEqual(entry.debit, entry.debit_in_account_currency)
+			self.assertEqual(entry.credit, entry.credit_in_account_currency)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
