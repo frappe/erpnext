@@ -2366,6 +2366,7 @@ def get_items_for_material_requests(
 	target_warehouse = doc.get("for_warehouse")
 	scope_warehouse = doc.get("raw_material_group_warehouse") or target_warehouse
 	is_transfer = bool((ignore_existing_ordered_qty or get_parent_warehouse_data) and warehouses)
+	transfer_warehouses = set(warehouses) if is_transfer else set()
 
 	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
@@ -2382,6 +2383,11 @@ def get_items_for_material_requests(
 				shortage_warehouse = row_target_warehouse
 				shortage_bin = _aggregate_bin_details(
 					row for row in bins if row.warehouse == row_target_warehouse
+				)
+			elif is_transfer and not row_scope_warehouse:
+				# no warehouse: availability spans all warehouses, the selected ones included
+				shortage_bin = _aggregate_bin_details(
+					row for row in bins if row.warehouse not in transfer_warehouses
 				)
 
 			if details.qty > 0:
