@@ -5,7 +5,6 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt
 
 from erpnext.manufacturing.doctype.bom.bom import validate_production_bom
@@ -591,8 +590,14 @@ class ProductionPlan(Document):
 			group_by="sales_order, sales_order_item",
 		)
 
-		data += get_planned_qty_of_references(sales_orders)
-		data += get_planned_bundle_qty(sales_orders)
+		bundle_qty = get_planned_bundle_qty(sales_orders)
+		bundle_lines = {row.sales_order_item for row in bundle_qty}
+		data += [
+			row
+			for row in get_planned_qty_of_references(sales_orders)
+			if row.sales_order_item not in bundle_lines
+		]
+		data += bundle_qty
 
 		for row in data:
 			key = (row.sales_order, row.sales_order_item)
@@ -819,10 +824,11 @@ def get_planned_qty_of_references(sales_orders):
 		.where(reference.parent.isin(plans))
 		.orderby(reference.idx)
 	).run(as_dict=True)
-	return allocate_reference_qty(references, get_planned_qty_by_order_row(plans))
+	planned_qty, item_codes = get_planned_qty_by_item_reference(plans)
+	return allocate_reference_qty(references, planned_qty, item_codes)
 
 
-def allocate_reference_qty(references, planned_qty):
+def allocate_reference_qty(references, planned_qty, item_codes=None):
 	"""Split the planned qty of each combined row over its references, in order.
 	Qty above the references goes to the row's own line, its first reference."""
 	allocated = []
@@ -831,7 +837,12 @@ def allocate_reference_qty(references, planned_qty):
 		key = (row.parent, row.item_reference)
 		qty = min(flt(row.qty), max(planned_qty.get(key, 0), 0))
 		planned_qty[key] = planned_qty.get(key, 0) - qty
-		line = frappe._dict(sales_order=row.sales_order, sales_order_item=row.sales_order_item, qty=qty)
+		line = frappe._dict(
+			sales_order=row.sales_order,
+			sales_order_item=row.sales_order_item,
+			item_code=(item_codes or {}).get(key),
+			qty=qty,
+		)
 		allocated.append(line)
 		own_line.setdefault(key, line)
 
@@ -853,13 +864,17 @@ def get_plans_with_references(sales_orders):
 	).run(pluck=True)
 
 
-def get_planned_qty_by_order_row(plans):
-	"""Planned qty of consolidated rows, which have no Sales Order of their own."""
-	plan_item = frappe.qb.DocType("Production Plan Item")
-	rows = (
-		frappe.qb.from_(plan_item)
-		.select(plan_item.parent, plan_item.sales_order_item, Sum(plan_item.planned_qty).as_("qty"))
-		.where(plan_item.parent.isin(plans) & (IfNull(plan_item.sales_order, "") == ""))
-		.groupby(plan_item.parent, plan_item.sales_order_item)
-	).run(as_dict=True)
-	return {(row.parent, row.sales_order_item): flt(row.qty) for row in rows}
+def get_planned_qty_by_item_reference(plans):
+	"""Planned qty and item of the consolidated rows of plans, which have no Sales Order of their own.
+	Older plans point by Sales Order Item."""
+	rows = frappe.get_all(
+		"Production Plan Item",
+		filters={"parent": ("in", plans), "sales_order": ("is", "not set")},
+		fields=["parent", "item_reference", "sales_order_item", "item_code", "planned_qty"],
+	)
+	planned_qty, item_codes = {}, {}
+	for row in rows:
+		key = (row.parent, row.item_reference or row.sales_order_item)
+		planned_qty[key] = planned_qty.get(key, 0) + flt(row.planned_qty)
+		item_codes[key] = row.item_code
+	return planned_qty, item_codes

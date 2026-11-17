@@ -569,9 +569,13 @@ class StatusService:
 	def update_work_order_qty_in_combined_so(self):
 		total_bundle_qty = self._total_bundle_qty()
 		prod_plan = frappe.get_doc("Production Plan", self.doc.production_plan)
-		item_reference = frappe.get_value(
-			"Production Plan Item", self.doc.production_plan_item, "sales_order_item"
+		po_item = frappe.get_value(
+			"Production Plan Item",
+			self.doc.production_plan_item,
+			["item_reference", "sales_order_item"],
+			as_dict=True,
 		)
+		item_reference = po_item.item_reference or po_item.sales_order_item
 
 		work_order = frappe.qb.DocType("Work Order")
 		plan_item = frappe.qb.DocType("Production Plan Item")
