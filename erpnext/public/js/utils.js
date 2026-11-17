@@ -1607,3 +1607,31 @@ erpnext.utils.task_priority_html = function (priority) {
 	const label = frappe.utils.escape_html(__(priority));
 	return `<span class="inline-flex items-center whitespace-nowrap">${icon}<span>${label}</span></span>`;
 };
+
+// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
+erpnext.utils.get_time_logs_seconds = function (time_logs) {
+	const now = frappe.datetime.system_datetime();
+	const intervals = time_logs
+		.filter((d) => d.from_time)
+		.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
+		.sort((a, b) => a[0] - b[0]);
+
+	let seconds = 0;
+	let current_start = null;
+	let current_end = null;
+	intervals.forEach(([start, end]) => {
+		if (current_end && start <= current_end) {
+			current_end = moment.max(current_end, end);
+			return;
+		}
+		if (current_end) {
+			seconds += current_end.diff(current_start, "seconds", true);
+		}
+		[current_start, current_end] = [start, end];
+	});
+
+	if (current_end) {
+		seconds += current_end.diff(current_start, "seconds", true);
+	}
+	return seconds;
+};

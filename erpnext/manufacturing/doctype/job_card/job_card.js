@@ -1012,31 +1012,7 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	get_current_time(frm) {
-		// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
-		const now = frappe.datetime.system_datetime();
-		const intervals = frm.doc.time_logs
-			.filter((d) => d.from_time)
-			.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
-			.sort((a, b) => a[0] - b[0]);
-
-		let current_time = 0;
-		let current_start = null;
-		let current_end = null;
-		intervals.forEach(([start, end]) => {
-			if (current_end && start <= current_end) {
-				current_end = moment.max(current_end, end);
-				return;
-			}
-			if (current_end) {
-				current_time += current_end.diff(current_start, "seconds", true);
-			}
-			[current_start, current_end] = [start, end];
-		});
-
-		if (current_end) {
-			current_time += current_end.diff(current_start, "seconds", true);
-		}
-		return current_time;
+		return erpnext.utils.get_time_logs_seconds(frm.doc.time_logs);
 	},
 
 	hide_timer(frm) {

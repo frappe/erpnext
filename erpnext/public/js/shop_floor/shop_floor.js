@@ -1237,19 +1237,7 @@ class ShopFloor {
 	}
 
 	elapsed_seconds(jc) {
-		let total = 0;
-		for (const log of jc.time_logs || []) {
-			if (log.to_time) {
-				if (log.time_in_mins) {
-					total += flt(log.time_in_mins, 2) * 60;
-				} else {
-					total += moment(log.to_time).diff(log.from_time, "seconds");
-				}
-			} else {
-				total += moment(frappe.datetime.system_datetime()).diff(log.from_time, "seconds");
-			}
-		}
-		return total;
+		return erpnext.utils.get_time_logs_seconds(jc.time_logs || []);
 	}
 
 	render_timer(jc_name, seconds, $container) {
