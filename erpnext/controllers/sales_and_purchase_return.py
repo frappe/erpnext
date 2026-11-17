@@ -342,7 +342,15 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 			reference_qty = ref.get(column) * ref.get("conversion_factor", 1.0)
 			current_stock_qty = flt(args.get(column)) * args.get("conversion_factor", 1.0)
 
-		max_returnable_qty = flt(flt(reference_qty, field_precision) - returned_qty, field_precision)
+		# in the return row's UOM, so that a stock UOM coarser than it cannot round a return away
+		max_returnable_qty = get_qty_in_row_uom(
+			args, column, flt(reference_qty) - flt(already_returned_data.get(returned_column))
+		)
+		returning_qty = get_qty_in_row_uom(
+			args,
+			column,
+			get_returned_stock_qty(doc, args) if column == "stock_qty" else abs(flt(current_stock_qty)),
+		)
 		label = column.replace("_", " ").title()
 
 		if reference_qty or flt(current_stock_qty):
@@ -352,13 +360,19 @@ def validate_quantity(doc, key, args, ref, valid_items, already_returned_items):
 				frappe.throw(
 					_("Item {0} has already been returned").format(args.item_code), StockOverReturnError
 				)
-			elif abs(flt(current_stock_qty, field_precision)) > max_returnable_qty:
+			elif returning_qty > max_returnable_qty:
 				frappe.throw(
 					_("Row # {0}: Cannot return more than {1} for Item {2}").format(
 						args.idx, max_returnable_qty, args.item_code
 					),
 					StockOverReturnError,
 				)
+
+
+def get_qty_in_row_uom(row, column, qty) -> float:
+	"""Convert a qty of the validated column to the row's UOM; only `qty` is in it already."""
+	conversion_factor = 1 if column == "qty" else flt(row.conversion_factor or 1)
+	return flt(qty / conversion_factor, row.precision("qty"))
 
 
 def validate_delivery_note_item_qty(doc, key, row, valid_items, already_returned_items):
