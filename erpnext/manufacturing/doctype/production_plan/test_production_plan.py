@@ -566,11 +566,16 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		first_plan, second_plan = plan_sales_order(), plan_sales_order()
 		self.assertEqual([row.planned_qty for row in first_plan.po_items], [6])
+		first_plan.po_items[0].planned_qty = 2
 		first_plan.submit()
+		self.assertRaisesRegex(frappe.ValidationError, "Only 4.0 Nos is left to plan", second_plan.submit)
+
+		last_plan = plan_sales_order()
+		self.assertEqual([row.planned_qty for row in last_plan.po_items], [4])
+		last_plan.submit()
 
 		self.assertFalse(plan_sales_order().po_items)
 		self.assertFalse(sales_order_query(filters={"company": sales_order.company, "item_code": fg_item}))
-		self.assertRaises(frappe.ValidationError, second_plan.submit)
 
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
