@@ -2764,6 +2764,9 @@ def get_next_reco_datetime_condition(sle, kwargs):
 	current_datetime = get_combine_datetime(kwargs.get("posting_date"), kwargs.get("posting_time"))
 
 	creation = kwargs.get("creation")
+	if kwargs.get("is_cancelled"):
+		creation = get_creation_of_cancelled_entry(kwargs)
+
 	if not creation:
 		# No creation tiebreaker available; fall back to the posting_datetime-only bound.
 		return sle.posting_datetime >= current_datetime
@@ -2771,6 +2774,29 @@ def get_next_reco_datetime_condition(sle, kwargs):
 	return (sle.posting_datetime > current_datetime) | (
 		(sle.posting_datetime == current_datetime) & (sle.creation > creation)
 	)
+
+
+def get_creation_of_cancelled_entry(args):
+	"""Creation of the entry that a cancellation reverses, which keeps its place in the ledger order."""
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	entry = (
+		frappe.qb.from_(sle)
+		.select(sle.creation)
+		.where(
+			(sle.voucher_type == args.voucher_type)
+			& (sle.voucher_no == args.voucher_no)
+			& (sle.voucher_detail_no == args.voucher_detail_no)
+			& (sle.item_code == args.item_code)
+			& (sle.warehouse == args.warehouse)
+			& (sle.is_cancelled == 1)
+			& (sle.name != args.name)
+			& (sle.actual_qty * flt(args.actual_qty) <= 0)
+		)
+		.orderby(sle.creation, order=Order.desc)
+		.limit(1)
+	).run()
+
+	return entry[0][0] if entry else None
 
 
 def get_next_stock_reco(kwargs):

@@ -1679,6 +1679,26 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(get_valuation_rate(item_code, warehouse, None, None), 100)
 		self.assertEqual(get_valuation_rate(item_code, warehouse, "Stock Entry", None), 100)
 
+	def test_cancel_stops_qty_shift_at_reconciliation_on_same_posting_datetime(self):
+		item_code = make_item(properties={"is_stock_item": 1, "valuation_method": "FIFO"}).name
+		warehouse = "_Test Warehouse - _TC"
+		posting = {"posting_date": add_days(today(), -10), "posting_time": "00:00:00"}
+
+		receipt = make_stock_entry(item_code=item_code, target=warehouse, qty=10, rate=100, **posting)
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=12, rate=100, **posting)
+		issue = make_stock_entry(
+			item_code=item_code, source=warehouse, qty=12, posting_date=add_days(today(), -5)
+		)
+
+		receipt.cancel()
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Stock Ledger Entry", {"voucher_no": issue.name, "is_cancelled": 0}, "qty_after_transaction"
+			),
+			0,
+		)
+
 	@change_settings("System Settings", {"float_precision": 4})
 	def test_negative_qty_with_precision(self):
 		"Test if system precision is respected while validating negative qty."
