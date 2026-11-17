@@ -660,7 +660,7 @@ class JobCard(Document):
 			((jctl.from_time < to_time) & (jctl.to_time > to_time)),
 			((jctl.from_time >= args.from_time) & (jctl.to_time <= to_time)),
 		]
-		if include_running:
+		if include_running and args.from_time:
 			time_conditions.append(jctl.to_time.isnull() & (jc.docstatus == 0) & (jctl.from_time < to_time))
 
 		return (
