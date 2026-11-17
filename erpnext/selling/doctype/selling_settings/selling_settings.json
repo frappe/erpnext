@@ -15,7 +15,8 @@
   "column_break_4",
   "customer_group",
   "territory",
-  "load_customer_overview_on_demand",
+  "customer_overview_section",
+  "load_customer_overview",
   "item_price_tab",
   "item_price_settings_section",
   "selling_price_list",
@@ -448,11 +449,16 @@
    "fieldtype": "HTML"
   },
   {
-   "default": "0",
-   "description": "Show a Load Overview button on the Customer Overview tab instead of loading it on open. Useful when customers have a very large number of transactions.",
-   "fieldname": "load_customer_overview_on_demand",
+   "fieldname": "customer_overview_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Overview"
+  },
+  {
+   "default": "1",
+   "description": "When off, the Overview tab on a customer shows a Load Overview button and loads only when clicked.",
+   "fieldname": "load_customer_overview",
    "fieldtype": "Check",
-   "label": "Load Customer Overview on Demand"
+   "label": "Enable Customer Overview Dashboard"
   }
  ],
  "grid_page_length": 50,
@@ -461,7 +467,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-17 02:35:06.472188",
+ "modified": "2026-11-17 15:11:39.690569",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

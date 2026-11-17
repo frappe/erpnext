@@ -39,6 +39,10 @@ erpnext.CustomerOverview = class CustomerOverview extends erpnext.PartyOverview 
 			empty_description: __(
 				"Quotations, orders, invoices and payments for this customer will show up here."
 			),
+			prompt_title: __("Customer Overview"),
+			prompt_description: __(
+				"Sales, receivables, open orders and recent transactions for this customer. To load it every time, turn on Enable Customer Overview Dashboard in Selling Settings."
+			),
 		});
 	}
 

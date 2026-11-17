@@ -119,8 +119,8 @@ class Customer(TransactionBase):
 		load_address_and_contact(self)
 		self.load_dashboard_info()
 		self.set_onload(
-			"load_overview_on_demand",
-			frappe.get_single_value("Selling Settings", "load_customer_overview_on_demand"),
+			"defer_overview",
+			not frappe.get_single_value("Selling Settings", "load_customer_overview"),
 		)
 
 	def load_dashboard_info(self):

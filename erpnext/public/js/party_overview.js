@@ -71,7 +71,7 @@ erpnext.PartyOverview = class PartyOverview {
 	}
 
 	start() {
-		if (this.frm.doc.__onload?.load_overview_on_demand && !this.requested) this.render_load_prompt();
+		if (this.frm.doc.__onload?.defer_overview && !this.requested) this.render_load_prompt();
 		else this.load_companies();
 	}
 
@@ -83,8 +83,8 @@ erpnext.PartyOverview = class PartyOverview {
 			.append(
 				frappe.ui.empty_state({
 					icon: "chart-column",
-					title: __("Overview not loaded"),
-					description: __("Load it to see totals, balances and recent transactions."),
+					title: this.prompt_title,
+					description: this.prompt_description,
 					actions: [
 						{
 							label: __("Load Overview"),
@@ -109,6 +109,7 @@ erpnext.PartyOverview = class PartyOverview {
 		const { PERIODS } = erpnext.PartyOverview;
 		this.seq.overview++;
 		this.seq.balances++;
+		this.company_seq = (this.company_seq || 0) + 1;
 		this.overview = null;
 		this.balances = null;
 		this.party = this.frm.doc.name;
@@ -136,6 +137,7 @@ erpnext.PartyOverview = class PartyOverview {
 					variant: "ghost",
 					tooltip: __("Refresh"),
 					onclick: () => {
+						if (!this.companies_ready) return this.load_companies();
 						this.load();
 						this.refresh_list();
 					},

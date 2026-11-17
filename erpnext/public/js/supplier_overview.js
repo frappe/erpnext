@@ -38,6 +38,10 @@ erpnext.SupplierOverview = class SupplierOverview extends erpnext.PartyOverview 
 			empty_description: __(
 				"Quotations, orders, bills and payments for this supplier will show up here."
 			),
+			prompt_title: __("Supplier Overview"),
+			prompt_description: __(
+				"Purchases, payables, open orders and recent transactions for this supplier. To load it every time, turn on Enable Supplier Overview Dashboard in Buying Settings."
+			),
 		});
 	}
 

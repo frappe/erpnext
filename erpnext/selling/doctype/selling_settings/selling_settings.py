@@ -61,7 +61,7 @@ class SellingSettings(Document):
 		enable_utm: DF.Check
 		fallback_to_default_price_list: DF.Check
 		hide_tax_id: DF.Check
-		load_customer_overview_on_demand: DF.Check
+		load_customer_overview: DF.Check
 		maintain_same_rate_action: DF.Literal["Stop", "Warn"]
 		maintain_same_sales_rate: DF.Check
 		proforma_email_template: DF.Link | None
