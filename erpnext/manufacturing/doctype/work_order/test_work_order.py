@@ -7598,6 +7598,21 @@ class TestWorkOrder(ERPNextTestSuite):
 		self.assertEqual(self.get_additional_operating_cost(wheel_entry), 0)
 		self.assertEqual(self.get_additional_operating_cost(assembly_entry), 100)
 
+	def test_semi_fg_entry_charges_non_stock_items_per_finished_good(self):
+		wo = self.make_car_with_four_wheels_work_order("Stores - _TC", service_rate=100)
+		wheel_jc = self.get_semi_fg_job_card(wo, wo.operations[0])
+		self.complete_semi_fg_job_card(wheel_jc, wheel_jc.for_quantity, "2024-03-01")
+
+		wheel_entry = frappe.get_doc(wheel_jc.make_stock_entry_for_semi_fg_item())
+		non_stock_cost = sum(
+			flt(row.amount) for row in wheel_entry.additional_costs if row.description == "Non stock items"
+		)
+		# Work Order is for 1 car: the cost is the BOM amount, not 4 times it
+		service_amount = frappe.db.get_value(
+			"BOM Item", {"parent": wo.bom_no, "item_code": "Test JCO Service"}, "base_amount"
+		)
+		self.assertEqual(non_stock_cost, service_amount)
+
 	def test_bom_from_semi_fg_work_order_keeps_operation_time(self):
 		wo = self.make_car_with_four_wheels_work_order("Stores - _TC")
 		self.complete_semi_fg_work_order(wo)
@@ -7651,7 +7666,7 @@ class TestWorkOrder(ERPNextTestSuite):
 		return entries
 
 	def make_car_with_four_wheels_work_order(
-		self, warehouse, prefix="Test JCO", stock_uom=None, bom_qty=1, wheel_qty=4
+		self, warehouse, prefix="Test JCO", stock_uom=None, bom_qty=1, wheel_qty=4, service_rate=0
 	):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import (
 			make_stock_entry as make_stock_entry_test_record,
@@ -7662,6 +7677,10 @@ class TestWorkOrder(ERPNextTestSuite):
 			name: make_item(f"{prefix} {name}", properties).name
 			for name in ("Rubber", "Rim", "Wheel", "Body", "Car")
 		}
+		if service_rate:
+			items["Service"] = make_item(
+				f"{prefix} Service", {"is_stock_item": 0, "valuation_rate": service_rate}
+			).name
 		if not frappe.db.exists("Workstation", "Test JCO Workstation"):
 			make_workstation(workstation="Test JCO Workstation", production_capacity=1)
 		for operation in ("Test JCO Wheel Making", "Test JCO Assembly"):
@@ -7722,6 +7741,9 @@ class TestWorkOrder(ERPNextTestSuite):
 		)
 		car_bom.append("items", {"item_code": items["Wheel"], "qty": wheel_qty, "operation_row_id": 2})
 		car_bom.append("items", {"item_code": items["Body"], "qty": 1, "operation_row_id": 2})
+		if items.get("Service"):
+			for name in ("Rubber", "Rim", "Service"):
+				car_bom.append("items", {"item_code": items[name], "qty": wheel_qty, "operation_row_id": 1})
 		car_bom.insert()
 		car_bom.submit()
 		return car_bom
