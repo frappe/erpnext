@@ -3781,11 +3781,64 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertIn("_Test PP Line RM B", items)
 		self.assertNotIn("_Test PP Line RM A", items)
 
+<<<<<<< HEAD
 	def test_exploded_row_keeps_sub_assemblies_it_does_not_explode(self):
 		make_item("_Test PP Kept SA RM", {"is_stock_item": 1})
 		make_item("_Test PP Kept SA RM 2", {"is_stock_item": 1})
 		make_item(
 			"_Test PP Kept SA", {"is_stock_item": 1, "default_material_request_type": "Material Transfer"}
+=======
+	def test_do_not_explode_line_is_requested_without_subcontracted_items(self):
+		properties = {"is_stock_item": 1, "default_material_request_type": "Purchase"}
+		rm_item = make_item(properties=properties).name
+		sub_assembly_rm = make_item(properties=properties).name
+		sub_assembly = make_item(properties=properties).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=sub_assembly, raw_materials=[sub_assembly_rm], rm_qty=2, currency="INR")
+		fg_bom = make_bom(item=fg_item, raw_materials=[sub_assembly, rm_item], currency="INR", do_not_save=1)
+		fg_bom.items[0].do_not_explode = 1
+		fg_bom.insert()
+		fg_bom.submit()
+
+		plan = create_production_plan(
+			item_code=fg_item, planned_qty=1, skip_getting_mr_items=True, do_not_submit=1
+		)
+		items = get_items_for_material_requests(plan.as_dict())
+
+		self.assertEqual(
+			sorted((row.get("item_code"), row.get("quantity")) for row in items),
+			sorted([(sub_assembly, 1), (rm_item, 1)]),
+		)
+
+	def test_production_plan_combine_subassembly(self):
+		"""
+		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
+		1) Red-Car -> Wheel (sub assembly) > BOM-WHEEL-001
+		2) Green-Car -> Wheel (sub assembly) > BOM-WHEEL-001
+		"""
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree_1 = {"Red-Car": {"Wheel": {"Rubber": {}}}}
+		bom_tree_2 = {"Green-Car": {"Wheel": {"Rubber": {}}}}
+
+		parent_bom_1 = create_nested_bom(bom_tree_1, prefix="")
+		parent_bom_2 = create_nested_bom(bom_tree_2, prefix="")
+
+		# make sure both boms use same subassembly bom
+		subassembly_bom = parent_bom_1.items[0].bom_no
+		frappe.db.set_value("BOM Item", parent_bom_2.items[0].name, "bom_no", subassembly_bom)
+
+		plan = create_production_plan(item_code="Red-Car", use_multi_level_bom=1, do_not_save=True)
+		plan.append(
+			"po_items",
+			{  # Add Green-Car to Prod Plan
+				"use_multi_level_bom": 1,
+				"item_code": "Green-Car",
+				"bom_no": frappe.db.get_value("Item", "Green-Car", "default_bom"),
+				"planned_qty": 1,
+				"planned_start_date": now_datetime(),
+			},
+>>>>>>> 05635d5 (test: Production Plan requests a Do Not Explode line without subcontracted items)
 		)
 		make_item("_Test PP Kept SA FG", {"is_stock_item": 1})
 		make_bom(item="_Test PP Kept SA", raw_materials=["_Test PP Kept SA RM"], currency="INR")
