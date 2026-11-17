@@ -1491,23 +1491,29 @@ class StockEntry(StockController, SubcontractingInwardController):
 			return
 
 		# no items would reserve every supplied item of the order
-		if items:
-			frappe.get_doc("Subcontracting Order", self.subcontracting_order).make_raw_material_reservations(
-				items=items, stock_entry=self.name
+		if not items:
+			return
+
+		order = frappe.get_doc("Subcontracting Order", self.subcontracting_order)
+		# the order takes one request per supplied item, so each warehouse goes separately
+		for warehouse in {item.warehouse for item in items}:
+			order.make_raw_material_reservations(
+				items=[item for item in items if item.warehouse == warehouse], stock_entry=self.name
 			)
 
 	def get_subcontracting_reservation_items(self) -> list:
-		"""Qty and bundles of the entry per Subcontracting Order supplied item, to reserve in its target warehouse."""
+		"""Qty and bundles of the entry per Subcontracting Order supplied item and target warehouse, to reserve there."""
 		items = {}
 		for item in self.items:
 			if not item.sco_rm_detail:
 				continue
 
-			if item.sco_rm_detail in items:
-				items[item.sco_rm_detail].qty_to_reserve += item.transfer_qty
-				items[item.sco_rm_detail].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
+			key = (item.sco_rm_detail, item.t_warehouse)
+			if key in items:
+				items[key].qty_to_reserve += item.transfer_qty
+				items[key].serial_and_batch_bundles.append(item.serial_and_batch_bundle)
 			else:
-				items[item.sco_rm_detail] = frappe._dict(
+				items[key] = frappe._dict(
 					{
 						"name": item.sco_rm_detail,
 						"qty_to_reserve": item.transfer_qty,
@@ -1538,10 +1544,11 @@ class StockEntry(StockController, SubcontractingInwardController):
 				as_list=True,
 			)
 		)
+		needed_qty = {name: flt(qty) - held_qty.get(name, 0) for name, qty in required_qty.items()}
 		precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
 		for item in items:
-			needed_qty = flt(required_qty[item.name]) - held_qty.get(item.name, 0)
-			item.qty_to_reserve = flt(min(item.qty_to_reserve, needed_qty), precision)
+			item.qty_to_reserve = flt(max(min(item.qty_to_reserve, needed_qty[item.name]), 0), precision)
+			needed_qty[item.name] -= item.qty_to_reserve
 
 		return [item for item in items if item.qty_to_reserve > 0]
 
