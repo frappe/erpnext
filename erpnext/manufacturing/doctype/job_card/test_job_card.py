@@ -4322,6 +4322,30 @@ class TestJobCard(ERPNextTestSuite):
 			[("2031-03-03 09:00:00", "2031-03-03 10:00:00")],
 		)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 0})
+	def test_work_order_planned_end_date_is_the_latest_parallel_operation_end(self):
+		long_workstation, short_workstation = make_jc_review_workstation(), make_jc_review_workstation()
+		operations = [
+			{
+				"operation": make_jc_review_operation(workstation),
+				"workstation": workstation,
+				"time_in_mins": minutes,
+				"sequence_id": 1,
+			}
+			for workstation, minutes in ((long_workstation, 9), (short_workstation, 6))
+		]
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			operations,
+			skip_transfer=1,
+			planned_start_date="2031-05-05 08:00:00",
+		)
+
+		self.assertEqual(
+			str(frappe.db.get_value("Work Order", wo.name, "planned_end_date")), "2031-05-05 09:30:00"
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_partial_sub_operation_cycles_keep_job_card_qty(self):
 		workstation = make_jc_review_workstation()
