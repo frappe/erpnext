@@ -67,7 +67,7 @@ class SalesOrderSourcingService:
 				& (mr.docstatus == 1)
 				& (mr.status != "Stopped")
 				& (mr.company == self.doc.company)
-				& (mr_item.qty > IfNull(mr_item.ordered_qty, 0))
+				& (mr_item.stock_qty > IfNull(mr_item.ordered_qty, 0))
 				& (mr_item.stock_qty > IfNull(_mr_item_planned_qty_query(mr_item), 0))
 				& bom_exists
 			)
@@ -376,7 +376,8 @@ def _mr_item_columns(mr_item):
 		mr_item.warehouse,
 		mr_item.description,
 		mr_item.bom_no,
-		((mr_item.qty - mr_item.ordered_qty) * mr_item.conversion_factor).as_("pending_qty"),
+		# ordered_qty of a Manufacture request is the Work Order qty in stock UOM
+		(mr_item.stock_qty - mr_item.ordered_qty).as_("pending_qty"),
 		mr_item.stock_qty,
 		IfNull(_mr_item_planned_qty_query(mr_item), 0).as_("planned_qty"),
 	]
@@ -398,6 +399,6 @@ def _mr_items_filter(bom, mr_item, mr_list):
 	return (
 		(mr_item.parent.isin(mr_list))
 		& (mr_item.docstatus == 1)
-		& (mr_item.qty > mr_item.ordered_qty)
+		& (mr_item.stock_qty > mr_item.ordered_qty)
 		& bom_exists
 	)
