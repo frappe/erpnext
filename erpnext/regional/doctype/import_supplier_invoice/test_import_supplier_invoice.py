@@ -145,7 +145,12 @@ class TestImportSupplierInvoice(FrappeTestCase):
 		self.addCleanup(frappe.clear_cache, doctype="Import Supplier Invoice")
 		frappe.clear_cache(doctype="Import Supplier Invoice")
 		user = frappe.get_doc(
-			{"doctype": "User", "email": "isi-accounts-user@example.com", "first_name": "ISI"}
+			{
+				"doctype": "User",
+				"send_welcome_email": 0,
+				"email": "isi-accounts-user@example.com",
+				"first_name": "ISI",
+			}
 		).insert()
 		user.add_roles("Accounts User")
 
