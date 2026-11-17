@@ -9,6 +9,10 @@ from frappe.utils import add_days, flt, formatdate, getdate, today
 
 from erpnext.accounts.doctype.tax_rule.test_tax_rule import make_tax_rule
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.manufacturing.doctype.master_production_schedule.test_master_production_schedule import (
+	make_mps,
+	make_mps_row,
+)
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.sales_forecast.test_sales_forecast import make_sales_forecast
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
@@ -104,45 +108,7 @@ class TestMaterialRequirementsPlanningReport(ERPNextTestSuite):
 		self.assertAlmostEqual(sum(row.sales_forecast_qty for row in report.mps_data), 10)
 
 	def test_mps_demand_uses_up_the_forecast_of_its_period(self):
-		item = make_item(properties={"is_stock_item": 1}).name
-		start_date = add_days(today(), 1)
-		forecast = frappe.get_doc(
-			{
-				"doctype": "Sales Forecast",
-				"company": COMPANY,
-				"parent_warehouse": "All Warehouses - _TC",
-				"from_date": start_date,
-				"frequency": "Monthly",
-				"demand_number": 1,
-				"selected_items": [{"item_code": item}],
-			}
-		)
-		forecast.generate_manual_demand()
-		forecast.items[0].demand_qty = 100
-		forecast.insert()
-		forecast.submit()
-
-		mps = frappe.get_doc(
-			{
-				"doctype": "Master Production Schedule",
-				"company": COMPANY,
-				"posting_date": today(),
-				"from_date": today(),
-				"to_date": add_days(start_date, 40),
-				"parent_warehouse": "All Warehouses - _TC",
-				"sales_forecast": forecast.name,
-				"items": [
-					{
-						"item_code": item,
-						"warehouse": WAREHOUSE,
-						"delivery_date": add_days(start_date, 14),
-						"planned_qty": 50,
-						"uom": frappe.get_cached_value("Item", item, "stock_uom"),
-					}
-				],
-			}
-		)
-		mps.insert()
+		item, mps = make_forecast_with_mps_demand(50)
 
 		rows = get_mrp_row_list(mps)
 
@@ -1118,6 +1084,22 @@ def make_mrp_plan(test_case, planned_qty=10, rm_qty=2):
 		rm_qty=rm_qty,
 		rows=rows,
 	)
+
+
+def make_forecast_with_mps_demand(planned_qty):
+	"""Return an item with a monthly forecast of 100 and an MPS for it with demand in that month."""
+	item = make_item(properties={"is_stock_item": 1}).name
+	start_date = add_days(today(), 1)
+	forecast = make_sales_forecast(item_code=item, from_date=start_date, demand_number=1, do_not_submit=True)
+	forecast.items[0].demand_qty = 100
+	forecast.submit()
+
+	mps = make_mps(
+		parent_warehouse="All Warehouses - _TC",
+		sales_forecast=forecast.name,
+		items=[make_mps_row(item, delivery_date=add_days(start_date, 14), planned_qty=planned_qty)],
+	)
+	return item, mps
 
 
 def get_mrp_rows(mps):
