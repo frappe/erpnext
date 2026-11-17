@@ -10,6 +10,7 @@ from frappe.utils import flt, random_string
 from frappe.utils.data import add_to_date, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
+	JobCardCancelError,
 	JobCardOverTransferError,
 	OperationSequenceError,
 	OverlapError,
@@ -4204,6 +4205,34 @@ class TestJobCard(ERPNextTestSuite):
 
 		work_order.reload()
 		self.assertEqual([row.status for row in work_order.operations], ["Completed", "Completed"])
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_card_for_handed_over_pending_qty_cannot_be_cancelled_after_manufacture(self):
+		workstation = make_jc_review_workstation()
+		operation = make_jc_review_operation(workstation)
+		rm_item = make_jc_review_item()
+		make_stock_entry(item_code=rm_item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": rm_item, "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+			skip_transfer=1,
+		)
+
+		first_card = get_jc_review_job_cards(wo.name)[0]
+		first_card.append("time_logs", jc_review_log("2031-03-03 08:00:00", 36, 6))
+		first_card.pending_qty = 4
+		first_card.submit()
+
+		row = frappe.get_doc("Work Order", wo.name).operations[0]
+		make_job_card(wo.name, [{"name": row.name, "operation": row.operation, "qty": 4, "pending_qty": 4}])
+		second_card = frappe.get_last_doc("Job Card", {"work_order": wo.name, "docstatus": 0})
+		second_card.append("time_logs", jc_review_log("2031-03-03 09:00:00", 24, 4))
+		second_card.submit()
+
+		frappe.get_doc(make_stock_entry_for_work_order(wo.name, "Manufacture", 10)).submit()
+
+		self.assertRaises(JobCardCancelError, second_card.cancel)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_sub_operations_with_two_operators_keep_completed_qty(self):
