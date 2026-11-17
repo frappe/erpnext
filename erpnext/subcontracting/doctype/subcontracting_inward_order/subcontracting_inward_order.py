@@ -579,7 +579,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 	def get_delivery_accounts(self):
 		"""Map each finished good row to the Difference Account of its deliveries, if they all used one."""
 		accounts = {}
-		for row in frappe.get_list(
+		for row in frappe.get_all(
 			"Stock Entry",
 			filters={
 				"subcontracting_inward_order": self.name,
