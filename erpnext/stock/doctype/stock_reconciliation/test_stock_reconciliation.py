@@ -2465,6 +2465,28 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 			),
 		).name
 
+	def test_zero_rate_kept_on_a_row_with_a_selected_batch_bundle(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self._make_batch_item("Test Stock Reco Zero Rate Batch Bundle", "TSRZRBB-.#####")
+		warehouse = "_Test Warehouse - _TC"
+
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=5, basic_rate=50)
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=5,
+			rate=0,
+			batch_no=get_batch_from_bundle(se.items[0].serial_and_batch_bundle),
+			reconcile_all_serial_batch=0,
+			do_not_save=1,
+		)
+		sr.items[0].allow_zero_valuation_rate = 1
+		sr.save()
+
+		self.assertEqual(sr.items[0].valuation_rate, 0)
+		self.assertEqual(sr.items[0].amount_difference, -250)
+
 	def test_zeroing_a_batch_does_not_make_an_adjustment_entry(self):
 		"""Emptying a batch that holds stock is an ordinary outward entry, not a value write-off."""
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
