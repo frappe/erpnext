@@ -542,26 +542,28 @@ erpnext.buying.link_to_mrs = function (frm) {
 
 			var item_length = frm.doc.items.length;
 			for (let item of frm.doc.items) {
-				var qty = item.qty;
+				// compare in stock UOM, as the request and the row can be in different UOMs
+				let stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
 				(r.message || []).forEach(function (d) {
 					if (
-						d.qty > 0 &&
-						qty > 0 &&
+						d.stock_qty > 0 &&
+						stock_qty > 0 &&
 						item.item_code == d.item_code &&
 						!item.material_request_item
 					) {
 						item.material_request = d.mr_name;
 						item.material_request_item = d.mr_item;
-						var my_qty = Math.min(qty, d.qty);
-						qty = qty - my_qty;
-						d.qty = d.qty - my_qty;
-						item.stock_qty = my_qty * item.conversion_factor;
-						item.qty = my_qty;
+						let linked_stock_qty = Math.min(stock_qty, d.stock_qty);
+						stock_qty = flt(stock_qty - linked_stock_qty, precision("stock_qty", item));
+						d.stock_qty = d.stock_qty - linked_stock_qty;
+						item.stock_qty = linked_stock_qty;
+						item.qty = flt(linked_stock_qty / item.conversion_factor, precision("qty", item));
 
 						frappe.msgprint(
 							__("Assigning {0} to {1} (row {2})", [d.mr_name, d.item_code, item.idx])
 						);
-						if (qty > 0) {
+						if (stock_qty > 0) {
+							let qty = flt(stock_qty / item.conversion_factor, precision("qty", item));
 							frappe.msgprint(__("Splitting {0} units of {1}", [qty, d.item_code]));
 							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
 							item_length++;
@@ -571,7 +573,7 @@ erpnext.buying.link_to_mrs = function (frm) {
 							}
 
 							newrow.idx = item_length;
-							newrow["stock_qty"] = newrow.conversion_factor * qty;
+							newrow["stock_qty"] = stock_qty;
 							newrow["qty"] = qty;
 
 							newrow["material_request"] = "";
