@@ -881,6 +881,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							child_doctype: item.doctype,
 							child_docname: item.name,
 							use_serial_batch_fields: item.use_serial_batch_fields,
+							against_blanket_order: item.against_blanket_order,
+							blanket_order: item.blanket_order,
 							serial_and_batch_bundle: item.serial_and_batch_bundle,
 						},
 					},
