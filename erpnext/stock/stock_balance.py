@@ -95,10 +95,11 @@ def get_reserved_qty(item_code, warehouse):
 	dont_reserve_on_return = frappe.get_cached_value(
 		"Selling Settings", "Selling Settings", "dont_reserve_sales_order_qty_on_sales_return"
 	)
+	# delivered_qty is net of returns, so a replacement delivery takes the returned share below 0
 	reserved_qty = frappe.db.sql(
 		f"""
 		select
-			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - if(dont_reserve_qty_on_return, so_item_returned_qty, 0)) / so_item_qty))
+			sum(dnpi_qty * (greatest(so_item_qty - so_item_delivered_qty - if(dont_reserve_qty_on_return, so_item_returned_qty, 0), 0) / so_item_qty))
 		from
 			(
 				(select
