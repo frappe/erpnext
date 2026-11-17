@@ -14,7 +14,13 @@ from erpnext.stock.doctype.putaway_rule.putaway_rule import (
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_items, get_stock_balance_for
-from erpnext.stock.utils import _get_stock_balance, get_stock_balance, lock_bins, scan_barcode
+from erpnext.stock.utils import (
+	_get_stock_balance,
+	get_or_make_bin,
+	get_stock_balance,
+	lock_bins,
+	scan_barcode,
+)
 from erpnext.tests.permission_test_utils import (
 	as_user,
 	assert_refused,
@@ -165,21 +171,31 @@ class TestStockUtilities(ERPNextTestSuite, StockTestMixin):
 		if frappe.db.db_type != "mariadb":
 			return
 
-		locked, holder = threading.Event(), {}
+		item_warehouse = ("_Test Item", "_Test Warehouse - _TC")
+		if not frappe.db.exists("Bin", {"item_code": item_warehouse[0], "warehouse": item_warehouse[1]}):
+			bin_name = get_or_make_bin(*item_warehouse)
+			frappe.db.commit()  # nosemgrep
+			self.addCleanup(frappe.db.commit)  # nosemgrep
+			self.addCleanup(frappe.db.delete, "Bin", bin_name)
+
+		locked = threading.Event()
 		thread = threading.Thread(
-			target=hold_bin_lock, args=(frappe.local.site, frappe.local.sites_path, locked, holder)
+			target=hold_bin_lock,
+			args=(frappe.local.site, frappe.local.sites_path, get_or_make_bin(*item_warehouse), locked),
 		)
 		thread.start()
 		self.assertTrue(locked.wait(30))
 
 		frappe.db.sql("set session innodb_lock_wait_timeout = 1")
+		start = time.monotonic()
 		try:
-			lock_bins([(holder["item_code"], holder["warehouse"])])
+			lock_bins([item_warehouse])
+			waited = time.monotonic() - start
 		finally:
 			frappe.db.sql("set session innodb_lock_wait_timeout = default")
 			thread.join()
 
-		self.assertGreaterEqual(time.monotonic() - holder["locked_at"], 2)
+		self.assertGreaterEqual(waited, 2)
 
 	def test_barcode_scanning_of_warehouse(self):
 		warehouse = frappe.get_doc(
@@ -581,19 +597,12 @@ class TestStockBalancePermissions(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(saved.items[0].t_warehouse, WAREHOUSE)
 
 
-def hold_bin_lock(site, sites_path, locked, holder):
+def hold_bin_lock(site, sites_path, bin_name, locked):
 	frappe.init(site, sites_path=sites_path)
 	frappe.connect()
 	try:
 		bin = frappe.qb.DocType("Bin")
-		holder.update(
-			frappe.qb.from_(bin)
-			.select(bin.item_code, bin.warehouse)
-			.limit(1)
-			.for_update()
-			.run(as_dict=True)[0]
-		)
-		holder["locked_at"] = time.monotonic()
+		frappe.qb.from_(bin).select(bin.name).where(bin.name == bin_name).for_update().run()
 		locked.set()
 		time.sleep(3)
 	finally:
