@@ -676,36 +676,23 @@ def validate_child_on_delete(row, parent, ordered_item=None) -> None:
 		frappe.throw(_("Cannot delete an item which has been ordered"))
 
 
-def update_bin_on_delete(row, parent) -> None:
-	"""Update bin quantities after a child item row is deleted."""
-	from erpnext.stock.stock_balance import (
-		get_ordered_qty,
-		get_reserved_qty,
-		update_bin_qty,
-	)
-
-	qty_dict = {}
-
+def update_bin_on_delete(rows, parent) -> None:
+	"""Update bin quantities after child item rows are deleted."""
+	row_names = [row.name for row in rows]
 	if parent.doctype == "Sales Order":
-		qty_dict["reserved_qty"] = get_reserved_qty(row.item_code, row.warehouse)
-		# a bundle row reserves its components, not the bundle item
-		for packed_item in parent.get("packed_items"):
-			if packed_item.parent_detail_docname == row.name and packed_item.warehouse:
-				update_bin_qty(
-					packed_item.item_code,
-					packed_item.warehouse,
-					{"reserved_qty": get_reserved_qty(packed_item.item_code, packed_item.warehouse)},
-				)
-	else:
-		# the request's warehouse, which the order row may have changed
-		if row.material_request_item:
-			frappe.get_doc("Material Request", row.material_request).update_requested_qty(
-				[row.material_request_item]
-			)
-		qty_dict["ordered_qty"] = get_ordered_qty(row.item_code, row.warehouse)
+		# covers a bundle row's components too
+		parent.update_reserved_qty(row_names)
+		return
 
-	if row.warehouse:
-		update_bin_qty(row.item_code, row.warehouse, qty_dict)
+	parent.update_ordered_qty(row_names)
+	# the request's warehouse, which the order row may have changed
+	request_items = {}
+	for row in rows:
+		if row.material_request_item:
+			request_items.setdefault(row.material_request, []).append(row.material_request_item)
+
+	for material_request, items in request_items.items():
+		frappe.get_doc("Material Request", material_request).update_requested_qty(items)
 
 
 def validate_no_issued_proforma(rows) -> None:
@@ -845,8 +832,8 @@ def validate_and_delete_children(parent, data, ordered_item=None) -> bool:
 
 	if parent.doctype not in ("Quotation", "Supplier Quotation"):
 		parent.update_prevdoc_status()
-		for d in deleted_children:
-			update_bin_on_delete(d, parent)
+		if deleted_children:
+			update_bin_on_delete(deleted_children, parent)
 
 	return bool(deleted_children)
 
