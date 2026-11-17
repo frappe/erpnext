@@ -581,11 +581,11 @@ class SubcontractingInwardOrder(SubcontractingController):
 		accounts = {}
 		for row in frappe.get_all(
 			"Stock Entry",
-			filters={
-				"subcontracting_inward_order": self.name,
-				"purpose": "Subcontracting Delivery",
-				"docstatus": 1,
-			},
+			filters=[
+				["Stock Entry Detail", "scio_detail", "in", [item.name for item in self.items]],
+				["purpose", "=", "Subcontracting Delivery"],
+				["docstatus", "=", 1],
+			],
 			fields=["`tabStock Entry Detail`.scio_detail", "`tabStock Entry Detail`.expense_account"],
 			distinct=True,
 		):
