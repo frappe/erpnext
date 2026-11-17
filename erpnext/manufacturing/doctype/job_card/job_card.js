@@ -482,11 +482,11 @@ frappe.ui.form.on("Job Card", {
 	},
 
 	get_current_time(frm) {
-		// union of the time log intervals, so parallel operators count once (as on the server)
+		// union of the intervals, so parallel operators count once; UTC gives wall-clock diffs, as on the server
 		const now = frappe.datetime.system_datetime();
 		const intervals = frm.doc.time_logs
 			.filter((d) => d.from_time)
-			.map((d) => [moment(d.from_time), moment(d.to_time || now)])
+			.map((d) => [moment.utc(d.from_time), moment.utc(d.to_time || now)])
 			.sort((a, b) => a[0] - b[0]);
 
 		let current_time = 0;
@@ -498,13 +498,13 @@ frappe.ui.form.on("Job Card", {
 				return;
 			}
 			if (current_end) {
-				current_time += get_seconds_diff(current_end, current_start);
+				current_time += current_end.diff(current_start, "seconds", true);
 			}
 			[current_start, current_end] = [start, end];
 		});
 
 		if (current_end) {
-			current_time += get_seconds_diff(current_end, current_start);
+			current_time += current_end.diff(current_start, "seconds", true);
 		}
 		return current_time;
 	},
@@ -574,6 +574,29 @@ frappe.ui.form.on("Job Card Time Log", {
 	},
 });
 
+<<<<<<< HEAD
 function get_seconds_diff(d1, d2) {
 	return moment(d1).diff(d2, "seconds");
+=======
+function get_last_completed_row(time_logs) {
+	const completed_rows = time_logs.filter((d) => d.to_time);
+	return completed_rows[completed_rows.length - 1];
+}
+
+function get_last_row(time_logs) {
+	return time_logs[time_logs.length - 1] || {};
+}
+
+function get_completable_qty(frm, qty) {
+	const max_completable_qty = frm.doc.__onload?.max_completable_qty;
+	if (max_completable_qty == null) {
+		return qty;
+	}
+
+	return Math.min(flt(qty), Math.max(flt(max_completable_qty), 0));
+}
+
+function get_qty_with_uom(qty, stock_uom) {
+	return stock_uom ? `${flt(qty)} ${stock_uom}` : flt(qty);
+>>>>>>> b60d936 (fix(manufacturing): keep wall-clock and fractional seconds in the Job Card timer)
 }
