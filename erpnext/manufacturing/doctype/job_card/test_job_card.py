@@ -4020,7 +4020,6 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual([row.status for row in work_order.operations], ["Completed", "Completed"])
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
-<<<<<<< HEAD
 	def test_material_shortages_list_only_short_raw_materials(self):
 		job_card, _first_item, second_item = make_jc_review_shortage_job_card()
 
@@ -4053,7 +4052,8 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertIn("Move the raw materials", str(error.exception))
 		self.assertIn(first_item, str(error.exception))
 		self.assertIn(second_item, str(error.exception))
-=======
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_card_for_handed_over_pending_qty_cannot_be_cancelled_after_manufacture(self):
 		workstation = make_jc_review_workstation()
 		operation = make_jc_review_operation(workstation)
@@ -4080,7 +4080,6 @@ class TestJobCard(ERPNextTestSuite):
 		frappe.get_doc(make_stock_entry_for_work_order(wo.name, "Manufacture", 10)).submit()
 
 		self.assertRaises(JobCardCancelError, second_card.cancel)
->>>>>>> 993ddcf (test: Job Card for the handed-over pending qty cannot be cancelled after manufacture)
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_sub_operations_with_two_operators_keep_completed_qty(self):

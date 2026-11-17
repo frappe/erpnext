@@ -1235,21 +1235,6 @@ class JobCard(Document):
 		):
 			return
 
-<<<<<<< HEAD
-=======
-		for_quantity, time_in_mins, process_loss_qty, pending_qty = self.get_operation_totals()
-
-		wo = frappe.get_doc("Work Order", self.work_order)
-
-		if self.is_corrective_job_card:
-			self.update_corrective_in_work_order(wo)
-
-		elif self.operation_id:
-			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
-			self.update_work_order_data(for_quantity, process_loss_qty, pending_qty, time_in_mins, wo)
-
-	def get_operation_totals(self):
->>>>>>> 6f32865 (fix(manufacturing): do not count handed-over pending qty in the Job Card cancel check)
 		for_quantity, time_in_mins, process_loss_qty, pending_qty = 0, 0, 0, 0
 
 		data = self.get_current_operation_data()
@@ -1265,7 +1250,7 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
-			self.validate_produced_quantity(for_quantity, process_loss_qty, pending_qty, wo)
+			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
 			self.update_work_order_data(for_quantity, process_loss_qty, pending_qty, time_in_mins, wo)
 
 	def update_semi_finished_good_details(self):
