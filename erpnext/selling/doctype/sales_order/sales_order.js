@@ -1917,9 +1917,11 @@ function prevent_past_delivery_dates(frm) {
 
 function get_unreserved_qty(item) {
 	// stock_reserved_qty is what is still reserved, so the delivered qty comes off as well
-	const unreserved_stock_qty =
+	const unreserved_stock_qty = flt(
 		flt(item.stock_qty) -
-		flt(item.delivered_qty) * flt(item.conversion_factor) -
-		flt(item.stock_reserved_qty);
-	return flt(unreserved_stock_qty / flt(item.conversion_factor), precision("qty", item));
+			flt(item.delivered_qty) * flt(item.conversion_factor) -
+			flt(item.stock_reserved_qty),
+		precision("stock_qty", item)
+	);
+	return unreserved_stock_qty / flt(item.conversion_factor);
 }
