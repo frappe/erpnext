@@ -102,19 +102,32 @@ def get_received_as_on(as_on_date):
 def get_returned_as_on(as_on_date):
 	"""Qty cancelled and stock sent back per invoice row by debit notes posted on or before the date.
 
-	`billing_only_qty` is the part cancelled by debit notes that do not move stock.
+	`billing_only_qty` is the part cancelled by debit notes that do not move stock. All qty is in the
+	invoice row's UOM, as a debit note may be in another UOM.
 	"""
 	debit_note = frappe.qb.DocType("Purchase Invoice")
 	debit_note_item = frappe.qb.DocType("Purchase Invoice Item")
-	stock_returned_qty = Case().when(debit_note.update_stock == 1, -debit_note_item.received_qty).else_(0)
-	billing_only_qty = Case().when(debit_note.update_stock == 0, -debit_note_item.qty).else_(0)
+	original_item = frappe.qb.DocType("Purchase Invoice Item").as_("original_item")
+
+	def returned_in_invoice_uom(qty):
+		return -qty * debit_note_item.conversion_factor / original_item.conversion_factor
+
+	qty = returned_in_invoice_uom(debit_note_item.qty)
+	stock_returned_qty = (
+		Case()
+		.when(debit_note.update_stock == 1, returned_in_invoice_uom(debit_note_item.received_qty))
+		.else_(0)
+	)
+	billing_only_qty = Case().when(debit_note.update_stock == 0, qty).else_(0)
 	return (
 		frappe.qb.from_(debit_note_item)
 		.join(debit_note)
 		.on(debit_note.name == debit_note_item.parent)
+		.join(original_item)
+		.on(original_item.name == debit_note_item.purchase_invoice_item)
 		.select(
 			debit_note_item.purchase_invoice_item.as_("detail"),
-			Sum(-debit_note_item.qty).as_("qty"),
+			Sum(qty).as_("qty"),
 			Sum(stock_returned_qty).as_("stock_qty"),
 			Sum(billing_only_qty).as_("billing_only_qty"),
 		)
@@ -123,7 +136,6 @@ def get_returned_as_on(as_on_date):
 			& (debit_note.is_return == 1)
 			& (debit_note.posting_date <= as_on_date)
 		)
-		.where(debit_note_item.purchase_invoice_item.isnotnull())
 		.groupby(debit_note_item.purchase_invoice_item)
 	).as_("returned")
 
