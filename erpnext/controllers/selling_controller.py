@@ -1185,9 +1185,14 @@ class SellingController(StockController):
 				qty_to_deliver = item.stock_qty
 =======
 				qty_to_deliver = item.get("stock_qty") or item.qty
+<<<<<<< HEAD
 				# read once, so that each reservation takes only what the ones before it left
 				delivered_serial_nos, delivered_batch_qty = None, None
 >>>>>>> d37c0d7 (fix(stock): count a batch delivery once across the reservations of an order row)
+=======
+				# shared by the row's reservations, so none counts a serial / batch qty twice
+				delivered_serial_nos, delivered_batch_qty = get_delivered_serial_batch_for_reservation(item)
+>>>>>>> 18d48b4 (refactor(stock): read a row's delivered serial and batch qty once before its reservations)
 				for sre in sre_list:
 					if qty_to_deliver <= 0:
 						break
@@ -1200,6 +1205,7 @@ class SellingController(StockController):
 						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 =======
 					if sre_doc.reservation_based_on == "Serial and Batch":
+<<<<<<< HEAD
 						# Delivered serial/batch may live in a Serial and Batch Bundle or directly in the
 						# row's serial_no/batch_no fields (use_serial_batch_fields). Read from whichever is
 						# present so this never crashes on a missing bundle.
@@ -1209,6 +1215,8 @@ class SellingController(StockController):
 								delivered_batch_qty,
 							) = get_delivered_serial_batch_for_reservation(item)
 >>>>>>> d37c0d7 (fix(stock): count a batch delivery once across the reservations of an order row)
+=======
+>>>>>>> 18d48b4 (refactor(stock): read a row's delivered serial and batch qty once before its reservations)
 						if sre_doc.has_serial_no:
 							delivered_serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
@@ -1273,9 +1281,17 @@ class SellingController(StockController):
 				qty_to_undelivered = item.stock_qty
 =======
 				qty_to_undelivered = item.get("stock_qty") or item.qty
+<<<<<<< HEAD
 				# read once, so that each reservation gives back only what the ones before it left
 				serial_nos_to_undelivered, batch_qty_to_undelivered = None, None
 >>>>>>> d37c0d7 (fix(stock): count a batch delivery once across the reservations of an order row)
+=======
+				# shared by the row's reservations, so none gives back a serial / batch qty twice
+				(
+					serial_nos_to_undelivered,
+					batch_qty_to_undelivered,
+				) = get_delivered_serial_batch_for_reservation(item)
+>>>>>>> 18d48b4 (refactor(stock): read a row's delivered serial and batch qty once before its reservations)
 				for sre in sre_list:
 					if qty_to_undelivered <= 0:
 						break
@@ -1289,11 +1305,14 @@ class SellingController(StockController):
 						if sre_doc.has_serial_no:
 =======
 					if sre_doc.reservation_based_on == "Serial and Batch":
+<<<<<<< HEAD
 						if batch_qty_to_undelivered is None:
 							sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 >>>>>>> d37c0d7 (fix(stock): count a batch delivery once across the reservations of an order row)
 							serial_nos_to_undelivered = [d.serial_no for d in sbb.entries]
 							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
+=======
+>>>>>>> 18d48b4 (refactor(stock): read a row's delivered serial and batch qty once before its reservations)
 						if sre_doc.has_serial_no:
 							for entry in sre_doc.sb_entries:
 								if entry.serial_no in serial_nos_to_undelivered:
