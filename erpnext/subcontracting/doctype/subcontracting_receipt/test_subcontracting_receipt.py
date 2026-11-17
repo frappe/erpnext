@@ -927,6 +927,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_return_of_receipt_without_consumed_bundle_keeps_consumed_rate(self):
+		set_backflush_based_on("BOM")
 		sco = make_order_with_two_batches_transferred()
 		for _ in range(2):
 			scr = make_subcontracting_receipt(sco.name)
