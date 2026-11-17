@@ -1927,6 +1927,31 @@ class TestProductionPlan(ERPNextTestSuite):
 		# 7 in Stores is available: 5 transferred from Work In Progress and 8 bought
 		self.assertEqual(flt(item_row[header.index("Required Qty")]), 13)
 
+	def test_transfer_counts_stock_of_selected_default_warehouse(self):
+		rm_item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"item_defaults": [{"company": "_Test Company", "default_warehouse": "Stores - _TC"}],
+			}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		make_bom(item=fg_item, raw_materials=[rm_item], currency="INR")
+		make_stock_entry(item_code=rm_item, target="Stores - _TC", qty=7, rate=100)
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=5,
+			ignore_existing_ordered_qty=1,
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "Stores - _TC"}], get_parent_warehouse_data=True
+		)
+
+		# 7 in Stores covers the 5 needed
+		self.assertFalse(items)
+
 	def test_requested_sub_assembly_components_are_not_requested(self):
 		for item in (
 			"_Test PP Bought SA RM",
