@@ -2488,6 +2488,76 @@ class TestPurchaseReceipt(FrappeTestCase):
 			10,
 		)
 
+	def test_return_of_only_the_rejected_batch_of_an_internal_transfer(self):
+		"""A return of only the rejected qty of an internal receipt puts the rejected stock back in
+		transit at the value it came in with, when the row is in another UOM."""
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		from_warehouse = create_warehouse("_Test Batch Transfer From", company=company)
+		transit_warehouse = create_warehouse("_Test Batch Transfer Transit", company=company)
+		to_warehouse = create_warehouse("_Test Batch Transfer To", company=company)
+		rejected_warehouse = create_warehouse("_Test Batch Transfer Rejected", company=company)
+
+		item_doc = make_item(
+			"_Test Box Batch Item For Rejected Return",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BRR-.####"},
+			uoms=[{"uom": "Box", "conversion_factor": 2}],
+		)
+		receipt = make_purchase_receipt(
+			item_code=item_doc.name, company=company, warehouse=from_warehouse, qty=20, rate=100
+		)
+		dn = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer="_Test Internal Customer 2",
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=6,
+			rate=200,
+			warehouse=from_warehouse,
+			target_warehouse=transit_warehouse,
+			do_not_save=True,
+		)
+		dn.items[0].update(
+			{
+				"uom": "Box",
+				"conversion_factor": 2,
+				"use_serial_batch_fields": 1,
+				"batch_no": get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle),
+			}
+		)
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.items[0].update(
+			{
+				"warehouse": to_warehouse,
+				"qty": 3,
+				"rejected_qty": 3,
+				"received_qty": 6,
+				"rejected_warehouse": rejected_warehouse,
+			}
+		)
+		pr.submit()
+
+		purchase_return = make_return_doc("Purchase Receipt", pr.name)
+		purchase_return.items[0].update({"qty": 0, "rejected_qty": -3, "received_qty": -3})
+		purchase_return.submit()
+
+		stock_value = {
+			d.warehouse: d.stock_value_difference
+			for d in frappe.get_all(
+				"Stock Ledger Entry",
+				filters={"voucher_no": purchase_return.name, "is_cancelled": 0},
+				fields=["warehouse", "stock_value_difference"],
+			)
+		}
+		self.assertEqual(stock_value, {transit_warehouse: 600, rejected_warehouse: -600})
+
 	def test_internal_transfer_of_batch_item_bought_in_another_uom(self):
 		"""The package of the in-transit warehouse is sized in stock UOM, which is what the row is
 		validated against."""
