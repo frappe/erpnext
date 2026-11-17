@@ -1049,8 +1049,10 @@ class PickList(TransactionBase):
 				)
 
 			picked_items[item_data.item_code][key]["picked_qty"] += item_data.picked_qty
-			if serial_no:
-				picked_items[item_data.item_code][key]["serial_no"].extend(serial_no)
+			moved_serial_nos = {entry.serial_no for entry in moved_entries.get(item_data.name, [])}
+			picked_items[item_data.item_code][key]["serial_no"].extend(
+				serial for serial in serial_no if serial not in moved_serial_nos
+			)
 
 		self.update_picked_item_from_current_pick_list(picked_items)
 		return picked_items
