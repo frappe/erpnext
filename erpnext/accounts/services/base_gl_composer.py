@@ -286,6 +286,11 @@ class BaseGLComposer:
 			"Company", doc.company, "cost_center"
 		)
 		remarks = _("Expenses Added To Stock for Item {0}").format(item_code)
+		# get_gl_dict leaves the transaction currency amounts to the composer on invoices
+		transaction_amount = flt(
+			amount / (doc.get("conversion_rate") or 1),
+			frappe.get_precision("GL Entry", "debit_in_transaction_currency"),
+		)
 		common_args = {
 			"cost_center": cost_center,
 			"project": item_row.get("project") or doc.get("project"),
@@ -298,6 +303,7 @@ class BaseGLComposer:
 					"account": details.expenses_added_to_stock_account,
 					"against": details.expenses_added_to_stock_contra_account,
 					"debit": amount,
+					"debit_in_transaction_currency": transaction_amount,
 					**common_args,
 				},
 				item=item_row,
@@ -309,6 +315,7 @@ class BaseGLComposer:
 					"account": details.expenses_added_to_stock_contra_account,
 					"against": details.expenses_added_to_stock_account,
 					"debit": -1 * amount,
+					"debit_in_transaction_currency": -1 * transaction_amount,
 					**common_args,
 				},
 				item=item_row,
