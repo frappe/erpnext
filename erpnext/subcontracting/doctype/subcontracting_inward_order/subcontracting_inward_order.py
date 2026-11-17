@@ -150,15 +150,19 @@ class SubcontractingInwardOrder(SubcontractingController):
 			self.db_set("status", status, update_modified=update_modified)
 
 	def update_subcontracted_quantity_in_so(self):
-		"""Sales Order rows keep subcontracted qty in stock UOM."""
+		"""Sales Order rows keep subcontracted qty in stock UOM, from all submitted finished good rows."""
+		table = frappe.qb.DocType("Subcontracting Inward Order Item")
+		fg_qty = dict(
+			frappe.qb.from_(table)
+			.select(table.sales_order_item, Sum(table.qty))
+			.where(table.sales_order_item.isin([item.sales_order_item for item in self.items]))
+			.where(table.docstatus == 1)
+			.groupby(table.sales_order_item)
+			.run()
+		)
 		for item in self.items:
 			doc = frappe.get_doc("Sales Order Item", item.sales_order_item)
-			stock_qty = item.qty * item.subcontracting_conversion_factor
-			doc.subcontracted_qty = (
-				(doc.subcontracted_qty + stock_qty)
-				if self._action == "submit"
-				else (doc.subcontracted_qty - stock_qty)
-			)
+			doc.subcontracted_qty = flt(fg_qty.get(item.sales_order_item)) * doc.stock_qty / doc.fg_item_qty
 			doc.save()
 
 	def set_subcontracting_conversion_factor(self):
