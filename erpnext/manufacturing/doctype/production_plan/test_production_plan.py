@@ -3300,6 +3300,25 @@ class TestProductionPlan(ERPNextTestSuite):
 		plan.submit()
 		self.assertEqual(frappe.db.get_value("Sales Order Item", so.items[1].name, "production_plan_qty"), 0)
 
+	def test_consolidated_production_plan_cannot_exceed_sales_order_qty(self):
+		so = make_sales_order(item_code="Test Production Item 1", qty=10)
+		consolidated_plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_save=True, skip_getting_mr_items=True
+		)
+		consolidated_plan.combine_items = 1
+		consolidated_plan.get_items()
+		consolidated_plan.insert()
+
+		plan = create_production_plan(
+			sales_order=so, get_items_from="Sales Order", do_not_save=True, skip_getting_mr_items=True
+		)
+		plan.po_items[0].planned_qty = 5
+		plan.submit()
+
+		self.assertRaisesRegex(
+			frappe.ValidationError, "Only 5.0 Nos is left to plan", consolidated_plan.submit
+		)
+
 	def test_production_plan_pending_qty_independent_items(self):
 		"Test Prod Plan impact if items are added independently (no from SO or MR)."
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
