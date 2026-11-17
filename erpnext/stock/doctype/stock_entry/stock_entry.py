@@ -511,6 +511,10 @@ class StockEntry(StockController, SubcontractingInwardController):
 		super().on_submit_subcontracting_inward()
 		self.update_material_request_qty()
 
+	def before_cancel(self):
+		super().before_cancel()
+		self.validate_no_returned_components()
+
 	def on_cancel(self):
 		if self.purpose_cls and hasattr(self.purpose_cls, "on_cancel"):
 			self.purpose_cls(self).on_cancel()
@@ -1551,6 +1555,23 @@ class StockEntry(StockController, SubcontractingInwardController):
 			needed_qty[item.name] -= item.qty_to_reserve
 
 		return [item for item in items if item.qty_to_reserve > 0]
+
+	def validate_no_returned_components(self):
+		"""A transfer cancelled after a return of its stock would leave the return's reservation on top of its own."""
+		if self.purpose == "Send to Subcontractor" and frappe.db.exists(
+			"Stock Reservation Entry",
+			{
+				"docstatus": 1,
+				"from_voucher_type": "Stock Entry",
+				"from_voucher_no": self.name,
+				"transferred_qty": (">", 0),
+			},
+		):
+			frappe.throw(
+				_(
+					"A Return of Components against {0} returned stock this entry sent. Cancel it first."
+				).format(get_link_to_form("Subcontracting Order", self.subcontracting_order))
+			)
 
 	def cancel_stock_reservation_entries_for_subcontracting(self):
 		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
