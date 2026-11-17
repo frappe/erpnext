@@ -13,7 +13,12 @@ from frappe.model.document import Document
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt
 
-from erpnext.stock.get_item_details import get_conversion_factor, get_item_details, get_price_list_rate
+from erpnext.stock.get_item_details import (
+	get_bundle_row_stock_qty,
+	get_conversion_factor,
+	get_item_details,
+	get_price_list_rate,
+)
 
 
 class PackedItem(Document):
@@ -100,7 +105,12 @@ def make_packing_list(doc, order_packed_items=None):
 				item_data = get_packed_item_details(bundle_item.item_code, doc.company)
 				# a component picked from several locations gets a packed row per location
 				locations = get_pick_list_locations(
-					doc, item_row, bundle_item, item_data, so_packed_item, stale_packed_items_table
+					doc,
+					item_row,
+					bundle_item,
+					get_packed_qty(item_row, bundle_item, item_data, so_packed_item),
+					so_packed_item,
+					stale_packed_items_table,
 				)
 				for location in locations or [None]:
 					pi_row = add_packed_item_row(
@@ -144,8 +154,8 @@ def get_bundle_components(doc, item_row, bundle_name, order_packed_items):
 
 
 def get_kept_packed_items(doc):
-	"""Yield (packed row, bundle row, stock qty per bundle unit) for each packed row of the last
-	build that make_packing_list keeps for the bundle rows as they are now."""
+	"""Yield (packed row, stock qty) for each packed row of the last build that make_packing_list
+	keeps for the bundle rows as they are now."""
 	packed_items_table = get_indexed_packed_items_table(doc)
 	order_packed_items = get_order_packed_items(doc)
 	# only a bundle row that has packed rows can keep one
@@ -160,20 +170,26 @@ def get_kept_packed_items(doc):
 		for bundle_item, so_packed_item in get_bundle_components(
 			doc, item_row, bundle_name, order_packed_items
 		):
-			stale_rows = get_stale_packed_rows(
-				doc,
-				item_row,
-				bundle_item,
-				packed_items_table,
-				get_linked_packed_item(doc, so_packed_item),
-			)
-			if stale_rows:
-				packed_row = stale_rows.pop(0)
-				yield (
-					packed_row,
-					item_row,
-					get_component_stock_qty_per_unit(bundle_item, packed_row.uom, so_packed_item),
-				)
+			yield from get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_items_table)
+
+
+def get_kept_component_rows(doc, item_row, bundle_item, so_packed_item, packed_items_table):
+	"""Yield (packed row, stock qty) for each stale row of the component that a re-pack keeps,
+	one per Pick List location it is packed from."""
+	stale_rows = get_stale_packed_rows(
+		doc, item_row, bundle_item, packed_items_table, get_linked_packed_item(doc, so_packed_item)
+	)
+	if not stale_rows:
+		return
+
+	precision = frappe.get_precision("Packed Item", "qty")
+	qty_per_unit = get_component_stock_qty_per_unit(bundle_item, stale_rows[0].uom, so_packed_item)
+	qty = flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision)
+	locations = get_pick_list_locations(doc, item_row, bundle_item, qty, so_packed_item, packed_items_table)
+	for location in locations or [None]:
+		if stale_rows:
+			packed_row = stale_rows.pop(get_stale_row_idx(stale_rows, location))
+			yield packed_row, flt(location.pack_qty, precision) if location else qty
 
 
 def is_product_bundle(item_code: str) -> bool:
@@ -605,8 +621,8 @@ def get_order_packed_item_pairs(doc) -> list[tuple]:
 	return pairs
 
 
-def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_packed_item, packed_items_table):
-	"""Pick List rows to pack a component from, each with its ``pack_qty``."""
+def get_pick_list_locations(doc, main_item_row, packing_item, qty, so_packed_item, packed_items_table):
+	"""Pick List rows to pack the component's stock ``qty`` from, each with its ``pack_qty``."""
 	if not main_item_row.get("against_pick_list"):
 		return []
 
@@ -639,7 +655,6 @@ def get_pick_list_locations(doc, main_item_row, packing_item, item_data, so_pack
 	)
 	stale_rows = packed_items_table.get(key, [])
 	pl_rows.sort(key=lambda row: not any(is_packed_from(stale_row, row) for stale_row in stale_rows))
-	qty = get_packed_qty(main_item_row, packing_item, item_data, so_packed_item)
 	return allocate_picked_qty(pl_rows, qty)
 
 

@@ -477,14 +477,7 @@ def get_current_packed_items(doc):
 	if not isinstance(doc, Document):
 		doc = frappe.get_doc(doc)
 
-	precision = frappe.get_precision("Packed Item", "qty")
-	return [
-		frappe._dict(
-			packed_row.as_dict(),
-			qty=flt(qty_per_unit * get_bundle_row_stock_qty(item_row), precision),
-		)
-		for packed_row, item_row, qty_per_unit in get_kept_packed_items(doc)
-	]
+	return [frappe._dict(packed_row.as_dict(), qty=qty) for packed_row, qty in get_kept_packed_items(doc)]
 
 
 def get_bundle_row_stock_qty(item_row):
