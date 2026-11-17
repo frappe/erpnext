@@ -28,7 +28,7 @@ def add_additional_cost(stock_entry, work_order, job_card=None):
 def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=None):
 	bom = frappe.get_doc("BOM", work_order.bom_no)
 	item_amounts = _non_phantom_item_amounts(bom, _bom_items_table(work_order, job_card))
-	cost = _non_stock_items_cost(item_amounts, stock_entry, bom)
+	cost = _non_stock_items_cost(item_amounts, _finished_good_qty(stock_entry, work_order, job_card), bom)
 
 	if cost:
 		stock_entry.append(
@@ -55,7 +55,19 @@ def _non_phantom_item_amounts(bom, table):
 	return items
 
 
-def _non_stock_items_cost(item_amounts, stock_entry, bom):
+def _finished_good_qty(stock_entry, work_order, job_card):
+	"""Entry qty in finished good units; a Job Card entry is in its operation's output item."""
+	from erpnext.manufacturing.doctype.work_order.mapper import get_operation_qty
+
+	qty = flt(stock_entry.fg_completed_qty)
+	if not job_card:
+		return qty
+
+	operation = work_order.get("operations", {"name": job_card.operation_id})[0]
+	return qty * flt(work_order.qty) / get_operation_qty(work_order, operation)
+
+
+def _non_stock_items_cost(item_amounts, fg_qty, bom):
 	non_stock_items = frappe.get_all(
 		"Item",
 		fields="name",
@@ -65,7 +77,7 @@ def _non_stock_items_cost(item_amounts, stock_entry, bom):
 
 	cost = 0.0
 	for name in non_stock_items:
-		cost += flt(item_amounts.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+		cost += flt(item_amounts.get(name[0])) * fg_qty / flt(bom.quantity)
 	return cost
 
 
