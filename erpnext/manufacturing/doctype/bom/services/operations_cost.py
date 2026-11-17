@@ -171,6 +171,8 @@ def _add_remaining_operating_cost(stock_entry, work_order, expense_account, job_
 		_add_fg_based_operating_cost(stock_entry, work_order, expense_account, job_card)
 		return
 	if job_card:
+		for operation in work_order.get("operations", {"name": job_card.operation_id}):
+			_add_operation_cost(stock_entry, work_order, operation, expense_account)
 		return
 
 	if work_order.operations and not uses_sub_assembly_operating_cost(work_order, stock_entry.bom_no):
