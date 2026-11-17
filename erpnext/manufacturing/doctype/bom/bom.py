@@ -1272,6 +1272,10 @@ class BOM(WebsiteGenerator):
 		return BOMCostingService(self).get_rm_rate(arg, notify)
 
 	@frappe.whitelist()
+	def apply_price_list(self, row: str | None = None):
+		return BOMCostingService(self).apply_price_list(row)
+
+	@frappe.whitelist()
 	def update_cost(
 		self,
 		update_parent: bool = True,
