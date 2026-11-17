@@ -2385,6 +2385,7 @@ def get_reserved_qty_for_production(
 			((wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty)), 0.0
 		)
 		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+		qty_field = qty_field.when(wo_item.consumed_qty > wo_item.required_qty, 0.0)
 		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
 
 	query = (
