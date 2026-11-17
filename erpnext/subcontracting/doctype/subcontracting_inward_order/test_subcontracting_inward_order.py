@@ -558,15 +558,7 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 	def test_part_rm_return_of_batch_received_in_two_lots(self):
 		so, scio = create_so_scio()
-		first_rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		next(item for item in first_rm_in.items if item.item_code == "RM with Batch").qty = 3
-		first_rm_in.submit()
-		scio.reload()
-		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
-		rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
-		rm_in.submit()
-
-		scio.reload()
+		receive_batch_in_two_lots(scio)
 		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
 		rm_return.items = [item for item in rm_return.items if item.item_code == "RM with Batch"]
 		rm_return.items[0].qty = 2
@@ -574,6 +566,18 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		bundle = rm_return.items[0].serial_and_batch_bundle
 		self.assertEqual(abs(frappe.get_value("Serial and Batch Bundle", bundle, "total_qty")), 2)
+
+	def test_rm_return_rows_of_one_batch_item_take_each_reserved_qty_once(self):
+		so, scio = create_so_scio()
+		receive_batch_in_two_lots(scio)
+		rm_return = frappe.new_doc("Stock Entry").update(scio.make_rm_return())
+		row = next(item for item in rm_return.items if item.item_code == "RM with Batch")
+		row.qty = 2
+		rm_return.items = [row]
+		rm_return.append("items", row.as_dict(no_default_fields=True))
+		rm_return.submit()
+
+		self.assertEqual(rm_return.docstatus, 1)
 
 	def test_fg_return_takes_batches_up_to_their_delivered_qty(self):
 		first, second = (
@@ -1785,6 +1789,19 @@ def create_delivered_so_scio():
 	frappe.new_doc("Stock Entry").update(scio.make_subcontracting_delivery()).submit()
 	scio.reload()
 	return so, scio
+
+
+def receive_batch_in_two_lots(scio):
+	"""Receive the batch raw material as 3 and then 2, in two batches."""
+	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+	next(item for item in rm_in.items if item.item_code == "RM with Batch").qty = 3
+	rm_in.submit()
+
+	scio.reload()
+	rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+	rm_in.items = [item for item in rm_in.items if item.item_code == "RM with Batch"]
+	rm_in.submit()
+	scio.reload()
 
 
 def receive_batch_twice(scio, first_qty=3):
