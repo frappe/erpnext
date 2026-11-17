@@ -195,11 +195,7 @@ class SalesOrderSourcingService:
 			query = query.where(so_item.item_code == self.doc.item_code)
 
 		items = query.run(as_dict=True)
-		planned_qty = get_planned_bundle_component_qty([item.name for item in items])
-		precision = frappe.get_precision("Production Plan Item", "planned_qty")
-		for item in items:
-			unplanned_qty = flt(item.qty) - planned_qty.get((item.name, item.item_code), 0)
-			item.pending_qty = flt(max(min(flt(item.pending_qty), unplanned_qty), 0), precision)
+		_set_packed_item_pending_qty(items)
 		return items
 
 	def get_mr_items(self):
@@ -347,6 +343,16 @@ def _set_so_item_pending_qty(items):
 		item.pending_qty = flt(min(pending_qty, flt(item.qty) - flt(item.production_plan_qty)), precision)
 
 
+def _set_packed_item_pending_qty(items):
+	planned_qty = get_planned_bundle_component_qty([item.name for item in items])
+	precision = frappe.get_precision("Production Plan Item", "planned_qty")
+	for item in items:
+		key = (item.name, item.item_code)
+		allocated = min(planned_qty.get(key, 0), flt(item.qty))
+		planned_qty[key] = planned_qty.get(key, 0) - allocated
+		item.pending_qty = flt(max(min(flt(item.pending_qty), flt(item.qty) - allocated), 0), precision)
+
+
 def _so_packed_columns(so_item, pi):
 	per_bundle = pi.qty / so_item.qty
 	work_order_qty = so_item.work_order_qty * per_bundle
@@ -441,9 +447,10 @@ def _get_manufactured_bundle_components(sales_orders):
 			so_item.name.as_("sales_order_item"),
 			so_item.stock_qty,
 			pi.item_code,
-			pi.qty,
+			Sum(pi.qty).as_("qty"),
 		)
 		.where((pi.parenttype == "Sales Order") & pi.parent.isin(sales_orders) & (pi.qty > 0) & bom_exists)
+		.groupby(pi.parent, so_item.name, so_item.stock_qty, pi.item_code)
 	).run(as_dict=True)
 
 
