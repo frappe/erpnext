@@ -747,6 +747,21 @@ class TestBlanketOrder(ERPNextTestSuite):
 					self.assertEqual(target.items[0].rate, expected_rate)
 					self.assertEqual(target.items[0].blanket_order, blanket_order.name)
 
+	def test_price_list_in_order_currency_follows_the_exchange_rate(self):
+		company_currency = get_company_currency("_Test Company")
+		transaction_currency = "USD" if company_currency != "USD" else "EUR"
+		blanket_order = new_blanket_order("Selling", currency=transaction_currency, conversion_rate=85)
+		blanket_order.selling_price_list = make_blanket_order_price_list(transaction_currency, 100)
+		blanket_order.price_list_currency = transaction_currency
+		blanket_order.plc_conversion_rate = 83
+		blanket_order.append("items", {"item_code": "_Test Item", "qty": 10})
+
+		pricing = apply_price_list(blanket_order.as_dict())
+
+		self.assertEqual(pricing["parent"]["plc_conversion_rate"], 85)
+		self.assertEqual(pricing["children"][0]["price_list_rate"], 100)
+		self.assertEqual(pricing["children"][0]["base_price_list_rate"], 8500)
+
 	def test_applying_price_list_ignores_empty_item_rows(self):
 		blanket_order = frappe.new_doc("Blanket Order")
 		blanket_order.blanket_order_type = "Selling"
