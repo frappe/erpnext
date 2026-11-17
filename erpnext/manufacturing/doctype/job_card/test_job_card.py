@@ -4054,6 +4054,65 @@ class TestJobCard(ERPNextTestSuite):
 			stock_entry.submit()
 			self.assertEqual(sum(row.amount for row in stock_entry.additional_costs), 300)
 
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_semi_fg_entry_adds_operating_cost_without_workstation_costs(self):
+		from erpnext.manufacturing.doctype.routing.test_routing import setup_operations
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		operation = {
+			"operation": "_Test Operation Without Costs",
+			"workstation": "_Test Workstation Without Costs",
+		}
+		setup_operations([operation])
+		rm_item = make_item("_Test RM Semi FG Without Workstation Costs", {"is_stock_item": 1}).name
+		fg_item = make_item("_Test FG Semi FG Without Workstation Costs", {"is_stock_item": 1}).name
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": fg_item,
+				"company": "_Test Company",
+				"currency": "INR",
+				"quantity": 1,
+				"with_operations": 1,
+				"track_semi_finished_goods": 1,
+				"items": [{"item_code": rm_item, "qty": 1, "rate": 100, "operation_row_id": 1}],
+				"operations": [
+					dict(
+						operation,
+						time_in_mins=6,
+						hour_rate=600,
+						finished_good=fg_item,
+						finished_good_qty=1,
+						is_final_finished_good=1,
+						sequence_id=1,
+					)
+				],
+			}
+		)
+		bom.insert()
+		bom.submit()
+		make_stock_entry(item_code=rm_item, target=warehouse, qty=10, basic_rate=100)
+
+		work_order = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom.name,
+			qty=10,
+			skip_transfer=1,
+			source_warehouse=warehouse,
+			wip_warehouse=warehouse,
+			fg_warehouse=warehouse,
+		)
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		job_card.append(
+			"time_logs",
+			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 10},
+		)
+		job_card.submit()
+
+		entry = frappe.get_doc(job_card.make_stock_entry_for_semi_fg_item())
+		self.assertEqual(sum(row.amount for row in entry.additional_costs if row.has_operating_cost), 600)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_stock_entry_needs_a_job_card_item_reference(self):
 		create_bom_with_multiple_operations()
