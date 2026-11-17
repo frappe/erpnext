@@ -6,6 +6,7 @@ import frappe
 from erpnext.manufacturing.doctype.work_order.mapper import make_stock_entry as make_stock_entry_from_wo
 from erpnext.selling.doctype.sales_order.mapper import make_subcontracting_inward_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.stock_entry.services.serial_batch import StockEntrySABB
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
@@ -571,6 +572,32 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 
 		bundle = rm_return.items[0].serial_and_batch_bundle
 		self.assertEqual(abs(frappe.get_value("Serial and Batch Bundle", bundle, "total_qty")), 2)
+
+	def test_fg_return_takes_batches_up_to_their_delivered_qty(self):
+		first, second = (
+			frappe.get_doc(doctype="Batch", item="RM with Batch", batch_id=frappe.generate_hash(length=10))
+			.insert()
+			.name
+			for _ in range(2)
+		)
+		reservation = frappe.get_doc(
+			doctype="Stock Reservation Entry",
+			voucher_detail_no="_FG Return Row",
+			docstatus=1,
+			sb_entries=[
+				{"batch_no": first, "warehouse": "_Test Warehouse - _TC", "qty": 5, "delivered_qty": 1},
+				{"batch_no": second, "warehouse": "_Test Warehouse - _TC", "qty": 5, "delivered_qty": 2},
+			],
+		)
+		reservation.db_insert()
+		for entry in reservation.sb_entries:
+			entry.parent = reservation.name
+			entry.db_insert()
+
+		_, picked = StockEntrySABB(frappe.new_doc("Stock Entry")).get_serial_nos_and_batches_from_sres(
+			"_FG Return Row", 3, only_pending=False
+		)
+		self.assertEqual(picked, {first: 1, second: 2})
 
 	def test_consumed_serial_and_batch_reservation(self):
 		so, scio = create_so_scio()
