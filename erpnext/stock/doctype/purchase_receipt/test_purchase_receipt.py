@@ -9683,9 +9683,9 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 			company="_Test Company with perpetual inventory",
 			supplier="_Test Supplier USD",
 			currency="USD",
-			conversion_rate=85,
-			qty=10,
-			rate=10,
+			conversion_rate=85.37,
+			qty=3,
+			rate=10.33,
 			warehouse="Stores - TCP1",
 			cost_center="Main - TCP1",
 			expense_account="Stock Received But Not Billed - TCP1",
@@ -9696,7 +9696,7 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pi.submit()
 
 		pr = frappe.get_doc(make_receipt(pi.name))
-		pr.conversion_rate = 83
+		pr.conversion_rate = 83.11
 		pr.submit()
 
 		for entry in frappe.get_all(
