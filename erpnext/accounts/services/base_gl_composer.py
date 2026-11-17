@@ -289,7 +289,7 @@ class BaseGLComposer:
 		# get_gl_dict leaves the transaction currency amounts to the composer on invoices
 		transaction_amount = flt(
 			amount / (doc.get("conversion_rate") or 1),
-			frappe.get_precision("GL Entry", "debit_in_transaction_currency"),
+			frappe.get_precision("GL Entry", "debit_in_transaction_currency", currency=doc.get("currency")),
 		)
 		common_args = {
 			"cost_center": cost_center,
