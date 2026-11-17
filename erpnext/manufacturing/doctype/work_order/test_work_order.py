@@ -8632,6 +8632,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
 			wo.insert()
 
+	def test_over_consumption_with_skip_transfer_reserves_nothing(self):
+		"""A Work Order that consumed more than it needs must not lower the reservation of others."""
+		warehouse = "_Test Warehouse - _TC"
+		raw_material, finished_good = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		test_stock_entry.make_stock_entry(item_code=raw_material, target=warehouse, qty=40, basic_rate=10)
+		make_bom(item=finished_good, raw_materials=[raw_material], source_warehouse=warehouse)
+
+		work_orders = [
+			make_wo_order_test_record(
+				production_item=finished_good,
+				qty=qty,
+				skip_transfer=1,
+				source_warehouse=warehouse,
+				wip_warehouse=warehouse,
+				fg_warehouse="Finished Goods - _TC",
+			)
+			for qty in (10, 5)
+		]
+
+		stock_entry = frappe.get_doc(make_stock_entry(work_orders[0].name, "Manufacture", 5))
+		for row in stock_entry.items:
+			if row.item_code == raw_material:
+				row.qty = row.transfer_qty = 12
+		stock_entry.submit()
+
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": raw_material, "warehouse": warehouse}, "reserved_qty_for_production"
+		)
+		self.assertEqual(reserved_qty, 5)
+
 
 def get_reserved_entries(voucher_no, warehouse=None):
 	doctype = frappe.qb.DocType("Stock Reservation Entry")
