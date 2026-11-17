@@ -213,14 +213,14 @@ class SubcontractingInwardOrder(SubcontractingController):
 		)
 		for service_item in self.service_items:
 			item = next(item for item in self.items if item.sales_order_item == service_item.sales_order_item)
-			service_item.qty = flt(
+			qty = (
 				item.qty
 				* item.subcontracting_conversion_factor
-				/ conversion_factors[service_item.sales_order_item],
-				service_item.precision("qty"),
+				/ conversion_factors[service_item.sales_order_item]
 			)
+			service_item.qty = flt(qty, service_item.precision("qty"))
 			service_item.fg_item_qty = item.qty
-			service_item.amount = flt(service_item.qty * service_item.rate, service_item.precision("amount"))
+			service_item.amount = flt(qty * service_item.rate, service_item.precision("amount"))
 
 	def populate_items_table(self):
 		items = []
@@ -240,8 +240,9 @@ class SubcontractingInwardOrder(SubcontractingController):
 				si.fg_item_qty = flt(
 					available_qty / conversion_factor, frappe.get_precision("Sales Order Item", "qty")
 				)
-				si.qty = flt(available_qty / so_item.conversion_factor, si.precision("qty"))
-				si.amount = flt(si.qty * si.rate, si.precision("amount"))
+				qty = available_qty / so_item.conversion_factor
+				si.qty = flt(qty, si.precision("qty"))
+				si.amount = flt(qty * si.rate, si.precision("amount"))
 
 				items.append(
 					{
