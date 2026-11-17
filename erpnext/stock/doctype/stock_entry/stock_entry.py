@@ -1754,6 +1754,13 @@ class StockEntry(StockController, SubcontractingInwardController):
 		if self.pick_list:
 			return
 
+		if self.job_card and self.purpose == "Manufacture":
+			frappe.throw(
+				_(
+					"Items of this Stock Entry come from Job Card {0}. Use Record Output on the Job Card instead of Get Items."
+				).format(frappe.bold(self.job_card))
+			)
+
 		if self.purpose in ("Manufacture", "Repack") and self.from_bom and not flt(self.fg_completed_qty):
 			frappe.throw(_("Please set Finished Good Quantity before fetching items from the BOM."))
 
