@@ -248,7 +248,7 @@ class SalesOrderSourcingService:
 			refs[bom_no]["qty"] += data.pending_qty
 			return True
 
-		refs[bom_no] = {"qty": data.pending_qty, "po_item_ref": data.name, "so_details": [detail]}
+		refs[bom_no] = {"qty": data.pending_qty, "so_details": [detail]}
 		return False
 
 	def _append_po_item(self, data, item_details, bom_no):
@@ -283,6 +283,7 @@ class SalesOrderSourcingService:
 			po_item.planned_qty = refs[po_item.bom_no]["qty"]
 			po_item.pending_qty = refs[po_item.bom_no]["qty"]
 			po_item.sales_order = ""
+			po_item.item_reference = po_item.bom_no
 		self.add_pp_ref(refs)
 
 	def add_pp_ref(self, refs):
@@ -291,7 +292,7 @@ class SalesOrderSourcingService:
 				self.doc.append(
 					"prod_plan_references",
 					{
-						"item_reference": refs[bom_no]["po_item_ref"],
+						"item_reference": bom_no,
 						"sales_order": so_detail["sales_order"],
 						"sales_order_item": so_detail["sales_order_item"],
 						"qty": so_detail["qty"],
@@ -426,6 +427,10 @@ def _so_packed_filter(bom, so_item, pi, so_list):
 
 def get_planned_bundle_component_qty(so_items):
 	"""Qty of each product bundle component of a Sales Order line planned on submitted plans."""
+	from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		get_planned_qty_of_references,
+	)
+
 	if not so_items:
 		return {}
 
@@ -440,7 +445,17 @@ def get_planned_bundle_component_qty(so_items):
 		fields=["sales_order_item", "item_code", {"SUM": "planned_qty", "as": "qty"}],
 		group_by="sales_order_item, item_code",
 	)
-	return {(row.sales_order_item, row.item_code): flt(row.qty) for row in rows}
+	sales_orders = frappe.get_all(
+		"Sales Order Item", filters={"name": ("in", so_items)}, pluck="parent", distinct=True
+	)
+	so_items = set(so_items)
+	rows += [row for row in get_planned_qty_of_references(sales_orders) if row.sales_order_item in so_items]
+
+	planned_qty = {}
+	for row in rows:
+		key = (row.sales_order_item, row.item_code)
+		planned_qty[key] = planned_qty.get(key, 0) + flt(row.qty)
+	return planned_qty
 
 
 def get_planned_bundle_qty(sales_orders):
