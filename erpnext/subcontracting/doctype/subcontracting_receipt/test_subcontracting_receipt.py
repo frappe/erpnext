@@ -615,6 +615,37 @@ class TestSubcontractingReceipt(ERPNextTestSuite):
 	def test_batch_return_uses_accepted_receipt_rate(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
+<<<<<<< HEAD
+=======
+		scr_return = make_return_subcontracting_receipt(scr_name=scr.name, qty=-8)
+
+		self.assertEqual(scr_return.items[0].process_loss_qty, 0)
+		self.assertEqual(scr_return.items[0].received_qty, -8)
+
+	def test_full_return_of_receipt_with_process_loss_marks_it_returned(self):
+		set_backflush_based_on("BOM")
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty = 8
+		scr.items[0].process_loss_qty = 2
+		scr.save()
+		scr.submit()
+
+		make_return_subcontracting_receipt(scr_name=scr.name)
+
+		scr.load_from_db()
+		self.assertEqual(scr.per_returned, 100)
+		self.assertEqual(scr.status, "Return Issued")
+
+	def test_batch_return_value_matches_receipt(self):
+>>>>>>> 2f6da7e (test: full return of a subcontracting receipt with process loss marks it returned)
 		fg_item = make_item(
 			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
 		).name
