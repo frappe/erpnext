@@ -168,7 +168,7 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 
 	existing_reserved_qty = reserved_qty_details.get(item.name, 0)
 	if item.get("delivered_qty") is not None:
-		return (
+		unreserved_qty = (
 			item.stock_qty
 			- flt(item.delivered_qty) * item.get("conversion_factor", 1)
 			- existing_reserved_qty
@@ -183,4 +183,7 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 			item.qty / stock_qty
 		)  # ratio of packed item qty to main item qty in product bundle
 		delivered_qty = delivered_qty * conversion_factor * bundle_conversion_factor
-		return item.qty - delivered_qty - existing_reserved_qty
+		unreserved_qty = item.qty - delivered_qty - existing_reserved_qty
+
+	# a residue below qty precision, as a fractional conversion factor leaves, is not unreserved
+	return unreserved_qty if flt(unreserved_qty, item.precision("qty")) > 0 else 0
