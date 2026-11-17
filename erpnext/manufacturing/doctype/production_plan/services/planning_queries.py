@@ -170,7 +170,7 @@ def get_sales_orders(self):
 	so = frappe.qb.DocType("Sales Order")
 	so_item = frappe.qb.DocType("Sales Order Item")
 
-	bom_subquery = frappe.qb.from_(bom).select(bom.name).where(bom.is_active == 1)
+	bom_subquery = get_item_or_template_bom_query(bom, so_item)
 	query = _open_so_base_query(self, so, so_item)
 	query = _apply_open_so_filters(self, query, so, so_item)
 
@@ -181,6 +181,21 @@ def get_sales_orders(self):
 	packed_subquery = _packed_item_subquery(bom, so, so_item)
 	query = query.where(ExistsCriterion(bom_subquery) | ExistsCriterion(packed_subquery))
 	return query.run(as_dict=True)
+
+
+def get_item_or_template_bom_query(bom, so_item):
+	"""Active BOMs of the Sales Order item or of its template."""
+	item = frappe.qb.DocType("Item")
+	return (
+		frappe.qb.from_(bom)
+		.from_(item)
+		.select(bom.name)
+		.where(
+			(item.name == so_item.item_code)
+			& bom.item.isin([item.name, item.variant_of])
+			& (bom.is_active == 1)
+		)
+	)
 
 
 def _open_so_base_query(plan, so, so_item):

@@ -9,7 +9,10 @@ from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, now_datetime
 from pypika.terms import ExistsCriterion
 
-from erpnext.manufacturing.doctype.production_plan.services.planning_queries import get_sales_orders
+from erpnext.manufacturing.doctype.production_plan.services.planning_queries import (
+	get_item_or_template_bom_query,
+	get_sales_orders,
+)
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 
 
@@ -157,7 +160,7 @@ class SalesOrderSourcingService:
 	def _so_items(self, so_list):
 		bom = frappe.qb.DocType("BOM")
 		so_item = frappe.qb.DocType("Sales Order Item")
-		items_subquery = frappe.qb.from_(bom).select(bom.name).where(bom.is_active == 1)
+		items_subquery = get_item_or_template_bom_query(bom, so_item)
 		items_query = (
 			frappe.qb.from_(so_item)
 			.select(*_so_item_columns(so_item))
