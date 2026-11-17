@@ -1690,10 +1690,26 @@ class TestSubcontractingOrder(ERPNextTestSuite):
 		transfer = make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
 		return_entry = make_return_of_components(sco, qty=4)
 
-		self.assertRaisesRegex(frappe.ValidationError, "Return of Components", transfer.cancel)
+		self.assertRaisesRegex(frappe.ValidationError, "later entry", transfer.cancel)
 
 		return_entry.cancel()
 		frappe.get_doc("Stock Entry", transfer.name).cancel()
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
+	def test_return_cancels_only_after_the_resend_of_its_stock(self):
+		sco = make_reserving_order_with_new_items("Resend Before Cancel", qty=10)
+		rm_items = get_rm_items(sco.supplied_items)
+		make_stock_in_entry(rm_items=rm_items)
+		sco.submit()
+		make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+		return_entry = make_return_of_components(sco, qty=4)
+		rm_items[0]["qty"] = 4
+		resend = make_stock_transfer_entry(sco_no=sco.name, rm_items=rm_items, itemwise_details={})
+
+		self.assertRaisesRegex(frappe.ValidationError, "later entry", return_entry.cancel)
+
+		resend.cancel()
+		frappe.get_doc("Stock Entry", return_entry.name).cancel()
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"enable_stock_reservation": 1})
 	def test_receipt_cancel_gives_back_only_its_own_batch_consumption(self):
