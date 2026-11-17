@@ -4,6 +4,7 @@
 import frappe
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.selling.doctype.customer.test_customer import create_internal_customer
 from erpnext.selling.doctype.quotation.test_quotation import make_quotation
 from erpnext.selling.doctype.sales_order.mapper import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -153,11 +154,16 @@ class TestSellingControllerConversions(ERPNextTestSuite):
 	def test_inter_company_sale_keeps_the_last_purchase_rate_check(self):
 		item_code = make_item(properties={"is_stock_item": 0}).name
 		frappe.db.set_value("Item", item_code, "last_purchase_rate", 120)
+		customer = create_internal_customer(
+			customer_name="_Test Internal Customer",
+			represents_company="_Test Company 1",
+			allowed_to_interact_with="Wind Power LLC",
+		)
 
 		si = create_sales_invoice(
 			item_code=item_code,
 			company="Wind Power LLC",
-			customer="_Test Internal Customer",
+			customer=customer,
 			debit_to="Debtors - WP",
 			income_account="Sales - WP",
 			expense_account="Cost of Goods Sold - WP",
