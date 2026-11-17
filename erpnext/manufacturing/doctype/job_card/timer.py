@@ -6,10 +6,14 @@ from typing import Any
 
 import frappe
 from frappe.query_builder import Case, Criterion
-from frappe.query_builder.functions import IfNull, Max, Sum
-from frappe.utils import cint, flt, now_datetime, time_diff_in_seconds
+from frappe.query_builder.functions import IfNull
+from frappe.utils import cint, flt, now_datetime
 
-from erpnext.manufacturing.doctype.job_card.job_card import CLOSED_WORK_ORDER_STATUSES
+from erpnext.manufacturing.doctype.job_card.job_card import (
+	CLOSED_WORK_ORDER_STATUSES,
+	get_workstation_minutes,
+)
+from erpnext.manufacturing.doctype.workstation.workstation import get_time_logs
 
 LIST_FIELDS = ["name", "status", "docstatus", "operation", "workstation", "for_quantity"]
 
@@ -88,8 +92,7 @@ def attach_timer_summary(job_cards: list[dict]) -> None:
 
 	item = frappe.qb.DocType("Job Card Item")
 
-	time_log_summary = get_time_log_summary(names)
-	open_logs = get_open_time_logs(names)
+	time_logs = get_time_logs(names)
 	employees = get_assigned_employees(names)
 	pending_transfer = get_parents_with_rows(
 		"Job Card Item", "items", names, IfNull(item.transferred_qty, 0) < item.required_qty
@@ -98,47 +101,19 @@ def attach_timer_summary(job_cards: list[dict]) -> None:
 	work_order_statuses = get_work_order_statuses(job_cards)
 
 	for job_card in job_cards:
-		summary = time_log_summary.get(job_card.name)
-		card_open_logs = open_logs[job_card.name]
+		card_time_logs = time_logs.get(job_card.name, [])
+		open_logs = [log for log in card_time_logs if log.from_time and not log.to_time]
 		job_card.update(
-			has_time_logs=summary is not None,
-			logged_minutes=summary.logged_minutes if summary else 0,
-			open_log_starts=[log.from_time for log in card_open_logs],
+			has_time_logs=bool(card_time_logs),
+			time_logs=card_time_logs,
+			open_log_starts=[log.from_time for log in open_logs],
 			# matches the Job Card form, which goes by the last log
-			last_log_open=bool(summary) and any(log.idx == summary.last_idx for log in card_open_logs),
+			last_log_open=bool(open_logs) and open_logs[-1] is card_time_logs[-1],
 			employees=employees.get(job_card.name, []),
 			has_pending_transfer=job_card.name in pending_transfer,
 			has_sub_operations=job_card.name in with_sub_operations,
 			work_order_status=work_order_statuses.get(job_card.work_order),
 		)
-
-
-def get_time_log_summary(names: list[str]) -> dict[str, frappe._dict]:
-	time_log = frappe.qb.DocType("Job Card Time Log")
-	rows = (
-		frappe.qb.from_(time_log)
-		.select(
-			time_log.parent,
-			Sum(IfNull(time_log.time_in_mins, 0)).as_("logged_minutes"),
-			Max(time_log.idx).as_("last_idx"),
-		)
-		.where(child_rows_criterion(time_log, "time_logs", names))
-		.groupby(time_log.parent)
-		.run(as_dict=True)
-	)
-	return {row.parent: row for row in rows}
-
-
-def get_open_time_logs(names: list[str]) -> dict[str, list[frappe._dict]]:
-	time_log = frappe.qb.DocType("Job Card Time Log")
-	rows = (
-		frappe.qb.from_(time_log)
-		.select(time_log.parent, time_log.idx, time_log.from_time)
-		.where(child_rows_criterion(time_log, "time_logs", names) & time_log.to_time.isnull())
-		.where(time_log.from_time.isnotnull())
-		.run(as_dict=True)
-	)
-	return group_by_parent(rows)
 
 
 def get_assigned_employees(names: list[str]) -> dict[str, list[str]]:
@@ -208,9 +183,10 @@ class JobCardTimer:
 		return row
 
 	def get_elapsed_seconds(self) -> int:
+		# union of the intervals, so parallel operators count once
 		now = now_datetime()
-		open_seconds = sum(time_diff_in_seconds(now, start) for start in self.job_card.open_log_starts)
-		return int(flt(self.job_card.logged_minutes) * 60 + open_seconds)
+		time_logs = [frappe._dict(log, to_time=log.to_time or now) for log in self.job_card.time_logs]
+		return int(get_workstation_minutes(time_logs) * 60)
 
 	def is_running(self) -> bool:
 		return self.job_card.last_log_open and not self.job_card.is_paused
