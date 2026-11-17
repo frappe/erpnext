@@ -3725,6 +3725,56 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(held, {(warehouse, second_batch): {"picked_qty": 1}})
 
 	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_serial_nos_transferred_back_are_no_longer_held(self):
+		warehouse, other_warehouse = "_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": f"PLMOV-{frappe.generate_hash(length=6)}-.###",
+			}
+		).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=4)
+		moved, held = frappe.get_all(
+			"Serial No", {"item_code": item}, pluck="serial_no", order_by="serial_no", limit=2
+		)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"pick_manually": 1,
+				"locations": [
+					{
+						"item_code": item,
+						"qty": 2,
+						"stock_qty": 2,
+						"picked_qty": 2,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+						"serial_no": f"{moved}\n{held}",
+						"use_serial_batch_fields": 1,
+					}
+				],
+			}
+		).submit()
+
+		stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+		stock_entry.items[0].update({"qty": 1, "serial_no": moved, "t_warehouse": other_warehouse})
+		stock_entry.submit()
+		make_stock_entry(
+			item=item,
+			from_warehouse=other_warehouse,
+			to_warehouse=warehouse,
+			qty=1,
+			serial_no=moved,
+			use_serial_batch_fields=1,
+		)
+
+		picked = frappe.new_doc("Pick List").get_picked_items_details([_dict(item_code=item)])[item]
+		self.assertEqual(picked[warehouse].serial_no, SerialBatchIdentity("Serial No").resolve(item, [held]))
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
 	def test_next_stock_entry_from_pick_list_skips_a_serial_no_moved_back_to_its_warehouse(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.work_order.mapper import create_pick_list as pick_list_for_wo
