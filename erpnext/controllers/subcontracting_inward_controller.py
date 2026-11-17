@@ -751,6 +751,7 @@ class SubcontractingInwardController:
 				if item.secondary_item_type or item.valuation_type:
 					secondary_qty[(item.item_code, item.t_warehouse)] += item.transfer_qty
 
+			consumed_by_item = defaultdict(float)
 			for item in [item for item in self.items if not item.is_finished_item]:
 				if item.secondary_item_type or item.valuation_type:
 					scio_secondary_item = frappe.get_value(
@@ -787,9 +788,12 @@ class SubcontractingInwardController:
 						["consumed_qty", "billed_qty", "returned_qty"],
 						as_dict=True,
 					)
-					if scio_rm_item and (scio_rm_item.billed_qty - scio_rm_item.returned_qty) > (
-						scio_rm_item.consumed_qty - item.transfer_qty
-					):
+					key = (item.item_code, item.s_warehouse)
+					consumed_by_item[key] += item.transfer_qty
+					precision = item.precision("transfer_qty")
+					if scio_rm_item and flt(
+						scio_rm_item.billed_qty - scio_rm_item.returned_qty, precision
+					) > flt(scio_rm_item.consumed_qty - consumed_by_item[key], precision):
 						frappe.throw(
 							_(
 								"Row #{0}: Cannot cancel this Manufacturing Stock Entry as billed quantity of Item {1} cannot be greater than consumed quantity."
