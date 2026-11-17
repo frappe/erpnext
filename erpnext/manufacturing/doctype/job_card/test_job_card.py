@@ -4109,6 +4109,39 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual([row.completed_qty for row in job_card.sub_operations], [10, 10])
 		self.assertEqual((job_card.total_completed_qty, job_card.process_loss_qty), (10, 0))
 
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_workstation_type_card_is_scheduled_on_the_free_workstation(self):
+		workstation_type, (busy, free) = make_jc_review_type_workstations(2)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 12, workstation=busy)
+
+		job_card = make_jc_review_scheduled_job_card(
+			"2031-03-03 09:00:00", 6, workstation_type=workstation_type
+		)
+		self.assertEqual(job_card.workstation, free)
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 09:00:00", "2031-03-03 10:00:00")],
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings", {"disable_capacity_planning": 0, "mins_between_operations": 10}
+	)
+	def test_workstation_type_card_uses_spare_workstation_capacity(self):
+		workstation_type, (workstation,) = make_jc_review_type_workstations(1)
+		frappe.db.set_value("Workstation", workstation, "production_capacity", 2)
+		make_jc_review_scheduled_job_card("2031-03-03 08:00:00", 12, workstation=workstation)
+
+		job_card = make_jc_review_scheduled_job_card(
+			"2031-03-03 09:00:00", 6, workstation_type=workstation_type
+		)
+		self.assertEqual(job_card.workstation, workstation)
+		self.assertEqual(
+			[(str(row.from_time), str(row.to_time)) for row in job_card.scheduled_time_logs],
+			[("2031-03-03 09:00:00", "2031-03-03 10:00:00")],
+		)
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_partial_sub_operation_cycles_keep_job_card_qty(self):
 		workstation = make_jc_review_workstation()
@@ -5338,6 +5371,40 @@ def make_jc_review_work_order(fg_item, rows, operations, qty=10, bom_quantity=1,
 	wo.insert()
 	wo.submit()
 	return wo
+
+
+def make_jc_review_type_workstations(count):
+	from erpnext.manufacturing.doctype.workstation_type.test_workstation_type import (
+		create_workstation_type,
+	)
+
+	workstation_type = create_workstation_type(
+		workstation_type=f"_Test JC Review Type {random_string(6)}"
+	).name
+	workstations = [
+		make_workstation(
+			workstation_name=f"_Test JC Review Workstation {random_string(6)}",
+			workstation_type=workstation_type,
+		).name
+		for _ in range(count)
+	]
+	return workstation_type, workstations
+
+
+def make_jc_review_scheduled_job_card(planned_start, time_in_mins, workstation=None, workstation_type=None):
+	operation = {
+		"operation": make_jc_review_operation(workstation),
+		"workstation": workstation,
+		"workstation_type": workstation_type,
+		"time_in_mins": time_in_mins,
+	}
+	wo = make_jc_review_work_order(
+		make_jc_review_item(),
+		[{"item_code": make_jc_review_item(), "qty": 1}],
+		[operation],
+		planned_start_date=planned_start,
+	)
+	return get_jc_review_job_cards(wo.name)[0]
 
 
 def get_jc_review_job_cards(work_order):
