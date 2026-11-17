@@ -22,7 +22,7 @@ frappe.ui.form.on("Payment Entry", {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
 			if (!frm.doc.paid_to) frm.set_value("paid_to_account_currency", null);
 		}
-		// the form object is reused for the next payment, so start without an opt out
+		// the form object is reused for the next payment, so start with suggestions on
 		frm.cheque_book_cleared = false;
 		// an amendment or a copy brings the number of a used cheque, so the suggestion can replace it
 		frm.suggested_cheque_no = frm.doc.__islocal && frm.doc.cheque_book ? frm.doc.reference_no : null;
@@ -281,7 +281,7 @@ frappe.ui.form.on("Payment Entry", {
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 		frappe.flags.allocate_payment_amount = true;
 		if (frm.is_new() && frm.cscript.is_onload) {
-			frm.events.set_cheque_book(frm);
+			frm.events.set_requires_cheque_book(frm);
 		} else if (frm.doc.docstatus === 0 && frm.doc.cheque_book) {
 			frm.events.cheque_book(frm);
 		}
@@ -474,6 +474,7 @@ frappe.ui.form.on("Payment Entry", {
 					frm.set_value(field, null);
 				}
 			);
+			frm.events.set_requires_cheque_book(frm);
 		} else {
 			if (frm.doc.party) {
 				frm.events.party(frm);
@@ -490,7 +491,32 @@ frappe.ui.form.on("Payment Entry", {
 			let payment_account_field = frm.doc.payment_type == "Receive" ? "paid_to" : "paid_from";
 			frm.set_value(payment_account_field, account);
 		});
-		frm.events.set_cheque_book(frm);
+		frm.events.set_requires_cheque_book(frm);
+	},
+
+	// The Mode of Payment decides if a payment needs a cheque book, so ask when it or the payment type changes
+	set_requires_cheque_book: async function (frm) {
+		if (frm.doc.docstatus !== 0) return;
+		const { name, payment_type, mode_of_payment } = frm.doc;
+		let required = false;
+		if (["Pay", "Internal Transfer"].includes(payment_type) && mode_of_payment) {
+			required = await frappe.xcall(
+				"erpnext.accounts.doctype.cheque.cheque_payment.requires_cheque_book",
+				{ payment_type, mode_of_payment }
+			);
+		}
+		// the user can change the form or open another payment while the server answers
+		if (
+			name !== frm.doc.name ||
+			frm.doc.docstatus !== 0 ||
+			payment_type !== frm.doc.payment_type ||
+			mode_of_payment !== frm.doc.mode_of_payment
+		)
+			return;
+		if (cint(frm.doc.requires_cheque_book) !== cint(required)) {
+			await frm.set_value("requires_cheque_book", cint(required));
+		}
+		return frm.events.set_cheque_book(frm);
 	},
 
 	// Suggest a cheque book for a cheque payment. A book that the user picked or cleared stays.
@@ -525,7 +551,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	// Show the free count of the book, and suggest its next number in Cheque/Reference No
 	cheque_book: async function (frm) {
-		// only the user emptying the field opts this payment out of a cheque book
+		// only the user emptying the field stops the suggestions for this payment
 		if (!frm.setting_cheque_book) frm.cheque_book_cleared = !frm.doc.cheque_book;
 		frm.set_df_property("cheque_book", "description", "");
 		const { name, cheque_book, paid_from: account } = frm.doc;
@@ -2113,10 +2139,7 @@ async function set_cheque_book_value(frm, value) {
 }
 
 function is_cheque_payment(frm) {
-	return (
-		["Pay", "Internal Transfer"].includes(frm.doc.payment_type) &&
-		["Cheque", "Check"].includes(frm.doc.mode_of_payment)
-	);
+	return Boolean(frm.doc.requires_cheque_book);
 }
 
 async function ask_cheque_cancellation_reason(frm) {

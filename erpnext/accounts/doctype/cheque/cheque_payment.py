@@ -75,7 +75,12 @@ def validate_cheque(payment_entry):
 		doc.cheque_book = None
 		return
 	if not doc.cheque_book:
-		return
+		if doc.flags.ignore_mandatory:
+			return
+		frappe.throw(
+			_("Mode of Payment {0} requires a Cheque Book").format(frappe.bold(doc.mode_of_payment)),
+			frappe.MandatoryError,
+		)
 
 	if doc.docstatus == 0 and not doc.reference_no:
 		doc.reference_no = get_next_cheque(doc.paid_from, doc.cheque_book).get("cheque_no")
@@ -210,11 +215,16 @@ def cancel_cheque_payment(
 		frappe.throw(_("Payment Entry {0} was not cancelled").format(frappe.bold(name)))
 
 
+@frappe.whitelist()
+def requires_cheque_book(payment_type: str | None = None, mode_of_payment: str | None = None) -> bool:
+	"""A payment out of a company bank account needs a cheque book when its Mode of Payment requires one."""
+	if payment_type not in ("Pay", "Internal Transfer") or not mode_of_payment:
+		return False
+	return bool(frappe.db.get_value("Mode of Payment", mode_of_payment, "requires_cheque_book", cache=True))
+
+
 def is_cheque_payment(payment_entry) -> bool:
-	return payment_entry.payment_type in ("Pay", "Internal Transfer") and payment_entry.mode_of_payment in (
-		"Cheque",
-		"Check",
-	)
+	return requires_cheque_book(payment_entry.payment_type, payment_entry.mode_of_payment)
 
 
 def lock_cheque(name: str) -> Cheque:

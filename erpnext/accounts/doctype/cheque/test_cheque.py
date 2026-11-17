@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.cheque.cheque_payment import (
 	get_next_cheque,
 	issue_cheque,
 	lock_cheque,
+	requires_cheque_book,
 	validate_cheque,
 )
 from erpnext.accounts.doctype.cheque_book.test_cheque_book import (
@@ -87,6 +88,7 @@ class TestChequePayment(ERPNextTestSuite):
 			frappe.get_doc(
 				{"doctype": "Mode of Payment", "mode_of_payment": "Cheque", "type": "Bank"}
 			).insert()
+		frappe.db.set_value("Mode of Payment", "Cheque", "requires_cheque_book", 1)
 		self.bank_account = make_company_bank_account()
 		self.book = make_cheque_book(self.bank_account, "000101", "000105")
 
@@ -256,6 +258,29 @@ class TestChequePayment(ERPNextTestSuite):
 		payment.mode_of_payment = "Cash"
 		payment.save()
 		self.assertEqual((payment.cheque_book, payment.cheque), (None, None))
+
+	def test_mode_of_payment_decides_if_a_cheque_book_is_required(self):
+		payment = self.pay("000101", submit=False)
+		payment.cheque_book = None
+		self.assertRaises(frappe.MandatoryError, payment.save)
+
+		# a mode that does not require a book works as it did before cheque books
+		frappe.db.set_value("Mode of Payment", "Cheque", "requires_cheque_book", 0)
+		payment.reload()
+		self.assertFalse(payment.as_dict().requires_cheque_book)
+		payment.reference_no = "ANY-REF-1"
+		payment.submit()
+		self.assertEqual(
+			(payment.cheque_book, payment.cheque, payment.reference_no), (None, None, "ANY-REF-1")
+		)
+		self.assertEqual(frappe.db.get_value("Cheque", self.name_of("000101"), "status"), "Available")
+
+	def test_only_payments_out_of_the_company_require_a_cheque_book(self):
+		self.assertTrue(requires_cheque_book("Pay", "Cheque"))
+		self.assertTrue(requires_cheque_book("Internal Transfer", "Cheque"))
+		self.assertFalse(requires_cheque_book("Receive", "Cheque"))
+		self.assertFalse(requires_cheque_book("Pay", "Cash"))
+		self.assertFalse(requires_cheque_book("Pay", None))
 
 	def test_issued_cheque_is_cancelled_with_its_payment(self):
 		payment = self.pay("000101")

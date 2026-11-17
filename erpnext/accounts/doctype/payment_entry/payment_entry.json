@@ -36,6 +36,7 @@
   "paid_from_account_type",
   "paid_from_account_currency",
   "paid_from_bank_account",
+  "requires_cheque_book",
   "cheque_book",
   "cheque",
   "reference_no",
@@ -429,11 +430,12 @@
    "options": "Payment Entry Deduction"
   },
   {
-   "depends_on": "eval:in_list([\"Pay\", \"Internal Transfer\"], doc.payment_type) && in_list([\"Cheque\", \"Check\"], doc.mode_of_payment)",
+   "depends_on": "eval:doc.requires_cheque_book || doc.cheque_book",
    "fieldname": "cheque_book",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Cheque Book",
+   "mandatory_depends_on": "eval:doc.requires_cheque_book",
    "options": "Cheque Book",
    "search_index": 1
   },
@@ -826,6 +828,15 @@
    "label": "Payment Term Discounts Calculated",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_cheque_book",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Requires Cheque Book",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
@@ -841,7 +852,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-11-16 12:00:00.000000",
+ "modified": "2026-11-16 16:48:42.393475",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

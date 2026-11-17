@@ -23,6 +23,7 @@ class ModeofPayment(Document):
 		accounts: DF.Table[ModeofPaymentAccount]
 		enabled: DF.Check
 		mode_of_payment: DF.Data
+		requires_cheque_book: DF.Check
 		type: DF.Literal["Cash", "Bank", "General", "Phone"]
 	# end: auto-generated types
 

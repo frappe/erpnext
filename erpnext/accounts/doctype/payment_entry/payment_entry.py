@@ -22,7 +22,12 @@ from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_default_company_bank_account,
 	get_party_bank_account,
 )
-from erpnext.accounts.doctype.cheque.cheque_payment import issue_cheque, validate_cheque, void_cheque
+from erpnext.accounts.doctype.cheque.cheque_payment import (
+	is_cheque_payment,
+	issue_cheque,
+	validate_cheque,
+	void_cheque,
+)
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
@@ -157,6 +162,11 @@ class PaymentEntry(AccountsController):
 		total_taxes_and_charges: DF.Currency
 		unallocated_amount: DF.Currency
 	# end: auto-generated types
+
+	@property
+	def requires_cheque_book(self):
+		# Read from the Mode of Payment on every load, so a draft follows a later change of its mode
+		return cint(is_cheque_payment(self))
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
