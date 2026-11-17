@@ -2176,6 +2176,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(booked_value[get_inventory_account(company, to_warehouse)], 700)
 		self.assertEqual(booked_value[get_inventory_account(company, rejected_warehouse)], 300)
 
+	@change_settings("System Settings", {"float_precision": 2})
 	def test_internal_transfer_that_rejects_material_into_transit(self):
 		"""Material rejected back into the in-transit warehouse stays there, so the receipt and its
 		return book transit with the net stock value that moved through it."""
