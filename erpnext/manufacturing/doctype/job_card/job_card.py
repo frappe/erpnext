@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 import datetime
 import json
-from collections import OrderedDict
 
 import frappe
 from frappe import _, bold
@@ -325,10 +324,10 @@ class JobCard(Document):
 		if not self.has_overlap(production_capacity, time_logs):
 			return {}
 
-		if not self.workstation and self.workstation_type and time_logs:
-			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
-				self.workstation = workstation_time.get("workstation")
-				return workstation_time
+		if not self.workstation and self.workstation_type:
+			if workstation := self.get_free_workstation(time_logs):
+				self.workstation = workstation
+				return {}
 
 		return time_logs[0]
 
@@ -402,11 +401,13 @@ class JobCard(Document):
 			.orderby(jctl.to_time)
 		)
 
-		if self.workstation_type:
-			query = query.where(jc.workstation_type == self.workstation_type)
-
 		if self.workstation:
 			query = query.where(jc.workstation == self.workstation)
+		elif self.workstation_type:
+			if workstations := get_workstations(self.workstation_type):
+				query = query.where(jc.workstation.isin(workstations))
+			else:
+				query = query.where(jc.workstation_type == self.workstation_type)
 
 		if args.get("employee"):
 			if not open_job_cards and doctype == "Job Card Scheduled Time":
@@ -447,32 +448,13 @@ class JobCard(Document):
 		jobs = query.run(as_dict=True)
 		return [job.get("name") for job in jobs] if jobs else []
 
-	def get_workstation_based_on_available_slot(self, existing_time_logs) -> dict:
-		workstations = get_workstations(self.workstation_type)
-		if workstations:
-			busy_workstations = self.time_slot_wise_busy_workstations(existing_time_logs)
-			for time_slot in busy_workstations:
-				available_workstations = sorted(list(set(workstations) - set(busy_workstations[time_slot])))
-				if available_workstations:
-					return frappe._dict(
-						{
-							"workstation": available_workstations[0],
-							"planned_start_time": get_datetime(time_slot[0]),
-							"to_time": get_datetime(time_slot[1]),
-						}
-					)
-
-		return frappe._dict({})
-
-	@staticmethod
-	def time_slot_wise_busy_workstations(existing_time_logs) -> dict:
-		time_slot = OrderedDict()
-		for row in existing_time_logs:
-			from_time = get_datetime(row.from_time).strftime("%Y-%m-%d %H:%M")
-			to_time = get_datetime(row.to_time).strftime("%Y-%m-%d %H:%M")
-			time_slot.setdefault((from_time, to_time), []).append(row.workstation)
-
-		return time_slot
+	def get_free_workstation(self, overlapping_time_logs):
+		for workstation in get_workstations(self.workstation_type):
+			time_logs = [row for row in overlapping_time_logs if row.workstation == workstation]
+			if not time_logs or not self.has_overlap(
+				frappe.get_cached_value("Workstation", workstation, "production_capacity") or 1, time_logs
+			):
+				return workstation
 
 	def schedule_time_logs(self, row):
 		row.remaining_time_in_mins = row.time_in_mins
@@ -542,11 +524,7 @@ class JobCard(Document):
 			return
 
 		if data:
-			if data.get("planned_start_time"):
-				args.planned_start_time = get_datetime(data.planned_start_time)
-			else:
-				args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
-
+			args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
 			args.from_time = args.planned_start_time
 			args.to_time = add_to_date(args.planned_start_time, minutes=row.remaining_time_in_mins)
 
