@@ -803,8 +803,10 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 		# a material is only covered by the entries that consumed it
 		consumed_qty = sum(material.consumed_for.values())
 		if self.wo_doc.transfer_material_against == "Job Card":
-			# the Work Order's transferred qty follows the completed operations, not the moved material
-			pending_qty = sum(material.transferred_for.values()) - consumed_qty
+			# the Work Order's transferred qty follows the completed operations, not the moved material;
+			# each operation that uses the material moves its own share for the same finished goods
+			transferred_qty = max(sum(entries.values()) for entries in material.transferred_for.values())
+			pending_qty = transferred_qty - consumed_qty
 			return pending_qty, pending_qty
 
 		pending_qty = transferred_qty - consumed_qty
@@ -937,12 +939,19 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 	def get_transfer_entries(self):
 		stock_entry = frappe.qb.DocType("Stock Entry")
 		stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+		job_card = frappe.qb.DocType("Job Card")
 
 		return (
 			frappe.qb.from_(stock_entry)
 			.inner_join(stock_entry_detail)
 			.on(stock_entry.name == stock_entry_detail.parent)
-			.select(stock_entry_detail.star, stock_entry.fg_completed_qty.as_("transfer_fg_qty"))
+			.left_join(job_card)
+			.on(stock_entry.job_card == job_card.name)
+			.select(
+				stock_entry_detail.star,
+				stock_entry.fg_completed_qty.as_("transfer_fg_qty"),
+				job_card.operation_id,
+			)
 			.where(
 				(stock_entry.work_order == self.doc.work_order)
 				& (stock_entry.purpose == "Material Transfer for Manufacture")
@@ -970,11 +979,11 @@ class ManufactureStockEntry(BaseManufactureStockEntry):
 					transferred_for={},
 				)
 
-			self.available_materials[key].qty += flt(row.transfer_qty)
-			self.available_materials[key].transferred_for[row.parent] = flt(row.transfer_fg_qty)
+			material = self.available_materials[key]
+			material.qty += flt(row.transfer_qty)
+			material.transferred_for.setdefault(row.operation_id, {})[row.parent] = flt(row.transfer_fg_qty)
 
 			if row.serial_and_batch_bundle:
-				material = self.available_materials[key]
 				details = self.get_sabb_details(row.serial_and_batch_bundle)
 				material.serial_nos.extend(details.serial_nos)
 				for batch_no, qty in details.batches.items():
