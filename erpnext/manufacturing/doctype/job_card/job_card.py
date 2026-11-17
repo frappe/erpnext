@@ -792,7 +792,8 @@ class JobCard(Document):
 					_("Workstation Type {0} has no enabled Workstation").format(bold(self.workstation_type))
 				)
 
-			self.workstation = workstations[0]
+			# all are busy: wait on the workstation whose booking ends first
+			self.workstation = data.get("workstation") or workstations[0]
 
 		if not data:
 			row.planned_start_time = args.from_time
