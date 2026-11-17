@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -5,6 +7,7 @@ from frappe.utils import add_days, flt, get_first_day, get_last_day, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note, make_sales_return
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.accounts.report.gross_profit import gross_profit
 from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator, execute
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -1258,11 +1261,16 @@ class TestGrossProfit(FrappeTestCase):
 			invoices.append(sinv.submit())
 
 		filters = dict(company=self.company, from_date=earlier_date, to_date=nowdate(), item_code=item.name)
-		_, data = execute(frappe._dict(filters, group_by="Invoice"))
+		with patch.object(
+			gross_profit, "_get_incoming_rate", wraps=gross_profit._get_incoming_rate
+		) as rate_lookup:
+			_, data = execute(frappe._dict(filters, group_by="Invoice"))
 		buying_amounts = {row.sales_invoice: row.buying_amount for row in data if row.indent == 0}
 
 		self.assertEqual(buying_amounts[invoices[0].name], 200)
 		self.assertEqual(buying_amounts[invoices[1].name], 400)
+		self.assertTrue(rate_lookup.call_args_list)
+		self.assertTrue(all(call.args[0].get("item_code") for call in rate_lookup.call_args_list))
 
 	def test_fifo_rate_cache_accounts_for_quantity(self):
 		item = create_item("_Test Gross Profit FIFO Qty Item")
@@ -1401,6 +1409,34 @@ class TestGrossProfit(FrappeTestCase):
 
 		self.assertEqual(data[0][0], project.name)
 		self.assertEqual(data[-1][1], 500)
+
+	def test_invoice_warehouse_changed_after_mapping_from_delivery_note(self):
+		item = create_item("_Test Gross Profit Warehouse Item").name
+		for warehouse in (self.warehouse, self.finished_warehouse):
+			make_stock_entry(company=self.company, item_code=item, target=warehouse, qty=5, basic_rate=100)
+
+		dnote = self.create_delivery_note(item=item, qty=4, rate=200)
+		sinv = make_sales_invoice(dnote.name)
+		sinv.items[0].warehouse = self.finished_warehouse
+		sinv.save().submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 400)
+
+	def test_non_stock_item_uses_discounted_purchase_rate(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+
+		item = create_item("_Test Gross Profit Discounted Service", is_stock_item=0).name
+		purchase_invoice = make_purchase_invoice(
+			item_code=item, qty=10, rate=100, cost_center=self.cost_center, do_not_save=True
+		)
+		purchase_invoice.additional_discount_percentage = 10
+		purchase_invoice.submit()
+
+		sinv = self.create_sales_invoice(rate=200, do_not_save=True)
+		sinv.items[0].item_code = item
+		sinv.submit()
+
+		self.assertEqual(self.get_invoice_buying_amount(sinv.name), 90)
 
 	def make_stocked_bundle(self):
 		"""Bundle of one unit each of two components valued at 100 and 30."""
