@@ -340,8 +340,9 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		dn = submit_one_box(create_delivery_note(item_code=item_code, do_not_submit=True))
 		self.assertRaises(frappe.ValidationError, return_in_nos(dn, -5, 2400).insert)
 		return_in_nos(dn, -5, 200).submit()
-		# what is left is 7 Nos, mapped in the delivered row's UOM
-		self.assertAlmostEqual(make_return_doc(dn.doctype, dn.name).items[0].qty, -7 / 12, places=2)
+		# the 7 Nos left are no whole Box, so they are mapped in stock UOM
+		next_return = make_return_doc(dn.doctype, dn.name).items[0]
+		self.assertEqual((next_return.uom, next_return.qty, next_return.rate), ("Nos", -7, 200))
 
 		si = submit_one_box(create_sales_invoice(item_code=item_code, do_not_submit=True))
 		return_in_nos(si, -5, 200).insert()
@@ -389,6 +390,47 @@ class TestSalesAndPurchaseReturn(ERPNextTestSuite):
 		rejected_return.submit()
 
 		self.assertEqual(make_purchase_return(pr.name).items[0].qty, -3)
+
+	def test_purchase_return_after_return_in_another_uom_maps_received_qty_alike(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item_code = make_item(
+			properties={
+				"is_stock_item": 1,
+				"stock_uom": "Nos",
+				"uoms": [{"uom": "Box", "conversion_factor": 10}],
+			}
+		).name
+		pi = make_purchase_invoice(item_code=item_code, update_stock=1, do_not_submit=True)
+		pi.items[0].update(
+			{
+				"uom": "Box",
+				"conversion_factor": 10,
+				"qty": 1,
+				"received_qty": 1,
+				"rate": 1000,
+				"price_list_rate": 1000,
+			}
+		)
+		pi.submit()
+
+		debit_note = make_return_doc(pi.doctype, pi.name)
+		debit_note.items[0].update(
+			{
+				"uom": "Nos",
+				"conversion_factor": 1,
+				"qty": -5,
+				"received_qty": -5,
+				"rate": 100,
+				"price_list_rate": 100,
+			}
+		)
+		debit_note.submit()
+
+		row = make_return_doc(pi.doctype, pi.name).items[0]
+		self.assertEqual((row.uom, row.qty, row.received_qty, row.rate), ("Nos", -5, -5, 100))
 
 
 def make_split_return_of_box_item(conversion_factor, delivery_rows):
