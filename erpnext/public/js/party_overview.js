@@ -110,6 +110,7 @@ erpnext.PartyOverview = class PartyOverview {
 		this.seq.overview++;
 		this.seq.balances++;
 		this.company_seq = (this.company_seq || 0) + 1;
+		this.companies_request = null;
 		this.overview = null;
 		this.balances = null;
 		this.party = this.frm.doc.name;
@@ -137,7 +138,7 @@ erpnext.PartyOverview = class PartyOverview {
 					variant: "ghost",
 					tooltip: __("Refresh"),
 					onclick: () => {
-						if (!this.companies_ready) return this.load_companies();
+						if (!this.companies_ready) return this.companies_request || this.load_companies();
 						this.load();
 						this.refresh_list();
 					},
@@ -196,7 +197,7 @@ erpnext.PartyOverview = class PartyOverview {
 		const token = (this.company_seq = (this.company_seq || 0) + 1);
 		this.companies_ready = false;
 		this.load();
-		return frappe
+		this.companies_request = frappe
 			.xcall(`${this.method_path}.get_${this.party_key}_companies`, { [this.party_key]: party })
 			.then((companies) => {
 				if (party !== this.party || token !== this.company_seq) return;
@@ -215,7 +216,11 @@ erpnext.PartyOverview = class PartyOverview {
 				this.companies_ready = true;
 				if (!known) this.load();
 				this.refresh_list();
+			})
+			.finally(() => {
+				if (token === this.company_seq) this.companies_request = null;
 			});
+		return this.companies_request;
 	}
 
 	refresh_list() {
