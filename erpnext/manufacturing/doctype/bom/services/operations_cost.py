@@ -95,6 +95,8 @@ def _add_operation_workstation_costs(stock_entry, work_order, row, op_expense_ac
 	)
 	consumed = get_consumed_operating_cost(work_order.name, stock_entry.bom_no, row.name) or []
 	total_component_rate = sum(flt(wc.operating_cost) for wc in workstation_cost)
+	if not (flt(row.actual_operating_cost) and total_component_rate):
+		return False
 
 	cost_added = False
 	for wc in workstation_cost:
@@ -121,11 +123,7 @@ def _append_workstation_cost(stock_entry, row, wc, consumed, op_expense_account,
 
 
 def _actual_operating_cost(wc, row, consumed_op_cost, total_component_rate):
-	if flt(row.actual_operating_cost) and total_component_rate:
-		cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
-	else:
-		cost = flt(wc.operating_cost) * flt(flt(row.actual_operation_time) / 60.0)
-
+	cost = flt(row.actual_operating_cost) * flt(wc.operating_cost) / total_component_rate
 	return flt(cost - flt(consumed_op_cost.get("consumed_cost")), row.precision("actual_operating_cost"))
 
 
