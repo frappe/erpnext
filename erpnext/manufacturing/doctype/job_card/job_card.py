@@ -986,7 +986,11 @@ class JobCard(Document):
 		if self.is_new() or not self.items or not self.has_value_changed("for_quantity"):
 			return
 
-		if any(flt(row.transferred_qty) or flt(row.consumed_qty) for row in self.items):
+		if (
+			self.transferred_qty
+			or any(flt(row.transferred_qty) or flt(row.consumed_qty) for row in self.items)
+			or self.has_stock_entry()
+		):
 			return
 
 		self.items = []
