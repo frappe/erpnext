@@ -9,9 +9,9 @@ frappe.ui.form.on("Subcontracting Inward Order Item", {
 		const service_item = frm.doc.service_items[row.idx - 1];
 		frappe.model.set_value(service_item.doctype, service_item.name, "fg_item_qty", row.qty);
 		frappe.db
-			.get_value("Sales Order Item", row.sales_order_item, "conversion_factor", null, "Sales Order")
+			.get_value("Sales Order Item", row.sales_order_item, ["qty", "fg_item_qty"], null, "Sales Order")
 			.then(({ message }) => {
-				const qty = (row.qty * row.subcontracting_conversion_factor) / message.conversion_factor;
+				const qty = (row.qty * message.qty) / message.fg_item_qty;
 				frappe.model.set_value(
 					service_item.doctype,
 					service_item.name,
