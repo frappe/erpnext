@@ -8,6 +8,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/journal-entry",
+ "enable_upload_first_workflow": 1,
  "engine": "InnoDB",
  "field_order": [
   "entry_type_and_date",
@@ -670,6 +671,7 @@
  "icon": "notebook-pen",
  "idx": 176,
  "is_submittable": 1,
+ "link_display_mode": "Search",
  "links": [
   {
    "is_child_table": 1,
@@ -679,7 +681,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2026-09-30 23:24:44.044604",
+ "modified": "2026-11-15 00:15:49.322062",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

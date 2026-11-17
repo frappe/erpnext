@@ -1694,6 +1694,261 @@ class TestDeliveryNote(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_the_stock_qty_of_a_later_row_in_another_uom(self):
+		self.assert_auto_set_batch_skips_later_row_without_stock_qty(
+			{"qty": 4, "uom": "Box", "conversion_factor": 2}
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_batch_qty_of_a_later_row_without_stock_qty(self):
+		self.assert_auto_set_batch_skips_later_row_without_stock_qty({"qty": 8})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_batch_qty_of_a_later_row_without_conversion_factor(self):
+		self.assert_auto_set_batch_skips_later_row_without_stock_qty(
+			{"qty": 4, "uom": "Box", "conversion_factor": None}
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_later_row_in_stock_uom_at_conversion_factor_1(self):
+		self.assert_auto_set_batch_skips_later_row_without_stock_qty({"qty": 8, "conversion_factor": 0.5})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_later_row_without_uom_in_default_sales_uom(self):
+		dn = self.assert_auto_set_batch_skips_later_row_without_stock_qty(
+			{"qty": 4, "uom": None, "conversion_factor": None}, sales_uom="Box"
+		)
+		self.assertEqual(dn.items[1].stock_qty, 8)
+
+	def assert_auto_set_batch_skips_later_row_without_stock_qty(self, later_row, sales_uom=None):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRLS-.#####",
+				"sales_uom": sales_uom,
+			},
+			uoms=[{"uom": "Box", "conversion_factor": 2}],
+		)
+		first = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		second = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+		second_batch = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+
+		# e.g. through the REST API: rows without stock_qty
+		dn = create_delivery_note(item_code=item.name, qty=5, do_not_save=True)
+		dn.items[0].uom = item.stock_uom
+		dn.append(
+			"items",
+			{**dn.items[0].as_dict(), "name": None, "idx": None, "batch_no": first_batch, **later_row},
+		)
+		for row in dn.items:
+			row.update({"use_serial_batch_fields": 1, "stock_qty": None})
+		dn.insert()
+		dn.submit()
+
+		self.assertEqual(
+			get_batches_from_bundle(dn.items[0].serial_and_batch_bundle), {first_batch: -2, second_batch: -3}
+		)
+		return dn
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_the_current_qty_of_a_row_with_stale_stock_qty(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRSQ-.#####",
+			}
+		).name
+		first = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		second = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+		second_batch = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(item_code=item, qty=4, do_not_save=True)
+		dn.items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 1})
+		dn.insert()
+
+		# e.g. through the API: stock_qty stays 4 until validate
+		dn.items[0].qty = 8
+		dn.append("items", {**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "batch_no": None})
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(
+			get_batches_from_bundle(dn.items[1].serial_and_batch_bundle), {first_batch: -2, second_batch: -3}
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_rows_of_other_warehouses(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TROW-.#####",
+			}
+		).name
+		first = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+		make_stock_entry(
+			item_code=item,
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC",
+			qty=5,
+			batch_no=first_batch,
+			use_serial_batch_fields=1,
+		)
+
+		dn = create_delivery_note(
+			item_code=item, qty=5, warehouse="_Test Warehouse 1 - _TC", do_not_save=True
+		)
+		dn.items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 1})
+		dn.append(
+			"items",
+			{
+				"item_code": item,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.save()
+
+		self.assertEqual(dn.items[1].batch_no, first_batch)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_later_row_without_a_warehouse(self):
+		item = make_item(properties={"is_stock_item": 1, "has_batch_no": 1, "create_new_batch": 1}).name
+		first = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		second = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(item_code=item, qty=5, do_not_save=True)
+		dn.set_warehouse = "_Test Warehouse - _TC"
+		dn.items[0].use_serial_batch_fields = 1
+		dn.append(
+			"items",
+			{
+				"item_code": item,
+				"qty": 10,
+				"rate": 100,
+				"batch_no": first_batch,
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.save()
+
+		self.assertEqual(dn.items[0].batch_no, get_batch_from_bundle(second.items[0].serial_and_batch_bundle))
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"use_serial_batch_fields": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"allow_to_edit_stock_uom_qty_for_sales": 1,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_row_at_its_rounded_stock_qty(self):
+		self.assert_auto_set_batch_counts_a_row_at_its_rounded_stock_qty()
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"use_serial_batch_fields": 1,
+			"auto_create_serial_and_batch_bundle_for_outward": 1,
+			"allow_to_edit_stock_uom_qty_for_sales": 0,
+		},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_counts_a_row_at_its_rounded_bundle_qty(self):
+		# the stored stock qty stays 0.335 when it is not editable
+		self.assert_auto_set_batch_counts_a_row_at_its_rounded_stock_qty()
+
+	def assert_auto_set_batch_counts_a_row_at_its_rounded_stock_qty(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRRS-.#####",
+				"stock_uom": "Kg",
+			},
+			uoms=[{"uom": "Box", "conversion_factor": 0.335}],
+		)
+		first = make_stock_entry(
+			item_code=item.name, target="_Test Warehouse - _TC", qty=0.99, basic_rate=100
+		)
+		second = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+		second_batch = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(item_code=item.name, qty=1, do_not_save=True)
+		dn.items[0].update(
+			{"uom": "Box", "conversion_factor": 0.335, "batch_no": first_batch, "use_serial_batch_fields": 1}
+		)
+		dn.insert()
+
+		# the first row takes 0.34 (not 0.335) of the first batch, so 0.65 is left
+		dn.append(
+			"items",
+			{
+				**dn.items[0].as_dict(),
+				"name": None,
+				"idx": None,
+				"qty": 0.66,
+				"uom": "Kg",
+				"conversion_factor": 1,
+				"batch_no": None,
+			},
+		)
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(
+			get_batches_from_bundle(dn.items[1].serial_and_batch_bundle),
+			{first_batch: -0.65, second_batch: -0.01},
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
 		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
 	)
 	def test_bundle_rows_of_a_repeated_serialized_component_get_their_own_serial_nos(self):
@@ -1763,27 +2018,133 @@ class TestDeliveryNote(ERPNextTestSuite):
 	)
 	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
 	def test_auto_picked_row_skips_batch_qty_of_a_row_with_batch_no_without_batch_fields(self):
+		item, first_batch = self.make_item_with_two_batches("TRBF-.#####")
+
+		# e.g. through the REST API: a batch_no without use_serial_batch_fields
+		self.assert_auto_picked_row_skips_first_row_batch_qty(item, first_batch, {"batch_no": first_batch})
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_picked_row_skips_batch_qty_of_a_row_with_bundle(self):
+		item, first_batch = self.make_item_with_two_batches("TRBS-.#####")
+
+		# e.g. through the REST API: a draft bundle without use_serial_batch_fields
+		bundle = make_serial_batch_bundle(
+			{
+				"item_code": item,
+				"warehouse": "_Test Warehouse - _TC",
+				"voucher_type": "Delivery Note",
+				"qty": 8,
+				"batches": frappe._dict({first_batch: 8}),
+				"type_of_transaction": "Outward",
+				"do_not_submit": True,
+			}
+		)
+		self.assert_auto_picked_row_skips_first_row_batch_qty(
+			item, first_batch, {"serial_and_batch_bundle": bundle.name}
+		)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_batch_qty_of_a_row_in_another_warehouse(self):
+		item, first_batch = self.make_item_with_two_batches("TRBW-.#####")
+		make_stock_entry(
+			item_code=item,
+			target="_Test Warehouse 1 - _TC",
+			qty=10,
+			basic_rate=100,
+			batch_no=first_batch,
+			use_serial_batch_fields=1,
+		)
+
+		dn = create_delivery_note(item_code=item, qty=8, do_not_save=True)
+		dn.items[0].batch_no = first_batch
+		dn.append(
+			"items",
+			{**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "batch_no": None},
+		)
+		dn.items[1].update({"warehouse": "_Test Warehouse 1 - _TC", "use_serial_batch_fields": 1})
+		dn.insert()
+
+		self.assertEqual(dn.items[1].batch_no, first_batch)
+
+	def make_item_with_two_batches(self, batch_number_series):
+		"""Batched item received in two batches of 10."""
 		item = make_item(
 			properties={
 				"is_stock_item": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
-				"batch_number_series": "TRBF-.#####",
+				"batch_number_series": batch_number_series,
 			}
 		).name
 		se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
-		first_batch = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		return item, get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
 
-		# e.g. through the REST API: a batch_no without use_serial_batch_fields
+	def assert_auto_picked_row_skips_first_row_batch_qty(self, item, first_batch, first_row):
+		"""Second row (5, auto-picked) gets only the 2 left of first_batch after the first row (8)."""
 		dn = create_delivery_note(item_code=item, qty=8, do_not_save=True)
-		dn.items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 0})
-		dn.append("items", {**dn.items[0].as_dict(), "name": None, "idx": None, "qty": 5, "batch_no": None})
+		dn.items[0].update({**first_row, "use_serial_batch_fields": 0})
+		dn.append(
+			"items",
+			{
+				**dn.items[0].as_dict(),
+				"name": None,
+				"idx": None,
+				"qty": 5,
+				"batch_no": None,
+				"serial_and_batch_bundle": None,
+			},
+		)
 		dn.items[1].use_serial_batch_fields = 1
 		dn.insert()
 		dn.submit()
 
 		self.assertEqual(get_batches_from_bundle(dn.items[1].serial_and_batch_bundle)[first_batch], -2)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_batch_skips_batch_qty_taken_by_a_packed_item(self):
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TRPI-.#####",
+			}
+		)
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [item.name])
+		first = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		second = make_stock_entry(item_code=item.name, target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		first_batch = get_batch_from_bundle(first.items[0].serial_and_batch_bundle)
+		second_batch = get_batch_from_bundle(second.items[0].serial_and_batch_bundle)
+
+		dn = create_delivery_note(item_code=bundle, qty=10, do_not_submit=True)
+		dn.packed_items[0].update({"batch_no": first_batch, "use_serial_batch_fields": 1})
+		dn.append(
+			"items",
+			{
+				"item_code": item.name,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.save()
+
+		self.assertEqual(dn.items[1].batch_no, second_batch)
 
 	@ERPNextTestSuite.change_settings(
 		"Stock Settings",
@@ -3595,6 +3956,57 @@ class TestDeliveryNote(ERPNextTestSuite):
 				for d in bundle_data:
 					self.assertEqual(d.incoming_rate, serial_no_valuation[d.serial_no])
 
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_serial_no_skips_serial_nos_taken_by_a_packed_item(self):
+		item, bundle, serial_nos = make_bundle_of_a_serial_item("TRPS-.#####")
+
+		dn = create_delivery_note(item_code=bundle, qty=2, do_not_submit=True)
+		dn.packed_items[0].update({"serial_no": "\n".join(serial_nos[:2]), "use_serial_batch_fields": 1})
+		dn.append(
+			"items",
+			{
+				"item_code": item,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.save()
+
+		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 1, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	@ERPNextTestSuite.change_settings("Selling Settings", {"allow_multiple_items": 1})
+	def test_auto_set_serial_no_skips_serial_nos_taken_by_a_packed_item_of_a_new_mapped_dn(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		item, bundle, serial_nos = make_bundle_of_a_serial_item("TRMP-.#####")
+		so = make_sales_order(item_code=bundle, qty=2, warehouse="_Test Warehouse - _TC")
+
+		dn = make_delivery_note(so.name)
+		dn.packed_items[0].update({"serial_no": "\n".join(serial_nos[:2]), "use_serial_batch_fields": 1})
+		dn.append(
+			"items",
+			{
+				"item_code": item,
+				"qty": 1,
+				"rate": 100,
+				"warehouse": "_Test Warehouse - _TC",
+				"use_serial_batch_fields": 1,
+			},
+		)
+		dn.insert()
+
+		self.assertEqual(dn.items[1].serial_no, serial_nos[2])
+
 	def test_auto_set_serial_batch_for_draft_dn(self):
 		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
 		frappe.db.set_single_value("Stock Settings", "pick_serial_and_batch_based_on", "FIFO")
@@ -4801,6 +5213,79 @@ class TestDeliveryNote(ERPNextTestSuite):
 			frappe.db.set_value("Sales Person", sales_person, "enabled", 1)
 			frappe.db.set_value("Sales Person", other_sales_person, "enabled", 1)
 
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_stock_ledger_preview_uses_serial_nos_of_packed_rows(self):
+		from erpnext.controllers.stock_controller import get_stock_ledger_preview
+
+		component = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TSLPP-.#####"}
+		).name
+		bundle = make_item(properties={"is_stock_item": 0}).name
+		make_product_bundle(bundle, [component], qty=2)
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+		make_stock_entry(item_code=component, target="_Test Warehouse - _TC", qty=2, basic_rate=500)
+		costlier_serial_nos = frappe.get_all(
+			"Serial No", {"item_code": component}, pluck="serial_no", order_by="serial_no"
+		)[3:]
+
+		dn = create_delivery_note(item_code=bundle, qty=1, do_not_submit=True)
+		dn.packed_items[0].serial_no = "\n".join(costlier_serial_nos)
+		dn.save()
+
+		columns, data = get_stock_ledger_preview(dn, frappe._dict(company=dn.company))
+		stock_value_difference = [column["name"] for column in columns].index("Value Change")
+		self.assertEqual(data[0][stock_value_difference], -1000)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"use_serial_batch_fields": 1})
+	def test_accounting_ledger_preview_uses_serial_nos_of_the_row(self):
+		from erpnext.controllers.stock_controller import get_accounting_ledger_preview
+
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TALPS-.#####"}
+		).name
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=3, basic_rate=100)
+		make_stock_entry(item_code=item, company=company, target=warehouse, qty=2, basic_rate=500)
+		costlier_serial_no = frappe.get_all(
+			"Serial No", {"item_code": item}, pluck="serial_no", order_by="serial_no"
+		)[3]
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			warehouse=warehouse,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			serial_no=costlier_serial_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		_columns, data = get_accounting_ledger_preview(dn, frappe._dict(company=company))
+		debit_by_account = {row[1]: row[2] for row in data}
+		self.assertEqual(debit_by_account["Cost of Goods Sold - TCP1"], 500)
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{"use_serial_batch_fields": 0, "auto_create_serial_and_batch_bundle_for_outward": 1},
+	)
+	def test_stock_ledger_preview_of_return_uses_returned_serial_nos(self):
+		from erpnext.controllers.stock_controller import get_stock_ledger_preview
+
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "TSLPR-.#####"}
+		).name
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+		dn = create_delivery_note(item_code=item, qty=1)
+		dn_return = make_sales_return(dn.name)
+		dn_return.save()
+
+		columns, data = get_stock_ledger_preview(dn_return, frappe._dict(company=dn_return.company))
+		in_qty = [column["name"] for column in columns].index("In Qty")
+		self.assertEqual(data[0][in_qty], 1)
+
 
 def make_so_with_reserved_produced_serial_no():
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -4850,6 +5335,17 @@ def make_so_with_reserved_produced_serial_no():
 	)
 
 	return so, reserved, unreserved
+
+
+def make_bundle_of_a_serial_item(serial_no_series):
+	"""A serial item with 3 serial nos in _Test Warehouse - _TC and a Product Bundle of it."""
+	item = make_item(
+		properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": serial_no_series}
+	).name
+	bundle = make_item(properties={"is_stock_item": 0}).name
+	make_product_bundle(bundle, [item])
+	se = make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=3, basic_rate=100)
+	return item, bundle, get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
 
 
 def create_delivery_note(**args):

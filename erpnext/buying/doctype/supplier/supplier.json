@@ -11,6 +11,9 @@
  "documentation": "https://docs.frappe.io/erpnext/user/manual/en/supplier",
  "engine": "InnoDB",
  "field_order": [
+  "overview_tab",
+  "overview_html",
+  "details_tab",
   "naming_series",
   "supplier_name",
   "supplier_type",
@@ -54,6 +57,10 @@
   "column_break_27",
   "tax_withholding_category",
   "tax_withholding_group",
+  "items_tab",
+  "frequently_bought_html",
+  "party_specific_items_section",
+  "party_specific_items_html",
   "settings_tab",
   "company_restrictions_section",
   "restrict_to_companies",
@@ -88,6 +95,22 @@
   "dashboard_tab"
  ],
  "fields": [
+  {
+   "depends_on": "eval: !doc.__islocal",
+   "fieldname": "overview_tab",
+   "fieldtype": "Tab Break",
+   "label": "Overview"
+  },
+  {
+   "fieldname": "overview_html",
+   "fieldtype": "HTML",
+   "label": "Overview HTML"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details"
+  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -446,6 +469,26 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "items_tab",
+   "fieldtype": "Tab Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "frequently_bought_html",
+   "fieldtype": "HTML",
+   "label": "Frequently Bought HTML"
+  },
+  {
+   "fieldname": "party_specific_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "party_specific_items_html",
+   "fieldtype": "HTML",
+   "label": "Party Specific Items HTML"
   },
   {
    "fieldname": "settings_tab",

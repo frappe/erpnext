@@ -12,7 +12,12 @@ from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
 	make_subcontracted_variant,
 )
-from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+from erpnext.tests.permission_test_utils import (
+	OTHER_COMPANY,
+	as_user,
+	make_company_fenced_user,
+	make_fenced_user,
+)
 from erpnext.tests.utils import ERPNextTestSuite
 
 
@@ -46,6 +51,23 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.submit()
 
 		self.assertEqual(scio.items[0].qty, 12)
+
+	def test_manufacture_cancel_releases_its_finished_good_reservation(self):
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		manufacture.submit()
+		reservation = {"from_voucher_no": manufacture.name, "docstatus": 1}
+		self.assertTrue(frappe.db.exists("Stock Reservation Entry", reservation))
+
+		manufacture.cancel()
+
+		self.assertFalse(frappe.db.exists("Stock Reservation Entry", reservation))
 
 	def test_customer_provided_item_cost_field(self):
 		so, scio = create_so_scio()
@@ -1706,6 +1728,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio = make_subcontracting_inward_order(so.name)
 
 		self.assertEqual(scio.items[0].bom, template_bom.name)
+
+	def test_fg_reference_names_follow_inward_order_read_access(self):
+		from erpnext.controllers.subcontracting_inward_controller import get_fg_reference_names
+
+		so, scio = create_so_scio()
+		args = ("Subcontracting Inward Order Item", "", "name", 0, 20)
+		expected = [[scio.items[0].name, scio.items[0].item_code, scio.items[0].delivery_warehouse]]
+		outside = make_company_fenced_user("scio-fg-outside@example.com", ["Stock User"], OTHER_COMPANY)
+		inside = make_company_fenced_user("scio-fg-inside@example.com", ["Stock User"], "_Test Company")
+
+		with as_user(outside):
+			with self.assertRaises(frappe.PermissionError):
+				get_fg_reference_names(*args, {"parent": scio.name})
+			self.assertEqual(get_fg_reference_names(*args, {"parent": ["like", "%"]}), [])
+
+		with as_user(inside):
+			self.assertEqual(
+				[list(row) for row in get_fg_reference_names(*args, {"parent": scio.name})], expected
+			)
 
 
 def create_delivered_so_scio():

@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
+	get_early_payment_discount_loss,
 	get_outstanding_reference_documents,
 	get_party_details,
 	get_payment_entry,
@@ -1159,6 +1160,51 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(si.payment_schedule[0].paid_amount, 212.40)
 		self.assertEqual(si.payment_schedule[0].outstanding, 0)
 		self.assertEqual(si.payment_schedule[0].discounted_amount, 23.6)
+
+	def test_early_payment_discount_loss_without_payment_entry(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template_with_discount()
+		si.payment_terms_template = "Test Discount Template"
+
+		frappe.db.set_value("Company", si.company, "default_discount_account", "Write Off - _TC")
+
+		si.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "Service Tax",
+				"rate": 18,
+			},
+		)
+		si.save()
+
+		valid_discounts = [{"type": "Percentage", "discount": 10}]
+		rows, base_total_discount_loss = get_early_payment_discount_loss(
+			si, valid_discounts, "Receive", si.company, "_Test Cost Center - _TC"
+		)
+
+		self.assertEqual(
+			rows,
+			[
+				{"account": "Write Off - _TC", "cost_center": "_Test Cost Center - _TC", "amount": 20.0},
+				{
+					"account": "_Test Account Service Tax - _TC",
+					"cost_center": "_Test Cost Center - _TC",
+					"amount": 3.6,
+				},
+			],
+		)
+		self.assertEqual(base_total_discount_loss, 23.6)
+
+		rows, base_total_discount_loss = get_early_payment_discount_loss(
+			si, valid_discounts, "Pay", si.company
+		)
+		company_cost_center = frappe.get_cached_value("Company", si.company, "cost_center")
+		self.assertEqual([row["amount"] for row in rows], [-20.0, -3.6])
+		self.assertEqual([row["cost_center"] for row in rows], [company_cost_center] * 2)
+		self.assertEqual(base_total_discount_loss, 23.6)
 
 	def test_payment_entry_against_payment_terms_with_discount_amount(self):
 		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
@@ -2345,6 +2391,9 @@ class TestPaymentEntry(ERPNextTestSuite):
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
 
+	@ERPNextTestSuite.change_settings(
+		"Accounts Settings", {"allow_multi_currency_invoices_against_single_party_account": 1}
+	)
 	def test_negative_outstanding_invoice_currency_multicurrency(self):
 		"""
 		A foreign-currency invoice whose party account is in company currency should report its

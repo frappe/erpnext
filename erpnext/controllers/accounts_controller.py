@@ -81,11 +81,11 @@ from erpnext.stock.get_item_details import (
 	ItemDetailsCtx,
 	_get_bin_details,
 	_get_item_details,
+	_get_item_tax_map,
 	_get_item_tax_template,
 	_get_item_tax_template_from_item_group,
 	get_conversion_factor,
 	get_default_bom,
-	get_item_tax_map,
 	get_item_warehouse_,
 )
 from erpnext.stock.utils import (
@@ -884,7 +884,7 @@ class AccountsController(TransactionBase):
 
 	def before_print(self, settings=None):
 		if self.docstatus.is_draft():
-			self.set_missing_terms()
+			self.set_missing_terms_for_display()
 
 		if self.doctype in [
 			"Purchase Order",
@@ -909,15 +909,42 @@ class AccountsController(TransactionBase):
 		set_print_templates_for_item_table(self, settings)
 		set_print_templates_for_taxes(self, settings)
 
-	def set_missing_terms(self):
+	def set_missing_terms(self, raise_exception=True):
 		if not self.get("tc_name") or self.get("terms"):
 			return
+
+		from jinja2 import TemplateError
 
 		from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import (
 			get_terms_and_conditions,
 		)
 
-		self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		try:
+			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
+		except (TemplateError, TypeError) as e:
+			# TypeError: a helper called with arguments the terms sandbox does not take
+			message = _("Terms and Conditions {0} could not be rendered: {1}").format(
+				frappe.bold(self.tc_name), e
+			)
+			if raise_exception:
+				frappe.throw(message)
+			# loading or printing a draft must not fail on a template it cannot render
+			frappe.msgprint(message, indicator="orange", alert=True)
+
+	def set_missing_terms_for_display(self):
+		"""Render missing terms to show or print, leaving them empty if they cannot be rendered."""
+		message_count = len(frappe.message_log)
+		try:
+			self.set_missing_terms(raise_exception=False)
+		except frappe.PermissionError:
+			# a check on the template's last editor fails without logging a message
+			del frappe.message_log[message_count:]
+			frappe.msgprint(
+				_("Terms and Conditions {0} could not be rendered due to missing permissions.").format(
+					bold(self.tc_name)
+				),
+				alert=True,
+			)
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -1731,7 +1758,7 @@ class AccountsController(TransactionBase):
 	def validate_zero_qty_for_return_invoices_with_stock(self):
 		rows = []
 		for item in self.items:
-			if not flt(item.qty):
+			if not (flt(item.qty) or flt(item.get("rejected_qty"))):
 				rows.append(item)
 		if rows:
 			frappe.throw(
@@ -1740,12 +1767,18 @@ class AccountsController(TransactionBase):
 				).format(frappe.bold(comma_and(["#" + str(x.idx) for x in rows])))
 			)
 
+	def is_stock_receipt(self) -> bool:
+		"""Whether this document receives material into a warehouse."""
+		return self.doctype == "Purchase Receipt" or (
+			self.doctype == "Purchase Invoice" and self.update_stock
+		)
+
 	def validate_qty_is_not_zero(self):
 		if self.flags.allow_zero_qty:
 			return
 
 		for item in self.items:
-			if self.doctype == "Purchase Receipt" and item.rejected_qty:
+			if self.is_stock_receipt() and item.get("rejected_qty"):
 				continue
 
 			if not flt(item.qty):
@@ -3693,6 +3726,10 @@ class AccountsController(TransactionBase):
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
+	ptype = "select" if frappe.only_has_select_perm("Account") else "read"
+	if not frappe.has_permission("Account", ptype, account_head):
+		_refuse()
+
 	return frappe.get_cached_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
 
 
@@ -4329,7 +4366,7 @@ def set_child_tax_template_and_map(item, child_item, parent_doc):
 		item_tax_template = _get_item_tax_template_from_item_group(ctx, item.item_group)
 
 	child_item.item_tax_template = item_tax_template
-	child_item.item_tax_rate = get_item_tax_map(
+	child_item.item_tax_rate = _get_item_tax_map(
 		doc=parent_doc,
 		tax_template=child_item.item_tax_template,
 		as_json=True,
@@ -4460,7 +4497,7 @@ def get_rows_with_kept_reservation(parent):
 def validate_child_on_delete(row, parent, ordered_item=None):
 	"""Check if partially transacted item (row) is being deleted."""
 	if parent.doctype == "Sales Order":
-		if flt(row.delivered_qty):
+		if flt(row.delivered_qty) or flt(row.returned_qty):
 			frappe.throw(
 				_("Row #{0}: Cannot delete item {1} which has already been delivered").format(
 					row.idx, row.item_code
@@ -4479,7 +4516,7 @@ def validate_child_on_delete(row, parent, ordered_item=None):
 				).format(row.idx, row.item_code)
 			)
 
-	if parent.doctype == "Purchase Order" and flt(row.received_qty):
+	if parent.doctype == "Purchase Order" and (flt(row.received_qty) or flt(row.returned_qty)):
 		frappe.throw(
 			_("Row #{0}: Cannot delete item {1} which has already been received").format(
 				row.idx, row.item_code
@@ -4571,6 +4608,69 @@ def validate_no_issued_proforma(rows) -> None:
 			)
 
 
+def validate_no_linked_order(rows, parent, linked_doctype) -> None:
+	"""Raise if a row being deleted is linked by a draft or submitted `linked_doctype` row."""
+	if not rows:
+		return
+
+	link_field = frappe.scrub(parent.doctype)
+	linked_orders = dict(
+		frappe.get_all(
+			f"{linked_doctype} Item",
+			filters={
+				link_field: parent.name,
+				f"{link_field}_item": ["in", [row.name for row in rows]],
+				"docstatus": ["<", 2],
+			},
+			fields=[f"{link_field}_item", "parent"],
+			as_list=True,
+		)
+	)
+	for row in rows:
+		if linked_order := linked_orders.get(row.name):
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which is already ordered on {2} {3}.").format(
+					row.idx, row.item_code, _(linked_doctype), get_link_to_form(linked_doctype, linked_order)
+				)
+			)
+
+
+def validate_no_ordered_packed_item(rows, parent) -> None:
+	"""Raise if a Sales Order bundle row being deleted has a packed item on a draft or submitted Purchase Order."""
+	deleted_rows = {row.name for row in rows}
+	row_by_packed_item = {
+		packed.name: packed.parent_detail_docname
+		for packed in parent.get("packed_items")
+		if packed.parent_detail_docname in deleted_rows
+	}
+	if not row_by_packed_item:
+		return
+
+	purchase_orders = dict(
+		frappe.get_all(
+			"Purchase Order Item",
+			filters={
+				"sales_order": parent.name,
+				"sales_order_packed_item": ["in", list(row_by_packed_item)],
+				"docstatus": ["<", 2],
+			},
+			fields=["sales_order_packed_item", "parent"],
+			as_list=True,
+		)
+	)
+	ordered_rows = {row_by_packed_item[packed]: order for packed, order in purchase_orders.items()}
+	for row in rows:
+		if purchase_order := ordered_rows.get(row.name):
+			frappe.throw(
+				_("Row #{0}: Cannot delete item {1} which is already ordered on {2} {3}.").format(
+					row.idx,
+					row.item_code,
+					_("Purchase Order"),
+					get_link_to_form("Purchase Order", purchase_order),
+				)
+			)
+
+
 def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept_reservation=None) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
@@ -4592,6 +4692,10 @@ def validate_and_delete_children(parent, data, ordered_item=None, rows_with_kept
 
 	if parent.doctype == "Sales Order":
 		validate_no_issued_proforma(deleted_children)
+		validate_no_linked_order(deleted_children, parent, "Purchase Order")
+		validate_no_ordered_packed_item(deleted_children, parent)
+	elif parent.doctype == "Purchase Order":
+		validate_no_linked_order(deleted_children, parent, "Sales Order")
 
 	for d in deleted_children:
 		validate_child_on_delete(d, parent, ordered_item)

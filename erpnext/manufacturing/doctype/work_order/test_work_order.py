@@ -674,6 +674,33 @@ class TestWorkOrder(ERPNextTestSuite):
 		for stock_entry in stock_entries:
 			stock_entry.cancel()
 
+	def test_finished_good_row_in_another_uom_books_no_process_loss(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 10}).name
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "Nos"},
+			uoms=[{"uom": "Box", "conversion_factor": 10}],
+		).name
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+		test_stock_entry.make_stock_entry(item_code=rm_item, qty=10, rate=10, target="_Test Warehouse - _TC")
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=10,
+			source_warehouse="_Test Warehouse - _TC",
+			wip_warehouse="Work In Progress - _TC",
+			fg_warehouse="_Test Warehouse 1 - _TC",
+		)
+		frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10)).submit()
+
+		se = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		fg_row = next(row for row in se.items if row.is_finished_item)
+		fg_row.update({"uom": "Box", "conversion_factor": 10, "qty": 1})
+		se.submit()
+
+		self.assertEqual(se.process_loss_qty, 0)
+		wo.reload()
+		self.assertEqual(wo.produced_qty, 10)
+		self.assertEqual(wo.process_loss_qty, 0)
+
 	def test_skip_transfer_work_order_completed_with_fractional_process_loss(self):
 		# 11.2 + 0.2 == 11.399999999999999 in float, which must still complete 11.4
 		work_order = frappe.new_doc("Work Order")
@@ -2235,6 +2262,18 @@ class TestWorkOrder(ERPNextTestSuite):
 		mr = make_material_request(work_order.name, for_qty=1)
 		self.assertEqual([row.qty for row in mr.items], [1])
 
+	def test_request_for_pending_qty_below_qty_precision(self):
+		rm = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "valuation_rate": 100}
+		).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+		bom = make_review_bom(fg, [{"item_code": rm, "qty": 100}])
+		work_order = make_review_work_order(fg, bom.name, 10)
+		self.submit_material_request(work_order.name, for_qty=9.9996)
+
+		mr = make_material_request(work_order.name, for_qty=0.01)
+		self.assertEqual([row.qty for row in mr.items], [0.04])
+
 	def test_material_request_qty_capped_at_pending_qty(self):
 		work_order = make_wo_order_test_record(
 			planned_start_date=now(), qty=10, source_warehouse="Stores - _TC"
@@ -3609,6 +3648,32 @@ class TestWorkOrder(ERPNextTestSuite):
 			"backflush_raw_materials_based_on",
 			"BOM",
 		)
+
+	def test_disassembly_from_work_order_uses_weighted_rate(self):
+		source_warehouse = "Stores - _TC"
+		fg_item = make_item("Test Disassembly Weighted Rate FG", {"is_stock_item": 1}).name
+		rm_item = make_item(
+			"Test Disassembly Weighted Rate RM", {"is_stock_item": 1, "valuation_method": "FIFO"}
+		).name
+		for rate in (100, 120):
+			test_stock_entry.make_stock_entry(
+				item_code=rm_item, target=source_warehouse, qty=1, basic_rate=rate
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=[rm_item])
+		wo = make_wo_order_test_record(
+			item=fg_item, qty=2, source_warehouse=source_warehouse, skip_transfer=1
+		)
+		for _ in range(2):
+			stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+			for row in stock_entry.items:
+				if row.item_code == rm_item:
+					row.s_warehouse = source_warehouse
+			stock_entry.submit()
+
+		disassembly = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+		rm_row = next(row for row in disassembly.items if row.item_code == rm_item)
+		self.assertEqual(rm_row.basic_rate, 110)
 
 	def test_disassemby_order(self):
 		fg_item = "Test Disassembly Item"
@@ -8051,6 +8116,33 @@ class TestWorkOrder(ERPNextTestSuite):
 			self.assertRaises(frappe.PermissionError, make_stock_entry, restricted.name, "Manufacture")
 			self.assertRaises(frappe.PermissionError, make_stock_return_entry, restricted.name)
 
+	def test_default_warehouse_follows_company_user_permission(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		from erpnext.manufacturing.doctype.work_order.work_order import get_default_warehouse
+
+		frappe.db.set_value("Company", "_Test Company", "default_wip_warehouse", "_Test Warehouse - _TC")
+		user = create_user("wo-default-warehouse-planner@example.com", "Manufacturing User")
+		add_user_permission("Company", "_Test Company", user.name)
+		website_user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": "wo-default-warehouse-website@example.com",
+				"first_name": "Website",
+				"user_type": "Website User",
+				"send_welcome_email": 0,
+			}
+		).insert(ignore_permissions=True)
+
+		with self.set_user(user.name):
+			defaults = get_default_warehouse("_Test Company")
+			self.assertRaises(frappe.PermissionError, get_default_warehouse, "_Test Company 1")
+
+		self.assertEqual(defaults["wip_warehouse"], "_Test Warehouse - _TC")
+		with self.set_user(website_user.name):
+			self.assertRaises(frappe.PermissionError, get_default_warehouse, "_Test Company")
+
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_qty_change_scales_a_normal_row_of_a_repeated_fixed_operation(self):
 		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100}).name
@@ -8539,6 +8631,36 @@ class TestWorkOrder(ERPNextTestSuite):
 		wo = make_wo_order_test_record(production_item=raw_material, bom_no=bom.name, do_not_save=True)
 		with self.assertRaisesRegex(frappe.ValidationError, "does not belong to Item"):
 			wo.insert()
+
+	def test_over_consumption_with_skip_transfer_reserves_nothing(self):
+		"""A Work Order that consumed more than it needs must not lower the reservation of others."""
+		warehouse = "_Test Warehouse - _TC"
+		raw_material, finished_good = (make_item(properties={"is_stock_item": 1}).name for _ in range(2))
+		test_stock_entry.make_stock_entry(item_code=raw_material, target=warehouse, qty=40, basic_rate=10)
+		make_bom(item=finished_good, raw_materials=[raw_material], source_warehouse=warehouse)
+
+		work_orders = [
+			make_wo_order_test_record(
+				production_item=finished_good,
+				qty=qty,
+				skip_transfer=1,
+				source_warehouse=warehouse,
+				wip_warehouse=warehouse,
+				fg_warehouse="Finished Goods - _TC",
+			)
+			for qty in (10, 5)
+		]
+
+		stock_entry = frappe.get_doc(make_stock_entry(work_orders[0].name, "Manufacture", 5))
+		for row in stock_entry.items:
+			if row.item_code == raw_material:
+				row.qty = row.transfer_qty = 12
+		stock_entry.submit()
+
+		reserved_qty = frappe.db.get_value(
+			"Bin", {"item_code": raw_material, "warehouse": warehouse}, "reserved_qty_for_production"
+		)
+		self.assertEqual(reserved_qty, 5)
 
 
 def get_reserved_entries(voucher_no, warehouse=None):

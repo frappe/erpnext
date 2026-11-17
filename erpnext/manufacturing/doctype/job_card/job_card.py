@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 import datetime
 import json
-from collections import OrderedDict
 
 import frappe
 from frappe import _, bold
@@ -42,6 +41,8 @@ from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+
+CLOSED_WORK_ORDER_STATUSES = ("Closed", "Stopped")
 
 
 class OverlapError(frappe.ValidationError):
@@ -550,10 +551,10 @@ class JobCard(Document):
 		if not self.has_overlap(self.get_production_capacity(), time_logs):
 			return {}
 
-		if not self.workstation and self.workstation_type and time_logs:
-			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
-				self.workstation = workstation_time.get("workstation")
-				return workstation_time
+		if not self.workstation and self.workstation_type:
+			if workstation := self.get_free_workstation(time_logs):
+				self.workstation = workstation
+				return {}
 
 		return time_logs[0]
 
@@ -563,9 +564,10 @@ class JobCard(Document):
 		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
 		return time_logs
 
-	def get_production_capacity(self):
-		if self.workstation:
-			return frappe.get_cached_value("Workstation", self.workstation, "production_capacity") or 1
+	def get_production_capacity(self, workstation=None):
+		workstation = workstation or self.workstation
+		if workstation:
+			return frappe.get_cached_value("Workstation", workstation, "production_capacity") or 1
 		return 1
 
 	def has_overlap(self, production_capacity, time_logs):
@@ -644,11 +646,13 @@ class JobCard(Document):
 		)
 
 	def apply_workstation_filters(self, query, jc):
-		if self.workstation_type:
-			query = query.where(jc.workstation_type == self.workstation_type)
-
 		if self.workstation:
-			query = query.where(jc.workstation == self.workstation)
+			return query.where(jc.workstation == self.workstation)
+
+		if self.workstation_type:
+			if workstations := get_workstations(self.workstation_type):
+				return query.where(jc.workstation.isin(workstations))
+			return query.where(jc.workstation_type == self.workstation_type)
 
 		return query
 
@@ -689,32 +693,11 @@ class JobCard(Document):
 		jobs = query.run(as_dict=True)
 		return [job.get("name") for job in jobs] if jobs else []
 
-	def get_workstation_based_on_available_slot(self, existing_time_logs) -> dict:
-		workstations = get_workstations(self.workstation_type)
-		if workstations:
-			busy_workstations = self.time_slot_wise_busy_workstations(existing_time_logs)
-			for time_slot in busy_workstations:
-				available_workstations = sorted(list(set(workstations) - set(busy_workstations[time_slot])))
-				if available_workstations:
-					return frappe._dict(
-						{
-							"workstation": available_workstations[0],
-							"planned_start_time": get_datetime(time_slot[0]),
-							"to_time": get_datetime(time_slot[1]),
-						}
-					)
-
-		return frappe._dict({})
-
-	@staticmethod
-	def time_slot_wise_busy_workstations(existing_time_logs) -> dict:
-		time_slot = OrderedDict()
-		for row in existing_time_logs:
-			from_time = get_datetime(row.from_time).strftime("%Y-%m-%d %H:%M")
-			to_time = get_datetime(row.to_time).strftime("%Y-%m-%d %H:%M")
-			time_slot.setdefault((from_time, to_time), []).append(row.workstation)
-
-		return time_slot
+	def get_free_workstation(self, overlapping_time_logs):
+		for workstation in get_workstations(self.workstation_type):
+			time_logs = [row for row in overlapping_time_logs if row.workstation == workstation]
+			if not time_logs or not self.has_overlap(self.get_production_capacity(workstation), time_logs):
+				return workstation
 
 	def schedule_time_logs(self, row):
 		row.remaining_time_in_mins = row.time_in_mins
@@ -787,11 +770,7 @@ class JobCard(Document):
 			return
 
 		if data:
-			if data.get("planned_start_time"):
-				args.planned_start_time = get_datetime(data.planned_start_time)
-			else:
-				args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
-
+			args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
 			args.from_time = args.planned_start_time
 			args.to_time = add_to_date(args.planned_start_time, minutes=row.remaining_time_in_mins)
 
@@ -1248,7 +1227,7 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
-			self.validate_produced_quantity(for_quantity, process_loss_qty, pending_qty, wo)
+			self.validate_produced_quantity(for_quantity, process_loss_qty, wo)
 			self.update_work_order_data(for_quantity, process_loss_qty, pending_qty, time_in_mins, wo)
 
 	def update_semi_finished_good_details(self):
@@ -1295,12 +1274,13 @@ class JobCard(Document):
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.save()
 
-	def validate_produced_quantity(self, for_quantity, process_loss_qty, pending_qty, wo):
+	def validate_produced_quantity(self, for_quantity, process_loss_qty, wo):
 		if self.docstatus < 2:
 			return
 
 		operation = next((row for row in wo.operations if row.name == self.operation_id), {})
-		operation_total = (for_quantity + process_loss_qty + pending_qty) * flt(wo.qty)
+		# pending qty is handed to another card, so it is not done by the remaining cards
+		operation_total = (for_quantity + process_loss_qty) * flt(wo.qty)
 		operation_total = flt(
 			operation_total / get_operation_qty(wo, operation), wo.precision("produced_qty")
 		)
@@ -1705,6 +1685,10 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		if self.is_paused:
+			frappe.throw(
+				_("Job Card {0} is already paused.").format(bold(self.name)), title=_("Already Paused")
+			)
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1717,6 +1701,8 @@ class JobCard(Document):
 		frappe.has_permission("Job Card", "write", doc=self, throw=True)
 
 		self.validate_docstatus()
+		if not self.is_paused:
+			frappe.throw(_("Job Card {0} is not paused.").format(bold(self.name)), title=_("Not Paused"))
 
 		if isinstance(kwargs, dict):
 			kwargs = frappe._dict(kwargs)
@@ -1892,7 +1878,8 @@ class JobCard(Document):
 		return flt(submitted.completed_qty) + flt(submitted.process_loss_qty) + flt(self.total_completed_qty)
 
 	def validate_input_from_previous_operations(self):
-		"""Completed qty and process loss together can't exceed what the previous operation completed."""
+		"""Completed qty and process loss together can't exceed what the previous operation completed.
+		Once the previous operation is done, its loss is taken off this card's loss and For Quantity."""
 		if self.is_corrective_job_card or self.track_semi_finished_goods or not self.sequence_id:
 			return
 
@@ -1903,7 +1890,15 @@ class JobCard(Document):
 		previous = min(previous_operations, key=lambda row: flt(row.completed_qty))
 		precision = self.precision("total_completed_qty")
 		input_qty = flt(self.get_operation_input_qty() + flt(self.process_loss_qty), precision)
-		if input_qty <= flt(previous.completed_qty, precision):
+		excess_qty = flt(input_qty - flt(previous.completed_qty), precision)
+		if excess_qty <= 0:
+			return
+
+		if previous.status == "Completed" and excess_qty <= flt(self.process_loss_qty, precision):
+			self.process_loss_qty = flt(
+				self.process_loss_qty - excess_qty, self.precision("process_loss_qty")
+			)
+			self.for_quantity = flt(self.for_quantity - excess_qty, self.precision("for_quantity"))
 			return
 
 		frappe.throw(
@@ -1965,7 +1960,7 @@ class JobCard(Document):
 		if self.work_order:
 			status = frappe.get_value("Work Order", self.work_order, "status")
 
-			if status in ["Closed", "Stopped"]:
+			if status in CLOSED_WORK_ORDER_STATUSES:
 				return True
 
 		return False
@@ -2074,8 +2069,27 @@ class JobCard(Document):
 		if isinstance(kwargs.employees, str):
 			kwargs.employees = [{"employee": kwargs.employees}]
 
+		self.validate_not_already_started(kwargs.employees)
+
 		if kwargs.start_time:
 			self.add_time_logs(from_time=kwargs.start_time, employees=kwargs.employees)
+
+	def validate_not_already_started(self, employees: list | None) -> None:
+		"""Block a second open log for the same employee; other employees may still join."""
+		started_employees = {log.employee for log in self.time_logs if log.from_time and not log.to_time}
+		requested_employees = {row.get("employee") for row in employees or []}
+		already_started = (
+			started_employees & requested_employees if requested_employees else started_employees
+		)
+
+		if already_started:
+			frappe.throw(
+				_("Job Card {0} is already started for {1}.").format(
+					bold(self.name),
+					", ".join(bold(employee or _("an operator")) for employee in already_started),
+				),
+				title=_("Already Started"),
+			)
 
 	@frappe.whitelist()
 	def complete_job_card(self, **kwargs):

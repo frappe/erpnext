@@ -311,6 +311,53 @@ class TestDeliveryTrip(ERPNextTestSuite):
 		trip.insert()
 		self.assertEqual(frappe.db.get_value("Delivery Note", delivery_note.name, "delivery_trip"), trip.name)
 
+	def test_contact_display_needs_delivery_trip_access(self):
+		contact = get_contact_and_address("_Test Customer").contact_person.parent
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(self.make_delivery_user("Projects User"))
+		self.assertRaises(frappe.PermissionError, get_contact_display, contact)
+
+		frappe.set_user(self.make_delivery_user("Delivery User"))
+		self.assertIn("<b>", get_contact_display(contact))
+
+	def test_dispatch_mail_needs_delivery_note_access(self):
+		from unittest.mock import patch
+
+		self.delivery_trip.delivery_stops[0].delivery_note = self.make_delivery_note_with_address().name
+		self.delivery_trip.submit()
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		with patch("frappe.sendmail") as sendmail:
+			frappe.set_user(self.make_delivery_user("Fulfillment User"))
+			self.assertRaises(frappe.PermissionError, notify_customers, self.delivery_trip.name)
+			self.assertFalse(sendmail.called)
+
+			frappe.set_user(self.make_delivery_user("Stock User"))
+			notify_customers(self.delivery_trip.name)
+			self.assertEqual(sendmail.call_count, 2)
+
+	def test_dispatch_mail_needs_access_to_every_delivery_note(self):
+		from unittest.mock import patch
+
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		allowed, blocked = (self.make_delivery_note_with_address() for _ in range(2))
+		self.delivery_trip.delivery_stops[0].delivery_note = allowed.name
+		self.delivery_trip.delivery_stops[1].delivery_note = blocked.name
+		self.delivery_trip.submit()
+		user = create_user("delivery-trip-one-note@example.com", "Stock User").name
+		add_user_permission("Delivery Note", allowed.name, user, applicable_for="Delivery Note")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		with patch("frappe.sendmail") as sendmail:
+			frappe.set_user(user)
+			self.assertTrue(frappe.has_permission("Delivery Note", "read", doc=allowed.name))
+			self.assertFalse(frappe.has_permission("Delivery Note", "read", doc=blocked.name))
+			self.assertRaises(frappe.PermissionError, notify_customers, self.delivery_trip.name)
+			self.assertFalse(sendmail.called)
+
 	def process_route_with_locks(self, locks):
 		from unittest.mock import patch
 

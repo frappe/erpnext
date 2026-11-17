@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
-from erpnext.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
+from erpnext.assets.doctype.asset.depreciation import _get_disposal_account_and_cost_center
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
@@ -133,7 +133,7 @@ class SalesInvoiceItem(Document):
 		if not self.is_fixed_asset:
 			return
 
-		disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(company)
+		disposal_account, depreciation_cost_center = _get_disposal_account_and_cost_center(company)
 
 		self.income_account = disposal_account
 		if not self.cost_center:

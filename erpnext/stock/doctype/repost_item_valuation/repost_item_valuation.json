@@ -263,11 +263,10 @@
   },
   {
    "default": "0",
-   "description": "Only works for Purchase Receipt, Purchase Invoice with Update Stock and Stock Entry with no row that has both a Source and Target Warehouse",
    "fieldname": "recalculate_valuation_rate",
    "fieldtype": "Check",
-   "label": "Recalculate Valuation Rate",
-   "show_description_on_click": 1
+   "hidden": 1,
+   "label": "Recalculate Valuation Rate"
   }
  ],
  "grid_page_length": 50,
@@ -275,7 +274,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-10-24 12:00:00.000000",
+ "modified": "2026-11-13 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",

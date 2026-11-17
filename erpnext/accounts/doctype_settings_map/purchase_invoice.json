@@ -48,6 +48,10 @@
    "settings_doctype": "Buying Settings"
   },
   {
+   "setting_field": "set_valuation_rate_for_rejected_materials",
+   "settings_doctype": "Buying Settings"
+  },
+  {
    "setting_field": "unlink_payment_on_cancellation_of_invoice",
    "settings_doctype": "Accounts Settings"
   },

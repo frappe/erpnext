@@ -25,7 +25,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	validate_inter_company_party,
 )
 from erpnext.accounts.party import CROSS_PARTY_FIELD_NO_MAP, get_party_account
-from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.buying.utils import check_on_hold_or_closed_status, get_qty_to_order
 from erpnext.controllers.mapper import get_qty_already_mapped
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
@@ -1695,7 +1695,7 @@ def make_sales_invoice(
 		)
 
 	def set_missing_values(source, target):
-		target.flags.ignore_permissions = True
+		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1958,7 +1958,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
-		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
@@ -1996,8 +1995,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
-		target.stock_qty = flt(source.stock_qty) - flt(source.ordered_qty)
+		target.qty = qty_to_order[source.name]
+		target.stock_qty = target.qty * flt(source.conversion_factor)
 		target.project = source_parent.project
 
 	def update_item_for_packed_item(source, target, _):
@@ -2005,7 +2004,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	def filter_items(item, supplier):
 		if (
-			item.ordered_qty < item.stock_qty
+			qty_to_order[item.name] > 0
 			and not is_product_bundle(item.item_code)
 			and item.name in items_to_map
 			and items_to_map[item.name] == supplier
@@ -2016,6 +2015,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	sales_order = frappe.get_doc("Sales Order", source_name)
 	sales_order.check_permission("read")
+	qty_to_order = get_qty_to_order(sales_order.items, "sales_order_item")
 	items_to_map = {}
 	for item in selected_items:
 		filters = {"name": item.get("name")} if item.get("name") else {"item_code": item.get("item_code")}
@@ -2243,6 +2243,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			{
 				"item_code": item.get("item_code"),
 				"qty": item.get("quantity"),
+				"uom": item.get("uom"),
 				"schedule_date": schedule_date,
 				"warehouse": item_wh.get(item.get("main_bom_item")) or item.get("warehouse"),
 				"sales_order": sales_order,

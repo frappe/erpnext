@@ -21,6 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	StockReconciliation,
+	get_difference_account,
 	get_items,
 	get_stock_balance_for,
 )
@@ -155,6 +156,44 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 		self.assertEqual(
 			["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100, "_Test UOM"],
 			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"], items[0]["stock_uom"]],
+		)
+
+	def test_difference_account_needs_company_and_reconciliation_access(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		users = {}
+		for company in ("_Test Company 1", "_Test Company"):
+			users[company] = create_user(
+				f"reco-account-{frappe.scrub(company)}@example.com", "Stock Manager"
+			).name
+			if not frappe.db.exists("User Permission", {"user": users[company], "allow": "Company"}):
+				add_user_permission("Company", company, users[company])
+		projects_user = create_user("reco-account-projects@example.com", "Projects User").name
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		for user in (projects_user, users["_Test Company 1"]):
+			frappe.set_user(user)
+			self.assertRaises(
+				frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company"
+			)
+
+		frappe.set_user(users["_Test Company"])
+		self.assertEqual(get_difference_account("Opening Stock", "_Test Company"), "Temporary Opening - _TC")
+
+	def test_difference_account_applies_company_permission_for_stock_reconciliation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+		from frappe.permissions import add_user_permission
+
+		user = create_user("reco-account-scoped@example.com", "Stock Manager").name
+		if not frappe.db.exists("User Permission", {"user": user, "allow": "Company"}):
+			add_user_permission("Company", "_Test Company 1", user, applicable_for="Stock Reconciliation")
+		self.addCleanup(frappe.set_user, "Administrator")
+
+		frappe.set_user(user)
+		self.assertRaises(frappe.PermissionError, get_difference_account, "Opening Stock", "_Test Company")
+		self.assertEqual(
+			get_difference_account("Opening Stock", "_Test Company 1"), "Temporary Opening - _TC1"
 		)
 
 	def test_stock_reco_for_serialized_item(self):
@@ -2873,6 +2912,47 @@ class TestStockReconciliation(ERPNextTestSuite, StockTestMixin):
 				[(flt(row.qty_after_transaction), flt(row.stock_value)) for row in balances],
 				[(0.0, 0.0), (4.0, 480.0)],
 			)
+
+	@ERPNextTestSuite.change_settings("Stock Settings", {"allow_negative_stock": 0})
+	def test_backdated_reconciliation_cannot_take_batch_qty_a_later_entry_used(self):
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		item = make_item(properties={"has_batch_no": 1}).name
+		batch = make_new_batch(item_code=item, batch_id=frappe.generate_hash(length=10)).name
+		other_batch = make_new_batch(item_code=item, batch_id=frappe.generate_hash(length=10)).name
+		warehouse = "_Test Warehouse - _TC"
+		batch_args = {"item_code": item, "batch_no": batch, "use_serial_batch_fields": 1}
+
+		# the other batch keeps the warehouse total positive and the second warehouse keeps the batch total
+		# positive, so only the batch in this warehouse goes negative
+		for batch_no, target in (
+			(batch, warehouse),
+			(other_batch, warehouse),
+			(batch, "_Test Warehouse 1 - _TC"),
+		):
+			make_stock_entry(
+				**{**batch_args, "batch_no": batch_no},
+				target=target,
+				qty=10,
+				rate=100,
+				posting_date=add_days(nowdate(), -3),
+			)
+		make_stock_entry(**batch_args, source=warehouse, qty=6, posting_date=add_days(nowdate(), -1))
+
+		reconcile = {
+			**batch_args,
+			"warehouse": warehouse,
+			"rate": 100,
+			"reconcile_all_serial_batch": 0,
+			"posting_date": add_days(nowdate(), -2),
+		}
+		create_stock_reconciliation(**reconcile, qty=6)
+
+		reco = create_stock_reconciliation(**reconcile, qty=5, do_not_submit=True)
+		self.assertRaises(NegativeStockError, reco.submit)
 
 	def test_stock_balance_lookup_needs_reconciliation_write(self):
 		user = "reco-accounts-user@example.com"

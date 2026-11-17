@@ -8,7 +8,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.utils.mask import mask_dict_results
 from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Count, Sum
+from frappe.query_builder.functions import Count, Min, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
@@ -121,10 +121,11 @@ class StockController(AccountsController):
 		self.validate_serialized_batch()
 		self.clean_serial_nos()
 		self.validate_customer_provided_item()
+		# before the stock UOM rate, which divides by the factor
+		self.reset_conversion_factor()
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
-		self.reset_conversion_factor()
 		self.validate_inventory_dimension_mandatory()
 
 	def on_update(self):
@@ -536,7 +537,7 @@ class StockController(AccountsController):
 					self.update_bundle_details(bundle_details, table_name, row, parent_details=parent_details)
 					self.create_auto_picked_bundle(bundle_details, row, picked_serial_nos, picked_batches)
 
-				if row.get("rejected_qty"):
+				if self.get_rejected_stock_qty(row):
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
 
@@ -565,12 +566,16 @@ class StockController(AccountsController):
 	def get_batches_used_in_rows(self):
 		"""Batch qty the rows already take, by (batch_no, warehouse)."""
 		entries, bundles = [], []
+		# the row's bundle takes the qty rounded to this precision
+		precision = frappe.get_precision("Serial and Batch Entry", "qty")
 		for row in self.get("items") + self.get_current_packed_rows():
 			if row.get("serial_and_batch_bundle"):
 				bundles.append(row.serial_and_batch_bundle)
 			elif row.get("batch_no"):
 				qty = row.qty if row.doctype == "Packed Item" else row.stock_qty
-				entries.append(frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty)))
+				entries.append(
+					frappe._dict(batch_no=row.batch_no, warehouse=row.warehouse, qty=-flt(qty, precision))
+				)
 
 		if bundles:
 			entries += frappe.get_all(
@@ -655,7 +660,7 @@ class StockController(AccountsController):
 				qty_field = "rejected_qty"
 				warehouse_field = "rejected_warehouse"
 				if row.get("return_qty_from_rejected_warehouse"):
-					qty_field = "qty"
+					qty_field = "stock_qty"
 					warehouse_field = "warehouse"
 
 				if not data.get("qty"):
@@ -701,7 +706,7 @@ class StockController(AccountsController):
 		available_dict = available_serial_batch_for_return(field, child_doctype, reference_ids)
 
 		for row in self.get(table_name):
-			if row.get("return_qty_from_rejected_warehouse"):
+			if row.get("return_qty_from_rejected_warehouse") or not row.get("qty"):
 				continue
 
 			value = row.get(field)
@@ -734,8 +739,15 @@ class StockController(AccountsController):
 
 		return bool(
 			row.get("rejected_warehouse")
-			and row.get("rejected_qty")
+			and self.get_rejected_stock_qty(row)
 			and not row.get("rejected_serial_and_batch_bundle")
+		)
+
+	def get_rejected_stock_qty(self, row) -> float:
+		"""Rejected qty of a row in the stock UOM, rounded as its bundle holds it."""
+		return flt(
+			flt(row.get("rejected_qty")) * flt(row.get("conversion_factor", 1.0)),
+			frappe.get_precision("Serial and Batch Entry", "qty"),
 		)
 
 	def get_value_for_packed_item(self, row, reference_field):
@@ -770,7 +782,9 @@ class StockController(AccountsController):
 			needs_bundle = (
 				self.needs_rejected_bundle(row)
 				if qty_field == "rejected_qty"
-				else not row.get("return_qty_from_rejected_warehouse") and not row.get(bundle_field)
+				else row.get("qty")
+				and not row.get("return_qty_from_rejected_warehouse")
+				and not row.get(bundle_field)
 			)
 			if row.get(field) and needs_bundle and not row.get("use_serial_batch_fields"):
 				reference_ids.append(row.get(field))
@@ -845,10 +859,7 @@ class StockController(AccountsController):
 		if is_rejected:
 			serial_nos = row.get("rejected_serial_no")
 			type_of_transaction = "Inward" if not self.is_return else "Outward"
-			qty = flt(
-				row.get("rejected_qty") * row.get("conversion_factor", 1.0),
-				frappe.get_precision("Serial and Batch Entry", "qty"),
-			)
+			qty = self.get_rejected_stock_qty(row)
 			warehouse = row.get("rejected_warehouse")
 
 		if (
@@ -1340,7 +1351,15 @@ class StockController(AccountsController):
 					)
 
 	def make_package_for_transfer(
-		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None, qty=0
+		self,
+		serial_and_batch_bundle,
+		warehouse,
+		type_of_transaction=None,
+		do_not_submit=None,
+		qty=0,
+		include_bundle=None,
+		exclude_serial_nos=None,
+		total_qty=0,
 	):
 		return make_bundle_for_material_transfer(
 			is_new=self.is_new(),
@@ -1352,6 +1371,9 @@ class StockController(AccountsController):
 			type_of_transaction=type_of_transaction,
 			do_not_submit=do_not_submit,
 			qty=qty,
+			include_bundle=include_bundle,
+			exclude_serial_nos=exclude_serial_nos,
+			total_qty=total_qty,
 		)
 
 	def get_sl_entries(self, d, args):
@@ -1922,7 +1944,7 @@ class StockController(AccountsController):
 				self.validate_multi_currency()
 				self.validate_packed_items()
 
-				if self.get("is_internal_supplier") and self.docstatus == 1:
+				if self.get("is_internal_supplier") and self.docstatus == 1 and not self.get("is_return"):
 					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
@@ -1936,6 +1958,10 @@ class StockController(AccountsController):
 				row.from_warehouse = None
 
 	def validate_in_transit_warehouses(self):
+		# a draft saved with ignore_mandatory (e.g. mapped from a Pick List) gets its warehouses before submit
+		if self.docstatus == 0 and self.flags.ignore_mandatory:
+			return
+
 		if (self.doctype == "Sales Invoice" and self.get("update_stock")) or self.doctype == "Delivery Note":
 			for item in self.get("items"):
 				if not item.target_warehouse:
@@ -1964,11 +1990,7 @@ class StockController(AccountsController):
 		if self.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
 			return
 
-		self.__inter_company_reference = (
-			self.get("inter_company_invoice_reference")
-			if self.doctype == "Purchase Invoice"
-			else self.get("inter_company_reference")
-		)
+		self.__inter_company_reference = self.get_inter_company_reference()
 
 		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
 		if not item_wise_transfer_qty:
@@ -2003,6 +2025,17 @@ class StockController(AccountsController):
 					),
 					OverAllowanceError,
 				)
+
+	def get_inter_company_reference(self):
+		if self.doctype == "Purchase Receipt":
+			return self.get("inter_company_reference")
+
+		if self.get("is_return"):
+			return frappe.db.get_value(
+				"Purchase Invoice", self.return_against, "inter_company_invoice_reference"
+			)
+
+		return self.get("inter_company_invoice_reference")
 
 	def get_item_wise_inter_transfer_qty(self):
 		parent_doctype = {
@@ -2056,48 +2089,27 @@ class StockController(AccountsController):
 				)
 
 	def get_item_wise_inter_received_qty(self):
-		child_doctype = self.doctype + " Item"
-
-		parent_tab = frappe.qb.DocType(self.doctype)
-		child_tab = frappe.qb.DocType(child_doctype)
-
-		query = (
-			frappe.qb.from_(self.doctype)
-			.inner_join(child_tab)
-			.on(child_tab.parent == parent_tab.name)
-			.select(
-				child_tab.item_code,
-				child_tab.qty,
-			)
-			.where(parent_tab.docstatus == 1)
-		)
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_inter_company_items
 
 		if self.doctype == "Purchase Invoice":
-			query = query.select(
-				child_tab.sales_invoice_item.as_("name"),
-			)
-
-			query = query.where(
-				parent_tab.inter_company_invoice_reference == self.inter_company_invoice_reference
-			)
+			reference_field, item_reference_field = "inter_company_invoice_reference", "sales_invoice_item"
+			fields = ["item_code", "qty"]
 		else:
-			query = query.select(
-				child_tab.delivery_note_item.as_("name"),
-				child_tab.delivery_note_packed_item,
-			)
+			reference_field, item_reference_field = "inter_company_reference", "delivery_note_item"
+			fields = ["item_code", "qty", "delivery_note_packed_item"]
 
-			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
+		other_items = get_inter_company_items(
+			self.doctype,
+			{reference_field: self.__inter_company_reference, "name": ("!=", self.name)},
+			item_reference_field,
+			fields,
+		)
 
-		query = query.where(parent_tab.name != self.name)
+		# a cancelled document no longer counts
+		own_items = self.items if self.docstatus == 1 else []
 		item_wise_received_qty = defaultdict(float)
-		for row in query.run(as_dict=True):
-			item_wise_received_qty[(row.get("delivery_note_packed_item") or row.name, row.item_code)] += flt(
-				row.qty
-			)
-
-		reference_field = "sales_invoice_item" if self.doctype == "Purchase Invoice" else "delivery_note_item"
-		for row in self.items:
-			reference = row.get("delivery_note_packed_item") or row.get(reference_field)
+		for row in [*other_items, *own_items]:
+			reference = row.get("delivery_note_packed_item") or row.get(item_reference_field)
 			item_wise_received_qty[(reference, row.item_code)] += flt(row.qty)
 
 		return item_wise_received_qty
@@ -2253,7 +2265,9 @@ class StockController(AccountsController):
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
 	def update_stock_reservation_entries(self):
-		def get_sre_list():
+		from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
+
+		def get_sre_list(item):
 			table = frappe.qb.DocType("Stock Reservation Entry")
 			query = (
 				frappe.qb.from_(table)
@@ -2272,6 +2286,9 @@ class StockController(AccountsController):
 			)
 			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
 				query = query.where(table.voucher_detail_no == item.get(reference_field))
+				# supplier warehouse reservations are used by the receipt, not the transfer
+				if warehouse_field := data_map[purpose or self.doctype].get("exclude_warehouse_field"):
+					query = query.where(table.warehouse != item.get(warehouse_field))
 			else:
 				query = query.where(
 					(table.item_code == item.rm_item_code) & (table.warehouse == self.supplier_warehouse)
@@ -2293,6 +2310,7 @@ class StockController(AccountsController):
 					"voucher_type": "Subcontracting Order",
 					"voucher_no": self.get("subcontracting_order"),
 					"voucher_detail_no_field": "sco_rm_detail",
+					"exclude_warehouse_field": "t_warehouse",
 					"field": "transferred_qty",
 				},
 				"Subcontracting Receipt": {
@@ -2313,14 +2331,21 @@ class StockController(AccountsController):
 		):
 			data_map = get_data_map()
 
+			if purpose == "Send to Subcontractor" and self._action == "cancel":
+				rows = {item.sco_rm_detail: item for item in self.items if item.sco_rm_detail}
+				self.rebuild_subcontracting_transfers({row: get_sre_list(item) for row, item in rows.items()})
+				return
+
 			field = data_map[purpose or self.doctype]["field"]
 			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
-				sre_list = get_sre_list()
+				sre_list = get_sre_list(item)
 
 				if not sre_list:
 					continue
 
 				qty = item.get("transfer_qty", item.get("consumed_qty"))
+				# shared by the row's reservations, so none counts a serial / batch qty twice
+				serial_nos, batch_qty = get_delivered_serial_batch_for_reservation(item)
 				for sre in sre_list:
 					if qty <= 0:
 						break
@@ -2329,9 +2354,7 @@ class StockController(AccountsController):
 
 					working_qty = 0
 					if sre_doc.reservation_based_on == "Serial and Batch":
-						sbb = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 						if sre_doc.has_serial_no:
-							serial_nos = [d.serial_no for d in sbb.entries]
 							for entry in sre_doc.sb_entries:
 								is_open = (
 									entry.qty > entry.delivered_qty
@@ -2344,7 +2367,6 @@ class StockController(AccountsController):
 									working_qty += 1
 									serial_nos.remove(entry.serial_no)
 						else:
-							batch_qty = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty:
 									delivered_qty = min(
@@ -2353,8 +2375,14 @@ class StockController(AccountsController):
 										else entry.delivered_qty,
 										batch_qty[entry.batch_no],
 									)
-									entry.delivered_qty += (
-										delivered_qty if self._action == "submit" else (-1 * delivered_qty)
+									entry.delivered_qty = flt(
+										entry.delivered_qty
+										+ (
+											delivered_qty
+											if self._action == "submit"
+											else (-1 * delivered_qty)
+										),
+										entry.precision("delivered_qty"),
 									)
 									entry.db_update()
 									working_qty += delivered_qty
@@ -2369,8 +2397,11 @@ class StockController(AccountsController):
 
 					sre_doc.set(
 						field,
-						sre_doc.get(field)
-						+ (working_qty if self._action == "submit" else (-1 * working_qty)),
+						flt(
+							sre_doc.get(field)
+							+ (working_qty if self._action == "submit" else (-1 * working_qty)),
+							sre_doc.precision(field),
+						),
 					)
 					sre_doc.db_update()
 					sre_doc.update_reserved_qty_in_voucher()
@@ -2378,6 +2409,78 @@ class StockController(AccountsController):
 					sre_doc.update_reserved_stock_in_bin()
 
 					qty -= working_qty
+
+	def rebuild_subcontracting_transfers(self, sre_lists: dict[str, list[str]]):
+		"""Replay the remaining transfers oldest first, each on the reservations made before it, as on submit."""
+		transfers = self.get_subcontracting_transfers(list(sre_lists))
+		for sco_rm_detail, sre_list in sre_lists.items():
+			sre_docs = [frappe.get_doc("Stock Reservation Entry", sre) for sre in sre_list]
+			for sre_doc in sre_docs:
+				sre_doc.transferred_qty = 0
+				for entry in sre_doc.sb_entries:
+					entry.delivered_qty = 0
+
+			for transfer in transfers.get(sco_rm_detail, []):
+				for sre_doc in sre_docs:
+					if sre_doc.creation < transfer.submitted_at:
+						add_transfer_to_reservation(sre_doc, transfer)
+
+			for sre_doc in sre_docs:
+				for entry in sre_doc.sb_entries:
+					entry.db_update()
+				sre_doc.db_update()
+				sre_doc.update_reserved_qty_in_voucher()
+				sre_doc.update_status()
+				sre_doc.update_reserved_stock_in_bin()
+
+	def get_subcontracting_transfers(self, sco_rm_details: list[str]) -> dict[str, list]:
+		"""Remaining transfers of each supplied row, oldest first, timed by their first stock ledger entry."""
+		stock_entry = frappe.qb.DocType("Stock Entry")
+		detail = frappe.qb.DocType("Stock Entry Detail")
+		ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+		bundle_entry = frappe.qb.DocType("Serial and Batch Entry")
+		submitted_at = (
+			frappe.qb.from_(ledger_entry)
+			.select(Min(ledger_entry.creation))
+			.where(ledger_entry.voucher_detail_no == detail.name)
+			.as_("submitted_at")
+		)
+		rows = (
+			frappe.qb.from_(detail)
+			.join(stock_entry)
+			.on(stock_entry.name == detail.parent)
+			.left_join(bundle_entry)
+			.on(bundle_entry.parent == detail.serial_and_batch_bundle)
+			.select(
+				detail.name,
+				detail.sco_rm_detail,
+				detail.transfer_qty,
+				submitted_at,
+				bundle_entry.serial_no,
+				bundle_entry.batch_no,
+				bundle_entry.qty,
+			)
+			.where(
+				(stock_entry.docstatus == 1)
+				& (stock_entry.purpose == "Send to Subcontractor")
+				& (stock_entry.subcontracting_order == self.subcontracting_order)
+				& detail.sco_rm_detail.isin(sco_rm_details)
+			)
+			.orderby(submitted_at)
+		).run(as_dict=True)
+
+		transfers = defaultdict(dict)
+		for row in rows:
+			transfer = transfers[row.sco_rm_detail].get(row.name)
+			if not transfer:
+				transfer = transfers[row.sco_rm_detail][row.name] = new_reservation_transfer()
+				transfer.qty, transfer.submitted_at = flt(row.transfer_qty), row.submitted_at
+			if row.serial_no:
+				transfer.serial_nos.add(row.serial_no)
+			if row.batch_no:
+				transfer.batch_qty[row.batch_no] += abs(flt(row.qty))
+
+		return {row: list(row_transfers.values()) for row, row_transfers in transfers.items()}
 
 	def check_for_on_hold_or_closed_status(
 		self, ref_doctype: str, ref_fieldname: str, exclude_if_field: str | None = None
@@ -2470,6 +2573,7 @@ def get_accounting_ledger_preview(doc, filters):
 	doc.docstatus = 1
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
+		make_serial_and_batch_bundles_for_preview(doc)
 		doc.update_stock_ledger()
 
 	doc.make_gl_entries()
@@ -2513,7 +2617,7 @@ def get_stock_ledger_preview(doc, filters):
 
 	if doc.get("update_stock") or doc.doctype in ("Purchase Receipt", "Delivery Note", "Stock Entry"):
 		doc.docstatus = 1
-		doc.make_bundle_using_old_serial_batch_fields()
+		make_serial_and_batch_bundles_for_preview(doc)
 		doc.update_stock_ledger()
 
 		columns = get_sl_columns(filters)
@@ -2528,6 +2632,14 @@ def get_stock_ledger_preview(doc, filters):
 		sl_data = get_data(columns_fields, sl_entries)
 
 	return sl_columns, sl_data
+
+
+def make_serial_and_batch_bundles_for_preview(doc):
+	for table_name in ("items", "packed_items"):
+		if doc.get(table_name):
+			# a return takes back the serial / batch nos of the original voucher, as on submit
+			doc.make_bundle_for_sales_purchase_return(table_name)
+			doc.make_bundle_using_old_serial_batch_fields(table_name)
 
 
 def get_sl_entries_for_preview(doctype, docname, fields):
@@ -2886,13 +2998,26 @@ def make_bundle_for_material_transfer(**kwargs):
 	bundle_doc.voucher_no = "" if kwargs.is_new or kwargs.docstatus == 2 else kwargs.voucher_no
 	bundle_doc.is_cancelled = 0
 
+	if kwargs.include_bundle:
+		for entry in frappe.get_doc("Serial and Batch Bundle", kwargs.include_bundle).entries:
+			bundle_doc.append("entries", entry.as_dict(no_default_fields=True))
+
+	if kwargs.exclude_serial_nos:
+		keep = [row for row in bundle_doc.entries if row.serial_no not in set(kwargs.exclude_serial_nos)]
+		bundle_doc.entries = keep
+		for idx, row in enumerate(keep, start=1):
+			row.idx = idx
+
 	qty = 0
 	if (
 		len(bundle_doc.entries) == 1
-		and flt(kwargs.qty) < flt(bundle_doc.total_qty)
+		and abs(flt(kwargs.qty)) < abs(flt(bundle_doc.total_qty))
 		and not bundle_doc.has_serial_no
 	):
 		qty = kwargs.qty
+
+	if kwargs.total_qty and not bundle_doc.has_serial_no:
+		set_entries_total_qty(bundle_doc.entries, kwargs.total_qty)
 
 	for row in bundle_doc.entries:
 		row.is_outward = 0
@@ -2923,6 +3048,38 @@ def make_bundle_for_material_transfer(**kwargs):
 			bundle_doc.check_future_entries_exists()
 
 	return bundle_doc.name
+
+
+def new_reservation_transfer():
+	return frappe._dict(qty=0, serial_nos=set(), batch_qty=defaultdict(float))
+
+
+def add_transfer_to_reservation(sre_doc, transfer) -> None:
+	"""Count on `sre_doc` the part of `transfer` it has room for, and take it off `transfer`."""
+	if sre_doc.reservation_based_on != "Serial and Batch":
+		qty = min(flt(sre_doc.reserved_qty) - flt(sre_doc.transferred_qty), transfer.qty)
+	else:
+		qty = 0
+		for entry in sre_doc.sb_entries:
+			if sre_doc.has_serial_no:
+				entry_qty = 0
+				if not flt(entry.delivered_qty) and entry.serial_no in transfer.serial_nos:
+					entry_qty = 1
+					transfer.serial_nos.discard(entry.serial_no)
+			else:
+				entry_qty = min(flt(entry.qty) - flt(entry.delivered_qty), transfer.batch_qty[entry.batch_no])
+				transfer.batch_qty[entry.batch_no] -= entry_qty
+
+			entry.delivered_qty = flt(flt(entry.delivered_qty) + entry_qty, entry.precision("delivered_qty"))
+			qty += entry_qty
+
+	transfer.qty -= qty
+	sre_doc.transferred_qty = flt(flt(sre_doc.transferred_qty) + qty, sre_doc.precision("transferred_qty"))
+
+
+def set_entries_total_qty(entries, total_qty):
+	"""Let the last entry take the difference, so the entries add up to the stock qty the voucher posts."""
+	entries[-1].qty = abs(flt(total_qty)) - sum(abs(flt(row.qty)) for row in entries[:-1])
 
 
 def get_item_wise_inventory_account_map(rows, company):

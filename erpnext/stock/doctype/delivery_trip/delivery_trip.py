@@ -509,7 +509,10 @@ def check_contact_customer_permission(contact):
 		)
 		.run(pluck=True)
 	)
-	if not any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers):
+	if not (
+		frappe.has_permission("Delivery Trip", "read")
+		and any(frappe.has_permission("Customer", "select", doc=customer) for customer in customers)
+	):
 		frappe.throw(_("Not permitted to view Contact {0}").format(contact), frappe.PermissionError)
 
 
@@ -539,6 +542,9 @@ def notify_customers(delivery_trip: str):
 	delivery_trip.check_permission()
 	if delivery_trip.docstatus != 1:
 		frappe.throw(_("Customers can be notified only for a submitted Delivery Trip"))
+
+	for delivery_note in {stop.delivery_note for stop in delivery_trip.delivery_stops if stop.delivery_note}:
+		frappe.has_permission("Delivery Note", "read", doc=delivery_note, throw=True)
 
 	dispatch_template_name = frappe.db.get_single_value("Delivery Settings", "dispatch_template")
 	if not dispatch_template_name:

@@ -3031,6 +3031,16 @@ def validate_inter_company_transaction(doc, doctype):
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 
+def validate_no_counterpart_sales_invoice(purchase_invoice):
+	"""Purchase Invoice rows link no Sales Invoice rows, so its header link marks it as already invoiced."""
+	if sales_invoice := purchase_invoice.inter_company_invoice_reference:
+		frappe.throw(
+			_(
+				"Cannot create Intercompany Sales Invoice. Purchase Invoice {0} already has Sales Invoice {1}."
+			).format(purchase_invoice.name, get_link_to_form("Sales Invoice", sales_invoice))
+		)
+
+
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name, target_doc=None):
 	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
@@ -3059,6 +3069,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			if doctype == "Purchase Order"
 			else {}
 		)
+
+	if doctype != "Purchase Invoice":
+		validate_not_made_from_counterpart(source_doc, target_doctype, received_items)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -3241,6 +3254,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
+	if doctype == "Purchase Invoice":
+		validate_no_counterpart_sales_invoice(source_doc)
 
 	if not doclist.get("items"):
 		if target_doctype in ("Sales Invoice", "Purchase Invoice"):
@@ -3256,6 +3271,21 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		frappe.throw(message.format(target_doctype, doctype, target_doctype))
 
 	return doclist
+
+
+def validate_not_made_from_counterpart(source_doc, target_doctype, received_items):
+	"""A document made from its counterpart links it, but the counterpart rows link none of its rows back."""
+	reference_field = get_inter_company_counterpart(source_doc.doctype)[1]
+	reference = source_doc.get(reference_field)
+	if reference and not any(row.name in received_items for row in source_doc.items):
+		frappe.throw(
+			_("Cannot create Intercompany {0}. {1} {2} was created from {0} {3}.").format(
+				target_doctype,
+				source_doc.doctype,
+				source_doc.name,
+				get_link_to_form(target_doctype, reference),
+			)
+		)
 
 
 def clear_item_tax_template_of_other_company(item, company):
@@ -3292,29 +3322,39 @@ def get_received_items(reference_name: str, doctype: str, reference_fieldname: s
 			frappe.ValidationError,
 		)
 
-	filters = {
-		reference_field: reference_name,
-		"docstatus": 1,
-	}
-
-	target_doctypes = frappe.get_all(
-		doctype,
-		filters=filters,
-		pluck="name",
-	)
 	received_items_map = {}
-	if target_doctypes:
-		received_items_data = frappe.get_all(
-			doctype + " Item",
-			filters={"parent": ("in", target_doctypes)},
-			fields=[reference_fieldname, "stock_qty"],
-		)
-		for item in received_items_data:
-			key = item.get(reference_fieldname)
-			if key:
-				received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
+	for item in get_inter_company_items(
+		doctype, {reference_field: reference_name}, reference_fieldname, ["stock_qty"]
+	):
+		key = item.get(reference_fieldname)
+		if key:
+			received_items_map[key] = received_items_map.get(key, 0.0) + flt(item.stock_qty)
 
 	return received_items_map
+
+
+def get_inter_company_items(doctype, filters, reference_fieldname, fields):
+	"""Items of the submitted documents matching `filters`, and of their returns for Purchase Invoices.
+	A return row links only the invoice row it returns, so it gets that row's `reference_fieldname`."""
+	parents = frappe.get_all(doctype, filters={**filters, "docstatus": 1}, pluck="name")
+	if not parents:
+		return []
+
+	fields = ["name", reference_fieldname, *fields]
+	if doctype == "Purchase Invoice":
+		parents += frappe.get_all(
+			doctype, filters={"return_against": ("in", parents), "docstatus": 1}, pluck="name"
+		)
+		fields.append("purchase_invoice_item")
+
+	items = frappe.get_all(doctype + " Item", filters={"parent": ("in", parents)}, fields=fields)
+	reference_by_row = {item.name: item.get(reference_fieldname) for item in items}
+	for item in items:
+		item[reference_fieldname] = reference_by_row[item.name] or reference_by_row.get(
+			item.get("purchase_invoice_item")
+		)
+
+	return items
 
 
 def set_purchase_references(doc):

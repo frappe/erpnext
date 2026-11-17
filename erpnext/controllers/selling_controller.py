@@ -53,7 +53,7 @@ class SellingController(StockController):
 				self.tc_name = frappe.get_value("Company", self.company, "default_selling_terms")
 			tnc = frappe.get_cached_doc("Terms and Conditions", self.tc_name) if self.tc_name else None
 			if tnc and not tnc.disabled and tnc.get("selling"):
-				self.set_missing_terms()
+				self.set_missing_terms_for_display()
 
 	def validate(self):
 		validate_terms_and_conditions(self.get("tc_name"), "selling")
@@ -454,6 +454,10 @@ class SellingController(StockController):
 			)
 
 		if self.get("is_return") or not frappe.get_single_value("Selling Settings", "validate_selling_price"):
+			return
+
+		# an internal transfer is not a sale, so neither rate applies
+		if self.is_internal_transfer():
 			return
 
 		is_internal_customer = self.get("is_internal_customer")
@@ -1164,6 +1168,10 @@ class SellingController(StockController):
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 
 		from erpnext.stock.doctype.packed_item.packed_item import get_order_packed_item_pairs
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_qty_to_undeliver,
+			get_qty_up_to_rounding,
+		)
 
 		# Don't update Delivered Qty on Return.
 		if self.is_return:
@@ -1233,8 +1241,9 @@ class SellingController(StockController):
 							for entry in sre_doc.sb_entries:
 								available_batch_qty = delivered_batch_qty.get(entry.batch_no, 0)
 								if available_batch_qty > 0:
-									delivered_qty = min(
-										(entry.qty - entry.delivered_qty), available_batch_qty
+									pending_qty = entry.qty - entry.delivered_qty
+									delivered_qty = get_qty_up_to_rounding(
+										min(pending_qty, available_batch_qty), pending_qty
 									)
 									entry.delivered_qty += delivered_qty
 									entry.db_update()
@@ -1302,8 +1311,8 @@ class SellingController(StockController):
 						else:
 							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
-								if entry.batch_no in batch_qty_to_undelivered:
-									undelivered_qty = min(
+								if batch_qty_to_undelivered.get(entry.batch_no, 0) > 0:
+									undelivered_qty = get_qty_to_undeliver(
 										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
 									)
 									entry.delivered_qty -= undelivered_qty
@@ -1369,7 +1378,9 @@ class SellingController(StockController):
 
 def remove_delivered_entries(package, pick_list_item):
 	"""Drop the serial nos and batch qty that earlier deliveries of the pick list row took."""
-	delivered = get_delivered_entries(pick_list_item)
+	from erpnext.stock.doctype.pick_list.pick_list import get_moved_entries
+
+	delivered = get_moved_entries([pick_list_item]).get(pick_list_item, [])
 	delivered_serial_nos = {row.serial_no for row in delivered if row.serial_no}
 	delivered_batch_qty = defaultdict(float)
 	for row in delivered:
@@ -1387,34 +1398,6 @@ def remove_delivered_entries(package, pick_list_item):
 		row.qty = flt(abs(row.qty) - taken, row.precision("qty"))
 		if not row.qty:
 			package.remove(row)
-
-
-def get_delivered_entries(pick_list_item):
-	"""Return the serial and batch entries that submitted deliveries of a pick list row took."""
-	voucher_detail_nos = [
-		name
-		for doctype in ("Delivery Note Item", "Sales Invoice Item")
-		for name in frappe.get_all(
-			doctype, filters={"pick_list_item": pick_list_item, "docstatus": 1}, pluck="name"
-		)
-	]
-	if not voucher_detail_nos:
-		return []
-
-	bundle = frappe.qb.DocType("Serial and Batch Bundle")
-	entry = frappe.qb.DocType("Serial and Batch Entry")
-	return (
-		frappe.qb.from_(entry)
-		.join(bundle)
-		.on(entry.parent == bundle.name)
-		.select(entry.serial_no, entry.batch_no, entry.qty)
-		.where(
-			bundle.voucher_detail_no.isin(voucher_detail_nos)
-			& (bundle.type_of_transaction == "Outward")
-			& (bundle.docstatus == 1)
-			& (bundle.is_cancelled == 0)
-		)
-	).run(as_dict=True)
 
 
 def set_default_income_account_for_item(obj):

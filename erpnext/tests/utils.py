@@ -250,7 +250,6 @@ class BootStrapTestData:
 		stock_settings.auto_indent = 1
 		stock_settings.auto_insert_price_list_rate_if_missing = 1
 		stock_settings.update_price_list_based_on = "Rate"
-		stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
 		stock_settings.enable_serial_and_batch_no_for_item = 1
 		stock_settings.save()
 
@@ -3028,6 +3027,8 @@ class ERPNextTestSuite(unittest.TestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.local.request_cache.clear()
+		# values cached from rolled-back rows, e.g. a party's GL currency
+		frappe.local.cache.clear()
 		if hasattr(frappe.local, "future_sle"):
 			frappe.local.future_sle.clear()
 

@@ -1155,11 +1155,13 @@ def make_sales_invoice(
 def make_delivery_trip(
 	source_name: str, target_doc: str | dict | Document | None = None, kwargs: dict | None = None
 ):
-	if frappe.db.get_value("Delivery Note", source_name, "docstatus") == 2:
+	docstatus, company = frappe.db.get_value("Delivery Note", source_name, ["docstatus", "company"])
+	if docstatus == 2:
 		frappe.throw(_("Delivery Note {0} is cancelled").format(source_name))
 
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
+		target_doc.company = company
 
 	def update_address(source_doc, target_doc, source_parent):
 		target_doc.address = source_doc.shipping_address_name or source_doc.customer_address

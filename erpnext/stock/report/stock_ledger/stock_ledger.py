@@ -477,7 +477,7 @@ def get_columns(filters):
 
 def get_stock_ledger_entries(filters, items):
 	from_date = get_datetime(filters.from_date + " 00:00:00")
-	to_date = get_datetime(filters.to_date + " 23:59:59")
+	to_date = get_datetime(filters.to_date + " 23:59:59.999999")
 
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (

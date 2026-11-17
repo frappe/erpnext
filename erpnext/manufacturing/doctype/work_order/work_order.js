@@ -1080,7 +1080,10 @@ erpnext.work_order = {
 			const pending = required[item_code] - covered[item_code];
 			max_fraction = Math.max(max_fraction, pending / required[item_code]);
 		});
-		return flt(max_fraction * flt(frm.doc.qty), precision("qty"));
+		// round up, so a pending qty below the qty precision is still requestable;
+		// the server caps each item at its pending qty
+		const factor = Math.pow(10, precision("qty"));
+		return flt(Math.ceil(flt(max_fraction * flt(frm.doc.qty) * factor, 9)) / factor, precision("qty"));
 	},
 
 	show_disassembly_prompt: function (frm) {
@@ -1142,6 +1145,12 @@ erpnext.work_order = {
 		if (purpose === "Manufacture") {
 			max = flt(Math.max(max - flt(frm.doc.process_loss_qty), 0), precision("qty"));
 		}
+		// a passed qty is already the caller's cap
+		const allowance =
+			qty == null ? (flt(frm.doc.qty) * flt(frm.doc.__onload?.overproduction_percentage)) / 100 : 0;
+		const allowed_qty = flt(max + allowance, precision("qty"));
+		// only the overproduction allowance may be left
+		const default_qty = max || allowed_qty;
 		const pending_process_loss =
 			purpose === "Manufacture" ? this.get_pending_operation_process_loss(frm) : 0;
 
@@ -1150,8 +1159,8 @@ erpnext.work_order = {
 				fieldtype: "Float",
 				label: __("Qty for {0}", [target || __(purpose)]),
 				fieldname: "qty",
-				description: __("Max: {0}", [max]),
-				default: max,
+				description: __("Max: {0}", [allowed_qty]),
+				default: default_qty,
 				onchange: function () {
 					if (pending_process_loss && frm.qty_prompt) {
 						frm.qty_prompt.set_value(
@@ -1177,7 +1186,7 @@ erpnext.work_order = {
 					fieldtype: "Float",
 					label: __("Finished Good Qty"),
 					fieldname: "finished_good_qty",
-					default: flt(Math.max(max - pending_process_loss, 0), precision("qty")),
+					default: flt(Math.max(default_qty - pending_process_loss, 0), precision("qty")),
 					read_only: 1,
 					description: __("Actual quantity of the finished good that will be manufactured."),
 				}
@@ -1188,15 +1197,13 @@ erpnext.work_order = {
 			frm.qty_prompt = frappe.prompt(
 				fields,
 				(data) => {
-					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
-
 					if (!data.qty || data.qty <= 0) {
 						frappe.msgprint(__("Quantity must be greater than zero."));
 						reject();
 						return;
 					}
-					if (data.qty > max) {
-						frappe.msgprint(__("Quantity must not be more than {0}", [max]));
+					if (data.qty > allowed_qty) {
+						frappe.msgprint(__("Quantity must not be more than {0}", [allowed_qty]));
 						reject();
 						return;
 					}
@@ -1478,7 +1485,19 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			job_card_tab: {
 				html_field: "job_card_list_html",
 				doctype: "Job Card",
-				fields: ["name", "status", "docstatus", "operation", "workstation", "for_quantity"],
+				list_overrides: {
+					get_page: (args) => erpnext.work_order.get_job_card_page(this.frm, args),
+					after_render() {
+						erpnext.work_order.bind_job_card_timer_actions(this);
+						// render() skips render_more when there are no rows
+						if (!this.data.length) erpnext.work_order.sync_job_card_rows(this);
+					},
+					// also runs on Load More, which skips after_render
+					render_more() {
+						this.constructor.prototype.render_more.call(this);
+						erpnext.work_order.sync_job_card_rows(this);
+					},
+				},
 				columns: [
 					{
 						label: __("Job Card"),
@@ -1498,6 +1517,16 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 							];
 							return frappe.ui.badge.html({ label, theme: color });
 						},
+					},
+					{
+						label: __("Time"),
+						width: "1%",
+						render: (row) => erpnext.work_order.job_card_time_html(row),
+					},
+					{
+						label: "",
+						width: "1%",
+						render: (row) => erpnext.work_order.job_card_actions_html(row),
 					},
 				],
 			},
@@ -1579,6 +1608,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			.require("embedded_list.bundle.js")
 			.then(() => {
 				this._loaded = true;
+				this.stop_timers();
 				this.lists = {};
 				this.load_active_tab();
 			})
@@ -1609,6 +1639,7 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			empty_state_action: can_add ? cfg.empty_state_action : undefined,
 			empty_description: cfg.empty_description,
 			empty_message: cfg.empty_message || __("No {0} linked to this Work Order.", [__(cfg.doctype)]),
+			...cfg.list_overrides,
 		};
 		const ListClass = erpnext.work_order.get_embedded_list_class();
 		const list = new ListClass(opts);
@@ -1632,4 +1663,264 @@ erpnext.work_order.LinkedLists = class WorkOrderLinkedLists {
 			this.build(fieldname);
 		}
 	}
+
+	stop_timers() {
+		Object.values(this.lists).forEach((list) => erpnext.work_order.stop_job_card_ticker(list));
+	}
+};
+
+erpnext.work_order.get_job_card_page = function (frm, { start, page_length, txt }) {
+	return frappe
+		.xcall("erpnext.manufacturing.doctype.job_card.timer.get_work_order_job_cards", {
+			work_order: frm.doc.name,
+			start,
+			page_length,
+			txt,
+		})
+		.then(erpnext.work_order.stamp_fetched_at);
+};
+
+// keep in sync with SEARCH_FIELDS in job_card/timer.py
+erpnext.work_order.JOB_CARD_SEARCH_FIELDS = ["name", "operation", "workstation", "status"];
+
+erpnext.work_order.job_card_matches_search = function (row, txt) {
+	const term = txt.toLowerCase();
+	return erpnext.work_order.JOB_CARD_SEARCH_FIELDS.some((field) =>
+		String(row[field] ?? "")
+			.toLowerCase()
+			.includes(term)
+	);
+};
+
+erpnext.work_order.stamp_fetched_at = function (rows) {
+	const fetched_at = Date.now();
+	rows.forEach((row) => (row.fetched_at = fetched_at));
+	return rows;
+};
+
+erpnext.work_order.JOB_CARD_TIMER_ACTIONS = {
+	start: { icon: "play", label: __("Start") },
+	resume: { icon: "play", label: __("Resume") },
+	pause: { icon: "pause", label: __("Pause") },
+	// opens the form: completing needs its quantity dialog
+	complete: {
+		icon: "check",
+		label: __("Complete"),
+		title: __("Complete in Job Card"),
+		show_label: true,
+	},
+};
+
+erpnext.work_order.get_job_card_row_actions = function (row) {
+	if (!row.timer_action) return [];
+	return row.timer_action === "pause" ? ["pause", "complete"] : [row.timer_action];
+};
+
+erpnext.work_order.job_card_time_html = function (row) {
+	return `<span class="job-card-timer${row.is_running ? "" : " text-muted"}"
+		style="font-variant-numeric: tabular-nums;"
+		data-job-card="${frappe.utils.escape_html(row.name)}">${erpnext.work_order.format_job_card_elapsed(
+		row
+	)}</span>`;
+};
+
+erpnext.work_order.job_card_actions_html = function (row) {
+	const name = frappe.utils.escape_html(row.name);
+	const buttons = erpnext.work_order
+		.get_job_card_row_actions(row)
+		.map((action_name) => {
+			const action = erpnext.work_order.JOB_CARD_TIMER_ACTIONS[action_name];
+			return frappe.ui.button.html({
+				label: action.show_label ? action.label : "",
+				icon: action.icon,
+				size: "xs",
+				title: action.title || action.label,
+				// button.html escapes attrs itself
+				attrs: { "data-timer-action": action_name, "data-job-card": row.name },
+			});
+		})
+		.join("");
+
+	return `<span class="job-card-actions inline-flex gap-1 embedded-list-hover-reveal" data-job-card="${name}">${buttons}</span>`;
+};
+
+// in-progress cards, else the next card to start, keep buttons visible; the rest on hover
+erpnext.work_order.show_persistent_job_card_actions = function (list) {
+	const persistent = erpnext.work_order.get_persistent_job_cards(list.data);
+	list.$wrapper.find(".job-card-actions").each((_, element) => {
+		const $actions = $(element);
+		$actions.toggleClass("embedded-list-hover-reveal", !persistent.has($actions.attr("data-job-card")));
+	});
+};
+
+erpnext.work_order.get_persistent_job_cards = function (rows) {
+	const in_progress = rows.filter((row) => ["pause", "resume"].includes(row.timer_action));
+	if (in_progress.length) {
+		return new Set(in_progress.map((row) => row.name));
+	}
+
+	// rows come in operation order, so the first startable one is next
+	const next = rows.find((row) => row.timer_action === "start");
+	return new Set(next ? [next.name] : []);
+};
+
+erpnext.work_order.format_job_card_elapsed = function (row) {
+	const live_seconds = (row.open_log_count * (Date.now() - row.fetched_at)) / 1000;
+	const total = Math.floor(row.elapsed_seconds + live_seconds);
+	const pad = (n) => String(n).padStart(2, "0");
+	return `${pad(Math.floor(total / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
+};
+
+erpnext.work_order.bind_job_card_timer_actions = function (list) {
+	list.$wrapper.off("click.job_card_timer").on("click.job_card_timer", "[data-timer-action]", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const $button = $(e.currentTarget);
+		const row = list.data.find((r) => r.name === $button.attr("data-job-card"));
+		if (!row) return;
+
+		erpnext.work_order.run_once_per_job_card(list, row.name, () =>
+			erpnext.work_order.run_job_card_timer_action(list, row, $button.attr("data-timer-action"))
+		);
+	});
+};
+
+// ignores repeat clicks while a card's action runs
+erpnext.work_order.run_once_per_job_card = function (list, job_card, run) {
+	list.pending_job_cards = list.pending_job_cards || new Set();
+	if (list.pending_job_cards.has(job_card)) return;
+
+	list.pending_job_cards.add(job_card);
+	const $buttons = list.$wrapper
+		.find(`[data-timer-action][data-job-card="${CSS.escape(job_card)}"]`)
+		.prop("disabled", true);
+
+	Promise.resolve()
+		.then(run)
+		.finally(() => {
+			list.pending_job_cards.delete(job_card);
+			$buttons.prop("disabled", false);
+		});
+};
+
+erpnext.work_order.run_job_card_timer_action = function (list, row, action) {
+	const now = frappe.datetime.system_datetime();
+	if (action === "complete") {
+		return frappe.set_route("Form", "Job Card", row.name);
+	}
+	if (action === "start") {
+		return erpnext.work_order.start_job_card(list, row);
+	}
+	if (action === "pause") {
+		return erpnext.work_order.update_job_card(list, row.name, "pause_job", { end_time: now });
+	}
+	return erpnext.work_order.update_job_card(list, row.name, "resume_job", { start_time: now });
+};
+
+erpnext.work_order.sync_job_card_rows = function (list) {
+	erpnext.work_order.show_persistent_job_card_actions(list);
+	erpnext.work_order.sync_job_card_ticker(list);
+};
+
+// ticks only while a loaded row has an open log
+erpnext.work_order.sync_job_card_ticker = function (list) {
+	list.ticking_rows = list.data.filter((row) => row.open_log_count > 0);
+	if (!list.ticking_rows.length) {
+		erpnext.work_order.stop_job_card_ticker(list);
+		return;
+	}
+	if (list.timer_interval) return;
+
+	list.timer_interval = setInterval(() => {
+		if (document.hidden || !list.$wrapper.is(":visible")) return;
+		list.ticking_rows.forEach((row) => {
+			list.$wrapper
+				.find(`.job-card-timer[data-job-card="${CSS.escape(row.name)}"]`)
+				.text(erpnext.work_order.format_job_card_elapsed(row));
+		});
+	}, 1000);
+};
+
+erpnext.work_order.stop_job_card_ticker = function (list) {
+	clearInterval(list.timer_interval);
+	list.timer_interval = null;
+};
+
+erpnext.work_order.start_job_card = function (list, row) {
+	const start = (employees) =>
+		erpnext.work_order.update_job_card(list, row.name, "start_timer", {
+			start_time: frappe.datetime.system_datetime(),
+			employees,
+		});
+
+	if (row.employees.length) {
+		return start(row.employees.map((employee) => ({ employee })));
+	}
+
+	// start time is taken on submit, so picking operators isn't counted
+	return new Promise((resolve) => {
+		let request = null;
+		const dialog = frappe.prompt(
+			{
+				fieldtype: "Table MultiSelect",
+				label: __("Select Employees"),
+				options: "Job Card Time Log",
+				fieldname: "employees",
+				reqd: 1,
+				filters: { status: "Active" },
+			},
+			(values) => (request = start(values.employees)),
+			__("Assign Job to Employee")
+		);
+		// onhide fires before the submit callback
+		dialog.onhide = () => setTimeout(() => resolve(request));
+	});
+};
+
+erpnext.work_order.update_job_card = function (list, job_card, method, args) {
+	const reload_row = () =>
+		frappe
+			.xcall("erpnext.manufacturing.doctype.job_card.timer.get_job_card_timer", { job_card })
+			.then((row) => erpnext.work_order.replace_job_card_row(list, row));
+
+	return (
+		frappe
+			.xcall("erpnext.manufacturing.doctype.workstation.workstation.update_job_card", {
+				job_card,
+				method,
+				...args,
+			})
+			// a failure often means the card changed elsewhere; xcall has shown the error already
+			.then(reload_row, reload_row)
+	);
+};
+
+erpnext.work_order.replace_job_card_row = function (list, row) {
+	erpnext.work_order.stamp_fetched_at([row]);
+	const index = list.data.findIndex((r) => r.name === row.name);
+	if (index === -1) return;
+
+	const txt = list.search_term();
+	if (txt && !erpnext.work_order.job_card_matches_search(row, txt)) {
+		erpnext.work_order.remove_job_card_row(list, index);
+		return;
+	}
+
+	list.data[index] = row;
+	list._all_data[index] = row;
+	list.$wrapper.find(`tr[data-row-idx="${index}"]`).replaceWith(list.build_row_html(row, index));
+	erpnext.work_order.sync_job_card_rows(list);
+};
+
+// render() shows one page; render back the rest of the loaded rows
+erpnext.work_order.remove_job_card_row = function (list, index) {
+	list.data.splice(index, 1);
+	list._all_data.splice(index, 1);
+
+	list.render();
+	while (list.rendered_count < list.data.length) {
+		list.render_more();
+	}
+	list.after_render();
+	list.toggle_result_area();
 };

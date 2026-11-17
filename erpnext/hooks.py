@@ -63,6 +63,16 @@ web_include_icons = [
 
 doctype_js = {
 	"Address": "public/js/address.js",
+	"Customer": [
+		"public/js/party_overview.js",
+		"public/js/customer_overview.js",
+		"public/js/party_items.js",
+	],
+	"Supplier": [
+		"public/js/party_overview.js",
+		"public/js/supplier_overview.js",
+		"public/js/party_items.js",
+	],
 	"Sales Order": "public/js/sales_order_proforma.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
@@ -366,7 +376,6 @@ has_website_permission = {
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
 	"Timesheet": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Project": "erpnext.controllers.website_list_for_contact.has_website_permission",
 }
 
 
@@ -616,6 +625,7 @@ accounting_dimension_doctypes = [
 	"Journal Entry Account",
 	"Journal Entry Template Account",
 	"Material Request Item",
+	"Request for Quotation Item",
 	"Delivery Note Item",
 	"Purchase Receipt Item",
 	"Stock Entry Detail",

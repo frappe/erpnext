@@ -3,9 +3,13 @@
   {
    "chart_name": "Profit and Loss",
    "label": "Profit and Loss"
+  },
+  {
+   "chart_name": "Bank Balance",
+   "label": "Bank Balance"
   }
  ],
- "content": "[{\"id\": \"5e7b1c9a2f\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Organization Onboarding\", \"col\": 12}}, {\"id\": \"797d6b3896\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Profit and Loss\", \"col\": 12}}, {\"id\": \"7dfaeec97e\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Annual Sales\", \"col\": 4}}, {\"id\": \"b76ffb894b\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Annual Purchase\", \"col\": 4}}, {\"id\": \"ba3943fb2d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Stock Value\", \"col\": 4}}]",
+ "content": "[{\"id\": \"5e7b1c9a2f\", \"type\": \"onboarding\", \"data\": {\"onboarding_name\": \"Organization Onboarding\", \"col\": 12}}, {\"id\": \"fac009a082\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Sales Invoice\", \"col\": 4}}, {\"id\": \"533dc0542e\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Purchase Invoice\", \"col\": 4}}, {\"id\": \"4638988c49\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Payment Entry\", \"col\": 4}}, {\"id\": \"20557a312b\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Journal Entry\", \"col\": 4}}, {\"id\": \"b9406c4357\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Customer\", \"col\": 4}}, {\"id\": \"fc03efe15d\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Item\", \"col\": 4}}, {\"id\": \"797d6b3896\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Profit and Loss\", \"col\": 6}}, {\"id\": \"1a85949964\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Bank Balance\", \"col\": 6}}, {\"id\": \"bd346165a6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sales Invoiced\", \"col\": 3}}, {\"id\": \"41f3adf6cb\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Payments Received\", \"col\": 3}}, {\"id\": \"5b9152da66\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Purchases Billed\", \"col\": 3}}, {\"id\": \"7fa5abc743\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Payments Made\", \"col\": 3}}, {\"id\": \"9a06eaa371\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Orders to Deliver\", \"col\": 3}}, {\"id\": \"99d7a45382\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Orders to Bill\", \"col\": 3}}, {\"id\": \"9e1ca01561\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Purchases to Receive\", \"col\": 3}}, {\"id\": \"2a88d0358a\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Purchases to Bill\", \"col\": 3}}, {\"id\": \"cf2ae48212\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Customers\", \"col\": 3}}, {\"id\": \"d3aa04bef5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Suppliers\", \"col\": 3}}, {\"id\": \"a02126731c\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Active Items\", \"col\": 3}}, {\"id\": \"ba3943fb2d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Total Stock Value\", \"col\": 3}}, {\"id\": \"7a685db9e4\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Overdue Sales Invoices\", \"col\": 6}}, {\"id\": \"109830feff\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open ToDos\", \"col\": 6}}, {\"id\": \"41747c2d40\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Users\", \"col\": 4}}, {\"id\": \"f28c9b0a3b\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Error Logs\", \"col\": 4}}, {\"id\": \"efa30716f3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Failed Scheduled Jobs\", \"col\": 4}}]",
  "creation": "2020-01-23 13:46:38.833076",
  "custom_blocks": [],
  "docstatus": 0,
@@ -17,28 +21,87 @@
  "is_hidden": 0,
  "label": "Home",
  "links": [],
- "modified": "2026-10-04 15:00:00.000000",
+ "modified": "2026-11-15 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
  "number_cards": [
   {
-   "label": "Annual Sales",
-   "number_card_name": "Annual Sales"
+   "label": "Sales Invoiced",
+   "number_card_name": "Total Outgoing Bills"
   },
   {
-   "label": "Annual Purchase",
-   "number_card_name": "Annual Purchase"
+   "label": "Payments Received",
+   "number_card_name": "Total Incoming Payment"
+  },
+  {
+   "label": "Purchases Billed",
+   "number_card_name": "Total Incoming Bills"
+  },
+  {
+   "label": "Payments Made",
+   "number_card_name": "Total Outgoing Payment"
+  },
+  {
+   "label": "Orders to Deliver",
+   "number_card_name": "Sales Orders to Deliver"
+  },
+  {
+   "label": "Orders to Bill",
+   "number_card_name": "Sales Orders to Bill"
+  },
+  {
+   "label": "Purchases to Receive",
+   "number_card_name": "Purchase Orders to Receive"
+  },
+  {
+   "label": "Purchases to Bill",
+   "number_card_name": "Purchase Orders to Bill"
+  },
+  {
+   "label": "Active Customers",
+   "number_card_name": "Active Customers"
+  },
+  {
+   "label": "Active Suppliers",
+   "number_card_name": "Active Suppliers"
+  },
+  {
+   "label": "Total Active Items",
+   "number_card_name": "Total Active Items"
   },
   {
    "label": "Total Stock Value",
    "number_card_name": "Total Stock Value"
+  },
+  {
+   "label": "Users",
+   "number_card_name": "Users"
+  },
+  {
+   "label": "Error Logs",
+   "number_card_name": "Error Logs"
+  },
+  {
+   "label": "Failed Scheduled Jobs",
+   "number_card_name": "Failed Scheduled Jobs"
   }
  ],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
- "quick_lists": [],
+ "quick_lists": [
+  {
+   "document_type": "Sales Invoice",
+   "label": "Overdue Sales Invoices",
+   "quick_list_filter": "{\"status\":[\"=\",\"Overdue\"]}"
+  },
+  {
+   "document_type": "ToDo",
+   "label": "Open ToDos",
+   "quick_list_filter": "{\"status\":[\"=\",\"Open\"]}"
+  }
+ ],
  "restrict_to_domain": "",
  "roles": [
   {
@@ -46,7 +109,50 @@
   }
  ],
  "sequence_id": 1.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "New Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "New Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "New Payment Entry",
+   "link_to": "Payment Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "New Journal Entry",
+   "link_to": "Journal Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "New Customer",
+   "link_to": "Customer",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "New",
+   "label": "New Item",
+   "link_to": "Item",
+   "type": "DocType"
+  }
+ ],
  "standard": 1,
  "title": "Home",
  "type": "Workspace"

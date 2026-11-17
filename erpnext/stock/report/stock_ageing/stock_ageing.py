@@ -530,7 +530,7 @@ class FIFOSlots:
 	def _prefetch_batchwise_valuations(self) -> None:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -569,7 +569,7 @@ class FIFOSlots:
 		company = self.filters.get("company")
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = frappe.qb.DocType("Item")
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		query = (
 			frappe.qb.from_(sle)
@@ -1108,7 +1108,7 @@ class FIFOSlots:
 	def _get_stock_ledger_entries(self) -> Iterator[dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self._get_item_query()  # used as derived table in sle query
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 
 		sle_query = (
 			frappe.qb.from_(sle)
@@ -1147,6 +1147,11 @@ class FIFOSlots:
 		if warehouses := get_allowed_docs_for_doctype(get_user_permissions().get("Warehouse", []), "Item"):
 			sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
+		if companies := get_allowed_docs_for_doctype(
+			get_user_permissions().get("Company", []), "Stock Ledger Entry"
+		):
+			sle_query = sle_query.where(sle.company.isin(companies))
+
 		if self.filters.get("warehouse"):
 			sle_query = self._get_warehouse_conditions(sle, sle_query)
 		elif self.filters.get("warehouse_type"):
@@ -1167,7 +1172,7 @@ class FIFOSlots:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)
@@ -1197,7 +1202,7 @@ class FIFOSlots:
 		entry = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59")
+		to_date = get_datetime(self.filters.get("to_date") + " 23:59:59.999999")
 		query = (
 			frappe.qb.from_(bundle)
 			.join(entry)

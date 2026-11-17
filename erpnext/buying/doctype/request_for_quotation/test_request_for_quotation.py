@@ -183,6 +183,46 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		self.assertEqual(supplier_quotation_doc.get("items")[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get("items")[0].amount, 500)
 
+	def test_accounting_dimensions_flow_from_material_request_to_supplier_quotation(self):
+		from erpnext.stock.doctype.material_request.material_request import (
+			make_request_for_quotation as make_rfq_from_mr,
+		)
+		from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+
+		mr = make_material_request(cost_center="_Test Cost Center - _TC", do_not_submit=True)
+		mr.items[0].location = "Block 1"
+		mr.save()
+		mr.submit()
+
+		rfq = make_rfq_from_mr(mr.name)
+		self.assertEqual(rfq.items[0].cost_center, "_Test Cost Center - _TC")
+		self.assertEqual(rfq.items[0].location, "Block 1")
+		rfq.append("suppliers", {"supplier": "_Test Supplier", "supplier_name": "_Test Supplier"})
+		rfq.insert()
+		rfq.submit()
+
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier="_Test Supplier")
+		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+		self.assertEqual(sq.items[0].location, "Block 1")
+
+	def test_portal_uses_stored_rfq_accounting_dimensions(self):
+		from erpnext.templates.pages.rfq import get_portal_doc
+
+		rfq = make_request_for_quotation(do_not_submit=True)
+		rfq.items[0].cost_center = "_Test Cost Center - _TC"
+		rfq.items[0].location = "Block 1"
+		rfq.save()
+		rfq.submit()
+
+		portal_doc = get_portal_doc(rfq)
+		portal_doc["supplier"] = rfq.suppliers[0].supplier
+		portal_doc["items"][0]["cost_center"] = "Untrusted Cost Center"
+		portal_doc["items"][0]["location"] = "Untrusted Location"
+
+		sq = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
+		self.assertEqual(sq.items[0].cost_center, "_Test Cost Center - _TC")
+		self.assertEqual(sq.items[0].location, "Block 1")
+
 	def test_rate_quoted_from_portal_is_kept(self):
 		from erpnext.accounts.doctype.pricing_rule.test_pricing_rule import make_pricing_rule
 
@@ -240,6 +280,28 @@ class TestRequestforQuotation(ERPNextTestSuite):
 			item["rate"] = 100
 		supplier_quotation = frappe.get_doc("Supplier Quotation", create_supplier_quotation(portal_doc))
 		self.assertEqual(supplier_quotation.items[0].amount, 500)
+
+	def test_supplier_portal_user_can_submit_a_quotation(self):
+		from frappe.core.doctype.user_permission.test_user_permission import create_user
+
+		from erpnext.templates.pages.rfq import get_portal_doc
+
+		user = create_user("rfq_portal_supplier@example.com", "Supplier").name
+		rfq = make_request_for_quotation()
+		supplier = rfq.suppliers[0].supplier
+		frappe.new_doc(
+			"Portal User", user=user, parent=supplier, parentfield="portal_users", parenttype="Supplier"
+		).insert()
+
+		portal_doc = get_portal_doc(rfq)
+		portal_doc["supplier"] = supplier
+		for item in portal_doc["items"]:
+			item["rate"] = 100
+
+		with self.set_user(user):
+			supplier_quotation = create_supplier_quotation(portal_doc)
+
+		self.assertEqual(frappe.db.get_value("Supplier Quotation", supplier_quotation, "supplier"), supplier)
 
 	def test_portal_row_left_untouched_is_quoted_at_zero(self):
 		from erpnext.templates.pages.rfq import get_portal_doc
@@ -343,10 +405,62 @@ class TestRequestforQuotation(ERPNextTestSuite):
 		parsed_link = urlparse(rfq.get_link())
 		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
 
+	def test_send_supplier_emails_needs_write_permission(self):
+		from unittest.mock import patch
+
+		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+			RequestforQuotation,
+			send_supplier_emails,
+		)
+		from erpnext.tests.permission_test_utils import as_user, make_fenced_user
+
+		rfq = make_request_for_quotation()
+		email_id = "rfq-send-email-supplier@example.com"
+		rfq.suppliers[0].db_set({"email_id": email_id, "send_email": 1})
+		reader = make_fenced_user("rfq-send-email-reader@example.com", ["Stock User"])
+		manager = make_fenced_user("rfq-send-email-manager@example.com", ["Purchase Manager"])
+
+		with patch.object(RequestforQuotation, "send_email") as send_email:
+			with as_user(reader):
+				self.assertRaises(frappe.PermissionError, send_supplier_emails, rfq.name)
+			self.assertFalse(frappe.db.exists("User", email_id))
+			send_email.assert_not_called()
+
+			with as_user(manager):
+				send_supplier_emails(rfq.name)
+			send_email.assert_called_once()
+
+		self.assertTrue(frappe.db.exists("User", email_id))
+		self.assertEqual(
+			frappe.db.get_value("Request for Quotation Supplier", rfq.suppliers[0].name, "email_sent"), 1
+		)
+
 	def test_get_pdf(self):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
 		self.assertEqual(frappe.local.response.type, "pdf")
+
+	def test_email_preview_keeps_formatting_and_drops_event_handlers(self):
+		rfq = make_request_for_quotation(
+			supplier_data=[
+				{
+					"supplier": "_Test Supplier",
+					"supplier_name": "_Test Supplier",
+					"email_id": "rfq-preview-supplier@example.com",
+				}
+			],
+			do_not_submit=True,
+		)
+		rfq.use_html = 1
+		rfq.mfs_html = '<p>Dear {{ supplier_name }}</p><b onclick="return false">Steel Sheet</b>'
+		rfq.save()
+
+		supplier = rfq.suppliers[0]
+		preview = rfq.get_supplier_email_preview(supplier.supplier)
+
+		self.assertIn(f"<p>Dear {supplier.supplier_name}</p>", preview["message"])
+		self.assertIn("<b>Steel Sheet</b>", preview["message"])
+		self.assertNotIn("onclick", preview["message"])
 
 	def test_portal_user_with_new_supplier(self):
 		supplier_doc = frappe.get_doc(

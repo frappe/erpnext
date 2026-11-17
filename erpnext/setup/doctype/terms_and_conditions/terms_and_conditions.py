@@ -10,7 +10,7 @@ from frappe.model import get_permitted_fields
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils.jinja import safe_render_flags, set_filters, validate_template
-from jinja2 import DebugUndefined
+from jinja2 import DebugUndefined, nodes
 from jinja2.sandbox import SandboxedEnvironment
 
 
@@ -34,6 +34,7 @@ class TermsandConditions(Document):
 	def validate(self):
 		if self.terms:
 			validate_template(self.terms, restrict_globals=True)
+			validate_terms_globals(self.terms)
 		if not cint(self.disabled) and not any(
 			cint(self.get(module)) for module in ("buying", "selling", "hr")
 		):
@@ -103,6 +104,37 @@ def get_terms_environment(author):
 		),
 	)
 	return jenv
+
+
+def validate_terms_globals(terms):
+	"""Refuse `frappe` attributes that the terms sandbox does not provide, so the template can render."""
+	jenv = get_terms_environment(None)
+	for node in jenv.parse(terms).find_all(nodes.Getattr):
+		path = get_attribute_path(node)
+		if path and path[0] == "frappe" and not has_global(jenv.globals, path):
+			throw(_("{0} cannot be used in Terms and Conditions").format(frappe.bold(".".join(path))))
+
+
+def get_attribute_path(node):
+	path = []
+	while isinstance(node, nodes.Getattr):
+		path.insert(0, node.attr)
+		node = node.node
+
+	return [node.name, *path] if isinstance(node, nodes.Name) else None
+
+
+def has_global(jenv_globals, path):
+	value = jenv_globals
+	for name in path:
+		# attributes of helpers are checked by the sandbox when rendering
+		if not isinstance(value, dict):
+			return True
+		if name not in value:
+			return False
+		value = value[name]
+
+	return True
 
 
 def format_terms_value(value, df=None, doc=None, currency=None, translated=False, format=None):

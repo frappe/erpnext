@@ -45,6 +45,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_or_make_bin, validate_warehouse_company
+from erpnext.utilities.query import get_user_permission_conditions_qb
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -152,10 +153,20 @@ class ProductionPlan(Document):
 		self.validate_sales_orders()
 		self.validate_material_request_type()
 		self.validate_raw_material_group_warehouse()
-		if self.for_warehouse:
-			validate_warehouse_company(self.for_warehouse, self.company)
+		self.validate_warehouse_belongs_to_company()
 		clear_reserve_stock_if_disabled(self)
 		self.enable_auto_reserve_stock()
+
+	def validate_warehouse_belongs_to_company(self):
+		warehouses = {self.for_warehouse, self.sub_assembly_warehouse}
+		warehouses.update(row.warehouse for row in self.po_items)
+		warehouses.update(row.fg_warehouse for row in self.sub_assembly_items)
+		for row in self.mr_items:
+			warehouses.update((row.warehouse, row.from_warehouse))
+
+		for warehouse in warehouses:
+			if warehouse:
+				validate_warehouse_company(warehouse, self.company)
 
 	def validate_raw_material_group_warehouse(self):
 		if not self.raw_material_group_warehouse:
@@ -832,6 +843,11 @@ class ProductionPlan(Document):
 
 	@frappe.whitelist()
 	def set_status(self, close: bool | None = None, update_bin: bool = False):
+		if close is not None:
+			self.reload()
+			if self.docstatus != 1:
+				frappe.throw(_("Only a submitted Production Plan can be closed or re-opened"))
+
 		self.check_permission("write")
 
 		if close is None and self.status == "Closed":
@@ -1503,6 +1519,7 @@ def download_raw_materials(doc, warehouses=None):
 			merged = duplicate_item_wh_list[key]
 			merged.quantity += _stock_quantity(d) / merged.conversion_factor
 			merged.row[12] = flt(merged.quantity, precision)
+			merged.row[5] = flt(flt(merged.row[5]) + flt(d.get("required_bom_qty")), precision)
 			continue
 
 		rm_data = [
@@ -1794,7 +1811,7 @@ def get_material_request_items(
 		quantity = round_up_whole_uom(
 			_quantity_in_purchase_uom(required_qty, conversion_factor, min_order_qty), uom
 		)
-	return {
+	item = {
 		"item_code": row.item_code,
 		"item_name": row.item_name,
 		"quantity": quantity,
@@ -1819,6 +1836,9 @@ def get_material_request_items(
 		"main_item_code": row.get("main_bom_item"),
 		"from_bom": row.get("main_bom"),
 	}
+	if not is_transfer:
+		_keep_stock_qty_whole(item, required_qty)
+	return item
 
 
 def consolidate_subcontracted_po(subcontracted_po, subcontracted_qty):
@@ -1947,6 +1967,22 @@ def _set_stock_quantity(row, stock_qty):
 	if frappe.get_cached_value("UOM", row.get("uom"), "must_be_whole_number"):
 		quantity = ceil(quantity)
 	row["quantity"] = quantity
+	_keep_stock_qty_whole(row, stock_qty)
+
+
+def _keep_stock_qty_whole(row, stock_qty):
+	"""Request ``stock_qty`` in the stock UOM when the row's qty is a fraction of a whole number stock UOM."""
+	stock_uom = row.get("stock_uom")
+	if not frappe.get_cached_value("UOM", stock_uom, "must_be_whole_number"):
+		return
+
+	row_stock_qty = flt(_stock_quantity(row), frappe.get_precision("Material Request Item", "stock_qty"))
+	if row_stock_qty.is_integer():
+		return
+
+	row.update(
+		{"uom": stock_uom, "conversion_factor": 1.0, "quantity": round_up_whole_uom(stock_qty, stock_uom)}
+	)
 
 
 def get_sales_orders(self):
@@ -2439,6 +2475,7 @@ def get_materials_from_other_locations(
 		# Convert qty to stock UOM
 		required_qty = required_qty * item.get("conversion_factor")
 
+	first_row = len(new_mr_items)
 	required_qty = _transfer_from_locations(item, locations, new_mr_items, required_qty)
 
 	# raise purchase request for remaining qty
@@ -2448,8 +2485,24 @@ def get_materials_from_other_locations(
 		min_order_qty = flt(item.get("min_order_qty")) if consider_minimum_order_qty else 0
 		quantity = _quantity_in_purchase_uom(required_qty, item.get("conversion_factor"), min_order_qty)
 		item["quantity"] = round_up_whole_uom(quantity, item.get("uom"))
+		_keep_stock_qty_whole(item, required_qty)
 
 		new_mr_items.append(item)
+
+	_split_required_bom_qty(item, new_mr_items[first_row:])
+
+
+def _split_required_bom_qty(item, rows):
+	"""Share the item's BOM qty across the rows it is split into, so it is reserved once."""
+	if not rows:
+		return
+
+	precision = frappe.get_precision("Material Request Plan Item", "required_bom_qty")
+	remaining_qty = flt(item.get("required_bom_qty"))
+	for row in rows[:-1]:
+		row["required_bom_qty"] = flt(min(flt(row.get("quantity")), remaining_qty), precision)
+		remaining_qty -= row["required_bom_qty"]
+	rows[-1]["required_bom_qty"] = flt(remaining_qty, precision)
 
 
 def _get_transfer_locations(mr_items, warehouses, company):
@@ -2839,6 +2892,9 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 
 	if txt:
 		query = query.where(table.parent.like(f"%{txt}%"))
+
+	for condition in get_user_permission_conditions_qb("Sales Order", so_table):
+		query = query.where(condition)
 
 	if page_len:
 		query = query.limit(page_len)

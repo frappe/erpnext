@@ -149,14 +149,18 @@ class StockReservationEntry(Document):
 
 	def before_cancel(self) -> None:
 		self.validate_reserved_entries()
-		self.validate_work_order_usage()
+		self.validate_order_usage()
 
-	def validate_work_order_usage(self) -> None:
-		"""Stock a Work Order has transferred or consumed is released by closing the Work Order, not by cancelling its reservation."""
-		if self.voucher_type != "Work Order" or not (flt(self.transferred_qty) or flt(self.consumed_qty)):
+	def validate_order_usage(self) -> None:
+		"""Stock an order has transferred or consumed is released by closing the order, not by cancelling its reservation."""
+		if self.voucher_type not in ("Work Order", "Subcontracting Order") or not (
+			flt(self.transferred_qty) or flt(self.consumed_qty)
+		):
 			return
 
-		if frappe.db.get_value("Work Order", self.voucher_no, "status") in ("Closed", "Cancelled"):
+		status = frappe.db.get_value(self.voucher_type, self.voucher_no, "status")
+		# a closed Subcontracting Order keeps its used reservations and can be re-opened
+		if status == "Cancelled" or (status == "Closed" and self.voucher_type == "Work Order"):
 			return
 
 		if (
@@ -167,8 +171,8 @@ class StockReservationEntry(Document):
 
 		frappe.throw(
 			_(
-				"Stock Reservation Entry {0} is already used by Work Order {1}. Close the Work Order to release the unused stock."
-			).format(frappe.bold(self.name), frappe.bold(self.voucher_no))
+				"Stock Reservation Entry {0} is already used by {1} {2}. Close the {1} to release the unused stock."
+			).format(frappe.bold(self.name), _(self.voucher_type), frappe.bold(self.voucher_no))
 		)
 
 	def validate_reserved_entries(self):
@@ -1239,6 +1243,7 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 			"Stock Reservation Entry", sre_list[0]["name"], "company"
 		)
 
+		round_to_ledger_qty(sb_entries)
 		for sb_entry in sb_entries:
 			bundle.append("entries", sb_entry)
 
@@ -1248,6 +1253,30 @@ def get_ssb_bundle_for_voucher(sre_list) -> object:
 		bundle.save()
 
 		return bundle
+
+
+def round_to_ledger_qty(sb_entries: list[dict]) -> None:
+	"""Round the reserved total as the stock ledger posts it, on the last entry.
+
+	The other entries keep their reserved qty, so each reservation still matches what it delivers.
+	"""
+	qty_before_last = sum(flt(entry.qty) for entry in sb_entries[:-1])
+	total = flt(
+		qty_before_last + flt(sb_entries[-1].qty), frappe.get_precision("Serial and Batch Entry", "qty")
+	)
+	sb_entries[-1].qty = total - qty_before_last
+
+
+def get_qty_up_to_rounding(qty: float, full_qty: float) -> float:
+	"""``full_qty`` when ``qty`` falls short of it only by rounding."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return full_qty if flt(full_qty - qty, precision) == 0 else qty
+
+
+def get_qty_to_undeliver(delivered_qty: float, qty: float) -> float:
+	"""Undeliver ``qty`` and leave the delivered qty as the stock ledger posts it, with no rounding residue."""
+	precision = frappe.get_precision("Serial and Batch Entry", "qty")
+	return delivered_qty - flt(delivered_qty - min(delivered_qty, qty), precision)
 
 
 def get_whole_sales_unit_qty(item, stock_qty: float, max_qty: float | None = None) -> float:
@@ -2219,7 +2248,8 @@ def get_status(sre) -> str:
 		return "Partially Delivered"
 	if sre.consumed_qty:
 		return "Partially Used"
-	if sre.reserved_qty >= sre.voucher_qty:
+	precision = frappe.get_precision("Stock Reservation Entry", "reserved_qty")
+	if flt(sre.reserved_qty, precision) >= flt(sre.voucher_qty, precision):
 		return "Reserved"
 	return "Partially Reserved"
 

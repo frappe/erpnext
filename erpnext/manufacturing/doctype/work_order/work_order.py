@@ -29,6 +29,7 @@ from frappe.utils import (
 from pypika import functions as fn
 from pypika.terms import ExistsCriterion
 
+from erpnext import get_company_currency, require_permission
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_items_as_dict,
@@ -2556,6 +2557,8 @@ class WorkOrder(Document):
 	def make_bom(self):
 		bom = frappe.new_doc("BOM")
 		bom.item = self.production_item
+		bom.company = self.company
+		bom.currency = get_company_currency(self.company)
 		bom.conversion_rate = 1
 		bom.quantity = flt(self.produced_qty) or flt(self.qty)
 
@@ -2928,19 +2931,23 @@ class WorkOrder(Document):
 		return frappe._dict(vocher_detail_no)
 
 	def cancel_reserved_qty_for_wip_and_fg(self, ste_doc):
-		for row in ste_doc.items:
-			sre_list = frappe.get_all(
-				"Stock Reservation Entry",
-				filters={
-					"from_voucher_no": ste_doc.name,
-					"from_voucher_detail_no": row.name,
-					"docstatus": 1,
-				},
-				pluck="name",
-			)
+		sre_list = frappe.get_all(
+			"Stock Reservation Entry",
+			filters={
+				"from_voucher_no": ste_doc.name,
+				"from_voucher_detail_no": ("in", [row.name for row in ste_doc.items]),
+				"docstatus": 1,
+			},
+			pluck="name",
+		)
+		for name in sre_list:
+			sre_doc = frappe.get_doc("Stock Reservation Entry", name)
+			sre_doc.flags.ignore_permissions = True
+			sre_doc.cancel()
 
-			if sre_list:
-				unreserve_stock_for_work_order(self, sre_list)
+		if sre_list:
+			self.reload()
+			self.db_set("status", self.get_status())
 
 	def release_reserved_qty_for_subcontract_transfer(self):
 		"""Free this Work Order's own reservation for items sent to a subcontractor.
@@ -3555,6 +3562,7 @@ def get_disassembly_available_qty(stock_entry_name: str, current_se_name: str | 
 
 @frappe.whitelist()
 def get_default_warehouse(company):
+	require_permission("Company", company, "select")
 	wip, fg, scrap = frappe.get_cached_value(
 		"Company", company, ["default_wip_warehouse", "default_fg_warehouse", "default_scrap_warehouse"]
 	)
@@ -4011,12 +4019,12 @@ def _allocate_material_demand(work_order, fraction):
 		key = _allocation_key(row)
 		required_by_group[key] = required_by_group.get(key, 0.0) + flt(row.required_qty)
 
+	precision = frappe.get_precision("Work Order Item", "required_qty")
 	pending_pool = {
-		item_code: required_qty - covered_by_item[item_code]
+		item_code: flt(required_qty - covered_by_item[item_code], precision)
 		for item_code, required_qty in required_by_item.items()
 	}
 
-	precision = frappe.get_precision("Work Order Item", "required_qty")
 	remaining_by_item = {
 		item_code: min(
 			_round_demand(required_qty * fraction, uom_by_item[item_code], precision),
@@ -4113,6 +4121,7 @@ def get_reserved_qty_for_production(
 			((wo.skip_transfer == 0) & (wo_item.transferred_qty > wo_item.required_qty)), 0.0
 		)
 		qty_field = qty_field.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+		qty_field = qty_field.when(wo_item.consumed_qty > wo_item.required_qty, 0.0)
 		qty_field = qty_field.else_(wo_item.required_qty - wo_item.consumed_qty)
 		# what Subcontracting Orders took over is their demand, not the Work Order's, even when they
 		# send what the Work Order already transferred

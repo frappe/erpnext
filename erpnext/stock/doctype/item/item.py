@@ -779,7 +779,7 @@ class Item(Document):
 			"Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 		).format(frappe.bold(old_name))
 
-		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
+		frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
 
 	def validate_properties_before_merge(self, new_name):
 		# Validate properties before merging
@@ -1525,6 +1525,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		{
 			"price_list_rate": out.base_price_list_rate / conversion_rate,
 			"rate": out.base_rate / conversion_rate,
+			# a rate above the price list rate is a margin, not a discount
+			"discount_amount": max(out.base_price_list_rate - out.base_rate, 0) / conversion_rate,
 			"base_rate": out.base_rate,
 			"base_net_rate": out.base_net_rate,
 		}

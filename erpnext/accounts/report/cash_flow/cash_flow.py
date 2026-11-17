@@ -37,7 +37,7 @@ def execute(filters=None):
 	if filters and filters.report_template:
 		return FinancialReportEngine().execute(filters)
 
-	period_list = build_period_list(filters)
+	period_list = build_period_list(filters, accumulated_values=bool(filters.accumulated_values))
 
 	if not period_list:
 		return

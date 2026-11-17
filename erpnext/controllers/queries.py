@@ -16,7 +16,6 @@ from frappe.utils import cint, nowdate, today, unique
 from pypika import Order
 
 import erpnext
-from erpnext.accounts.utils import build_qb_match_conditions
 from erpnext.selling.doctype.party_specific_item.party_specific_item import get_allowed_items_condition
 from erpnext.stock.doctype.company_restriction.company_restriction import get_restriction_criterion
 from erpnext.stock.doctype.item.item_search import get_item_search_candidates
@@ -805,12 +804,8 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("company"):
 		condition.append(acc.company.eq(filters.get("company")))
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
 	return (
-		qb.from_(acc)
-		.select(acc.name)
+		frappe.qb.get_query(dt, fields=["name"], ignore_permissions=False)
 		.where(Criterion.all(condition))
 		.orderby(acc.idx, order=Order.desc)
 		.orderby(acc.name)
@@ -903,10 +898,11 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("company"):
 		condition.append(acc.company.eq(filters.get("company")))
 
-	user_perms = build_qb_match_conditions(dt)
-	condition.extend(user_perms)
-
-	return qb.from_(acc).select(acc.name).where(Criterion.all(condition)).run()
+	return (
+		frappe.qb.get_query(dt, fields=["name"], ignore_permissions=False)
+		.where(Criterion.all(condition))
+		.run()
+	)
 
 
 @frappe.whitelist()
@@ -923,21 +919,29 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 		searchfield = meta.get("title_field")
 		warehouse_field = meta.get("title_field")
 
-	query = """select `tabWarehouse`.`{warehouse_field}`,
-		CONCAT_WS(' : ', 'Actual Qty', ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
-		from `tabWarehouse` left join `tabBin`
-		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
+	stock_column, bin_join, stock_order = "", "", ""
+	if frappe.has_permission("Bin", "read"):
+		stock_column = (
+			", CONCAT_WS(' : ', 'Actual Qty', ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty"
+		)
+		bin_join = "left join `tabBin` on `tabBin`.warehouse = `tabWarehouse`.name " + get_filters_cond(
+			doctype, filter_dict.get("Bin"), bin_conditions, ignore_permissions=True
+		)
+		stock_order = "ifnull(`tabBin`.actual_qty, 0) desc,"
+
+	query = """select `tabWarehouse`.`{warehouse_field}` {stock_column}
+		from `tabWarehouse` {bin_join}
 		where
 			`tabWarehouse`.`{key}` like {txt}
 			{fcond} {mcond}
-		order by ifnull(`tabBin`.actual_qty, 0) desc, `tabWarehouse`.`{warehouse_field}` asc
+		order by {stock_order} `tabWarehouse`.`{warehouse_field}` asc
 		limit
 			{page_len} offset {start}
 		""".format(
 		warehouse_field=warehouse_field,
-		bin_conditions=get_filters_cond(
-			doctype, filter_dict.get("Bin"), bin_conditions, ignore_permissions=True
-		),
+		stock_column=stock_column,
+		bin_join=bin_join,
+		stock_order=stock_order,
 		key=searchfield,
 		fcond=get_filters_cond(doctype, filter_dict.get("Warehouse"), conditions),
 		mcond=get_match_cond(doctype),
@@ -981,9 +985,14 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
+	item_code = filters.get("item_code")
+	if not item_code or not isinstance(item_code, str):
+		return []
+
+	frappe.has_permission("Item", "read", item_code, throw=True)
 	item_filters = [
 		["manufacturer", "like", "%" + txt + "%"],
-		["item_code", "=", filters.get("item_code")],
+		["item_code", "=", item_code],
 	]
 
 	item_manufacturers = frappe.get_all(
@@ -1075,8 +1084,13 @@ def get_doctypes_for_closing(doctype, txt, searchfield, start, page_len, filters
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
-	item_doc = frappe.get_cached_doc("Item", filters.get("item_code"))
+	item_code = filters.get("item_code")
 	item_group = filters.get("item_group")
+	if not isinstance(item_code, str) or not isinstance(item_group, str | None):
+		frappe.throw(_("Invalid Item Code or Item Group"), frappe.PermissionError)
+
+	frappe.has_permission("Item", "read", item_code, throw=True)
+	item_doc = frappe.get_cached_doc("Item", item_code)
 	company = filters.get("company")
 	taxes = item_doc.taxes or []
 
@@ -1113,7 +1127,7 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 		ctx = ItemDetailsCtx(
 			{
-				"item_code": filters.get("item_code"),
+				"item_code": item_code,
 				"posting_date": valid_from,
 				"tax_category": filters.get("tax_category"),
 				"company": company,
@@ -1123,7 +1137,11 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 		taxes = _get_item_tax_template(ctx, taxes, for_validate=True)
 		txt = txt.lower()
-		return [(d,) for d in set(taxes) if not txt or txt in d.lower()]
+		templates = [d for d in set(taxes) if not txt or txt in d.lower()]
+		if not templates:
+			return []
+
+		return frappe.get_list("Item Tax Template", filters={"name": ["in", templates]}, as_list=True)
 
 
 def get_fields(doctype, fields=None):
@@ -1201,7 +1219,7 @@ def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters)
 
 	table = frappe.qb.DocType(doctype)
 	query = (
-		frappe.get_query(table, filters=filters)
+		frappe.get_query(table, filters=filters, ignore_permissions=False, parent_doctype=parenttype)
 		.select(
 			Concat("#", table.idx, ", ", table.item_code),
 		)
@@ -1255,6 +1273,11 @@ def get_item_uom_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, page_len: int, filters: dict):
+	warehouse = filters.get("warehouse")
+	if not warehouse or not isinstance(warehouse, str):
+		return []
+
+	frappe.has_permission("Warehouse", "read", warehouse, throw=True)
 	table = frappe.qb.DocType(doctype)
 	child_table = frappe.qb.DocType("Dynamic Link")
 
@@ -1264,7 +1287,7 @@ def get_warehouse_address(doctype: str, txt: str, searchfield: str, start: int, 
 		.on((table.name == child_table.parent) & (child_table.parenttype == doctype))
 		.select(table.name)
 		.where(
-			(child_table.link_name == filters.get("warehouse"))
+			(child_table.link_name == warehouse)
 			& (table.disabled == 0)
 			& (child_table.link_doctype == "Warehouse")
 			& (table.name.like(f"%{txt}%"))
