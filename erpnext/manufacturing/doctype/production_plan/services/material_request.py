@@ -928,6 +928,10 @@ def _transfer_from_locations(item, locations, new_mr_items, required_qty):
 		if flt(required_qty, precision) <= 0:
 			return required_qty
 
+		# stock is not transferred from the receiving warehouse to itself
+		if d.get("warehouse") == item.get("warehouse"):
+			continue
+
 		quantity = flt(min(required_qty, d.get("qty")), precision)
 		if quantity <= 0:
 			continue
