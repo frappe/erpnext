@@ -128,7 +128,7 @@ class SubcontractingInwardOrder(SubcontractingController):
 					status = "Delivered"
 				elif self.per_produced == 100:
 					status = "Produced"
-				elif self.per_raw_material_received > 0:
+				elif total_received:
 					status = "Ongoing"
 				else:
 					status = "Open"
