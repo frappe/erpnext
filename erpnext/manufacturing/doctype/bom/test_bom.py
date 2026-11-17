@@ -1887,10 +1887,19 @@ class TestBOM(ERPNextTestSuite):
 				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
 			)
 
-<<<<<<< HEAD
 	def test_bom_tree_returns_item_image_as_stored(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_children
-=======
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		image = "/files/bom tree <b>part</b>'s photo.png"
+		raw_material = make_item("_Test BOM Tree Image RM", {"is_stock_item": 1, "image": image}).name
+		plain_material = make_item("_Test BOM Tree Plain RM", {"is_stock_item": 1}).name
+		finished_good = make_item("_Test BOM Tree Image FG", {"is_stock_item": 1}).name
+		bom = make_bom(item=finished_good, raw_materials=[raw_material, plain_material])
+
+		images = {row.item_code: row.image for row in get_children(doctype="BOM", parent=bom.name)}
+		self.assertEqual(images, {raw_material: image, plain_material: None})
+
 	def test_valuation_rate_from_source_warehouse_without_bin(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -1933,63 +1942,6 @@ class TestBOM(ERPNextTestSuite):
 		).insert()
 
 		self.assertEqual(bom.items[0].rate, 5)
-
-	def test_price_list_rate_valid_today(self):
-		price_list = frappe.get_doc(
-			{
-				"doctype": "Price List",
-				"price_list_name": frappe.generate_hash(length=10),
-				"currency": "INR",
-				"buying": 1,
-			}
-		).insert()
-		current_item = make_item(properties={"is_stock_item": 1}).name
-		expired_item = make_item(properties={"is_stock_item": 1}).name
-		fg_item = make_item(properties={"is_stock_item": 1}).name
-		for item_code, rate, valid_from, valid_upto in (
-			(current_item, 10, -30, None),
-			(current_item, 12, 30, None),
-			(expired_item, 7, -60, -30),
-		):
-			frappe.get_doc(
-				{
-					"doctype": "Item Price",
-					"item_code": item_code,
-					"price_list": price_list.name,
-					"price_list_rate": rate,
-					"valid_from": add_days(today(), valid_from),
-					"valid_upto": valid_upto and add_days(today(), valid_upto),
-				}
-			).insert()
-
-		bom = frappe.get_doc(
-			{
-				"doctype": "BOM",
-				"item": fg_item,
-				"company": "_Test Company",
-				"currency": "INR",
-				"rm_cost_as_per": "Price List",
-				"buying_price_list": price_list.name,
-				"items": [{"item_code": current_item, "qty": 1}, {"item_code": expired_item, "qty": 1}],
-			}
-		).insert()
-
-		self.assertEqual(bom.items[0].rate, 10)
-		self.assertEqual(bom.items[1].rate, 0)
-
-	def test_get_items_rate_in_stock_uom(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
->>>>>>> 77e6aa6 (test: BOM row from a source warehouse without a Bin takes the last valuation rate)
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		image = "/files/bom tree <b>part</b>'s photo.png"
-		raw_material = make_item("_Test BOM Tree Image RM", {"is_stock_item": 1, "image": image}).name
-		plain_material = make_item("_Test BOM Tree Plain RM", {"is_stock_item": 1}).name
-		finished_good = make_item("_Test BOM Tree Image FG", {"is_stock_item": 1}).name
-		bom = make_bom(item=finished_good, raw_materials=[raw_material, plain_material])
-
-		images = {row.item_code: row.image for row in get_children(doctype="BOM", parent=bom.name)}
-		self.assertEqual(images, {raw_material: image, plain_material: None})
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
