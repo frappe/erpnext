@@ -3703,6 +3703,44 @@ class TestPickList(ERPNextTestSuite):
 		self.assertEqual(get_serial_nos(second_transfer.items[0].serial_no), picked_serial_nos[2:])
 		second_transfer.save().submit()
 
+	def test_stock_entry_moves_only_the_picked_item_or_its_alternative(self):
+		warehouse = "_Test Warehouse - _TC"
+		picked_item = make_item(properties={"is_stock_item": 1}).name
+		other_item = make_item(properties={"is_stock_item": 1}).name
+		for item in (picked_item, other_item):
+			make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+		pick_list = frappe.get_doc(
+			{
+				"doctype": "Pick List",
+				"company": "_Test Company",
+				"purpose": "Material Transfer",
+				"locations": [
+					{
+						"item_code": picked_item,
+						"qty": 10,
+						"stock_qty": 10,
+						"picked_qty": 10,
+						"conversion_factor": 1,
+						"warehouse": warehouse,
+					}
+				],
+			}
+		).submit()
+
+		def transfer_other_item(original_item=None):
+			stock_entry = frappe.get_doc(create_stock_entry(pick_list.as_dict()))
+			row = stock_entry.items[0]
+			row.item_code, row.item_name, row.original_item = other_item, other_item, original_item
+			row.t_warehouse = "_Test Warehouse 1 - _TC"
+			return stock_entry.submit()
+
+		self.assertRaisesRegex(frappe.ValidationError, "is not the item", transfer_other_item)
+
+		transfer_other_item(original_item=picked_item)
+		self.assertEqual(
+			frappe.db.get_value("Pick List Item", pick_list.locations[0].name, "transferred_qty"), 10
+		)
+
 	def test_pick_list_validation(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item("Test Non Serialized Pick List Item", properties={"is_stock_item": 1}).name
