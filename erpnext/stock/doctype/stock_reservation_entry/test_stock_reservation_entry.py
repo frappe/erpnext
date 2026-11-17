@@ -611,6 +611,73 @@ class TestStockReservationEntry(ERPNextTestSuite):
 		{
 			"allow_negative_stock": 0,
 			"enable_stock_reservation": 1,
+			"allow_partial_reservation": 1,
+			"auto_reserve_serial_and_batch": 0,
+			"use_serial_batch_fields": 1,
+		},
+	)
+	def test_batch_delivery_is_counted_once_across_qty_and_batch_reservations_of_a_row(self) -> None:
+		"""The batch reservation takes its batch first, and the Qty reservation only what is left."""
+		item_code = make_item(properties={"is_stock_item": 1, "has_batch_no": 1}).name
+		batch_no = (
+			frappe.get_doc({"doctype": "Batch", "item": item_code, "batch_id": item_code + "-B"})
+			.insert()
+			.name
+		)
+
+		def receive_batch():
+			make_stock_entry(
+				item_code=item_code,
+				qty=5,
+				rate=10,
+				to_warehouse=self.warehouse,
+				batch_no=batch_no,
+				use_serial_batch_fields=1,
+			)
+
+		receive_batch()
+		so = make_sales_order(
+			item_code=item_code, warehouse=self.warehouse, qty=10, rate=100, do_not_submit=True
+		)
+		so.reserve_stock = so.items[0].reserve_stock = 1
+		so.submit()
+		frappe.db.set_single_value("Stock Settings", "auto_reserve_serial_and_batch", 1)
+		receive_batch()
+		so.create_stock_reservation_entries()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].update(
+			{"qty": 6, "batch_no": batch_no, "use_serial_batch_fields": 1, "serial_and_batch_bundle": None}
+		)
+		dn.submit()
+
+		def delivered_qty():
+			return list(
+				frappe.get_all(
+					"Stock Reservation Entry",
+					{"voucher_no": so.name, "docstatus": 1},
+					["reservation_based_on", "delivered_qty"],
+					order_by="creation",
+					as_list=True,
+				)
+			)
+
+		self.assertEqual(delivered_qty(), [("Qty", 1), ("Serial and Batch", 5)])
+		self.assertEqual(
+			frappe.db.get_value(
+				"Bin", {"item_code": item_code, "warehouse": self.warehouse}, "reserved_stock"
+			),
+			4,
+		)
+
+		dn.cancel()
+		self.assertEqual(delivered_qty(), [("Qty", 0), ("Serial and Batch", 0)])
+
+	@ERPNextTestSuite.change_settings(
+		"Stock Settings",
+		{
+			"allow_negative_stock": 0,
+			"enable_stock_reservation": 1,
 			"auto_reserve_serial_and_batch": 1,
 			"pick_serial_and_batch_based_on": "FIFO",
 			"use_serial_batch_fields": 1,
