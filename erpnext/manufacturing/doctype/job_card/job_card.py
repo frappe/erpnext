@@ -726,7 +726,7 @@ class JobCard(Document):
 	def get_free_workstation(self, overlapping_time_logs):
 		for workstation in get_workstations(self.workstation_type):
 			time_logs = [row for row in overlapping_time_logs if row.workstation == workstation]
-			if not self.has_overlap(self.get_production_capacity(workstation), time_logs):
+			if not time_logs or not self.has_overlap(self.get_production_capacity(workstation), time_logs):
 				return workstation
 
 	def schedule_time_logs(self, row):
