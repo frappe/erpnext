@@ -447,7 +447,7 @@ class TestBOM(ERPNextTestSuite):
 		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
 		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
 
-	def test_base_costs_are_rounded_for_foreign_currency_bom(self):
+	def test_costs_are_rounded_for_foreign_currency_bom(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 		from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
@@ -479,6 +479,8 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(
 			(bom.base_raw_material_cost, bom.base_operating_cost, bom.base_total_cost), (120.1, 11.68, 131.78)
 		)
+		self.assertEqual(bom.operations[0].operating_cost, 0.15)
+		self.assertEqual((bom.raw_material_cost, bom.operating_cost, bom.total_cost), (1.5, 0.15, 1.65))
 
 	def test_parent_bom_follows_child_base_total_cost(self):
 		def make_usd_bom(item, rows):
