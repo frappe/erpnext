@@ -417,6 +417,10 @@ class SellingController(StockController):
 		):
 			return
 
+		# an internal transfer is not a sale, so neither rate applies
+		if self.is_internal_transfer():
+			return
+
 		is_internal_customer = self.get("is_internal_customer")
 
 		for item in self.items:
