@@ -1259,16 +1259,16 @@ class MaterialRequirementsPlanningReport:
 		"""Let the MPS demand of a forecast period use up that period's forecast."""
 		demand_by_item = {}
 		for row in self.mps_data:
-			demand = [getdate(row.delivery_date), flt(row.planned_qty)]
+			demand = frappe._dict(date=getdate(row.delivery_date), qty=flt(row.planned_qty))
 			demand_by_item.setdefault(row.item_code, []).append(demand)
 
 		for row in forecast_rows:
 			start_date, end_date = get_forecast_period(row)
 			for demand in demand_by_item.get(row.item_code, []):
-				if start_date <= demand[0] < end_date:
-					consumed_qty = min(flt(row.qty), demand[1])
-					row.qty = flt(row.qty) - consumed_qty
-					demand[1] -= consumed_qty
+				if start_date <= demand.date < end_date:
+					consumed_qty = min(row.qty, demand.qty)
+					row.qty -= consumed_qty
+					demand.qty -= consumed_qty
 
 
 def get_stock_reserved_for_work_orders(items, warehouses=None):
