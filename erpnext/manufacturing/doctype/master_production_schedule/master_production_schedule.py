@@ -56,11 +56,9 @@ class MasterProductionSchedule(Document):
 
 		item_wise_data = self.get_item_wise_mps_data(actual_demand_data)
 
-		if not item_wise_data:
-			return []
-
-		self.update_item_details(item_wise_data)
-		self.add_mps_data(item_wise_data)
+		if item_wise_data:
+			self.update_item_details(item_wise_data)
+			self.add_mps_data(item_wise_data)
 
 		if not self.is_new():
 			self.save()
@@ -302,6 +300,7 @@ class MasterProductionSchedule(Document):
 				(doctype.docstatus == 1)
 				& (parent.company == self.company)
 				& parent.status.notin(["Closed", "Completed"])
+				& (doctype.closed == 0)
 				& (pending_qty > 0)
 			)
 			.orderby(doctype.delivery_date)
@@ -349,6 +348,7 @@ class MasterProductionSchedule(Document):
 				(parent.docstatus == 1)
 				& (parent.company == self.company)
 				& parent.status.notin(["Closed", "Completed"])
+				& (so_item.closed == 0)
 			)
 			.orderby(doctype.sales_order_item)
 			.orderby(doctype.delivery_date)
