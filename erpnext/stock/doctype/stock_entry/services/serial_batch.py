@@ -115,7 +115,7 @@ class StockEntrySABB(BaseStockEntry):
 			if d.serial_no in serial_nos:
 				continue
 
-			entry_qty = min(d.qty - d.delivered_qty if only_pending else d.qty, qty)
+			entry_qty = min(d.qty - d.delivered_qty if only_pending else d.delivered_qty, qty)
 			qty -= entry_qty
 			if d.serial_no:
 				serial_nos.append(d.serial_no)
