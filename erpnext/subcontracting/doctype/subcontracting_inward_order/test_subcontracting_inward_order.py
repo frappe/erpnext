@@ -909,6 +909,29 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		row = next(row for row in scio.received_items if row.rm_item_code == "Self RM")
 		self.assertEqual(row.consumed_qty, 6)
 
+	def test_billed_extra_material_on_two_manufacture_rows_blocks_cancel(self):
+		make_stock_entry(
+			item_code="_Test Item", qty=6, to_warehouse="Stores - _TC", purpose="Material Receipt"
+		)
+		so, scio = create_so_scio()
+		frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward()).submit()
+		scio.reload()
+		wo = frappe.get_doc("Work Order", scio.make_work_order()[0])
+		wo.skip_transfer = 1
+		wo.required_items[-1].source_warehouse = "Stores - _TC"
+		wo.submit()
+
+		manufacture = frappe.new_doc("Stock Entry").update(make_stock_entry_from_wo(wo.name, "Manufacture"))
+		for _ in range(2):
+			manufacture.append("items", {"item_code": "_Test Item", "qty": 3, "s_warehouse": "Stores - _TC"})
+		manufacture.submit()
+
+		scio.reload()
+		row = next(row for row in scio.received_items if row.rm_item_code == "_Test Item")
+		self.assertEqual(row.consumed_qty, 6)
+		frappe.db.set_value(row.doctype, row.name, "billed_qty", 3)
+		self.assertRaises(frappe.ValidationError, manufacture.cancel)
+
 	def test_extra_items_reservation_transfer(self):
 		so, scio = create_so_scio()
 		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
