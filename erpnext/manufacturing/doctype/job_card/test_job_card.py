@@ -1151,6 +1151,41 @@ class TestJobCard(ERPNextTestSuite):
 		self.assertEqual(cost_after_cancel, original_cost)
 
 	@ERPNextTestSuite.change_settings(
+		"Manufacturing Settings",
+		{"add_corrective_operation_cost_in_finished_good_valuation": 1, "disable_capacity_planning": 1},
+	)
+	def test_corrective_operation_cost_is_rounded(self):
+		workstation = make_jc_review_workstation(hour_rate=600)
+		operation = make_jc_review_operation(workstation)
+		wo = make_jc_review_work_order(
+			make_jc_review_item(),
+			[{"item_code": make_jc_review_item(), "qty": 1}],
+			[{"operation": operation, "workstation": workstation, "time_in_mins": 60}],
+			skip_transfer=1,
+		)
+		job_card = get_jc_review_job_cards(wo.name)[0]
+		job_card.append("time_logs", jc_review_log("2031-03-11 08:00:00", 60, job_card.for_quantity))
+		job_card.submit()
+
+		corrective_operation = frappe.get_doc(
+			doctype="Operation", is_corrective_operation=1, name=frappe.generate_hash()
+		).insert()
+		corrective_job_card = make_corrective_job_card(
+			job_card.name, operation=corrective_operation.name, for_operation=job_card.operation
+		)
+		corrective_job_card.hour_rate = 1000
+		corrective_job_card.insert()
+		corrective_job_card.append(
+			"time_logs", jc_review_log("2031-03-11 10:00:00", 7, corrective_job_card.for_quantity)
+		)
+		corrective_job_card.submit()
+
+		self.assertEqual(
+			frappe.db.get_value("Work Order", wo.name, ["corrective_operation_cost", "total_operating_cost"]),
+			(116.67, 716.67),
+		)
+
+	@ERPNextTestSuite.change_settings(
 		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
 	)
 	def test_if_corrective_jc_ops_cost_is_added_to_manufacture_stock_entry(self):
