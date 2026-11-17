@@ -94,6 +94,21 @@ class TestPickList(ERPNextTestSuite):
 
 		self.assertEqual(filtered_locations[0].serial_nos, ["SN-1", "SN-3"])
 
+	def test_filter_locations_offers_no_more_qty_than_free_serial_nos(self):
+		"""A partly transferred row still lists both picked serial nos while it holds only 1."""
+		from erpnext.stock.doctype.pick_list.pick_list import filter_locations_by_picked_materials
+
+		warehouse = "Test Warehouse"
+		locations = [
+			_dict(warehouse=warehouse, batch_no=None, qty=4, serial_nos=["SN-1", "SN-2", "SN-3", "SN-4"])
+		]
+		picked_item_details = {warehouse: {"picked_qty": 1, "serial_no": ["SN-1", "SN-2"]}}
+
+		filtered_locations = filter_locations_by_picked_materials(locations, picked_item_details)
+
+		self.assertEqual(filtered_locations[0].qty, 2)
+		self.assertEqual(filtered_locations[0].serial_nos, ["SN-3", "SN-4"])
+
 	def test_get_items_with_location_trims_allocated_serial_nos(self):
 		from erpnext.stock.doctype.pick_list.pick_list import get_items_with_location_and_quantity
 
