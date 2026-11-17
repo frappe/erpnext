@@ -653,8 +653,10 @@ class JobCard(Document):
 		if self.workstation:
 			return query.where(jc.workstation == self.workstation)
 
-		if self.workstation_type and (workstations := get_workstations(self.workstation_type)):
-			return query.where(jc.workstation.isin(workstations))
+		if self.workstation_type:
+			if workstations := get_workstations(self.workstation_type):
+				return query.where(jc.workstation.isin(workstations))
+			return query.where(jc.workstation_type == self.workstation_type)
 
 		return query
 
