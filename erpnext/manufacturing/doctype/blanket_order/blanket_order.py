@@ -10,15 +10,6 @@ from frappe.query_builder import Case
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import flt, getdate
 
-<<<<<<< HEAD
-=======
-from erpnext import get_company_currency
-from erpnext.accounts.services.taxes import validate_conversion_rate
-from erpnext.controllers.item_close import clear_closed_rows_on_amend, validate_parent_reopen
-from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
-from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
->>>>>>> ad16ee4 (fix: match a Quotation's Blanket Order against its customer)
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
 
@@ -91,100 +82,8 @@ class BlanketOrder(Document):
 		self.set(other_party_field, None)
 		self.set(f"{other_party_field}_name", None)
 
-<<<<<<< HEAD
 	def before_update_after_submit(self):
 		self.validate_dates()
-=======
-	def validate_order_matches(self, order_doc) -> None:
-		order_type, order_party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
-		if self.blanket_order_type != order_type:
-			frappe.throw(
-				_("Blanket Order {0} is a {1} order and cannot be used on a {2}").format(
-					frappe.bold(self.name), _(self.blanket_order_type), _(order_doc.doctype)
-				)
-			)
-
-		party = self.get(blanket_order_pricing.get_order_type_config(order_type)["party_field"])
-		order_party = order_doc.get(order_party_field)
-		if order_doc.doctype == "Quotation":
-			order_party = get_existing_customer_name(order_doc.quotation_to, order_party)
-
-		if party != order_party:
-			frappe.throw(
-				_("Blanket Order {0} is for {1}, not {2}").format(
-					frappe.bold(self.name),
-					frappe.bold(party),
-					frappe.bold(order_doc.get(order_party_field)),
-				)
-			)
-
-		if self.currency != order_doc.currency:
-			frappe.throw(
-				_("Blanket Order {0} is in {1}, not {2}").format(
-					frappe.bold(self.name), self.currency, order_doc.currency
-				)
-			)
-
-	def set_order_rates(self, order_doc) -> None:
-		rates = {row.item_code: flt(row.rate) for row in self.items}
-		for row in order_doc.get("items"):
-			if row.blanket_order != self.name or row.item_code not in rates:
-				continue
-
-			row.blanket_order_rate = rates[row.item_code]
-			expected_rate = flt(
-				row.blanket_order_rate * (flt(row.conversion_factor) or 1), row.precision("rate")
-			)
-			if flt(row.rate, row.precision("rate")) != expected_rate:
-				frappe.msgprint(
-					_("Row #{0}: Rate {1} differs from the rate {2} agreed in Blanket Order {3}").format(
-						row.idx, row.rate, expected_rate, frappe.bold(self.name)
-					),
-					alert=True,
-					indicator="orange",
-				)
-
-	def validate_is_open(self) -> None:
-		if self.status == "Closed":
-			frappe.throw(
-				_("Blanket Order {0} is closed").format(frappe.bold(self.name)), frappe.InvalidStatusError
-			)
-
-	def validate_items_are_open(self, item_codes: list[str]) -> None:
-		for row in self.items:
-			if row.closed and row.item_code in item_codes:
-				frappe.throw(
-					_("Item {0} is closed in Blanket Order {1}").format(
-						frappe.bold(row.item_code), frappe.bold(self.name)
-					),
-					frappe.InvalidStatusError,
-				)
-
-	def set_currency(self):
-		if self.currency:
-			return
-
-		config = blanket_order_pricing.get_order_type_config(self.blanket_order_type)
-		party_type = config["party_type"]
-		party = self.get(config["party_field"])
-		party_currency = frappe.get_cached_value(party_type, party, "default_currency") if party else None
-		self.currency = party_currency or get_company_currency(self.company)
-
-	def set_conversion_rate(self):
-		company_currency = get_company_currency(self.company)
-		if self.currency == company_currency:
-			self.conversion_rate = 1.0
-		elif not self.conversion_rate:
-			self.conversion_rate = blanket_order_pricing.get_exchange_rate_to_company(self, self.currency)
-
-		validate_conversion_rate(
-			self.currency,
-			self.conversion_rate,
-			self.meta.get_translated_label("conversion_rate"),
-			self.company,
-		)
-		self.conversion_rate = flt(self.conversion_rate, self.precision("conversion_rate"))
->>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -287,7 +186,7 @@ class BlanketOrder(Document):
 				)
 
 	def validate_order_matches(self, order_doc) -> None:
-		order_type, party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
+		order_type, order_party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
 		if self.blanket_order_type != order_type:
 			frappe.throw(
 				_("Blanket Order {0} is a {1} order and cannot be used on a {2}").format(
@@ -295,12 +194,19 @@ class BlanketOrder(Document):
 				)
 			)
 
-		if self.get(party_field) != order_doc.get(party_field):
+		party = self.customer if order_type == "Selling" else self.supplier
+		order_party = order_doc.get(order_party_field)
+		if order_doc.doctype == "Quotation":
+			from erpnext.selling.doctype.quotation.quotation import get_existing_customer_name
+
+			order_party = get_existing_customer_name(order_doc.quotation_to, order_party)
+
+		if party != order_party:
 			frappe.throw(
 				_("Blanket Order {0} is for {1}, not {2}").format(
 					frappe.bold(self.name),
-					frappe.bold(self.get(party_field)),
-					frappe.bold(order_doc.get(party_field)),
+					frappe.bold(party),
+					frappe.bold(order_doc.get(order_party_field)),
 				)
 			)
 
@@ -382,13 +288,8 @@ def validate_against_blanket_order(order_doc):
 		for bo_name, item_data in sorted(order_data.items()):
 			bo_doc = frappe.get_doc("Blanket Order", bo_name, for_update=True)
 			bo_doc.validate_order_matches(order_doc)
-<<<<<<< HEAD
-			bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
-=======
-			bo_doc.validate_items_are_open(list(item_data))
 			if order_doc.doctype != "Quotation":
 				bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
->>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 			bo_doc.set_order_rates(order_doc)
 
 

@@ -22,7 +22,6 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 	set_transaction_type,
 	validate_pricing_context,
 )
-from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.utils import get_exchange_rate
@@ -1986,32 +1985,21 @@ def _get_blanket_order_details(args):
 			.limit(1)
 		)
 
-<<<<<<< HEAD
-		if args.customer and args.doctype == "Sales Order":
-			query = query.where(bo.customer == args.customer)
-		elif args.supplier and args.doctype == "Purchase Order":
-			query = query.where(bo.supplier == args.supplier)
+		if args.doctype in ("Sales Order", "Quotation"):
+			customer = args.customer
+			if args.doctype == "Quotation":
+				from erpnext.selling.doctype.quotation.quotation import get_existing_customer_name
+
+				customer = get_existing_customer_name(args.quotation_to, args.party_name or args.customer)
+			query = query.where((bo.blanket_order_type == "Selling") & (bo.customer == customer))
+		elif args.doctype == "Purchase Order":
+			query = query.where((bo.blanket_order_type == "Purchasing") & (bo.supplier == args.supplier))
 		if args.blanket_order:
 			query = query.where(bo.name == args.blanket_order)
 		if args.transaction_date:
 			query = query.where(
 				(bo.from_date <= args.transaction_date) & (bo.to_date >= args.transaction_date)
 			)
-=======
-		if ctx.doctype in ("Sales Order", "Quotation"):
-			customer = ctx.customer
-			if ctx.doctype == "Quotation":
-				customer = get_existing_customer_name(ctx.quotation_to, ctx.party_name or ctx.customer)
-			query = query.where((bo.blanket_order_type == "Selling") & (bo.customer == customer))
-		elif ctx.doctype == "Purchase Order":
-			query = query.where((bo.blanket_order_type == "Purchasing") & (bo.supplier == ctx.supplier))
-		if ctx.blanket_order:
-			query = query.where(bo.name == ctx.blanket_order)
-		if ctx.currency:
-			query = query.where(bo.currency == ctx.currency)
-		if ctx.transaction_date:
-			query = query.where((bo.from_date <= ctx.transaction_date) & (bo.to_date >= ctx.transaction_date))
->>>>>>> 138a0e0 (fix(selling): link only a Selling Blanket Order of the customer on a Quotation)
 
 		blanket_order_details = query.run(as_dict=True)
 		blanket_order_details = blanket_order_details[0] if blanket_order_details else ""
