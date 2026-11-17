@@ -1408,6 +1408,22 @@ class TestItem(ERPNextTestSuite):
 			[("Nos", 1)],
 		)
 
+	def test_uom_used_by_item_price_cannot_be_removed(self):
+		item = make_item(uoms=[{"uom": "Box", "conversion_factor": 12}])
+		frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item.name,
+				"price_list": "_Test Price List",
+				"uom": "Box",
+				"price_list_rate": 1200,
+			}
+		).insert()
+
+		item.reload()
+		item.uoms = [row for row in item.uoms if row.uom != "Box"]
+		self.assertRaises(frappe.ValidationError, item.save)
+
 	def test_validate_stock_item(self):
 		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")
 
