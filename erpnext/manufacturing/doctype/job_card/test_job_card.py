@@ -2399,6 +2399,61 @@ class TestJobCard(ERPNextTestSuite):
 			8,
 		)
 
+	def test_get_items_is_refused_on_record_output_entry(self):
+		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		warehouse = "Stores - _TC"
+		rm = make_item("Record Output Get Items RM", {"is_stock_item": 1}).name
+		fg = make_item("Record Output Get Items FG", {"is_stock_item": 1}).name
+
+		operation = {
+			"operation": "Record Output Get Items Op",
+			"workstation": "_Test Workstation A",
+			"finished_good": fg,
+			"finished_good_qty": 1,
+			"is_final_finished_good": 1,
+			"sequence_id": 1,
+			"time_in_mins": 60,
+			"source_warehouse": warehouse,
+			"fg_warehouse": warehouse,
+			"skip_material_transfer": 1,
+		}
+		make_workstation(operation)
+		make_operation(operation)
+		bom = frappe.new_doc(
+			"BOM",
+			company="_Test Company",
+			item=fg,
+			quantity=1,
+			with_operations=1,
+			track_semi_finished_goods=1,
+		)
+		bom.append("items", {"item_code": rm, "qty": 1, "operation_row_id": 1})
+		bom.append("operations", operation)
+		bom.insert()
+		bom.submit()
+
+		work_order = make_wo_order_test_record(
+			item=fg,
+			qty=2,
+			source_warehouse=warehouse,
+			fg_warehouse=warehouse,
+			bom_no=bom.name,
+			skip_transfer=1,
+		)
+		make_stock_entry(item_code=rm, target=warehouse, qty=2, basic_rate=100)
+
+		job_card = frappe.get_doc("Job Card", {"work_order": work_order.name})
+		job_card.append(
+			"time_logs",
+			{"from_time": "2024-02-01 08:00:00", "to_time": "2024-02-01 09:00:00", "completed_qty": 2},
+		)
+		job_card.submit()
+
+		entry = frappe.get_doc("Stock Entry", job_card.make_stock_entry_for_semi_fg_item()["name"])
+		self.assertRaises(frappe.ValidationError, entry.get_items)
+
 	def test_semi_fg_secondary_items_across_split_job_cards(self):
 		from erpnext.manufacturing.doctype.operation.test_operation import make_operation
 		from erpnext.manufacturing.doctype.work_order.mapper import make_job_card
