@@ -718,6 +718,19 @@ class TestPlanAdapter(ERPNextTestSuite):
 			}
 		).insert()
 
+	def test_supplier_lead_times_follow_renamed_item(self):
+		from erpnext.manufacturing.scheduling.plan_adapter import get_supplier_lead_times
+
+		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
+		old_item = create_item("Test PPS Renamed RM Old").name
+		self.make_supplier_lead_time(old_item, suppliers)
+		new_item = frappe.rename_doc("Item", old_item, "Test PPS Renamed RM New")
+		create_item(old_item)
+
+		supplier_lead_times = get_supplier_lead_times([old_item, new_item])
+		self.assertEqual(set(supplier_lead_times), {new_item})
+		self.assertEqual(supplier_lead_times[new_item][suppliers[0]].purchase_time, 3)
+
 	@change_settings("Manufacturing Settings", {"mins_between_operations": 10, "allow_overtime": 0})
 	def test_schedule_uses_supplier_wise_lead_time(self):
 		suppliers = ["Test PPS Supplier A", "Test PPS Supplier B"]
