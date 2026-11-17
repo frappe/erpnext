@@ -12,14 +12,8 @@ from frappe.core.doctype.version.version import get_diff
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Field
-<<<<<<< HEAD
 from frappe.query_builder.functions import Count, IfNull, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
-=======
-from frappe.query_builder.functions import Count, IfNull, Max, Min, NullIf, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, parse_json, today
-from frappe.utils.caching import request_cache
->>>>>>> 62b2b68 (fix(manufacturing): cost BOM rows at the Item Price valid today)
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -1556,6 +1550,7 @@ def get_bom_item_rate(args, bom_doc):
 				"transaction_type": "buying",
 				"company": bom_doc.company,
 				"currency": bom_doc.currency,
+				"transaction_date": today(),
 				"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
 				"conversion_factor": args.get("conversion_factor") or 1,
 				"plc_conversion_rate": 1,
@@ -1570,36 +1565,6 @@ def get_bom_item_rate(args, bom_doc):
 	return flt(rate)
 
 
-<<<<<<< HEAD
-=======
-def _get_price_list_item_rate(args, bom_doc):
-	if not bom_doc.buying_price_list:
-		frappe.throw(_("Please select Price List"))
-
-	ctx = frappe._dict(
-		{
-			"doctype": "BOM",
-			"price_list": bom_doc.buying_price_list,
-			"qty": args.get("qty") or 1,
-			"uom": args.get("uom") or args.get("stock_uom"),
-			"stock_uom": args.get("stock_uom"),
-			"transaction_type": "buying",
-			"company": bom_doc.company,
-			"currency": bom_doc.currency,
-			"transaction_date": today(),
-			"conversion_rate": 1,  # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
-			"conversion_factor": args.get("conversion_factor") or 1,
-			"plc_conversion_rate": 1,
-			"ignore_party": True,
-			"ignore_conversion_rate": True,
-		}
-	)
-	item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
-	price_list_data = get_price_list_rate(ctx, item_doc)
-	return price_list_data.price_list_rate
-
-
->>>>>>> 62b2b68 (fix(manufacturing): cost BOM rows at the Item Price valid today)
 def get_valuation_rate(data):
 	"""
 	1) Get average valuation rate from all warehouses

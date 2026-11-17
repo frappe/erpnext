@@ -1887,11 +1887,6 @@ class TestBOM(ERPNextTestSuite):
 				[{"item_code": raw_material, "qty": 1, "bom_no": sub_bom.name}],
 			)
 
-<<<<<<< HEAD
-	def test_bom_tree_returns_item_image_as_stored(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_children
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-=======
 	def test_price_list_rate_valid_today(self):
 		price_list = frappe.get_doc(
 			{
@@ -1935,7 +1930,9 @@ class TestBOM(ERPNextTestSuite):
 		self.assertEqual(bom.items[0].rate, 10)
 		self.assertEqual(bom.items[1].rate, 0)
 
->>>>>>> 87c8ed5 (test: BOM Price List costing skips future and expired Item Prices)
+	def test_bom_tree_returns_item_image_as_stored(self):
+		from erpnext.manufacturing.doctype.bom.bom import get_children
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
 		image = "/files/bom tree <b>part</b>'s photo.png"
 		raw_material = make_item("_Test BOM Tree Image RM", {"is_stock_item": 1, "image": image}).name
