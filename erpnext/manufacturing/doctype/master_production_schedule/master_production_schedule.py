@@ -221,7 +221,7 @@ class MasterProductionSchedule(Document):
 
 	def get_cumulative_lead_time(self, item_code, bom_no, qty):
 		if not bom_no:
-			return self._purchase_lead_days.get(item_code) or 0
+			return self._purchase_lead_days[item_code]
 
 		own_time = get_own_lead_time(self._lead_times.get(item_code), qty)
 		component_times = [
