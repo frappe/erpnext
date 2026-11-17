@@ -14,6 +14,7 @@ from erpnext.accounts.services.taxes import validate_conversion_rate
 from erpnext.controllers.item_close import clear_closed_rows_on_amend, validate_parent_reopen
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.manufacturing.doctype.blanket_order import blanket_order_pricing
+from erpnext.selling.doctype.quotation.mapper import get_existing_customer_name
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import validate_terms_and_conditions
 from erpnext.stock.doctype.item.item import get_item_defaults
 
@@ -26,6 +27,7 @@ ORDER_DOCTYPES_BY_TYPE = {
 
 ORDER_TYPE_BY_DOCTYPE = {
 	"Sales Order": ("Selling", "customer"),
+	"Quotation": ("Selling", "party_name"),
 	"Purchase Order": ("Purchasing", "supplier"),
 }
 
@@ -146,7 +148,7 @@ class BlanketOrder(StatusUpdater):
 		self.set(f"{other_party_field}_name", None)
 
 	def validate_order_matches(self, order_doc) -> None:
-		order_type, party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
+		order_type, order_party_field = ORDER_TYPE_BY_DOCTYPE[order_doc.doctype]
 		if self.blanket_order_type != order_type:
 			frappe.throw(
 				_("Blanket Order {0} is a {1} order and cannot be used on a {2}").format(
@@ -154,12 +156,17 @@ class BlanketOrder(StatusUpdater):
 				)
 			)
 
-		if self.get(party_field) != order_doc.get(party_field):
+		party = self.get(blanket_order_pricing.get_order_type_config(order_type)["party_field"])
+		order_party = order_doc.get(order_party_field)
+		if order_doc.doctype == "Quotation":
+			order_party = get_existing_customer_name(order_doc.quotation_to, order_party)
+
+		if party != order_party:
 			frappe.throw(
 				_("Blanket Order {0} is for {1}, not {2}").format(
 					frappe.bold(self.name),
-					frappe.bold(self.get(party_field)),
-					frappe.bold(order_doc.get(party_field)),
+					frappe.bold(party),
+					frappe.bold(order_doc.get(order_party_field)),
 				)
 			)
 
@@ -412,7 +419,7 @@ def make_order(source_name: str):
 
 
 def validate_against_blanket_order(order_doc):
-	if order_doc.doctype in ("Sales Order", "Purchase Order"):
+	if order_doc.doctype in ORDER_TYPE_BY_DOCTYPE:
 		order_data = {}
 
 		for item in order_doc.get("items"):
@@ -426,7 +433,8 @@ def validate_against_blanket_order(order_doc):
 			bo_doc.validate_can_be_ordered(order_doc.transaction_date)
 			bo_doc.validate_order_matches(order_doc)
 			bo_doc.validate_items_are_open(list(item_data))
-			bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
+			if order_doc.doctype != "Quotation":
+				bo_doc.validate_qty_can_be_ordered(item_data, order_doc.doctype)
 			bo_doc.set_order_rates(order_doc)
 
 
