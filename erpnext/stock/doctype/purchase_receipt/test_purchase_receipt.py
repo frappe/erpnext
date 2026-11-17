@@ -9895,11 +9895,15 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		pr.conversion_rate = 83.11
 		pr.submit()
 
-		for entry in frappe.get_all(
+		gl_entries = frappe.get_all(
 			"GL Entry",
 			{"voucher_no": pr.name, "is_cancelled": 0},
-			["debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
-		):
+			["account", "debit", "credit", "debit_in_account_currency", "credit_in_account_currency"],
+		)
+		gain_loss_account = frappe.get_cached_value("Company", pr.company, "exchange_gain_loss_account")
+		self.assertEqual({entry.account: entry.debit for entry in gl_entries}.get(gain_loss_account), 70.04)
+
+		for entry in gl_entries:
 			self.assertEqual(entry.debit, entry.debit_in_account_currency)
 			self.assertEqual(entry.credit, entry.credit_in_account_currency)
 
