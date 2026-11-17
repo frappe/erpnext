@@ -334,10 +334,10 @@ def _collect_item_details(doc, po_items):
 	requested_sub_assemblies, planned_sub_assemblies = _get_sub_assemblies_by_plan_row(doc)
 	all_requested = set().union(*requested_sub_assemblies.values())
 	all_planned = {key: value for rows in planned_sub_assemblies.values() for key, value in rows.items()}
+	combined = doc.get("combine_sub_items")
 	for data in po_items:
 		if not data.get("include_exploded_items") and doc.get("sub_assembly_items"):
 			data["include_exploded_items"] = 1
-		combined = doc.get("combine_sub_items")
 		data["requested_sub_assemblies"] = (
 			all_requested if combined else requested_sub_assemblies.get(data.get("name"), set())
 		)
