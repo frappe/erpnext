@@ -66,6 +66,12 @@ class SubcontractingInwardOrder(SubcontractingController):
 
 	pass
 
+	def onload(self):
+		self.set_onload(
+			"allow_delivery_of_overproduced_qty",
+			frappe.get_single_value("Selling Settings", "allow_delivery_of_overproduced_qty"),
+		)
+
 	def validate(self):
 		super().validate()
 		check_on_hold_or_closed_status("Sales Order", self.sales_order)
