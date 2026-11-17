@@ -32,7 +32,7 @@ frappe.ui.form.on("Sales Forecast", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function (r) {
-				frm.reload_doc();
+				frm.dirty();
 			},
 		});
 	},
