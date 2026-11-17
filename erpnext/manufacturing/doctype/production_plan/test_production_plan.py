@@ -3917,6 +3917,35 @@ class TestProductionPlan(ERPNextTestSuite):
 
 		self.assertFalse(items)
 
+	def test_projected_qty_plan_follows_include_subcontracted_items(self):
+		rm_items = [
+			make_item(f"_Test PP Projected SC RM {idx}", {"is_stock_item": 1}).name for idx in range(2)
+		]
+		subcontracted = make_item(
+			"_Test PP Projected SC", {"is_stock_item": 1, "is_sub_contracted_item": 1}
+		).name
+		fg_item = make_item("_Test PP Projected SC FG", {"is_stock_item": 1}).name
+		make_bom(item=subcontracted, raw_materials=[rm_items[1]], rm_qty=3, currency="INR")
+		make_bom(item=fg_item, raw_materials=[subcontracted, rm_items[0]], currency="INR")
+
+		plan = create_production_plan(
+			item_code=fg_item,
+			planned_qty=2,
+			skip_available_sub_assembly_item=1,
+			sub_assembly_warehouse="_Test Warehouse - _TC",
+			skip_getting_mr_items=True,
+			do_not_submit=1,
+		)
+		plan.get_sub_assembly_items()
+
+		for include_subcontracted_items, expected in (
+			(0, [(rm_items[0], 2)]),
+			(1, [(rm_items[0], 2), (rm_items[1], 6)]),
+		):
+			plan.include_subcontracted_items = include_subcontracted_items
+			items = get_items_for_material_requests(plan.as_dict())
+			self.assertEqual(sorted((row.get("item_code"), row.get("quantity")) for row in items), expected)
+
 	def test_transfer_and_purchase_mrp_for_purchase_uom(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
