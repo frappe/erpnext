@@ -135,7 +135,6 @@ class TestSellingControllerConversions(ERPNextTestSuite):
 		item_code = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item_code=item_code, target="Stores - TCP1", qty=10, basic_rate=89.48)
 		frappe.db.set_value("Item", item_code, "last_purchase_rate", 120)
-		frappe.clear_document_cache("Item", item_code)
 
 		dn = create_delivery_note(
 			item_code=item_code,
