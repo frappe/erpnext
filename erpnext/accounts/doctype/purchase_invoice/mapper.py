@@ -82,10 +82,12 @@ def make_purchase_receipt(
 		)
 
 		pending_qty = flt(obj.qty) - received_and_mapped_qty(obj)
+		# debit notes may be in another UOM than the invoice row
+		returned_qty = flt(returned_qty_map.get("stock_qty")) / flt(obj.conversion_factor or 1)
 
-		target.qty = pending_qty - flt(returned_qty_map.get("qty"))
-		target.received_qty = pending_qty
-		target.stock_qty = (pending_qty - flt(returned_qty_map.get("qty"))) * flt(obj.conversion_factor)
+		target.qty = flt(pending_qty - returned_qty, target.precision("qty"))
+		target.received_qty = target.qty
+		target.stock_qty = target.qty * flt(obj.conversion_factor)
 		target.amount = pending_qty * flt(obj.rate)
 		target.base_amount = pending_qty * flt(obj.rate) * flt(source_parent.conversion_rate)
 
