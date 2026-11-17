@@ -369,6 +369,12 @@ class SalesInvoice(SellingController):
 				if row.billing_amount:
 					row.billing_amount = -abs(row.billing_amount)
 
+<<<<<<< HEAD
+=======
+		self.validate_update_stock_for_pick_list_reference()
+		self.validate_against_pick_list_items()
+		self.set_serial_and_batch_bundle_from_pick_list()
+>>>>>>> ca335b6 (fix(stock): refuse a delivery row that delivers another item against a pick list row)
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
 		self.update_timesheet_billing_for_project()
