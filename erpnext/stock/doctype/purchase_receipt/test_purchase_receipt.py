@@ -10185,6 +10185,22 @@ class TestPurchaseReceipt(ERPNextTestSuite):
 		)
 		self.assertEqual(reversed_amount, 70.04)
 
+	def test_receipt_from_invoice_at_another_rate_clears_stock_received_but_not_billed(self):
+		pr = self.make_receipt_from_usd_invoice(87.59)
+
+		srbnb = frappe.get_all(
+			"GL Entry",
+			{
+				"voucher_no": ("in", [pr.name, pr.items[0].purchase_invoice]),
+				"account": "Stock Received But Not Billed - TCP1",
+				"is_cancelled": 0,
+			},
+			[{"SUM": "debit"}, {"SUM": "credit"}],
+			as_list=True,
+		)[0]
+		self.assertEqual(srbnb[0], 2645.62)
+		self.assertEqual(srbnb[1], 2645.62)
+
 
 def create_asset_category_for_pr_test():
 	category_name = "Test Asset Category for PR"
