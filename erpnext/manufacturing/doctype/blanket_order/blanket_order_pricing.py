@@ -80,6 +80,8 @@ def set_price_list(doc, set_default=False, force_exchange_rate=False):
 	company_currency = get_company_currency(doc.company)
 	if doc.price_list_currency == company_currency:
 		doc.plc_conversion_rate = 1.0
+	elif doc.price_list_currency == doc.currency:
+		doc.plc_conversion_rate = doc.conversion_rate
 	elif price_list_currency_changed or not doc.plc_conversion_rate or force_exchange_rate:
 		doc.plc_conversion_rate = get_exchange_rate_to_company(doc, doc.price_list_currency)
 
