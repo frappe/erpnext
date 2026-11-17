@@ -30,8 +30,7 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 	table = _bom_items_table(work_order, job_card)
 	rows = bom.get(table)
 	if job_card:
-		# an operation's output entry carries only that operation's items
-		rows = [row for row in rows if job_card.is_own_material(row)]
+		rows = [row for row in rows if _is_job_card_row(row, job_card, work_order)]
 	item_amounts = _non_phantom_item_amounts(rows, table)
 	cost = _non_stock_items_cost(item_amounts, stock_entry, bom)
 
@@ -40,6 +39,13 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account, job_card=
 			"additional_costs",
 			{"expense_account": expense_account, "description": _("Non stock items"), "amount": cost},
 		)
+
+
+def _is_job_card_row(row, job_card, work_order):
+	"""Whether the row is charged on this card's output; rows of no operation go to the last one."""
+	if row.operation_row_id or row.operation:
+		return job_card.is_own_material(row)
+	return job_card.finished_good == work_order.production_item
 
 
 def _bom_items_table(work_order, job_card):
