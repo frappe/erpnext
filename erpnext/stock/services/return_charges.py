@@ -1,9 +1,14 @@
+from collections import defaultdict
+
 import frappe
 from frappe.utils import flt
 
 from erpnext.buying.doctype.buying_settings.buying_settings import bills_rejected_quantity
 from erpnext.controllers.buying_controller import get_stock_qty
-from erpnext.controllers.sales_and_purchase_return import get_return_against_item_fields
+from erpnext.controllers.sales_and_purchase_return import (
+	get_already_returned_items,
+	get_return_against_item_fields,
+)
 
 
 class ReturnChargesService:
@@ -21,14 +26,68 @@ class ReturnChargesService:
 			return
 
 		original = frappe.get_doc(doc.doctype, doc.return_against)
+		original_charges = get_actual_valuation_charges(original)
 		returned_qty = self.get_returned_qty_by_original_row()
-		for tax, original_tax in pair_with_original_charges(charges, get_actual_valuation_charges(original)):
-			base_share = self.get_returned_base_share(original, original_tax, returned_qty)
-			tax.tax_amount = -flt(base_share / doc.conversion_rate, tax.precision("tax_amount"))
+		total_qty = add_returned_qty(self.get_earlier_returned_qty_by_original_row(), returned_qty)
+		earlier_charges = self.get_earlier_returned_charges(original_charges)
+		for tax, original_charge in pair_with_original_charges(charges, original_charges):
+			tax.tax_amount = -self.get_returned_charge(
+				original, original_charge, returned_qty, total_qty, earlier_charges[original_charge.name]
+			)
+
+	def get_returned_charge(
+		self, original, original_charge, returned_qty, total_qty, earlier_charge
+	) -> float:
+		"""Rounded share of the charge that the returned stock carried.
+		The return of the last stock that carried it takes the rest, so the returns add up to the charge."""
+		precision = original_charge.precision("tax_amount")
+		total_share = self.get_returned_base_share(original, original_charge, total_qty)
+		if flt(total_share, precision) >= flt(original_charge.base_tax_amount, precision):
+			return flt(original_charge.tax_amount + earlier_charge, precision)
+
+		base_share = self.get_returned_base_share(original, original_charge, returned_qty)
+		return flt(base_share / self.doc.conversion_rate, precision)
 
 	def is_traced_to_original(self) -> bool:
 		"""Only rows linked to the original row tell which charge the returned stock carried."""
 		return all(row.get(self.detail_field) for row in self.doc.get("items"))
+
+	def get_earlier_returned_qty_by_original_row(self) -> dict:
+		"""Accepted and rejected stock qty of the other submitted returns, by original row."""
+		return {
+			row_name: {"accepted": flt(qty.stock_qty), "rejected": flt(qty.rejected_qty)}
+			for (_item_code, row_name), qty in get_already_returned_items(self.doc).items()
+		}
+
+	def get_earlier_returned_charges(self, original_charges) -> defaultdict:
+		"""Actual valuation charges of the other submitted returns, added up by the original charge they
+		were mapped from."""
+		earlier_returns = frappe.get_all(
+			self.doc.doctype,
+			filters={"docstatus": 1, "is_return": 1, "return_against": self.doc.return_against},
+			pluck="name",
+		)
+		taxes_by_return = defaultdict(list)
+		if earlier_returns:
+			for tax in frappe.get_all(
+				"Purchase Taxes and Charges",
+				filters={
+					"parenttype": self.doc.doctype,
+					"parent": ["in", earlier_returns],
+					"charge_type": "Actual",
+					"category": ["in", ["Valuation", "Valuation and Total"]],
+				},
+				fields=["parent", "original_tax_row", "account_head", "description", "tax_amount"],
+				order_by="idx",
+			):
+				taxes_by_return[tax.parent].append(tax)
+
+		charges = defaultdict(float)
+		for taxes in taxes_by_return.values():
+			for tax, original_charge in pair_with_original_charges(taxes, original_charges):
+				charges[original_charge.name] += flt(tax.tax_amount)
+
+		return charges
 
 	def get_returned_qty_by_original_row(self) -> dict:
 		"""Accepted and rejected stock qty returned, by original row."""
@@ -101,6 +160,17 @@ def pair_with_original_charges(charges, original_charges) -> list:
 			pairs.append((tax, original_tax))
 
 	return pairs
+
+
+def add_returned_qty(earlier_qty, returned_qty) -> dict:
+	"""Accepted and rejected stock qty of both, by original row."""
+	total_qty = defaultdict(lambda: {"accepted": 0.0, "rejected": 0.0})
+	for qty_by_row in (earlier_qty, returned_qty):
+		for row_name, qty in qty_by_row.items():
+			total_qty[row_name]["accepted"] += qty["accepted"]
+			total_qty[row_name]["rejected"] += qty["rejected"]
+
+	return total_qty
 
 
 def get_actual_valuation_charges(doc) -> list:
