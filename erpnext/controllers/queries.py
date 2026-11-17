@@ -950,6 +950,7 @@ def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, pag
 	bo_filters = [
 		["docstatus", "=", 1],
 		["status", "!=", "Closed"],
+		["name", "like", f"%{txt}%"],
 		["blanket_order_type", "=", filters.get("blanket_order_type")],
 		["customer" if filters.get("blanket_order_type") == "Selling" else "supplier", "=", party],
 		["company", "=", filters.get("company")],
@@ -978,6 +979,8 @@ def get_blanket_orders(doctype: str, txt: str, searchfield: str, start: int, pag
 		filters=bo_filters,
 		fields=["name", "blanket_order_type", "to_date"],
 		group_by="name",
+		limit_start=start,
+		limit_page_length=page_len,
 		as_list=True,
 	)
 
