@@ -359,6 +359,25 @@ class IntegrationTestSubcontractingInwardOrder(ERPNextTestSuite):
 		scio.reload()
 		self.assertEqual(scio.per_raw_material_received, 25)
 
+	def test_additional_material_alone_marks_order_ongoing(self):
+		so, scio = create_so_scio()
+		rm_in = frappe.new_doc("Stock Entry").update(scio.make_rm_stock_entry_inward())
+		rm_in.items = []
+		rm_in.append(
+			"items",
+			{
+				"item_code": "Basic RM 2",
+				"qty": 5,
+				"t_warehouse": scio.customer_warehouse,
+				"against_fg": scio.items[0].name,
+			},
+		)
+		rm_in.submit()
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Ongoing")
+
+		rm_in.cancel()
+		self.assertEqual(frappe.db.get_value(scio.doctype, scio.name, "status"), "Open")
+
 	def test_rm_return(self):
 		from erpnext.stock.serial_batch_bundle import get_batch_nos, get_serial_nos
 
