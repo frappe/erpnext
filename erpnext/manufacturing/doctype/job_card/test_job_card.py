@@ -4625,25 +4625,7 @@ class TestJobCard(ERPNextTestSuite):
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_running_job_keeps_its_workstation_busy(self):
-		workstation = make_jc_review_workstation(capacity=1)
-		rows = [{"item_code": make_jc_review_item(), "qty": 1}]
-		running_card, second_card = (
-			get_jc_review_job_cards(
-				make_jc_review_work_order(
-					make_jc_review_item(),
-					rows,
-					[
-						{
-							"operation": make_jc_review_operation(workstation),
-							"workstation": workstation,
-							"time_in_mins": 6,
-						}
-					],
-					skip_transfer=1,
-				).name
-			)[0]
-			for _ in range(2)
-		)
+		running_card, second_card = make_jc_review_job_cards(make_jc_review_workstation(capacity=1), 2)
 
 		running_card.start_timer(
 			start_time="2031-03-04 08:00:00", employees=[{"employee": make_jc_review_employee()}]
@@ -4662,6 +4644,24 @@ class TestJobCard(ERPNextTestSuite):
 			qty=10, for_quantity=10, pending_qty=0, process_loss_qty=0, end_time="2031-03-04 09:30:00"
 		)
 		self.assertEqual(frappe.db.get_value("Job Card", running_card.name, "total_completed_qty"), 10)
+
+	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
+	def test_running_job_takes_one_slot_of_its_workstation(self):
+		running_card, first_card, second_card = make_jc_review_job_cards(
+			make_jc_review_workstation(capacity=2), 3
+		)
+		running_card.start_timer(
+			start_time="2031-03-05 08:00:00", employees=[{"employee": make_jc_review_employee()}]
+		)
+		first_card.append("time_logs", jc_review_log("2031-03-05 08:00:00", 60))
+		first_card.save()
+
+		second_card.append("time_logs", jc_review_log("2031-03-05 08:30:00", 60))
+		self.assertRaises(OverlapError, second_card.save)
+
+		second_card.reload()
+		second_card.append("time_logs", jc_review_log("2031-03-05 09:00:00", 60))
+		second_card.save()
 
 	@ERPNextTestSuite.change_settings("Manufacturing Settings", {"disable_capacity_planning": 1})
 	def test_two_operators_on_one_job_charge_the_workstation_once(self):
@@ -5751,6 +5751,21 @@ def get_jc_review_job_cards(work_order):
 		for name in frappe.get_all(
 			"Job Card", filters={"work_order": work_order}, order_by="sequence_id, creation", pluck="name"
 		)
+	]
+
+
+def make_jc_review_job_cards(workstation, count):
+	operation = make_jc_review_operation(workstation)
+	return [
+		get_jc_review_job_cards(
+			make_jc_review_work_order(
+				make_jc_review_item(),
+				[{"item_code": make_jc_review_item(), "qty": 1}],
+				[{"operation": operation, "workstation": workstation, "time_in_mins": 6}],
+				skip_transfer=1,
+			).name
+		)[0]
+		for _ in range(count)
 	]
 
 
