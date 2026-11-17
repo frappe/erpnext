@@ -2,11 +2,6 @@
 # For license information, please see license.txt
 import datetime
 import json
-<<<<<<< HEAD
-from collections import OrderedDict
-=======
-from typing import Any
->>>>>>> 305cc7a (fix(manufacturing): check Workstation Type job cards against the cards on its workstations)
 
 import frappe
 from frappe import _, bold
@@ -336,30 +331,6 @@ class JobCard(Document):
 
 		return time_logs[0]
 
-<<<<<<< HEAD
-=======
-	def get_overlapping_time_logs(self, args, open_job_cards=None):
-		time_logs = []
-		time_logs.extend(self.get_time_logs(args, "Job Card Time Log"))
-		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
-		return time_logs
-
-	def get_production_capacity(self, workstation=None):
-		workstation = workstation or self.workstation
-		if workstation:
-			return frappe.get_cached_value("Workstation", workstation, "production_capacity") or 1
-		return 1
-
-	def validate_employee_overlap(self, args):
-		if self.get_open_job_cards(args.get("employee")):
-			frappe.throw(
-				_(
-					"Employee {0} is currently working on another workstation. Please assign another employee."
-				).format(args.get("employee")),
-				OverlapError,
-			)
-
->>>>>>> 38bff92 (fix(manufacturing): use spare workstation capacity for Workstation Type job cards)
 	def has_overlap(self, production_capacity, time_logs):
 		overlap = False
 		if production_capacity == 1 and len(time_logs) >= 1:
@@ -430,20 +401,13 @@ class JobCard(Document):
 			.orderby(jctl.to_time)
 		)
 
-<<<<<<< HEAD
-		if self.workstation_type:
-			query = query.where(jc.workstation_type == self.workstation_type)
-
-=======
-	def apply_workstation_filters(self, query, jc):
->>>>>>> 305cc7a (fix(manufacturing): check Workstation Type job cards against the cards on its workstations)
 		if self.workstation:
-			return query.where(jc.workstation == self.workstation)
-
-		if self.workstation_type:
+			query = query.where(jc.workstation == self.workstation)
+		elif self.workstation_type:
 			if workstations := get_workstations(self.workstation_type):
-				return query.where(jc.workstation.isin(workstations))
-			return query.where(jc.workstation_type == self.workstation_type)
+				query = query.where(jc.workstation.isin(workstations))
+			else:
+				query = query.where(jc.workstation_type == self.workstation_type)
 
 		if args.get("employee"):
 			if not open_job_cards and doctype == "Job Card Scheduled Time":
@@ -487,7 +451,9 @@ class JobCard(Document):
 	def get_free_workstation(self, overlapping_time_logs):
 		for workstation in get_workstations(self.workstation_type):
 			time_logs = [row for row in overlapping_time_logs if row.workstation == workstation]
-			if not time_logs or not self.has_overlap(self.get_production_capacity(workstation), time_logs):
+			if not time_logs or not self.has_overlap(
+				frappe.get_cached_value("Workstation", workstation, "production_capacity") or 1, time_logs
+			):
 				return workstation
 
 	def schedule_time_logs(self, row):
