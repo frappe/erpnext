@@ -302,7 +302,7 @@ def _so_item_columns(so_item):
 		so_item.parent,
 		so_item.item_code,
 		so_item.warehouse,
-		(so_item.stock_qty - so_item.stock_reserved_qty).as_("qty"),
+		(so_item.stock_qty - _reserved_qty_from_stock(so_item)).as_("qty"),
 		so_item.work_order_qty,
 		so_item.stock_qty,
 		so_item.production_plan_qty,
@@ -318,9 +318,25 @@ def _so_items_filter(so_item, so_list):
 	return (
 		(so_item.parent.isin(so_list))
 		& (so_item.docstatus == 1)
-		& ((so_item.stock_qty - so_item.stock_reserved_qty) > so_item.work_order_qty)
+		& ((so_item.stock_qty - _reserved_qty_from_stock(so_item)) > so_item.work_order_qty)
 		& (so_item.stock_qty > so_item.production_plan_qty)
 	)
+
+
+def _reserved_qty_from_stock(so_item):
+	"""Reserved qty of a Sales Order Item, less the Work Order output that work_order_qty already counts."""
+	sre = frappe.qb.DocType("Stock Reservation Entry")
+	work_order_output_qty = (
+		frappe.qb.from_(sre)
+		.select(Sum(sre.reserved_qty - sre.delivered_qty - sre.transferred_qty - sre.consumed_qty))
+		.where(
+			(sre.docstatus == 1)
+			& (sre.voucher_type == "Sales Order")
+			& (sre.voucher_detail_no == so_item.name)
+			& (sre.from_voucher_type == "Stock Entry")
+		)
+	)
+	return so_item.stock_reserved_qty - IfNull(work_order_output_qty, 0)
 
 
 def _set_so_item_pending_qty(items):
