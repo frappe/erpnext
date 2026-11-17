@@ -5578,6 +5578,47 @@ class TestWorkOrder(FrappeTestCase):
 		)
 		self.assertEqual(reserved_qty, 5)
 
+	def test_work_order_plans_operation_cost_as_the_bom(self):
+		workstation = frappe.get_doc(
+			{"doctype": "Workstation", "workstation_name": "_Test Batch Cost WS", "hour_rate_rent": 100}
+		).insert()
+		for batch_based, cost_based_on_bom_qty in ((0, 0), (1, 0), (0, 1)):
+			operation = frappe.get_doc(
+				{
+					"doctype": "Operation",
+					"name": f"_Test Batch Cost Op {batch_based}{cost_based_on_bom_qty}",
+					"workstation": workstation.name,
+					"batch_size": 10,
+					"create_job_card_based_on_batch_size": batch_based,
+				}
+			).insert()
+			bom = frappe.get_doc(
+				{
+					"doctype": "BOM",
+					"item": make_item(properties={"is_stock_item": 1}).name,
+					"company": "_Test Company",
+					"currency": "INR",
+					"with_operations": 1,
+					"items": [{"item_code": make_item(properties={"is_stock_item": 1}).name, "qty": 1}],
+					"operations": [
+						{
+							"operation": operation.name,
+							"workstation": workstation.name,
+							"time_in_mins": 60,
+							"batch_size": 10,
+							"set_cost_based_on_bom_qty": cost_based_on_bom_qty,
+						}
+					],
+				}
+			).insert()
+			bom.submit()
+
+			work_order = make_wo_order_test_record(
+				production_item=bom.item, bom_no=bom.name, qty=10, do_not_save=True
+			)
+			work_order.insert()
+			self.assertEqual(work_order.planned_operating_cost, flt(bom.operating_cost * 10))
+
 
 def make_stock_in_entries_and_get_batches(rm_item, source_warehouse, wip_warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import (
