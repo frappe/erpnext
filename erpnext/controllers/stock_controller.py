@@ -499,7 +499,7 @@ class StockController(AccountsController):
 	def update_stock_reservation_entries(self):
 		from erpnext.controllers.selling_controller import get_delivered_serial_batch_for_reservation
 
-		def get_sre_list(item):
+		def get_sre_list(item, newest_first=False):
 			table = frappe.qb.DocType("Stock Reservation Entry")
 			query = (
 				frappe.qb.from_(table)
@@ -516,7 +516,7 @@ class StockController(AccountsController):
 				)
 				# serial and batch reservations first, so a qty one only takes what they did not match
 				.orderby(table.reservation_based_on, order=Order.desc)
-				.orderby(table.creation)
+				.orderby(table.creation, order=Order.desc if newest_first else Order.asc)
 			)
 			if reference_field := data_map[purpose or self.doctype].get("voucher_detail_no_field"):
 				query = query.where(table.voucher_detail_no == item.get(reference_field))
@@ -584,7 +584,8 @@ class StockController(AccountsController):
 
 			field = data_map[purpose or self.doctype]["field"]
 			for item in self.get(data_map[purpose or self.doctype]["table_name"]):
-				sre_list = get_sre_list(item)
+				# a submit uses the oldest reservation first, so a cancel gives back the newest first
+				sre_list = get_sre_list(item, newest_first=self._action == "cancel")
 
 				if not sre_list:
 					continue
