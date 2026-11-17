@@ -67,10 +67,11 @@ class StockController(AccountsController):
 		self.validate_serialized_batch()
 		self.clean_serial_nos()
 		self.validate_customer_provided_item()
+		# before the stock UOM rate, which divides by the factor
+		self.reset_conversion_factor()
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
-		self.reset_conversion_factor()
 
 	def validate_warehouse_of_sabb(self):
 		is_internal_transfer = self.is_internal_transfer()
